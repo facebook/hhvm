@@ -190,16 +190,16 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(Int,             bits_t::bit<3>())                                \
   IRT(Dbl,             bits_t::bit<4>())                                \
   IRT(StaticStr,       bits_t::bit<5>())                                \
-  IRT(UncountedStr,    bits_t::bit<6>())                                \
+  IRT(SharedStr,       bits_t::bit<6>())                                \
   IRT(CountedStr,      bits_t::bit<7>())                                \
   IRT(StaticVec,       bits_t::bit<8>())                                \
-  IRT(UncountedVec,    bits_t::bit<9>())                                \
+  IRT(SharedVec,       bits_t::bit<9>())                                \
   IRT(CountedVec,      bits_t::bit<10>())                               \
   IRT(StaticDict,      bits_t::bit<11>())                               \
-  IRT(UncountedDict,   bits_t::bit<12>())                               \
+  IRT(SharedDict,      bits_t::bit<12>())                               \
   IRT(CountedDict,     bits_t::bit<13>())                               \
   IRT(StaticKeyset,    bits_t::bit<14>())                               \
-  IRT(UncountedKeyset, bits_t::bit<15>())                               \
+  IRT(SharedKeyset,    bits_t::bit<15>())                               \
   IRT(CountedKeyset,   bits_t::bit<16>())                               \
   IRT(Obj,             bits_t::bit<17>())                               \
   IRT(Res,             bits_t::bit<18>())                               \
@@ -223,13 +223,13 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
  */
 #define IRT_PHP_UNIONS                                                  \
   IRT(Null,                kUninit|kInitNull)                           \
-  IRT(PersistentStr,       kStaticStr|kUncountedStr)                    \
+  IRT(PersistentStr,       kStaticStr|kSharedStr)                       \
   IRT(Str,                 kPersistentStr|kCountedStr)                  \
-  IRT(PersistentVec,       kStaticVec|kUncountedVec)                    \
+  IRT(PersistentVec,       kStaticVec|kSharedVec)                       \
   IRT(Vec,                 kPersistentVec|kCountedVec)                  \
-  IRT(PersistentDict,      kStaticDict|kUncountedDict)                  \
+  IRT(PersistentDict,      kStaticDict|kSharedDict)                     \
   IRT(Dict,                kPersistentDict|kCountedDict)                \
-  IRT(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)              \
+  IRT(PersistentKeyset,    kStaticKeyset|kSharedKeyset)                 \
   IRT(Keyset,              kPersistentKeyset|kCountedKeyset)            \
   IRT(StaticArrLike,       kStaticVec|kStaticDict|kStaticKeyset)        \
   IRT(PersistentArrLike,   kPersistentVec|kPersistentDict|kPersistentKeyset) \

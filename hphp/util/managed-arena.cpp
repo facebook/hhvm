@@ -32,13 +32,14 @@ RangeArenaStorage g_lowArena{};
 RangeArenaStorage g_lowSmallArena{};
 RangeArenaStorage g_highArena{};
 RangeArenaStorage g_coldArena{};
-RangeStateStorage g_ranges[AddrRangeClass::NumRangeClasses];
+RangeStateStorage g_ranges[folly::to_underlying(AddrRangeClass::NumRangeClasses)];
 ArenaArray g_arenas;
 std::vector<PreMappedArena*> g_auto_arenas;
 std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
 
 NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
-  auto result = reinterpret_cast<RangeState*>(g_ranges + index);
+  auto result = reinterpret_cast<RangeState*>(
+    g_ranges + folly::to_underlying(index));
   if (!result->low()) {
     static std::atomic_flag lock = ATOMIC_FLAG_INIT;
     while (lock.test_and_set(std::memory_order_acq_rel)) {
@@ -48,19 +49,19 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
       // safety in case someone starts to abuse the code.
     }
     if (!result->high()) {
-      new (&(g_ranges[AddrRangeClass::Low]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::Low)]))
         RangeState(kLowArenaMinAddr, kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize);
-      new (&(g_ranges[AddrRangeClass::LowSmall]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::LowSmall)]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize);
-      new (&(g_ranges[AddrRangeClass::LowEmergency]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::LowEmergency)]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr);
-      new (&(g_ranges[AddrRangeClass::Mid]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::Mid)]))
         RangeState(kLowArenaMaxAddr, kMidArenaMaxAddr);
-      new (&(g_ranges[AddrRangeClass::Uncounted]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::High)]))
         RangeState(kMidArenaMaxAddr, kHighArenaMaxAddr);
-      new (&(g_ranges[AddrRangeClass::UncountedCold]))
-        RangeState(kHighArenaMaxAddr, kUncountedMaxAddr);
-      new (&(g_ranges[AddrRangeClass::Global]))
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::HighCold)]))
+        RangeState(kHighArenaMaxAddr, kSharedMaxAddr);
+      new (&(g_ranges[folly::to_underlying(AddrRangeClass::Global)]))
         RangeState(kArena0Base, kArena0Base); // need to reinitialize when used.
     }
     lock.clear(std::memory_order_release);

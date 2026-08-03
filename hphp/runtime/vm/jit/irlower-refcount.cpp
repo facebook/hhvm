@@ -199,7 +199,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     auto const addr = loc.reg();
     // Look at upper bits of the pointer to decide if it is counted.
     auto const sf = v.makeReg();
-    v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
+    v << shrqi{(int)kSharedMaxShift, addr, v.makeReg(), sf};
     unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                    [&] (Vout& v) {
                      emitIncRef(v, loc.reg(), TRAP_REASON);
@@ -598,7 +598,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     if (unlikelyDecrement) {
       auto sf = v.makeReg();
       auto const addr = srcLoc(env, inst, 0).reg();
-      v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
+      v << shrqi{(int)kSharedMaxShift, addr, v.makeReg(), sf};
       unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                      [&] (Vout& v) {
                        impl(v, negativeCheckType(ty, TUncounted));
@@ -738,7 +738,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
     assertx(profile.optimizing());
     auto sf = v.makeReg();
-    v << shrqi{(int)kUncountedMaxShift, loc.reg(), v.makeReg(), sf};
+    v << shrqi{(int)kSharedMaxShift, loc.reg(), v.makeReg(), sf};
     unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                    [&] (Vout& v) {
                      emitDecRef(v, loc.reg(), TRAP_REASON);

@@ -78,10 +78,10 @@ uintptr_t tc_start_address();
 //   lower range. These are just preferences, all these arenas are able to use
 //   spare space in the 1G to 4G region, when the preferred range is used up.
 //
-// - high arena and high cold arena span addresses from 4G to kHighArenaMaxAddr.
-//   It is currently used for some VM metadata and APC (the table, and all
-//   uncounted data). high_cold_arena can be used for global cold data. We don't
-//   expect to run out of memory in the high arenas.
+// - high arena and high cold arena span addresses from kMidArenaMaxAddr (32G)
+//   to kHighArenaMaxAddr (256G). It is currently used for some VM metadata and
+//   APC (the table, and all shared data). high_cold_arena can be used for
+//   global cold data. We don't expect to run out of memory in the high arenas.
 //
 // - local arena only exists in some threads, mostly for data that is not
 //   accessed by other threads. In some threads, local arena is 0, and the
@@ -142,9 +142,9 @@ void* low_bump_malloc(size_t size);
 void* low_bump_realloc(void* ptr, size_t size);
 void low_bump_free(void* ptr);
 
-void* uncounted_bump_malloc(size_t size);
-void* uncounted_bump_realloc(void* ptr, size_t size);
-void uncounted_bump_free(void* ptr);
+void* shared_bump_malloc(size_t size);
+void* shared_bump_realloc(void* ptr, size_t size);
+void shared_bump_free(void* ptr);
 
 #endif // USE_JEMALLOC
 
@@ -354,7 +354,7 @@ struct WrapAllocator {
 #define DEF_LOW_ALLOC_FUNCS(prefix, flag, upper_prefix)         \
   DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
 
-#define DEF_UNCOUNTED_ALLOC_FUNCS(prefix, flag, upper_prefix)   \
+#define DEF_SHARED_ALLOC_FUNCS(prefix, flag, upper_prefix)      \
   DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
 
 #define DEF_HIGH_ALLOC_FUNCS(prefix, flag, upper_prefix)        \
@@ -382,22 +382,22 @@ struct WrapAllocator {
   template<typename T> using upper_prefix##Allocator =          \
     WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
 
-#define DEF_UNCOUNTED_ALLOC_FUNCS(prefix, flag, upper_prefix)   \
+#define DEF_SHARED_ALLOC_FUNCS(prefix, flag, upper_prefix)      \
   inline void* prefix##_malloc(size_t size) {                   \
     assert(size != 0);                                          \
-    return uncounted_bump_malloc(size);                         \
+    return shared_bump_malloc(size);                            \
   }                                                             \
   inline void prefix##_free(void* ptr) {                        \
     assert(ptr != nullptr);                                     \
-    return uncounted_bump_free(ptr);                            \
+    return shared_bump_free(ptr);                               \
   }                                                             \
   inline void* prefix##_realloc(void* ptr, size_t size) {       \
     assert(size != 0);                                          \
-    return uncounted_bump_realloc(ptr, size);                   \
+    return shared_bump_realloc(ptr, size);                      \
   }                                                             \
   inline void prefix##_sized_free(void* ptr, size_t size) {     \
     assert(ptr != nullptr);                                     \
-    return uncounted_bump_free(ptr);                            \
+    return shared_bump_free(ptr);                               \
   }                                                             \
                                                                 \
   template<typename T> using upper_prefix##Allocator =          \
@@ -431,13 +431,13 @@ struct WrapAllocator {
 DEF_HIGH_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, VM)
 DEF_HIGH_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, VMCold)
 
-// Allocations that are guaranteed to live below kUncountedMaxAddr.
+// Allocations that are guaranteed to live below kSharedMaxAddr.
 // This provides a new way to check for countedness for arrays and strings.
-DEF_UNCOUNTED_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
+DEF_SHARED_ALLOC_FUNCS(shared, HIGH_ARENA_FLAGS, Shared)
 
-// Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
+// Allocations for the APC but do not necessarily live below kSharedMaxAddr,
 // e.g., APCObject, or the hash table. Currently they live below
-// kUncountedMaxAddr anyway, but this may change later.
+// kSharedMaxAddr anyway, but this may change later.
 DEF_HIGH_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
 
 // Thread-local allocations that are not accessed outside the thread.

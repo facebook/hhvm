@@ -426,7 +426,7 @@ void ProcStatus::update() {
     // partially used.
     unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
     unused += alloc::getRange(alloc::AddrRangeClass::Mid).retained();
-    unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
+    unused += alloc::getRange(alloc::AddrRangeClass::High).retained();
     for (auto const arena : alloc::g_auto_arenas) {
       if (arena) unused += arena->retained();
     }

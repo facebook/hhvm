@@ -38,7 +38,7 @@ struct MakeSharedEnv {
 };
 
 /*
- * Wrappers around uncounted_malloc, etc. that update APC stats.
+ * Wrappers around shared_malloc, etc. that update APC stats.
  */
 void* AllocShared(size_t bytes);
 void FreeShared(void* ptr);

@@ -49,7 +49,7 @@ struct APCString {
   static void Delete(APCString* s) {
     auto const allocSize = sizeof(APCString) + s->m_str.m_len + 1;
     s->~APCString();
-    uncounted_sized_free(s, allocSize);
+    shared_sized_free(s, allocSize);
   }
 
   static APCString* fromHandle(APCHandle* handle) {

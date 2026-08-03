@@ -32,21 +32,21 @@ void* AllocShared(size_t bytes) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCSharedBlock();
   }
-  return uncounted_malloc(bytes);
+  return shared_malloc(bytes);
 }
 
 void FreeShared(void* ptr) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCSharedBlock();
   }
-  return uncounted_free(ptr);
+  return shared_free(ptr);
 }
 
 void FreeShared(void* ptr, size_t bytes) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCSharedBlock();
   }
-  return uncounted_sized_free(ptr, bytes);
+  return shared_sized_free(ptr, bytes);
 }
 
 //////////////////////////////////////////////////////////////////////////////

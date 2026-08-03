@@ -994,11 +994,11 @@ ArrayData* ArrayData::toKeyset(bool copy) {
 
 
 void* ArrayData::AllocStatic(size_t size) {
-  return Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+  return Cfg::Eval::LowStaticArrays ? low_malloc(size) : shared_malloc(size);
 }
 
 void ArrayData::FreeStatic(void* ptr) {
-  Cfg::Eval::LowStaticArrays ? low_free(ptr) : uncounted_free(ptr);
+  Cfg::Eval::LowStaticArrays ? low_free(ptr) : shared_free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

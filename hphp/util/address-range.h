@@ -55,10 +55,10 @@ constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
 constexpr size_t kLowSmallArenaSize = 128 << 20;
 
-constexpr unsigned kUncountedMaxShift = 38;
-constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
+constexpr unsigned kSharedMaxShift = 38;
+constexpr uintptr_t kSharedMaxAddr = 1ull << kSharedMaxShift;
 constexpr size_t kHighColdCap = 4ull << 30;
-constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
+constexpr uintptr_t kHighArenaMaxAddr = kSharedMaxAddr - kHighColdCap;
 constexpr uintptr_t kHighArenaMinAddr = kMidArenaMaxAddr;
 
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kHighArenaMinAddr;
@@ -77,13 +77,13 @@ inline bool is_low_mem(void* m) {
 namespace alloc {
 
 // List of address ranges ManagedArena can manage.
-enum AddrRangeClass : uint32_t {
+enum class AddrRangeClass : uint32_t {
   Low = 0,                         // [.., kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize)
   LowSmall,                        // [kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize)
   LowEmergency,                    // [kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr)
   Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr)
-  Uncounted,                       // [kMidArenaMaxAddr, kHighArenaMaxAddr)
-  UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
+  High,                            // [kMidArenaMaxAddr, kHighArenaMaxAddr)
+  HighCold,                        // [kHighArenaMaxAddr, kSharedMaxAddr)
   Global,                          // [kArena0Base, ...)
   NumRangeClasses,
 };

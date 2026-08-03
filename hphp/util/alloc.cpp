@@ -304,7 +304,7 @@ void setup_low_arena(PageSpec s) {
 }
 
 void setup_high_arena(PageSpec s) {
-  auto& range = getRange(AddrRangeClass::Uncounted);
+  auto& range = getRange(AddrRangeClass::High);
   auto mapper = getMapperChain(range, s.n1GPages,
                                true, s.n2MPages, // 2M pages can be added later
                                true,             // use normal pages
@@ -318,7 +318,7 @@ void setup_high_arena(PageSpec s) {
   // The flag will be combined with thread-local tcache
   high_arena_flags = MALLOCX_ARENA(high_arena);
 
-  auto& fileRange = getRange(AddrRangeClass::UncountedCold);
+  auto& fileRange = getRange(AddrRangeClass::HighCold);
   cold_file_mapper = new BumpFileMapper(fileRange);
   fileRange.setLowMapper(cold_file_mapper);
   auto coldMapper =
@@ -580,7 +580,7 @@ private:
 };
 
 std::unique_ptr<BumpAllocatedArena> s_lowArena;
-std::unique_ptr<BumpAllocatedArena> s_uncountedArena;
+std::unique_ptr<BumpAllocatedArena> s_sharedArena;
 
 void setup_arenas() {
 #ifdef FOLLY_SANITIZE_ADDRESS
@@ -600,45 +600,45 @@ void setup_arenas() {
   always_assert(lowMinAddr < lowMaxAddr);
   always_assert(lowMaxAddr <= kMidArenaMaxAddr);
 
-  // For uncounted range, pick all space under 256GB that doesn't overlap with
+  // For the shared range, pick all space under 256GB that doesn't overlap with
   // its own shadow space and its shadow space doesn't overlap with low range.
   // Default ASAN confnig makes this range ~112GB..256GB.
-  auto const uncountedMinAddr = std::max(
-    (kUncountedMaxAddr >> shadowScale) + shadowOffset,  // ~32GB
-    (lowMaxAddr - shadowOffset) << shadowScale          // ~112GB
+  auto const sharedMinAddr = std::max(
+    (kSharedMaxAddr >> shadowScale) + shadowOffset,  // ~32GB
+    (lowMaxAddr - shadowOffset) << shadowScale       // ~112GB
   );
-  auto constexpr uncountedMaxAddr = kUncountedMaxAddr;
+  auto constexpr sharedMaxAddr = kSharedMaxAddr;
 
   // ASAN already mapped this as PROT_NONE.
   auto constexpr noReplace = false;
 #else
   auto constexpr lowMinAddr = kLowArenaMinAddr;
   auto constexpr lowMaxAddr = kMidArenaMaxAddr;
-  auto constexpr uncountedMinAddr = kMidArenaMaxAddr;
-  auto constexpr uncountedMaxAddr = kUncountedMaxAddr;
+  auto constexpr sharedMinAddr = kMidArenaMaxAddr;
+  auto constexpr sharedMaxAddr = kSharedMaxAddr;
   auto constexpr noReplace = true;
 #endif
 
   always_assert(!s_lowArena);
-  always_assert(!s_uncountedArena);
+  always_assert(!s_sharedArena);
   s_lowArena = std::make_unique<BumpAllocatedArena>(
     lowMinAddr, lowMaxAddr, noReplace);
-  s_uncountedArena = std::make_unique<BumpAllocatedArena>(
-    uncountedMinAddr, uncountedMaxAddr, noReplace);
+  s_sharedArena = std::make_unique<BumpAllocatedArena>(
+    sharedMinAddr, sharedMaxAddr, noReplace);
 
 #ifdef FOLLY_SANITIZE_ADDRESS
   // Map zero-initialized read only shadow space for ASAN.
   auto const lowShadowMinAddr = (lowMinAddr >> shadowScale) + shadowOffset;
   auto const lowShadowMaxAddr = (lowMaxAddr >> shadowScale) + shadowOffset;
-  auto const uncountedShadowMinAddr =
-    (uncountedMinAddr >> shadowScale) + shadowOffset;
-  auto const uncountedShadowMaxAddr =
-    (uncountedMaxAddr >> shadowScale) + shadowOffset;
+  auto const sharedShadowMinAddr =
+    (sharedMinAddr >> shadowScale) + shadowOffset;
+  auto const sharedShadowMaxAddr =
+    (sharedMaxAddr >> shadowScale) + shadowOffset;
   always_assert(lowShadowMinAddr < lowShadowMaxAddr);
   always_assert(lowShadowMaxAddr == lowMinAddr);
-  always_assert(lowMaxAddr <= uncountedShadowMinAddr);
-  always_assert(uncountedShadowMinAddr < uncountedShadowMaxAddr);
-  always_assert(uncountedShadowMaxAddr <= uncountedMinAddr);
+  always_assert(lowMaxAddr <= sharedShadowMinAddr);
+  always_assert(sharedShadowMinAddr < sharedShadowMaxAddr);
+  always_assert(sharedShadowMaxAddr <= sharedMinAddr);
 
   auto const allocShadow = [](uintptr_t minAddr, uintptr_t maxAddr) {
     UNUSED auto const shadow = mmap(
@@ -656,14 +656,14 @@ void setup_arenas() {
   };
 
   allocShadow(lowShadowMinAddr, lowShadowMaxAddr);
-  allocShadow(uncountedShadowMinAddr, uncountedShadowMaxAddr);
+  allocShadow(sharedShadowMinAddr, sharedShadowMaxAddr);
 #endif
 
   if (debug) {
     auto const ptr1 = malloc(1);
     auto const ptr2 = malloc(1 << 20);
-    assertx(reinterpret_cast<uintptr_t>(ptr1) >= kUncountedMaxAddr);
-    assertx(reinterpret_cast<uintptr_t>(ptr2) >= kUncountedMaxAddr);
+    assertx(reinterpret_cast<uintptr_t>(ptr1) >= kSharedMaxAddr);
+    assertx(reinterpret_cast<uintptr_t>(ptr2) >= kSharedMaxAddr);
     free(ptr1);
     free(ptr2);
   }
@@ -687,18 +687,18 @@ void low_bump_free(void* ptr) {
   // and if we do just have it leak
 }
 
-void* uncounted_bump_malloc(size_t size) {
-  return s_uncountedArena->alloc(size);
+void* shared_bump_malloc(size_t size) {
+  return s_sharedArena->alloc(size);
 }
 
-void* uncounted_bump_realloc(void* ptr, size_t size) {
-  auto newptr = uncounted_malloc(size);
+void* shared_bump_realloc(void* ptr, size_t size) {
+  auto newptr = shared_malloc(size);
   if (newptr == nullptr) return nullptr;
   memcpy(newptr, ptr, size);
   return newptr;
 }
 
-void uncounted_bump_free(void* ptr) {
+void shared_bump_free(void* ptr) {
   // Do nothing. It is very very rare that we actually try to free something
   // and if we do just have it leak
 }
@@ -860,7 +860,7 @@ void low_2m_pages(uint32_t pages) {
 
 void high_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC
-  allocate2MPagesToRange(AddrRangeClass::Uncounted, pages);
+  allocate2MPagesToRange(AddrRangeClass::High, pages);
 #endif
 }
 

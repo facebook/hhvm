@@ -188,7 +188,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     }
   }
 
-  if (const auto& fmd = metadata.frameworkMetadata()) {
+  if (const auto& fmd = metadata.frameworkMetadata().as_const()) {
     THRIFT_APPLICATION_EVENT(rpc_metadata_framework_metadata).log([&] {
       folly::dynamic log = folly::dynamic::object;
 

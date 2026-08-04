@@ -633,17 +633,17 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
-          ? ArrayData::CreateVec()
+          ? staticEmptyVec()
           : VanillaVec::MakeVecNatural(top - fp, fp);
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? ArrayData::CreateVec()
+          ? staticEmptyVec()
           : VanillaVec::MakeVecNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::DARRAYS);
       return top == fp
-        ? ArrayData::CreateDict()
+        ? staticEmptyDictArray()
         : VanillaDict::MakeDictNatural(top - fp, fp);
     }();
     top = fp;
@@ -667,13 +667,13 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
-          ? ArrayData::CreateDict()
+          ? staticEmptyDictArray()
           : VanillaDict::MakeDict((top - fp) >> 1, fp)->asArrayData();
       }
       assertx(container_type == JSONContainerType::DARRAYS ||
               container_type == JSONContainerType::DARRAYS_AND_VARRAYS);
       return top == fp
-        ? ArrayData::CreateDict()
+        ? staticEmptyDictArray()
         : VanillaDict::MakeDict((top - fp) >> 1, fp)->asArrayData();
     }();
     // VanillaDict::MakeMixed can return nullptr if there are duplicate keys

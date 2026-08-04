@@ -263,7 +263,7 @@ Object BaseVector::getIterator() {
 void c_Vector::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  setArrayData(ArrayData::CreateVec());
+  setArrayData(staticEmptyVec());
   m_size = 0;
 }
 
@@ -289,7 +289,7 @@ void c_Vector::resize(uint32_t sz, const TypedValue* val) {
   if (sz == 0) {
     dropImmCopy();
     decRefArr(arrayData());
-    setArrayData(ArrayData::CreateVec());
+    setArrayData(staticEmptyVec());
     m_size = 0;
   } else if (m_size > sz) {
     // If there were any objects in the part that's being resized away, their

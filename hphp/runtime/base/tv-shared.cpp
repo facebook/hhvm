@@ -118,10 +118,14 @@ ArrayData* MakeSharedArray(
   if (in->empty()) {
     auto const legacy = in->isLegacyArray();
     switch (in->toDataType()) {
-      case KindOfVec: return ArrayData::CreateVec(legacy);
-      case KindOfDict: return ArrayData::CreateDict(legacy);
-      case KindOfKeyset: return ArrayData::CreateKeyset();
-      default: always_assert(false);
+      case KindOfVec:
+        return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
+      case KindOfDict:
+        return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
+      case KindOfKeyset:
+        return staticEmptyKeysetArray();
+      default:
+        always_assert(false);
     }
   }
 

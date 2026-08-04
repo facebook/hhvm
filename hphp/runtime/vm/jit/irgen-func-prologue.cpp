@@ -274,7 +274,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       gen(env, RaiseWarning, cns(env, errMsg));
 
       if (namedArgsAccountedInStack) {
-        push(env, cns(env, ArrayData::CreateVec()));
+        push(env, cns(env, staticEmptyVec()));
         updateStackOffsetAndExceptionBoundary(env);
         return;
       }
@@ -646,7 +646,7 @@ void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t posArgc,
 
   // Empty array for `...$args`
   if (callee->hasVariadicCaptureParam() && argc < callee->numParams()) {
-    args.emplace_back(cns(env, ArrayData::CreateVec()));
+    args.emplace_back(cns(env, staticEmptyVec()));
   }
 
   // Uninit for un-passed positionals
@@ -700,7 +700,7 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t posArgc) {
   if (argc < callee->numParams()) {
     // Push an empty array for `...$args'.
     assertx(callee->hasVariadicCaptureParam());
-    push(env, cns(env, ArrayData::CreateVec()));
+    push(env, cns(env, staticEmptyVec()));
     ++argc;
   }
 

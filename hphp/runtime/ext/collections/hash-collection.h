@@ -10,7 +10,7 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE VanillaDict* CreateDictAsMixed() {
-  return VanillaDict::as(ArrayData::CreateDict());
+  return VanillaDict::as(staticEmptyDictArray());
 }
 
 // Common base class for BaseMap/BaseSet collections

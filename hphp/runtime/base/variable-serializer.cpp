@@ -2023,7 +2023,7 @@ void VariableSerializerImpl<Buffer>::serializeVariant(tv_rval tv,
 template <class Buffer>
 void VariableSerializerImpl<Buffer>::serializeResourceImpl(const ResourceData* res) {
   pushResourceInfo(res->o_getResourceName(), res->getId());
-  serializeArray(ArrayData::CreateDict());
+  serializeArray(staticEmptyDictArray());
   popResourceInfo();
 }
 

@@ -1527,7 +1527,7 @@ inline Array& forceToArray(Variant& var) {
 
 inline Array& forceToArray(tv_lval lval) {
   if (!isArrayLikeType(lval.type())) {
-    tvMove(make_array_like_tv(ArrayData::CreateDict()), lval);
+    tvMove(make_array_like_tv(staticEmptyDictArray()), lval);
   }
   return asArrRef(lval);
 }
@@ -1539,7 +1539,7 @@ inline Array& forceToDict(Variant& var) {
 
 inline Array& forceToDict(tv_lval lval) {
   if (!isDictType(lval.type())) {
-    tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), lval);
+    tvSet(make_tv<KindOfDict>(staticEmptyDictArray()), lval);
   }
   return asArrRef(lval);
 }
@@ -1574,7 +1574,7 @@ inline bool isa_non_null(const Variant& v) {
 // and type-array
 template <IntishCast IC>
 ALWAYS_INLINE TypedValue Array::convertKey(TypedValue k) const {
-  return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::CreateDict());
+  return tvToKey<IC>(k, m_arr ? m_arr.get() : staticEmptyDictArray());
 }
 template <IntishCast IC>
 ALWAYS_INLINE TypedValue Array::convertKey(const Variant& k) const {

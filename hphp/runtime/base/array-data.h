@@ -166,13 +166,6 @@ protected:
 
 public:
   /*
-   * Create a new empty ArrayData with the appropriate ArrayKind.
-   */
-  static ArrayData* CreateVec(bool legacy = false);
-  static ArrayData* CreateDict(bool legacy = false);
-  static ArrayData* CreateKeyset();
-
-  /*
    * Convert between array kinds.
    */
   ArrayData* toVec(bool copy);
@@ -731,8 +724,7 @@ extern ArrayData* s_theEmptyDictArrayPtr;
 extern ArrayData* s_theEmptyMarkedDictArrayPtr;
 
 /*
- * Return the static empty array, for PHP and Hack arrays. Prefer using
- * ArrayData::CreateVec(), ArrayData::CreateDict(), ArrayData::CreateKeyset().
+ * Return the static empty array, for PHP and Hack arrays.
  */
 ArrayData* staticEmptyVec();
 ArrayData* staticEmptyDictArray();

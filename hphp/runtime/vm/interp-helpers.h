@@ -225,7 +225,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
 
     // Push an empty array, as the remainder of the call setup assumes generics
     // are on the stack.
-    auto const ad = ArrayData::CreateVec();
+    auto const ad = staticEmptyVec();
     vmStack().pushArrayLikeNoRc(ad);
     return;
   }
@@ -338,7 +338,7 @@ inline void initFuncInputs(const Func* callee, uint32_t numPositionalArgs) {
   }
 
   if (callee->hasVariadicCaptureParam()) {
-    auto const ad = ArrayData::CreateVec();
+    auto const ad = staticEmptyVec();
     vmStack().pushArrayLikeNoRc(ad);
     ++numPositionalArgs;
   }

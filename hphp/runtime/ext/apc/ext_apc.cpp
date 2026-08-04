@@ -185,7 +185,7 @@ Variant apc_store_impl(const Variant& key_or_array,
         ServerStats::Log("apc.write", 1);
       }
     }
-    return Variant(ArrayData::CreateDict());
+    return Variant(staticEmptyDictArray());
   }
 
   if (!key_or_array.isString()) {

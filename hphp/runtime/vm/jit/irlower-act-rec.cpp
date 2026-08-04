@@ -155,7 +155,7 @@ void pushEmptyReifiedGenericsWithNamedArgs(const Func* callee,
   auto namedArgNamesSize = namedArgNames == nullptr ? 0 : namedArgNames->size();
   stackTop -= namedArgNamesSize;
   // We're apparating an empty stack above the top.
-  stackTop[-1] = make_tv<KindOfVec>(ArrayData::CreateVec());
+  stackTop[-1] = make_tv<KindOfVec>(staticEmptyVec());
 }
 } // namespace
 

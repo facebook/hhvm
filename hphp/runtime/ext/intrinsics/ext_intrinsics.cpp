@@ -94,11 +94,11 @@ Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofdarray_builtin) {
-  return make_array_like_tv(ArrayData::CreateDict());
+  return make_array_like_tv(staticEmptyDictArray());
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofvarray_builtin) {
-  return make_array_like_tv(ArrayData::CreateVec());
+  return make_array_like_tv(staticEmptyVec());
 }
 
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
@@ -106,7 +106,7 @@ TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
     auto const& arr = var.asCArrRef();
     if (arr.isVec() || arr.isDict()) return tvReturn(arr);
   }
-  return tvReturn(ArrayData::CreateVec());
+  return tvReturn(staticEmptyVec());
 }
 
 TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
@@ -114,7 +114,7 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
     auto const& arr = var.asCArrRef();
     return tvReturn(arr);
   }
-  return tvReturn(ArrayData::CreateKeyset());
+  return tvReturn(staticEmptyKeysetArray());
 }
 
 Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {

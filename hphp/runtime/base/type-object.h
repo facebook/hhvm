@@ -70,7 +70,7 @@ public:
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
     // Needed for serialization
     if (cls->hasReifiedParent()) {
-      m_obj->setReifiedGenerics(cls, ArrayData::CreateVec());
+      m_obj->setReifiedGenerics(cls, staticEmptyVec());
     }
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
@@ -83,7 +83,7 @@ public:
     if (cls->hasReifiedGenerics()) {
       m_obj->setReifiedGenerics(cls, reifiedTypes);
     } else if (cls->hasReifiedParent()) {
-      m_obj->setReifiedGenerics(cls, ArrayData::CreateVec());
+      m_obj->setReifiedGenerics(cls, staticEmptyVec());
     }
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.

@@ -50,18 +50,6 @@ ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
 ///////////////////////////////////////////////////////////////////////////////
 // Creation and destruction.
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateVec(bool legacy) {
-  return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
-}
-
-ALWAYS_INLINE ArrayData* ArrayData::CreateDict(bool legacy) {
-  return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
-}
-
-ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
-  return staticEmptyKeysetArray();
-}
-
 ALWAYS_INLINE void ArrayData::decRefAndRelease() {
   assertx(kindIsValid());
   if (decReleaseCheck()) release();

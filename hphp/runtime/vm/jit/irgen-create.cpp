@@ -423,7 +423,7 @@ void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
 
 void emitNewVec(IRGS& env, uint32_t numArgs) {
   if (numArgs == 0) {
-    push(env, cns(env, ArrayData::CreateVec()));
+    push(env, cns(env, staticEmptyVec()));
     return;
   }
 

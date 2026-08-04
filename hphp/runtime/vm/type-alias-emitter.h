@@ -77,7 +77,7 @@ private:
   int m_line1;
   AliasKind m_kind;
   UserAttributeMap m_userAttributes;
-  Array m_typeStructure{ArrayData::CreateDict()};
+  Array m_typeStructure{staticEmptyDictArray()};
   // If !isNull(), contains m_typeStructure in post-resolved form from
   // HHBBC.
   Array m_resolvedTypeStructure;

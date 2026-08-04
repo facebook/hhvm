@@ -153,7 +153,7 @@ static Array HHVM_FUNCTION(get_included_files) {
 
 static void HHVM_FUNCTION(record_visited_files) {
   if (g_context->m_visitedFiles.isNull()) {
-    g_context->m_visitedFiles = ArrayData::CreateKeyset();
+    g_context->m_visitedFiles = staticEmptyKeysetArray();
   }
 }
 

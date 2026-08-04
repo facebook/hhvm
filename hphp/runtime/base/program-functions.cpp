@@ -418,7 +418,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        symtable->append(make_persistent_array_like_tv(ArrayData::CreateDict()));
+        symtable->append(make_persistent_array_like_tv(staticEmptyDictArray()));
         auto const key = symtable->get()->getKey(symtable->get()->iter_last());
         symtable = &asArrRef(symtable->lval(key));
       } else {
@@ -427,7 +427,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
         auto const v = symtable->lookup(key);
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, make_persistent_array_like_tv(ArrayData::CreateDict()));
+          symtable->set(key, make_persistent_array_like_tv(staticEmptyDictArray()));
         }
         symtable = &asArrRef(symtable->lval(key));
       }

@@ -109,7 +109,7 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
         !isStringType(tv.m_type) &&
         !isClassType(tv.m_type) &&
         !isLazyClassType(tv.m_type))  {
-      throwInvalidArrayKeyException(&tv, ArrayData::CreateKeyset());
+      throwInvalidArrayKeyException(&tv, staticEmptyKeysetArray());
     }
   }
   auto ad = asSet(MakeReserveSet(size));

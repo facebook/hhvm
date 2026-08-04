@@ -597,7 +597,7 @@ std::vector<Type> funcEntryTypes(IRGS& env, const Func* callee,
 
   // Variadic parameter
   if (callee->hasVariadicCaptureParam() && argc < callee->numParams()) {
-    inputTypes.emplace_back(Type::cns(ArrayData::CreateVec()));
+    inputTypes.emplace_back(Type::cns(staticEmptyVec()));
   }
 
   // Generics and coeffects

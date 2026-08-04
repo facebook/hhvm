@@ -316,7 +316,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   Array frameinfo;
   {
-    frameinfo = Array::attach(ArrayData::CreateDict());
+    frameinfo = Array::attach(staticEmptyDictArray());
     if (!isResume) {
       // Add arguments only if this is a function call.
       frameinfo.set(s_args, hhvm_get_frame_pos_args(ar));

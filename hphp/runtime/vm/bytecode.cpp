@@ -277,7 +277,7 @@ void createGlobalNVTable() {
   assertx(!g_context->m_globalNVTable);
   g_context->m_globalNVTable = req::make_raw<NameValueTable>();
   auto nvTable = g_context->m_globalNVTable;
-  Variant arr(ArrayData::CreateDict());
+  Variant arr(staticEmptyDictArray());
   nvTable->set(s_argc.get(),               init_null_variant.asTypedValue());
   nvTable->set(s_argv.get(),               init_null_variant.asTypedValue());
   nvTable->set(s__SERVER.get(),            arr.asTypedValue());
@@ -1189,7 +1189,7 @@ OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity ? VanillaDict::MakeReserveDict(capacity)
-                           : ArrayData::CreateDict();
+                           : staticEmptyDictArray();
   vmStack().pushDictNoRc(maybeMakeBespokeArray(ad));
 }
 
@@ -2381,7 +2381,7 @@ OPTBLD_INLINE void classGetTSImpl(bool pushGenerics) {
     if (reified_types) {
       vmStack().pushStaticArrayLike(reified_types);
     } else {
-      vmStack().pushStaticArrayLike(ArrayData::CreateVec());
+      vmStack().pushStaticArrayLike(staticEmptyVec());
     }
   }
 }

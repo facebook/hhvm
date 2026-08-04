@@ -61,13 +61,13 @@ const char* show(APCBespokeMode mode) {
 template <typename Array>
 ArrayData* GetEmptyArray(bool legacy) {
   if constexpr (std::is_same<Array, VanillaVec>::value) {
-    return ArrayData::CreateVec(legacy);
+    return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
   }
   if constexpr (std::is_same<Array, VanillaDict>::value) {
-    return ArrayData::CreateDict(legacy);
+    return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
   }
   if constexpr (std::is_same<Array, VanillaKeyset>::value) {
-    return ArrayData::CreateKeyset();
+    return staticEmptyKeysetArray();
   }
 }
 

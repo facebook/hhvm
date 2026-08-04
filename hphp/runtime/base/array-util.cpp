@@ -54,7 +54,8 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length,
     length = num_in - offset;
   }
 
-  auto const ad = ArrayData::CreateDict(input->isLegacyArray());
+  auto const ad = input->isLegacyArray()
+    ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
   auto out_hash = Array::attach(ad);
 
   int pos = 0;

@@ -75,13 +75,13 @@ public:
    * Create an empty array of a given type.
    */
   static Array CreateVec() {
-    return Array(ArrayData::CreateVec(), NoIncRef{});
+    return Array(staticEmptyVec(), NoIncRef{});
   }
   static Array CreateDict() {
-    return Array(ArrayData::CreateDict(), NoIncRef{});
+    return Array(staticEmptyDictArray(), NoIncRef{});
   }
   static Array CreateKeyset() {
-    return Array(ArrayData::CreateKeyset(), NoIncRef{});
+    return Array(staticEmptyKeysetArray(), NoIncRef{});
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -539,15 +539,15 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Array empty_vec_array() {
-  return Array::attach(ArrayData::CreateVec());
+  return Array::attach(staticEmptyVec());
 }
 
 ALWAYS_INLINE Array empty_dict_array() {
-  return Array::attach(ArrayData::CreateDict());
+  return Array::attach(staticEmptyDictArray());
 }
 
 ALWAYS_INLINE Array empty_keyset() {
-  return Array::attach(ArrayData::CreateKeyset());
+  return Array::attach(staticEmptyKeysetArray());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

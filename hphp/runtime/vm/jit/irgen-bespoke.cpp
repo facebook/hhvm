@@ -998,7 +998,7 @@ void classGetTSImpl(IRGS& env, bool pushGenerics) {
   auto const cls = ldCls(env, className);
   popDecRef(env);
   push(env, cls);
-  if (pushGenerics) push(env, cns(env, ArrayData::CreateVec()));
+  if (pushGenerics) push(env, cns(env, staticEmptyVec()));
 }
 
 void emitBespokeClassGetTS(IRGS& env) {

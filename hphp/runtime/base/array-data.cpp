@@ -210,10 +210,14 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     return replace([&]{
       auto const legacy = arr->isLegacyArray();
       switch (arr->toDataType()) {
-        case KindOfVec:    return ArrayData::CreateVec(legacy);
-        case KindOfDict:   return ArrayData::CreateDict(legacy);
-        case KindOfKeyset: return ArrayData::CreateKeyset();
-        default: always_assert(false);
+        case KindOfVec:
+          return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
+        case KindOfDict:
+          return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
+        case KindOfKeyset:
+          return staticEmptyKeysetArray();
+        default:
+          always_assert(false);
       }
     }());
   }
@@ -967,7 +971,7 @@ ArrayData* ArrayData::toVec(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));
   if (isVecType()) return this;
 
-  if (empty()) return ArrayData::CreateVec();
+  if (empty()) return staticEmptyVec();
   VecInit init{size()};
   IterateV(this, [&](auto v) { init.append(v); });
   return init.create();
@@ -977,7 +981,7 @@ ArrayData* ArrayData::toDict(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));
   if (isDictType()) return this;
 
-  if (empty()) return ArrayData::CreateDict();
+  if (empty()) return staticEmptyDictArray();
   DictInit init{size()};
   IterateKV(this, [&](auto k, auto v) { init.setValidKey(k, v); });
   return init.create();
@@ -986,7 +990,7 @@ ArrayData* ArrayData::toDict(bool copy) {
 ArrayData* ArrayData::toKeyset(bool copy) {
   assertx(IMPLIES(cowCheck(), copy));
   if (isKeysetType()) return this;
-  if (empty()) return ArrayData::CreateKeyset();
+  if (empty()) return staticEmptyKeysetArray();
   KeysetInit init{size()};
   IterateV(this, [&](auto v) { init.add(v); });
   return init.create();

@@ -35,7 +35,7 @@ const Array null_array{};
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
-  if (!m_arr) thisPtr->m_arr = Ptr::attach(ArrayData::CreateDict());
+  if (!m_arr) thisPtr->m_arr = Ptr::attach(staticEmptyDictArray());
   if (!m_arr->isStatic()) {
     thisPtr->m_arr = ArrayData::GetScalarArray(std::move(*thisPtr));
   }
@@ -293,7 +293,7 @@ TypedValue Array::lookupImpl(const T& key, AccessFlags flags) const {
 
 template<typename T> ALWAYS_INLINE
 tv_lval Array::lvalImpl(const T& key, AccessFlags) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::CreateDict());
+  if (!m_arr) m_arr = Ptr::attach(staticEmptyDictArray());
   auto const lval = m_arr->lval(key);
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
@@ -372,7 +372,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
                     const OptString& key, Args&&... args) {
   if (is_key) return fn(key, std::forward<Args>(args)...);
 
-  auto const ad = arr.get() ? arr.get() : ArrayData::CreateDict();
+  auto const ad = arr.get() ? arr.get() : staticEmptyDictArray();
 
   // The logic here is a specialization of tvToKey().
   if (key.isNull()) {

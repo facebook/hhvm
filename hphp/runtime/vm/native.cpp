@@ -377,11 +377,11 @@ static Optional<TypedValue> builtinInValue(
     case KindOfPersistentString:
     case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
     case KindOfPersistentVec:
-    case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
+    case KindOfVec:     return make_tv<KindOfVec>(staticEmptyVec());
     case KindOfPersistentDict:
-    case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
+    case KindOfDict:    return make_tv<KindOfDict>(staticEmptyDictArray());
     case KindOfPersistentKeyset:
-    case KindOfKeyset:  return make_tv<KindOfKeyset>(ArrayData::CreateKeyset());
+    case KindOfKeyset:  return make_tv<KindOfKeyset>(staticEmptyKeysetArray());
     case KindOfUninit:
     case KindOfObject:
     case KindOfResource:

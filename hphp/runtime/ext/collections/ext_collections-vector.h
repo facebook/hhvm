@@ -32,7 +32,7 @@ protected:
     : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
-    setArrayData(ArrayData::CreateVec());
+    setArrayData(staticEmptyVec());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : c_Collection(cls, kind)

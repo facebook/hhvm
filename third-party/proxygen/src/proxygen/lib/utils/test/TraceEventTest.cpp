@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <proxygen/lib/utils/ConnectionTelemetryBridge.h>
 #include <proxygen/lib/utils/TraceEvent.h>
 
 #include <proxygen/lib/utils/Exception.h>
@@ -19,6 +20,44 @@
 #include <vector>
 
 using namespace proxygen;
+
+namespace {
+
+struct ConnectionTelemetryCapture {
+  bool sinkCalled{false};
+  TraceEventType receivedType{TraceEventType::TotalRequest};
+};
+
+ConnectionTelemetryCapture& connectionTelemetryCapture() {
+  static ConnectionTelemetryCapture capture;
+  return capture;
+}
+
+void captureConnectionTelemetry(const TraceEvent& event) {
+  auto& capture = connectionTelemetryCapture();
+  capture.sinkCalled = true;
+  capture.receivedType = event.getType();
+}
+
+} // namespace
+
+TEST(ConnectionTelemetryBridgeTest, DropsEventsWithoutSinkAndForwardsWithSink) {
+  auto& capture = connectionTelemetryCapture();
+  ConnectionTelemetryBridge::registerSink(nullptr);
+  capture.sinkCalled = false;
+
+  ConnectionTelemetryBridge::emit(TraceEvent(TraceEventType::TotalRequest));
+  EXPECT_FALSE(capture.sinkCalled);
+
+  ConnectionTelemetryBridge::registerSink(&captureConnectionTelemetry);
+  EXPECT_FALSE(capture.sinkCalled);
+
+  ConnectionTelemetryBridge::emit(TraceEvent(TraceEventType::TotalRequest));
+  EXPECT_TRUE(capture.sinkCalled);
+  EXPECT_EQ(capture.receivedType, TraceEventType::TotalRequest);
+
+  ConnectionTelemetryBridge::registerSink(nullptr);
+}
 
 TEST(TraceEventTest, IntegralDataIntegralValue) {
   TraceEvent traceEvent((TraceEventType::TotalRequest));

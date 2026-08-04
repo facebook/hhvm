@@ -2217,20 +2217,6 @@ TEST_P(H2QDownstreamSessionTest, StopReadingDefault500Source) {
 }
 
 TEST_P(HTTPDownstreamSessionTest, ContentLengthMismatch) {
-  if (IS_H1()) {
-    // Both Content-Length and Transfer-Encoding is ambiguous framing; the
-    // HTTP/1.1 codec rejects it at headers-complete before dispatch.
-    auto msg = getPostRequest(/*contentLength=*/200);
-    msg.setIsChunked(true);
-    msg.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
-    auto id = sendRequestHeader(std::move(msg));
-    transport_->addReadEvent(id, writeBuf_.move(), /*eom=*/false);
-    evb_.loop();
-    expectResponse(id, 400, /*headers=*/nullptr, /*expectBody=*/false);
-    parseOutput();
-    return;
-  }
-
   auto handler =
       addSimpleStrictHandler([this](folly::EventBase *evb,
                                     HTTPSessionContextPtr /*ctx*/,
@@ -2259,11 +2245,20 @@ TEST_P(HTTPDownstreamSessionTest, ContentLengthMismatch) {
   transport_->addReadEvent(id, writeBuf_.move(), /*eom=*/false);
   loopN(1);
 
-  sendBody(id, makeBuf(100), /*eom=*/true);
-  transport_->addReadEvent(id, writeBuf_.move(), /*eof(h1)/eom(hq)*/ isHQ());
+  if (IS_H1()) {
+    sendBody(id, makeBuf(300));
+    transport_->addReadEvent(id, writeBuf_.move());
+  } else {
+    sendBody(id, makeBuf(100), /*eom=*/true);
+    transport_->addReadEvent(id, writeBuf_.move(), /*eof(h1)/eom(hq)*/ isHQ());
+  }
 
   evb_.loop();
-  expectStreamAbort(id, ErrorCode::INTERNAL_ERROR);
+  if (IS_H1()) {
+    expectedError_ = TransportErrorCode::NETWORK_ERROR;
+  } else {
+    expectStreamAbort(id, ErrorCode::INTERNAL_ERROR);
+  }
   parseOutput();
 }
 
@@ -3371,7 +3366,9 @@ TEST_P(HQDownstreamSessionTest, CodecHTTPError) {
 
 TEST_P(H1DownstreamSessionTest, CodecHTTPErrorStreamEgressComplete) {
   std::string malformedChunkHeader("z\r\n");
-  auto req = getChunkedPostRequest();
+  auto req = getPostRequest(100);
+  req.setIsChunked(true);
+  req.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
   auto id = sendRequestHeader(req);
   transport_->addReadEvent(id, writeBuf_.move(), false);
   auto handler =
@@ -3402,7 +3399,9 @@ TEST_P(H1DownstreamSessionTest, CodecHTTPErrorStreamEgressComplete) {
 
 TEST_P(H1DownstreamSessionTest, CodecHTTPErrorStreamReadInProgress) {
   std::string malformedChunkHeader("z\r\n");
-  auto req = getChunkedPostRequest();
+  auto req = getPostRequest(100);
+  req.setIsChunked(true);
+  req.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
   auto id = sendRequestHeader(req);
   transport_->addReadEvent(id, writeBuf_.move(), false);
   transport_->addReadEvent(

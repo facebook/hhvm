@@ -1354,14 +1354,18 @@ TEST_F(HTTPDownstreamSessionTest, TestOnContentMismatch) {
   gracefulShutdown();
 }
 
-// A request carrying both Transfer-Encoding and Content-Length has ambiguous
-// framing. Client codecs normalize away one of the two headers, so the raw
-// request is fed directly; the codec rejects it at headers-complete time with a
-// 400 and tears down the connection.
-TEST_F(HTTPDownstreamSessionTest, RequestWithTEAndCLRejected) {
-  auto* errorHandler = new HTTPDirectResponseHandler(400, "Bad Request");
-  EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
-      .WillOnce(Return(errorHandler));
+// A request carrying both Transfer-Encoding and Content-Length is counted.
+// Client codecs normalize away one of the two framing headers, so the raw
+// request is fed directly to exercise the ambiguous case.
+TEST_F(HTTPDownstreamSessionTest, RequestWithTEAndCLRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(1);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
 
   const std::string rawRequest =
       "POST / HTTP/1.1\r\n"
@@ -1371,11 +1375,8 @@ TEST_F(HTTPDownstreamSessionTest, RequestWithTEAndCLRejected) {
       "\r\n"
       "0\r\n\r\n";
   requests_.append(folly::IOBuf::copyBuffer(rawRequest));
-
-  folly::DelayedDestruction::DestructorGuard dg(httpSession_);
   flushRequestsAndLoop();
-  expectResponse(400, false, false);
-  expectDetachSession();
+  gracefulShutdown();
 }
 
 // A GET request without a body must not be counted.
@@ -3670,14 +3671,9 @@ TEST_F(HTTP2DownstreamSessionTest, Test304ContentLength) {
   gracefulShutdown();
 }
 
-// A chunked request that also declares a Content-Length carries both framing
-// headers, so the codec rejects it at headers-complete time before any body is
-// processed. This drives the codec-generated chunked path.
-TEST_F(HTTPDownstreamSessionTest, ChunkedRequestWithContentLengthRejected) {
-  auto* errorHandler = new HTTPDirectResponseHandler(400, "Bad Request");
-  EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
-      .WillOnce(Return(errorHandler));
-
+// chunked with wrong content-length
+TEST_F(HTTPDownstreamSessionTest, HttpShortContentLength) {
+  InSequence enforceOrder;
   auto req = getPostRequest(10);
   req.setIsChunked(true);
   req.getHeaders().add(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
@@ -3687,11 +3683,18 @@ TEST_F(HTTPDownstreamSessionTest, ChunkedRequestWithContentLengthRejected) {
       requests_, streamID, makeBuf(20), HTTPCodec::NoPadding, false);
   clientCodec_->generateChunkTerminator(requests_, streamID);
   clientCodec_->generateEOM(requests_, streamID);
+  auto handler1 = addSimpleStrictHandler();
 
-  folly::DelayedDestruction::DestructorGuard dg(httpSession_);
-  flushRequestsAndLoop();
-  expectResponse(400, false, false);
+  handler1->expectHeaders();
+  EXPECT_CALL(*handler1, _onChunkHeader(20));
+
+  handler1->expectError([&handler1](const HTTPException& ex) {
+    EXPECT_EQ(ex.getProxygenError(), kErrorParseBody);
+    handler1->txn_->sendAbort();
+  });
+  handler1->expectDetachTransaction();
   expectDetachSession();
+  flushRequestsAndLoop();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestSessionStallByFlowControl) {

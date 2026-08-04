@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-string.h"

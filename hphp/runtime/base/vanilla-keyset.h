@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -129,9 +128,7 @@ struct VanillaKeysetElm {
     return tv.m_type == kEmpty || isTombstone();
   }
 
-  ALWAYS_INLINE void erase() {
-    tvDecRefGen(&tv);
-  }
+  void erase();
 
   static constexpr ptrdiff_t keyOff() {
     return offsetof(VanillaKeysetElm, tv) + offsetof(TypedValue, m_data.pstr);

@@ -18,10 +18,8 @@
 #define HPHP_BESPOKE_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -67,6 +65,9 @@ struct LayoutTest {
     always_assert(false);
   }
 };
+
+struct RuntimeStruct;
+struct TypeAlias;
 
 namespace bespoke {
 

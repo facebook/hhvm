@@ -15,7 +15,9 @@
 */
 
 #include "hphp/runtime/base/bespoke-runtime.h"
+
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/bespoke-array.h"
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 

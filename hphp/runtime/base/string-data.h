@@ -25,7 +25,6 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/assertions.h"

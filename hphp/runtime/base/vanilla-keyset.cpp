@@ -54,6 +54,12 @@ VanillaKeyset::Initializer VanillaKeyset::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
+ALWAYS_INLINE void VanillaKeysetElm::erase() {
+  tvDecRefGen(&tv);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 VanillaKeyset* VanillaKeyset::asSet(ArrayData* ad) {
   assertx(ad->isVanillaKeyset());
   auto a = static_cast<VanillaKeyset*>(ad);

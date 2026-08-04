@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 
 #include <fmt/format.h>

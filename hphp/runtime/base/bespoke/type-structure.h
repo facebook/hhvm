@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/type-structure.h"
 
 /*
  * TypeStructure layout:

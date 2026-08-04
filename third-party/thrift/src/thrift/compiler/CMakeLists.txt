@@ -100,6 +100,7 @@ add_library(
   diagnostic.cc
   source_location.cc
 )
+set_target_properties(compiler_base PROPERTIES POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
 target_link_libraries(
   compiler_base
   fmt::fmt
@@ -134,6 +135,7 @@ add_library(
   sema/sema_context.cc
   sema/resolution_mismatch.cc
 )
+set_target_properties(compiler_lib PROPERTIES POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
 target_compile_definitions(compiler_lib PRIVATE THRIFT_OSS)
 target_link_libraries(
   compiler_lib
@@ -183,6 +185,7 @@ add_library(
   whisker/standard_library.cc
   whisker/token.cc
 )
+set_target_properties(whisker PROPERTIES POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
 target_link_libraries(
   whisker
   fmt::fmt

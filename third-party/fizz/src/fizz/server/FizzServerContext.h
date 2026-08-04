@@ -396,7 +396,8 @@ class FizzServerContext {
       SignatureScheme::ecdsa_secp521r1_sha512,
       SignatureScheme::rsa_pss_sha256};
   std::vector<NamedGroup> supportedGroups_ = {
-#if FIZZ_HAVE_OQS && OQS_ENABLE_KEM_ml_kem_768
+#if FIZZ_HAVE_OQS && defined(OQS_ENABLE_KEM_ml_kem_768) && \
+    OQS_ENABLE_KEM_ml_kem_768
       NamedGroup::X25519MLKEM768,
 #endif
       NamedGroup::x25519,

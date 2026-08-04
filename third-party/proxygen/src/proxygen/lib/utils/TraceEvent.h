@@ -270,6 +270,8 @@ class TraceEvent {
   MetaDataMap metaData_;
 };
 
+using ConnectionTelemetrySink = void (*)(const TraceEvent&);
+
 template <>
 struct TraceEvent::MetaData::ConvVisitor<std::vector<std::string>> {
   std::vector<std::string> operator()(

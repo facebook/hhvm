@@ -33,6 +33,20 @@ class ProtocolTest : public testing::Test {};
 
 static constexpr size_t kTestingProtocolMaxDepth = 4;
 
+namespace {
+
+struct StructuredExpectedTagTestStruct {
+  using __fbthrift_cpp2_type = StructuredExpectedTagTestStruct;
+  static constexpr bool __fbthrift_cpp2_is_union = false;
+};
+
+struct StructuredExpectedTagTestUnion {
+  using __fbthrift_cpp2_type = StructuredExpectedTagTestUnion;
+  static constexpr bool __fbthrift_cpp2_is_union = true;
+};
+
+} // namespace
+
 TEST(TTypeTest, Format) {
   EXPECT_EQ(fmt::format("{}", T_BOOL), "BOOL");
   EXPECT_EQ(fmt::format("{}", T_I64), "I64");
@@ -124,6 +138,32 @@ TEST_F(ProtocolTest, container_expected_tag) {
   EXPECT_FALSE((matches_wire_tag_v<
                 type::map<type::i32_t, type::string_t>,
                 type::list_c>));
+}
+
+TEST_F(ProtocolTest, structured_expected_tag) {
+  struct TestAdapter {};
+  using TestStruct = StructuredExpectedTagTestStruct;
+  using TestUnion = StructuredExpectedTagTestUnion;
+  using apache::thrift::detail::pm::matches_structured_wire_tag_v;
+
+  EXPECT_TRUE(
+      (matches_structured_wire_tag_v<type::struct_t<TestStruct>, TestStruct>));
+  EXPECT_TRUE(
+      (matches_structured_wire_tag_v<type::union_t<TestUnion>, TestUnion>));
+  EXPECT_TRUE((matches_structured_wire_tag_v<
+               type::cpp_type<TestStruct, type::struct_t<TestStruct>>,
+               TestStruct>));
+  EXPECT_TRUE((matches_structured_wire_tag_v<
+               type::adapted<TestAdapter, type::union_t<TestUnion>>,
+               TestUnion>));
+
+  EXPECT_FALSE((matches_structured_wire_tag_v<type::i32_t, TestStruct>));
+  EXPECT_FALSE(
+      (matches_structured_wire_tag_v<type::list<type::i32_t>, TestStruct>));
+  EXPECT_FALSE(
+      (matches_structured_wire_tag_v<type::struct_t<TestStruct>, TestUnion>));
+  EXPECT_FALSE(
+      (matches_structured_wire_tag_v<type::union_t<TestUnion>, TestStruct>));
 }
 
 template <typename ProtocolWriter>

@@ -363,6 +363,11 @@ template <typename ExpectedTag, typename WireTag>
 inline constexpr bool matches_wire_tag_v =
     std::is_base_of_v<WireTag, ExpectedTag>;
 
+template <typename ExpectedTag, typename Type>
+inline constexpr bool matches_structured_wire_tag_v =
+    matches_wire_tag_v<ExpectedTag, type::structured_c> &&
+    (matches_wire_tag_v<ExpectedTag, type::union_c> == is_thrift_union_v<Type>);
+
 template <typename ExpectedTag, typename WireTag>
 inline constexpr bool matches_integral_wire_tag_v =
     matches_wire_tag_v<ExpectedTag, WireTag>;
@@ -1165,12 +1170,8 @@ struct protocol_methods<
   }
 };
 
-/*
- * Struct Specialization
- * Forwards to Cpp2Ops wrapper around member read/write/etc.
- */
-template <typename Type, typename ExpectedTag>
-struct protocol_methods<type_class::structure, Type, ExpectedTag> {
+template <typename Type>
+struct structured_protocol_methods {
   template <typename Tag>
   using Wrap = type::detail::Wrap<Type, Tag>;
   static Type& unwrap(Type& inst) { return inst; }
@@ -1207,12 +1208,28 @@ struct protocol_methods<type_class::structure, Type, ExpectedTag> {
 };
 
 /*
+ * Structured Type Specialization
+ * Forwards to Cpp2Ops wrapper around member read/write/etc.
+ */
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::structure, Type, ExpectedTag>
+    : structured_protocol_methods<Type> {
+  static_assert(
+      matches_structured_wire_tag_v<ExpectedTag, Type>,
+      "ExpectedTag does not match the structured type");
+};
+
+/*
  * Union Specialization
  * Forwards to Cpp2Ops wrapper around member read/write/etc.
  */
 template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::variant, Type, ExpectedTag>
-    : protocol_methods<type_class::structure, Type, ExpectedTag> {};
+    : structured_protocol_methods<Type> {
+  static_assert(
+      matches_wire_tag_v<ExpectedTag, type::union_c>,
+      "ExpectedTag does not match the union type");
+};
 
 } // namespace detail::pm
 

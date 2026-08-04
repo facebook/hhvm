@@ -1281,6 +1281,8 @@ TEST(HTTP1xCodecTest, UpgradeAccepted) {
   EXPECT_FALSE(serverAcceptedUpgrade(",test1,test2,", ",,Test3,Test4"));
   EXPECT_FALSE(serverAcceptedUpgrade("websocket", ""));
   EXPECT_FALSE(serverAcceptedUpgrade("", "websocket"));
+  // A match on a non-first client protocol must still be accepted.
+  EXPECT_TRUE(serverAcceptedUpgrade("test1,websocket", "websocket"));
 }
 
 TEST(HTTP1xCodecTest, HugeURL) {

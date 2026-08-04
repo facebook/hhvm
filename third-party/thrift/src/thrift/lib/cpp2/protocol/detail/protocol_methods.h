@@ -84,14 +84,7 @@
  * methods::read(struct_instance.fieldA, reader);
  */
 
-namespace apache::thrift {
-
-namespace type::detail {
-template <typename, typename>
-class Wrap;
-}
-
-namespace detail::pm {
+namespace apache::thrift::detail::pm {
 
 template <typename C, typename... A>
 using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
@@ -1172,37 +1165,24 @@ struct protocol_methods<
 
 template <typename Type>
 struct structured_protocol_methods {
-  template <typename Tag>
-  using Wrap = type::detail::Wrap<Type, Tag>;
-  static Type& unwrap(Type& inst) { return inst; }
-  static const Type& unwrap(const Type& inst) { return inst; }
-  template <typename Tag>
-  static Type& unwrap(Wrap<Tag>& inst) {
-    return inst.toThrift();
+  template <typename Protocol>
+  static void read(Protocol& protocol, Type& out) {
+    Cpp2Ops<Type>::read(&protocol, &out);
   }
-  template <typename Tag>
-  static const Type& unwrap(const Wrap<Tag>& inst) {
-    return inst.toThrift();
-  }
-
-  template <typename Protocol, typename U>
-  static void read(Protocol& protocol, U& out) {
-    Cpp2Ops<Type>::read(&protocol, &unwrap(out));
-  }
-  template <typename Protocol, typename Context, typename U>
-  static void readWithContext(Protocol& protocol, U& out, Context&) {
+  template <typename Protocol, typename Context>
+  static void readWithContext(Protocol& protocol, Type& out, Context&) {
     read(protocol, out);
   }
-  template <typename Protocol, typename U>
-  static std::size_t write(Protocol& protocol, const U& in) {
-    return Cpp2Ops<Type>::write(&protocol, &unwrap(in));
+  template <typename Protocol>
+  static std::size_t write(Protocol& protocol, const Type& in) {
+    return Cpp2Ops<Type>::write(&protocol, &in);
   }
-  template <bool ZeroCopy, typename Protocol, typename U>
-  static std::size_t serializedSize(Protocol& protocol, const U& in) {
+  template <bool ZeroCopy, typename Protocol>
+  static std::size_t serializedSize(Protocol& protocol, const Type& in) {
     if (ZeroCopy) {
-      return Cpp2Ops<Type>::serializedSizeZC(&protocol, &unwrap(in));
+      return Cpp2Ops<Type>::serializedSizeZC(&protocol, &in);
     } else {
-      return Cpp2Ops<Type>::serializedSize(&protocol, &unwrap(in));
+      return Cpp2Ops<Type>::serializedSize(&protocol, &in);
     }
   }
 };
@@ -1231,6 +1211,4 @@ struct protocol_methods<type_class::variant, Type, ExpectedTag>
       "ExpectedTag does not match the union type");
 };
 
-} // namespace detail::pm
-
-} // namespace apache::thrift
+} // namespace apache::thrift::detail::pm

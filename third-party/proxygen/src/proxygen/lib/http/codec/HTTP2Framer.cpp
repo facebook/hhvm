@@ -912,6 +912,5 @@ const char* getFrameTypeString(FrameType type) {
       // can happen when type was cast from uint8_t
       return "Unknown";
   }
-  LOG(FATAL) << "Unreachable";
 }
 } // namespace proxygen::http2

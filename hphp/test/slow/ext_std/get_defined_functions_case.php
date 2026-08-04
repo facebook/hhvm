@@ -2,5 +2,7 @@
 
 function UpPer():mixed{}
 <<__EntryPoint>> function main(): void {
-var_dump(get_defined_functions()['user']);
+$funcs = get_defined_functions()['user'];
+sort(inout $funcs);
+var_dump($funcs);
 }

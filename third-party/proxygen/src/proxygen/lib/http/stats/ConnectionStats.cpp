@@ -48,6 +48,10 @@ void MinimalConnectionStats::recordConnectionClose() {
   BaseStats::incrementOptionalCounter(currConns_, -1);
 }
 
+void MinimalConnectionStats::recordTcpConnectionClose() {
+  BaseStats::incrementOptionalCounter(currTcpConns_, -1);
+}
+
 void MinimalConnectionStats::recordRequest() {
   BaseStats::addToOptionalStat(req_, 1);
 }

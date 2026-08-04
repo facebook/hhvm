@@ -29,6 +29,8 @@ class ConnectionStats {
 
   virtual void recordConnectionClose() = 0;
 
+  virtual void recordTcpConnectionClose() = 0;
+
   virtual void recordRequest() = 0;
 
   virtual void recordResponse(
@@ -61,6 +63,8 @@ class MinimalConnectionStats : public ConnectionStats {
   void recordTcpConnectionOpen() override;
 
   void recordConnectionClose() override;
+
+  void recordTcpConnectionClose() override;
 
   void recordRequest() override;
 

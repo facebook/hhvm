@@ -179,38 +179,11 @@ def _unaligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     return utv
 
 
-def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
-    target = base.target
-    quot = idx // 8
-    rem = idx % 8
-    chunk = base.load_addr + utils.Type("HPHP::PackedBlock", target).size * quot
-
-    val_type = utils.Type("HPHP::Value", target)
-    valaddr = chunk + val_type.size * (1 + rem)
-    val = base.CreateValueFromAddress("val", valaddr, val_type)
-
-    ty_type = utils.Type("HPHP::DataType", target)
-    tyaddr = chunk + rem
-    ty = base.CreateValueFromAddress("datatype", tyaddr, ty_type)
-
-    data = val.GetData()
-    success = data.Append(ty.data)
-    assert success, "Couldn't construct a raw TypedValue"
-
-    tv_type = utils.Type("HPHP::TypedValue", base.target)
-    tv = base.CreateValueFromData("[" + str(idx) + "]", data, tv_type)
-
-    return tv
-
-
 def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue | None:
     # base is a generic pointer to the start of the array of typed values
     utils.debug_print(f"vec_at({base.unsigned}, idx)")
     try:
-        if utils.Global("HPHP::VanillaVec::stores_unaligned_typed_values", base.target):
-            return _unaligned_tv_at_pos_to_tv(base, idx)
-        else:
-            return _aligned_tv_at_pos_to_tv(base, idx)
+        return _unaligned_tv_at_pos_to_tv(base, idx)
     except Exception as ex:
         print(
             f"error while trying to get element #{idx} of vec {str(base)}: {ex}",

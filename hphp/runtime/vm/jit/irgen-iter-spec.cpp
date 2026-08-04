@@ -262,7 +262,7 @@ struct VecAccessor : public Accessor {
   explicit VecAccessor(bool baseConst, bool outputKey)
     : Accessor(
         allowBespokeArrayLikes() ? TVanillaVec : TVec,
-        baseConst && !outputKey && VanillaVec::stores_unaligned_typed_values
+        baseConst && !outputKey
       )
   {}
 

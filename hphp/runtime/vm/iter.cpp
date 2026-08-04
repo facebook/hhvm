@@ -325,7 +325,7 @@ TypedValue iter_get_value_array(ArrayData* ad, ssize_t pos) noexcept {
 
   switch (ad->kind()) {
     case ArrayData::kVecKind:
-      return BaseConst && !WithKeys && VanillaVec::stores_unaligned_typed_values
+      return BaseConst && !WithKeys
         ? *reinterpret_cast<UnalignedTypedValue*>(pos)
         : VanillaVec::GetPosVal(ad, pos);
     case ArrayData::kDictKind: {
@@ -387,7 +387,7 @@ int64_t iter_init_array(Iter* iter, ArrayData* ad) noexcept {
   }
 
   if (LIKELY(ad->isVanillaVec())) {
-    if (BaseConst && !WithKeys && VanillaVec::stores_unaligned_typed_values) {
+    if (BaseConst && !WithKeys) {
       // We can use a pointer iterator for vanilla vecs storing unaligned
       // tvs if there are no associated keys we need to track.
       iter->m_unaligned_elm = VanillaVec::entries(ad);
@@ -441,7 +441,7 @@ int64_t iter_next_array(Iter* iter, ArrayData* ad) noexcept {
 
   switch (ad->kind()) {
     case ArrayData::kVecKind:
-      return BaseConst && !WithKeys && VanillaVec::stores_unaligned_typed_values
+      return BaseConst && !WithKeys
         ? iter_next_vanilla_vec_pointer(iter, ad)
         : iter_next_vanilla_vec(iter, ad);
     case ArrayData::kDictKind:

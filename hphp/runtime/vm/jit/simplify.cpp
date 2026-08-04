@@ -3146,7 +3146,6 @@ SSATmp* simplifyGetKeysetPtrIter(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyGetVecPtrIter(State& env, const IRInstruction* inst) {
-  assertx(VanillaVec::stores_unaligned_typed_values);
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   if (!arr->hasConstVal(TArrLike)) return nullptr;
@@ -3563,7 +3562,7 @@ SSATmp* simplifyIterGetValArr(State& env, const IRInstruction* inst) {
 
   if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
     if (base->isA(TVec)) {
-      if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
+      if (baseConst && !withKeys) {
         auto const elm = gen(env, IntAsPtrToElem, pos);
         return gen(env, LdPtrIterVal, TInitCell, base, elm);
       }

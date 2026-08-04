@@ -741,8 +741,6 @@ void cgAdvanceKeysetPtrIter(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
-  assertx(VanillaVec::stores_unaligned_typed_values);
-
   auto const pos_tmp = inst->src(1);
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const pos = srcLoc(env, inst, 1).reg();
@@ -764,8 +762,6 @@ void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgAdvanceVecPtrIter(IRLS& env, const IRInstruction* inst) {
-  assertx(VanillaVec::stores_unaligned_typed_values);
-
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
 
@@ -897,29 +893,20 @@ irlower::LvalPtrs implVecElemLval(IRLS& env, Vreg rarr,
     }
   }
 
-  if constexpr (VanillaVec::stores_unaligned_typed_values) {
-    // Compute `rarr + ridx * sizeof(UnalignedTypedValue) + VanillaVec::entriesOffset().
-    static_assert(IMPLIES(VanillaVec::stores_unaligned_typed_values, sizeof(UnalignedTypedValue) == 9));
-    auto ridx_times_9 = v.makeReg();
-    v << lea{ridx[ridx * 8], ridx_times_9};
-    auto const type_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_type);
-    auto const data_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_data);
-    if (arch::any<arch::ARM>()) {
-      auto new_base = v.makeReg();
-      v << lea{rarr[ridx_times_9], new_base};
-      return {new_base + type_offset, new_base + data_offset};
-    }
-    return {rarr[ridx_times_9] + type_offset, rarr[ridx_times_9] + data_offset};
-  } else {
-    // See PackedBlock::LvalAt for an explanation of this math.
-    auto const x = v.makeReg();
-    auto const a = v.makeReg();
-    auto const b = v.makeReg();
-    v << andqi{-8, ridx, x, v.makeReg()};
-    v << lea{rarr[x    * 8] + VanillaVec::entriesOffset(), a};
-    v << lea{rarr[ridx * 8] + VanillaVec::entriesOffset(), b};
-    return {a[ridx], b[x] + 8};
+  // Compute `rarr + ridx * sizeof(UnalignedTypedValue) + VanillaVec::entriesOffset().
+  static_assert(sizeof(UnalignedTypedValue) == 9);
+  auto ridx_times_9 = v.makeReg();
+  v << lea{ridx[ridx * 8], ridx_times_9};
+  auto const type_offset =
+    VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_type);
+  auto const data_offset =
+    VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_data);
+  if (arch::any<arch::ARM>()) {
+    auto new_base = v.makeReg();
+    v << lea{rarr[ridx_times_9], new_base};
+    return {new_base + type_offset, new_base + data_offset};
   }
+  return {rarr[ridx_times_9] + type_offset, rarr[ridx_times_9] + data_offset};
 }
 
 /*

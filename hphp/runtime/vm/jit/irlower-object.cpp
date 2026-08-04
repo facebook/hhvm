@@ -54,23 +54,6 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(AllocObj)
 
-namespace {
-
-void objectPropsRawInit(Vout& v, Vreg base, size_t props) {
-  if (props == 0) return;
-
-  if constexpr (std::is_same_v<ObjectProps, tv_layout::Tv7Up>) {
-    // Maintain 7-up invariant
-    auto const last_type_word_offset =
-      sizeof(ObjectData) +
-      8 * sizeof(uint64_t) * ((props - 1) / 7);
-
-    v << storeqi{0, base[last_type_word_offset]};
-  }
-}
-
-}
-
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dst = dstLoc(env, inst, 0).reg();
@@ -110,8 +93,6 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
     SyncOptions::None,
     args
   );
-  objectPropsRawInit(v, dst, cls->numDeclProperties());
-
 }
 
 void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
@@ -155,8 +136,6 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
 
     cgCallHelper(vmain(env), env, target,
                  callDest(dst), SyncOptions::None, args);
-
-    objectPropsRawInit(v, dst, cls->numDeclProperties());
   }
 
   if (inst->src(0)->isA(TNullptr)) {

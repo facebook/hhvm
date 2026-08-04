@@ -297,21 +297,9 @@ def object_data_at(obj, cls, prop_name_or_slot, hasher=None):
 
 def vec_at(base, idx):
     try:
-        if V("HPHP::VanillaVec::stores_unaligned_typed_values"):
-            idx = int(idx)
-            base = base.cast(T("char").pointer())
-            return _utv_at_pos_to_tv(base, idx)
-        else:
-            idx = int(idx)
-            base = base.cast(T("char").pointer())
-            quot = idx // 8
-            rem = idx % 8
-            chunk = base + T("HPHP::PackedBlock").sizeof * quot
-            tyaddr = chunk + rem
-            ty = tyaddr.cast(T("HPHP::DataType").pointer()).dereference()
-            valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
-            val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
-            return pretty_tv(ty, val)
+        idx = int(idx)
+        base = base.cast(T("char").pointer())
+        return _utv_at_pos_to_tv(base, idx)
     except:
         pass
 

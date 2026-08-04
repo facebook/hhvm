@@ -209,7 +209,7 @@ void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
 
   if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
     if (base->isA(TVec)) {
-      if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
+      if (baseConst && !withKeys) {
         auto const elm = gen(env, IntAsPtrToElem, pos);
         pushIncRef(env, gen(env, LdPtrIterVal, TInitCell, base, elm));
       } else {

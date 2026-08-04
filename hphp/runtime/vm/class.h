@@ -143,7 +143,7 @@ using ClassPtr = AtomicSharedPackedPtr<Class>;
 // compatible signatures.
 using ObjReleaseFunc = BuiltinDtorFunction;
 
-using ObjectProps = std::conditional<tv_layout::stores_unaligned_typed_values, tv_layout::UnalignedTVLayout, tv_layout::Tv7Up>::type;
+using ObjectProps = tv_layout::UnalignedTVLayout;
 
 /*
  * Class represents the full definition of a user class in a given request

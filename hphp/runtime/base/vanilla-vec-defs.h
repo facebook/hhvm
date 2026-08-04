@@ -29,17 +29,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-// This method does the actual logic for computing a size given a layout,
-// using `stores_unaligned_typed_values` to select between layout types.
 constexpr size_t bytes2VanillaVecCapacity(size_t bytes) {
-  if (VanillaVec::stores_unaligned_typed_values) {
-    return bytes / sizeof(UnalignedTypedValue);
-  } else {
-    static_assert(sizeof(Value) == 8);
-    static_assert(sizeof(DataType) == 1);
-    const size_t values = bytes / sizeof(Value);
-    return values / 9 * 8 + std::max(int8_t(values % 9) - 1, 0);
-  }
+  return bytes / sizeof(UnalignedTypedValue);
 }
 
 // This method is just to help compilers with types in the macro usage below.
@@ -80,13 +71,11 @@ static_assert(
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE UnalignedTypedValue* VanillaVec::entries(ArrayData* arr) {
-  assertx(stores_unaligned_typed_values);
   return reinterpret_cast<UnalignedTypedValue*>(arr + 1);
 }
 
 ALWAYS_INLINE
 const UnalignedTypedValue* VanillaVec::entries(const ArrayData* arr) {
-  assertx(stores_unaligned_typed_values);
   return reinterpret_cast<const UnalignedTypedValue*>(arr + 1);
 }
 
@@ -96,15 +85,8 @@ ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
 
 ALWAYS_INLINE
 size_t VanillaVec::capacityToSizeBytes(size_t capacity) {
-  const auto base = sizeof(ArrayData);
-  // When we use the PackedBlock layout, we can store each entry in 9 bytes
-  // (1 byte for the type and 8 bytes for the value), but we must round up to
-  // a multiple of 8 to handle the leftover types.
-  //
-  // We round to up to a multiple of 16 since our allocations are aligned.
-  auto const size = stores_unaligned_typed_values ?
-                    base + capacity * sizeof(UnalignedTypedValue) :
-                    base + capacity * (sizeof(DataType) + sizeof(Value));
+  // We round up to a multiple of 16 since our allocations are aligned.
+  auto const size = sizeof(ArrayData) + capacity * sizeof(UnalignedTypedValue);
   return (size + 15) & size_t(-16);
 }
 

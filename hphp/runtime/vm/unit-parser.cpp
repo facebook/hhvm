@@ -424,9 +424,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
       case CompileAbortMode::Never:
         break;
       case CompileAbortMode::AllErrorsNull: {
-        auto ue = std::unique_ptr<UnitEmitter>{};
-        ue->finish();
-        return ue;
+        return std::unique_ptr<UnitEmitter>{};
       }
       case CompileAbortMode::OnlyICE:
       case CompileAbortMode::VerifyErrors:

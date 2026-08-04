@@ -33,18 +33,18 @@ struct InteractionState {
   std::atomic<size_t> refcount{1};
 
   struct Deleter {
-    void operator()(InteractionState* self) {
+    void operator()(InteractionState* FOLLY_NONNULL self) {
       if (self->refcount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
         std::move(self->keepAlive)
-            .add([id = std::move(self->id),
+            .add([interactionId = std::move(self->id),
                   implPtr = std::move(self->impl)](auto&& keepAlive_2) mutable {
               auto* channel = implPtr->get(*keepAlive_2);
               if (channel) {
-                (*channel)->terminateInteraction(std::move(id));
+                (*channel)->terminateInteraction(std::move(interactionId));
               } else {
                 // channel is only null if nothing was ever sent on that evb,
                 // in which case server doesn't know about this interaction
-                DCHECK(!id);
+                DCHECK(!interactionId);
               }
             });
         delete self;

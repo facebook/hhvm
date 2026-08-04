@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <folly/portability/Config.h>
+
 #if !FOLLY_MOBILE
 #include <folly/small_vector.h>
 #endif

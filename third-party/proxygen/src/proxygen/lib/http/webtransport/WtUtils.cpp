@@ -386,9 +386,9 @@ NotifyPeerStreamsGuard::~NotifyPeerStreamsGuard() noexcept {
   }
 }
 
-WtSessionBase::WtSessionBase(folly::EventBase* evb,
+WtSessionBase::WtSessionBase(folly::Executor* executor,
                              WtStreamManager& sm) noexcept
-    : evb_{evb},
+    : executor_{executor},
       sm_{sm},
       awaitUniCredit_{makeEmptyPromise()},
       awaitBidiCredit_{makeEmptyPromise()} {

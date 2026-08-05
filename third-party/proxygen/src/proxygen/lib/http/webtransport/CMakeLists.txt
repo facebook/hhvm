@@ -97,6 +97,8 @@ proxygen_add_library(proxygen_http_webtransport_wt_util
     proxygen_http_codec_direction
     proxygen_http_codec_webtransport_webtransport_capsule_codec
     proxygen_http_webtransport_wt_stream_manager
+    Folly::folly_executor
+    Folly::folly_io_async_async_base
 )
 
 proxygen_add_library(proxygen_http_webtransport_webtransport_session

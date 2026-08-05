@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <folly/Executor.h>
+#include <folly/io/async/EventBase.h>
 #include <proxygen/lib/http/codec/TransportDirection.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
@@ -154,7 +156,7 @@ class WtSessionBase : public WebTransport {
  public:
   using Ptr = std::shared_ptr<WtSessionBase>;
   using IoBufPtr = std::unique_ptr<folly::IOBuf>;
-  WtSessionBase(folly::EventBase* evb, WtStreamManager& sm) noexcept;
+  WtSessionBase(folly::Executor* executor, WtStreamManager& sm) noexcept;
   ~WtSessionBase() noexcept override = default;
 
   WtExpected<StreamWriteHandle*>::Type createUniStream() noexcept override;
@@ -205,8 +207,12 @@ class WtSessionBase : public WebTransport {
     datagrams_.ingress.push_back(std::move(datagram));
   }
 
+  folly::Executor* executor() {
+    return executor_;
+  }
+
   folly::EventBase* evb() {
-    return evb_;
+    return dynamic_cast<folly::EventBase*>(executor_);
   }
 
  protected:
@@ -225,7 +231,7 @@ class WtSessionBase : public WebTransport {
   }
 
  private:
-  folly::EventBase* evb_;
+  folly::Executor* executor_;
   WtStreamManager& sm_;
   folly::Promise<folly::Unit> awaitUniCredit_;
   folly::Promise<folly::Unit> awaitBidiCredit_;

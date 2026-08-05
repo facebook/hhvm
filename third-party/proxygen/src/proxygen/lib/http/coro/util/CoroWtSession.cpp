@@ -153,9 +153,9 @@ folly::coro::Task<void> CoroWtSession::writeLoop(Ptr self) {
 void CoroWtSession::start(CoroWtSession::Ptr self) {
   wtHandler_->onWebTransportSession(self);
   auto ct = cs_.getToken();
-  auto* eventBase = evb();
-  co_withExecutor(eventBase, co_withCancellation(ct, readLoop(self))).start();
-  co_withExecutor(eventBase, co_withCancellation(ct, writeLoop(self))).start();
+  auto* executor = this->executor();
+  co_withExecutor(executor, co_withCancellation(ct, readLoop(self))).start();
+  co_withExecutor(executor, co_withCancellation(ct, writeLoop(self))).start();
 }
 
 void CoroWtSession::writeLoopFinished() noexcept {

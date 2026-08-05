@@ -54,7 +54,7 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
       new (&(g_ranges[folly::to_underlying(AddrRangeClass::LowSmall)]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize);
       new (&(g_ranges[folly::to_underlying(AddrRangeClass::LowEmergency)]))
-        RangeState(kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr);
+        RangeState(kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr - kLowEmergencyStolenByStaticLiterals);
       new (&(g_ranges[folly::to_underlying(AddrRangeClass::Mid)]))
         RangeState(kLowArenaMaxAddr, kMidArenaMaxAddr);
       new (&(g_ranges[folly::to_underlying(AddrRangeClass::High)]))

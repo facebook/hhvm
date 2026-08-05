@@ -102,22 +102,20 @@ bool mapTC(uintptr_t usedBase, uintptr_t size) {
 }
 
 uintptr_t getTCMaxExtent(uintptr_t usedBase) {
-#if USE_JEMALLOC
-  // When we have a low arena, TC must fit below lowArenaMinAddr(). If it
-  // doesn't, we shrink things to make it so.
+  // Use all the low 2GB space, but do not conflict with static literals.
+  auto constexpr tcMaxAddr =
+    rd<size2m>(std::min(kLowArenaMinAddr, kStaticLiteralsMinAddr));
+
   if (Cfg::Server::Mode) {
-    Logger::Info("kLowArenaMinAddr: 0x%lx", kLowArenaMinAddr);
+    Logger::Info("tcMaxAddr: 0x%lx", tcMaxAddr);
   }
   always_assert_flog(
-    usedBase + (32u << 20) <= kLowArenaMinAddr,
-    "brk is too big (usedBase = {}, kLowArenaMinAddr = {})",
-    usedBase, kLowArenaMinAddr
+    usedBase + (32u << 20) <= tcMaxAddr,
+    "brk is too big (usedBase = {}, tcMaxAddr = {})",
+    usedBase, tcMaxAddr
   );
 
-  return std::min(kLowArenaMinAddr, 2ul << 30);
-#endif
-
-  return 2ul << 30;
+  return tcMaxAddr;
 }
 
 }

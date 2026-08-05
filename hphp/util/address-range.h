@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <folly/CPortability.h>
+
 #include "hphp/util/alloc-defs.h"
 
 #include "hphp/util/lock-free-ptr-wrapper.h"
@@ -48,12 +50,11 @@ namespace HPHP {
 // USE_JEMALLOC is defined. We make them available for all modes to avoid having
 // ifdefs everywhere.
 
-constexpr size_t kLowEmergencySize = 128 << 20;
-
 constexpr uintptr_t kLowArenaMinAddr = 2ull << 30;
 constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
 constexpr size_t kLowSmallArenaSize = 128 << 20;
+constexpr size_t kLowEmergencySize = 128 << 20;
 
 constexpr unsigned kSharedMaxShift = 38;
 constexpr uintptr_t kSharedMaxAddr = 1ull << kSharedMaxShift;
@@ -69,6 +70,40 @@ constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
 constexpr uintptr_t kDebugAddr = 3ull << 39;
+
+#ifndef USE_JEMALLOC
+// Not performance sensitive without jemalloc. Use the beginning of the bump
+// allocated low arena for convenience.
+#ifdef FOLLY_SANITIZE_ADDRESS
+// ASAN: 0x000000010000xxxx
+constexpr uintptr_t kStaticLiteralsMinAddr = kLowArenaMaxAddr;
+constexpr uintptr_t kStaticLiteralsMaxAddr = kLowArenaMaxAddr + (1ul << 16);
+#else
+// No jemalloc: 0x000000008000xxxx
+constexpr uintptr_t kStaticLiteralsMinAddr = kLowArenaMinAddr;
+constexpr uintptr_t kStaticLiteralsMaxAddr = kLowArenaMinAddr + (1ul << 16);
+#endif
+constexpr size_t kLowEmergencyStolenByStaticLiterals = 0;
+#elif defined(__aarch64__)
+// ARM: 0x00000000FFFFxxxx (taken from the LowEmergency range)
+// - 1 instruction to load literal into a register (using MOVN)
+constexpr uintptr_t kStaticLiteralsMinAddr = kLowArenaMaxAddr - (1ull << 16);
+constexpr uintptr_t kStaticLiteralsMaxAddr = kLowArenaMaxAddr;
+// The stolen space must be aligned to 2M due to RangeState constraints.
+constexpr size_t kLowEmergencyStolenByStaticLiterals = (2ull << 20);
+static_assert(kStaticLiteralsMinAddr > kLowArenaMaxAddr - kLowEmergencySize);
+static_assert(kLowEmergencyStolenByStaticLiterals >= kStaticLiteralsMaxAddr - kStaticLiteralsMinAddr);
+static_assert(kLowEmergencyStolenByStaticLiterals < kLowEmergencySize);
+#else
+// X64: 0x000000007FFFxxxx (taken from the TC range)
+// - 5-6 bytes to load literal into a register (depending on register)
+// - 6 bytes single instruction to store it into 32 bit memory slot
+// - 7 bytes single instruction to store it into 64 bit memory slot
+//   (only possible because it fits into signed int32_t)
+constexpr uintptr_t kStaticLiteralsMinAddr = kLowArenaMinAddr - (1ull << 16);
+constexpr uintptr_t kStaticLiteralsMaxAddr = kLowArenaMinAddr;
+constexpr size_t kLowEmergencyStolenByStaticLiterals = 0;
+#endif
 
 inline bool is_low_mem(void* m) {
   return reinterpret_cast<uintptr_t>(m) < kMidArenaMaxAddr;

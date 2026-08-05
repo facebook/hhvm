@@ -331,6 +331,44 @@ void setup_high_arena(PageSpec s) {
   high_cold_arena_flags = MALLOCX_ARENA(high_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
+void setup_static_literals_arena() {
+  // Map space for static literals.
+  auto const addr = mmap(
+    reinterpret_cast<void*>(kStaticLiteralsMinAddr),
+    kStaticLiteralsMaxAddr - kStaticLiteralsMinAddr,
+    PROT_READ | PROT_WRITE,
+    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE | MAP_NORESERVE,
+    -1,
+    0
+  );
+
+  always_assert_flog(
+    addr == reinterpret_cast<void*>(kStaticLiteralsMinAddr),
+    "mmap failed: {}", folly::errnoStr(errno)
+  );
+
+  // If the space was stolen from the emergency area, we might have stolen more
+  // than needed (RangeState constructor requires range to be 2M aligned).
+  // Map the remaining space as inaccessible.
+  auto constexpr stolenMinAddr =
+    kStaticLiteralsMaxAddr - kLowEmergencyStolenByStaticLiterals;
+  if constexpr (stolenMinAddr < kStaticLiteralsMinAddr) {
+    auto const stolenAddr = mmap(
+      reinterpret_cast<void*>(stolenMinAddr),
+      kStaticLiteralsMinAddr - stolenMinAddr,
+      PROT_NONE,
+      MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE | MAP_NORESERVE,
+      -1,
+      0
+    );
+
+    always_assert_flog(
+      stolenAddr == reinterpret_cast<void*>(stolenMinAddr),
+      "mmap failed: {}", folly::errnoStr(errno)
+    );
+  }
+}
+
 void setup_auto_arenas(PageSpec s) {
   size_t size = size1g * s.n1GPages + size2m * s.n2MPages;
   if (size == 0) return;
@@ -659,6 +697,13 @@ void setup_arenas() {
   allocShadow(sharedShadowMinAddr, sharedShadowMaxAddr);
 #endif
 
+  auto const staticLiteralsAddr =
+    low_bump_malloc(kStaticLiteralsMaxAddr - kStaticLiteralsMinAddr);
+  always_assert_flog(
+    reinterpret_cast<uintptr_t>(staticLiteralsAddr) == kStaticLiteralsMinAddr,
+    "static literals allocated at wrong location"
+  );
+
   if (debug) {
     auto const ptr1 = malloc(1);
     auto const ptr2 = malloc(1 << 20);
@@ -829,6 +874,7 @@ struct JEMallocInitializer {
     }
 #endif
     setup_high_arena({high_1g_pages, high_2m_pages});
+    setup_static_literals_arena();
     // Make sure high/low arenas are available to the current thread.
     arenas_thread_init();
 

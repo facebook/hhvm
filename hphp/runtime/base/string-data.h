@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/static-literals.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/blob-encoder.h"
@@ -146,10 +147,10 @@ struct StringData final : MaybeCountable,
   static StringData* MakeShared(folly::StringPiece);
 
   /*
-   * Same as MakeStatic but initializes the empty string in aligned storage.
-   * This should be called by the static string table initialization code.
+   * Same as MakeStatic, but initializes the empty string in reserved storage.
+   * This should only be called by the static string table initialization code.
    */
-  static StringData* MakeEmpty();
+  static StringData* InitializeEmpty();
 
   /*
    * return estimated capacity for a string of the given size, due to
@@ -601,36 +602,9 @@ struct string_data_hash_tsame; // for type names
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef USE_JEMALLOC
-extern std::aligned_storage<
-  kStringOverhead + sizeof(SymbolPrefix),
-  alignof(StringData)
->::type s_theEmptyStringFixed;
-#endif
-
-#if !defined(USE_JEMALLOC) || !defined(NDEBUG)
-extern StringData* s_theEmptyStringDynamic;
-#endif
-
-/*
- * Return the "static empty string". This is a singleton StaticString
- * that can be used to return a StaticString for the empty string in
- * as lightweight a manner as possible.
- */
 ALWAYS_INLINE StringData* staticEmptyString() {
-#ifdef USE_JEMALLOC
-#ifndef NDEBUG
-  if (uintptr_t(&s_theEmptyStringFixed) >= kMidArenaMaxAddr) {
-    return s_theEmptyStringDynamic;
-  }
-#endif
-  void* vp = &s_theEmptyStringFixed;
-  return reinterpret_cast<StringData*>(
-    reinterpret_cast<uintptr_t>(vp) + sizeof(SymbolPrefix)
-  );
-#else
-return s_theEmptyStringDynamic;
-#endif
+  auto constexpr ptr = StaticLiterals::EmptyString() + sizeof(SymbolPrefix);
+  return reinterpret_cast<StringData*>(ptr);
 }
 
 //////////////////////////////////////////////////////////////////////

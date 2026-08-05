@@ -207,7 +207,7 @@ void create_string_data_map() {
                           config);
 
   if (!precomputed_chars) {
-    insertStaticString(StringData::MakeEmpty());
+    insertStaticString(StringData::InitializeEmpty());
     precomputed_chars = precompute_chars();
   }
 }

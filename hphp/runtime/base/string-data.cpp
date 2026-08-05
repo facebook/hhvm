@@ -23,6 +23,7 @@
 #include "hphp/util/alloc.h"
 
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/static-literals.h"
 #include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/zend-functions.h"
 
@@ -50,19 +51,6 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
   assertx(sd->capacity() >= len);
   return sd;
 }
-
-//////////////////////////////////////////////////////////////////////
-
-#ifdef USE_JEMALLOC
-std::aligned_storage<
-  kStringOverhead + sizeof(SymbolPrefix),
-  alignof(StringData)
->::type s_theEmptyStringFixed;
-#endif
-
-#if !defined(USE_JEMALLOC) || !defined(NDEBUG)
-StringData* s_theEmptyStringDynamic = nullptr;
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -194,20 +182,14 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
   return MakePersistent<false>(sl);
 }
 
-StringData* StringData::MakeEmpty() {
-#ifdef USE_JEMALLOC
-#ifndef NDEBUG
-  if (uintptr_t(&s_theEmptyStringFixed) >= kMidArenaMaxAddr) {
-    s_theEmptyStringDynamic = MakeStatic(folly::StringPiece{""});
-    return s_theEmptyStringDynamic;
-  }
-#endif
-  return MakePersistentAt<true>(folly::StringPiece{""},
-                            MemBlock{&s_theEmptyStringFixed, sizeof(s_theEmptyStringFixed)});
-#else
-  s_theEmptyStringDynamic = MakeStatic(folly::StringPiece{""});
-  return s_theEmptyStringDynamic;
-#endif
+StringData* StringData::InitializeEmpty() {
+  auto constexpr size = kStringOverhead + sizeof(SymbolPrefix);
+  static_assert(size == StaticLiterals::kEmptyStringSize);
+
+  return StringData::MakePersistentAt<true>(
+    folly::StringPiece{""},
+    MemBlock{reinterpret_cast<void*>(StaticLiterals::EmptyString()), size}
+  );
 }
 
 void StringData::destructStatic() {

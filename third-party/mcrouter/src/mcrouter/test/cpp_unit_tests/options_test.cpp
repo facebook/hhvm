@@ -70,7 +70,14 @@ TEST(OptionsSetFromDictTest, StringMapValueMayContainColons) {
 }
 
 TEST(OptionsSetFromDictTest, StringMapRejectsMalformedPairs) {
-  for (const auto& value : {"missing-delimiter", ":missing-name"}) {
+  for (const auto& value : {
+           "missing-delimiter",
+           ":missing-name",
+           ",a:1",
+           "a:1,",
+           "a:1,,b:2",
+           ",",
+       }) {
     McrouterOptions opts;
     opts.config_params = {{"existing", "value"}};
     const unordered_map<string, string> dict{{"config_params", value}};

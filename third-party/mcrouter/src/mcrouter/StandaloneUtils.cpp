@@ -19,7 +19,6 @@
 #include <vector>
 
 #include <folly/Conv.h>
-#include <folly/String.h>
 #include <folly/system/HardwareConcurrency.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
@@ -492,24 +491,13 @@ void setupStandaloneMcrouter(
   // Merge additional-config-params into config_params.
   // Additional params take precedence over existing config_params.
   if (!cmdLineOpts.additionalConfigParams.empty()) {
-    auto substituted =
-        options::substituteTemplates(cmdLineOpts.additionalConfigParams);
-    std::vector<folly::StringPiece> pairs;
-    folly::split(',', substituted, pairs);
-    for (const auto& pair : pairs) {
-      if (pair.empty()) {
-        continue;
-      }
-      std::string key;
-      std::string value;
-      checkLogic(
-          folly::split(':', pair, key, value),
-          "Invalid additional-config-params pair: '{}'. Expected name:value.",
-          pair);
-      checkLogic(
-          !key.empty(),
-          "Empty key in additional-config-params pair: '{}'.",
-          pair);
+    auto additionalConfigParams = options::parseStringMapOption(
+        cmdLineOpts.additionalConfigParams,
+        {
+            .ignoreEmptyPairs = true,
+            .overwriteDuplicateKeys = true,
+        });
+    for (auto& [key, value] : additionalConfigParams) {
       libmcrouterOptions.config_params[key] = std::move(value);
     }
   }

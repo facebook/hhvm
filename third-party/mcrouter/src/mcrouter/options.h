@@ -104,10 +104,19 @@ class McrouterOptionsBase {
 
 namespace options {
 
+struct StringMapParseOptions {
+  bool ignoreEmptyPairs{false};
+  bool overwriteDuplicateKeys{false};
+};
+
 /**
  * Perform %..% variable substitution on an individual string
  */
 std::string substituteTemplates(std::string str);
+
+std::unordered_map<std::string, std::string> parseStringMapOption(
+    const std::string& str,
+    StringMapParseOptions parseOptions = {});
 
 } // namespace options
 } // namespace memcache

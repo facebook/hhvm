@@ -25,6 +25,45 @@ using std::unordered_map;
 using std::unordered_set;
 using std::vector;
 
+namespace facebook {
+namespace memcache {
+namespace options {
+
+unordered_map<string, string> parseStringMapOption(
+    const string& str,
+    StringMapParseOptions parseOptions) {
+  vector<folly::StringPiece> pairs;
+  folly::split(',', str, pairs);
+  unordered_map<string, string> result;
+  for (const auto& pair : pairs) {
+    if (pair.empty()) {
+      checkLogic(
+          parseOptions.ignoreEmptyPairs,
+          "Invalid string map pair: '{}'. Expected name:value.",
+          pair);
+      continue;
+    }
+    const auto delimiter = pair.find(':');
+    checkLogic(
+        delimiter != string::npos,
+        "Invalid string map pair: '{}'. Expected name:value.",
+        pair);
+    auto key = substituteTemplates(pair.subpiece(0, delimiter).str());
+    checkLogic(!key.empty(), "Empty key in string map pair: '{}'.", pair);
+    auto value = substituteTemplates(pair.subpiece(delimiter + 1).str());
+    if (parseOptions.overwriteDuplicateKeys) {
+      result.insert_or_assign(std::move(key), std::move(value));
+    } else {
+      result.emplace(std::move(key), std::move(value));
+    }
+  }
+  return result;
+}
+
+} // namespace options
+} // namespace memcache
+} // namespace facebook
+
 namespace folly {
 
 namespace {
@@ -83,19 +122,7 @@ typename std::enable_if<
     std::is_same<unordered_map<string, string>, Tgt>::value,
     unordered_map<string, string>>::type
 to(const string& s) {
-  vector<folly::StringPiece> pairs;
-  folly::split(',', s, pairs);
-  unordered_map<string, string> result;
-  for (const auto& it : pairs) {
-    string key;
-    string value;
-    facebook::memcache::checkLogic(
-        folly::split<false>(':', it, key, value) && !key.empty(),
-        "Invalid string map pair: '{}'. Expected name:value.",
-        it);
-    result.emplace(std::move(key), std::move(value));
-  }
-  return result;
+  return facebook::memcache::options::parseStringMapOption(s);
 }
 
 } // namespace folly
@@ -200,20 +227,25 @@ vector<McrouterOptionError> McrouterOptionsBase::updateFromDict(
               const boost::any& value) {
     auto it = new_opts.find(name);
     if (it != new_opts.end()) {
-      auto subValue = options::substituteTemplates(it->second);
+      std::optional<string> substitutedValue;
+      const string* subValue = &it->second;
+      if (type != McrouterOptionData::Type::string_map) {
+        substitutedValue = options::substituteTemplates(it->second);
+        subValue = &*substitutedValue;
+      }
       try {
-        fromString(subValue, value);
+        fromString(*subValue, value);
       } catch (const std::exception& ex) {
         McrouterOptionError e;
         e.requestedName = name;
-        e.requestedValue = subValue;
+        e.requestedValue = *subValue;
         e.errorMsg = "couldn't convert value to " + optionTypeToString(type) +
             ". Exception: " + ex.what();
         errors.push_back(std::move(e));
       } catch (...) {
         McrouterOptionError e;
         e.requestedName = name;
-        e.requestedValue = subValue;
+        e.requestedValue = *subValue;
         e.errorMsg = "couldn't convert value to " + optionTypeToString(type);
         errors.push_back(std::move(e));
       }
@@ -252,10 +284,16 @@ vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
           "Not found in luna_opts, with type " + optionTypeToString(type);
       errors.push_back(std::move(e));
     } else {
-      auto subValue = options::substituteTemplates(it->second);
+      std::optional<string> substitutedValue;
+      const string* subValue = &it->second;
+      if (type != McrouterOptionData::Type::string_map) {
+        substitutedValue = options::substituteTemplates(it->second);
+        subValue = &*substitutedValue;
+      }
 
       try {
         auto currValue = toString(value);
+        auto displayedNewValue = *subValue;
         // config_params is a string of comma-separated key-value pairs
         // e.g. "key1:value1,key2:value2", and are stored as
         // McrouterOptionData::Type::string_map. We need to compare as maps
@@ -269,17 +307,18 @@ vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
           if (oldValuePtr == nullptr) {
             throw std::runtime_error("could not cast config_params to a map");
           }
-          fromString(subValue, newValue);
+          fromString(*subValue, newValue);
+          displayedNewValue = folly::to<string>(newValueMap);
           isSame = **boost::any_cast<unordered_map<string, string>*>(
                        &newValue) == **oldValuePtr;
         } else {
-          isSame = currValue == subValue;
+          isSame = currValue == *subValue;
         }
         if (!isSame) {
           McrouterOptionMismatch e;
           e.optionName = name;
           e.lunaValue = it->second;
-          e.errorMsg = "luna value " + subValue +
+          e.errorMsg = "luna value " + displayedNewValue +
               " and current mcrouter_options value " + currValue +
               " are different";
           errors.push_back(std::move(e));

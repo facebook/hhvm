@@ -15,5 +15,5 @@ proc-macro = true
 
 [dependencies]
 proc-macro-error2 = "2.0.1"
-proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
 quote = "1.0.46"

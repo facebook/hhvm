@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<875ec0369cecbc685a9c8b59098b5bfd>>
+// @generated SignedSource<<3941042515ea75de8f0db346cc273726>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -67,6 +67,11 @@ pub struct Package {
     /// for it), and [package_exclude_patterns] (e.g. [__tests__]) do not
     /// grant a typecheck exemption for references into it.
     pub enable_strict_isolation: bool,
+    /// True for an implicit-package family entry (from an
+    /// [implicit_packages] stanza) and for the members synthesized from it.
+    /// A family entry's [include_paths] holds the family [path]; member
+    /// packages are synthesized lazily during lookup.
+    pub is_implicit: bool,
 }
 
 #[derive(

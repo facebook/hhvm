@@ -52,34 +52,74 @@ pub fn package_info_to_vec(
     if !errors.is_empty() {
         return Err(errors);
     };
-    let packages: Vec<Package> = info
+    let convert = |x: &Spanned<String>| -> PosId {
+        let Range { start, end } = x.span();
+        let pos = pos_from_span((start, end));
+        let id = x.to_owned().into_inner();
+        PosId(pos, id)
+    };
+    let convert_many = |xs: &Option<packages::NameSet>| -> Vec<PosId> {
+        xs.as_ref()
+            .unwrap_or_default()
+            .iter()
+            .map(convert)
+            .collect()
+    };
+
+    let mut packages: Vec<Package> = info
         .packages()
         .iter()
-        .map(|(name, package)| {
-            let convert = |x: &Spanned<String>| -> PosId {
-                let Range { start, end } = x.span();
-                let pos = pos_from_span((start, end));
-                let id = x.to_owned().into_inner();
-                PosId(pos, id)
-            };
-            let convert_many = |xs: &Option<packages::NameSet>| -> Vec<PosId> {
-                xs.as_ref()
-                    .unwrap_or_default()
-                    .iter()
-                    .map(convert)
-                    .collect()
-            };
-
-            Package {
-                name: convert(name),
-                includes: convert_many(&package.includes),
-                soft_includes: convert_many(&package.soft_includes),
-                include_paths: convert_many(&package.include_paths),
-                enable_strict_isolation: package.enable_strict_isolation,
-            }
+        .map(|(name, package)| Package {
+            name: convert(name),
+            includes: convert_many(&package.includes),
+            soft_includes: convert_many(&package.soft_includes),
+            include_paths: convert_many(&package.include_paths),
+            enable_strict_isolation: package.enable_strict_isolation,
+            is_implicit: false,
         })
         .collect();
+
+    // Append one entry per implicit-package family. The family's `path` becomes
+    // its sole include_path and the entry is flagged `is_implicit`. Members
+    // `F.D` are synthesized lazily during lookup (see `package_info.ml` and
+    // `PackageInfo::get_package_for_file`), never materialized here.
+    for (name, fam) in info.implicit_packages().iter() {
+        packages.push(Package {
+            name: convert(name),
+            includes: convert_many(&fam.includes),
+            soft_includes: convert_many(&fam.soft_includes),
+            include_paths: vec![convert(&fam.path)],
+            // Implicit packages opt into strict isolation.
+            enable_strict_isolation: true,
+            is_implicit: true,
+        });
+    }
     Ok(packages)
+}
+
+/// Synthesize the member package `F.D` of an implicit family. `family` is the
+/// flagged family entry (its single `include_path` is the family `path`);
+/// `member_dir` is the first path segment `D` below that path. This is a pure
+/// function of the family declaration and `D` — it touches no filesystem.
+fn synthesize_member(family: &Package, member_dir: &str) -> Package {
+    let family_name = &family.name;
+    let member_name = format!("{}.{}", family_name.1, member_dir);
+    // The family's include_path is its `path`; the member's is `path/D/`.
+    let (member_path_pos, member_path) = match family.include_paths.first() {
+        Some(PosId(pos, path)) => (pos.clone(), format!("{}{}/", path, member_dir)),
+        // A well-formed family always has exactly one include_path; fall back
+        // defensively to the family name's position.
+        None => (family_name.0.clone(), format!("{}/", member_dir)),
+    };
+    Package {
+        name: PosId(family_name.0.clone(), member_name),
+        includes: family.includes.clone(),
+        soft_includes: family.soft_includes.clone(),
+        include_paths: vec![PosId(member_path_pos, member_path)],
+        // Members inherit the family's strict-isolation setting.
+        enable_strict_isolation: family.enable_strict_isolation,
+        is_implicit: true,
+    }
 }
 
 impl TryFrom<packages::PackageInfo> for PackageInfo {
@@ -121,16 +161,93 @@ impl PackageInfo {
         &self,
         support_multifile_tests: bool,
         path: &str,
-    ) -> Option<&Package> {
+    ) -> Option<Cow<'_, Package>> {
         let path = if support_multifile_tests {
             let re = regex::Regex::new(r"[^/]*--").unwrap();
             re.replace(path, "")
         } else {
             Cow::Borrowed(path)
         };
-        self.include_path_to_package_map
+        let (include_path, package) = self
+            .include_path_to_package_map
             .iter()
-            .find(|(include_path, _)| path.starts_with(include_path))
-            .map(|(_, package)| package)
+            .find(|(include_path, _)| path.starts_with(include_path))?;
+        if !package.is_implicit {
+            // Common case: the stored package is returned by reference, no clone.
+            return Some(Cow::Borrowed(package));
+        }
+        // Implicit family match: the member directory `D` is the first path
+        // segment after the family `path`. Only direct child *directories*
+        // denote members, so a file lying directly in the family path (no `/`
+        // after the prefix) belongs to no package. The member is synthesized on
+        // demand, hence owned.
+        let remainder = &path[include_path.len()..];
+        match remainder.split_once('/') {
+            Some((dir, _)) if !dir.is_empty() => Some(Cow::Owned(synthesize_member(package, dir))),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use rc_pos::Pos;
+
+    use super::*;
+
+    fn pos_id(s: &str) -> PosId {
+        PosId(Pos::NONE, s.to_string())
+    }
+
+    // Exercises the lazy member-synthesis algorithm directly (the Rust mirror of
+    // the OCaml `Package_info.get_package_for_file`). No member package is stored
+    // in the map -- only the flagged family entry -- so any returned member must
+    // have been synthesized on demand from the queried path.
+    #[test]
+    fn lazy_member_synthesis() {
+        let family = Package {
+            name: pos_id("prototypes"),
+            includes: vec![pos_id("intern")],
+            soft_includes: vec![],
+            include_paths: vec![pos_id("www/prototypes/")],
+            enable_strict_isolation: true,
+            is_implicit: true,
+        };
+        let info = PackageInfo {
+            existing_packages: Default::default(),
+            include_path_to_package_map: vec![("www/prototypes/".to_string(), family)],
+        };
+
+        // A file in a child directory `alpha` resolves to the synthesized member
+        // `prototypes.alpha`, inheriting the family's includes and getting its
+        // own derived include_path.
+        let member = info
+            .get_package_for_file(false, "www/prototypes/alpha/a.php")
+            .expect("file under a child directory should belong to a member package");
+        assert_eq!(member.name.1, "prototypes.alpha");
+        assert_eq!(member.include_paths[0].1, "www/prototypes/alpha/");
+        assert_eq!(member.includes[0].1, "intern");
+        assert!(member.is_implicit);
+        // Members inherit the family's strict-isolation setting.
+        assert!(member.enable_strict_isolation);
+
+        // A deeper file resolves to the same first-segment member.
+        assert_eq!(
+            info.get_package_for_file(false, "www/prototypes/alpha/sub/deep.php")
+                .unwrap()
+                .name
+                .1,
+            "prototypes.alpha"
+        );
+
+        // A file lying directly in the family path (no child directory) belongs
+        // to no member.
+        assert!(
+            info.get_package_for_file(false, "www/prototypes/top.php")
+                .is_none()
+        );
+
+        // A file outside the family path belongs to no package.
+        assert!(info.get_package_for_file(false, "other/x.php").is_none());
     }
 }

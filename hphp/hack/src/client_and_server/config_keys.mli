@@ -268,6 +268,8 @@ module Hhconfig : sig
 
   val packages_config_path : string
 
+  val enable_implicit_packages : string
+
   val sharedmem_compression : string
 
   val sharedmem_dirs : string

@@ -957,7 +957,7 @@ let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
     [
       ( def_pos,
         Printf.sprintf
-          "`%s` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed"
+          "`%s` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed"
           pkg );
     ]
 

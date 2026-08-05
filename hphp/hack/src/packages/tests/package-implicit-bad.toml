@@ -1,0 +1,12 @@
+[packages]
+
+[packages.www_pkg]
+include_paths = ["//www/prototypes/shared/"]
+
+# Triggers all three implicit-package validation errors:
+#  - the family name `www_pkg` collides with the package `www_pkg`
+#  - `include_paths` is not allowed on a family stanza
+#  - the family `path` overlaps the package's include_path
+[implicit_packages.www_pkg]
+path = "//www/prototypes/"
+include_paths = ["//somewhere/"]

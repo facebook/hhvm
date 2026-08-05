@@ -784,6 +784,11 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
   let package_info =
     Package_config.load_and_parse
       ~strict:local_config.ServerLocalConfig.package_config_strict_validation
+      ~enable_implicit_packages:
+        (bool_
+           Config_keys.Hhconfig.enable_implicit_packages
+           ~default:false
+           config)
       ~pkgs_config_abs_path
   in
   Package_info.log_package_info package_info;

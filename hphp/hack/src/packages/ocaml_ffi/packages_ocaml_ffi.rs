@@ -11,8 +11,9 @@ use oxidized::package_info_impl::package_info_to_vec;
 ocaml_ffi! {
     fn extract_packages_from_text_strict_ffi(
         filename: String,
+        enable_implicit_packages: bool,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match packages::PackageInfo::from_text_strict(&filename) {
+        let info = match packages::PackageInfo::from_text_strict(enable_implicit_packages, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),
@@ -22,8 +23,9 @@ ocaml_ffi! {
 
     fn extract_packages_from_text_non_strict_ffi(
         filename: String,
+        enable_implicit_packages: bool,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match packages::PackageInfo::from_text_non_strict(&filename) {
+        let info = match packages::PackageInfo::from_text_non_strict(enable_implicit_packages, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),

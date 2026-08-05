@@ -1,0 +1,12 @@
+[packages]
+
+# Two implicit families whose paths are prefix-related. This must be rejected:
+# a file under //www/prototypes/sub/ would match both families, and lookup is a
+# first-match over a non-stable sort, so membership would be order-dependent.
+[implicit_packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+
+[implicit_packages.protosub]
+path = "//www/prototypes/sub/"

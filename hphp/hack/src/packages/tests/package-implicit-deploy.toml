@@ -1,0 +1,21 @@
+[packages]
+
+[packages.intern]
+
+[implicit_packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["intern"]
+
+[deployments]
+
+# A deployment may name the whole family (expands to all members) ...
+[deployments.prod]
+packages = ["intern", "prototypes"]
+
+# ... or an individual synthesized member `F.D`. Both normalize to the family
+# `prototypes` for the transitive-closure check, so deploying it together with
+# its hard include `intern` is complete.
+[deployments.protofoo]
+packages = ["intern", "prototypes.foo"]

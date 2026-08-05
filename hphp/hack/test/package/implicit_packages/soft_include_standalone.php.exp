@@ -1,0 +1,38 @@
+error: Typing[4473] Cannot access global constant `STANDALONE_C` defined in package `standalone` which may not be available [1]
+-> `STANDALONE_C` is defined in soft_include_standalone.php--standalone/s.php [2]
+-> `STANDALONE_C` belongs to package `standalone` by this package definition [3]
+-> package `prototypes.alpha` is available because the current file belongs to it by this package definition [4]
+-> `prototypes.alpha` includes `intern` via its definition [5]
+-> `prototypes.alpha` includes `shared` via its definition [6]
+
+soft_include_standalone.php--prototypes/alpha/a.php:4:21
+ 2 | // prototypes.alpha only soft-includes standalone: access is reported as a
+ 3 | // soft-include cross-package access
+ 4 | const int ALPHA_C = STANDALONE_C;
+   |                     ^^^^^^^^^^^^ [1]
+
+soft_include_standalone.php--standalone/s.php:3:1
+ 1 | <?hh
+ 2 | // belongs to package standalone
+ 3 | const int STANDALONE_C = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:10:11
+ 8 | includes = ["shared"]
+ 9 | 
+10 | [packages.standalone]
+   |           ^^^^^^^^^^ [3]
+11 | include_paths = ["//standalone/"]
+12 | 
+   :
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [4]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+   |             ^^^^^^^^ [5]
+   |                       ^^^^^^^^ [6]
+21 | soft_includes = ["standalone"]
+
+1 error found

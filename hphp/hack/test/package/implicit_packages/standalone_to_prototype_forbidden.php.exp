@@ -1,0 +1,33 @@
+error: Typing[4472] Cannot access global constant `ALPHA_C` defined in package `prototypes.alpha` which may not be available [1]
+-> `ALPHA_C` is defined in standalone_to_prototype_forbidden.php--prototypes/alpha/a.php [2]
+-> `ALPHA_C` belongs to package `prototypes.alpha` by this package definition [3]
+-> package `standalone` is available because the current file belongs to it by this package definition [4]
+
+standalone_to_prototype_forbidden.php--standalone/s.php:3:26
+ 1 | <?hh
+ 2 | // standalone does not include any prototypes member: cross-package violation
+ 3 | const int STANDALONE_C = ALPHA_C;
+   |                          ^^^^^^^ [1]
+
+standalone_to_prototype_forbidden.php--prototypes/alpha/a.php:3:1
+ 1 | <?hh
+ 2 | // belongs to synthesized package prototypes.alpha
+ 3 | const int ALPHA_C = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:18:20
+ 8 | includes = ["shared"]
+ 9 | 
+10 | [packages.standalone]
+   |           ^^^^^^^^^^ [4]
+11 | include_paths = ["//standalone/"]
+12 | 
+   :
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [3]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

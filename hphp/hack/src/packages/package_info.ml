@@ -30,11 +30,55 @@ let log_package_info (info : t) : unit =
       "")
     package_info
 
-let package_exists (info : t) (pkg : string) : bool =
-  SMap.mem pkg info.existing_packages
+(* Synthesize the member package [F.D] of an implicit family. [family] is the
+ * flagged family entry (its single include_path is the family path); [member_dir]
+ * is the first path segment [D] below that path. Pure function of the family
+ * declaration and [D] -- it touches no filesystem. *)
+let synthesize_member (family : Package.t) (member_dir : string) : Package.t =
+  let (fpos, fname) = family.Package.name in
+  let member_name = fname ^ "." ^ member_dir in
+  let member_path =
+    match family.Package.include_paths with
+    | (pos, path) :: _ -> (pos, path ^ member_dir ^ "/")
+    | [] -> (fpos, member_dir ^ "/")
+  in
+  {
+    Package.name = (fpos, member_name);
+    Package.includes = family.Package.includes;
+    Package.soft_includes = family.Package.soft_includes;
+    Package.include_paths = [member_path];
+    (* Members inherit the family's strict-isolation setting. *)
+    Package.enable_strict_isolation = family.Package.enable_strict_isolation;
+    Package.is_implicit = true;
+  }
+
+(* Splits a (possibly synthesized) name [F.D] into family [F] and member [D],
+ * splitting on the *first* [.]. The member [D] is a single directory name that
+ * may itself contain [.] (e.g. [proto.v1]), so we keep the remainder after the
+ * first [.] as the member. Family names are forbidden from containing [.] (see
+ * the family-name validation in config.rs), so this split is unambiguous.
+ * Returns None unless both the family and the member are non-empty. *)
+let split_member_name (pkg : string) : (string * string) option =
+  match String.lsplit2 pkg ~on:'.' with
+  | Some (family, member)
+    when (not (String.is_empty family)) && not (String.is_empty member) ->
+    Some (family, member)
+  | _ -> None
 
 let get_package (info : t) (pkg : string) : Package.t option =
-  SMap.find_opt pkg info.existing_packages
+  match SMap.find_opt pkg info.existing_packages with
+  | Some p -> Some p
+  | None ->
+    (* Not declared directly -- it may be a member [F.D] of a declared family. *)
+    (match split_member_name pkg with
+    | Some (family, member) ->
+      (match SMap.find_opt family info.existing_packages with
+      | Some f when f.Package.is_implicit -> Some (synthesize_member f member)
+      | _ -> None)
+    | None -> None)
+
+let package_exists (info : t) (pkg : string) : bool =
+  Option.is_some (get_package info pkg)
 
 let from_packages (packages : Package.t list) : t =
   let existing_packages =
@@ -69,11 +113,23 @@ let get_package_for_file ~support_multifile_tests (info : t) ~(path : string) :
     else
       path
   in
-  Option.map
-    ~f:snd
-    (List.find
-       ~f:(fun (ip, _) -> String.is_prefix path ~prefix:ip)
-       info.include_path_to_package_map)
+  match
+    List.find
+      ~f:(fun (ip, _) -> String.is_prefix path ~prefix:ip)
+      info.include_path_to_package_map
+  with
+  | None -> None
+  | Some (_, p) when not p.Package.is_implicit -> Some p
+  | Some (ip, p) ->
+    (* Implicit family match: the member directory [D] is the first path segment
+     * after the family [path]. Only direct child *directories* denote members,
+     * so a file lying directly in the family path (no [/] after the prefix)
+     * belongs to no package. *)
+    let remainder = String.drop_prefix path (String.length ip) in
+    (match String.lsplit2 remainder ~on:'/' with
+    | Some (dir, _) when not (String.is_empty dir) ->
+      Some (synthesize_member p dir)
+    | _ -> None)
 
 (** The get_package_with_override function returns the package a file belongs
   * taking into account __PackageOverride annotations.  This function scans the

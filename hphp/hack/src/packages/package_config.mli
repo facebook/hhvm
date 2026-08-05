@@ -11,8 +11,13 @@
   * include_path does not exist in the filesystem.  `hh` runs with `strict=true`,
   * while `hh_single_type_check` with `strict=false` to avoid false positves in
   * the test suite.
+  * When [enable_implicit_packages] is false (the default), an [implicit_packages]
+  * stanza in PACKAGES.toml is reported as an error and the families are ignored.
   *)
 val load_and_parse :
-  strict:bool -> pkgs_config_abs_path:string -> Package_info.t
+  strict:bool ->
+  enable_implicit_packages:bool ->
+  pkgs_config_abs_path:string ->
+  Package_info.t
 
 val repo_config_path : Relative_path.t

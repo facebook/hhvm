@@ -291,6 +291,8 @@ module Hhconfig = struct
 
   let packages_config_path = key "packages_config_path"
 
+  let enable_implicit_packages = key "enable_implicit_packages"
+
   let sharedmem_compression = key "sharedmem_compression"
 
   let sharedmem_dirs = key "sharedmem_dirs"

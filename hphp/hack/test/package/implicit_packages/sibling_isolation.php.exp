@@ -1,0 +1,31 @@
+error: Typing[4472] Cannot access global constant `ALPHA_C` defined in package `prototypes.alpha` which may not be available [1]
+-> `ALPHA_C` is defined in sibling_isolation.php--prototypes/alpha/a.php [2]
+-> `ALPHA_C` belongs to package `prototypes.alpha` by this package definition [3]
+-> package `prototypes.beta` is available because the current file belongs to it by this package definition [3]
+-> `prototypes.beta` includes `intern` via its definition [4]
+-> `prototypes.beta` includes `shared` via its definition [5]
+
+sibling_isolation.php--prototypes/beta/b.php:4:20
+ 2 | // belongs to synthesized package prototypes.beta
+ 3 | // prototypes.beta does not include prototypes.alpha: cross-package violation
+ 4 | const int BETA_C = ALPHA_C;
+   |                    ^^^^^^^ [1]
+
+sibling_isolation.php--prototypes/alpha/a.php:3:1
+ 1 | <?hh
+ 2 | // belongs to synthesized package prototypes.alpha
+ 3 | const int ALPHA_C = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [3]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+   |             ^^^^^^^^ [4]
+   |                       ^^^^^^^^ [5]
+21 | soft_includes = ["standalone"]
+
+1 error found

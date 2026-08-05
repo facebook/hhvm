@@ -40,8 +40,11 @@ mod ffi {
 }
 
 pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
-    // HHVM should not perform validation of include_paths, so invoking from_text_non_strict
-    let s = packages::PackageInfo::from_text_non_strict(&packages_toml.to_string());
+    // HHVM should not perform validation of include_paths, so invoking from_text_non_strict.
+    // `implicit_packages` is passed through permissively (true): the HHVM runtime does not yet
+    // consume implicit-package families (they are dropped by the conversion below), so this
+    // preserves the runtime's existing behavior of ignoring the section rather than erroring on it.
+    let s = packages::PackageInfo::from_text_non_strict(true, &packages_toml.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&packages::NameSet>| {

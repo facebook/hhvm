@@ -117,7 +117,13 @@ impl HhConfig {
     fn get_package_info(root: impl AsRef<Path>, hhconfig: &ConfigFile) -> PackageInfo {
         let package_config_pathbuf =
             Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
+        // Gate implicit packages on the same .hhconfig flag the OCaml typechecker
+        // reads, so the Rust-side package info stays consistent with it.
+        let enable_implicit_packages = hhconfig
+            .get_bool_or("enable_implicit_packages", false)
+            .unwrap_or(false);
         PackageInfo::from_text_non_strict(
+            enable_implicit_packages,
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()

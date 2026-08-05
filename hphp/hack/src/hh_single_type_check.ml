@@ -99,6 +99,7 @@ type options = {
   rust_provider_backend: bool;
   naming_table_path: string option;
   packages_config_path: string option;
+  enable_implicit_packages: bool;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -778,6 +779,12 @@ let parse_options () =
     config
     |> Config_file.Getters.string_opt Config_keys.Hhconfig.packages_config_path
   in
+  let enable_implicit_packages =
+    config
+    |> Config_file.Getters.bool_
+         Config_keys.Hhconfig.enable_implicit_packages
+         ~default:false
+  in
   (* --root implies certain things... *)
   let root =
     match !root with
@@ -957,6 +964,7 @@ let parse_options () =
       rust_provider_backend;
       naming_table_path = !naming_table;
       packages_config_path;
+      enable_implicit_packages;
     },
     root,
     if rust_provider_backend then
@@ -2473,6 +2481,7 @@ let decl_and_run_mode
       rust_provider_backend;
       naming_table_path;
       packages_config_path;
+      enable_implicit_packages;
     }
     (hhi_root : Path.t) : unit =
   Ident.track_names := true;
@@ -2590,6 +2599,7 @@ let decl_and_run_mode
     | Some pkgs_config_relpath ->
       Package_config.load_and_parse
         ~strict:false
+        ~enable_implicit_packages
         ~pkgs_config_abs_path:
           Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
   in

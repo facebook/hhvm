@@ -1,0 +1,37 @@
+error: Typing[4472] Cannot access global constant `ALPHA_C` defined in package `prototypes.alpha` which may not be available [1]
+-> `ALPHA_C` is defined in intern_to_prototype_forbidden.php--prototypes/alpha/a.php [2]
+-> `ALPHA_C` belongs to package `prototypes.alpha` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+intern_to_prototype_forbidden.php--intern/i.php:3:22
+ 1 | <?hh
+ 2 | // intern does not include any prototypes member: cross-package violation
+ 3 | const int INTERN_C = ALPHA_C;
+   |                      ^^^^^^^ [1]
+
+intern_to_prototype_forbidden.php--prototypes/alpha/a.php:3:1
+ 1 | <?hh
+ 2 | // belongs to synthesized package prototypes.alpha
+ 3 | const int ALPHA_C = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:18:20
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | [packages.standalone]
+   :
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [3]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

@@ -1,0 +1,7 @@
+[packages]
+
+[packages.intern]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["intern"]

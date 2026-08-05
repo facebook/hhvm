@@ -1,0 +1,9 @@
+[packages]
+
+# A family name may not contain '.': the '.' separator is reserved for
+# synthesized member names (family.directory), so a dotted family name would
+# make member-name resolution ambiguous.
+[implicit_packages]
+
+[implicit_packages."proto.v1"]
+path = "//www/prototypes/"

@@ -5,12 +5,14 @@
 
 use std::collections::VecDeque;
 
+use hash::HashMap;
 use hash::HashSet;
 use serde::Deserialize;
 use toml::Spanned;
 
 use crate::error::Error;
 use crate::types::DeploymentMap;
+pub use crate::types::ImplicitPackageMap;
 use crate::types::NameSet;
 pub use crate::types::Package;
 pub use crate::types::PackageMap;
@@ -19,21 +21,61 @@ pub use crate::types::PackageMap;
 pub struct Config {
     pub packages: PackageMap,
     pub deployments: Option<DeploymentMap>,
+    /// `[implicit_packages]` families. Empty when the section is absent.
+    #[serde(default)]
+    pub implicit_packages: ImplicitPackageMap,
 }
+
+/// Splits a (possibly synthesized) package name `F.D` into its family name `F`
+/// and member segment `D`, splitting on the *first* `.`. Returns `None` if there
+/// is no `.` separator, or if either side is empty. The member `D` is a single
+/// directory name, which may itself contain `.` (e.g. `proto.v1`); this is why
+/// we split on the first `.` and keep the remainder as the member. Family names
+/// are forbidden from containing `.` (see `check_config`), so the split is
+/// unambiguous.
+fn split_member_name(name: &str) -> Option<(&str, &str)> {
+    let (family, member) = name.split_once('.')?;
+    if family.is_empty() || member.is_empty() {
+        None
+    } else {
+        Some((family, member))
+    }
+}
+
 impl Config {
     pub fn check_config(&self, errors: &mut Vec<Error>) {
+        // Set of declared implicit-package family names, plus a map from family
+        // name to its positioned (Spanned) name so we can normalize member
+        // references `F.D` back to the family `F` for transitive-closure checks.
+        let family_key: HashSet<&str> = self
+            .implicit_packages
+            .keys()
+            .map(|k| k.get_ref().as_str())
+            .collect();
+
+        // A name is "defined" if it is a hand-written package, an implicit
+        // family `F`, or a synthesized member `F.D` of a declared family. The
+        // member case is validated structurally (no filesystem access): we do
+        // NOT verify that directory `D` currently exists.
+        let name_is_defined = |name: &Spanned<String>| -> bool {
+            let n = name.get_ref().as_str();
+            self.packages.contains_key(name)
+                || family_key.contains(n)
+                || split_member_name(n).is_some_and(|(f, _)| family_key.contains(f))
+        };
+
         let check_packages_are_defined =
             |errors: &mut Vec<Error>, pkgs: &Option<NameSet>, soft_pkgs: &Option<NameSet>| {
                 if let Some(packages) = pkgs {
                     packages.iter().for_each(|package| {
-                        if !self.packages.contains_key(package) {
+                        if !name_is_defined(package) {
                             errors.push(Error::undefined_package(package))
                         }
                     })
                 }
                 if let Some(packages) = soft_pkgs {
                     packages.iter().for_each(|package| {
-                        if !self.packages.contains_key(package) {
+                        if !name_is_defined(package) {
                             errors.push(Error::undefined_package(package))
                         }
                     })
@@ -51,16 +93,53 @@ impl Config {
                     })
                 }
             };
+        // Augmented map used for transitive-closure checks: the hand-written
+        // packages plus one synthetic node per implicit family `F`, carrying the
+        // family's includes/soft_includes. Every member of `F` shares those
+        // includes by construction, so treating the family as a single node is
+        // both correct and avoids enumerating members that do not exist at parse
+        // time.
+        let mut closure_map: PackageMap = self.packages.clone();
+        let mut family_name_spanned: HashMap<&str, &Spanned<String>> = HashMap::default();
+        for (fname, fam) in self.implicit_packages.iter() {
+            family_name_spanned.insert(fname.get_ref().as_str(), fname);
+            closure_map.insert(
+                fname.clone(),
+                Package {
+                    includes: fam.includes.clone(),
+                    soft_includes: fam.soft_includes.clone(),
+                    include_paths: None,
+                    // Synthetic node used only for include-closure checks; the
+                    // flag is irrelevant here.
+                    enable_strict_isolation: false,
+                },
+            );
+        }
+        // Normalize a name set so member references `F.D` collapse to the family
+        // `F` (which exists in `closure_map`); other names pass through.
+        let normalize_set = |set: &NameSet| -> NameSet {
+            set.iter()
+                .map(|n| match split_member_name(n.get_ref()) {
+                    Some((f, _)) => match family_name_spanned.get(f) {
+                        Some(s) => (*s).clone(),
+                        None => n.clone(),
+                    },
+                    None => n.clone(),
+                })
+                .collect()
+        };
+
         let check_package_includes_are_transitively_closed =
             |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
-                let mut includes = package.includes.as_ref().unwrap_or_default().clone();
+                let mut includes = normalize_set(package.includes.as_ref().unwrap_or_default());
                 includes.insert(package_name.clone());
-                let soft_includes = package.soft_includes.as_ref().unwrap_or_default();
+                let soft_includes =
+                    normalize_set(package.soft_includes.as_ref().unwrap_or_default());
                 let (missing_pkgs, missing_soft_pkgs) =
                     find_missing_packages_from_transitive_closure(
-                        &self.packages,
+                        &closure_map,
                         &includes,
-                        soft_includes,
+                        &soft_includes,
                     );
                 if !missing_pkgs.is_empty() {
                     errors.push(Error::incomplete_includes(
@@ -82,13 +161,13 @@ impl Config {
              deployment: &Spanned<String>,
              pkgs: &Option<NameSet>,
              soft_pkgs: &Option<NameSet>| {
-                let deployed = pkgs.as_ref().unwrap_or_default();
-                let soft_deployed = soft_pkgs.as_ref().unwrap_or_default();
+                let deployed = normalize_set(pkgs.as_ref().unwrap_or_default());
+                let soft_deployed = normalize_set(soft_pkgs.as_ref().unwrap_or_default());
                 let (missing_pkgs, missing_soft_pkgs) =
                     find_missing_packages_from_transitive_closure(
-                        &self.packages,
-                        deployed,
-                        soft_deployed,
+                        &closure_map,
+                        &deployed,
+                        &soft_deployed,
                     );
                 if !missing_pkgs.is_empty() {
                     errors.push(Error::incomplete_deployment(
@@ -121,6 +200,86 @@ impl Config {
                 );
             }
         };
+
+        // Validate the implicit-package families themselves. Note these checks
+        // are purely structural / textual -- none of them reads the filesystem,
+        // so parsing remains a pure function of PACKAGES.toml's contents.
+        for (fname, fam) in self.implicit_packages.iter() {
+            // (0) A family name must not contain `.`: the `.` separator is
+            // reserved for synthesized member names (`family.directory`), so a
+            // dotted family name would make `split_member_name` ambiguous.
+            if fname.get_ref().contains('.') {
+                errors.push(Error::implicit_family_name_invalid(fname));
+            }
+
+            // (1) `include_paths` is not permitted on a family stanza.
+            if fam.include_paths.is_some() {
+                errors.push(Error::implicit_include_paths_not_allowed(fname));
+            }
+
+            // (2) A family `path` must be disjoint from every package
+            // `include_path` AND from every other family `path` (neither may be
+            // a prefix of the other). Otherwise a file under the overlap would
+            // match more than one entry in `include_path_to_package_map`, whose
+            // lookup is a first-match over a non-stable sort -- making package
+            // membership order-dependent. Paths have already been normalized to
+            // the leading-`//`-stripped form.
+            let fpath = fam.path.get_ref().as_str();
+            for package in self.packages.values() {
+                if let Some(ips) = &package.include_paths {
+                    for ip in ips.iter() {
+                        let ipath = ip.get_ref().as_str();
+                        if fpath.starts_with(ipath) || ipath.starts_with(fpath) {
+                            errors.push(Error::overlapping_implicit_path(
+                                fpath.to_owned(),
+                                fam.path.span(),
+                            ));
+                        }
+                    }
+                }
+            }
+            for (other_name, other_fam) in self.implicit_packages.iter() {
+                // Compare each unordered pair once; skip self.
+                if other_name.get_ref() <= fname.get_ref() {
+                    continue;
+                }
+                let opath = other_fam.path.get_ref().as_str();
+                if fpath.starts_with(opath) || opath.starts_with(fpath) {
+                    errors.push(Error::overlapping_implicit_path(
+                        fpath.to_owned(),
+                        fam.path.span(),
+                    ));
+                }
+            }
+
+            // (3) A family name must not collide with, or namespace-shadow, any
+            // hand-written package name (`F` itself or anything under `F.`).
+            let f = fname.get_ref().as_str();
+            let dotted = format!("{}.", f);
+            for pname in self.packages.keys() {
+                let p = pname.get_ref().as_str();
+                if p == f || p.starts_with(&dotted) {
+                    errors.push(Error::package_name_prefix_collision(fname));
+                }
+            }
+
+            // (4) A family's own includes must be transitively closed, exactly
+            // as for a hand-written package. Every member shares these includes,
+            // so checking the family once suffices for all (current and future)
+            // members.
+            check_package_includes_are_transitively_closed(
+                errors,
+                fname,
+                &Package {
+                    includes: fam.includes.clone(),
+                    soft_includes: fam.soft_includes.clone(),
+                    include_paths: None,
+                    // Synthetic node used only for include-closure checks; the
+                    // flag is irrelevant here.
+                    enable_strict_isolation: false,
+                },
+            );
+        }
     }
 }
 

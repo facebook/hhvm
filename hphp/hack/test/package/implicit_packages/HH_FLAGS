@@ -1,0 +1,3 @@
+--config packages_config_path=PACKAGES.toml
+--config package_support_multifile_tests=true
+--config enable_implicit_packages=true

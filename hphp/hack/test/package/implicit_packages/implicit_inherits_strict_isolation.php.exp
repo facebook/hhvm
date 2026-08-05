@@ -1,0 +1,20 @@
+error: NastCheck[3110] The `package` expression is not supported for package `prototypes`, which has strict isolation enabled [1]
+-> `prototypes` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed [2]
+
+implicit_inherits_strict_isolation.php--intern/i.php:6:15
+ 4 | // rejected for an implicit family, reported as a strict-isolation error.
+ 5 | function test_package_expr(): void {
+ 6 |   if (package prototypes) {
+   |               ^^^^^^^^^^ [1]
+ 7 |   }
+ 8 | }
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

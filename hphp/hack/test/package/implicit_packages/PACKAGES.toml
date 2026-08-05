@@ -1,0 +1,21 @@
+[packages]
+
+[packages.shared]
+include_paths = ["//shared/"]
+
+[packages.intern]
+include_paths = ["//intern/"]
+includes = ["shared"]
+
+[packages.standalone]
+include_paths = ["//standalone/"]
+
+[implicit_packages]
+
+# Every top-level directory under //prototypes/ becomes its own package
+# (prototypes.<dir>). Members are isolated from each other but all hard-include
+# intern (and transitively shared) and soft-include standalone.
+[implicit_packages.prototypes]
+path = "//prototypes/"
+includes = ["intern", "shared"]
+soft_includes = ["standalone"]

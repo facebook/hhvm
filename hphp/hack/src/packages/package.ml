@@ -28,6 +28,11 @@ type t = {
           [__RequirePackage] / [__SoftRequirePackage] attributes are rejected
           for it), and [package_exclude_patterns] (e.g. [__tests__]) do not
           grant a typecheck exemption for references into it. *)
+  is_implicit: bool;
+      (** True for an implicit-package family entry (from an
+          [implicit_packages] stanza) and for the members synthesized from it.
+          A family entry's [include_paths] holds the family [path]; member
+          packages are synthesized lazily during lookup. *)
 }
 [@@deriving eq, show]
 

@@ -15,6 +15,7 @@ use toml::Spanned;
 // Alternatively, we could use HashMap for performance
 pub type PackageMap = IndexMap<Spanned<String>, Package>;
 pub type DeploymentMap = IndexMap<Spanned<String>, Deployment>;
+pub type ImplicitPackageMap = IndexMap<Spanned<String>, ImplicitPackage>;
 
 #[derive(Debug, Default, Deserialize, Clone, Eq, PartialEq)]
 pub struct NameSet(IndexSet<Spanned<String>>);
@@ -29,6 +30,26 @@ pub struct Package {
     /// `enable_strict_isolation` key is absent from the `[packages.*]` stanza.
     #[serde(default)]
     pub enable_strict_isolation: bool,
+}
+
+/// A single `[implicit_packages.<family>]` stanza. It declares a *family* of
+/// packages: every direct child directory `D` of `path` denotes a synthesized
+/// package `<family>.D` whose `include_paths` is `path/D/` and whose
+/// `includes` / `soft_includes` are the ones declared here.
+///
+/// The members are NEVER materialized at parse time — they are synthesized
+/// lazily during package lookup (see `package_info.ml`). This struct therefore
+/// only carries the family-level declaration.
+#[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
+pub struct ImplicitPackage {
+    pub path: Spanned<String>,
+    pub includes: Option<NameSet>,
+    pub soft_includes: Option<NameSet>,
+    /// `include_paths` is NOT a valid field on an implicit_packages entry (the
+    /// include paths are derived from `path`). We accept it during
+    /// deserialization only so we can emit a precise error if a user specifies
+    /// it, rather than silently ignoring it.
+    pub include_paths: Option<NameSet>,
 }
 
 #[derive(Debug, Deserialize)]

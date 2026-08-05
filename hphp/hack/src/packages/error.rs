@@ -39,6 +39,26 @@ pub enum Error {
         missing_pkgs: Vec<Spanned<String>>,
         soft: bool,
     },
+    ImplicitIncludePathsNotAllowed {
+        name: String,
+        span: (usize, usize),
+    },
+    OverlappingImplicitPath {
+        path: String,
+        span: (usize, usize),
+    },
+    PackageNamePrefixCollision {
+        name: String,
+        span: (usize, usize),
+    },
+    ImplicitFamilyNameInvalid {
+        name: String,
+        span: (usize, usize),
+    },
+    ImplicitPackagesDisabled {
+        name: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -102,6 +122,46 @@ impl Error {
         }
     }
 
+    pub fn implicit_include_paths_not_allowed(family: &Spanned<String>) -> Self {
+        let Range { start, end } = family.span();
+        Self::ImplicitIncludePathsNotAllowed {
+            name: family.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn overlapping_implicit_path(path: String, span: Range<usize>) -> Self {
+        let Range { start, end } = span;
+        Self::OverlappingImplicitPath {
+            path,
+            span: (start, end),
+        }
+    }
+
+    pub fn package_name_prefix_collision(family: &Spanned<String>) -> Self {
+        let Range { start, end } = family.span();
+        Self::PackageNamePrefixCollision {
+            name: family.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn implicit_family_name_invalid(family: &Spanned<String>) -> Self {
+        let Range { start, end } = family.span();
+        Self::ImplicitFamilyNameInvalid {
+            name: family.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn implicit_packages_disabled(family: &Spanned<String>) -> Self {
+        let Range { start, end } = family.span();
+        Self::ImplicitPackagesDisabled {
+            name: family.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateIncludePath { span, .. }
@@ -109,7 +169,12 @@ impl Error {
             | Self::IncompleteDeployment { span, .. }
             | Self::InvalidIncludePath { span, .. }
             | Self::MalformedIncludePath { span, .. }
-            | Self::IncompleteIncludes { span, .. } => *span,
+            | Self::IncompleteIncludes { span, .. }
+            | Self::ImplicitIncludePathsNotAllowed { span, .. }
+            | Self::OverlappingImplicitPath { span, .. }
+            | Self::PackageNamePrefixCollision { span, .. }
+            | Self::ImplicitFamilyNameInvalid { span, .. }
+            | Self::ImplicitPackagesDisabled { span, .. } => *span,
         }
     }
 
@@ -184,6 +249,41 @@ impl Display for Error {
                         write!(f, "{}, ", pkg.get_ref())?;
                     }
                 }
+            }
+            Self::ImplicitIncludePathsNotAllowed { name, .. } => {
+                write!(
+                    f,
+                    "implicit_packages.{} must not specify include_paths: the include paths are derived from its path",
+                    name
+                )?;
+            }
+            Self::OverlappingImplicitPath { path, .. } => {
+                write!(
+                    f,
+                    "implicit_packages path //{} overlaps another package or implicit-family include path; they must be disjoint",
+                    path
+                )?;
+            }
+            Self::PackageNamePrefixCollision { name, .. } => {
+                write!(
+                    f,
+                    "implicit_packages family {} collides with a package name (a family name may not equal or be a prefix of a package name)",
+                    name
+                )?;
+            }
+            Self::ImplicitFamilyNameInvalid { name, .. } => {
+                write!(
+                    f,
+                    "implicit_packages family name {} must not contain '.': the '.' separator is reserved for synthesized member names (family.directory)",
+                    name
+                )?;
+            }
+            Self::ImplicitPackagesDisabled { name, .. } => {
+                write!(
+                    f,
+                    "[implicit_packages.{}] is not permitted: set enable_implicit_packages = true in .hhconfig to use implicit packages",
+                    name
+                )?;
             }
         };
         Ok(())

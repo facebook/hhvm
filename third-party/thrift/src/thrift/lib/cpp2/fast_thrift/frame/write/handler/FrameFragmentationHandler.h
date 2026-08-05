@@ -123,12 +123,12 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
     // for this stream, then forward immediately.
     if (isTerminalFrameType(frameType)) {
       cancelStream(streamId);
-      return ctx.fireWrite(std::move(msg));
+      return passThrough(ctx, std::move(msg), streamId);
     }
 
     // Non-fragmentable types (KEEPALIVE, SETUP, ...) bypass the handler.
     if (!frame.canFragment()) {
-      return ctx.fireWrite(std::move(msg));
+      return passThrough(ctx, std::move(msg), streamId);
     }
 
     const size_t dataSize =
@@ -144,7 +144,7 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
     } else if (streams_.empty() || dataSize <= config_.minSizeToFragment) {
       // Fast path: no per-stream ordering risk and either nothing else is
       // pending or this frame is tiny enough to bypass.
-      return ctx.fireWrite(std::move(msg));
+      return passThrough(ctx, std::move(msg), streamId);
     } else {
       // Other streams have pending fragments; preserve cross-stream batching
       // semantics by queueing behind them.
@@ -209,6 +209,32 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
   }
 
  private:
+  /**
+   * Forward a frame that bypasses fragmentation, recording it as a completed
+   * single-fragment frame.
+   *
+   * The tracker's FIFO is popped against the downstream batch frame count, and
+   * the batcher counts every frame it receives — bypassed ones included. A
+   * bypassed frame that went unrecorded would leave the FIFO permanently short
+   * of the counts, misattributing every later completion. Recording happens
+   * after fireWrite and only on non-Error for the same reason it does in
+   * doFlush: a frame the downstream rejected never reaches the batcher and so
+   * is never counted.
+   */
+  template <typename Context>
+  [[nodiscard]] apache::thrift::fast_thrift::channel_pipeline::Result
+  passThrough(
+      Context& ctx,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&& msg,
+      uint32_t streamId) noexcept {
+    auto result = ctx.fireWrite(std::move(msg));
+    if (result !=
+        apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+      tracker_.onFragment(streamId, /*isLastFragment=*/true);
+    }
+    return result;
+  }
+
   void addToStreamQueue(
       uint32_t streamId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&

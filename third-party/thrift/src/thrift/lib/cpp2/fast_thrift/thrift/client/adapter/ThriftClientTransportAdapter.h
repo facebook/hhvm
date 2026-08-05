@@ -65,11 +65,21 @@ namespace apache::thrift::fast_thrift::thrift::client {
  *
  *   // 4. Wire up
  *   transportAdapter.setPipeline(thriftPipeline.get());
+ *
+ * Templated on the rocket connection's write-completion event factory so the
+ * bridge can own either connection flavour. The default matches the
+ * non-tracking RocketClientConnection; pipelines that opt into write tracking
+ * instantiate with the same factory they built the rocket pipeline with, or
+ * the two connection types won't match.
  */
-class ThriftClientTransportAdapter {
+template <
+    transport::WriteCompleteEventFactory Factory =
+        transport::NoOpWriteCompleteEventFactory>
+class ThriftClientTransportAdapterT {
  public:
-  explicit ThriftClientTransportAdapter(
-      std::unique_ptr<rocket::client::RocketClientConnection> connection)
+  using Connection = rocket::client::RocketClientConnectionT<Factory>;
+
+  explicit ThriftClientTransportAdapterT(std::unique_ptr<Connection> connection)
       : connection_(std::move(connection)) {
     connection_->appAdapter->setResponseHandlers(
         [this](channel_pipeline::TypeErasedBox&& msg) noexcept {
@@ -111,7 +121,7 @@ class ThriftClientTransportAdapter {
         });
   }
 
-  ~ThriftClientTransportAdapter() {
+  ~ThriftClientTransportAdapterT() {
     // Defensive: if the bridge is destroyed without going through the
     // thrift pipeline's handlerRemoved (which would have called destroy
     // already), tear the rocket connection down explicitly. destroy() is
@@ -122,11 +132,11 @@ class ThriftClientTransportAdapter {
     }
   }
 
-  ThriftClientTransportAdapter(const ThriftClientTransportAdapter&) = delete;
-  ThriftClientTransportAdapter& operator=(const ThriftClientTransportAdapter&) =
-      delete;
-  ThriftClientTransportAdapter(ThriftClientTransportAdapter&&) = delete;
-  ThriftClientTransportAdapter& operator=(ThriftClientTransportAdapter&&) =
+  ThriftClientTransportAdapterT(const ThriftClientTransportAdapterT&) = delete;
+  ThriftClientTransportAdapterT& operator=(
+      const ThriftClientTransportAdapterT&) = delete;
+  ThriftClientTransportAdapterT(ThriftClientTransportAdapterT&&) = delete;
+  ThriftClientTransportAdapterT& operator=(ThriftClientTransportAdapterT&&) =
       delete;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
@@ -360,8 +370,16 @@ class ThriftClientTransportAdapter {
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
-  std::unique_ptr<rocket::client::RocketClientConnection> connection_;
+  std::unique_ptr<Connection> connection_;
   bool connected_{false};
 };
+
+// Default: bridges a non-tracking RocketClientConnection.
+using ThriftClientTransportAdapter = ThriftClientTransportAdapterT<>;
+
+// Opt-in: bridges a RocketClientTrackingConnection, whose transport fires
+// per-writev events feeding the write-completion chain.
+using ThriftClientTrackingTransportAdapter =
+    ThriftClientTransportAdapterT<rocket::client::RocketClientEventFactory>;
 
 } // namespace apache::thrift::fast_thrift::thrift::client

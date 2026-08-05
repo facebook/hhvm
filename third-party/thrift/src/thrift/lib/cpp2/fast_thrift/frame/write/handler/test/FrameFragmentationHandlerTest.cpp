@@ -167,6 +167,15 @@ apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makeCancelFrame(
       std::move(f));
 }
 
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+makeKeepAliveFrame() {
+  ComposedFrame f;
+  f.frameType = FrameType::KEEPALIVE;
+  f.streamId = 0;
+  return apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+      std::move(f));
+}
+
 apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makeErrorFrame(
     uint32_t streamId) {
   ComposedFrame f;
@@ -846,6 +855,100 @@ TEST_F(
   ASSERT_EQ(frags.size(), 3u);
   EXPECT_TRUE(frags[2].isLastFragment);
   EXPECT_EQ(handler.tracker().flushCount, 0u);
+}
+
+// ============================================================================
+// Tracker wiring — frames that BYPASS fragmentation.
+//
+// The tracker's FIFO is popped against a downstream batch frame count, and the
+// batcher counts every frame it receives. So the invariant is not just "each
+// fragment is recorded" but "every frame handed downstream is recorded,
+// exactly once" — bypassed frames included. A bypass path that skipped the
+// tracker would leave the FIFO permanently short and misattribute every later
+// write completion.
+// ============================================================================
+
+TEST_F(FrameFragmentationHandlerTest, TrackerRecordsFastPathFrameAsComplete) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Under maxFragmentSize with nothing pending: forwarded inline, never
+  // touching doFlush. This is the common case for small request-response
+  // traffic and the one most likely to go unrecorded.
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 1024));
+
+  ASSERT_EQ(ctx_->written().size(), 1u);
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 1u);
+  EXPECT_EQ(frags[0].streamId, 1u);
+  EXPECT_TRUE(frags[0].isLastFragment);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest, TrackerRecordsNonFragmentableFrameOnBypass) {
+  FrameFragmentationHandlerT<RecordingTracker> handler{};
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makeKeepAliveFrame());
+
+  ASSERT_EQ(ctx_->written().size(), 1u);
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 1u);
+  EXPECT_TRUE(frags[0].isLastFragment);
+}
+
+TEST_F(FrameFragmentationHandlerTest, TrackerRecordsTerminalFrameOnBypass) {
+  FrameFragmentationHandlerT<RecordingTracker> handler{};
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makeCancelFrame(3));
+
+  ASSERT_EQ(ctx_->written().size(), 1u);
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 1u);
+  EXPECT_EQ(frags[0].streamId, 3u);
+  EXPECT_TRUE(frags[0].isLastFragment);
+}
+
+TEST_F(FrameFragmentationHandlerTest, TrackerSkipsErroredBypassFrame) {
+  FrameFragmentationHandlerT<RecordingTracker> handler{};
+  handler.handlerAdded(*ctx_);
+
+  // A frame the downstream rejected never reaches the batcher, so it must not
+  // be counted either — same discipline the doFlush path uses.
+  ctx_->setErrorAt(0);
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 1024));
+
+  EXPECT_EQ(ctx_->written().size(), 0u);
+  EXPECT_EQ(handler.tracker().fragments.size(), 0u);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest,
+    TrackerRecordCountMatchesDownstreamWritesAcrossMixedTraffic) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Interleave every path through onWrite: bypass (non-fragmentable), fast
+  // path, fragmented, immediate-queue, and terminal.
+  (void)handler.onWrite(*ctx_, makeKeepAliveFrame());
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(10, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 32 * 1024));
+  (void)handler.onWrite(*ctx_, makeCancelFrame(5));
+  runEventBaseLoop();
+
+  // The invariant the batch FIFO depends on: one record per downstream write.
+  EXPECT_EQ(handler.tracker().fragments.size(), ctx_->written().size());
+
+  // And one frame-completing record per original frame, not per fragment.
+  size_t completed = 0;
+  for (const auto& f : handler.tracker().fragments) {
+    completed += f.isLastFragment ? 1 : 0;
+  }
+  EXPECT_EQ(completed, 5u);
 }
 
 } // namespace

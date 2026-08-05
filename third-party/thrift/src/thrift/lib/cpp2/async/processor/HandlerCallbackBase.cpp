@@ -627,7 +627,16 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
+    // Upstream Clang < 19 and Apple Clang < 17 misdiagnose terminal co_yield
+    // expressions as unreachable.
+    FOLLY_PUSH_WARNING
+#if defined(__clang__) &&      \
+    ((__clang_major__ < 17) || \
+     (!defined(__apple_build_version__) && __clang_major__ < 19))
+    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
+#endif
     co_yield folly::coro::co_error(TApplicationException(message));
+    FOLLY_POP_WARNING
   }
 }
 
@@ -686,7 +695,16 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
+    // Upstream Clang < 19 and Apple Clang < 17 misdiagnose terminal co_yield
+    // expressions as unreachable.
+    FOLLY_PUSH_WARNING
+#if defined(__clang__) &&      \
+    ((__clang_major__ < 17) || \
+     (!defined(__apple_build_version__) && __clang_major__ < 19))
+    FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
+#endif
     co_yield folly::coro::co_error(TApplicationException(message));
+    FOLLY_POP_WARNING
   }
 }
 #endif // FOLLY_HAS_COROUTINES

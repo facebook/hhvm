@@ -119,7 +119,16 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
             StreamMessage::PayloadOrError{
                 folly::Try<apache::thrift::StreamPayload>(
                     rocket::RocketException(rocket::ErrorCode::CANCELED))});
+        // Upstream Clang < 19 and Apple Clang < 17 misdiagnose terminal
+        // co_yield expressions as unreachable.
+        FOLLY_PUSH_WARNING
+#if defined(__clang__) &&      \
+    ((__clang_major__ < 17) || \
+     (!defined(__apple_build_version__) && __clang_major__ < 19))
+        FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
+#endif
         co_yield folly::coro::co_stopped_may_throw;
+        FOLLY_POP_WARNING
       }
     }
 
@@ -134,7 +143,16 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
           StreamMessage::PayloadOrError{
               folly::Try<apache::thrift::StreamPayload>(
                   rocket::RocketException(rocket::ErrorCode::CANCELED))});
+      // Upstream Clang < 19 and Apple Clang < 17 misdiagnose terminal co_yield
+      // expressions as unreachable.
+      FOLLY_PUSH_WARNING
+#if defined(__clang__) &&      \
+    ((__clang_major__ < 17) || \
+     (!defined(__apple_build_version__) && __clang_major__ < 19))
+      FOLLY_CLANG_DISABLE_WARNING("-Wunreachable-code")
+#endif
       co_yield folly::coro::co_stopped_may_throw;
+      FOLLY_POP_WARNING
     }
 
     if (item.has_value()) {

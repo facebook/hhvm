@@ -169,30 +169,51 @@ class TestMcrouterBasicTouch(TestMcrouterBasicBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_mcrouter(self, additional_args=()):
+        extra_args = self.extra_args[:]
+        extra_args.extend(additional_args)
+        return self.add_mcrouter(self.config, extra_args=extra_args, enable_thrift=True)
+
     def test_basic_touch(self):
-        mcr = self.get_mcrouter()
+        client = self.get_mcrouter().get_thrift_client()
 
         # positive
-        self.assertTrue(mcr.set("key", "value", exptime=0))
-        self.assertEqual(mcr.get("key"), "value")
-        self.assertEqual(mcr.touch("key", 20), "TOUCHED")
-        self.assertEqual(mcr.get("key"), "value")
+        self.assertEqual(
+            Result.STORED, client.mcSet(b"key", b"value", exptime=0).result
+        )
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
+
+        self.assertEqual(Result.TOUCHED, client.mcTouch(b"key", exptime=20).result)
+
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
 
         # negative
-        self.assertEqual(mcr.touch("fake_key", 20), "NOT_FOUND")
-        self.assertIsNone(mcr.get("fake_key"))
+        self.assertEqual(
+            Result.NOTFOUND, client.mcTouch(b"fake_key", exptime=20).result
+        )
+        self.assertEqual(Result.NOTFOUND, client.mcGet(b"fake_key").result)
 
         # negative exptime
-        self.assertTrue(mcr.set("key1", "value", exptime=10))
-        self.assertEqual(mcr.get("key1"), "value")
-        self.assertEqual(mcr.touch("key1", -20), "TOUCHED")
-        self.assertIsNone(mcr.get("key1"))
+        self.assertEqual(
+            Result.STORED, client.mcSet(b"key1", b"value", exptime=10).result
+        )
+        self.assertEqual(Result.FOUND, client.mcGet(b"key1").result)
+        self.assertEqual(Result.TOUCHED, client.mcTouch(b"key1", exptime=-20).result)
+        self.assertEqual(Result.NOTFOUND, client.mcGet(b"key1").result)
 
         # past
-        self.assertTrue(mcr.set("key2", "value", exptime=10))
-        self.assertEqual(mcr.get("key"), "value")
-        self.assertEqual(mcr.touch("key", 1432250000), "TOUCHED")
-        self.assertIsNone(mcr.get("key"))
+        self.assertEqual(
+            Result.STORED, client.mcSet(b"key2", b"value", exptime=10).result
+        )
+        self.assertEqual(Result.FOUND, client.mcGet(b"key2").result)
+        self.assertEqual(
+            Result.TOUCHED, client.mcTouch(b"key2", exptime=1432250000).result
+        )
+        self.assertEqual(Result.NOTFOUND, client.mcGet(b"key2").result)
 
 
 class TestMcrouterBasicGat(TestMcrouterBasicBase):
@@ -471,32 +492,37 @@ class TestBasicAllSyncAppendPrependTouch(TestBasicAllSyncBase):
         self.assertIsNone(key3_get.value)
 
     def test_touch_all_sync(self):
-        mcr = self.get_mcrouter()
+        client = self.get_mcrouter().get_thrift_client()
 
-        mcr.set("key", "value")
+        self.assertEqual(Result.STORED, client.mcSet(b"key", b"value").result)
         self.assertEqual(self.mc1.get("key"), "value")
         self.assertEqual(self.mc2.get("key"), "value")
         self.assertEqual(self.mc3.get("key"), "value")
-        self.assertEqual(mcr.get("key"), "value")
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
 
-        self.assertEqual(mcr.touch("key", 3600), "TOUCHED")
+        self.assertEqual(Result.TOUCHED, client.mcTouch(b"key", exptime=3600).result)
         self.assertEqual(self.mc1.get("key"), "value")
         self.assertEqual(self.mc2.get("key"), "value")
         self.assertEqual(self.mc3.get("key"), "value")
-        self.assertEqual(mcr.get("key"), "value")
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
 
         self.mc1.set("key2", "value")
         self.assertEqual(self.mc1.get("key2"), "value")
         self.assertEqual(self.mc1.touch("key2", 3600), "TOUCHED")
         self.assertEqual(self.mc1.get("key2"), "value")
-        self.assertFalse(mcr.get("key2"))
+        self.assertEqual(Result.NOTFOUND, client.mcGet(b"key2").result)
 
-        mcr.set("key3", "value")
+        self.assertEqual(Result.STORED, client.mcSet(b"key3", b"value").result)
         self.assertEqual(self.mc1.get("key3"), "value")
         self.assertEqual(self.mc1.touch("key3", -10), "TOUCHED")
+        self.assertIsNone(self.mc1.get("key3"))
         self.assertEqual(self.mc2.get("key3"), "value")
         self.assertEqual(self.mc3.get("key3"), "value")
-        self.assertFalse(mcr.get("key3"))
+        self.assertEqual(Result.NOTFOUND, client.mcGet(b"key3").result)
 
     def test_gat_all_sync(self):
         mcr = self.get_mcrouter()

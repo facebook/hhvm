@@ -9,7 +9,11 @@
 from unittest.mock import MagicMock, patch
 
 from carbon.carbon_result.thrift_types import Result
-from facebook.memcache.thrift.Memcache.thrift_types import McAppendReply, McPrependReply
+from facebook.memcache.thrift.Memcache.thrift_types import (
+    McAppendReply,
+    McPrependReply,
+    McTouchReply,
+)
 from mcrouter.facebook.test.thrift_test_client import ThriftTestClient
 from mcrouter.test.MCProcess import MockMemcachedDual
 from mcrouter.test.McrouterTestCase import McrouterTestCase
@@ -74,6 +78,38 @@ class TestThriftClient(McrouterTestCase):
         get_reply = self.client.mcGet(key)
         self.assertEqual(Result.FOUND, get_reply.result)
         self.assertEqual(prefix + value + suffix, bytes(get_reply.value))
+
+    def test_touch(self):
+        key = b"touch-key"
+        value = b"touch-value"
+
+        self.assertEqual(Result.STORED, self.client.mcSet(key, value).result)
+        self.assertEqual(Result.TOUCHED, self.client.mcTouch(key, exptime=100).result)
+
+        get_reply = self.client.mcGet(key)
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(value, bytes(get_reply.value))
+
+        self.assertEqual(
+            Result.NOTFOUND,
+            self.client.mcTouch(b"missing-key", exptime=100).result,
+        )
+        self.assertEqual(Result.TOUCHED, self.client.mcTouch(key, exptime=-1).result)
+        self.assertEqual(Result.NOTFOUND, self.client.mcGet(key).result)
+
+    def test_touch_request_fields(self):
+        client = ThriftTestClient("::1", 1)
+        rpc_client = MagicMock()
+        rpc_client.mcTouch.return_value = McTouchReply(result=Result.TOUCHED)
+        context_manager = MagicMock()
+        context_manager.__enter__.return_value = rpc_client
+
+        with patch.object(client, "_getSRClient", return_value=context_manager):
+            client.mcTouch(b"touch-key\x00", exptime=123)
+
+        touch_request = rpc_client.mcTouch.call_args.args[0]
+        self.assertEqual(b"touch-key\x00", bytes(touch_request.key))
+        self.assertEqual(123, touch_request.exptime)
 
     def test_append_prepend_request_fields(self):
         client = ThriftTestClient("::1", 1)

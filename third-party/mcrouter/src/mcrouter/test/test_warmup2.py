@@ -136,11 +136,12 @@ class TestWarmup2AppendPrependTouch(TestWarmup2):
         self.assertEqual(self.mc_cold.get("key"), "prefixvaluesuffix")
 
     def test_warmup_touch(self):
-        k = "key"
-        v = "value"
+        key = b"key"
+        value = b"value"
+        client = self.mcrouter.get_thrift_client()
 
         # make sure touch requests go to cold route
-        self.assertTrue(self.mcrouter.set(k, v, exptime=1000))
-        self.assertEqual(self.mc_cold.get(k), v)
-        self.assertEqual(self.mcrouter.touch(k, 0), "TOUCHED")
-        self.assertEqual(self.mcrouter.metaget(k)["exptime"], "0")
+        self.assertEqual(Result.STORED, client.mcSet(key, value, exptime=1000).result)
+        self.assertEqual(self.mc_cold.get("key"), "value")
+        self.assertEqual(Result.TOUCHED, client.mcTouch(key, exptime=0).result)
+        self.assertEqual(self.mcrouter.metaget("key")["exptime"], "0")

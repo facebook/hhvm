@@ -6,6 +6,7 @@
 
 # pyre-unsafe
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -15,7 +16,9 @@ class TestMigratedFailover(McrouterTestCase):
     extra_args = ["--probe-timeout-initial=100", "--probe-timeout-max=100"]
 
     def get_mcrouter(self):
-        return self.add_mcrouter(self.config, extra_args=self.extra_args)
+        return self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        )
 
     def test_migrated_failover(self):
         self.add_server(MockMemcached())  # "old" pool, ignored
@@ -26,10 +29,14 @@ class TestMigratedFailover(McrouterTestCase):
         mc_a.set("key", "a")
         mc_b.set("key", "b")
 
-        mcrouter = self.get_mcrouter()
+        client = self.get_mcrouter().get_thrift_client()
 
-        self.assertEqual("a", mcrouter.get("key"))
+        reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, reply.result)
+        self.assertEqual(b"a", bytes(reply.value))
 
         mc_a.terminate()
 
-        self.assertEqual("b", mcrouter.get("key"))
+        reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, reply.result)
+        self.assertEqual(b"b", bytes(reply.value))

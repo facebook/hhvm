@@ -8,6 +8,7 @@
 
 import time
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -19,13 +20,18 @@ class TestWarmup(McrouterTestCase):
     def setUp(self):
         self.mc1 = self.add_server(MockMemcached())
         self.mc2 = self.add_server(MockMemcached())
-        self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
+        self.mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        )
+        self.client = self.mcrouter.get_thrift_client()
 
     def test_sanity(self):
         key = "foo"
         value = "value"
         self.mc1.set(key, value)
-        self.assertEqual(self.mcrouter.get(key), value)
+        reply = self.client.mcGet(key.encode())
+        self.assertEqual(Result.FOUND, reply.result)
+        self.assertEqual(value.encode(), bytes(reply.value))
         # warmup request is async
         time.sleep(1)
         self.assertEqual(self.mc2.get(key), value)
@@ -34,7 +40,9 @@ class TestWarmup(McrouterTestCase):
         key = "foo2"
         value = "value"
         self.mc1.set(key, value)
-        self.assertEqual(self.mcrouter.get(key), value)
+        reply = self.client.mcGet(key.encode())
+        self.assertEqual(Result.FOUND, reply.result)
+        self.assertEqual(value.encode(), bytes(reply.value))
         min_expected_exptime = int(time.time() + 20000)
         # warmup request is async
         time.sleep(1)

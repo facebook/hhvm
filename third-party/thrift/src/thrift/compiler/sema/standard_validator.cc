@@ -1216,10 +1216,10 @@ void validate_explicit_uri_value(sema_context& ctx, const t_named& node) {
 }
 
 void validate_function_param_id(sema_context& ctx, const t_field& node) {
-  if (node.explicit_id() != node.id()) {
-    ctx.warning(
-        node.src_range().begin, "No param id specified for `{}`", node.name());
-  }
+  ctx.check(
+      node.explicit_id() == node.id(),
+      "No param id specified for `{}`",
+      node.name());
 }
 
 void validate_thrown_exception_id(sema_context& ctx, const t_field& node) {

@@ -334,23 +334,23 @@ TEST(StandardValidatorTest, ValidateFunctionParamId) {
     package "facebook.com/thrift/test"
 
     service MyService {
-      // Function with explicit param ids - no warning
+      // Function with explicit param ids - no error
       void explicitIds(1: i32 a, 2: string b);
 
-      // Function with implicit param ids - warning expected
+      // Function with implicit param ids - error expected
       void implicitIds(i32 x, string y);
-      # expected-warning@-1: No param id specified for `x`
-      # expected-warning@-2: No param id specified for `y`
+      # expected-error@-1: No param id specified for `x`
+      # expected-error@-2: No param id specified for `y`
 
       // Mixed explicit and implicit param ids
       void mixedIds(1: i32 a, string b, 3: bool c);
-      # expected-warning@-1: No param id specified for `b`
+      # expected-error@-1: No param id specified for `b`
     }
 
     interaction MyInteraction {
       // Function with implicit param ids in interaction
       void interactionMethod(i32 p);
-      # expected-warning@-1: No param id specified for `p`
+      # expected-error@-1: No param id specified for `p`
     }
   )");
 }

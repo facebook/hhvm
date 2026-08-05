@@ -17,5 +17,5 @@ ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", b
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 packages = { version = "0.0.0", path = "../../../packages/cargo" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
+serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 sha1 = "0.10.7"

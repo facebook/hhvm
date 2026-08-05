@@ -24,7 +24,6 @@
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
-#include <folly/container/span.h>
 #include <folly/json/dynamic.h>
 #include <folly/lang/Exception.h>
 #include <folly/memory/not_null.h>

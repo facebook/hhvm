@@ -23,10 +23,10 @@
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/container/F14Map.h>
-#include <folly/container/span.h>
 
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 

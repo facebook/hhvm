@@ -28,7 +28,6 @@
 #include <folly/Utility.h>
 #include <folly/container/F14Set.h>
 #include <folly/container/MapUtil.h>
-#include <folly/container/span.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/SafeAssert.h>
 #include <folly/memory/not_null.h>

@@ -22,7 +22,6 @@
 #include <folly/Function.h>
 #include <folly/SharedMutex.h>
 #include <folly/container/F14Map.h>
-#include <folly/container/span.h>
 
 namespace apache::thrift {
 

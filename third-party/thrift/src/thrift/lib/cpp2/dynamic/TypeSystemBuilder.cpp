@@ -23,9 +23,9 @@
 
 #include <folly/Overload.h>
 #include <folly/container/F14Set.h>
-#include <folly/container/span.h>
 
 #include <functional>
+#include <span>
 #include <utility>
 #include <variant>
 

@@ -20,7 +20,6 @@
 #include <vector>
 
 #include <folly/container/F14Map.h>
-#include <folly/container/span.h>
 
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>

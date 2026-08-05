@@ -22,7 +22,6 @@
 #include <string_view>
 #include <vector>
 
-#include <folly/container/span.h>
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 

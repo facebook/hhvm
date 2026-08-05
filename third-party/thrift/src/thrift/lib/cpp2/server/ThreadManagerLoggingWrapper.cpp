@@ -25,20 +25,18 @@ void ThreadManagerLoggingWrapper::recordStackTrace(std::string funcName) const {
   if (server_) {
     folly::call_once(
         ThreadManagerLoggingWrapper::recordFlag_,
-        [server_ = server_,
+        [serverPtr = server_,
          funcName = std::move(funcName),
          shouldLog = shouldLog_]() mutable {
-          if (!shouldLog) {
+          if (!shouldLog || !serverPtr) {
             return;
           }
-          auto& actions = server_->getRuntimeServerActions();
+          auto& actions = serverPtr->getRuntimeServerActions();
           actions.executorToThreadManagerUnexpectedFunctionName =
               std::move(funcName);
           // let's reused the old event instead of creating a new one
-          if (auto server = server_) {
-            THRIFT_SERVER_EVENT(executor_thread_manager_unexpected_calls)
-                .log(*server);
-          }
+          THRIFT_SERVER_EVENT(executor_thread_manager_unexpected_calls)
+              .log(*serverPtr);
         });
   }
 }

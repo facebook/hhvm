@@ -265,20 +265,29 @@ class MCProcess(ProcessBase):
                         "MCProcess connected but did not respond to ping"
                     )
                 time.sleep(1)
-        if self.versionPing and self.thrift_client is not None:
+        # Thrift readiness is always verified when a thrift_client is set --
+        # intentionally not gated by versionPing; no caller relies on skipping it.
+        if self.thrift_client is not None:
             retry_count = 0
+            last_exception = None
             while True:
                 try:
                     res = self.thrift_client.mcVersion()
                     if res.result == Result.OK:
                         return
                 except Exception as e:
+                    last_exception = e
                     print(f"Error on sending mcVersion in Thrift: {e}")
                 retry_count += 1
+                if not self.is_alive():
+                    self.terminate()
+                    raise RuntimeError(
+                        "MCProcess exited while waiting for Thrift readiness"
+                    ) from last_exception
                 if self.max_retries and retry_count >= self.max_retries:
                     raise RuntimeError(
-                        "MCProcess connected but did not respond to ping"
-                    )
+                        "MCProcess connected but Thrift did not respond to mcVersion"
+                    ) from last_exception
                 time.sleep(1)
 
     def disconnect(self):

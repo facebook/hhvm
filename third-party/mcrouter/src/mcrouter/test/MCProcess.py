@@ -143,9 +143,22 @@ class MCProcess(ProcessBase):
         use_ssl=False,
         versionPing=False,
         thriftPort=None,
+        connectLegacySocket=True,
     ):
+        if not connectLegacySocket:
+            if thriftPort is None:
+                raise ValueError("A Thrift port is required without a legacy socket")
+            if not McrouterGlobals.useThriftClient():
+                raise ValueError(
+                    "The Thrift test client must be enabled without a legacy socket"
+                )
+            if versionPing:
+                raise ValueError(
+                    "versionPing requires a legacy socket and is unsupported without one"
+                )
         self.fd = None
         self.versionPing = versionPing
+        self.connectLegacySocket = connectLegacySocket
         if cmd is not None and "-s" in cmd:
             if os.path.exists(addr):
                 raise Exception(f"file path {addr} already exists")
@@ -228,27 +241,28 @@ class MCProcess(ProcessBase):
 
     def ensure_connected(self):
         retry_count = 0
-        # First, try to connect
-        while True:
-            try:
-                self.connect()
-                break
-            except Exception as e:
-                retry_count += 1
-                print(
-                    # pyrefly: ignore [missing-attribute]
-                    f"Cannot connect (errno: {e.errno}). Retry {retry_count} of {self.max_retries}."
-                )
-                self.disconnect()
-                if not self.is_alive():
-                    print("Process exited unexpectedly!")
-                    self.terminate()  # This will print logs as well
+        if self.connectLegacySocket:
+            # First, try to connect
+            while True:
+                try:
+                    self.connect()
+                    break
+                except Exception as e:
+                    retry_count += 1
+                    print(
+                        # pyrefly: ignore [missing-attribute]
+                        f"Cannot connect (errno: {e.errno}). Retry {retry_count} of {self.max_retries}."
+                    )
+                    self.disconnect()
+                    if not self.is_alive():
+                        print("Process exited unexpectedly!")
+                        self.terminate()  # This will print logs as well
+                        raise
+                    # If we defined a retry count, retry until that's exceeded.
+                    if not self.max_retries or retry_count < self.max_retries:
+                        time.sleep(1)
+                        continue
                     raise
-                # If we defined a retry count, retry until that's exceeded.
-                if not self.max_retries or retry_count < self.max_retries:
-                    time.sleep(1)
-                    continue
-                raise
 
         # Then, verify Memcache is ready for traffic
         if self.versionPing:

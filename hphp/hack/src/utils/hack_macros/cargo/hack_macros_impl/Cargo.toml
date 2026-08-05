@@ -19,7 +19,7 @@ naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
 proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
-quote = "1.0.46"
+quote = "1.0.47"
 regex = "1.13.1"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }

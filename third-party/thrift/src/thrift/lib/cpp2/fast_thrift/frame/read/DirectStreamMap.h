@@ -241,4 +241,9 @@ class DirectStreamMap {
   size_t size_{0};
 };
 
+// DirectStreamSet — a DirectStreamMap used purely for key membership.
+// The value type is uint8_t (minimal, never read).
+template <typename Key = uint32_t, typename IndexPolicy = StreamIdIndex>
+using DirectStreamSet = DirectStreamMap<uint8_t, Key, IndexPolicy>;
+
 } // namespace apache::thrift::fast_thrift::frame::read

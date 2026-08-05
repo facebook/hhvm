@@ -9,17 +9,21 @@
 
 import time
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestWarmup2(McrouterTestCase):
     config = "./mcrouter/test/test_warmup2.json"
+    enable_thrift_frontend = False
 
     def setUp(self):
         self.mc_warm = self.add_server(MockMemcached())
         self.mc_cold = self.add_server(MockMemcached())
-        self.mcrouter = self.add_mcrouter(self.config)
+        self.mcrouter = self.add_mcrouter(
+            self.config, enable_thrift=self.enable_thrift_frontend
+        )
 
     def test_warmup_get(self):
         k = "key"
@@ -111,22 +115,25 @@ class TestWarmup2(McrouterTestCase):
 
 
 class TestWarmup2AppendPrependTouch(TestWarmup2):
+    enable_thrift_frontend = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def test_warmup_append_prepend(self):
-        k = "key"
-        v = "value"
-        suffix = "suffix"
-        prefix = "prefix"
+        key = b"key"
+        value = b"value"
+        suffix = b"suffix"
+        prefix = b"prefix"
+        client = self.mcrouter.get_thrift_client()
 
         # make sure appends and prepends go to cold route
-        self.assertTrue(self.mcrouter.set(k, v, exptime=1000))
-        self.assertEqual(self.mc_cold.get(k), v)
-        self.assertEqual(self.mcrouter.append(k, suffix), "STORED")
-        self.assertEqual(self.mc_cold.get(k), v + suffix)
-        self.assertEqual(self.mcrouter.prepend(k, prefix), "STORED")
-        self.assertEqual(self.mc_cold.get(k), prefix + v + suffix)
+        self.assertEqual(Result.STORED, client.mcSet(key, value, exptime=1000).result)
+        self.assertEqual(self.mc_cold.get("key"), "value")
+        self.assertEqual(Result.STORED, client.mcAppend(key, suffix).result)
+        self.assertEqual(self.mc_cold.get("key"), "valuesuffix")
+        self.assertEqual(Result.STORED, client.mcPrepend(key, prefix).result)
+        self.assertEqual(self.mc_cold.get("key"), "prefixvaluesuffix")
 
     def test_warmup_touch(self):
         k = "key"

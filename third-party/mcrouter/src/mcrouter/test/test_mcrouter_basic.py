@@ -10,6 +10,7 @@
 import time
 from threading import Thread
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import Mcrouter, McrouterClient, MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -273,18 +274,30 @@ class TestMcrouterInvalidRouteAppendPrepend(TestMcrouterInvalidRouteBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_mcrouter(self, additional_args=()):
+        extra_args = self.extra_args[:]
+        extra_args.extend(additional_args)
+        return self.add_mcrouter(self.config, extra_args=extra_args, enable_thrift=True)
+
     def test_basic_invalid_route(self):
-        mcr = self.get_mcrouter()
+        client = self.get_mcrouter().get_thrift_client()
 
-        self.assertTrue(mcr.set("key", "value"))
-        self.assertEqual(mcr.get("key"), "value")
+        self.assertEqual(Result.STORED, client.mcSet(b"key", b"value").result)
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
 
-        self.assertEqual(mcr.append("/*/*/key", "abc"), "STORED")
-        self.assertEqual(mcr.get("/a/a/key"), "valueabc")
-        self.assertEqual(mcr.get("key"), "valueabc")
-        self.assertEqual(mcr.prepend("/*/*/key", "123"), "STORED")
-        self.assertEqual(mcr.get("/a/a/key"), "123valueabc")
-        self.assertEqual(mcr.get("key"), "123valueabc")
+        self.assertEqual(Result.STORED, client.mcAppend(b"/*/*/key", b"abc").result)
+        for key in (b"/a/a/key", b"key"):
+            get_reply = client.mcGet(key)
+            self.assertEqual(Result.FOUND, get_reply.result)
+            self.assertEqual(b"valueabc", bytes(get_reply.value))
+
+        self.assertEqual(Result.STORED, client.mcPrepend(b"/*/*/key", b"123").result)
+        for key in (b"/a/a/key", b"key"):
+            get_reply = client.mcGet(key)
+            self.assertEqual(Result.FOUND, get_reply.result)
+            self.assertEqual(b"123valueabc", bytes(get_reply.value))
 
 
 class TestMcrouterBasic2(McrouterTestCase):
@@ -404,7 +417,9 @@ class TestBasicAllSyncAppendPrependTouch(TestBasicAllSyncBase):
         super().__init__(*args, **kwargs)
 
     def get_mcrouter(self):
-        return self.add_mcrouter(self.config, extra_args=self.extra_args)
+        return self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        )
 
     def test_append_prepend_all_sync(self):
         """
@@ -412,32 +427,48 @@ class TestBasicAllSyncAppendPrependTouch(TestBasicAllSyncBase):
         tests to verify correctness of append/prepend since we don't use
         these commands in production.
         """
-        mcr = self.get_mcrouter()
+        client = self.get_mcrouter().get_thrift_client()
 
-        mcr.set("key", "value")
+        self.assertEqual(Result.STORED, client.mcSet(b"key", b"value").result)
         self.assertEqual(self.mc1.get("key"), "value")
         self.assertEqual(self.mc2.get("key"), "value")
         self.assertEqual(self.mc3.get("key"), "value")
-        self.assertEqual(mcr.get("key"), "value")
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"value", bytes(get_reply.value))
 
-        self.assertEqual(mcr.append("key", "abc"), "STORED")
-        self.assertEqual(mcr.prepend("key", "123"), "STORED")
+        self.assertEqual(Result.STORED, client.mcAppend(b"key", b"abc").result)
+        self.assertEqual(Result.STORED, client.mcPrepend(b"key", b"123").result)
         self.assertEqual(self.mc1.get("key"), "123valueabc")
         self.assertEqual(self.mc2.get("key"), "123valueabc")
         self.assertEqual(self.mc3.get("key"), "123valueabc")
-        self.assertEqual(mcr.get("key"), "123valueabc")
+        get_reply = client.mcGet(b"key")
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(b"123valueabc", bytes(get_reply.value))
 
+        # When the key exists on only one backend, the AllSync append still
+        # applies on that backend (mc1 -> "valuexyz") but fails on the others,
+        # so the aggregated result is the worst outcome: NOTSTORED.
         self.mc1.set("key2", "value")
-        self.assertEqual(self.mc1.get("key2"), "value")
-        self.assertEqual(self.mc1.append("key2", "xyz"), "STORED")
+        append_reply = client.mcAppend(b"key2", b"xyz")
+        self.assertEqual(Result.NOTSTORED, append_reply.result)
         self.assertEqual(self.mc1.get("key2"), "valuexyz")
-        self.assertFalse(mcr.get("key2"))
+        self.assertIsNone(self.mc2.get("key2"))
+        self.assertIsNone(self.mc3.get("key2"))
+        # A routed GET still misses since the key is not present on all backends.
+        key2_get = client.mcGet(b"key2")
+        self.assertEqual(Result.NOTFOUND, key2_get.result)
+        self.assertIsNone(key2_get.value)
 
         self.mc1.set("key3", "value")
-        self.assertEqual(self.mc1.get("key3"), "value")
-        self.assertEqual(self.mc1.prepend("key3", "xyz"), "STORED")
+        prepend_reply = client.mcPrepend(b"key3", b"xyz")
+        self.assertEqual(Result.NOTSTORED, prepend_reply.result)
         self.assertEqual(self.mc1.get("key3"), "xyzvalue")
-        self.assertFalse(mcr.get("key3"))
+        self.assertIsNone(self.mc2.get("key3"))
+        self.assertIsNone(self.mc3.get("key3"))
+        key3_get = client.mcGet(b"key3")
+        self.assertEqual(Result.NOTFOUND, key3_get.result)
+        self.assertIsNone(key3_get.value)
 
     def test_touch_all_sync(self):
         mcr = self.get_mcrouter()

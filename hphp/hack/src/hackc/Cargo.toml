@@ -63,5 +63,5 @@ shallow_decl_provider = { version = "0.0.0", path = "../hackrs/shallow_decl_prov
 strum = { version = "0.28.0", features = ["derive"] }
 tempfile = "3.27.0"
 textual = { version = "0.0.0", path = "ir/conversions/textual/cargo/textual" }
-thiserror = "2.0.18"
+thiserror = "2.0.19"
 ty = { version = "0.0.0", path = "../hackrs/ty/cargo/ty" }

@@ -12,5 +12,5 @@ license = "Apache-2.0"
 path = "type_system/lib.rs"
 
 [dependencies]
-thiserror = "2.0.18"
+thiserror = "2.0.19"
 type_system_digest = { version = "0.0.1", path = "type_system_digest" }

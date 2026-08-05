@@ -1254,6 +1254,8 @@ void HTTPCoroSession::onAbort(HTTPCodec::StreamID streamID, ErrorCode code) {
 
 void HTTPCoroSession::onResetStream(HTTPCodec::StreamID streamID,
                                     HTTPErrorCode code) {
+  deliverLifecycleEvent(
+      &LifecycleObserver::onResetStream, *this, streamID, code);
   auto stream = findStream(streamID);
   if (!stream) {
     return;

@@ -567,6 +567,10 @@ CO_TEST_P_X(H2QUpstreamSessionTest, IngressResetStream) {
       session_->sendRequest(HTTPFixedSource::makeFixedRequest("/")));
   XCHECK(!responseSource.hasException());
   auto id = *responseSource->getStreamID();
+  EXPECT_CALL(lifecycleObs_,
+              onResetStream(_, id, Truly([](HTTPErrorCode error) {
+                              return isCancelled(error);
+                            })));
   resetStream(id, ErrorCode::CANCEL);
   auto headerEvent = co_await co_awaitTry(responseSource->readHeaderEvent());
   EXPECT_TRUE(headerEvent.hasException());

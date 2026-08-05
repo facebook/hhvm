@@ -128,6 +128,10 @@ class LifecycleObserver {
   }
   virtual void onIngressError(const HTTPCoroSession&, ProxygenError) {
   }
+  virtual void onResetStream(const HTTPCoroSession&,
+                             HTTPCodec::StreamID /*streamID*/,
+                             HTTPErrorCode /*errorCode*/) {
+  }
   virtual void onIngressEOF(const HTTPCoroSession&) {
   }
   virtual void onRequestBegin(const HTTPCoroSession&) {

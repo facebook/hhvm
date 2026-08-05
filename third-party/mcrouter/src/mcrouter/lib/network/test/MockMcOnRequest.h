@@ -20,7 +20,14 @@
 namespace facebook {
 namespace memcache {
 
-static std::atomic_uint64_t cmd_get_count{0};
+inline std::atomic_uint64_t cmd_get_count{0};
+inline std::atomic_uint64_t cmd_lease_get_count{0};
+inline std::atomic_uint64_t cmd_lease_set_count{0};
+// Cumulative count of successful store operations (set/add/replace/append/
+// prepend/cas/lease-set), matching memcached's `total_items` stat. This is NOT
+// the current item count (curr_items) -- it is never decremented on delete or
+// expiry.
+inline std::atomic_uint64_t total_items{0};
 
 class MockMcOnRequest {
  public:
@@ -129,6 +136,7 @@ class MockMcOnRequest {
   template <class Context>
   void onRequest(Context&& ctx, McLeaseGetRequest&& req) {
     using Reply = McLeaseGetReply;
+    cmd_lease_get_count++;
 
     auto key = req.key()->fullKey().str();
 
@@ -146,6 +154,7 @@ class MockMcOnRequest {
   template <class Context>
   void onRequest(Context&& ctx, McLeaseSetRequest&& req) {
     using Reply = McLeaseSetReply;
+    cmd_lease_set_count++;
 
     auto key = req.key()->fullKey().str();
 
@@ -155,10 +164,12 @@ class MockMcOnRequest {
         return;
 
       case MockMc::LeaseSetResult::STORED:
+        total_items++;
         Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
         return;
 
       case MockMc::LeaseSetResult::STALE_STORED:
+        total_items++;
         Context::reply(std::move(ctx), Reply(carbon::Result::STALESTORED));
         return;
     }
@@ -173,6 +184,7 @@ class MockMcOnRequest {
       reply.message() = "returned error msg with binary data \xdd\xab";
     } else {
       mc_.set(key, MockMc::Item(req));
+      total_items++;
       reply.result() = carbon::Result::STORED;
     }
 
@@ -186,6 +198,7 @@ class MockMcOnRequest {
     auto key = req.key()->fullKey().str();
 
     if (mc_.add(key, MockMc::Item(req))) {
+      total_items++;
       Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
     } else {
       Context::reply(std::move(ctx), Reply(carbon::Result::NOTSTORED));
@@ -199,6 +212,7 @@ class MockMcOnRequest {
     auto key = req.key()->fullKey().str();
 
     if (mc_.replace(key, MockMc::Item(req))) {
+      total_items++;
       Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
     } else {
       Context::reply(std::move(ctx), Reply(carbon::Result::NOTSTORED));
@@ -212,6 +226,7 @@ class MockMcOnRequest {
     auto key = req.key()->fullKey().str();
 
     if (mc_.append(key, MockMc::Item(req))) {
+      total_items++;
       Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
     } else {
       Context::reply(std::move(ctx), Reply(carbon::Result::NOTSTORED));
@@ -225,6 +240,7 @@ class MockMcOnRequest {
     auto key = req.key()->fullKey().str();
 
     if (mc_.prepend(key, MockMc::Item(req))) {
+      total_items++;
       Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
     } else {
       Context::reply(std::move(ctx), Reply(carbon::Result::NOTSTORED));
@@ -344,6 +360,7 @@ class MockMcOnRequest {
         Context::reply(std::move(ctx), Reply(carbon::Result::EXISTS));
         break;
       case MockMc::CasResult::STORED:
+        total_items++;
         Context::reply(std::move(ctx), Reply(carbon::Result::STORED));
         break;
     }
@@ -354,8 +371,13 @@ class MockMcOnRequest {
     using Reply = McStatsReply;
 
     auto key = req.key()->fullKey().str();
-    if (key == "__mockmc__") {
-      StatsReply stats;
+    StatsReply stats;
+    if (key.empty()) {
+      stats.addStat("cmd_lease_get", cmd_lease_get_count.load());
+      stats.addStat("cmd_lease_set", cmd_lease_set_count.load());
+      stats.addStat("total_items", total_items.load());
+      Context::reply(std::move(ctx), stats.getReply());
+    } else if (key == "__mockmc__") {
       stats.addStat("cmd_get_count", cmd_get_count.load());
       Context::reply(std::move(ctx), stats.getReply());
     } else {

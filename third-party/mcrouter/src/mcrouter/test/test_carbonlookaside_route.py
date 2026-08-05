@@ -93,15 +93,15 @@ class CarbonLookasideTmpConfig:
 """
 
     def cleanup(self):
-        if not self.tmpRouteFile:
-            # pyrefly: ignore [bad-argument-type]
-            os.remove(self.tmpRouteFile)
-        if not self.tmpClientFile:
-            # pyrefly: ignore [bad-argument-type]
-            os.remove(self.tmpClientFile)
-        if not self.tmpFlavorFile:
-            # pyrefly: ignore [bad-argument-type]
-            os.remove(self.tmpFlavorFile)
+        for temp_file in (
+            self.tmpRouteFile,
+            self.tmpClientFile,
+            self.tmpFlavorFile,
+        ):
+            try:
+                os.remove(temp_file.name)
+            except FileNotFoundError:
+                pass
 
     def __init__(
         self,
@@ -165,7 +165,10 @@ class TestCarbonLookasideRouteBasic(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_basic(self):
         n = 20
@@ -226,7 +229,10 @@ class TestCarbonLookasideRouteExpiry(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_ttl_expiry(self):
         n = 20
@@ -265,7 +271,10 @@ class TestCarbonLookasideRouteNoExpiry(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_ttl_no_expiry(self):
         n = 20
@@ -303,7 +312,10 @@ class TestCarbonLookasideRouteLeases(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_basic_leases(self):
         n = 20
@@ -366,7 +378,10 @@ class TestCarbonLookasideRouteLeasesHotMiss(McrouterTestCase):
         self.mcrouter2 = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def async_get(self, key, ret):
         ret.put(self.mcrouter.get(key))
@@ -382,21 +397,25 @@ class TestCarbonLookasideRouteLeasesHotMiss(McrouterTestCase):
         # a hot miss before backend responds and carbon lookaside does a lease
         # set.
         ret = queue.Queue()
-        t = threading.Thread(target=self.async_get, args=(key, ret))
+        t = threading.Thread(target=self.async_get, args=(key, ret), daemon=True)
         t.start()
         # Ensure lease get has arrived at MC server before proceeding
+        deadline = time.monotonic() + 10
         stats = self.mc.stats()
-        while stats["cmd_lease_get"] == "0":
+        while stats["cmd_lease_get"] == "0" and time.monotonic() < deadline:
+            time.sleep(0.1)
             stats = self.mc.stats()
+        self.assertGreater(int(stats["cmd_lease_get"]), 0)
         # Hot miss
-        self.assertTrue(self.mcrouter2.get(key), "value")
+        self.assertEqual("value", self.mcrouter2.get(key))
         stats = self.mc.stats()
-        self.assertTrue(stats["cmd_lease_get"] == "5")
+        self.assertEqual("5", stats["cmd_lease_get"])
 
         # Now wait on the back end returning and the write to carbonLookaside
         # completing.
-        t.join()
-        self.assertTrue(ret.get())
+        t.join(timeout=10)
+        self.assertFalse(t.is_alive(), "CarbonLookaside get did not complete")
+        self.assertEqual("value", ret.get_nowait())
         stats = self.mc.stats()
 
         # the lookaside sets dont block, so allow it to retry till set arrives
@@ -405,7 +424,8 @@ class TestCarbonLookasideRouteLeasesHotMiss(McrouterTestCase):
         while stats["cmd_lease_set"] == "0" and retry < 3:
             time.sleep(1)
             retry += 1
-        self.assertTrue(stats["cmd_lease_set"] == "1")
+            stats = self.mc.stats()
+        self.assertEqual("1", stats["cmd_lease_set"])
 
 
 class TestCarbonLookasideRouteExpiryMsTTLBase(McrouterTestCase):
@@ -431,7 +451,10 @@ class TestCarbonLookasideRouteExpiryMsTTLBase(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_ttl_ms_expiry_config(self):
         k = "some_key"
@@ -471,7 +494,10 @@ class TestCarbonLookasideRouteExpiryMsTTL(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def tearDown(self):
-        self.tmpConfig.cleanup()
+        try:
+            super().tearDown()
+        finally:
+            self.tmpConfig.cleanup()
 
     def test_carbonlookaside_ttl_ms_expiry(self):
         # Align to 1 second boundary

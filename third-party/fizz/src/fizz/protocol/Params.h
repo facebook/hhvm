@@ -15,9 +15,12 @@
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/record/Types.h>
 #include <fizz/util/Variant.h>
-#include <folly/Executor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/WriteFlags.h>
+
+namespace folly {
+class Executor;
+}
 
 namespace fizz {
 

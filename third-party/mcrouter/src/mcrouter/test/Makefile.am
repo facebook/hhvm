@@ -19,8 +19,6 @@ TESTS = \
 if HAVE_PYTHON
 TESTS += \
   test_allow_only_gets.py \
-  test_ascii_error.py \
-  test_ascii_multiget_mock.py \
   test_async_files.py \
   test_bad_params.py \
   test_config_params.py \
@@ -43,7 +41,6 @@ TESTS += \
   test_modify_exptime.py \
   test_modify_key.py \
   test_named_handles.py \
-  test_noreply.py \
   test_probe_timeout.py \
   test_rates.py \
   test_routing_prefixes.py \

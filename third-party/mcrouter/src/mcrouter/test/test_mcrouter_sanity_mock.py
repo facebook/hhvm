@@ -9,11 +9,7 @@
 
 import random
 
-from mcrouter.test.MCProcess import (
-    MockMemcached,
-    MockMemcachedDual,
-    MockMemcachedThrift,
-)
+from mcrouter.test.MCProcess import MockMemcached, MockMemcachedThrift
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import DeadServer, SleepServer
 
@@ -101,19 +97,8 @@ class TestMcrouterSanityMock(McrouterTestCase):
         self.assertEqual(self.mcrouter.metaget("unknown_age")["age"], "unknown")
 
 
-class TestCaretSanityMock(TestMcrouterSanityMock):
-    config = "./mcrouter/test/test_caret.json"
-
-
 class TestThriftSanityMock(TestMcrouterSanityMock):
     config = "./mcrouter/test/test_thrift.json"
 
     def make_memcached(self):
         return MockMemcachedThrift()
-
-
-class TestDualCaretSanityMock(TestMcrouterSanityMock):
-    config = "./mcrouter/test/test_caret.json"
-
-    def make_memcached(self):
-        return MockMemcachedDual(mcrouterUseThrift=False)

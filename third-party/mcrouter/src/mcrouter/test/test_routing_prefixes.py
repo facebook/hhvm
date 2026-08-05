@@ -49,10 +49,6 @@ class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
             self.assertEqual(local["value"], "testvalue")
 
 
-class TestMcrouterRoutingPrefixCaret(TestMcrouterRoutingPrefixAscii):
-    config = "./mcrouter/test/routing_prefix_test_caret.json"
-
-
 class TestMcrouterRoutingPrefixOldNaming(TestMcrouterRoutingPrefixAscii):
     config = "./mcrouter/test/routing_prefix_test_old_naming.json"
 

@@ -26,7 +26,7 @@ go = { version = "0.0.1", path = "../go" }
 hack = { version = "0.0.1", path = "../hack" }
 java = { version = "0.0.1", path = "../java" }
 python = { version = "0.0.1", path = "../python" }
-ref-cast = "1.0.18"
+ref-cast = "1.0.26"
 rust = { version = "0.0.1", path = "../rust" }
 scope = { version = "0.0.1", path = "../scope" }
 thiserror = "2.0.18"

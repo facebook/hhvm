@@ -20,7 +20,7 @@ anyhow = "1.0.103"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 fbthrift = { version = "0.0.1", path = "../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-ref-cast = "1.0.18"
+ref-cast = "1.0.26"
 scope = { version = "0.0.1", path = "../scope" }
 thiserror = "2.0.18"
 

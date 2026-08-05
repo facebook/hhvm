@@ -1763,7 +1763,16 @@ where
                 }
             }
         };
-        let name = self.require_variable();
+        // A variadic named parameter carries no name, e.g. `named arraykey...`.
+        let name = if !named.is_missing()
+            && !ellipsis.is_missing()
+            && self.peek_token_kind() != TokenKind::Variable
+        {
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        } else {
+            self.require_variable()
+        };
         let default = self.parse_simple_initializer_opt();
         let parameter_end = self.pos();
         let parameter_end_token = self.sc_mut().make_missing(parameter_end);

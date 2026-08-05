@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bee71e2a85d9d13295e7c2ab8c6c9dc6>>
+// @generated SignedSource<<202cd448177983274a6d0b347936ab02>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -288,7 +288,7 @@ pub struct GlobalOptions {
     /// `(function(named int...): void)`
     pub tco_named_variadic_type: bool,
     /// Allow variadic named parameters on function definitions, e.g.
-    /// `function f(named int ...$xs): void {}`
+    /// `function f(named int...): void {}`
     pub tco_variadic_named_parameters: bool,
     pub tco_global_access_check_enabled: bool,
     /// Ignores unsafe_cast and retains the original type of the expression

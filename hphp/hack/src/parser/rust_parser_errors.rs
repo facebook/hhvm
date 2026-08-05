@@ -519,11 +519,7 @@ fn misplaced_variadic_param<'a>(params: S<'a>) -> Option<S<'a>> {
                 // If later_param is NOT named, then variadic is misplaced
                 let is_named = match &later_param.children {
                     ClosureParameterTypeSpecifier(x) => !x.named.is_missing(),
-                    ParameterDeclaration(_) => {
-                        // For function declarations, we don't have named variadic support yet,
-                        // so treat all params as unnamed for this check
-                        false
-                    }
+                    ParameterDeclaration(x) => !x.named.is_missing(),
                     _ => false,
                 };
                 if !is_named {
@@ -536,6 +532,23 @@ fn misplaced_variadic_param<'a>(params: S<'a>) -> Option<S<'a>> {
     }
     None
 }
+// A variadic `named` parameter collects arguments nothing can refer to, so it
+// has no name. Return the name of any that was given one.
+fn variadic_named_param_with_name<'a>(params: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_no_separators(params).find_map(|param| {
+        let (named, ellipsis, name) = match &param.children {
+            ParameterDeclaration(x) => (&x.named, &x.ellipsis, &x.name),
+            ClosureParameterTypeSpecifier(x) => (&x.named, &x.ellipsis, &x.name),
+            _ => return None,
+        };
+        if !named.is_missing() && ellipsis.is_ellipsis() && !name.is_missing() {
+            Some(name)
+        } else {
+            None
+        }
+    })
+}
+
 fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_splat_parameter_declaration, param)
 }
@@ -2381,6 +2394,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.produce_error_from_check(ends_with_variadic_comma, params, || errors::error2022);
         self.produce_error_from_check(misplaced_variadic_param, params, || errors::error2021);
         self.produce_error_from_check(misplaced_splat_param, params, || errors::error2081);
+        self.produce_error_from_check(variadic_named_param_with_name, params, || {
+            errors::variadic_named_param_with_name
+        });
 
         self.produce_error_from_check(variadic_param_with_default_value, params, || {
             errors::error2065

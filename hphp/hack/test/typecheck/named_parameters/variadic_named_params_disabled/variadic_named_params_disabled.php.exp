@@ -1,6 +1,16 @@
-ERROR: File "variadic_named_params_disabled.php", line 6, characters 43-45:
-Variadic named parameters (e.g. `named int ...$xs`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 8, characters 45-49:
-Variadic named parameters (e.g. `named int ...$xs`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 12, characters 35-40:
-Variadic named parameters (e.g. `named int ...$xs`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 6, characters 44-46:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 8, characters 41-43:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 11, characters 40-42:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 12, characters 48-50:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 16, characters 32-34:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 20, characters 31-33:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 21, characters 26-28:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+ERROR: File "variadic_named_params_disabled.php", line 22, characters 24-26:
+Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])

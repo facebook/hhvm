@@ -16,7 +16,7 @@
 
 // OK: identical named variadic.
 function take1((function(named int...): void) $_): void {}
-function f1(named int ...$xs): void {}
+function f1(named int...): void {}
 function test1(): void {
   take1(f1<>);
 }
@@ -24,7 +24,7 @@ function test1(): void {
 // OK: sub has named variadic; super has no named params. Consumer sends
 // no named args; sub's variadic accepts zero.
 function take2((function(): void) $_): void {}
-function f2(named int ...$xs): void {}
+function f2(named int...): void {}
 function test2(): void {
   take2(f2<>);
 }
@@ -33,14 +33,14 @@ function test2(): void {
 // variadic absorbs them, and the element type is contravariantly
 // compatible.
 function take3((function(named int $a, named int $b): void) $_): void {}
-function f3(named int ...$xs): void {}
+function f3(named int...): void {}
 function test3(): void {
   take3(f3<>);
 }
 
 // OK: positional + named variadic on both sides.
 function take4((function(int, named string...): void) $_): void {}
-function f4(int $x, named string ...$rest): void {}
+function f4(int $x, named string...): void {}
 function test4(): void {
   take4(f4<>);
 }
@@ -48,7 +48,7 @@ function test4(): void {
 // OK: contravariance in the variadic element type — sub accepts a wider
 // type than super promises.
 function take5((function(named int...): void) $_): void {}
-function f5(named arraykey ...$xs): void {}
+function f5(named arraykey...): void {}
 function test5(): void {
   take5(f5<>);
 }
@@ -66,7 +66,7 @@ function test_err1(): void {
 // accepts named strings, super promises named ints, so a caller of the
 // super type sending an int arg would fail.
 function take_err2((function(named int...): void) $_): void {}
-function f_err2(named string ...$xs): void {}
+function f_err2(named string...): void {}
 function test_err2(): void {
   take_err2(f_err2<>);
 }
@@ -75,7 +75,7 @@ function test_err2(): void {
 // it via a variadic whose element type is string — int is not a subtype
 // of string.
 function take_err3((function(named int $x): void) $_): void {}
-function f_err3(named string ...$xs): void {}
+function f_err3(named string...): void {}
 function test_err3(): void {
   take_err3(f_err3<>);
 }

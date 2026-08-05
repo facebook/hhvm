@@ -655,6 +655,10 @@ pub const named_param_missing_name: Error = Cow::Borrowed(
     "Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.",
 );
 
+pub const variadic_named_param_with_name: Error = Cow::Borrowed(
+    "A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`.",
+);
+
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 
 pub fn not_allowed_in_write(what: &str) -> Error {

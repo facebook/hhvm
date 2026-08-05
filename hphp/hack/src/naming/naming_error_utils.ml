@@ -374,7 +374,7 @@ let named_variadic_type_disallowed pos =
 let variadic_named_parameter_disallowed pos =
   User_diagnostic.make_err
     Error_code.(to_enum VariadicNamedParameterDisallowed)
-    (pos, "Variadic named parameters (e.g. `named int ...$xs`) are not enabled.")
+    (pos, "Variadic named parameters (e.g. `named int...`) are not enabled.")
     []
 
 let primitive_top_level pos =

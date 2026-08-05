@@ -1030,18 +1030,24 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env pre_ellipsis;
           when_present pre_ellipsis space;
           t env param_type;
-          (if
-           Syntax.is_missing visibility
-           && Syntax.is_missing callconv
-           && Syntax.is_missing param_type
-          then begin
-            Concat [t env ellipsis; t env name]
-          end else begin
-            Concat
-              [
-                Space; SplitWith Cost.Moderate; Nest [t env ellipsis; t env name];
-              ]
-          end);
+          (* A variadic named parameter has no name, e.g. `named arraykey...` *)
+          (if Syntax.is_missing name then
+            t env ellipsis
+          else
+            let no_prefix =
+              Syntax.is_missing visibility
+              && Syntax.is_missing callconv
+              && Syntax.is_missing param_type
+            in
+            if no_prefix then
+              Concat [t env ellipsis; t env name]
+            else
+              Concat
+                [
+                  Space;
+                  SplitWith Cost.Moderate;
+                  Nest [t env ellipsis; t env name];
+                ]);
           t env default;
         ]
     | Syntax.FileAttributeSpecification

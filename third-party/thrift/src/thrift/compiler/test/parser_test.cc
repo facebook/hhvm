@@ -17,6 +17,7 @@
 #include <thrift/compiler/parse/parse_ast.h>
 
 #include <optional>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -40,6 +41,29 @@ TEST(ParserTest, type_resolution) {
 
   // Programs must be non-null even in case of an error.
   EXPECT_TRUE(programs != nullptr);
+}
+
+TEST(ParserTest, missing_field_ids) {
+  const auto expect_missing_id = [](std::string_view source) {
+    auto source_mgr = source_manager();
+    source_mgr.add_virtual_file("test.thrift", source);
+    auto messages = std::vector<std::string>();
+    auto diags = diagnostics_engine(
+        source_mgr,
+        [&messages](const diagnostic& d) { messages.push_back(d.message()); });
+
+    parse_ast(source_mgr, diags, "test.thrift", {});
+    EXPECT_TRUE(diags.has_errors());
+    ASSERT_FALSE(messages.empty());
+    EXPECT_EQ(messages[0], "expected integer");
+  };
+
+  expect_missing_id("struct Struct { i32 field; }");
+  expect_missing_id("service Service { void method(i32 param); }");
+  expect_missing_id(R"(
+    exception Error {}
+    service Service { void method() throws (Error error); }
+  )");
 }
 
 TEST(ParserTest, missing_includes) {

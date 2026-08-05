@@ -245,7 +245,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_16
    │  │     │  │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  │  ├─ begin (offset): 125
-   │  │     │  │  │  │  │  ╰─ end (offset): 211
+   │  │     │  │  │  │  │  ╰─ end (offset): 217
    │  │     │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │  │  │  ├─ name: MyService
    │  │     │  │  │  ├─ scoped_name: ParseAndDebugPrint.MyService
@@ -331,7 +331,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │  ├─ (base) [t_node] @0xNORMALIZED_20
    │  │     │        │  │  ├─ src_range [source_range]
    │  │     │        │  │  │  ├─ begin (offset): 164
-   │  │     │        │  │  │  ╰─ end (offset): 209
+   │  │     │        │  │  │  ╰─ end (offset): 215
    │  │     │        │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │        │  ├─ name: func2
    │  │     │        │  ├─ scoped_name: ParseAndDebugPrint.func2
@@ -383,7 +383,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │           │  ├─ (base) [t_node] @0xNORMALIZED_22
    │  │     │        │           │  │  ├─ src_range [source_range]
    │  │     │        │           │  │  │  ├─ begin (offset): 174
-   │  │     │        │           │  │  │  ╰─ end (offset): 181
+   │  │     │        │           │  │  │  ╰─ end (offset): 184
    │  │     │        │           │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │        │           │  ├─ name: foo
    │  │     │        │           │  ├─ scoped_name: foo
@@ -396,17 +396,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │           │  │  ├─ begin (offset): 0
    │  │     │        │           │  │  ╰─ end (offset): 0
    │  │     │        │           │  ╰─ name_range [source_range]
-   │  │     │        │           │     ├─ begin (offset): 178
-   │  │     │        │           │     ╰─ end (offset): 181
+   │  │     │        │           │     ├─ begin (offset): 181
+   │  │     │        │           │     ╰─ end (offset): 184
    │  │     │        │           ├─ qualifier: 0
-   │  │     │        │           ├─ id: -1
-   │  │     │        │           ├─ explicit_id: <absent>
+   │  │     │        │           ├─ id: 1
    │  │     │        │           ├─ type [t_type_ref]
    │  │     │        │           │  ├─ empty? false
    │  │     │        │           │  ├─ resolved? true
    │  │     │        │           │  ├─ src_range [source_range]
-   │  │     │        │           │  │  ├─ begin (offset): 174
-   │  │     │        │           │  │  ╰─ end (offset): 177
+   │  │     │        │           │  │  ├─ begin (offset): 177
+   │  │     │        │           │  │  ╰─ end (offset): 180
    │  │     │        │           │  ╰─ type: [t_type*] 0xNORMALIZED_11
    │  │     │        │           │     ╰─ full_name: ParseAndDebugPrint.Foo
    │  │     │        │           ├─ is_injected? false
@@ -439,8 +438,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │           ├─ (base) [t_named] @0xNORMALIZED_24
    │  │     │        │           │  ├─ (base) [t_node] @0xNORMALIZED_24
    │  │     │        │           │  │  ├─ src_range [source_range]
-   │  │     │        │           │  │  │  ├─ begin (offset): 191
-   │  │     │        │           │  │  │  ╰─ end (offset): 207
+   │  │     │        │           │  │  │  ├─ begin (offset): 194
+   │  │     │        │           │  │  │  ╰─ end (offset): 213
    │  │     │        │           │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │        │           │  ├─ name: ex
    │  │     │        │           │  ├─ scoped_name: ex
@@ -453,17 +452,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │           │  │  ├─ begin (offset): 0
    │  │     │        │           │  │  ╰─ end (offset): 0
    │  │     │        │           │  ╰─ name_range [source_range]
-   │  │     │        │           │     ├─ begin (offset): 205
-   │  │     │        │           │     ╰─ end (offset): 207
+   │  │     │        │           │     ├─ begin (offset): 211
+   │  │     │        │           │     ╰─ end (offset): 213
    │  │     │        │           ├─ qualifier: 0
-   │  │     │        │           ├─ id: -1
-   │  │     │        │           ├─ explicit_id: <absent>
+   │  │     │        │           ├─ id: 1
    │  │     │        │           ├─ type [t_type_ref]
    │  │     │        │           │  ├─ empty? false
    │  │     │        │           │  ├─ resolved? true
    │  │     │        │           │  ├─ src_range [source_range]
-   │  │     │        │           │  │  ├─ begin (offset): 191
-   │  │     │        │           │  │  ╰─ end (offset): 204
+   │  │     │        │           │  │  ├─ begin (offset): 197
+   │  │     │        │           │  │  ╰─ end (offset): 210
    │  │     │        │           │  ╰─ type: [t_type*] 0xNORMALIZED_15
    │  │     │        │           │     ╰─ full_name: ParseAndDebugPrint.TestException
    │  │     │        │           ├─ is_injected? false
@@ -1095,7 +1093,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │     │  │     ╰─ end (offset): 2118
    │  │  │     │  ├─ qualifier: 0
    │  │  │     │  ├─ id: 1
-   │  │  │     │  ├─ explicit_id: 1
    │  │  │     │  ├─ type [t_type_ref]
    │  │  │     │  │  ├─ empty? false
    │  │  │     │  │  ├─ resolved? true
@@ -1128,7 +1125,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │     ╰─ end (offset): 2458
    │  │  │        ├─ qualifier: 0
    │  │  │        ├─ id: 2
-   │  │  │        ├─ explicit_id: 2
    │  │  │        ├─ type [t_type_ref]
    │  │  │        │  ├─ empty? false
    │  │  │        │  ├─ resolved? true
@@ -1246,7 +1242,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │     ╰─ end (offset): 2771
    │  │  │        ├─ qualifier: 0
    │  │  │        ├─ id: 1
-   │  │  │        ├─ explicit_id: 1
    │  │  │        ├─ type [t_type_ref]
    │  │  │        │  ├─ empty? false
    │  │  │        │  ├─ resolved? true
@@ -1989,7 +1984,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │     ╰─ end (offset): 7146
    │  │  │        ├─ qualifier: 0
    │  │  │        ├─ id: 1
-   │  │  │        ├─ explicit_id: 1
    │  │  │        ├─ type [t_type_ref]
    │  │  │        │  ├─ empty? false
    │  │  │        │  ├─ resolved? true
@@ -2077,7 +2071,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │     ╰─ end (offset): 7274
    │  │  │        ├─ qualifier: 0
    │  │  │        ├─ id: 1
-   │  │  │        ├─ explicit_id: 1
    │  │  │        ├─ type [t_type_ref]
    │  │  │        │  ├─ empty? false
    │  │  │        │  ├─ resolved? true
@@ -2220,7 +2213,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │     ╰─ end (offset): 8399
    │  │  │        ├─ qualifier: 0
    │  │  │        ├─ id: 1
-   │  │  │        ├─ explicit_id: 1
    │  │  │        ├─ type [t_type_ref]
    │  │  │        │  ├─ empty? false
    │  │  │        │  ├─ resolved? true
@@ -2923,7 +2915,6 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │           │     ╰─ end (offset): 16633
    │  │           ├─ qualifier: 0
    │  │           ├─ id: 1
-   │  │           ├─ explicit_id: 1
    │  │           ├─ type [t_type_ref]
    │  │           │  ├─ empty? false
    │  │           │  ├─ resolved? true

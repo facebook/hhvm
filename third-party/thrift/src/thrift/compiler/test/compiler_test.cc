@@ -31,7 +31,7 @@ TEST(CompilerTest, diagnostic_in_last_line) {
     package "facebook.com/thrift/test"
     struct S {
       1: i32 i;
-      # expected-error: expected type)");
+      # expected-error: expected integer)");
 }
 
 TEST(CompilerTest, absolute_line_number) {
@@ -92,8 +92,7 @@ TEST(CompilerTest, zero_as_field_id) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct Foo {
-        0: i32 field; # expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-                      # expected-error@-1: Zero value (0) not allowed as a field id for `field`
+      0: i32 field; # expected-error: Zero value (0) not allowed as a field id for `field`
       1: list<i32> other;
     }
   )");
@@ -106,8 +105,7 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
       R"(
       package "facebook.com/thrift/test"
       struct Foo {
-        0: i32 field; # expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-                      # expected-error@-1: Zero value (0) not allowed as a field id for `field`
+        0: i32 field; # expected-error: Zero value (0) not allowed as a field id for `field`
         1: list<i32> other;
       }
       )",
@@ -115,20 +113,12 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
 }
 
 TEST(CompilerTest, no_field_id) {
-  check_compile(
-      R"(
+  check_compile(R"(
     package "facebook.com/thrift/test"
-    include "thrift/annotation/thrift.thrift"
-    @thrift.Uri{value = "facebook.com/thrift/test/Experimental"}
-    struct Experimental {}
     struct Foo {
-      @Experimental
-      i32 field2; # expected-error@-1: No field id specified for `field2`
+      i32 field; # expected-error: expected integer
     }
-
-    struct Bar {
-      i32 field4; # expected-error: No field id specified for `field4`
-    })");
+  )");
 }
 
 TEST(CompilerTest, zero_as_field_id_annotation) {
@@ -137,7 +127,6 @@ TEST(CompilerTest, zero_as_field_id_annotation) {
     struct Foo {
       0: i32 field (cpp.deprecated_allow_zero_as_field_id);
         # expected-error@-1: Unstructured annotation `cpp.deprecated_allow_zero_as_field_id` is not allowed. Use a structured annotation instead.
-        # expected-warning@-2: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
 
       1: list<i32> other;
     }
@@ -149,12 +138,10 @@ TEST(CompilerTest, neg_field_ids) {
       R"(
       package "facebook.com/thrift/test"
       struct Foo {
-        i32 f1;  // auto id = -1
-          # expected-error@-1: No field id specified for `f1`
+        -1: i32 f1;
 
-        -2: i32 f2; // auto and manual id = -2
+        -2: i32 f2;
         -32: i32 f3; // min value.
-          # expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -3
 
         -33: i32 f4; // min value - 1.
           # expected-error@-1: Reserved field id (-33) cannot be used for `f4`.
@@ -162,43 +149,14 @@ TEST(CompilerTest, neg_field_ids) {
       )");
 }
 
-TEST(CompilerTest, exhausted_neg_field_ids) {
-  check_compile(
-      R"(
-      package "facebook.com/thrift/test"
-      struct Foo {
-        -32: i32 f1; // min value.
-          # expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-
-        i32 f2; // auto id = -2 or min value - 1
-          # expected-error@-1: Cannot allocate an id for `f2`. Automatic field ids are exhausted.
-      }
-      )");
-}
-
-TEST(CompilerTest, exhausted_pos_field_ids) {
-  std::string src;
-  src += "package \"facebook.com/thrift/test\"\n";
-  src += "struct Foo {\n";
-  for (int i = 0; i < 33; i++) {
-    src += "  i32 field_" + std::to_string(i) + ";\n";
-  }
-  src +=
-      "# expected-error@-1: Cannot allocate an id for `field_32`. "
-      "Automatic field ids are exhausted.\n";
-  src += "}\n";
-  check_compile(src);
-}
-
 TEST(CompilerTest, out_of_range_field_ids_overflow) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct Foo {
-      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
+      -32768: i32 f1;
       32767: i32 f2;
       32768: i32 f3; # expected-error: Integer constant 32768 outside the range of field ids ([-32768, 32767]).
         # expected-error@-1: Field id -32768 for `f3` has already been used.
-        # expected-warning@-2: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): 32767
     }
   )");
 }
@@ -207,7 +165,7 @@ TEST(CompilerTest, out_of_range_field_ids_underflow) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct Foo {
-      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
+      -32768: i32 f1;
       32767: i32 f2;
 
       -32769: i32 f3; # expected-error: Integer constant -32769 outside the range of field ids ([-32768, 32767]).

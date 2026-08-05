@@ -1215,20 +1215,6 @@ void validate_explicit_uri_value(sema_context& ctx, const t_named& node) {
   }
 }
 
-void validate_function_param_id(sema_context& ctx, const t_field& node) {
-  ctx.check(
-      node.explicit_id() == node.id(),
-      "No param id specified for `{}`",
-      node.name());
-}
-
-void validate_thrown_exception_id(sema_context& ctx, const t_field& node) {
-  ctx.check(
-      node.explicit_id() == node.id(),
-      "No throws id specified for `{}`",
-      node.name());
-}
-
 void validate_field_id_value(sema_context& ctx, const t_field& node) {
   ctx.check(
       node.id() != 0 ||
@@ -1242,14 +1228,6 @@ void validate_field_id_value(sema_context& ctx, const t_field& node) {
       "Reserved field id ({}) cannot be used for `{}`.",
       node.id(),
       node.name());
-}
-
-void validate_field_id(sema_context& ctx, const t_field& node) {
-  ctx.check(
-      node.explicit_id() == node.id(),
-      "No field id specified for `{}`",
-      node.name());
-  validate_field_id_value(ctx, node);
 }
 
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
@@ -2538,7 +2516,6 @@ ast_validator standard_validator() {
   validator.add_interaction_visitor(&validate_interaction_annotations);
 
   validator.add_thrown_exception_visitor(&validate_throws_exceptions);
-  validator.add_thrown_exception_visitor(&validate_thrown_exception_id);
   validator.add_thrown_exception_visitor(&validate_field_id_value);
   validator.add_thrown_exception_visitor(
       &detail::validate_annotation_scopes<
@@ -2561,7 +2538,7 @@ ast_validator standard_validator() {
 
   validator.add_union_visitor(&validate_union_field_attributes);
   validator.add_exception_visitor(&validate_exception_message_annotation);
-  validator.add_field_visitor(&validate_field_id);
+  validator.add_field_visitor(&validate_field_id_value);
   validator.add_field_visitor(&validate_mixin_field_attributes);
   validator.add_field_visitor(&validate_boxed_field_attributes);
   validator.add_field_visitor(&validate_field_default_value);
@@ -2603,7 +2580,6 @@ ast_validator standard_validator() {
   validator.add_function_param_visitor(
       &detail::validate_annotation_scopes<
           detail::scope_check_type::function_parameter>);
-  validator.add_function_param_visitor(&validate_function_param_id);
   validator.add_function_param_visitor(&validate_field_id_value);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);

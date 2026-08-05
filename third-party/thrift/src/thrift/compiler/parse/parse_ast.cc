@@ -319,55 +319,6 @@ class ast_builder : public parser_actions {
     program_.add_definition(std::move(definition));
   }
 
-  // DEPRECATED! Allocates a new field id using automatic numbering.
-  //
-  // Field ids are assigned starting from -1 and working their way down.
-  void allocate_field_id(t_field_id& next_id, t_field& field) {
-    if (params_.strict >= 192) {
-      diags_.error(
-          field,
-          "Implicit field ids are deprecated and not allowed with -strict");
-    }
-    if (next_id < t_field::min_id) {
-      diags_.error(
-          field,
-          "Cannot allocate an id for `{}`. Automatic field ids are exhausted.",
-          field.name());
-    }
-    field.set_implicit_id(next_id--);
-  }
-
-  void maybe_allocate_field_id(t_field_id& next_id, t_field& field) {
-    if (!field.explicit_id()) {
-      // Auto assign an id.
-      allocate_field_id(next_id, field);
-      return;
-    }
-
-    // Check the explicitly provided id.
-    if (field.id() > 0) {
-      return;
-    }
-
-    if (field.id() != next_id) {
-      // DO_BEFORE(aristidis,20250301): Remove when --ignore-non-positive-keys
-      // no longer exists.
-      diags_.warning(
-          field,
-          "Nonpositive field id ({}) differs from what would be "
-          "auto-assigned by thrift (if 'allow-neg-keys' was disabled): {}",
-          field.id(),
-          next_id);
-    }
-
-    // Skip past any negative, manually assigned ids.
-    if (field.id() < 0) {
-      // Update the next field id to be one less than the value.
-      // The field_list parsing will catch any duplicates.
-      next_id = field.id() - 1;
-    }
-  }
-
   // Creates a reference to a known type, potentally with additional
   // annotations.
   t_type_ref new_type_ref(const t_type& type, const source_range& range = {}) {
@@ -392,9 +343,7 @@ class ast_builder : public parser_actions {
   // Tries to set the given fields, reporting an error on a collision.
   void set_fields(t_structured& s, t_field_list&& fields) {
     assert(s.fields().empty());
-    t_field_id next_id = -1;
     for (auto& field : fields) {
-      maybe_allocate_field_id(next_id, *field);
       if (!s.try_append_field(field)) {
         diags_.error(
             *field,
@@ -734,16 +683,16 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_field> on_field(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      std::optional<int64_t> id,
+      int64_t id,
       t_field_qualifier qual,
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
       std::optional<comment> doc) override {
-    auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
-                       : std::optional<t_field_id>();
-    auto field =
-        std::make_unique<t_field>(type, fmt::to_string(name.str), valid_id);
+    auto field = std::make_unique<t_field>(
+        type,
+        fmt::to_string(name.str),
+        narrow_int<t_field_id>(range.begin, id, "field ids"));
     field->set_name_range(name.range());
     field->set_qualifier(qual);
     field->set_default_value(std::move(value));

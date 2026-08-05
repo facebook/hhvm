@@ -221,7 +221,7 @@ class parser_actions {
   virtual std::unique_ptr<t_field> on_field(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      std::optional<int64_t> id,
+      int64_t id,
       t_field_qualifier qual,
       t_type_ref type,
       const identifier& name,

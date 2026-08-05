@@ -17,7 +17,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
 
@@ -59,11 +58,8 @@ class t_field final : public t_named {
    * @param name - The symbolic name of the field
    * @param id  - The numeric identifier of the field
    */
-  t_field(t_type_ref type, std::string name, std::optional<t_field_id> id = {})
-      : t_named(nullptr, std::move(name)),
-        type_(type),
-        id_(id.value_or(0)),
-        explicit_id_(id) {}
+  t_field(t_type_ref type, std::string name, t_field_id id = 0)
+      : t_named(nullptr, std::move(name)), type_(type), id_(id) {}
 
   t_field(t_field&&) = delete;
   ~t_field() override;
@@ -73,11 +69,9 @@ class t_field final : public t_named {
   void set_type(t_type_ref type) { type_ = type; }
 
   t_field_id id() const { return id_; }
-  std::optional<t_field_id> explicit_id() const { return explicit_id_; }
   bool is_injected() const { return injected_; }
   void set_injected_id(t_field_id id) {
     id_ = id;
-    explicit_id_ = id;
     injected_ = true;
   }
 
@@ -89,12 +83,9 @@ class t_field final : public t_named {
   t_field_qualifier qualifier() const { return qual_; }
   void set_qualifier(t_field_qualifier qual) { qual_ = qual; }
 
-  void set_implicit_id(t_field_id id) { id_ = id; }
-
  private:
   t_type_ref type_;
   t_field_id id_;
-  std::optional<t_field_id> explicit_id_;
 
   t_field_qualifier qual_ = {};
   std::unique_ptr<t_const_value> value_;

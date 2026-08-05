@@ -185,7 +185,7 @@ exception TestException {}
 service MyService {
   void func1();
 
-  i32 func2(Foo foo) throws (TestException ex);
+  i32 func2(1: Foo foo) throws (1: TestException ex);
 }
 )");
   diagnostics_engine diagnosticsEngine =

@@ -752,12 +752,8 @@ class parser_core {
     auto range = track_range();
     auto attrs = parse_attributes();
 
-    // Parse the field id.
-    auto field_id = std::optional<int64_t>();
-    if (auto integer = try_parse_integer()) {
-      field_id = *integer;
-      expect_and_consume(':');
-    }
+    auto field_id = parse_integer();
+    expect_and_consume(':');
 
     // Parse the field qualifier.
     auto qual = t_field_qualifier::none;

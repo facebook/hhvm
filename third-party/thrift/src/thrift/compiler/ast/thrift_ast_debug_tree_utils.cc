@@ -301,12 +301,6 @@ scope& addChildForField(
 
   fieldScope.make_child("qualifier: {}", field.qualifier());
   fieldScope.make_child("id: {}", field.id());
-  std::optional<t_field_id> explicitId = field.explicit_id();
-  if (explicitId.has_value()) {
-    fieldScope.make_child("explicit_id: {}", explicitId.value());
-  } else {
-    fieldScope.make_child("explicit_id: <absent>");
-  }
   addChildForTypeRef("type", field.type(), fieldScope);
   fieldScope.make_child("is_injected? {}", field.is_injected());
   addChildForConstValuePtr("default_value", field.default_value(), fieldScope);

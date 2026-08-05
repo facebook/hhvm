@@ -366,12 +366,12 @@ TEST(FormatterTest, formatsAnnotatedDefinitions) {
           "can format union definitions",
           R"THRIFT(
       union foo {
-string bar;
+1: string bar;
             }
              ( hs.a1 =1)
     )THRIFT",
           R"THRIFT(union foo {
-  string bar;
+  1: string bar;
 } (hs.a1 = 1)
 )THRIFT",
       },
@@ -411,12 +411,12 @@ string bar;
           "can format exception definitions",
           R"THRIFT(
       exception foo {
-        string bar;
+        1: string bar;
             }
              ( hs.a1 =1)
     )THRIFT",
           R"THRIFT(exception foo {
-  string bar;
+  1: string bar;
 } (hs.a1 = 1)
 )THRIFT",
       },
@@ -456,12 +456,12 @@ const map<string, int> _map = {key1: 1, key2: 2};
           R"THRIFT(
     service s {
       void short () throws ();
-      void very_looooooooooonng_method_name (type very_loooooooooonong_parameter) throws (1: yet_extremely_loooooooooonong_type_name e);
+      void very_looooooooooonng_method_name (1: type very_loooooooooonong_parameter) throws (1: yet_extremely_loooooooooonong_type_name e);
     })THRIFT",
           R"THRIFT(service s {
   void short() throws ();
   void very_looooooooooonng_method_name(
-    type very_loooooooooonong_parameter,
+    1: type very_loooooooooonong_parameter,
   ) throws (1: yet_extremely_loooooooooonong_type_name e);
 }
 )THRIFT",
@@ -536,7 +536,7 @@ service y {
       }
       // outer fields should have semicolons
       struct b {
-        string field1,
+        1: string field1,
       }
 
     )THRIFT",
@@ -550,7 +550,7 @@ service a {
 }
 // outer fields should have semicolons
 struct b {
-  string field1;
+  1: string field1;
 }
 )THRIFT",
       },
@@ -574,19 +574,19 @@ enum SourceEnumType {
           "should append last separator only if it was going to break",
           R"THRIFT(
         service MyService {
-          void long (string long_parameter_1, string long_parameter_2,string long_parameter_3)
+          void long (1: string long_parameter_1, 2: string long_parameter_2,3: string long_parameter_3)
           void short (
-            string s,
+            1: string s,
           )
         }
 )THRIFT",
           R"THRIFT(service MyService {
   void long(
-    string long_parameter_1,
-    string long_parameter_2,
-    string long_parameter_3,
+    1: string long_parameter_1,
+    2: string long_parameter_2,
+    3: string long_parameter_3,
   );
-  void short(string s);
+  void short(1: string s);
 }
 )THRIFT",
       },

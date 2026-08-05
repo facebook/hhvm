@@ -329,32 +329,6 @@ TEST(StandardValidatorTest, ErrorInvalidPackageAndUris) {
   )");
 }
 
-TEST(StandardValidatorTest, ValidateFunctionParamId) {
-  check_compile(R"(
-    package "facebook.com/thrift/test"
-
-    service MyService {
-      // Function with explicit param ids - no error
-      void explicitIds(1: i32 a, 2: string b);
-
-      // Function with implicit param ids - error expected
-      void implicitIds(i32 x, string y);
-      # expected-error@-1: No param id specified for `x`
-      # expected-error@-2: No param id specified for `y`
-
-      // Mixed explicit and implicit param ids
-      void mixedIds(1: i32 a, string b, 3: bool c);
-      # expected-error@-1: No param id specified for `b`
-    }
-
-    interaction MyInteraction {
-      // Function with implicit param ids in interaction
-      void interactionMethod(i32 p);
-      # expected-error@-1: No param id specified for `p`
-    }
-  )");
-}
-
 TEST(StandardValidatorTest, ValidateFunctionParamAndThrowsIdValues) {
   check_compile(R"(
     package "facebook.com/thrift/test"
@@ -363,34 +337,16 @@ TEST(StandardValidatorTest, ValidateFunctionParamAndThrowsIdValues) {
 
     service MyService {
       void zeroParam(0: i32 value);
-      # expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-      # expected-error@-2: Zero value (0) not allowed as a field id for `value`
+      # expected-error@-1: Zero value (0) not allowed as a field id for `value`
 
       void reservedParam(-33: i32 value);
-      # expected-warning@-1: Nonpositive field id (-33) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-      # expected-error@-2: Reserved field id (-33) cannot be used for `value`.
+      # expected-error@-1: Reserved field id (-33) cannot be used for `value`.
 
       void zeroThrows() throws (0: Error error);
-      # expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-      # expected-error@-2: Zero value (0) not allowed as a field id for `error`
+      # expected-error@-1: Zero value (0) not allowed as a field id for `error`
 
       void reservedThrows() throws (-33: Error error);
-      # expected-warning@-1: Nonpositive field id (-33) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
-      # expected-error@-2: Reserved field id (-33) cannot be used for `error`.
-    }
-  )");
-}
-
-TEST(StandardValidatorTest, ValidateThrownExceptionId) {
-  check_compile(R"(
-    package "facebook.com/thrift/test"
-
-    exception Error {}
-
-    service MyService {
-      void explicitId() throws (1: Error error);
-      void implicitId() throws (Error error);
-      # expected-error@-1: No throws id specified for `error`
+      # expected-error@-1: Reserved field id (-33) cannot be used for `error`.
     }
   )");
 }

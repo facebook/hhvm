@@ -10,6 +10,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <boost/any.hpp>
@@ -84,7 +85,8 @@ class McrouterOptionsBase {
       const std::unordered_map<std::string, std::string>& new_opts);
 
   virtual std::vector<McrouterOptionMismatch> compare(
-      const std::unordered_map<std::string, std::string>& new_opts) const;
+      const std::unordered_map<std::string, std::string>& new_opts,
+      const std::unordered_set<std::string>& ignored_opts = {}) const;
 
   virtual ~McrouterOptionsBase() {}
 

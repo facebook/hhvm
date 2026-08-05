@@ -270,12 +270,16 @@ vector<McrouterOptionError> McrouterOptionsBase::updateFromDict(
 }
 
 vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
-    const std::unordered_map<std::string, std::string>& new_opts) const {
+    const std::unordered_map<std::string, std::string>& new_opts,
+    const std::unordered_set<std::string>& ignored_opts) const {
   vector<McrouterOptionMismatch> errors;
-  forEach([&errors, &new_opts](
+  forEach([&errors, &new_opts, &ignored_opts](
               const string& name,
               McrouterOptionData::Type type,
               const boost::any& value) {
+    if (ignored_opts.contains(name)) {
+      return;
+    }
     auto it = new_opts.find(name);
     if (it == new_opts.end()) {
       McrouterOptionMismatch e;

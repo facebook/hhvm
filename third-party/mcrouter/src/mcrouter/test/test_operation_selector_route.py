@@ -6,6 +6,7 @@
 
 # pyre-unsafe
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -19,17 +20,24 @@ class TestOperationSelectorRoute(McrouterTestCase):
         self.memcached_set = self.add_server(MockMemcached())
         self.memcached_delete = self.add_server(MockMemcached())
 
-        self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
+        mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        )
+        self.client = mcrouter.get_thrift_client()
 
     def test_get(self):
         self.assertTrue(self.memcached_get.set("key_get", "val_get"))
-        self.assertEqual("val_get", self.mcrouter.get("key_get"))
+        reply = self.client.mcGet(b"key_get")
+        self.assertEqual(Result.FOUND, reply.result)
+        self.assertEqual(b"val_get", bytes(reply.value))
 
     def test_set(self):
-        self.assertTrue(self.mcrouter.set("key_set", "val_set"))
+        reply = self.client.mcSet(b"key_set", b"val_set")
+        self.assertEqual(Result.STORED, reply.result)
         self.assertEqual("val_set", self.memcached_set.get("key_set"))
 
     def test_delete(self):
         self.assertTrue(self.memcached_delete.set("key_del", "val_del"))
-        self.assertTrue(self.mcrouter.delete("key_del"))
+        reply = self.client.mcDelete(b"key_del")
+        self.assertEqual(Result.DELETED, reply.result)
         self.assertFalse(self.memcached_delete.get("key_del"))

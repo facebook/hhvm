@@ -6,6 +6,7 @@
 
 # pyre-unsafe
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -25,14 +26,19 @@ class TestBucketizedPoolRoute(McrouterTestCase):
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
         extra_args.extend(additional_args)
-        return self.add_mcrouter(self.config, extra_args=extra_args)
+        return self.add_mcrouter(
+            self.config, extra_args=extra_args, enable_thrift=True
+        ).get_thrift_client()
 
     def test_bucketized_pool_route(self):
         mcr = self.get_mcrouter()
         key = "key1"
         val = "value1"
-        self.assertTrue(mcr.set(key, val))
-        self.assertEqual(mcr.get(key), val)
+        set_reply = mcr.mcSet(key.encode(), val.encode())
+        self.assertEqual(Result.STORED, set_reply.result)
+        get_reply = mcr.mcGet(key.encode())
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(val.encode(), bytes(get_reply.value))
         # todo key1 maps to bucketId 808 and server #5 with bucketization
         self.assertFalse(self.mc1.get(key))
         self.assertFalse(self.mc2.get(key))
@@ -56,14 +62,19 @@ class TestNonBucketizedPoolRoute(McrouterTestCase):
     def get_mcrouter(self, additional_args=()):
         extra_args = self.extra_args[:]
         extra_args.extend(additional_args)
-        return self.add_mcrouter(self.config, extra_args=extra_args)
+        return self.add_mcrouter(
+            self.config, extra_args=extra_args, enable_thrift=True
+        ).get_thrift_client()
 
     def test_bucketized_pool_route(self):
         mcr = self.get_mcrouter()
         key = "key1"
         val = "value1"
-        self.assertTrue(mcr.set(key, val))
-        self.assertEqual(mcr.get(key), val)
+        set_reply = mcr.mcSet(key.encode(), val.encode())
+        self.assertEqual(Result.STORED, set_reply.result)
+        get_reply = mcr.mcGet(key.encode())
+        self.assertEqual(Result.FOUND, get_reply.result)
+        self.assertEqual(val.encode(), bytes(get_reply.value))
         # key1 maps to server #3 without bucketization
         self.assertFalse(self.mc1.get(key))
         self.assertFalse(self.mc2.get(key))

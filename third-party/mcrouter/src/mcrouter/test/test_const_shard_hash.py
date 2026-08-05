@@ -6,6 +6,7 @@
 
 # pyre-unsafe
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -17,15 +18,19 @@ class TestConstShardHash(McrouterTestCase):
     def test_const_shard_hash(self):
         mc1 = self.add_server(MockMemcached())
         mc2 = self.add_server(MockMemcached())
-        mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
+        mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        ).get_thrift_client()
 
         key = "foo:0:test"
         value = "value0"
-        mcrouter.set(key, value)
+        reply = mcrouter.mcSet(key.encode(), value.encode())
+        self.assertEqual(Result.STORED, reply.result)
         self.assertEqual(mc1.get(key), value)
         self.assertIsNone(mc2.get(key))
         key = "foo:1:test"
         value = "value1"
-        mcrouter.set(key, value)
+        reply = mcrouter.mcSet(key.encode(), value.encode())
+        self.assertEqual(Result.STORED, reply.result)
         self.assertIsNone(mc1.get(key))
         self.assertEqual(mc2.get(key), value)

@@ -6,6 +6,7 @@
 
 # pyre-unsafe
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
@@ -24,8 +25,11 @@ class TestSendToAllHosts(McrouterTestCase):
         self.cacheB2.set("ccw", "cacheB2")
 
     def test_regular_request(self):
-        mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
-        mcrouter.set("test", "val")
+        mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        ).get_thrift_client()
+        reply = mcrouter.mcSet(b"test", b"val")
+        self.assertEqual(Result.STORED, reply.result)
         self.assertEqual(self.cacheA.get("test"), "val")
         self.assertIsNone(self.cacheB1.get("test"))
         self.assertIsNone(self.cacheB2.get("test"))
@@ -33,8 +37,11 @@ class TestSendToAllHosts(McrouterTestCase):
     def test_set(self):
         self.assertIsNone(self.cacheB1.get("aaa"))
         self.assertIsNone(self.cacheB2.get("aaa"))
-        mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
-        mcrouter.set("aaa", "val")
+        mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        ).get_thrift_client()
+        reply = mcrouter.mcSet(b"aaa", b"val")
+        self.assertEqual(Result.STORED, reply.result)
         self.assertEqual(self.cacheA.get("aaa"), "val")
         self.assertEqual(self.cacheB1.get("aaa"), "val")
         self.assertEqual(self.cacheB2.get("aaa"), "val")
@@ -43,8 +50,11 @@ class TestSendToAllHosts(McrouterTestCase):
         self.assertTrue(self.cacheA.set("aaa", "val"))
         self.assertTrue(self.cacheB1.set("aaa", "val"))
         self.assertTrue(self.cacheB2.set("aaa", "val"))
-        mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
-        mcrouter.delete("aaa")
+        mcrouter = self.add_mcrouter(
+            self.config, extra_args=self.extra_args, enable_thrift=True
+        ).get_thrift_client()
+        reply = mcrouter.mcDelete(b"aaa")
+        self.assertEqual(Result.DELETED, reply.result)
         self.assertIsNone(self.cacheA.get("aaa"))
         self.assertIsNone(self.cacheB1.get("aaa"))
         self.assertIsNone(self.cacheB2.get("aaa"))

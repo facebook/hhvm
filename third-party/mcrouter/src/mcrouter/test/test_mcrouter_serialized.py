@@ -254,10 +254,11 @@ class TestFailoverWithLimit(McrouterTestCase):
         self.assertTrue(mcr.set("key", "value.gut"))
         for _ in range(11):
             self.assertEqual(mcr.get("key"), "value.gut")
-        # now every 5th request should succeed
+        # now every 5th request should succeed; rate-limited requests
+        # return the error that triggered failover
         for _ in range(10):
             for _ in range(4):
-                self.assertIsNone(mcr.get("key"))
+                self.assertEqual(mcr.get("key"), "SERVER_ERROR 307 busy")
             self.assertEqual(mcr.get("key"), "value.gut")
 
 
@@ -281,10 +282,11 @@ class TestFailoverWithLimitWithTKO(McrouterTestCase):
         self.assertTrue(mcr.set("key", "value.gut"))
         for _ in range(11):
             self.assertEqual(mcr.get("key"), "value.gut")
-        # now every 5th request should succeed
+        # now every 5th request should succeed; rate-limited requests
+        # return the error that triggered failover
         for _ in range(10):
             for _ in range(4):
-                self.assertIsNone(mcr.get("key"))
+                self.assertEqual(mcr.get("key"), "SERVER_ERROR 307 busy")
             self.assertEqual(mcr.get("key"), "value.gut")
 
 
@@ -311,10 +313,13 @@ class TestFailoverWithLimitWithErrors(McrouterTestCase):
         for _ in range(2):
             self.assertEqual(mcr.get("key"), "value.gut")
 
-        # all subsequest requests would fail until timeouts become
-        # as TKOs
+        # Failover remains rate-limited until the timeout destinations become
+        # TKOs, returning the error that triggered the denied failover.
         for _ in range(18):
-            self.assertIsNone(mcr.get("key"))
+            self.assertIn(
+                mcr.get("key"),
+                ("SERVER_ERROR 307 busy", "SERVER_ERROR Reply timeout"),
+            )
 
         # From here it should behave like the testcase above because
         # all destinations are declared TKO and ratelimiting is not
@@ -322,7 +327,7 @@ class TestFailoverWithLimitWithErrors(McrouterTestCase):
         for _ in range(10):
             self.assertEqual(mcr.get("key"), "value.gut")
             for _ in range(4):
-                self.assertIsNone(mcr.get("key"))
+                self.assertEqual(mcr.get("key"), "SERVER_ERROR 307 busy")
 
 
 class TestFailoverWithLimitWithTKOAndErrors(McrouterTestCase):
@@ -346,9 +351,9 @@ class TestFailoverWithLimitWithTKOAndErrors(McrouterTestCase):
         # operations would succeed before rate limiting kicks in)
         for _ in range(4):
             self.assertEqual(mcr.get("key"), "value.gut")
-        self.assertIsNone(mcr.get("key"))
+        self.assertEqual(mcr.get("key"), "SERVER_ERROR 307 busy")
         # All dests are TKO now, so now every 5th request should succeed
         for _ in range(10):
             self.assertEqual(mcr.get("key"), "value.gut")
             for _ in range(4):
-                self.assertIsNone(mcr.get("key"))
+                self.assertEqual(mcr.get("key"), "SERVER_ERROR 307 busy")

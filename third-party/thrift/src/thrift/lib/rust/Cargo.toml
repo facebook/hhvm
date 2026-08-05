@@ -11,7 +11,7 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.103"
-async-trait = "0.1.86"
+async-trait = "0.1.91"
 base64 = { version = "0.22.1", features = ["alloc"] }
 bufsize = "1.0.10"
 bytes = { version = "1.12.1", features = ["serde"] }

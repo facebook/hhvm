@@ -950,7 +950,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       credVec.emplace_back(
           Extension{
               ExtensionType::delegated_credential,
-              folly::IOBuf::copyBuffer(std::move(credData))});
+              folly::IOBuf::copyBuffer(credData)});
 
       try {
         Error err;

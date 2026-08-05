@@ -200,6 +200,14 @@ class MCProcess(ProcessBase):
     def getport(self):
         return self.port
 
+    def get_thrift_client(self):
+        # None (and thus raises) unless the process was started with a Thrift
+        # listener AND McrouterGlobals.useThriftClient() is true; requesting a
+        # listener alone is not sufficient. See __init__.
+        if self.thrift_client is None:
+            raise RuntimeError("This process has no Thrift test listener")
+        return self.thrift_client
+
     def getsslport(self):
         return None
 
@@ -262,7 +270,7 @@ class MCProcess(ProcessBase):
             while True:
                 try:
                     res = self.thrift_client.mcVersion()
-                    if res == Result.OK:
+                    if res.result == Result.OK:
                         return
                 except Exception as e:
                     print(f"Error on sending mcVersion in Thrift: {e}")
@@ -787,7 +795,7 @@ def create_listen_socket():
 
 
 class McrouterBase(MCProcess):
-    def __init__(self, args, port=None, base_dir=None):
+    def __init__(self, args, port=None, base_dir=None, enable_thrift=False):
         if base_dir is None:
             base_dir = BaseDirectory("mcrouter")
 
@@ -818,6 +826,8 @@ class McrouterBase(MCProcess):
         )
 
         listen_sock = None
+        thrift_sock = None
+        thrift_port = None
         pass_fds = []
         if port is None:
             listen_sock = create_listen_socket()
@@ -828,14 +838,31 @@ class McrouterBase(MCProcess):
         else:
             args.extend(["-p", str(port)])
 
+        if enable_thrift:
+            thrift_sock = create_listen_socket()
+            thrift_port = thrift_sock.getsockname()[1]
+            thrift_sock_fd = thrift_sock.fileno()
+            args.extend(
+                ["--use-thrift", "--thrift-listen-sock-fd", str(thrift_sock_fd)]
+            )
+            pass_fds.append(thrift_sock_fd)
+
         args = McrouterGlobals.preprocessArgs(args)
 
         MCProcess.__init__(
-            self, args, port, base_dir, junk_fill=True, pass_fds=pass_fds
+            self,
+            args,
+            port,
+            base_dir,
+            junk_fill=True,
+            pass_fds=pass_fds,
+            thriftPort=thrift_port,
         )
 
         if listen_sock is not None:
             listen_sock.close()
+        if thrift_sock is not None:
+            thrift_sock.close()
 
     def get_async_spool_dir(self):
         return self.async_spool
@@ -858,6 +885,7 @@ class Mcrouter(McrouterBase):
         replace_map=None,
         flavor=None,
         sr_mock_smc_config=None,
+        enable_thrift=False,
     ):
         if base_dir is None:
             base_dir = BaseDirectory("mcrouter")
@@ -930,7 +958,7 @@ class Mcrouter(McrouterBase):
             self.sr_mock_smc_config = "file:" + sr_mock_smc_config
             args.extend(["--debug-sr-host-list", self.sr_mock_smc_config])
 
-        McrouterBase.__init__(self, args, port, base_dir)
+        McrouterBase.__init__(self, args, port, base_dir, enable_thrift=enable_thrift)
 
     def change_config(self, new_config_path):
         shutil.copyfile(new_config_path, self.config)

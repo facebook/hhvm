@@ -84,6 +84,7 @@ class McrouterTestCase(unittest.TestCase):
         flavor=None,
         sr_mock_smc_config=None,
         base_dir=None,
+        enable_thrift=False,
     ):
         self.ensureClassVariables()
         substitute_ports = None
@@ -102,6 +103,7 @@ class McrouterTestCase(unittest.TestCase):
             flavor=flavor,
             sr_mock_smc_config=sr_mock_smc_config,
             base_dir=base_dir,
+            enable_thrift=enable_thrift,
         )
         mcrouter.ensure_connected()
 

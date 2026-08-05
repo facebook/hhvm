@@ -118,6 +118,9 @@ extern bool serverAcceptedUpgrade(const std::string& clientUpgrade,
 
   for (const auto& cp : clientProtocols) {
     auto cpt = folly::trimWhitespace(cp);
+    if (cpt.empty()) {
+      continue;
+    }
     if (std::any_of(serverProtocols.begin(),
                     serverProtocols.end(),
                     [cpt](const auto& sp) {

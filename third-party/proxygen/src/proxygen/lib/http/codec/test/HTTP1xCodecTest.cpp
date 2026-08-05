@@ -1278,6 +1278,7 @@ TEST(HTTP1xCodecTest, WebsocketUpgradeDuplicate) {
 
 TEST(HTTP1xCodecTest, UpgradeAccepted) {
   EXPECT_TRUE(serverAcceptedUpgrade("  Websocket,,,", ",,,websocket  "));
+  EXPECT_FALSE(serverAcceptedUpgrade("h2c, ,websocket", " ,not-advertised"));
   EXPECT_FALSE(serverAcceptedUpgrade(",test1,test2,", ",,Test3,Test4"));
   EXPECT_FALSE(serverAcceptedUpgrade("websocket", ""));
   EXPECT_FALSE(serverAcceptedUpgrade("", "websocket"));

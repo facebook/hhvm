@@ -29,7 +29,7 @@ options = { version = "0.0.0", path = "../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
-serde = { version = "1.0.219", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
 sha1 = "0.10.7"
 thiserror = "2.0.18"
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }

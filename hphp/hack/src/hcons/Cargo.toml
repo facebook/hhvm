@@ -14,4 +14,4 @@ path = "lib.rs"
 dashmap = { version = "6.2.1", features = ["rayon", "serde"] }
 fnv = "1.0"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-serde = { version = "1.0.219", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }

@@ -16,5 +16,5 @@ hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_strin
 itertools = "0.15.0"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-serde = { version = "1.0.219", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

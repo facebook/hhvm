@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/program-functions.h"
 
 #include <atomic>
+#include <exception>
 
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
@@ -629,6 +630,12 @@ static void handle_exception_helper(bool& ret,
     } else {
       Logger::Error(errorMsg);
     }
+  } catch (const std::exception& e) {
+    ret = false;
+    error = true;
+    errorMsg = "C++ exception: ";
+    errorMsg += e.what();
+    Logger::Error(errorMsg);
   } catch (...) {
     ret = false;
     error = true;

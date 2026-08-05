@@ -23,7 +23,6 @@
 #include <folly/executors/MeteredExecutor.h>
 #include <folly/hash/Hash.h>
 
-#include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 
 namespace apache::thrift::concurrency {

@@ -129,7 +129,7 @@ void ASimpleStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_boolField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_boolField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_boolField);
   }
  this->__isset.set(0, true);
 
@@ -258,7 +258,7 @@ void ASimpleStructNoexcept::readNoXfer(Protocol_* iprot) {
   }
 _readField_boolField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_boolField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_boolField);
   }
  this->__isset.set(0, true);
 
@@ -387,7 +387,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_MyBoolField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_MyBoolField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_MyBoolField);
   }
  this->__isset.set(0, true);
 
@@ -400,7 +400,7 @@ _readField_MyBoolField:
   }
 _readField_MyIntField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_MyIntField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_MyIntField);
   }
  this->__isset.set(1, true);
 
@@ -413,7 +413,7 @@ _readField_MyIntField:
   }
 _readField_MyStringField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_MyStringField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_MyStringField);
   }
  this->__isset.set(2, true);
 
@@ -426,7 +426,7 @@ _readField_MyStringField:
   }
 _readField_MyStringField2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_MyStringField2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_MyStringField2);
   }
  this->__isset.set(3, true);
 
@@ -439,7 +439,7 @@ _readField_MyStringField2:
   }
 _readField_MyBinaryField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, this->__fbthrift_field_MyBinaryField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, this->__fbthrift_field_MyBinaryField);
   }
  this->__isset.set(4, true);
 
@@ -452,7 +452,7 @@ _readField_MyBinaryField:
   }
 _readField_MyBinaryField2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, this->__fbthrift_field_MyBinaryField2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, this->__fbthrift_field_MyBinaryField2);
   }
  this->__isset.set(5, true);
 
@@ -465,7 +465,7 @@ _readField_MyBinaryField2:
   }
 _readField_MyBinaryField3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, this->__fbthrift_field_MyBinaryField3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, this->__fbthrift_field_MyBinaryField3);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -479,7 +479,7 @@ _readField_MyBinaryListField4:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_MyBinaryListField4 = ::std::vector<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>::readWithContext(*iprot, this->__fbthrift_field_MyBinaryListField4, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>::read(*iprot, this->__fbthrift_field_MyBinaryListField4);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -495,7 +495,7 @@ _readField_MyMapEnumAndInt:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_MyMapEnumAndInt = ::std::map<::some::valid::ns::MyEnumA, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::enumeration, ::apache::thrift::type_class::string>, ::std::map<::some::valid::ns::MyEnumA, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>, ::apache::thrift::type::string_t>>::readWithContext(*iprot, this->__fbthrift_field_MyMapEnumAndInt, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::enumeration, ::apache::thrift::type_class::string>, ::std::map<::some::valid::ns::MyEnumA, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>, ::apache::thrift::type::string_t>>::read(*iprot, this->__fbthrift_field_MyMapEnumAndInt);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);
@@ -886,7 +886,7 @@ void SimpleUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I64)) {
           this->intValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, value_.intValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, value_.intValue);
         } else {
           _readState.skip(iprot);
         }
@@ -896,7 +896,7 @@ void SimpleUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRING)) {
           this->stringValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, value_.stringValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, value_.stringValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1033,7 +1033,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I64)) {
           this->intValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, value_.intValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, value_.intValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1043,7 +1043,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I64)) {
           this->opt_intValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, value_.opt_intValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, value_.opt_intValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1053,7 +1053,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRING)) {
           this->stringValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, value_.stringValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, value_.stringValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1063,7 +1063,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRING)) {
           this->opt_stringValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, value_.opt_stringValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, value_.opt_stringValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1073,7 +1073,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I16)) {
           this->intValue2_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::readWithContext(*iprot, value_.intValue2, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::read(*iprot, value_.intValue2);
         } else {
           _readState.skip(iprot);
         }
@@ -1083,7 +1083,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I32)) {
           this->intValue3_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, value_.intValue3, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, value_.intValue3);
         } else {
           _readState.skip(iprot);
         }
@@ -1093,7 +1093,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_DOUBLE)) {
           this->doubelValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::readWithContext(*iprot, value_.doubelValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::read(*iprot, value_.doubelValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1103,7 +1103,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_BOOL)) {
           this->boolValue_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, value_.boolValue, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, value_.boolValue);
         } else {
           _readState.skip(iprot);
         }
@@ -1115,7 +1115,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->union_list_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.union_list = ::std::vector<::std::int32_t>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, value_.union_list, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::read(*iprot, value_.union_list);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1128,7 +1128,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->union_set_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.union_set = ::std::set<::std::int64_t>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>, ::apache::thrift::type::set<::apache::thrift::type::i64_t>>::readWithContext(*iprot, value_.union_set, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>, ::apache::thrift::type::set<::apache::thrift::type::i64_t>>::read(*iprot, value_.union_set);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1141,7 +1141,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->union_map_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.union_map = ::std::map<::std::string, ::std::int32_t>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, value_.union_map, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::read(*iprot, value_.union_map);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1154,7 +1154,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->opt_union_map_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.opt_union_map = ::std::map<::std::string, ::std::int32_t>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, value_.opt_union_map, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::read(*iprot, value_.opt_union_map);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1165,7 +1165,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_I32)) {
           this->enum_field_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, value_.enum_field, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, value_.enum_field);
         } else {
           _readState.skip(iprot);
         }
@@ -1177,7 +1177,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->enum_container_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.enum_container = ::std::vector<::some::valid::ns::MyEnumA>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::readWithContext(*iprot, value_.enum_container, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::read(*iprot, value_.enum_container);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1189,7 +1189,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRUCT)) {
           this->a_struct_ref().emplace();
           _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, value_.a_struct, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, value_.a_struct);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1202,7 +1202,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->a_set_struct_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.a_set_struct = ::std::set<::some::valid::ns::MyStruct>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::readWithContext(*iprot, value_.a_set_struct, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::read(*iprot, value_.a_set_struct);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1214,7 +1214,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRUCT)) {
           this->a_union_ref().emplace();
           _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::SimpleUnion, ::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>::readWithContext(*iprot, value_.a_union, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::SimpleUnion, ::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>::read(*iprot, value_.a_union);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1226,7 +1226,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRUCT)) {
           this->opt_a_union_ref().emplace();
           _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::SimpleUnion, ::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>::readWithContext(*iprot, value_.opt_a_union, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::SimpleUnion, ::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>::read(*iprot, value_.opt_a_union);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1239,7 +1239,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->a_union_list_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.a_union_list = ::std::vector<::some::valid::ns::SimpleUnion>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::SimpleUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::readWithContext(*iprot, value_.a_union_list, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::SimpleUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::read(*iprot, value_.a_union_list);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1252,7 +1252,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->a_union_typedef_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.a_union_typedef = ::some::valid::ns::unionTypeDef();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::readWithContext(*iprot, value_.a_union_typedef, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::read(*iprot, value_.a_union_typedef);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1265,7 +1265,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->a_union_typedef_list_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.a_union_typedef_list = ::std::vector<::some::valid::ns::unionTypeDef>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::readWithContext(*iprot, value_.a_union_typedef_list, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::read(*iprot, value_.a_union_typedef_list);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1276,7 +1276,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRING)) {
           this->MyBinaryField_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, value_.MyBinaryField, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, value_.MyBinaryField);
         } else {
           _readState.skip(iprot);
         }
@@ -1286,7 +1286,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRING)) {
           this->MyBinaryField2_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, value_.MyBinaryField2, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, value_.MyBinaryField2);
         } else {
           _readState.skip(iprot);
         }
@@ -1298,7 +1298,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->MyBinaryListField4_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.MyBinaryListField4 = ::std::vector<::std::string>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>::readWithContext(*iprot, value_.MyBinaryListField4, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>::read(*iprot, value_.MyBinaryListField4);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -1311,7 +1311,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->ref_field_ref().emplace();
           _readState.beforeSubobject(iprot);
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::MyStruct>>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, *ptr, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, *ptr);
           value_.ref_field = std::move(ptr);
           _readState.afterSubobject(iprot);
         } else {
@@ -1325,7 +1325,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
           this->ref_field2_ref().emplace();
           _readState.beforeSubobject(iprot);
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::some::valid::ns::MyStruct>>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, *ptr, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, *ptr);
           value_.ref_field2 = std::move(ptr);
           _readState.afterSubobject(iprot);
         } else {
@@ -1338,7 +1338,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_STRUCT)) {
           this->excp_field_ref().emplace();
           _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AnException, ::apache::thrift::type::exception_t<::some::valid::ns::AnException>>::readWithContext(*iprot, value_.excp_field, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AnException, ::apache::thrift::type::exception_t<::some::valid::ns::AnException>>::read(*iprot, value_.excp_field);
           _readState.afterSubobject(iprot);
         } else {
           _readState.skip(iprot);
@@ -2037,7 +2037,7 @@ void AnException::readNoXfer(Protocol_* iprot) {
   }
 _readField_code:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_code, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_code);
   }
  this->__isset.set(0, true);
 
@@ -2050,7 +2050,7 @@ _readField_code:
   }
 _readField_req_code:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_req_code, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_req_code);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -2062,7 +2062,7 @@ _readField_req_code:
   }
 _readField_message2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message2);
   }
  this->__isset.set(1, true);
 
@@ -2075,7 +2075,7 @@ _readField_message2:
   }
 _readField_req_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_req_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_req_message);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -2089,7 +2089,7 @@ _readField_exception_list:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_exception_list = ::std::vector<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_exception_list, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_exception_list);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -2105,7 +2105,7 @@ _readField_exception_set:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_exception_set = ::std::set<::std::int64_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>, ::apache::thrift::type::set<::apache::thrift::type::i64_t>>::readWithContext(*iprot, this->__fbthrift_field_exception_set, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>, ::apache::thrift::type::set<::apache::thrift::type::i64_t>>::read(*iprot, this->__fbthrift_field_exception_set);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -2121,7 +2121,7 @@ _readField_exception_map:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_exception_map = ::std::map<::std::string, ::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_exception_map, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_exception_map);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -2137,7 +2137,7 @@ _readField_req_exception_map:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_req_exception_map = ::std::map<::std::string, ::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_req_exception_map, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_req_exception_map);
     _readState.afterSubobject(iprot);
   }
 
@@ -2150,7 +2150,7 @@ _readField_req_exception_map:
   }
 _readField_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_enum_field);
   }
  this->__isset.set(5, true);
 
@@ -2165,7 +2165,7 @@ _readField_enum_container:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_enum_container = ::std::vector<::some::valid::ns::MyEnumA>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::readWithContext(*iprot, this->__fbthrift_field_enum_container, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::read(*iprot, this->__fbthrift_field_enum_container);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -2180,7 +2180,7 @@ _readField_enum_container:
 _readField_a_struct:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, this->__fbthrift_field_a_struct, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, this->__fbthrift_field_a_struct);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);
@@ -2196,7 +2196,7 @@ _readField_a_set_struct:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_a_set_struct = ::std::set<::some::valid::ns::MyStruct>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::readWithContext(*iprot, this->__fbthrift_field_a_set_struct, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::read(*iprot, this->__fbthrift_field_a_set_struct);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(8, true);
@@ -2212,7 +2212,7 @@ _readField_a_union_list:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_a_union_list = ::std::vector<::some::valid::ns::SimpleUnion>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::SimpleUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::readWithContext(*iprot, this->__fbthrift_field_a_union_list, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::SimpleUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::read(*iprot, this->__fbthrift_field_a_union_list);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(9, true);
@@ -2228,7 +2228,7 @@ _readField_union_typedef:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_union_typedef = ::some::valid::ns::unionTypeDef();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::readWithContext(*iprot, this->__fbthrift_field_union_typedef, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::read(*iprot, this->__fbthrift_field_union_typedef);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(10, true);
@@ -2244,7 +2244,7 @@ _readField_a_union_typedef_list:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_a_union_typedef_list = ::std::vector<::some::valid::ns::unionTypeDef>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::readWithContext(*iprot, this->__fbthrift_field_a_union_typedef_list, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::read(*iprot, this->__fbthrift_field_a_union_typedef_list);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(11, true);
@@ -2770,7 +2770,7 @@ void AnotherException::readNoXfer(Protocol_* iprot) {
   }
 _readField_code:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_code, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_code);
   }
  this->__isset.set(0, true);
 
@@ -2783,7 +2783,7 @@ _readField_code:
   }
 _readField_req_code:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_req_code, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_req_code);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -2795,7 +2795,7 @@ _readField_req_code:
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(1, true);
 
@@ -2970,7 +2970,7 @@ void ContainerStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_fieldA:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_fieldA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_fieldA);
   }
  this->__isset.set(0, true);
 
@@ -2983,7 +2983,7 @@ _readField_fieldA:
   }
 _readField_req_fieldA:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_req_fieldA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_req_fieldA);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -2995,7 +2995,7 @@ _readField_req_fieldA:
   }
 _readField_opt_fieldA:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_opt_fieldA);
   }
  this->__isset.set(1, true);
 
@@ -3010,7 +3010,7 @@ _readField_fieldB:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldB = ::std::map<::std::string, bool>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::readWithContext(*iprot, this->__fbthrift_field_fieldB, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::read(*iprot, this->__fbthrift_field_fieldB);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -3026,7 +3026,7 @@ _readField_req_fieldB:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_req_fieldB = ::std::map<::std::string, bool>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldB, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::read(*iprot, this->__fbthrift_field_req_fieldB);
     _readState.afterSubobject(iprot);
   }
 
@@ -3041,7 +3041,7 @@ _readField_opt_fieldB:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_opt_fieldB = ::std::map<::std::string, bool>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldB, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>::read(*iprot, this->__fbthrift_field_opt_fieldB);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -3057,7 +3057,7 @@ _readField_fieldC:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldC = ::std::set<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_fieldC, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_fieldC);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -3073,7 +3073,7 @@ _readField_req_fieldC:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_req_fieldC = ::std::set<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldC, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_req_fieldC);
     _readState.afterSubobject(iprot);
   }
 
@@ -3088,7 +3088,7 @@ _readField_opt_fieldC:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_opt_fieldC = ::std::set<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldC, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_opt_fieldC);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(5, true);
@@ -3102,7 +3102,7 @@ _readField_opt_fieldC:
   }
 _readField_fieldD:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_fieldD, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_fieldD);
   }
  this->__isset.set(6, true);
 
@@ -3115,7 +3115,7 @@ _readField_fieldD:
   }
 _readField_fieldE:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_fieldE, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_fieldE);
   }
  this->__isset.set(7, true);
 
@@ -3128,7 +3128,7 @@ _readField_fieldE:
   }
 _readField_req_fieldE:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_req_fieldE, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_req_fieldE);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -3140,7 +3140,7 @@ _readField_req_fieldE:
   }
 _readField_opt_fieldE:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldE, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_opt_fieldE);
   }
  this->__isset.set(8, true);
 
@@ -3155,7 +3155,7 @@ _readField_fieldF:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldF = ::std::vector<::std::vector<::std::int32_t>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::vector<::std::vector<::std::int32_t>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::readWithContext(*iprot, this->__fbthrift_field_fieldF, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::vector<::std::vector<::std::int32_t>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::read(*iprot, this->__fbthrift_field_fieldF);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(9, true);
@@ -3171,7 +3171,7 @@ _readField_fieldG:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldG = ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>>>, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldG, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>>>, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>>::read(*iprot, this->__fbthrift_field_fieldG);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(10, true);
@@ -3187,7 +3187,7 @@ _readField_fieldH:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldH = ::std::vector<::std::set<::std::int32_t>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>, ::std::vector<::std::set<::std::int32_t>>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i32_t>>>::readWithContext(*iprot, this->__fbthrift_field_fieldH, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>, ::std::vector<::std::set<::std::int32_t>>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i32_t>>>::read(*iprot, this->__fbthrift_field_fieldH);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(11, true);
@@ -3201,7 +3201,7 @@ _readField_fieldH:
   }
 _readField_fieldI:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_fieldI, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_fieldI);
   }
  this->__isset.set(12, true);
 
@@ -3216,7 +3216,7 @@ _readField_fieldJ:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldJ = ::std::map<::std::string, ::std::vector<::std::int32_t>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::std::string, ::std::vector<::std::int32_t>>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::readWithContext(*iprot, this->__fbthrift_field_fieldJ, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::std::string, ::std::vector<::std::int32_t>>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::read(*iprot, this->__fbthrift_field_fieldJ);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(13, true);
@@ -3232,7 +3232,7 @@ _readField_fieldK:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldK = ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>>>, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldK, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>>>, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>>>::read(*iprot, this->__fbthrift_field_fieldK);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(14, true);
@@ -3248,7 +3248,7 @@ _readField_fieldL:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldL = ::std::set<::std::set<::std::set<bool>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>>, ::std::set<::std::set<::std::set<bool>>>, ::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::bool_t>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldL, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>>, ::std::set<::std::set<::std::set<bool>>>, ::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::bool_t>>>>::read(*iprot, this->__fbthrift_field_fieldL);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(15, true);
@@ -3264,7 +3264,7 @@ _readField_fieldM:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldM = ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::apache::thrift::type_class::map<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::string>>, ::apache::thrift::type_class::string>>, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_fieldM, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::apache::thrift::type_class::map<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::string>>, ::apache::thrift::type_class::string>>, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_fieldM);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(16, true);
@@ -3278,7 +3278,7 @@ _readField_fieldM:
   }
 _readField_fieldN:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::some::valid::ns::simpleTypeDef, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_fieldN, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::some::valid::ns::simpleTypeDef, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_fieldN);
   }
  this->__isset.set(17, true);
 
@@ -3293,7 +3293,7 @@ _readField_fieldO:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldO = ::some::valid::ns::complexStructTypeDef();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::structure>>, ::some::valid::ns::complexStructTypeDef, ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldO, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::structure>>, ::some::valid::ns::complexStructTypeDef, ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>::read(*iprot, this->__fbthrift_field_fieldO);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(18, true);
@@ -3309,7 +3309,7 @@ _readField_fieldP:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldP = ::std::vector<::some::valid::ns::mostComplexTypeDef>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::structure>>>>, ::std::vector<::some::valid::ns::mostComplexTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldP, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::structure>>>>, ::std::vector<::some::valid::ns::mostComplexTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>>>::read(*iprot, this->__fbthrift_field_fieldP);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(19, true);
@@ -3323,7 +3323,7 @@ _readField_fieldP:
   }
 _readField_fieldQ:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_fieldQ, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_fieldQ);
   }
  this->__isset.set(20, true);
 
@@ -3336,7 +3336,7 @@ _readField_fieldQ:
   }
 _readField_fieldR:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_fieldR, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_fieldR);
   }
  this->__isset.set(21, true);
 
@@ -3349,7 +3349,7 @@ _readField_fieldR:
   }
 _readField_req_fieldR:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldR, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_req_fieldR);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -3361,7 +3361,7 @@ _readField_req_fieldR:
   }
 _readField_opt_fieldR:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldR, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_opt_fieldR);
   }
  this->__isset.set(22, true);
 
@@ -3374,7 +3374,7 @@ _readField_opt_fieldR:
   }
 _readField_fieldS:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::readWithContext(*iprot, this->__fbthrift_field_fieldS, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>::read(*iprot, this->__fbthrift_field_fieldS);
   }
  this->__isset.set(23, true);
 
@@ -3389,7 +3389,7 @@ _readField_fieldT:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldT = ::std::vector<::some::valid::ns::MyEnumA>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::readWithContext(*iprot, this->__fbthrift_field_fieldT, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::read(*iprot, this->__fbthrift_field_fieldT);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(24, true);
@@ -3405,7 +3405,7 @@ _readField_fieldU:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldU = ::std::vector<::some::valid::ns::MyEnumA>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::readWithContext(*iprot, this->__fbthrift_field_fieldU, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::some::valid::ns::MyEnumA>, ::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>::read(*iprot, this->__fbthrift_field_fieldU);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(25, true);
@@ -3420,7 +3420,7 @@ _readField_fieldU:
 _readField_fieldV:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, this->__fbthrift_field_fieldV, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, this->__fbthrift_field_fieldV);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(26, true);
@@ -3435,7 +3435,7 @@ _readField_fieldV:
 _readField_req_fieldV:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldV, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, this->__fbthrift_field_req_fieldV);
     _readState.afterSubobject(iprot);
   }
 
@@ -3449,7 +3449,7 @@ _readField_req_fieldV:
 _readField_opt_fieldV:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldV, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>::read(*iprot, this->__fbthrift_field_opt_fieldV);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(27, true);
@@ -3465,7 +3465,7 @@ _readField_fieldW:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldW = ::std::set<::some::valid::ns::MyStruct>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::readWithContext(*iprot, this->__fbthrift_field_fieldW, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::some::valid::ns::MyStruct>, ::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>::read(*iprot, this->__fbthrift_field_fieldW);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(28, true);
@@ -3480,7 +3480,7 @@ _readField_fieldW:
 _readField_fieldX:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::readWithContext(*iprot, this->__fbthrift_field_fieldX, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::read(*iprot, this->__fbthrift_field_fieldX);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(29, true);
@@ -3495,7 +3495,7 @@ _readField_fieldX:
 _readField_req_fieldX:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldX, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::read(*iprot, this->__fbthrift_field_req_fieldX);
     _readState.afterSubobject(iprot);
   }
 
@@ -3509,7 +3509,7 @@ _readField_req_fieldX:
 _readField_opt_fieldX:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldX, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion, ::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>::read(*iprot, this->__fbthrift_field_opt_fieldX);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(30, true);
@@ -3525,7 +3525,7 @@ _readField_fieldY:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldY = ::std::vector<::some::valid::ns::ComplexUnion>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>>::readWithContext(*iprot, this->__fbthrift_field_fieldY, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>, ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>>::read(*iprot, this->__fbthrift_field_fieldY);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(31, true);
@@ -3541,7 +3541,7 @@ _readField_fieldZ:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldZ = ::some::valid::ns::unionTypeDef();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::readWithContext(*iprot, this->__fbthrift_field_fieldZ, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::some::valid::ns::unionTypeDef, ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>::read(*iprot, this->__fbthrift_field_fieldZ);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(32, true);
@@ -3557,7 +3557,7 @@ _readField_fieldAA:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldAA = ::std::vector<::some::valid::ns::unionTypeDef>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::readWithContext(*iprot, this->__fbthrift_field_fieldAA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>>, ::std::vector<::some::valid::ns::unionTypeDef>, ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>::read(*iprot, this->__fbthrift_field_fieldAA);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(33, true);
@@ -3571,7 +3571,7 @@ _readField_fieldAA:
   }
 _readField_fieldAC:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumB, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumB>>::readWithContext(*iprot, this->__fbthrift_field_fieldAC, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumB, ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumB>>::read(*iprot, this->__fbthrift_field_fieldAC);
   }
  this->__isset.set(34, true);
 
@@ -3584,7 +3584,7 @@ _readField_fieldAC:
   }
 _readField_fieldAD:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::a::different::ns::AnEnum, ::apache::thrift::type::enum_t<::a::different::ns::AnEnum>>::readWithContext(*iprot, this->__fbthrift_field_fieldAD, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::a::different::ns::AnEnum, ::apache::thrift::type::enum_t<::a::different::ns::AnEnum>>::read(*iprot, this->__fbthrift_field_fieldAD);
   }
  this->__isset.set(35, true);
 
@@ -3599,7 +3599,7 @@ _readField_fieldAE:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_fieldAE = ::std::map<::std::string, ::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_fieldAE, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_fieldAE);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(36, true);
@@ -4732,7 +4732,7 @@ void MyIncludedStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_MyIncludedInt:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::a::different::ns::IncludedInt64, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedInt, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::a::different::ns::IncludedInt64, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_MyIncludedInt);
   }
  this->__isset.set(0, true);
 
@@ -4746,7 +4746,7 @@ _readField_MyIncludedInt:
 _readField_MyIncludedStruct:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedStruct, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::read(*iprot, this->__fbthrift_field_MyIncludedStruct);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -4762,7 +4762,7 @@ _readField_ARefField:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::AStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_ARefField = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -4777,7 +4777,7 @@ _readField_ARefField:
 _readField_ARequiredField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::readWithContext(*iprot, this->__fbthrift_field_ARequiredField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::read(*iprot, this->__fbthrift_field_ARequiredField);
     _readState.afterSubobject(iprot);
   }
 
@@ -4992,7 +4992,7 @@ void AnnotatedStruct::readNoXfer(Protocol_* iprot) {
 _readField_no_annotation:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, this->__fbthrift_field_no_annotation, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, this->__fbthrift_field_no_annotation);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -5008,7 +5008,7 @@ _readField_cpp_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_cpp_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5024,7 +5024,7 @@ _readField_cpp2_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_cpp2_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5040,7 +5040,7 @@ _readField_container_with_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, ::std::map<::std::int32_t, ::std::vector<::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, ::std::map<::std::int32_t, ::std::vector<::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, *ptr);
     this->__fbthrift_field_container_with_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5056,7 +5056,7 @@ _readField_req_cpp_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_cpp_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5072,7 +5072,7 @@ _readField_req_cpp2_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_cpp2_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5088,7 +5088,7 @@ _readField_req_container_with_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_container_with_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5104,7 +5104,7 @@ _readField_opt_cpp_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_cpp_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5120,7 +5120,7 @@ _readField_opt_cpp2_unique_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_cpp2_unique_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5136,7 +5136,7 @@ _readField_opt_container_with_ref:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::set<::std::int32_t>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_container_with_ref = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5152,7 +5152,7 @@ _readField_ref_type_unique:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_ref_type_unique = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5168,7 +5168,7 @@ _readField_ref_type_shared:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_ref_type_shared = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5184,7 +5184,7 @@ _readField_ref_type_const:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, ::std::map<::std::int32_t, ::std::vector<::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, ::std::map<::std::int32_t, ::std::vector<::std::string>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, *ptr);
     this->__fbthrift_field_ref_type_const = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5200,7 +5200,7 @@ _readField_req_ref_type_shared:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_ref_type_shared = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5216,7 +5216,7 @@ _readField_req_ref_type_const:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_ref_type_const = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5232,7 +5232,7 @@ _readField_req_ref_type_unique:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>::read(*iprot, *ptr);
     this->__fbthrift_field_req_ref_type_unique = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5248,7 +5248,7 @@ _readField_opt_ref_type_const:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_ref_type_const = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5264,7 +5264,7 @@ _readField_opt_ref_type_unique:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::ContainerStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_ref_type_unique = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5280,7 +5280,7 @@ _readField_opt_ref_type_shared:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::set<::std::int32_t>>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, *ptr);
     this->__fbthrift_field_opt_ref_type_shared = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -5294,7 +5294,7 @@ _readField_opt_ref_type_shared:
   }
 _readField_base_type:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::some::valid::ns::CppFakeI32, ::apache::thrift::type::cpp_type<::some::valid::ns::CppFakeI32, ::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_base_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::some::valid::ns::CppFakeI32, ::apache::thrift::type::cpp_type<::some::valid::ns::CppFakeI32, ::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_base_type);
   }
  this->__isset.set(1, true);
 
@@ -5309,7 +5309,7 @@ _readField_list_type:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_list_type = ::some::valid::ns::FollySmallVectorI64();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::FollySmallVectorI64, ::apache::thrift::type::cpp_type<::some::valid::ns::FollySmallVectorI64, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>>::readWithContext(*iprot, this->__fbthrift_field_list_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::FollySmallVectorI64, ::apache::thrift::type::cpp_type<::some::valid::ns::FollySmallVectorI64, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>>::read(*iprot, this->__fbthrift_field_list_type);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -5325,7 +5325,7 @@ _readField_set_type:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_set_type = ::some::valid::ns::SortedVectorSetString();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::SortedVectorSetString, ::apache::thrift::type::cpp_type<::some::valid::ns::SortedVectorSetString, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_set_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::SortedVectorSetString, ::apache::thrift::type::cpp_type<::some::valid::ns::SortedVectorSetString, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_set_type);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -5341,7 +5341,7 @@ _readField_map_type:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_map_type = ::some::valid::ns::FakeMap();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::floating_point>, ::some::valid::ns::FakeMap, ::apache::thrift::type::cpp_type<::some::valid::ns::FakeMap, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::double_t>>>::readWithContext(*iprot, this->__fbthrift_field_map_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::floating_point>, ::some::valid::ns::FakeMap, ::apache::thrift::type::cpp_type<::some::valid::ns::FakeMap, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::double_t>>>::read(*iprot, this->__fbthrift_field_map_type);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -5357,7 +5357,7 @@ _readField_map_struct_type:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_map_struct_type = ::some::valid::ns::UnorderedMapStruct();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::some::valid::ns::UnorderedMapStruct, ::apache::thrift::type::cpp_type<::some::valid::ns::UnorderedMapStruct, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>>>::readWithContext(*iprot, this->__fbthrift_field_map_struct_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::some::valid::ns::UnorderedMapStruct, ::apache::thrift::type::cpp_type<::some::valid::ns::UnorderedMapStruct, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>>>::read(*iprot, this->__fbthrift_field_map_struct_type);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(5, true);
@@ -5371,7 +5371,7 @@ _readField_map_struct_type:
   }
 _readField_iobuf_type:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>::readWithContext(*iprot, this->__fbthrift_field_iobuf_type, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>::read(*iprot, this->__fbthrift_field_iobuf_type);
   }
  this->__isset.set(6, true);
 
@@ -5384,7 +5384,7 @@ _readField_iobuf_type:
   }
 _readField_iobuf_ptr:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>::readWithContext(*iprot, this->__fbthrift_field_iobuf_ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>::read(*iprot, this->__fbthrift_field_iobuf_ptr);
   }
  this->__isset.set(7, true);
 
@@ -5399,7 +5399,7 @@ _readField_list_i32_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_list_i32_template = std::list<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, std::list<::std::int32_t>, ::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::readWithContext(*iprot, this->__fbthrift_field_list_i32_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, std::list<::std::int32_t>, ::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::read(*iprot, this->__fbthrift_field_list_i32_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(8, true);
@@ -5415,7 +5415,7 @@ _readField_list_string_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_list_string_template = std::deque<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<::std::string>, ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_list_string_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<::std::string>, ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_list_string_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(9, true);
@@ -5431,7 +5431,7 @@ _readField_set_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_set_template = folly::sorted_vector_set<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::sorted_vector_set<::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_set_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::sorted_vector_set<::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_set_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(10, true);
@@ -5447,7 +5447,7 @@ _readField_map_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_map_template = folly::sorted_vector_map<::std::int64_t, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_map_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_map_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(11, true);
@@ -5463,7 +5463,7 @@ _readField_typedef_list_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_typedef_list_template = ::some::valid::ns::std_list();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::std_list, ::apache::thrift::type::cpp_type<::some::valid::ns::std_list, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::readWithContext(*iprot, this->__fbthrift_field_typedef_list_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::std_list, ::apache::thrift::type::cpp_type<::some::valid::ns::std_list, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>::read(*iprot, this->__fbthrift_field_typedef_list_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(12, true);
@@ -5479,7 +5479,7 @@ _readField_typedef_deque_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_typedef_deque_template = ::some::valid::ns::std_deque();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::some::valid::ns::std_deque, ::apache::thrift::type::cpp_type<::some::valid::ns::std_deque, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_typedef_deque_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::some::valid::ns::std_deque, ::apache::thrift::type::cpp_type<::some::valid::ns::std_deque, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_typedef_deque_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(13, true);
@@ -5495,7 +5495,7 @@ _readField_typedef_set_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_typedef_set_template = ::some::valid::ns::folly_set();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::folly_set, ::apache::thrift::type::cpp_type<::some::valid::ns::folly_set, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_typedef_set_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::folly_set, ::apache::thrift::type::cpp_type<::some::valid::ns::folly_set, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_typedef_set_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(14, true);
@@ -5511,7 +5511,7 @@ _readField_typedef_map_template:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_typedef_map_template = ::some::valid::ns::folly_map();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::some::valid::ns::folly_map, ::apache::thrift::type::cpp_type<::some::valid::ns::folly_map, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_typedef_map_template, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::some::valid::ns::folly_map, ::apache::thrift::type::cpp_type<::some::valid::ns::folly_map, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_typedef_map_template);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(15, true);
@@ -5525,7 +5525,7 @@ _readField_typedef_map_template:
   }
 _readField_iobuf_type_val:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>::readWithContext(*iprot, this->__fbthrift_field_iobuf_type_val, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>::read(*iprot, this->__fbthrift_field_iobuf_type_val);
   }
  this->__isset.set(16, true);
 
@@ -5538,7 +5538,7 @@ _readField_iobuf_type_val:
   }
 _readField_iobuf_ptr_val:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>::readWithContext(*iprot, this->__fbthrift_field_iobuf_ptr_val, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>::read(*iprot, this->__fbthrift_field_iobuf_ptr_val);
   }
  this->__isset.set(17, true);
 
@@ -5552,7 +5552,7 @@ _readField_iobuf_ptr_val:
 _readField_struct_struct:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::readWithContext(*iprot, this->__fbthrift_field_struct_struct, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::ContainerStruct, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>::read(*iprot, this->__fbthrift_field_struct_struct);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(18, true);
@@ -6712,7 +6712,7 @@ _readField_map_of_iobufs:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_map_of_iobufs = ::std::map<::std::string, ::some::valid::ns::IOBuf>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::some::valid::ns::IOBuf>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>::readWithContext(*iprot, this->__fbthrift_field_map_of_iobufs, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::some::valid::ns::IOBuf>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>::read(*iprot, this->__fbthrift_field_map_of_iobufs);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -6728,7 +6728,7 @@ _readField_map_of_iobuf_ptrs:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_map_of_iobuf_ptrs = ::std::map<::std::string, ::some::valid::ns::IOBufPtr>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::some::valid::ns::IOBufPtr>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>>::readWithContext(*iprot, this->__fbthrift_field_map_of_iobuf_ptrs, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::some::valid::ns::IOBufPtr>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>>::read(*iprot, this->__fbthrift_field_map_of_iobuf_ptrs);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -6881,7 +6881,7 @@ void FloatStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_floatField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float, ::apache::thrift::type::float_t>::readWithContext(*iprot, this->__fbthrift_field_floatField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float, ::apache::thrift::type::float_t>::read(*iprot, this->__fbthrift_field_floatField);
   }
  this->__isset.set(0, true);
 
@@ -6894,7 +6894,7 @@ _readField_floatField:
   }
 _readField_doubleField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::readWithContext(*iprot, this->__fbthrift_field_doubleField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::read(*iprot, this->__fbthrift_field_doubleField);
   }
  this->__isset.set(1, true);
 
@@ -7047,7 +7047,7 @@ void FloatUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_FLOAT)) {
           this->floatSide_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float, ::apache::thrift::type::float_t>::readWithContext(*iprot, value_.floatSide, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float, ::apache::thrift::type::float_t>::read(*iprot, value_.floatSide);
         } else {
           _readState.skip(iprot);
         }
@@ -7057,7 +7057,7 @@ void FloatUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::TType::T_DOUBLE)) {
           this->doubleSide_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::readWithContext(*iprot, value_.doubleSide, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::read(*iprot, value_.doubleSide);
         } else {
           _readState.skip(iprot);
         }
@@ -7193,7 +7193,7 @@ void AllRequiredNoExceptMoveCtrStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_intField:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_intField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_intField);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

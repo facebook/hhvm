@@ -40,7 +40,7 @@ void Struct::readNoXfer(Protocol_* iprot) {
 _readField_first:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module0::Struct, ::apache::thrift::type::struct_t<::module0::Struct>>::readWithContext(*iprot, this->__fbthrift_field_first, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module0::Struct, ::apache::thrift::type::struct_t<::module0::Struct>>::read(*iprot, this->__fbthrift_field_first);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -55,7 +55,7 @@ _readField_first:
 _readField_second:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module1::Struct, ::apache::thrift::type::struct_t<::module1::Struct>>::readWithContext(*iprot, this->__fbthrift_field_second, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module1::Struct, ::apache::thrift::type::struct_t<::module1::Struct>>::read(*iprot, this->__fbthrift_field_second);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -205,7 +205,7 @@ void BigStruct::readNoXfer(Protocol_* iprot) {
 _readField_s:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module2::Struct, ::apache::thrift::type::struct_t<::module2::Struct>>::readWithContext(*iprot, this->__fbthrift_field_s, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module2::Struct, ::apache::thrift::type::struct_t<::module2::Struct>>::read(*iprot, this->__fbthrift_field_s);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -219,7 +219,7 @@ _readField_s:
   }
 _readField_id:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_id);
   }
  this->__isset.set(1, true);
 

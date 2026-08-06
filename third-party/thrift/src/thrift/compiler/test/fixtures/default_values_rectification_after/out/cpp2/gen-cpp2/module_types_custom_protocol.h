@@ -124,7 +124,7 @@ void TestStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_unqualified_int_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_unqualified_int_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_unqualified_int_field);
   }
  this->__isset.set(0, true);
 
@@ -137,7 +137,7 @@ _readField_unqualified_int_field:
   }
 _readField_unqualified_bool_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_unqualified_bool_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_unqualified_bool_field);
   }
  this->__isset.set(1, true);
 
@@ -152,7 +152,7 @@ _readField_unqualified_list_field:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_unqualified_list_field = ::std::vector<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_unqualified_list_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_unqualified_list_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -167,7 +167,7 @@ _readField_unqualified_list_field:
 _readField_unqualified_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::readWithContext(*iprot, this->__fbthrift_field_unqualified_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::read(*iprot, this->__fbthrift_field_unqualified_struct_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -181,7 +181,7 @@ _readField_unqualified_struct_field:
   }
 _readField_optional_int_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_optional_int_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_optional_int_field);
   }
  this->__isset.set(4, true);
 
@@ -194,7 +194,7 @@ _readField_optional_int_field:
   }
 _readField_optional_bool_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_optional_bool_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::read(*iprot, this->__fbthrift_field_optional_bool_field);
   }
  this->__isset.set(5, true);
 
@@ -209,7 +209,7 @@ _readField_optional_list_field:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_optional_list_field = ::std::vector<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_optional_list_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_optional_list_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -224,7 +224,7 @@ _readField_optional_list_field:
 _readField_optional_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::readWithContext(*iprot, this->__fbthrift_field_optional_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::read(*iprot, this->__fbthrift_field_optional_struct_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);

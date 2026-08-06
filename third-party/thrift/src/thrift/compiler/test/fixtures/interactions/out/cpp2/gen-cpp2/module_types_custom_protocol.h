@@ -38,7 +38,7 @@ void CustomException::readNoXfer(Protocol_* iprot) {
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(0, true);
 
@@ -163,7 +163,7 @@ void ShouldBeBoxed::readNoXfer(Protocol_* iprot) {
   }
 _readField_sessionId:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_sessionId, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_sessionId);
   }
  this->__isset.set(0, true);
 

@@ -37,7 +37,7 @@ void DataItem::readNoXfer(Protocol_* iprot) {
   }
 _readField_id:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_id);
   }
  this->__isset.set(0, true);
 
@@ -50,7 +50,7 @@ _readField_id:
   }
 _readField_name:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_name);
   }
  this->__isset.set(1, true);
 
@@ -63,7 +63,7 @@ _readField_name:
   }
 _readField_value:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::readWithContext(*iprot, this->__fbthrift_field_value, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double, ::apache::thrift::type::double_t>::read(*iprot, this->__fbthrift_field_value);
   }
  this->__isset.set(2, true);
 
@@ -234,7 +234,7 @@ void NotFoundException::readNoXfer(Protocol_* iprot) {
   }
 _readField_id:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_id);
   }
  this->__isset.set(0, true);
 
@@ -247,7 +247,7 @@ _readField_id:
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(1, true);
 
@@ -395,7 +395,7 @@ void PermissionDeniedException::readNoXfer(Protocol_* iprot) {
   }
 _readField_user:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_user, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_user);
   }
  this->__isset.set(0, true);
 
@@ -408,7 +408,7 @@ _readField_user:
   }
 _readField_reason:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_reason, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_reason);
   }
  this->__isset.set(1, true);
 

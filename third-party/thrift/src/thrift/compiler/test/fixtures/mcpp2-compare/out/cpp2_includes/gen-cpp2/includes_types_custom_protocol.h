@@ -37,7 +37,7 @@ void AStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_FieldA:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_FieldA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_FieldA);
   }
  this->__isset.set(0, true);
 
@@ -168,7 +168,7 @@ _readField_FieldA:
   {
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::a::different::ns::AStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::a::different::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::a::different::ns::AStruct, ::apache::thrift::type::struct_t<::a::different::ns::AStruct>>::read(*iprot, *ptr);
     this->__fbthrift_field_FieldA = std::move(ptr);
     _readState.afterSubobject(iprot);
   }

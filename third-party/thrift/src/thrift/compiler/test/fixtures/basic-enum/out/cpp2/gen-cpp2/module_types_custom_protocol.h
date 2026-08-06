@@ -37,7 +37,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_myEnum:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enumstrict::MyEnum, ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyEnum>>::readWithContext(*iprot, this->__fbthrift_field_myEnum, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enumstrict::MyEnum, ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyEnum>>::read(*iprot, this->__fbthrift_field_myEnum);
   }
  this->__isset.set(0, true);
 
@@ -50,7 +50,7 @@ _readField_myEnum:
   }
 _readField_myBigEnum:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enumstrict::MyBigEnum, ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyBigEnum>>::readWithContext(*iprot, this->__fbthrift_field_myBigEnum, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enumstrict::MyBigEnum, ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyBigEnum>>::read(*iprot, this->__fbthrift_field_myBigEnum);
   }
  this->__isset.set(1, true);
 

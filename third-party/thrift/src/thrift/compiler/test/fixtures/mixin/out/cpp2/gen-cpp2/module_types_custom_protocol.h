@@ -37,7 +37,7 @@ void Mixin1::readNoXfer(Protocol_* iprot) {
   }
 _readField_field1:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_field1);
   }
  this->__isset.set(0, true);
 
@@ -163,7 +163,7 @@ void Mixin2::readNoXfer(Protocol_* iprot) {
 _readField_m1:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin1, ::apache::thrift::type::struct_t<::cpp2::Mixin1>>::readWithContext(*iprot, this->__fbthrift_field_m1, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin1, ::apache::thrift::type::struct_t<::cpp2::Mixin1>>::read(*iprot, this->__fbthrift_field_m1);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -177,7 +177,7 @@ _readField_m1:
   }
 _readField_field2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_field2);
   }
  this->__isset.set(1, true);
 
@@ -327,7 +327,7 @@ void Mixin3Base::readNoXfer(Protocol_* iprot) {
   }
 _readField_field3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_field3);
   }
  this->__isset.set(0, true);
 
@@ -452,7 +452,7 @@ void Foo::readNoXfer(Protocol_* iprot) {
   }
 _readField_field4:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_field4);
   }
  this->__isset.set(0, true);
 
@@ -466,7 +466,7 @@ _readField_field4:
 _readField_m2:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin2, ::apache::thrift::type::struct_t<::cpp2::Mixin2>>::readWithContext(*iprot, this->__fbthrift_field_m2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin2, ::apache::thrift::type::struct_t<::cpp2::Mixin2>>::read(*iprot, this->__fbthrift_field_m2);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -481,7 +481,7 @@ _readField_m2:
 _readField_m3:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin3, ::apache::thrift::type::struct_t<::cpp2::Mixin3Base>>::readWithContext(*iprot, this->__fbthrift_field_m3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin3, ::apache::thrift::type::struct_t<::cpp2::Mixin3Base>>::read(*iprot, this->__fbthrift_field_m3);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);

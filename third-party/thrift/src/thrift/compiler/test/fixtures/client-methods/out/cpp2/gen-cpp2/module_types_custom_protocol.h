@@ -37,7 +37,7 @@ void EchoRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_text:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_text);
   }
  this->__isset.set(0, true);
 
@@ -162,7 +162,7 @@ void EchoResponse::readNoXfer(Protocol_* iprot) {
   }
 _readField_text:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_text);
   }
  this->__isset.set(0, true);
 

@@ -39,7 +39,7 @@ _readField_std_string:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_std_string = std::vector<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::vector<::std::string>, ::apache::thrift::type::cpp_type<std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_std_string, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::vector<::std::string>, ::apache::thrift::type::cpp_type<std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_std_string);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -55,7 +55,7 @@ _readField_deque_string:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_deque_string = std::deque<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>, ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>>::readWithContext(*iprot, this->__fbthrift_field_deque_string, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>, ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>>::read(*iprot, this->__fbthrift_field_deque_string);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -71,7 +71,7 @@ _readField_small_vector_iobuf:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_small_vector_iobuf = ::test::fixtures::python_capi::small_vector_iobuf();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::test::fixtures::python_capi::small_vector_iobuf, ::apache::thrift::type::cpp_type<::test::fixtures::python_capi::small_vector_iobuf, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::IOBuf, ::apache::thrift::type::binary_t>>>>::readWithContext(*iprot, this->__fbthrift_field_small_vector_iobuf, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::test::fixtures::python_capi::small_vector_iobuf, ::apache::thrift::type::cpp_type<::test::fixtures::python_capi::small_vector_iobuf, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::IOBuf, ::apache::thrift::type::binary_t>>>>::read(*iprot, this->__fbthrift_field_small_vector_iobuf);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -87,7 +87,7 @@ _readField_nested_small_vector:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_nested_small_vector = folly::small_vector<::test::fixtures::python_capi::fbvector_string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, folly::small_vector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::cpp_type<folly::small_vector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>::readWithContext(*iprot, this->__fbthrift_field_nested_small_vector, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, folly::small_vector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::cpp_type<folly::small_vector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>::read(*iprot, this->__fbthrift_field_nested_small_vector);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -103,7 +103,7 @@ _readField_small_vector_tensor:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_small_vector_tensor = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::string>>>, folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>>>::readWithContext(*iprot, this->__fbthrift_field_small_vector_tensor, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::string>>>, folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<::test::fixtures::python_capi::fbvector_string, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>>>::read(*iprot, this->__fbthrift_field_small_vector_tensor);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -325,7 +325,7 @@ _readField_std_set:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_std_set = std::set<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, std::set<::std::string>, ::apache::thrift::type::cpp_type<std::set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_std_set, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, std::set<::std::string>, ::apache::thrift::type::cpp_type<std::set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_std_set);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -341,7 +341,7 @@ _readField_std_unordered:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_std_unordered = std::unordered_set<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, std::unordered_set<::std::string>, ::apache::thrift::type::cpp_type<std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_std_unordered, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, std::unordered_set<::std::string>, ::apache::thrift::type::cpp_type<std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_std_unordered);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -357,7 +357,7 @@ _readField_folly_fast:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_fast = folly::F14FastSet<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14FastSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14FastSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_fast, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14FastSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14FastSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_fast);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -373,7 +373,7 @@ _readField_folly_node:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_node = folly::F14NodeSet<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14NodeSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14NodeSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_node, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14NodeSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14NodeSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_node);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -389,7 +389,7 @@ _readField_folly_value:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_value = folly::F14ValueSet<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14ValueSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14ValueSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_value, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14ValueSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14ValueSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_value);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -405,7 +405,7 @@ _readField_folly_vector:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_vector = folly::F14VectorSet<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14VectorSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14VectorSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_vector, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::F14VectorSet<::std::string>, ::apache::thrift::type::cpp_type<folly::F14VectorSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_vector);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(5, true);
@@ -421,7 +421,7 @@ _readField_folly_sorted_vector:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_sorted_vector = folly::sorted_vector_set<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::sorted_vector_set<::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_sorted_vector, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::string>, folly::sorted_vector_set<::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_sorted_vector);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -687,7 +687,7 @@ _readField_std_map:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_std_map = std::map<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<std::map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_std_map, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<std::map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_std_map);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -703,7 +703,7 @@ _readField_std_unordered:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_std_unordered = std::unordered_map<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<std::unordered_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_std_unordered, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<std::unordered_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_std_unordered);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -719,7 +719,7 @@ _readField_folly_fast:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_fast = folly::F14FastMap<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14FastMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14FastMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_fast, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14FastMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14FastMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_fast);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -735,7 +735,7 @@ _readField_folly_node:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_node = folly::F14NodeMap<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14NodeMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14NodeMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_node, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14NodeMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14NodeMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_node);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -751,7 +751,7 @@ _readField_folly_value:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_value = folly::F14ValueMap<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14ValueMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14ValueMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_value, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14ValueMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14ValueMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_value);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(4, true);
@@ -767,7 +767,7 @@ _readField_folly_vector:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_vector = folly::F14VectorMap<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14VectorMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14VectorMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_vector, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::F14VectorMap<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::F14VectorMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_vector);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(5, true);
@@ -783,7 +783,7 @@ _readField_folly_sorted_vector:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_folly_sorted_vector = folly::sorted_vector_map<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_folly_sorted_vector, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_folly_sorted_vector);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -1047,7 +1047,7 @@ void TWrapped::readNoXfer(Protocol_* iprot) {
   }
 _readField_fieldA:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_fieldA, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_fieldA);
   }
  this->__isset.set(0, true);
 
@@ -1060,7 +1060,7 @@ _readField_fieldA:
   }
 _readField_fieldB:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::readWithContext(*iprot, this->__fbthrift_field_fieldB, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string, ::apache::thrift::type::binary_t>::read(*iprot, this->__fbthrift_field_fieldB);
   }
  this->__isset.set(1, true);
 
@@ -1210,7 +1210,7 @@ _readField_lst:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_lst = ::test::fixtures::python_capi::ListOfWrapped();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrapped, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>::readWithContext(*iprot, this->__fbthrift_field_lst, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrapped, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>::read(*iprot, this->__fbthrift_field_lst);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -1338,7 +1338,7 @@ _readField_lst:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_lst = ::test::fixtures::python_capi::VecOfWrapped();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::VecOfWrapped, ::apache::thrift::type::cpp_type<::test::fixtures::python_capi::VecOfWrapped, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>>::readWithContext(*iprot, this->__fbthrift_field_lst, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::VecOfWrapped, ::apache::thrift::type::cpp_type<::test::fixtures::python_capi::VecOfWrapped, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>>::read(*iprot, this->__fbthrift_field_lst);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -1466,7 +1466,7 @@ _readField_lst:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_lst = ::test::fixtures::python_capi::ListOfWrappedAlias();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrappedAlias, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>::readWithContext(*iprot, this->__fbthrift_field_lst, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrappedAlias, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>::read(*iprot, this->__fbthrift_field_lst);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);

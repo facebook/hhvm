@@ -39,7 +39,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_MyIncludedField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::read(*iprot, this->__fbthrift_field_MyIncludedField);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -54,7 +54,7 @@ _readField_MyIncludedField:
 _readField_MyOtherIncludedField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::readWithContext(*iprot, this->__fbthrift_field_MyOtherIncludedField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::read(*iprot, this->__fbthrift_field_MyOtherIncludedField);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -68,7 +68,7 @@ _readField_MyOtherIncludedField:
   }
 _readField_MyIncludedInt:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedInt, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_MyIncludedInt);
   }
  this->__isset.set(2, true);
 

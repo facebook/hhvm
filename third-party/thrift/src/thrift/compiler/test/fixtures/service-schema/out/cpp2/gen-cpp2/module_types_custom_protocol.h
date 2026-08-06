@@ -39,7 +39,7 @@ void CustomException::readNoXfer(Protocol_* iprot) {
   }
 _readField_name:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_name);
   }
  this->__isset.set(0, true);
 
@@ -52,7 +52,7 @@ _readField_name:
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::service_schema::Result, ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::service_schema::Result>>::readWithContext(*iprot, this->__fbthrift_field_result, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::service_schema::Result, ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::service_schema::Result>>::read(*iprot, this->__fbthrift_field_result);
   }
  this->__isset.set(1, true);
 

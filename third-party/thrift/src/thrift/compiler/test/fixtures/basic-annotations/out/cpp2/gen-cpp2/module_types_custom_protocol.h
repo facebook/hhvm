@@ -37,7 +37,7 @@ void MyStructNestedAnnotation::readNoXfer(Protocol_* iprot) {
   }
 _readField_name:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_name);
   }
  this->__isset.set(0, true);
 
@@ -337,7 +337,7 @@ void YourStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_majorVer:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_majorVer, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_majorVer);
   }
  this->__isset.set(0, true);
 
@@ -350,7 +350,7 @@ _readField_majorVer:
   }
 _readField_abstract:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_abstract, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_abstract);
   }
  this->__isset.set(1, true);
 
@@ -363,7 +363,7 @@ _readField_abstract:
   }
 _readField_annotation_with_quote:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_annotation_with_quote, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_annotation_with_quote);
   }
  this->__isset.set(2, true);
 
@@ -376,7 +376,7 @@ _readField_annotation_with_quote:
   }
 _readField_class_:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_class_, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_class_);
   }
  this->__isset.set(3, true);
 
@@ -389,7 +389,7 @@ _readField_class_:
   }
 _readField_annotation_with_trailing_comma:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_annotation_with_trailing_comma, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_annotation_with_trailing_comma);
   }
  this->__isset.set(4, true);
 
@@ -402,7 +402,7 @@ _readField_annotation_with_trailing_comma:
   }
 _readField_empty_annotations:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_empty_annotations, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_empty_annotations);
   }
  this->__isset.set(5, true);
 
@@ -415,7 +415,7 @@ _readField_empty_annotations:
   }
 _readField_my_enum:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::YourEnum, ::apache::thrift::type::enum_t<::cpp2::YourEnum>>::readWithContext(*iprot, this->__fbthrift_field_my_enum, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::YourEnum, ::apache::thrift::type::enum_t<::cpp2::YourEnum>>::read(*iprot, this->__fbthrift_field_my_enum);
   }
  this->__isset.set(6, true);
 
@@ -430,7 +430,7 @@ _readField_cpp_type_annotation:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_cpp_type_annotation = ::cpp2::list_string_6884();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884, ::apache::thrift::type::cpp_type<::cpp2::list_string_6884, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::readWithContext(*iprot, this->__fbthrift_field_cpp_type_annotation, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884, ::apache::thrift::type::cpp_type<::cpp2::list_string_6884, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>::read(*iprot, this->__fbthrift_field_cpp_type_annotation);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);
@@ -756,7 +756,7 @@ void SecretStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_id:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_id);
   }
  this->__isset.set(0, true);
 
@@ -769,7 +769,7 @@ _readField_id:
   }
 _readField_password:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_password, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_password);
   }
  this->__isset.set(1, true);
 

@@ -40,7 +40,7 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_other_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>>::readWithContext(*iprot, this->__fbthrift_field_other_foo, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>>::read(*iprot, this->__fbthrift_field_other_foo);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -55,7 +55,7 @@ _readField_other_foo:
 _readField_yet_another_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>>::readWithContext(*iprot, this->__fbthrift_field_yet_another_foo, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>>::read(*iprot, this->__fbthrift_field_yet_another_foo);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);

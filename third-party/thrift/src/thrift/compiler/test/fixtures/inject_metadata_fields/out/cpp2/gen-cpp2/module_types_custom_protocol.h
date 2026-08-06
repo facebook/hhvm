@@ -38,7 +38,7 @@ void Fields::readNoXfer(Protocol_* iprot) {
   }
 _readField_injected_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_injected_field);
   }
  this->__isset.set(0, true);
 
@@ -163,7 +163,7 @@ void FieldsInjectedToEmptyStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_injected_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_injected_field);
   }
  this->__isset.set(0, true);
 
@@ -288,7 +288,7 @@ void FieldsInjectedToStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_string_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_string_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_string_field);
   }
  this->__isset.set(0, true);
 
@@ -301,7 +301,7 @@ _readField_string_field:
   }
 _readField_injected_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_injected_field);
   }
  this->__isset.set(1, true);
 
@@ -449,7 +449,7 @@ void FieldsInjectedWithIncludedStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_string_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_string_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_string_field);
   }
  this->__isset.set(0, true);
 
@@ -462,7 +462,7 @@ _readField_string_field:
   }
 _readField_injected_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_injected_field);
   }
  this->__isset.set(1, true);
 
@@ -476,7 +476,7 @@ _readField_injected_field:
 _readField_injected_structured_annotation_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::string>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, *ptr);
     this->__fbthrift_field_injected_structured_annotation_field = std::move(ptr);
   }
 
@@ -490,7 +490,7 @@ _readField_injected_structured_annotation_field:
 _readField_injected_unstructured_annotation_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::string>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, *ptr, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, *ptr);
     this->__fbthrift_field_injected_unstructured_annotation_field = std::move(ptr);
   }
 
@@ -688,7 +688,7 @@ void FieldsInjectedWithFieldsWithIncludedStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_string_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_string_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_string_field);
   }
  this->__isset.set(0, true);
 
@@ -702,7 +702,7 @@ _readField_string_field:
 _readField_injected_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::InjectedField, ::apache::thrift::type::struct_t<::cpp2::InjectedField>>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::InjectedField, ::apache::thrift::type::struct_t<::cpp2::InjectedField>>::read(*iprot, this->__fbthrift_field_injected_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);

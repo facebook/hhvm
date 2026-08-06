@@ -37,7 +37,7 @@ void Limits::readNoXfer(Protocol_* iprot) {
   }
 _readField_max_i64_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_max_i64_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_max_i64_field);
   }
  this->__isset.set(0, true);
 
@@ -50,7 +50,7 @@ _readField_max_i64_field:
   }
 _readField_min_i64_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_min_i64_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t, ::apache::thrift::type::i64_t>::read(*iprot, this->__fbthrift_field_min_i64_field);
   }
  this->__isset.set(1, true);
 
@@ -63,7 +63,7 @@ _readField_min_i64_field:
   }
 _readField_max_i32_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_max_i32_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_max_i32_field);
   }
  this->__isset.set(2, true);
 
@@ -76,7 +76,7 @@ _readField_max_i32_field:
   }
 _readField_min_i32_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_min_i32_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::read(*iprot, this->__fbthrift_field_min_i32_field);
   }
  this->__isset.set(3, true);
 
@@ -89,7 +89,7 @@ _readField_min_i32_field:
   }
 _readField_max_i16_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::readWithContext(*iprot, this->__fbthrift_field_max_i16_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::read(*iprot, this->__fbthrift_field_max_i16_field);
   }
  this->__isset.set(4, true);
 
@@ -102,7 +102,7 @@ _readField_max_i16_field:
   }
 _readField_min_i16_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::readWithContext(*iprot, this->__fbthrift_field_min_i16_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t, ::apache::thrift::type::i16_t>::read(*iprot, this->__fbthrift_field_min_i16_field);
   }
  this->__isset.set(5, true);
 
@@ -115,7 +115,7 @@ _readField_min_i16_field:
   }
 _readField_max_byte_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t, ::apache::thrift::type::byte_t>::readWithContext(*iprot, this->__fbthrift_field_max_byte_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t, ::apache::thrift::type::byte_t>::read(*iprot, this->__fbthrift_field_max_byte_field);
   }
  this->__isset.set(6, true);
 
@@ -128,7 +128,7 @@ _readField_max_byte_field:
   }
 _readField_min_byte_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t, ::apache::thrift::type::byte_t>::readWithContext(*iprot, this->__fbthrift_field_min_byte_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t, ::apache::thrift::type::byte_t>::read(*iprot, this->__fbthrift_field_min_byte_field);
   }
  this->__isset.set(7, true);
 

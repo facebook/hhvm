@@ -38,7 +38,7 @@ void SomeStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_reasonable:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_reasonable, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::read(*iprot, this->__fbthrift_field_reasonable);
   }
  this->__isset.set(0, true);
 
@@ -51,7 +51,7 @@ _readField_reasonable:
   }
 _readField_fine:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_fine, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::read(*iprot, this->__fbthrift_field_fine);
   }
  this->__isset.set(1, true);
 
@@ -64,7 +64,7 @@ _readField_fine:
   }
 _readField_questionable:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_questionable, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::read(*iprot, this->__fbthrift_field_questionable);
   }
  this->__isset.set(2, true);
 
@@ -79,7 +79,7 @@ _readField_tags:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_tags = ::std::set<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_tags, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::read(*iprot, this->__fbthrift_field_tags);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -274,7 +274,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_me2_3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::readWithContext(*iprot, this->__fbthrift_field_me2_3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::read(*iprot, this->__fbthrift_field_me2_3);
   }
  this->__isset.set(0, true);
 
@@ -287,7 +287,7 @@ _readField_me2_3:
   }
 _readField_me3_n3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::readWithContext(*iprot, this->__fbthrift_field_me3_n3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::read(*iprot, this->__fbthrift_field_me3_n3);
   }
  this->__isset.set(1, true);
 
@@ -300,7 +300,7 @@ _readField_me3_n3:
   }
 _readField_me1_t1:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::readWithContext(*iprot, this->__fbthrift_field_me1_t1, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::read(*iprot, this->__fbthrift_field_me1_t1);
   }
  this->__isset.set(2, true);
 
@@ -313,7 +313,7 @@ _readField_me1_t1:
   }
 _readField_me1_t2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::readWithContext(*iprot, this->__fbthrift_field_me1_t2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::read(*iprot, this->__fbthrift_field_me1_t2);
   }
  this->__isset.set(3, true);
 

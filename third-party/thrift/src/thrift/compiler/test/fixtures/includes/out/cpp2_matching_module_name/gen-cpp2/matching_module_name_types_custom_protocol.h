@@ -39,7 +39,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_OtherStructField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::matching_module_name::OtherStruct, ::apache::thrift::type::struct_t<::matching_module_name::OtherStruct>>::readWithContext(*iprot, this->__fbthrift_field_OtherStructField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::matching_module_name::OtherStruct, ::apache::thrift::type::struct_t<::matching_module_name::OtherStruct>>::read(*iprot, this->__fbthrift_field_OtherStructField);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);

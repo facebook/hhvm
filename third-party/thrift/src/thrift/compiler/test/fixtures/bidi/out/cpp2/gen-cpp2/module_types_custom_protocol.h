@@ -37,7 +37,7 @@ void BiDiSinkException::readNoXfer(Protocol_* iprot) {
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(0, true);
 
@@ -162,7 +162,7 @@ void BiDiStreamException::readNoXfer(Protocol_* iprot) {
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(0, true);
 
@@ -287,7 +287,7 @@ void BiDiMethodException::readNoXfer(Protocol_* iprot) {
   }
 _readField_message:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::read(*iprot, this->__fbthrift_field_message);
   }
  this->__isset.set(0, true);
 

@@ -162,11 +162,6 @@ class Json5ProtocolReader final {
   template <class Int>
   void readEnum(
       std::int32_t& value, ::apache::thrift::detail::st::enum_find<Int>& map);
-  template <typename EnumType, typename Context>
-  void readEnumWithContext(EnumType& value, Context& /*ctx*/) {
-    readEnum(value);
-  }
-
   bool peekMap();
   bool peekList();
   bool peekSet();

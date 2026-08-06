@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
-#include <limits>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -30,66 +29,6 @@ using namespace apache::thrift::protocol;
 using namespace apache::thrift::detail::pm;
 
 namespace {
-
-struct NonAcceptingContext {
-  static constexpr bool kAcceptsContext = false;
-  std::int16_t fieldId;
-};
-
-class ContextAwareCompactProtocolReader : public CompactProtocolReader {
- public:
-  template <typename Context>
-  void readI32WithContext(std::int32_t& out, Context& context) {
-    contextHookCalled = true;
-    contextFieldId = context.fieldId;
-    readI32(out);
-  }
-
-  bool contextHookCalled{false};
-  std::int16_t contextFieldId{0};
-};
-
-std::unique_ptr<folly::IOBuf> createI32Input(std::int32_t value) {
-  folly::IOBufQueue queue;
-  CompactProtocolWriter writer;
-  writer.setOutput(&queue);
-  writer.writeI32(value);
-  return queue.move();
-}
-
-TEST(ProtocolMethods, UsesProtocolContextHookWhenContextDoesNotAdvertiseIt) {
-  auto input = createI32Input(42);
-  ContextAwareCompactProtocolReader reader;
-  reader.setInput(input.get());
-  NonAcceptingContext context{17};
-  std::int32_t value = 0;
-
-  protocol_methods<
-      type_class::integral,
-      std::int32_t,
-      type::infer_tag<std::int32_t>>::readWithContext(reader, value, context);
-
-  EXPECT_EQ(value, 42);
-  EXPECT_TRUE(reader.contextHookCalled);
-  EXPECT_EQ(reader.contextFieldId, 17);
-}
-
-TEST(ProtocolMethods, UsesProtocolContextHookForUnsignedInteger) {
-  auto input = createI32Input(-1);
-  ContextAwareCompactProtocolReader reader;
-  reader.setInput(input.get());
-  NonAcceptingContext context{23};
-  std::uint32_t value = 0;
-
-  protocol_methods<
-      type_class::integral,
-      std::uint32_t,
-      type::infer_tag<std::uint32_t>>::readWithContext(reader, value, context);
-
-  EXPECT_EQ(value, std::numeric_limits<std::uint32_t>::max());
-  EXPECT_TRUE(reader.contextHookCalled);
-  EXPECT_EQ(reader.contextFieldId, 23);
-}
 
 template <class ProtocolWriter>
 std::unique_ptr<folly::IOBuf> createTestInput() {
@@ -129,10 +68,10 @@ std::unique_ptr<folly::IOBuf> createTestInput() {
   return queue.move();
 }
 
-template <typename Protocol, typename State, typename T>
-void readFieldContents(Protocol& protocol, State& state, T& out) {
-  protocol_methods<type_class::integral, T, type::infer_tag<T>>::
-      readWithContext(protocol, out, state);
+template <typename Protocol, typename T>
+void readFieldContents(Protocol& protocol, T& out) {
+  protocol_methods<type_class::integral, T, type::infer_tag<T>>::read(
+      protocol, out);
 }
 
 template <class ProtocolReader>
@@ -146,43 +85,43 @@ void testAdvanceToNextFieldSuccess() {
   EXPECT_TRUE(state.advanceToNextField(&reader, 0, 13, T_BYTE));
   {
     int8_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 24);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 13, 23, T_BYTE));
   {
     int8_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 123);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 23, 38, T_I64));
   {
     int64_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 123456789);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 38, 39, T_BOOL));
   {
     bool value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, true);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 39, 63, T_BOOL));
   {
     bool value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, false);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 63, -8192, T_I32));
   {
     int32_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 5678910);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, -8192, 16381, T_I16));
   {
     int16_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 12345);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 16381, 0, T_STOP));
@@ -208,7 +147,7 @@ void testAdvanceToNextFieldFail() {
   EXPECT_TRUE(state.advanceToNextField(&reader, 13, 23, T_BYTE));
   {
     int8_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 123);
   }
   // Test mismatched field id.
@@ -288,7 +227,7 @@ TEST(SimpleJSONProtocol, basicStructReadState) {
   EXPECT_EQ(state.fieldType, T_VOID); // SimpleJSON infers type from value
   {
     int8_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 24);
   }
   state.readFieldEnd(&reader);
@@ -298,7 +237,7 @@ TEST(SimpleJSONProtocol, basicStructReadState) {
   EXPECT_EQ(state.fieldType, T_VOID);
   {
     int32_t value;
-    readFieldContents(reader, state, value);
+    readFieldContents(reader, value);
     EXPECT_EQ(value, 123456);
   }
   state.readFieldEnd(&reader);

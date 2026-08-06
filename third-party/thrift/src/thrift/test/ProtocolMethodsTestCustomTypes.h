@@ -49,11 +49,6 @@ struct protocol_methods<type_class::integral, test::MyInt, ExpectedTag> {
     protocol.readI32(out.value);
   }
 
-  template <typename Protocol, typename Context>
-  static void readWithContext(Protocol& protocol, test::MyInt& out, Context&) {
-    read(protocol, out);
-  }
-
   template <typename Protocol>
   static std::size_t write(Protocol& protocol, const test::MyInt& in) {
     return protocol.writeI32(in.value);
@@ -70,12 +65,6 @@ struct protocol_methods<type_class::string, test::MyString, ExpectedTag> {
   template <typename Protocol>
   static void read(Protocol& protocol, test::MyString& out) {
     protocol.readString(out.value);
-  }
-
-  template <typename Protocol, typename Context>
-  static void readWithContext(
-      Protocol& protocol, test::MyString& out, Context&) {
-    read(protocol, out);
   }
 
   template <typename Protocol>

@@ -879,6 +879,24 @@ final class ThriftContextPropState {
     );
   }
 
+  public function isIGAgentTestingPlatformRequest(): bool {
+    return $this->isBaggageFlags1Set(
+      ContextProp\BaggageFlags1::IG_AGENT_TESTING_PLATFORM_REQUEST,
+    );
+  }
+
+  public function setIGAgentTestingPlatformRequest(): void {
+    $this->setBaggageFlags1ByName(
+      ContextProp\BaggageFlags1::IG_AGENT_TESTING_PLATFORM_REQUEST,
+    );
+  }
+
+  public function clearIGAgentTestingPlatformRequest(): void {
+    $this->clearBaggageFlags1ByName(
+      ContextProp\BaggageFlags1::IG_AGENT_TESTING_PLATFORM_REQUEST,
+    );
+  }
+
   public readonly function getAgentId_DIRECTLY_WITHOUT_LOOKASIDE_DO_NOT_CALL_THIS_UNLESS_YOU_ARE_AGENT_DOT_PHP(
   )[leak_safe]: ?string {
     if ($this->storage->baggage?->agent_id is null) {

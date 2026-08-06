@@ -66,6 +66,7 @@ class FilterChain {
 
   // release ownership of chain
   HTTPSource* release() {
+    tail_ = nullptr;
     return head_.release();
   }
 

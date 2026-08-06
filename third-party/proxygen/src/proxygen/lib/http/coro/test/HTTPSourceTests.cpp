@@ -14,6 +14,7 @@
 #include "proxygen/lib/http/coro/HTTPSourceReader.h"
 #include "proxygen/lib/http/coro/HTTPStreamSource.h"
 #include "proxygen/lib/http/coro/HTTPStreamSourceHolder.h"
+#include "proxygen/lib/http/coro/filters/MutateFilter.h"
 #include "proxygen/lib/http/coro/test/Mocks.h"
 #include "proxygen/lib/http/coro/util/ExecutorSourceFilter.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
@@ -1267,6 +1268,27 @@ TEST(HTTPSourceReader, filter) {
   folly::coro::blockingWait(reader.read(), &evb);
   EXPECT_EQ(filter.bytes, 100);
   EXPECT_EQ(events, 2);
+}
+
+// A heap allocated filter deletes itself when it reads EOM, so the reader must
+// not touch it after the read - notably HTTPClient clears the reader's source
+// once the read completes.
+TEST(HTTPSourceReader, heapAllocatedFilter) {
+  folly::EventBase evb;
+  bool sawHeaders = false;
+  auto* filter = new MutateFilter(
+      /*source=*/nullptr, [&sawHeaders](HTTPHeaderEvent& headerEvent) {
+        sawHeaders = true;
+        EXPECT_EQ(headerEvent.headers->getStatusCode(), 200);
+      });
+  filter->setHeapAllocated();
+
+  HTTPSourceReader reader;
+  reader.insertFilter(filter);
+  reader.setSource(HTTPFixedSource::makeFixedResponse(200, makeBuf(100)));
+  folly::coro::blockingWait(reader.read(), &evb);
+  reader.setSource(nullptr);
+  EXPECT_TRUE(sawHeaders);
 }
 
 TEST(HTTPErrorTests, ErrorStrings) {

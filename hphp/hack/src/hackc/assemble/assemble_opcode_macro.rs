@@ -129,7 +129,7 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
     if expected.segments.len() > 1 {
         expected.segments.pop();
         // Make sure to remove any trailing punctuation.
-        let t = expected.segments.pop().unwrap().into_value();
+        let t = expected.segments.pop().unwrap();
         expected.segments.push(t);
     }
 

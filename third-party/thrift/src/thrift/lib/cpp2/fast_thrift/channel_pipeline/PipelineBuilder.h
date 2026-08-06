@@ -305,6 +305,26 @@ class PipelineBuilder {
   }
 
   /**
+   * Append an already-constructed, type-erased handler node in head-to-tail
+   * order.
+   *
+   * Unlike addNext{Inbound,Outbound,Duplex}, the concrete handler type is not
+   * known at this call site — the node was produced by
+   * detail::makeHandlerNode<H, EventEnumT> where H was in scope (e.g. a
+   * config-time handler registry that erased H into a factory). The node is
+   * placed at the current tail-most position, so nodes appended later sit
+   * closer to the tail. Callers are responsible for building the node with the
+   * same EventEnumT as this builder so event subscriptions link correctly.
+   *
+   * @param node A HandlerNode produced by detail::makeHandlerNode
+   * @return Reference to this builder for chaining
+   */
+  PipelineBuilder& addErasedHandler(detail::HandlerNode node) {
+    handlers_.push_back(std::move(node));
+    return *this;
+  }
+
+  /**
    * Build the pipeline.
    *
    * Validates all required components are set, creates the PipelineImpl,

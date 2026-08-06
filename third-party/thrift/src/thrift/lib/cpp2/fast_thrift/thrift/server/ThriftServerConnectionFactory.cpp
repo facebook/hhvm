@@ -296,6 +296,12 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
     thriftPipelineBuilder.template addNextDuplex<WriteBufferHandler>(
         write_buffer_backpressure_handler_tag);
   }
+  // Embedder-registered handlers go after all built-ins, in registration
+  // order — the first sits closest to the head, the last immediately above
+  // the tail adapter. Each factory constructs a fresh per-connection instance.
+  for (const auto& factory : config_.thriftPipelineHandlerFactories) {
+    thriftPipelineBuilder.addErasedHandler(factory());
+  }
   auto thriftPipeline = thriftPipelineBuilder.build();
   transportAdapterPtr->setPipeline(thriftPipeline.get());
   tailAdapter->setPipeline(thriftPipeline.get());

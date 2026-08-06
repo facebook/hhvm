@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <memory>
 #include <variant>
+#include <vector>
 
 #include <boost/intrusive_ptr.hpp>
 #include <folly/io/async/AsyncTransport.h>
@@ -37,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ThriftServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
@@ -93,6 +95,13 @@ struct ThriftServerConnectionFactoryConfig {
   // for semantics.
   std::chrono::milliseconds drainTimeout{std::chrono::seconds{30}};
   std::chrono::milliseconds reapTimeout{std::chrono::seconds{60}};
+
+  // Ordered factories for embedder-registered thrift pipeline handlers. Each
+  // factory produces a fresh handler node per connection; they are spliced
+  // into the thrift pipeline after all built-in handlers, in registration
+  // order — first registered sits closest to the head, last registered sits
+  // immediately above the tail app adapter.
+  std::vector<ThriftPipelineHandlerFactory> thriftPipelineHandlerFactories;
 };
 
 /**

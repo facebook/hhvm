@@ -18,7 +18,11 @@
 
 #include <chrono>
 #include <csignal>
+#include <stdexcept>
+#include <utility>
 #include <vector>
+
+#include <fmt/core.h>
 
 #include <folly/Executor.h>
 #include <folly/Function.h>
@@ -90,6 +94,50 @@ void FastThriftServer::setDebugInterface(
   CHECK(!auxInterfaces_.debugHandler)
       << "FastThriftServer::setDebugInterface called more than once";
   auxInterfaces_.debugHandler = std::move(handler);
+}
+
+void FastThriftServer::addNativeThriftPipelineHandlers(
+    std::vector<server::ThriftPipelineHandlerFactory> factories) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::addNativeThriftPipelineHandlers must be called "
+         "before start()/serve()";
+  thriftPipelineHandlerFactories_.reserve(
+      thriftPipelineHandlerFactories_.size() + factories.size());
+  for (auto& factory : factories) {
+    thriftPipelineHandlerFactories_.push_back(std::move(factory));
+  }
+}
+
+void FastThriftServer::addModule(FastServerModule module) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::addModule must be called before start()/serve()";
+  if (module.name().empty()) {
+    // The empty namespace is reserved for top-level
+    // addNativeThriftPipelineHandlers ids; rejecting empty module names keeps
+    // module and top-level id streams disjoint.
+    throw std::logic_error(
+        "FastThriftServer::addModule: module name must be non-empty");
+  }
+  if (moduleNames_.contains(module.name())) {
+    throw std::logic_error(
+        fmt::format(
+            "FastThriftServer::addModule: duplicate module name: {}",
+            module.name()));
+  }
+  auto name = module.name();
+  // Splice the module's handlers into the ordered list at the current call
+  // position, preserving intra-module order.
+  auto factories = std::move(module).handlers();
+  thriftPipelineHandlerFactories_.reserve(
+      thriftPipelineHandlerFactories_.size() + factories.size());
+  for (auto& factory : factories) {
+    thriftPipelineHandlerFactories_.push_back(std::move(factory));
+  }
+  // Claim the name only once the splice succeeded, so a throwing splice does
+  // not leave the name permanently reserved against a retry.
+  moduleNames_.insert(std::move(name));
 }
 
 void FastThriftServer::setOnConnectionAccepted(OnConnectionAcceptedFn cb) {
@@ -277,6 +325,7 @@ void FastThriftServer::start() {
       .batchingConfig = config_.batchingConfig,
       .drainTimeout = config_.drainTimeout,
       .reapTimeout = config_.reapTimeout,
+      .thriftPipelineHandlerFactories = thriftPipelineHandlerFactories_,
   };
   std::function<void(server::ThriftServerConnection&)> onAccept;
   if (onConnectionAccepted_) {

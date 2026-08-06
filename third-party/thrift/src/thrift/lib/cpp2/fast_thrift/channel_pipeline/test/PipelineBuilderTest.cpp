@@ -196,6 +196,59 @@ TEST_F(PipelineBuilderTest, BuildThrowsWithoutAllocator) {
       std::runtime_error);
 }
 
+TEST_F(PipelineBuilderTest, AddErasedHandlerAppendsPrebuiltNode) {
+  auto handler = std::make_unique<MockHandler>();
+  auto* handler_ptr = handler.get();
+  auto node =
+      detail::makeHandlerNode<MockHandler>(codec_tag, std::move(handler));
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(&transport_)
+          .setTail(&app_)
+          .setAllocator(&allocator_)
+          .addErasedHandler(std::move(node))
+          .build();
+
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
+  EXPECT_EQ(pipeline->handlerCount(), 1);
+  EXPECT_EQ(handler_ptr->handlerAddedCount(), 1);
+  EXPECT_NE(pipeline->context(codec_tag), nullptr);
+}
+
+TEST_F(PipelineBuilderTest, AddErasedHandlerPreservesRegistrationOrder) {
+  auto typed = std::make_unique<MockHandler>();
+  auto erased = std::make_unique<MockHandler>();
+  auto* typed_ptr = typed.get();
+  auto* erased_ptr = erased.get();
+  auto node =
+      detail::makeHandlerNode<MockHandler>(logging_tag, std::move(erased));
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(&transport_)
+          .setTail(&app_)
+          .setAllocator(&allocator_)
+          .addNextDuplex<MockHandler>(codec_tag, std::move(typed))
+          .addErasedHandler(std::move(node))
+          .build();
+
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
+  EXPECT_EQ(pipeline->handlerCount(), 2);
+  // Typed handler registered first (order 0), erased node second (order 1):
+  // addErasedHandler appends at the current tail-most position.
+  EXPECT_EQ(typed_ptr->handlerAddedOrder(), 0);
+  EXPECT_EQ(erased_ptr->handlerAddedOrder(), 1);
+}
+
 TEST_F(PipelineBuilderTest, AddNextDuplexWithInPlaceConstruction) {
   struct TestHandler {
     std::string name;

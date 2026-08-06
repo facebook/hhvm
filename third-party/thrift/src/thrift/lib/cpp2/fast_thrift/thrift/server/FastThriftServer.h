@@ -21,8 +21,11 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include <folly/SocketAddress.h>
+#include <folly/container/F14Set.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/synchronization/Baton.h>
 
@@ -37,6 +40,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/FastServerModule.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -126,6 +131,32 @@ class FastThriftServer {
    */
   void setDebugInterface(
       std::shared_ptr<fast_thrift::DebugServerInterface> handler);
+
+  /**
+   * Register raw ("native") embedder handlers to splice into the thrift
+   * pipeline of every accepted connection. The handlers are inserted after all
+   * built-in thrift handlers, immediately above the tail app adapter: the first
+   * registered sits closest to the head, the last closest to the tail. Each
+   * factory is invoked once per connection to construct a fresh handler
+   * instance (handlers may hold per-connection state).
+   *
+   * Appends to any handlers already registered (via a prior call or addModule),
+   * preserving registration order. Build the factories with
+   * server::makeThriftPipelineHandlerFactory<T>(...). Must be called before
+   * start()/serve().
+   */
+  void addNativeThriftPipelineHandlers(
+      std::vector<server::ThriftPipelineHandlerFactory> factories);
+
+  /**
+   * Register a module — a named, ordered bundle of thrift pipeline handlers.
+   * The module's handlers are appended to the pipeline in call order relative
+   * to other addModule / addNativeThriftPipelineHandlers calls, preserving
+   * intra-module order. Module names must be non-empty and unique; a duplicate
+   * or empty name throws std::logic_error. Must be called before
+   * start()/serve().
+   */
+  void addModule(FastServerModule module);
 
   /**
    * Configure TLS. After this is called, every accepted connection is wrapped
@@ -292,6 +323,12 @@ class FastThriftServer {
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
   AuxiliaryInterfaces auxInterfaces_;
+  // Embedder-registered thrift pipeline handler factories, in registration
+  // order. Copied into the per-connection factory config at start().
+  std::vector<server::ThriftPipelineHandlerFactory>
+      thriftPipelineHandlerFactories_;
+  // Names of registered modules, for duplicate detection in addModule.
+  folly::F14FastSet<std::string> moduleNames_;
   // Cached ThriftServiceMetadataResponse for the user's service. Built once
   // at start() when config_.enableMetadataService is set; null otherwise.
   // Shared across every per-connection MetadataAppAdapter.

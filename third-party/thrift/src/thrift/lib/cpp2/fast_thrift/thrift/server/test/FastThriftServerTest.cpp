@@ -16,10 +16,14 @@
 
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <chrono>
+#include <cstddef>
 #include <memory>
+#include <set>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <thread>
 
 #include <fizz/client/AsyncFizzClient.h>
@@ -32,9 +36,15 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/test/TestCert.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftExtension.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftExtensionPipelineHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/FastServerModule.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/NativeThriftHandlerAllowlist.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServerAsyncClient.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
@@ -808,6 +818,132 @@ std::shared_ptr<folly::IOThreadPoolExecutor> makeFixedSizePool(size_t threads) {
       /*maxThreads=*/threads, /*minThreads=*/threads);
 }
 
+namespace cp = ::apache::thrift::fast_thrift::channel_pipeline;
+
+// Observer extension: counts the requests and responses it sees, then lets
+// them continue. When given a shared globalSeq counter, it records the sequence
+// number of its first request into firstRequestSeq; extensions registered in
+// order see strictly increasing first-request sequences (requests flow
+// head→tail), which pins registration order == pipeline order.
+struct CountingExtension {
+  std::atomic<int>* requests{nullptr};
+  std::atomic<int>* responses{nullptr};
+  std::atomic<int>* globalSeq{nullptr};
+  std::atomic<int>* firstRequestSeq{nullptr};
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    if (requests) {
+      requests->fetch_add(1, std::memory_order_relaxed);
+    }
+    if (globalSeq && firstRequestSeq) {
+      int seq = globalSeq->fetch_add(1, std::memory_order_relaxed);
+      int expected = -1;
+      firstRequestSeq->compare_exchange_strong(expected, seq);
+    }
+    return ftt::RequestVerdict::proceed();
+  }
+
+  void onResponse(const ftt::ThriftResponseView& /*response*/) noexcept {
+    if (responses) {
+      responses->fetch_add(1, std::memory_order_relaxed);
+    }
+  }
+};
+
+// Read/write extension that rejects every request. Reads the method name and
+// stamps a header (exercising both halves of the mutator's access) then returns
+// a rejecting verdict, which short-circuits the pipeline: the service handler
+// must never run and the client receives an application error.
+struct RejectingExtension {
+  std::atomic<int>* rejections{nullptr};
+
+  ftt::RequestVerdict onRequest(ftt::ThriftRequestMutator& request) noexcept {
+    request.setHeader(
+        "x-rejected-by-extension", std::string(request.methodName()));
+    if (rejections) {
+      rejections->fetch_add(1, std::memory_order_relaxed);
+    }
+    return ftt::RequestVerdict::reject<std::runtime_error>(
+        "denied by extension");
+  }
+};
+
+// Drives one `add(7, 35)` RPC against `addr` and returns the result, so tests
+// that only care about exercising the server pipeline stay tight.
+int64_t addRoundTrip(const folly::SocketAddress& addr) {
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, addr);
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  int64_t sum = 0;
+  evb->runInEventBaseThread([&] {
+    if (client == nullptr) {
+      ADD_FAILURE() << "client was not constructed";
+      done.post();
+      return;
+    }
+    client->semifuture_add(7, 35)
+        .via(evb)
+        .thenValue([&](int64_t v) {
+          sum = v;
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          ADD_FAILURE() << "RPC failed: " << folly::exceptionStr(ew);
+          done.post();
+        });
+  });
+  EXPECT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  return sum;
+}
+
+// Drives one `add(7, 35)` RPC against `addr` and returns true iff the RPC
+// failed (errored) rather than returning a value. Used by reject tests.
+bool addRoundTripFails(const folly::SocketAddress& addr) {
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, addr);
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  bool failed = false;
+  evb->runInEventBaseThread([&] {
+    if (client == nullptr) {
+      ADD_FAILURE() << "client was not constructed";
+      done.post();
+      return;
+    }
+    client->semifuture_add(7, 35)
+        .via(evb)
+        .thenValue([&](int64_t) { done.post(); })
+        .thenError([&](const folly::exception_wrapper&) {
+          failed = true;
+          done.post();
+        });
+  });
+  EXPECT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  return failed;
+}
+
 } // namespace
 
 // Embedder pool actually drives accept + dispatch end-to-end.
@@ -851,6 +987,143 @@ TEST(FastThriftServerSharedPoolTest, RoundTripWithEmbedderPool) {
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
   EXPECT_EQ(sum, 42);
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// An observer extension registered via addThriftExtension is spliced into every
+// per-connection thrift pipeline and sees the inbound request and the outbound
+// response of a real RPC without disturbing it.
+TEST(FastThriftServerExtensionTest, ObserverExtensionObservesTraffic) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  std::atomic<int> requests{0};
+  std::atomic<int> responses{0};
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("observer")
+          .addThriftExtension<CountingExtension>(
+              &requests, &responses, nullptr, nullptr));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_GE(requests.load(), 1);
+  EXPECT_GE(responses.load(), 1);
+}
+
+// Extensions are spliced in registration order (head→tail), across modules and
+// within a module: module "first" (A) runs before module "second" (B, C), and
+// within "second" B runs before C. First-request sequence numbers pin
+// registration order == pipeline order.
+TEST(FastThriftServerExtensionTest, ExtensionsSplicedInRegistrationOrder) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  std::atomic<int> g{0};
+  std::atomic<int> seqA{-1};
+  std::atomic<int> seqB{-1};
+  std::atomic<int> seqC{-1};
+
+  auto handler = std::make_shared<TestHandler>();
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+
+  server.addModule(
+      ftt::FastServerModule("first").addThriftExtension<CountingExtension>(
+          nullptr, nullptr, &g, &seqA));
+  server.addModule(
+      ftt::FastServerModule("second")
+          .addThriftExtension<CountingExtension>(nullptr, nullptr, &g, &seqB)
+          .addThriftExtension<CountingExtension>(nullptr, nullptr, &g, &seqC));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_GE(seqA.load(), 0);
+  EXPECT_GE(seqB.load(), 0);
+  EXPECT_GE(seqC.load(), 0);
+  EXPECT_LT(seqA.load(), seqB.load());
+  EXPECT_LT(seqB.load(), seqC.load());
+}
+
+// The native-handler allowlist denies arbitrary user types and always permits
+// the framework's own extension adapter — so addThriftExtension needs no
+// allowlist entry while a raw user handler would be rejected at compile time by
+// makeThriftPipelineHandlerFactory's static_assert.
+TEST(FastThriftServerExtensionTest, NativeHandlerAllowlistGate) {
+  static_assert(
+      !ftt::server::kIsAllowedNativeThriftHandler<CountingExtension>,
+      "a raw user type must not be an allowlisted native handler");
+  static_assert(
+      ftt::server::kIsAllowedNativeThriftHandler<
+          ftt::server::ThriftExtensionPipelineHandler<CountingExtension>>,
+      "the framework extension adapter must always be allowlisted");
+}
+
+// ThriftRequestMutator derives from ThriftRequestView, so a mutator binds to a
+// const-view parameter but not vice versa. The adapter relies on that asymmetry
+// to dispatch: it tests the view form first, which is the only reason a
+// read/write extension is not silently handed a read-only view.
+TEST(FastThriftServerExtensionTest, ExtensionDispatchDiscriminatesAccess) {
+  static_assert(
+      ftt::HasRequestViewCallback<CountingExtension>,
+      "a read-only extension must match the view form");
+  static_assert(
+      ftt::HasRequestMutatorCallback<RejectingExtension>,
+      "a read/write extension must match the mutator form");
+  static_assert(
+      !ftt::HasRequestViewCallback<RejectingExtension>,
+      "a read/write extension must not match the view form, or view-first "
+      "dispatch would strip its write access");
+}
+
+// A read/write extension that rejects short-circuits the pipeline: the client
+// receives an error and the service handler never runs.
+TEST(FastThriftServerExtensionTest, ModifierRejectionShortCircuitsService) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  std::atomic<int> rejections{0};
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("reject").addThriftExtension<RejectingExtension>(
+          &rejections));
+  server.start();
+
+  EXPECT_TRUE(addRoundTripFails(server.getAddress()));
+  EXPECT_GE(rejections.load(), 1);
+}
+
+// Registering two modules with the same name on the server is rejected.
+TEST(FastThriftServerPipelineHandlerTest, DuplicateModuleNameThrows) {
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.addModule(ftt::FastServerModule("dup"));
+  EXPECT_THROW(
+      server.addModule(ftt::FastServerModule("dup")), std::logic_error);
+}
+
+// Empty module name is rejected — the empty namespace is reserved for
+// loose-handler ids.
+TEST(FastThriftServerPipelineHandlerTest, EmptyModuleNameThrows) {
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  EXPECT_THROW(server.addModule(ftt::FastServerModule("")), std::logic_error);
+}
+
+// The two-level id derivation yields a distinct id for every (namespace,
+// index) pair — no cross-namespace or arithmetic-adjacency collisions.
+TEST(FastServerModuleTest, DerivedHandlerIdsAreUniqueAcrossNamespaces) {
+  const std::vector<std::string_view> namespaces = {
+      "", "a", "b", "moduleA", "moduleB", "logging", "metrics"};
+  std::set<cp::HandlerId> ids;
+  std::size_t count = 0;
+  for (auto ns : namespaces) {
+    for (std::size_t i = 0; i < 32; ++i) {
+      ids.insert(ftt::server::deriveThriftPipelineHandlerId(ns, i));
+      ++count;
+    }
+  }
+  EXPECT_EQ(ids.size(), count);
 }
 
 // Server holds a reference to the embedder pool while running and releases

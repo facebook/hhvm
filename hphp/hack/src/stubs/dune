@@ -175,6 +175,14 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name saved_state_lookup_stubs)
+ (wrapped false)
+ (modules saved_state_lookup)
+ (libraries saved_state_lookup_common)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name edenfs_watcher_stubs)
  (wrapped false)
  (modules edenfs_watcher edenfs_watcher_types)

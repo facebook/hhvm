@@ -23,3 +23,6 @@ path = "src/integration_test.rs"
 
 [dependencies]
 cxx = "1.0.194"
+
+[dev-dependencies]
+static_assertions = "1.1.0"

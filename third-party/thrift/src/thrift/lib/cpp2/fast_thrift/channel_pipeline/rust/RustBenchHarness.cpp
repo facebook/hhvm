@@ -31,6 +31,7 @@
 #include <folly/BenchmarkUtil.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/memory/MallctlHelper.h>
 #include <folly/memory/Malloc.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
@@ -387,6 +388,54 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
   requireCount(rustApp.readCount, iterations, "Rust read tail");
   requireCount(rustTransport.writeCount, iterations, "Rust write head");
 
+  folly::ScopedEventBaseThread contextHandleEventBaseThread;
+  auto* contextHandleEventBase = contextHandleEventBaseThread.getEventBase();
+  BenchTransport contextHandleReadTransport;
+  BenchApp contextHandleReadApp;
+  BenchTransport contextHandleWriteTransport;
+  BenchApp contextHandleWriteApp;
+  PipelineImpl::Ptr contextHandleReadPipeline;
+  PipelineImpl::Ptr contextHandleWritePipeline;
+  double contextHandleRead = 0;
+  double contextHandleWrite = 0;
+  contextHandleEventBase->runInEventBaseThreadAndWait([&] {
+    contextHandleReadPipeline =
+        PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
+            .setEventBase(contextHandleEventBase)
+            .setHead(&contextHandleReadTransport)
+            .setTail(&contextHandleReadApp)
+            .setAllocator(&allocator)
+            .addNextDuplex<RustHandlerImpl>(
+                bench_rust_tag,
+                std::make_unique<RustHandlerImpl>(
+                    rust_handler_new_context_handle_test(8)))
+            .build();
+    contextHandleWritePipeline =
+        PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
+            .setEventBase(contextHandleEventBase)
+            .setHead(&contextHandleWriteTransport)
+            .setTail(&contextHandleWriteApp)
+            .setAllocator(&allocator)
+            .addNextDuplex<RustHandlerImpl>(
+                bench_rust_tag,
+                std::make_unique<RustHandlerImpl>(
+                    rust_handler_new_context_handle_test(9)))
+            .build();
+
+    watchdog.operation("Rust ContextHandle immediate read");
+    contextHandleRead = measureRead(*contextHandleReadPipeline, iterations);
+    watchdog.operation("Rust ContextHandle immediate write");
+    contextHandleWrite = measureWrite(*contextHandleWritePipeline, iterations);
+  });
+  requireCount(
+      contextHandleReadApp.readCount,
+      iterations,
+      "Rust ContextHandle read tail");
+  requireCount(
+      contextHandleWriteTransport.writeCount,
+      iterations,
+      "Rust ContextHandle write head");
+
   rust_handler_reset_test_counts();
   auto exceptionPipeline =
       PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
@@ -543,11 +592,53 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
   const uint64_t forwardAllocBytes = threadAllocatedBytes() - forwardBefore;
   const uint64_t forwardLoopCallbacks = forwardEvidenceEb.getNumLoopCallbacks();
 
+  watchdog.operation("ContextHandle type erasure allocation evidence");
+  auto typeErasureMessages = makeMessages(iterations);
+  const auto typeErasureBefore = threadAllocatedBytes();
+  for (auto& message : typeErasureMessages) {
+    auto bytes = RustMessageAdapter<BytesPtr>::tryTake(std::move(message));
+    if (!bytes) {
+      throw std::runtime_error("ContextHandle type erasure take failed");
+    }
+    folly::doNotOptimizeAway(
+        RustMessageAdapter<BytesPtr>::box(std::move(*bytes)));
+  }
+  const uint64_t contextHandleTypeErasureAllocBytes =
+      threadAllocatedBytes() - typeErasureBefore;
+
+  uint64_t contextHandlePathAllocBytes = 0;
+  uint64_t contextHandlePathLoopCallbacks = 0;
+  contextHandleEventBase->runInEventBaseThreadAndWait([&] {
+    auto warmup = makeMessages(1000);
+    for (auto& message : warmup) {
+      folly::doNotOptimizeAway(
+          contextHandleReadPipeline->fireRead(std::move(message)));
+    }
+    auto messages = makeMessages(iterations);
+    const auto callbacksBefore = contextHandleEventBase->getNumLoopCallbacks();
+    const auto before = threadAllocatedBytes();
+    for (auto& message : messages) {
+      folly::doNotOptimizeAway(
+          contextHandleReadPipeline->fireRead(std::move(message)));
+    }
+    contextHandlePathAllocBytes = threadAllocatedBytes() - before;
+    contextHandlePathLoopCallbacks =
+        contextHandleEventBase->getNumLoopCallbacks() - callbacksBefore;
+  });
+
   requireZero(readyLoopCallbacks, "ready path EventBase enqueue");
   requireZero(forwardLoopCallbacks, "forward path EventBase enqueue");
+  requireZero(
+      contextHandlePathLoopCallbacks, "ContextHandle EventBase-local enqueue");
   if (jemalloc) {
     requireZero(readyAllocBytes, "ready path heap allocation");
     requireZero(forwardAllocBytes, "forward path heap allocation");
+    requireZero(
+        contextHandleTypeErasureAllocBytes,
+        "ContextHandle inline type erasure heap allocation");
+    requireZero(
+        contextHandlePathAllocBytes,
+        "ContextHandle EventBase-local heap allocation");
   }
 
   watchdog.operation("benchmark result assembly");
@@ -557,6 +648,8 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
       rustRead,
       nativeWrite,
       rustWrite,
+      contextHandleRead,
+      contextHandleWrite,
       nativeException,
       rustException,
       nativeReadReady,
@@ -567,8 +660,11 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
       rustWriteRecovery,
       readyAllocBytes,
       forwardAllocBytes,
+      contextHandleTypeErasureAllocBytes,
+      contextHandlePathAllocBytes,
       readyLoopCallbacks,
       forwardLoopCallbacks,
+      contextHandlePathLoopCallbacks,
       jemalloc,
   };
 }

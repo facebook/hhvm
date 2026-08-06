@@ -53,7 +53,12 @@ pub(crate) mod ffi {
         fn rust_handler_new_panic_retention() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_exception_preserve() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_reentrancy() -> Box<RustHandlerOpaque>;
+        fn rust_handler_new_context_handle_test(scenario: u32) -> Box<RustHandlerOpaque>;
         fn rust_handler_reset_test_counts();
+        fn rust_handler_reset_context_handle_test_slot();
+        fn rust_handler_context_handle_test_slot_len() -> u32;
+        fn rust_handler_drop_one_context_handle_for_test();
+        fn rust_handler_drop_all_context_handles_for_test();
         fn rust_handler_test_read_callbacks() -> u32;
         fn rust_handler_test_write_callbacks() -> u32;
         fn rust_handler_test_exception_callbacks() -> u32;
@@ -126,6 +131,11 @@ pub(crate) mod ffi {
         #[cxx_name = "CallbackContext"]
         type FfiCallbackContext;
 
+        /// SAFETY: `storage` must point to two pointer-sized, pointer-aligned,
+        /// uninitialized words that remain valid until `destroy_context_handle`.
+        #[cxx_name = "initContextHandle"]
+        unsafe fn init_context_handle(self: Pin<&mut FfiCallbackContext>, storage: *mut u8);
+
         #[cxx_name = "fireRead"]
         fn fire_read(self: Pin<&mut FfiCallbackContext>, message: UniquePtr<IOBuf>) -> i32;
 
@@ -173,6 +183,31 @@ pub(crate) mod ffi {
         fn close(self: Pin<&mut FfiCallbackContext>);
         #[cxx_name = "isClosed"]
         fn is_closed(self: &FfiCallbackContext) -> bool;
+
+        /// SAFETY: `storage` must contain one live token constructed by
+        /// `init_context_handle`. This consumes the token exactly once and
+        /// continues immediately on its EventBase or enqueues there otherwise.
+        #[cxx_name = "fireContextHandleRead"]
+        unsafe fn fire_context_handle_read(storage: *mut u8, message: UniquePtr<IOBuf>);
+        /// SAFETY: same contract as `fire_context_handle_read`.
+        #[cxx_name = "fireContextHandleWrite"]
+        unsafe fn fire_context_handle_write(storage: *mut u8, message: UniquePtr<IOBuf>);
+        /// SAFETY: same token contract as `fire_context_handle_read`.
+        /// `message_data` must reference `message_size` initialized bytes, and
+        /// native code must copy them before this call returns.
+        #[cxx_name = "fireContextHandleException"]
+        unsafe fn fire_context_handle_exception(
+            storage: *mut u8,
+            message_data: *const u8,
+            message_size: usize,
+        );
+
+        /// SAFETY: `storage` must contain one live token constructed by
+        /// `init_context_handle`, and this call must consume it exactly once.
+        /// The token may be consumed from any thread; native code schedules its
+        /// live guard back to the originating EventBase when necessary.
+        #[cxx_name = "destroyContextHandle"]
+        unsafe fn destroy_context_handle(storage: *mut u8);
     }
 
     #[namespace = "folly"]
@@ -301,8 +336,23 @@ pub fn rust_handler_new_exception_preserve() -> Box<RustHandlerOpaque> {
 pub fn rust_handler_new_reentrancy() -> Box<RustHandlerOpaque> {
     boxed(crate::handler::new_reentrancy_handler())
 }
+pub fn rust_handler_new_context_handle_test(scenario: u32) -> Box<RustHandlerOpaque> {
+    boxed(crate::handler::new_context_handle_test_handler(scenario))
+}
 pub fn rust_handler_reset_test_counts() {
     crate::handler::reset_test_callback_counts();
+}
+pub fn rust_handler_reset_context_handle_test_slot() {
+    crate::handler::reset_context_handle_test_slot();
+}
+pub fn rust_handler_context_handle_test_slot_len() -> u32 {
+    crate::handler::context_handle_test_slot_len()
+}
+pub fn rust_handler_drop_one_context_handle_for_test() {
+    crate::handler::drop_one_context_handle_for_test();
+}
+pub fn rust_handler_drop_all_context_handles_for_test() {
+    crate::handler::drop_all_context_handles_for_test();
 }
 pub fn rust_handler_test_read_callbacks() -> u32 {
     crate::handler::test_read_callbacks()

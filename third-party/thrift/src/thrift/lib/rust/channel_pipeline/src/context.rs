@@ -16,7 +16,9 @@
 
 //! Borrowed, callback-scoped access to the synchronous C++ pipeline context.
 
+use std::cell::Cell;
 use std::marker::PhantomData;
+use std::mem::MaybeUninit;
 use std::pin::Pin;
 use std::rc::Rc;
 
@@ -24,6 +26,111 @@ use crate::adapter::BytesPtr;
 use crate::adapter::RustMessageAdapter;
 use crate::ffi::ffi::FfiCallbackContext;
 use crate::handler::HandlerResult;
+
+/// Owned error that can be sent through a deferred pipeline continuation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PipelineError {
+    message: String,
+}
+
+impl PipelineError {
+    pub fn new(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+        }
+    }
+
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+}
+
+impl std::fmt::Display for PipelineError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for PipelineError {}
+
+/// Move-only continuation handle retaining its pipeline context.
+///
+/// The token is stored inline and is safe to relocate when Rust moves this
+/// value. It is intentionally neither `Clone` nor `Copy`. Dropping it from any
+/// thread releases its native pipeline guard on the originating EventBase.
+pub struct ContextHandle {
+    storage: [MaybeUninit<usize>; 2],
+    _not_sync: PhantomData<Cell<()>>,
+}
+
+// SAFETY: native construction gives this token unique ownership of a pipeline
+// guard. Moving it between threads only relocates its two pointer-sized words;
+// native destruction runs inline on the EventBase or schedules the live token
+// back there before Rust's inline storage expires.
+unsafe impl Send for ContextHandle {}
+
+impl ContextHandle {
+    /// Continue an inbound message from this captured pipeline position.
+    ///
+    /// This consumes the handle. The continuation runs immediately when called
+    /// on the originating EventBase and is otherwise enqueued onto that
+    /// EventBase. Moving `BytesPtr` into the native `TypeErasedBox` is zero-copy.
+    pub fn fire_read(self, message: BytesPtr) {
+        let mut handle = std::mem::ManuallyDrop::new(self);
+        // SAFETY: `handle` owns one live token and ManuallyDrop prevents Rust
+        // Drop from consuming it again after native code moves it away.
+        unsafe {
+            crate::ffi::ffi::fire_context_handle_read(
+                handle.storage.as_mut_ptr().cast(),
+                message.into_cpp(),
+            );
+        }
+    }
+
+    /// Continue an exception from this captured pipeline position.
+    ///
+    /// Native code copies the message into an owning `folly::exception_wrapper`
+    /// before this call returns. The continuation then runs immediately on the
+    /// EventBase or is enqueued there using the same one-shot semantics as data.
+    pub fn fire_exception(self, error: PipelineError) {
+        let mut handle = std::mem::ManuallyDrop::new(self);
+        // SAFETY: native code consumes the token exactly once and copies the
+        // borrowed message before `error` is dropped at the end of this call.
+        unsafe {
+            crate::ffi::ffi::fire_context_handle_exception(
+                handle.storage.as_mut_ptr().cast(),
+                error.message().as_ptr(),
+                error.message().len(),
+            );
+        }
+    }
+
+    /// Continue an outbound message from this captured pipeline position.
+    ///
+    /// This has the same one-shot, immediate-or-enqueued semantics as
+    /// [`ContextHandle::fire_read`].
+    pub fn fire_write(self, message: BytesPtr) {
+        let mut handle = std::mem::ManuallyDrop::new(self);
+        // SAFETY: see `fire_read`; native code consumes the token exactly once.
+        unsafe {
+            crate::ffi::ffi::fire_context_handle_write(
+                handle.storage.as_mut_ptr().cast(),
+                message.into_cpp(),
+            );
+        }
+    }
+}
+
+impl Drop for ContextHandle {
+    fn drop(&mut self) {
+        // SAFETY: `ContextHandle` uniquely owns one live token initialized by
+        // `CallbackContext::context_handle`. Native destruction either consumes
+        // it inline or moves it to the EventBase before this storage expires.
+        unsafe {
+            crate::ffi::ffi::destroy_context_handle(self.storage.as_mut_ptr().cast());
+        }
+    }
+}
 
 /// Borrowed, callback-scoped view of the live C++ pipeline context.
 ///
@@ -86,6 +193,22 @@ impl<'callback> CallbackContext<'callback> {
             inner,
             _not_send_or_sync: PhantomData,
         }
+    }
+
+    /// Create a move-only continuation handle retaining this pipeline context.
+    pub fn context_handle(&mut self) -> ContextHandle {
+        let mut handle = ContextHandle {
+            storage: [MaybeUninit::uninit(); 2],
+            _not_sync: PhantomData,
+        };
+        // SAFETY: `storage` is exactly two pointer-aligned words and remains
+        // exclusively owned by `handle` until its native destructor runs.
+        unsafe {
+            self.inner
+                .as_mut()
+                .init_context_handle(handle.storage.as_mut_ptr().cast());
+        }
+        handle
     }
 
     /// Forward the inbound buffer downstream and return the result.

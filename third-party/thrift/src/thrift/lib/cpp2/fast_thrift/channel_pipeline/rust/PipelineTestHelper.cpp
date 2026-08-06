@@ -29,6 +29,9 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/memory/MallctlHelper.h>
+#include <folly/memory/Malloc.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
@@ -89,6 +92,15 @@ BytesPtr makeBytes(size_t size, uint8_t value) {
   bytes->append(size);
   std::memset(bytes->writableData(), value, size);
   return bytes;
+}
+
+uint64_t threadAllocatedBytes() {
+  if (!folly::usingJEMalloc()) {
+    return 0;
+  }
+  uint64_t allocated = 0;
+  folly::mallctlRead("thread.allocated", &allocated);
+  return allocated;
 }
 
 std::pair<uint64_t, uint8_t> writtenBytesObservation(
@@ -1432,6 +1444,334 @@ EventNoopResult run_event_noop_test() noexcept {
       .out_of_range_noop = out_of_range_noop,
       .empty_payload_delivered = empty_payload_delivered,
       .subscriber_count_for_A = subscriber_count_for_A,
+  };
+}
+
+ContextHandleTestResult run_context_handle_test(uint32_t scenario) noexcept {
+  TestWatchdog watchdog{"ContextHandle lifecycle"};
+  rust_handler_reset_test_counts();
+  rust_handler_reset_context_handle_test_slot();
+
+  if (scenario == 2) {
+    folly::ScopedEventBaseThread eventBaseThread;
+    auto* eventBase = eventBaseThread.getEventBase();
+    MockHeadHandler head;
+    MockTailHandler tail;
+    TestAllocator allocator;
+    PipelineImpl::Ptr pipeline;
+    int32_t readResult = static_cast<int32_t>(Result::Error);
+    uint32_t removedBeforeOwnerRelease = 0;
+    uint32_t removedAfterOwnerRelease = 0;
+    eventBase->runInEventBaseThreadAndWait([&] {
+      pipeline = buildSingleRust(
+          *eventBase,
+          head,
+          tail,
+          allocator,
+          rust_handler_new_context_handle_test(scenario));
+      pipeline->activate();
+      readResult =
+          static_cast<int32_t>(pipeline->fireRead(TypeErasedBox{uint32_t{0}}));
+      removedBeforeOwnerRelease = rust_handler_test_removed_callbacks();
+      pipeline.reset();
+      removedAfterOwnerRelease = rust_handler_test_removed_callbacks();
+    });
+
+    eventBase->runInEventBaseThreadAndWait([] {});
+    const auto removedAfterFinalDrop = rust_handler_test_removed_callbacks();
+
+    return ContextHandleTestResult{
+        .removed_before_owner_release = removedBeforeOwnerRelease,
+        .removed_after_owner_release = removedAfterOwnerRelease,
+        .removed_after_first_drop = removedAfterOwnerRelease,
+        .removed_after_final_drop = removedAfterFinalDrop,
+        .stored_handles = 0,
+        .read_result = readResult,
+        .allocation_delta = 0,
+        .jemalloc_available = folly::usingJEMalloc(),
+    };
+  }
+
+  folly::EventBase eventBase;
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+  auto pipeline = buildSingleRust(
+      eventBase,
+      head,
+      tail,
+      allocator,
+      rust_handler_new_context_handle_test(scenario));
+  pipeline->activate();
+
+  if (scenario == 7) {
+    (void)pipeline->fireRead(TypeErasedBox{uint32_t{0}});
+  }
+
+  const auto before = threadAllocatedBytes();
+  const auto readResult = pipeline->fireRead(TypeErasedBox{uint32_t{0}});
+  const auto allocationDelta = threadAllocatedBytes() - before;
+  const auto removedBeforeOwnerRelease = rust_handler_test_removed_callbacks();
+  const auto storedHandles = rust_handler_context_handle_test_slot_len();
+
+  if (scenario == 5) {
+    pipeline->close();
+  }
+  pipeline.reset();
+  const auto removedAfterOwnerRelease = rust_handler_test_removed_callbacks();
+
+  if (scenario == 4) {
+    rust_handler_drop_one_context_handle_for_test();
+  }
+  const auto removedAfterFirstDrop = rust_handler_test_removed_callbacks();
+  rust_handler_drop_all_context_handles_for_test();
+  const auto removedAfterFinalDrop = rust_handler_test_removed_callbacks();
+
+  return ContextHandleTestResult{
+      .removed_before_owner_release = removedBeforeOwnerRelease,
+      .removed_after_owner_release = removedAfterOwnerRelease,
+      .removed_after_first_drop = removedAfterFirstDrop,
+      .removed_after_final_drop = removedAfterFinalDrop,
+      .stored_handles = storedHandles,
+      .read_result = static_cast<int32_t>(readResult),
+      .allocation_delta = allocationDelta,
+      .jemalloc_available = folly::usingJEMalloc(),
+  };
+}
+
+ContextHandleFireResult run_context_handle_fire_test(
+    uint32_t scenario) noexcept {
+  TestWatchdog watchdog{"ContextHandle deferred fire"};
+  rust_handler_reset_test_counts();
+
+  folly::ScopedEventBaseThread eventBaseThread;
+  auto* eventBase = eventBaseThread.getEventBase();
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+  const bool read = scenario == 8 || scenario == 10 || scenario == 12;
+  const folly::IOBuf* received = nullptr;
+  if (read) {
+    tail.setOnReadCallback([&](TypeErasedBox&& message) noexcept {
+      received = message.get<BytesPtr>().get();
+      return Result::Success;
+    });
+  } else {
+    head.setOnWriteCallback([&](TypeErasedBox&& message) noexcept {
+      received = message.get<BytesPtr>().get();
+      return Result::Success;
+    });
+  }
+
+  PipelineImpl::Ptr pipeline;
+  uint32_t endpointCallsBeforeFence = 0;
+  uint32_t removedAfterOwnerRelease = 0;
+  uint64_t allocationDelta = 0;
+  const folly::IOBuf* original = nullptr;
+  eventBase->runInEventBaseThreadAndWait([&] {
+    pipeline = buildSingleRust(
+        *eventBase,
+        head,
+        tail,
+        allocator,
+        rust_handler_new_context_handle_test(scenario));
+    pipeline->activate();
+
+    auto message = makeBytes(8, 0xa5);
+    original = message.get();
+    const auto before = threadAllocatedBytes();
+    if (read) {
+      (void)pipeline->fireRead(erase_and_box(std::move(message)));
+      endpointCallsBeforeFence = static_cast<uint32_t>(tail.readCount());
+    } else {
+      (void)pipeline->fireWrite(erase_and_box(std::move(message)));
+      endpointCallsBeforeFence = static_cast<uint32_t>(head.writeCount());
+    }
+    allocationDelta = threadAllocatedBytes() - before;
+    pipeline.reset();
+    removedAfterOwnerRelease = rust_handler_test_removed_callbacks();
+  });
+
+  eventBase->runInEventBaseThreadAndWait([] {});
+  const auto endpointCallsAfterFence =
+      static_cast<uint32_t>(read ? tail.readCount() : head.writeCount());
+  const auto removedAfterFence = rust_handler_test_removed_callbacks();
+
+  return ContextHandleFireResult{
+      .endpoint_calls_before_fence = endpointCallsBeforeFence,
+      .endpoint_calls_after_fence = endpointCallsAfterFence,
+      .removed_after_owner_release = removedAfterOwnerRelease,
+      .removed_after_fence = removedAfterFence,
+      .pointer_identity_preserved = received != nullptr && received == original,
+      .allocation_delta = allocationDelta,
+      .jemalloc_available = folly::usingJEMalloc(),
+  };
+}
+
+ContextHandleSandwichResult run_context_handle_sandwich_test(
+    uint32_t scenario) noexcept {
+  TestWatchdog watchdog{"ContextHandle C++/Rust/C++ sandwich"};
+  rust_handler_reset_test_counts();
+
+  folly::ScopedEventBaseThread eventBaseThread;
+  auto* eventBase = eventBaseThread.getEventBase();
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+  const bool read = scenario == 8 || scenario == 10;
+  const folly::IOBuf* received = nullptr;
+  if (read) {
+    tail.setOnReadCallback([&](TypeErasedBox&& message) noexcept {
+      received = message.get<BytesPtr>().get();
+      return Result::Success;
+    });
+  } else {
+    head.setOnWriteCallback([&](TypeErasedBox&& message) noexcept {
+      received = message.get<BytesPtr>().get();
+      return Result::Success;
+    });
+  }
+
+  auto before = std::make_unique<MockHandler>();
+  auto* beforePtr = before.get();
+  auto after = std::make_unique<MockHandler>();
+  auto* afterPtr = after.get();
+  auto rustHandler = std::make_unique<ProductionRustHandler>(
+      rust_handler_new_context_handle_test(scenario));
+
+  PipelineImpl::Ptr pipeline;
+  uint32_t beforeReadsBeforeFence = 0;
+  uint32_t afterReadsBeforeFence = 0;
+  uint32_t beforeWritesBeforeFence = 0;
+  uint32_t afterWritesBeforeFence = 0;
+  uint32_t endpointCallsBeforeFence = 0;
+  const folly::IOBuf* original = nullptr;
+  eventBase->runInEventBaseThreadAndWait([&] {
+    pipeline =
+        PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+            .setEventBase(eventBase)
+            .setHead(&head)
+            .setTail(&tail)
+            .setAllocator(&allocator)
+            .addNextDuplex<MockHandler>(normal_before_tag, std::move(before))
+            .addNextDuplex<ProductionRustHandler>(
+                rust_middle_tag, std::move(rustHandler))
+            .addNextDuplex<MockHandler>(normal_after_tag, std::move(after))
+            .build();
+    pipeline->activate();
+
+    auto message = makeBytes(8, 0xa5);
+    original = message.get();
+    if (read) {
+      (void)pipeline->fireRead(erase_and_box(std::move(message)));
+      endpointCallsBeforeFence = static_cast<uint32_t>(tail.readCount());
+    } else {
+      (void)pipeline->fireWrite(erase_and_box(std::move(message)));
+      endpointCallsBeforeFence = static_cast<uint32_t>(head.writeCount());
+    }
+    beforeReadsBeforeFence = static_cast<uint32_t>(beforePtr->readCount());
+    afterReadsBeforeFence = static_cast<uint32_t>(afterPtr->readCount());
+    beforeWritesBeforeFence = static_cast<uint32_t>(beforePtr->writeCount());
+    afterWritesBeforeFence = static_cast<uint32_t>(afterPtr->writeCount());
+  });
+
+  eventBase->runInEventBaseThreadAndWait([] {});
+  ContextHandleSandwichResult result{
+      .before_reads_before_fence = beforeReadsBeforeFence,
+      .before_reads_after_fence = static_cast<uint32_t>(beforePtr->readCount()),
+      .after_reads_before_fence = afterReadsBeforeFence,
+      .after_reads_after_fence = static_cast<uint32_t>(afterPtr->readCount()),
+      .before_writes_before_fence = beforeWritesBeforeFence,
+      .before_writes_after_fence =
+          static_cast<uint32_t>(beforePtr->writeCount()),
+      .after_writes_before_fence = afterWritesBeforeFence,
+      .after_writes_after_fence = static_cast<uint32_t>(afterPtr->writeCount()),
+      .endpoint_calls_before_fence = endpointCallsBeforeFence,
+      .endpoint_calls_after_fence =
+          static_cast<uint32_t>(read ? tail.readCount() : head.writeCount()),
+      .pointer_identity_preserved = received != nullptr && received == original,
+  };
+  eventBase->runInEventBaseThreadAndWait(
+      [pipeline = std::move(pipeline)]() mutable { pipeline.reset(); });
+  return result;
+}
+
+ContextHandleExceptionResult run_context_handle_exception_test(
+    uint32_t scenario) noexcept {
+  TestWatchdog watchdog{"ContextHandle deferred exception"};
+  rust_handler_reset_test_counts();
+
+  folly::ScopedEventBaseThread eventBaseThread;
+  auto* eventBase = eventBaseThread.getEventBase();
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+  const std::string expectedMessage = scenario == 17 ? std::string{}
+      : scenario == 18                               ? std::string(4096, 'x')
+                       : std::string{"deferred exception \xce\xbb"};
+  uint32_t beforeExceptions = 0;
+  uint32_t afterExceptions = 0;
+  uint32_t tailExceptions = 0;
+  bool messagePreserved = false;
+  tail.setOnExceptionCallback([&](folly::exception_wrapper&& exception) {
+    ++tailExceptions;
+    exception.with_exception([&](const std::runtime_error& error) {
+      messagePreserved = error.what() == expectedMessage;
+    });
+  });
+
+  auto before = std::make_unique<MockHandler>();
+  before->setOnException(
+      [&](detail::ContextImpl& context, folly::exception_wrapper&& exception) {
+        ++beforeExceptions;
+        context.fireException(std::move(exception));
+      });
+  auto after = std::make_unique<MockHandler>();
+  after->setOnException(
+      [&](detail::ContextImpl& context, folly::exception_wrapper&& exception) {
+        ++afterExceptions;
+        context.fireException(std::move(exception));
+      });
+  auto rustHandler = std::make_unique<ProductionRustHandler>(
+      rust_handler_new_context_handle_test(scenario));
+
+  PipelineImpl::Ptr pipeline;
+  uint32_t beforeExceptionsBeforeFence = 0;
+  uint32_t afterExceptionsBeforeFence = 0;
+  uint32_t tailExceptionsBeforeFence = 0;
+  uint32_t removedAfterOwnerRelease = 0;
+  eventBase->runInEventBaseThreadAndWait([&] {
+    pipeline =
+        PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+            .setEventBase(eventBase)
+            .setHead(&head)
+            .setTail(&tail)
+            .setAllocator(&allocator)
+            .addNextDuplex<MockHandler>(normal_before_tag, std::move(before))
+            .addNextDuplex<ProductionRustHandler>(
+                rust_middle_tag, std::move(rustHandler))
+            .addNextDuplex<MockHandler>(normal_after_tag, std::move(after))
+            .build();
+    pipeline->activate();
+    (void)pipeline->fireRead(erase_and_box(makeBytes(8, 0xa5)));
+    beforeExceptionsBeforeFence = beforeExceptions;
+    afterExceptionsBeforeFence = afterExceptions;
+    tailExceptionsBeforeFence = tailExceptions;
+    pipeline.reset();
+    removedAfterOwnerRelease = rust_handler_test_removed_callbacks();
+  });
+
+  eventBase->runInEventBaseThreadAndWait([] {});
+  return ContextHandleExceptionResult{
+      .before_exceptions_before_fence = beforeExceptionsBeforeFence,
+      .before_exceptions_after_fence = beforeExceptions,
+      .after_exceptions_before_fence = afterExceptionsBeforeFence,
+      .after_exceptions_after_fence = afterExceptions,
+      .tail_exceptions_before_fence = tailExceptionsBeforeFence,
+      .tail_exceptions_after_fence = tailExceptions,
+      .removed_after_owner_release = removedAfterOwnerRelease,
+      .removed_after_fence = rust_handler_test_removed_callbacks(),
+      .message_preserved = messagePreserved,
   };
 }
 

@@ -23,6 +23,8 @@ use std::sync::atomic::Ordering;
 
 use crate::adapter::BytesPtr;
 use crate::context::CallbackContext;
+use crate::context::ContextHandle;
+use crate::context::PipelineError;
 use crate::erased::RustTypeErasedBox;
 
 /// FFI-stable result type mirroring C++ `channel_pipeline::Result`.
@@ -161,6 +163,162 @@ pub(crate) struct ErrorTestHandler;
 pub(crate) struct PanickingTestHandler;
 pub(crate) struct LifecycleTestHandler;
 pub(crate) struct ForwardingTestHandler;
+pub(crate) struct ContextHandleTestHandler {
+    scenario: u32,
+}
+
+static CONTEXT_HANDLE_TEST_SLOT: Mutex<Vec<ContextHandle>> = Mutex::new(Vec::new());
+
+fn move_context_handle(handle: ContextHandle) -> ContextHandle {
+    handle
+}
+
+impl RustHandler for ContextHandleTestHandler {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        match self.scenario {
+            0 => drop(ctx.context_handle()),
+            1 => {
+                let local = move_context_handle(ctx.context_handle());
+                let (sender, receiver) = std::sync::mpsc::channel();
+                sender
+                    .send(local)
+                    .expect("move-chain receiver should remain alive");
+                drop(
+                    receiver
+                        .recv()
+                        .expect("move-chain sender should provide the handle"),
+                );
+            }
+            2 => {
+                let handle = ctx.context_handle();
+                std::thread::spawn(move || drop(handle))
+                    .join()
+                    .expect("off-thread ContextHandle drop should not panic");
+            }
+            3 | 5 => context_handle_test_slot().push(ctx.context_handle()),
+            4 => {
+                let mut slot = context_handle_test_slot();
+                slot.push(ctx.context_handle());
+                slot.push(ctx.context_handle());
+            }
+            6 => {
+                let _handle = ctx.context_handle();
+                panic!("intentional panic with a live ContextHandle");
+            }
+            7 => {
+                let handle = move_context_handle(ctx.context_handle());
+                drop(handle);
+            }
+            8 => ctx.context_handle().fire_read(msg.take::<BytesPtr>()),
+            10 => {
+                let handle = ctx.context_handle();
+                let message = msg.take::<BytesPtr>();
+                std::thread::spawn(move || handle.fire_read(message))
+                    .join()
+                    .expect("worker fire_read should not panic");
+            }
+            12 => {
+                let handle = ctx.context_handle();
+                let message = msg.take::<BytesPtr>();
+                ctx.close();
+                handle.fire_read(message);
+            }
+            14 => ctx
+                .context_handle()
+                .fire_exception(PipelineError::new("deferred exception \u{03bb}")),
+            15 => {
+                let handle = ctx.context_handle();
+                std::thread::spawn(move || {
+                    handle.fire_exception(PipelineError::new("deferred exception \u{03bb}"));
+                })
+                .join()
+                .expect("worker fire_exception should not panic");
+            }
+            16 => {
+                let handle = ctx.context_handle();
+                ctx.close();
+                handle.fire_exception(PipelineError::new("suppressed exception"));
+            }
+            17 => ctx.context_handle().fire_exception(PipelineError::new("")),
+            18 => ctx
+                .context_handle()
+                .fire_exception(PipelineError::new("x".repeat(4096))),
+            19 => {
+                let handle = ctx.context_handle();
+                std::thread::spawn(move || {
+                    handle.fire_exception(PipelineError::new("queued before close"));
+                })
+                .join()
+                .expect("worker fire_exception should enqueue before close");
+                ctx.close();
+            }
+            scenario => panic!("unknown ContextHandle test scenario {scenario}"),
+        }
+        HandlerResult::Success
+    }
+
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        match self.scenario {
+            9 => ctx.context_handle().fire_write(msg.take::<BytesPtr>()),
+            11 => {
+                let handle = ctx.context_handle();
+                let message = msg.take::<BytesPtr>();
+                std::thread::spawn(move || handle.fire_write(message))
+                    .join()
+                    .expect("worker fire_write should not panic");
+            }
+            13 => {
+                let handle = ctx.context_handle();
+                let message = msg.take::<BytesPtr>();
+                ctx.close();
+                handle.fire_write(message);
+            }
+            scenario => panic!("unknown ContextHandle write test scenario {scenario}"),
+        }
+        HandlerResult::Success
+    }
+
+    fn handler_removed(&mut self, _ctx: &mut CallbackContext<'_>) {
+        REMOVED.fetch_add(1, Ordering::Relaxed);
+    }
+}
+
+fn context_handle_test_slot() -> std::sync::MutexGuard<'static, Vec<ContextHandle>> {
+    CONTEXT_HANDLE_TEST_SLOT
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+pub(crate) fn new_context_handle_test_handler(scenario: u32) -> ContextHandleTestHandler {
+    ContextHandleTestHandler { scenario }
+}
+
+pub(crate) fn reset_context_handle_test_slot() {
+    context_handle_test_slot().clear();
+}
+
+pub(crate) fn context_handle_test_slot_len() -> u32 {
+    context_handle_test_slot()
+        .len()
+        .try_into()
+        .expect("ContextHandle test slot length should fit in u32")
+}
+
+pub(crate) fn drop_one_context_handle_for_test() {
+    drop(context_handle_test_slot().pop());
+}
+
+pub(crate) fn drop_all_context_handles_for_test() {
+    context_handle_test_slot().clear();
+}
 
 impl RustHandler for CountingTestHandler {
     fn on_read(

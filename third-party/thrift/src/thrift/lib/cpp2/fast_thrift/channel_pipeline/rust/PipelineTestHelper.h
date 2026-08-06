@@ -41,6 +41,10 @@ struct ReentrancyResult;
 struct AdapterExtResult;
 struct EventNoopResult;
 struct ForwardUnknownResult;
+struct ContextHandleTestResult;
+struct ContextHandleFireResult;
+struct ContextHandleSandwichResult;
+struct ContextHandleExceptionResult;
 
 PipelineTestResult run_pipeline_test() noexcept;
 BehaviorTestResult run_behavior_test() noexcept;
@@ -73,5 +77,12 @@ ReentrancyResult run_reentrancy_test() noexcept;
 AdapterExtResult run_adapter_ext_test() noexcept;
 EventNoopResult run_event_noop_test() noexcept;
 ForwardUnknownResult run_forward_unknown_test() noexcept;
+ContextHandleTestResult run_context_handle_test(uint32_t scenario) noexcept;
+ContextHandleFireResult run_context_handle_fire_test(
+    uint32_t scenario) noexcept;
+ContextHandleSandwichResult run_context_handle_sandwich_test(
+    uint32_t scenario) noexcept;
+ContextHandleExceptionResult run_context_handle_exception_test(
+    uint32_t scenario) noexcept;
 
 } // namespace channel_pipeline_rust::test

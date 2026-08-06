@@ -15,7 +15,21 @@
  */
 
 use channel_pipeline as _;
+use channel_pipeline::ContextHandle;
 use channel_pipeline::HandlerResult;
+
+fn run_with_timeout(test: impl FnOnce() + Send + 'static) {
+    let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+    std::thread::spawn(move || {
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(test));
+        let _ = sender.send(result);
+    });
+    match receiver.recv_timeout(std::time::Duration::from_secs(5)) {
+        Ok(Ok(())) => {}
+        Ok(Err(panic)) => std::panic::resume_unwind(panic),
+        Err(error) => panic!("test exceeded five-second deadline: {error}"),
+    }
+}
 
 #[cxx::bridge(namespace = "channel_pipeline_rust::test")]
 mod ffi {
@@ -206,6 +220,53 @@ mod ffi {
         write_is_error: bool,
     }
 
+    struct ContextHandleTestResult {
+        removed_before_owner_release: u32,
+        removed_after_owner_release: u32,
+        removed_after_first_drop: u32,
+        removed_after_final_drop: u32,
+        stored_handles: u32,
+        read_result: i32,
+        allocation_delta: u64,
+        jemalloc_available: bool,
+    }
+
+    struct ContextHandleFireResult {
+        endpoint_calls_before_fence: u32,
+        endpoint_calls_after_fence: u32,
+        removed_after_owner_release: u32,
+        removed_after_fence: u32,
+        pointer_identity_preserved: bool,
+        allocation_delta: u64,
+        jemalloc_available: bool,
+    }
+
+    struct ContextHandleExceptionResult {
+        before_exceptions_before_fence: u32,
+        before_exceptions_after_fence: u32,
+        after_exceptions_before_fence: u32,
+        after_exceptions_after_fence: u32,
+        tail_exceptions_before_fence: u32,
+        tail_exceptions_after_fence: u32,
+        removed_after_owner_release: u32,
+        removed_after_fence: u32,
+        message_preserved: bool,
+    }
+
+    struct ContextHandleSandwichResult {
+        before_reads_before_fence: u32,
+        before_reads_after_fence: u32,
+        after_reads_before_fence: u32,
+        after_reads_after_fence: u32,
+        before_writes_before_fence: u32,
+        before_writes_after_fence: u32,
+        after_writes_before_fence: u32,
+        after_writes_after_fence: u32,
+        endpoint_calls_before_fence: u32,
+        endpoint_calls_after_fence: u32,
+        pointer_identity_preserved: bool,
+    }
+
     unsafe extern "C++" {
         include!("thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/PipelineTestHelper.h");
 
@@ -236,6 +297,10 @@ mod ffi {
         fn run_adapter_ext_test() -> AdapterExtResult;
         fn run_event_noop_test() -> EventNoopResult;
         fn run_forward_unknown_test() -> ForwardUnknownResult;
+        fn run_context_handle_test(scenario: u32) -> ContextHandleTestResult;
+        fn run_context_handle_fire_test(scenario: u32) -> ContextHandleFireResult;
+        fn run_context_handle_sandwich_test(scenario: u32) -> ContextHandleSandwichResult;
+        fn run_context_handle_exception_test(scenario: u32) -> ContextHandleExceptionResult;
     }
 }
 
@@ -551,6 +616,286 @@ fn event_subsystem_noop_and_const_ref() {
         "Alpha subscriber count proof of dispatch: empty + typed payload, got {}",
         result.subscriber_count_for_A
     );
+}
+
+#[test]
+fn context_handle_layout_is_two_words_and_pointer_aligned() {
+    run_with_timeout(|| {
+        assert_eq!(
+            std::mem::size_of::<ContextHandle>(),
+            2 * std::mem::size_of::<usize>()
+        );
+        assert_eq!(
+            std::mem::align_of::<ContextHandle>(),
+            std::mem::align_of::<usize>()
+        );
+    });
+}
+
+#[test]
+fn context_handle_is_send_not_sync_clone_or_copy() {
+    run_with_timeout(|| {
+        static_assertions::assert_impl_all!(ContextHandle: Send);
+        static_assertions::assert_not_impl_any!(ContextHandle: Sync, Clone, Copy);
+    });
+}
+
+#[test]
+fn native_context_handle_token_traits_match_rust_abi() {
+    run_with_timeout(|| {
+        assert_eq!(
+            std::mem::size_of::<ContextHandle>(),
+            2 * std::mem::size_of::<*mut ()>()
+        );
+        assert_eq!(
+            std::mem::align_of::<ContextHandle>(),
+            std::mem::align_of::<*mut ()>()
+        );
+    });
+}
+
+fn assert_final_teardown_once(result: &ffi::ContextHandleTestResult) {
+    assert_eq!(result.removed_before_owner_release, 0);
+    assert_eq!(result.removed_after_final_drop, 1);
+}
+
+#[test]
+fn context_handle_acquires_and_drops_on_event_base() {
+    let result = ffi::run_context_handle_test(0);
+    assert_final_teardown_once(&result);
+    assert_eq!(result.removed_after_owner_release, 1);
+}
+
+#[test]
+fn context_handle_rust_move_chain_drops_once() {
+    let result = ffi::run_context_handle_test(1);
+    assert_final_teardown_once(&result);
+    assert_eq!(result.removed_after_owner_release, 1);
+}
+
+#[test]
+fn context_handle_cross_thread_round_trip_drops_on_event_base() {
+    let result = ffi::run_context_handle_test(2);
+    assert_eq!(result.removed_after_owner_release, 0);
+    assert_final_teardown_once(&result);
+}
+
+#[test]
+fn context_handle_retains_pipeline_until_drop() {
+    let result = ffi::run_context_handle_test(3);
+    assert_eq!(result.stored_handles, 1);
+    assert_eq!(result.removed_after_owner_release, 0);
+    assert_final_teardown_once(&result);
+}
+
+#[test]
+fn context_handle_multiple_handles_release_on_last_drop() {
+    let result = ffi::run_context_handle_test(4);
+    assert_eq!(result.stored_handles, 2);
+    assert_eq!(result.removed_after_owner_release, 0);
+    assert_eq!(result.removed_after_first_drop, 0);
+    assert_final_teardown_once(&result);
+}
+
+#[test]
+fn context_handle_survives_pipeline_close_until_drop() {
+    let result = ffi::run_context_handle_test(5);
+    assert_eq!(result.stored_handles, 1);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_final_drop, 1);
+}
+
+#[test]
+fn context_handle_panic_unwind_releases_guard() {
+    let result = ffi::run_context_handle_test(6);
+    assert_eq!(result.read_result, HandlerResult::Error as i32);
+    assert_final_teardown_once(&result);
+    assert_eq!(result.removed_after_owner_release, 1);
+}
+
+#[test]
+fn context_handle_acquire_move_drop_allocates_nothing() {
+    let result = ffi::run_context_handle_test(7);
+    assert_final_teardown_once(&result);
+    if result.jemalloc_available {
+        assert_eq!(result.allocation_delta, 0);
+    }
+}
+
+fn assert_context_handle_inline_fire(result: &ffi::ContextHandleFireResult) {
+    assert_eq!(result.endpoint_calls_before_fence, 1);
+    assert_eq!(result.endpoint_calls_after_fence, 1);
+    assert!(result.pointer_identity_preserved);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+fn assert_context_handle_worker_fire(result: &ffi::ContextHandleFireResult) {
+    assert_eq!(result.endpoint_calls_before_fence, 0);
+    assert_eq!(result.endpoint_calls_after_fence, 1);
+    assert!(result.pointer_identity_preserved);
+    assert_eq!(result.removed_after_owner_release, 0);
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+#[test]
+fn context_handle_fire_read_runs_immediately_on_event_base() {
+    assert_context_handle_inline_fire(&ffi::run_context_handle_fire_test(8));
+}
+
+#[test]
+fn context_handle_fire_write_runs_immediately_on_event_base() {
+    assert_context_handle_inline_fire(&ffi::run_context_handle_fire_test(9));
+}
+
+#[test]
+fn context_handle_fire_read_from_worker_enqueues_on_event_base() {
+    assert_context_handle_worker_fire(&ffi::run_context_handle_fire_test(10));
+}
+
+#[test]
+fn context_handle_fire_write_from_worker_enqueues_on_event_base() {
+    assert_context_handle_worker_fire(&ffi::run_context_handle_fire_test(11));
+}
+
+fn assert_context_handle_read_sandwich(result: &ffi::ContextHandleSandwichResult, inline: bool) {
+    assert_eq!(result.before_reads_before_fence, 1);
+    assert_eq!(result.before_reads_after_fence, 1);
+    assert_eq!(result.after_reads_before_fence, u32::from(inline));
+    assert_eq!(result.after_reads_after_fence, 1);
+    assert_eq!(result.before_writes_before_fence, 0);
+    assert_eq!(result.before_writes_after_fence, 0);
+    assert_eq!(result.after_writes_before_fence, 0);
+    assert_eq!(result.after_writes_after_fence, 0);
+    assert_eq!(result.endpoint_calls_before_fence, u32::from(inline));
+    assert_eq!(result.endpoint_calls_after_fence, 1);
+    assert!(result.pointer_identity_preserved);
+}
+
+fn assert_context_handle_write_sandwich(result: &ffi::ContextHandleSandwichResult, inline: bool) {
+    assert_eq!(result.before_reads_before_fence, 0);
+    assert_eq!(result.before_reads_after_fence, 0);
+    assert_eq!(result.after_reads_before_fence, 0);
+    assert_eq!(result.after_reads_after_fence, 0);
+    assert_eq!(result.after_writes_before_fence, 1);
+    assert_eq!(result.after_writes_after_fence, 1);
+    assert_eq!(result.before_writes_before_fence, u32::from(inline));
+    assert_eq!(result.before_writes_after_fence, 1);
+    assert_eq!(result.endpoint_calls_before_fence, u32::from(inline));
+    assert_eq!(result.endpoint_calls_after_fence, 1);
+    assert!(result.pointer_identity_preserved);
+}
+
+#[test]
+fn context_handle_inline_read_resumes_inside_cpp_sandwich() {
+    assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(8), true);
+}
+
+#[test]
+fn context_handle_inline_write_resumes_inside_cpp_sandwich() {
+    assert_context_handle_write_sandwich(&ffi::run_context_handle_sandwich_test(9), true);
+}
+
+#[test]
+fn context_handle_worker_read_resumes_inside_cpp_sandwich() {
+    assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(10), false);
+}
+
+#[test]
+fn context_handle_worker_write_resumes_inside_cpp_sandwich() {
+    assert_context_handle_write_sandwich(&ffi::run_context_handle_sandwich_test(11), false);
+}
+
+fn assert_context_handle_exception(
+    result: &ffi::ContextHandleExceptionResult,
+    delivered_before_fence: bool,
+) {
+    assert_eq!(result.before_exceptions_before_fence, 0);
+    assert_eq!(result.before_exceptions_after_fence, 0);
+    assert_eq!(
+        result.after_exceptions_before_fence,
+        u32::from(delivered_before_fence)
+    );
+    assert_eq!(result.after_exceptions_after_fence, 1);
+    assert_eq!(
+        result.tail_exceptions_before_fence,
+        u32::from(delivered_before_fence)
+    );
+    assert_eq!(result.tail_exceptions_after_fence, 1);
+    assert!(result.message_preserved);
+    assert_eq!(
+        result.removed_after_owner_release,
+        u32::from(delivered_before_fence)
+    );
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+#[test]
+fn context_handle_fire_exception_runs_immediately_inside_cpp_sandwich() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(14), true);
+}
+
+#[test]
+fn context_handle_fire_exception_from_worker_resumes_inside_cpp_sandwich() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(15), false);
+}
+
+#[test]
+fn context_handle_fire_exception_preserves_empty_message() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(17), true);
+}
+
+#[test]
+fn context_handle_fire_exception_preserves_long_message() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(18), true);
+}
+
+#[test]
+fn context_handle_fire_exception_enqueued_before_close_is_suppressed() {
+    let result = ffi::run_context_handle_exception_test(19);
+    assert_eq!(result.before_exceptions_before_fence, 0);
+    assert_eq!(result.before_exceptions_after_fence, 0);
+    assert_eq!(result.after_exceptions_before_fence, 0);
+    assert_eq!(result.after_exceptions_after_fence, 0);
+    assert_eq!(result.tail_exceptions_before_fence, 0);
+    assert_eq!(result.tail_exceptions_after_fence, 0);
+    assert!(!result.message_preserved);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+#[test]
+fn context_handle_fire_exception_after_close_is_suppressed() {
+    let result = ffi::run_context_handle_exception_test(16);
+    assert_eq!(result.before_exceptions_before_fence, 0);
+    assert_eq!(result.before_exceptions_after_fence, 0);
+    assert_eq!(result.after_exceptions_before_fence, 0);
+    assert_eq!(result.after_exceptions_after_fence, 0);
+    assert_eq!(result.tail_exceptions_before_fence, 0);
+    assert_eq!(result.tail_exceptions_after_fence, 0);
+    assert!(!result.message_preserved);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+#[test]
+fn context_handle_fire_read_after_close_is_suppressed() {
+    let result = ffi::run_context_handle_fire_test(12);
+    assert_eq!(result.endpoint_calls_before_fence, 0);
+    assert_eq!(result.endpoint_calls_after_fence, 0);
+    assert!(!result.pointer_identity_preserved);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_fence, 1);
+}
+
+#[test]
+fn context_handle_fire_write_after_close_is_suppressed() {
+    let result = ffi::run_context_handle_fire_test(13);
+    assert_eq!(result.endpoint_calls_before_fence, 0);
+    assert_eq!(result.endpoint_calls_after_fence, 0);
+    assert!(!result.pointer_identity_preserved);
+    assert_eq!(result.removed_after_owner_release, 1);
+    assert_eq!(result.removed_after_fence, 1);
 }
 
 #[test]

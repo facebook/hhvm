@@ -155,9 +155,14 @@ pub mod erased;
 pub mod ffi;
 pub mod handler;
 
+#[cfg(test)]
+mod context_test;
+
 pub use adapter::BytesPtr;
 pub use adapter::RustMessageAdapter;
 pub use context::CallbackContext;
+pub use context::ContextHandle;
+pub use context::PipelineError;
 pub use erased::ErasedCheck;
 pub use erased::RustTypeErasedBox;
 pub use handler::HandlerResult;

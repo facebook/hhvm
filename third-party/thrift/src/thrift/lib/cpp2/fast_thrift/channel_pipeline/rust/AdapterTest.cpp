@@ -14,24 +14,81 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/CallbackContext.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustMessageAdapter.h>
 
+#include <array>
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
+#include <future>
 #include <mutex>
 #include <thread>
 #include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBase.h>
+#include <folly/io/async/Request.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 
 namespace channel_pipeline_rust {
 namespace {
 
 using apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
 using apache::thrift::fast_thrift::channel_pipeline::erase_and_box;
+using apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder;
+using apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
 using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
+using apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl;
+using apache::thrift::fast_thrift::channel_pipeline::test::MockHandler;
+using apache::thrift::fast_thrift::channel_pipeline::test::MockHeadHandler;
+using apache::thrift::fast_thrift::channel_pipeline::test::MockTailHandler;
+using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
+
+HANDLER_TAG(context_handle_safety);
+
+struct ContextFixture {
+  ContextFixture() {
+    auto handler = std::make_unique<MockHandler>();
+    handler->setHandlerRemoved([this](ContextImpl&) {
+      removed.fetch_add(1, std::memory_order_relaxed);
+    });
+    eventBase->runInEventBaseThreadAndWait([&] {
+      pipeline =
+          PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+              .setEventBase(eventBase)
+              .setHead(&head)
+              .setTail(&tail)
+              .setAllocator(&allocator)
+              .addNextDuplex<MockHandler>(
+                  context_handle_safety_tag, std::move(handler))
+              .build();
+    });
+  }
+
+  folly::ScopedEventBaseThread eventBaseThread;
+  folly::EventBase* eventBase{eventBaseThread.getEventBase()};
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+  std::atomic<uint32_t> removed{0};
+  PipelineImpl::Ptr pipeline;
+
+  ContextImpl& context() {
+    return *pipeline->context(context_handle_safety_tag);
+  }
+
+  ~ContextFixture() {
+    eventBase->runInEventBaseThreadAndWait(
+        [pipeline = std::move(pipeline)]() mutable { pipeline.reset(); });
+  }
+};
 
 // In-process watchdog: aborts with a diagnostic if the test body does not
 // complete within 5 seconds. Matches the convention in PipelineTestHelper.cpp.
@@ -161,6 +218,176 @@ TEST(AdapterTest, WrongMessageTypeReportsAdapterFailure) {
 TEST(AdapterTest, NullBytesReportsConversionFailure) {
   TestWatchdog watchdog{"null BytesPtr conversion failure"};
   EXPECT_FALSE(RustMessageAdapter<BytesPtr>::tryBox(nullptr).has_value());
+}
+
+TEST(ContextHandleSafetyDeathTest, NullConstructionStorage) {
+  TestWatchdog watchdog{"null ContextHandle construction storage"};
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  ContextFixture fixture;
+  CallbackContext context{fixture.context()};
+  EXPECT_DEATH(
+      fixture.eventBase->runInEventBaseThreadAndWait(
+          [&] { context.initContextHandle(nullptr); }),
+      "storage != nullptr");
+}
+
+TEST(ContextHandleSafetyDeathTest, MisalignedConstructionStorage) {
+  TestWatchdog watchdog{"misaligned ContextHandle construction storage"};
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  ContextFixture fixture;
+  CallbackContext context{fixture.context()};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*) + 1> storage{};
+  EXPECT_DEATH(
+      fixture.eventBase->runInEventBaseThreadAndWait(
+          [&] { context.initContextHandle(storage.data() + 1); }),
+      "alignof\\(RustContextHandleToken\\)");
+}
+
+TEST(ContextHandleSafetyDeathTest, ConstructionOutsideEventBase) {
+  TestWatchdog watchdog{"ContextHandle construction outside EventBase"};
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  ContextFixture fixture;
+  CallbackContext context{fixture.context()};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> storage{};
+  EXPECT_DEATH(
+      context.initContextHandle(storage.data()), "isInEventBaseThread");
+}
+
+TEST(ContextHandleSafetyDeathTest, NullDestructionStorage) {
+  TestWatchdog watchdog{"null ContextHandle destruction storage"};
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  EXPECT_DEATH(destroyContextHandle(nullptr), "storage != nullptr");
+}
+
+TEST(ContextHandleSafetyDeathTest, MisalignedDestructionStorage) {
+  TestWatchdog watchdog{"misaligned ContextHandle destruction storage"};
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*) + 1> storage{};
+  EXPECT_DEATH(
+      destroyContextHandle(storage.data() + 1),
+      "alignof\\(RustContextHandleToken\\)");
+}
+
+TEST(ContextHandleExceptionTest, InlinePreservesAndRestoresRequestContext) {
+  TestWatchdog watchdog{"inline exception request context"};
+  ContextFixture fixture;
+  auto customContext = std::make_shared<folly::RequestContext>();
+  auto replacementContext = std::make_shared<folly::RequestContext>();
+  bool observedCustomContext = false;
+  bool restoredCustomContext = false;
+
+  fixture.eventBase->runInEventBaseThreadAndWait([&] {
+    fixture.tail.setOnExceptionCallback(
+        [&](folly::exception_wrapper&&) noexcept {
+          observedCustomContext =
+              folly::RequestContext::get() == customContext.get();
+          folly::RequestContext::setContext(replacementContext);
+        });
+    folly::RequestContextScopeGuard contextGuard{customContext};
+    CallbackContext context{fixture.context()};
+    alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> storage{};
+    context.initContextHandle(storage.data());
+    constexpr std::string_view message{"inline context"};
+    fireContextHandleException(
+        storage.data(),
+        reinterpret_cast<const uint8_t*>(message.data()),
+        message.size());
+    restoredCustomContext = folly::RequestContext::get() == customContext.get();
+  });
+
+  EXPECT_TRUE(observedCustomContext);
+  EXPECT_TRUE(restoredCustomContext);
+}
+
+TEST(ContextHandleExceptionTest, WorkerCapturesRequestContext) {
+  TestWatchdog watchdog{"worker exception request context"};
+  ContextFixture fixture;
+  auto customContext = std::make_shared<folly::RequestContext>();
+  std::atomic<bool> observedCustomContext{false};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> storage{};
+
+  fixture.eventBase->runInEventBaseThreadAndWait([&] {
+    fixture.tail.setOnExceptionCallback(
+        [&](folly::exception_wrapper&&) noexcept {
+          observedCustomContext.store(
+              folly::RequestContext::get() == customContext.get(),
+              std::memory_order_relaxed);
+        });
+    CallbackContext context{fixture.context()};
+    context.initContextHandle(storage.data());
+  });
+
+  std::thread worker([&] {
+    folly::RequestContextScopeGuard contextGuard{customContext};
+    constexpr std::string_view message{"worker context"};
+    fireContextHandleException(
+        storage.data(),
+        reinterpret_cast<const uint8_t*>(message.data()),
+        message.size());
+  });
+  worker.join();
+  fixture.eventBase->runInEventBaseThreadAndWait([] {});
+
+  EXPECT_TRUE(observedCustomContext.load(std::memory_order_relaxed));
+}
+
+TEST(ContextHandleExceptionTest, DistinctHandlesFireConcurrentlyExactlyOnce) {
+  TestWatchdog watchdog{"concurrent exception handles"};
+  ContextFixture fixture;
+  std::atomic<uint32_t> exceptions{0};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> first{};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> second{};
+
+  fixture.eventBase->runInEventBaseThreadAndWait([&] {
+    fixture.tail.setOnExceptionCallback(
+        [&](folly::exception_wrapper&&) noexcept {
+          exceptions.fetch_add(1, std::memory_order_relaxed);
+        });
+    CallbackContext firstContext{fixture.context()};
+    firstContext.initContextHandle(first.data());
+    CallbackContext secondContext{fixture.context()};
+    secondContext.initContextHandle(second.data());
+  });
+
+  auto fire = [](auto& storage, std::string_view message) {
+    fireContextHandleException(
+        storage.data(),
+        reinterpret_cast<const uint8_t*>(message.data()),
+        message.size());
+  };
+  std::thread firstWorker([&] { fire(first, "first"); });
+  std::thread secondWorker([&] { fire(second, "second"); });
+  firstWorker.join();
+  secondWorker.join();
+  fixture.eventBase->runInEventBaseThreadAndWait([] {});
+
+  EXPECT_EQ(exceptions.load(std::memory_order_relaxed), 2);
+}
+
+TEST(ContextHandleSafetyDeathTest, LiveHandleDestructionOutsideEventBase) {
+  TestWatchdog watchdog{"live ContextHandle destruction outside EventBase"};
+  ContextFixture fixture;
+  CallbackContext context{fixture.context()};
+  alignas(void*) std::array<uint8_t, 2 * sizeof(void*)> storage{};
+  fixture.eventBase->runInEventBaseThreadAndWait(
+      [&] { context.initContextHandle(storage.data()); });
+
+  std::promise<void> blockerStarted;
+  std::promise<void> unblock;
+  auto unblockFuture = unblock.get_future().share();
+  fixture.eventBase->runInEventBaseThread([&blockerStarted, unblockFuture] {
+    blockerStarted.set_value();
+    unblockFuture.wait();
+  });
+  blockerStarted.get_future().wait();
+
+  destroyContextHandle(storage.data());
+  fixture.pipeline.reset();
+  EXPECT_EQ(fixture.removed.load(std::memory_order_relaxed), 0);
+
+  unblock.set_value();
+  fixture.eventBase->runInEventBaseThreadAndWait([] {});
+  EXPECT_EQ(fixture.removed.load(std::memory_order_relaxed), 1);
 }
 
 } // namespace

@@ -17,6 +17,11 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/CallbackContext.h>
 
 #include <cstring>
+#include <new>
+#include <type_traits>
+#include <utility>
+
+#include <folly/io/async/DelayedDestruction.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustMessageAdapter.h>
 
@@ -25,12 +30,151 @@ namespace {
 
 using apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
 using apache::thrift::fast_thrift::channel_pipeline::Result;
+using apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl;
+
+struct RustContextHandleToken final {
+  using IsRelocatable = std::true_type;
+
+  explicit RustContextHandleToken(ContextImpl& context) noexcept
+      : context(&context), pipelineGuard(context.pipeline()) {}
+
+  RustContextHandleToken(const RustContextHandleToken&) = delete;
+  RustContextHandleToken& operator=(const RustContextHandleToken&) = delete;
+
+  RustContextHandleToken(RustContextHandleToken&& other) noexcept
+      : context(std::exchange(other.context, nullptr)),
+        pipelineGuard(std::move(other.pipelineGuard)) {}
+
+  RustContextHandleToken& operator=(RustContextHandleToken&&) = delete;
+
+  ~RustContextHandleToken() {
+    CHECK(context == nullptr || context->eventBase()->isInEventBaseThread());
+  }
+
+  ContextImpl* context;
+  folly::DelayedDestruction::DestructorGuard pipelineGuard;
+};
+
+static_assert(sizeof(RustContextHandleToken) == 2 * sizeof(void*));
+static_assert(alignof(RustContextHandleToken) == alignof(void*));
+static_assert(folly::IsRelocatable<RustContextHandleToken>::value);
+static_assert(!std::is_copy_constructible_v<RustContextHandleToken>);
+static_assert(!std::is_copy_assignable_v<RustContextHandleToken>);
+static_assert(std::is_nothrow_move_constructible_v<RustContextHandleToken>);
+static_assert(!std::is_move_assignable_v<RustContextHandleToken>);
 
 int32_t toInt(Result result) noexcept {
   return static_cast<int32_t>(result);
 }
 
+RustContextHandleToken consumeContextHandle(uint8_t* storage) noexcept {
+  CHECK(storage != nullptr);
+  CHECK(
+      reinterpret_cast<uintptr_t>(storage) % alignof(RustContextHandleToken) ==
+      0);
+  auto* token = reinterpret_cast<RustContextHandleToken*>(storage);
+  CHECK(token->context != nullptr);
+  auto consumed = std::move(*token);
+  token->~RustContextHandleToken();
+  return consumed;
+}
+
+template <typename Fire>
+void fireContextHandle(
+    uint8_t* storage, BytesPtr message, Fire&& fire) noexcept {
+  auto token = consumeContextHandle(storage);
+  auto* eventBase = token.context->eventBase();
+  if (eventBase->isInEventBaseThread()) {
+    folly::RequestContextSaverScopeGuard requestContextGuard;
+    auto boxed = RustMessageAdapter<BytesPtr>::tryBox(std::move(message));
+    if (!boxed || token.context->pipeline()->isClosed()) {
+      return;
+    }
+    fire(*token.context, std::move(*boxed));
+    return;
+  }
+
+  auto continuation = [token = std::move(token),
+                       message = std::move(message),
+                       fire = std::forward<Fire>(fire)]() mutable noexcept {
+    auto boxed = RustMessageAdapter<BytesPtr>::tryBox(std::move(message));
+    if (!boxed || token.context->pipeline()->isClosed()) {
+      return;
+    }
+    fire(*token.context, std::move(*boxed));
+  };
+  static_assert(
+      sizeof(continuation) <= sizeof(folly::detail::function::Data),
+      "ContextHandle continuation must fit folly::Function inline storage");
+  eventBase->runInEventBaseThreadAlwaysEnqueue(std::move(continuation));
+}
+
 } // namespace
+
+void CallbackContext::initContextHandle(uint8_t* storage) noexcept {
+  CHECK(context_.eventBase()->isInEventBaseThread());
+  CHECK(storage != nullptr);
+  CHECK(
+      reinterpret_cast<uintptr_t>(storage) % alignof(RustContextHandleToken) ==
+      0);
+  ::new (storage) RustContextHandleToken(context_);
+}
+
+void fireContextHandleRead(uint8_t* storage, BytesPtr message) noexcept {
+  fireContextHandle(
+      storage,
+      std::move(message),
+      [](ContextImpl& context, auto boxed) noexcept {
+        (void)context.fireRead(std::move(boxed));
+      });
+}
+
+void fireContextHandleWrite(uint8_t* storage, BytesPtr message) noexcept {
+  fireContextHandle(
+      storage,
+      std::move(message),
+      [](ContextImpl& context, auto boxed) noexcept {
+        (void)context.fireWrite(std::move(boxed));
+      });
+}
+
+void fireContextHandleException(
+    uint8_t* storage, const uint8_t* messageData, size_t messageSize) noexcept {
+  CHECK(messageData != nullptr || messageSize == 0);
+  auto token = consumeContextHandle(storage);
+  auto exception = folly::make_exception_wrapper<std::runtime_error>(
+      std::string(reinterpret_cast<const char*>(messageData), messageSize));
+  auto* eventBase = token.context->eventBase();
+  if (eventBase->isInEventBaseThread()) {
+    folly::RequestContextSaverScopeGuard requestContextGuard;
+    if (!token.context->pipeline()->isClosed()) {
+      token.context->fireException(std::move(exception));
+    }
+    return;
+  }
+
+  auto continuation = [token = std::move(token),
+                       exception = std::move(exception)]() mutable noexcept {
+    if (!token.context->pipeline()->isClosed()) {
+      token.context->fireException(std::move(exception));
+    }
+  };
+  static_assert(
+      sizeof(continuation) <= sizeof(folly::detail::function::Data),
+      "ContextHandle exception must fit folly::Function inline storage");
+  eventBase->runInEventBaseThreadAlwaysEnqueue(std::move(continuation));
+}
+
+void destroyContextHandle(uint8_t* storage) noexcept {
+  auto token = consumeContextHandle(storage);
+  auto* eventBase = token.context->eventBase();
+  if (eventBase->isInEventBaseThread()) {
+    return;
+  }
+
+  eventBase->runInEventBaseThread(
+      [token = std::move(token)]() mutable noexcept {});
+}
 
 int32_t CallbackContext::fireRead(
     std::unique_ptr<folly::IOBuf> message) noexcept {

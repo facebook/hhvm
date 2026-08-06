@@ -26,6 +26,8 @@ mod ffi {
         rust_read_pipeline_ns: f64,
         native_write_pipeline_ns: f64,
         rust_write_pipeline_ns: f64,
+        rust_context_handle_read_ns: f64,
+        rust_context_handle_write_ns: f64,
         native_exception_pipeline_ns: f64,
         rust_exception_pipeline_ns: f64,
         native_read_ready_ns: f64,
@@ -36,8 +38,11 @@ mod ffi {
         rust_write_recovery_ns: f64,
         ready_path_alloc_bytes: u64,
         forward_path_alloc_bytes: u64,
+        context_handle_type_erasure_alloc_bytes: u64,
+        context_handle_path_alloc_bytes: u64,
         ready_path_loop_callbacks: u64,
         forward_path_loop_callbacks: u64,
+        context_handle_path_loop_callbacks: u64,
         jemalloc_available: bool,
     }
 
@@ -57,17 +62,19 @@ fn main() {
     for repetition in 0..REPETITIONS {
         let result = ffi::run_bench_with_watchdog(ITERATIONS, TIMEOUT_MS);
         println!(
-            "raw repetition={repetition} adapter_round_trip_ns={:.3} native_read_pipeline_ns={:.3} rust_read_pipeline_ns={:.3} native_write_pipeline_ns={:.3} rust_write_pipeline_ns={:.3} native_exception_pipeline_ns={:.3} rust_exception_pipeline_ns={:.3}",
+            "raw repetition={repetition} adapter_round_trip_ns={:.3} native_read_pipeline_ns={:.3} rust_read_pipeline_ns={:.3} native_write_pipeline_ns={:.3} rust_write_pipeline_ns={:.3} rust_context_handle_read_ns={:.3} rust_context_handle_write_ns={:.3} native_exception_pipeline_ns={:.3} rust_exception_pipeline_ns={:.3}",
             result.adapter_round_trip_ns,
             result.native_read_pipeline_ns,
             result.rust_read_pipeline_ns,
             result.native_write_pipeline_ns,
             result.rust_write_pipeline_ns,
+            result.rust_context_handle_read_ns,
+            result.rust_context_handle_write_ns,
             result.native_exception_pipeline_ns,
             result.rust_exception_pipeline_ns,
         );
         println!(
-            "raw repetition={repetition} native_read_ready_ns={:.3} rust_read_ready_ns={:.3} native_read_recovery_ns={:.3} rust_read_recovery_ns={:.3} native_write_recovery_ns={:.3} rust_write_recovery_ns={:.3} ready_path_alloc_bytes={} forward_path_alloc_bytes={} ready_path_loop_callbacks={} forward_path_loop_callbacks={} jemalloc_available={}",
+            "raw repetition={repetition} native_read_ready_ns={:.3} rust_read_ready_ns={:.3} native_read_recovery_ns={:.3} rust_read_recovery_ns={:.3} native_write_recovery_ns={:.3} rust_write_recovery_ns={:.3} ready_path_alloc_bytes={} forward_path_alloc_bytes={} context_handle_type_erasure_alloc_bytes={} context_handle_path_alloc_bytes={} ready_path_loop_callbacks={} forward_path_loop_callbacks={} context_handle_path_loop_callbacks={} jemalloc_available={}",
             result.native_read_ready_ns,
             result.rust_read_ready_ns,
             result.native_read_recovery_ns,
@@ -76,8 +83,11 @@ fn main() {
             result.rust_write_recovery_ns,
             result.ready_path_alloc_bytes,
             result.forward_path_alloc_bytes,
+            result.context_handle_type_erasure_alloc_bytes,
+            result.context_handle_path_alloc_bytes,
             result.ready_path_loop_callbacks,
             result.forward_path_loop_callbacks,
+            result.context_handle_path_loop_callbacks,
             result.jemalloc_available,
         );
         samples.push(result);
@@ -103,6 +113,18 @@ fn main() {
     });
     print_stats("incremental_write_handler_ns", &samples, |sample| {
         sample.rust_write_pipeline_ns - sample.native_write_pipeline_ns
+    });
+    print_stats("rust_context_handle_read_ns", &samples, |sample| {
+        sample.rust_context_handle_read_ns
+    });
+    print_stats("rust_context_handle_write_ns", &samples, |sample| {
+        sample.rust_context_handle_write_ns
+    });
+    print_stats("incremental_context_handle_read_ns", &samples, |sample| {
+        sample.rust_context_handle_read_ns - sample.rust_read_pipeline_ns
+    });
+    print_stats("incremental_context_handle_write_ns", &samples, |sample| {
+        sample.rust_context_handle_write_ns - sample.rust_write_pipeline_ns
     });
     print_stats("native_exception_pipeline_ns", &samples, |sample| {
         sample.native_exception_pipeline_ns
@@ -150,6 +172,16 @@ fn main() {
         .map(|sample| sample.forward_path_alloc_bytes)
         .max()
         .unwrap_or(0);
+    let context_handle_type_erasure_alloc = samples
+        .iter()
+        .map(|sample| sample.context_handle_type_erasure_alloc_bytes)
+        .max()
+        .unwrap_or(0);
+    let context_handle_alloc = samples
+        .iter()
+        .map(|sample| sample.context_handle_path_alloc_bytes)
+        .max()
+        .unwrap_or(0);
     let ready_cbs = samples
         .iter()
         .map(|sample| sample.ready_path_loop_callbacks)
@@ -160,9 +192,14 @@ fn main() {
         .map(|sample| sample.forward_path_loop_callbacks)
         .max()
         .unwrap_or(0);
+    let context_handle_cbs = samples
+        .iter()
+        .map(|sample| sample.context_handle_path_loop_callbacks)
+        .max()
+        .unwrap_or(0);
     let jemalloc = samples.iter().all(|sample| sample.jemalloc_available);
     println!(
-        "evidence jemalloc_available={jemalloc} ready_path_alloc_bytes_max={ready_alloc} forward_path_alloc_bytes_max={forward_alloc} ready_path_loop_callbacks_max={ready_cbs} forward_path_loop_callbacks_max={forward_cbs}"
+        "evidence jemalloc_available={jemalloc} ready_path_alloc_bytes_max={ready_alloc} forward_path_alloc_bytes_max={forward_alloc} context_handle_type_erasure_alloc_bytes_max={context_handle_type_erasure_alloc} context_handle_path_alloc_bytes_max={context_handle_alloc} ready_path_loop_callbacks_max={ready_cbs} forward_path_loop_callbacks_max={forward_cbs} context_handle_path_loop_callbacks_max={context_handle_cbs}"
     );
 }
 

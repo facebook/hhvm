@@ -80,6 +80,10 @@ class CallbackContext final {
   CallbackContext(const CallbackContext&) = delete;
   CallbackContext& operator=(const CallbackContext&) = delete;
 
+  // Constructs an allocation-free, relocatable continuation token in the
+  // caller-provided storage. Must be destroyed with destroyContextHandle().
+  void initContextHandle(uint8_t* storage) noexcept;
+
   int32_t fireRead(std::unique_ptr<folly::IOBuf> message) noexcept;
   int32_t fireWrite(std::unique_ptr<folly::IOBuf> message) noexcept;
 
@@ -114,5 +118,18 @@ class CallbackContext final {
       nullptr};
   bool forwarded_{false};
 };
+
+// Consume a token and continue from its captured context. The continuation runs
+// immediately on the EventBase and is otherwise enqueued onto that EventBase.
+void fireContextHandleRead(
+    uint8_t* storage, std::unique_ptr<folly::IOBuf> message) noexcept;
+void fireContextHandleWrite(
+    uint8_t* storage, std::unique_ptr<folly::IOBuf> message) noexcept;
+void fireContextHandleException(
+    uint8_t* storage, const uint8_t* messageData, size_t messageSize) noexcept;
+
+// Consumes a token previously constructed by initContextHandle(). Destruction
+// is inline on its EventBase and otherwise scheduled back to that EventBase.
+void destroyContextHandle(uint8_t* storage) noexcept;
 
 } // namespace channel_pipeline_rust

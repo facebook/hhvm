@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/op/detail/EncodeHelpers.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -328,8 +329,6 @@ struct SerializedSize<ZeroCopy, type::enum_t<T>> {
         type::enum_t<T>>::template serializedSize<ZeroCopy>(prot, s);
   }
 };
-
-using apache::thrift::detail::pm::checked_container_size;
 
 template <bool ZeroCopy, typename Tag>
 struct SerializedSize<ZeroCopy, type::list<Tag>> {
@@ -660,11 +659,10 @@ struct ListEncode {
     xfer += prot.writeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
 
-    if constexpr (apache::thrift::detail::pm::
-                      should_process_as_arithmetic_vector_v<
-                          Protocol,
-                          detail::TypeTagToTType<Tag>,
-                          T>) {
+    if constexpr (should_process_as_arithmetic_vector_v<
+                      Protocol,
+                      detail::TypeTagToTType<Tag>,
+                      T>) {
       xfer += prot.template writeArithmeticVector<elem_type>(
           list.data(), list.size());
     } else {
@@ -687,10 +685,9 @@ struct SetEncode {
     uint32_t xfer = 0;
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
-    apache::thrift::detail::pm::encodeSetElements<Tag>(
-        prot, set, [&](const auto& elem) {
-          xfer += Encode<Tag>{}(prot, elem);
-        });
+    encodeSetElements<Tag>(prot, set, [&](const auto& elem) {
+      xfer += Encode<Tag>{}(prot, elem);
+    });
     xfer += prot.writeSetEnd();
     return xfer;
   }
@@ -713,13 +710,12 @@ struct MapEncode {
         checked_container_size(map.size()),
         alternativeKeyForm);
 
-    apache::thrift::detail::pm::encodeMapElements<Key>(
-        prot, map, [&](const auto& key, const auto& value) {
-          xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
-          xfer += Encode<Key>{}(prot, key);
-          xfer += Encode<Value>{}(prot, value);
-          xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
-        });
+    encodeMapElements<Key>(prot, map, [&](const auto& key, const auto& value) {
+      xfer += writeMapValueBegin(prot);
+      xfer += Encode<Key>{}(prot, key);
+      xfer += Encode<Value>{}(prot, value);
+      xfer += writeMapValueEnd(prot);
+    });
 
     xfer += prot.writeMapEnd();
     return xfer;
@@ -982,7 +978,7 @@ struct Decode<type::list<Tag>> {
   template <typename Protocol, typename ListType>
   void operator()(Protocol& prot, ListType& list) const {
     auto consumeElem = [&] {
-      auto&& elem = apache::thrift::detail::pm::emplace_back_default(list);
+      auto&& elem = emplace_back_default(list);
       Decode<Tag>{}(prot, elem);
     };
     TType t;
@@ -1003,7 +999,7 @@ struct Decode<type::list<Tag>> {
       constexpr auto should_resize_without_initialization =
           std::is_trivial_v<typename ListType::value_type> &&
           folly::is_detected_v<
-              apache::thrift::detail::pm::detect_resize_without_initialization,
+              detect_resize_without_initialization,
               ListType,
               decltype(s)>;
 #else
@@ -1013,20 +1009,16 @@ struct Decode<type::list<Tag>> {
 #endif
       using value_type = typename ListType::value_type;
       constexpr auto should_resize =
-          folly::is_detected_v<
-              apache::thrift::detail::pm::detect_resize,
-              ListType,
-              decltype(s)> &&
+          folly::is_detected_v<detect_resize, ListType, decltype(s)> &&
           std::is_trivial_v<value_type>;
       // Do special treatments for lists of primitive types, as we found
       // resize is more performant than reserve.
       if constexpr (should_resize_without_initialization) {
         folly::resizeWithoutInitialization(list, s);
-        if constexpr (apache::thrift::detail::pm::
-                          should_process_as_arithmetic_vector_v<
-                              Protocol,
-                              detail::TypeTagToTType<Tag>,
-                              ListType>) {
+        if constexpr (should_process_as_arithmetic_vector_v<
+                          Protocol,
+                          detail::TypeTagToTType<Tag>,
+                          ListType>) {
           prot.template readArithmeticVector<value_type>(
               list.data(), list.size());
         } else {
@@ -1080,7 +1072,7 @@ struct Decode<type::set<Tag>> {
       if (!canReadNElements(prot, s, {t})) {
         TProtocolException::throwTruncatedData();
       }
-      apache::thrift::detail::pm::deserialize_known_length_set(
+      deserialize_known_length_set(
           set, s, [&prot](auto& value) { Decode<Tag>{}(prot, value); });
     } else {
       apache::thrift::skip_n(prot, s, {t});
@@ -1109,7 +1101,7 @@ struct Decode<type::map<Key, Value>> {
       if (!canReadNElements(prot, s, {keyType, valueType})) {
         TProtocolException::throwTruncatedData();
       }
-      apache::thrift::detail::pm::deserialize_known_length_map(
+      deserialize_known_length_map(
           map,
           s,
           [&prot](auto& key) { Decode<Key>{}(prot, key); },

@@ -41,7 +41,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
-#include <thrift/lib/cpp2/op/detail/Compare.h>
+#include <thrift/lib/cpp2/op/detail/EncodeHelpers.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderWireTypeInfo.h>
@@ -86,238 +86,19 @@
 
 namespace apache::thrift::detail::pm {
 
-template <typename C, typename... A>
-using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
-template <typename C, typename... A>
-using detect_resize_without_initialization =
-    decltype(folly::resizeWithoutInitialization(
-        FOLLY_DECLVAL(C&), FOLLY_DECLVAL(A)...));
-
-template <typename Container>
-typename Container::reference emplace_back_default(Container& c) {
-  constexpr auto pass_alloc =
-      alloc_should_propagate<Container, typename Container::value_type>;
-  if constexpr (pass_alloc) {
-    return c.emplace_back(typename Container::value_type(c.get_allocator()));
-  } else {
-    return c.emplace_back();
-  }
-}
-
-template <typename Container, typename Map>
-typename Container::reference emplace_back_default_map(Container& c, Map& m) {
-  constexpr auto pass_alloc =
-      alloc_should_propagate<Map, typename Map::key_type> ||
-      alloc_should_propagate<Map, typename Map::mapped_type>;
-  if constexpr (pass_alloc) {
-    return c.emplace_back(
-        typename Map::key_type(m.get_allocator()),
-        typename Map::mapped_type(m.get_allocator()));
-  } else {
-    return c.emplace_back();
-  }
-}
-
-template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-std::enable_if_t<detail::alloc_should_propagate_map<Map>>
-deserialize_key_val_into_map(
-    Map& m, const KeyDeserializer& kr, const MappedDeserializer& mr) {
-  typename Map::key_type key = detail::default_map_key(m);
-  typename Map::mapped_type value = detail::default_map_value(m);
-  kr(key);
-  mr(value);
-  m.emplace(std::move(key), std::move(value));
-}
-
-template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-std::enable_if_t<!detail::alloc_should_propagate_map<Map>>
-deserialize_key_val_into_map(
-    Map& m, const KeyDeserializer& kr, const MappedDeserializer& mr) {
-  typename Map::key_type key; // Create key/val without allocator awareness.
-  kr(key);
-  mr(m[std::move(key)]);
-}
-
-template <typename Void, typename T>
-inline constexpr bool sorted_unique_constructible_ = false;
-template <typename T>
-inline constexpr bool sorted_unique_constructible_<
-    folly::void_t<
-        decltype(T(folly::sorted_unique, typename T::container_type())),
-        decltype(T(typename T::container_type()))>,
-    T> = true;
-template <typename T>
-inline constexpr bool sorted_unique_constructible_v =
-    sorted_unique_constructible_<void, T>;
-
-FOLLY_CREATE_MEMBER_INVOKER(emplace_hint_invoker, emplace_hint);
-
-template <typename T>
-using detect_key_compare = typename T::key_compare;
-
-template <typename T>
-constexpr bool map_emplace_hint_is_invocable_v = folly::is_invocable_v<
-    emplace_hint_invoker,
-    T,
-    typename T::iterator,
-    typename T::key_type,
-    typename T::mapped_type>;
-
-template <typename T>
-constexpr bool set_emplace_hint_is_invocable_v = folly::is_invocable_v<
-    emplace_hint_invoker,
-    T,
-    typename T::iterator,
-    typename T::value_type>;
-
-template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-std::enable_if_t<sorted_unique_constructible_v<Map>>
-deserialize_known_length_map(
-    Map& map,
-    std::uint32_t map_size,
-    const KeyDeserializer& kr,
-    const MappedDeserializer& mr) {
-  if (map_size == 0) {
-    return;
-  }
-
-  bool sorted = true;
-  typename Map::container_type tmp(map.get_allocator());
-  folly::reserve_if_available(tmp, map_size);
-  {
-    decltype(auto) elem0 = emplace_back_default_map(tmp, map);
-    kr(elem0.first);
-    mr(elem0.second);
-  }
-  for (size_t i = 1; i < map_size; ++i) {
-    decltype(auto) elem = emplace_back_default_map(tmp, map);
-    kr(elem.first);
-    mr(elem.second);
-    sorted = sorted && map.key_comp()(tmp[i - 1].first, elem.first);
-  }
-
-  using folly::sorted_unique;
-  map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
-}
-
-template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-std::enable_if_t<
-    !sorted_unique_constructible_v<Map> && map_emplace_hint_is_invocable_v<Map>>
-deserialize_known_length_map(
-    Map& map,
-    std::uint32_t map_size,
-    const KeyDeserializer& kr,
-    const MappedDeserializer& mr) {
-  folly::reserve_if_available(map, map_size);
-
-  for (auto i = map_size; i--;) {
-    typename Map::key_type key = detail::default_map_key(map);
-    typename Map::mapped_type value = detail::default_map_value(map);
-    kr(key);
-    mr(value);
-    map.emplace_hint(map.end(), std::move(key), std::move(value));
-  }
-}
-
-template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-std::enable_if_t<
-    !sorted_unique_constructible_v<Map> &&
-    !map_emplace_hint_is_invocable_v<Map>>
-deserialize_known_length_map(
-    Map& map,
-    std::uint32_t map_size,
-    const KeyDeserializer& kr,
-    const MappedDeserializer& mr) {
-  folly::reserve_if_available(map, map_size);
-
-  for (auto i = map_size; i--;) {
-    deserialize_key_val_into_map(map, kr, mr);
-  }
-}
-
-template <typename Set, typename ValDeserializer>
-std::enable_if_t<sorted_unique_constructible_v<Set>>
-deserialize_known_length_set(
-    Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
-  if (set_size == 0) {
-    return;
-  }
-
-  bool sorted = true;
-  typename Set::container_type tmp(set.get_allocator());
-  folly::reserve_if_available(tmp, set_size);
-  {
-    auto& elem0 = emplace_back_default(tmp);
-    vr(elem0);
-  }
-  for (size_t i = 1; i < set_size; ++i) {
-    auto& elem = emplace_back_default(tmp);
-    vr(elem);
-    sorted = sorted && set.key_comp()(tmp[i - 1], elem);
-  }
-
-  using folly::sorted_unique;
-  set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
-}
-
-template <typename Set, typename ValDeserializer>
-std::enable_if_t<
-    !sorted_unique_constructible_v<Set> && set_emplace_hint_is_invocable_v<Set>>
-deserialize_known_length_set(
-    Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
-  folly::reserve_if_available(set, set_size);
-
-  for (auto i = set_size; i--;) {
-    typename Set::value_type value = detail::default_set_element(set);
-    vr(value);
-    set.emplace_hint(set.end(), std::move(value));
-  }
-}
-
-template <typename Set, typename ValDeserializer>
-std::enable_if_t<
-    !sorted_unique_constructible_v<Set> &&
-    !set_emplace_hint_is_invocable_v<Set>>
-deserialize_known_length_set(
-    Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
-  folly::reserve_if_available(set, set_size);
-
-  for (auto i = set_size; i--;) {
-    typename Set::value_type value = detail::default_set_element(set);
-    vr(value);
-    set.insert(std::move(value));
-  }
-}
-
-inline uint32_t checked_container_size(size_t size) {
-  const size_t limit = std::numeric_limits<int32_t>::max();
-  if (size > limit) {
-    TProtocolException::throwExceededSizeLimit(size, limit);
-  }
-  return static_cast<uint32_t>(size);
-}
-
-template <typename Protocol>
-static constexpr bool map_value_api_v = requires(Protocol& p) {
-  p.writeMapValueBegin();
-  p.writeMapValueEnd();
-};
-
-template <typename Protocol>
-std::size_t writeMapValueBegin(Protocol& protocol) {
-  if constexpr (map_value_api_v<Protocol>) {
-    return protocol.writeMapValueBegin();
-  }
-  return 0;
-}
-
-template <typename Protocol>
-std::size_t writeMapValueEnd(Protocol& protocol) {
-  if constexpr (map_value_api_v<Protocol>) {
-    return protocol.writeMapValueEnd();
-  }
-  return 0;
-}
+using op::detail::checked_container_size;
+using op::detail::deserialize_key_val_into_map;
+using op::detail::deserialize_known_length_map;
+using op::detail::deserialize_known_length_set;
+using op::detail::detect_key_compare;
+using op::detail::detect_resize;
+using op::detail::detect_resize_without_initialization;
+using op::detail::emplace_back_default;
+using op::detail::map_emplace_hint_is_invocable_v;
+using op::detail::set_emplace_hint_is_invocable_v;
+using op::detail::sorted_unique_constructible_v;
+using op::detail::writeMapValueBegin;
+using op::detail::writeMapValueEnd;
 
 /*
  * Primitive Types Specialization
@@ -585,45 +366,7 @@ template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::integral, Type, ExpectedTag>
     : enum_protocol_methods<type_class::integral, Type> {};
 
-template <typename Protocol, typename = void>
-struct supports_arithmetic_vectors : std::false_type {};
-template <typename Protocol>
-struct supports_arithmetic_vectors<
-    Protocol,
-    std::void_t<decltype(Protocol::kSupportsArithmeticVectors())>>
-    : std::bool_constant<Protocol::kSupportsArithmeticVectors()> {};
-template <typename Protocol>
-static constexpr bool supports_arithmetic_vectors_v =
-    supports_arithmetic_vectors<Protocol>::value;
-
-template <typename elem_type, typename elem_ttype>
-static constexpr bool is_supported_arithmetic_elem_type_v =
-    (std::is_same_v<elem_type, float> || std::is_same_v<elem_type, double> ||
-     std::is_same_v<elem_type, std::int8_t> ||
-     std::is_same_v<elem_type, std::uint8_t> ||
-     std::is_same_v<elem_type, std::int64_t> ||
-     std::is_same_v<elem_type, std::uint64_t> ||
-     std::is_same_v<elem_type, std::int32_t> ||
-     std::is_same_v<elem_type, std::uint32_t> ||
-     std::is_same_v<elem_type, std::int16_t> ||
-     std::is_same_v<elem_type, std::uint16_t>) &&
-    (elem_ttype::value == TType::T_BYTE ||
-     elem_ttype::value == TType::T_FLOAT ||
-     elem_ttype::value == TType::T_DOUBLE ||
-     elem_ttype::value == TType::T_U64 || elem_ttype::value == TType::T_I64 ||
-     elem_ttype::value == TType::T_I32 || elem_ttype::value == TType::T_I16 ||
-     elem_ttype::value == TType::T_I08);
-
-template <typename Protocol, typename elem_ttype, typename ContainerType>
-static constexpr bool should_process_as_arithmetic_vector_v =
-    supports_arithmetic_vectors<Protocol>::value &&
-    is_supported_arithmetic_elem_type_v<
-        typename ContainerType::value_type,
-        elem_ttype> &&
-    folly::is_contiguous_range_v<ContainerType> &&
-    requires(typename ContainerType::value_type* v, size_t len) {
-      Protocol::writeArithmeticVector(v, len);
-    };
+using op::detail::should_process_as_arithmetic_vector_v;
 /*
  * List Specialization
  */
@@ -775,92 +518,8 @@ struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
   }
 };
 
-/*
- * Common helper that iterates over a set-like container in the order required
- * by `Protocol`, invoking `writeElem(elem)` for each element. Used by both
- * `protocol_methods<type_class::set<...>, ..., ...>::write` and
- * `op::detail::SetEncode<Tag>`.
- */
-template <typename Tag, typename Protocol, typename Container, typename WriteFn>
-void encodeSetElements(
-    Protocol& protocol, const Container& set, WriteFn writeElem) {
-  constexpr bool kContainerIsOrdered =
-      folly::is_detected_v<detect_key_compare, Container>;
-  const KeyOrder kKeyOrder = protocol.keyOrder();
-  const bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-      (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-  if (kShouldSort) {
-    std::vector<typename Container::const_iterator> iters;
-    iters.reserve(set.size());
-    for (auto it = set.begin(); it != set.end(); ++it) {
-      iters.push_back(it);
-    }
-    auto compare = [&](auto a, auto b) {
-      if (protocol.keyOrder() == KeyOrder::StableAscending) {
-        return ::apache::thrift::op::detail::StableLessThan<Tag>{}(*a, *b);
-      } else {
-        return *a < *b;
-      }
-    };
-    std::sort(iters.begin(), iters.end(), compare);
-    for (auto it : iters) {
-      writeElem(*it);
-    }
-  } else {
-    // Support containers with defined but non-FIFO iteration order.
-    for (const auto& elem :
-         folly::order_preserving_reinsertion_view_or_default(set)) {
-      writeElem(elem);
-    }
-  }
-}
-
-/*
- * Common helper that iterates over a map-like container in the order required
- * by `Protocol`, invoking `writeEntry(key, value)` for each entry. Used by
- * both `protocol_methods<type_class::map<...>, ..., ...>::write` and
- * `op::detail::MapEncode<Key, Value>`.
- */
-template <
-    typename KeyTag,
-    typename Protocol,
-    typename Container,
-    typename WriteFn>
-void encodeMapElements(
-    Protocol& protocol, const Container& map, WriteFn writeEntry) {
-  constexpr bool kContainerIsOrdered =
-      folly::is_detected_v<detect_key_compare, Container>;
-  const KeyOrder kKeyOrder = protocol.keyOrder();
-  const bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-      (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-  if (kShouldSort) {
-    std::vector<typename Container::const_iterator> iters;
-    iters.reserve(map.size());
-    for (auto it = map.begin(); it != map.end(); ++it) {
-      iters.push_back(it);
-    }
-    auto compare = [&](auto a, auto b) {
-      if (protocol.keyOrder() == KeyOrder::StableAscending) {
-        return ::apache::thrift::op::detail::StableLessThan<KeyTag>{}(
-            (*a).first, (*b).first);
-      } else {
-        return (*a).first < (*b).first;
-      }
-    };
-    std::sort(iters.begin(), iters.end(), compare);
-    for (auto it : iters) {
-      writeEntry((*it).first, (*it).second);
-    }
-  } else {
-    // Support containers with defined but non-FIFO iteration order.
-    for (const auto& elem_pair :
-         folly::order_preserving_reinsertion_view_or_default(map)) {
-      writeEntry(elem_pair.first, elem_pair.second);
-    }
-  }
-}
+using op::detail::encodeMapElements;
+using op::detail::encodeSetElements;
 
 /*
  * Set Specialization

@@ -34,13 +34,13 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime)
 
-std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
-
 struct VanillaKeyset::Initializer {
   Initializer() {
-    static_assert(computeAllocBytes(SmallScale) == kEmptyKeysetSize);
+    static_assert(
+      computeAllocBytes(SmallScale) == StaticLiterals::kEmptyKeysetSize);
     auto const index = computeIndexFromScale(SmallScale);
-    auto const ad    = reinterpret_cast<VanillaKeyset*>(&s_theEmptyKeyset);
+    auto const ad    =
+      reinterpret_cast<VanillaKeyset*>(staticEmptyKeysetArray());
     auto const aux   = packSizeIndexAndAuxBits(index, 0);
     ad->initHash(VanillaKeyset::SmallScale);
     ad->m_size = 0;

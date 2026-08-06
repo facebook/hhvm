@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/static-literals.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/safe-cast.h"
 
@@ -23,28 +24,28 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE ArrayData* staticEmptyVec() {
-  void* vp = &s_theEmptyVec;
-  return static_cast<ArrayData*>(vp);
+  auto constexpr ptr = StaticLiterals::EmptyVec();
+  return reinterpret_cast<ArrayData*>(ptr);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedVec() {
-  void* vp = &s_theEmptyMarkedVec;
-  return static_cast<ArrayData*>(vp);
+  auto constexpr ptr = StaticLiterals::EmptyMarkedVec();
+  return reinterpret_cast<ArrayData*>(ptr);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
-  void* vp = s_theEmptyDictArrayPtr;
-  return static_cast<ArrayData*>(vp);
+  auto constexpr ptr = StaticLiterals::EmptyDict() + sizeof(StrKeyTable);
+  return reinterpret_cast<ArrayData*>(ptr);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedDictArray() {
-  void* vp = s_theEmptyMarkedDictArrayPtr;
-  return static_cast<ArrayData*>(vp);
+  auto constexpr ptr = StaticLiterals::EmptyMarkedDict() + sizeof(StrKeyTable);
+  return reinterpret_cast<ArrayData*>(ptr);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptyKeyset;
-  return static_cast<ArrayData*>(vp);
+  auto constexpr ptr = StaticLiterals::EmptyKeyset();
+  return reinterpret_cast<ArrayData*>(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

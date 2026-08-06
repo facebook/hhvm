@@ -37,15 +37,13 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
-std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
-
 auto constexpr kVanillaLayoutIndex = ArrayData::kVanillaLayoutIndex;
 
 struct VanillaVec::VecInitializer {
   VecInitializer() {
+    static_assert(sizeof(ArrayData) == StaticLiterals::kEmptyVecSize);
     auto const aux = packSizeIndexAndAuxBits(0, 0);
-    auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVec);
+    auto const ad = staticEmptyVec();
     ad->m_size = 0;
     ad->m_layout_index = kVanillaLayoutIndex;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
@@ -56,8 +54,9 @@ VanillaVec::VecInitializer VanillaVec::s_vec_initializer;
 
 struct VanillaVec::MarkedVecInitializer {
   MarkedVecInitializer() {
+    static_assert(sizeof(ArrayData) == StaticLiterals::kEmptyVecSize);
     auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
-    auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVec);
+    auto const ad = staticEmptyMarkedVec();
     ad->m_size = 0;
     ad->m_layout_index = kVanillaLayoutIndex;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);

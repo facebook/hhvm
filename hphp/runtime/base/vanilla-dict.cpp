@@ -41,34 +41,15 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime)
 
-static_assert(
-  VanillaDict::computeAllocBytes(VanillaDict::SmallScale) +
-  kEmptyVanillaDictStrKeyTableSize ==
-  kEmptyVanillaDictSize, ""
-);
-
-namespace {
-using EmptyArrayType = std::aligned_storage<kEmptyVanillaDictSize, 16>::type;
-EmptyArrayType s_theEmptyDictArrayMem;
-EmptyArrayType s_theEmptyMarkedDictArrayMem;
-}
-
-#define ArrayMemToPtr(mem) ((ArrayData*)(((char*)&mem) +                \
-                                         kEmptyVanillaDictStrKeyTableSize))
-
-
-ArrayData*      s_theEmptyDictArrayPtr =
-  ArrayMemToPtr(s_theEmptyDictArrayMem);
-ArrayData*      s_theEmptyMarkedDictArrayPtr =
-  ArrayMemToPtr(s_theEmptyMarkedDictArrayMem);
-
-#undef ArrayMemToPtr
-
 struct VanillaDict::DictInitializer {
   DictInitializer() {
+    static_assert(
+      computeAllocBytes(SmallScale) + sizeof(StrKeyTable) ==
+        StaticLiterals::kEmptyDictSize
+    );
     auto constexpr scale = 1;
     auto const index = computeIndexFromScale(scale);
-    auto const ad    = reinterpret_cast<VanillaDict*>(s_theEmptyDictArrayPtr);
+    auto const ad    = reinterpret_cast<VanillaDict*>(staticEmptyDictArray());
     auto const flags = kHasStrKeyTable;
     auto const aux   = packSizeIndexAndAuxBits(index, flags);
     ad->initHash(scale);
@@ -86,9 +67,14 @@ VanillaDict::DictInitializer VanillaDict::s_dict_initializer;
 
 struct VanillaDict::MarkedDictArrayInitializer {
   MarkedDictArrayInitializer() {
+    static_assert(
+      computeAllocBytes(SmallScale) + sizeof(StrKeyTable) ==
+        StaticLiterals::kEmptyDictSize
+    );
     auto constexpr scale = 1;
     auto const index = computeIndexFromScale(scale);
-    auto const ad    = reinterpret_cast<VanillaDict*>(s_theEmptyMarkedDictArrayPtr);
+    auto const ad    =
+      reinterpret_cast<VanillaDict*>(staticEmptyMarkedDictArray());
     auto const flags = kLegacyArray | kHasStrKeyTable;
     auto const aux   = packSizeIndexAndAuxBits(index, flags);
     ad->initHash(scale);

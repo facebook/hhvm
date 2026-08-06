@@ -30,18 +30,52 @@ struct StaticLiterals {
     return kBase + offsetof(StaticLiterals, m_emptyString);
   }
 
-  // Pre-computed size of empty string to avoid unnecessary header dependencies.
-  // Statically asserted to match the computed value at StringData.
+  static constexpr uintptr_t EmptyVec() {
+    return kBase + offsetof(StaticLiterals, m_emptyVec);
+  }
+
+  static constexpr uintptr_t EmptyMarkedVec() {
+    return kBase + offsetof(StaticLiterals, m_emptyMarkedVec);
+  }
+
+  static constexpr uintptr_t EmptyDict() {
+    return kBase + offsetof(StaticLiterals, m_emptyDict);
+  }
+
+  static constexpr uintptr_t EmptyMarkedDict() {
+    return kBase + offsetof(StaticLiterals, m_emptyMarkedDict);
+  }
+
+  static constexpr uintptr_t EmptyKeyset() {
+    return kBase + offsetof(StaticLiterals, m_emptyKeyset);
+  }
+
+  // Pre-computed size of empty string, vec, dict and keyset to avoid
+  // unnecessary header dependencies. Statically asserted to match the
+  // computed value at StringData, VanillaVec, VanillaDict and VanillaKeyset.
   static constexpr size_t kEmptyStringSize = 25;
+  static constexpr size_t kEmptyVecSize = 16;
+  static constexpr size_t kEmptyDictSize = 128;
+  static constexpr size_t kEmptyKeysetSize = 96;
 
 private:
   static constexpr uintptr_t kBase = kStaticLiteralsMinAddr;
 
   UNUSED std::aligned_storage<kEmptyStringSize, 16>::type m_emptyString;
+  UNUSED std::aligned_storage<kEmptyVecSize, 16>::type m_emptyVec;
+  UNUSED std::aligned_storage<kEmptyVecSize, 16>::type m_emptyMarkedVec;
+  UNUSED std::aligned_storage<kEmptyDictSize, 16>::type m_emptyDict;
+  UNUSED std::aligned_storage<kEmptyDictSize, 16>::type m_emptyMarkedDict;
+  UNUSED std::aligned_storage<kEmptyKeysetSize, 16>::type m_emptyKeyset;
 };
 
 static_assert(sizeof(StaticLiterals) <= kStaticLiteralsMaxAddr - kStaticLiteralsMinAddr);
 static_assert(StaticLiterals::EmptyString() < kMidArenaMaxAddr);
+static_assert(StaticLiterals::EmptyVec() < kMidArenaMaxAddr);
+static_assert(StaticLiterals::EmptyMarkedVec() < kMidArenaMaxAddr);
+static_assert(StaticLiterals::EmptyDict() < kMidArenaMaxAddr);
+static_assert(StaticLiterals::EmptyMarkedDict() < kMidArenaMaxAddr);
+static_assert(StaticLiterals::EmptyKeyset() < kMidArenaMaxAddr);
 
 //////////////////////////////////////////////////////////////////////
 

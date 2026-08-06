@@ -701,28 +701,6 @@ static_assert(ArrayData::kBespokeKeysetKind == uint8_t(HeaderKind::BespokeKeyset
 
 //////////////////////////////////////////////////////////////////////
 
-// The size of the StrKeyTable, which is stored in front of the array, needs to
-// rounded up to a multiple of 16, so that we can enforce the base array pointer
-// is 16-byte aligned.
-constexpr size_t kEmptyVanillaDictStrKeyTableSize =
-  ((sizeof(StrKeyTable) - 1) / 16 + 1) * 16;
-
-constexpr size_t kEmptyVanillaDictSize = 120 + kEmptyVanillaDictStrKeyTableSize;
-constexpr size_t kEmptyKeysetSize  = 96;
-
-/*
- * Storage for the static empty arrays.
- */
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
-extern std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
-
-/*
- * Pointers to canonical empty dicts.
- */
-extern ArrayData* s_theEmptyDictArrayPtr;
-extern ArrayData* s_theEmptyMarkedDictArrayPtr;
-
 /*
  * Return the static empty array, for PHP and Hack arrays.
  */

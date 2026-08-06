@@ -51,10 +51,21 @@ unordered_map<string, string> parseStringMapOption(
     auto key = substituteTemplates(pair.subpiece(0, delimiter).str());
     checkLogic(!key.empty(), "Empty key in string map pair: '{}'.", pair);
     auto value = substituteTemplates(pair.subpiece(delimiter + 1).str());
-    if (parseOptions.overwriteDuplicateKeys) {
-      result.insert_or_assign(std::move(key), std::move(value));
-    } else {
+    auto duplicate = result.find(key);
+    if (duplicate == result.end()) {
       result.emplace(std::move(key), std::move(value));
+      continue;
+    }
+    const bool overwrite = parseOptions.overwriteDuplicateKeys;
+    LOG_FAILURE(
+        "mcrouter",
+        failure::Category::kInvalidOption,
+        "Duplicate key '{}' in string map option: using value '{}', ignoring '{}'.",
+        key,
+        overwrite ? value : duplicate->second,
+        overwrite ? duplicate->second : value);
+    if (overwrite) {
+      duplicate->second = std::move(value);
     }
   }
   return result;

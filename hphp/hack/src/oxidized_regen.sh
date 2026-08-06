@@ -146,6 +146,7 @@ run_hh_oxidize \
   hphp/hack/src/diagnostics/error_codes.ml                                         \
   hphp/hack/src/diagnostics/message.ml                                             \
   hphp/hack/src/facebook/edenfs_watcher/edenfs_watcher_types.ml               \
+  hphp/hack/src/facebook/state_lookup/saved_state_lookup_eden_types.ml         \
   hphp/hack/src/naming/name_context.ml                                        \
   hphp/hack/src/naming/naming_error.ml                                        \
   hphp/hack/src/typing/nast_check/nast_check_error.ml                         \

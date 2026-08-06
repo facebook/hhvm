@@ -116,6 +116,7 @@ pub use r#gen::pos_or_decl;
 pub use r#gen::quickfix;
 pub use r#gen::reason_collector;
 pub use r#gen::refinement_counter;
+pub use r#gen::saved_state_lookup_eden_types;
 pub use r#gen::saved_state_rollouts;
 pub use r#gen::scoured_comments;
 pub use r#gen::search_types;

@@ -131,11 +131,19 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
       Saved_state_loader.Watchman_options.
         { root = env.root; sockname = watchman_sockname }
     in
+    let eden_opts =
+      Saved_state_loader.Eden_options.
+        {
+          lookup_timeout =
+            local_config.ServerLocalConfig.load_state_natively_download_timeout;
+        }
+    in
     let%lwt result =
       State_loader_lwt.load
         ~ssopt
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
+        ~eden_opts
         ~ignore_hh_version:false
     in
     Lwt.return result

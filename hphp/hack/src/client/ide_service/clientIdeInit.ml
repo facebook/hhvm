@@ -73,15 +73,18 @@ let init_via_lsp
 
 (** We might find a saved-state available for download, and download it. *)
 let init_via_fetch
-    (ctx : Provider_context.t) ~(root : Path.t) ~(ignore_hh_version : bool) :
+    (ctx : Provider_context.t)
+    ~(watchman_opts : Saved_state_loader.Watchman_options.t)
+    ~(eden_opts : Saved_state_loader.Eden_options.t)
+    ~(ignore_hh_version : bool) :
     State_loader_lwt.FromDisk.load_result outcome Lwt.t =
   let ssopt = TypecheckerOptions.saved_state (Provider_context.get_tcopt ctx) in
   let%lwt load_result =
     State_loader_lwt.load
       ~ssopt
       ~progress_callback:(fun _ -> ())
-      ~watchman_opts:
-        Saved_state_loader.Watchman_options.{ root; sockname = None }
+      ~watchman_opts
+      ~eden_opts
       ~ignore_hh_version
   in
   match load_result with
@@ -401,7 +404,18 @@ let init
     match result with
     | Ok _ -> Lwt.return result
     | Error prev ->
-      init_via_fetch ctx ~root ~ignore_hh_version
+      let watchman_opts =
+        Saved_state_loader.Watchman_options.{ root; sockname = None }
+      in
+      let eden_opts =
+        Saved_state_loader.Eden_options.
+          {
+            lookup_timeout =
+              local_config
+                .ServerLocalConfig.load_state_natively_download_timeout;
+          }
+      in
+      init_via_fetch ctx ~watchman_opts ~eden_opts ~ignore_hh_version
       |> map_attempt "fetch" ctx ~prev ~f:with_sienv
   in
   (* BUILD *)

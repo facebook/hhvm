@@ -216,6 +216,16 @@ let download_and_load_state_exn
     in
     Option.map sockname ~f:Path.make
   in
+  let watchman_opts =
+    Saved_state_loader.Watchman_options.{ root; sockname = watchman_sockname }
+  in
+  let eden_opts =
+    Saved_state_loader.Eden_options.
+      {
+        lookup_timeout =
+          genv.local_config.SLC.load_state_natively_download_timeout;
+      }
+  in
   let dependency_table_saved_state_future :
       (Saved_state_loader.load_result, ServerInitTypes.load_state_error) result
       Future.t =
@@ -228,9 +238,8 @@ let download_and_load_state_exn
             update
             progress_dep_table_load
             ~other:progress_naming_table_load)
-        ~watchman_opts:
-          Saved_state_loader.Watchman_options.
-            { root; sockname = watchman_sockname }
+        ~watchman_opts
+        ~eden_opts
         ~ignore_hh_version
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout

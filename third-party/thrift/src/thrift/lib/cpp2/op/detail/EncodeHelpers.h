@@ -32,11 +32,41 @@
 
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
 namespace apache::thrift::op::detail {
+
+template <typename Protocol, typename T>
+void readEnum(Protocol& protocol, T& out) {
+  if constexpr (requires { protocol.readEnum(out); }) {
+    protocol.readEnum(out);
+  } else {
+    std::int32_t value;
+    protocol.readI32(value);
+    out = static_cast<T>(value);
+  }
+}
+
+template <typename Protocol, typename T>
+std::size_t writeEnum(Protocol& protocol, const T& in) {
+  const auto value = static_cast<std::int32_t>(in);
+  if constexpr (requires {
+                  protocol.writeEnum(std::string_view{}, std::int32_t{});
+                }) {
+    const char* name = apache::thrift::util::enumName(in);
+    return protocol.writeEnum(name ? name : "", value);
+  } else {
+    return protocol.writeI32(value);
+  }
+}
+
+template <typename Protocol, typename T>
+std::size_t serializedSizeEnum(Protocol& protocol, const T& in) {
+  return protocol.serializedSizeI32(static_cast<std::int32_t>(in));
+}
 
 template <typename C, typename... A>
 using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));

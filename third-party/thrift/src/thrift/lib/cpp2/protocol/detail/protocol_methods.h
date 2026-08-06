@@ -323,35 +323,33 @@ struct enum_protocol_methods {
 
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
-    if constexpr (
-        std::is_same_v<TypeClass, type_class::enumeration> &&
-        requires { protocol.readEnum(out); }) {
-      protocol.readEnum(out);
-      return;
+    if constexpr (std::is_same_v<TypeClass, type_class::enumeration>) {
+      op::detail::readEnum(protocol, out);
+    } else {
+      IntType value;
+      int_methods::read(protocol, value);
+      out = static_cast<Type>(value);
     }
-    IntType tmp;
-    int_methods::read(protocol, tmp);
-    out = static_cast<Type>(tmp);
   }
 
   template <typename Protocol>
   static std::size_t write(Protocol& protocol, const Type& in) {
-    if constexpr (
-        std::is_same_v<TypeClass, type_class::enumeration> &&
-        requires { protocol.writeEnum(std::string_view{}, std::int32_t{}); }) {
-      const auto value = static_cast<std::int32_t>(in);
-      const char* name = ::apache::thrift::util::enumName(in);
-      return protocol.writeEnum(name ? name : "", value);
+    if constexpr (std::is_same_v<TypeClass, type_class::enumeration>) {
+      return op::detail::writeEnum(protocol, in);
     } else {
-      IntType tmp = static_cast<IntType>(in);
-      return int_methods::template write<Protocol>(protocol, tmp);
+      return int_methods::template write<Protocol>(
+          protocol, static_cast<IntType>(in));
     }
   }
 
   template <bool ZeroCopy, typename Protocol>
   static std::size_t serializedSize(Protocol& protocol, const Type& in) {
-    IntType tmp = static_cast<IntType>(in);
-    return int_methods::template serializedSize<ZeroCopy>(protocol, tmp);
+    if constexpr (std::is_same_v<TypeClass, type_class::enumeration>) {
+      return op::detail::serializedSizeEnum(protocol, in);
+    } else {
+      return int_methods::template serializedSize<ZeroCopy>(
+          protocol, static_cast<IntType>(in));
+    }
   }
 };
 

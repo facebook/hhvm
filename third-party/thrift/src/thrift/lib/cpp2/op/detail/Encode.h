@@ -323,10 +323,7 @@ template <bool ZeroCopy, typename T>
 struct SerializedSize<ZeroCopy, type::enum_t<T>> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& s) const {
-    return apache::thrift::detail::pm::protocol_methods<
-        type_class::enumeration,
-        T,
-        type::enum_t<T>>::template serializedSize<ZeroCopy>(prot, s);
+    return serializedSizeEnum(prot, s);
   }
 };
 
@@ -643,9 +640,7 @@ template <typename T>
 struct Encode<type::enum_t<T>> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& s) const {
-    return apache::thrift::detail::pm::
-        protocol_methods<type_class::enumeration, T, type::enum_t<T>>::write(
-            prot, s);
+    return writeEnum(prot, s);
   }
 };
 
@@ -966,9 +961,7 @@ template <typename T>
 struct Decode<type::enum_t<T>> {
   template <typename Protocol>
   void operator()(Protocol& prot, T& t) const {
-    apache::thrift::detail::pm::
-        protocol_methods<type_class::enumeration, T, type::enum_t<T>>::read(
-            prot, t);
+    readEnum(prot, t);
   }
 };
 

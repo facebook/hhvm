@@ -14,6 +14,7 @@
 #include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/coro/transport/test/TestCoroTransport.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
+#include <proxygen/lib/transport/qmux/FollyQmuxTransport.h>
 #include <proxygen/lib/transport/qmux/QmuxCodec.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 
@@ -271,15 +272,16 @@ class QmuxSessionTest : public ::testing::Test {
         .peerMaxStreamDataBidi = peerParams.initialMaxStreamDataBidiRemote,
         .peerMaxStreamDataUni = peerParams.initialMaxStreamDataUni};
 
-    session_ = std::make_shared<QmuxSession>(&evb_,
-                                             WtDir::Server,
-                                             selfParams,
-                                             std::move(transport),
-                                             std::move(wtConfig),
-                                             peerParams.maxRecordSize,
-                                             /*effectiveMaxIdleTimeoutMs=*/0,
-                                             /*initialIngress=*/nullptr,
-                                             QmuxSession::Config{});
+    session_ = std::make_shared<QmuxSession>(
+        &evb_,
+        WtDir::Server,
+        selfParams,
+        std::make_unique<FollyQmuxTransport>(std::move(transport)),
+        std::move(wtConfig),
+        peerParams.maxRecordSize,
+        /*effectiveMaxIdleTimeoutMs=*/0,
+        /*initialIngress=*/nullptr,
+        QmuxSession::Config{});
     selfParams_ = selfParams;
     handler_ = std::make_unique<TestWtHandler>();
     session_->setHandler(handler_.get());
@@ -489,15 +491,16 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
 
   auto preroll = streamRecord(kPeerBidiId, "preroll", /*fin=*/false);
 
-  auto session = std::make_shared<QmuxSession>(&evb_,
-                                               WtDir::Server,
-                                               selfParams_,
-                                               std::move(transport),
-                                               std::move(wtConfig),
-                                               kDefaultMaxRecordSize,
-                                               /*effectiveMaxIdleTimeoutMs=*/0,
-                                               std::move(preroll),
-                                               QmuxSession::Config{});
+  auto session = std::make_shared<QmuxSession>(
+      &evb_,
+      WtDir::Server,
+      selfParams_,
+      std::make_unique<FollyQmuxTransport>(std::move(transport)),
+      std::move(wtConfig),
+      kDefaultMaxRecordSize,
+      /*effectiveMaxIdleTimeoutMs=*/0,
+      std::move(preroll),
+      QmuxSession::Config{});
   auto handler = std::make_unique<TestWtHandler>();
   session->setHandler(handler.get());
   session->start(session);
@@ -594,16 +597,16 @@ TEST_F(QmuxSessionTest, IdleTimer_ArmedWhenEffectiveTimeoutNonzero) {
                                      .peerMaxStreamDataBidi = 1 << 16,
                                      .peerMaxStreamDataUni = 1 << 16};
 
-  auto session = std::make_shared<QmuxSession>(&evb_,
-                                               WtDir::Server,
-                                               selfParams_,
-                                               std::move(transport),
-                                               std::move(wtConfig),
-                                               kDefaultMaxRecordSize,
-                                               /*effectiveMaxIdleTimeoutMs=*/
-                                               30'000,
-                                               /*initialIngress=*/nullptr,
-                                               QmuxSession::Config{});
+  auto session = std::make_shared<QmuxSession>(
+      &evb_,
+      WtDir::Server,
+      selfParams_,
+      std::make_unique<FollyQmuxTransport>(std::move(transport)),
+      std::move(wtConfig),
+      kDefaultMaxRecordSize,
+      /*effectiveMaxIdleTimeoutMs=*/30'000,
+      /*initialIngress=*/nullptr,
+      QmuxSession::Config{});
   auto handler = std::make_unique<TestWtHandler>();
   session->setHandler(handler.get());
   session->start(session);

@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/transport/qmux/QmuxSession.h>
 
-#include <folly/io/coro/Transport.h>
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/transport/qmux/QmuxCodec.h>
 
@@ -138,7 +137,7 @@ class QmuxCallback : public QmuxCodec::Callback {
 QmuxSession::QmuxSession(folly::EventBase* evb,
                          WtDir dir,
                          QxTransportParams selfParams,
-                         std::unique_ptr<folly::coro::TransportIf> transport,
+                         std::unique_ptr<QmuxTransport> transport,
                          WtStreamManager::WtConfig wtConfig,
                          uint64_t peerMaxRecordSize,
                          uint64_t effectiveMaxIdleTimeoutMs,
@@ -169,7 +168,7 @@ proxygen::detail::WtExpected<folly::Unit>::Type QmuxSession::closeSession(
 }
 
 folly::AsyncTransport* QmuxSession::getUnderlyingTransport() const noexcept {
-  return transport_ ? transport_->getTransport() : nullptr;
+  return transport_ ? transport_->getUnderlyingTransport() : nullptr;
 }
 
 proxygen::detail::WtExpected<folly::Unit>::Type QmuxSession::sendDatagram(

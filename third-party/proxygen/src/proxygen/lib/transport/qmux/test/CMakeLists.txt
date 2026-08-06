@@ -40,6 +40,7 @@ proxygen_add_test(TARGET QmuxSessionTest
   DEPENDS
     proxygen_transport_qmux_qmux_session
     proxygen_transport_qmux_qmux_codec
+    proxygen_transport_qmux_folly_qmux_transport
     proxygen_transport_qmux_qmux_framer
     proxygen_http_codec_webtransport_webtransport_framer
     proxygen_http_webtransport_wt_stream_manager
@@ -53,6 +54,7 @@ proxygen_add_test(TARGET QmuxConnectorTest
     QmuxConnectorTest.cpp
   DEPENDS
     proxygen_transport_qmux_qmux_connector
+    proxygen_transport_qmux_folly_qmux_transport
     proxygen_transport_qmux_qmux_framer
     TestCoroTransport
     testmain

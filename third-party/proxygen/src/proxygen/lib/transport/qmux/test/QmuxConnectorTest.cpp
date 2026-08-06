@@ -13,6 +13,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/coro/transport/test/TestCoroTransport.h>
+#include <proxygen/lib/transport/qmux/FollyQmuxTransport.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 
 using namespace proxygen;
@@ -85,7 +86,7 @@ folly::coro::Task<void> connectAndCapture(
     folly::EventBase* evb,
     WtDir dir,
     QxTransportParams selfParams,
-    std::unique_ptr<folly::coro::TransportIf> transport,
+    std::unique_ptr<QmuxTransport> transport,
     std::chrono::milliseconds timeout,
     folly::Try<QmuxSession::Ptr>* out,
     bool* done) {
@@ -116,7 +117,8 @@ class QmuxConnectorTest : public ::testing::Test {
                     connectAndCapture(&evb_,
                                       WtDir::Client,
                                       std::move(selfParams),
-                                      std::move(transport),
+                                      std::make_unique<FollyQmuxTransport>(
+                                          std::move(transport)),
                                       timeout,
                                       &result,
                                       &done))

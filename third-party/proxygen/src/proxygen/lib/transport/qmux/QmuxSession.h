@@ -14,13 +14,10 @@
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
+#include <proxygen/lib/transport/qmux/QmuxTransport.h>
 
 namespace folly {
 class AsyncTransport;
-}
-
-namespace folly::coro {
-class TransportIf;
 }
 
 namespace proxygen::qmux {
@@ -43,7 +40,7 @@ class QmuxSession
   QmuxSession(folly::EventBase* evb,
               WtDir dir,
               QxTransportParams selfParams,
-              std::unique_ptr<folly::coro::TransportIf> transport,
+              std::unique_ptr<QmuxTransport> transport,
               WtStreamManager::WtConfig wtConfig,
               uint64_t peerMaxRecordSize,
               uint64_t effectiveMaxIdleTimeoutMs,
@@ -110,7 +107,7 @@ class QmuxSession
   folly::SocketAddress localAddr_;
   folly::SocketAddress peerAddr_;
   folly::CancellationSource cs_;
-  std::unique_ptr<folly::coro::TransportIf> transport_;
+  std::unique_ptr<QmuxTransport> transport_;
   QxTransportParams selfParams_;
   uint64_t effectiveMaxIdleTimeoutMs_;
   std::unique_ptr<folly::IOBuf> initialIngress_;

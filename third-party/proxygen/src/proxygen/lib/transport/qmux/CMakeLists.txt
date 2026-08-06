@@ -33,18 +33,36 @@ proxygen_add_library(proxygen_transport_qmux_qmux_codec
     Folly::folly_io_iobuf
 )
 
+proxygen_add_library(proxygen_transport_qmux_qmux_transport
+  SRCS
+    QmuxTransport.cpp
+  EXPORTED_DEPS
+    Folly::folly_coro_task
+    Folly::folly_io_iobuf
+    Folly::folly_network_address
+)
+
+proxygen_add_library(proxygen_transport_qmux_folly_qmux_transport
+  SRCS
+    FollyQmuxTransport.cpp
+  DEPS
+    Folly::folly_io_coro_socket
+  EXPORTED_DEPS
+    proxygen_transport_qmux_qmux_transport
+)
+
 proxygen_add_library(proxygen_transport_qmux_qmux_session
   SRCS
     QmuxSession.cpp
   DEPS
     proxygen_transport_qmux_qmux_codec
-    Folly::folly_io_coro_socket
     Folly::folly_logging_logging
   EXPORTED_DEPS
     proxygen_http_coro_util_CoroWtSession
     proxygen_http_webtransport_wt_stream_manager
     proxygen_http_webtransport_wt_util
     proxygen_transport_qmux_qmux_framer
+    proxygen_transport_qmux_qmux_transport
     Folly::folly_io_async_async_base
 )
 
@@ -55,7 +73,6 @@ proxygen_add_library(proxygen_transport_qmux_qmux_connector
     mvfst::mvfst_folly_utils
     Folly::folly_coro_timeout
     Folly::folly_futures_core
-    Folly::folly_io_coro_socket
     Folly::folly_io_iobuf
     Folly::folly_logging_logging
     fmt::fmt
@@ -63,6 +80,7 @@ proxygen_add_library(proxygen_transport_qmux_qmux_connector
     proxygen_http_webtransport_wt_stream_manager
     proxygen_transport_qmux_qmux_framer
     proxygen_transport_qmux_qmux_session
+    proxygen_transport_qmux_qmux_transport
     Folly::folly_coro_task
 )
 

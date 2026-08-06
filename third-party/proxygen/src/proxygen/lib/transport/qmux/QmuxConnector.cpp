@@ -14,7 +14,6 @@
 #include <folly/futures/ThreadWheelTimekeeper.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/io/coro/Transport.h>
 #include <folly/logging/xlog.h>
 #include <quic/folly_utils/Utils.h>
 #include <stdexcept>
@@ -146,7 +145,7 @@ PeelOutcome peelTransportParams(folly::IOBufQueue& buf) {
 }
 
 folly::coro::Task<QxTransportParams> readPeerTransportParams(
-    folly::coro::TransportIf& transport,
+    QmuxTransport& transport,
     folly::IOBufQueue& ingressBuf,
     std::chrono::milliseconds timeout) {
   while (true) {
@@ -198,7 +197,7 @@ folly::coro::Task<QmuxSession::Ptr> QmuxConnector::connect(
     folly::EventBase* evb,
     WtDir dir,
     QxTransportParams selfParams,
-    std::unique_ptr<folly::coro::TransportIf> transport,
+    std::unique_ptr<QmuxTransport> transport,
     std::chrono::milliseconds timeout,
     QmuxSession::Config sessionConfig) {
   XLOG(DBG4) << "QmuxConnector::connect dir=" << static_cast<int>(dir)

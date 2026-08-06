@@ -13,14 +13,11 @@
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 #include <proxygen/lib/transport/qmux/QmuxSession.h>
+#include <proxygen/lib/transport/qmux/QmuxTransport.h>
 
 namespace folly {
 class EventBase;
 } // namespace folly
-
-namespace folly::coro {
-class TransportIf;
-} // namespace folly::coro
 
 namespace proxygen::qmux {
 
@@ -30,7 +27,7 @@ class QmuxConnector {
       folly::EventBase* evb,
       WtDir dir,
       QxTransportParams selfParams,
-      std::unique_ptr<folly::coro::TransportIf> transport,
+      std::unique_ptr<QmuxTransport> transport,
       std::chrono::milliseconds timeout,
       QmuxSession::Config sessionConfig = {});
 };

@@ -94,7 +94,7 @@ let init_via_fetch
             warning_hashes_path;
             _;
           };
-        changed_files_according_to_watchman;
+        changed_files_since_saved_state;
         _;
       } ->
     Lwt.return
@@ -103,7 +103,7 @@ let init_via_fetch
            State_loader_lwt.FromDisk.naming_table_path =
              naming_sqlite_table_path;
            warning_saved_state_path = warning_hashes_path;
-           files_changed = changed_files_according_to_watchman;
+           files_changed = changed_files_since_saved_state;
          })
   | Error load_error -> Lwt.return (Failure (error_from_load_error load_error))
 

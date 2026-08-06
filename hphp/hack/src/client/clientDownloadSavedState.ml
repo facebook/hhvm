@@ -165,7 +165,7 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
         {
           Saved_state_loader.main_artifacts;
           additional_info;
-          changed_files_according_to_watchman = changed_files;
+          changed_files_since_saved_state = changed_files;
           manifold_path;
           is_cached;
         }
@@ -194,7 +194,7 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
               warning_hashes_path;
             };
           additional_info;
-          changed_files_according_to_watchman;
+          changed_files_since_saved_state;
           manifold_path;
           is_cached;
         } ->
@@ -202,7 +202,7 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
       make_replay_token
         ~env
         ~manifold_path
-        ~changed_files:changed_files_according_to_watchman
+        ~changed_files:changed_files_since_saved_state
         ~is_cached
         ~additional_info
     in
@@ -210,8 +210,8 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
       `Assoc
         [
           ( "changed_files",
-            changed_files_to_absolute_paths_json
-              changed_files_according_to_watchman );
+            changed_files_to_absolute_paths_json changed_files_since_saved_state
+          );
           ("naming_table_path", `String (naming_table_path |> Path.to_string));
           ( "naming_sqlite_table_path",
             `String (naming_sqlite_table_path |> Path.to_string) );

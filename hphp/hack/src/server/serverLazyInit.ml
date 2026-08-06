@@ -86,7 +86,7 @@ let run_saved_state_future
     let {
       Saved_state_loader.main_artifacts;
       additional_info;
-      changed_files_according_to_watchman;
+      changed_files_since_saved_state;
       manifold_path;
       is_cached = _;
     } =
@@ -149,8 +149,8 @@ let run_saved_state_future
           local_changes = dirty_local_files;
         } ->
       let () = HackEventLogger.state_loader_dirty_files t in
-      let changed_files_according_to_watchman =
-        Relative_path.Set.of_list changed_files_according_to_watchman
+      let changed_files_since_saved_state =
+        Relative_path.Set.of_list changed_files_since_saved_state
       in
       let naming_table_manifold_path = Some manifold_path in
       Ok
@@ -159,8 +159,7 @@ let run_saved_state_future
             Path.to_string naming_sqlite_table_path;
           naming_table_fallback_fn = naming_table_fallback_path;
           deptable_fn;
-          changed_files_since_saved_state_rev =
-            changed_files_according_to_watchman;
+          changed_files_since_saved_state_rev = changed_files_since_saved_state;
           dirty_master_files;
           dirty_local_files;
           old_naming_table;

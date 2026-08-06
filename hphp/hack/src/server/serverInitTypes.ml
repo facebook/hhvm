@@ -110,8 +110,8 @@ type loaded_info = {
   naming_table_fallback_fn: string option;
   changed_files_since_saved_state_rev: (Relative_path.Set.t[@yojson.opaque]);
       [@printer Relative_path.Set.pp_large]
-      (** All files changed since the saved state revision according to either watchman
-        if we load the saved state via watchman, or
+      (** All files changed since the saved state revision according to either
+        Saved_state_lookup if we load using Saved_state_loader, or
         if we initialized with a pre-loaded saved state, the list of files passed to hh_server.
         This should be the disjoint union of `dirty_master_files` and `dirty_local_files`,
         which are determined using hg and this set. *)

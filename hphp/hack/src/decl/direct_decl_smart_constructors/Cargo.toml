@@ -9,8 +9,6 @@ license = "MIT"
 
 [lib]
 path = "../direct_decl_smart_constructors.rs"
-test = false
-doctest = false
 
 [dependencies]
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }

@@ -6802,3 +6802,330 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         declarations
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::borrow::Cow;
+
+    use oxidized::aast;
+    use oxidized::ast_defs::Id;
+    use oxidized::pos::Pos;
+    use oxidized::typing_defs::TaccessType;
+    use oxidized::typing_defs::Ty;
+    use oxidized::typing_defs::Ty_;
+    use oxidized::typing_reason::Reason;
+    use parser_core_types::token_kind::TokenKind;
+
+    use super::DirectDeclSmartConstructors;
+    use super::Modifiers;
+    use super::NamespaceBuilder;
+    use super::Node;
+    use super::fixed_width_token::FixedWidthToken;
+    use super::prefix_slash;
+    use super::read_member_modifiers;
+    use super::strip_dollar_prefix;
+
+    // The polymorphic-context predicates below are associated functions on the
+    // lifetime-parameterized DirectDeclSmartConstructors, but none of them touch
+    // those lifetimes, so any concrete choice works when naming the type.
+    type Ddsc = DirectDeclSmartConstructors<'static, 'static>;
+
+    fn token(kind: TokenKind) -> Node {
+        Node::Token(FixedWidthToken::new(kind, 0))
+    }
+
+    // prefix_slash --------------------------------------------------------
+
+    // Invariant: prefix_slash always prepends a backslash and does not check for
+    // one already present, so it is not idempotent on already-qualified names.
+    #[test]
+    fn prefix_slash_is_not_idempotent() {
+        assert_eq!(prefix_slash("Foo"), "\\Foo");
+        assert_eq!(prefix_slash(""), "\\");
+        assert_eq!(prefix_slash("\\Foo"), "\\\\Foo");
+    }
+
+    // strip_dollar_prefix -------------------------------------------------
+
+    // Invariant: strip_dollar_prefix removes every leading '$' (not just one) and
+    // leaves interior '$' characters untouched.
+    #[test]
+    fn strip_dollar_prefix_strips_all_leading_dollars_only() {
+        assert_eq!(strip_dollar_prefix("$x"), "x");
+        assert_eq!(strip_dollar_prefix("x"), "x");
+        assert_eq!(strip_dollar_prefix("$$x"), "x");
+        assert_eq!(strip_dollar_prefix("x$y"), "x$y");
+    }
+
+    // Node::as_visibility -------------------------------------------------
+
+    // Invariant: as_visibility maps exactly the four visibility keyword tokens and
+    // returns None for any other token kind or for a non-token node.
+    #[test]
+    fn as_visibility_maps_only_visibility_keywords() {
+        assert!(matches!(
+            token(TokenKind::Public).as_visibility(),
+            Some(aast::Visibility::Public)
+        ));
+        assert!(matches!(
+            token(TokenKind::Private).as_visibility(),
+            Some(aast::Visibility::Private)
+        ));
+        assert!(matches!(
+            token(TokenKind::Protected).as_visibility(),
+            Some(aast::Visibility::Protected)
+        ));
+        assert!(matches!(
+            token(TokenKind::Internal).as_visibility(),
+            Some(aast::Visibility::Internal)
+        ));
+        // A non-visibility keyword token yields no visibility.
+        assert!(token(TokenKind::Static).as_visibility().is_none());
+        // A non-token node yields no visibility.
+        assert!(Node::Missing(0).as_visibility().is_none());
+    }
+
+    // Node::as_id ---------------------------------------------------------
+
+    // Invariant: as_id produces an Id only for Name/XhpName nodes; unlike
+    // as_variable it rejects Variable nodes (and any token).
+    #[test]
+    fn as_id_accepts_name_and_xhpname_but_not_variable() {
+        let Id(_, name) = token_name("Foo").as_id().expect("Name yields an Id");
+        assert_eq!(name, "Foo");
+
+        let Id(_, xhp) = Node::XhpName(":x:y".to_string(), Pos::NONE)
+            .as_id()
+            .expect("XhpName yields an Id");
+        assert_eq!(xhp, ":x:y");
+
+        // A Variable is accepted by as_variable but explicitly not by as_id.
+        assert!(
+            Node::Variable("$x".to_string(), Pos::NONE)
+                .as_id()
+                .is_none()
+        );
+        assert!(token(TokenKind::Public).as_id().is_none());
+    }
+
+    fn token_name(s: &str) -> Node {
+        Node::Name(s.to_string(), Pos::NONE)
+    }
+
+    // read_member_modifiers -----------------------------------------------
+
+    fn modifiers(kinds: &[TokenKind]) -> Modifiers {
+        let nodes: Vec<Node> = kinds.iter().map(|&k| token(k)).collect();
+        read_member_modifiers(nodes.iter())
+    }
+
+    // Invariant: each modifier keyword sets its OWN flag and leaves the others
+    // false, so a swapped token->flag assignment in the source is caught here;
+    // absent a visibility keyword, visibility stays at the Public default.
+    #[test]
+    fn read_member_modifiers_each_keyword_sets_only_its_flag() {
+        let m = modifiers(&[TokenKind::Static]);
+        assert!(m.is_static);
+        assert!(!m.is_abstract && !m.is_final && !m.is_readonly);
+        assert!(matches!(m.visibility, aast::Visibility::Public));
+
+        let m = modifiers(&[TokenKind::Abstract]);
+        assert!(m.is_abstract);
+        assert!(!m.is_static && !m.is_final && !m.is_readonly);
+
+        let m = modifiers(&[TokenKind::Final]);
+        assert!(m.is_final);
+        assert!(!m.is_static && !m.is_abstract && !m.is_readonly);
+
+        let m = modifiers(&[TokenKind::Readonly]);
+        assert!(m.is_readonly);
+        assert!(!m.is_static && !m.is_abstract && !m.is_final);
+    }
+
+    // Invariant: when several visibility keywords appear the last one wins, except
+    // for the protected+internal special case (checked separately below).
+    #[test]
+    fn read_member_modifiers_last_visibility_wins() {
+        assert!(matches!(
+            modifiers(&[TokenKind::Public, TokenKind::Private]).visibility,
+            aast::Visibility::Private
+        ));
+        // Protected followed by a non-internal visibility is plain last-wins.
+        assert!(matches!(
+            modifiers(&[TokenKind::Protected, TokenKind::Public]).visibility,
+            aast::Visibility::Public
+        ));
+    }
+
+    // Invariant: protected and internal combine into ProtectedInternal regardless
+    // of which of the two keywords comes first.
+    #[test]
+    fn read_member_modifiers_protected_internal_combines_either_order() {
+        assert!(matches!(
+            modifiers(&[TokenKind::Protected, TokenKind::Internal]).visibility,
+            aast::Visibility::ProtectedInternal
+        ));
+        assert!(matches!(
+            modifiers(&[TokenKind::Internal, TokenKind::Protected]).visibility,
+            aast::Visibility::ProtectedInternal
+        ));
+    }
+
+    // NamespaceBuilder ----------------------------------------------------
+
+    fn ns_builder() -> NamespaceBuilder {
+        NamespaceBuilder::new(Vec::new(), false, false)
+    }
+
+    // Invariant: a fresh builder is in the global namespace (None); each pushed
+    // name is qualified against the current namespace with a backslash separator.
+    #[test]
+    fn push_namespace_qualifies_against_current() {
+        let mut b = ns_builder();
+        assert_eq!(b.current_namespace(), None);
+        b.push_namespace(Some(Cow::Borrowed("Foo")));
+        assert_eq!(b.current_namespace(), Some("Foo"));
+        b.push_namespace(Some(Cow::Borrowed("Bar")));
+        assert_eq!(b.current_namespace(), Some("Foo\\Bar"));
+    }
+
+    // Invariant: pushing an unnamed namespace inherits the current namespace name
+    // rather than clearing it.
+    #[test]
+    fn push_unnamed_namespace_inherits_current() {
+        let mut b = ns_builder();
+        b.push_namespace(Some(Cow::Borrowed("Foo")));
+        b.push_namespace(None);
+        assert_eq!(b.current_namespace(), Some("Foo"));
+    }
+
+    // Invariant: pop_namespace unwinds pushed namespaces but never pops the global
+    // namespace off the bottom of the stack (popping at global is a no-op).
+    #[test]
+    fn pop_namespace_never_pops_global() {
+        let mut b = ns_builder();
+        b.push_namespace(Some(Cow::Borrowed("Foo")));
+        b.push_namespace(Some(Cow::Borrowed("Bar")));
+        b.pop_namespace();
+        assert_eq!(b.current_namespace(), Some("Foo"));
+        b.pop_namespace();
+        assert_eq!(b.current_namespace(), None);
+        // Already global: popping again must be a no-op that leaves the global
+        // namespace on the stack intact. Verify by pushing afterward -- if the
+        // guard had let the stack empty, this push would qualify against nothing
+        // (or panic); instead it re-qualifies cleanly from the root.
+        b.pop_namespace();
+        b.push_namespace(Some(Cow::Borrowed("Zed")));
+        assert_eq!(b.current_namespace(), Some("Zed"));
+    }
+
+    // Invariant (documented on the source fn): push(Y);pop();push(X) is equivalent
+    // to push(Y);push(X);pop_previous() — pop_previous drops the *previous*
+    // namespace while keeping the most recent one, re-anchored to global.
+    #[test]
+    fn pop_previous_namespace_matches_pop_then_push() {
+        let mut a = ns_builder();
+        a.push_namespace(Some(Cow::Borrowed("Y")));
+        a.pop_namespace();
+        a.push_namespace(Some(Cow::Borrowed("X")));
+
+        let mut b = ns_builder();
+        b.push_namespace(Some(Cow::Borrowed("Y")));
+        b.push_namespace(Some(Cow::Borrowed("X")));
+        b.pop_previous_namespace();
+
+        assert_eq!(a.current_namespace(), Some("X"));
+        assert_eq!(b.current_namespace(), a.current_namespace());
+    }
+
+    // Invariant: pop_previous_namespace is a no-op unless at least two namespaces
+    // are pushed above the global one (stack depth greater than two).
+    #[test]
+    fn pop_previous_namespace_noop_without_two_pushed() {
+        let mut b = ns_builder();
+        b.push_namespace(Some(Cow::Borrowed("Y")));
+        b.pop_previous_namespace();
+        assert_eq!(b.current_namespace(), Some("Y"));
+    }
+
+    // Polymorphic-context predicates --------------------------------------
+
+    fn generic(name: &str) -> Ty {
+        Ty(Reason::NoReason, Box::new(Ty_::Tgeneric(name.to_string())))
+    }
+
+    fn apply(name: &str, args: Vec<Ty>) -> Ty {
+        Ty(
+            Reason::NoReason,
+            Box::new(Ty_::Tapply((Pos::NONE, name.to_string()), args)),
+        )
+    }
+
+    fn access(root: Ty, id: &str) -> Ty {
+        Ty(
+            Reason::NoReason,
+            Box::new(Ty_::Taccess(TaccessType(root, (Pos::NONE, id.to_string())))),
+        )
+    }
+
+    // Invariant: taccess_root_is_generic walks a Taccess tree and is true iff the
+    // innermost root is a generic parameter, false when it is a class application.
+    #[test]
+    fn taccess_root_is_generic_follows_the_access_root() {
+        assert!(Ddsc::taccess_root_is_generic(&generic("T")));
+        assert!(!Ddsc::taccess_root_is_generic(&apply("C", vec![])));
+        assert!(Ddsc::taccess_root_is_generic(&access(generic("T"), "TC")));
+        assert!(!Ddsc::taccess_root_is_generic(&access(
+            apply("C", vec![]),
+            "TC"
+        )));
+        // Recurses through nested accesses down to the generic root.
+        assert!(Ddsc::taccess_root_is_generic(&access(
+            access(generic("T"), "A"),
+            "B"
+        )));
+    }
+
+    // Invariant: has_polymorphic_context flags a context when it is an
+    // argument-less Tapply whose name contains '$', a Taccess whose root is such a
+    // Tapply, or a Taccess rooted at a generic. The tys.is_empty() guard means a
+    // '$' name carrying type arguments does NOT count.
+    #[test]
+    fn has_polymorphic_context_detects_dollar_roots_and_generic_accesses() {
+        assert!(!Ddsc::has_polymorphic_context(&[]));
+        // Bare context generic (name carries '$'), no type args -> polymorphic.
+        assert!(Ddsc::has_polymorphic_context(&[apply("Tctx$0", vec![])]));
+        // Same '$' name but with type arguments fails the empty-args guard.
+        assert!(!Ddsc::has_polymorphic_context(&[apply(
+            "Tctx$0",
+            vec![generic("T")]
+        )]));
+        // A plain class application without '$' is not polymorphic.
+        assert!(!Ddsc::has_polymorphic_context(&[apply(
+            "Container",
+            vec![]
+        )]));
+        // A type-constant access rooted at a generic is polymorphic.
+        assert!(Ddsc::has_polymorphic_context(&[access(generic("T"), "TC")]));
+        // A type-constant access whose root is a '$'-named argument-less Tapply
+        // also qualifies (the first match arm's Taccess alternative).
+        assert!(Ddsc::has_polymorphic_context(&[access(
+            apply("Tctx$0", vec![]),
+            "TC"
+        )]));
+    }
+
+    // Invariant: ctx_generic_for_generic_taccess_inner renders a nested generic
+    // Taccess as "<generic>::<const>[::<const>...]", recursing through the tree.
+    #[test]
+    fn ctx_generic_for_generic_taccess_inner_renders_nested_accesses() {
+        assert_eq!(
+            Ddsc::ctx_generic_for_generic_taccess_inner(&generic("T"), "C"),
+            "T::C"
+        );
+        assert_eq!(
+            Ddsc::ctx_generic_for_generic_taccess_inner(&access(generic("T"), "C1"), "C2"),
+            "T::C1::C2"
+        );
+    }
+}

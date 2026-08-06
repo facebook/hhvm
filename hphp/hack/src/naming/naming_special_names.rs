@@ -510,6 +510,8 @@ pub mod special_idents {
 
     pub const DOLLAR_DOLLAR: &str = "$$";
 
+    pub const PROSECCO_TAP: &str = "$prosecco_tap";
+
     /* Intentionally using an invalid variable name to ensure it's translated */
     pub const TMP_VAR_PREFIX: &str = "__tmp$";
 

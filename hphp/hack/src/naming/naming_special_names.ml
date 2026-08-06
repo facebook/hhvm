@@ -992,6 +992,8 @@ module SpecialIdents = struct
 
   let dollardollar = "$$"
 
+  let prosecco_tap = "$prosecco_tap"
+
   (* Intentionally using an invalid variable name to ensure it's translated *)
   let tmp_var_prefix = "__tmp$"
 

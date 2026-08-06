@@ -5854,6 +5854,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             {
                 self.check_can_use_feature(node, &FeatureName::TestFeature);
             }
+            Token(t)
+                if t.kind() == TokenKind::Variable
+                    && self.token_text(t) == sn::special_idents::PROSECCO_TAP =>
+            {
+                self.errors
+                    .push(make_error_from_node(node, errors::prosecco_tap_disallowed));
+            }
             _ => {}
         }
         self.lval_errors(node);

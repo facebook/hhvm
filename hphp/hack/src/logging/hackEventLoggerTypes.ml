@@ -76,6 +76,8 @@ type rollout_flags = {
   log_saved_state_age_and_distance: bool;
       (** POC: @nzthomas. Collects the age of a saved state (in seconds)
           and distance (in globalrevs) for telemetry *)
+  saved_state_lookup_use_eden: bool;
+      (** Whether to use Eden rather than Watchman to look up saved states. *)
   fetch_remote_old_decls: bool;
       (** POC: @bobren - Fetching old decls remotely to reduce fanout *)
   only_fetch_remote_old_decl_during_init: bool;

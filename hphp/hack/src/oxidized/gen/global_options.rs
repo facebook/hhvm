@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<202cd448177983274a6d0b347936ab02>>
+// @generated SignedSource<<a4ff7fdc7cd8e2f89954aae5cbc968c0>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -42,6 +42,8 @@ pub struct SavedStateLoading {
     /// If set, connect to a Manifold instance on localhost using this port.
     /// Useful for testing.
     pub manifold_local_port: Option<isize>,
+    /// Use Eden rather than Watchman to look up saved states.
+    pub use_eden: bool,
     /// Override the database shard used by saved-state lookup. Useful for testing.
     pub database_shard_name: Option<String>,
     /// Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry

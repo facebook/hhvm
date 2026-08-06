@@ -25,6 +25,7 @@ open Hh_prelude
 type saved_state_loading = {
   saved_state_manifold_api_key: string option;
   manifold_local_port: int option;
+  use_eden: bool;
   database_shard_name: string option;
   log_saved_state_age_and_distance: bool;
   use_manifold_cython_client: bool;
@@ -38,6 +39,7 @@ let default_saved_state_loading =
   {
     saved_state_manifold_api_key = None;
     manifold_local_port = None;
+    use_eden = false;
     database_shard_name = None;
     log_saved_state_age_and_distance = false;
     use_manifold_cython_client = false;

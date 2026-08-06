@@ -14,6 +14,7 @@ type saved_state_loading = {
   manifold_local_port: int option;
       (** If set, connect to a Manifold instance on localhost using this port.
         Useful for testing. *)
+  use_eden: bool;  (** Use Eden rather than Watchman to look up saved states. *)
   database_shard_name: string option;
       (** Override the database shard used by saved-state lookup. Useful for testing. *)
   log_saved_state_age_and_distance: bool;

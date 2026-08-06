@@ -781,6 +781,15 @@ let load_
       ~current_version
       config
   in
+  let use_eden =
+    bool_
+      Config_keys.Hhconf.saved_state_lookup_use_eden
+      ~default:GlobalOptions.(default_saved_state_loading.use_eden)
+      config
+  in
+  let database_shard_name =
+    string_opt Config_keys.Hhconf.saved_state_database_shard_name config
+  in
   let use_manifold_cython_client =
     bool_if_min_version
       Config_keys.Hhconf.use_manifold_cython_client
@@ -826,9 +835,6 @@ let load_
   in
   let manifold_local_port =
     int_opt Config_keys.Hhconf.saved_state_manifold_local_port config
-  in
-  let database_shard_name =
-    string_opt Config_keys.Hhconf.saved_state_database_shard_name config
   in
   let rust_provider_backend =
     bool_if_min_version
@@ -1048,6 +1054,7 @@ let load_
           {
             GlobalOptions.saved_state_manifold_api_key;
             manifold_local_port;
+            use_eden;
             database_shard_name;
             log_saved_state_age_and_distance;
             use_manifold_cython_client;
@@ -1207,6 +1214,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_saved_state_age_and_distance =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);
+      saved_state_lookup_use_eden =
+        GlobalOptions.(options.saved_state.loading.use_eden);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       only_fetch_remote_old_decl_during_init =
         options.only_fetch_remote_old_decl_during_init;

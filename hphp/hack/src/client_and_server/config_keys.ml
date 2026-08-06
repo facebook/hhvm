@@ -471,6 +471,8 @@ module Hhconf = struct
   let log_saved_state_age_and_distance =
     hhconf_key "log_saved_state_age_and_distance"
 
+  let saved_state_lookup_use_eden = hhconf_key "saved_state_lookup_use_eden"
+
   let saved_state_database_shard_name =
     hhconf_key "saved_state_database_shard_name"
 

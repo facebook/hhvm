@@ -82,7 +82,6 @@ void ZlibStreamCompressor::init() {
       break;
     default:
       DCHECK(false) << "Unsupported zlib compression type.";
-      break;
   }
 
   if (status_ != Z_OK) {

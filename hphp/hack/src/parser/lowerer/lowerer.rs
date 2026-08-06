@@ -7106,3 +7106,158 @@ fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
 pub fn lower<'a>(env: &mut Env<'a>, script: S<'a>) -> ast::Program {
     p_script(script, env)
 }
+
+#[cfg(test)]
+mod tests {
+    use bstr::BString;
+
+    use super::*;
+
+    // Invariant: rfind scans backward from index `i` (inclusive) and returns the
+    // nearest matching byte at or before `i`. The `i >= len` guard yields None
+    // instead of clamping to the end, and any match strictly after `i` is ignored.
+    #[test]
+    fn rfind_backward_scan_and_oob_guard() {
+        let cases: &[(&[u8], usize, u8, Option<usize>)] = &[
+            // Nearest match strictly before `i`.
+            (b"a.b.c", 4, b'.', Some(3)),
+            // A match sitting exactly at `i` is included.
+            (b"a.b.", 3, b'.', Some(3)),
+            // Matches after `i` are ignored; only index 1 is at or before `i`.
+            (b"a.b.c", 2, b'.', Some(1)),
+            // OOB guard: `i == len` returns None even though b'c' exists at index 2.
+            (b"abc", 3, b'c', None),
+            // OOB guard: `i` far past the end also returns None (no clamping).
+            (b"abc", 100, b'a', None),
+            // In bounds, but the byte is absent.
+            (b"abc", 2, b'z', None),
+            // Empty input: `0 >= 0` trips the guard.
+            (b"", 0, b'x', None),
+            // Realistic caller shape: locate the newline at or before `i`.
+            (b"line1\nline2", 6, b'\n', Some(5)),
+        ];
+        for (idx, &(s, i, c, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                rfind(s, i, c),
+                expected,
+                "case {idx}: rfind({s:?}, {i}, {c})"
+            );
+        }
+    }
+
+    // Invariant: get_quoted_content greedily captures everything between the first
+    // and last double quote (after optional leading whitespace); on any non-match
+    // it passes the input through unchanged rather than returning empty.
+    #[test]
+    fn get_quoted_content_extract_and_passthrough() {
+        let cases: &[(&[u8], &[u8])] = &[
+            // Basic extraction of the double-quoted body.
+            (b"\"hello\"", b"hello"),
+            // Leading whitespace before the opening quote is skipped, but
+            // whitespace inside the quotes is preserved.
+            (b"  \" x \"", b" x "),
+            // Greedy: captures across interior quotes up to the final quote.
+            (b"\"a\" \"b\"", b"a\" \"b"),
+            // Newlines inside the quotes are captured (the pattern allows `\n`).
+            (b"\"a\nb\"", b"a\nb"),
+            // No quotes at all -> fallback passthrough returns the input verbatim.
+            (b"hello", b"hello"),
+            // A single (unterminated) quote does not match -> passthrough.
+            (b"\"x", b"\"x"),
+        ];
+        for (idx, &(input, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                get_quoted_content(input),
+                expected,
+                "case {idx}: input {input:?}"
+            );
+        }
+    }
+
+    // Invariant: every maximal run of whitespace bytes collapses to exactly one
+    // space, including leading and trailing runs (collapse, not trim); a run of
+    // mixed whitespace kinds collapses together and non-whitespace is untouched.
+    #[test]
+    fn unesc_xhp_collapses_whitespace_runs() {
+        let cases: &[(&[u8], &[u8])] = &[
+            // A run of spaces collapses to one.
+            (b"a    b", b"a b"),
+            // Mixed whitespace kinds (space/tab/newline/CR) in one run -> one space.
+            (b"a \t\n\r b", b"a b"),
+            // A leading run collapses to a single leading space (not trimmed).
+            (b"  ab", b" ab"),
+            // A trailing run collapses to a single trailing space (not trimmed).
+            (b"ab  ", b"ab "),
+            // Already-single spaces are preserved as single spaces.
+            (b"a b c", b"a b c"),
+            // No whitespace -> unchanged.
+            (b"abc", b"abc"),
+            // All whitespace collapses to exactly one space.
+            (b"   ", b" "),
+        ];
+        for (idx, &(input, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                unesc_xhp(input).as_slice(),
+                expected,
+                "case {idx}: input {input:?}"
+            );
+        }
+    }
+
+    // Invariant: after unescaping, a result equal to the two-byte "''" or "\"\""
+    // is normalized to an empty string; anything else -- including a lone quote or
+    // an already-empty string -- passes through unchanged.
+    #[test]
+    fn unesc_dbl_empty_quote_guard_vs_passthrough() {
+        let cases: &[(&str, &str)] = &[
+            // Guard: a bare pair of single quotes normalizes to empty.
+            ("''", ""),
+            // Guard: a bare pair of double quotes normalizes to empty.
+            ("\"\"", ""),
+            // The guard applies to the post-unescape value: `\x22\x22` unescapes
+            // to `""`, which the guard then maps to empty.
+            ("\\x22\\x22", ""),
+            // Passthrough: an ordinary string is returned unescaped, unchanged.
+            ("hello", "hello"),
+            // A single quote is not the two-byte pair, so it passes through.
+            ("'", "'"),
+        ];
+        for (idx, &(input, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                unesc_dbl(input).unwrap(),
+                BString::from(expected),
+                "case {idx}: input {input:?}"
+            );
+        }
+    }
+
+    // Invariant: drop_prefix removes exactly one leading byte iff the string is
+    // non-empty and starts with `prefix`; an interior or absent prefix, or an
+    // empty string, leaves the input unchanged.
+    #[test]
+    fn drop_prefix_strips_single_leading_char() {
+        let cases: &[(&str, char, &str)] = &[
+            // A leading prefix is dropped.
+            ("$foo", '$', "foo"),
+            // No leading prefix -> unchanged.
+            ("foo", '$', "foo"),
+            // Empty string -> unchanged (the is_empty guard).
+            ("", '$', ""),
+            // Only ONE leading occurrence is removed.
+            ("$$foo", '$', "$foo"),
+            // A prefix in the interior is not at the start -> unchanged.
+            ("f$oo", '$', "f$oo"),
+            // Works for other single-byte prefixes (e.g. '%').
+            ("%raw", '%', "raw"),
+            // A prefix equal to the whole string leaves an empty string.
+            ("$", '$', ""),
+        ];
+        for (idx, &(s, prefix, expected)) in cases.iter().enumerate() {
+            assert_eq!(
+                drop_prefix(s, prefix),
+                expected,
+                "case {idx}: drop_prefix({s:?}, {prefix:?})"
+            );
+        }
+    }
+}

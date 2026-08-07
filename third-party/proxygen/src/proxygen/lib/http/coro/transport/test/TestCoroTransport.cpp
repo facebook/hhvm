@@ -190,6 +190,9 @@ void TestCoroTransport::shutdownWrite() {
 
 void TestCoroTransport::close() {
   XLOG(DBG8) << __func__;
+  if (auto onClose = std::move(onClose_)) {
+    onClose();
+  }
   state_->writesClosed = true;
   if (!state_->closedWithReset) {
     state_->readEOF = true;

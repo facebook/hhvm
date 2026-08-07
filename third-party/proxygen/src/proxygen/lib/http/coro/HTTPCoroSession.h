@@ -882,6 +882,7 @@ class HTTPUniplexTransportSession final : public HTTPCoroSession {
   void attachEvb(folly::EventBase* evb) override;
   bool isDetachable() const override;
 
+  AsyncSocketByteEventObserver byteEventObserver_;
   std::unique_ptr<folly::coro::TransportIf> coroTransport_;
   folly::coro::Baton writesFinished_;
   detail::CancellableBaton antiPipelineBaton_;
@@ -893,7 +894,6 @@ class HTTPUniplexTransportSession final : public HTTPCoroSession {
   std::list<PendingByteEvent> kernelWriteEvents_;
   RateLimitFilter* rateLimitFilter_{nullptr};
   folly::CancellationSource readCancellationSource_;
-  AsyncSocketByteEventObserver byteEventObserver_;
 
  public:
   void start();

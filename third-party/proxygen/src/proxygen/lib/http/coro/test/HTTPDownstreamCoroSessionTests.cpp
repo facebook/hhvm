@@ -968,6 +968,70 @@ TEST_P(H12DownstreamSessionTest, CancelPendingByteEvents) {
   expectedError_ = TransportErrorCode::NETWORK_ERROR;
 }
 
+// HTTPUniplexTransportSession installs byteEventObserver_ as a lifecycle
+// observer on the AsyncSocket owned by coroTransport_, and ~AsyncSocket calls
+// destroy() on every observer still attached to it.  byteEventObserver_ must
+// therefore be destroyed *after* coroTransport_, which only holds if it is
+// declared before it.
+//
+// The order is observed by queueing a TX byte event on the observer from
+// ~HTTPUniplexTransportSession (via coroTransport_->close(), the first thing
+// that destructor does).  Nothing else consumes that event, so it is cancelled
+// by ~AsyncSocketByteEventObserver, and the cancellation callback can tell
+// whether the transport is already gone.
+TEST_P(H12DownstreamSessionTest, ByteEventObserverOutlivesTransport) {
+  auto *transport = static_cast<TestUniplexTransport *>(transport_);
+  ASSERT_EQ(transport->observers_.size(), 1);
+  auto *byteEventObserver = static_cast<AsyncSocketByteEventObserver *>(
+      transport->observers_.front());
+
+  MockByteEventCallback mockByteEventCallback;
+  transport->setOnClose([byteEventObserver, &mockByteEventCallback] {
+    HTTPByteEventRegistration reg;
+    reg.streamID = 1ull;
+    reg.events = uint8_t(HTTPByteEvent::Type::NIC_TX);
+    reg.callback = mockByteEventCallback.getWeakRefCountedPtr();
+    std::vector<HTTPByteEventRegistration> registrations;
+    registrations.push_back(std::move(reg));
+    byteEventObserver->registerByteEvents(/*streamID=*/1,
+                                          /*sessionByteOffset=*/1,
+                                          /*sessionBytesScheduled=*/0,
+                                          /*streamOffset=*/0,
+                                          /*fsInfo=*/folly::none,
+                                          /*bodyOffset=*/0,
+                                          std::move(registrations),
+                                          /*eom=*/false);
+  });
+
+  bool transportDestroyed = false;
+  transport->setOnDestroy([&transportDestroyed] { transportDestroyed = true; });
+
+  folly::Optional<bool> transportDestroyedFirst;
+  EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _))
+      .WillOnce(Invoke([&] { transportDestroyedFirst = transportDestroyed; }));
+
+  auto id = sendRequest("/");
+  auto handler =
+      addSimpleStrictHandler([this](folly::EventBase *,
+                                    HTTPSessionContextPtr,
+                                    HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        co_await expectRequest(requestSource, HTTPMethod::GET, "/");
+        co_return HTTPFixedSource::makeFixedResponse(200, makeBuf(100));
+      });
+  // Complete the request so the session drains and destroys itself, taking
+  // the transport with it.
+  transport_->addReadEvent(nullptr, /*eom=*/true);
+  evb_.loop();
+  expectResponse(id, 200);
+  parseOutput();
+
+  ASSERT_TRUE(transportDestroyedFirst.has_value())
+      << "the session was never destroyed";
+  EXPECT_TRUE(*transportDestroyedFirst)
+      << "byteEventObserver_ was destroyed before coroTransport_";
+}
+
 TEST_P(H12DownstreamSessionTest, TxAckBeforeScheduleByteEvents) {
   static_cast<TestUniplexTransport *>(transport_)->setFastTxAckEvents(true);
   sendRequest("/");

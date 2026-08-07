@@ -16,6 +16,8 @@
 #include <folly/io/coro/Transport.h>
 #include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 
+#include <functional>
+
 namespace proxygen::coro::test {
 
 class TestCoroTransport : public folly::coro::TransportIf {
@@ -43,6 +45,30 @@ class TestCoroTransport : public folly::coro::TransportIf {
               observer->byteEventsEnabled(&mockAsyncSocket_);
               observer->observerAttach(&mockAsyncSocket_);
             }));
+  }
+
+  ~TestCoroTransport() override {
+    if (onDestroy_) {
+      onDestroy_();
+    }
+    // ~folly::AsyncSocket invokes destroy() on every attached lifecycle
+    // observer; do the same so that observers which fail to outlive the
+    // socket are exercised here rather than only in production.
+    for (auto *observer : observers_) {
+      observer->destroy(&mockAsyncSocket_);
+    }
+  }
+
+  // Invoked at the very beginning of ~TestCoroTransport, while observers_ and
+  // mockAsyncSocket_ are still alive.
+  void setOnDestroy(std::function<void()> onDestroy) {
+    onDestroy_ = std::move(onDestroy);
+  }
+
+  // Invoked from ::close(), which HTTPUniplexTransportSession calls from its
+  // destructor before destroying any of its members.
+  void setOnClose(std::function<void()> onClose) {
+    onClose_ = std::move(onClose);
   }
 
   folly::SocketAddress getLocalAddress() const noexcept override {
@@ -131,6 +157,8 @@ class TestCoroTransport : public folly::coro::TransportIf {
       mockAsyncTransport_;
   mutable testing::NiceMock<folly::test::MockAsyncSocket> mockAsyncSocket_;
   std::list<folly::AsyncSocket::LegacyLifecycleObserver *> observers_;
+  std::function<void()> onDestroy_;
+  std::function<void()> onClose_;
   bool writesPaused_{false};
   folly::EventBase *evb_;
   detail::CancellableBaton readEvent_;

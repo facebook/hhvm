@@ -71,7 +71,6 @@ struct MaybeCountable : HeapObject {
   void rawIncRefCount() const;
   void decRefCount() const;
   bool decWillRelease() const;
-  bool countedDecRefAndCheck();
   bool decReleaseCheck();
   void fixCountForRelease();            // set count to 1 if it was 0
   bool cowCheck() const;
@@ -170,7 +169,9 @@ ALWAYS_INLINE bool MaybeCountable::persistentIncRef() const {
 ALWAYS_INLINE bool MaybeCountable::checkCount() const {
   // If this assertion fails, it indicates a double-free. Check it separately.
   assertx(m_count < RefCountMaxRealistic);
-  return m_count >= 1 || m_count <= SharedValue || m_count == StaticValue;
+  return
+    (isRefCounted() && m_count >= 1) ||
+    (!isRefCounted() && (m_count <= SharedValue || m_count == StaticValue));
 }
 
 ALWAYS_INLINE bool MaybeCountable::checkCountZ() const {
@@ -188,7 +189,7 @@ ALWAYS_INLINE bool Countable::checkCountZ() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::isRefCounted() const {
-  return m_count >= 0;
+  return reinterpret_cast<uintptr_t>(this) >= kSharedMaxAddr;
 }
 
 ALWAYS_INLINE bool Countable::isRefCounted() const {
@@ -196,7 +197,7 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
-  return uint32_t(m_count) > 1; // treat Static/Shared as large counts
+  return !isRefCounted() || m_count > 1;
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
@@ -270,8 +271,9 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
   assertx(!tl_sweeping);
   assertx(checkCount());
   if (noop_decref) return false;
+  if (!isRefCounted()) return false;
   if (m_count == 1) return true;
-  if (m_count > 1) --m_count;
+  --m_count;
   return false;
 }
 
@@ -281,16 +283,13 @@ ALWAYS_INLINE void MaybeCountable::fixCountForRelease() {
   }
 }
 
-ALWAYS_INLINE bool MaybeCountable::countedDecRefAndCheck() {
+ALWAYS_INLINE bool Countable::decReleaseCheck() {
   assertx(!tl_sweeping);
   assertx(checkCount());
   if (noop_decref) return false;
-  assertx(m_count > 0);
-  return !(--m_count);
-}
-
-ALWAYS_INLINE bool Countable::decReleaseCheck() {
-  return countedDecRefAndCheck();
+  if (m_count == 1) return true;
+  --m_count;
+  return false;
 }
 
 ALWAYS_INLINE bool MaybeCountable::isStatic() const {

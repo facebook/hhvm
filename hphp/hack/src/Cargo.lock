@@ -2061,6 +2061,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "hack_name"
+version = "0.0.0"
+
+[[package]]
 name = "hackc"
 version = "0.0.0"
 dependencies = [
@@ -3547,6 +3551,7 @@ dependencies = [
 name = "parser"
 version = "0.0.0"
 dependencies = [
+ "hack_name",
  "heapless",
  "operator",
  "parser_core_types",

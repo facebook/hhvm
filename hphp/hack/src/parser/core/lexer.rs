@@ -310,16 +310,15 @@ where
         c.is_ascii_digit() || ('a'..='f').contains(&c) || ('A'..='F').contains(&c)
     }
 
+    // Defined in the `hack_name` crate so that code outside the parser can ask
+    // "is this a Hack name?" and get the same answer the lexer would, without
+    // depending on the parser itself.
     fn is_name_nondigit(c: char) -> bool {
-        (c == '_') || c.is_ascii_lowercase() || c.is_ascii_uppercase() || ('\x7f' <= c)
+        hack_name::is_name_nondigit(c)
     }
 
     fn is_name_letter(c: char) -> bool {
-        (c == '_')
-            || c.is_ascii_digit()
-            || c.is_ascii_lowercase()
-            || c.is_ascii_uppercase()
-            || ('\x7f' <= c)
+        hack_name::is_name_letter(c)
     }
 
     // Lexing

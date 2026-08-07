@@ -11,6 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
+hack_name = { version = "0.0.0", path = "../../utils/hack_name/cargo" }
 heapless = "0.9.3"
 operator = { version = "0.0.0", path = "../cargo/operator" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }

@@ -744,7 +744,7 @@ struct protocol_methods<
     ExpectedTag> {
   using indirection = Indirection;
   using elem_type =
-      std::remove_reference_t<folly::invoke_result_t<indirection, Type&>>;
+      std::remove_reference_t<std::invoke_result_t<indirection, Type&>>;
   using elem_methods = protocol_methods<ElemClass, elem_type, ExpectedTag>;
 
   template <typename Protocol>

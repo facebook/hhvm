@@ -117,7 +117,7 @@ struct protocol_type_<indirection_tag<IndirectedTypeClass, Indirection>> {
   template <typename Type>
   static constexpr protocol::TType apply =
       protocol_type_<IndirectedTypeClass>::template apply<
-          std::remove_reference_t<folly::invoke_result_t<Indirection, Type&>>>;
+          std::remove_reference_t<std::invoke_result_t<Indirection, Type&>>>;
 };
 
 } // namespace detail

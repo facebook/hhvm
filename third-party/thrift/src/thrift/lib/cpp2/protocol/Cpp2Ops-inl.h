@@ -858,7 +858,7 @@ class Cpp2Ops<
     std::enable_if_t<folly::is_detected_v<detect_indirection_fn_t, T>>> {
  private:
   using S = folly::remove_cvref_t<
-      folly::invoke_result_t<detail::apply_indirection_fn, T>>;
+      std::invoke_result_t<detail::apply_indirection_fn, T>>;
 
  public:
   using Type = T;

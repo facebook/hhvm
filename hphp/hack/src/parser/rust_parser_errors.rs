@@ -549,6 +549,21 @@ fn variadic_named_param_with_name<'a>(params: S<'a>) -> Option<S<'a>> {
     })
 }
 
+// The first variadic `named` parameter collects every named argument that
+// matches no named parameter, so a second one can never be reached. Return it.
+fn duplicate_variadic_named_param<'a>(params: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_no_separators(params)
+        .filter(|param| {
+            let (named, ellipsis) = match &param.children {
+                ParameterDeclaration(x) => (&x.named, &x.ellipsis),
+                ClosureParameterTypeSpecifier(x) => (&x.named, &x.ellipsis),
+                _ => return false,
+            };
+            !named.is_missing() && ellipsis.is_ellipsis()
+        })
+        .nth(1)
+}
+
 fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_splat_parameter_declaration, param)
 }
@@ -2396,6 +2411,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.produce_error_from_check(misplaced_splat_param, params, || errors::error2081);
         self.produce_error_from_check(variadic_named_param_with_name, params, || {
             errors::variadic_named_param_with_name
+        });
+        self.produce_error_from_check(duplicate_variadic_named_param, params, || {
+            errors::duplicate_variadic_named_param
         });
 
         self.produce_error_from_check(variadic_param_with_default_value, params, || {

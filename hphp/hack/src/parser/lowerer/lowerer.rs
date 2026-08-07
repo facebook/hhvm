@@ -1245,15 +1245,6 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                     p_pos(&c.parameter_list, env),
                 );
             }
-            if named_variadic_hints.len() > 1 {
-                return parsing_error(
-                    format!(
-                        "{} named variadic parameters found. There should be no more than one.",
-                        named_variadic_hints.len()
-                    ),
-                    p_pos(&c.parameter_list, env),
-                );
-            }
             let variadic_ty = unnamed_variadic_hints.into_iter().next().unwrap_or(None);
             let named_variadic_ty = named_variadic_hints.into_iter().next().unwrap_or(None);
             let ctxs = p_contexts(

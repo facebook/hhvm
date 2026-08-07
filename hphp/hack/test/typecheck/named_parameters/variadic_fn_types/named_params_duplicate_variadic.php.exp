@@ -1,0 +1,32 @@
+ERROR: File "named_params_duplicate_variadic.php", line 13, characters 28-42:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 16, characters 59-73:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 19, characters 30-44:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 22, characters 45-56:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 26, characters 37-48:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 30, characters 23-37:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 31, characters 31-45:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 36, characters 45-59:
+A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
+ERROR: File "named_params_duplicate_variadic.php", line 13, characters 40-42:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 16, characters 71-73:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 19, characters 42-44:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 19, characters 57-59:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 22, characters 54-56:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 26, characters 46-48:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 30, characters 35-37:
+Argument already bound: `...` (Naming[2036])
+ERROR: File "named_params_duplicate_variadic.php", line 31, characters 43-45:
+Argument already bound: `...` (Naming[2036])

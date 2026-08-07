@@ -659,6 +659,10 @@ pub const variadic_named_param_with_name: Error = Cow::Borrowed(
     "A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`.",
 );
 
+pub const duplicate_variadic_named_param: Error = Cow::Borrowed(
+    "A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter.",
+);
+
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 
 pub fn not_allowed_in_write(what: &str) -> Error {

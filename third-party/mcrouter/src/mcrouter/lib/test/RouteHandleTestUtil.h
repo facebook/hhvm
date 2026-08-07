@@ -9,10 +9,10 @@
 
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <folly/Optional.h>
-#include <folly/Traits.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/fibers/SimpleLoopController.h>
 #include <folly/fibers/WhenN.h>
@@ -346,7 +346,7 @@ struct RecordingRoute {
   template <typename T>
   struct has_app_error<
       T,
-      folly::void_t<decltype(std::declval<T>().appSpecificErrorCode_ref())>>
+      std::void_t<decltype(std::declval<T>().appSpecificErrorCode_ref())>>
       : std::true_type {};
 
   template <
@@ -364,9 +364,7 @@ struct RecordingRoute {
   template <typename T, typename = void>
   struct has_exptime : std::false_type {};
   template <typename T>
-  struct has_exptime<
-      T,
-      folly::void_t<decltype(std::declval<T>().exptime_ref())>>
+  struct has_exptime<T, std::void_t<decltype(std::declval<T>().exptime_ref())>>
       : std::true_type {};
 
   template <

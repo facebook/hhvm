@@ -202,10 +202,27 @@ class HeaderServerChannel : public ServerChannel,
         apache::thrift::transport::THeader* header) override;
 
    private:
+    // Validation applied once a full frame has been decoded.
+    std::tuple<
+        std::unique_ptr<folly::IOBuf>,
+        size_t,
+        std::unique_ptr<apache::thrift::transport::THeader>>
+    removeFrameTail(
+        std::unique_ptr<folly::IOBuf> buf,
+        std::unique_ptr<apache::thrift::transport::THeader> header);
+
     HeaderServerChannel& channel_;
   };
 
  private:
+  // Answers a frame that could not be decoded with `tae` instead of letting
+  // the connection be torn down, so the client learns the reason. Returns
+  // false if no reply could be sent, in which case the caller should fall
+  // back to failing the connection.
+  bool trySendFrameError(
+      std::unique_ptr<apache::thrift::transport::THeader> header,
+      const TApplicationException& tae);
+
   static std::string getTHeaderPayloadString(folly::IOBuf* buf);
   static std::string getTransportDebugString(folly::AsyncTransport* transport);
 

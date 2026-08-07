@@ -29,6 +29,7 @@
 #include <folly/io/async/test/TestSSLServer.h>
 #include <folly/lang/Bits.h>
 #include <folly/testing/TestUtil.h>
+#include <thrift/lib/cpp2/SerializationSwitch.h>
 #include <thrift/lib/cpp2/async/Cpp2Channel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
@@ -36,6 +37,7 @@
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::transport;
@@ -641,6 +643,114 @@ class HeaderChannelClosedTest
 
 TEST(Channel, HeaderChannelClosedTest) {
   HeaderChannelClosedTest().run();
+}
+
+class UnsupportedTransformTest
+    : public SocketPairTest<Cpp2Channel, HeaderServerChannel>,
+      public ResponseCallback,
+      public MessageChannel::RecvCallback {
+ public:
+  void preLoop() override {
+    channel0_->setReceiveCallback(this);
+    channel1_->setCallback(this);
+
+    THeader header;
+    header.setClientType(THRIFT_HEADER_CLIENT_TYPE);
+    header.forceClientType(true);
+    header.setProtocolId(protocol::T_BINARY_PROTOCOL);
+    header.setSequenceNumber(kSeqId);
+    header.setTTransform(TTransform::ZSTD);
+    // addHeader() records the transform in the header either way; passing false
+    // skips actually applying it, so the payload the server receives cannot be
+    // untransformed. That is what a codec the server cannot decode looks like
+    // on the wire.
+    auto frame = header.addHeader(makeTestBuf(64), /* transform */ false);
+    frame->coalesce();
+
+    // Written straight to the fd: the frame is already framed, so it must not
+    // go through channel0_'s framing handler and get length-prefixed twice.
+    const auto len = frame->length();
+    ASSERT_EQ(len, folly::writeFull(getFd0(), frame->data(), len));
+  }
+
+  void messageReceived(
+      unique_ptr<IOBuf>&& buf, unique_ptr<THeader>&&) override {
+    replies_++;
+    replyExceptionType_ = readExceptionType(*buf);
+    // Drop both callbacks so the event loop can drain and the test can finish.
+    channel0_->setReceiveCallback(nullptr);
+    channel1_->setCallback(nullptr);
+  }
+
+  void messageChannelEOF() override { clientEOF_++; }
+
+  void messageReceiveErrorWrapped(folly::exception_wrapper&&) override {
+    clientRecvError_++;
+  }
+
+  void postLoop() override {
+    // The client is told what went wrong ...
+    EXPECT_EQ(replies_, 1);
+    EXPECT_EQ(replyExceptionType_, TApplicationException::INVALID_TRANSFORM);
+    // ... instead of inferring it from a dropped connection.
+    EXPECT_EQ(clientEOF_, 0);
+    EXPECT_EQ(clientRecvError_, 0);
+    EXPECT_FALSE(serverClosed_);
+    // The frame is never dispatched as a request, since it could not be
+    // decoded.
+    EXPECT_EQ(request_, 0u);
+  }
+
+ private:
+  static constexpr int32_t kSeqId = 7;
+
+  // Re-frames a response body so THeader can strip it, then returns the type of
+  // the TApplicationException it carries.
+  static TApplicationException::TApplicationExceptionType readExceptionType(
+      const IOBuf& frameBody) {
+    const auto bodyLen = frameBody.computeChainDataLength();
+    auto lengthPrefix = IOBuf::create(4);
+    lengthPrefix->append(4);
+    folly::io::RWPrivateCursor(lengthPrefix.get())
+        .writeBE<uint32_t>(folly::to_narrow(bodyLen));
+
+    IOBufQueue q(IOBufQueue::cacheChainLength());
+    q.append(std::move(lengthPrefix));
+    q.append(frameBody.clone());
+
+    THeader header;
+    size_t needed = 0;
+    THeader::StringToStringMap persistentHeaders;
+    auto payload = header.removeHeader(&q, needed, persistentHeaders);
+    EXPECT_TRUE(payload);
+
+    BinaryProtocolReader reader;
+    reader.setInput(payload.get());
+    std::string methodName;
+    MessageType messageType;
+    int32_t seqId;
+    reader.readMessageBegin(methodName, messageType, seqId);
+    EXPECT_EQ(messageType, MessageType::T_EXCEPTION);
+    EXPECT_EQ(seqId, kSeqId);
+
+    TApplicationException ex;
+    apache::thrift::detail::deserializeExceptionBody(&reader, &ex);
+    return ex.getType();
+  }
+
+  uint32_t replies_{0};
+  uint32_t clientEOF_{0};
+  uint32_t clientRecvError_{0};
+  TApplicationException::TApplicationExceptionType replyExceptionType_{
+      TApplicationException::UNKNOWN};
+};
+
+// A frame the server cannot untransform must come back as INVALID_TRANSFORM.
+// Closing the connection instead leaves the caller with a bare EOF that names
+// none of the causes it suggests, which is near impossible to attribute to a
+// compression codec.
+TEST(Channel, UnsupportedTransformTest) {
+  UnsupportedTransformTest().run();
 }
 
 class InOrderTest

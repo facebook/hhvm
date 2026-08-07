@@ -75,28 +75,48 @@ unique_ptr<IOBuf> HeaderServerChannel::ServerFramingHandler::addFrame(
 
 std::tuple<unique_ptr<IOBuf>, size_t, unique_ptr<THeader>>
 HeaderServerChannel::ServerFramingHandler::removeFrame(IOBufQueue* q) {
-  std::unique_ptr<THeader> header(new THeader(THeader::ALLOW_BIG_FRAMES));
-  // removeHeader will set seqid in header.
-  // For older clients with seqid in the protocol, header
-  // will dig in to the protocol to get the seqid correctly.
-  if (!q || !q->front() || q->front()->empty()) {
-    return make_tuple(std::unique_ptr<IOBuf>(), 0, nullptr);
-  }
+  // Looping so that a frame answered with an error below does not stall any
+  // further frames already buffered in the queue.
+  while (true) {
+    std::unique_ptr<THeader> header(new THeader(THeader::ALLOW_BIG_FRAMES));
+    // removeHeader will set seqid in header.
+    // For older clients with seqid in the protocol, header
+    // will dig in to the protocol to get the seqid correctly.
+    if (!q || !q->front() || q->front()->empty()) {
+      return make_tuple(std::unique_ptr<IOBuf>(), 0, nullptr);
+    }
 
-  std::unique_ptr<folly::IOBuf> buf;
-  size_t remaining = 0;
-  try {
-    buf = header->removeHeader(q, remaining, channel_.persistentReadHeaders_);
-  } catch (const std::exception& e) {
-    LOG(ERROR) << "Received invalid request from client: "
-               << folly::exceptionStr(e) << " "
-               << getTransportDebugString(channel_.getTransport());
-    throw;
+    std::unique_ptr<folly::IOBuf> buf;
+    size_t remaining = 0;
+    try {
+      buf = header->removeHeader(q, remaining, channel_.persistentReadHeaders_);
+    } catch (const std::exception& e) {
+      LOG(ERROR) << "Received invalid request from client: "
+                 << folly::exceptionStr(e) << " "
+                 << getTransportDebugString(channel_.getTransport());
+      // An unsupported compression codec is recoverable: removeHeader() has
+      // already split the whole frame off the queue, and seqid, protocol and
+      // flags are all parsed before the payload is untransformed. So answer
+      // this frame and keep reading, rather than dropping the connection and
+      // leaving the client with a bare EOF that names none of the causes it
+      // suggests.
+      const auto* tae = dynamic_cast<const TApplicationException*>(&e);
+      if (tae && tae->getType() == TApplicationException::INVALID_TRANSFORM &&
+          channel_.trySendFrameError(std::move(header), *tae)) {
+        continue;
+      }
+      throw;
+    }
+    if (!buf) {
+      return make_tuple(std::unique_ptr<IOBuf>(), remaining, nullptr);
+    }
+    return removeFrameTail(std::move(buf), std::move(header));
   }
-  if (!buf) {
-    return make_tuple(std::unique_ptr<IOBuf>(), remaining, nullptr);
-  }
+}
 
+std::tuple<unique_ptr<IOBuf>, size_t, unique_ptr<THeader>>
+HeaderServerChannel::ServerFramingHandler::removeFrameTail(
+    std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<THeader> header) {
   CLIENT_TYPE ct = header->getClientType();
   if (!HeaderChannelTrait::isSupportedClient(ct)) {
     LOG(ERROR) << "Server rejecting unsupported client type " << ct;
@@ -371,6 +391,34 @@ TServerObserver::SamplingStatus HeaderServerChannel::shouldSample(
   bool isServerSamplingEnabled =
       (sampleRate_ > 0) && ((sample_++ % sampleRate_) == 0);
   return SamplingStatus(isServerSamplingEnabled);
+}
+
+bool HeaderServerChannel::trySendFrameError(
+    std::unique_ptr<THeader> header, const TApplicationException& tae) {
+  DestructorGuard dg(this);
+
+  // Mirror the ordering bookkeeping messageReceived() does, so the reply is
+  // sequenced like any other response on this channel.
+  const bool outOfOrder =
+      (header->getFlags() & HEADER_FLAG_SUPPORT_OUT_OF_ORDER);
+  if (!outOfOrder_.has_value()) {
+    outOfOrder_ = outOfOrder;
+  } else if (outOfOrder_.value() != outOfOrder) {
+    return false;
+  }
+
+  const auto protoSeqId = static_cast<int32_t>(header->getSequenceNumber());
+  HeaderRequest request(this, nullptr, std::move(header), SamplingStatus());
+  if (!outOfOrder && !request.isOneway()) {
+    request.setInOrderRecvSequenceId(arrivalSeqId_++);
+  }
+
+  // The method name lives in the payload we failed to decode, so it is not
+  // available here. Clients do not match on it for exception replies.
+  TApplicationException ex(tae);
+  request.serializeAndSendError(
+      *request.getHeader(), ex, /* methodName */ "", protoSeqId, nullptr);
+  return true;
 }
 
 // Interface from MessageChannel::RecvCallback

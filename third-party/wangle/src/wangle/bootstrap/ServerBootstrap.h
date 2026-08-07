@@ -352,6 +352,16 @@ class ServerBootstrap {
     workerFactory_->forEachWorker(f);
   }
 
+  // The callback is invoked only when the worker pool exists and is non-empty;
+  // otherwise this is a no-op.
+  template <typename F>
+  void forRandomWorker(F&& f) const {
+    if (!workerFactory_) {
+      return;
+    }
+    workerFactory_->forRandomWorker(f);
+  }
+
   ServerSocketConfig socketConfig;
 
   ServerBootstrap* setReusePort(bool reusePort) {

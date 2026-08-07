@@ -465,7 +465,12 @@ template <typename F>
 void ServerWorkerPool::forRandomWorker(F&& f) const {
   std::shared_lock holder(workersMutex_);
   WANGLE_DCHECK(workers_->size());
-  f((*workers_).at(folly::Random::rand32(workers_->size())).second.get());
+  if (workers_->empty()) {
+    return;
+  }
+  const auto index = static_cast<WorkerMap::size_type>(
+      folly::Random::rand64(workers_->size()));
+  f((*workers_).at(index).second.get());
 }
 
 class DefaultAcceptPipelineFactory : public AcceptPipelineFactory {

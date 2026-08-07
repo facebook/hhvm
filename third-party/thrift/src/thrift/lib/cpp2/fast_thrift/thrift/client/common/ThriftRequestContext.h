@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include <folly/io/async/HHWheelTimer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ClientAppAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift::client {
@@ -30,6 +31,13 @@ namespace apache::thrift::fast_thrift::thrift::client {
  */
 struct ThriftRequestContext {
   RequestResponseHandler handler;
+
+  // Per-request client-timeout callback, armed and disarmed by
+  // ThriftClientRequestTimeoutHandler. Owned here so it is cancelled
+  // automatically when the context is destroyed (e.g. connection teardown);
+  // no correlation map is needed since the context round-trips with the
+  // request/response.
+  std::unique_ptr<folly::HHWheelTimer::Callback> timeout;
 
   explicit ThriftRequestContext(RequestResponseHandler handler)
       : handler(std::move(handler)) {}

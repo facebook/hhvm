@@ -470,6 +470,12 @@ class DOMDocument extends DOMNode {
   <<__Native>>
   public function createElement(string $name, ?string $value = null): mixed;
 
+  public function createElementTyped(string $name, ?string $value = null): DOMElement {
+    $result = $this->createElement($name, $value);
+    invariant($result is DOMElement, 'Error in creating element');
+    return $result;
+  }
+
   /**
    * This function creates a new element node with an associated namespace.
    *   This node will not show up in the document unless it is inserted with
@@ -489,6 +495,13 @@ class DOMDocument extends DOMNode {
   public function createElementNS(string $namespaceuri,
                            string $qualifiedname,
                            ?string $value = null): mixed;
+
+  public function createElementNSTyped(string $namespaceuri, string $qualifiedname, ?string $value = null): DOMElement {
+    $result = $this->createElementNS($namespaceuri, $qualifiedname, $value);
+    invariant($result is DOMElement, 'Error in creating element');
+    return $result;
+  }
+
 
   /**
    * This function creates a new instance of class DOMEntityReference. This

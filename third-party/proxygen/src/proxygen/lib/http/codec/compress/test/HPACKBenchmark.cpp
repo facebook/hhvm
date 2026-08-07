@@ -7,7 +7,6 @@
  */
 
 #include <folly/Benchmark.h>
-#include <folly/Range.h>
 #include <proxygen/lib/http/codec/compress/test/TestStreamingCallback.h>
 #include <proxygen/lib/http/codec/compress/test/TestUtil.h>
 

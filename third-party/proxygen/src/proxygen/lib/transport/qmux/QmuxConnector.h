@@ -14,17 +14,14 @@
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 #include <proxygen/lib/transport/qmux/QmuxSession.h>
 #include <proxygen/lib/transport/qmux/QmuxTransport.h>
-
-namespace folly {
-class EventBase;
-} // namespace folly
+#include <quic/common/events/QuicExecutor.h>
 
 namespace proxygen::qmux {
 
 class QmuxConnector {
  public:
   static folly::coro::Task<QmuxSession::Ptr> connect(
-      folly::EventBase* evb,
+      std::shared_ptr<quic::QuicExecutor> executor,
       WtDir dir,
       QxTransportParams selfParams,
       std::unique_ptr<QmuxTransport> transport,

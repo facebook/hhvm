@@ -17,6 +17,7 @@
 #include <proxygen/lib/transport/qmux/FollyQmuxTransport.h>
 #include <proxygen/lib/transport/qmux/QmuxCodec.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
+#include <quic/common/events/QuicFollyExecutorImpl.h>
 
 using namespace proxygen;
 using namespace proxygen::qmux;
@@ -273,7 +274,7 @@ class QmuxSessionTest : public ::testing::Test {
         .peerMaxStreamDataUni = peerParams.initialMaxStreamDataUni};
 
     session_ = std::make_shared<QmuxSession>(
-        &evb_,
+        executor_,
         WtDir::Server,
         selfParams,
         std::make_unique<FollyQmuxTransport>(std::move(transport)),
@@ -338,6 +339,8 @@ class QmuxSessionTest : public ::testing::Test {
   static constexpr uint64_t kPeerBidiId = 0x00;
 
   folly::EventBase evb_;
+  std::shared_ptr<quic::QuicFollyExecutorImpl> executor_{
+      std::make_shared<quic::QuicFollyExecutorImpl>(&evb_)};
   std::unique_ptr<TestCoroTransport::State> state_;
   TestCoroTransport* transport_{nullptr};
   std::unique_ptr<TestWtHandler> handler_;
@@ -492,7 +495,7 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
   auto preroll = streamRecord(kPeerBidiId, "preroll", /*fin=*/false);
 
   auto session = std::make_shared<QmuxSession>(
-      &evb_,
+      executor_,
       WtDir::Server,
       selfParams_,
       std::make_unique<FollyQmuxTransport>(std::move(transport)),
@@ -598,7 +601,7 @@ TEST_F(QmuxSessionTest, IdleTimer_ArmedWhenEffectiveTimeoutNonzero) {
                                      .peerMaxStreamDataUni = 1 << 16};
 
   auto session = std::make_shared<QmuxSession>(
-      &evb_,
+      executor_,
       WtDir::Server,
       selfParams_,
       std::make_unique<FollyQmuxTransport>(std::move(transport)),

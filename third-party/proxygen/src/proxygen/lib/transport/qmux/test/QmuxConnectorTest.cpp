@@ -15,6 +15,7 @@
 #include <proxygen/lib/http/coro/transport/test/TestCoroTransport.h>
 #include <proxygen/lib/transport/qmux/FollyQmuxTransport.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
+#include <quic/common/events/QuicFollyExecutorImpl.h>
 
 using namespace proxygen;
 using namespace proxygen::qmux;
@@ -83,15 +84,19 @@ std::unique_ptr<folly::IOBuf> tpAndPingRecord(const QxTransportParams& params,
 // in a capturing lambda would dangle the captures once the lambda temporary
 // destructs at the call site.
 folly::coro::Task<void> connectAndCapture(
-    folly::EventBase* evb,
+    std::shared_ptr<quic::QuicExecutor> executor,
     WtDir dir,
     QxTransportParams selfParams,
     std::unique_ptr<QmuxTransport> transport,
     std::chrono::milliseconds timeout,
     folly::Try<QmuxSession::Ptr>* out,
     bool* done) {
-  *out = co_await folly::coro::co_awaitTry(QmuxConnector::connect(
-      evb, dir, std::move(selfParams), std::move(transport), timeout));
+  *out = co_await folly::coro::co_awaitTry(
+      QmuxConnector::connect(std::move(executor),
+                             dir,
+                             std::move(selfParams),
+                             std::move(transport),
+                             timeout));
   *done = true;
 }
 
@@ -113,8 +118,8 @@ class QmuxConnectorTest : public ::testing::Test {
       QxTransportParams selfParams = sampleSelfParams()) {
     folly::Try<QmuxSession::Ptr> result;
     bool done = false;
-    co_withExecutor(&evb_,
-                    connectAndCapture(&evb_,
+    co_withExecutor(executor_.get(),
+                    connectAndCapture(executor_,
                                       WtDir::Client,
                                       std::move(selfParams),
                                       std::make_unique<FollyQmuxTransport>(
@@ -130,6 +135,8 @@ class QmuxConnectorTest : public ::testing::Test {
   }
 
   folly::EventBase evb_;
+  std::shared_ptr<quic::QuicFollyExecutorImpl> executor_{
+      std::make_shared<quic::QuicFollyExecutorImpl>(&evb_)};
 };
 
 } // namespace

@@ -9,7 +9,6 @@
 #pragma once
 
 #include <folly/Executor.h>
-#include <folly/io/async/EventBase.h>
 #include <proxygen/lib/http/codec/TransportDirection.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
@@ -209,10 +208,6 @@ class WtSessionBase : public WebTransport {
 
   folly::Executor* executor() {
     return executor_;
-  }
-
-  folly::EventBase* evb() {
-    return dynamic_cast<folly::EventBase*>(executor_);
   }
 
  protected:

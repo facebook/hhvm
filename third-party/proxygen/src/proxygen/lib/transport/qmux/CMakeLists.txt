@@ -63,7 +63,7 @@ proxygen_add_library(proxygen_transport_qmux_qmux_session
     proxygen_http_webtransport_wt_util
     proxygen_transport_qmux_qmux_framer
     proxygen_transport_qmux_qmux_transport
-    Folly::folly_io_async_async_base
+    mvfst::mvfst_common_events_quic_executor
 )
 
 proxygen_add_library(proxygen_transport_qmux_qmux_connector
@@ -71,8 +71,6 @@ proxygen_add_library(proxygen_transport_qmux_qmux_connector
     QmuxConnector.cpp
   DEPS
     mvfst::mvfst_folly_utils
-    Folly::folly_coro_timeout
-    Folly::folly_futures_core
     Folly::folly_io_iobuf
     Folly::folly_logging_logging
     fmt::fmt
@@ -81,6 +79,7 @@ proxygen_add_library(proxygen_transport_qmux_qmux_connector
     proxygen_transport_qmux_qmux_framer
     proxygen_transport_qmux_qmux_session
     proxygen_transport_qmux_qmux_transport
+    mvfst::mvfst_common_events_quic_executor
     Folly::folly_coro_task
 )
 

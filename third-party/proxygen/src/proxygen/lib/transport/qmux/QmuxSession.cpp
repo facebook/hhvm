@@ -134,7 +134,7 @@ class QmuxCallback : public QmuxCodec::Callback {
 
 //////// QmuxSession ////////
 
-QmuxSession::QmuxSession(folly::EventBase* evb,
+QmuxSession::QmuxSession(std::shared_ptr<quic::QuicExecutor> executor,
                          WtDir dir,
                          QxTransportParams selfParams,
                          std::unique_ptr<QmuxTransport> transport,
@@ -144,7 +144,8 @@ QmuxSession::QmuxSession(folly::EventBase* evb,
                          std::unique_ptr<folly::IOBuf> initialIngress,
                          Config config)
     : CoroWtSessionBase(dir, wtConfig),
-      WtSessionBase(evb, sm),
+      WtSessionBase(executor.get(), sm),
+      executor_(std::move(executor)),
       localAddr_(transport->getLocalAddress()),
       peerAddr_(transport->getPeerAddress()),
       transport_(std::move(transport)),
@@ -233,7 +234,7 @@ folly::coro::Task<void> QmuxSession::readLoop(Ptr self) {
       break;
     }
   }
-  idleTimeout_.cancelTimeout();
+  idleTimeout_.cancelTimerCallback();
   XLOG(DBG4) << "QmuxSession::readLoop exiting";
   sm.shutdown(WtStreamManager::CloseSession{.err = 0x00,
                                             .msg = "stream ingress closed"});
@@ -246,8 +247,8 @@ void QmuxSession::resetIdleTimeout() {
     // connection has no idle deadline. Nothing to do.
     return;
   }
-  idleTimeout_.cancelTimeout();
-  evb()->timer().scheduleTimeout(
+  idleTimeout_.cancelTimerCallback();
+  executor_->scheduleTimeout(
       &idleTimeout_, std::chrono::milliseconds(effectiveMaxIdleTimeoutMs_));
 }
 

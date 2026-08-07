@@ -45,6 +45,7 @@ proxygen_add_test(TARGET QmuxSessionTest
     proxygen_http_codec_webtransport_webtransport_framer
     proxygen_http_webtransport_wt_stream_manager
     proxygen_http_webtransport_wt_util
+    mvfst::mvfst_common_events_quic_folly_executor_impl
     TestCoroTransport
     testmain
 )
@@ -56,6 +57,7 @@ proxygen_add_test(TARGET QmuxConnectorTest
     proxygen_transport_qmux_qmux_connector
     proxygen_transport_qmux_folly_qmux_transport
     proxygen_transport_qmux_qmux_framer
+    mvfst::mvfst_common_events_quic_folly_executor_impl
     TestCoroTransport
     testmain
 )

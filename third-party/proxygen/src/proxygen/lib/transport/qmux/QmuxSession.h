@@ -9,16 +9,16 @@
 #pragma once
 
 #include <deque>
-#include <folly/io/async/HHWheelTimer.h>
 #include <proxygen/lib/http/coro/util/CoroWtSession.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 #include <proxygen/lib/transport/qmux/QmuxTransport.h>
+#include <quic/common/events/QuicExecutor.h>
 
 namespace folly {
 class AsyncTransport;
-}
+} // namespace folly
 
 namespace proxygen::qmux {
 
@@ -37,7 +37,7 @@ class QmuxSession
  public:
   using Ptr = std::shared_ptr<QmuxSession>;
 
-  QmuxSession(folly::EventBase* evb,
+  QmuxSession(std::shared_ptr<quic::QuicExecutor> executor,
               WtDir dir,
               QxTransportParams selfParams,
               std::unique_ptr<QmuxTransport> transport,
@@ -46,6 +46,7 @@ class QmuxSession
               uint64_t effectiveMaxIdleTimeoutMs,
               std::unique_ptr<folly::IOBuf> initialIngress,
               Config config);
+
   ~QmuxSession() override;
 
   void setHandler(WebTransportHandler* handler) {
@@ -77,7 +78,7 @@ class QmuxSession
   [[nodiscard]] folly::AsyncTransport* getUnderlyingTransport() const noexcept;
 
   [[nodiscard]] bool isIdleTimeoutScheduled() const noexcept {
-    return idleTimeout_.isScheduled();
+    return idleTimeout_.isTimerCallbackScheduled();
   }
 
  private:
@@ -90,7 +91,7 @@ class QmuxSession
   void resetIdleTimeout();
   void onIdleTimeout();
 
-  class IdleTimeoutCallback : public folly::HHWheelTimer::Callback {
+  class IdleTimeoutCallback : public quic::QuicTimerCallback {
    public:
     explicit IdleTimeoutCallback(QmuxSession& session) noexcept
         : session_(session) {
@@ -98,11 +99,14 @@ class QmuxSession
     void timeoutExpired() noexcept override {
       session_.onIdleTimeout();
     }
+    void callbackCanceled() noexcept override {
+    }
 
    private:
     QmuxSession& session_;
   };
 
+  std::shared_ptr<quic::QuicExecutor> executor_;
   WebTransportHandler* wtHandler_{nullptr};
   folly::SocketAddress localAddr_;
   folly::SocketAddress peerAddr_;

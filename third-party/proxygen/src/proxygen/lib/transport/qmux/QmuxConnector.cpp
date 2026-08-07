@@ -8,10 +8,9 @@
 
 #include <proxygen/lib/transport/qmux/QmuxConnector.h>
 
+#include <chrono>
 #include <cstdint>
 #include <fmt/core.h>
-#include <folly/coro/Timeout.h>
-#include <folly/futures/ThreadWheelTimekeeper.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/logging/xlog.h>
@@ -148,12 +147,21 @@ folly::coro::Task<QxTransportParams> readPeerTransportParams(
     QmuxTransport& transport,
     folly::IOBufQueue& ingressBuf,
     std::chrono::milliseconds timeout) {
+  const auto deadline = std::chrono::steady_clock::now() + timeout;
   while (true) {
+    const auto remaining =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            deadline - std::chrono::steady_clock::now());
+    if (remaining <= std::chrono::milliseconds::zero()) {
+      co_yield co_error(
+          std::runtime_error("timed out waiting for QX_TRANSPORT_PARAMETERS"));
+    }
+
     auto readRes = co_await folly::coro::co_awaitTry(
         transport.read(ingressBuf,
                        /*minReadSize=*/1,
                        /*newAllocationSize=*/4096,
-                       timeout));
+                       remaining));
     if (readRes.hasException()) {
       co_yield co_error(readRes.exception());
     }
@@ -194,7 +202,7 @@ WtStreamManager::WtConfig makeWtConfig(
 }
 
 folly::coro::Task<QmuxSession::Ptr> QmuxConnector::connect(
-    folly::EventBase* evb,
+    std::shared_ptr<quic::QuicExecutor> executor,
     WtDir dir,
     QxTransportParams selfParams,
     std::unique_ptr<QmuxTransport> transport,
@@ -220,10 +228,9 @@ folly::coro::Task<QmuxSession::Ptr> QmuxConnector::connect(
   //    timeout. peelTransportParams trims the TP frame and rewraps any
   //    same-record trailing bytes so they parse cleanly downstream.
   folly::IOBufQueue ingressBuf{folly::IOBufQueue::cacheChainLength()};
-  folly::EventBaseThreadTimekeeper tk{*evb};
 
-  auto peerParams = co_await folly::coro::co_awaitTry(folly::coro::timeout(
-      readPeerTransportParams(*transport, ingressBuf, timeout), timeout, &tk));
+  auto peerParams = co_await folly::coro::co_awaitTry(
+      readPeerTransportParams(*transport, ingressBuf, timeout));
   if (peerParams.hasException()) {
     XLOG(ERR) << "QmuxConnector: TP read failed: " << peerParams.exception();
     co_yield co_error(peerParams.exception());
@@ -246,7 +253,7 @@ folly::coro::Task<QmuxSession::Ptr> QmuxConnector::connect(
     effectiveMaxIdleTimeoutMs = peerParams->maxIdleTimeout;
   }
 
-  co_return std::make_shared<QmuxSession>(evb,
+  co_return std::make_shared<QmuxSession>(std::move(executor),
                                           dir,
                                           std::move(selfParams),
                                           std::move(transport),

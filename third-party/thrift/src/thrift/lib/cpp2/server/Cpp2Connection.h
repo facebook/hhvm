@@ -208,7 +208,8 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     bool isActive() const final { return stateMachine_.isActive(); }
 
     bool tryCancel() {
-      return stateMachine_.tryCancel(connection_->getWorker()->getEventBase());
+      return stateMachine_.tryTerminate(
+          connection_->getWorker()->getEventBase());
     }
 
     bool isOneway() const override { return req_->isOneway(); }

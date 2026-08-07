@@ -40,23 +40,23 @@ class RequestStateMachine {
 
   ~RequestStateMachine();
 
-  // Returns true if the request has not been cancelled (via tryCancel())
+  // Returns true if the request has not been terminated (via tryTerminate())
   //
   // Note: using this method from a thread other than that of eventBase_
   //       presents a data race condition. As such, the isActive() API returning
   //       true should be considered a weak promise that a request is active
   //       and should not be relied upon for the purposes of synchronization.
-  bool isActive() const { return !cancelled_.load(std::memory_order_relaxed); }
+  bool isActive() const { return !terminated_.load(std::memory_order_relaxed); }
 
   // Instruct whether request no longer requires processing.
   // This API may only be called from IO worker thread of the request.
-  // @return: whether request has already been in "cancelled" stage
-  // before calling the API.
+  // @return: whether this call terminated the request. False means the request
+  // had already been terminated before the call.
   // Suggested usages of the API:
   // * queue/task timeout has sent load shedding response, and no further
   //   response is needed
   // * client has closed its connection and does not expect a response
-  [[nodiscard]] bool tryCancel(folly::EventBase* eb);
+  [[nodiscard]] bool tryTerminate(folly::EventBase* eb);
 
   // The tryStartProcessing() API is used to mark the request as started
   // processing. This method is ultimately called by request processors. A
@@ -88,7 +88,7 @@ class RequestStateMachine {
 
  private:
   std::atomic<bool> startProcessingOrQueueTimeout_{false};
-  std::atomic<bool> cancelled_{false};
+  std::atomic<bool> terminated_{false};
 
   std::atomic<bool> infoStartedProcessing_{false};
   const bool includeInRecentRequests_;

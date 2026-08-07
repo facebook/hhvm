@@ -103,7 +103,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
   bool isActive() const final { return stateMachine_.isActive(); }
 
-  bool tryCancel() { return stateMachine_.tryCancel(getEventBase()); }
+  bool tryCancel() { return stateMachine_.tryTerminate(getEventBase()); }
 
   RpcKind kind() const { return kind_; }
 

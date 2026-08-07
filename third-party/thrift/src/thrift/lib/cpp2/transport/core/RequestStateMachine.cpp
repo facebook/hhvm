@@ -45,17 +45,13 @@ RequestStateMachine::~RequestStateMachine() {
   }
 }
 
-[[nodiscard]] bool RequestStateMachine::tryCancel(folly::EventBase* eb) {
+[[nodiscard]] bool RequestStateMachine::tryTerminate(folly::EventBase* eb) {
   eb->dcheckIsInEventBaseThread();
-  if (cancelled_.load(std::memory_order_relaxed)) {
-    return false;
-  }
-  cancelled_.store(true, std::memory_order_relaxed);
-  return true;
+  return !terminated_.exchange(true, std::memory_order_relaxed);
 }
 
 [[nodiscard]] bool RequestStateMachine::tryStartProcessing() {
-  if (cancelled_.load(std::memory_order_relaxed) ||
+  if (terminated_.load(std::memory_order_relaxed) ||
       startProcessingOrQueueTimeout_.exchange(
           true, std::memory_order_relaxed)) {
     return false;

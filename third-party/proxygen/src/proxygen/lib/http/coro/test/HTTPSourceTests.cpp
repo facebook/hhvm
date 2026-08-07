@@ -1236,6 +1236,9 @@ TEST(HTTPSourceReader, filter) {
   HTTPSourceReader reader;
   class ByteCountFilter : public HTTPSourceFilter {
    public:
+    [[nodiscard]] std::string_view getFilterName() const noexcept override {
+      return "TestByteCount";
+    }
     folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t max) override {
       XLOG(INFO) << __func__;
       auto bodyEvent = co_await readBodyEventImpl(max);
@@ -1376,6 +1379,10 @@ CO_TEST(HybridSourceTest, StopReading) {
 
 class NameFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestName";
+  }
+
   NameFilter(std::string inName, std::vector<std::string>& inNames)
       : name(std::move(inName)), names(inNames) {
     setHeapAllocated();

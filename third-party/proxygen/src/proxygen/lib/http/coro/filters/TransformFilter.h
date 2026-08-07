@@ -20,6 +20,9 @@ namespace proxygen::coro {
  */
 class TransformFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Transform";
+  }
   using HeaderTransformFn =
       std::function<folly::Try<HTTPHeaderEvent>(folly::Try<HTTPHeaderEvent>&&)>;
   using BodyTransformFn =

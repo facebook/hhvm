@@ -21,6 +21,9 @@ namespace proxygen::coro {
  */
 class MutateFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Mutate";
+  }
   using HeaderMutateFn = std::function<void(HTTPHeaderEvent&)>;
   using BodyMutateFn = std::function<void(HTTPBodyEvent&)>;
 

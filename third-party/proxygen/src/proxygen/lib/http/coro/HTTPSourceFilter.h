@@ -10,6 +10,7 @@
 
 #include "proxygen/lib/http/coro/HTTPSource.h"
 #include <folly/logging/xlog.h>
+#include <string_view>
 
 namespace proxygen::coro {
 
@@ -48,6 +49,8 @@ class HTTPSourceFilter : public HTTPSource {
       prevSource->stopReading();
     }
   }
+
+  [[nodiscard]] virtual std::string_view getFilterName() const noexcept = 0;
 
   // HTTPSource overrides
   folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override {

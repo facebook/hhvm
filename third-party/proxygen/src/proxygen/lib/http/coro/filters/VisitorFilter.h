@@ -20,6 +20,9 @@ namespace proxygen::coro {
  */
 class VisitorFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Visitor";
+  }
   using HeaderHookFn = std::function<void(const folly::Try<HTTPHeaderEvent>&)>;
   using BodyHookFn = std::function<void(const folly::Try<HTTPBodyEvent>&)>;
 

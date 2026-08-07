@@ -18,6 +18,9 @@ using FilterParams = proxygen::CompressionFilterUtils::FilterParams;
 namespace proxygen::coro {
 class CompressionFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Compression";
+  }
   CompressionFilter(HTTPSource* source,
                     std::shared_ptr<folly::Optional<FilterParams>> params)
       : HTTPSourceFilter(source), params_(std::move(params)) {

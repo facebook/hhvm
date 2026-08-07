@@ -16,6 +16,9 @@ namespace proxygen::coro {
 // read, or stopReading is called on the source.
 class HTTPSourceHolder : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "SourceHolder";
+  }
   HTTPSourceHolder() = default;
 
   /* implicit */ HTTPSourceHolder(HTTPSource* source)

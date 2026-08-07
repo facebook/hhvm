@@ -20,6 +20,9 @@ namespace proxygen::coro {
  */
 class RateLimitFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "RateLimit";
+  }
   explicit RateLimitFilter(HTTPSource* source);
   explicit RateLimitFilter(HTTPSource* source,
                            std::chrono::seconds maxDelay,

@@ -21,6 +21,10 @@ namespace proxygen::coro::test {
 // ErrorSource is a source that throws an exception in the middle of the
 // 'readBodyEvent' routine
 struct ErrorSource : public HTTPSourceFilter {
+
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestErrorSource";
+  }
   explicit ErrorSource(std::string body,
                        bool client,
                        uint32_t bytesTillTheError,
@@ -75,6 +79,9 @@ struct ErrorSource : public HTTPSourceFilter {
 /* OnEOMSource is a source filter that runs a user callback before EOM */
 class OnEOMSource : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestOnEOMSource";
+  }
   using CallbackReturn = folly::coro::Task<folly::Optional<HTTPError>>;
 
   OnEOMSource(HTTPSource* source, std::function<CallbackReturn()> eomCallback)
@@ -164,6 +171,9 @@ class TimeoutSource : public HTTPSource {
 
 class EchoBodySource : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestEchoBodySource";
+  }
   explicit EchoBodySource(HTTPSourceHolder requestSource,
                           uint16_t statusCode,
                           bool eom,
@@ -212,6 +222,9 @@ class EchoBodySource : public HTTPSourceFilter {
 
 class ByteEventFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestByteEvent";
+  }
   ByteEventFilter(
       uint8_t headerEvents,
       uint8_t bodyEvents,
@@ -314,6 +327,9 @@ class YieldExceptionSource : public HTTPSource {
  */
 class ChunkedBodySource : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "TestChunkedBodySource";
+  }
   ChunkedBodySource(std::string body, uint32_t chunkSize)
       : HTTPSourceFilter(
             HTTPFixedSource::makeFixedResponse(200, std::move(body))),

@@ -63,6 +63,9 @@ class HTTPRedirectHandler {
  private:
   class RequestFilter : public HTTPSourceFilter {
    public:
+    [[nodiscard]] std::string_view getFilterName() const noexcept override {
+      return "RedirectRequest";
+    }
     explicit RequestFilter(HTTPRedirectHandler& handler) : handler_(handler) {
     }
 
@@ -86,6 +89,9 @@ class HTTPRedirectHandler {
 
   class ResponseFilter : public HTTPSourceFilter {
    public:
+    [[nodiscard]] std::string_view getFilterName() const noexcept override {
+      return "RedirectResponse";
+    }
     explicit ResponseFilter(HTTPRedirectHandler& handler) : handler_(handler) {
     }
 

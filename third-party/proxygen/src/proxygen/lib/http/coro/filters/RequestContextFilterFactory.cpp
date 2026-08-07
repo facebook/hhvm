@@ -14,6 +14,9 @@ namespace proxygen::coro {
 namespace {
 class RequestContextFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "RequestContext";
+  }
   explicit RequestContextFilter(
       std::shared_ptr<folly::RequestContext> context) noexcept
       : context_{std::move(context)} {

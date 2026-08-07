@@ -158,6 +158,9 @@ class Logger {
 
   class Filter : public HTTPSourceFilter {
    public:
+    [[nodiscard]] std::string_view getFilterName() const noexcept override {
+      return "Logger";
+    }
     enum class Direction { REQUEST, RESPONSE };
     explicit Filter(Direction dir) : direction_(dir) {
       done = folly::coro::makePromiseContract<void>();

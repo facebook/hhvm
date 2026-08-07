@@ -20,6 +20,9 @@ namespace proxygen::coro {
  */
 class ExecutorSourceFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "ExecutorSource";
+  }
   static std::unique_ptr<HTTPSourceFilter> make(folly::EventBase* evb) {
     auto* executorSource = new ExecutorSourceFilter(*CHECK_NOTNULL(evb));
     executorSource->setHeapAllocated();

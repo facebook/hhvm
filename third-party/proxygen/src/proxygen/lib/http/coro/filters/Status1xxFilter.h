@@ -17,6 +17,9 @@ namespace proxygen::coro {
  */
 class Status1xxFilter : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Status1xx";
+  }
   /**
    * Read header event from underlying HTTPSource silently ignoring any 1xx
    * responses

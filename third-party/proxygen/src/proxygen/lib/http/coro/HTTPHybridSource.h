@@ -19,6 +19,9 @@ namespace proxygen::coro {
  */
 class HTTPHybridSource : public HTTPSourceFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "HybridSource";
+  }
   HTTPHybridSource(std::unique_ptr<HTTPMessage> headers, HTTPSource* source)
       : headerEvent_(std::move(headers), !source) {
     if (source) {

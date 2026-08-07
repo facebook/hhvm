@@ -22,6 +22,9 @@ namespace proxygen::coro {
  */
 class DecompressionEgressFilter : public MutateFilter {
  public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "DecompressionEgress";
+  }
   DecompressionEgressFilter(HTTPSource* source = nullptr);
 };
 
@@ -49,6 +52,11 @@ class DecompressionIngressFilter : public HTTPSourceFilter {
 
   folly::coro::Task<HTTPBodyEvent> readBodyEvent(
       uint32_t max = std::numeric_limits<uint32_t>::max()) override;
+
+  // Matches the non-coro DecompressionFilter's name.
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return "Decompression";
+  }
 
   static bool compressionSupported(HTTPMessage& msg);
 

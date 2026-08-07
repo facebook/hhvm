@@ -27,6 +27,8 @@
 
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/alloc.h"
+
 #include <algorithm>
 
 namespace HPHP::bespoke {
@@ -49,8 +51,8 @@ constexpr size_t kMinSizeBytes = 128;
 static_assert(sizeof(EmptyMonotypeDict) <= kMinSizeBytes);
 static_assert(kMinSizeBytes == kSizeIndex2Size[kMinSizeIndex]);
 
-std::aligned_storage<kMinSizeBytes, 16>::type s_emptyDict;
-std::aligned_storage<kMinSizeBytes, 16>::type s_emptyMarkedDict;
+EmptyMonotypeDict* s_emptyMonotypeDict;
+EmptyMonotypeDict* s_emptyMonotypeMarkedDict;
 
 const LayoutFunctions* emptyVtable() {
   static auto const result = fromArray<EmptyMonotypeDict>();
@@ -155,8 +157,7 @@ const EmptyMonotypeDict* EmptyMonotypeDict::As(const ArrayData* ad) {
   return As(const_cast<ArrayData*>(ad));
 }
 EmptyMonotypeDict* EmptyMonotypeDict::GetDict(bool legacy) {
-  auto const mem = legacy ? &s_emptyMarkedDict : &s_emptyDict;
-  return reinterpret_cast<EmptyMonotypeDict*>(mem);
+  return legacy ? s_emptyMonotypeMarkedDict : s_emptyMonotypeDict;
 }
 
 bool EmptyMonotypeDict::checkInvariants() const {
@@ -1615,11 +1616,12 @@ DATATYPES
 
   new EmptyMonotypeDictLayout();
 
-  auto const init = [&](EmptyMonotypeDict* ad, bool legacy) {
+  auto const create = [&](bool legacy) {
     // We use kMinSizeIndex in the header of EmptyMonotypeDicts so that they
     // can be used interchangeably with regular MonotypeDicts. This information
     // will never be used to compute capacity, as all EmptyMonotypeDicts are
     // static.
+    auto ad = static_cast<EmptyMonotypeDict*>(low_malloc(kMinSizeBytes));
     auto const aux = packSizeIndexAndAuxBits(
         kMinSizeIndex, legacy ? kLegacyArray : 0);
     ad->initHeader_16(HeaderKind::BespokeDict, StaticValue, aux);
@@ -1629,9 +1631,11 @@ DATATYPES
     auto const mad = reinterpret_cast<StringDict*>(ad);
     mad->initHash();
     assertx(mad->checkInvariants());
+    return ad;
   };
-  init(GetDict(false), false);
-  init(GetDict(true), true);
+
+  s_emptyMonotypeDict = create(false);
+  s_emptyMonotypeMarkedDict = create(true);
 }
 
 TopMonotypeDictLayout::TopMonotypeDictLayout(KeyTypes kt)

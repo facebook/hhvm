@@ -30,6 +30,7 @@
 
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/word-mem.h"
 
 namespace HPHP::bespoke {
@@ -68,10 +69,8 @@ alignas(64) constexpr uint32_t kSizeIndex2MonotypeVecCapacity[] = {
 
 namespace {
 
-using StaticVec = std::aligned_storage<kMinSizeBytes, 16>::type;
-
-StaticVec s_emptyMonotypeVec;
-StaticVec s_emptyMonotypeVecMarked;
+EmptyMonotypeVec* s_emptyMonotypeVec;
+EmptyMonotypeVec* s_emptyMonotypeMarkedVec;
 
 const LayoutFunctions* monotypeVecVtable() {
   static auto const result = fromArray<MonotypeVec>();
@@ -133,8 +132,7 @@ const EmptyMonotypeVec* EmptyMonotypeVec::As(const ArrayData* ad) {
 }
 
 EmptyMonotypeVec* EmptyMonotypeVec::GetVec(bool legacy) {
-  auto const src = legacy ? &s_emptyMonotypeVecMarked : &s_emptyMonotypeVec;
-  return reinterpret_cast<EmptyMonotypeVec*>(src);
+  return legacy ? s_emptyMonotypeMarkedVec : s_emptyMonotypeVec;
 }
 
 bool EmptyMonotypeVec::checkInvariants() const {
@@ -860,21 +858,23 @@ void MonotypeVec::InitializeLayouts() {
 
   new EmptyMonotypeVecLayout();
 
-  auto const init = [&](EmptyMonotypeVec* ead, bool legacy) {
+  auto const create = [&](bool legacy) {
     // For EmptyMonotypeVecs, we use the minimum size index so that MonotypeVec
     // functions can always safely read the size index. It will never be used
     // for capacity decisions in this case, as EmptyMonotypeVecs are always
     // static.
+    auto ead = static_cast<EmptyMonotypeVec*>(low_malloc(kMinSizeBytes));
     auto const aux = packSizeIndexAndAuxBits(
         kMinSizeIndex, legacy ? ArrayData::kLegacyArray : 0);
     ead->initHeader_16(HeaderKind::BespokeVec, StaticValue, aux);
     ead->m_size = 0;
     ead->setLayoutIndex(getEmptyLayoutIndex());
     assertx(ead->checkInvariants());
+    return ead;
   };
 
-  init(EmptyMonotypeVec::GetVec(false), false);
-  init(EmptyMonotypeVec::GetVec(true), true);
+  s_emptyMonotypeVec = create(false);
+  s_emptyMonotypeMarkedVec = create(true);
 }
 
 TopMonotypeVecLayout::TopMonotypeVecLayout()

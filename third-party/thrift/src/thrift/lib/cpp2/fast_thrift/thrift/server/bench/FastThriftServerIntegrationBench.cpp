@@ -447,7 +447,12 @@ void runRequestBench(
 
   for (uint32_t i = 0; i < iters; ++i) {
     fixture.injectFrame(std::move(requests[i]));
-    fixture.evb.loopOnce();
+    // injectFrame delivers the read inline, so the request is fully processed
+    // synchronously; loopOnce only flushes deferred callbacks (e.g. the
+    // per-stream pipeline's runInLoop teardown). Must be non-blocking —
+    // a fully-synchronous fixture leaves nothing on the loop, so a blocking
+    // loopOnce() would wait forever in epoll_wait.
+    fixture.evb.loopOnce(EVLOOP_NONBLOCK);
   }
 }
 
@@ -470,7 +475,12 @@ void runResponseBench(
 
   for (uint32_t i = 0; i < iters; ++i) {
     fixture.injectFrame(std::move(requests[i]));
-    fixture.evb.loopOnce();
+    // injectFrame delivers the read inline, so the request is fully processed
+    // synchronously; loopOnce only flushes deferred callbacks (e.g. the
+    // per-stream pipeline's runInLoop teardown). Must be non-blocking —
+    // a fully-synchronous fixture leaves nothing on the loop, so a blocking
+    // loopOnce() would wait forever in epoll_wait.
+    fixture.evb.loopOnce(EVLOOP_NONBLOCK);
     if (clearBetween) {
       fixture.testTransport->clearWrittenData();
     }

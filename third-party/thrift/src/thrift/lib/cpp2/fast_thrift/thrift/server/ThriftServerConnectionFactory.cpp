@@ -31,11 +31,13 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/handler/RocketMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerKeepAliveHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/handler/ThriftMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
@@ -182,6 +184,16 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
     TailAdapter* tailAdapter,
     boost::intrusive_ptr<ThriftConnContext> connContext) {
   auto* evb = socket->getEventBase();
+
+  // Accept runs on the IO thread that will own this connection, which is the
+  // thread holding the shard these counts belong in — both to look it up here
+  // and to increment it from the pipeline later.
+  ServerStatsShard* statsShard = nullptr;
+  if (config_.stats) {
+    DCHECK(evb->isInEventBaseThread());
+    statsShard = &config_.stats->currentThreadShard();
+  }
+
   auto transportHandler =
       transport::TransportHandler::create(std::move(socket));
 
@@ -208,7 +220,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
         transportAdapterPtr->setMetadataProtocol(p.metadataProtocol);
         return makeSetupResponseResult(
             std::move(setupMetadata), p.metadataProtocol);
-      });
+      },
+      statsShard);
   rocketConn.appAdapter->setPipeline(rocketPipeline.get());
   transportHandler->setPipeline(rocketPipeline.get());
 
@@ -250,6 +263,13 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       .setHead(transportAdapterPtr)
       .setTail(tailAdapter)
       .setAllocator(&conn.thriftAllocator);
+  // Sits closest to the head so it sees every message crossing the thrift
+  // layer, before any handler below can absorb or synthesize one.
+  if (statsShard != nullptr) {
+    thriftPipelineBuilder.template addNextDuplex<
+        ThriftMetricsHandler<Direction::Server, ServerStatsShard>>(
+        thrift_metrics_handler_tag, statsShard);
+  }
   DCHECK(!config_.enableRequestHeaders || config_.enableRequestContext)
       << "enableRequestHeaders requires enableRequestContext; the request "
          "headers handler is skipped while enableRequestContext is off";
@@ -315,16 +335,21 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
     transport::TransportHandler* transportHandler,
     rocket::server::RocketServerAppAdapter* appAdapter,
     rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-        onSetupComplete) {
-  return PipelineBuilder<
-             transport::TransportHandler,
-             rocket::server::RocketServerAppAdapter,
-             SimpleBufferAllocator>()
-      .setEventBase(evb)
-      .setHead(transportHandler)
-      .setTail(appAdapter)
-      .setAllocator(&rocketAllocator_)
-      .addState<rocket::RocketStreamContexts>()
+        onSetupComplete,
+    ServerStatsShard* FOLLY_NULLABLE statsShard) {
+  // addState rebinds: it returns a builder of an extended type and leaves the
+  // original moved-from, so the chain up to and including it must be bound
+  // here rather than continued on a pre-declared builder.
+  auto builder = PipelineBuilder<
+                     transport::TransportHandler,
+                     rocket::server::RocketServerAppAdapter,
+                     SimpleBufferAllocator>()
+                     .setEventBase(evb)
+                     .setHead(transportHandler)
+                     .setTail(appAdapter)
+                     .setAllocator(&rocketAllocator_)
+                     .addState<rocket::RocketStreamContexts>();
+  builder
       .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
           frame_length_parser_handler_tag)
       .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandler>(
@@ -347,8 +372,16 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
           rocket::server::handler::RocketServerRequestResponseHandler>(
           server_request_response_frame_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
-          server_stream_state_handler_tag)
-      .build();
+          server_stream_state_handler_tag);
+  // Sits closest to the tail, so inbound it counts frames that survived
+  // parsing/defragmentation and outbound it counts frames as the app emits
+  // them, before batching or fragmentation can change the frame count.
+  if (statsShard != nullptr) {
+    builder.addNextDuplex<
+        RocketMetricsHandler<Direction::Server, ServerStatsShard>>(
+        rocket_metrics_handler_tag, statsShard);
+  }
+  return builder.build();
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::server

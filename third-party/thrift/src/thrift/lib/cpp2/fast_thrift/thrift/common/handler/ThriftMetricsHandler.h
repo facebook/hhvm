@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <memory>
+#include <glog/logging.h>
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
@@ -46,8 +46,11 @@ class ThriftMetricsHandler {
   static_assert(FastThriftStatsConcept<Stats>);
 
  public:
-  explicit ThriftMetricsHandler(std::shared_ptr<Stats> stats)
-      : stats_(std::move(stats)) {}
+  // Borrowed for the handler's lifetime. The shard belongs to the server,
+  // which drains every connection before releasing it.
+  explicit ThriftMetricsHandler(Stats* stats) noexcept : stats_(stats) {
+    DCHECK(stats_ != nullptr);
+  }
 
   template <typename Context>
   void handlerAdded(Context& /*ctx*/) noexcept {}
@@ -64,6 +67,7 @@ class ThriftMetricsHandler {
   template <typename Context>
   [[nodiscard]] channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
+    DCHECK(stats_ != nullptr);
     stats_->thriftInbound.incrementValue(1);
     if constexpr (Dir == Direction::Server) {
       stats_->thriftActive.incrementValue(1);
@@ -75,6 +79,7 @@ class ThriftMetricsHandler {
 
   template <typename Context>
   void onException(Context& ctx, folly::exception_wrapper&& e) noexcept {
+    DCHECK(stats_ != nullptr);
     stats_->thriftErrors.incrementValue(1);
     ctx.fireException(std::move(e));
   }
@@ -82,6 +87,7 @@ class ThriftMetricsHandler {
   template <typename Context>
   [[nodiscard]] channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
+    DCHECK(stats_ != nullptr);
     stats_->thriftOutbound.incrementValue(1);
     if constexpr (Dir == Direction::Server) {
       stats_->thriftActive.incrementValue(-1);
@@ -98,7 +104,7 @@ class ThriftMetricsHandler {
   void onPipelineInactive(Context& /*ctx*/) noexcept {}
 
  private:
-  std::shared_ptr<Stats> stats_;
+  Stats* stats_;
 };
 
 } // namespace apache::thrift::fast_thrift

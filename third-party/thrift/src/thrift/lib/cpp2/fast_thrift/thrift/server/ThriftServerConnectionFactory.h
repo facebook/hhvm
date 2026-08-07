@@ -23,11 +23,13 @@
 #include <vector>
 
 #include <boost/intrusive_ptr.hpp>
+#include <folly/CppAttributes.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/common/ServerStats.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
@@ -102,6 +104,13 @@ struct ThriftServerConnectionFactoryConfig {
   // order — first registered sits closest to the head, last registered sits
   // immediately above the tail app adapter.
   std::vector<ThriftPipelineHandlerFactory> thriftPipelineHandlerFactories;
+
+  // When set, insert RocketMetricsHandler / ThriftMetricsHandler into the
+  // rocket and thrift pipelines, counting messages and errors at each layer
+  // into the accepting IO thread's shard. Null leaves both handlers out
+  // entirely, so a server without stats pays nothing for them.
+  //
+  std::shared_ptr<ServerStats> stats;
 };
 
 /**
@@ -133,12 +142,15 @@ class ThriftServerConnectionFactory {
   // Builds the rocket pipeline (TransportHandler ... RocketServerAppAdapter).
   // Same shape as the legacy FastThriftServer::buildRocketPipeline; lives
   // here because the factory owns the shared rocket allocator.
+  // `statsShard` is null when config_.stats is unset, in which case no
+  // metrics handler is added.
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
       transport::TransportHandler* transportHandler,
       rocket::server::RocketServerAppAdapter* appAdapter,
       rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-          onSetupComplete);
+          onSetupComplete,
+      ServerStatsShard* FOLLY_NULLABLE statsShard);
 
   ThriftServerConnection buildSimpleConnection(
       folly::AsyncTransport::UniquePtr socket,

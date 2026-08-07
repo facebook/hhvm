@@ -96,6 +96,15 @@ void FastThriftServer::setDebugInterface(
   auxInterfaces_.debugHandler = std::move(handler);
 }
 
+void FastThriftServer::setStats(std::shared_ptr<ServerStats> stats) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setStats must be called before start()/serve()";
+  CHECK(stats) << "FastThriftServer::setStats requires non-null stats";
+  CHECK(!stats_) << "FastThriftServer::setStats called more than once";
+  stats_ = std::move(stats);
+}
+
 void FastThriftServer::addNativeThriftPipelineHandlers(
     std::vector<server::ThriftPipelineHandlerFactory> factories) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
@@ -139,7 +148,6 @@ void FastThriftServer::addModule(FastServerModule module) {
   // not leave the name permanently reserved against a retry.
   moduleNames_.insert(std::move(name));
 }
-
 void FastThriftServer::setOnConnectionAccepted(OnConnectionAcceptedFn cb) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
@@ -326,6 +334,7 @@ void FastThriftServer::start() {
       .drainTimeout = config_.drainTimeout,
       .reapTimeout = config_.reapTimeout,
       .thriftPipelineHandlerFactories = thriftPipelineHandlerFactories_,
+      .stats = stats_,
   };
   std::function<void(server::ThriftServerConnection&)> onAccept;
   if (onConnectionAccepted_) {

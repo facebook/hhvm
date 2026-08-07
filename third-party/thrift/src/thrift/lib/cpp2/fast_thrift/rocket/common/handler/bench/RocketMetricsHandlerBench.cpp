@@ -57,7 +57,7 @@ BENCHMARK(Baseline_DirectFireRead, n) {
 
 BENCHMARK_RELATIVE(RocketMetricsHandler_OnRead, n) {
   auto stats = std::make_shared<BenchStats>();
-  RocketMetricsHandler<Direction::Server, BenchStats> handler(std::move(stats));
+  RocketMetricsHandler<Direction::Server, BenchStats> handler(stats.get());
   BenchContext ctx;
   for (unsigned i = 0; i < n; ++i) {
     TypeErasedBox box(uint64_t{42});
@@ -77,7 +77,7 @@ BENCHMARK(Baseline_DirectFireWrite, n) {
 
 BENCHMARK_RELATIVE(RocketMetricsHandler_OnWrite, n) {
   auto stats = std::make_shared<BenchStats>();
-  RocketMetricsHandler<Direction::Server, BenchStats> handler(std::move(stats));
+  RocketMetricsHandler<Direction::Server, BenchStats> handler(stats.get());
   BenchContext ctx;
   for (unsigned i = 0; i < n; ++i) {
     TypeErasedBox box(uint64_t{42});
@@ -89,7 +89,7 @@ BENCHMARK_DRAW_LINE();
 
 BENCHMARK(RocketMetricsHandler_FullCycle, n) {
   auto stats = std::make_shared<BenchStats>();
-  RocketMetricsHandler<Direction::Server, BenchStats> handler(std::move(stats));
+  RocketMetricsHandler<Direction::Server, BenchStats> handler(stats.get());
   BenchContext ctx;
   for (unsigned i = 0; i < n; ++i) {
     TypeErasedBox readBox(uint64_t{42});

@@ -29,6 +29,7 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/synchronization/Baton.h>
 
+#include <thrift/lib/cpp2/fast_thrift/common/ServerStats.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
@@ -133,6 +134,23 @@ class FastThriftServer {
       std::shared_ptr<fast_thrift::DebugServerInterface> handler);
 
   /**
+   * Attach server counters. Wires the rocket- and thrift-layer metrics
+   * handlers into every connection built after this point; leaving it unset
+   * omits both handlers, so a server without stats pays nothing. Must be
+   * called before start()/serve().
+   *
+   * Counters are sharded per EventBase and readable only from the owning
+   * EventBase thread (see ServerStats). To publish them to fb303, hand the
+   * same instance to a FastThriftStatsPublisher.
+   */
+  void setStats(std::shared_ptr<ServerStats> stats);
+
+  /// The counters attached via setStats, or nullptr if none were.
+  const std::shared_ptr<ServerStats>& getStats() const noexcept {
+    return stats_;
+  }
+
+  /**
    * Register raw ("native") embedder handlers to splice into the thrift
    * pipeline of every accepted connection. The handlers are inserted after all
    * built-in thrift handlers, immediately above the tail app adapter: the first
@@ -157,7 +175,6 @@ class FastThriftServer {
    * start()/serve().
    */
   void addModule(FastServerModule module);
-
   /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees
@@ -274,6 +291,19 @@ class FastThriftServer {
   bool isRunning() const noexcept { return state_ == State::kRunning; }
 
   /**
+   * The IO pool backing this server, or nullptr before start() unless the
+   * embedder supplied one via setIOThreadPool (start() materializes the
+   * default pool otherwise).
+   *
+   * Exposed so a consumer of the server's per-EventBase state — chiefly
+   * FastThriftStatsPublisher — can enumerate the EventBases it must hop onto.
+   */
+  const std::shared_ptr<folly::IOThreadPoolExecutorBase>& getIOThreadPool()
+      const noexcept {
+    return ioThreadPool_;
+  }
+
+  /**
    * Returns the cached ThriftServiceMetadataResponse if
    * config.enableMetadataService was set and the server has been start()ed,
    * else nullptr. Read-only handle suitable for sharing — the response is
@@ -329,6 +359,9 @@ class FastThriftServer {
       thriftPipelineHandlerFactories_;
   // Names of registered modules, for duplicate detection in addModule.
   folly::F14FastSet<std::string> moduleNames_;
+  // Per-EventBase server counters, or null when the embedder never called
+  // setStats — in which case no metrics handler is built into any pipeline.
+  std::shared_ptr<ServerStats> stats_;
   // Cached ThriftServiceMetadataResponse for the user's service. Built once
   // at start() when config_.enableMetadataService is set; null otherwise.
   // Shared across every per-connection MetadataAppAdapter.

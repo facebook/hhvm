@@ -19,6 +19,8 @@
 #include <concepts>
 #include <cstdint>
 
+#include <folly/lang/Align.h>
+
 namespace apache::thrift::fast_thrift {
 
 // Direction of the pipeline — determines which callback increments/decrements
@@ -68,5 +70,39 @@ struct NoStats {
   NoOpCounter thriftErrors;
   NoOpCounter thriftActive;
 };
+
+// Counter with a single writer thread.
+//
+// Increments are plain adds rather than atomic ones. That is only sound
+// because of how ServerStatsShard below is handed out: a shard reaches a
+// pipeline only via the EventBase that owns it, so exactly one thread ever
+// writes it. Reads are subject to the same restriction — see ServerStats.h.
+struct PlainCounter {
+  void incrementValue(int64_t delta) noexcept { value_ += delta; }
+  int64_t value() const noexcept { return value_; }
+
+ private:
+  int64_t value_{0};
+};
+
+// Per-EventBase block of the server's counters.
+//
+// Aligned so that two shards never share a cache line. Shards are separately
+// heap-allocated and could otherwise land adjacent, which would reintroduce
+// exactly the cross-core interference that the single-writer design exists to
+// avoid — the counters carry no atomics, so that interference would buy
+// nothing in return.
+struct alignas(folly::hardware_destructive_interference_size) ServerStatsShard {
+  PlainCounter rocketInbound;
+  PlainCounter rocketOutbound;
+  PlainCounter rocketErrors;
+  PlainCounter rocketActive;
+  PlainCounter thriftInbound;
+  PlainCounter thriftOutbound;
+  PlainCounter thriftErrors;
+  PlainCounter thriftActive;
+};
+
+static_assert(FastThriftStatsConcept<ServerStatsShard>);
 
 } // namespace apache::thrift::fast_thrift

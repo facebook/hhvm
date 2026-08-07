@@ -46,7 +46,7 @@ class ThriftMetricsHandlerTest : public ::testing::Test {
     stats_ = std::make_shared<MockStats>();
     handler_ =
         std::make_unique<ThriftMetricsHandler<Direction::Server, MockStats>>(
-            stats_);
+            stats_.get());
   }
 
   std::shared_ptr<MockStats> stats_;
@@ -161,7 +161,7 @@ class ThriftMetricsHandlerClientTest : public ::testing::Test {
     stats_ = std::make_shared<MockStats>();
     handler_ =
         std::make_unique<ThriftMetricsHandler<Direction::Client, MockStats>>(
-            stats_);
+            stats_.get());
   }
 
   std::shared_ptr<MockStats> stats_;

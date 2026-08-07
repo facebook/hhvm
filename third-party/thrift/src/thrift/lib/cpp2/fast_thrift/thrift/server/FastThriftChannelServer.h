@@ -140,6 +140,13 @@ struct FastThriftServerConfig {
  * incrementally during pipeline wiring before returning.
  */
 struct ThriftServerChannelConnection {
+  // Per-connection metrics counters, when the server is templated on a real
+  // Stats. Declared first so it is destroyed last: the metrics handlers in
+  // both pipelines reference it and are torn down with those pipelines.
+  // Type-erased because this struct is not templated, and held by pointer so
+  // the counters keep their address across the moves this struct undergoes on
+  // its way out of the factory.
+  std::shared_ptr<void> stats;
   // Tail of the thrift pipeline; outlives the pipeline because the
   // pipeline holds a raw pointer to it.
   std::shared_ptr<ThriftServerChannel> serverChannel;
@@ -317,7 +324,7 @@ class FastThriftServerT {
       rocket::server::RocketServerAppAdapter* appAdapter,
       rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
           onSetupComplete,
-      std::shared_ptr<Stats> stats);
+      Stats* stats);
 
   const FastThriftServerConfig config_;
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> processorFactory_;
@@ -441,7 +448,8 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
   rocketConn->transportHandler =
       transport::TransportHandler::create(std::move(socket));
 
-  // Per-connection stats (when enabled).
+  // Per-connection stats (when enabled). Ownership moves to the connection
+  // below; the metrics handlers only reference it.
   std::shared_ptr<Stats> stats;
   if constexpr (kStatsEnabled) {
     stats = std::make_shared<Stats>();
@@ -465,7 +473,7 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
         return makeSetupResponseResult(
             std::move(setupMetadata), p.metadataProtocol);
       },
-      stats);
+      stats.get());
   rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
   rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
 
@@ -484,6 +492,8 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
           std::move(rocketConn));
 
   ThriftServerChannelConnection conn;
+  // Copied, not moved: the thrift pipeline below still references `stats`.
+  conn.stats = stats;
   conn.serverChannel = serverChannel;
 
   if constexpr (kStatsEnabled) {
@@ -498,7 +508,7 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
             .setAllocator(&conn.thriftAllocator)
             .template addNextDuplex<
                 ThriftMetricsHandler<Direction::Server, Stats>>(
-                thrift_metrics_handler_tag, stats)
+                thrift_metrics_handler_tag, stats.get())
             .build();
   } else {
     conn.thriftPipeline = channel_pipeline::PipelineBuilder<
@@ -551,7 +561,7 @@ FastThriftServerT<Stats>::buildRocketPipeline(
     rocket::server::RocketServerAppAdapter* appAdapter,
     rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
         onSetupComplete,
-    std::shared_ptr<Stats> stats) {
+    Stats* stats) {
   if constexpr (kStatsEnabled) {
     return channel_pipeline::PipelineBuilder<
                transport::TransportHandler,
@@ -588,7 +598,7 @@ FastThriftServerT<Stats>::buildRocketPipeline(
             rocket::server::handler::RocketServerRequestResponseHandler>(
             server_request_response_frame_handler_tag)
         .template addNextDuplex<RocketMetricsHandler<Direction::Server, Stats>>(
-            rocket_metrics_handler_tag, std::move(stats))
+            rocket_metrics_handler_tag, stats)
         .build();
   } else {
     return channel_pipeline::PipelineBuilder<

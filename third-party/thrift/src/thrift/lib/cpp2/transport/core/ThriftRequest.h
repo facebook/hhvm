@@ -103,7 +103,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
   bool isActive() const final { return stateMachine_.isActive(); }
 
-  bool tryCancel() { return stateMachine_.tryTerminate(getEventBase()); }
+  bool tryTerminate() { return stateMachine_.tryTerminate(getEventBase()); }
 
   RpcKind kind() const { return kind_; }
 
@@ -175,7 +175,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       StreamServerCallbackPtr stream,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -199,7 +199,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       apache::thrift::detail::ServerStreamFactory&& stream,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -222,7 +222,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       apache::thrift::detail::ServerSinkFactory&& consumerImpl,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -246,7 +246,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       SinkServerCallbackPtr callback,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -273,7 +273,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       detail::ServerBiDiStreamFactory&& bidiStreamFactory,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -297,7 +297,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response,
       BiDiServerCallbackPtr callback,
       folly::Optional<uint32_t> crc32c) final {
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
@@ -354,7 +354,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
     // AppClientException or AppServerException is the default value UNKNOWN. So
     // we can simply pass down the excetpion `ew`, no need to re-create a
     // TApplicationException object here.
-    if (tryCancel()) {
+    if (tryTerminate()) {
       cancelTimeout();
       sendErrorWrappedInternal(
           std::move(ew),
@@ -368,7 +368,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
       ResponsePayload&& response, MessageChannel::SendCallback* cb) final;
 
   void sendQueueTimeoutResponse(bool interactionIsTerminated = false) final {
-    if (tryCancel() && !isOneway()) {
+    if (tryTerminate() && !isOneway()) {
       // once queue timeout is fired, there's no need for task timeout.
       // Also queue timeout is always <= task timeout,
       // so it makes sense to cancel both queue timeout and task timeout
@@ -729,7 +729,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
         : request(requestP), serverConfigs(serverConfigsP) {}
 
     void timeoutExpired() noexcept override {
-      if (request.tryCancel() && !request.isOneway()) {
+      if (request.tryTerminate() && !request.isOneway()) {
         if (auto* observer = serverConfigs.getObserver()) {
           observer->taskTimeout();
         }

@@ -828,7 +828,7 @@ void Cpp2Connection::Cpp2Request::sendReply(
     ResponsePayload&& response,
     MessageChannel::SendCallback* sendCallback,
     folly::Optional<uint32_t>) {
-  if (tryCancel()) {
+  if (tryTerminate()) {
     connection_->setServerHeaders(*req_);
     markProcessEnd();
     auto* server = connection_->getWorker()->getServer();
@@ -864,7 +864,7 @@ void Cpp2Connection::Cpp2Request::sendReply(
 
 void Cpp2Connection::Cpp2Request::sendException(
     ResponsePayload&& response, MessageChannel::SendCallback* sendCallback) {
-  if (tryCancel()) {
+  if (tryTerminate()) {
     connection_->setServerHeaders(*req_);
     markProcessEnd();
     auto* observer = connection_->getWorker()->getServer()->getObserver();
@@ -892,7 +892,7 @@ void Cpp2Connection::Cpp2Request::sendException(
 
 void Cpp2Connection::Cpp2Request::sendErrorWrapped(
     folly::exception_wrapper ew, std::string exCode) {
-  if (tryCancel()) {
+  if (tryTerminate()) {
     connection_->setServerHeaders(*req_);
     markProcessEnd();
     auto* observer = connection_->getWorker()->getServer()->getObserver();
@@ -908,7 +908,7 @@ void Cpp2Connection::Cpp2Request::sendErrorWrapped(
 
 void Cpp2Connection::Cpp2Request::sendTimeoutResponse(
     HeaderServerChannel::HeaderRequest::TimeoutResponseType responseType) {
-  if (!tryCancel()) {
+  if (!tryTerminate()) {
     // Timeout was not properly cancelled when request was previously
     // cancelled
     DCHECK(false);
@@ -970,7 +970,7 @@ Cpp2Connection::Cpp2Request::~Cpp2Request() {
 }
 
 void Cpp2Connection::Cpp2Request::cancelRequest() {
-  if (tryCancel()) {
+  if (tryTerminate()) {
     cancelTimeout();
   }
 }

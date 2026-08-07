@@ -141,7 +141,7 @@ template <typename T>
 using detect_key_compare = typename T::key_compare;
 
 template <typename T>
-constexpr bool map_emplace_hint_is_invocable_v = folly::is_invocable_v<
+constexpr bool map_emplace_hint_is_invocable_v = std::is_invocable_v<
     emplace_hint_invoker,
     T,
     typename T::iterator,
@@ -149,7 +149,7 @@ constexpr bool map_emplace_hint_is_invocable_v = folly::is_invocable_v<
     typename T::mapped_type>;
 
 template <typename T>
-constexpr bool set_emplace_hint_is_invocable_v = folly::is_invocable_v<
+constexpr bool set_emplace_hint_is_invocable_v = std::is_invocable_v<
     emplace_hint_invoker,
     T,
     typename T::iterator,

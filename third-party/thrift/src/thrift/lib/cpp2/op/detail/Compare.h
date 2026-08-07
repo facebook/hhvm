@@ -22,6 +22,7 @@
 #include <concepts>
 #include <functional>
 #include <memory>
+#include <type_traits>
 #include <unordered_map>
 
 #include <folly/CPortability.h>
@@ -353,7 +354,7 @@ struct MapLessThan {
 template <typename T, typename E>
 struct LessThan<type::cpp_type<T, type::list<E>>>
     : std::conditional_t<
-          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           ListLessThan<T, E>> {};
 
@@ -385,14 +386,14 @@ struct LessThan<type::list<VTag>> {
 template <typename T, typename E>
 struct LessThan<type::cpp_type<T, type::set<E>>>
     : std::conditional_t<
-          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           SetLessThan<T, E>> {};
 
 template <typename T, typename K, typename V>
 struct LessThan<type::cpp_type<T, type::map<K, V>>>
     : std::conditional_t<
-          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           MapLessThan<T, K, V>> {};
 
@@ -401,7 +402,7 @@ struct LessThan<type::map<K, V>> {
   using map_type = type::native_type<type::map<K, V>>;
 
   bool operator()(const map_type& x, const map_type& y) const {
-    if constexpr (folly::is_invocable_v<
+    if constexpr (std::is_invocable_v<
                       std::less<>,
                       const map_type&,
                       const map_type&>) {
@@ -553,11 +554,11 @@ struct IdenticalTo<type::cpp_type<T, type::map<KTag, VTag>>>
 template <typename T, typename KTag, typename VTag>
 struct EqualTo<type::cpp_type<T, type::map<KTag, VTag>>>
     : std::conditional_t<
-          folly::is_invocable_v<
+          std::is_invocable_v<
               std::equal_to<>,
               const type::native_type<KTag>&,
               const type::native_type<KTag>&> &&
-              folly::is_invocable_v<
+              std::is_invocable_v<
                   std::equal_to<>,
                   const type::native_type<VTag>&,
                   const type::native_type<VTag>&>,
@@ -592,7 +593,7 @@ struct CompareThreeWay<type::cpp_type<T, type::list<E>>, DefaultComparePolicy> {
   std::partial_ordering operator()(const T& l, const T& r) const {
     // Preserve existing `LessThan` behavior for custom C++ containers: prefer
     // their native ordering when present under the default policy.
-    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+    if constexpr (std::is_invocable_v<std::less<>, const T&, const T&>) {
       return DefaultCompareThreeWay<type::cpp_type<T, type::list<E>>>{}(l, r);
     } else {
       return compareLists<T, E>(l, r);
@@ -628,7 +629,7 @@ struct CompareThreeWay<type::cpp_type<T, type::set<E>>, DefaultComparePolicy> {
   std::partial_ordering operator()(const T& l, const T& r) const {
     // Preserve existing `LessThan` behavior for custom C++ containers: prefer
     // their native ordering when present under the default policy.
-    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+    if constexpr (std::is_invocable_v<std::less<>, const T&, const T&>) {
       return DefaultCompareThreeWay<type::cpp_type<T, type::set<E>>>{}(l, r);
     } else {
       return compareSets<T, E>(l, r);
@@ -652,7 +653,7 @@ struct CompareThreeWay<type::map<K, V>, DefaultComparePolicy> {
   std::partial_ordering operator()(const map_type& l, const map_type& r) const {
     // Preserve existing `LessThan` behavior for maps: prefer native ordering
     // when present under the default policy.
-    if constexpr (folly::is_invocable_v<
+    if constexpr (std::is_invocable_v<
                       std::less<>,
                       const map_type&,
                       const map_type&>) {
@@ -681,7 +682,7 @@ struct CompareThreeWay<
   std::partial_ordering operator()(const T& l, const T& r) const {
     // Preserve existing `LessThan` behavior for custom C++ containers: prefer
     // their native ordering when present under the default policy.
-    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+    if constexpr (std::is_invocable_v<std::less<>, const T&, const T&>) {
       return DefaultCompareThreeWay<type::cpp_type<T, type::map<K, V>>>{}(l, r);
     } else {
       return compareMaps<T, K, V>(l, r);
@@ -698,7 +699,7 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
   constexpr bool operator()(const T& lhs, const T& rhs) const {
     if constexpr (adapt_detail::is_equal_adapter_v<Adapter, T>) {
       return Adapter::equal(lhs, rhs);
-    } else if constexpr (folly::is_invocable_v<
+    } else if constexpr (std::is_invocable_v<
                              std::equal_to<>,
                              const T&,
                              const T&>) {
@@ -732,8 +733,7 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>, ComparePolicy> {
       const T& lhs, const T& rhs) {
     if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
       return compareWithAdapterLess(lhs, rhs);
-    } else if constexpr (folly::
-                             is_invocable_v<std::less<>, const T&, const T&>) {
+    } else if constexpr (std::is_invocable_v<std::less<>, const T&, const T&>) {
       return compareWithNativeLess(lhs, rhs);
     } else {
       return compareThrift(lhs, rhs);
@@ -755,7 +755,7 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>, ComparePolicy> {
   template <typename T>
   static constexpr std::partial_ordering compareWithNativeLess(
       const T& lhs, const T& rhs) {
-    if constexpr (folly::is_invocable_v<std::equal_to<>, const T&, const T&>) {
+    if constexpr (std::is_invocable_v<std::equal_to<>, const T&, const T&>) {
       return DefaultCompareThreeWay<adapted_tag, T>{}(lhs, rhs);
     } else {
       const auto& thriftLhs = Adapter::toThrift(lhs);

@@ -216,6 +216,7 @@ class t_hack_generator : public t_concat_generator {
         option_is_specified(options, "__service_metadata_full_name");
     union_logger_rollout_ =
         option_is_specified(options, "__union_logger_rollout");
+    final_structs_ = option_is_specified(options, "__final_structs");
 
     auto [_, ns_type_] = get_namespace(program_);
     has_hack_namespace_ = ns_type_ == HackThriftNamespaceType::HACK ||
@@ -437,7 +438,8 @@ class t_hack_generator : public t_concat_generator {
       const t_structured* tstruct,
       ThriftStructType type,
       const std::string& struct_hack_name_with_ns);
-  void generate_php_struct_withDefaultValues_method(std::ofstream& out);
+  void generate_php_struct_withDefaultValues_method(
+      std::ofstream& out, const t_structured* tstruct);
 
   void generate_php_struct_clear_terse_fields(
       std::ofstream& out,
@@ -513,7 +515,9 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_name_with_ns,
       ThriftAsyncStructCreationMethod method_type);
   void generate_php_struct_async_struct_creation_method_header(
-      std::ofstream& out, ThriftAsyncStructCreationMethod method_type);
+      std::ofstream& out,
+      const t_structured* tstruct,
+      ThriftAsyncStructCreationMethod method_type);
   void generate_php_struct_async_struct_creation_method_footer(
       std::ofstream& out);
   void generate_php_struct_async_struct_creation_method_field_assignment(
@@ -1109,6 +1113,37 @@ class t_hack_generator : public t_concat_generator {
         kHackGenerateClientMethodsWithHeaders);
   }
 
+  bool allows_inheritance(const t_structured* tstruct) const {
+    return tstruct->has_structured_annotation(
+        kHackMigrationBlockingAllowInheritance);
+  }
+
+  /**
+   * Whether to emit `final` on this struct's class. Traits can't be final, and
+   * structs that opt into inheritance keep it, getting `__NeedsConcrete`
+   * factories instead.
+   */
+  bool should_generate_final_struct(const t_structured* tstruct) const {
+    return final_structs_ && !has_hack_struct_as_trait(tstruct) &&
+        !allows_inheritance(tstruct);
+  }
+
+  /**
+   * Late-static-binding factories need `__NeedsConcrete` exactly when the class
+   * stays open: `new static()` is otherwise unsafe, and Hack rejects the
+   * attribute on a final class (Needs_concrete_in_final_class).
+   */
+  bool should_generate_needs_concrete(const t_structured* tstruct) const {
+    return final_structs_ && !should_generate_final_struct(tstruct);
+  }
+
+  void emit_needs_concrete_attribute(
+      std::ofstream& out, const t_structured* tstruct) {
+    if (should_generate_needs_concrete(tstruct)) {
+      indent(out) << "<<__NeedsConcrete>>\n";
+    }
+  }
+
   bool has_hack_fixme_wrong_type(
       const t_field& field, const t_structured* parent_struct) const {
     if (field.has_structured_annotation(kHackFixmeWrongTypeUri)) {
@@ -1518,6 +1553,14 @@ class t_hack_generator : public t_concat_generator {
    * in service metadata
    */
   bool service_metadata_full_name_;
+
+  /**
+   * Control rollout of `final` on generated structs. Structs opting out via
+   * MigrationBlockingAllowInheritance get `__NeedsConcrete` on their
+   * late-static-binding factories instead; the two are mutually exclusive in
+   * Hack.
+   */
+  bool final_structs_;
 
   bool has_hack_namespace_;
 
@@ -4034,6 +4077,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
   const std::string shape_method_context =
       uses_object_key_containers ? "[write_props]" : "[]";
 
+  emit_needs_concrete_attribute(out, tstruct);
   indent(out) << "public static function __fromShape(self::TShape $shape)"
               << shape_method_context << ": this {\n";
   indent_up();
@@ -4852,7 +4896,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     const std::string& struct_hack_name_with_ns) {
   generate_php_struct_stringifyMapKeys_method(out);
   generate_php_struct_async_struct_creation_method_header(
-      out, ThriftAsyncStructCreationMethod::FROM_SHAPE);
+      out, tstruct, ThriftAsyncStructCreationMethod::FROM_SHAPE);
   t_name_generator namer;
   for (const auto& field : tstruct->fields()) {
     if (skip_codegen(&field)) {
@@ -5656,7 +5700,7 @@ void t_hack_generator::generate_php_struct_methods(
   if (is_async_struct) {
     generate_php_struct_default_constructor(
         out, tstruct, type, struct_hack_name_with_ns);
-    generate_php_struct_withDefaultValues_method(out);
+    generate_php_struct_withDefaultValues_method(out, tstruct);
     generate_php_struct_async_struct_creation_method(
         out,
         tstruct,
@@ -5674,7 +5718,7 @@ void t_hack_generator::generate_php_struct_methods(
   } else {
     generate_php_struct_constructor(
         out, tstruct, type, struct_hack_name_with_ns);
-    generate_php_struct_withDefaultValues_method(out);
+    generate_php_struct_withDefaultValues_method(out, tstruct);
     generate_php_struct_from_shape(out, tstruct);
     out << "\n";
 
@@ -5985,7 +6029,8 @@ void t_hack_generator::generate_php_struct_constructor(
 }
 
 void t_hack_generator::generate_php_struct_withDefaultValues_method(
-    std::ofstream& out) {
+    std::ofstream& out, const t_structured* tstruct) {
+  emit_needs_concrete_attribute(out, tstruct);
   indent(out) << "public static function withDefaultValues()[]: this {\n";
   indent_up();
   indent(out) << "return new static();\n";
@@ -6512,6 +6557,9 @@ void t_hack_generator::_generate_php_struct_definition(
     struct_hack_decl = hack_name(name, program, true);
   }
 
+  if (should_generate_final_struct(tstruct)) {
+    out << "final ";
+  }
   out << (generateAsTrait ? "trait " : "class ") << struct_hack_decl;
 
   if (generateAsTrait) {
@@ -6642,6 +6690,7 @@ void t_hack_generator::_generate_php_struct_definition(
 
 void t_hack_generator::generate_php_struct_from_shape(
     std::ofstream& out, const t_structured* tstruct) {
+  emit_needs_concrete_attribute(out, tstruct);
   out << indent() << "public static function fromShape"
       << "(self::TConstructorShape $shape)[]: this {\n";
   indent_up();
@@ -6662,6 +6711,7 @@ void t_hack_generator::generate_php_struct_from_shape(
 
 void t_hack_generator::generate_php_struct_from_map(
     std::ofstream& out, const t_structured* tstruct) {
+  emit_needs_concrete_attribute(out, tstruct);
   out << indent() << "public static function fromMap_DEPRECATED(";
   if (strict_types_) {
     // Generate constructor from Map
@@ -6747,7 +6797,10 @@ void t_hack_generator::_generate_args(
 }
 
 void t_hack_generator::generate_php_struct_async_struct_creation_method_header(
-    std::ofstream& out, ThriftAsyncStructCreationMethod method_type) {
+    std::ofstream& out,
+    const t_structured* tstruct,
+    ThriftAsyncStructCreationMethod method_type) {
+  emit_needs_concrete_attribute(out, tstruct);
   indent(out) << "public static async function ";
   switch (method_type) {
     case ThriftAsyncStructCreationMethod::FROM_MAP:
@@ -6881,7 +6934,8 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
     const t_structured* tstruct,
     const std::string& struct_hack_name_with_ns,
     ThriftAsyncStructCreationMethod method_type) {
-  generate_php_struct_async_struct_creation_method_header(out, method_type);
+  generate_php_struct_async_struct_creation_method_header(
+      out, tstruct, method_type);
   std::string idx_prefix = "Shapes::idx($shape, '";
   if (method_type == ThriftAsyncStructCreationMethod::FROM_MAP) {
     idx_prefix = "idx($map, '";

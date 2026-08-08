@@ -87,7 +87,7 @@ class FinalStructsServiceClient extends \ThriftClientBase implements FinalStruct
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class FinalStructsService_getStruct_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+final class FinalStructsService_getStruct_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -186,7 +186,7 @@ class FinalStructsService_getStruct_args implements \IThriftSyncStruct, \IThrift
 
 }
 
-class FinalStructsService_getStruct_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+final class FinalStructsService_getStruct_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = \test\fixtures\hack_final_structs\FinalStruct;

@@ -13,7 +13,7 @@ namespace test\fixtures\hack_final_structs;
  * FinalStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/hack_final_structs/FinalStruct'))>>
-class FinalStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+final class FinalStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -213,10 +213,12 @@ class OpenStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     $this->entries = $entries;
   }
 
+  <<__NeedsConcrete>>
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'value'),
@@ -285,6 +287,7 @@ class OpenStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     );
   }
 
+  <<__NeedsConcrete>>
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['value'],
@@ -315,7 +318,7 @@ enum FinalUnionEnum: int {
  * FinalUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/hack_final_structs/FinalUnion'))>>
-class FinalUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\hack_final_structs\FinalUnionEnum>, \IThriftShapishSyncStruct {
+final class FinalUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\hack_final_structs\FinalUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -575,10 +578,12 @@ class OpenUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     }
   }
 
+  <<__NeedsConcrete>>
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'str_value'),
@@ -699,6 +704,7 @@ class OpenUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     );
   }
 
+  <<__NeedsConcrete>>
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'str_value'),
@@ -723,7 +729,7 @@ class OpenUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
  * FinalException
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/hack_final_structs/FinalException'))>>
-class FinalException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
+final class FinalException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -835,10 +841,12 @@ class OpenException extends \TException implements \IThriftSyncStruct, \IThriftE
     $this->message = $message ?? '';
   }
 
+  <<__NeedsConcrete>>
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'message'),
@@ -920,10 +928,12 @@ trait StructAsTraitCannotBeFinalTrait implements \IThriftSyncStruct, \IThriftStr
     $this->value = $value ?? '';
   }
 
+  <<__NeedsConcrete>>
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'value'),
@@ -966,6 +976,7 @@ trait StructAsTraitCannotBeFinalTrait implements \IThriftSyncStruct, \IThriftStr
     );
   }
 
+  <<__NeedsConcrete>>
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['value'],
@@ -1019,10 +1030,12 @@ class OpenStructWithOtherAttributes implements \IThriftSyncStruct, \IThriftStruc
     $this->value = $value ?? '';
   }
 
+  <<__NeedsConcrete>>
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'value'),
@@ -1072,6 +1085,7 @@ class OpenStructWithOtherAttributes implements \IThriftSyncStruct, \IThriftStruc
     );
   }
 
+  <<__NeedsConcrete>>
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['value'],

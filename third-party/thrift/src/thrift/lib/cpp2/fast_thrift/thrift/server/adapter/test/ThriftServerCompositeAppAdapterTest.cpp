@@ -292,7 +292,10 @@ TEST_F(ThriftServerCompositeAppAdapterTest, RoutesByMethodNameToOwningChild) {
   // userMethod → user
   auto userMsg = makeRequestMessage(1, "userMethod");
   EXPECT_EQ(
-      composite->onRead(erase_and_box(std::move(userMsg))), Result::Success);
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(userMsg))),
+      Result::Success);
   EXPECT_EQ(userChild->dispatchedTo, "user");
   EXPECT_EQ(userChild->capturedStreamId, 1u);
   EXPECT_EQ(monitoringChild->dispatchedTo, "")
@@ -301,7 +304,10 @@ TEST_F(ThriftServerCompositeAppAdapterTest, RoutesByMethodNameToOwningChild) {
   // getStatus → monitoring
   auto monMsg = makeRequestMessage(3, "getStatus");
   EXPECT_EQ(
-      composite->onRead(erase_and_box(std::move(monMsg))), Result::Success);
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(monMsg))),
+      Result::Success);
   EXPECT_EQ(monitoringChild->dispatchedTo, "monitoring");
   EXPECT_EQ(monitoringChild->capturedStreamId, 3u);
   // Symmetric cross-pollination check: monitoring's request must not have
@@ -330,7 +336,11 @@ TEST_F(ThriftServerCompositeAppAdapterTest, UserWinsOnMethodNameConflict) {
   auto built = buildPipeline(composite.get());
 
   auto msg = makeRequestMessage(7, "ping");
-  EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Success);
+  EXPECT_EQ(
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(msg))),
+      Result::Success);
 
   EXPECT_EQ(userChild->dispatchedTo, "user");
   EXPECT_EQ(monitoringChild->dispatchedTo, "");
@@ -365,7 +375,11 @@ TEST_F(ThriftServerCompositeAppAdapterTest, UnknownMethodEmitsFrameworkError) {
       });
 
   auto msg = makeRequestMessage(1, "neitherChildHasThis");
-  EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Success);
+  EXPECT_EQ(
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(msg))),
+      Result::Success);
 
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(
@@ -509,7 +523,11 @@ TEST_F(ThriftServerCompositeAppAdapterTest, RejectsUnsupportedRpcKind) {
       "streamingMethod",
       apache::thrift::ProtocolId::BINARY,
       apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE);
-  EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Success);
+  EXPECT_EQ(
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(msg))),
+      Result::Success);
 
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(
@@ -591,13 +609,19 @@ TEST_F(
 
   auto userMsg = makeRequestMessage(1, "userMethod");
   EXPECT_EQ(
-      composite->onRead(erase_and_box(std::move(userMsg))), Result::Success);
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(userMsg))),
+      Result::Success);
   EXPECT_EQ(userChild->dispatchedTo, "user");
   EXPECT_EQ(otherChild->dispatchedTo, "");
 
   auto otherMsg = makeRequestMessage(3, "otherMethod");
   EXPECT_EQ(
-      composite->onRead(erase_and_box(std::move(otherMsg))), Result::Success);
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(otherMsg))),
+      Result::Success);
   EXPECT_EQ(otherChild->dispatchedTo, "other");
   EXPECT_EQ(otherChild->capturedStreamId, 3u);
 }
@@ -656,7 +680,11 @@ TEST_F(
   // fire a framework error through the pipeline; with no pipeline it must
   // surface Result::Error instead of crashing.
   auto msg = makeRequestMessage(1, "nobodyOwnsThis");
-  EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Error);
+  EXPECT_EQ(
+      composite->onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(std::move(msg))),
+      Result::Error);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

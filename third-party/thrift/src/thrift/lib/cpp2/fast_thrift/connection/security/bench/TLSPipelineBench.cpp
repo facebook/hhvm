@@ -64,7 +64,9 @@ namespace {
 
 class NoopHead {
  public:
-  channel_pipeline::Result onWrite(channel_pipeline::TypeErasedBox&&) noexcept {
+  channel_pipeline::Result onWrite(
+      channel_pipeline::detail::ContextImpl&,
+      channel_pipeline::TypeErasedBox&&) noexcept {
     return channel_pipeline::Result::Success;
   }
   void onReadReady() noexcept {}
@@ -80,6 +82,7 @@ class CapturingTail {
   explicit CapturingTail(OnRead onRead) noexcept : onRead_(std::move(onRead)) {}
 
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto m = msg.take<conn::ConnectionMessage>();
     if (onRead_) {

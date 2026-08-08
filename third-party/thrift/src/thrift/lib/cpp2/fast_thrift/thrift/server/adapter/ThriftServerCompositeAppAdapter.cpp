@@ -46,6 +46,7 @@ void ThriftServerCompositeAppAdapter::setCloseCallback(
 }
 
 channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
+    channel_pipeline::detail::ContextImpl& ctx,
     channel_pipeline::TypeErasedBox&& msg) noexcept {
   // Peek (not take) so we can forward the original box to the chosen child
   // unchanged — child does its own take<> on the same message.
@@ -64,7 +65,7 @@ channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
   if (FOLLY_UNLIKELY(it == methodMap_.end())) {
     return writeUnknownMethodError(request.streamId, methodName);
   }
-  return it->second.invoke(it->second.owner, std::move(msg));
+  return it->second.invoke(it->second.owner, ctx, std::move(msg));
 }
 
 void ThriftServerCompositeAppAdapter::onException(

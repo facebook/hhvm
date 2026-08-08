@@ -97,6 +97,7 @@ class ThriftServerChannel {
   // === TailEndpointHandler interface ===
   // Called by the pipeline when a request message arrives
   apache::thrift::fast_thrift::channel_pipeline::Result onRead(
+      apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept;
 

@@ -82,7 +82,8 @@ TEST(RocketServerAppAdapterTest, OnReadDelegatesToCallback) {
   auto box = channel_pipeline::erase_and_box(
       rocket::server::RocketRequestMessage{.frame = {}, .streamId = 1});
 
-  auto result = adapter->onRead(std::move(box));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), std::move(box));
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(requestCount, 1);
 }
@@ -107,7 +108,8 @@ TEST(RocketServerAppAdapterTest, OnReadWithoutCallbackReturnsError) {
 
   auto box =
       channel_pipeline::erase_and_box(rocket::server::RocketRequestMessage{});
-  auto result = adapter->onRead(std::move(box));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), std::move(box));
   EXPECT_EQ(result, Result::Error);
 }
 

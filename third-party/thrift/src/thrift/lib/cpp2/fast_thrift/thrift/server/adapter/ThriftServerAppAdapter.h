@@ -113,6 +113,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // === TailEndpointHandler interface ===
 
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept;
 
   void onException(folly::exception_wrapper&& e) noexcept;

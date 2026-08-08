@@ -81,7 +81,8 @@ class TcpClient::AppAdapter {
    * Called by the pipeline when a response message is received.
    * Looks up the pending request and fulfills its promise.
    */
-  Result onRead(TypeErasedBox&& msg) noexcept {
+  Result onRead(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&& msg) noexcept {
     auto iobuf = std::move(msg).take<std::unique_ptr<folly::IOBuf>>();
 
     // Complete the oldest pending request

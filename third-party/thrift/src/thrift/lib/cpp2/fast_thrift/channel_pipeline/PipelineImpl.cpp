@@ -82,6 +82,8 @@ PipelineImpl::PipelineImpl(
     std::uint32_t eventCount) noexcept
     : eventBase_(eventBase),
       handlers_(std::move(handlers)),
+      headCtx_(this, eventBase, allocator, handlers_.size(), 0),
+      tailCtx_(this, eventBase, allocator, handlers_.size(), 0),
       headHandler_(headHandler),
       tailHandler_(tailHandler),
       allocator_(allocator),
@@ -152,6 +154,16 @@ void PipelineImpl::initializeContexts() noexcept {
     lastHandler_ = handlers_[N - 1].handlerPtr;
     lastCtx_ = &contexts_[N - 1];
   }
+
+  headCtx_.nextReadFn_ = firstReadFn_ ? firstReadFn_ : &tailHandlerReadFn;
+  headCtx_.nextExceptionFn_ =
+      firstExceptionFn_ ? firstExceptionFn_ : &tailHandlerExceptionFn;
+  headCtx_.nextHandler_ = firstHandler_ ? firstHandler_ : this;
+  headCtx_.nextCtx_ = firstCtx_ ? firstCtx_ : &tailCtx_;
+
+  tailCtx_.prevWriteFn_ = lastWriteFn_ ? lastWriteFn_ : &headHandlerWriteFn;
+  tailCtx_.prevHandler_ = lastHandler_ ? lastHandler_ : this;
+  tailCtx_.prevCtx_ = lastCtx_ ? lastCtx_ : &headCtx_;
 
   // Per-event hooks are linked later by linkEventLists(), after the builder has
   // wired the endpoints (endpoints subscribe too). See build().
@@ -241,9 +253,11 @@ void PipelineImpl::callHandlerAdded() noexcept {
 }
 
 void PipelineImpl::propagatePipelineState() noexcept {
+  headCtx_.pipelineState_ = pipelineState_;
   for (auto& ctx : contexts_) {
     ctx.pipelineState_ = pipelineState_;
   }
+  tailCtx_.pipelineState_ = pipelineState_;
 }
 
 void PipelineImpl::callHandlerRemovedImpl() noexcept {
@@ -441,14 +455,14 @@ Result PipelineImpl::fireReadToTailHandler(TypeErasedBox&& msg) noexcept {
   if (!tailOnReadFn_ || !tailHandler_) {
     return Result::Error;
   }
-  return tailOnReadFn_(tailHandler_, std::move(msg));
+  return tailOnReadFn_(tailHandler_, tailCtx_, std::move(msg));
 }
 
 Result PipelineImpl::fireWriteToHeadHandler(TypeErasedBox&& msg) noexcept {
   if (!headOnWriteFn_ || !headHandler_) {
     return Result::Error;
   }
-  return headOnWriteFn_(headHandler_, std::move(msg));
+  return headOnWriteFn_(headHandler_, headCtx_, std::move(msg));
 }
 
 void PipelineImpl::fireExceptionToTailHandler(

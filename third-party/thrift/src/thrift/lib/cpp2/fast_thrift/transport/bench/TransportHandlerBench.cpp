@@ -118,7 +118,11 @@ class BenchEndpointHandler {
   BenchEndpointHandler() = default;
 
   // TailEndpointHandler interface
-  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onRead(
+      apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+      TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
 
   void onException(folly::exception_wrapper&&) noexcept {}
 
@@ -180,6 +184,8 @@ BENCHMARK(Write_TransportHandler_Small, iters) {
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
     auto result = handler->onWrite(
+        apache::thrift::fast_thrift::channel_pipeline::test::
+            inertEndpointContext(),
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);
@@ -201,6 +207,8 @@ BENCHMARK(Write_TransportHandler_Medium, iters) {
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
     auto result = handler->onWrite(
+        apache::thrift::fast_thrift::channel_pipeline::test::
+            inertEndpointContext(),
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);
@@ -222,6 +230,8 @@ BENCHMARK(Write_TransportHandler_Large, iters) {
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
     auto result = handler->onWrite(
+        apache::thrift::fast_thrift::channel_pipeline::test::
+            inertEndpointContext(),
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);

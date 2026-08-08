@@ -79,7 +79,9 @@ class EventCapturingAppHandler {
  public:
   using Result = cp::Result;
 
-  Result onRead(cp::TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onRead(cp::detail::ContextImpl&, cp::TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
   void onException(folly::exception_wrapper&&) noexcept {}
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}

@@ -227,7 +227,10 @@ namespace {
 // Thrift-pipeline tail that subscribes to the WriteComplete event and records
 // the relayed payload — models the consumer the bridge fires toward.
 struct WriteCompleteCapturingTail {
-  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onRead(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
   void onException(folly::exception_wrapper&&) noexcept {}
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}

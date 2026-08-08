@@ -125,6 +125,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   // === TailEndpointHandler interface ===
 
   apache::thrift::fast_thrift::channel_pipeline::Result onRead(
+      apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept;
 

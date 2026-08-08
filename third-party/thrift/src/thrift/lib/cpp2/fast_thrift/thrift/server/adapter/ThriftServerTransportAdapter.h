@@ -189,6 +189,7 @@ class ThriftServerTransportAdapter {
    * here (e.g., via RpcKindMapping::toFrameType).
    */
   channel_pipeline::Result onWrite(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
     rocket::server::RocketResponseMessage rocketMsg{

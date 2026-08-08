@@ -649,6 +649,36 @@ TEST_F(PipelineImplTest, EmptyPipelineFireWriteGoesToTransport) {
   EXPECT_EQ(transport_.writeCount(), 1);
 }
 
+TEST_F(PipelineImplTest, EmptyPipelineEndpointsReceiveStableContexts) {
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(&transport_)
+          .setTail(&app_)
+          .setAllocator(&allocator_)
+          .build();
+
+  EXPECT_EQ(pipeline->fireRead(TypeErasedBox(1)), Result::Success);
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::copyBuffer("first"))),
+      Result::Success);
+
+  auto* tailCtx = app_.lastReadContext();
+  auto* headCtx = transport_.lastWriteContext();
+  ASSERT_NE(tailCtx, nullptr);
+  ASSERT_NE(headCtx, nullptr);
+  EXPECT_NE(tailCtx, headCtx);
+  EXPECT_EQ(tailCtx->pipeline(), pipeline.get());
+  EXPECT_EQ(headCtx->pipeline(), pipeline.get());
+
+  EXPECT_EQ(pipeline->fireRead(TypeErasedBox(2)), Result::Success);
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::copyBuffer("second"))),
+      Result::Success);
+  EXPECT_EQ(app_.lastReadContext(), tailCtx);
+  EXPECT_EQ(transport_.lastWriteContext(), headCtx);
+}
+
 // ==================== Inbound-Only / Outbound-Only Handler Tests
 // ====================
 
@@ -1154,7 +1184,9 @@ TEST(EndpointLifecycleTest, HeadHookCalledOnActivateDeactivate) {
     LifecycleHead(int* a, int* d) : activated_(a), deactivated_(d) {}
 
     // HeadEndpointHandler data method
-    Result onWrite(TypeErasedBox&&) noexcept { return Result::Success; }
+    Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
+      return Result::Success;
+    }
 
     // EndpointHandlerLifecycle methods
     void handlerAdded() noexcept {}

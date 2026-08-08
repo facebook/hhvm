@@ -284,7 +284,8 @@ class PipelineImpl : public folly::DelayedDestruction {
    * Returns nullptr if handler doesn't have a hook.
    */
   WriteReadyHook* handlerWriteReadyHook(size_t index) noexcept {
-    return handlers_[index].writeReadyHook_;
+    return index < handlers_.size() ? handlers_[index].writeReadyHook_
+                                    : nullptr;
   }
 
   /**
@@ -297,7 +298,7 @@ class PipelineImpl : public folly::DelayedDestruction {
    * Returns nullptr if handler doesn't have a hook.
    */
   ReadReadyHook* handlerReadReadyHook(size_t index) noexcept {
-    return handlers_[index].readReadyHook_;
+    return index < handlers_.size() ? handlers_[index].readReadyHook_ : nullptr;
   }
 
   /**
@@ -370,6 +371,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   folly::EventBase* eventBase_;
   std::vector<detail::HandlerNode> handlers_;
   std::vector<detail::ContextImpl> contexts_;
+  detail::ContextImpl headCtx_;
+  detail::ContextImpl tailCtx_;
 
   // Type-erased endpoint adapters
   void* headHandler_; // HeadHandler*
@@ -377,7 +380,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   void* allocator_; // BufferAllocator*
 
   // Tail handler callbacks
-  Result (*tailOnReadFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
+  Result (*tailOnReadFn_)(
+      void*, detail::ContextImpl&, TypeErasedBox&&) noexcept {nullptr};
   void (*tailOnExceptionFn_)(void*, folly::exception_wrapper&&) noexcept {
       nullptr};
   void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
@@ -396,7 +400,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   void (*tailHandlerRemovedFn_)(void*) noexcept {nullptr};
 
   // Head handler callbacks
-  Result (*headOnWriteFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
+  Result (*headOnWriteFn_)(
+      void*, detail::ContextImpl&, TypeErasedBox&&) noexcept {nullptr};
   void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
   // User-event subscription for the head endpoint (see
   // EndpointEventSubscriber).

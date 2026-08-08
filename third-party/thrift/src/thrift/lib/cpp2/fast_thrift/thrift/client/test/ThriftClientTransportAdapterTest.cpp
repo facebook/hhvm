@@ -163,7 +163,8 @@ struct AdapterWithRocketPipeline {
 TEST(ThriftClientTransportAdapterTest, OnWriteConvertsAndWritesToRocket) {
   AdapterWithRocketPipeline fixture;
 
-  auto result = fixture.adapter->onWrite(makeThriftRequestBox());
+  auto result = fixture.adapter->onWrite(
+      channel_pipeline::test::inertEndpointContext(), makeThriftRequestBox());
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(fixture.rocketHead.writeCount(), 1);
 }
@@ -177,7 +178,8 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
     return Result::Success;
   });
 
-  auto result = fixture.adapter->onWrite(makeThriftRequestBox());
+  auto result = fixture.adapter->onWrite(
+      channel_pipeline::test::inertEndpointContext(), makeThriftRequestBox());
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::RocketRequestMessage>();
@@ -229,7 +231,8 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
   auto responseBox = makeRocketResponseBox(
       reinterpret_cast<void*>(0x42), frame::FrameType::REQUEST_RESPONSE);
-  auto result = appAdapter->onRead(std::move(responseBox));
+  auto result = appAdapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), std::move(responseBox));
   EXPECT_EQ(result, Result::Success);
 
   EXPECT_EQ(thriftTail.readCount(), 1);
@@ -286,7 +289,8 @@ TEST(
   // channel stays Open (no fireException).
   auto errorBox = makeRocketErrorResponseBox(
       folly::make_exception_wrapper<std::runtime_error>("serialize boom"));
-  auto result = appAdapter->onRead(std::move(errorBox));
+  auto result = appAdapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), std::move(errorBox));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(thriftTail.readCount(), 1);
@@ -508,7 +512,10 @@ namespace {
 // Thrift-pipeline tail that subscribes to the WriteComplete event and records
 // the relayed payload — models the consumer the bridge fires toward.
 struct WriteCompleteCapturingTail {
-  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onRead(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
   void onException(folly::exception_wrapper&&) noexcept {}
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}

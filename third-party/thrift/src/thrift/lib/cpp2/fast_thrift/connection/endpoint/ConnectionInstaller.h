@@ -70,10 +70,10 @@ class ConnectionInstaller : public folly::DelayedDestruction {
     pipelineGuard_.reset();
   }
 
-  // === TailEndpointHandler — no-arg lifecycle / one-arg onRead/onException
-  // per EndpointAdapter's concept ===
+  // === TailEndpointHandler ===
 
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     registerConnection_(msg.take<Conn>());
     return channel_pipeline::Result::Success;

@@ -89,6 +89,7 @@ void ThriftServerAppAdapter::fireCloseCallback() noexcept {
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::onRead(
+    channel_pipeline::detail::ContextImpl&,
     channel_pipeline::TypeErasedBox&& msg) noexcept {
   auto request = msg.take<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";

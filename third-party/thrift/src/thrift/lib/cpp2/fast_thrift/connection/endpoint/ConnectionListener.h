@@ -164,10 +164,11 @@ class ConnectionListener : public folly::DelayedDestruction,
     stopGuard_.reset();
   }
 
-  // === HeadEndpointHandler — no-arg lifecycle / one-arg onWrite per
-  // EndpointAdapter's concept ===
+  // === HeadEndpointHandler ===
 
-  channel_pipeline::Result onWrite(channel_pipeline::TypeErasedBox&&) noexcept {
+  channel_pipeline::Result onWrite(
+      channel_pipeline::detail::ContextImpl&,
+      channel_pipeline::TypeErasedBox&&) noexcept {
     // Acceptance pipeline is one-way; outbound writes are an error.
     return channel_pipeline::Result::Error;
   }

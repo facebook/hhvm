@@ -20,6 +20,10 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
+namespace apache::thrift::fast_thrift::channel_pipeline::detail {
+class ContextImpl;
+}
+
 namespace apache::thrift::fast_thrift::rocket::server {
 
 /**
@@ -31,9 +35,12 @@ namespace apache::thrift::fast_thrift::rocket::server {
  */
 template <typename H>
 concept RocketServerAppInboundHandler = requires(
-    H h, channel_pipeline::TypeErasedBox&& msg, folly::exception_wrapper&& e) {
+    H h,
+    channel_pipeline::detail::ContextImpl& ctx,
+    channel_pipeline::TypeErasedBox&& msg,
+    folly::exception_wrapper&& e) {
   {
-    h.onRead(std::move(msg))
+    h.onRead(ctx, std::move(msg))
   } noexcept -> std::same_as<channel_pipeline::Result>;
   { h.onException(std::move(e)) } noexcept -> std::same_as<void>;
 };

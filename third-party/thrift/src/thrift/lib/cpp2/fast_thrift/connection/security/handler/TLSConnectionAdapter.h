@@ -83,6 +83,7 @@ class TLSConnectionAdapter {
 
   // Read-exit: the resolved transport returns here. Hand it back to the owner.
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto resolved = msg.take<TLSResponseMessage>();
     DCHECK(onResolved_);

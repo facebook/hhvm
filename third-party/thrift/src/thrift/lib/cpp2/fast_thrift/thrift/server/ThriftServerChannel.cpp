@@ -285,6 +285,7 @@ void ThriftServerChannel::setWorker(
 
 apache::thrift::fast_thrift::channel_pipeline::Result
 ThriftServerChannel::onRead(
+    apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
     apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
         msg) noexcept {
   auto request = msg.take<ThriftServerRequestMessage>();

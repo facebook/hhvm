@@ -270,7 +270,7 @@ struct BenchTransportHandler {
   uint64_t write_count{0};
   uint64_t exception_count{0};
 
-  Result onWrite(TypeErasedBox&&) noexcept {
+  Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
     ++write_count;
     return Result::Success;
   }
@@ -292,7 +292,7 @@ struct BenchAppHandler {
   uint64_t read_count{0};
   uint64_t exception_count{0};
 
-  Result onRead(TypeErasedBox&&) noexcept {
+  Result onRead(detail::ContextImpl&, TypeErasedBox&&) noexcept {
     ++read_count;
     return Result::Success;
   }

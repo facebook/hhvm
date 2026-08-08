@@ -290,7 +290,10 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
 
   ThriftServerResponseMessage drive(ThriftServerRequestMessage&& msg) {
     captureCount_ = 0;
-    auto result = adapter_->onRead(erase_and_box(std::move(msg)));
+    auto result = adapter_->onRead(
+        apache::thrift::fast_thrift::channel_pipeline::test::
+            inertEndpointContext(),
+        erase_and_box(std::move(msg)));
     EXPECT_EQ(result, Result::Success);
     EXPECT_EQ(captureCount_, 1);
     return std::move(captured_);

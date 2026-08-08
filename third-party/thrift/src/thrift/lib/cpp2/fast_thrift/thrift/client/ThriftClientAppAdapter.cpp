@@ -63,6 +63,7 @@ void ThriftClientAppAdapter::sendRequestResponse(
 
 apache::thrift::fast_thrift::channel_pipeline::Result
 ThriftClientAppAdapter::onRead(
+    apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
     apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
         msg) noexcept {
   auto response = msg.take<ThriftResponseMessage>();

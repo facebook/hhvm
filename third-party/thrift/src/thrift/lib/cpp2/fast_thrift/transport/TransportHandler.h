@@ -185,7 +185,8 @@ class TransportHandlerT : public folly::DelayedDestruction,
 
   // --- TailEndpointHandler interface (OutboundTransportHandler refines) ---
 
-  Result onWrite(TypeErasedBox&& msg) noexcept {
+  Result onWrite(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&& msg) noexcept {
     folly::DelayedDestruction::DestructorGuard dg(this);
     auto bytes = std::move(msg.template get<BytesPtr>());
     DCHECK(bytes);

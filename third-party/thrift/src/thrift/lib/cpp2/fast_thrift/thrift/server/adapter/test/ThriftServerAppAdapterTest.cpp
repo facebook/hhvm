@@ -273,7 +273,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadDispatchesToRegisteredHandler) {
   auto built = buildPipeline(adapter.get());
 
   auto msg = makeRequestMessage(1, "testMethod");
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(adapter->handlerCalled);
@@ -302,7 +304,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnknownMethodSendsErrorResponse) {
       });
 
   auto msg = makeRequestMessage(1, "nonExistentMethod");
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unknown method";
@@ -328,7 +332,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
   auto built = buildPipeline(adapter.get());
 
   auto msg = makeRequestMessage(1, "testMethod");
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(adapter->capturedProtocol, apache::thrift::ProtocolId::BINARY);
@@ -354,7 +360,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadForwardsRequestContextToHandler) {
   auto* stampedContext = new ThriftRequestContext();
   msg.requestContext.reset(stampedContext);
 
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(adapter->capturedRequestContext, stampedContext);
@@ -386,13 +394,19 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
   auto built = buildPipeline(adapter.get());
 
   auto msg1 = makeRequestMessage(1, "method1");
-  std::ignore = adapter->onRead(erase_and_box(std::move(msg1)));
+  std::ignore = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg1)));
 
   auto msg2 = makeRequestMessage(3, "method2");
-  std::ignore = adapter->onRead(erase_and_box(std::move(msg2)));
+  std::ignore = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg2)));
 
   auto msg3 = makeRequestMessage(5, "method1");
-  std::ignore = adapter->onRead(erase_and_box(std::move(msg3)));
+  std::ignore = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg3)));
 
   EXPECT_EQ(adapter->method1Count, 2);
   EXPECT_EQ(adapter->method2Count, 1);
@@ -565,7 +579,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnsupportedFrameSendsErrorResponse) {
 
   // FNF frame is not REQUEST_RESPONSE, so should trigger error response
   auto msg = makeFnfRequestMessage(1, "testMethod");
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unsupported "
@@ -743,7 +759,9 @@ TEST_F(
 
   // Streaming RPC kind in a REQUEST_RESPONSE frame should be rejected
   auto msg = makeStreamingRequestMessage(1, "testMethod");
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled)

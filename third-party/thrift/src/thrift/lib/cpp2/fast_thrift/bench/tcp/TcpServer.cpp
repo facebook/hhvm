@@ -59,7 +59,8 @@ class TcpServer::ServerAppAdapter {
    * Called by the pipeline when a message reaches the application layer.
    * Immediately echoes the message back.
    */
-  Result onRead(TypeErasedBox&& msg) noexcept {
+  Result onRead(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&& msg) noexcept {
     if (!pipeline_) {
       XLOG(ERR) << "ServerAppAdapter::onRead called with null pipeline";
       return Result::Error;

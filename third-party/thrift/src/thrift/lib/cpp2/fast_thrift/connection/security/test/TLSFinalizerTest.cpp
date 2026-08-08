@@ -58,6 +58,7 @@ class CapturingTail {
   explicit CapturingTail(OnRead onRead) noexcept : onRead_(std::move(onRead)) {}
 
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto m = msg.take<TLSResponseMessage>();
     if (onRead_) {

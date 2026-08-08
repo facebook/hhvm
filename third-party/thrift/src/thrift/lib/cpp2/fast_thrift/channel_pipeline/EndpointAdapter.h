@@ -21,6 +21,10 @@
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
 
+namespace detail {
+class ContextImpl;
+}
+
 /**
  * EndpointHandlerLifecycle concept — base lifecycle methods for all endpoint
  * handlers.
@@ -50,14 +54,15 @@ concept EndpointHandlerLifecycle = requires(H h) {
  * onReadReady() to the head so the transport can resume reads.
  *
  * Required methods:
- * - onWrite(TypeErasedBox&&): Handle data exiting the pipeline
+ * - onWrite(detail::ContextImpl&, TypeErasedBox&&): Handle data exiting the
+ * pipeline
  * - onReadReady(): Handle read-ready notification (resume transport reads)
  * - Plus all EndpointHandlerLifecycle methods
  */
 template <typename H>
-concept HeadEndpointHandler =
-    EndpointHandlerLifecycle<H> && requires(H h, TypeErasedBox&& msg) {
-      { h.onWrite(std::move(msg)) } noexcept -> std::same_as<Result>;
+concept HeadEndpointHandler = EndpointHandlerLifecycle<H> &&
+    requires(H h, detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+      { h.onWrite(ctx, std::move(msg)) } noexcept -> std::same_as<Result>;
       { h.onReadReady() } noexcept -> std::same_as<void>;
     };
 
@@ -72,15 +77,19 @@ concept HeadEndpointHandler =
  * to the tail so the app can produce more outbound messages.
  *
  * Required methods:
- * - onRead(TypeErasedBox&&): Handle data entering the pipeline
+ * - onRead(detail::ContextImpl&, TypeErasedBox&&): Handle data entering the
+ * pipeline
  * - onException(exception_wrapper&&): Handle pipeline exceptions
  * - onWriteReady(): Handle write-ready notification (resume producing writes)
  * - Plus all EndpointHandlerLifecycle methods
  */
 template <typename T>
 concept TailEndpointHandler = EndpointHandlerLifecycle<T> &&
-    requires(T t, TypeErasedBox&& msg, folly::exception_wrapper&& ex) {
-      { t.onRead(std::move(msg)) } noexcept -> std::same_as<Result>;
+    requires(T t,
+             detail::ContextImpl& ctx,
+             TypeErasedBox&& msg,
+             folly::exception_wrapper&& ex) {
+      { t.onRead(ctx, std::move(msg)) } noexcept -> std::same_as<Result>;
       { t.onException(std::move(ex)) } noexcept -> std::same_as<void>;
       { t.onWriteReady() } noexcept -> std::same_as<void>;
     };

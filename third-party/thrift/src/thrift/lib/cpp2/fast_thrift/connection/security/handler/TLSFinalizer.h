@@ -57,6 +57,7 @@ class TLSFinalizer {
   // Collapse the request down to a response and turn it around onto the read
   // path so it returns to the tail adapter.
   channel_pipeline::Result onWrite(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {
       return channel_pipeline::Result::Error;

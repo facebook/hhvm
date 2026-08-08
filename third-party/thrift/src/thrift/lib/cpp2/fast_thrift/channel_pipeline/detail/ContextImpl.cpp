@@ -39,7 +39,11 @@ void ContextImpl::activate() noexcept {
 }
 
 void ContextImpl::deactivate() noexcept {
-  pipeline_->deactivateFromIndex(handlerIndex_);
+  if (handlerIndex_ < pipeline_->handlerCount()) {
+    pipeline_->deactivateFromIndex(handlerIndex_);
+  } else {
+    pipeline_->deactivate();
+  }
 }
 
 void ContextImpl::fireEvent(

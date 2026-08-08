@@ -65,7 +65,8 @@ class TestClientAppAdapter {
     lastException_ = std::move(ew);
   }
 
-  Result onRead(TypeErasedBox&& msg) noexcept {
+  Result onRead(
+      channel_pipeline::detail::ContextImpl&, TypeErasedBox&& msg) noexcept {
     std::lock_guard lock(responsesMutex_);
     responseCount_++;
     responses_.push_back(std::move(msg));

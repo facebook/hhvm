@@ -95,6 +95,7 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
 
   // === TailEndpointHandler ===
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept;
   void onException(folly::exception_wrapper&& e) noexcept;
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
@@ -141,8 +142,10 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   //   - kLifecycleVTable<T> : pipeline -> child wiring + lifecycle fan-out
   template <typename T>
   static channel_pipeline::Result invokeOnRead(
-      void* p, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    return static_cast<T*>(p)->onRead(std::move(msg));
+      void* p,
+      channel_pipeline::detail::ContextImpl& ctx,
+      channel_pipeline::TypeErasedBox&& msg) noexcept {
+    return static_cast<T*>(p)->onRead(ctx, std::move(msg));
   }
 
   struct LifecycleVTable {
@@ -179,7 +182,9 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   struct Entry {
     void* owner;
     channel_pipeline::Result (*invoke)(
-        void*, channel_pipeline::TypeErasedBox&&) noexcept;
+        void*,
+        channel_pipeline::detail::ContextImpl&,
+        channel_pipeline::TypeErasedBox&&) noexcept;
   };
   struct ChildHook {
     void* owner;

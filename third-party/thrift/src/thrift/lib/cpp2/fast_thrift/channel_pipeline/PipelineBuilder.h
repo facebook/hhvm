@@ -373,9 +373,11 @@ class PipelineBuilder {
       // finalized (the same stability point nextCtx_/prevCtx_ rely on).
       // Handlers then receive a stable TypedContext<StateTuple>& in every
       // callback, including lifecycle.
+      detail::initTypedView<StateTuple>(pipeline->headCtx_);
       for (auto& ctx : pipeline->contexts_) {
         detail::initTypedView<StateTuple>(ctx);
       }
+      detail::initTypedView<StateTuple>(pipeline->tailCtx_);
     }
 
     pipeline->callHandlerAdded();
@@ -400,8 +402,9 @@ class PipelineBuilder {
 
   void wireHeadHandler(PipelineImpl* pipeline) {
     pipeline->headOnWriteFn_ = [](void* h,
+                                  detail::ContextImpl& ctx,
                                   TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<HeadHandler*>(h)->onWrite(std::move(msg));
+      return static_cast<HeadHandler*>(h)->onWrite(ctx, std::move(msg));
     };
     pipeline->headOnReadReadyFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onReadReady();
@@ -435,8 +438,9 @@ class PipelineBuilder {
 
   void wireTailHandler(PipelineImpl* pipeline) {
     pipeline->tailOnReadFn_ = [](void* h,
+                                 detail::ContextImpl& ctx,
                                  TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<TailHandler*>(h)->onRead(std::move(msg));
+      return static_cast<TailHandler*>(h)->onRead(ctx, std::move(msg));
     };
     pipeline->tailOnExceptionFn_ = [](void* h,
                                       folly::exception_wrapper&& e) noexcept {

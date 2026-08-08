@@ -137,7 +137,8 @@ struct AdapterWithRocketPipeline {
 TEST(ThriftServerTransportAdapterTest, OnWriteConvertsAndWritesToRocket) {
   AdapterWithRocketPipeline fixture;
 
-  auto result = fixture.adapter->onWrite(makeThriftResponseBox());
+  auto result = fixture.adapter->onWrite(
+      channel_pipeline::test::inertEndpointContext(), makeThriftResponseBox());
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(fixture.rocketHead.writeCount(), 1);
 }
@@ -151,7 +152,9 @@ TEST(ThriftServerTransportAdapterTest, OnWriteConvertsResponseFields) {
     return Result::Success;
   });
 
-  auto result = fixture.adapter->onWrite(makeThriftResponseBox(42));
+  auto result = fixture.adapter->onWrite(
+      channel_pipeline::test::inertEndpointContext(),
+      makeThriftResponseBox(42));
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::server::RocketResponseMessage>();
@@ -182,7 +185,8 @@ TEST(ThriftServerTransportAdapterTest, InboundRequestConvertedToThrift) {
   fixture.adapter->setPipeline(thriftPipeline.get());
 
   auto requestBox = makeRocketRequestBox(7);
-  auto result = fixture.appAdapter->onRead(std::move(requestBox));
+  auto result = fixture.appAdapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), std::move(requestBox));
   EXPECT_EQ(result, Result::Success);
 
   EXPECT_EQ(thriftTail.readCount(), 1);

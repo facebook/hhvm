@@ -19,11 +19,20 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 
 #include <functional>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::channel_pipeline::test {
+
+// Only use for callbacks that do not access the null pipeline or retain
+// mutable context state; this instance is shared across all callers.
+inline detail::ContextImpl& inertEndpointContext() noexcept {
+  /* library-local */ static detail::ContextImpl context(
+      nullptr, nullptr, nullptr, 0, 0);
+  return context;
+}
 
 /**
  * MockHeadHandler satisfies HeadEndpointHandler concept.
@@ -39,7 +48,8 @@ class MockHeadHandler {
   MockHeadHandler() = default;
 
   // HeadEndpointHandler data method
-  Result onWrite(TypeErasedBox&& msg) noexcept {
+  Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    lastWriteContext_ = &ctx;
     writeCount_++;
     if (onWriteCallback_) {
       return onWriteCallback_(std::move(msg));
@@ -81,6 +91,7 @@ class MockHeadHandler {
 
   // Inspection
   int writeCount() const { return writeCount_; }
+  detail::ContextImpl* lastWriteContext() const { return lastWriteContext_; }
   int exceptionCount() const { return exceptionCount_; }
 
   const std::vector<BytesPtr>& writtenBytes() const { return writtenBytes_; }
@@ -93,6 +104,7 @@ class MockHeadHandler {
 
   void reset() {
     writeCount_ = 0;
+    lastWriteContext_ = nullptr;
     exceptionCount_ = 0;
     writtenBytes_.clear();
     writeResult_ = Result::Success;
@@ -108,6 +120,7 @@ class MockHeadHandler {
 
  private:
   int writeCount_{0};
+  detail::ContextImpl* lastWriteContext_{nullptr};
   int exceptionCount_{0};
   std::vector<BytesPtr> writtenBytes_;
   Result writeResult_{Result::Success};
@@ -134,7 +147,8 @@ class MockTailHandler {
   MockTailHandler() = default;
 
   // TailEndpointHandler data methods
-  Result onRead(TypeErasedBox&& msg) noexcept {
+  Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    lastReadContext_ = &ctx;
     readCount_++;
     if (onReadCallback_) {
       return onReadCallback_(std::move(msg));
@@ -169,6 +183,7 @@ class MockTailHandler {
 
   // Inspection
   int readCount() const { return readCount_; }
+  detail::ContextImpl* lastReadContext() const { return lastReadContext_; }
   int exceptionCount() const { return exceptionCount_; }
 
   int handlerAddedCount() const { return handlerAddedCount_; }
@@ -179,6 +194,7 @@ class MockTailHandler {
 
   void reset() {
     readCount_ = 0;
+    lastReadContext_ = nullptr;
     exceptionCount_ = 0;
     readResult_ = Result::Success;
     onReadCallback_ = nullptr;
@@ -192,6 +208,7 @@ class MockTailHandler {
 
  private:
   int readCount_{0};
+  detail::ContextImpl* lastReadContext_{nullptr};
   int exceptionCount_{0};
   Result readResult_{Result::Success};
   OnReadCallback onReadCallback_;

@@ -224,7 +224,9 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
 
   ASSERT_NE(capturedUserContext, nullptr);
   auto response = makeResponse(capturedUserContext);
-  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(handlerCalled);
@@ -238,7 +240,9 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageNullUserContextSucceeds) {
   // Response without a requestContext stamped — adapter logs and returns
   // Success.
   auto response = makeResponse(nullptr);
-  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
 }
@@ -278,7 +282,9 @@ TEST_F(ThriftClientAppAdapterTest, EachRequestGetsUniqueUserContext) {
   // Deliver synthetic responses so per-request contexts are freed.
   evb_->runInEventBaseThreadAndWait([&] {
     for (auto* ctx : capturedUserContexts) {
-      (void)client.adapter().onRead(erase_and_box(makeResponse(ctx)));
+      (void)client.adapter().onRead(
+          channel_pipeline::test::inertEndpointContext(),
+          erase_and_box(makeResponse(ctx)));
     }
   });
 }
@@ -309,6 +315,7 @@ TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
   // Deliver a synthetic response so the per-request context is freed.
   evb_->runInEventBaseThreadAndWait([&] {
     (void)client.adapter().onRead(
+        channel_pipeline::test::inertEndpointContext(),
         erase_and_box(makeResponse(capturedUserContext)));
   });
 }
@@ -366,6 +373,7 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
   // Deliver a synthetic response so the per-request context is freed.
   evb_->runInEventBaseThreadAndWait([&] {
     (void)client.adapter().onRead(
+        channel_pipeline::test::inertEndpointContext(),
         erase_and_box(makeResponse(capturedUserContext)));
   });
 }

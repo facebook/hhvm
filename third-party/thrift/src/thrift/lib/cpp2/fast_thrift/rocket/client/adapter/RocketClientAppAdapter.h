@@ -183,6 +183,7 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
    * Forwards to the registered onResponse callback.
    */
   channel_pipeline::Result onRead(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     if (FOLLY_UNLIKELY(!onResponse_)) {
       return channel_pipeline::Result::Error;

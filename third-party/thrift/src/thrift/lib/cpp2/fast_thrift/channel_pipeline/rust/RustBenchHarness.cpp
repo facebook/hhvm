@@ -109,7 +109,7 @@ struct NativeReadyHandler {
 
 struct BenchTransport {
   uint64_t writeCount{0};
-  Result onWrite(TypeErasedBox&&) noexcept {
+  Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
     ++writeCount;
     return Result::Success;
   }
@@ -126,7 +126,7 @@ struct BenchTransport {
 struct BenchApp {
   uint64_t readCount{0};
   uint64_t exceptionCount{0};
-  Result onRead(TypeErasedBox&&) noexcept {
+  Result onRead(detail::ContextImpl&, TypeErasedBox&&) noexcept {
     ++readCount;
     return Result::Success;
   }

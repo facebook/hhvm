@@ -253,6 +253,7 @@ class ThriftClientTransportAdapterT {
    * alternative.
    */
   channel_pipeline::Result onWrite(
+      channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftRequestMessage>();
     // toRocketFrame() serializes the request metadata and can throw on

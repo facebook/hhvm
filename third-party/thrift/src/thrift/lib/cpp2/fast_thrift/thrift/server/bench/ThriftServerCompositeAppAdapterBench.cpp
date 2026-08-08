@@ -44,6 +44,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
@@ -63,6 +64,13 @@ using apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter;
 using apache::thrift::fast_thrift::thrift::ThriftServerCompositeAppAdapter;
 using apache::thrift::fast_thrift::thrift::ThriftServerInboundPayloadVariant;
 using apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage;
+
+apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&
+endpointContext() noexcept {
+  static apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl
+      context(nullptr, nullptr, nullptr, 0, 0);
+  return context;
+}
 
 // Adapter whose registered methods are no-op thunks. Lets us bench routing
 // in isolation: addMethodHandler inserts into dispatch_; the thunk returns
@@ -162,7 +170,8 @@ BENCHMARK(BareAdapter_HitMethod, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result = adapter->onRead(erase_and_box(std::move(requests[i])));
+    auto result = adapter->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -178,8 +187,8 @@ BENCHMARK_RELATIVE(Composite_OneChild_HitMethod, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -197,8 +206,8 @@ BENCHMARK(Composite_TwoChildren_HitFirst, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -210,8 +219,8 @@ BENCHMARK_RELATIVE(Composite_TwoChildren_HitLast, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -229,8 +238,8 @@ BENCHMARK(Composite_FourChildren_HitFirst, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -242,8 +251,8 @@ BENCHMARK_RELATIVE(Composite_FourChildren_HitLast, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -261,8 +270,8 @@ BENCHMARK(Composite_EightChildren_HitLast, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -274,8 +283,8 @@ BENCHMARK_RELATIVE(Composite_SixteenChildren_HitLast, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -340,8 +349,8 @@ BENCHMARK(Composite_HeterogeneousChildren_HitFirst, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -353,8 +362,8 @@ BENCHMARK_RELATIVE(Composite_HeterogeneousChildren_HitSecond, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -378,8 +387,8 @@ BENCHMARK(Composite_UnknownMethod, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    auto result =
-        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    auto result = fixture.composite->onRead(
+        endpointContext(), erase_and_box(std::move(requests[i])));
     folly::doNotOptimizeAway(result);
   }
 }

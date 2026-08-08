@@ -86,7 +86,9 @@ class SubHead {
  public:
   static constexpr Subscriptions<Evs...> kSubscribedEvents{};
 
-  Result onWrite(TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
   void onException(folly::exception_wrapper&&) noexcept {}
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
@@ -110,7 +112,9 @@ class SubTail {
  public:
   static constexpr Subscriptions<Evs...> kSubscribedEvents{};
 
-  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
+  Result onRead(detail::ContextImpl&, TypeErasedBox&&) noexcept {
+    return Result::Success;
+  }
   void onException(folly::exception_wrapper&&) noexcept {}
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}

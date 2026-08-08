@@ -59,7 +59,7 @@ struct PassthroughHandler {
 };
 
 struct BenchHead {
-  Result onWrite(TypeErasedBox&& message) noexcept {
+  Result onWrite(detail::ContextImpl&, TypeErasedBox&& message) noexcept {
     folly::doNotOptimizeAway(message);
     ++writes;
     return Result::Success;
@@ -73,7 +73,7 @@ struct BenchHead {
 };
 
 struct BenchTail {
-  Result onRead(TypeErasedBox&& message) noexcept {
+  Result onRead(detail::ContextImpl&, TypeErasedBox&& message) noexcept {
     folly::doNotOptimizeAway(message);
     ++reads;
     if (completion != nullptr && reads == target) {

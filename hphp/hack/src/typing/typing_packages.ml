@@ -113,13 +113,10 @@ let can_access_ignoring_package_override
     ~(target_package : Package.pos_id option)
     ~(target_file : Relative_path.t)
     ~(classptr_reference_warning : bool) =
-  let tcopt = Env.get_tcopt env in
   let target_package_before_override =
     Option.map
-      (Package_info.get_package_for_file
-         ~support_multifile_tests:
-           (TypecheckerOptions.package_support_multifile_tests tcopt)
-         (TypecheckerOptions.package_info tcopt)
+      (Package_provider.get_package_for_file
+         (Env.get_ctx env)
          ~path:(Relative_path.suffix target_file))
       ~f:Package.get_package_name
   in

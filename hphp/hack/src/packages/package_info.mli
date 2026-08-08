@@ -17,11 +17,12 @@ val get_package : t -> string -> Package.t option
 
 val package_exists : t -> string -> bool
 
-(** The get_package_for_file function returns the package a file path belongs
-  * without taking into account eventual __PackageOverride annotations.
+(** The package a file path belongs to, ignoring any __PackageOverride
+  * annotation. [path] must already be repo-relative and normalized; callers in
+  * the typechecker should go through [Package_provider] rather than calling this
+  * directly, so that multifile test paths are handled in one place.
   *)
-val get_package_for_file :
-  support_multifile_tests:bool -> t -> path:string -> Package.t option
+val get_package_for_file : t -> path:string -> Package.t option
 
 (** The get_package_with_override function returns the package a file path belongs
   * taking into account __PackageOverride annotations.  It requires not only the file path
@@ -32,8 +33,4 @@ val get_package_for_file :
   * Glean indexer and the redundant PackageOverride linter, and NEVER from the typechecker.
   *)
 val get_package_with_override_for_file_no_env :
-  support_multifile_tests:bool ->
-  t ->
-  path:string ->
-  content:string ->
-  Package.t option * bool
+  t -> path:string -> content:string -> Package.t option * bool

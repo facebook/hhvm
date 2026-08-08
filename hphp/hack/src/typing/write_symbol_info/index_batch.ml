@@ -50,11 +50,8 @@ let process_source_text ctx fa File_info.{ path; root_path; source_text; _ } =
     | _ -> fa
   in
   let (package_opt, has_package_override) =
-    Package_info.get_package_with_override_for_file_no_env
-      ~support_multifile_tests:
-        (Provider_context.get_tcopt ctx
-        |> TypecheckerOptions.package_support_multifile_tests)
-      (Provider_context.get_package_info ctx)
+    Package_provider.get_package_with_override_for_file_no_env
+      ctx
       ~path:(strip_root_if_possible path root_path)
       ~content:text
   in

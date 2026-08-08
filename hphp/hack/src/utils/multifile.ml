@@ -24,8 +24,16 @@ let delim_regexp = "////.*\n"
 
 let delim = Str.regexp delim_regexp
 
-let short_suffix path =
-  Relative_path.suffix path |> Str.replace_first (Str.regexp "^.*--") ""
+(* Anchored and greedy: the simulated path is repo-relative, so the whole
+   container path goes. Must stay identical to [MULTIFILE_PREFIX] in
+   [oxidized/manual/package_info_impl.rs], or a file resolves to different
+   packages in OCaml and Rust. *)
+let multifile_prefix = Str.regexp "^.*--"
+
+let strip_multifile_prefix (path : string) : string =
+  Str.replace_first multifile_prefix "" path
+
+let short_suffix path = Relative_path.suffix path |> strip_multifile_prefix
 
 let split_multifile_content content : (string * content) list =
   let file_name_of_header header =

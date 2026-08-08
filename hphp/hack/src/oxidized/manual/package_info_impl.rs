@@ -6,6 +6,7 @@ use std::borrow::Cow;
 use std::ops::Range;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 use rc_pos::Pos;
 use relative_path::Prefix;
@@ -156,6 +157,17 @@ impl TryFrom<packages::PackageInfo> for PackageInfo {
     }
 }
 
+/// Strips the container prefix from a multifile test path
+/// `<container>--<simulated/path.php>`. The simulated path is repo-relative, so
+/// the whole container path goes, hence anchored and greedy.
+///
+/// Must stay identical to `Multifile.strip_multifile_prefix` in
+/// `utils/multifile.ml`, or a file resolves to different packages in OCaml and
+/// Rust.
+static MULTIFILE_PREFIX: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"^.*--").expect("should compile: the pattern is a literal")
+});
+
 impl PackageInfo {
     pub fn get_package_for_file(
         &self,
@@ -163,8 +175,7 @@ impl PackageInfo {
         path: &str,
     ) -> Option<Cow<'_, Package>> {
         let path = if support_multifile_tests {
-            let re = regex::Regex::new(r"[^/]*--").unwrap();
-            re.replace(path, "")
+            MULTIFILE_PREFIX.replace(path, "")
         } else {
             Cow::Borrowed(path)
         };
@@ -249,5 +260,43 @@ mod test {
 
         // A file outside the family path belongs to no package.
         assert!(info.get_package_for_file(false, "other/x.php").is_none());
+    }
+
+    // A container path with directories in it must be dropped whole; a
+    // `/`-restricted pattern would leave `test/pkg/` glued to the front.
+    #[test]
+    fn multifile_prefix_strips_the_whole_container_path() {
+        let family = Package {
+            name: pos_id("prototypes"),
+            includes: vec![],
+            soft_includes: vec![],
+            include_paths: vec![pos_id("www/prototypes/")],
+            enable_strict_isolation: true,
+            is_implicit: true,
+        };
+        let info = PackageInfo {
+            existing_packages: Default::default(),
+            include_path_to_package_map: vec![("www/prototypes/".to_string(), family)],
+        };
+
+        for path in [
+            "container.php--www/prototypes/alpha/a.php",
+            "test/pkg/container.php--www/prototypes/alpha/a.php",
+        ] {
+            assert_eq!(
+                info.get_package_for_file(true, path)
+                    .unwrap_or_else(|| panic!("{path} should resolve to a member package"))
+                    .name
+                    .1,
+                "prototypes.alpha"
+            );
+        }
+
+        // Without the flag the path is taken literally, so the mangled name does
+        // not match the family.
+        assert!(
+            info.get_package_for_file(false, "container.php--www/prototypes/alpha/a.php")
+                .is_none()
+        );
     }
 }

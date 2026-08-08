@@ -45,6 +45,11 @@ val file_to_file_list : Relative_path.t -> (Relative_path.t * content) list
   *)
 val file_to_files : Relative_path.t -> repo
 
+(** Strip the [<container>--] prefix from a multifile pathname, leaving the path
+the multifile is simulating: "a.php--chess.php" becomes "chess.php". Returns the
+argument unchanged when there is no such prefix. *)
+val strip_multifile_prefix : string -> string
+
 (** Multifile pathnames are like (DummyRoot, "/home/ljw/a.php--chess.php"),
 or just (DummyRoot, "/home/ljw/chess.php") if there weren't any multifiles within the file.
 This function strips both to "chess.php", a more appropriate rendering for test output. *)

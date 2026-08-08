@@ -152,17 +152,9 @@ let go genv env file candidate_files =
      "what if the override on the target were removed?". Dependents use
      their *effective* package (override-honored) — they're not part of
      that hypothetical. *)
-  let tcopt = Provider_context.get_tcopt ctx in
-  let pkg_info = TypecheckerOptions.package_info tcopt in
-  let support_multifile_tests =
-    TypecheckerOptions.package_support_multifile_tests tcopt
-  in
   let target_suffix = Relative_path.suffix path in
   let natural_pkg =
-    Package_info.get_package_for_file
-      ~support_multifile_tests
-      pkg_info
-      ~path:target_suffix
+    Package_provider.get_package_for_file ctx ~path:target_suffix
   in
 
   match natural_pkg with
@@ -183,9 +175,8 @@ let go genv env file candidate_files =
               | None -> None
               | Some text ->
                 let (pkg, _has_override) =
-                  Package_info.get_package_with_override_for_file_no_env
-                    ~support_multifile_tests
-                    pkg_info
+                  Package_provider.get_package_with_override_for_file_no_env
+                    ctx
                     ~path:(Relative_path.suffix dep_path)
                     ~content:text
                 in

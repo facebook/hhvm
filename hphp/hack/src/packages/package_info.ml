@@ -104,15 +104,7 @@ let from_packages (packages : Package.t list) : t =
 (** The get_package_for_file returns the package a file path belongs to;
   * it ignores PackageOverride annotations. 
   *)
-let get_package_for_file ~support_multifile_tests (info : t) ~(path : string) :
-    Package.t option =
-  let path =
-    if support_multifile_tests then
-      let re = Str.regexp "[^/]*--" in
-      Str.replace_first re "" path
-    else
-      path
-  in
+let get_package_for_file (info : t) ~(path : string) : Package.t option =
   match
     List.find
       ~f:(fun (ip, _) -> String.is_prefix path ~prefix:ip)
@@ -148,8 +140,7 @@ let extract_package_override text =
   | _ -> None
 
 let get_package_with_override_for_file_no_env
-    ~support_multifile_tests (info : t) ~(path : string) ~(content : string) :
-    Package.t option * bool =
+    (info : t) ~(path : string) ~(content : string) : Package.t option * bool =
   match extract_package_override content with
   | Some package_override -> (get_package info package_override, true)
-  | None -> (get_package_for_file ~support_multifile_tests info ~path, false)
+  | None -> (get_package_for_file info ~path, false)

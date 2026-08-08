@@ -222,6 +222,7 @@
   naming_global
   naming_provider
   nast
+  package_provider
   provider_backend
   typing_deps
   typechecker_options

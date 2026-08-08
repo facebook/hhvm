@@ -23,6 +23,7 @@
   glean_schema
   ast_provider
   naming_table
+  package_provider
   tast_provider
   typing
   typing_ast

@@ -1,0 +1,2 @@
+hack: hack:shapes=1,__final_structs src/hack_final_structs.thrift
+hack_no_rollout: hack:shapes=1 src/hack_final_structs.thrift

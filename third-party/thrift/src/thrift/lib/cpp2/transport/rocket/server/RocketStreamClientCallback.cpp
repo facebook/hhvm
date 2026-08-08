@@ -75,6 +75,11 @@ bool RocketStreamClientCallback::onFirstResponse(
           std::move(firstResponse.fds));
     } catch (std::exception const& ex) {
       sendError(RocketException(ErrorCode::CANCELED, ex.what()));
+      // The destructor does not cancel, and the source still holds our pointer.
+      // markRequestComplete is true because unsetMarkRequestComplete() already
+      // ran before onFirstResponse().
+      serverCallback->onStreamCancel();
+      connection_.freeStream(streamId_, /* markRequestComplete */ true);
       return false;
     }
     connection_.sendPayload(
@@ -83,11 +88,15 @@ bool RocketStreamClientCallback::onFirstResponse(
         Flags().next(true).complete(false),
         nullptr);
   } else {
-    sendPayload(
-        std::move(firstResponse),
-        /* next */ true,
-        /* complete */ false,
-        /* sendCallback */ nullptr);
+    if (!sendPayload(
+            std::move(firstResponse),
+            /* next */ true,
+            /* complete */ false,
+            /* sendCallback */ nullptr)) {
+      serverCallback->onStreamCancel();
+      connection_.freeStream(streamId_, /* markRequestComplete */ true);
+      return false;
+    }
   }
 
   if (tokens_) {
@@ -147,7 +156,10 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
         makeSendCallback(/* endReason */ std::nullopt));
   } else {
     applyCompressionConfigIfNeeded(payload);
-    sendStreamPayload(std::move(payload));
+    if (!sendStreamPayload(std::move(payload))) {
+      connection_.freeStream(streamId_, /* complete */ true);
+      return false;
+    }
   }
 
   return true;
@@ -367,8 +379,8 @@ void RocketStreamClientCallback::cancelTimeout() {
   timeoutCallback_.reset();
 }
 
-void RocketStreamClientCallback::sendStreamPayload(StreamPayload&& payload) {
-  sendPayload(
+bool RocketStreamClientCallback::sendStreamPayload(StreamPayload&& payload) {
+  return sendPayload(
       std::move(payload),
       /* next */ true,
       /* complete */ false,
@@ -381,6 +393,20 @@ void RocketStreamClientCallback::sendCompletePayload() {
       Payload::makeFromData(std::unique_ptr<folly::IOBuf>{}),
       Flags().complete(true),
       makeSendCallback(details::STREAM_ENDING_TYPES::COMPLETE));
+}
+
+void RocketStreamClientCallback::sendPackFailureError(
+    const folly::exception_wrapper& ew) {
+  StreamRpcError streamRpcError;
+  streamRpcError.code() = StreamRpcErrorCode::UNKNOWN;
+  streamRpcError.name_utf8() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::UNKNOWN);
+  streamRpcError.what_utf8() =
+      fmt::format("Failed to pack stream payload: {}", ew.what());
+  sendError(RocketException(
+      ErrorCode::CANCELED,
+      connection_.getPayloadSerializer()->packCompact(streamRpcError)));
 }
 
 void RocketStreamClientCallback::applyCompressionConfigIfNeeded(

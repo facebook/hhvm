@@ -669,3 +669,73 @@ INSTANTIATE_TEST_CASE_P(
             R"(Failed to pack or send payload due to: error during compress)")
         //
         ));
+
+// Stream payloads are packed on a noexcept path, so a compressor that cannot
+// produce output must fail one stream rather than abort the process.
+class StreamTestHandler : public TestHandler {
+  apache::thrift::ServerStream<int32_t> range(
+      int32_t from, int32_t to) override {
+    for (int32_t i = from; i <= to; ++i) {
+      co_yield int32_t(i);
+    }
+  }
+};
+
+class RocketCustomCompressionStreamCompressorServerFailure
+    : public RocketCustomCompressionTest {
+ public:
+  std::unique_ptr<AsyncProcessorFactory> makeStreamFactory() {
+    return std::make_unique<StreamTestHandler>();
+  }
+
+  void SetUp() override {
+    setupCommon();
+
+    compressorAutoRegistry =
+        std::make_unique<TestCustomThriftCompressorFactory::AutoRegistry>(
+            std::make_shared<TestCustomThriftCompressorFactory>(
+                getCustomCompressorNameForCurrentTestCase(),
+                TestCustomThriftCompressorFactory::
+                    GetCustomCompressorNegotiationResponseBehavior::Success,
+                TestCustomThriftCompressorFactory::ServerMakeBehavior::Success,
+                TestCustomThriftCompressorFactory::ClientMakeBehavior::Success,
+                /*server*/
+                std::make_tuple(
+                    TestCustomCompressor::CompressBehavior::Throw,
+                    TestCustomCompressor::UncompressBehavior::Success),
+                /*client*/
+                std::make_tuple(
+                    TestCustomCompressor::CompressBehavior::Success,
+                    TestCustomCompressor::UncompressBehavior::Unreachable)
+                //
+                ));
+  }
+};
+
+TEST_F(RocketCustomCompressionStreamCompressorServerFailure, _) {
+  folly::EventBase base;
+
+  ScopedServerInterfaceThread runner(makeStreamFactory());
+  auto client = makeStickyClient(runner, &base);
+
+  // Negotiates custom compression on this connection.
+  std::string response;
+  client->sync_sendResponse(response, 64);
+  EXPECT_EQ(response, "test64");
+
+  // The stream must fail. Reaching the end of the test is the liveness
+  // assertion: an escaping throw would abort this binary with the server.
+  bool gotError = false;
+  try {
+    std::move(client->sync_range(0, 10))
+        .subscribeInline([&](folly::Try<int32_t>&& next) {
+          if (next.hasException()) {
+            gotError = true;
+          }
+        });
+  } catch (const std::exception&) {
+    // A first-response failure surfaces here, not through the stream.
+    gotError = true;
+  }
+  EXPECT_TRUE(gotError);
+}

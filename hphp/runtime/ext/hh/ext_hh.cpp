@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <atomic>
+#include <cstdint>
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
 #include <folly/synchronization/AtomicNotification.h>
@@ -847,7 +849,7 @@ void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
   // mechanism.
   auto gate = hint
     ? nullptr
-    : std::make_shared<folly::atomic_uint_fast_wait_t>(0);
+    : std::make_shared<std::atomic<std::uint32_t>>(0);
 
   IterateV(
     paths.get(),

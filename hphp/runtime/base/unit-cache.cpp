@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <atomic>
+#include <cstdint>
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
@@ -1765,7 +1767,7 @@ Unit* lookupSyslibUnit(StringData* path) {
 //////////////////////////////////////////////////////////////////////
 
 void prefetchUnit(StringData* requestedPath,
-                  std::shared_ptr<folly::atomic_uint_fast_wait_t> gate,
+                  std::shared_ptr<std::atomic<std::uint32_t>> gate,
                   const Unit* loadingUnit) {
   assertx(!Cfg::Repo::Authoritative);
   assertx(unitPrefetchingEnabled());
@@ -2505,7 +2507,7 @@ private:
   const std::chrono::seconds m_interval;
 
   // Flag to mark that the thread should shutdown
-  folly::atomic_uint_fast_wait_t m_done{0};
+  std::atomic<std::uint32_t> m_done{0};
   std::thread m_thread;
 };
 

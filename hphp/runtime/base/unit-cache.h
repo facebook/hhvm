@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <atomic>
+#include <cstdint>
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 
@@ -190,7 +192,7 @@ Unit* getLoadedUnit(StringData* path);
  * to prefetch a Unit which you're in the process of loading already.
  */
 void prefetchUnit(StringData* path,
-                  std::shared_ptr<folly::atomic_uint_fast_wait_t> gate,
+                  std::shared_ptr<std::atomic<std::uint32_t>> gate,
                   const Unit* loadingUnit);
 
 /*

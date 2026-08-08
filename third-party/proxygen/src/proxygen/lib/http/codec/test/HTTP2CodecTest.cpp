@@ -2157,7 +2157,7 @@ TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
       };
 
       for (http2::FrameType type : expectedTypes) {
-        EXPECT_TRUE(types.find(static_cast<uint8_t>(type)) != types.end())
+        EXPECT_TRUE(types.contains(static_cast<uint8_t>(type)))
             << "callback missing for type " << static_cast<uint8_t>(type);
       }
       return types.size() == (sizeof(expectedTypes) / sizeof(http2::FrameType));

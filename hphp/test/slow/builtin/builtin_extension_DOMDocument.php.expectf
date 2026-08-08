@@ -75,7 +75,7 @@ object(DOMDocument) (35) {
 Warning: Attempted to serialize unserializable builtin class DOMDocument in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-vec(49) {
+vec(51) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(15) "createAttribute"
@@ -84,7 +84,9 @@ vec(49) {
   string(13) "createComment"
   string(22) "createDocumentFragment"
   string(13) "createElement"
+  string(18) "createElementTyped"
   string(15) "createElementNS"
+  string(20) "createElementNSTyped"
   string(21) "createEntityReference"
   string(27) "createProcessingInstruction"
   string(14) "createTextNode"
@@ -206,7 +208,7 @@ object(A_DOMDocument) (36) {
 Warning: Attempted to serialize unserializable builtin class A_DOMDocument in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-vec(49) {
+vec(51) {
   string(11) "__construct"
   string(11) "__debugInfo"
   string(15) "createAttribute"
@@ -215,7 +217,9 @@ vec(49) {
   string(13) "createComment"
   string(22) "createDocumentFragment"
   string(13) "createElement"
+  string(18) "createElementTyped"
   string(15) "createElementNS"
+  string(20) "createElementNSTyped"
   string(21) "createEntityReference"
   string(27) "createProcessingInstruction"
   string(14) "createTextNode"

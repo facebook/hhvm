@@ -139,7 +139,9 @@ class TcpConnectionFactory {
       std::function<TcpConnection(folly::AsyncTransport::UniquePtr)>;
   explicit TcpConnectionFactory(BuildFn build) : build_(std::move(build)) {}
 
-  TcpConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+  TcpConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& /*clientAddr*/) {
     return build_(std::move(socket));
   }
 

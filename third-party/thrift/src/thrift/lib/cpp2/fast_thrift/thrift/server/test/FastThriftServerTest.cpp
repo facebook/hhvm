@@ -29,6 +29,7 @@
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/FizzClientContext.h>
 #include <folly/ExceptionWrapper.h>
+#include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
@@ -987,6 +988,43 @@ TEST(FastThriftServerSharedPoolTest, RoundTripWithEmbedderPool) {
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
   EXPECT_EQ(sum, 42);
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// The per-connection context carries the peer address captured when the socket
+// was accepted, not one re-derived from the transport at build time.
+TEST(FastThriftServerConnContextTest, PeerAddressReachesConnContext) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  auto config = makeLoopbackConfig();
+  config.enableRequestContext = true;
+
+  ftt::FastThriftServer server(std::move(config));
+  server.setInterface(handler);
+
+  folly::Baton<> accepted;
+  folly::SocketAddress observedPeer;
+  server.setOnConnectionAccepted([&](ftt::ThriftConnContext* connContext) {
+    if (connContext != nullptr) {
+      observedPeer = connContext->getPeerAddress();
+    }
+    accepted.post();
+  });
+  server.start();
+
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::shared_ptr<folly::AsyncSocket> socket;
+  folly::SocketAddress clientLocalAddr;
+  evb->runInEventBaseThreadAndWait([&] {
+    socket = folly::AsyncSocket::newSocket(evb, server.getAddress());
+    socket->getLocalAddress(&clientLocalAddr);
+  });
+
+  ASSERT_TRUE(accepted.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_EQ(observedPeer, clientLocalAddr);
+
+  evb->runInEventBaseThreadAndWait([&] { socket.reset(); });
 }
 
 // An observer extension registered via addThriftExtension is spliced into every

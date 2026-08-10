@@ -241,7 +241,9 @@ class FastThriftBenchmarkServer {
    public:
     explicit ConnectionFactory(FastThriftBenchmarkServer* server) noexcept
         : server_(server) {}
-    BenchmarkConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+    BenchmarkConnection getConnection(
+        folly::AsyncTransport::UniquePtr socket,
+        const folly::SocketAddress& /*clientAddr*/) {
       return server_->buildConnection(std::move(socket));
     }
 

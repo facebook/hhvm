@@ -86,13 +86,19 @@ class TestConnectionFactory {
       bool closeOnStart = false) noexcept
       : closeCount_(std::move(closeCount)), closeOnStart_(closeOnStart) {}
 
-  TestConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+  TestConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& clientAddr) {
+    lastClientAddr = clientAddr;
     return TestConnection{
         .transport = std::move(socket),
         .closeCount = closeCount_,
         .closeCb = {},
         .closeOnStart = closeOnStart_};
   }
+
+  // Written on the accepting EVB; read back through that EVB.
+  folly::SocketAddress lastClientAddr;
 
  private:
   std::shared_ptr<std::atomic<size_t>> closeCount_;
@@ -332,6 +338,26 @@ TEST_F(ConnectionHandlerTest, SynchronousCloseDuringStartIsSafe) {
   cc.socket = std::move(clientSocket);
   cc.thread = std::move(clientThread);
   clientConnections_.push_back(std::move(cc));
+}
+
+// The factory is handed the peer address observed at accept, so it never has
+// to re-derive one from a transport whose peer may already be gone.
+TEST_F(ConnectionHandlerTest, FactoryReceivesPeerAddress) {
+  auto handler = createConnectionHandler();
+  wireFactory(*handler);
+
+  connectAndWait(*handler, handler->getAddress());
+
+  auto& client = clientConnections_.back();
+  folly::SocketAddress clientLocalAddr;
+  client.thread->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.socket->getLocalAddress(&clientLocalAddr); });
+
+  folly::SocketAddress seen;
+  evb_->runInEventBaseThreadAndWait([&] { seen = factory_->lastClientAddr; });
+
+  EXPECT_FALSE(seen.empty());
+  EXPECT_EQ(seen, clientLocalAddr);
 }
 
 } // namespace apache::thrift::fast_thrift::connection

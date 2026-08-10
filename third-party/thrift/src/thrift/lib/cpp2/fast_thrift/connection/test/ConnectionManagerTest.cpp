@@ -74,7 +74,9 @@ class TestConnectionFactory {
       std::shared_ptr<std::atomic<size_t>> closeCount) noexcept
       : closeCount_(std::move(closeCount)) {}
 
-  TestConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+  TestConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& /*clientAddr*/) {
     return TestConnection{
         .transport = std::move(socket),
         .closeCount = closeCount_,

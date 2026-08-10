@@ -102,7 +102,9 @@ class TestServerConnectionFactory {
           allocator) noexcept
       : appAdapter_(appAdapter), allocator_(allocator) {}
 
-  TestServerConnection getConnection(folly::AsyncTransport::UniquePtr socket);
+  TestServerConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& clientAddr);
 
  private:
   TestServerAppAdapter* appAdapter_;

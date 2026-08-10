@@ -209,7 +209,9 @@ class FastTransportE2ETest : public ::testing::Test {
    public:
     explicit ServerConnectionFactory(FastTransportE2ETest* fixture) noexcept
         : fixture_(fixture) {}
-    ServerConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+    ServerConnection getConnection(
+        folly::AsyncTransport::UniquePtr socket,
+        const folly::SocketAddress& /*clientAddr*/) {
       return fixture_->buildServerConnection(std::move(socket));
     }
 

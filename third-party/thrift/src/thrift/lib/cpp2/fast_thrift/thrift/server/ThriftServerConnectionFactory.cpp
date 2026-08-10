@@ -88,23 +88,16 @@ ThriftServerConnectionFactory::ThriftServerConnectionFactory(
 }
 
 ThriftServerConnection ThriftServerConnectionFactory::getConnection(
-    folly::AsyncTransport::UniquePtr socket) {
+    folly::AsyncTransport::UniquePtr socket,
+    const folly::SocketAddress& clientAddr) {
   // Per-connection context — only built when enableRequestContext is set.
   // When unset, the thrift pipeline below skips the context-propagation
   // handlers and the embedder accept hook (wired at the connection-layer
   // ConnectionAcceptCallbackHandler) receives a null connContext.
   boost::intrusive_ptr<ThriftConnContext> connContext;
   if (config_.enableRequestContext) {
-    // Snapshot peer address before consuming the socket. After TLS this
-    // reflects the post-handshake peer.
-    folly::SocketAddress peerAddress;
-    try {
-      socket->getPeerAddress(&peerAddress);
-    } catch (const std::exception& ex) {
-      XLOG(WARN) << "Failed to read peer address on accept: " << ex.what();
-    }
     connContext.reset(new ThriftConnContext());
-    connContext->setPeerAddress(peerAddress);
+    connContext->setPeerAddress(clientAddr);
   }
 
   auto conn = needsComposite_

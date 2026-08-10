@@ -94,7 +94,9 @@ class TestServerConnectionFactory {
   explicit TestServerConnectionFactory(BuildFn build) noexcept
       : build_(std::move(build)) {}
 
-  TestServerConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+  TestServerConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& /*clientAddr*/) {
     return build_(std::move(socket));
   }
 

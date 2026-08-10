@@ -292,7 +292,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
         : build_(std::move(build)) {}
 
     ServerConnectionContext getConnection(
-        folly::AsyncTransport::UniquePtr socket) {
+        folly::AsyncTransport::UniquePtr socket,
+        const folly::SocketAddress& /*clientAddr*/) {
       return build_(std::move(socket));
     }
 

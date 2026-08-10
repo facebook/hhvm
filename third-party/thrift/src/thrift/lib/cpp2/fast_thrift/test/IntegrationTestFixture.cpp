@@ -42,7 +42,8 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
 } // namespace
 
 TestServerConnection TestServerConnectionFactory::getConnection(
-    folly::AsyncTransport::UniquePtr socket) {
+    folly::AsyncTransport::UniquePtr socket,
+    const folly::SocketAddress& /*clientAddr*/) {
   auto* evb = socket->getEventBase();
   auto transportHandler =
       apache::thrift::fast_thrift::transport::TransportHandler::create(

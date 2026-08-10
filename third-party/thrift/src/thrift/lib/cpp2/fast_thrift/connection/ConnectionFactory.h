@@ -20,6 +20,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>
 
 namespace apache::thrift::fast_thrift::connection {
@@ -51,17 +52,25 @@ concept Connection = requires(C& c, std::function<void()> cb) {
 };
 
 /**
- * ConnectionFactory — anything that, given a ready transport, produces a
- * Connection. The returned type is up to the factory; the connection layer
- * doesn't care, as long as it satisfies the Connection concept.
+ * ConnectionFactory — anything that, given a ready transport and the peer
+ * address observed when the socket was accepted, produces a Connection. The
+ * returned type is up to the factory; the connection layer doesn't care, as
+ * long as it satisfies the Connection concept.
+ *
+ * clientAddr is passed rather than re-derived from the transport: the
+ * transport can no longer report a peer once that peer has gone away.
  */
 template <typename F>
 concept ConnectionFactory =
-    requires(F& f, folly::AsyncTransport::UniquePtr socket) {
-      { f.getConnection(std::move(socket)) };
+    requires(
+        F& f,
+        folly::AsyncTransport::UniquePtr socket,
+        const folly::SocketAddress& clientAddr) {
+      { f.getConnection(std::move(socket), clientAddr) };
     } &&
     Connection<std::decay_t<decltype(std::declval<F&>().getConnection(
-        std::declval<folly::AsyncTransport::UniquePtr>()))>>;
+        std::declval<folly::AsyncTransport::UniquePtr>(),
+        std::declval<const folly::SocketAddress&>()))>>;
 
 /**
  * The connection type produced by a given factory.
@@ -69,6 +78,7 @@ concept ConnectionFactory =
 template <ConnectionFactory F>
 using FactoryConnectionType =
     std::decay_t<decltype(std::declval<F&>().getConnection(
-        std::declval<folly::AsyncTransport::UniquePtr>()))>;
+        std::declval<folly::AsyncTransport::UniquePtr>(),
+        std::declval<const folly::SocketAddress&>()))>;
 
 } // namespace apache::thrift::fast_thrift::connection

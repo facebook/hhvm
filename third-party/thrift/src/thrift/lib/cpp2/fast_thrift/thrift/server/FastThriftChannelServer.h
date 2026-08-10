@@ -307,7 +307,8 @@ class FastThriftServerT {
     explicit ConnectionFactoryImpl(FastThriftServerT* server) noexcept
         : server_(server) {}
     ThriftServerChannelConnection getConnection(
-        folly::AsyncTransport::UniquePtr socket) {
+        folly::AsyncTransport::UniquePtr socket,
+        const folly::SocketAddress& /*clientAddr*/) {
       return server_->buildConnection(std::move(socket));
     }
 

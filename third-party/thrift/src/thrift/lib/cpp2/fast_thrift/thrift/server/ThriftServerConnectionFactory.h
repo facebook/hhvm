@@ -139,13 +139,16 @@ class ThriftServerConnectionFactory {
       ThriftServerConnectionFactoryConfig config);
 
   /**
-   * Build a connection for `socket`. Constructs the per-connection
-   * ThriftConnContext (when enableRequestContext is set), builds the rocket +
-   * thrift pipelines, and fires `onConnect()` before returning.
+   * Build a connection for `socket`, whose peer was at `clientAddr` when the
+   * socket was accepted. Constructs the per-connection ThriftConnContext (when
+   * enableRequestContext is set), builds the rocket + thrift pipelines, and
+   * fires `onConnect()` before returning.
    *
    * Satisfies the connection::ConnectionFactory concept.
    */
-  ThriftServerConnection getConnection(folly::AsyncTransport::UniquePtr socket);
+  ThriftServerConnection getConnection(
+      folly::AsyncTransport::UniquePtr socket,
+      const folly::SocketAddress& clientAddr);
 
  private:
   // Builds the rocket pipeline (TransportHandler ... RocketServerAppAdapter).

@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/test/MockIRocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/test/ThrowingPayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 using namespace ::testing;
@@ -861,4 +862,109 @@ TEST_F(RocketBiDiClientCallbackTest, ErrorFrameAfterStreamCompleteFreesStream) {
   EXPECT_FALSE(callback_->serverCallbackReady());
   EXPECT_FALSE(callback_->isSinkOpen());
   EXPECT_FALSE(callback_->isStreamOpen());
+}
+
+// --- Payload compression failure tests ---
+//
+// pack() compresses, and the bidi callbacks are reached from noexcept callers
+// (ThriftServerRequestBiDi::sendBiDiThriftResponse). A compressor that throws
+// must fail only this interaction, not abort the process. Failure is injected
+// with a custom compressor that throws, selected per-payload by setting
+// CompressionAlgorithm::CUSTOM on the payload's metadata.
+
+class RocketBiDiClientCallbackPackFailureTest
+    : public RocketBiDiClientCallbackTest {
+ protected:
+  void SetUp() override {
+    RocketBiDiClientCallbackTest::SetUp();
+    ON_CALL(connection_, getPayloadSerializer()).WillByDefault([this] {
+      return serializer_.getNonOwningPtr();
+    });
+  }
+
+  static FirstResponsePayload makeUncompressableFirstResponse() {
+    ResponseRpcMetadata metadata;
+    metadata.compression() = CompressionAlgorithm::CUSTOM;
+    return FirstResponsePayload(
+        folly::IOBuf::copyBuffer("data"), std::move(metadata));
+  }
+
+  static StreamPayload makeUncompressableStreamPayload() {
+    StreamPayloadMetadata metadata;
+    metadata.compression() = CompressionAlgorithm::CUSTOM;
+    return StreamPayload(folly::IOBuf::copyBuffer("data"), std::move(metadata));
+  }
+
+  // The client cannot parse an error frame whose data is not a serialized
+  // StreamRpcError.
+  void expectStreamRpcErrorFrame() {
+    EXPECT_CALL(connection_, sendError(kStreamId, _, _))
+        .WillOnce([](StreamId, RocketException&& rex, auto) {
+          EXPECT_EQ(rex.getErrorCode(), ErrorCode::CANCELED);
+          StreamRpcError streamRpcError;
+          CompactSerializer::deserialize(
+              rex.moveErrorData().get(), streamRpcError);
+          EXPECT_EQ(*streamRpcError.code(), StreamRpcErrorCode::UNKNOWN);
+        });
+  }
+
+  ThrowingPayloadSerializer serializer_;
+};
+
+TEST_F(RocketBiDiClientCallbackPackFailureTest, FirstResponseTearsDownBoth) {
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(serverCallback_, onStreamCancel()).WillOnce(Return(true));
+  EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce(Return(true));
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+
+  EXPECT_FALSE(callback_->onFirstResponse(
+      makeUncompressableFirstResponse(),
+      &connection_.getEventBase(),
+      &serverCallback_));
+
+  // The interaction never started, so no server callback is retained.
+  EXPECT_FALSE(callback_->serverCallbackReady());
+}
+
+TEST_F(RocketBiDiClientCallbackPackFailureTest, StreamNextTearsDownBoth) {
+  makeReadyWithTokens(1);
+
+  // A stream payload failure is fatal for both halves: the stapler discards the
+  // return value of onStreamNext, so closing only the stream half would leave
+  // the bridge producing.
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(serverCallback_, onSinkError(_)).WillOnce(Return(true));
+  EXPECT_CALL(serverCallback_, onStreamCancel()).WillOnce(Return(true));
+  EXPECT_CALL(connection_, sendCancel(kStreamId)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+
+  EXPECT_FALSE(callback_->onStreamNext(makeUncompressableStreamPayload()));
+  EXPECT_FALSE(callback_->serverCallbackReady());
+}
+
+TEST_F(RocketBiDiClientCallbackPackFailureTest, StreamErrorClosesStreamHalf) {
+  makeReady();
+
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(connection_, freeStream(_, _)).Times(0);
+
+  // The sink half is still open, so the interaction survives.
+  EXPECT_TRUE(callback_->onStreamError(
+      folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(
+          makeUncompressableStreamPayload())));
+  EXPECT_FALSE(callback_->isStreamOpen());
+  EXPECT_TRUE(callback_->isSinkOpen());
+}
+
+TEST_F(RocketBiDiClientCallbackPackFailureTest, FirstResponseErrorFreesStream) {
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+
+  callback_->onFirstResponseError(
+      folly::make_exception_wrapper<
+          apache::thrift::detail::EncodedFirstResponseError>(
+          makeUncompressableFirstResponse()));
 }

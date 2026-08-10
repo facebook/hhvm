@@ -20,10 +20,12 @@
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Try.h>
 #include <folly/io/async/HHWheelTimer.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IConnectionStreamHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
@@ -103,6 +105,14 @@ class RocketSinkClientCallback final : public SinkClientCallback,
   void scheduleTimeout(std::chrono::milliseconds chunkTimeout);
   void cancelTimeout();
 
+  // Returns false if a stream error was sent instead of the payload.
+  template <typename Payload>
+  bool sendPayload(Payload&& payload, bool next, bool complete);
+
+  // Error data must be a serialized StreamRpcError, or the client cannot parse
+  // the error frame.
+  void sendPackFailureError(const folly::exception_wrapper& ew);
+
   /**
    * Buffers payload frame fragments until the final fragment arrives.
    * Returns the fully assembled payload when all fragments are received,
@@ -121,5 +131,29 @@ class RocketSinkClientCallback final : public SinkClientCallback,
   std::unique_ptr<CompressionConfig> compressionConfig_;
   folly::Optional<Payload> bufferedFragment_;
 };
+
+template <typename Payload>
+bool RocketSinkClientCallback::sendPayload(
+    Payload&& payload, bool next, bool complete) {
+  auto serializer = connection_.getPayloadSerializer();
+  // pack() compresses, and callers are noexcept: an escaping throw would abort
+  // the process instead of failing one sink.
+  auto rocketPayload = folly::makeTryWith([&] {
+    return serializer->pack(
+        std::forward<Payload>(payload),
+        connection_.isDecodingMetadataUsingBinaryProtocol(),
+        connection_.getRawSocket());
+  });
+  if (rocketPayload.hasException()) {
+    sendPackFailureError(rocketPayload.exception());
+    return false;
+  }
+
+  connection_.sendPayload(
+      streamId_,
+      std::move(*rocketPayload),
+      Flags().next(next).complete(complete));
+  return true;
+}
 
 } // namespace apache::thrift::rocket

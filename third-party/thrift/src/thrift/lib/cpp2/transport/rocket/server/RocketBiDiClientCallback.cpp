@@ -69,10 +69,19 @@ bool RocketBiDiClientCallback::onFirstResponse(
   DCHECK(state_.isAwaitingFirstResponse());
 
   DCHECK(serverCallback_ == nullptr) << "Server callback must not be set yet";
-  serverCallback_ = serverCallback;
 
   firstResponse.metadata.streamId() = static_cast<uint32_t>(streamId_);
-  sendPayload(std::move(firstResponse), /* next= */ true);
+  if (!sendPayload(std::move(firstResponse), /* next= */ true)) {
+    // Leave serverCallback_ unset: the interaction never started.
+    state_.onFirstResponseError();
+    if (serverCallback->onStreamCancel()) {
+      std::ignore = serverCallback->onSinkComplete();
+    }
+
+    DCHECK(state_.isTerminal());
+    return freeStreamAndReturn(false);
+  }
+  serverCallback_ = serverCallback;
   state_.onFirstResponseSent();
 
   if (UNLIKELY(connection_.areStreamsPaused())) {
@@ -96,7 +105,8 @@ void RocketBiDiClientCallback::onFirstResponseError(
       },
       [this](EncodedFirstResponseError& err) {
         DCHECK(err.encoded.payload);
-        sendPayload(err.encoded, /* next */ true, /* complete */ true);
+        std::ignore = sendPayload(
+            std::move(err.encoded), /* next */ true, /* complete */ true);
       });
 
   DCHECK(state_.isTerminal());
@@ -130,7 +140,9 @@ bool RocketBiDiClientCallback::onStreamNext(StreamPayload&& payload) {
   }
 
   applyCompressionConfigIfNeeded(payload);
-  sendPayload(std::move(payload), /* next */ true);
+  if (!sendPayload(std::move(payload), /* next */ true)) {
+    return terminateAfterPackFailure();
+  }
 
   return state_.isAlive() ? true : freeStreamAndReturn(false);
 }
@@ -147,7 +159,7 @@ bool RocketBiDiClientCallback::onStreamError(folly::exception_wrapper ew) {
       },
       [this](EncodedStreamError& err) {
         applyCompressionConfigIfNeeded(err.encoded);
-        sendPayload(
+        std::ignore = sendPayload(
             std::move(err.encoded), /* next */ true, /* complete */ true);
       },
       [this, &ew](...) { sendError(ErrorCode::APPLICATION_ERROR, ew.what()); });
@@ -627,6 +639,59 @@ void RocketBiDiClientCallback::sinkChunkTimeoutExpired() noexcept {
           ErrorCode::CANCELED,
           connection_.getPayloadSerializer()->packCompact(streamRpcError)));
   connection_.freeStream(streamId_, /* markRequestComplete */ true);
+}
+
+void RocketBiDiClientCallback::sendPackFailureError(
+    const folly::exception_wrapper& ew) {
+  StreamRpcError streamRpcError;
+  streamRpcError.code() = StreamRpcErrorCode::UNKNOWN;
+  streamRpcError.name_utf8() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::UNKNOWN);
+  streamRpcError.what_utf8() =
+      fmt::format("Failed to pack bidi payload: {}", ew.what());
+  sendError(
+      ErrorCode::CANCELED,
+      connection_.getPayloadSerializer()->packCompact(streamRpcError));
+}
+
+bool RocketBiDiClientCallback::terminateAfterPackFailure() {
+  cancelTimeout();
+  cancelSinkTimeout();
+
+  // A pack failure is fatal for the entire bidi interaction: the stapler
+  // discards the return value of onStreamNext, so closing only the stream half
+  // would leave the bridge producing into a dead stream.
+  // Null out serverCallback_ before calling through it. This prevents
+  // use-after-free if the bridge's onSinkError destroys the server callback
+  // (the subsequent onStreamCancel would otherwise call a dangling pointer).
+  auto* cb = std::exchange(serverCallback_, nullptr);
+  DCHECK(cb) << "Server callback must be set";
+
+  // Close the sink half first. We must not delegate to onSinkError() because it
+  // calls freeStreamAndReturn() when both halves are closed, which would
+  // destroy `this` before we finish cleanup.
+  bool sinkWasOpen = state_.isSinkOpen();
+  if (sinkWasOpen) {
+    state_.onSinkCancel();
+    std::ignore = cb->onSinkError(
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::TApplicationExceptionType::INTERNAL_ERROR,
+            "Failed to pack bidi payload"));
+  }
+
+  if (state_.isStreamOpen()) {
+    state_.onStreamCancel();
+    std::ignore = cb->onStreamCancel();
+  }
+
+  // sendPayload() already sent the error frame, which closes the client's
+  // stream half. Cancel the sink direction so the client stops sending.
+  if (sinkWasOpen) {
+    connection_.sendCancel(streamId_);
+  }
+
+  return freeStreamAndReturn(false);
 }
 
 void RocketBiDiClientCallback::scheduleSinkTimeout(

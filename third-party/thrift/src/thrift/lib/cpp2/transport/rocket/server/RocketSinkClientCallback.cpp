@@ -59,13 +59,17 @@ bool RocketSinkClientCallback::onFirstResponse(
 
   serverCallbackOrError_ = reinterpret_cast<intptr_t>(serverCallback);
 
-  connection_.sendPayload(
-      streamId_,
-      connection_.getPayloadSerializer()->pack(
-          std::move(firstResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
-          connection_.getRawSocket()),
-      Flags().next(true));
+  if (!sendPayload(
+          std::move(firstResponse), /* next */ true, /* complete */ false)) {
+    // The destructor does not cancel, and the source still holds our pointer.
+    // markRequestComplete is true because unsetMarkRequestComplete() already
+    // ran before onFirstResponse().
+    serverCallback->onSinkError(TApplicationException(
+        TApplicationException::TApplicationExceptionType::INTERNAL_ERROR,
+        "Failed to pack sink first response"));
+    connection_.freeStream(streamId_, /* markRequestComplete */ true);
+    return false;
+  }
   return true;
 }
 
@@ -77,13 +81,10 @@ void RocketSinkClientCallback::onFirstResponseError(
       ew.with_exception<thrift::detail::EncodedFirstResponseError>(
           [&](auto& encodedError) {
             DCHECK(encodedError.encoded.payload);
-            connection_.sendPayload(
-                streamId_,
-                connection_.getPayloadSerializer()->pack(
-                    std::move(encodedError.encoded),
-                    connection_.isDecodingMetadataUsingBinaryProtocol(),
-                    connection_.getRawSocket()),
-                Flags().next(true).complete(true));
+            std::ignore = sendPayload(
+                std::move(encodedError.encoded),
+                /* next */ true,
+                /* complete */ true);
           });
   DCHECK(isEncodedError);
 
@@ -106,13 +107,8 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
                               : 0);
   }
 
-  connection_.sendPayload(
-      streamId_,
-      connection_.getPayloadSerializer()->pack(
-          std::move(finalResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
-          connection_.getRawSocket()),
-      Flags().next(true).complete(true));
+  std::ignore = sendPayload(
+      std::move(finalResponse), /* next */ true, /* complete */ true);
   auto state = state_;
   auto& connection = connection_;
   connection_.freeStream(streamId_, true);
@@ -138,13 +134,8 @@ void RocketSinkClientCallback::onFinalResponseError(
               err.encoded.metadata,
               err.encoded.payload->computeChainDataLength());
         }
-        connection_.sendPayload(
-            streamId_,
-            connection_.getPayloadSerializer()->pack(
-                std::move(err.encoded),
-                connection_.isDecodingMetadataUsingBinaryProtocol(),
-                connection_.getRawSocket()),
-            Flags().next(true).complete(true));
+        std::ignore = sendPayload(
+            std::move(err.encoded), /* next */ true, /* complete */ true);
       },
       [&](...) {
         connection_.sendError(
@@ -248,6 +239,22 @@ void RocketSinkClientCallback::cancelTimeout() {
   if (timeout_) {
     timeout_->cancelTimeout();
   }
+}
+
+void RocketSinkClientCallback::sendPackFailureError(
+    const folly::exception_wrapper& ew) {
+  StreamRpcError streamRpcError;
+  streamRpcError.code() = StreamRpcErrorCode::UNKNOWN;
+  streamRpcError.name_utf8() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::UNKNOWN);
+  streamRpcError.what_utf8() =
+      fmt::format("Failed to pack sink payload: {}", ew.what());
+  connection_.sendError(
+      streamId_,
+      RocketException(
+          ErrorCode::CANCELED,
+          connection_.getPayloadSerializer()->packCompact(streamRpcError)));
 }
 
 void RocketSinkClientCallback::TimeoutCallback::incCredits(uint64_t n) {

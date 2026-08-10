@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Try.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
@@ -141,8 +142,17 @@ class RocketBiDiClientCallback final : public BiDiClientCallback,
   std::optional<CompressionConfig> compressionConfig_;
   folly::Optional<Payload> bufferedFragment_;
 
+  // Returns false if a stream error was sent instead of the payload.
   template <typename Payload>
-  void sendPayload(Payload&& payload, bool next = false, bool complete = false);
+  bool sendPayload(Payload&& payload, bool next = false, bool complete = false);
+
+  // Error data must be a serialized StreamRpcError, or the client cannot parse
+  // the error frame.
+  void sendPackFailureError(const folly::exception_wrapper& ew);
+
+  // Tears down both halves of the interaction after sendPayload() already sent
+  // the error frame. Always returns false.
+  bool terminateAfterPackFailure();
 
   template <typename ErrorData>
   void sendError(ErrorCode errorCode, ErrorData errorData);
@@ -194,17 +204,27 @@ class RocketBiDiClientCallback final : public BiDiClientCallback,
 };
 
 template <typename Payload>
-void RocketBiDiClientCallback::sendPayload(
+bool RocketBiDiClientCallback::sendPayload(
     Payload&& payload, bool next, bool complete) {
   auto serializer = connection_.getPayloadSerializer();
-  auto rocketPayload = serializer->pack(
-      std::move(payload),
-      connection_.isDecodingMetadataUsingBinaryProtocol(),
-      connection_.getRawSocket());
+  // pack() compresses, and callers are noexcept: an escaping throw would abort
+  // the process instead of failing one bidi interaction.
+  auto rocketPayload = folly::makeTryWith([&] {
+    return serializer->pack(
+        std::forward<Payload>(payload),
+        connection_.isDecodingMetadataUsingBinaryProtocol(),
+        connection_.getRawSocket());
+  });
+  if (rocketPayload.hasException()) {
+    sendPackFailureError(rocketPayload.exception());
+    return false;
+  }
+
   connection_.sendPayload(
       streamId_,
-      std::move(rocketPayload),
+      std::move(*rocketPayload),
       Flags().next(next).complete(complete));
+  return true;
 }
 
 template <typename ErrorData>

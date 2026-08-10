@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+#include <folly/executors/GlobalExecutor.h>
 #include <folly/test/TestUtils.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/test/e2e/gen-cpp2/TestBiDiService.h>
 #include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
 #include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
+
+#if FOLLY_HAS_COROUTINES
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Invoke.h>
+#include <folly/coro/Task.h>
+#endif
 
 using namespace apache::thrift;
 using namespace apache::thrift::test;
@@ -739,3 +749,146 @@ TEST_F(RocketCustomCompressionStreamCompressorServerFailure, _) {
   }
   EXPECT_TRUE(gotError);
 }
+
+#if FOLLY_HAS_COROUTINES
+
+// Sink payloads are packed on a noexcept path, so a compressor that cannot
+// produce output must fail one sink rather than abort the process.
+class SinkTestHandler : public TestHandler {
+  folly::coro::Task<SinkConsumer<int32_t, int32_t>> co_sumSink() override {
+    SinkConsumer<int32_t, int32_t> sink;
+    sink.consumer = [](folly::coro::AsyncGenerator<int32_t&&> gen)
+        -> folly::coro::Task<int32_t> {
+      int32_t sum = 0;
+      while (auto val = co_await gen.next()) {
+        sum += *val;
+      }
+      co_return sum;
+    };
+    sink.bufferSize = 10;
+    co_return sink;
+  }
+};
+
+class RocketCustomCompressionThrowingServerCompressor
+    : public RocketCustomCompressionTest {
+ public:
+  void SetUp() override {
+    setupCommon();
+
+    compressorAutoRegistry =
+        std::make_unique<TestCustomThriftCompressorFactory::AutoRegistry>(
+            std::make_shared<TestCustomThriftCompressorFactory>(
+                getCustomCompressorNameForCurrentTestCase(),
+                TestCustomThriftCompressorFactory::
+                    GetCustomCompressorNegotiationResponseBehavior::Success,
+                TestCustomThriftCompressorFactory::ServerMakeBehavior::Success,
+                TestCustomThriftCompressorFactory::ClientMakeBehavior::Success,
+                /*server*/
+                std::make_tuple(
+                    TestCustomCompressor::CompressBehavior::Throw,
+                    TestCustomCompressor::UncompressBehavior::Success),
+                /*client*/
+                std::make_tuple(
+                    TestCustomCompressor::CompressBehavior::Success,
+                    TestCustomCompressor::UncompressBehavior::Unreachable)
+                //
+                ));
+  }
+
+  template <typename Service>
+  auto makeCoroClient(ScopedServerInterfaceThread& runner) {
+    // Callbacks are delivered on the global CPU executor so the interaction can
+    // be driven from folly::coro::blockingWait.
+    return runner.newStickyClient<Client<Service>>(
+        folly::getGlobalCPUExecutor().get(),
+        [&](auto socket) mutable { return makeChannel(std::move(socket)); });
+  }
+};
+
+class RocketCustomCompressionSinkCompressorServerFailure
+    : public RocketCustomCompressionThrowingServerCompressor {};
+
+TEST_F(RocketCustomCompressionSinkCompressorServerFailure, _) {
+  ScopedServerInterfaceThread runner(std::make_shared<SinkTestHandler>());
+  auto client = makeCoroClient<TestService>(runner);
+
+  // Negotiates custom compression on this connection. The first request on a
+  // connection is not itself custom compressed.
+  std::string response;
+  client->sync_sendResponse(response, 64);
+  EXPECT_EQ(response, "test64");
+
+  // The sink must fail with the error the server encoded into the error frame.
+  // Reaching the end of the test is an additional liveness assertion: an
+  // escaping throw would abort this binary with the server.
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_awaitTry([&]() -> folly::coro::Task<void> {
+        auto consumer = co_await client->co_sumSink();
+        co_await consumer.sink([]() -> folly::coro::AsyncGenerator<int32_t&&> {
+          for (int32_t i = 1; i <= 5; ++i) {
+            co_yield int32_t(i);
+          }
+        }());
+      }()));
+
+  ASSERT_TRUE(result.hasException<TApplicationException>());
+  EXPECT_THAT(
+      result.exception().what().toStdString(),
+      testing::HasSubstr(
+          "Failed to pack sink payload: std::runtime_error: error during compress"));
+}
+
+// BiDi payloads are packed on a noexcept path as well.
+class BiDiTestHandler
+    : public ServiceHandler<apache::thrift::detail::test::TestBiDiService> {
+  folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
+      override {
+    co_return StreamTransformation<std::string, std::string>{
+        [](folly::coro::AsyncGenerator<std::string&&> input)
+            -> folly::coro::AsyncGenerator<std::string&&> {
+          while (auto item = co_await input.next()) {
+            co_yield std::move(*item);
+          }
+        }};
+  }
+};
+
+class RocketCustomCompressionBiDiCompressorServerFailure
+    : public RocketCustomCompressionThrowingServerCompressor {};
+
+TEST_F(RocketCustomCompressionBiDiCompressorServerFailure, _) {
+  ScopedServerInterfaceThread runner(std::make_shared<BiDiTestHandler>());
+  auto client =
+      makeCoroClient<apache::thrift::detail::test::TestBiDiService>(runner);
+
+  auto runEcho = [&]() -> folly::coro::Task<void> {
+    auto stream = co_await client->co_echo();
+    co_await std::move(stream.sink)
+        .sink(
+            folly::coro::co_invoke(
+                []() -> folly::coro::AsyncGenerator<std::string&&> {
+                  co_yield "hello";
+                }));
+    auto gen = std::move(stream.stream).toAsyncGenerator();
+    while (co_await gen.next()) {
+    }
+  };
+
+  // TestBiDiService has no unary method, so the first interaction performs the
+  // custom compression negotiation.
+  folly::coro::blockingWait(folly::coro::co_awaitTry(runEcho()));
+
+  // The next one must fail with the error the server encoded into the error
+  // frame. Reaching the end of the test is an additional liveness assertion: an
+  // escaping throw would abort this binary with the server.
+  auto result = folly::coro::blockingWait(folly::coro::co_awaitTry(runEcho()));
+
+  ASSERT_TRUE(result.hasException<TApplicationException>());
+  EXPECT_THAT(
+      result.exception().what().toStdString(),
+      testing::HasSubstr(
+          "Failed to pack bidi payload: std::runtime_error: error during compress"));
+}
+
+#endif // FOLLY_HAS_COROUTINES

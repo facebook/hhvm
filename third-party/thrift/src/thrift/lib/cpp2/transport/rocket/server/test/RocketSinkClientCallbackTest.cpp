@@ -16,8 +16,11 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/test/MockIRocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/test/ThrowingPayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 using namespace ::testing;
@@ -76,8 +79,8 @@ TEST_F(RocketSinkClientCallbackTest, HandlePayloadOnSinkNextCompletesInline) {
   EXPECT_CALL(connection_, freeStream(kStreamId, true))
       .WillOnce([&](StreamId, bool) { callback_.reset(); });
   EXPECT_CALL(serverCallback_, onSinkNext(_)).WillOnce([&](StreamPayload&&) {
-    callback_->onFinalResponse(
-        StreamPayload(folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
+    callback_->onFinalResponse(StreamPayload(
+        folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
     return false;
   });
   EXPECT_CALL(connection_, close(_)).Times(0);
@@ -100,8 +103,7 @@ TEST_F(RocketSinkClientCallbackTest, HandlePayloadOnSinkComplete) {
 }
 
 TEST_F(
-    RocketSinkClientCallbackTest,
-    HandlePayloadOnSinkCompleteCompletesInline) {
+    RocketSinkClientCallbackTest, HandlePayloadOnSinkCompleteCompletesInline) {
   makeReady();
 
   EXPECT_CALL(connection_, incInflightFinalResponse()).Times(1);
@@ -110,8 +112,8 @@ TEST_F(
       .WillOnce([&](StreamId, bool) { callback_.reset(); });
   EXPECT_CALL(connection_, decInflightFinalResponse()).Times(1);
   EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce([&] {
-    callback_->onFinalResponse(
-        StreamPayload(folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
+    callback_->onFinalResponse(StreamPayload(
+        folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
     return false;
   });
   EXPECT_CALL(connection_, close(_)).Times(0);
@@ -230,4 +232,103 @@ TEST_F(RocketSinkClientCallbackTest, HandleStreamHeadersPushIsNoop) {
   makeReady();
   EXPECT_CALL(connection_, close(_)).Times(0);
   callback_->handleStreamHeadersPush(HeadersPayload(HeadersPayloadContent{}));
+}
+
+// --- Payload compression failure tests ---
+//
+// pack() compresses, and the sink callbacks are reached from noexcept callers
+// (ThriftServerRequestSink::sendSinkThriftResponse). A compressor that throws
+// must fail only this sink, not abort the process. Failure is injected with a
+// custom compressor that throws, selected per-payload by setting
+// CompressionAlgorithm::CUSTOM on the payload's metadata.
+
+class RocketSinkClientCallbackPackFailureTest
+    : public RocketSinkClientCallbackTest {
+ protected:
+  void SetUp() override {
+    RocketSinkClientCallbackTest::SetUp();
+    ON_CALL(connection_, getPayloadSerializer()).WillByDefault([this] {
+      return serializer_.getNonOwningPtr();
+    });
+  }
+
+  static FirstResponsePayload makeUncompressableFirstResponse() {
+    ResponseRpcMetadata metadata;
+    metadata.compression() = CompressionAlgorithm::CUSTOM;
+    return FirstResponsePayload(
+        folly::IOBuf::copyBuffer("data"), std::move(metadata));
+  }
+
+  static StreamPayload makeUncompressableStreamPayload() {
+    StreamPayloadMetadata metadata;
+    metadata.compression() = CompressionAlgorithm::CUSTOM;
+    return StreamPayload(folly::IOBuf::copyBuffer("data"), std::move(metadata));
+  }
+
+  // The client cannot parse an error frame whose data is not a serialized
+  // StreamRpcError.
+  void expectStreamRpcErrorFrame() {
+    EXPECT_CALL(connection_, sendError(kStreamId, _, _))
+        .WillOnce([](StreamId, RocketException&& rex, auto) {
+          EXPECT_EQ(rex.getErrorCode(), ErrorCode::CANCELED);
+          StreamRpcError streamRpcError;
+          CompactSerializer::deserialize(
+              rex.moveErrorData().get(), streamRpcError);
+          EXPECT_EQ(*streamRpcError.code(), StreamRpcErrorCode::UNKNOWN);
+        });
+  }
+
+  ThrowingPayloadSerializer serializer_;
+};
+
+TEST_F(RocketSinkClientCallbackPackFailureTest, FirstResponseFailsSink) {
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(serverCallback_, onSinkError(_)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+
+  EXPECT_FALSE(callback_->onFirstResponse(
+      makeUncompressableFirstResponse(),
+      &connection_.getEventBase(),
+      &serverCallback_));
+}
+
+TEST_F(RocketSinkClientCallbackPackFailureTest, FinalResponseFailsSink) {
+  makeReady();
+
+  // Close the sink half so the final response also releases the inflight
+  // final-response accounting.
+  EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce(Return(true));
+  callback_->onSinkComplete();
+
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+  EXPECT_CALL(connection_, decInflightFinalResponse()).Times(1);
+
+  callback_->onFinalResponse(makeUncompressableStreamPayload());
+}
+
+TEST_F(RocketSinkClientCallbackPackFailureTest, FinalResponseErrorFreesStream) {
+  makeReady();
+
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true)).Times(1);
+
+  callback_->onFinalResponseError(
+      folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(
+          makeUncompressableStreamPayload()));
+}
+
+TEST_F(RocketSinkClientCallbackPackFailureTest, FirstResponseErrorFreesStream) {
+  expectStreamRpcErrorFrame();
+  EXPECT_CALL(connection_, sendPayload(_, _, _, _)).Times(0);
+  // ThriftServerRequestSink marks the request complete on this path.
+  EXPECT_CALL(connection_, freeStream(kStreamId, false)).Times(1);
+
+  callback_->onFirstResponseError(
+      folly::make_exception_wrapper<
+          apache::thrift::detail::EncodedFirstResponseError>(
+          makeUncompressableFirstResponse()));
 }

@@ -71,9 +71,12 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
     if (msg instanceof RequestContext) {
       final RequestContext<?, ?> requestContext = (RequestContext) msg;
       final int sequenceId = requestContext.getSequenceId();
-      final ThriftFrame frame = encodeThriftFrame(requestContext, sequenceId);
+      ThriftFrame frame = null;
 
       try {
+        // Ownership of the encoded request buffer moves from the context to the frame here.
+        frame = encodeThriftFrame(requestContext, sequenceId);
+
         requestContexts.put(requestContext.getSequenceId(), requestContext);
 
         final ChannelPromise p;
@@ -102,7 +105,8 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
 
         ctx.writeAndFlush(frame, p);
       } catch (Throwable t) {
-        ReferenceCountUtil.safeRelease(frame);
+        requestContexts.remove(sequenceId);
+        ReferenceCountUtil.safeRelease(frame != null ? frame : requestContext);
         requestContext.getProcessor().emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
       }
     } else {

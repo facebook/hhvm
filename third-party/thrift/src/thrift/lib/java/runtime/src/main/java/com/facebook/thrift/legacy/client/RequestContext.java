@@ -19,9 +19,18 @@ package com.facebook.thrift.legacy.client;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.payload.ClientRequestPayload;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.ReferenceCounted;
 import reactor.core.publisher.Sinks;
 
-public class RequestContext<T, R> {
+/**
+ * Reference counting is delegated to {@link #encodedRequest}. This object is written through the
+ * Netty pipeline, and Netty disposes of a dropped outbound message with {@code
+ * ReferenceCountUtil.release(msg)} -- a silent no-op unless the message itself is {@link
+ * ReferenceCounted}. Messages are dropped when the channel closes before {@code
+ * ThriftClientHandler} converts this context into a {@code ThriftFrame} (head releases with a null
+ * outbound buffer) or when the event loop rejects the write task.
+ */
+public class RequestContext<T, R> implements ReferenceCounted {
   private final Sinks.One<R> future;
   private final ClientRequestPayload<T> payload;
   private final ByteBuf encodedRequest;
@@ -66,5 +75,44 @@ public class RequestContext<T, R> {
 
   public int getSequenceId() {
     return sequenceId;
+  }
+
+  @Override
+  public int refCnt() {
+    return encodedRequest.refCnt();
+  }
+
+  @Override
+  public RequestContext<T, R> retain() {
+    encodedRequest.retain();
+    return this;
+  }
+
+  @Override
+  public RequestContext<T, R> retain(int increment) {
+    encodedRequest.retain(increment);
+    return this;
+  }
+
+  @Override
+  public RequestContext<T, R> touch() {
+    encodedRequest.touch();
+    return this;
+  }
+
+  @Override
+  public RequestContext<T, R> touch(Object hint) {
+    encodedRequest.touch(hint);
+    return this;
+  }
+
+  @Override
+  public boolean release() {
+    return encodedRequest.release();
+  }
+
+  @Override
+  public boolean release(int decrement) {
+    return encodedRequest.release(decrement);
   }
 }

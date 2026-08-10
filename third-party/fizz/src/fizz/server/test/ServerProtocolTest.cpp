@@ -4331,8 +4331,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
-            .WillOnce(InvokeWithoutArgs(
-                []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
+            .WillOnce(
+                []() { return folly::IOBuf::copyBuffer("sharedsecret"); });
         EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));

@@ -34,7 +34,6 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/EncodeHelpers.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
-#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/detail/TypeClassFromTypeTag.h>
@@ -720,6 +719,9 @@ struct MapEncode {
 template <typename Key, typename Value>
 struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 
+template <typename TypeClass, typename Type, typename ExpectedTag>
+struct ProtocolMethodsBridge;
+
 template <typename T, typename Tag>
 struct CppTypeEncode {
   static constexpr bool requestedBypass =
@@ -728,7 +730,6 @@ struct CppTypeEncode {
   static constexpr bool directlyEncodable =
       requires(Protocol& prot, const U& u) { Encode<Tag>{}(prot, u); } &&
       !requestedBypass;
-
   template <class Protocol, class U>
     requires directlyEncodable<Protocol, U>
   uint32_t operator()(Protocol& prot, const U& m) const {
@@ -749,13 +750,11 @@ struct CppTypeEncode {
   uint32_t operator()(Protocol& prot, const U& m) const
     requires(
         requires {
-          apache::thrift::detail::pm::protocol_methods<TC, T, ExpectedTag>::
-              write(prot, m);
+          ProtocolMethodsBridge<TC, T, ExpectedTag>::write(prot, m);
         } && !std::convertible_to<U, type::standard_type<Tag>> &&
         !directlyEncodable<Protocol, U>)
   {
-    return apache::thrift::detail::pm::protocol_methods<TC, T, ExpectedTag>::
-        write(prot, m);
+    return ProtocolMethodsBridge<TC, T, ExpectedTag>::write(prot, m);
   }
 };
 

@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/op/detail/EncodeHelpers.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -808,3 +809,21 @@ struct protocol_methods<type_class::variant, Type, ExpectedTag>
 };
 
 } // namespace apache::thrift::detail::pm
+
+namespace apache::thrift::op::detail {
+
+template <typename TypeClass, typename Type, typename ExpectedTag>
+struct ProtocolMethodsBridge {
+  template <typename Protocol, typename U>
+    requires requires(Protocol& protocol, const U& value) {
+      apache::thrift::detail::pm::
+          protocol_methods<TypeClass, Type, ExpectedTag>::write(
+              protocol, value);
+    }
+  static uint32_t write(Protocol& protocol, const U& value) {
+    return apache::thrift::detail::pm::
+        protocol_methods<TypeClass, Type, ExpectedTag>::write(protocol, value);
+  }
+};
+
+} // namespace apache::thrift::op::detail

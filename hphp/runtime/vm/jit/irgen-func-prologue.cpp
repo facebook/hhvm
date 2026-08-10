@@ -202,7 +202,6 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
     return;
   }
 
-
   // Fail if generics were not passed.
   ifThenElse(
     env,

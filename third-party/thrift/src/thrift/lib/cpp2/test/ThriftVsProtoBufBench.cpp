@@ -27,6 +27,7 @@
 #include <folly/memory/MallctlHelper.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/test/ProtoBufArena.h>
 #include <thrift/lib/cpp2/test/ProtoBufBenchData.pb.h>
 #include <thrift/lib/cpp2/test/Structs.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_types.h>
@@ -126,7 +127,7 @@ static int writeBenchMemory(size_t iters) {
 template <typename Struct>
 static int writeBenchArenaMemory(size_t iters) {
   google::protobuf::Arena arena;
-  auto* data = google::protobuf::Arena::CreateMessage<Struct>(&arena);
+  auto* data = arenaCreate<Struct>(arena);
   *data = create<Struct>();
 
   auto before = getMemoryRequestsCounter();
@@ -226,7 +227,7 @@ static int readBenchArenaMemory(size_t iters) {
 
   while (iters--) {
     google::protobuf::Arena arena;
-    auto* data = google::protobuf::Arena::CreateMessage<Struct>(&arena);
+    auto* data = arenaCreate<Struct>(arena);
     data->ParseFromString(s);
   }
 

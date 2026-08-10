@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/test/ProtoBufArena.h>
 #include <thrift/lib/cpp2/test/Structs.h>
 
 #include <glog/logging.h>
@@ -46,7 +47,7 @@ template <typename Struct>
 void writeBenchArena(size_t iters) {
   BenchmarkSuspender susp;
   google::protobuf::Arena arena;
-  auto* data = google::protobuf::Arena::CreateMessage<Struct>(&arena);
+  auto* data = arenaCreate<Struct>(arena);
   *data = create<Struct>();
   susp.dismiss();
 
@@ -82,7 +83,7 @@ void readBenchArena(size_t iters) {
 
   google::protobuf::Arena arena;
   while (iters--) {
-    auto* data = google::protobuf::Arena::CreateMessage<Struct>(&arena);
+    auto* data = arenaCreate<Struct>(arena);
     data->ParseFromString(s);
     data->release_message();
   }

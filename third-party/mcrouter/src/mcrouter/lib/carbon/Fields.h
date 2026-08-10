@@ -129,7 +129,7 @@ struct IsKVContainer {
   static constexpr bool value = IsOfTraitFieldType<T, FieldType::Map>::value;
 };
 
-using namespace apache::thrift::protocol;
+using apache::thrift::protocol::TType;
 
 constexpr TType CarbonToThriftFields[14] = {
     TType::T_STOP,

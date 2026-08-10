@@ -2063,11 +2063,11 @@ TEST_F(ClientProtocolTest, TestServerHelloAfterHrrFlow) {
       *mockKeyScheduler_,
       _getSecret(
           HandshakeSecrets::ClientHandshakeTraffic, RangeMatches("chlo_shlo")))
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return DerivedSecret(
             std::vector<uint8_t>({'c', 'h', 't'}),
             HandshakeSecrets::ClientHandshakeTraffic);
-      }));
+      });
   EXPECT_CALL(*mockKeyScheduler_, _getTrafficKey(RangeMatches("sht"), _, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return TrafficKey{

@@ -96,6 +96,7 @@ class ServiceHandler<::cpp2::test::BasicService> : public apache::thrift::Server
   virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_secureLookup(apache::thrift::RequestParams params, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
 #endif
   virtual void async_tm_secureLookup(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+  virtual void async_eb_ebLookup(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id);
   virtual void sync_fireAndForget(std::unique_ptr<::std::string> /*event*/);
   [[deprecated("Use sync_fireAndForget instead")]] virtual void fireAndForget(std::unique_ptr<::std::string> /*event*/);
   virtual folly::Future<folly::Unit> future_fireAndForget(std::unique_ptr<::std::string> p_event);
@@ -140,6 +141,11 @@ class ServiceHandler<::cpp2::test::BasicService> : public apache::thrift::Server
   static void fbthrift_invoke_decorator_after_secureLookup(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type result) {
     static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_secureLookup(*ctx, result);
   }
+  virtual void fbthrift_execute_decorators_before_ebLookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_ebLookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_ebLookup(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type result) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_ebLookup(*ctx, result);
+  }
   virtual void fbthrift_execute_decorators_before_fireAndForget(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_event*/) {}
   virtual void fbthrift_execute_decorators_after_fireAndForget(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   static void fbthrift_invoke_decorator_after_fireAndForget(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
@@ -150,8 +156,8 @@ class ServiceHandler<::cpp2::test::BasicService> : public apache::thrift::Server
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::test::BasicService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4328462459938241469;
-  static constexpr ::std::string_view definitionKey = {"\x04\x3f\x8c\x84\x82\xa4\x1b\x33\x79\xa6\x80\x56\x33\x20\x0c\x86", 16};
+  static constexpr int64_t programId = -8456849235406565360;
+  static constexpr ::std::string_view definitionKey = {"\x7b\x5c\x33\xf3\xd3\xc8\x8b\x72\xc3\xfe\x8c\x4b\x71\xb5\x47\xe7", 16};
 };
 }
 } // namespace apache::thrift
@@ -342,6 +348,36 @@ class BasicServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   //
 
   //
+  // Method 'ebLookup'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_ebLookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_ebLookup(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_ebLookup(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::test::DataItem const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_ebLookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'ebLookup'
+  //
+
+  //
   // Method 'fireAndForget'
   //
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -383,6 +419,10 @@ namespace apache::thrift {
  * value, with done(), or with an exception). The default implementation
  * reports UNKNOWN_METHOD, so unimplemented methods fail loudly without
  * requiring users to override every entry point.
+ *
+ * Failures must be reported through callback->exception(ew). Throwing out of
+ * a method instead is caught and discarded by the dispatcher: the type and
+ * message never reach the wire, and the client sees a bare INTERNAL_ERROR.
  */
 template <>
 class FastServiceHandler<::cpp2::test::BasicService>
@@ -450,6 +490,14 @@ class FastServiceHandler<::cpp2::test::BasicService>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: secureLookup"));
   }
+  virtual void async_eb_ebLookup(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+      ::std::int32_t /*p_id*/) {
+    callback->exception(
+        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
+            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+            "Unimplemented fast_thrift method: ebLookup"));
+  }
 };
 
 } // namespace apache::thrift
@@ -494,6 +542,10 @@ class BasicServiceAppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_ping_impl(
       uint32_t streamId,
@@ -501,6 +553,14 @@ class BasicServiceAppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_ping_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
@@ -512,6 +572,10 @@ class BasicServiceAppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_add_impl(
       uint32_t streamId,
@@ -519,6 +583,14 @@ class BasicServiceAppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_add_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
@@ -530,6 +602,10 @@ class BasicServiceAppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_buildItem_impl(
       uint32_t streamId,
@@ -537,6 +613,14 @@ class BasicServiceAppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_buildItem_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
@@ -548,6 +632,10 @@ class BasicServiceAppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_lookup_impl(
       uint32_t streamId,
@@ -555,6 +643,14 @@ class BasicServiceAppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_lookup_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
@@ -566,6 +662,10 @@ class BasicServiceAppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_secureLookup_impl(
       uint32_t streamId,
@@ -573,6 +673,44 @@ class BasicServiceAppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_secureLookup_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
+  // Per-method dispatcher: switches on protocolId into the templated impl.
+  // Wrapped by a captureless-lambda thunk in the ctor when registered with
+  // the base's dispatch table.
+  void process_ebLookup(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data,
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
+
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_ebLookup_impl(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_ebLookup_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
 };
 
 } // namespace cpp2::test

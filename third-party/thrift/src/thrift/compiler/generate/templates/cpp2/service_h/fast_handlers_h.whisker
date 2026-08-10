@@ -35,6 +35,10 @@ namespace apache::thrift {
  * value, with done(), or with an exception). The default implementation
  * reports UNKNOWN_METHOD, so unimplemented methods fail loudly without
  * requiring users to override every entry point.
+ *
+ * Failures must be reported through callback->exception(ew). Throwing out of
+ * a method instead is caught and discarded by the dispatcher: the type and
+ * message never reach the wire, and the client sees a bare INTERNAL_ERROR.
  */
 template <>
 class FastServiceHandler<{{service.qualified_name}}>
@@ -129,6 +133,10 @@ class {{service.cpp_name}}AppAdapter
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
 
+  // Builds the FastHandlerCallback and decides where the method body runs:
+  // inline on the EventBase, or offloaded to the CPU pool when one is
+  // configured. Always runs on the EventBase — constructing the callback
+  // takes a non-atomic DestructorGuard on the adapter.
   template <typename ProtocolReader, typename ProtocolWriter>
   void process_{{function.cpp_name}}_impl(
       uint32_t streamId,
@@ -136,6 +144,14 @@ class {{service.cpp_name}}AppAdapter
       std::unique_ptr<
           ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
           requestContext) noexcept;
+
+  // Deserializes arguments and invokes the user handler. Runs on a CPU
+  // thread when a pool is configured, otherwise inline on the EventBase.
+  // Touches no adapter state beyond handler_ and the callback.
+  template <typename ProtocolReader, typename ProtocolWriter>
+  void process_{{function.cpp_name}}_run(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<{{#partial server.return_type function=function service=service}}> callback,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
   {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
   {{/each}}
 };

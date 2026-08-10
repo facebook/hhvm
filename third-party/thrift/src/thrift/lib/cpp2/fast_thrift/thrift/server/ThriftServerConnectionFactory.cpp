@@ -125,12 +125,20 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   return conn;
 }
 
+void ThriftServerConnectionFactory::attachCPUExecutor(
+    ThriftServerAppAdapter& adapter) const {
+  if (config_.cpuExecutor) {
+    adapter.setCPUExecutor(config_.cpuExecutor);
+  }
+}
+
 ThriftServerConnection ThriftServerConnectionFactory::buildSimpleConnection(
     folly::AsyncTransport::UniquePtr socket,
     boost::intrusive_ptr<ThriftConnContext> connContext) {
   ThriftServerConnection::SimpleTail tail{
       .adapter = config_.handler->getAppAdapter(config_.handler)};
   auto* tailAdapter = tail.adapter.get();
+  attachCPUExecutor(*tailAdapter);
   return buildConnectionImpl<ThriftServerAppAdapter>(
       std::move(socket), std::move(tail), tailAdapter, std::move(connContext));
 }
@@ -144,6 +152,9 @@ ThriftServerConnection ThriftServerConnectionFactory::buildCompositeConnection(
   // guarantees this.
   ThriftServerConnection::CompositeTail tail;
   tail.children.push_back(config_.handler->getAppAdapter(config_.handler));
+  // Only the user adapter offloads; the aux adapters appended below stay on
+  // the EventBase. See ThriftServerConnectionFactoryConfig::cpuExecutor.
+  attachCPUExecutor(*tail.children.back());
   if (config_.monitoringHandler) {
     tail.children.push_back(
         config_.monitoringHandler->getAppAdapter(config_.monitoringHandler));

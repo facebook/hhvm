@@ -174,17 +174,28 @@ void ThriftServerAppAdapter::handleUnknownMethod(
 }
 
 void ThriftServerAppAdapter::writeResponse(
-    ThriftServerResponseMessage&& message) noexcept {
+    ThriftServerResponseMessage&& message,
+    folly::DelayedDestruction::DestructorGuard&& adapterGuard) noexcept {
   if (evb_->isInEventBaseThread()) {
     writeResponseOnEventBase(std::move(message));
-  } else {
-    evb_->runInEventBaseThread(
-        [this,
-         dg = folly::DelayedDestruction::DestructorGuard(this),
-         message = std::move(message)]() mutable {
-          writeResponseOnEventBase(std::move(message));
-        });
+    return;
   }
+  // adapterGuard is moved, not copied: a copy would construct a new guard on
+  // this thread and mutate the non-atomic guardCount_ off the EventBase. The
+  // move keeps us alive across the hop and releases on the EventBase.
+  evb_->runInEventBaseThread([this,
+                              adapterGuard = std::move(adapterGuard),
+                              message = std::move(message)]() mutable {
+    writeResponseOnEventBase(std::move(message));
+  });
+}
+
+void ThriftServerAppAdapter::writeResponse(
+    ThriftServerResponseMessage&& message) noexcept {
+  DCHECK(evb_->isInEventBaseThread())
+      << "writeResponse without a guard is EventBase-only; off-thread callers "
+         "must donate a DestructorGuard so the adapter survives the hop";
+  writeResponseOnEventBase(std::move(message));
 }
 
 void ThriftServerAppAdapter::writeResponseOnEventBase(

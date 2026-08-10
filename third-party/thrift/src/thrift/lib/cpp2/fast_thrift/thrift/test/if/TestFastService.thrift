@@ -27,4 +27,10 @@ service TestFastService {
   i64 add(1: i64 a, 2: i64 b);
   string sendResponse(1: i64 size);
   void ping();
+
+  // Paired probes: each reports whether its handler ran on the connection's
+  // EventBase. Only the annotated one must stay there when a CPU pool exists.
+  bool ranOnEventBase();
+  @cpp.ProcessInEbThreadUnsafe
+  bool ebRanOnEventBase();
 }

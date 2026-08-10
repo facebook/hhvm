@@ -54,6 +54,7 @@ void onResult(
     ThriftServerAppAdapter* a,
     uint32_t streamId,
     std::unique_ptr<ThriftRequestContext> /*requestContext*/,
+    folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/,
     int value) {
   auto& r = asRecorder(a);
   r.resultCount++;
@@ -61,9 +62,13 @@ void onResult(
   r.lastValue = value;
 }
 
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
+// The by-value exception_wrapper matches the ExceptionFn signature.
 void onException(
-    ThriftServerAppAdapter* a, uint32_t streamId, folly::exception_wrapper ew) {
+    ThriftServerAppAdapter* a,
+    uint32_t streamId,
+    folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/,
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    folly::exception_wrapper ew) {
   auto& r = asRecorder(a);
   r.exceptionCount++;
   r.lastStreamId = streamId;
@@ -73,7 +78,8 @@ void onException(
 void onDone(
     ThriftServerAppAdapter* a,
     uint32_t streamId,
-    std::unique_ptr<ThriftRequestContext> /*requestContext*/) {
+    std::unique_ptr<ThriftRequestContext> /*requestContext*/,
+    folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/) {
   auto& r = asRecorder(a);
   r.doneCount++;
   r.lastStreamId = streamId;
@@ -94,7 +100,7 @@ TEST(FastHandlerCallbackTest, ResultInvokesResultFnAndSuppressesDestructor) {
   auto rec = makeRecorder();
   folly::EventBase evb;
   {
-    auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
         &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->result(123);
   }
@@ -111,7 +117,7 @@ TEST(
   auto rec = makeRecorder();
   folly::EventBase evb;
   {
-    auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
         &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->exception(
         folly::make_exception_wrapper<TApplicationException>(
@@ -127,7 +133,7 @@ TEST(FastHandlerCallbackTest, DestructorFiresExceptionWhenNotCompleted) {
   auto rec = makeRecorder();
   folly::EventBase evb;
   {
-    auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
         &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     // Drop without completing — destructor must synthesize an error so the
     // peer never hangs.
@@ -142,7 +148,7 @@ TEST(FastHandlerCallbackTest, VoidDoneInvokesDoneFnAndSuppressesDestructor) {
   auto rec = makeRecorder();
   folly::EventBase evb;
   {
-    auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<void>>(
         &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->done();
   }
@@ -155,7 +161,7 @@ TEST(FastHandlerCallbackTest, VoidDestructorFiresExceptionWhenNotCompleted) {
   auto rec = makeRecorder();
   folly::EventBase evb;
   {
-    auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<void>>(
         &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
   }
   EXPECT_EQ(rec->doneCount, 0);
@@ -166,7 +172,7 @@ TEST(FastHandlerCallbackTest, VoidDestructorFiresExceptionWhenNotCompleted) {
 TEST(FastHandlerCallbackTest, GetEventBaseReturnsConfiguredEventBase) {
   auto rec = makeRecorder();
   folly::EventBase evb;
-  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+  auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
       &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
   EXPECT_EQ(cb->getEventBase(), &evb);
   cb->result(0); // suppress destructor exception
@@ -177,7 +183,7 @@ TEST(FastHandlerCallbackTest, RequestContextAccessorReturnsStoredPointer) {
   folly::EventBase evb;
   auto requestContext = std::make_unique<ThriftRequestContext>();
   auto* requestContextPtr = requestContext.get();
-  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+  auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
       &onResult,
       &onException,
       rec.get(),
@@ -200,7 +206,7 @@ TEST(FastHandlerCallbackTest, OutlivingFHCKeepsAdapterAlive) {
   auto rec = makeRecorder();
   RecordingAdapter* recPtr = rec.get();
 
-  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+  auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
       &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
 
   // Owner drops its Ptr while the FHC is still alive — the FHC's
@@ -230,7 +236,7 @@ TEST(FastHandlerCallbackTest, UncompletedFHCDestructorIsSafeAfterOwnerDrop) {
   auto rec = makeRecorder();
   RecordingAdapter* recPtr = rec.get();
 
-  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+  auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
       &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
 
   // Test-only: keep the adapter alive past cb.reset() so we can

@@ -24,6 +24,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <folly/CppAttributes.h>
+#include <folly/Executor.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
@@ -53,6 +54,14 @@ namespace apache::thrift::fast_thrift::thrift::server {
  */
 struct ThriftServerConnectionFactoryConfig {
   std::shared_ptr<ThriftServerAppAdapterFactory> handler;
+  // Executor that user handler methods are dispatched to. Null keeps
+  // dispatch inline on the connection's EventBase.
+  //
+  // Deliberately applied to the user handler only. Monitoring / status /
+  // debug / metadata methods stay on the EventBase so health checks and
+  // introspection keep answering while the executor is saturated — which is
+  // exactly when they are most likely to be asked.
+  folly::Executor::KeepAlive<> cpuExecutor;
   std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler;
   std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler;
   std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler;
@@ -151,6 +160,10 @@ class ThriftServerConnectionFactory {
       rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
           onSetupComplete,
       ServerStatsShard* FOLLY_NULLABLE statsShard);
+
+  // Hands the configured CPU pool to a user adapter. No-op when no pool is
+  // configured, leaving the adapter dispatching inline on its EventBase.
+  void attachCPUExecutor(ThriftServerAppAdapter& adapter) const;
 
   ThriftServerConnection buildSimpleConnection(
       folly::AsyncTransport::UniquePtr socket,

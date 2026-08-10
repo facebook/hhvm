@@ -22,8 +22,11 @@
 
 #include <gtest/gtest.h>
 
+#include <folly/Executor.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Task.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/task_queue/BlockingQueue.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
@@ -116,9 +119,55 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
 class TestFastServiceHandler
     : public apache::thrift::FastServiceHandler<TestFastService> {
  public:
+  // When set, echo hands the callback to this executor instead of completing
+  // inline, so the callback is released on a thread that is neither the
+  // connection's EventBase nor the thread the method was dispatched on.
+  void setEchoCompletionExecutor(folly::Executor* executor) {
+    echoExecutor_ = executor;
+  }
+
+  // When set, echo parks the callback instead of completing it, so a test can
+  // tear the connection down with a request still outstanding and complete it
+  // afterwards.
+  void parkNextEcho() { parkEcho_ = true; }
+
+  // Blocks until async_eb_echo has parked a callback. Returns false on timeout.
+  bool waitParkedEcho(std::chrono::milliseconds timeout) {
+    return parkedBaton_.try_wait_for(timeout);
+  }
+
+  // Completes a parked callback, if any. Returns false when none was parked.
+  bool releaseParkedEcho() {
+    ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> parked;
+    {
+      std::lock_guard<std::mutex> lock(parkedMutex_);
+      parked = std::move(parkedEcho_);
+    }
+    if (!parked) {
+      return false;
+    }
+    parked->result(std::make_unique<std::string>("parked"));
+    return true;
+  }
+
   void async_eb_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> message) override {
+    if (parkEcho_.exchange(false)) {
+      {
+        std::lock_guard<std::mutex> lock(parkedMutex_);
+        parkedEcho_ = std::move(cb);
+      }
+      parkedBaton_.post();
+      return;
+    }
+    if (auto* executor = echoExecutor_.load()) {
+      executor->add(
+          [cb = std::move(cb), message = std::move(message)]() mutable {
+            cb->result(std::move(message));
+          });
+      return;
+    }
     cb->result(std::move(message));
   }
 
@@ -136,6 +185,24 @@ class TestFastServiceHandler
   void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     cb->done();
   }
+
+  void async_eb_ranOnEventBase(ftt::FastHandlerCallbackPtr<bool> cb) override {
+    const bool onEventBase = cb->getEventBase()->isInEventBaseThread();
+    cb->result(onEventBase);
+  }
+
+  void async_eb_ebRanOnEventBase(
+      ftt::FastHandlerCallbackPtr<bool> cb) override {
+    const bool onEventBase = cb->getEventBase()->isInEventBaseThread();
+    cb->result(onEventBase);
+  }
+
+ private:
+  std::atomic<folly::Executor*> echoExecutor_{nullptr};
+  std::atomic<bool> parkEcho_{false};
+  std::mutex parkedMutex_;
+  ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> parkedEcho_;
+  folly::Baton<> parkedBaton_;
 };
 
 /**
@@ -149,10 +216,18 @@ class TestFastServiceHandler
  *   Thrift pipeline: ThriftClientAppAdapter → ThriftClientMetadataPushHandler
  *     → ThriftClientChecksumHandler → ThriftClientTransportAdapter
  */
-class FastThriftE2ETest : public ::testing::Test {
+// Parameterized on numCPUThreads so every case below runs twice: once with
+// handlers inline on the IO thread, once dispatched to a CPU pool. The two
+// configurations must be indistinguishable from the client's side.
+class FastThriftE2ETest : public ::testing::TestWithParam<uint32_t> {
  protected:
   using FastClientType = apache::thrift::
       FastClient<TestFastService, thrift::ThriftClientAppAdapter>;
+
+  bool usingCPUPool() const { return GetParam() > 0; }
+
+  // Adjust the server between setInterface() and start().
+  virtual void configureServer(ftt::FastThriftServer&) {}
 
   void SetUp() override {
     handler_ = std::make_shared<TestFastServiceHandler>();
@@ -160,6 +235,7 @@ class FastThriftE2ETest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    config.numCPUThreads = GetParam();
     // Validate request checksums and echo a response checksum. enableChecksum
     // requires enableRequestContext (the response algorithm rides the
     // per-request ThriftRequestContext).
@@ -168,6 +244,7 @@ class FastThriftE2ETest : public ::testing::Test {
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
     server_->setInterface(handler_);
+    configureServer(*server_);
     server_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
@@ -332,7 +409,7 @@ class FastThriftE2ETest : public ::testing::Test {
 // Test Cases
 // =============================================================================
 
-TEST_F(FastThriftE2ETest, ReuseAppAdapterWithNewClient) {
+TEST_P(FastThriftE2ETest, ReuseAppAdapterWithNewClient) {
   using BorrowedAppAdapter =
       thrift::client::BorrowedClientAppAdapter<thrift::ThriftClientAppAdapter>;
   using ReusedFastClientType =
@@ -350,7 +427,7 @@ TEST_F(FastThriftE2ETest, ReuseAppAdapterWithNewClient) {
   destroyFastClientOnEvb(client);
 }
 
-TEST_F(FastThriftE2ETest, Ping) {
+TEST_P(FastThriftE2ETest, Ping) {
   auto client = createFastClient();
   auto* evb = clientThread_->getEventBase();
 
@@ -379,7 +456,7 @@ TEST_F(FastThriftE2ETest, Ping) {
   destroyFastClientOnEvb(client);
 }
 
-TEST_F(FastThriftE2ETest, Echo) {
+TEST_P(FastThriftE2ETest, Echo) {
   auto client = createFastClient();
   auto* evb = clientThread_->getEventBase();
 
@@ -414,7 +491,7 @@ TEST_F(FastThriftE2ETest, Echo) {
   destroyFastClientOnEvb(client);
 }
 
-TEST_F(FastThriftE2ETest, Add) {
+TEST_P(FastThriftE2ETest, Add) {
   auto client = createFastClient();
   auto* evb = clientThread_->getEventBase();
 
@@ -446,7 +523,7 @@ TEST_F(FastThriftE2ETest, Add) {
   destroyFastClientOnEvb(client);
 }
 
-TEST_F(FastThriftE2ETest, SendResponse) {
+TEST_P(FastThriftE2ETest, SendResponse) {
   auto client = createFastClient();
   auto* evb = clientThread_->getEventBase();
   constexpr int64_t kResponseSize = 10000;
@@ -491,7 +568,7 @@ TEST_F(FastThriftE2ETest, SendResponse) {
 // sent a real XXH3 checksum, the server validated the request, the server
 // echoed a checksum, and the client validated the echo — any broken link
 // surfaces as a CHECKSUM_MISMATCH RPC error.
-TEST_F(FastThriftE2ETest, ChecksumRoundTrip) {
+TEST_P(FastThriftE2ETest, ChecksumRoundTrip) {
   auto client = createFastClient();
   auto* evb = clientThread_->getEventBase();
 
@@ -504,5 +581,186 @@ TEST_F(FastThriftE2ETest, ChecksumRoundTrip) {
 
   destroyFastClientOnEvb(client);
 }
+
+// Many requests in flight on a *single* connection. Every one of them
+// acquires and releases a DestructorGuard on the same adapter, and with a CPU
+// pool those happen off the connection's EventBase. The adapter's guard
+// counter is a plain uint32_t, so a lost increment or decrement here is a
+// use-after-free or a leak. Meaningful under TSAN above all — that is what
+// distinguishes this from the single-request cases above.
+TEST_P(FastThriftE2ETest, ConcurrentRequestsOnOneConnection) {
+  constexpr int kRequests = 200;
+
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  std::vector<folly::SemiFuture<int64_t>> futures;
+  futures.reserve(kRequests);
+  for (int i = 0; i < kRequests; ++i) {
+    futures.push_back(
+        folly::coro::co_withExecutor(evb, client->co_add(i, i)).start());
+  }
+
+  for (int i = 0; i < kRequests; ++i) {
+    EXPECT_EQ(std::move(futures[i]).get(), int64_t{2} * i);
+  }
+
+  destroyFastClientOnEvb(client);
+}
+
+// The handler completes on a thread that is neither the connection's
+// EventBase nor the thread the method was dispatched on, so the callback —
+// and with it the adapter guard and the request context's ThriftConnContext
+// reference — is released from a third thread.
+//
+// Runs in both configurations. Ownership of the callback is unique and simply
+// travels to whichever thread completes it, so there is no count to race; the
+// only requirement is that destruction lands back on the EventBase, which
+// holds regardless of whether a CPU pool is configured.
+TEST_P(FastThriftE2ETest, HandlerCompletesOnForeignThread) {
+  folly::CPUThreadPoolExecutor completionPool(2);
+  handler_->setEchoCompletionExecutor(&completionPool);
+
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  constexpr int kRequests = 50;
+  // co_echo takes the message by const reference, so it must outlive the
+  // deferred coroutines below — a temporary would dangle past .start().
+  const std::string message = "foreign";
+  std::vector<folly::SemiFuture<std::string>> futures;
+  futures.reserve(kRequests);
+  for (int i = 0; i < kRequests; ++i) {
+    futures.push_back(
+        folly::coro::co_withExecutor(evb, client->co_echo(message)).start());
+  }
+  for (auto& future : futures) {
+    EXPECT_EQ(std::move(future).get(), "foreign");
+  }
+
+  destroyFastClientOnEvb(client);
+  handler_->setEchoCompletionExecutor(nullptr);
+  completionPool.join();
+}
+
+// A request outlives its connection: the handler parks the callback, the
+// client goes away, and only then is the callback completed — from a foreign
+// thread. The adapter has to survive until that straggler is released, and
+// the write it attempts has to be dropped rather than touching a dead
+// pipeline. This is the teardown ordering the whole lifetime design exists
+// for, and it must hold whether or not a CPU pool is in play.
+TEST_P(FastThriftE2ETest, StragglerCompletesAfterConnectionClosed) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  handler_->parkNextEcho();
+
+  // Fire and forget: the server parks this one, so it never completes. The
+  // message must outlive the deferred coroutine — co_echo binds it by
+  // reference.
+  const std::string message = "parked";
+  auto parked =
+      folly::coro::co_withExecutor(evb, client->co_echo(message)).start();
+
+  // Wait for the server to actually park it before tearing anything down,
+  // otherwise the request may not have reached the handler yet.
+  ASSERT_TRUE(handler_->waitParkedEcho(std::chrono::seconds(10)));
+
+  destroyFastClientOnEvb(client);
+
+  // Straggler completes on a foreign thread with the connection already gone.
+  std::thread releaser([&] { EXPECT_TRUE(handler_->releaseParkedEcho()); });
+  releaser.join();
+
+  // The response cannot arrive — the connection is gone — so this either
+  // stays unfulfilled or fails. Either is fine; what matters is that the
+  // server did not crash and the adapter was torn down cleanly, which
+  // ASAN/TSAN check when the fixture stops the server.
+  std::move(parked).wait(std::chrono::seconds(1));
+}
+
+// @cpp.ProcessInEbThreadUnsafe is resolved at IDL compile time: the generated
+// dispatcher for an annotated method has no offload path at all, so it stays
+// on the connection's EventBase even when the server owns a CPU pool. An
+// unannotated method on the same service must still offload, which is what
+// makes this an A/B rather than an assertion that the pool exists.
+TEST_P(FastThriftE2ETest, EventBaseMethodsBypassCPUPool) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  EXPECT_TRUE(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(evb, client->co_ebRanOnEventBase())));
+
+  EXPECT_EQ(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(evb, client->co_ranOnEventBase())),
+      !usingCPUPool());
+
+  destroyFastClientOnEvb(client);
+}
+
+namespace {
+constexpr const char* kRejectionReason = "cpu queue refused the task";
+
+// Refuses every task, standing in for a bounded CPU queue at its limit.
+class RejectingExecutor : public folly::Executor {
+ public:
+  void add(folly::Func) override {
+    throw folly::QueueFullException(kRejectionReason);
+  }
+};
+} // namespace
+
+// A CPU executor that refuses the request still has to answer the client, and
+// the answer has to name the refusal. The dispatcher hands the task a raw
+// pointer and keeps the owning handle until the enqueue commits, so a
+// rejection leaves the callback completable rather than unwinding through the
+// task — which would report only that the callback went uncompleted.
+class FastThriftRejectedDispatchTest : public FastThriftE2ETest {
+ protected:
+  void configureServer(ftt::FastThriftServer& server) override {
+    server.setCPUExecutor(folly::getKeepAliveToken(&executor_));
+  }
+
+ private:
+  RejectingExecutor executor_;
+};
+
+TEST_P(FastThriftRejectedDispatchTest, RejectedEnqueueTellsClientWhy) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  std::string message;
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(evb, client->co_add(1, 2)));
+    FAIL() << "a refused request must not look like success";
+  } catch (const std::exception& ex) {
+    message = ex.what();
+  }
+
+  EXPECT_NE(message.find(kRejectionReason), std::string::npos) << message;
+  EXPECT_EQ(message.find("not completed"), std::string::npos) << message;
+
+  destroyFastClientOnEvb(client);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    RejectingCPUExecutor,
+    FastThriftRejectedDispatchTest,
+    ::testing::Values(uint32_t{0}),
+    [](const auto&) { return "RejectingCPUExecutor"; });
+
+INSTANTIATE_TEST_SUITE_P(
+    Inline, FastThriftE2ETest, ::testing::Values(uint32_t{0}), [](const auto&) {
+      return "InlineOnIOThread";
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CPUPool,
+    FastThriftE2ETest,
+    ::testing::Values(uint32_t{4}),
+    [](const auto&) { return "CPUThreadPool"; });
 
 } // namespace apache::thrift::fast_thrift::thrift::test

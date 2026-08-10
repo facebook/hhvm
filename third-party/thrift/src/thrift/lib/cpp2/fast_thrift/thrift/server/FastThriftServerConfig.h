@@ -37,6 +37,16 @@ struct FastThriftServerConfig {
   // connections via SO_REUSEPORT.
   uint32_t numIOThreads{1};
 
+  // Size of the CPU thread pool that user handler methods are dispatched to.
+  // Zero keeps the pre-existing behavior: request deserialization and the
+  // handler call both run inline on the IO thread that owns the connection,
+  // so a handler that blocks stalls every other connection on that thread.
+  //
+  // Ignored when an executor is supplied via FastThriftServer::setCPUExecutor.
+  // Auxiliary interfaces (monitoring / status / debug / metadata) never
+  // dispatch to it — see setCPUExecutor.
+  uint32_t numCPUThreads{0};
+
   // Minimum payload size in bytes for MSG_ZEROCOPY. 0 disables zero-copy.
   size_t zeroCopyThreshold{0};
 

@@ -56,6 +56,10 @@ service BasicService {
     2: PermissionDeniedException denied,
   );
 
+  // event-base method — dispatcher must call _run inline, never the CPU pool
+  @cpp.ProcessInEbThreadUnsafe
+  DataItem ebLookup(1: i32 id);
+
   // oneway — generator must skip this method entirely
   // @lint-ignore THRIFTCHECKS oneway is intentional fixture input
   oneway void fireAndForget(1: string event);

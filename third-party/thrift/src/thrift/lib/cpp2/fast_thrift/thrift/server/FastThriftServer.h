@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include <folly/Executor.h>
 #include <folly/SocketAddress.h>
 #include <folly/container/F14Set.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
@@ -204,6 +205,28 @@ class FastThriftServer {
   void setIOThreadPool(std::shared_ptr<folly::IOThreadPoolExecutorBase> pool);
 
   /**
+   * Supply the CPU executor that user handler methods are dispatched to,
+   * instead of constructing a thread pool from config_.numCPUThreads. Lets
+   * multiple servers/subsystems share one executor.
+   *
+   * The keep-alive token is held for the server's lifetime, so the executor
+   * outlives every dispatch the server enqueues onto it.
+   *
+   * When no executor is configured (the default), argument deserialization
+   * and the handler call both run inline on the IO thread owning the
+   * connection. That is the cheapest path, and correct for handlers that
+   * never block.
+   *
+   * Only the user handler offloads. Monitoring, status, debug and metadata
+   * methods always run on the IO thread, so health checks and introspection
+   * keep answering while the executor is saturated.
+   *
+   * Must be called before start()/serve(). When set, config_.numCPUThreads
+   * is ignored.
+   */
+  void setCPUExecutor(folly::Executor::KeepAlive<> executor);
+
+  /**
    * Attach a cBPF program to the SO_REUSEPORT group that replaces the
    * kernel's default 4-tuple hash selection with uniform random across
    * worker listening sockets. Mitigates per-worker pile-up when client
@@ -378,6 +401,15 @@ class FastThriftServer {
   // constructed in start() from config_.numIOThreads. Released on
   // destruction; the pool's own dtor joins when the last ref drops.
   std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool_;
+  // Backs cpuExecutor_ only when start() had to construct the pool itself
+  // from config_.numCPUThreads; an embedder-supplied executor is owned by
+  // the embedder and this stays null. Declared before cpuExecutor_ so the
+  // keep-alive is released before the pool it refers to is destroyed.
+  std::shared_ptr<folly::Executor> ownedCPUThreadPool_;
+  // CPU executor for user handler dispatch. Either embedder-supplied via
+  // setCPUExecutor or a keep-alive on ownedCPUThreadPool_. Null means
+  // handlers run inline on the IO threads.
+  folly::Executor::KeepAlive<> cpuExecutor_;
   connection::ConnectionManager::Ptr connectionManager_;
   folly::Baton<> stopBaton_;
   // Guards state_ and serializes lifecycle transitions so that stop()

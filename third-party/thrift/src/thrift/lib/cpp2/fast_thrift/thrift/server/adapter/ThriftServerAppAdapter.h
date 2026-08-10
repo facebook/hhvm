@@ -64,6 +64,25 @@ namespace apache::thrift::fast_thrift::thrift {
  * valid even if the upper-layer Ptr is dropped. Once the pipeline is
  * gone (signaled to the adapter via ConnectionClosed), pipelineActive_
  * is false and straggler writeResponse calls are silently dropped.
+ *
+ * Threading: when a CPU executor is attached, generated method bodies run
+ * off the connection's EventBase. Two refcounts reachable from a request
+ * are deliberately non-atomic — this adapter's DelayedDestruction
+ * guardCount_, and the ThriftConnContext refcount held via
+ * ThriftRequestContext. Both are per-connection, so concurrent requests
+ * would contend on them.
+ *
+ * The invariant that keeps that sound: *both are mutated only on this
+ * adapter's EventBase.* Three things uphold it, and all three must survive
+ * refactoring together —
+ *   1. FastHandlerCallback is constructed on the EventBase, before any
+ *      offload, so acquiring the adapter guard happens there.
+ *   2. FastHandlerCallback releases on the EventBase, hopping if needed,
+ *      which covers both its adapter guard and its request context.
+ *   3. Moving a request context never touches the refcount, so building a
+ *      response off-EventBase is safe.
+ * Everything else off-EventBase must confine itself to writeResponse,
+ * which does its own hop.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
@@ -102,8 +121,20 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
 
+  // Attach the executor that generated dispatchers offload method bodies to.
+  // When unset, dispatch stays inline on the connection's EventBase.
+  //
+  // Must be called before the connection starts reading — the executor is
+  // read without synchronization on the dispatch path.
+  void setCPUExecutor(folly::Executor::KeepAlive<> executor) noexcept {
+    cpuExecutor_ = std::move(executor);
+  }
+
   // Drops the pipeline reference and releases the DestructorGuard taken in
   // setPipeline. Must be called before the adapter is destroyed.
+  //
+  // EventBase-only: it mutates guardCount_ and clears evb_, both of which
+  // in-flight off-EventBase work depends on. See the threading note above.
   void resetPipeline() noexcept;
 
   channel_pipeline::PipelineImpl* pipeline() const noexcept {
@@ -141,13 +172,26 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept {}
 
-  // Single write entry point. Thread-safe: hops to the adapter's EVB if
-  // called off-thread, fires inline otherwise.
+  // Write entry point for callers that may be off the EventBase.
+  //
+  // `adapterGuard` must be a guard the caller already owns — typically the
+  // one a FastHandlerCallback took at construction time. It is *moved*, never
+  // constructed here: constructing a DestructorGuard bumps this adapter's
+  // non-atomic guardCount_, which is only safe on the EventBase, whereas
+  // moving one just transfers a pointer. Ownership rides into the hop so the
+  // adapter cannot be destroyed before the write runs, and the guard is
+  // released on the EventBase.
   //
   // Build the message via the free functions in
   // thrift/server/util/ResponsePayloads.h (makeResponseMessage,
   // makeErrorMessage, makeFrameworkErrorMessage, makeUnknownExceptionMessage,
   // makeSuccessResponseMessage<>, makeDeclaredExceptionMessage<>, ...).
+  void writeResponse(
+      ThriftServerResponseMessage&& message,
+      folly::DelayedDestruction::DestructorGuard&& adapterGuard) noexcept;
+
+  // Write entry point for callers already on the EventBase, which therefore
+  // need no guard to survive a hop. DCHECKs the thread.
   void writeResponse(ThriftServerResponseMessage&& message) noexcept;
 
   // Initiate connection close. Internally fires a
@@ -182,6 +226,10 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   folly::EventBase* getEventBase() const { return evb_.get(); }
 
+  // Executor for generated dispatchers to offload to, or null when method
+  // bodies should run inline on the EventBase.
+  folly::Executor* cpuExecutor() const noexcept { return cpuExecutor_.get(); }
+
  private:
   void handleRequestResponse(ThriftServerRequestMessage&& request) noexcept;
   FOLLY_NOINLINE void handleWrongRpcKind(
@@ -194,6 +242,9 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void writeResponseOnEventBase(ThriftServerResponseMessage&& message) noexcept;
 
   folly::Executor::KeepAlive<folly::EventBase> evb_{};
+  // Null unless the server was configured with a CPU executor. Written once
+  // at wiring time, read on every dispatch.
+  folly::Executor::KeepAlive<> cpuExecutor_{};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
 

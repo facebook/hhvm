@@ -33,10 +33,21 @@ namespace apache::thrift::fast_thrift::thrift {
 
 // Per-connection context. Lives for the duration of one accepted connection.
 //
-// Refcount is non-atomic (boost::thread_unsafe_counter): a ThriftConnContext
-// is per-connection and per-IO-thread — all increments/decrements happen on
-// the owning EventBase. Using a non-atomic counter avoids the per-bump
-// atomic op when the context is shared into per-request handles.
+// Refcount is non-atomic (boost::thread_unsafe_counter), which avoids an
+// atomic op every time the context is shared into a per-request handle. The
+// invariant that makes this sound is that every increment and decrement
+// happens on the connection's EventBase.
+//
+// That is not automatic once user handlers run on a CPU pool. It holds
+// because the only reference outside the pipeline lives in
+// ThriftRequestContext, which is owned by FastHandlerCallback, and the
+// callback defers its own destruction to the EventBase. Moving a context —
+// as the response path does — never touches the refcount, so building a
+// response off-EventBase stays safe.
+//
+// Handler code must therefore not copy a boost::intrusive_ptr to this object
+// off the EventBase. getConnectionContext() hands back a raw pointer
+// precisely so the safe usage is the obvious one.
 class ThriftConnContext : public boost::intrusive_ref_counter<
                               ThriftConnContext,
                               boost::thread_unsafe_counter> {

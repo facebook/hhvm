@@ -774,6 +774,19 @@ determineInvocationType:
 //
 
 //
+// Method 'ebLookup'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_eb_ebLookup(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t /*id*/) {
+  callback->exception(
+      apache::thrift::detail::si::create_app_exn_unimplemented("ebLookup"));
+}
+//
+// End of Method 'ebLookup'
+//
+
+//
 // Method 'fireAndForget'
 //
 
@@ -990,6 +1003,11 @@ const BasicServiceAsyncProcessor::ProcessMap BasicServiceAsyncProcessor::kOwnPro
      &BasicServiceAsyncProcessor::setUpAndProcess_secureLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &BasicServiceAsyncProcessor::executeRequest_secureLookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &BasicServiceAsyncProcessor::executeRequest_secureLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"ebLookup",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_ebLookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_ebLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_ebLookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_ebLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
   {"fireAndForget",
     {&BasicServiceAsyncProcessor::setUpAndProcess_fireAndForget<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &BasicServiceAsyncProcessor::setUpAndProcess_fireAndForget<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
@@ -1044,6 +1062,14 @@ apache::thrift::ServiceRequestInfoMap BasicServiceServiceInfoHolder::staticReque
      apache::thrift::concurrency::NORMAL,
      std::nullopt,
      ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("secureLookup")}},
+  {"ebLookup",
+    { true,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.ebLookup",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("ebLookup")}},
   {"fireAndForget",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
@@ -1155,6 +1181,19 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
               requestContext) noexcept {
         static_cast<BasicServiceAppAdapter*>(a)
             ->process_secureLookup(
+                streamId, std::move(data), p, std::move(requestContext));
+      });
+  addMethodHandler(
+      "ebLookup",
+      +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
+          uint32_t streamId,
+          std::unique_ptr<folly::IOBuf> data,
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
+        static_cast<BasicServiceAppAdapter*>(a)
+            ->process_ebLookup(
                 streamId, std::move(data), p, std::move(requestContext));
       });
 }
@@ -1372,6 +1411,50 @@ template void BasicServiceAppAdapter::process_secureLookup_impl<
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template void BasicServiceAppAdapter::process_secureLookup_impl<
+    ::apache::thrift::BinaryProtocolReader,
+    ::apache::thrift::BinaryProtocolWriter>(
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
+
+void BasicServiceAppAdapter::process_ebLookup(
+    uint32_t streamId,
+    std::unique_ptr<folly::IOBuf> data,
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
+  switch (protocolId) {
+    case ::apache::thrift::ProtocolId::COMPACT:
+      process_ebLookup_impl<
+          ::apache::thrift::CompactProtocolReader,
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
+      break;
+    case ::apache::thrift::ProtocolId::BINARY:
+      process_ebLookup_impl<
+          ::apache::thrift::BinaryProtocolReader,
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
+      break;
+    default:
+      writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
+      break;
+  }
+}
+
+template void BasicServiceAppAdapter::process_ebLookup_impl<
+    ::apache::thrift::CompactProtocolReader,
+    ::apache::thrift::CompactProtocolWriter>(
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
+template void BasicServiceAppAdapter::process_ebLookup_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,

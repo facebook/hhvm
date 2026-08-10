@@ -26,6 +26,7 @@
 
 #include <folly/Executor.h>
 #include <folly/Function.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/io/async/AsyncSignalHandler.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
@@ -180,6 +181,16 @@ void FastThriftServer::setIOThreadPool(
   ioThreadPool_ = std::move(pool);
 }
 
+void FastThriftServer::setCPUExecutor(folly::Executor::KeepAlive<> executor) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setCPUExecutor must be called before "
+         "start()/serve()";
+  CHECK(executor)
+      << "FastThriftServer::setCPUExecutor requires a non-null executor";
+  cpuExecutor_ = std::move(executor);
+}
+
 void FastThriftServer::setEnableReusePortBpfSpread(bool enable) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
@@ -306,6 +317,14 @@ void FastThriftServer::start() {
         /*maxThreads=*/config_.numIOThreads,
         /*minThreads=*/config_.numIOThreads);
   }
+
+  // Materialize the CPU pool only when asked for one and the embedder didn't
+  // supply it. Leaving it null keeps handlers inline on the IO threads.
+  if (!cpuExecutor_ && config_.numCPUThreads > 0) {
+    ownedCPUThreadPool_ =
+        std::make_shared<folly::CPUThreadPoolExecutor>(config_.numCPUThreads);
+    cpuExecutor_ = folly::getKeepAliveToken(ownedCPUThreadPool_.get());
+  }
   connectionManager_ = connection::ConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),
@@ -321,6 +340,7 @@ void FastThriftServer::start() {
   // the per-connection ThriftConnContext via ThriftServerConnection.
   server::ThriftServerConnectionFactoryConfig factoryConfig{
       .handler = handler_,
+      .cpuExecutor = cpuExecutor_,
       .monitoringHandler = auxInterfaces_.monitoringHandler,
       .statusHandler = auxInterfaces_.statusHandler,
       .debugHandler = auxInterfaces_.debugHandler,

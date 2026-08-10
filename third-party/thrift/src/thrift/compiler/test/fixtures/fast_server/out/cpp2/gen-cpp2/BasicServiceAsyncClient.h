@@ -667,6 +667,129 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
   template <typename CallbackType>
   folly::SemiFuture<::cpp2::test::DataItem> fbthrift_semifuture_secureLookup(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_id, const ::std::string& p_user);
  public:
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void ebLookup(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void ebLookup(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_id);
+ protected:
+  void fbthrift_serialize_and_send_ebLookup(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_id, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void sync_ebLookup(::cpp2::test::DataItem& _return, ::std::int32_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void sync_ebLookup(apache::thrift::RpcOptions& rpcOptions, ::cpp2::test::DataItem& _return, ::std::int32_t p_id);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual folly::Future<::cpp2::test::DataItem> future_ebLookup(::std::int32_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual folly::SemiFuture<::cpp2::test::DataItem> semifuture_ebLookup(::std::int32_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual folly::Future<::cpp2::test::DataItem> future_ebLookup(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual folly::SemiFuture<::cpp2::test::DataItem> semifuture_ebLookup(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_id);
+
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  template <int = 0>
+  folly::coro::Task<::cpp2::test::DataItem> co_ebLookup(::std::int32_t p_id) {
+    return co_ebLookup<false>(nullptr, p_id);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  template <int = 0>
+  folly::coro::Task<::cpp2::test::DataItem> co_ebLookup(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_id) {
+    return co_ebLookup<true>(&rpcOptions, p_id);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<::cpp2::test::DataItem> co_ebLookup(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_id) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
+    auto [ctx, header] = ebLookupCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie(p_id);
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_ebLookup(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id);
+    } else {
+      fbthrift_serialize_and_send_ebLookup(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    ::cpp2::test::DataItem _return;
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
+    auto ew = recv_wrapped_ebLookup(_return, returnState);
+    if (returnState.ctx()) {
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
+      folly::Try<void> interceptorTry;
+      if (!apache::thrift::ContextStack::tryResolveInterceptorResultSync(interceptorResult, interceptorTry)) {
+        interceptorTry = co_await std::get<folly::coro::Task<folly::Try<void>>>(std::move(interceptorResult));
+      }
+      interceptorTry.throwUnlessValue();
+    }
+    if (ew) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void ebLookup(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_id);
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  static folly::exception_wrapper recv_wrapped_ebLookup(::cpp2::test::DataItem& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  static void recv_ebLookup(::cpp2::test::DataItem& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual void recv_instance_ebLookup(::cpp2::test::DataItem& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "ebLookup"} */
+  virtual folly::exception_wrapper recv_instance_wrapped_ebLookup(::cpp2::test::DataItem& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_ebLookup(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_id);
+  template <typename RpcOptions>
+  void fbthrift_send_ebLookup(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> ebLookupCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::cpp2::test::DataItem> fbthrift_semifuture_ebLookup(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_id);
+ public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "fireAndForget"} */
   virtual void fireAndForget(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_event);
   /** Glean {"file": "thrift/compiler/test/fixtures/fast_server/src/module.thrift", "service": "BasicService", "function": "fireAndForget"} */

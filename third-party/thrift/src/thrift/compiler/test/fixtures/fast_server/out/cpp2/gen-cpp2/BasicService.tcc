@@ -22,6 +22,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::test::DataItem*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::test::NotFoundException>> BasicService_lookup_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int32_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>> BasicService_secureLookup_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::test::DataItem*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::test::NotFoundException>, apache::thrift::FieldData<2, ::apache::thrift::type_class::structure, ::cpp2::test::PermissionDeniedException>> BasicService_secureLookup_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int32_t*>> BasicService_ebLookup_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::test::DataItem*>> BasicService_ebLookup_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::std::string*>> BasicService_fireAndForget_pargs;
 //
 // Service Methods
@@ -972,6 +974,189 @@ void BasicServiceAsyncProcessor::throw_wrapped_secureLookup(
 //
 
 //
+// Method 'ebLookup'
+//
+template <typename ProtocolIn_, typename ProtocolOut_>
+void BasicServiceAsyncProcessor::setUpAndProcess_ebLookup(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, nullptr, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+    return;
+  }
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(
+        std::move(req),
+        eb);
+    return;
+  }
+  apache::thrift::ServerRequest serverRequest{
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      {},
+      {},
+      {},
+      {}};
+  executeRequest_ebLookup<ProtocolIn_, ProtocolOut_>(std::move(serverRequest));
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void BasicServiceAsyncProcessor::executeRequest_ebLookup(
+    apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  struct ArgsState {
+    ::std::int32_t uarg_id{0};
+    BasicService_ebLookup_pargs pargs() {
+      BasicService_ebLookup_pargs args;
+      args.get<0>().value = &uarg_id;
+      return args;
+    }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+        std::as_const(uarg_id)
+      );
+    }
+  } args;
+
+  auto ctxStack = apache::thrift::ContextStack::create(
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "BasicService.ebLookup",
+      serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
+  try {
+    auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "ebLookup",
+        serializedRequest,
+        ctxStack.get());
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "ebLookup");
+    return;
+  }
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "BasicService",
+      /* .methodName =*/ "ebLookup",
+      /* .qualifiedMethodName =*/ "BasicService.ebLookup"};
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::test::BasicService>::fbthrift_invoke_decorator_after_ebLookup};
+ auto callback =
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_ebLookup<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_ebLookup<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          nullptr,
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
+  // Execute method decorator before_ebLookup.
+  iface_->fbthrift_execute_decorators_before_ebLookup(*serverRequest.requestContext(), args.uarg_id);
+
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
+      (void)args;
+      ifacePtr->async_eb_ebLookup(std::move(cb), args.uarg_id);
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback), std::move(args));
+  }
+#else
+  makeExecuteHandler()(std::move(callback), std::move(args));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+/* static */ apache::thrift::SerializedResponse BasicServiceAsyncProcessor::return_ebLookup(
+    apache::thrift::ContextStack* ctx,
+    ::cpp2::test::DataItem const& _return) {
+  ProtocolOut_ prot;
+  ::cpp2::test::BasicService_ebLookup_presult result;
+  result.get<0>().value = const_cast<::cpp2::test::DataItem*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("ebLookup", &prot, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void BasicServiceAsyncProcessor::throw_wrapped_ebLookup(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "ebLookup");
+    return;
+  }
+}
+//
+// End of Method 'ebLookup'
+//
+
+//
 // Method 'fireAndForget'
 //
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -1127,11 +1312,72 @@ void BasicServiceAppAdapter::process_ping_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_ping_presult;
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<void>;
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
+      &Cb::template writeDone<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase(),
+      std::move(requestContext));
+
+  auto* executor = cpuExecutor();
+  if (executor == nullptr) {
+    process_ping_run<ProtocolReader, ProtocolWriter>(
+        std::move(callback), std::move(data));
+    return;
+  }
+
+  using CbPtr = ::apache::thrift::fast_thrift::thrift::detail::CallbackPtr<Cb>;
+
+  // The task carries a raw pointer rather than the owning handle. add() is not
+  // noexcept — a bounded queue rejects by throwing — and this function is, so
+  // ownership has to stay here until the enqueue commits; otherwise the
+  // rejection unwinds through the task and the client is told the callback was
+  // dropped rather than that the request was refused.
+  auto* cb = callback.release();
+  auto task = [this, cb, data = std::move(data)]() mutable {
+    process_ping_run<ProtocolReader, ProtocolWriter>(
+        CbPtr(cb), std::move(data));
+  };
+  // folly::Function stores callables of up to six pointers inline, so
+  // staying under that keeps enqueueing a request allocation-free.
+  static_assert(
+      sizeof(task) <= 6 * sizeof(void*),
+      "dispatch task outgrew folly::Function's in-situ buffer");
+  try {
+    executor->add(std::move(task));
+  } catch (...) {
+    // add() never took the task, so the callback is still ours to answer with.
+    CbPtr owned(cb);
+    owned->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_ping_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   // Local args storage. Storage form must match the handler virtual's
   // parameter type so the dispatcher passes a compatible argument:
-  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
   //       handler takes `const T&` — store complex args by value.
-  //   - default services:
+  //   - default:
   //       handler takes `std::unique_ptr<T>` — store complex args as
   //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
@@ -1142,48 +1388,40 @@ void BasicServiceAppAdapter::process_ping_impl(
     }
   } args;
 
-  using PresultT = ::cpp2::test::BasicService_ping_presult;
-
   try {
     auto pargs = args.pargs();
     ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
         *data, pargs);
   } catch (...) {
-    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
-        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
     return;
   }
 
-  // Inner cascade: pre-instantiated FastHandlerCallback static templates
-  // own success-frame / declared-exception / undeclared-exception writes.
-  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<void>;
-  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
-      &Cb::template writeDone<PresultT, ProtocolWriter>,
-      &Cb::template writeException<PresultT, ProtocolWriter>,
-      this,
-      streamId,
-      getEventBase(),
-      std::move(requestContext));
-
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way
-  // the callbacks own any further write/close coordination.
+  // the callback owns any further write/close coordination.
   //
   // A synchronous throw out of async_eb_* would otherwise hit the noexcept
-  // boundary on this function and terminate the process. Instead, hold a
-  // DestructorGuard so the callback stays alive even if the user moved it
-  // into a continuation that completed and released it, then route the
-  // exception through callback->exception() — but only if the callback
-  // hasn't already been completed (avoid double-write).
-  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
-  auto* cbRaw = callback.get();
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
   try {
     handler_->async_eb_ping(
         std::move(callback));
   } catch (...) {
-    if (!cbRaw->isCompleted()) {
-      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
-    }
   }
 }
 
@@ -1200,11 +1438,72 @@ void BasicServiceAppAdapter::process_add_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_add_presult;
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<::std::int32_t>;
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
+      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase(),
+      std::move(requestContext));
+
+  auto* executor = cpuExecutor();
+  if (executor == nullptr) {
+    process_add_run<ProtocolReader, ProtocolWriter>(
+        std::move(callback), std::move(data));
+    return;
+  }
+
+  using CbPtr = ::apache::thrift::fast_thrift::thrift::detail::CallbackPtr<Cb>;
+
+  // The task carries a raw pointer rather than the owning handle. add() is not
+  // noexcept — a bounded queue rejects by throwing — and this function is, so
+  // ownership has to stay here until the enqueue commits; otherwise the
+  // rejection unwinds through the task and the client is told the callback was
+  // dropped rather than that the request was refused.
+  auto* cb = callback.release();
+  auto task = [this, cb, data = std::move(data)]() mutable {
+    process_add_run<ProtocolReader, ProtocolWriter>(
+        CbPtr(cb), std::move(data));
+  };
+  // folly::Function stores callables of up to six pointers inline, so
+  // staying under that keeps enqueueing a request allocation-free.
+  static_assert(
+      sizeof(task) <= 6 * sizeof(void*),
+      "dispatch task outgrew folly::Function's in-situ buffer");
+  try {
+    executor->add(std::move(task));
+  } catch (...) {
+    // add() never took the task, so the callback is still ours to answer with.
+    CbPtr owned(cb);
+    owned->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_add_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   // Local args storage. Storage form must match the handler virtual's
   // parameter type so the dispatcher passes a compatible argument:
-  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
   //       handler takes `const T&` — store complex args by value.
-  //   - default services:
+  //   - default:
   //       handler takes `std::unique_ptr<T>` — store complex args as
   //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
@@ -1219,48 +1518,40 @@ void BasicServiceAppAdapter::process_add_impl(
     }
   } args;
 
-  using PresultT = ::cpp2::test::BasicService_add_presult;
-
   try {
     auto pargs = args.pargs();
     ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
         *data, pargs);
   } catch (...) {
-    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
-        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
     return;
   }
 
-  // Inner cascade: pre-instantiated FastHandlerCallback static templates
-  // own success-frame / declared-exception / undeclared-exception writes.
-  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<::std::int32_t>;
-  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
-      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
-      &Cb::template writeException<PresultT, ProtocolWriter>,
-      this,
-      streamId,
-      getEventBase(),
-      std::move(requestContext));
-
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way
-  // the callbacks own any further write/close coordination.
+  // the callback owns any further write/close coordination.
   //
   // A synchronous throw out of async_eb_* would otherwise hit the noexcept
-  // boundary on this function and terminate the process. Instead, hold a
-  // DestructorGuard so the callback stays alive even if the user moved it
-  // into a continuation that completed and released it, then route the
-  // exception through callback->exception() — but only if the callback
-  // hasn't already been completed (avoid double-write).
-  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
-  auto* cbRaw = callback.get();
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
   try {
     handler_->async_eb_add(
         std::move(callback), args.uarg_a, args.uarg_b);
   } catch (...) {
-    if (!cbRaw->isCompleted()) {
-      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
-    }
   }
 }
 
@@ -1277,11 +1568,72 @@ void BasicServiceAppAdapter::process_buildItem_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_buildItem_presult;
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
+      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase(),
+      std::move(requestContext));
+
+  auto* executor = cpuExecutor();
+  if (executor == nullptr) {
+    process_buildItem_run<ProtocolReader, ProtocolWriter>(
+        std::move(callback), std::move(data));
+    return;
+  }
+
+  using CbPtr = ::apache::thrift::fast_thrift::thrift::detail::CallbackPtr<Cb>;
+
+  // The task carries a raw pointer rather than the owning handle. add() is not
+  // noexcept — a bounded queue rejects by throwing — and this function is, so
+  // ownership has to stay here until the enqueue commits; otherwise the
+  // rejection unwinds through the task and the client is told the callback was
+  // dropped rather than that the request was refused.
+  auto* cb = callback.release();
+  auto task = [this, cb, data = std::move(data)]() mutable {
+    process_buildItem_run<ProtocolReader, ProtocolWriter>(
+        CbPtr(cb), std::move(data));
+  };
+  // folly::Function stores callables of up to six pointers inline, so
+  // staying under that keeps enqueueing a request allocation-free.
+  static_assert(
+      sizeof(task) <= 6 * sizeof(void*),
+      "dispatch task outgrew folly::Function's in-situ buffer");
+  try {
+    executor->add(std::move(task));
+  } catch (...) {
+    // add() never took the task, so the callback is still ours to answer with.
+    CbPtr owned(cb);
+    owned->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_buildItem_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   // Local args storage. Storage form must match the handler virtual's
   // parameter type so the dispatcher passes a compatible argument:
-  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
   //       handler takes `const T&` — store complex args by value.
-  //   - default services:
+  //   - default:
   //       handler takes `std::unique_ptr<T>` — store complex args as
   //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
@@ -1297,48 +1649,40 @@ void BasicServiceAppAdapter::process_buildItem_impl(
     }
   } args;
 
-  using PresultT = ::cpp2::test::BasicService_buildItem_presult;
-
   try {
     auto pargs = args.pargs();
     ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
         *data, pargs);
   } catch (...) {
-    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
-        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
     return;
   }
 
-  // Inner cascade: pre-instantiated FastHandlerCallback static templates
-  // own success-frame / declared-exception / undeclared-exception writes.
-  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
-  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
-      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
-      &Cb::template writeException<PresultT, ProtocolWriter>,
-      this,
-      streamId,
-      getEventBase(),
-      std::move(requestContext));
-
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way
-  // the callbacks own any further write/close coordination.
+  // the callback owns any further write/close coordination.
   //
   // A synchronous throw out of async_eb_* would otherwise hit the noexcept
-  // boundary on this function and terminate the process. Instead, hold a
-  // DestructorGuard so the callback stays alive even if the user moved it
-  // into a continuation that completed and released it, then route the
-  // exception through callback->exception() — but only if the callback
-  // hasn't already been completed (avoid double-write).
-  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
-  auto* cbRaw = callback.get();
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
   try {
     handler_->async_eb_buildItem(
         std::move(callback), std::move(args.uarg_template_), args.uarg_id);
   } catch (...) {
-    if (!cbRaw->isCompleted()) {
-      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
-    }
   }
 }
 
@@ -1355,11 +1699,72 @@ void BasicServiceAppAdapter::process_lookup_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_lookup_presult;
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
+      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase(),
+      std::move(requestContext));
+
+  auto* executor = cpuExecutor();
+  if (executor == nullptr) {
+    process_lookup_run<ProtocolReader, ProtocolWriter>(
+        std::move(callback), std::move(data));
+    return;
+  }
+
+  using CbPtr = ::apache::thrift::fast_thrift::thrift::detail::CallbackPtr<Cb>;
+
+  // The task carries a raw pointer rather than the owning handle. add() is not
+  // noexcept — a bounded queue rejects by throwing — and this function is, so
+  // ownership has to stay here until the enqueue commits; otherwise the
+  // rejection unwinds through the task and the client is told the callback was
+  // dropped rather than that the request was refused.
+  auto* cb = callback.release();
+  auto task = [this, cb, data = std::move(data)]() mutable {
+    process_lookup_run<ProtocolReader, ProtocolWriter>(
+        CbPtr(cb), std::move(data));
+  };
+  // folly::Function stores callables of up to six pointers inline, so
+  // staying under that keeps enqueueing a request allocation-free.
+  static_assert(
+      sizeof(task) <= 6 * sizeof(void*),
+      "dispatch task outgrew folly::Function's in-situ buffer");
+  try {
+    executor->add(std::move(task));
+  } catch (...) {
+    // add() never took the task, so the callback is still ours to answer with.
+    CbPtr owned(cb);
+    owned->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_lookup_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   // Local args storage. Storage form must match the handler virtual's
   // parameter type so the dispatcher passes a compatible argument:
-  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
   //       handler takes `const T&` — store complex args by value.
-  //   - default services:
+  //   - default:
   //       handler takes `std::unique_ptr<T>` — store complex args as
   //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
@@ -1372,48 +1777,40 @@ void BasicServiceAppAdapter::process_lookup_impl(
     }
   } args;
 
-  using PresultT = ::cpp2::test::BasicService_lookup_presult;
-
   try {
     auto pargs = args.pargs();
     ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
         *data, pargs);
   } catch (...) {
-    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
-        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
     return;
   }
 
-  // Inner cascade: pre-instantiated FastHandlerCallback static templates
-  // own success-frame / declared-exception / undeclared-exception writes.
-  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
-  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
-      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
-      &Cb::template writeException<PresultT, ProtocolWriter>,
-      this,
-      streamId,
-      getEventBase(),
-      std::move(requestContext));
-
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way
-  // the callbacks own any further write/close coordination.
+  // the callback owns any further write/close coordination.
   //
   // A synchronous throw out of async_eb_* would otherwise hit the noexcept
-  // boundary on this function and terminate the process. Instead, hold a
-  // DestructorGuard so the callback stays alive even if the user moved it
-  // into a continuation that completed and released it, then route the
-  // exception through callback->exception() — but only if the callback
-  // hasn't already been completed (avoid double-write).
-  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
-  auto* cbRaw = callback.get();
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
   try {
     handler_->async_eb_lookup(
         std::move(callback), args.uarg_id);
   } catch (...) {
-    if (!cbRaw->isCompleted()) {
-      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
-    }
   }
 }
 
@@ -1430,11 +1827,72 @@ void BasicServiceAppAdapter::process_secureLookup_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_secureLookup_presult;
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
+      &Cb::template writeSuccess<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase(),
+      std::move(requestContext));
+
+  auto* executor = cpuExecutor();
+  if (executor == nullptr) {
+    process_secureLookup_run<ProtocolReader, ProtocolWriter>(
+        std::move(callback), std::move(data));
+    return;
+  }
+
+  using CbPtr = ::apache::thrift::fast_thrift::thrift::detail::CallbackPtr<Cb>;
+
+  // The task carries a raw pointer rather than the owning handle. add() is not
+  // noexcept — a bounded queue rejects by throwing — and this function is, so
+  // ownership has to stay here until the enqueue commits; otherwise the
+  // rejection unwinds through the task and the client is told the callback was
+  // dropped rather than that the request was refused.
+  auto* cb = callback.release();
+  auto task = [this, cb, data = std::move(data)]() mutable {
+    process_secureLookup_run<ProtocolReader, ProtocolWriter>(
+        CbPtr(cb), std::move(data));
+  };
+  // folly::Function stores callables of up to six pointers inline, so
+  // staying under that keeps enqueueing a request allocation-free.
+  static_assert(
+      sizeof(task) <= 6 * sizeof(void*),
+      "dispatch task outgrew folly::Function's in-situ buffer");
+  try {
+    executor->add(std::move(task));
+  } catch (...) {
+    // add() never took the task, so the callback is still ours to answer with.
+    CbPtr owned(cb);
+    owned->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_secureLookup_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   // Local args storage. Storage form must match the handler virtual's
   // parameter type so the dispatcher passes a compatible argument:
-  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
   //       handler takes `const T&` — store complex args by value.
-  //   - default services:
+  //   - default:
   //       handler takes `std::unique_ptr<T>` — store complex args as
   //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
@@ -1450,22 +1908,71 @@ void BasicServiceAppAdapter::process_secureLookup_impl(
     }
   } args;
 
-  using PresultT = ::cpp2::test::BasicService_secureLookup_presult;
-
   try {
     auto pargs = args.pargs();
     ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
         *data, pargs);
   } catch (...) {
-    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
-        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
     return;
   }
+
+  // Dispatch to the user-implemented FastServiceHandler<Service> method.
+  // The handler may complete synchronously or asynchronously; either way
+  // the callback owns any further write/close coordination.
+  //
+  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
+  try {
+    handler_->async_eb_secureLookup(
+        std::move(callback), args.uarg_id, std::move(args.uarg_user));
+  } catch (...) {
+  }
+}
+
+//
+// End of Method 'secureLookup'
+//
+
+//
+// Method 'ebLookup'
+//
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_ebLookup_impl(
+    uint32_t streamId,
+    std::unique_ptr<folly::IOBuf> data,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
+  using PresultT = ::cpp2::test::BasicService_ebLookup_presult;
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
   // own success-frame / declared-exception / undeclared-exception writes.
   using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<std::unique_ptr<::cpp2::test::DataItem>>;
-  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
+
+  // Built here, before any offload, because this runs on the EventBase: the
+  // callback's constructor takes a DestructorGuard on the adapter, and that
+  // counter is non-atomic. The callback releases it back on the EventBase
+  // too, so the whole guard lifetime stays single-threaded.
+  //
+  // Ownership is unique from here on. The handle moves down the chain and is
+  // never copied, so the callback needs no reference count even once it is
+  // running on a CPU thread.
+  auto callback = ::apache::thrift::fast_thrift::thrift::makeFastHandlerCallback<Cb>(
       &Cb::template writeSuccess<PresultT, ProtocolWriter>,
       &Cb::template writeException<PresultT, ProtocolWriter>,
       this,
@@ -1473,30 +1980,73 @@ void BasicServiceAppAdapter::process_secureLookup_impl(
       getEventBase(),
       std::move(requestContext));
 
+  // @cpp.ProcessInEbThreadUnsafe: this method runs inline on the EventBase,
+  // so it never consults the CPU pool even when the server has one.
+  process_ebLookup_run<ProtocolReader, ProtocolWriter>(
+      std::move(callback), std::move(data));
+}
+
+template <typename ProtocolReader, typename ProtocolWriter>
+void BasicServiceAppAdapter::process_ebLookup_run(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
+  // Local args storage. Storage form must match the handler virtual's
+  // parameter type so the dispatcher passes a compatible argument:
+  //   - stack_arguments (the mstch_cpp2:stack_arguments compiler option, or
+  //     cpp.stack_arguments on the function — unrelated to eb dispatch):
+  //       handler takes `const T&` — store complex args by value.
+  //   - default:
+  //       handler takes `std::unique_ptr<T>` — store complex args as
+  //       unique_ptr so we can std::move() them at dispatch.
+  struct ArgsState {
+    ::std::int32_t uarg_id{0};
+
+    ::cpp2::test::BasicService_ebLookup_pargs pargs() {
+      ::cpp2::test::BasicService_ebLookup_pargs args;
+      args.template get<0>().value = &uarg_id;
+      return args;
+    }
+  } args;
+
+  try {
+    auto pargs = args.pargs();
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    // Goes through the callback rather than writing to the adapter directly:
+    // the callback owns the adapter guard that has to ride along with the
+    // write, and it marks itself complete so its destructor does not add a
+    // second response on top of the app-error frame.
+    callback->sendAppError(
+        ::folly::exception_wrapper(std::current_exception()));
+    return;
+  }
+
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way
-  // the callbacks own any further write/close coordination.
+  // the callback owns any further write/close coordination.
   //
   // A synchronous throw out of async_eb_* would otherwise hit the noexcept
-  // boundary on this function and terminate the process. Instead, hold a
-  // DestructorGuard so the callback stays alive even if the user moved it
-  // into a continuation that completed and released it, then route the
-  // exception through callback->exception() — but only if the callback
-  // hasn't already been completed (avoid double-write).
-  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
-  auto* cbRaw = callback.get();
+  // boundary on this function and terminate the process, so it is swallowed
+  // here. The callback is deliberately not touched: ownership passed to the
+  // handler at the call, and reaching back for it would mean a second owner
+  // and the reference count that sole ownership exists to avoid.
+  //
+  // The client still gets an error either way. A handler that completed and
+  // then threw has already written its response; one that threw without
+  // completing gets INTERNAL_ERROR synthesized by the callback's destructor.
+  // Reporting errors by throwing is not the documented contract —
+  // callback->exception(ew) is — so the lost exception detail is confined to
+  // handler misuse.
   try {
-    handler_->async_eb_secureLookup(
-        std::move(callback), args.uarg_id, std::move(args.uarg_user));
+    handler_->async_eb_ebLookup(
+        std::move(callback), args.uarg_id);
   } catch (...) {
-    if (!cbRaw->isCompleted()) {
-      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
-    }
   }
 }
 
 //
-// End of Method 'secureLookup'
+// End of Method 'ebLookup'
 //
 
 

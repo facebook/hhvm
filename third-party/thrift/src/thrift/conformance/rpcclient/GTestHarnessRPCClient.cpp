@@ -607,9 +607,8 @@ class RPCClientConformanceTest : public testing::Test {
         createClient(clientCmd, server_.getAddress().getAddressStr(), port);
       } else {
         auto cmd = std::string(clientCmd);
-        auto args = cmd.ends_with(".jar")
-            ? std::vector<std::string>{"/usr/bin/env", "java", "-jar", cmd}
-            : std::vector<std::string>{cmd};
+        auto args = cmd.ends_with(".jar") ? javaLaunchArgs(cmd)
+                                          : std::vector<std::string>{cmd};
         args.emplace_back("--port");
         args.push_back(port);
         clientProcess_ = launch_client_process_(args);

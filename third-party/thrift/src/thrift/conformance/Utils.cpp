@@ -33,6 +33,13 @@ const char* getEnvOr(const char* name, const char* dflt) {
   return dflt;
 }
 
+std::vector<std::string> javaLaunchArgs(const std::string& jar) {
+  if (const char* javaBinary = std::getenv("THRIFT_CONFORMANCE_JAVA_BINARY")) {
+    return {javaBinary, "-jar", jar};
+  }
+  return {"/usr/bin/env", "java", "-jar", jar};
+}
+
 const char* getEnvOrThrow(const char* name) {
   if (const char* value = std::getenv(name)) {
     return value;

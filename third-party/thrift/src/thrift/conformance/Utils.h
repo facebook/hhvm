@@ -38,6 +38,13 @@ std::string readFromFile(const char* filename);
 // Runs the given command and returns its stdout as a string.
 std::string readFromCmd(const std::vector<std::string>& argv);
 
+// Builds the argv for running a jar. Resolving `java` from PATH picks up
+// whatever JRE the host happens to ship, which stops working as soon as the jar
+// targets a newer release than that JRE supports, so the build passes the
+// toolchain's JRE in THRIFT_CONFORMANCE_JAVA_BINARY. The PATH lookup remains
+// only for callers that do not set it.
+std::vector<std::string> javaLaunchArgs(const std::string& jar);
+
 // Names default to parent directory, or can be customized by appending
 // '#<name>' to the command. If the command itself has a '#' character in it,
 // appending an additional "#" will cause it to parse correctly.

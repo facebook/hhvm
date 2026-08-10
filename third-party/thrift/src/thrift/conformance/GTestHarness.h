@@ -135,9 +135,8 @@ client_fn_map<Client> getServers(ChannelType channelType) {
         [name = std::string(entry.first),
          cmd = std::string(entry.second),
          channelType]() mutable -> Client& {
-          auto args = cmd.ends_with(".jar")
-              ? std::vector<std::string>{"/usr/bin/env", "java", "-jar", cmd}
-              : std::vector<std::string>{cmd};
+          auto args = cmd.ends_with(".jar") ? javaLaunchArgs(cmd)
+                                            : std::vector<std::string>{cmd};
           static folly::Synchronized<std::map<
               std::string_view,
               std::unique_ptr<ClientAndServer<Client>>>>

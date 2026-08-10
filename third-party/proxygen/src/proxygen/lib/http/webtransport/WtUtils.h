@@ -19,8 +19,9 @@ class HTTPSettings;
 
 namespace proxygen::detail {
 
-// if ENABLE_CONNECT_PROTOCOL is set for downstream, applies some default h2 wt
-// settings on the HttpSettings (e.g. MaxData, MaxStreamData, etc.)
+// applies some default h2 wt settings on the HttpSettings (e.g. MaxData,
+// MaxStreamData, etc.) if this endpoint supports wt; that is if WT_ENABLED is
+// set for upstream, or WT_ENABLED && ENABLE_CONNECT_PROTOCOL for downstream
 void setEgressWtHttpSettings(TransportDirection dir,
                              HTTPSettings* settings) noexcept;
 
@@ -47,6 +48,9 @@ void writeWtBidiFramePrefix(folly::IOBufQueue& q,
  *  The server sends a SETTINGS_WT_ENABLED setting with a value of "1" to
  *  indicate that it supports WebTransport over HTTP/2. Note that the client
  *  does not need to send any value to indicate support for WebTransport
+ *
+ * An application enables wt on an upstream session by setting WT_ENABLED on the
+ * egress settings
  */
 bool supportsH2Wt(TransportDirection dir,
                   const HTTPSettings* ingress,

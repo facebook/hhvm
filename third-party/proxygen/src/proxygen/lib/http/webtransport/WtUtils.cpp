@@ -58,30 +58,34 @@ void writeWtFramePrefix(folly::IOBufQueue& q,
 
 namespace proxygen::detail {
 
-// sets default egress h2 wt http settings if ENABLE_CONNECT_PROTOCOL set
+// sets default egress h2 wt flow control settings if this endpoint supports wt
 void setEgressWtHttpSettings(TransportDirection dir,
                              HTTPSettings* settings) noexcept {
-  const bool clientOk = isUpstream(dir) && settings;
-  const bool serverOk = supportsH2Wt(dir, settings, settings);
-  const bool supportsWt = clientOk || serverOk;
-  if (supportsWt) {
-    // max data
-    static constexpr auto kMaxDataSettings = {
-        SettingsId::WT_INITIAL_MAX_DATA,
-        SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
-        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI};
-    for (auto maxDataSetting : kMaxDataSettings) {
-      settings->setIfNotPresent(maxDataSetting, kWtInitMaxData);
-    }
+  // clients opt into wt by setting WT_ENABLED in their egress settings
+  const bool supportsWt =
+      isUpstream(dir) ? settings && settings->getSetting(SettingsId::WT_ENABLED,
+                                                         /*defaultVal=*/0)
+                      : supportsH2Wt(dir, settings, settings);
+  if (!supportsWt) {
+    return;
+  }
 
-    // max streams
-    static constexpr auto kMaxStreamsSettings = {
-        SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
-        SettingsId::WT_INITIAL_MAX_STREAMS_BIDI,
-    };
-    for (auto maxStreams : kMaxStreamsSettings) {
-      settings->setIfNotPresent(maxStreams, kWtInitMaxStreams);
-    }
+  // max data
+  static constexpr auto kMaxDataSettings = {
+      SettingsId::WT_INITIAL_MAX_DATA,
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI};
+  for (auto maxDataSetting : kMaxDataSettings) {
+    settings->setIfNotPresent(maxDataSetting, kWtInitMaxData);
+  }
+
+  // max streams
+  static constexpr auto kMaxStreamsSettings = {
+      SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
+      SettingsId::WT_INITIAL_MAX_STREAMS_BIDI,
+  };
+  for (auto maxStreams : kMaxStreamsSettings) {
+    settings->setIfNotPresent(maxStreams, kWtInitMaxStreams);
   }
 }
 
@@ -161,7 +165,12 @@ bool supportsH2Wt(TransportDirection dir,
                   const HTTPSettings* egress) noexcept {
   const HTTPSettings* client = isUpstream(dir) ? egress : ingress;
   const HTTPSettings* server = isUpstream(dir) ? ingress : egress;
-  const bool clientOk = bool(client);
+  // a client never advertises WT_ENABLED, so a server cannot infer client
+  // support from ingress settings; a client consults the WT_ENABLED it set on
+  // its own egress settings to determine whether the app opted into wt
+  const bool clientOk =
+      client && (isDownstream(dir) || client->getSetting(SettingsId::WT_ENABLED,
+                                                         /*defaultVal=*/0));
   const bool serverOk = server &&
                         server->getSetting(SettingsId::WT_ENABLED,
                                            /*defaultVal=*/0) &&

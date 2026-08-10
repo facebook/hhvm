@@ -1516,40 +1516,63 @@ TEST_F(HTTP2CodecTest, BasicSetting) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
-TEST_F(HTTP2CodecTest, WebTransportSettings) {
-  constexpr auto kWtSettings =
-      std::array{SettingsId::WT_ENABLED,
-                 SettingsId::WT_INITIAL_MAX_DATA,
-                 SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
-                 SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI,
-                 SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
-                 SettingsId::WT_INITIAL_MAX_STREAMS_BIDI};
+constexpr auto kWtFlowControlSettings =
+    std::array{SettingsId::WT_INITIAL_MAX_DATA,
+               SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
+               SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI,
+               SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
+               SettingsId::WT_INITIAL_MAX_STREAMS_BIDI};
 
+// clients serialize the wt flow control settings but not WT_ENABLED, which is
+// a server setting used locally to opt into wt
+TEST_F(HTTP2CodecTest, WebTransportSettings) {
   auto* settings = upstreamCodec_.getEgressSettings();
   settings->clearSettings();
-  for (auto id : kWtSettings) {
+  settings->setSetting(SettingsId::WT_ENABLED, 1);
+  for (auto id : kWtFlowControlSettings) {
     settings->setSetting(id, 1);
   }
 
-  // expect ::onSettings to contain all of kWtSettings
   upstreamCodec_.generateSettings(output_);
   parse();
   const auto& ingressSettings = callbacks_.ingressSettings;
-  EXPECT_EQ(ingressSettings.size(), kWtSettings.size());
+  EXPECT_EQ(ingressSettings.size(), kWtFlowControlSettings.size());
   for (size_t i = 0; i < ingressSettings.size(); i++) {
-    EXPECT_EQ(ingressSettings[i].id, kWtSettings[i]);
+    EXPECT_EQ(ingressSettings[i].id, kWtFlowControlSettings[i]);
     EXPECT_EQ(ingressSettings[i].value, 1);
+  }
+}
+
+// servers serialize WT_ENABLED along with the wt flow control settings
+TEST_F(HTTP2CodecTest, ServerWebTransportSettings) {
+  auto* settings = downstreamCodec_.getEgressSettings();
+  settings->clearSettings();
+  settings->setSetting(SettingsId::WT_ENABLED, 1);
+  for (auto id : kWtFlowControlSettings) {
+    settings->setSetting(id, 1);
+  }
+
+  SetUpUpstreamTest();
+  parseUpstream();
+  const auto& ingressSettings = callbacks_.ingressSettings;
+  EXPECT_EQ(ingressSettings.size(), kWtFlowControlSettings.size() + 1);
+  EXPECT_EQ(ingressSettings[0].id, SettingsId::WT_ENABLED);
+  for (size_t i = 0; i < kWtFlowControlSettings.size(); i++) {
+    EXPECT_EQ(ingressSettings[i + 1].id, kWtFlowControlSettings[i]);
+    EXPECT_EQ(ingressSettings[i + 1].value, 1);
   }
 }
 
 /*
  * supportsH2Wt returns iff server advertises support for http/2 wt
- * (WT_ENABLED & ENABLE_CONNECT_PROTOCOL); client does not need to advertise
- * any settings to indicate support for wt
+ * (WT_ENABLED & ENABLE_CONNECT_PROTOCOL) and the client opted into wt by
+ * setting WT_ENABLED on its own egress settings; the client's WT_ENABLED is
+ * never serialized, so a server assumes client support
  */
 TEST(HTTP2CodecWebTransportTest, SupportsH2WebTransport) {
   HTTPSettings client;
   HTTPSettings server;
+  client.setSetting(SettingsId::WT_ENABLED, 1);
   server.setSetting(SettingsId::ENABLE_CONNECT_PROTOCOL, 1);
   server.setSetting(SettingsId::WT_ENABLED, 1);
 
@@ -1558,7 +1581,16 @@ TEST(HTTP2CodecWebTransportTest, SupportsH2WebTransport) {
   EXPECT_TRUE(proxygen::detail::supportsH2Wt(
       TransportDirection::DOWNSTREAM, /*ingress=*/&client, /*egress=*/&server));
 
+  // client did not opt into wt; the server is unaffected since it never
+  // receives WT_ENABLED from a client
+  client.unsetSetting(SettingsId::WT_ENABLED);
+  EXPECT_FALSE(proxygen::detail::supportsH2Wt(
+      TransportDirection::UPSTREAM, &server, &client));
+  EXPECT_TRUE(proxygen::detail::supportsH2Wt(
+      TransportDirection::DOWNSTREAM, &client, &server));
+
   // unset WT_ENABLE => server does not support wt
+  client.setSetting(SettingsId::WT_ENABLED, 1);
   server.unsetSetting(SettingsId::WT_ENABLED);
   EXPECT_FALSE(proxygen::detail::supportsH2Wt(
       TransportDirection::UPSTREAM, &server, &client));
@@ -1573,8 +1605,16 @@ TEST(HTTP2CodecWebTransportTest, SetsEgressH2WebTransportSettings) {
       SettingsId::WT_INITIAL_MAX_STREAMS_BIDI};
 
   {
-    // always advertise the above wt settings for http/2 clients
+    // only advertise the above wt settings for http/2 clients if WT_ENABLED is
+    // set; clients opt into wt locally and never serialize WT_ENABLED
     HTTPSettings client;
+    proxygen::detail::setEgressWtHttpSettings(TransportDirection::UPSTREAM,
+                                              &client);
+    for (auto id : kDefaultWtSettings) {
+      EXPECT_EQ(client.getSetting(id), nullptr);
+    }
+
+    client.setSetting(SettingsId::WT_ENABLED, 1);
     proxygen::detail::setEgressWtHttpSettings(TransportDirection::UPSTREAM,
                                               &client);
     for (auto id : kDefaultWtSettings) {

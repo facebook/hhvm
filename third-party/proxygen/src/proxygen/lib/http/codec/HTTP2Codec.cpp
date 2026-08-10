@@ -1443,10 +1443,16 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
           CHECK(setting.value == 0 || setting.value == 1);
         }
         break;
+      case SettingsId::WT_ENABLED:
+        if (isUpstream(transportDirection_)) {
+          // wt draft: WT_ENABLED is a server setting; upstream sessions use it
+          // locally to signal that the application opted into WebTransport
+          continue;
+        }
+        break;
       case SettingsId::MAX_CONCURRENT_STREAMS:
       case SettingsId::INITIAL_WINDOW_SIZE:
       case SettingsId::MAX_FRAME_SIZE:
-      case SettingsId::WT_ENABLED:
       case SettingsId::WT_INITIAL_MAX_DATA:
       case SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI:
       case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI:

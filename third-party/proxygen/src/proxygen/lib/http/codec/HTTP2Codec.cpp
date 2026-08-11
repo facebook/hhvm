@@ -762,7 +762,8 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
       case SettingsId::WT_ENABLED:
       case SettingsId::WT_INITIAL_MAX_DATA:
       case SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI:
-      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI:
+      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
+      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
       case SettingsId::WT_INITIAL_MAX_STREAMS_UNI:
       case SettingsId::WT_INITIAL_MAX_STREAMS_BIDI:
         break;
@@ -1455,7 +1456,8 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
       case SettingsId::MAX_FRAME_SIZE:
       case SettingsId::WT_INITIAL_MAX_DATA:
       case SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI:
-      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI:
+      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
+      case SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
       case SettingsId::WT_INITIAL_MAX_STREAMS_UNI:
       case SettingsId::WT_INITIAL_MAX_STREAMS_BIDI:
         break;

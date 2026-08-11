@@ -163,11 +163,15 @@ TEST(MakeWtConfigTest, MapsParamsCorrectly) {
 
   EXPECT_EQ(cfg.selfMaxStreamsBidi, self.initialMaxStreamsBidi);
   EXPECT_EQ(cfg.selfMaxConnData, self.initialMaxData);
-  EXPECT_EQ(cfg.selfMaxStreamDataBidi, self.initialMaxStreamDataBidiLocal);
+  EXPECT_EQ(cfg.selfMaxStreamDataBidiLocal, self.initialMaxStreamDataBidiLocal);
+  EXPECT_EQ(cfg.selfMaxStreamDataBidiRemote,
+            self.initialMaxStreamDataBidiRemote);
   EXPECT_EQ(cfg.selfMaxStreamDataUni, self.initialMaxStreamDataUni);
   EXPECT_EQ(cfg.peerMaxStreamsBidi, peer.initialMaxStreamsBidi);
   EXPECT_EQ(cfg.peerMaxConnData, peer.initialMaxData);
-  EXPECT_EQ(cfg.peerMaxStreamDataBidi, peer.initialMaxStreamDataBidiRemote);
+  EXPECT_EQ(cfg.peerMaxStreamDataBidiLocal, peer.initialMaxStreamDataBidiLocal);
+  EXPECT_EQ(cfg.peerMaxStreamDataBidiRemote,
+            peer.initialMaxStreamDataBidiRemote);
   EXPECT_EQ(cfg.peerMaxStreamDataUni, peer.initialMaxStreamDataUni);
 }
 

@@ -22,12 +22,14 @@ WtStreamManager::WtConfig createQuicConfig() {
   config.selfMaxStreamsBidi = kMaxVarint;
   config.selfMaxStreamsUni = kMaxVarint;
   config.selfMaxConnData = kMaxVarint;
-  config.selfMaxStreamDataBidi = kMaxWtIngressBuf;
+  config.selfMaxStreamDataBidiLocal = kMaxWtIngressBuf;
+  config.selfMaxStreamDataBidiRemote = kMaxWtIngressBuf;
   config.selfMaxStreamDataUni = kMaxWtIngressBuf;
   config.peerMaxStreamsBidi = kMaxVarint;
   config.peerMaxStreamsUni = kMaxVarint;
   config.peerMaxConnData = kMaxVarint;
-  config.peerMaxStreamDataBidi = kMaxVarint;
+  config.peerMaxStreamDataBidiLocal = kMaxVarint;
+  config.peerMaxStreamDataBidiRemote = kMaxVarint;
   config.peerMaxStreamDataUni = kMaxVarint;
   return config;
 }

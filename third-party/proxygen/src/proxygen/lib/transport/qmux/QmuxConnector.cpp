@@ -192,12 +192,14 @@ WtStreamManager::WtConfig makeWtConfig(
       .selfMaxStreamsBidi = selfParams.initialMaxStreamsBidi,
       .selfMaxStreamsUni = selfParams.initialMaxStreamsUni,
       .selfMaxConnData = selfParams.initialMaxData,
-      .selfMaxStreamDataBidi = selfParams.initialMaxStreamDataBidiLocal,
+      .selfMaxStreamDataBidiLocal = selfParams.initialMaxStreamDataBidiLocal,
+      .selfMaxStreamDataBidiRemote = selfParams.initialMaxStreamDataBidiRemote,
       .selfMaxStreamDataUni = selfParams.initialMaxStreamDataUni,
       .peerMaxStreamsBidi = peerParams.initialMaxStreamsBidi,
       .peerMaxStreamsUni = peerParams.initialMaxStreamsUni,
       .peerMaxConnData = peerParams.initialMaxData,
-      .peerMaxStreamDataBidi = peerParams.initialMaxStreamDataBidiRemote,
+      .peerMaxStreamDataBidiLocal = peerParams.initialMaxStreamDataBidiLocal,
+      .peerMaxStreamDataBidiRemote = peerParams.initialMaxStreamDataBidiRemote,
       .peerMaxStreamDataUni = peerParams.initialMaxStreamDataUni};
 }
 

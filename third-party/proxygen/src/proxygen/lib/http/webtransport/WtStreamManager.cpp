@@ -745,13 +745,22 @@ bool WtStreamManager::hasEvent() const noexcept {
 }
 
 uint64_t WtStreamManager::initStreamRecvFc(uint64_t streamId) const noexcept {
-  return isBidi(streamId) ? wtConfig_.selfMaxStreamDataBidi
-                          : wtConfig_.selfMaxStreamDataUni;
+  if (!isBidi(streamId)) {
+    return wtConfig_.selfMaxStreamDataUni;
+  }
+  // our advertised limits are Local/Remote relative to us
+  return isPeer(streamId) ? wtConfig_.selfMaxStreamDataBidiRemote
+                          : wtConfig_.selfMaxStreamDataBidiLocal;
 }
 
 uint64_t WtStreamManager::initStreamSendFc(uint64_t streamId) const noexcept {
-  return isBidi(streamId) ? wtConfig_.peerMaxStreamDataBidi
-                          : wtConfig_.peerMaxStreamDataUni;
+  if (!isBidi(streamId)) {
+    return wtConfig_.peerMaxStreamDataUni;
+  }
+  // the peer's limits are Local/Remote relative to the peer, so a stream the
+  // peer opened is Local to them and one we opened is Remote to them
+  return isPeer(streamId) ? wtConfig_.peerMaxStreamDataBidiLocal
+                          : wtConfig_.peerMaxStreamDataBidiRemote;
 }
 
 void WtStreamManager::erase(uint64_t streamId) noexcept {

@@ -550,10 +550,11 @@ TEST(WtStreamManager, GrantConnFlowControlCreditAfterRead) {
 TEST(WtStreamManager, NonDefaultFlowControlValues) {
   WtConfig config{};
   config.peerMaxConnData = 100;
-  config.peerMaxStreamDataBidi = config.peerMaxStreamDataUni = 60;
+  config.peerMaxStreamDataBidiLocal = config.peerMaxStreamDataBidiRemote =
+      config.peerMaxStreamDataUni = 60;
 
-  config.selfMaxConnData = config.selfMaxStreamDataBidi =
-      config.selfMaxStreamDataUni = 100;
+  config.selfMaxConnData = config.selfMaxStreamDataBidiLocal =
+      config.selfMaxStreamDataBidiRemote = config.selfMaxStreamDataUni = 100;
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
   auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
@@ -603,6 +604,60 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
   dequeue = streamManager.dequeue(*two, std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 40);
   EXPECT_FALSE(dequeue.fin);
+}
+
+// Bidi stream data limits are Local/Remote relative to whoever advertised
+// them, so which limit applies depends on who opened the stream.
+TEST(WtStreamManager, BidiStreamDataLimitsFollowStreamInitiator) {
+  constexpr uint64_t kSelfLocal = 50;
+  constexpr uint64_t kSelfRemote = 90;
+  constexpr uint64_t kPeerLocal = 30;
+  constexpr uint64_t kPeerRemote = 70;
+  constexpr uint64_t kNotTheLimit = 1000;
+
+  WtConfig config{};
+  config.selfMaxStreamsBidi = config.peerMaxStreamsBidi = 4;
+  config.selfMaxConnData = config.peerMaxConnData = kNotTheLimit;
+  config.selfMaxStreamDataBidiLocal = kSelfLocal;
+  config.selfMaxStreamDataBidiRemote = kSelfRemote;
+  config.peerMaxStreamDataBidiLocal = kPeerLocal;
+  config.peerMaxStreamDataBidiRemote = kPeerRemote;
+
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  auto selfBidi = streamManager.createBidiHandle(); // 0x00
+  CHECK(selfBidi.readHandle && selfBidi.writeHandle);
+  auto peerBidi = streamManager.getOrCreateBidiHandle(0x01);
+  CHECK(peerBidi.readHandle && peerBidi.writeHandle);
+
+  // egress is bounded by the peer's limits: the stream we opened is Remote to
+  // the peer, the one it opened is Local to it
+  constexpr auto kMoreThanAnyLimit = 200;
+  constexpr auto kNoCap = std::numeric_limits<uint64_t>::max();
+  selfBidi.writeHandle->writeStreamData(
+      makeBuf(kMoreThanAnyLimit), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  auto dequeued = streamManager.dequeue(*selfBidi.writeHandle, kNoCap);
+  EXPECT_EQ(dequeued.data->computeChainDataLength(), kPeerRemote);
+
+  peerBidi.writeHandle->writeStreamData(
+      makeBuf(kMoreThanAnyLimit), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  dequeued = streamManager.dequeue(*peerBidi.writeHandle, kNoCap);
+  EXPECT_EQ(dequeued.data->computeChainDataLength(), kPeerLocal);
+
+  // ingress is bounded by our own limits, mirrored: the stream we opened is
+  // Local to us
+  EXPECT_TRUE(streamManager.enqueue(*selfBidi.readHandle,
+                                    {makeBuf(kSelfLocal), /*fin=*/false}));
+  EXPECT_FALSE(
+      streamManager.enqueue(*selfBidi.readHandle, {makeBuf(1), /*fin=*/false}));
+  EXPECT_TRUE(streamManager.enqueue(*peerBidi.readHandle,
+                                    {makeBuf(kSelfRemote), /*fin=*/false}));
+  EXPECT_FALSE(
+      streamManager.enqueue(*peerBidi.readHandle, {makeBuf(1), /*fin=*/false}));
 }
 
 TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {

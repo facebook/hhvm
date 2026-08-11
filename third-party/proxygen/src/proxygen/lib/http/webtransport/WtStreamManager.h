@@ -106,18 +106,21 @@ struct WtStreamManager {
 
   struct WtConfig {
     static constexpr auto kDefaultFc = std::numeric_limits<uint16_t>::max();
-    // values we've advertised to the peer
+    // values we've advertised to the peer; Local/Remote denote which endpoint
+    // opened the bidi stream the limit applies to, relative to the advertiser
     uint64_t selfMaxStreamsBidi{1};
     uint64_t selfMaxStreamsUni{1};
     uint64_t selfMaxConnData{kDefaultFc};
-    uint64_t selfMaxStreamDataBidi{kDefaultFc};
+    uint64_t selfMaxStreamDataBidiLocal{kDefaultFc};
+    uint64_t selfMaxStreamDataBidiRemote{kDefaultFc};
     uint64_t selfMaxStreamDataUni{kDefaultFc};
 
     // values peer has advertised to us
     uint64_t peerMaxStreamsBidi{1};
     uint64_t peerMaxStreamsUni{1};
     uint64_t peerMaxConnData{kDefaultFc};
-    uint64_t peerMaxStreamDataBidi{kDefaultFc};
+    uint64_t peerMaxStreamDataBidiLocal{kDefaultFc};
+    uint64_t peerMaxStreamDataBidiRemote{kDefaultFc};
     uint64_t peerMaxStreamDataUni{kDefaultFc};
 
     // move to a new struct options?

@@ -74,7 +74,8 @@ void setEgressWtHttpSettings(TransportDirection dir,
   static constexpr auto kMaxDataSettings = {
       SettingsId::WT_INITIAL_MAX_DATA,
       SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
-      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI};
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE};
   for (auto maxDataSetting : kMaxDataSettings) {
     settings->setIfNotPresent(maxDataSetting, kWtInitMaxData);
   }
@@ -115,8 +116,10 @@ WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
         ingress->getSetting(SettingsId::WT_INITIAL_MAX_DATA, /*defaultVal=*/0);
     config.peerMaxStreamDataUni = ingress->getSetting(
         SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI, /*defaultVal=*/0);
-    config.peerMaxStreamDataBidi = ingress->getSetting(
-        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI, /*defaultVal=*/0);
+    config.peerMaxStreamDataBidiLocal = ingress->getSetting(
+        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL, /*defaultVal=*/0);
+    config.peerMaxStreamDataBidiRemote = ingress->getSetting(
+        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE, /*defaultVal=*/0);
     config.peerMaxStreamsUni =
         ingress->getSetting(SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
                             /*defaultVal=*/0);
@@ -129,8 +132,10 @@ WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
         egress->getSetting(SettingsId::WT_INITIAL_MAX_DATA, /*defaultVal=*/0);
     config.selfMaxStreamDataUni = egress->getSetting(
         SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI, /*defaultVal=*/0);
-    config.selfMaxStreamDataBidi = egress->getSetting(
-        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI, /*defaultVal=*/0);
+    config.selfMaxStreamDataBidiLocal = egress->getSetting(
+        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL, /*defaultVal=*/0);
+    config.selfMaxStreamDataBidiRemote = egress->getSetting(
+        SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE, /*defaultVal=*/0);
     config.selfMaxStreamsUni =
         egress->getSetting(SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
                            /*defaultVal=*/0);
@@ -139,13 +144,15 @@ WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
                            /*defaultVal=*/0);
   }
 
-  XLOG(DBG6) << config.selfMaxStreamsBidi << "; " << config.selfMaxStreamsUni
-             << "; " << config.selfMaxConnData << "; "
-             << config.selfMaxStreamDataBidi << "; "
-             << config.selfMaxStreamDataUni << "; " << config.peerMaxStreamsBidi
-             << "; " << config.peerMaxStreamsUni << "; "
-             << config.peerMaxConnData << "; " << config.peerMaxStreamDataBidi
-             << "; " << config.peerMaxStreamDataUni;
+  XLOG(DBG6)
+      << config.selfMaxStreamsBidi << "; " << config.selfMaxStreamsUni << "; "
+      << config.selfMaxConnData << "; " << config.selfMaxStreamDataBidiLocal
+      << "; " << config.selfMaxStreamDataBidiRemote << "; "
+      << config.selfMaxStreamDataUni << "; " << config.peerMaxStreamsBidi
+      << "; " << config.peerMaxStreamsUni << "; " << config.peerMaxConnData
+      << "; " << config.peerMaxStreamDataBidiLocal << "; "
+      << config.peerMaxStreamDataBidiRemote << "; "
+      << config.peerMaxStreamDataUni;
 
   return config;
 }
@@ -155,8 +162,10 @@ WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
   WtStreamManager::WtConfig config = getWtConfig(ingress, egress);
   // disables peer&self MaxStreamData(Uni|Bidi) as these are derived from quic
   // transport params
-  config.peerMaxStreamDataBidi = config.peerMaxStreamDataUni =
-      config.selfMaxStreamDataBidi = config.selfMaxStreamDataUni = kMaxVarint;
+  config.peerMaxStreamDataBidiLocal = config.peerMaxStreamDataBidiRemote =
+      config.peerMaxStreamDataUni = config.selfMaxStreamDataBidiLocal =
+          config.selfMaxStreamDataBidiRemote = config.selfMaxStreamDataUni =
+              kMaxVarint;
   return config;
 }
 

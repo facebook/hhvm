@@ -265,12 +265,16 @@ class QmuxSessionTest : public ::testing::Test {
         .selfMaxStreamsBidi = selfParams.initialMaxStreamsBidi,
         .selfMaxStreamsUni = selfParams.initialMaxStreamsUni,
         .selfMaxConnData = selfParams.initialMaxData,
-        .selfMaxStreamDataBidi = selfParams.initialMaxStreamDataBidiLocal,
+        .selfMaxStreamDataBidiLocal = selfParams.initialMaxStreamDataBidiLocal,
+        .selfMaxStreamDataBidiRemote =
+            selfParams.initialMaxStreamDataBidiRemote,
         .selfMaxStreamDataUni = selfParams.initialMaxStreamDataUni,
         .peerMaxStreamsBidi = peerParams.initialMaxStreamsBidi,
         .peerMaxStreamsUni = peerParams.initialMaxStreamsUni,
         .peerMaxConnData = peerParams.initialMaxData,
-        .peerMaxStreamDataBidi = peerParams.initialMaxStreamDataBidiRemote,
+        .peerMaxStreamDataBidiLocal = peerParams.initialMaxStreamDataBidiLocal,
+        .peerMaxStreamDataBidiRemote =
+            peerParams.initialMaxStreamDataBidiRemote,
         .peerMaxStreamDataUni = peerParams.initialMaxStreamDataUni};
 
     session_ = std::make_shared<QmuxSession>(
@@ -484,12 +488,14 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
   WtStreamManager::WtConfig wtConfig{.selfMaxStreamsBidi = kSelfMaxStreams,
                                      .selfMaxStreamsUni = kSelfMaxStreams,
                                      .selfMaxConnData = 1 << 20,
-                                     .selfMaxStreamDataBidi = 1 << 16,
+                                     .selfMaxStreamDataBidiLocal = 1 << 16,
+                                     .selfMaxStreamDataBidiRemote = 1 << 16,
                                      .selfMaxStreamDataUni = 1 << 16,
                                      .peerMaxStreamsBidi = 5,
                                      .peerMaxStreamsUni = 5,
                                      .peerMaxConnData = 1 << 20,
-                                     .peerMaxStreamDataBidi = 1 << 16,
+                                     .peerMaxStreamDataBidiLocal = 1 << 16,
+                                     .peerMaxStreamDataBidiRemote = 1 << 16,
                                      .peerMaxStreamDataUni = 1 << 16};
 
   auto preroll = streamRecord(kPeerBidiId, "preroll", /*fin=*/false);
@@ -556,8 +562,8 @@ TEST_F(QmuxSessionTest, CloseSession_CancelsQueuedByteEvent) {
   const auto streamId = created.value().writeHandle->getID();
 
   RecordingByteEventCallback byteEventCb;
-  // peerMaxStreamDataBidi is 1<<16; write past it so the tail stays queued
-  // behind stream flow control and the write never fully completes.
+  // peerMaxStreamDataBidiRemote is 1<<16; write past it so the tail stays
+  // queued behind stream flow control and the write never fully completes.
   const std::string payload((1 << 16) + 5000, 'x');
   auto writeResult = created.value().writeHandle->writeStreamData(
       folly::IOBuf::copyBuffer(payload), /*fin=*/false, &byteEventCb);
@@ -592,12 +598,14 @@ TEST_F(QmuxSessionTest, IdleTimer_ArmedWhenEffectiveTimeoutNonzero) {
   WtStreamManager::WtConfig wtConfig{.selfMaxStreamsBidi = kSelfMaxStreams,
                                      .selfMaxStreamsUni = kSelfMaxStreams,
                                      .selfMaxConnData = 1 << 20,
-                                     .selfMaxStreamDataBidi = 1 << 16,
+                                     .selfMaxStreamDataBidiLocal = 1 << 16,
+                                     .selfMaxStreamDataBidiRemote = 1 << 16,
                                      .selfMaxStreamDataUni = 1 << 16,
                                      .peerMaxStreamsBidi = 5,
                                      .peerMaxStreamsUni = 5,
                                      .peerMaxConnData = 1 << 20,
-                                     .peerMaxStreamDataBidi = 1 << 16,
+                                     .peerMaxStreamDataBidiLocal = 1 << 16,
+                                     .peerMaxStreamDataBidiRemote = 1 << 16,
                                      .peerMaxStreamDataUni = 1 << 16};
 
   auto session = std::make_shared<QmuxSession>(

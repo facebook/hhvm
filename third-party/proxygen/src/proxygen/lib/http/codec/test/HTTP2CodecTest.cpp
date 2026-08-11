@@ -1519,7 +1519,8 @@ TEST_F(HTTP2CodecTest, BasicSetting) {
 constexpr auto kWtFlowControlSettings =
     std::array{SettingsId::WT_INITIAL_MAX_DATA,
                SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
-               SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI,
+               SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+               SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
                SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
                SettingsId::WT_INITIAL_MAX_STREAMS_BIDI};
 
@@ -1600,7 +1601,8 @@ TEST(HTTP2CodecWebTransportTest, SetsEgressH2WebTransportSettings) {
   static constexpr auto kDefaultWtSettings = {
       SettingsId::WT_INITIAL_MAX_DATA,
       SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
-      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI,
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_LOCAL,
+      SettingsId::WT_INITIAL_MAX_STREAM_DATA_BIDI_REMOTE,
       SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
       SettingsId::WT_INITIAL_MAX_STREAMS_BIDI};
 

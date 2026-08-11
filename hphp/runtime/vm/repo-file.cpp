@@ -140,6 +140,15 @@ struct RepoFileBuilder::Data : Blob::Writer<RepoFileChunks, RepoFileIndexes> {
     Blob::Bounds location;
   };
   std::vector<UnitEmitterIndex> unitEmittersIndex;
+
+  void finish(const RepoGlobalData&,
+              std::vector<RepoUnitSymbols>,
+              const PackageInfo&,
+              const RepoAutoloadMapBuilder::TypeNameMap& types,
+              const RepoAutoloadMapBuilder::FuncNameMap& funcs,
+              const RepoAutoloadMapBuilder::CaseSensitiveMap& constants,
+              const RepoAutoloadMapBuilder::TypeNameMap& typeAliases,
+              const RepoAutoloadMapBuilder::CaseSensitiveMap& modules);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,49 +192,69 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
                              const PackageInfo& packageInfo) {
   assertx(m_data);
 
+  std::vector<RepoUnitSymbols> unitSymbols(
+    m_data->unitEmittersIndex.size());
+  auto add_symbols = [&](auto const& symbols, auto type) {
+    for (auto const& info : symbols) {
+      unitSymbols[info.second].push_back(std::make_pair(info.first, type));
+    }
+  };
+
+  add_symbols(autoloadMap.getTypes(), RepoSymbolType::TYPE);
+  add_symbols(autoloadMap.getFuncs(), RepoSymbolType::FUNC);
+  add_symbols(autoloadMap.getConstants(), RepoSymbolType::CONSTANT);
+  add_symbols(autoloadMap.getTypeAliases(), RepoSymbolType::TYPE_ALIAS);
+  add_symbols(autoloadMap.getModules(), RepoSymbolType::MODULE);
+
+  auto data = std::move(m_data);
+  data->finish(
+    global,
+    std::move(unitSymbols),
+    packageInfo,
+    autoloadMap.getTypes(),
+    autoloadMap.getFuncs(),
+    autoloadMap.getConstants(),
+    autoloadMap.getTypeAliases(),
+    autoloadMap.getModules()
+  );
+}
+
+void RepoFileBuilder::Data::finish(
+    const RepoGlobalData& global,
+    std::vector<RepoUnitSymbols> unitSymbols,
+    const PackageInfo& packageInfo,
+    const RepoAutoloadMapBuilder::TypeNameMap& types,
+    const RepoAutoloadMapBuilder::FuncNameMap& funcs,
+    const RepoAutoloadMapBuilder::CaseSensitiveMap& constants,
+    const RepoAutoloadMapBuilder::TypeNameMap& typeAliases,
+    const RepoAutoloadMapBuilder::CaseSensitiveMap& modules) {
   // Global data
   {
     BlobEncoder encoder;
     encoder(global);
-    m_data->write(RepoFileChunks::GLOBAL_DATA, encoder.data(), encoder.size());
+    write(RepoFileChunks::GLOBAL_DATA, encoder.data(), encoder.size());
     always_assert(
-      m_data->sizes.get(RepoFileChunks::GLOBAL_DATA) <= kGlobalDataSizeLimit);
+      sizes.get(RepoFileChunks::GLOBAL_DATA) <= kGlobalDataSizeLimit);
   }
 
   // Package Info
   {
     BlobEncoder encoder;
     encoder(packageInfo);
-    m_data->write(RepoFileChunks::PACKAGE_INFO, encoder.data(), encoder.size());
+    write(RepoFileChunks::PACKAGE_INFO, encoder.data(), encoder.size());
     always_assert(
-      m_data->sizes.get(RepoFileChunks::PACKAGE_INFO) <= kPackageInfoSizeLimit);
+      sizes.get(RepoFileChunks::PACKAGE_INFO) <= kPackageInfoSizeLimit);
   }
 
   // Unit Symbols
-  std::vector<Blob::Bounds> unitSymbolsBounds;
-  {
-    std::vector<RepoUnitSymbols> list(m_data->unitEmittersIndex.size());
-
-    auto add_symbols = [&](auto const& symbols, auto type) {
-      for (auto const& info : symbols) {
-        list[info.second].push_back(std::make_pair(info.first, type));
-      }
-    };
-
-    add_symbols(autoloadMap.getTypes(), RepoSymbolType::TYPE);
-    add_symbols(autoloadMap.getFuncs(), RepoSymbolType::FUNC);
-    add_symbols(autoloadMap.getConstants(), RepoSymbolType::CONSTANT);
-    add_symbols(autoloadMap.getTypeAliases(), RepoSymbolType::TYPE_ALIAS);
-    add_symbols(autoloadMap.getModules(), RepoSymbolType::MODULE);
-
-    unitSymbolsBounds = m_data->listIndex(RepoFileIndexes::UNIT_SYMBOLS, list);
-  }
+  auto const unitSymbolsBounds =
+    listIndex(RepoFileIndexes::UNIT_SYMBOLS, unitSymbols);
 
   // Unit Infos
   std::vector<Blob::Bounds> unitInfosBounds;
   {
-    std::vector<RepoUnitInfo> list(m_data->unitEmittersIndex.size());
-    for (auto const& unit : m_data->unitEmittersIndex) {
+    std::vector<RepoUnitInfo> list(unitEmittersIndex.size());
+    for (auto const& unit : unitEmittersIndex) {
       list[unit.sn] = RepoUnitInfo {
         unit.sn,
         unit.path,
@@ -234,7 +263,7 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
       };
     }
 
-    unitInfosBounds = m_data->listIndex(RepoFileIndexes::UNIT_INFOS, list);
+    unitInfosBounds = listIndex(RepoFileIndexes::UNIT_INFOS, list);
   }
 
   // Repo Autoload Map
@@ -245,31 +274,30 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
       return &unitInfosBounds[it.second];
     };
 
-    m_data->hashMapIndex<Blob::Bounds, TypeNameCompare>(
-      RepoFileIndexes::AUTOLOAD_TYPES, autoloadMap.getTypes(),
+    hashMapIndex<Blob::Bounds, TypeNameCompare>(
+      RepoFileIndexes::AUTOLOAD_TYPES, types,
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, FuncNameCompare>(
-      RepoFileIndexes::AUTOLOAD_FUNCS, autoloadMap.getFuncs(),
+    hashMapIndex<Blob::Bounds, FuncNameCompare>(
+      RepoFileIndexes::AUTOLOAD_FUNCS, funcs,
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
-      RepoFileIndexes::AUTOLOAD_CONSTANTS, autoloadMap.getConstants(),
+    hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
+      RepoFileIndexes::AUTOLOAD_CONSTANTS, constants,
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, TypeNameCompare>(
-      RepoFileIndexes::AUTOLOAD_TYPEALIASES, autoloadMap.getTypeAliases(),
+    hashMapIndex<Blob::Bounds, TypeNameCompare>(
+      RepoFileIndexes::AUTOLOAD_TYPEALIASES, typeAliases,
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
-      RepoFileIndexes::AUTOLOAD_MODULES, autoloadMap.getModules(),
+    hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
+      RepoFileIndexes::AUTOLOAD_MODULES, modules,
       key_lambda, value_lambda);
   }
 
   // Path to Blob::Bounds for the UnitInfo
-  m_data->hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
-    RepoFileIndexes::PATH_TO_UNIT_INFO, m_data->unitEmittersIndex,
+  hashMapIndex<Blob::Bounds, Blob::CaseSensitiveCompare>(
+    RepoFileIndexes::PATH_TO_UNIT_INFO, unitEmittersIndex,
     [](auto const& unit) { return unit.path->toCppString(); },
     [&](auto const& unit) { return &unitInfosBounds[unit.sn]; });
 
-  auto data = std::move(m_data);
-  data->finish();
+  Blob::Writer<RepoFileChunks, RepoFileIndexes>::finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -289,6 +317,23 @@ namespace {
 
 // Reader state
 struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
+  explicit RepoFileData(
+      const std::string& inputPath,
+      Blob::ReadMode mode = Blob::ReadMode::PReadOnly) {
+    init(inputPath, kMagic, kCurrentVersion, mode);
+
+    check(RepoFileChunks::UNIT_EMITTERS, 0);
+    check(RepoFileChunks::GLOBAL_DATA, kGlobalDataSizeLimit);
+    check(RepoFileChunks::PACKAGE_INFO, kPackageInfoSizeLimit);
+
+    for (auto index : magic_enum::enum_values<RepoFileIndexes>()) {
+      check(index, kIndexSizeLimit, kIndexDataSizeLimit);
+    }
+
+    globalData = readChunk<RepoGlobalData>(RepoFileChunks::GLOBAL_DATA);
+    packageInfo = readChunk<PackageInfo>(RepoFileChunks::PACKAGE_INFO);
+  }
+
   RepoGlobalData globalData;
 
   PackageInfo packageInfo;
@@ -306,6 +351,16 @@ struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
   using PathToSymbolsMap = folly_concurrent_hash_map_simd<
     const StringData*, RepoUnitSymbols, string_data_hash, string_data_same>;
   mutable PathToSymbolsMap pathToSymbols{};
+
+private:
+  template <typename T>
+  T readChunk(RepoFileChunks chunk) {
+    auto blob = fd.readBlob(offsets.get(chunk), sizes.get(chunk));
+    T value;
+    blob.decoder(value);
+    blob.decoder.assertDone();
+    return value;
+  }
 };
 
 std::unique_ptr<RepoFileData> s_repoFileData{};
@@ -394,37 +449,7 @@ const RepoUnitInfo* findUnitInfoFromPath(const RepoFileData& data,
 
 void RepoFile::init(const std::string& path) {
   assertx(!s_repoFileData);
-  s_repoFileData = std::make_unique<RepoFileData>();
-  auto& data = *s_repoFileData;
-  data.init(path, kMagic, kCurrentVersion);
-
-  data.check(RepoFileChunks::UNIT_EMITTERS, 0);
-  data.check(RepoFileChunks::GLOBAL_DATA, kGlobalDataSizeLimit);
-  data.check(RepoFileChunks::PACKAGE_INFO, kPackageInfoSizeLimit);
-
-  for (auto index : magic_enum::enum_values<RepoFileIndexes>()) {
-    data.check(index, kIndexSizeLimit, kIndexDataSizeLimit);
-  }
-
-  // We load global data eagerly
-  {
-    auto blob = data.fd.readBlob(
-      data.offsets.get(RepoFileChunks::GLOBAL_DATA),
-      data.sizes.get(RepoFileChunks::GLOBAL_DATA)
-    );
-    blob.decoder(data.globalData);
-    blob.decoder.assertDone();
-  }
-
-  // We load package info eagerly
-  {
-    auto blob = data.fd.readBlob(
-      data.offsets.get(RepoFileChunks::PACKAGE_INFO),
-      data.sizes.get(RepoFileChunks::PACKAGE_INFO)
-    );
-    blob.decoder(data.packageInfo);
-    blob.decoder.assertDone();
-  }
+  s_repoFileData = std::make_unique<RepoFileData>(path);
 }
 
 void RepoFile::destroy() {

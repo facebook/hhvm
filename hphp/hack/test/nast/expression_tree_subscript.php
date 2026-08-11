@@ -18,6 +18,17 @@ function test_keyset(): void {
   ExampleDsl`(keyset<ExampleInt> $ks, ExampleInt $key) ==> $ks[$key]`;
 }
 
+// The cases above all index with a variable, which does not exercise how the
+// key is virtualized. A literal key does, and shape field resolution depends on
+// what it virtualizes to.
+function test_literal_key(): void {
+  ExampleDsl`(dict<ExampleString, ExampleInt> $map) ==> $map['a']`;
+}
+
+function test_int_literal_key(): void {
+  ExampleDsl`(vec<ExampleInt> $arr) ==> $arr[0]`;
+}
+
 abstract class PropVec {
   public vec<ExampleInt> $items;
 }

@@ -787,6 +787,23 @@ impl RewriteState {
     /// Replaces the extracted splices, function pointers, and static method pointers
     /// with temporary variables
     fn rewrite_expr(&mut self, e: Expr, visitor_name: &str) -> RewriteResult {
+        self.rewrite_expr_impl(e, visitor_name, false)
+    }
+
+    /// Rewrite an expression in subscript index position, where a string or
+    /// int literal virtualizes as itself rather than as the DSL's arraykey
+    /// type. Handling string and int literals in subscripts this way is
+    /// necessary to support shape indexing properly.
+    fn rewrite_subscript_index(&mut self, e: Expr, visitor_name: &str) -> RewriteResult {
+        self.rewrite_expr_impl(e, visitor_name, true)
+    }
+
+    fn rewrite_expr_impl(
+        &mut self,
+        e: Expr,
+        visitor_name: &str,
+        subscript_index: bool,
+    ) -> RewriteResult {
         use aast::Expr_::*;
 
         // If we can't rewrite the expression (e.g. due to unsupported syntax), return the
@@ -802,10 +819,14 @@ impl RewriteState {
 
         match expr_ {
             // Source: MyDsl`1`
-            // Virtualized: MyDsl::intType()
+            // Virtualized: MyDsl::intType(), or `1` in a subscript index
             // Desugared: $0v->visitInt(new ExprPos(...), 1)
             Int(_) => {
-                let virtual_expr = static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos);
+                let virtual_expr = if subscript_index {
+                    Expr((), pos.clone(), expr_.clone())
+                } else {
+                    static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos)
+                };
                 let desugar_expr = v_meth_call(
                     et::VISIT_INT,
                     vec![pos_expr, Expr((), pos.clone(), expr_)],
@@ -832,10 +853,14 @@ impl RewriteState {
                 }
             }
             // Source: MyDsl`'foo'`
-            // Virtualized: MyDsl::stringType()
+            // Virtualized: MyDsl::stringType(), or `'foo'` in a subscript index
             // Desugared: $0v->visitString(new ExprPos(...), 'foo')
             String(_) => {
-                let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
+                let virtual_expr = if subscript_index {
+                    Expr((), pos.clone(), expr_.clone())
+                } else {
+                    static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos)
+                };
                 let desugar_expr = mk_visit_string(&pos, expr_);
                 RewriteResult {
                     virtual_expr,
@@ -1016,7 +1041,7 @@ impl RewriteState {
                         .iter()
                         .map(|(_, idx_opt)| {
                             let idx = idx_opt.clone().expect("checked above");
-                            let r = self.rewrite_expr(idx, visitor_name);
+                            let r = self.rewrite_subscript_index(idx, visitor_name);
                             (r.virtual_expr, r.desugar_expr)
                         })
                         .unzip();
@@ -2009,7 +2034,7 @@ impl RewriteState {
                 };
 
                 let rewritten_container = self.rewrite_expr(container_expr, visitor_name);
-                let rewritten_index = self.rewrite_expr(index_expr, visitor_name);
+                let rewritten_index = self.rewrite_subscript_index(index_expr, visitor_name);
 
                 let virtual_expr = Expr::new(
                     (),

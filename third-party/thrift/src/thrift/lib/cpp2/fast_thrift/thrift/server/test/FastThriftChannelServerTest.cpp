@@ -134,6 +134,7 @@ class FastThriftChannelServerTest : public ::testing::Test {
     thrift::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    config.enableBackpressure = enableBackpressure();
 
     server_ = std::make_unique<thrift::FastThriftChannelServer>(
         std::move(config), handler_);
@@ -141,6 +142,10 @@ class FastThriftChannelServerTest : public ::testing::Test {
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
   }
+
+  // Overridden by FastThriftChannelServerNoBackpressureTest to build the
+  // server with the no-backpressure batching / fragmentation handlers.
+  virtual bool enableBackpressure() const { return true; }
 
   void TearDown() override {
     clientThread_.reset();
@@ -499,6 +504,49 @@ TEST_F(FastThriftChannelServerTlsTest, PlaintextClientFailsToConnect) {
   EXPECT_TRUE(rpcErr) << "plaintext client should fail against TLS server";
 
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// ---------------------------------------------------------------------------
+// enableBackpressure = false — the batching / fragmentation handlers are
+// spliced as their no-backpressure specializations. They still batch and still
+// fragment; they simply carry no write-ready hook, so nothing in the rocket
+// write path absorbs Result::Backpressure. These tests exist to prove that
+// responses still complete on that configuration, in particular that a large
+// response is not stranded by a saturating write with no resume path.
+// ---------------------------------------------------------------------------
+
+class FastThriftChannelServerNoBackpressureTest
+    : public FastThriftChannelServerTest {
+ protected:
+  bool enableBackpressure() const override { return false; }
+};
+
+TEST_F(FastThriftChannelServerNoBackpressureTest, PingSucceeds) {
+  auto client = createClient();
+  syncCall([&] { return client->semifuture_ping(); });
+  destroyClientOnEvb(client);
+}
+
+TEST_F(FastThriftChannelServerNoBackpressureTest, LargeResponseCompletes) {
+  auto client = createClient();
+  constexpr int64_t kResponseSize = 10000;
+  auto result =
+      syncCall([&] { return client->semifuture_sendResponse(kResponseSize); });
+  EXPECT_EQ(result, std::string(kResponseSize, 'x'));
+  destroyClientOnEvb(client);
+}
+
+TEST_F(
+    FastThriftChannelServerNoBackpressureTest, ManyLargeResponsesAllComplete) {
+  auto client = createClient();
+  constexpr int64_t kResponseSize = 10000;
+  constexpr int kIterations = 20;
+  for (int i = 0; i < kIterations; ++i) {
+    auto result = syncCall(
+        [&] { return client->semifuture_sendResponse(kResponseSize); });
+    EXPECT_EQ(result.size(), static_cast<size_t>(kResponseSize));
+  }
+  destroyClientOnEvb(client);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::server::test

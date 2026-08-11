@@ -353,18 +353,37 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
                      .setTail(appAdapter)
                      .setAllocator(&rocketAllocator_)
                      .addState<rocket::RocketStreamContexts>();
+  builder.addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+      frame_length_parser_handler_tag);
+  // Batching and fragmentation are always present, but which specialization
+  // is spliced depends on enableBackpressure. The no-backpressure variants
+  // batch and fragment identically; they simply carry no write-ready hook, so
+  // makeHandlerNode never registers them and the pipeline's writeReadyList_
+  // stays empty. The choice costs one branch per connection, not per message.
+  if (config_.enableBackpressure) {
+    builder
+        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandler>(
+            batching_frame_handler_tag, config_.batchingConfig);
+  } else {
+    builder.addNextOutbound<
+        frame::write::handler::IntervalBatchingFrameHandlerNoBackpressure>(
+        batching_frame_handler_tag, config_.batchingConfig);
+  }
   builder
-      .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-          frame_length_parser_handler_tag)
-      .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandler>(
-          batching_frame_handler_tag, config_.batchingConfig)
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
           frame_length_encoder_handler_tag)
       .addNextDuplex<frame::handler::FrameCodecHandler>(frame_codec_handler_tag)
       .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
-          frame_defragmentation_handler_tag)
-      .addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
-          frame_fragmentation_handler_tag, config_.fragmentationConfig)
+          frame_defragmentation_handler_tag);
+  if (config_.enableBackpressure) {
+    builder.addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
+        frame_fragmentation_handler_tag, config_.fragmentationConfig);
+  } else {
+    builder.addNextOutbound<
+        frame::write::handler::FrameFragmentationHandlerNoBackpressure>(
+        frame_fragmentation_handler_tag, config_.fragmentationConfig);
+  }
+  builder
       .addNextDuplex<
           rocket::server::handler::RocketServerMessageMarshalHandler>(
           rocket_server_message_marshal_handler_tag)

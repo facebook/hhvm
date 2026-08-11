@@ -951,5 +951,34 @@ TEST_F(
   EXPECT_EQ(completed, 5u);
 }
 
+// ============================================================================
+// Backpressure disabled
+// ============================================================================
+
+// Contrast with BackpressureFiresAwaitWriteReady above: the no-backpressure
+// specialization has no writeReadyHook_, so the pipeline could never deliver
+// an onWriteReady to it. It must therefore never register for one, and never
+// park the flush loop waiting for a resume that cannot arrive.
+//
+// Note this mock *rejects* the frame when it reports saturation (it returns
+// before recording the write), so the written count cannot exceed the
+// threshold whatever the handler does. Registration is the observable that
+// distinguishes the two policies here.
+TEST_F(
+    FrameFragmentationHandlerTest,
+    NoBackpressure_SaturatedDownstreamNeverRegistersAwait) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerNoBackpressure handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024)); // 3 fragments
+
+  ctx_->setBackpressureAt(2); // saturates partway through the flush
+
+  runEventBaseLoop();
+
+  EXPECT_FALSE(ctx_->awaitWriteReadyCalled());
+}
+
 } // namespace
 } // namespace apache::thrift::fast_thrift::frame::write::handler

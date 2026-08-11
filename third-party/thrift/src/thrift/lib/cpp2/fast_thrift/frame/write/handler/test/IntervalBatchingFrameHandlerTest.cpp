@@ -773,5 +773,39 @@ TEST_F(IntervalBatchingFrameHandlerTest, FlushListUnlinksOnHandlerTeardown) {
   EXPECT_TRUE(flushList.empty());
 }
 
+// ============================================================================
+// Backpressure disabled
+// ============================================================================
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    NoBackpressure_DownstreamSaturationNeitherPropagatesNorStrands) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandlerNoBackpressure handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setBackpressureAt(0); // every flush reports saturation
+
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(100))),
+      channel_pipeline::Result::Success);
+  runEventBaseLoop();
+
+  // The batch went downstream, but the handler neither recorded saturation nor
+  // registered for a write-ready callback the pipeline can never deliver to it
+  // (it has no writeReadyHook_ to register).
+  EXPECT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_FALSE(handler.isBackpressured());
+  EXPECT_FALSE(ctx_->awaitWriteReadyCalled());
+
+  // Later writes keep flowing rather than being stranded behind a saturation
+  // flag that nothing would ever clear.
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(50, 'B'))),
+      channel_pipeline::Result::Success);
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 2);
+}
+
 } // namespace
 } // namespace apache::thrift::fast_thrift::frame::write::handler

@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/PerStreamState.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/SrptHeap.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BackpressurePolicy.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 
 #include <folly/ExceptionWrapper.h>
@@ -71,10 +72,18 @@ struct RemainingBytesFn {
  * that need per-frame write completion fire through a concrete tracker that
  * maps fragments back to original frames.
  */
-template <FragmentCompletionTracker Tracker = NoOpFragmentCompletionTracker>
-class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
+template <
+    FragmentCompletionTracker Tracker = NoOpFragmentCompletionTracker,
+    BackpressurePolicy Backpressure = BackpressureEnabled>
+class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback,
+                                   public Backpressure {
  public:
-  apache::thrift::fast_thrift::channel_pipeline::WriteReadyHook writeReadyHook_;
+  // Backpressure state (writeReadyHook_, backpressured_) is inherited from the
+  // policy and reached through `this->`. With BackpressureDisabled the policy
+  // is empty and hook-less, so this handler is never linked into the
+  // pipeline's writeReadyList_; doFlush then drains straight through instead
+  // of parking, which is what keeps queued fragments from being stranded with
+  // nothing left to resume them.
 
   explicit FrameFragmentationHandlerT(
       FragmentationHandlerConfig config = {}) noexcept
@@ -170,11 +179,17 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
     resetPending();
   }
 
+  // Never invoked when backpressure is disabled: the policy contributes no
+  // writeReadyHook_, so makeHandlerNode never registers this handler and the
+  // pipeline has no way to reach it. The method still has to exist to satisfy
+  // the OutboundHandler concept.
   template <typename Context>
   void onWriteReady(Context& ctx) noexcept {
-    ctx.cancelAwaitWriteReady();
-    backpressured_ = false;
-    flushAndPropagateErrors(ctx);
+    if constexpr (Backpressure::kBackpressureEnabled) {
+      ctx.cancelAwaitWriteReady();
+      this->backpressured_ = false;
+      flushAndPropagateErrors(ctx);
+    }
   }
 
   void runLoopCallback() noexcept override {
@@ -351,11 +366,14 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
         return result;
       }
       tracker_.onFragment(streamId, true);
-      if (result ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
-        backpressured_ = true;
-        ctx.awaitWriteReady();
-        return result;
+      if constexpr (Backpressure::kBackpressureEnabled) {
+        if (result ==
+            apache::thrift::fast_thrift::channel_pipeline::Result::
+                Backpressure) {
+          this->backpressured_ = true;
+          ctx.awaitWriteReady();
+          return result;
+        }
       }
     }
 
@@ -388,11 +406,14 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
         return result;
       }
       tracker_.onFragment(curStreamId, frameDone);
-      if (result ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
-        backpressured_ = true;
-        ctx.awaitWriteReady();
-        return result;
+      if constexpr (Backpressure::kBackpressureEnabled) {
+        if (result ==
+            apache::thrift::fast_thrift::channel_pipeline::Result::
+                Backpressure) {
+          this->backpressured_ = true;
+          ctx.awaitWriteReady();
+          return result;
+        }
       }
 
       if (!state.hasMore()) {
@@ -414,7 +435,6 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
       nullptr};
 
   bool isScheduled_{false};
-  bool backpressured_{false};
 
   size_t pendingBytes_{0};
   size_t pendingFrames_{0};
@@ -429,5 +449,29 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
 
 using FrameFragmentationHandler =
     FrameFragmentationHandlerT<NoOpFragmentCompletionTracker>;
+
+// Fragments identically, but declines to participate in write backpressure:
+// no writeReadyHook_, no saturation flag, no awaitWriteReady. Selected by
+// FastThriftServerConfig::enableBackpressure.
+using FrameFragmentationHandlerNoBackpressure = FrameFragmentationHandlerT<
+    NoOpFragmentCompletionTracker,
+    BackpressureDisabled>;
+
+// The zero-cost claim. makeHandlerNode registers a handler for write-ready
+// notification only when it exposes writeReadyHook_, so its absence is what
+// keeps the no-backpressure specialization out of the pipeline's
+// writeReadyList_ entirely. Losing the hook must also shrink the handler.
+static_assert(
+    HasWriteReadyHook<FrameFragmentationHandler>,
+    "FrameFragmentationHandler must expose writeReadyHook_ so the pipeline "
+    "can drive onWriteReady");
+static_assert(
+    !HasWriteReadyHook<FrameFragmentationHandlerNoBackpressure>,
+    "FrameFragmentationHandlerNoBackpressure must not expose writeReadyHook_, "
+    "or the pipeline would register it anyway");
+static_assert(
+    sizeof(FrameFragmentationHandlerNoBackpressure) <
+        sizeof(FrameFragmentationHandler),
+    "disabling backpressure must remove per-handler state, not just branches");
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

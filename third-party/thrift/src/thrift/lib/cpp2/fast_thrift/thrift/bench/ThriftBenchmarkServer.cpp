@@ -63,6 +63,13 @@ DEFINE_string(
     rpc_type,
     "thrift",
     "Server implementation: thrift (ThriftServer) or fast_thrift (pipeline)");
+DEFINE_bool(
+    enable_backpressure,
+    true,
+    "Whether the outbound batching / fragmentation handlers participate in "
+    "pipeline write backpressure. False selects the no-backpressure "
+    "specializations, which batch and fragment identically but carry no "
+    "write-ready hook and no saturation state.");
 
 using namespace apache::thrift::fast_thrift;
 using namespace apache::thrift::fast_thrift::thrift::bench;
@@ -184,7 +191,11 @@ class FastThriftBenchmarkServer {
     auto serverChannel =
         std::make_shared<thrift::ThriftServerChannel>(handler_);
 
-    auto pipeline =
+    // addState rebinds the builder type, so bind through it once and append
+    // from there. --enable_backpressure selects which specialization of the
+    // batching / fragmentation handlers is spliced, so the benchmark can
+    // measure both configurations of the same pipeline.
+    auto builder =
         channel_pipeline::PipelineBuilder<
             transport::TransportHandler,
             thrift::ThriftServerChannel,
@@ -194,20 +205,36 @@ class FastThriftBenchmarkServer {
             .setTail(serverChannel.get())
             .setAllocator(&allocator_)
             .addState<
-                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-                batching_frame_handler_tag)
-            .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
-            .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
-                frame_length_encoder_handler_tag)
-            .addNextDuplex<frame::handler::FrameCodecHandler>(
-                frame_codec_handler_tag)
-            .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
-                frame_defragmentation_handler_tag)
-            .addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
-                frame_fragmentation_handler_tag,
-                frame::write::FragmentationHandlerConfig{})
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>();
+    if (FLAGS_enable_backpressure) {
+      builder.addNextOutbound<frame::write::handler::BatchingFrameHandler>(
+          batching_frame_handler_tag);
+    } else {
+      builder.addNextOutbound<
+          frame::write::handler::BatchingFrameHandlerNoBackpressure>(
+          batching_frame_handler_tag);
+    }
+    builder
+        .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+            frame_length_parser_handler_tag)
+        .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
+            frame_length_encoder_handler_tag)
+        .addNextDuplex<frame::handler::FrameCodecHandler>(
+            frame_codec_handler_tag)
+        .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
+            frame_defragmentation_handler_tag);
+    if (FLAGS_enable_backpressure) {
+      builder.addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
+          frame_fragmentation_handler_tag,
+          frame::write::FragmentationHandlerConfig{});
+    } else {
+      builder.addNextOutbound<
+          frame::write::handler::FrameFragmentationHandlerNoBackpressure>(
+          frame_fragmentation_handler_tag,
+          frame::write::FragmentationHandlerConfig{});
+    }
+    auto pipeline =
+        builder
             .addNextDuplex<
                 rocket::server::handler::RocketServerMessageMarshalHandler>(
                 rocket_server_message_marshal_handler_tag)

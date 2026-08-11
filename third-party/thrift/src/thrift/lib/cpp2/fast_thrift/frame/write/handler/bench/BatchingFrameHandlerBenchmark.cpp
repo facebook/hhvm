@@ -295,6 +295,53 @@ BENCHMARK_RELATIVE(BM_BatchedWrite_32Frames, iters) {
   folly::doNotOptimizeAway(ctx.writeCount());
 }
 
+// =============================================================================
+// Backpressure policy cost
+// =============================================================================
+//
+// Identical workload against both specializations. The no-backpressure variant
+// carries no writeReadyHook_ and no saturation flag, so its onWrite drops the
+// per-write check entirely. This pair is what makes the zero-cost claim
+// measurable rather than merely asserted by the header's static_asserts.
+
+template <typename Handler>
+void runBatchingWorkload(size_t iters, size_t frameSize) {
+  folly::BenchmarkSuspender suspender;
+
+  folly::EventBase evb;
+  BenchContext ctx(&evb);
+
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  Handler handler(config);
+  handler.handlerAdded(ctx);
+
+  auto frames = preallocateFrames(iters, frameSize);
+
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    (void)handler.onWrite(ctx, std::move(frames[i]));
+  }
+
+  evb.loopOnce(EVLOOP_NONBLOCK);
+
+  folly::doNotOptimizeAway(ctx.writeCount());
+  folly::doNotOptimizeAway(ctx.bytesWritten());
+}
+
+BENCHMARK(BM_BackpressureEnabled_256B, iters) {
+  runBatchingWorkload<BatchingFrameHandler>(iters, 256);
+}
+
+BENCHMARK_RELATIVE(BM_BackpressureDisabled_256B, iters) {
+  runBatchingWorkload<BatchingFrameHandlerNoBackpressure>(iters, 256);
+}
+
+BENCHMARK_DRAW_LINE();
+
 } // namespace
 
 // =============================================================================

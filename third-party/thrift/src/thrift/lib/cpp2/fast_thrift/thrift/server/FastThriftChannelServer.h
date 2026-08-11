@@ -78,6 +78,17 @@ struct FastThriftServerConfig {
   // context propagation (e.g., setUserData stashing). Only takes effect on
   // FastThriftServer; ignored by FastThriftChannelServer.
   bool enableRequestContext{false};
+
+  // When true, the outbound write-path handlers (batching, fragmentation)
+  // participate in pipeline write backpressure: they buffer while the
+  // transport's write buffer is saturated and drain when it reports ready.
+  //
+  // When false, those handlers still batch and still fragment, but their
+  // backpressure participation is compiled out entirely — no write-ready hook,
+  // no saturation state, no per-write check. Outbound data is pushed straight
+  // through and queues in AsyncSocket instead, so a slow peer grows that queue
+  // unbounded.
+  bool enableBackpressure{true};
 };
 
 /**
@@ -563,81 +574,68 @@ FastThriftServerT<Stats>::buildRocketPipeline(
     rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
         onSetupComplete,
     Stats* stats) {
-  if constexpr (kStatsEnabled) {
-    return channel_pipeline::PipelineBuilder<
-               transport::TransportHandler,
-               rocket::server::RocketServerAppAdapter,
-               channel_pipeline::SimpleBufferAllocator>()
-        .setEventBase(evb)
-        .setHead(transportHandler)
-        .setTail(appAdapter)
-        .setAllocator(&rocketAllocator_)
-        .addState<rocket::RocketStreamContexts>()
-        .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-            frame_length_parser_handler_tag)
-        .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-            batching_frame_handler_tag)
-        .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
-            frame_length_encoder_handler_tag)
-        .addNextDuplex<frame::handler::FrameCodecHandler>(
-            frame_codec_handler_tag)
-        .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
-            frame_defragmentation_handler_tag)
-        .addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
-            frame_fragmentation_handler_tag,
-            frame::write::FragmentationHandlerConfig{})
-        .addNextDuplex<
-            rocket::server::handler::RocketServerMessageMarshalHandler>(
-            rocket_server_message_marshal_handler_tag)
-        .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-            server_setup_frame_handler_tag, std::move(onSetupComplete))
-        .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
-            server_keepalive_handler_tag)
-        .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
-            server_stream_state_handler_tag)
-        .addNextDuplex<
-            rocket::server::handler::RocketServerRequestResponseHandler>(
-            server_request_response_frame_handler_tag)
-        .template addNextDuplex<RocketMetricsHandler<Direction::Server, Stats>>(
-            rocket_metrics_handler_tag, stats)
-        .build();
+  // Single chain for both stats modes. Only addState rebinds the builder
+  // type, so bind through it once and append conditionally from there —
+  // same shape as ThriftServerConnectionFactory::buildRocketPipeline.
+  auto builder = channel_pipeline::PipelineBuilder<
+                     transport::TransportHandler,
+                     rocket::server::RocketServerAppAdapter,
+                     channel_pipeline::SimpleBufferAllocator>()
+                     .setEventBase(evb)
+                     .setHead(transportHandler)
+                     .setTail(appAdapter)
+                     .setAllocator(&rocketAllocator_)
+                     .addState<rocket::RocketStreamContexts>();
+  builder.addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+      frame_length_parser_handler_tag);
+  // Batching and fragmentation are always present, but which specialization
+  // is spliced depends on enableBackpressure. The no-backpressure variants
+  // batch and fragment identically; they simply carry no write-ready hook, so
+  // makeHandlerNode never registers them and the pipeline's writeReadyList_
+  // stays empty. The choice costs one branch per connection, not per message.
+  if (config_.enableBackpressure) {
+    builder.addNextOutbound<frame::write::handler::BatchingFrameHandler>(
+        batching_frame_handler_tag);
   } else {
-    return channel_pipeline::PipelineBuilder<
-               transport::TransportHandler,
-               rocket::server::RocketServerAppAdapter,
-               channel_pipeline::SimpleBufferAllocator>()
-        .setEventBase(evb)
-        .setHead(transportHandler)
-        .setTail(appAdapter)
-        .setAllocator(&rocketAllocator_)
-        .addState<rocket::RocketStreamContexts>()
-        .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-            frame_length_parser_handler_tag)
-        .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-            batching_frame_handler_tag)
-        .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
-            frame_length_encoder_handler_tag)
-        .addNextDuplex<frame::handler::FrameCodecHandler>(
-            frame_codec_handler_tag)
-        .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
-            frame_defragmentation_handler_tag)
-        .addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
-            frame_fragmentation_handler_tag,
-            frame::write::FragmentationHandlerConfig{})
-        .addNextDuplex<
-            rocket::server::handler::RocketServerMessageMarshalHandler>(
-            rocket_server_message_marshal_handler_tag)
-        .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-            server_setup_frame_handler_tag, std::move(onSetupComplete))
-        .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
-            server_keepalive_handler_tag)
-        .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
-            server_stream_state_handler_tag)
-        .addNextDuplex<
-            rocket::server::handler::RocketServerRequestResponseHandler>(
-            server_request_response_frame_handler_tag)
-        .build();
+    builder.addNextOutbound<
+        frame::write::handler::BatchingFrameHandlerNoBackpressure>(
+        batching_frame_handler_tag);
   }
+  builder
+      .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
+          frame_length_encoder_handler_tag)
+      .addNextDuplex<frame::handler::FrameCodecHandler>(frame_codec_handler_tag)
+      .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
+          frame_defragmentation_handler_tag);
+  if (config_.enableBackpressure) {
+    builder.addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
+        frame_fragmentation_handler_tag,
+        frame::write::FragmentationHandlerConfig{});
+  } else {
+    builder.addNextOutbound<
+        frame::write::handler::FrameFragmentationHandlerNoBackpressure>(
+        frame_fragmentation_handler_tag,
+        frame::write::FragmentationHandlerConfig{});
+  }
+  builder
+      .addNextDuplex<
+          rocket::server::handler::RocketServerMessageMarshalHandler>(
+          rocket_server_message_marshal_handler_tag)
+      .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
+          server_setup_frame_handler_tag, std::move(onSetupComplete))
+      .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
+          server_keepalive_handler_tag)
+      .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
+          server_stream_state_handler_tag)
+      .addNextDuplex<
+          rocket::server::handler::RocketServerRequestResponseHandler>(
+          server_request_response_frame_handler_tag);
+  if constexpr (kStatsEnabled) {
+    builder
+        .template addNextDuplex<RocketMetricsHandler<Direction::Server, Stats>>(
+            rocket_metrics_handler_tag, stats);
+  }
+  return builder.build();
 }
 
 template <typename Stats>

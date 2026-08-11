@@ -84,6 +84,21 @@ struct FastThriftServerConfig {
   // Backpressure while saturated so the transport pauses socket reads.
   bool enableWriteBufferBackpressure{false};
 
+  // When true, the outbound write-path handlers (batching, fragmentation)
+  // participate in pipeline write backpressure: they buffer while the
+  // transport's write buffer is saturated and drain when it reports ready.
+  //
+  // When false, those handlers still batch and still fragment, but their
+  // backpressure participation is compiled out entirely — no write-ready hook,
+  // no saturation state, no per-write check. Outbound data is pushed straight
+  // through and queues in AsyncSocket instead.
+  //
+  // Disabling this removes rocket-layer flow control. Nothing else in the
+  // rocket write path absorbs Result::Backpressure, so it will propagate up
+  // into the thrift pipeline; set enableWriteBufferBackpressure to absorb it
+  // there, or accept that a slow peer grows the socket write queue unbounded.
+  bool enableBackpressure{true};
+
   // Outbound write batching. Default zero-interval flushes via LoopCallback
   // at end of each event loop iteration. Set batchingInterval > 0 to use
   // an HHWheelTimer-driven flush instead.

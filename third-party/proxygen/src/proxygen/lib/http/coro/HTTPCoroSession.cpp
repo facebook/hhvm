@@ -3264,6 +3264,11 @@ folly::coro::Task<void> HTTPUniplexTransportSession::writeLoop() noexcept {
         byteEventObserver_.transportWriteComplete(sessionBytesScheduled_,
                                                   std::move(txAckEvent));
       }
+    } else {
+      // A zero-byte codec write still registers byte events
+      byteEventObserver_.transportWrite(sessionBytesScheduled_);
+      byteEventObserver_.transportWriteComplete(sessionBytesScheduled_,
+                                                folly::none);
     }
   }
 

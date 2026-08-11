@@ -77,6 +77,7 @@ fn parse_script<'o, 't>(
     ParsedFile {
         mode: mode_opt,
         file_attributes: sc_state.file_attributes,
+        function_attributes: sc_state.function_attributes.into_iter().collect(),
         decls,
         disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),

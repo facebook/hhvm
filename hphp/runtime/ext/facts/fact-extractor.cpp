@@ -183,8 +183,10 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                     "Error extracting {}: {}",
                     absPathAndHash.m_path.native().c_str(),
                     facts.exception().what().c_str());
-                // There might have been a SHA1 mismatch due to a filesystem
-                // race. Try again without an expected hash.
+                // Cache decode failures, including an incompatible FileFacts
+                // format version, and SHA1 mismatches retry from source. The
+                // Extractor API has no eviction operation; its cache datatype
+                // namespace isolates incompatible entries.
                 PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
                 return decode_facts(facts_binary_from_path(withoutHash));
               }

@@ -8,6 +8,23 @@
 
 use crate::ffi;
 
+impl Default for ffi::FileFacts {
+    fn default() -> Self {
+        Self {
+            format_version: crate::FILE_FACTS_FORMAT_VERSION,
+            types: Vec::new(),
+            functions: Vec::new(),
+            function_attributes: Vec::new(),
+            constants: Vec::new(),
+            modules: Vec::new(),
+            file_attributes: Vec::new(),
+            module_membership: String::new(),
+            package_membership: String::new(),
+            sha1sum: String::new(),
+        }
+    }
+}
+
 impl From<facts::Facts> for ffi::FileSymbols {
     fn from(facts: facts::Facts) -> Self {
         Self {
@@ -35,6 +52,7 @@ impl From<facts::TypeKind> for ffi::TypeKind {
 impl ffi::FileFacts {
     pub(crate) fn from_facts(facts: facts::Facts, sha1sum: String) -> Self {
         Self {
+            format_version: crate::FILE_FACTS_FORMAT_VERSION,
             sha1sum,
             types: facts
                 .types
@@ -62,6 +80,12 @@ impl ffi::FileFacts {
                 })
                 .collect(),
             functions: facts.functions,
+            function_attributes: (facts.function_attributes.into_iter())
+                .map(|(name, attributes)| ffi::FunctionFacts {
+                    name,
+                    attributes: attributes.into_iter().map(ffi::AttrFacts::from).collect(),
+                })
+                .collect(),
             constants: facts.constants,
             file_attributes: (facts.file_attributes.into_iter())
                 .map(ffi::AttrFacts::from)
@@ -205,10 +229,24 @@ mod tests {
         );
         let mut modules = facts::ModuleFactsByName::new();
         modules.insert(String::from("foo"), facts::ModuleFacts {});
+        let mut function_attributes = BTreeMap::new();
+        function_attributes.insert(
+            "mock_factory".into(),
+            vec![(
+                "FunctionMocker".into(),
+                vec![
+                    facts::AttrValue::String("first".into()),
+                    facts::AttrValue::Int("42".into()),
+                ],
+            )]
+            .into_iter()
+            .collect(),
+        );
         let facts = facts::Facts {
             constants: vec!["c1".into(), "c2".into()],
             file_attributes: BTreeMap::new(),
-            functions: vec![],
+            functions: vec!["mock_factory".into()],
+            function_attributes,
             modules,
             types,
             module_membership: None,
@@ -230,6 +268,7 @@ mod tests {
         let rust_facts = facts::Facts {
             types: rust_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
+            function_attributes: Default::default(),
             constants: vec!["C".to_string()],
             modules: rust_module_facts_by_name,
             file_attributes: Default::default(),

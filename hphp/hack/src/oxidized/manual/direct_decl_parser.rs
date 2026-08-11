@@ -28,6 +28,9 @@ pub struct ParsedFile {
 
     pub file_attributes: Vec<typing_defs::UserAttribute>,
 
+    /// User attributes on top-level functions, keyed by elaborated name.
+    pub function_attributes: Vec<(String, Vec<typing_defs::UserAttribute>)>,
+
     pub decls: Decls,
 
     /// How did the parser handle xhp elements? This is a copy of

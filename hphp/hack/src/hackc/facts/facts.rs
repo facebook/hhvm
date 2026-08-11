@@ -125,6 +125,7 @@ pub type ModuleFactsByName = BTreeMap<String, ModuleFacts>;
 pub struct Facts {
     pub types: TypeFactsByName,
     pub functions: Vec<String>,
+    pub function_attributes: BTreeMap<String, Attributes>,
     pub constants: Vec<String>,
     pub file_attributes: Attributes,
     pub modules: ModuleFactsByName,
@@ -185,10 +186,23 @@ impl Facts {
         constants.reverse();
 
         let file_attributes = to_facts_attributes(&parsed_file.file_attributes);
+        let function_names = functions
+            .iter()
+            .map(String::as_str)
+            .collect::<BTreeSet<_>>();
+        let function_attributes = parsed_file
+            .function_attributes
+            .iter()
+            .map(|(name, attributes)| (format(name), to_facts_attributes(attributes)))
+            .filter(|(name, attributes)| {
+                function_names.contains(name.as_str()) && !attributes.is_empty()
+            })
+            .collect();
 
         Facts {
             types,
             functions,
+            function_attributes,
             constants,
             file_attributes,
             modules,
@@ -211,6 +225,14 @@ impl Facts {
                 !method_facts.attributes.is_empty()
             })
         }
+    }
+
+    /// Remove function attributes that are not explicitly allowlisted.
+    pub fn filter_function_attributes(&mut self, indexed_function_attrs: &IndexSet<String>) {
+        self.function_attributes.retain(|_, attributes| {
+            attributes.retain(|attr, _| indexed_function_attrs.contains(attr));
+            !attributes.is_empty()
+        });
     }
 }
 

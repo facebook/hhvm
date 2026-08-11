@@ -33,6 +33,8 @@ use relative_path::RelativePath;
 use sha1::Digest;
 use sha1::Sha1;
 
+const FILE_FACTS_FORMAT_VERSION: u16 = 1;
+
 #[allow(clippy::derivable_impls)]
 #[cxx::bridge(namespace = "HPHP::hackc")]
 mod ffi {
@@ -330,16 +332,24 @@ mod ffi {
         is_strict: bool,
     }
 
-    #[derive(Default, Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
     pub struct FileFacts {
+        pub format_version: u16,
         pub types: Vec<TypeFacts>,
         pub functions: Vec<String>,
+        pub function_attributes: Vec<FunctionFacts>,
         pub constants: Vec<String>,
         pub modules: Vec<ModuleFacts>,
         pub file_attributes: Vec<AttrFacts>,
         pub module_membership: String, // Empty means none. Cannot use Option in ffi.
         pub package_membership: String, // Empty means none. Cannot use Option in ffi.
         pub sha1sum: String,
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    pub struct FunctionFacts {
+        pub name: String,
+        pub attributes: Vec<AttrFacts>,
     }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
@@ -746,8 +756,25 @@ fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec
     Ok(buf)
 }
 
-fn binary_to_facts(blob: &CxxString) -> Result<ffi::FileFacts, bincode::error::DecodeError> {
-    bincode::serde::decode_from_slice(blob.as_bytes(), bincode::config::standard()).map(|(v, _)| v)
+fn binary_to_facts(blob: &CxxString) -> Result<ffi::FileFacts> {
+    decode_file_facts(blob.as_bytes())
+}
+
+fn decode_file_facts(blob: &[u8]) -> Result<ffi::FileFacts> {
+    let (facts, bytes_read): (ffi::FileFacts, usize) =
+        bincode::serde::decode_from_slice(blob, bincode::config::standard())?;
+    anyhow::ensure!(
+        facts.format_version == FILE_FACTS_FORMAT_VERSION,
+        "Unsupported FileFacts format version {}; expected {}",
+        facts.format_version,
+        FILE_FACTS_FORMAT_VERSION,
+    );
+    anyhow::ensure!(
+        bytes_read == blob.len(),
+        "FileFacts blob has {} trailing bytes",
+        blob.len() - bytes_read,
+    );
+    Ok(facts)
 }
 
 fn decls_holder_to_binary(decls: &DeclsHolder) -> Result<Vec<u8>, bincode::error::EncodeError> {
@@ -929,5 +956,36 @@ unsafe fn deref_bytes(i: u32) -> &'static [u8] {
         use intern::InternId;
         let biased = i.try_into().expect("raw id should be nonzero");
         intern::string::BytesId::from_raw(biased).as_bytes()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rejects_unsupported_file_facts_version() -> anyhow::Result<()> {
+        let facts = ffi::FileFacts {
+            format_version: 0,
+            ..Default::default()
+        };
+        let blob = bincode::serde::encode_to_vec(&facts, bincode::config::standard())?;
+
+        let error = decode_file_facts(&blob).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Unsupported FileFacts format version 0; expected 1"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn default_file_facts_uses_current_format_version() -> anyhow::Result<()> {
+        let facts = ffi::FileFacts::default();
+        assert_eq!(facts.format_version, FILE_FACTS_FORMAT_VERSION);
+
+        let blob = bincode::serde::encode_to_vec(&facts, bincode::config::standard())?;
+        assert_eq!(decode_file_facts(&blob)?, facts);
+        Ok(())
     }
 }

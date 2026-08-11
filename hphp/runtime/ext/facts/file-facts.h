@@ -74,6 +74,7 @@ constexpr DeriveKindMask kDeriveKindAll =
 
 using hackc::AttrFacts;
 using hackc::FileFacts;
+using hackc::FunctionFacts;
 using hackc::MethodFacts;
 using hackc::ModuleFacts;
 using hackc::TypeFacts;
@@ -87,7 +88,8 @@ inline bool isFinal(const hackc::TypeFacts& t) noexcept {
 }
 
 inline bool isEmpty(const FileFacts& f) noexcept {
-  return f.types.empty() && f.functions.empty() && f.constants.empty() &&
+  return f.types.empty() && f.functions.empty() &&
+      f.function_attributes.empty() && f.constants.empty() &&
       f.modules.empty() && f.file_attributes.empty();
 }
 

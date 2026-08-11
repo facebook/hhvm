@@ -121,6 +121,7 @@ impl<'o, 't> std::ops::Deref for DirectDeclSmartConstructors<'o, 't> {
 pub struct Impl<'o, 't> {
     pub source_text: IndexedSourceText<'t>,
     pub file_attributes: Vec<typing_defs::UserAttribute>,
+    pub function_attributes: BTreeMap<String, Vec<typing_defs::UserAttribute>>,
 
     // const_refs will accumulate all scope-resolution-expressions it
     // encounters while it's "Some"
@@ -167,6 +168,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 filename,
                 file_mode,
                 file_attributes: Default::default(),
+                function_attributes: Default::default(),
                 const_refs: None,
                 namespace_builder: Rc::new(NamespaceBuilder::new(
                     opts.auto_namespace_map.clone(),
@@ -4039,7 +4041,23 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                         .require_package
                         .unwrap_or(PackageRequirement::RPNormal),
                 };
+                let function_attributes = if self.opts.keep_user_attributes {
+                    attributes
+                        .into_iter()
+                        .rev()
+                        .filter_map(|attribute| match attribute {
+                            Node::Attribute(box attr) => Some(self.user_attribute_to_decl(attr)),
+                            _ => None,
+                        })
+                        .collect()
+                } else {
+                    Vec::new()
+                };
                 let this = Rc::make_mut(&mut self.state);
+                if !function_attributes.is_empty() {
+                    this.function_attributes
+                        .insert(name.clone(), function_attributes);
+                }
                 this.fun_decl(name, fun_elt)
             }
             _ => Node::Ignored(SK::FunctionDeclaration),

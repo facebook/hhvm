@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/CallbackContext.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustMessageAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
@@ -1618,7 +1619,8 @@ ContextHandleSandwichResult run_context_handle_sandwich_test(
   MockHeadHandler head;
   MockTailHandler tail;
   TestAllocator allocator;
-  const bool read = scenario == 8 || scenario == 10;
+  const bool read =
+      scenario == 8 || scenario == 10 || scenario == 20 || scenario == 21;
   const folly::IOBuf* received = nullptr;
   if (read) {
     tail.setOnReadCallback([&](TypeErasedBox&& message) noexcept {
@@ -1773,6 +1775,23 @@ ContextHandleExceptionResult run_context_handle_exception_test(
       .removed_after_fence = rust_handler_test_removed_callbacks(),
       .message_preserved = messagePreserved,
   };
+}
+
+void run_event_base_destruction_test(
+    uintptr_t task,
+    rust::Fn<void(uintptr_t)> call,
+    rust::Fn<void(uintptr_t)> drop) noexcept {
+  auto eventBase = std::make_unique<folly::EventBase>();
+  eventBase->setStrictLoopThread();
+  std::thread worker([eventBase = eventBase.get(),
+                      task,
+                      call = std::move(call),
+                      drop = std::move(drop)]() mutable {
+    channel_pipeline_rust::enqueueInEventBase(
+        eventBase, task, std::move(call), std::move(drop));
+  });
+  worker.join();
+  eventBase.reset();
 }
 
 // Proves forward-unknown via RustTypeErasedBox: a Rust handler forwards the

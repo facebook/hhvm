@@ -47,6 +47,10 @@ using namespace apache::thrift::fast_thrift::channel_pipeline;
 HANDLER_TAG(bench_rust);
 HANDLER_TAG(bench_cpp);
 
+// Upper bound on the bytes a spawned Rust coroutine may allocate per call: one
+// task cell holding the task state, scheduler, future, completion, and payload.
+constexpr uint64_t kCoroTaskCellByteBudget = 256;
+
 struct PassthroughHandler {
   Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
     return ctx.fireRead(std::move(msg));
@@ -260,6 +264,17 @@ void requireZero(uint64_t actual, const char* path) {
   }
 }
 
+void requireAtMostPerIteration(
+    uint64_t actual, uint64_t iterations, uint64_t budget, const char* path) {
+  const uint64_t perIteration = actual / iterations;
+  if (perIteration > budget) {
+    throw std::runtime_error(
+        std::string(path) + " used " + std::to_string(perIteration) +
+        " bytes per iteration, over its " + std::to_string(budget) +
+        " byte budget");
+  }
+}
+
 TypeErasedBox makeBox() {
   auto bytes = folly::IOBuf::create(64);
   bytes->append(64);
@@ -394,10 +409,23 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
   BenchApp contextHandleReadApp;
   BenchTransport contextHandleWriteTransport;
   BenchApp contextHandleWriteApp;
+  BenchTransport readyCoroReadTransport;
+  BenchApp readyCoroReadApp;
+  BenchTransport readyCoroWriteTransport;
+  BenchApp readyCoroWriteApp;
+  BenchTransport pendingCoroReadTransport;
+  BenchApp pendingCoroReadApp;
   PipelineImpl::Ptr contextHandleReadPipeline;
   PipelineImpl::Ptr contextHandleWritePipeline;
+  PipelineImpl::Ptr readyCoroReadPipeline;
+  PipelineImpl::Ptr readyCoroWritePipeline;
+  PipelineImpl::Ptr pendingCoroReadPipeline;
   double contextHandleRead = 0;
   double contextHandleWrite = 0;
+  double readyCoroRead = 0;
+  double readyCoroWrite = 0;
+  double pendingCoroSubmit = 0;
+  uint64_t pendingCoroSubmitAllocBytes = 0;
   contextHandleEventBase->runInEventBaseThreadAndWait([&] {
     contextHandleReadPipeline =
         PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
@@ -421,12 +449,63 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
                 std::make_unique<RustHandlerImpl>(
                     rust_handler_new_context_handle_test(9)))
             .build();
+    readyCoroReadPipeline =
+        PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
+            .setEventBase(contextHandleEventBase)
+            .setHead(&readyCoroReadTransport)
+            .setTail(&readyCoroReadApp)
+            .setAllocator(&allocator)
+            .addNextDuplex<RustHandlerImpl>(
+                bench_rust_tag,
+                std::make_unique<RustHandlerImpl>(
+                    rust_handler_new_context_handle_test(20)))
+            .build();
+    readyCoroWritePipeline =
+        PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
+            .setEventBase(contextHandleEventBase)
+            .setHead(&readyCoroWriteTransport)
+            .setTail(&readyCoroWriteApp)
+            .setAllocator(&allocator)
+            .addNextDuplex<RustHandlerImpl>(
+                bench_rust_tag,
+                std::make_unique<RustHandlerImpl>(
+                    rust_handler_new_context_handle_test(22)))
+            .build();
+    pendingCoroReadPipeline =
+        PipelineBuilder<BenchTransport, BenchApp, BenchAllocator>()
+            .setEventBase(contextHandleEventBase)
+            .setHead(&pendingCoroReadTransport)
+            .setTail(&pendingCoroReadApp)
+            .setAllocator(&allocator)
+            .addNextDuplex<RustHandlerImpl>(
+                bench_rust_tag,
+                std::make_unique<RustHandlerImpl>(
+                    rust_handler_new_context_handle_test(26)))
+            .build();
 
     watchdog.operation("Rust ContextHandle immediate read");
     contextHandleRead = measureRead(*contextHandleReadPipeline, iterations);
     watchdog.operation("Rust ContextHandle immediate write");
     contextHandleWrite = measureWrite(*contextHandleWritePipeline, iterations);
+    watchdog.operation("Rust ready coroutine read");
+    readyCoroRead = measureRead(*readyCoroReadPipeline, iterations);
+    watchdog.operation("Rust ready coroutine write");
+    readyCoroWrite = measureWrite(*readyCoroWritePipeline, iterations);
+
+    watchdog.operation("Rust pending coroutine submit");
+    auto pendingMessages = makeMessages(iterations);
+    const auto pendingBefore = threadAllocatedBytes();
+    pendingCoroSubmit =
+        measureNs([&] {
+          for (auto& message : pendingMessages) {
+            folly::doNotOptimizeAway(
+                pendingCoroReadPipeline->fireRead(std::move(message)));
+          }
+        }) /
+        static_cast<double>(iterations);
+    pendingCoroSubmitAllocBytes = threadAllocatedBytes() - pendingBefore;
   });
+  contextHandleEventBase->runInEventBaseThreadAndWait([] {});
   requireCount(
       contextHandleReadApp.readCount,
       iterations,
@@ -435,6 +514,16 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
       contextHandleWriteTransport.writeCount,
       iterations,
       "Rust ContextHandle write head");
+  requireCount(
+      readyCoroReadApp.readCount, iterations, "Rust ready coroutine read tail");
+  requireCount(
+      readyCoroWriteTransport.writeCount,
+      iterations,
+      "Rust ready coroutine write head");
+  requireCount(
+      pendingCoroReadApp.readCount,
+      iterations,
+      "Rust pending coroutine read tail");
 
   rust_handler_reset_test_counts();
   auto exceptionPipeline =
@@ -608,6 +697,8 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
 
   uint64_t contextHandlePathAllocBytes = 0;
   uint64_t contextHandlePathLoopCallbacks = 0;
+  uint64_t readyCoroPathAllocBytes = 0;
+  uint64_t readyCoroPathLoopCallbacks = 0;
   contextHandleEventBase->runInEventBaseThreadAndWait([&] {
     auto warmup = makeMessages(1000);
     for (auto& message : warmup) {
@@ -624,12 +715,31 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
     contextHandlePathAllocBytes = threadAllocatedBytes() - before;
     contextHandlePathLoopCallbacks =
         contextHandleEventBase->getNumLoopCallbacks() - callbacksBefore;
+
+    auto coroWarmup = makeMessages(1000);
+    for (auto& message : coroWarmup) {
+      folly::doNotOptimizeAway(
+          readyCoroReadPipeline->fireRead(std::move(message)));
+    }
+    auto coroMessages = makeMessages(iterations);
+    const auto coroCallbacksBefore =
+        contextHandleEventBase->getNumLoopCallbacks();
+    const auto coroBefore = threadAllocatedBytes();
+    for (auto& message : coroMessages) {
+      folly::doNotOptimizeAway(
+          readyCoroReadPipeline->fireRead(std::move(message)));
+    }
+    readyCoroPathAllocBytes = threadAllocatedBytes() - coroBefore;
+    readyCoroPathLoopCallbacks =
+        contextHandleEventBase->getNumLoopCallbacks() - coroCallbacksBefore;
   });
 
   requireZero(readyLoopCallbacks, "ready path EventBase enqueue");
   requireZero(forwardLoopCallbacks, "forward path EventBase enqueue");
   requireZero(
       contextHandlePathLoopCallbacks, "ContextHandle EventBase-local enqueue");
+  requireZero(
+      readyCoroPathLoopCallbacks, "ready coroutine EventBase-local enqueue");
   if (jemalloc) {
     requireZero(readyAllocBytes, "ready path heap allocation");
     requireZero(forwardAllocBytes, "forward path heap allocation");
@@ -639,6 +749,16 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
     requireZero(
         contextHandlePathAllocBytes,
         "ContextHandle EventBase-local heap allocation");
+    // A Rust future must be polled at its final address, so a spawned
+    // coroutine allocates its task cell before the first poll even when that
+    // poll completes inline. The cell is a single allocation holding the task
+    // state, scheduler, future, completion, and payload inline; this budget
+    // fails if anything else on the path starts allocating.
+    requireAtMostPerIteration(
+        readyCoroPathAllocBytes,
+        iterations,
+        kCoroTaskCellByteBudget,
+        "ready coroutine task cell");
   }
 
   watchdog.operation("benchmark result assembly");
@@ -650,6 +770,9 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
       rustWrite,
       contextHandleRead,
       contextHandleWrite,
+      readyCoroRead,
+      readyCoroWrite,
+      pendingCoroSubmit,
       nativeException,
       rustException,
       nativeReadReady,
@@ -662,9 +785,12 @@ BenchResult run_bench_with_watchdog(uint64_t iterations, uint64_t timeoutMs) {
       forwardAllocBytes,
       contextHandleTypeErasureAllocBytes,
       contextHandlePathAllocBytes,
+      readyCoroPathAllocBytes,
+      pendingCoroSubmitAllocBytes,
       readyLoopCallbacks,
       forwardLoopCallbacks,
       contextHandlePathLoopCallbacks,
+      readyCoroPathLoopCallbacks,
       jemalloc,
   };
 }

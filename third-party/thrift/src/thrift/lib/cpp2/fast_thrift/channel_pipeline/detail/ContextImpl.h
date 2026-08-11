@@ -48,7 +48,7 @@ namespace detail {
  * They do not need independent delayed destruction - the pipeline's
  * DestructorGuard protects all contexts during callback execution.
  */
-class ContextImpl {
+class alignas(64) ContextImpl {
  public:
   /**
    * Constructs a context for a handler at the given index.
@@ -261,8 +261,21 @@ class ContextImpl {
   // cycle. Private so callers use the type-safe enum API.
   void fireEvent(std::uint32_t ev, TypeErasedBox&& eventMessage) noexcept;
 
+  // The first cache line contains the pipeline/EventBase pointers and both
+  // read/write dispatch triples used by continuation completion.
   PipelineImpl* pipeline_;
   folly::EventBase* eventBase_;
+
+  Result (*nextReadFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
+      nullptr};
+  void* nextHandler_{nullptr};
+  ContextImpl* nextCtx_{nullptr};
+
+  Result (*prevWriteFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
+      nullptr};
+  void* prevHandler_{nullptr};
+  ContextImpl* prevCtx_{nullptr};
+
   void* allocator_; // Type-erased BufferAllocator
   void* pipelineState_{nullptr}; // Type-erased pipeline-level state
   // Storage for the per-context TypedContext view (constructed by the builder
@@ -271,24 +284,8 @@ class ContextImpl {
   size_t handlerIndex_;
   HandlerId handlerId_;
 
-  // Cached next-handler dispatch for hot path.
-  // Set once during PipelineImpl::initializeContexts().
-  // Eliminates per-hop round-trip through PipelineImpl.
-
-  // Read/exception direction: head→tail. Each context's "next" is the
-  // handler closer to the tail.
-  Result (*nextReadFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
-      nullptr};
   void (*nextExceptionFn_)(
       void*, ContextImpl&, folly::exception_wrapper&&) noexcept {nullptr};
-  void* nextHandler_{nullptr};
-  ContextImpl* nextCtx_{nullptr};
-
-  // Write direction: tail→head (prev handler or head terminal)
-  Result (*prevWriteFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
-      nullptr};
-  void* prevHandler_{nullptr};
-  ContextImpl* prevCtx_{nullptr};
 
   // Per-event subscription hooks — one per event type this handler subscribed
   // to, each linked into the matching per-event list in PipelineImpl. Kept
@@ -305,6 +302,9 @@ class ContextImpl {
   template <typename StateTuple>
   friend class TypedContext;
 };
+
+static_assert(sizeof(ContextImpl) == 128);
+static_assert(alignof(ContextImpl) == 64);
 
 } // namespace detail
 } // namespace apache::thrift::fast_thrift::channel_pipeline

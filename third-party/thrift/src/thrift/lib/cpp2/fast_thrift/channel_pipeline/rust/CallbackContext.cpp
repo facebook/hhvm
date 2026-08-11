@@ -120,6 +120,56 @@ void CallbackContext::initContextHandle(uint8_t* storage) noexcept {
   ::new (storage) RustContextHandleToken(context_);
 }
 
+folly::EventBase* CallbackContext::eventBase() const noexcept {
+  return context_.eventBase();
+}
+
+bool isInEventBaseThread(folly::EventBase* eventBase) noexcept {
+  DCHECK(eventBase != nullptr);
+  return eventBase != nullptr && eventBase->isInEventBaseThread();
+}
+
+void enqueueInEventBase(
+    folly::EventBase* eventBase,
+    uintptr_t task,
+    rust::Fn<void(uintptr_t)> call,
+    rust::Fn<void(uintptr_t)> drop) noexcept {
+  CHECK(eventBase != nullptr);
+  struct Task final {
+    uintptr_t value;
+    rust::Fn<void(uintptr_t)> call;
+    rust::Fn<void(uintptr_t)> drop;
+
+    Task(
+        uintptr_t value,
+        rust::Fn<void(uintptr_t)> call,
+        rust::Fn<void(uintptr_t)> drop)
+        : value(value), call(std::move(call)), drop(std::move(drop)) {}
+    Task(Task&& other) noexcept
+        : value(std::exchange(other.value, 0)),
+          call(std::move(other.call)),
+          drop(std::move(other.drop)) {}
+    Task(const Task&) = delete;
+    Task& operator=(const Task&) = delete;
+    ~Task() {
+      if (auto owned = std::exchange(value, 0)) {
+        drop(owned);
+      }
+    }
+    void operator()() {
+      if (auto owned = std::exchange(value, 0)) {
+        call(owned);
+      }
+    }
+  };
+
+  eventBase->runInEventBaseThreadAlwaysEnqueue(
+      [owned =
+           Task(task, std::move(call), std::move(drop))]() mutable noexcept {
+        owned();
+      });
+}
+
 void fireContextHandleRead(uint8_t* storage, BytesPtr message) noexcept {
   fireContextHandle(
       storage,

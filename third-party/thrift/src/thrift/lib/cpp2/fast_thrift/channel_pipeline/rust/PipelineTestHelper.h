@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include <rust/cxx.h>
+
 namespace channel_pipeline_rust::test {
 
 struct BehaviorTestResult;
@@ -84,5 +86,9 @@ ContextHandleSandwichResult run_context_handle_sandwich_test(
     uint32_t scenario) noexcept;
 ContextHandleExceptionResult run_context_handle_exception_test(
     uint32_t scenario) noexcept;
+void run_event_base_destruction_test(
+    uintptr_t task,
+    rust::Fn<void(uintptr_t)> call,
+    rust::Fn<void(uintptr_t)> drop) noexcept;
 
 } // namespace channel_pipeline_rust::test

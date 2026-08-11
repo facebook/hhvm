@@ -54,13 +54,18 @@ namespace channel_pipeline_rust {
  * lifetime. The box is destroyed during LIFO teardown when the C++ shim
  * destructs, dropping the inner `Box<dyn RustHandler>`.
  *
- * ## Synchronous scope
+ * ## Synchronous and deferred scope
  *
- * This shim is synchronous only. The C++ `ContextHandle` and
- * `CoroContextHandle` APIs — which hand off the pipeline context to an
- * external thread or coroutine — are not accessible to Rust callbacks through
- * this bridge. All Rust handler methods must complete inline before the shim
- * returns to the pipeline.
+ * A Rust callback may complete inline and return a `HandlerResult`, or it may
+ * defer: `CallbackContext::context_handle()` captures the exact pipeline
+ * position into a move-only Rust `ContextHandle` that is safe to send to
+ * another thread and resumes the pipeline when consumed, and
+ * `CallbackContext::spawn()` starts a Rust future on the pipeline's EventBase
+ * whose first poll runs inline and whose later polls return to that EventBase.
+ * Both retain the pipeline until the continuation completes or is cancelled.
+ *
+ * Folly's `CoroContextHandle` is still not accessible through this bridge:
+ * Rust drives its own futures and never awaits a `folly::coro::Task`.
  *
  * ## Result and backpressure mapping
  *

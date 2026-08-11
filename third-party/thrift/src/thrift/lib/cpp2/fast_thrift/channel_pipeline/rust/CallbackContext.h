@@ -20,7 +20,9 @@
 #include <cstdint>
 #include <memory>
 
+#include <rust/cxx.h>
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
@@ -84,6 +86,8 @@ class CallbackContext final {
   // caller-provided storage. Must be destroyed with destroyContextHandle().
   void initContextHandle(uint8_t* storage) noexcept;
 
+  folly::EventBase* eventBase() const noexcept;
+
   int32_t fireRead(std::unique_ptr<folly::IOBuf> message) noexcept;
   int32_t fireWrite(std::unique_ptr<folly::IOBuf> message) noexcept;
 
@@ -118,6 +122,14 @@ class CallbackContext final {
       nullptr};
   bool forwarded_{false};
 };
+
+bool isInEventBaseThread(folly::EventBase* eventBase) noexcept;
+
+void enqueueInEventBase(
+    folly::EventBase* eventBase,
+    uintptr_t task,
+    rust::Fn<void(uintptr_t)> call,
+    rust::Fn<void(uintptr_t)> drop) noexcept;
 
 // Consume a token and continue from its captured context. The continuation runs
 // immediately on the EventBase and is otherwise enqueued onto that EventBase.

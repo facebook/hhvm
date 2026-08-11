@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//! CXX boundary declarations for the synchronous channel_pipeline Rust bridge.
+//! CXX boundary declarations for the channel_pipeline Rust bridge.
 //!
 //! Every `unsafe extern "C++"` declaration carries explicit invariant
 //! contracts at its declaration site. The public Rust API in [`context`] and
@@ -135,6 +135,20 @@ pub(crate) mod ffi {
         /// uninitialized words that remain valid until `destroy_context_handle`.
         #[cxx_name = "initContextHandle"]
         unsafe fn init_context_handle(self: Pin<&mut FfiCallbackContext>, storage: *mut u8);
+
+        #[namespace = "folly"]
+        type EventBase;
+        #[cxx_name = "eventBase"]
+        fn event_base(self: &FfiCallbackContext) -> *mut EventBase;
+        #[cxx_name = "isInEventBaseThread"]
+        unsafe fn is_in_event_base_thread(event_base: *mut EventBase) -> bool;
+        #[cxx_name = "enqueueInEventBase"]
+        unsafe fn enqueue_in_event_base(
+            event_base: *mut EventBase,
+            task: usize,
+            call: fn(usize),
+            drop: fn(usize),
+        );
 
         #[cxx_name = "fireRead"]
         fn fire_read(self: Pin<&mut FfiCallbackContext>, message: UniquePtr<IOBuf>) -> i32;

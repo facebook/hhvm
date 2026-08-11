@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-//! Synchronous Rust handler trait and result type for `channel_pipeline`.
+//! Rust handler trait and result type for `channel_pipeline`.
 
+use std::future::Future;
+use std::pin::Pin;
+use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU32;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
+use std::task::Context;
+use std::task::Poll;
+use std::task::Waker;
 
 use crate::adapter::BytesPtr;
 use crate::context::CallbackContext;
 use crate::context::ContextHandle;
 use crate::context::PipelineError;
+use crate::coro_handler::CoroExceptionHandle;
+use crate::coro_handler::CoroReadHandle;
+use crate::coro_handler::CoroWriteHandle;
 use crate::erased::RustTypeErasedBox;
 
 /// FFI-stable result type mirroring C++ `channel_pipeline::Result`.
@@ -59,7 +69,7 @@ impl HandlerResult {
     }
 }
 
-/// A synchronous Rust handler in a `channel_pipeline` pipeline.
+/// A Rust handler in a `channel_pipeline` pipeline.
 ///
 /// # Contract
 ///
@@ -88,12 +98,12 @@ impl HandlerResult {
 /// return normally to C++. After `on_exception`, the C++ shim always fires
 /// the exception downstream regardless of what the Rust callback did.
 ///
-/// # Async work — not supported
+/// # Async work
 ///
-/// All callbacks must return synchronously. The C++ `ContextHandle` and
-/// `CoroContextHandle` APIs are not accessible from Rust handlers through this
-/// bridge. If the result of async work is needed, it must be materialized
-/// before the callback returns.
+/// A callback may use [`CallbackContext::spawn`] to start a `Send + 'static`
+/// Rust future on the pipeline's EventBase. The first poll runs inline; later
+/// wakes return to that EventBase. Completion receives the existing move-only
+/// [`ContextHandle`] so it can resume the pipeline from the captured position.
 ///
 /// # Backpressure
 ///
@@ -107,7 +117,7 @@ impl HandlerResult {
 ///
 /// Native C++ pipelines use typed events (write-completion chain, close
 /// signals) via a separate `fireEvent` channel. These are not exposed to Rust
-/// handlers today because no concrete synchronous Rust handler consumer uses
+/// handlers today because no concrete Rust handler consumer uses
 /// them. A future extension would add append-only event enum support while
 /// preserving the `CallbackContext` `!Send` invariant.
 pub trait RustHandler: Send + 'static {
@@ -171,6 +181,50 @@ static CONTEXT_HANDLE_TEST_SLOT: Mutex<Vec<ContextHandle>> = Mutex::new(Vec::new
 
 fn move_context_handle(handle: ContextHandle) -> ContextHandle {
     handle
+}
+
+/// A future that suspends until a worker thread wakes it.
+///
+/// The worker blocks on a waker handoff instead of polling a shared slot, so no
+/// lock is needed: readiness cannot be published before the waker arrives, which
+/// also removes the re-check a lock-based slot would require after storing.
+struct WorkerWakeFuture {
+    ready: Arc<AtomicBool>,
+    wakers: std::sync::mpsc::Sender<Waker>,
+}
+
+impl WorkerWakeFuture {
+    fn new() -> (Self, std::sync::mpsc::Receiver<()>) {
+        let ready = Arc::new(AtomicBool::new(false));
+        let worker_ready = Arc::clone(&ready);
+        let (wakers, waker_receiver) = std::sync::mpsc::channel::<Waker>();
+        let (woke, woke_receiver) = std::sync::mpsc::sync_channel(1);
+        std::thread::spawn(move || {
+            // A cancelled task drops the future and disconnects the channel;
+            // there is nothing to wake in that case.
+            let Ok(waker) = waker_receiver.recv() else {
+                return;
+            };
+            worker_ready.store(true, Ordering::Release);
+            waker.wake();
+            woke.send(()).expect("wake observer should remain alive");
+        });
+        (Self { ready, wakers }, woke_receiver)
+    }
+}
+
+impl Future for WorkerWakeFuture {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
+        if self.ready.load(Ordering::Acquire) {
+            return Poll::Ready(());
+        }
+        self.wakers
+            .send(context.waker().clone())
+            .expect("worker should still be awaiting the waker");
+        Poll::Pending
+    }
 }
 
 impl RustHandler for ContextHandleTestHandler {
@@ -256,6 +310,78 @@ impl RustHandler for ContextHandleTestHandler {
                 .expect("worker fire_exception should enqueue before close");
                 ctx.close();
             }
+            20 => {
+                let mut handler =
+                    CoroReadHandle::<BytesPtr, _>::new(|message| async move { message });
+                return handler.fire_read(ctx, msg);
+            }
+            21 => {
+                let (wake, woke) = WorkerWakeFuture::new();
+                let mut wake = Some(wake);
+                let mut handler = CoroReadHandle::<BytesPtr, _>::new(move |message| {
+                    let wake = wake.take().expect("coroutine method should run once");
+                    async move {
+                        wake.await;
+                        message
+                    }
+                });
+                let result = handler.fire_read(ctx, msg);
+                woke.recv().expect("worker should issue the EventBase wake");
+                return result;
+            }
+            26 => {
+                let mut first_poll = true;
+                let mut handler = CoroReadHandle::<BytesPtr, _>::new(move |message| {
+                    let pending = first_poll;
+                    first_poll = false;
+                    async move {
+                        if pending {
+                            struct YieldOnce(bool);
+                            impl Future for YieldOnce {
+                                type Output = ();
+
+                                fn poll(
+                                    mut self: Pin<&mut Self>,
+                                    context: &mut Context<'_>,
+                                ) -> Poll<()> {
+                                    if self.0 {
+                                        Poll::Ready(())
+                                    } else {
+                                        self.0 = true;
+                                        context.waker().wake_by_ref();
+                                        Poll::Pending
+                                    }
+                                }
+                            }
+                            YieldOnce(false).await;
+                        }
+                        message
+                    }
+                });
+                return handler.fire_read(ctx, msg);
+            }
+            24 => {
+                drop(msg.take::<BytesPtr>());
+                let mut handler = CoroExceptionHandle::new(|error| async move { error });
+                return handler
+                    .fire_exception(ctx, PipelineError::new("deferred exception \u{03bb}"));
+            }
+            25 => {
+                drop(msg.take::<BytesPtr>());
+                let (wake, woke) = WorkerWakeFuture::new();
+                let mut wake = Some(wake);
+                let mut handler = CoroExceptionHandle::new(move |error| {
+                    let wake = wake.take().expect("coroutine method should run once");
+                    async move {
+                        wake.await;
+                        error
+                    }
+                });
+                let result =
+                    handler.fire_exception(ctx, PipelineError::new("deferred exception \u{03bb}"));
+                woke.recv().expect("worker should issue the EventBase wake");
+                return result;
+            }
             scenario => panic!("unknown ContextHandle test scenario {scenario}"),
         }
         HandlerResult::Success
@@ -280,6 +406,26 @@ impl RustHandler for ContextHandleTestHandler {
                 let message = msg.take::<BytesPtr>();
                 ctx.close();
                 handle.fire_write(message);
+            }
+            20 | 21 => return ctx.fire_write(msg.take::<BytesPtr>()),
+            22 => {
+                let mut handler =
+                    CoroWriteHandle::<BytesPtr, _>::new(|message| async move { message });
+                return handler.fire_write(ctx, msg);
+            }
+            23 => {
+                let (wake, woke) = WorkerWakeFuture::new();
+                let mut wake = Some(wake);
+                let mut handler = CoroWriteHandle::<BytesPtr, _>::new(move |message| {
+                    let wake = wake.take().expect("coroutine method should run once");
+                    async move {
+                        wake.await;
+                        message
+                    }
+                });
+                let result = handler.fire_write(ctx, msg);
+                woke.recv().expect("worker should issue the EventBase wake");
+                return result;
             }
             scenario => panic!("unknown ContextHandle write test scenario {scenario}"),
         }

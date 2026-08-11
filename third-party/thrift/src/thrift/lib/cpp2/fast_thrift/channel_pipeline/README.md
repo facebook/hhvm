@@ -12,6 +12,12 @@ while still be relatively easy to use.
 The design makes it possible to create a Thrift Rocket transport that is
 composable but can achieve higher performance than monolithic implementations.
 
+A pipeline stage can also be written in **Rust** — same EventBase, same
+zero-copy `IOBuf`, no serialization or thread hop at the boundary — through the
+opt-in bridge documented in
+[`thrift/lib/rust/channel_pipeline/README.md`](../../../rust/channel_pipeline/README.md).
+Pipelines that do not add a Rust handler carry no Rust or CXX link edge.
+
 ---
 
 ## Design Principles

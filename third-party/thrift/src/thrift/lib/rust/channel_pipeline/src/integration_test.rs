@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
+
 use channel_pipeline as _;
 use channel_pipeline::ContextHandle;
 use channel_pipeline::HandlerResult;
+
+static NATIVE_DESTRUCTION_CALLS: AtomicUsize = AtomicUsize::new(0);
+static NATIVE_DESTRUCTION_DROPS: AtomicUsize = AtomicUsize::new(0);
+
+fn native_destruction_call(_task: usize) {
+    NATIVE_DESTRUCTION_CALLS.fetch_add(1, Ordering::Relaxed);
+}
+
+fn native_destruction_drop(_task: usize) {
+    NATIVE_DESTRUCTION_DROPS.fetch_add(1, Ordering::Relaxed);
+}
 
 fn run_with_timeout(test: impl FnOnce() + Send + 'static) {
     let (sender, receiver) = std::sync::mpsc::sync_channel(1);
@@ -267,6 +281,11 @@ mod ffi {
         pointer_identity_preserved: bool,
     }
 
+    extern "Rust" {
+        fn native_destruction_call(task: usize);
+        fn native_destruction_drop(task: usize);
+    }
+
     unsafe extern "C++" {
         include!("thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/PipelineTestHelper.h");
 
@@ -301,7 +320,23 @@ mod ffi {
         fn run_context_handle_fire_test(scenario: u32) -> ContextHandleFireResult;
         fn run_context_handle_sandwich_test(scenario: u32) -> ContextHandleSandwichResult;
         fn run_context_handle_exception_test(scenario: u32) -> ContextHandleExceptionResult;
+        unsafe fn run_event_base_destruction_test(task: usize, call: fn(usize), drop: fn(usize));
     }
+}
+
+#[test]
+fn native_event_base_destruction_drains_queued_task_once() {
+    NATIVE_DESTRUCTION_CALLS.store(0, Ordering::Relaxed);
+    NATIVE_DESTRUCTION_DROPS.store(0, Ordering::Relaxed);
+
+    // SAFETY: the task token is inert test data and both function pointers stay
+    // valid for the duration of the synchronous native helper.
+    unsafe {
+        ffi::run_event_base_destruction_test(1, native_destruction_call, native_destruction_drop);
+    }
+
+    assert_eq!(NATIVE_DESTRUCTION_CALLS.load(Ordering::Relaxed), 1);
+    assert_eq!(NATIVE_DESTRUCTION_DROPS.load(Ordering::Relaxed), 0);
 }
 
 #[test]
@@ -806,6 +841,26 @@ fn context_handle_worker_write_resumes_inside_cpp_sandwich() {
     assert_context_handle_write_sandwich(&ffi::run_context_handle_sandwich_test(11), false);
 }
 
+#[test]
+fn coro_read_ready_future_polls_inline_and_resumes_read() {
+    assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(20), true);
+}
+
+#[test]
+fn coro_read_worker_wake_repolls_and_resumes_read() {
+    assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(21), false);
+}
+
+#[test]
+fn coro_write_ready_future_polls_inline_and_resumes_write() {
+    assert_context_handle_write_sandwich(&ffi::run_context_handle_sandwich_test(22), true);
+}
+
+#[test]
+fn coro_write_worker_wake_repolls_and_resumes_write() {
+    assert_context_handle_write_sandwich(&ffi::run_context_handle_sandwich_test(23), false);
+}
+
 fn assert_context_handle_exception(
     result: &ffi::ContextHandleExceptionResult,
     delivered_before_fence: bool,
@@ -838,6 +893,16 @@ fn context_handle_fire_exception_runs_immediately_inside_cpp_sandwich() {
 #[test]
 fn context_handle_fire_exception_from_worker_resumes_inside_cpp_sandwich() {
     assert_context_handle_exception(&ffi::run_context_handle_exception_test(15), false);
+}
+
+#[test]
+fn coro_exception_ready_future_polls_inline_and_resumes_exception() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(24), true);
+}
+
+#[test]
+fn coro_exception_worker_wake_repolls_and_resumes_exception() {
+    assert_context_handle_exception(&ffi::run_context_handle_exception_test(25), false);
 }
 
 #[test]

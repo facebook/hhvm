@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-//! Borrowed, callback-scoped access to the synchronous C++ pipeline context.
+//! Borrowed, callback-scoped access to the C++ pipeline context, plus the
+//! move-only captured continuation and coroutine spawn entry points.
 
 use std::cell::Cell;
 use std::marker::PhantomData;
@@ -24,6 +25,8 @@ use std::rc::Rc;
 
 use crate::adapter::BytesPtr;
 use crate::adapter::RustMessageAdapter;
+use crate::event_base::EventBaseTask;
+use crate::event_base::FirstPoll;
 use crate::ffi::ffi::FfiCallbackContext;
 use crate::handler::HandlerResult;
 
@@ -192,6 +195,49 @@ impl<'callback> CallbackContext<'callback> {
         Self {
             inner,
             _not_send_or_sync: PhantomData,
+        }
+    }
+
+    /// Start a Rust future on this pipeline's EventBase.
+    ///
+    /// The task owns the existing move-only continuation handle, which retains
+    /// the pipeline and its EventBase until completion or cancellation. Its
+    /// first poll runs inline in the current callback; wakes schedule later
+    /// polls back onto this same EventBase. `complete` consumes the continuation
+    /// and the future's output when the task becomes ready.
+    pub fn spawn<T, Fut, Complete>(&mut self, future: Fut, complete: Complete)
+    where
+        T: Send + 'static,
+        Fut: Future<Output = T> + Send + 'static,
+        Complete: FnOnce(ContextHandle, T) + Send + 'static,
+    {
+        let event_base = self.inner.as_ref().get_ref().event_base();
+        let continuation = self.context_handle();
+        EventBaseTask::start(event_base, async move {
+            complete(continuation, future.await);
+        });
+    }
+
+    pub(crate) fn spawn_deferred<T, Fut, Ready, Complete>(
+        &mut self,
+        future: Fut,
+        ready: Ready,
+        complete: Complete,
+    ) -> HandlerResult
+    where
+        T: Send + 'static,
+        Fut: Future<Output = T> + Send + 'static,
+        Ready: FnOnce(&mut Self, T) -> HandlerResult,
+        Complete: FnOnce(ContextHandle, T) + Send + 'static,
+    {
+        let event_base = self.inner.as_ref().get_ref().event_base();
+        match EventBaseTask::poll(event_base, future, complete) {
+            FirstPoll::Ready(output) => ready(self, output),
+            FirstPoll::Pending(task) => {
+                task.install(self.context_handle());
+                HandlerResult::Success
+            }
+            FirstPoll::Panicked => HandlerResult::Success,
         }
     }
 

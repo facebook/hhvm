@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//! Synchronous Rust handler bridge for the `fast_thrift` channel pipeline.
+//! Rust handler bridge for the `fast_thrift` channel pipeline.
 //!
 //! # Status: experimental prototype
 //!
@@ -27,21 +27,57 @@
 //! # Overview
 //!
 //! This crate provides a pay-for-use, opt-in Rust integration for the
-//! `channel_pipeline` framework. It lets you write a
-//! pipeline handler in Rust that participates synchronously in a C++ pipeline.
+//! `channel_pipeline` framework. It lets you write a pipeline handler in Rust
+//! that participates in a C++ pipeline, either synchronously or as a coroutine.
 //! All callbacks arrive on the pipeline's EventBase thread with a borrowed,
 //! non-escapable [`CallbackContext`] that is structurally `!Send`/`!Sync`.
 //!
-//! # Synchronous-only scope
+//! # Scope
 //!
-//! This bridge exposes **only the synchronous subset** of the pipeline API:
-//! `on_read`, `on_write`, lifecycle callbacks (`handler_added`,
-//! `on_pipeline_active`, …), one-shot readiness hooks (`await_read_ready`,
-//! `await_write_ready`), and `close`. The C++ `ContextHandle`
-//! (EventBase-enqueue) and `CoroContextHandle` (coroutine) APIs — which hand
-//! off a pipeline context to an external thread or coroutine — are **not**
-//! exposed through this bridge. All Rust handler code must complete inline and
-//! return a [`HandlerResult`] before control passes back to C++.
+//! The synchronous subset is `on_read`, `on_write`, lifecycle callbacks
+//! (`handler_added`, `on_pipeline_active`, …), one-shot readiness hooks
+//! (`await_read_ready`, `await_write_ready`), and `close`. A synchronous
+//! callback returns a [`HandlerResult`] before control passes back to C++.
+//!
+//! Beyond that, a callback can defer its answer:
+//!
+//! - [`CallbackContext::context_handle`] captures the exact pipeline position
+//!   into a move-only, two-word [`ContextHandle`] that is safe to send to
+//!   another thread. Its consuming `fire_read`, `fire_write`, and
+//!   `fire_exception` resume the pipeline from that position, executing inline
+//!   when called on the EventBase and enqueueing otherwise. RAII destruction
+//!   releases the native guard, so a dropped handle cannot leak the pipeline.
+//! - [`CallbackContext::spawn`] starts a `Send + 'static` Rust future on the
+//!   pipeline's own EventBase. The first poll runs inline in the current
+//!   callback, so an already-ready future never leaves the callback frame;
+//!   later wakes schedule further polls back onto that same EventBase. The task
+//!   owns a [`ContextHandle`], which retains the pipeline until the task
+//!   completes or is cancelled.
+//! - [`CoroReadHandle`], [`CoroWriteHandle`], and [`CoroExceptionHandle`] wrap
+//!   an `async` handler body so the message or error round-trips through a
+//!   future and resumes the pipeline on completion.
+//!
+//! Still **not** exposed: Folly's `CoroContextHandle` — Rust drives its own
+//! futures and never awaits a `folly::coro::Task` — and typed events
+//! (`fireEvent`), covered below.
+//!
+//! # Futures are polled where they live
+//!
+//! A future may be self-referential once polled, so `Pin` requires the address
+//! used for the first poll to be the address used for every later poll and for
+//! the drop. The task cell is allocated and the future moved into it *before*
+//! the future is polled at all, so the inline first poll already observes the
+//! future's final location and the future is never relocated.
+//!
+//! That costs one allocation per [`CallbackContext::spawn`], since readiness is
+//! only knowable after a poll and the poll may not happen anywhere but the
+//! future's final home — a future completing on its first poll still allocates
+//! its cell. The cell is a single 64-byte allocation holding the task state,
+//! scheduler, future, completion, and payload inline; wakers are borrowed and
+//! their clones are refcount bumps, so polling, waking, completion, and
+//! scheduling allocate nothing further. Because an `async fn` state machine
+//! flattens every await point and nested async call into that one cell, the
+//! cost is per task rather than per suspension.
 //!
 //! # Quick start
 //!
@@ -59,6 +95,18 @@
 //! }
 //! ```
 //!
+//! A handler body may instead be an `async` closure over the message, driven on
+//! the pipeline's EventBase:
+//!
+//! ```rust,ignore
+//! use channel_pipeline::{BytesPtr, CoroReadHandle};
+//!
+//! // Completion resumes the read from the exact captured pipeline position.
+//! let mut read = CoroReadHandle::<BytesPtr, _>::new(|message: BytesPtr| async move {
+//!     transform(message).await
+//! });
+//! ```
+//!
 //! On the C++ side, expose a factory function via the CXX bridge, wrap the
 //! returned `rust::Box<RustHandlerOpaque>` in a `RustHandler<Context>` shim,
 //! and add it to a `PipelineBuilder`. See
@@ -71,9 +119,15 @@
 //! |------|------|
 //! | [`RustHandler`] | Trait to implement for your handler |
 //! | [`CallbackContext`] | Borrowed pipeline context — `!Send`, `!Sync`, non-escapable |
+//! | [`ContextHandle`] | Move-only captured pipeline position; consuming `fire_read`/`fire_write`/`fire_exception` |
+//! | [`RustTypeErasedBox`] | Borrowed, type-erased message box; recover the value with `take::<T>()` |
 //! | [`BytesPtr`] | Zero-copy `unique_ptr<folly::IOBuf>` adapter |
+//! | [`PipelineError`] | Owned Rust error converted to `folly::exception_wrapper` |
 //! | [`HandlerResult`] | FFI-stable return value (`Success`, `Backpressure`, `Error`) |
 //! | [`RustMessageAdapter`] | Trait describing how a message type crosses the FFI boundary |
+//! | [`CoroReadHandle`] / [`CoroWriteHandle`] / [`CoroExceptionHandle`] | Adapters from a pipeline callback to an `async` handler body |
+//! | [`ContextReadMessage`] / [`ContextWriteMessage`] | Message traits describing how to resume a captured continuation |
+//! | [`ErasedCheck`] | Dev-build type check for erased message recovery |
 //! | [`NoopHandler`] | Pass-through handler for testing and composition |
 //!
 //! # Opt-in: zero cost for native pipelines
@@ -91,14 +145,26 @@
 //!
 //! | Metric | Median |
 //! |--------|--------|
-//! | `rust_read_pipeline_ns` | 13.525 ns |
-//! | `rust_write_pipeline_ns` | 13.262 ns |
-//! | Allocations on forwarding path | 0 bytes |
-//! | EventBase enqueues on forwarding path | 0 |
+//! | `native_read_pipeline_ns` (C++ baseline) | 2.726 ns |
+//! | `rust_read_pipeline_ns` | 15.344 ns |
+//! | `rust_write_pipeline_ns` | 14.971 ns |
+//! | `rust_context_handle_read_ns` | 63.256 ns |
+//! | `rust_ready_coro_read_ns` (future ready on first poll) | 32.814 ns |
+//! | `rust_ready_coro_write_ns` | 32.421 ns |
+//! | `rust_pending_coro_submit_ns` (future suspends) | 75.521 ns |
+//! | Allocations on the synchronous forwarding path | 0 bytes |
+//! | Allocations per spawned coroutine | 64 bytes (one task cell) |
+//! | EventBase enqueues on forwarding and inline-ready coro paths | 0 |
+//!
+//! A coroutine whose future is ready on the first poll is cheaper than the
+//! [`ContextHandle`] path it would otherwise use, because it forwards inline
+//! instead of building and firing through a handle.
 //!
 //! These figures reflect the micro-benchmark pipeline. Production pipelines
-//! with additional handlers will differ. Allocation and enqueue absence is
-//! verified via jemalloc allocation counting in the benchmark harness.
+//! with additional handlers will differ. Allocation and enqueue counts are
+//! verified via jemalloc allocation counting in the benchmark harness, which
+//! fails the run if the synchronous path allocates at all or a spawn exceeds a
+//! 256-byte-per-call budget.
 //!
 //! # FFI and memory safety
 //!
@@ -142,7 +208,7 @@
 //! Native C++ pipelines use typed events for write-completion correlation
 //! (`TransportWriteComplete` → … → `RocketWriteComplete`) and connection-close
 //! signaling. These are not exposed to Rust handlers today because no concrete
-//! synchronous Rust handler consumer uses them. A future extension would add
+//! Rust handler consumer uses them. A future extension would add
 //! an append-only event enum with a `Count` sentinel, static
 //! `kSubscribedEvents`, and per-event intrusive dispatch — preserving
 //! `CallbackContext` `!Send` semantics and the `NoEvent` zero-cost path.
@@ -151,7 +217,9 @@
 
 pub mod adapter;
 pub mod context;
+mod coro_handler;
 pub mod erased;
+mod event_base;
 pub mod ffi;
 pub mod handler;
 
@@ -163,6 +231,11 @@ pub use adapter::RustMessageAdapter;
 pub use context::CallbackContext;
 pub use context::ContextHandle;
 pub use context::PipelineError;
+pub use coro_handler::ContextReadMessage;
+pub use coro_handler::ContextWriteMessage;
+pub use coro_handler::CoroExceptionHandle;
+pub use coro_handler::CoroReadHandle;
+pub use coro_handler::CoroWriteHandle;
 pub use erased::ErasedCheck;
 pub use erased::RustTypeErasedBox;
 pub use handler::HandlerResult;

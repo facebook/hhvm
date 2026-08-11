@@ -5734,6 +5734,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
                         sizeof(image_info_data);
   list = (image_info_data*)
     IM_REALLOC(image_info->info_list[section_index].list, realloc_size);
+  if (!list) {
+    // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+    // reset the count so subsequent exif_iif_add_* calls and exif_iif_free
+    // cleanup do not use-after-free / double-free it (CVE-2026-23867 sibling).
+    image_info->info_list[section_index].list = nullptr;
+    image_info->info_list[section_index].count = 0;
+  }
   CHECK_ALLOC(list, realloc_size);
   image_info->info_list[section_index].list = list;
 
@@ -6116,6 +6123,13 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
     new_move = new_size;
     new_data = (char *)IM_REALLOC(ImageInfo->Thumbnail.data,
                                   ImageInfo->Thumbnail.size + new_size);
+    if (!new_data) {
+      // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+      // reset the size so exif_discard_imageinfo cleanup does not double-free it
+      // (CVE-2026-23867 sibling).
+      ImageInfo->Thumbnail.data = nullptr;
+      ImageInfo->Thumbnail.size = 0;
+    }
     CHECK_ALLOC(new_data, ImageInfo->Thumbnail.size + new_size);
     ImageInfo->Thumbnail.data = new_data;
     memmove(ImageInfo->Thumbnail.data + new_move,
@@ -6643,6 +6657,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
           IM_REALLOC(ImageInfo->xp_fields.list, realloc_size);
         if (!tmp_xp) {
           if (outside) IM_FREE(outside);
+          // IM_REALLOC frees the old buffer on failure; null the stale pointer
+          // and reset the count so exif_discard_imageinfo cleanup does not
+          // use-after-free / double-free it (CVE-2026-23867 sibling).
+          ImageInfo->xp_fields.list = nullptr;
+          ImageInfo->xp_fields.count = 0;
         }
         CHECK_ALLOC_R(tmp_xp, realloc_size, 0);
         ImageInfo->sections_found |= FOUND_WINXP;
@@ -7132,6 +7151,13 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo,
     return -1;
   }
   tmp = IM_REALLOC(ImageInfo->file.list[section_index].data, size);
+  if (!tmp) {
+    // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+    // reset the size so exif_file_sections_free cleanup does not double-free it
+    // (CVE-2026-23867 sibling).
+    ImageInfo->file.list[section_index].data = nullptr;
+    ImageInfo->file.list[section_index].size = 0;
+  }
   CHECK_ALLOC_R(tmp, size, -1);
   ImageInfo->file.list[section_index].data = (unsigned char *)tmp;
   ImageInfo->file.list[section_index].size = size;
@@ -7629,6 +7655,13 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index,
                         sizeof(image_info_data);
   list = (image_info_data *)
     IM_REALLOC(image_info->info_list[section_index].list, realloc_size);
+  if (!list) {
+    // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+    // reset the count so subsequent exif_iif_add_* calls and exif_iif_free
+    // cleanup do not use-after-free / double-free it (CVE-2026-23867 sibling).
+    image_info->info_list[section_index].list = nullptr;
+    image_info->info_list[section_index].count = 0;
+  }
   CHECK_ALLOC(list, realloc_size);
   image_info->info_list[section_index].list = list;
 
@@ -7655,6 +7688,13 @@ static void exif_iif_add_str(image_info_type *image_info,
                           sizeof(image_info_data);
     list = (image_info_data *)
       IM_REALLOC(image_info->info_list[section_index].list, realloc_size);
+    if (!list) {
+      // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+      // reset the count so subsequent exif_iif_add_* calls and exif_iif_free
+      // cleanup do not use-after-free / double-free it (CVE-2026-23867 sibling).
+      image_info->info_list[section_index].list = nullptr;
+      image_info->info_list[section_index].count = 0;
+    }
     CHECK_ALLOC(list, realloc_size);
     image_info->info_list[section_index].list = list;
     info_data = &image_info->info_list[section_index].
@@ -7701,6 +7741,13 @@ static void exif_iif_add_buffer(image_info_type *image_info,
                           sizeof(image_info_data);
     list = (image_info_data *)
       IM_REALLOC(image_info->info_list[section_index].list, realloc_size);
+    if (!list) {
+      // IM_REALLOC frees the old buffer on failure; null the stale pointer and
+      // reset the count so subsequent exif_iif_add_* calls and exif_iif_free
+      // cleanup do not use-after-free / double-free it (CVE-2026-23867 sibling).
+      image_info->info_list[section_index].list = nullptr;
+      image_info->info_list[section_index].count = 0;
+    }
     CHECK_ALLOC(list, realloc_size);
     image_info->info_list[section_index].list = list;
     info_data = &image_info->info_list[section_index].

@@ -173,69 +173,36 @@ inline constexpr bool matches_floating_point_wire_tag_v =
     return protocol.serializedSize##Method(in);                           \
   }
 
-// stamp out specializations for primitive types
-#define THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(            \
-    Type, Method, WireTag)                                             \
-  template <typename ExpectedTag>                                      \
-  struct protocol_methods<type_class::integral, Type, ExpectedTag> {   \
-    static_assert(                                                     \
-        matches_integral_wire_tag_v<ExpectedTag, WireTag>,             \
-        "ExpectedTag does not match the selected integral overload");  \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, Type, Method) \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, Type, Method) \
+#define THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(Type, WireTag)   \
+  template <typename ExpectedTag>                                     \
+  struct protocol_methods<type_class::integral, Type, ExpectedTag> {  \
+    static_assert(                                                    \
+        matches_integral_wire_tag_v<ExpectedTag, WireTag>,            \
+        "ExpectedTag does not match the selected integral overload"); \
+    template <typename Protocol>                                      \
+    static void read(Protocol& protocol, Type& out) {                 \
+      op::decode<WireTag>(protocol, out);                             \
+    }                                                                 \
+    template <typename Protocol>                                      \
+    static std::size_t write(Protocol& protocol, Type in) {           \
+      return op::encode<WireTag>(protocol, in);                       \
+    }                                                                 \
+    template <bool ZeroCopy, typename Protocol>                       \
+    static std::size_t serializedSize(Protocol& protocol, Type in) {  \
+      return op::serialized_size<ZeroCopy, WireTag>(protocol, in);    \
+    }                                                                 \
   }
 
-THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
-    std::int8_t, Byte, type::byte_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
-    std::int16_t, I16, type::i16_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
-    std::int32_t, I32, type::i32_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
-    std::int64_t, I64, type::i64_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::int8_t, type::byte_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::uint8_t, type::byte_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::int16_t, type::i16_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::uint16_t, type::i16_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::int32_t, type::i32_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::uint32_t, type::i32_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::int64_t, type::i64_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(std::uint64_t, type::i64_t);
 
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD
-
-// Macros for defining protocol_methods for unsigned integers
-// Need special macros due to the casts needed
-#define THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method) \
-  using SignedType = std::make_signed_t<Type>;                      \
-  template <typename Protocol>                                      \
-  static void read(Protocol& protocol, Type& out) {                 \
-    SignedType tmp;                                                 \
-    protocol.read##Method(tmp);                                     \
-    out = folly::to_unsigned(tmp);                                  \
-  }                                                                 \
-  template <typename Protocol>                                      \
-  static std::size_t write(Protocol& protocol, const Type& in) {    \
-    return protocol.write##Method(folly::to_signed(in));            \
-  }
-
-#define THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)       \
-  template <bool, typename Protocol>                                      \
-  static std::size_t serializedSize(Protocol& protocol, const Type& in) { \
-    return protocol.serializedSize##Method(folly::to_signed(in));         \
-  }
-
-// stamp out specializations for unsigned integer primitive types
-#define THRIFT_PROTOCOL_METHODS_REGISTER_UI(Class, Type, Method, WireTag) \
-  template <typename ExpectedTag>                                         \
-  struct protocol_methods<type_class::Class, Type, ExpectedTag> {         \
-    static_assert(                                                        \
-        matches_integral_wire_tag_v<ExpectedTag, WireTag>,                \
-        "ExpectedTag does not match the selected integral overload");     \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method)           \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)           \
-  }
-
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint8_t, Byte, type::byte_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint16_t, I16, type::i16_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint32_t, I32, type::i32_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint64_t, I64, type::i64_t);
-
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_UI
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI
+#undef THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL
 
 // std::vector<bool> isn't actually a container, so
 // define a special overload which takes its specialized
@@ -245,8 +212,21 @@ struct protocol_methods<type_class::integral, bool, ExpectedTag> {
   static_assert(
       matches_integral_wire_tag_v<ExpectedTag, type::bool_t>,
       "ExpectedTag does not match the selected integral overload");
-  THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, bool, Bool)
-  THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, bool, Bool)
+
+  template <typename Protocol>
+  static void read(Protocol& protocol, bool& out) {
+    op::decode<type::bool_t>(protocol, out);
+  }
+
+  template <typename Protocol>
+  static std::size_t write(Protocol& protocol, bool in) {
+    return op::encode<type::bool_t>(protocol, in);
+  }
+
+  template <bool ZeroCopy, typename Protocol>
+  static std::size_t serializedSize(Protocol& protocol, bool in) {
+    return op::serialized_size<ZeroCopy, type::bool_t>(protocol, in);
+  }
 
   template <
       typename Protocol,
@@ -254,9 +234,9 @@ struct protocol_methods<type_class::integral, bool, ExpectedTag> {
       typename =
           std::enable_if_t<folly::is_vector_bool_reference_v<BitReference>>>
   static void read(Protocol& protocol, BitReference out) {
-    bool tmp;
-    read(protocol, tmp);
-    out = tmp;
+    bool value;
+    op::decode<type::bool_t>(protocol, value);
+    out = value;
   }
 };
 
@@ -319,8 +299,7 @@ template <
     typename IntType = std::underlying_type_t<Type>>
 struct enum_protocol_methods {
   static_assert(std::is_enum_v<Type>, "must be enum");
-  using int_methods =
-      protocol_methods<type_class::integral, IntType, type::infer_tag<IntType>>;
+  using WireTag = type::infer_tag<IntType>;
 
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
@@ -328,27 +307,26 @@ struct enum_protocol_methods {
       op::detail::readEnum(protocol, out);
     } else {
       IntType value;
-      int_methods::read(protocol, value);
+      op::decode<WireTag>(protocol, value);
       out = static_cast<Type>(value);
     }
   }
 
   template <typename Protocol>
-  static std::size_t write(Protocol& protocol, const Type& in) {
+  static std::size_t write(Protocol& protocol, Type in) {
     if constexpr (std::is_same_v<TypeClass, type_class::enumeration>) {
       return op::detail::writeEnum(protocol, in);
     } else {
-      return int_methods::template write<Protocol>(
-          protocol, static_cast<IntType>(in));
+      return op::encode<WireTag>(protocol, static_cast<IntType>(in));
     }
   }
 
   template <bool ZeroCopy, typename Protocol>
-  static std::size_t serializedSize(Protocol& protocol, const Type& in) {
+  static std::size_t serializedSize(Protocol& protocol, Type in) {
     if constexpr (std::is_same_v<TypeClass, type_class::enumeration>) {
       return op::detail::serializedSizeEnum(protocol, in);
     } else {
-      return int_methods::template serializedSize<ZeroCopy>(
+      return op::serialized_size<ZeroCopy, WireTag>(
           protocol, static_cast<IntType>(in));
     }
   }

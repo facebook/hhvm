@@ -181,14 +181,15 @@ writeVector(Error& err, const std::vector<T>& data, folly::io::Appender& out) {
 }
 
 inline void writeBufWithoutLength(const Buf& buf, folly::io::Appender& out) {
-  auto current = buf.get();
-  size_t chainElements = buf->countChainElements();
-  for (size_t i = 0; i < chainElements; ++i) {
+  // Reserve the full chain length so the Appender allocates a single buffer.
+  out.ensure(buf->computeChainDataLength());
+  const folly::IOBuf* current = buf.get();
+  do {
     // TODO: fina a better way not to require copying all the buffers into
     // the cursor
     out.push(current->data(), current->length());
     current = current->next();
-  }
+  } while (current != buf.get());
 }
 
 template <class N>

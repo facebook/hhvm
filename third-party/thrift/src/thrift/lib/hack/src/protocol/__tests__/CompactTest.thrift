@@ -50,6 +50,7 @@ struct CompactTestStruct {
   3681: string s;
 }
 
+@hack.MigrationBlockingAllowInheritance
 union SerializerTestUnion {
   1: i32 int_value;
   2: string str_value;

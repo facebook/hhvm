@@ -217,9 +217,11 @@ class FastThriftServer {
    * connection. That is the cheapest path, and correct for handlers that
    * never block.
    *
-   * Only the user handler offloads. Monitoring, status, debug and metadata
-   * methods always run on the IO thread, so health checks and introspection
-   * keep answering while the executor is saturated.
+   * Applies to the user handler and to the monitoring, status and debug aux
+   * interfaces. Methods pinned with @cpp.ProcessInEbThreadUnsafe in their
+   * IDLs stay on the IO thread regardless — that is how the liveness probe
+   * and counter scrapes keep answering while the executor is saturated.
+   * Metadata never offloads; see ThriftServerConnectionFactoryConfig.
    *
    * Must be called before start()/serve(). When set, config_.numCPUThreads
    * is ignored.

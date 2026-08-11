@@ -54,13 +54,18 @@ namespace apache::thrift::fast_thrift::thrift::server {
  */
 struct ThriftServerConnectionFactoryConfig {
   std::shared_ptr<ThriftServerAppAdapterFactory> handler;
-  // Executor that user handler methods are dispatched to. Null keeps
-  // dispatch inline on the connection's EventBase.
+  // Executor that handler methods are dispatched to. Null keeps dispatch
+  // inline on the connection's EventBase.
   //
-  // Deliberately applied to the user handler only. Monitoring / status /
-  // debug / metadata methods stay on the EventBase so health checks and
-  // introspection keep answering while the executor is saturated — which is
-  // exactly when they are most likely to be asked.
+  // Applied to the user handler and to the monitoring / status / debug aux
+  // interfaces alike. Methods that must stay on the EventBase — the liveness
+  // probe and the counter scrapes — are pinned per-method in their IDLs with
+  // @cpp.ProcessInEbThreadUnsafe, mirroring what the legacy stack pins in
+  // common/thrift/thrift/status.thrift and fb303/thrift/fb303_core.thrift.
+  //
+  // Metadata is the exception: MetadataAppAdapter is hand-written, never
+  // consults cpuExecutor(), and completes on the EventBase. See the comment
+  // at its construction site in buildCompositeConnection.
   folly::Executor::KeepAlive<> cpuExecutor;
   std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler;
   std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler;

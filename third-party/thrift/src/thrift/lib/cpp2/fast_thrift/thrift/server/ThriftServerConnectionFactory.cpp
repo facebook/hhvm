@@ -145,21 +145,30 @@ ThriftServerConnection ThriftServerConnectionFactory::buildCompositeConnection(
   // guarantees this.
   ThriftServerConnection::CompositeTail tail;
   tail.children.push_back(config_.handler->getAppAdapter(config_.handler));
-  // Only the user adapter offloads; the aux adapters appended below stay on
-  // the EventBase. See ThriftServerConnectionFactoryConfig::cpuExecutor.
   attachCPUExecutor(*tail.children.back());
+  // Aux interfaces offload like the user handler. Methods that must stay on
+  // the EventBase are pinned per-method in their IDLs via
+  // @cpp.ProcessInEbThreadUnsafe, not by withholding the executor here.
   if (config_.monitoringHandler) {
     tail.children.push_back(
         config_.monitoringHandler->getAppAdapter(config_.monitoringHandler));
+    attachCPUExecutor(*tail.children.back());
   }
   if (config_.statusHandler) {
     tail.children.push_back(
         config_.statusHandler->getAppAdapter(config_.statusHandler));
+    attachCPUExecutor(*tail.children.back());
   }
   if (config_.debugHandler) {
     tail.children.push_back(
         config_.debugHandler->getAppAdapter(config_.debugHandler));
+    attachCPUExecutor(*tail.children.back());
   }
+  // Deliberately not offloaded: MetadataAppAdapter is hand-written rather
+  // than generated, so it never consults cpuExecutor() and completes through
+  // the EventBase-only writeResponse overload. Attaching an executor would
+  // compile and do nothing. Its body only re-serializes an immutable
+  // prebuilt response, so there is nothing to move off the EventBase.
   if (config_.metadataResponse) {
     tail.children.push_back(
         ThriftServerAppAdapter::Ptr{

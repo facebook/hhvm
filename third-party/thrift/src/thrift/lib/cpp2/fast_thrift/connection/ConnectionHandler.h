@@ -133,6 +133,14 @@ class ConnectionHandler {
    */
   void stop();
 
+  /**
+   * The address this handler listens on. Before setConnectionFactory() binds
+   * the socket this is the configured address (port may be 0); afterwards it
+   * is the bound address. Remains readable after stop() — callers such as
+   * debug-interface handlers can race shutdown from other threads.
+   *
+   * Safe to call from any thread once the handler has been wired.
+   */
   folly::SocketAddress getAddress() const;
 
   // Thread-safe: backed by an atomic kept in sync with connections_ on the
@@ -192,8 +200,8 @@ class ConnectionHandler {
       tlsParamsObserver_;
 
   // Acceptance pipeline pieces. listener_ is constructed in the ctor so
-  // getAddress() works before setConnectionFactory(); the rest is built
-  // lazily in setConnectionFactory(). Declaration order ensures the
+  // the handler is addressable before setConnectionFactory(); the rest is
+  // built lazily in setConnectionFactory(). Declaration order ensures the
   // pipeline tears down first.
   channel_pipeline::SimpleBufferAllocator allocator_;
   ConnectionListener::Ptr listener_;
@@ -202,6 +210,17 @@ class ConnectionHandler {
       void (*)(folly::DelayedDestruction*) noexcept>
       installer_{nullptr, [](folly::DelayedDestruction*) noexcept {}};
   channel_pipeline::PipelineImpl::Ptr pipeline_;
+
+  // Snapshot of the listening address, seeded with the configured address
+  // and overwritten with the bound one once setConnectionFactory() binds.
+  // Outlives listener_ so getAddress() stays answerable during and after
+  // teardown.
+  //
+  // Written once at wiring time and read unsynchronized thereafter, matching
+  // ThriftServerAppAdapter::cpuExecutor_. ConnectionManager wires a handler
+  // before inserting it into handlers_, so the map's lock publishes this to
+  // every reader that goes through it.
+  folly::SocketAddress boundAddress_;
 
   folly::F14NodeMap<uint64_t, AnyConnection> connections_;
   // Mirrors connections_.size(). Mutated on the EVB alongside the map so
@@ -289,6 +308,12 @@ void ConnectionHandler::setConnectionFactory(
   listener_->setPipeline(pipeline_.get());
   installerRaw->setPipeline(pipeline_.get());
   listener_->start();
+  // start() binds, so the port is only final here. Snapshot it: getAddress()
+  // reads this rather than the listener, which teardown destroys while
+  // off-EVB observability callers may still be asking. Written before this
+  // handler is published to ConnectionManager::handlers_, so readers reaching
+  // it through that map see it via the map's lock.
+  boundAddress_ = listener_->getAddress();
 }
 
 } // namespace apache::thrift::fast_thrift::connection

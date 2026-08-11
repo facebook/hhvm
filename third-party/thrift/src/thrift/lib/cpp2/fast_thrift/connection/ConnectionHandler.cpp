@@ -40,7 +40,8 @@ ConnectionHandler::ConnectionHandler(
               evb_.get(),
               address_,
               socketOptions_,
-              enableReusePortBpfSpread_))) {}
+              enableReusePortBpfSpread_))),
+      boundAddress_(address_) {}
 
 ConnectionHandler::~ConnectionHandler() {
   // Defensive: ensure shutdown runs at least once. From the EVB we can't
@@ -145,8 +146,10 @@ void ConnectionHandler::postDrainedOnce() noexcept {
 }
 
 folly::SocketAddress ConnectionHandler::getAddress() const {
-  CHECK(listener_) << "ConnectionHandler::getAddress called after stop()";
-  return listener_->getAddress();
+  // Deliberately does not consult listener_: teardown destroys it on the EVB
+  // while off-EVB callers (debug interfaces, observability) may still be
+  // asking, and dereferencing it there is a use-after-free.
+  return boundAddress_;
 }
 
 } // namespace apache::thrift::fast_thrift::connection

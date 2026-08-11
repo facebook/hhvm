@@ -41,12 +41,19 @@ service Monitor {
   /**
    * Gets the counters for this service
    */
+  // EventBase-pinned to mirror `BaseService.getCounters` in
+  // `fb303/thrift/fb303_core.thrift`, so counter scrapes keep answering
+  // while the CPU pool is saturated.
+  @cpp.ProcessInEbThreadUnsafe
   map<string, i64> getCounters();
 
   /**
    * Gets a subset of counters which match a
    * Perl Compatible Regular Expression for this service
    */
+  // EventBase-pinned to mirror `BaseService.getRegexCounters` in
+  // `fb303/thrift/fb303_core.thrift`.
+  @cpp.ProcessInEbThreadUnsafe
   map<string, i64> getRegexCounters(1: string regex);
 
   /**
@@ -54,6 +61,9 @@ service Monitor {
    * key to counter value; if a requested counter doesn't exist, it won't
    * be in the returned map.
    */
+  // EventBase-pinned to mirror `BaseService.getSelectedCounters` in
+  // `fb303/thrift/fb303_core.thrift`.
+  @cpp.ProcessInEbThreadUnsafe
   map<string, i64> getSelectedCounters(1: list<string> keys);
 
   /**

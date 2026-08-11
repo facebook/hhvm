@@ -107,21 +107,35 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
 };
 
 // Monitoring-side handler. Implements the canonical Monitor service
-// (interface/monitor/if/monitor.thrift) but only overrides aliveSince —
-// the cheapest pure-compute method, distinct from anything FastThriftServer
-// exposes, so routing is unambiguously testable. Also derives from the
-// MonitoringServerInterface marker which the typed setMonitoringInterface
-// requires.
+// (interface/monitor/if/monitor.thrift). Overrides aliveSince — the cheapest
+// pure-compute method, distinct from anything FastThriftServer exposes, so
+// routing is unambiguously testable — plus getCounters, which the IDL pins to
+// the EventBase with @cpp.ProcessInEbThreadUnsafe. The pair forms the A/B for
+// aux thread placement. Also derives from the MonitoringServerInterface
+// marker which the typed setMonitoringInterface requires.
 class MonitoringHandler : public FastServiceHandler<Monitor>,
                           public MonitoringServerInterface {
  public:
   static constexpr std::int64_t kAliveSinceValue = 1717171717;
   std::atomic<int> aliveSinceCount{0};
+  // Thread placement observed by the most recent call to each method.
+  std::atomic<bool> aliveSinceRanOnEventBase{false};
+  std::atomic<bool> getCountersRanOnEventBase{false};
 
   void async_eb_aliveSince(
       ftt::FastHandlerCallbackPtr<std::int64_t> cb) override {
     aliveSinceCount.fetch_add(1, std::memory_order_relaxed);
+    aliveSinceRanOnEventBase.store(
+        cb->getEventBase()->isInEventBaseThread(), std::memory_order_relaxed);
     cb->result(kAliveSinceValue);
+  }
+
+  void async_eb_getCounters(
+      ftt::FastHandlerCallbackPtr<
+          std::unique_ptr<std::map<std::string, std::int64_t>>> cb) override {
+    getCountersRanOnEventBase.store(
+        cb->getEventBase()->isInEventBaseThread(), std::memory_order_relaxed);
+    cb->result(std::make_unique<std::map<std::string, std::int64_t>>());
   }
 };
 
@@ -137,8 +151,14 @@ namespace integration =
     ::apache::thrift::fast_thrift::thrift::test::integration;
 namespace ftt = ::apache::thrift::fast_thrift::thrift;
 
-class FastThriftServerMonitoringE2ETest : public ::testing::Test {
+// Parameterized on numCPUThreads so every case below runs twice: once with
+// handlers inline on the IO thread, once dispatched to a CPU pool. Routing
+// and protocol negotiation must be indistinguishable across the two.
+class FastThriftServerMonitoringE2ETest
+    : public ::testing::TestWithParam<uint32_t> {
  protected:
+  bool usingCPUPool() const { return GetParam() > 0; }
+
   void SetUp() override {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
 
@@ -148,6 +168,7 @@ class FastThriftServerMonitoringE2ETest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    config.numCPUThreads = GetParam();
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
     server_->setInterface(userHandler_);
@@ -197,7 +218,7 @@ class FastThriftServerMonitoringE2ETest : public ::testing::Test {
 // over the same physical server. Both must succeed AND only their
 // respective handler counter must increment — proves the composite routes
 // by method name without crosstalk.
-TEST_F(FastThriftServerMonitoringE2ETest, RoutesUserAndMonitoringMethods) {
+TEST_P(FastThriftServerMonitoringE2ETest, RoutesUserAndMonitoringMethods) {
   auto userClient = createClient<integration::FastThriftServer>();
   auto monClient = createClient<Monitor>();
 
@@ -219,7 +240,7 @@ TEST_F(FastThriftServerMonitoringE2ETest, RoutesUserAndMonitoringMethods) {
 // Both handlers must end up with the negotiated metadata protocol pushed
 // through the composite's setMetadataProtocol fan-out — otherwise one of
 // these RPCs would fail with REQUEST_PARSING_FAILURE.
-TEST_F(FastThriftServerMonitoringE2ETest, BothHandlersHonorNegotiatedProtocol) {
+TEST_P(FastThriftServerMonitoringE2ETest, BothHandlersHonorNegotiatedProtocol) {
   auto userClient = createClient<integration::FastThriftServer>();
   auto monClient = createClient<Monitor>();
 
@@ -240,3 +261,35 @@ TEST_F(FastThriftServerMonitoringE2ETest, BothHandlersHonorNegotiatedProtocol) {
   destroyClientOnEvb(userClient);
   destroyClientOnEvb(monClient);
 }
+
+// Aux interfaces offload to the CPU pool like the user handler, except for
+// methods the IDL pins with @cpp.ProcessInEbThreadUnsafe. getCounters is
+// pinned (mirroring BaseService.getCounters in fb303_core.thrift) so counter
+// scrapes keep answering while the pool is saturated; aliveSince is not, so
+// it must move off the IO thread whenever a pool exists. Asserting both in
+// one test makes this an A/B rather than a claim that a pool is configured.
+TEST_P(FastThriftServerMonitoringE2ETest, PinnedMonitoringMethodsStayOnEvb) {
+  auto monClient = createClient<Monitor>();
+
+  monClient->semifuture_getCounters().get();
+  EXPECT_TRUE(monitoringHandler_->getCountersRanOnEventBase.load())
+      << "getCounters is @cpp.ProcessInEbThreadUnsafe and must never offload";
+
+  monClient->semifuture_aliveSince().get();
+  EXPECT_EQ(
+      monitoringHandler_->aliveSinceRanOnEventBase.load(), !usingCPUPool());
+
+  destroyClientOnEvb(monClient);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Inline,
+    FastThriftServerMonitoringE2ETest,
+    ::testing::Values(uint32_t{0}),
+    [](const auto&) { return "InlineOnIOThread"; });
+
+INSTANTIATE_TEST_SUITE_P(
+    CPUPool,
+    FastThriftServerMonitoringE2ETest,
+    ::testing::Values(uint32_t{4}),
+    [](const auto&) { return "CPUThreadPool"; });

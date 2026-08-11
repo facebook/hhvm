@@ -227,6 +227,22 @@ TEST_F(ConnectionHandlerTest, GetAddressAfterFactoryBindsPort) {
   EXPECT_NE(bound.getPort(), 0);
 }
 
+// stop() destroys the listener on the EVB, but off-EVB callers (debug
+// interfaces, observability) can still be asking for the address. Reading
+// through the listener would be a use-after-free, so the bound address has
+// to outlive it.
+TEST_F(ConnectionHandlerTest, GetAddressSurvivesStop) {
+  auto handler = createConnectionHandler();
+  wireFactory(*handler);
+
+  const auto bound = handler->getAddress();
+  ASSERT_NE(bound.getPort(), 0);
+
+  handler->stop();
+
+  EXPECT_EQ(handler->getAddress(), bound);
+}
+
 TEST_F(ConnectionHandlerTest, AcceptsSingleConnection) {
   auto handler = createConnectionHandler();
   wireFactory(*handler);

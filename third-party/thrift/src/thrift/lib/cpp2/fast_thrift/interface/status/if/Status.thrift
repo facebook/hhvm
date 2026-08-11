@@ -54,6 +54,11 @@ service Status {
   /**
    * Gets the status of this service.
    */
+  // EventBase-pinned to mirror `Status.getStatus` in
+  // `common/thrift/thrift/status.thrift`. Container scheduler health checks
+  // poll this; answering it off a saturated CPU pool would report the
+  // service unhealthy exactly when it is merely busy.
+  @cpp.ProcessInEbThreadUnsafe
   fast_fb303_status getStatus();
 
   /**

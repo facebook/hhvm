@@ -20,9 +20,6 @@ namespace java test_java.cpp_compat
 namespace java.swift test_swift.cpp_compat
 namespace py3 test_py.cpp_compat
 
-cpp_include "thrift/test/reflection/fatal_custom_types.h"
-
-include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @thrift.AllowLegacyMissingUris
@@ -81,9 +78,6 @@ struct compat_structA {
   1: i32 a;
   2: string b;
 }
-
-@cpp.Type{name = "test_cpp_reflection::custom_compat_structA"}
-typedef compat_structA my_compat_structA
 
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {

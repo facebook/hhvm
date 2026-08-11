@@ -31,7 +31,6 @@ include "thrift/annotation/python.thrift"
 package;
 
 cpp_include "thrift/test/AdapterTest.h"
-cpp_include "thrift/test/reflection/fatal_custom_types.h"
 cpp_include "<deque>"
 cpp_include "<unordered_set>"
 cpp_include "<unordered_map>"
@@ -107,9 +106,6 @@ struct structA {
   1: i32 a;
   2: string b;
 }
-
-@cpp.Type{name = "test_cpp_reflection::custom_structA"}
-typedef structA my_structA
 
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {

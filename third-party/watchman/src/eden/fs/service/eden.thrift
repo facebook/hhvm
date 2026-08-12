@@ -1678,6 +1678,50 @@ struct PrefetchStats {
   17: i64 filesFailed;
 }
 
+/**
+ * Disk-usage state of one cache (blob/tree/lfs) within HgCacheStats.
+ */
+enum CacheUsageState {
+  // No cache is configured for this store (e.g. no remotefilelog.cachepath).
+  NOT_CONFIGURED = 0,
+  // This store implementation does not support usage reporting.
+  UNSUPPORTED = 1,
+  // A cache is configured; see the paired *BytesUsed/*BytesLimit fields.
+  AVAILABLE = 2,
+  // A cache is configured, but its usage could not be measured due to an
+  // error (e.g. corrupted on-disk data). The failure reason is logged
+  // server-side, not carried on this value.
+  UNAVAILABLE = 3,
+}
+
+/**
+ * Per-repo hgcache usage and limits (blob, tree, and LFS caches).
+ *
+ * Each of blob/tree/lfs independently reports NOT_CONFIGURED, UNSUPPORTED,
+ * AVAILABLE, or UNAVAILABLE via its *State field; the paired
+ * *BytesUsed/*BytesLimit fields are only meaningful when *State is
+ * AVAILABLE (0 otherwise). An AVAILABLE *BytesLimit of -1 means uncapped.
+ *
+ * lfsBytes* covers only the indexedlog-backed portion of the LFS cache
+ * (lfs/blobs, lfs/pointers); the loose-file lfs/objects directory is
+ * excluded, since sizing it needs a full directory walk.
+ */
+struct HgCacheStats {
+  1: PathString cachePath;
+  // Whether cachePath is meaningful; false when no cache is configured at
+  // all (cachePath is empty in that case, not merely unset).
+  2: bool cachePathConfigured;
+  3: CacheUsageState blobState;
+  4: i64 blobBytesUsed;
+  5: i64 blobBytesLimit;
+  6: CacheUsageState treeState;
+  7: i64 treeBytesUsed;
+  8: i64 treeBytesLimit;
+  9: CacheUsageState lfsState;
+  10: i64 lfsBytesUsed;
+  11: i64 lfsBytesLimit;
+}
+
 /** Result for prefetchFiles(). */
 struct PrefetchResult {
   1: optional Glob prefetchedFiles;
@@ -1685,6 +1729,9 @@ struct PrefetchResult {
   // ID for a long-running preload operation.
   // Only populated when preload=true and preloadProgress=true.
   3: optional string operationId;
+  // Set only when returnStats=true and the hgcache stats lookup succeeds;
+  // absent (not merely zeroed) when returnStats=false or the lookup fails.
+  4: optional HgCacheStats cacheStats;
 }
 
 /**

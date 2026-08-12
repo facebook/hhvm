@@ -3257,6 +3257,30 @@ end = struct
     in
     create ~code:Error_code.DuplicateInterface ~claim ~reasons ()
 
+  let enum_duplicate_value pos value member_name member_pos prev_name prev_pos =
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "This enum has members %s and %s with the same value %s. Duplicate enum values are not allowed."
+            (Markdown_lite.md_codify prev_name)
+            (Markdown_lite.md_codify member_name)
+            (Markdown_lite.md_codify value) )
+    and reasons =
+      lazy
+        [
+          ( prev_pos,
+            Printf.sprintf
+              "%s is declared here"
+              (Markdown_lite.md_codify prev_name) );
+          ( member_pos,
+            Printf.sprintf
+              "%s is declared here"
+              (Markdown_lite.md_codify member_name) );
+        ]
+    in
+    create ~code:Error_code.EnumDuplicateValue ~claim ~reasons ()
+
   let reified_function_reference call_pos =
     let claim =
       lazy
@@ -5222,6 +5246,9 @@ end = struct
     | Meth_caller_trait { pos; trait_name } -> meth_caller_trait pos trait_name
     | Duplicate_interface { pos; name; others } ->
       duplicate_interface pos name others
+    | Enum_duplicate_value
+        { pos; value; member_name; member_pos; prev_name; prev_pos } ->
+      enum_duplicate_value pos value member_name member_pos prev_name prev_pos
     | Reified_function_reference pos -> reified_function_reference pos
     | Reinheriting_classish_const
         {

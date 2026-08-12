@@ -96,6 +96,14 @@ module Enum_member_value : sig
 
   (** The "no recorded value" case (computed values and non-enum consts). *)
   val absent : t
+
+  (** Whether the value is [EMVAbsent] (no recorded value). *)
+  val is_absent : t -> bool
+
+  (** A canonical textual rendering of the value, usable as a comparison key and
+      a human-readable form. [member_name] supplies the name for the [EMVLabel]
+      (value equals member name) case. *)
+  val value_repr : member_name:string -> t -> string
 end
 
 type class_const = {

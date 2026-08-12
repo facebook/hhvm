@@ -812,6 +812,7 @@ module Typing = struct
     | TestsBypassVisibilityAbstractMissingAttr [@value 4516]
     | ThisAsFunctionPointerParam [@value 4517]
     | StrictIsolationExcludedPathAccess [@value 4518]
+    | EnumDuplicateValue [@value 4519]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

@@ -159,6 +159,25 @@ module Enum_member_value = struct
 
   (** The "no recorded value" case (computed values and non-enum consts). *)
   let absent = EMVAbsent
+
+  let is_absent = function
+    | EMVAbsent -> true
+    | _ -> false
+
+  (** A canonical textual rendering of the value: distinct values render to
+      distinct strings and equal values to equal strings, so it serves as both a
+      comparison key and a human-readable form. `EMVLabel` (value equals the
+      member name) renders like the equivalent `EMVString`, so the two compare
+      equal. `EMVAbsent` carries no value and is rendered defensively for
+      totality. `member_name` supplies the name for the `EMVLabel` case. *)
+  let value_repr ~member_name = function
+    | EMVInt n -> string_of_int n
+    | EMVLargeInt s -> s
+    | EMVString s -> "\"" ^ s ^ "\""
+    | EMVLabel -> "\"" ^ member_name ^ "\""
+    | EMVNameof s -> "nameof " ^ s
+    | EMVClassPointer s -> s ^ "::class"
+    | EMVAbsent -> "<absent>"
 end
 
 type class_const = {

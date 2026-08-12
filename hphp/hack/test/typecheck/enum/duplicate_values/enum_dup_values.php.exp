@@ -1,0 +1,36 @@
+ERROR: File "enum_dup_values.php", line 9, characters 6-18:
+This enum has members `Low` and `Medium` with the same value `1`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 10, characters 3-5:
+  `Low` is declared here
+  File "enum_dup_values.php", line 11, characters 3-8:
+  `Medium` is declared here
+ERROR: File "enum_dup_values.php", line 22, characters 6-18:
+This enum has members `A` and `C` with the same value `1`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 18, characters 3-3:
+  `A` is declared here
+  File "enum_dup_values.php", line 24, characters 3-3:
+  `C` is declared here
+ERROR: File "enum_dup_values.php", line 37, characters 6-24:
+This enum has members `X` and `Y` with the same value `10`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 30, characters 3-3:
+  `X` is declared here
+  File "enum_dup_values.php", line 34, characters 3-3:
+  `Y` is declared here
+ERROR: File "enum_dup_values.php", line 43, characters 6-19:
+This enum has members `S1` and `S2` with the same value `"dup"`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 44, characters 3-4:
+  `S1` is declared here
+  File "enum_dup_values.php", line 45, characters 3-4:
+  `S2` is declared here
+ERROR: File "enum_dup_values.php", line 51, characters 6-18:
+This enum has members `N1` and `N2` with the same value `nameof \Foo`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 52, characters 3-4:
+  `N1` is declared here
+  File "enum_dup_values.php", line 53, characters 3-4:
+  `N2` is declared here
+ERROR: File "enum_dup_values.php", line 65, characters 6-19:
+This enum has members `Aa` and `Bb` with the same value `1`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_values.php", line 66, characters 3-4:
+  `Aa` is declared here
+  File "enum_dup_values.php", line 67, characters 3-4:
+  `Bb` is declared here

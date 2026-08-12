@@ -914,6 +914,14 @@ module Primary : sig
         name: string;
         others: Pos_or_decl.t list;
       }
+    | Enum_duplicate_value of {
+        pos: Pos.t;  (** the enum definition *)
+        value: string;
+        member_name: string;
+        member_pos: Pos_or_decl.t;
+        prev_name: string;
+        prev_pos: Pos_or_decl.t;
+      }
     | Reified_function_reference of Pos.t
     | Reinheriting_classish_const of {
         pos: Pos.t;

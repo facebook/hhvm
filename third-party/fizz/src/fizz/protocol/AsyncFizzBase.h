@@ -170,6 +170,17 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
    * App level information for reading/writing app data.
    */
   ReadCallback* getReadCallback() const override;
+
+  /**
+   * Returns the first application read error received while no read callback
+   * was installed. This accessor does not consume the error; setReadCB() keeps
+   * its existing behavior of delivering and clearing it.
+   */
+  const folly::Optional<folly::AsyncSocketException>& getPendingReadException()
+      const {
+    return pendingReadEx_;
+  }
+
   void setReadCB(ReadCallback* callback) override;
   void writeChain(
       folly::AsyncTransportWrapper::WriteCallback* callback,

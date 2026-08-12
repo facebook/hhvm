@@ -348,6 +348,40 @@ TEST_F(AsyncFizzBaseTest, TestReadErrNoCallback) {
   this->deliverError(this->ase_);
 }
 
+TEST_F(AsyncFizzBaseTest, TestPendingReadExceptionPreservesFirstError) {
+  AsyncSocketException first(
+      AsyncSocketException::NETWORK_ERROR, "first error", 123);
+  AsyncSocketException second(
+      AsyncSocketException::INTERNAL_ERROR, "second error", 456);
+
+  this->deliverError(first, false);
+  ASSERT_TRUE(this->getPendingReadException().hasValue());
+  EXPECT_EQ(
+      this->getPendingReadException()->getType(),
+      AsyncSocketException::NETWORK_ERROR);
+  EXPECT_EQ(this->getPendingReadException()->getErrno(), 123);
+  EXPECT_THAT(
+      this->getPendingReadException()->what(), HasSubstr("first error"));
+
+  // A later transport error must not hide the original application error.
+  this->deliverError(second, false);
+  ASSERT_TRUE(this->getPendingReadException().hasValue());
+  EXPECT_EQ(
+      this->getPendingReadException()->getType(),
+      AsyncSocketException::NETWORK_ERROR);
+  EXPECT_EQ(this->getPendingReadException()->getErrno(), 123);
+
+  EXPECT_CALL(this->readCallback_, readErr_(_));
+  auto* socket = this->socket_;
+  if (!socket) {
+    ADD_FAILURE() << "Expected an underlying transport";
+    return;
+  }
+  EXPECT_CALL(*socket, close());
+  this->setReadCB(&this->readCallback_);
+  EXPECT_FALSE(this->getPendingReadException().hasValue());
+}
+
 TEST_F(AsyncFizzBaseTest, TestReadErrAsync) {
   ON_CALL(*this, good()).WillByDefault(Return(false));
   this->deliverError(this->ase_);

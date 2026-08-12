@@ -1,7 +1,7 @@
 <?hh
 
 // OptedOut gives two members the same value on purpose. The diff that adds the
-// <<__AllowDuplicateValues>> attribute opts it out of the duplicate-value check;
+// <<__AllowUncheckedEnumValues>> attribute opts it out of the duplicate-value check;
 // contrast its recorded member values (scc_value) with the plain Normal enum.
 enum OptedOut: int {
   A = 1;

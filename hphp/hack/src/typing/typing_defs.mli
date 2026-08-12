@@ -88,6 +88,16 @@ type class_const_kind =
   | CCConcrete
 [@@deriving eq, show]
 
+(** The value recorded for an enum member. The type is abstract: callers
+    construct via [absent] and go through this module's API rather than matching
+    raw constructors. *)
+module Enum_member_value : sig
+  type t [@@deriving eq, ord, show]
+
+  (** The "no recorded value" case (computed values and non-enum consts). *)
+  val absent : t
+end
+
 type class_const = {
   cc_synthesized: bool;
   cc_abstract: class_const_kind;
@@ -97,6 +107,10 @@ type class_const = {
       (** identifies the class from which this const originates *)
   cc_refs: class_const_ref list;
       (** references to the constants used in the initializer *)
+  cc_enum_value: Enum_member_value.t;
+      (** For enum members, the canonical checkable value (`EMVLabel` when the
+          value equals the member name); `EMVAbsent` for computed values and
+          non-enum consts. *)
 }
 [@@deriving show]
 

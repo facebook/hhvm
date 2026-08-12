@@ -24,6 +24,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\A",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     deferred_init_members: {
@@ -68,6 +69,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\B",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     extends: {

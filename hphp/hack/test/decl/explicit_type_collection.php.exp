@@ -82,7 +82,8 @@
            scc_name = ([9:16-19], "KEY");
            scc_type =
            (Rhint ([9:9-15]), (Tapply (([9:9-15], "\\HH\\string"), [])));
-           scc_refs = []; scc_value = None }
+           scc_refs = []; scc_value = None;
+           scc_enum_value = Typing_defs.Enum_member_value.EMVAbsent }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,86 +1,86 @@
+@@ -1,90 +1,90 @@
  FoldedClass {
      name: "\\T1",
      pos: Pos(root|trait_require_class.php, 4:7-9),
@@ -13,6 +13,7 @@
              ty: class<this>,
              origin: "\\T1",
              refs: [],
+             enum_value: EMVAbsent,
          },
      },
      req_constraints_ancestors: [
@@ -36,6 +37,7 @@
              ty: class<this>,
              origin: "\\T2",
              refs: [],
+             enum_value: EMVAbsent,
          },
      },
      req_constraints_ancestors: [
@@ -71,6 +73,7 @@
              ty: class<this>,
              origin: "\\C",
              refs: [],
+             enum_value: EMVAbsent,
          },
      },
  }
@@ -88,6 +91,7 @@
              ty: class<this>,
              origin: "\\D",
              refs: [],
+             enum_value: EMVAbsent,
          },
      },
  }

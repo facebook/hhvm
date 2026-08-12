@@ -57,6 +57,7 @@ use oxidized::typing_defs::ClassConstKind;
 use oxidized::typing_defs::ClassRefinement;
 use oxidized::typing_defs::ConcreteTypeconst;
 use oxidized::typing_defs::ConstDecl;
+use oxidized::typing_defs::EnumMemberValue;
 use oxidized::typing_defs::EnumType;
 use oxidized::typing_defs::FunElt;
 use oxidized::typing_defs::FunImplicitParams;
@@ -1423,6 +1424,75 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             // ... VariableExpression, BinaryExpression, SubscriptExpression,
             //     FunctionCallExpression, ConditionalExpression ...
             _ => Self::str_from_utf8(self.source_text_at_pos(&expr.1)).to_string(),
+        }
+    }
+
+    /// For an enum member initializer, returns its recorded value when it is a
+    /// recordable kind (int, string, nameof or ::class), and None for computed
+    /// values (constant references, arithmetic, ...).
+    fn enum_member_value(value: Node) -> Option<EnumMemberValue> {
+        match value {
+            Node::IntLiteral(s, _) => Self::int_enum_value(&s, false),
+            // Only valid UTF-8 strings are recorded; non-UTF-8 bytes -> None
+            // (treated as computed) so distinct byte strings can't collapse to
+            // the same recorded value.
+            Node::StringLiteral(s, _) => String::from_utf8(s.to_vec())
+                .ok()
+                .map(EnumMemberValue::EMVString),
+            Node::Expr(box aast::Expr(_, _, expr_)) => match expr_ {
+                // `nameof C` (a string) and `C::class` (a class pointer) are kept
+                // as distinct variants so they never compare equal.
+                aast::Expr_::ClassConst(box (
+                    aast::ClassId(_, _, aast::ClassId_::CI(Id(_, class_name))),
+                    (_, const_name),
+                )) if const_name == "class" => Some(EnumMemberValue::EMVClassPointer(class_name)),
+                aast::Expr_::Nameof(box aast::ClassId(
+                    _,
+                    _,
+                    aast::ClassId_::CI(Id(_, class_name)),
+                )) => Some(EnumMemberValue::EMVNameof(class_name)),
+                aast::Expr_::Unop(box (Uop::Uminus, aast::Expr(_, _, aast::Expr_::Int(s)))) => {
+                    Self::int_enum_value(&s, true)
+                }
+                aast::Expr_::Unop(box (Uop::Uplus, aast::Expr(_, _, aast::Expr_::Int(s)))) => {
+                    Self::int_enum_value(&s, false)
+                }
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    /// The value of an int literal, optionally negated. Literals that fit OCaml's
+    /// 63-bit `int` use the compact `EMVInt`; the rest of the `i64` range
+    /// (including `i64::MIN`) uses the `EMVLargeInt` slow path, storing the
+    /// literal's source text verbatim (not canonicalized) so no valid Hack
+    /// literal is dropped -- different spellings of the same value (e.g. hex vs
+    /// decimal) therefore don't compare equal. Uses the same `parse_int` the
+    /// lowerer uses. Returns None only when the literal is genuinely out of
+    /// `i64` range (Hack rejects it too).
+    fn int_enum_value(s: &str, negate: bool) -> Option<EnumMemberValue> {
+        // OCaml `int` is 63-bit: [-(2^62), 2^62 - 1].
+        const OCAML_MAX_INT: i64 = i64::MAX >> 1;
+        const OCAML_MIN_INT: i64 = i64::MIN >> 1;
+        // Parse the signed text directly (rather than parsing the magnitude and
+        // negating) so `i64::MIN` -- whose magnitude 2^63 overflows i64 -- is
+        // handled: `parse_int` accumulates negatives via `checked_sub`, reaching
+        // `i64::MIN` without ever forming +2^63.
+        let text = if negate {
+            format!("-{s}")
+        } else {
+            s.to_owned()
+        };
+        let n = ocaml_helper::parse_int(&text).ok()?;
+        if (OCAML_MIN_INT..=OCAML_MAX_INT).contains(&n) {
+            Some(EnumMemberValue::EMVInt(n as isize))
+        } else {
+            // Slow path for a literal outside OCaml's 63-bit `int`. We store the
+            // source text as written rather than canonicalising it, so different
+            // spellings of the same large value (e.g. hex vs decimal) won't
+            // compare equal.
+            Some(EnumMemberValue::EMVLargeInt(text))
         }
     }
 
@@ -4229,6 +4299,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                                         } else {
                                             None
                                         },
+                                        enum_value: EnumMemberValue::EMVAbsent,
                                     },
                                 )))
                             }
@@ -5241,6 +5312,17 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             Some(id) => id,
             None => return Node::Ignored(SyntaxKind::Enumerator),
         };
+        // Inline the "no value" case as EMVAbsent (no option wrapper), and
+        // collapse `MEMBER = 'MEMBER'` to the nullary EMVLabel (no stored string).
+        let enum_value = if self.opts.include_enum_member_values {
+            match Self::enum_member_value(value.clone()) {
+                Some(EnumMemberValue::EMVString(s)) if s == id.1 => EnumMemberValue::EMVLabel,
+                Some(v) => v,
+                None => EnumMemberValue::EMVAbsent,
+            }
+        } else {
+            EnumMemberValue::EMVAbsent
+        };
         let v = if self.opts.include_assignment_values {
             Some(self.node_to_str(value.clone(), &semicolon))
         } else {
@@ -5253,6 +5335,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 .infer_const(name, value)
                 .unwrap_or_else(|| self.tany_with_pos(id.0.clone())),
             value: v,
+            enum_value,
             name: id.into(),
             refs,
         }))
@@ -5473,6 +5556,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             } else {
                 None
             },
+            enum_value: EnumMemberValue::EMVAbsent,
         }))
     }
 

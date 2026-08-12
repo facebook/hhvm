@@ -85,6 +85,9 @@ let enum_modules =
     ("error_codes", "Warning");
     (* An optional error set that runs only for arg --enable-global-access-check. *)
     ("error_codes", "GlobalAccessCheck");
+    (* Nested module scoping the enum member value constructors; flattened to a
+       Rust enum in typing_defs. *)
+    ("typing_defs", "Enum_member_value");
   ]
 
 let is_manually_converted_nested_module mod_name =

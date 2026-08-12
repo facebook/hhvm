@@ -669,6 +669,24 @@ pub enum ClassConstFrom {
     From(TypeName),
 }
 
+/// For an enum member, its recorded value. `EMVInt` holds values that fit
+/// OCaml's 63-bit `int`; literals outside that range (including `i64::MIN`) use
+/// `EMVLargeInt`, which stores the literal's source text verbatim (not
+/// canonicalized) so it marshals without truncation. `EMVNameof` and
+/// `EMVClassPointer` are kept distinct so that `nameof C` (a string) and
+/// `C::class` (a class pointer) never coincide.
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+pub enum EnumMemberValue {
+    EMVInt(isize),
+    EMVLargeInt(String),
+    EMVString(String),
+    EMVNameof(String),
+    EMVClassPointer(String),
+    EMVLabel,
+    EMVAbsent,
+}
+
 /// Class Constant References:
 /// In order to be able to detect cycle definitions like
 /// class C {

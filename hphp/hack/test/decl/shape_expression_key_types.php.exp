@@ -13,14 +13,16 @@
           scc_name = ([4:16-19], "KEY");
           scc_type =
           (Rhint ([4:9-15]), (Tapply (([4:9-15], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None };
+          scc_refs = []; scc_value = None;
+          scc_enum_value = Typing_defs.Enum_member_value.EMVAbsent };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:15-16], "X");
            scc_type = (Rhint ([6:9-14]), Tmixed);
            scc_refs =
            [((Typing_defs.From "\\C"), "KEY");
              ((Typing_defs.From "\\C"), "class")];
-           scc_value = None }
+           scc_value = None;
+           scc_enum_value = Typing_defs.Enum_member_value.EMVAbsent }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

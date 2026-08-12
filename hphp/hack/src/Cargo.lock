@@ -1389,6 +1389,7 @@ dependencies = [
  "itertools",
  "namespaces_rust",
  "naming_special_names_rust",
+ "ocaml_helper",
  "oxidized",
  "parser_core_types",
  "relative_path",

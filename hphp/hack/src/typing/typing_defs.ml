@@ -130,6 +130,37 @@ type class_const_kind =
   | CCConcrete
 [@@deriving eq, show]
 
+(** The value recorded for an enum member. The representation is abstract
+    outside this module (see the .mli), so callers go through the API rather than
+    matching raw constructors. *)
+module Enum_member_value = struct
+  (** For an enum member, its recorded value. `EMVInt` holds values that fit
+      OCaml's 63-bit `int`; literals outside that range (including `i64::MIN`)
+      use `EMVLargeInt`, which stores the literal's source text verbatim (not
+      canonicalized) so it marshals without truncation -- so different spellings
+      of the same value compare unequal. `EMVNameof` and `EMVClassPointer` are
+      kept distinct so `nameof C` (a string) and `C::class` (a class pointer)
+      never coincide. `EMVLabel` means the value is a string equal to the
+      member's own name (`FOO = 'FOO'`), recorded without storing the string.
+      `EMVAbsent` represents the "no value" case (computed values and non-enum
+      consts) inline, so the recorded value needs no `option` wrapper. *)
+  type t =
+    | EMVInt of int
+    | EMVLargeInt of string
+    | EMVString of string
+    | EMVNameof of string
+    | EMVClassPointer of string
+    | EMVLabel
+    | EMVAbsent
+  [@@deriving eq, ord, show] [@@warning "-37"]
+  (* Every constructor except [EMVAbsent] is built only by the Rust decl parser
+     and marshaled in via ocamlrep; OCaml never builds them, so silence the
+     unused-constructor warning. *)
+
+  (** The "no recorded value" case (computed values and non-enum consts). *)
+  let absent = EMVAbsent
+end
+
 type class_const = {
   cc_synthesized: bool;
   cc_abstract: class_const_kind;
@@ -139,6 +170,9 @@ type class_const = {
       (** identifies the class from which this const originates *)
   cc_refs: class_const_ref list;
       (** references to the constants used in the initializer *)
+  cc_enum_value: Enum_member_value.t;
+      (** For enum members, the recorded value (`EMVLabel` when it equals the
+          member name); `EMVAbsent` for computed values and non-enum consts. *)
 }
 [@@deriving show]
 

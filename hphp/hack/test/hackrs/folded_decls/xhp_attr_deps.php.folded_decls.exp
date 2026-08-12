@@ -12,6 +12,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\:quux",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
 }
@@ -29,6 +30,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\:bar",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     xhp_attr_deps: {
@@ -49,6 +51,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\:foo",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     xhp_attr_deps: {

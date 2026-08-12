@@ -49,6 +49,10 @@ struct CliOptions {
     /// Print the folded decls of the classes in the file.
     #[clap(long)]
     folded: bool,
+
+    /// Record enum member values on class consts (for duplicate-value checking).
+    #[clap(long)]
+    enable_enum_member_values: bool,
 }
 
 fn main() {
@@ -99,8 +103,13 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-    let decl_parser =
-        DeclParser::<R>::new(Arc::clone(&file_provider), DeclParserOptions::default());
+    let decl_parser = DeclParser::<R>::new(
+        Arc::clone(&file_provider),
+        DeclParserOptions {
+            include_enum_member_values: opts.enable_enum_member_values,
+            ..Default::default()
+        },
+    );
     all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);

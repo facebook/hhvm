@@ -320,6 +320,21 @@ impl From<o::typing_defs::ClassConstFrom> for ty::ClassConstFrom {
     }
 }
 
+impl From<o::typing_defs::EnumMemberValue> for ty::EnumMemberValue {
+    fn from(x: o::typing_defs::EnumMemberValue) -> Self {
+        use o::typing_defs::EnumMemberValue as O;
+        match x {
+            O::EMVInt(n) => Self::EMVInt(n),
+            O::EMVLargeInt(s) => Self::EMVLargeInt(s),
+            O::EMVString(s) => Self::EMVString(s),
+            O::EMVNameof(s) => Self::EMVNameof(s),
+            O::EMVClassPointer(s) => Self::EMVClassPointer(s),
+            O::EMVLabel => Self::EMVLabel,
+            O::EMVAbsent => Self::EMVAbsent,
+        }
+    }
+}
+
 impl From<o::typing_defs::ClassConstRef> for ty::ClassConstRef {
     fn from(x: o::typing_defs::ClassConstRef) -> Self {
         Self(x.0.into(), x.1.into())
@@ -382,6 +397,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowClassConst> for shallow::Shall
             ty: scc.type_.into(),
             refs: slice(scc.refs),
             value: scc.value,
+            enum_value: scc.enum_value.into(),
         }
     }
 }
@@ -651,6 +667,7 @@ impl<R: Reason> From<o::typing_defs::ClassConst> for folded::ClassConst<R> {
             ty: x.type_.into(),
             origin: x.origin.into(),
             refs: slice(x.refs),
+            enum_value: x.enum_value.into(),
         }
     }
 }

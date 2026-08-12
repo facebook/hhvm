@@ -95,6 +95,17 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
   | Ptyp_constr ({ txt = Ldot (Lident "Expression_id", "t"); _ }, [])
   | Ptyp_constr ({ txt = Ldot (Lident "Tvid", "t"); _ }, []) ->
     rust_type "isize" [] []
+  (* [Enum_member_value.t] is a nested module (in typing_defs) whose sole purpose
+     is to scope the variant constructors; [enum_modules] in
+     convert_toplevel_phrase flattens it to a Rust enum [EnumMemberValue] defined
+     directly in the typing_defs crate, so references must not include the
+     [enum_member_value] submodule segment. *)
+  | Ptyp_constr ({ txt = Ldot (Lident "Enum_member_value", "t"); _ }, []) ->
+    rust_type "EnumMemberValue" [] []
+  | Ptyp_constr
+      ( { txt = Ldot (Ldot (Lident "Typing_defs", "Enum_member_value"), "t"); _ },
+        [] ) ->
+    rust_type "typing_defs::EnumMemberValue" [] []
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with

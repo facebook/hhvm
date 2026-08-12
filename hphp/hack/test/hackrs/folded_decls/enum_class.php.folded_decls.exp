@@ -43,6 +43,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\A",
             refs: [],
+            enum_value: EMVAbsent,
         },
         "fred": ClassConst {
             is_synthesized: false,
@@ -53,6 +54,7 @@ FoldedClass {
             ty: HH\MemberOf<A, string>,
             origin: "\\A",
             refs: [],
+            enum_value: EMVAbsent,
         },
         "ginger": ClassConst {
             is_synthesized: false,
@@ -63,6 +65,7 @@ FoldedClass {
             ty: HH\MemberOf<A, string>,
             origin: "\\A",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     extends: {
@@ -171,6 +174,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\E",
             refs: [],
+            enum_value: EMVAbsent,
         },
         "fred": ClassConst {
             is_synthesized: false,
@@ -179,6 +183,7 @@ FoldedClass {
             ty: HH\MemberOf<E, string>,
             origin: "\\E",
             refs: [],
+            enum_value: EMVAbsent,
         },
         "ginger": ClassConst {
             is_synthesized: false,
@@ -187,6 +192,7 @@ FoldedClass {
             ty: HH\MemberOf<E, string>,
             origin: "\\E",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     extends: {

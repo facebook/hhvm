@@ -1,0 +1,239 @@
+FoldedClass {
+    name: "\\C",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\C",
+            refs: [],
+            enum_value: EMVAbsent,
+        },
+    },
+}
+FoldedClass {
+    name: "\\E",
+    kind: Cenum,
+    enum_type: EnumType {
+        base: arraykey,
+        constraint: None,
+        includes: [],
+    },
+    substs: {
+        "\\HH\\BuiltinEnum": SubstContext {
+            subst: Subst(
+                {
+                    "T": E,
+                },
+            ),
+            class_context: "\\E",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+    },
+    static_methods: {
+        "getValues": FoldedElement {
+            flags: ClassEltFlags(
+                2,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "getNames": FoldedElement {
+            flags: ClassEltFlags(
+                2,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "isValid": FoldedElement {
+            flags: ClassEltFlags(
+                2,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "coerce": FoldedElement {
+            flags: ClassEltFlags(
+                2,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "assert": FoldedElement {
+            flags: ClassEltFlags(
+                2,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "assertAll": FoldedElement {
+            flags: ClassEltFlags(
+                258,
+            ),
+            origin: "\\HH\\BuiltinEnum",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVAbsent,
+        },
+        "IntVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVInt(
+                1,
+            ),
+        },
+        "NegIntVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVInt(
+                -2,
+            ),
+        },
+        "HexVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVInt(
+                16,
+            ),
+        },
+        "BigIntVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVLargeInt(
+                "9223372036854775807",
+            ),
+        },
+        "MinIntVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVLargeInt(
+                "-9223372036854775808",
+            ),
+        },
+        "StrVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVString(
+                "hello",
+            ),
+        },
+        "NameofVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVNameof(
+                "\\C",
+            ),
+        },
+        "ClassConstVal": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\C",
+                    ),
+                    "class",
+                ),
+            ],
+            enum_value: EMVClassPointer(
+                "\\C",
+            ),
+        },
+        "Computed": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: E,
+            origin: "\\E",
+            refs: [],
+            enum_value: EMVAbsent,
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnum",
+    },
+}

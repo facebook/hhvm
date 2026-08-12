@@ -19,13 +19,15 @@
           scc_type =
           (Rwitness_from_decl ([5:7-10]),
            (Tapply (([5:7-10], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None };
+          scc_refs = []; scc_value = None;
+          scc_enum_value = Typing_defs.Enum_member_value.EMVLabel };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:3-4], "B");
            scc_type =
            (Rwitness_from_decl ([6:7-10]),
             (Tapply (([6:7-10], "\\HH\\string"), [])));
-           scc_refs = []; scc_value = None }
+           scc_refs = []; scc_value = None;
+           scc_enum_value = Typing_defs.Enum_member_value.EMVLabel }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

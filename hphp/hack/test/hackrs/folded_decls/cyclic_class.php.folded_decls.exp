@@ -24,6 +24,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\A",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     extends: {
@@ -47,6 +48,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\C",
             refs: [],
+            enum_value: EMVAbsent,
         },
     },
     extends: {

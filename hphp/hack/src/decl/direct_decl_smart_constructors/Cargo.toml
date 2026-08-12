@@ -19,6 +19,7 @@ hh_autoimport_rust = { version = "0.0.0", path = "../../parser/cargo/hh_autoimpo
 itertools = "0.15.0"
 namespaces_rust = { version = "0.0.0", path = "../../parser/cargo/namespaces" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
+ocaml_helper = { version = "0.0.0", path = "../../utils/ocaml_helper" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }

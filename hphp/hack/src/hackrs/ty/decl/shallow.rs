@@ -30,6 +30,7 @@ use crate::decl::ty::ClassConstRef;
 pub use crate::decl::ty::ConstDecl;
 use crate::decl::ty::DeclConstraintRequirement;
 use crate::decl::ty::Enforceable;
+use crate::decl::ty::EnumMemberValue;
 use crate::decl::ty::EnumType;
 use crate::decl::ty::FunElt;
 use crate::decl::ty::ModuleDefType;
@@ -71,6 +72,11 @@ pub struct ShallowClassConst<R: Reason> {
     /// If DeclParserConfig option include_assignment_values is true,
     /// The string value for the constant
     pub value: Option<String>,
+
+    /// If DeclParserConfig option include_enum_member_values is true and this is
+    /// an enum member with a recordable value, its recorded value (or EMVLabel
+    /// when value == member name). EMVAbsent otherwise.
+    pub enum_value: EnumMemberValue,
 }
 
 walkable!(ShallowClassConst<R> => [ty]);

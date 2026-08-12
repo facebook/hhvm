@@ -13,7 +13,8 @@
           scc_name = ([4:16-19], "KEY");
           scc_type =
           (Rhint ([4:9-15]), (Tapply (([4:9-15], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None }
+          scc_refs = []; scc_value = None;
+          scc_enum_value = Typing_defs.Enum_member_value.EMVAbsent }
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_name = ([6:14-24], "TClassType");

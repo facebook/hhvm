@@ -176,6 +176,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ty,
             origin: name,
             refs: Box::default(),
+            enum_value: ty::decl::EnumMemberValue::EMVAbsent,
         };
         consts.insert(*sn::members::mClass, class_const);
     }
@@ -213,6 +214,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ty: ts_ty,
             origin: self.child.name.id(),
             refs: Default::default(),
+            enum_value: ty::decl::EnumMemberValue::EMVAbsent,
         }
     }
 
@@ -282,6 +284,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ty: c.ty.clone(),
             origin: self.child.name.id(),
             refs: c.refs.clone(),
+            enum_value: c.enum_value.clone(),
         };
         consts.insert(c.name.id(), class_const);
     }

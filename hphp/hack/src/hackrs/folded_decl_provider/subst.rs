@@ -242,6 +242,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
             ty: self.instantiate(&cc.ty),
             origin: cc.origin,
             refs: cc.refs.clone(),
+            enum_value: cc.enum_value.clone(),
         }
     }
 

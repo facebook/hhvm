@@ -40,6 +40,7 @@ pub use ty::ClassRefinement;
 pub use ty::ClassishKind;
 pub use ty::ConcreteTypeconst;
 pub use ty::ConsistentKind;
+pub use ty::EnumMemberValue;
 pub use ty::EnumType;
 pub use ty::FunParam;
 pub use ty::FunType;

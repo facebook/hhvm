@@ -59,7 +59,7 @@ void onLoadUE(std::unique_ptr<UnitEmitter>& ue) {
   std::lock_guard lock{s_encodedUELock};
   ue->m_sn = s_encodedUEs.size();
   s_autoload.addUnit(*ue);
-  s_encodedUEs.emplace_back(RepoFileBuilder::EncodedUE{*ue});
+  s_encodedUEs.emplace_back(RepoFileBuilder::EncodedUE{*ue, false});
 }
 
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,

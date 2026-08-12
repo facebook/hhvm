@@ -27,6 +27,23 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+enum class RepoFileCapability : uint32_t {
+  // This RepoFile was explicitly built for incremental reuse. Its UnitEmitter
+  // blobs can be copied without decoding or recompiling them, and it contains
+  // one meth-caller list per unit so RepoFile-level indexes can be rebuilt
+  // without decoding retained UnitEmitters.
+  //
+  // HHBBC and declaration-driven compilation can make a unit's output depend
+  // on other units, so RepoFiles produced in those modes do not advertise this
+  // capability. This capability alone does not establish full compatibility:
+  // the RepoFile schema must still match, the caller must use a compatible
+  // compiler configuration, and every unit affected by an input change must
+  // be invalidated.
+  RAW_UNIT_EMITTER_REUSE = 1 << 0,
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Global repo metadata.
  *
@@ -46,6 +63,12 @@ struct RepoGlobalData {
    * A more-or-less unique identifier for the repo
    */
   uint64_t Signature = 0;
+
+  uint32_t RepoFileCapabilities = 0;
+
+  bool hasRepoFileCapability(RepoFileCapability capability) const {
+    return RepoFileCapabilities & static_cast<uint32_t>(capability);
+  }
 
   std::vector<std::pair<std::string,std::string>> ConstantFunctions;
 
@@ -68,6 +91,7 @@ struct RepoGlobalData {
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(Signature)
+      (RepoFileCapabilities)
       (EnableArgsInBacktraces)
       (ConstantFunctions)
       (EvalCoeffectEnforcementLevels, std::less<std::string>{})

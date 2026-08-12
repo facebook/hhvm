@@ -508,7 +508,7 @@ void compile_repo() {
   auto const emit = [&] (std::unique_ptr<UnitEmitter> ue) {
     ++numUnits;
     autoload.addUnit(*ue);
-    RepoFileBuilder::EncodedUE encoded{*ue};
+    RepoFileBuilder::EncodedUE encoded{*ue, false};
     std::scoped_lock<std::mutex> _{repoLock};
     repo.add(encoded);
   };

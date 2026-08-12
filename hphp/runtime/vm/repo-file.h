@@ -38,6 +38,7 @@ struct BlobEncoder;
 struct Extension;
 struct PackageInfo;
 struct RepoAutoloadMapBuilder;
+struct RepoFileData;
 struct RepoFileIndex;
 struct RepoGlobalData;
 struct SHA1;
@@ -97,25 +98,38 @@ struct RepoFileBuilder {
   // Create a new repo file at the given path. The file will actually
   // be created with a temporary name, then renamed to the given name
   // when finish() is called.
-  explicit RepoFileBuilder(const std::string& path);
+  explicit RepoFileBuilder(const std::string& path,
+                           bool enableUnitEmitterReuse = false);
+
   ~RepoFileBuilder();
 
   // Encoding a UnitEmitter is expensive, so one can do it ahead of
   // time (in different threads), then add it directly.
   struct EncodedUE {
-    explicit EncodedUE(const UnitEmitter& ue);
+    explicit EncodedUE(const UnitEmitter& ue, bool includeUnitMethCallers);
    private:
     friend struct RepoFileBuilder;
     const StringData* path;
     int64_t sn;
     std::vector<char> blob;
+    std::vector<const StringData*> methCallers;
   };
 
   // Add the given UnitEmitter to the repo file. This will encode it
   // and then write it to disk. This can only be called before
   // finish() is called.
   void add(const EncodedUE& ue);
-  void add(const UnitEmitter& ue) { add(EncodedUE{ue}); }
+  void add(const UnitEmitter& ue);
+
+  // Retain reusable units from `base`, excluding units whose paths match or
+  // are descendants of a path in `exclude`. `exclude` must contain unique,
+  // non-empty paths relative to the source root, including every added unit
+  // and every input change which can affect a retained unit. The caller must
+  // use a compatible compiler/configuration.
+  void addFrom(RepoFileData& base,
+               RepoAutoloadMapBuilder& autoload,
+               std::vector<std::string> exclude,
+               const PackageInfo& packageInfo);
 
   // "Finish" the repo file by writing RepoGlobalData, the
   // RepoAutoloadMapBuilder, the literal string table, and indexing
@@ -132,6 +146,21 @@ struct RepoFileBuilder {
   RepoFileBuilder& operator=(RepoFileBuilder&&) = delete;
 private:
   struct Data;
+  std::unique_ptr<Data> m_data;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct RepoFileData {
+  struct Data;
+
+  explicit RepoFileData(const std::string& path);
+  ~RepoFileData();
+
+  RepoFileData(RepoFileData&&) = delete;
+  RepoFileData& operator=(RepoFileData&&) = delete;
+private:
+  friend struct RepoFileBuilder;
   std::unique_ptr<Data> m_data;
 };
 

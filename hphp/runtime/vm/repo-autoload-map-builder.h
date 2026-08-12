@@ -31,6 +31,7 @@ struct FuncEmitter;
 struct TypeAlias;
 struct Constant;
 struct Module;
+struct RepoFileBuilder;
 
 struct RepoAutoloadMapBuilder {
 
@@ -47,6 +48,7 @@ struct RepoAutoloadMapBuilder {
   using CaseSensitiveMap = Map<string_data_same>;
 
   friend struct FuncEmitter;
+  friend struct RepoFileBuilder;
 
   void addUnit(const UnitEmitter& ue);
 

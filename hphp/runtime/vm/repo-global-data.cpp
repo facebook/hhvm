@@ -58,6 +58,7 @@ std::string show(const RepoGlobalData& gd) {
 #define SHOW(x) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #x, gd.x);
   SHOW(EnableArgsInBacktraces)
   SHOW(Signature)
+  SHOW(RepoFileCapabilities)
 #undef SHOW
 
 #define C(_, Name, ...) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #Name, gd.Name);

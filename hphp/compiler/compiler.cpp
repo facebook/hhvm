@@ -94,6 +94,9 @@ struct CompilerOptions {
   std::string inputDir;
   std::vector<std::string> inputs;
   std::string inputList;
+  bool buildIncrementalBase{false};
+  std::string incrementalBaseRepo;
+  std::string incrementalInvalidatedList;
   std::vector<std::string> dirs;
   std::vector<std::string> excludeDirs;
   std::vector<std::string> excludeFiles;
@@ -113,6 +116,10 @@ struct CompilerOptions {
   std::string filesInBuildPath;
   bool logPackageBuildDrift;
 };
+
+bool isIncrementalBuild(const CompilerOptions& po) {
+  return !po.incrementalBaseRepo.empty();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -196,12 +203,14 @@ void addListToPackage(Package& package, const std::vector<std::string>& dirs,
 
 bool addInputsToPackage(Package& package, const CompilerOptions& po) {
   if (po.dirs.empty() && po.inputs.empty() && po.inputList.empty()) {
-    package.addDirectory("/");
+    if (!isIncrementalBuild(po)) package.addDirectory("/");
     return true;
   }
 
-  for (auto const& dir : po.dirs) {
-    package.addDirectory(dir);
+  if (!isIncrementalBuild(po)) {
+    for (auto const& dir : po.dirs) {
+      package.addDirectory(dir);
+    }
   }
 
   if (!po.staticPatterns.empty() && (!po.cdirs.empty() || !po.cfiles.empty())) {
@@ -503,6 +512,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
+    ("build-incremental-base",
+     "include RepoFile metadata required by --incremental-base-repo")
+    ("incremental-base-repo", value<std::string>(&po.incrementalBaseRepo),
+     "merge explicit inputs with this base repo; requires --input-list")
+    ("incremental-invalidated-list",
+     value<std::string>(&po.incrementalInvalidatedList),
+     "file containing base repo paths to replace or remove")
     ("dir", value<std::vector<std::string>>(&po.dirs)->composing(),
      "directories containing all input files")
     ("exclude-dir",
@@ -626,6 +642,35 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (vm.contains("repo-schema")) {
     std::cout << repoSchemaId() << "\n";
     return 1;
+  }
+
+  po.buildIncrementalBase = vm.contains("build-incremental-base");
+  auto const hasIncrementalRepo = vm.contains("incremental-base-repo");
+  auto const hasRepoInvalidatedList =
+    vm.contains("incremental-invalidated-list");
+  if (hasIncrementalRepo != hasRepoInvalidatedList) {
+    Logger::Error(
+      "Error in command line: incremental-base-repo and "
+      "incremental-invalidated-list must be specified together."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
+  if ((hasIncrementalRepo && po.incrementalBaseRepo.empty()) ||
+      (hasRepoInvalidatedList && po.incrementalInvalidatedList.empty())) {
+    Logger::Error(
+      "Error in command line: incremental paths cannot be empty."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
+  if (hasIncrementalRepo &&
+      (!vm.contains("input-list") || po.inputList.empty())) {
+    Logger::Error(
+      "Error in command line: incremental bases require a non-empty input-list."
+    );
+    std::cout << desc << "\n";
+    return -1;
   }
 
   if (po.outputDir.empty()) {
@@ -905,17 +950,21 @@ std::unique_ptr<UnitIndex> computeIndex(
   Package indexPackage{po.inputDir, executor, client, po.coredump};
   Timer indexTimer(Timer::WallTime, "indexing");
 
-  auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
-  auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
-  auto const queryStr = repoFlags.autoloadQuery();
-  if (!dirs.empty()) {
-    addListToPackage(indexPackage, dirs, po);
-  } else if (!queryStr.empty()) {
-    // Index the files specified by Autoload.Query
-    if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return nullptr;
-  } else {
-    // index just the input files
+  if (isIncrementalBuild(po)) {
     if (!addInputsToPackage(indexPackage, po)) return nullptr;
+  } else {
+    auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+    auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
+    auto const queryStr = repoFlags.autoloadQuery();
+    if (!dirs.empty()) {
+      addListToPackage(indexPackage, dirs, po);
+    } else if (!queryStr.empty()) {
+      // Index the files specified by Autoload.Query
+      if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return nullptr;
+    } else {
+      // index just the input files
+      if (!addInputsToPackage(indexPackage, po)) return nullptr;
+    }
   }
   // Here, we are doing the following in parallel:
   // * Indexing the build package
@@ -1081,8 +1130,86 @@ bool process(CompilerOptions &po) {
   SCOPE_EXIT { hphp_process_exit(); };
   SystemLib::keepRegisteredUnitEmitters(false);
 
+  auto const incrementalRepo = !po.incrementalBaseRepo.empty();
+  auto const enableUnitEmitterReuse =
+    incrementalRepo || po.buildIncrementalBase;
+  if (enableUnitEmitterReuse &&
+      (!Option::GenerateBinaryHHBC ||
+       Option::GenerateTextHHBC ||
+       Option::GenerateHhasHHBC ||
+       Option::NoOutputHHBC)) {
+    Logger::Error(
+      "UnitEmitter-reusable repo builds require binary-only HHBC output"
+    );
+    return false;
+  }
+  if (enableUnitEmitterReuse && Cfg::Eval::UseHHBBC) {
+    Logger::Error("UnitEmitter-reusable repo builds do not support HHBBC");
+    return false;
+  }
+  if (enableUnitEmitterReuse && Cfg::Eval::EnableDecl) {
+    Logger::Error(
+      "UnitEmitter-reusable repo builds do not support declaration-driven "
+      "bytecode"
+    );
+    return false;
+  }
+  if (incrementalRepo && Option::ForceEnableSymbolRefs) {
+    Logger::Error(
+      "Incremental repo builds do not support forced symbol references"
+    );
+    return false;
+  }
+
   auto const outputFile = po.outputDir + "/hhvm.hhbc";
+  auto const aliasesBase = [](const std::string& path,
+                              const std::string& base) {
+    if (path == base) return true;
+    std::error_code error;
+    return std::filesystem::equivalent(path, base, error);
+  };
+  if (incrementalRepo) {
+    if (aliasesBase(outputFile, po.incrementalBaseRepo) ||
+        aliasesBase(outputFile + ".part", po.incrementalBaseRepo)) {
+      Logger::FError(
+        "Incremental repo output {} aliases its base {}",
+        outputFile,
+        po.incrementalBaseRepo
+      );
+      return false;
+    }
+  }
   unlink(outputFile.c_str());
+
+  auto const readInvalidatedPaths = [](const std::string& listPath,
+                                       std::vector<std::string>& paths) {
+    std::ifstream input{listPath};
+    if (!input) {
+      Logger::FError(
+        "Unable to read incremental invalidation list {}", listPath
+      );
+      return false;
+    }
+
+    std::string path;
+    while (std::getline(input, path)) {
+      if (!path.empty()) paths.push_back(std::move(path));
+    }
+    if (input.bad()) {
+      Logger::FError(
+        "Error reading incremental invalidation list {}", listPath
+      );
+      return false;
+    }
+    return true;
+  };
+
+  std::vector<std::string> repoInvalidatedPaths;
+  if (incrementalRepo &&
+      !readInvalidatedPaths(
+        po.incrementalInvalidatedList, repoInvalidatedPaths)) {
+    return false;
+  }
 
   auto executor = std::make_unique<TicketExecutor>(
     "HPHPcWorker",
@@ -1228,8 +1355,11 @@ bool process(CompilerOptions &po) {
     }
 
     autoload->addUnit(*ue);
-    RepoFileBuilder::EncodedUE encoded{*ue};
+    RepoFileBuilder::EncodedUE encoded{*ue, enableUnitEmitterReuse};
     std::scoped_lock<std::mutex> _{repoLock};
+    if (incrementalRepo) {
+      repoInvalidatedPaths.push_back(ue->m_filepath->toCppString());
+    }
     repo->add(encoded);
   };
 
@@ -1527,14 +1657,16 @@ bool process(CompilerOptions &po) {
 
     // Parse the input files specified on the command line
     if (!addInputsToPackage(*parsePackage, po)) return false;
-    auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
-    auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
-    auto const queryStr = repoFlags.autoloadQuery();
-    if (!dirs.empty()) {
-      addListToPackage(*parsePackage, dirs, po);
-    } else if (!queryStr.empty()) {
-      // Parse all the files specified by Autoload.Query
-      if (!addAutoloadQueryToPackage(*parsePackage, queryStr)) return false;
+    if (!isIncrementalBuild(po)) {
+      auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+      auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
+      auto const queryStr = repoFlags.autoloadQuery();
+      if (!dirs.empty()) {
+        addListToPackage(*parsePackage, dirs, po);
+      } else if (!queryStr.empty()) {
+        // Parse all the files specified by Autoload.Query
+        if (!addAutoloadQueryToPackage(*parsePackage, queryStr)) return false;
+      }
     }
 
     if (!coro::blockingWait(parsePackage->parse(*index,
@@ -1563,7 +1695,7 @@ bool process(CompilerOptions &po) {
     if (!Cfg::Eval::UseHHBBC && Option::GenerateBinaryHHBC) {
       // Initialize autoload and repo for emitUnit() to populate
       autoload.emplace();
-      repo.emplace(outputFile);
+      repo.emplace(outputFile, enableUnitEmitterReuse);
     }
 
     if (!coro::blockingWait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
@@ -1636,6 +1768,11 @@ bool process(CompilerOptions &po) {
     Timer _{Timer::WallTime, "finalizing repo"};
     auto const& packageInfo =
       RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
+    if (incrementalRepo) {
+      RepoFileData base{po.incrementalBaseRepo};
+      repo->addFrom(
+        base, *autoload, std::move(repoInvalidatedPaths), packageInfo);
+    }
     repo->finish(getGlobalData(), *autoload, packageInfo);
     return true;
   };

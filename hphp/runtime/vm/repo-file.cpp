@@ -25,8 +25,17 @@
 
 #include "hphp/util/blob-writer.h"
 
+#include <folly/Format.h>
 #include <folly/String.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 #include <magic_enum/magic_enum.hpp>
+
+#include <algorithm>
+#include <filesystem>
+#include <optional>
+#include <stdexcept>
+#include <string_view>
 
 TRACE_SET_MOD(repo_file)
 
@@ -44,6 +53,7 @@ enum class RepoFileChunks {
 
 enum class RepoFileIndexes {
   UNIT_SYMBOLS,
+  UNIT_METH_CALLERS,
   UNIT_INFOS,
   AUTOLOAD_TYPES,
   AUTOLOAD_FUNCS,
@@ -101,6 +111,39 @@ const StringData* relativePathToSourceRoot(const StringData* path) {
   return path;
 }
 
+std::string relativePathToSourceRoot(std::string_view path) {
+  if (path.empty()) return {};
+  if (path[0] == '/' && !Cfg::Server::SourceRoot.empty() &&
+      path.starts_with(Cfg::Server::SourceRoot)) {
+    path.remove_prefix(Cfg::Server::SourceRoot.size());
+  }
+  return std::string{path};
+}
+
+bool containsPathOrAncestor(
+    const std::vector<std::string>& sortedPaths,
+    std::string_view path) {
+  for (;;) {
+    auto const it = std::lower_bound(
+      sortedPaths.begin(),
+      sortedPaths.end(),
+      path,
+      [](const std::string& candidate, std::string_view value) {
+        return std::string_view{candidate} < value;
+      }
+    );
+    if (it != sortedPaths.end() && std::string_view{*it} == path) {
+      return true;
+    }
+
+    auto const slash = path.rfind('/');
+    if (slash == std::string_view::npos) return false;
+    path = path.substr(0, slash);
+  }
+}
+
+using UnitMethCallers = std::vector<const StringData*>;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -138,11 +181,14 @@ struct RepoFileBuilder::Data : Blob::Writer<RepoFileChunks, RepoFileIndexes> {
     const StringData* path;
     int64_t sn;
     Blob::Bounds location;
+    UnitMethCallers methCallers;
   };
   std::vector<UnitEmitterIndex> unitEmittersIndex;
+  bool enableUnitEmitterReuse{false};
 
   void finish(const RepoGlobalData&,
               std::vector<RepoUnitSymbols>,
+              std::vector<UnitMethCallers>,
               const PackageInfo&,
               const RepoAutoloadMapBuilder::TypeNameMap& types,
               const RepoAutoloadMapBuilder::FuncNameMap& funcs,
@@ -153,9 +199,17 @@ struct RepoFileBuilder::Data : Blob::Writer<RepoFileChunks, RepoFileIndexes> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RepoFileBuilder::RepoFileBuilder(const std::string& path)
+RepoFileBuilder::RepoFileBuilder(const std::string& path,
+                                 bool enableUnitEmitterReuse)
   : m_data{std::make_unique<Data>()}
 {
+  if (enableUnitEmitterReuse &&
+      (Cfg::Eval::UseHHBBC || Cfg::Eval::EnableDecl)) {
+    throw std::runtime_error(
+      "Current build configuration cannot reuse raw unit emitters"
+    );
+  }
+  m_data->enableUnitEmitterReuse = enableUnitEmitterReuse;
   m_data->header(path, kMagic, kCurrentVersion);
 }
 
@@ -180,11 +234,17 @@ void RepoFileBuilder::add(const EncodedUE& ue) {
     RepoFileBuilder::Data::UnitEmitterIndex{
       path,
       ue.sn,
-      { m_data->sizes.get(RepoFileChunks::UNIT_EMITTERS), size }
+      { m_data->sizes.get(RepoFileChunks::UNIT_EMITTERS), size },
+      ue.methCallers
     }
   );
 
   m_data->write(RepoFileChunks::UNIT_EMITTERS, ue.blob.data(), size);
+}
+
+void RepoFileBuilder::add(const UnitEmitter& ue) {
+  assertx(m_data);
+  add(EncodedUE{ue, m_data->enableUnitEmitterReuse});
 }
 
 void RepoFileBuilder::finish(const RepoGlobalData& global,
@@ -206,10 +266,19 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
   add_symbols(autoloadMap.getTypeAliases(), RepoSymbolType::TYPE_ALIAS);
   add_symbols(autoloadMap.getModules(), RepoSymbolType::MODULE);
 
+  std::vector<UnitMethCallers> unitMethCallers;
+  if (m_data->enableUnitEmitterReuse) {
+    unitMethCallers.resize(m_data->unitEmittersIndex.size());
+    for (auto const& unit : m_data->unitEmittersIndex) {
+      unitMethCallers[unit.sn] = unit.methCallers;
+    }
+  }
+
   auto data = std::move(m_data);
   data->finish(
     global,
     std::move(unitSymbols),
+    std::move(unitMethCallers),
     packageInfo,
     autoloadMap.getTypes(),
     autoloadMap.getFuncs(),
@@ -222,16 +291,22 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
 void RepoFileBuilder::Data::finish(
     const RepoGlobalData& global,
     std::vector<RepoUnitSymbols> unitSymbols,
+    std::vector<UnitMethCallers> unitMethCallers,
     const PackageInfo& packageInfo,
     const RepoAutoloadMapBuilder::TypeNameMap& types,
     const RepoAutoloadMapBuilder::FuncNameMap& funcs,
     const RepoAutoloadMapBuilder::CaseSensitiveMap& constants,
     const RepoAutoloadMapBuilder::TypeNameMap& typeAliases,
     const RepoAutoloadMapBuilder::CaseSensitiveMap& modules) {
+  auto outputGlobal = global;
+  outputGlobal.RepoFileCapabilities = enableUnitEmitterReuse
+    ? static_cast<uint32_t>(RepoFileCapability::RAW_UNIT_EMITTER_REUSE)
+    : 0;
+
   // Global data
   {
     BlobEncoder encoder;
-    encoder(global);
+    encoder(outputGlobal);
     write(RepoFileChunks::GLOBAL_DATA, encoder.data(), encoder.size());
     always_assert(
       sizes.get(RepoFileChunks::GLOBAL_DATA) <= kGlobalDataSizeLimit);
@@ -247,8 +322,19 @@ void RepoFileBuilder::Data::finish(
   }
 
   // Unit Symbols
-  auto const unitSymbolsBounds =
-    listIndex(RepoFileIndexes::UNIT_SYMBOLS, unitSymbols);
+  auto const unitSymbolsBounds = listIndex(
+    RepoFileIndexes::UNIT_SYMBOLS, std::move(unitSymbols));
+
+  // Unit Meth Callers
+  if (outputGlobal.hasRepoFileCapability(
+        RepoFileCapability::RAW_UNIT_EMITTER_REUSE)) {
+    listIndex(
+      RepoFileIndexes::UNIT_METH_CALLERS, std::move(unitMethCallers));
+  } else {
+    listIndex(
+      RepoFileIndexes::UNIT_METH_CALLERS,
+      std::vector<UnitMethCallers>{});
+  }
 
   // Unit Infos
   std::vector<Blob::Bounds> unitInfosBounds;
@@ -302,10 +388,21 @@ void RepoFileBuilder::Data::finish(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
+RepoFileBuilder::EncodedUE::EncodedUE(
+    const UnitEmitter& ue,
+    bool includeUnitMethCallers)
   : path{ue.m_filepath}
   , sn{ue.m_sn}
 {
+  if (includeUnitMethCallers) {
+    for (auto const& fe : ue.fevec()) {
+      if (!fe->isMethod() && (fe->attrs & AttrIsMethCaller) &&
+          !fe->name->slice().endsWith("$memoize_impl")) {
+        methCallers.push_back(fe->name);
+      }
+    }
+  }
+
   BlobEncoder encoder;
   const_cast<UnitEmitter&>(ue).serde(encoder, false);
   blob = encoder.take();
@@ -315,17 +412,40 @@ RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
 
 namespace {
 
+void appendRange(std::vector<Blob::Bounds>& ranges,
+                 const Blob::Bounds& location) {
+  if (!ranges.empty() &&
+      ranges.back().offset + ranges.back().size == location.offset) {
+    ranges.back().size += location.size;
+    return;
+  }
+  ranges.push_back(location);
+}
+
+bool boundsWithin(size_t size, const Blob::Bounds& bounds) {
+  return bounds.offset <= size && bounds.size <= size - bounds.offset;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+
 // Reader state
-struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
-  explicit RepoFileData(
-      const std::string& inputPath,
-      Blob::ReadMode mode = Blob::ReadMode::PReadOnly) {
-    init(inputPath, kMagic, kCurrentVersion, mode);
+struct RepoFileData::Data : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
+  struct IncrementalBaseUnit {
+    RepoUnitInfo info;
+    RepoUnitSymbols symbols;
+    UnitMethCallers methCallers;
+  };
+
+  explicit Data(const std::string& path,
+                Blob::ReadMode mode = Blob::ReadMode::PReadOnly)
+    : inputPath{path} {
+    init(path, kMagic, kCurrentVersion, mode);
 
     check(RepoFileChunks::UNIT_EMITTERS, 0);
     check(RepoFileChunks::GLOBAL_DATA, kGlobalDataSizeLimit);
     check(RepoFileChunks::PACKAGE_INFO, kPackageInfoSizeLimit);
-
     for (auto index : magic_enum::enum_values<RepoFileIndexes>()) {
       check(index, kIndexSizeLimit, kIndexDataSizeLimit);
     }
@@ -334,9 +454,89 @@ struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
     packageInfo = readChunk<PackageInfo>(RepoFileChunks::PACKAGE_INFO);
   }
 
+  bool canReuseUnitEmitters() const {
+    return globalData.hasRepoFileCapability(
+      RepoFileCapability::RAW_UNIT_EMITTER_REUSE);
+  }
+
+  std::vector<IncrementalBaseUnit> loadUnitsForIncrementalBuild() {
+    always_assert(canReuseUnitEmitters());
+    auto const infosIndex = listIndex(RepoFileIndexes::UNIT_INFOS);
+      always_assert(
+        infosIndex.size == listIndex(RepoFileIndexes::UNIT_SYMBOLS).size);
+      always_assert(
+        infosIndex.size == listIndex(RepoFileIndexes::UNIT_METH_CALLERS).size);
+
+    std::vector<IncrementalBaseUnit> units;
+    units.reserve(infosIndex.size);
+    DEBUG_ONLY folly::F14FastSet<std::string> paths;
+    DEBUG_ONLY auto const infosRead = readList<RepoUnitInfo>(
+      RepoFileIndexes::UNIT_INFOS,
+      [&](size_t i, RepoUnitInfo info) {
+        assertx(info.unitSn == i);
+        assertx(info.path && !info.path->empty());
+        assertx(info.emitterLocation.size != 0);
+        assertx(boundsWithin(
+          sizes.get(RepoFileChunks::UNIT_EMITTERS),
+          info.emitterLocation));
+        assertx(info.symbolsLocation.size != 0);
+        assertx(boundsWithin(
+          listIndex(RepoFileIndexes::UNIT_SYMBOLS).dataBounds.size,
+          info.symbolsLocation));
+
+        info.path = relativePathToSourceRoot(info.path);
+        assertx(paths.emplace(info.path->toCppString()).second);
+
+        units.push_back(IncrementalBaseUnit{std::move(info), {}, {}});
+      }
+    );
+    assertx(infosRead == infosIndex.size);
+
+    DEBUG_ONLY auto const symbolsRead = readList<RepoUnitSymbols>(
+      RepoFileIndexes::UNIT_SYMBOLS,
+      [&](size_t i, RepoUnitSymbols symbols) {
+        assertx(i < units.size());
+        units[i].symbols = std::move(symbols);
+      }
+    );
+      assertx(symbolsRead == units.size());
+
+    DEBUG_ONLY auto const methCallersRead = readList<UnitMethCallers>(
+      RepoFileIndexes::UNIT_METH_CALLERS,
+      [&](size_t i, UnitMethCallers methCallers) {
+        assertx(i < units.size());
+        units[i].methCallers = std::move(methCallers);
+      }
+    );
+    assertx(methCallersRead == units.size());
+
+    if constexpr (debug) {
+      std::vector<Blob::Bounds> emitterLocations;
+      emitterLocations.reserve(units.size());
+      for (auto const& unit : units) {
+        emitterLocations.push_back(unit.info.emitterLocation);
+      }
+      std::sort(
+        emitterLocations.begin(),
+        emitterLocations.end(),
+        [](auto const& left, auto const& right) {
+          return left.offset < right.offset;
+        }
+      );
+      for (size_t i = 1; i < emitterLocations.size(); ++i) {
+        assertx(
+          emitterLocations[i].offset >=
+          emitterLocations[i - 1].offset + emitterLocations[i - 1].size);
+      }
+    }
+    return units;
+  }
+
   RepoGlobalData globalData;
 
   PackageInfo packageInfo;
+
+  std::string inputPath;
 
   CaseSensitiveHashMapIndex pathToUnitInfoBoundsIndex;
   Blob::ListIndex unitInfosIndex;
@@ -361,11 +561,47 @@ private:
     blob.decoder.assertDone();
     return value;
   }
+
+  template <typename T, typename F>
+  size_t readList(RepoFileIndexes index, F&& consume) {
+    auto const list = listIndex(index);
+    auto blob = fd.readBlob(list.dataBounds.offset, list.dataBounds.size);
+    size_t i = 0;
+    while (blob.decoder.remaining() > 0) {
+      T value;
+      blob.decoder(value);
+      consume(i++, std::move(value));
+    }
+    return i;
+  }
 };
 
-std::unique_ptr<RepoFileData> s_repoFileData{};
+namespace {
 
-const RepoUnitInfo& getUnitInfoFromUnitSn(const RepoFileData& data,
+template <typename Writer>
+void copyUnitEmitters(
+    Writer& output,
+    const RepoFileData::Data& input,
+    const std::vector<Blob::Bounds>& ranges) {
+  constexpr size_t kCopyBufferSize = 1 << 20;
+  std::vector<char> buffer(kCopyBufferSize);
+
+  auto const chunkOffset = input.offsets.get(RepoFileChunks::UNIT_EMITTERS);
+  for (auto const& range : ranges) {
+    size_t copied = 0;
+    while (copied < range.size) {
+      auto const size = std::min(buffer.size(), range.size - copied);
+      input.fd.pread(
+        buffer.data(), size, chunkOffset + range.offset + copied);
+      output.write(RepoFileChunks::UNIT_EMITTERS, buffer.data(), size);
+      copied += size;
+    }
+  }
+}
+
+std::unique_ptr<RepoFileData::Data> s_repoFileData{};
+
+const RepoUnitInfo& getUnitInfoFromUnitSn(const RepoFileData::Data& data,
                                           int64_t unitSn) {
   auto index = data.unitInfosIndex;
   assertx(unitSn >= 0 && unitSn < index.size);
@@ -381,7 +617,7 @@ const RepoUnitInfo& getUnitInfoFromUnitSn(const RepoFileData& data,
   return insertRes.first->second;
 }
 
-const RepoUnitInfo& getUnitInfoFromBounds(const RepoFileData& data,
+const RepoUnitInfo& getUnitInfoFromBounds(const RepoFileData::Data& data,
                                           const Blob::Bounds& bounds) {
   FTRACE(1, "getUnitInfoFromBounds {} {} {} {}\n", bounds.offset, bounds.size,
          data.unitInfosIndex.dataBounds.offset,
@@ -401,7 +637,7 @@ const RepoUnitInfo& getUnitInfoFromBounds(const RepoFileData& data,
   return insertRes.first->second;
 }
 
-RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData& data,
+RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData::Data& data,
                                          const Blob::Bounds& bounds) {
   FTRACE(1, "getUnitSymbolsFromBounds {} {} {} {}\n", bounds.offset,
          bounds.size, data.unitSymbolsIndex.dataBounds.offset,
@@ -422,7 +658,8 @@ RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData& data,
 
 template <typename KeyCompare>
 const RepoUnitInfo* findUnitInfoFromKey(
-    const RepoFileData& data, const Blob::HashMapIndex<KeyCompare>& map,
+    const RepoFileData::Data& data,
+    const Blob::HashMapIndex<KeyCompare>& map,
     const StringData* key) {
   auto bounds = data.getFromIndex<Blob::Bounds>(map, key->slice());
   if (!bounds) {
@@ -431,7 +668,7 @@ const RepoUnitInfo* findUnitInfoFromKey(
   return &getUnitInfoFromBounds(data, *bounds);
 }
 
-const RepoUnitInfo* findUnitInfoFromPath(const RepoFileData& data,
+const RepoUnitInfo* findUnitInfoFromPath(const RepoFileData::Data& data,
                                          const StringData* path) {
   auto searchPath = path;
   if (!path->empty()) {
@@ -447,9 +684,232 @@ const RepoUnitInfo* findUnitInfoFromPath(const RepoFileData& data,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void validateIncrementalPackageInfo(
+    const PackageInfo& basePackageInfo,
+    const PackageInfo& packageInfo) {
+  auto const sameMap = [](auto const& left,
+                          auto const& right,
+                          auto const& sameValue) {
+    if (left.size() != right.size()) return false;
+    for (auto const& [name, value] : left) {
+      auto const it = right.find(name);
+      if (it == right.end() || !sameValue(value, it->second)) return false;
+    }
+    return true;
+  };
+  auto const samePackage = [](const PackageInfo::Package& left,
+                              const PackageInfo::Package& right) {
+    return left.m_includes == right.m_includes &&
+      left.m_soft_includes == right.m_soft_includes &&
+      left.m_include_paths == right.m_include_paths;
+  };
+  auto const sameDeployment = [](const PackageInfo::Deployment& left,
+                                 const PackageInfo::Deployment& right) {
+    return left.m_packages == right.m_packages &&
+      left.m_soft_packages == right.m_soft_packages;
+  };
+
+  if (!sameMap(
+        basePackageInfo.packages(),
+        packageInfo.packages(),
+        samePackage
+      ) ||
+      !sameMap(
+        basePackageInfo.deployments(),
+        packageInfo.deployments(),
+        sameDeployment
+      )) {
+    throw std::runtime_error(
+      "Incremental RepoFile base PackageInfo does not match the current build"
+    );
+  }
+}
+
+}
+
+RepoFileData::RepoFileData(const std::string& path)
+  : m_data{std::make_unique<Data>(path)}
+{}
+
+RepoFileData::~RepoFileData() = default;
+
+void RepoFileBuilder::addFrom(
+    RepoFileData& base,
+    RepoAutoloadMapBuilder& autoload,
+    std::vector<std::string> exclude,
+    const PackageInfo& packageInfo) {
+  assertx(m_data);
+  assertx(base.m_data);
+  auto& baseData = *base.m_data;
+
+  auto const aliasesBase = [&](const std::string& candidate) {
+    if (candidate == baseData.inputPath) return true;
+    std::error_code error;
+    return std::filesystem::equivalent(candidate, baseData.inputPath, error);
+  };
+  if (aliasesBase(m_data->destFilename) ||
+      aliasesBase(m_data->sourceFilename)) {
+    throw std::runtime_error(folly::sformat(
+      "Incremental RepoFile output '{}' aliases its base '{}'",
+      m_data->destFilename,
+      baseData.inputPath
+    ));
+  }
+  if (!m_data->enableUnitEmitterReuse) {
+    throw std::runtime_error(
+      "Incremental RepoFile output must enable raw unit emitter reuse"
+    );
+  }
+  if (!baseData.canReuseUnitEmitters()) {
+    throw std::runtime_error(folly::sformat(
+      "RepoFile '{}' cannot be used as an incremental base",
+      baseData.inputPath
+    ));
+  }
+  validateIncrementalPackageInfo(baseData.packageInfo, packageInfo);
+
+  std::sort(exclude.begin(), exclude.end());
+
+  auto const addedUnitCount = m_data->unitEmittersIndex.size();
+  // Units are encoded concurrently, so they are not necessarily added in
+  // serial-number order. The added units own exactly the SNs
+  // [0, addedUnitCount), which is what lets the retained base units below take
+  // their SN from their position in the index without colliding.
+  folly::F14FastMap<int64_t, size_t> addedUnitIndexBySn;
+  addedUnitIndexBySn.reserve(addedUnitCount);
+  for (size_t i = 0; i < addedUnitCount; ++i) {
+    auto const sn = m_data->unitEmittersIndex[i].sn;
+    always_assert(sn >= 0 && static_cast<size_t>(sn) < addedUnitCount);
+    always_assert(addedUnitIndexBySn.emplace(sn, i).second);
+  }
+  auto const unitIndexBySn = [&](int64_t sn) {
+    auto const it = addedUnitIndexBySn.find(sn);
+    auto const index =
+      it != addedUnitIndexBySn.end() ? it->second : static_cast<size_t>(sn);
+    always_assert(sn >= 0 && index < m_data->unitEmittersIndex.size());
+    return index;
+  };
+
+  auto baseUnits = baseData.loadUnitsForIncrementalBuild();
+
+  std::vector<RepoFileData::Data::IncrementalBaseUnit*> retainedBaseUnits;
+  retainedBaseUnits.reserve(baseUnits.size());
+  for (auto& unit : baseUnits) {
+    auto const path = unit.info.path->toCppString();
+    if (!containsPathOrAncestor(exclude, path)) {
+      retainedBaseUnits.push_back(&unit);
+    }
+  }
+
+  auto nextEmitterOffset =
+    m_data->sizes.get(RepoFileChunks::UNIT_EMITTERS);
+  std::vector<Blob::Bounds> baseRanges;
+  for (auto unit : retainedBaseUnits) {
+    auto const baseLocation = unit->info.emitterLocation;
+    unit->info.emitterLocation = {
+      nextEmitterOffset, baseLocation.size};
+    nextEmitterOffset += baseLocation.size;
+    appendRange(baseRanges, baseLocation);
+  }
+  copyUnitEmitters(*m_data, baseData, baseRanges);
+
+  auto const failSymbolCollision = [&](const char* kind,
+                                       const StringData* symbol,
+                                       int64_t existingUnitSn,
+                                       int64_t incomingUnitSn) {
+    throw std::runtime_error(folly::sformat(
+      "More than one {} with the name {}. In {} and {}",
+      kind,
+      symbol->data(),
+      m_data->unitEmittersIndex[unitIndexBySn(existingUnitSn)].path->data(),
+      m_data->unitEmittersIndex[unitIndexBySn(incomingUnitSn)].path->data()
+    ));
+  };
+  auto const addSymbol = [&](auto& map,
+                             const StringData* symbol,
+                             int64_t unitSn,
+                             const char* kind) {
+    auto const result = map.emplace(symbol, unitSn);
+    if (!result.second) {
+      failSymbolCollision(kind, symbol, result.first->second, unitSn);
+    }
+  };
+  auto const checkNoSymbol = [&](const auto& map,
+                                 const StringData* symbol,
+                                 int64_t unitSn) {
+    auto const it = map.find(symbol);
+    if (it != map.cend()) {
+      failSymbolCollision("symbol", symbol, it->second, unitSn);
+    }
+  };
+  auto const isMethCaller = [](const UnitMethCallers& methCallers,
+                               const StringData* symbol) {
+    return std::find(methCallers.begin(), methCallers.end(), symbol) !=
+      methCallers.end();
+  };
+  // The same meth caller may be defined by several units, so an ordinary
+  // function claiming a name already held by an added unit's meth caller is a
+  // precedence question rather than a duplicate definition.
+  auto const definedByAddedMethCaller = [&](const StringData* symbol,
+                                            int64_t unitSn) {
+    auto const it = addedUnitIndexBySn.find(unitSn);
+    return it != addedUnitIndexBySn.end() &&
+      isMethCaller(m_data->unitEmittersIndex[it->second].methCallers, symbol);
+  };
+
+  m_data->unitEmittersIndex.reserve(
+    addedUnitCount + retainedBaseUnits.size());
+  for (auto unit : retainedBaseUnits) {
+    auto const unitSn =
+      static_cast<int64_t>(m_data->unitEmittersIndex.size());
+    m_data->unitEmittersIndex.push_back(Data::UnitEmitterIndex{
+      unit->info.path,
+      unitSn,
+      unit->info.emitterLocation,
+      std::move(unit->methCallers),
+    });
+    auto const& methCallers =
+      m_data->unitEmittersIndex.back().methCallers;
+
+    for (auto const& [symbol, type] : unit->symbols) {
+      if (type == RepoSymbolType::TYPE) {
+        checkNoSymbol(autoload.m_typeAliases, symbol, unitSn);
+        addSymbol(autoload.m_types, symbol, unitSn, "type");
+      } else if (type == RepoSymbolType::FUNC) {
+        // This unit's own meth callers are added by the loop below, once every
+        // ordinary function has had a chance to claim the name.
+        if (isMethCaller(methCallers, symbol)) continue;
+        auto const result = autoload.m_funcs.emplace(symbol, unitSn);
+        if (!result.second) {
+          if (!definedByAddedMethCaller(symbol, result.first->second)) {
+            failSymbolCollision(
+              "function", symbol, result.first->second, unitSn);
+          }
+          autoload.m_funcs.assign(symbol, unitSn);
+        }
+      } else if (type == RepoSymbolType::CONSTANT) {
+        addSymbol(autoload.m_constants, symbol, unitSn, "constant");
+      } else if (type == RepoSymbolType::TYPE_ALIAS) {
+        checkNoSymbol(autoload.m_types, symbol, unitSn);
+        addSymbol(autoload.m_typeAliases, symbol, unitSn, "type alias");
+      } else {
+        assertx(type == RepoSymbolType::MODULE);
+        addSymbol(autoload.m_modules, symbol, unitSn, "module");
+      }
+    }
+    for (auto const symbol : methCallers) {
+      autoload.m_funcs.emplace(symbol, unitSn);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void RepoFile::init(const std::string& path) {
   assertx(!s_repoFileData);
-  s_repoFileData = std::make_unique<RepoFileData>(path);
+  s_repoFileData = std::make_unique<RepoFileData::Data>(path);
 }
 
 void RepoFile::destroy() {

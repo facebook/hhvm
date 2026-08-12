@@ -35,7 +35,7 @@ void TccStructTraits<T>::translateFieldName(
       (data::fields_size <= 12),
       st::translate_field_name_table,
       st::translate_field_name_hash_table>;
-  static const Table table{
+  static const auto& table = *new Table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

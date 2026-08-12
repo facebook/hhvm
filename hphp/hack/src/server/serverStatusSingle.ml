@@ -9,11 +9,15 @@
 open Hh_prelude
 open ServerCommandTypes
 
-let file_inputs_to_paths file_inputs =
+let file_inputs_to_cacheable_paths file_inputs =
   let rec aux acc = function
     | [] -> Some (List.rev acc)
     | FileName file_name :: rest ->
-      aux (Relative_path.create_detect_prefix file_name :: acc) rest
+      let path = Relative_path.create_detect_prefix file_name in
+      if FindUtils.path_filter path then
+        aux (path :: acc) rest
+      else
+        None
     | FileContent _ :: _ -> None
   in
   aux [] file_inputs
@@ -46,7 +50,7 @@ let go_from_cached_diagnostics
   then
     None
   else
-    match file_inputs_to_paths file_inputs with
+    match file_inputs_to_cacheable_paths file_inputs with
     | None -> None
     | Some paths ->
       Hh_logger.debug "ServerStatusSingle: using cached diagnostics";

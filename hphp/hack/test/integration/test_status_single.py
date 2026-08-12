@@ -189,6 +189,17 @@ class TestStatusSingle(common_tests.CommonTests):
         )
         self.check_cached_status_single_outputs()
 
+    def test_status_single_cached_diagnostics_typechecks_unrecognized_extension(
+        self,
+    ) -> None:
+        file_name = "cached_error.input"
+        self.write_status_single_error_fixture(file_name, "cached_error")
+        self.test_driver.start_hh_server(
+            args=["--config", "status_single_use_cached_diagnostics=true"]
+        )
+
+        self.check_status_single_reports_errors_for_files([file_name])
+
     def test_status_single_cached_diagnostics_rechecks_changed_file(self) -> None:
         file_name = "cached_clean_then_error.php"
         with open(os.path.join(self.test_driver.repo_dir, file_name), "w") as f:

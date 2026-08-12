@@ -38,6 +38,7 @@ type subdecl_kind =
   | Module
   | Internal
   | TestsBypassVisibility
+  | AllowUncheckedEnumValues
   | IsModuleLevelTrait
   | Pos
   | Tparams
@@ -128,6 +129,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Module
   | Internal
   | TestsBypassVisibility
+  | AllowUncheckedEnumValues
   | IsModuleLevelTrait
   | Pos
   | Tparams

@@ -1026,6 +1026,10 @@ and class_decl
         Attributes.mem
           SN.UserAttributes.uaTestsBypassVisibility
           c.sc_user_attributes;
+      dc_allow_unchecked_enum_values =
+        Attributes.mem
+          SN.UserAttributes.uaAllowUncheckedEnumValues
+          c.sc_user_attributes;
       dc_abstract = is_abstract;
       dc_need_init = has_concrete_cstr;
       dc_deferred_init_members = deferred_members;

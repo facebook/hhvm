@@ -41,6 +41,7 @@ type subdecl_kind =
   | Module
   | Internal
   | TestsBypassVisibility
+  | AllowUncheckedEnumValues
   | IsModuleLevelTrait
   | Pos
   | Tparams

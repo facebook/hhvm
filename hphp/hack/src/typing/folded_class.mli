@@ -60,6 +60,8 @@ val internal : t -> bool
 
 val tests_bypass_visibility : t -> bool
 
+val allow_unchecked_enum_values : t -> bool
+
 val is_module_level_trait : t -> bool
 
 val pos : t -> Pos_or_decl.t

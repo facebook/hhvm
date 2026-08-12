@@ -106,6 +106,12 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_tests_bypass_visibility
 
+  let allow_unchecked_enum_values (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.AllowUncheckedEnumValues
+    @@ fun () ->
+    let (c, _) = t in
+    c.Decl_defs.dc_allow_unchecked_enum_values
+
   let is_module_level_trait (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.IsModuleLevelTrait
     @@ fun () ->

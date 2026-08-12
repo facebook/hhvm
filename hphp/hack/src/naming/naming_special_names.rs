@@ -277,6 +277,8 @@ pub mod user_attributes {
 
     pub const TESTS_BYPASS_VISIBILITY: &str = "__TestsBypassVisibility";
 
+    pub const ALLOW_UNCHECKED_ENUM_VALUES: &str = "__AllowUncheckedEnumValues";
+
     pub const PROVENANCE_SKIP_FRAME: &str = "__ProvenanceSkipFrame";
 
     pub const DYNAMICALLY_CALLABLE: &str = "__DynamicallyCallable";

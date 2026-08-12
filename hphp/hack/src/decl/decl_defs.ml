@@ -162,6 +162,9 @@ type decl_class_type = {
       (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
   dc_package: Aast_defs.package_membership option;
   dc_tests_bypass_visibility: bool;
+  dc_allow_unchecked_enum_values: bool;
+      (** Whether this enum has the attribute that opts out of the duplicate /
+          uncheckable enum-value check. *)
 }
 [@@deriving show]
 

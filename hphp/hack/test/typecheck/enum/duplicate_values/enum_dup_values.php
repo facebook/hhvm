@@ -59,10 +59,10 @@ enum EnumDistinct: int as int {
   N = 2;
 }
 
-// 7. Without an opt-out, a deliberate duplicate is flagged like any other. The
-//    next diff adds <<__AllowUncheckedEnumValues>> to this enum and the error goes
-//    away.
+// 7. The <<__AllowUncheckedEnumValues>> attribute opts the enum out of the check,
+//    so the duplicate below is permitted (no error).
+<<__AllowUncheckedEnumValues>>
 enum EnumDupAllowed: int as int {
   Aa = 1;
-  Bb = 1; // duplicate of Aa
+  Bb = 1; // duplicate of Aa, permitted by the attribute
 }

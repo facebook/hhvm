@@ -1,8 +1,10 @@
 <?hh
 
-// OptedOut gives two members the same value on purpose. The diff that adds the
-// <<__AllowUncheckedEnumValues>> attribute opts it out of the duplicate-value check;
-// contrast its recorded member values (scc_value) with the plain Normal enum.
+// OptedOut gives two members the same value on purpose, and opts out of the
+// duplicate-value check with <<__AllowUncheckedEnumValues>>. Its values are
+// therefore not recorded (scc_value = None) -- contrast with the plain Normal
+// enum below, whose values are recorded.
+<<__AllowUncheckedEnumValues>>
 enum OptedOut: int {
   A = 1;
   B = 1;

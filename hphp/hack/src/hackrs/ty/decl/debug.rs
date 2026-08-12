@@ -162,6 +162,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             is_const,
             is_internal,
             tests_bypass_visibility,
+            allow_unchecked_enum_values,
             is_xhp,
             has_xhp_keyword,
             support_dynamic_type,
@@ -214,6 +215,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if *tests_bypass_visibility {
             s.field("tests_bypass_visibility", tests_bypass_visibility);
+        }
+        if *allow_unchecked_enum_values {
+            s.field("allow_unchecked_enum_values", allow_unchecked_enum_values);
         }
         if *is_xhp {
             s.field("is_xhp", is_xhp);

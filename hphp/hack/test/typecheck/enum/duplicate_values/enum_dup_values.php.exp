@@ -28,9 +28,3 @@ This enum has members `N1` and `N2` with the same value `nameof \Foo`. Duplicate
   `N1` is declared here
   File "enum_dup_values.php", line 53, characters 3-4:
   `N2` is declared here
-ERROR: File "enum_dup_values.php", line 65, characters 6-19:
-This enum has members `Aa` and `Bb` with the same value `1`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_values.php", line 66, characters 3-4:
-  `Aa` is declared here
-  File "enum_dup_values.php", line 67, characters 3-4:
-  `Bb` is declared here

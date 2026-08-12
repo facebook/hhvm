@@ -924,8 +924,12 @@ module Primary : sig
       }
     | Enum_uncheckable_value of {
         pos: Pos.t;  (** the enum definition *)
-        members: (Pos_or_decl.t * string) list;
-            (** members whose value can't be statically checked for duplicates *)
+        name: string;  (** the enum's name *)
+        reasons: ((Pos_or_decl.t * string) list * int) Lazy.t;
+            (** Lazily: [(reasons, num_omitted)] -- why the enum can't be
+                statically checked for duplicate values (capped for display) and
+                how many further reasons were omitted. Lazy so the reason strings
+                are only built when the error is rendered. *)
       }
     | Reified_function_reference of Pos.t
     | Reinheriting_classish_const of {

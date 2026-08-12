@@ -1,14 +1,28 @@
 ERROR: File "enum_uncheckable_values.php", line 13, characters 6-17:
-This enum has members whose values cannot be statically checked for duplicates. Use literal values, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+`EnumConstRef` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
   File "enum_uncheckable_values.php", line 14, characters 3-3:
   `A` cannot be checked
 ERROR: File "enum_uncheckable_values.php", line 19, characters 6-14:
-This enum has members whose values cannot be statically checked for duplicates. Use literal values, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+`EnumArith` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
   File "enum_uncheckable_values.php", line 20, characters 3-3:
   `X` cannot be checked
 ERROR: File "enum_uncheckable_values.php", line 25, characters 6-21:
-This enum has members whose values cannot be statically checked for duplicates. Use literal values, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+`EnumManyComputed` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
   File "enum_uncheckable_values.php", line 26, characters 3-3:
   `P` cannot be checked
   File "enum_uncheckable_values.php", line 27, characters 3-3:
   `Q` cannot be checked
+ERROR: File "enum_uncheckable_values.php", line 45, characters 6-24:
+`EnumManyUncheckable` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_uncheckable_values.php", line 46, characters 3-4:
+  `R1` cannot be checked
+  File "enum_uncheckable_values.php", line 47, characters 3-4:
+  `R2` cannot be checked
+  File "enum_uncheckable_values.php", line 48, characters 3-4:
+  `R3` cannot be checked
+  File "enum_uncheckable_values.php", line 49, characters 3-4:
+  `R4` cannot be checked
+  File "enum_uncheckable_values.php", line 50, characters 3-4:
+  `R5` cannot be checked
+  File "enum_uncheckable_values.php", line 45, characters 6-24:
+  (and 2 more)

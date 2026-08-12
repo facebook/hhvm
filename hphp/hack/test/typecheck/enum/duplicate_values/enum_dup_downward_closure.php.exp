@@ -1,0 +1,20 @@
+ERROR: File "enum_dup_downward_closure.php", line 18, characters 6-11:
+`DcUser` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_dup_downward_closure.php", line 11, characters 6-11:
+  it uses `DcBase`, which cannot be checked for duplicate values
+ERROR: File "enum_dup_downward_closure.php", line 31, characters 6-19:
+`DcComputedBase` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_dup_downward_closure.php", line 32, characters 3-3:
+  `E` cannot be checked
+ERROR: File "enum_dup_downward_closure.php", line 49, characters 6-17:
+This enum has members `X` and `Y` with the same value `10`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_downward_closure.php", line 46, characters 3-3:
+  `X` is declared here
+  File "enum_dup_downward_closure.php", line 51, characters 3-3:
+  `Y` is declared here
+ERROR: File "enum_dup_downward_closure.php", line 74, characters 6-22:
+`DcUsesTwoOptedOut` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_dup_downward_closure.php", line 65, characters 6-14:
+  it uses `DcOptOutA`, which cannot be checked for duplicate values
+  File "enum_dup_downward_closure.php", line 70, characters 6-14:
+  it uses `DcOptOutB`, which cannot be checked for duplicate values

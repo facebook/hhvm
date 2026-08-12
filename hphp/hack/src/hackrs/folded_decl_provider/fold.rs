@@ -1014,6 +1014,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_internal: self.child.is_internal,
             tests_bypass_visibility: self
                 .has_user_attribute(*sn::user_attributes::uaTestsBypassVisibility),
+            allow_unchecked_enum_values: self
+                .has_user_attribute(*sn::user_attributes::uaAllowUncheckedEnumValues),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.opts.implicit_inherit_sdt && support_dynamic_type
                 || self.child.support_dynamic_type

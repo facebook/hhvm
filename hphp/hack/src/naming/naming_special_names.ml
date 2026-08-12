@@ -416,6 +416,8 @@ module UserAttributes = struct
 
   let uaGatedByFeatureFlag = "__GatedByFeatureFlag"
 
+  let uaAllowUncheckedEnumValues = "__AllowUncheckedEnumValues"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -472,6 +474,13 @@ module UserAttributes = struct
               contexts = [cls; enum; enumcls; typealias];
               autocomplete = true;
               doc = "Shows the linked URL when hovering over this type.";
+            } );
+          ( uaAllowUncheckedEnumValues,
+            {
+              contexts = [enum];
+              autocomplete = true;
+              doc =
+                "Opts this enum out of the enum-value check, allowing members to share a value or to have values that cannot be statically checked.";
             } );
           ( uaEntryPoint,
             {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b43c0b27a186e9f840797912168af392>>
+// @generated SignedSource<<c83f5b5bb0593b7c8a3f7b5fd4b1a7de>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -244,6 +244,9 @@ pub struct DeclClassType {
     pub allow_multiple_instantiations: bool,
     pub package: Option<aast_defs::PackageMembership>,
     pub tests_bypass_visibility: bool,
+    /// Whether this enum has the attribute that opts out of the duplicate /
+    /// uncheckable enum-value check.
+    pub allow_unchecked_enum_values: bool,
 }
 
 #[derive(

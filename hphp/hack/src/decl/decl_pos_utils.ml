@@ -187,6 +187,7 @@ struct
       dc_const = dc.dc_const;
       dc_internal = dc.dc_internal;
       dc_tests_bypass_visibility = dc.dc_tests_bypass_visibility;
+      dc_allow_unchecked_enum_values = dc.dc_allow_unchecked_enum_values;
       dc_need_init = dc.dc_need_init;
       dc_deferred_init_members = dc.dc_deferred_init_members;
       dc_abstract = dc.dc_abstract;

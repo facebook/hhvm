@@ -39,3 +39,15 @@ enum class EnumClassNotChecked: int {
   int A = 1;
   int B = 1;
 }
+
+// 7. More than `max_reasons` (5) uncheckable members: the error lists the first
+//    few reasons and notes how many were omitted ("(and N more)").
+enum EnumManyUncheckable: int as int {
+  R1 = 1 + 1; // uncheckable
+  R2 = 2 + 2; // uncheckable
+  R3 = 3 + 3; // uncheckable
+  R4 = 4 + 4; // uncheckable
+  R5 = 5 + 5; // uncheckable
+  R6 = 6 + 6; // uncheckable
+  R7 = 7 + 7; // uncheckable
+}

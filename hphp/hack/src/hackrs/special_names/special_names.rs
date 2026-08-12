@@ -262,6 +262,8 @@ pub mod user_attributes {
     pub static uaConst: LazyLock<TypeName> = lazy!(sn::user_attributes::CONST);
     pub static uaTestsBypassVisibility: LazyLock<TypeName> =
         lazy!(sn::user_attributes::TESTS_BYPASS_VISIBILITY);
+    pub static uaAllowUncheckedEnumValues: LazyLock<TypeName> =
+        lazy!(sn::user_attributes::ALLOW_UNCHECKED_ENUM_VALUES);
     pub static uaDeprecated: LazyLock<TypeName> = lazy!(sn::user_attributes::DEPRECATED);
     pub static uaEntryPoint: LazyLock<TypeName> = lazy!(sn::user_attributes::ENTRY_POINT);
     pub static uaMemoize: LazyLock<TypeName> = lazy!(sn::user_attributes::MEMOIZE);
@@ -328,6 +330,7 @@ pub mod user_attributes {
             *uaConsistentConstruct,
             *uaConst,
             *uaTestsBypassVisibility,
+            *uaAllowUncheckedEnumValues,
             *uaDeprecated,
             *uaEntryPoint,
             *uaMemoize,

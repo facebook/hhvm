@@ -791,6 +791,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             allow_multiple_instantiations,
             package,
             tests_bypass_visibility,
+            allow_unchecked_enum_values,
         } = cls;
         Self {
             name: name.into(),
@@ -800,6 +801,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             is_const: const_,
             is_internal: internal,
             tests_bypass_visibility,
+            allow_unchecked_enum_values,
             is_xhp,
             has_xhp_keyword,
             support_dynamic_type,

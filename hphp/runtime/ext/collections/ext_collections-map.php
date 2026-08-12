@@ -125,8 +125,6 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
     mixed $key,
     Tv $value,
   )[write_props]: this {
-    // TODO(T125046752): Pushing `Tk` to the function boundary would add a
-    // upper bound generic check (as `arraykey`).
     $this->setNative(HH\FIXME\UNSAFE_CAST<mixed, Tk>($key), $value);
     return $this;
   }

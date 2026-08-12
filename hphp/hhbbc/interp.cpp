@@ -4049,7 +4049,7 @@ FoldResult fcallTryFold(
   auto calleeCtx = CallContext {
     foldableFunc,
     std::move(args),
-    fca.namedArgNames(),
+    copy_arg_names(fca.namedArgNames()),
     std::move(context)
   };
   if (env.collect.unfoldableFuncs.contains(calleeCtx)) return NotFolded{};

@@ -21271,7 +21271,7 @@ Index::ReturnType Index::lookup_return_type(Context caller,
     return context_sensitive_return_type(
       *m_data,
       caller,
-      { finfo->func, args, argNames, context },
+      { finfo->func, args, copy_arg_names(argNames), context },
       std::move(returnType)
     );
   };
@@ -21289,7 +21289,7 @@ Index::ReturnType Index::lookup_return_type(Context caller,
       return context_sensitive_return_type(
         *m_data,
         caller,
-        { f.finfo->func, args, argNames, context },
+        { f.finfo->func, args, copy_arg_names(argNames), context },
         R{ f.finfo->returnTy, f.finfo->effectFree }
       );
     },
@@ -28135,7 +28135,7 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
   auto const contextual = [&] (const FuncInfo2& finfo, R ret) {
     return context_sensitive_return_type(
       *m_data,
-      { finfo.func, args, argNames, context },
+      { finfo.func, args, copy_arg_names(argNames), context },
       std::move(ret)
     );
   };

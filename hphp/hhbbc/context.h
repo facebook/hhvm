@@ -56,22 +56,17 @@ struct Context {
 struct CallContext {
   const php::Func* callee;
   CompactVector<Type> args;
-  const NamedArgNameVec* argNames;
+  NamedArgNameVec argNames;
   Type context;
 };
 
-inline bool argNamesEqual(const NamedArgNameVec* a, const NamedArgNameVec* b) {
-  if (a == b) return true;
-  auto const aSize = a ? a->size() : 0;
-  auto const bSize = b ? b->size() : 0;
-  if (aSize != bSize) return false;
-  if (aSize == 0) return true;
-  return *a == *b;
+inline NamedArgNameVec copy_arg_names(const NamedArgNameVec* names) {
+  return names ? *names : NamedArgNameVec{};
 }
 
 inline bool operator==(const CallContext& a, const CallContext& b) {
   return a.callee == b.callee &&
-         argNamesEqual(a.argNames, b.argNames) &&
+         a.argNames == b.argNames &&
          equal(a.args, b.args) &&
          equal(a.context, b.context);
 }
@@ -81,16 +76,14 @@ struct CallContextHasher {
     auto ret = folly::hash::hash_combine(
       c.callee,
       c.args.size(),
-      c.argNames ? c.argNames->size() : 0,
+      c.argNames.size(),
       c.context.hash()
     );
     for (auto& t : c.args) {
       ret = folly::hash::hash_combine(ret, t.hash());
     }
-    if (c.argNames) {
-      for (auto& name : *c.argNames) {
-        ret = folly::hash::hash_combine(ret, name);
-      }
+    for (auto& name : c.argNames) {
+      ret = folly::hash::hash_combine(ret, name);
     }
     return ret;
   }

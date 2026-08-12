@@ -329,7 +329,7 @@ FuncAnalysis analyze_func_inline(const IIndex&,
                                  const AnalysisContext&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
-                                 const NamedArgNameVec* argNames,
+                                 const NamedArgNameVec& argNames,
                                  ClsConstantWork* clsCnsWork = nullptr,
                                  CollectionOpts opts = {});
 

@@ -3281,6 +3281,22 @@ end = struct
     in
     create ~code:Error_code.EnumDuplicateValue ~claim ~reasons ()
 
+  let enum_uncheckable_value pos members =
+    let claim =
+      lazy
+        ( pos,
+          "This enum has members whose values cannot be statically checked for duplicates. Use literal values, or add `<<__AllowUncheckedEnumValues>>` to the enum."
+        )
+    and reasons =
+      lazy
+        (List.map members ~f:(fun (member_pos, member_name) ->
+             ( member_pos,
+               Printf.sprintf
+                 "%s cannot be checked"
+                 (Markdown_lite.md_codify member_name) )))
+    in
+    create ~code:Error_code.EnumUncheckableValue ~claim ~reasons ()
+
   let reified_function_reference call_pos =
     let claim =
       lazy
@@ -5249,6 +5265,8 @@ end = struct
     | Enum_duplicate_value
         { pos; value; member_name; member_pos; prev_name; prev_pos } ->
       enum_duplicate_value pos value member_name member_pos prev_name prev_pos
+    | Enum_uncheckable_value { pos; members } ->
+      enum_uncheckable_value pos members
     | Reified_function_reference pos -> reified_function_reference pos
     | Reinheriting_classish_const
         {

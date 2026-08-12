@@ -25,9 +25,8 @@ let handler =
           ()
         | Decl_entry.Found cls ->
           (* The folded consts merge `use`-included members, so one pass over
-             them catches own, included, and cross-include clashes. The error is
-             always anchored at the enum itself, with both clashing members as
-             secondary positions. *)
+             them catches own, included, and cross-include clashes. Errors are
+             anchored at the enum itself. *)
           let enum_decl_name = Cls.name cls in
           let is_local cc = String.equal cc.cc_origin enum_decl_name in
           (* Maps each value to the first member that defines it; a later member
@@ -35,36 +34,57 @@ let handler =
           let seen : (string, string * class_const) Hashtbl.t =
             String.Table.create ()
           in
-          List.iter (Tast_env.consts env cls) ~f:(fun (member_name, cc) ->
-              if Enum_member_value.is_absent cc.cc_enum_value then
-                ()
-              else
-                let value =
-                  Enum_member_value.value_repr ~member_name cc.cc_enum_value
-                in
-                match Hashtbl.find seen value with
-                | None -> Hashtbl.set seen ~key:value ~data:(member_name, cc)
-                | Some (prev_name, prev_cc) ->
-                  (* Skip a clash between two members inherited from the *same*
-                     included enum: it is reported when that enum is checked, not
-                     again on every enum that uses it. *)
-                  let both_inherited_same_origin =
-                    (not (is_local cc))
-                    && (not (is_local prev_cc))
-                    && String.equal cc.cc_origin prev_cc.cc_origin
+          (* Single pass: flag duplicates as we go, and collect members whose
+             value can't be statically checked (reported at the enum that
+             defines them). *)
+          let uncheckable =
+            List.fold
+              (Tast_env.consts env cls)
+              ~init:[]
+              ~f:(fun uncheckable (member_name, cc) ->
+                if Enum_member_value.is_absent cc.cc_enum_value then
+                  if is_local cc && not cc.cc_synthesized then
+                    (cc.cc_pos, member_name) :: uncheckable
+                  else
+                    uncheckable
+                else begin
+                  let value =
+                    Enum_member_value.value_repr ~member_name cc.cc_enum_value
                   in
-                  if not both_inherited_same_origin then
-                    Tast_env.add_typing_error
-                      ~env
-                      Typing_error.(
-                        primary
-                        @@ Primary.Enum_duplicate_value
-                             {
-                               pos = enum_pos;
-                               value;
-                               member_name;
-                               member_pos = cc.cc_pos;
-                               prev_name;
-                               prev_pos = prev_cc.cc_pos;
-                             }))
+                  (match Hashtbl.find seen value with
+                  | None -> Hashtbl.set seen ~key:value ~data:(member_name, cc)
+                  | Some (prev_name, prev_cc) ->
+                    (* Skip a clash between two members inherited from the *same*
+                       included enum: it is reported when that enum is checked,
+                       not again on every enum that uses it. *)
+                    let both_inherited_same_origin =
+                      (not (is_local cc))
+                      && (not (is_local prev_cc))
+                      && String.equal cc.cc_origin prev_cc.cc_origin
+                    in
+                    if not both_inherited_same_origin then
+                      Tast_env.add_typing_error
+                        ~env
+                        Typing_error.(
+                          primary
+                          @@ Primary.Enum_duplicate_value
+                               {
+                                 pos = enum_pos;
+                                 value;
+                                 member_name;
+                                 member_pos = cc.cc_pos;
+                                 prev_name;
+                                 prev_pos = prev_cc.cc_pos;
+                               }));
+                  uncheckable
+                end)
+          in
+          (match List.rev uncheckable with
+          | [] -> ()
+          | members ->
+            Tast_env.add_typing_error
+              ~env
+              Typing_error.(
+                primary
+                @@ Primary.Enum_uncheckable_value { pos = enum_pos; members }))
   end

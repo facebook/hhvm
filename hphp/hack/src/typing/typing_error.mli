@@ -922,6 +922,11 @@ module Primary : sig
         prev_name: string;
         prev_pos: Pos_or_decl.t;
       }
+    | Enum_uncheckable_value of {
+        pos: Pos.t;  (** the enum definition *)
+        members: (Pos_or_decl.t * string) list;
+            (** members whose value can't be statically checked for duplicates *)
+      }
     | Reified_function_reference of Pos.t
     | Reinheriting_classish_const of {
         pos: Pos.t;

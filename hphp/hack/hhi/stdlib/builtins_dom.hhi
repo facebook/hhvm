@@ -207,6 +207,15 @@ class DOMDocument extends DOMNode {
     string $qualifiedname,
     HH\FIXME\MISSING_PARAM_TYPE $value = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createElementTyped(
+    string $name,
+    ?string $value = null,
+  ): DOMElement;
+  public function createElementNSTyped(
+    string $namespaceuri,
+    string $qualifiedname,
+    ?string $value = null,
+  ): DOMElement;
   public function createEntityReference(
     string $name,
   ): HH\FIXME\MISSING_RETURN_TYPE;

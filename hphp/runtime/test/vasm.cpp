@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -38,6 +39,8 @@
 #include <xmmintrin.h>
 #endif
 
+#include <optional>
+
 #include <gtest/gtest.h>
 
 namespace HPHP { namespace jit {
@@ -47,38 +50,95 @@ constexpr size_t kDefaultBlockSize = 4096;
 constexpr size_t kDataSize = 100;
 
 template<typename Lcodegen, typename Ltest>
-void test_vasm(size_t blockSize,
-               Lcodegen lcodegen,
-               Ltest ltest,
-               bool forceFarLiteral = false) {
-  auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
+void test_vasm_areas(size_t mainSize,
+                     size_t coldSize,
+                     Lcodegen lcodegen,
+                     Ltest ltest,
+                     bool forceFarLiteral,
+                     TCA logicalBase) {
+  auto const mappingSize = mainSize + coldSize + kDataSize;
+  auto code = static_cast<uint8_t*>(mmap(nullptr, mappingSize,
                                          PROT_READ | PROT_WRITE | PROT_EXEC,
                                          MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
-  SCOPE_EXIT { munmap(code, blockSize); };
+  SCOPE_EXIT { munmap(code, mappingSize); };
 
-  auto const codeSize = blockSize - kDataSize;
-  // None of these tests should use much data.
-  auto data_buffer = code + codeSize;
+  auto const coldBuffer = code + mainSize;
+  auto const dataBuffer = coldBuffer + coldSize;
 
   CodeBlock main;
-  main.init(code, codeSize, "test");
+  CodeBlock cold;
   DataBlock data;
-  data.init(data_buffer, kDataSize, "data");
+  if (logicalBase) {
+    main.init(logicalBase, code, mainSize, "test");
+    if (coldSize) {
+      cold.init(
+        logicalBase + mainSize,
+        coldBuffer,
+        coldSize,
+        "cold"
+      );
+    }
+    data.init(
+      logicalBase + mainSize + coldSize,
+      dataBuffer,
+      kDataSize,
+      "data"
+    );
+  } else {
+    main.init(code, mainSize, "test");
+    if (coldSize) cold.init(coldBuffer, coldSize, "cold");
+    data.init(dataBuffer, kDataSize, "data");
+  }
 
   Vunit unit;
   if (forceFarLiteral) unit.enableFarLiteral();
   Vasm vasm{unit};
-  Vtext text { main, data };
 
   auto& v = vasm.main();
   unit.entry = v;
 
-  lcodegen(v);
+  lcodegen(unit, v);
 
   CGMeta meta;
-  emit(unit, text, meta, nullptr);
+  std::optional<Vtext> text;
+  if (coldSize) {
+    text.emplace(main, cold, data);
+  } else {
+    text.emplace(main, data);
+  }
+  emit(unit, *text, meta, nullptr);
 
   ltest(code, main, meta);
+}
+
+template<typename Lcodegen, typename Ltest>
+void test_vasm(size_t blockSize,
+               Lcodegen lcodegen,
+               Ltest ltest,
+               bool forceFarLiteral = false,
+               TCA logicalBase = nullptr) {
+  test_vasm_areas(
+    blockSize - kDataSize,
+    0,
+    [&] (Vunit&, Vout& v) { lcodegen(v); },
+    ltest,
+    forceFarLiteral,
+    logicalBase
+  );
+}
+
+template<typename Lcodegen, typename Ltest>
+void test_cross_area_emission(Lcodegen lcodegen, Ltest ltest) {
+  test_vasm_areas(
+    kDefaultBlockSize,
+    kDefaultBlockSize,
+    lcodegen,
+    [&] (uint8_t*, CodeBlock& main, CGMeta& meta) {
+      ltest(main, meta);
+    },
+    false,
+    reinterpret_cast<TCA>(0x10000000)
+  );
 }
 
 template<typename T, typename Lcodegen, typename Ltest>
@@ -94,12 +154,13 @@ template<typename Lcodegen, typename Ltest>
 void test_emission(size_t blockSize,
                    Lcodegen lcodegen,
                    Ltest ltest,
-                   bool forceFarLiteral = false) {
+                   bool forceFarLiteral = false,
+                   TCA logicalBase = nullptr) {
   test_vasm(blockSize, lcodegen, [&] (uint8_t*,
                                       CodeBlock& main,
                                       const CGMeta& meta) {
     ltest(main, meta);
-  }, forceFarLiteral);
+  }, forceFarLiteral, logicalBase);
 }
 }
 
@@ -208,6 +269,91 @@ TEST(Vasm, ArmMcprepSeedsTaggedMovqLiteral) {
     auto const literal =
       *reinterpret_cast<uint64_t*>(load.literalAddress());
     EXPECT_EQ(literal, (reinterpret_cast<uint64_t>(main.base()) << 1) | 1);
+  });
+}
+
+TEST(Vasm, ArmTestBranchEmissionMarksRecognizableTst) {
+  test_emission(4096, [] (Vout& v) {
+    auto taken = v.makeBlock();
+    auto next = v.makeBlock();
+    v << tbzq{Immed{63}, Vreg64{Reg64{0}}, {taken, next}};
+    taken << ret{};
+    next << ret{};
+  }, [] (CodeBlock& main, const CGMeta& meta) {
+    auto const start = vixl::Instruction::Cast(
+      main.toDestAddress(main.base())
+    );
+    EXPECT_TRUE(meta.testBranches.contains(main.base()));
+
+    arm::BitTestDetails details;
+    ASSERT_TRUE(arm::getBitTestDetails(start, details));
+    EXPECT_EQ(details.reg.code(), vixl::x0.code());
+    EXPECT_EQ(details.reg.size(), vixl::x0.size());
+    EXPECT_EQ(details.bit, 63);
+
+    EXPECT_TRUE(start->GetNextInstruction()->IsCondBranchImm());
+  }, false, reinterpret_cast<TCA>(0x10000000));
+}
+
+TEST(Vasm, ArmTestBranchIdenticalTargetsOmitsTest) {
+  test_emission(4096, [] (Vout& v) {
+    auto target = v.makeBlock();
+    v << tbzq{Immed{42}, Vreg64{Reg64{0}}, {target, target}};
+    target << ret{};
+  }, [] (CodeBlock& main, const CGMeta& meta) {
+    EXPECT_TRUE(meta.testBranches.empty());
+
+    arm::BitTestDetails details;
+    EXPECT_FALSE(arm::getBitTestDetails(
+      vixl::Instruction::Cast(main.toDestAddress(main.base())), details
+    ));
+  });
+}
+
+TEST(Vasm, ArmCrossAreaTestBranchRelocatesToVeneer) {
+  test_cross_area_emission([] (Vunit& unit, Vout& v) {
+    auto next = v.makeBlock();
+    auto const takenLabel = unit.makeBlock(AreaIndex::Cold, 1);
+    Vout taken{unit, takenLabel};
+    v << tbzq{Immed{63}, Vreg64{Reg64{0}}, {next, takenLabel}};
+    next << ret{};
+    taken << ret{};
+  }, [] (CodeBlock& main, CGMeta& meta) {
+    auto const start = main.base();
+    auto const end = main.frontier();
+
+    auto const emitted = vixl::Instruction::Cast(main.toDestAddress(start));
+    arm::BitTestDetails test;
+    ASSERT_TRUE(arm::getBitTestDetails(emitted, test));
+    auto const branch = emitted->GetNextInstruction();
+    ASSERT_TRUE(branch->IsCondBranchImm());
+    auto const branchFrom = vixl::Instruction::Cast(
+      start + vixl::kInstructionSize
+    );
+    auto const veneer = reinterpret_cast<TCA>(
+      branch->GetImmPCOffsetTarget(branchFrom)
+    );
+    ASSERT_TRUE(main.contains(veneer));
+    EXPECT_TRUE(meta.veneerAddrs.contains(veneer));
+
+    RelocationInfo rel;
+    auto area = AreaIndex::Main;
+    relocate(rel, main, start, end, main, meta, area);
+
+    auto const relocatedAddr = rel.adjustedAddressAfter(start);
+    auto const relocatedVeneer = rel.adjustedAddressAfter(veneer);
+    ASSERT_NE(relocatedAddr, nullptr);
+    ASSERT_NE(relocatedVeneer, nullptr);
+    auto const relocated = vixl::Instruction::Cast(
+      main.toDestAddress(relocatedAddr)
+    );
+    ASSERT_TRUE(relocated->IsTestBranch());
+    auto const details = arm::getTestAndBranchDetails(relocated);
+    EXPECT_FALSE(details.isTbnz);
+    EXPECT_EQ(
+      relocated->ImmPCOffsetTarget(),
+      vixl::Instruction::CastConst(main.toDestAddress(relocatedVeneer))
+    );
   });
 }
 

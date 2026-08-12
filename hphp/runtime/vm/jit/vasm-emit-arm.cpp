@@ -268,6 +268,8 @@ struct Vgen {
 
   void emitCompareAndBranch(vixl::Register r, const Vlabel targets[2],
                             bool branchOnZero);
+  void emitTestAndBranch(vixl::Register r, unsigned bit,
+                         const Vlabel targets[2], bool branchOnZero);
 
   // intrinsics
   void emit(const copy& i);
@@ -362,6 +364,10 @@ struct Vgen {
   void emit(const cbnzl& i);
   void emit(const cbzq& i);
   void emit(const cbnzq& i);
+  void emit(const tbzl& i);
+  void emit(const tbnzl& i);
+  void emit(const tbzq& i);
+  void emit(const tbnzq& i);
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -1579,6 +1585,42 @@ void Vgen::emit(const cbzq& i) {
 
 void Vgen::emit(const cbnzq& i) {
   emitCompareAndBranch(X(i.s), i.targets, false);
+}
+
+void Vgen::emitTestAndBranch(vixl::Register r,
+                             unsigned bit,
+                             const Vlabel targets[2],
+                             bool branchOnZero) {
+  if (targets[1] == targets[0]) return emit(jmp{targets[0]});
+  assertx(bit < static_cast<unsigned>(r.GetSizeInBits()));
+
+  // Keep the flag-setting form until relocation knows the final layout.
+  // Relocation can shrink it to TBZ/TBNZ when the imm14 target fits, while
+  // jcc's existing far-branch path handles longer targets without padding.
+  env.meta.testBranches.insert(a->frontier());
+  a->Tst(r, uint64_t{1} << bit);
+  emit(jcc{
+    branchOnZero ? CC_E : CC_NE,
+    VregSF{InvalidReg},
+    {targets[0], targets[1]},
+    StringTag{}
+  });
+}
+
+void Vgen::emit(const tbzl& i) {
+  emitTestAndBranch(W(i.s), i.bit.l(), i.targets, true);
+}
+
+void Vgen::emit(const tbnzl& i) {
+  emitTestAndBranch(W(i.s), i.bit.l(), i.targets, false);
+}
+
+void Vgen::emit(const tbzq& i) {
+  emitTestAndBranch(X(i.s), i.bit.l(), i.targets, true);
+}
+
+void Vgen::emit(const tbnzq& i) {
+  emitTestAndBranch(X(i.s), i.bit.l(), i.targets, false);
 }
 
 void Vgen::emit(const jcc& i) {

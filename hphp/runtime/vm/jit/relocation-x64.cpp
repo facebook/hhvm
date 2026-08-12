@@ -44,7 +44,6 @@ size_t relocateImpl(RelocationInfo& rel,
                     TCA start, TCA end,
                     DataBlock& srcBlock,
                     CGMeta& fixups,
-                    TCA* exitAddr,
                     WideJmpSet& wideJmps,
                     AreaIndex codeArea) {
   TCA src = start;
@@ -53,7 +52,6 @@ size_t relocateImpl(RelocationInfo& rel,
   bool internalRefsNeedUpdating = false;
   TCA destStart = destBlock.frontier();
   size_t asm_count{0};
-  TCA jmpDest = nullptr;
   TCA keepNopLow = nullptr;
   TCA keepNopHigh = nullptr;
   try {
@@ -134,14 +132,10 @@ size_t relocateImpl(RelocationInfo& rel,
 
       bool preserveAlignment = keepNopLow && keepNopHigh &&
         keepNopLow <= src && keepNopHigh > src;
-      TCA target = nullptr;
       TCA dest = destBlock.frontier();
       destBlock.bytes(di.size(), srcBlock.toDestAddress(src));
       DecodedInstruction d2(destBlock.toDestAddress(dest), dest);
       if (di.hasPicOffset()) {
-        if (di.isBranch(DecodedInstruction::Unconditional)) {
-          target = di.picAddress();
-        }
         /*
          * Rip-relative offsets that point outside the range
          * being moved need to be adjusted so they continue
@@ -214,7 +208,6 @@ size_t relocateImpl(RelocationInfo& rel,
       } else {
         dest += d2.size();
       }
-      jmpDest = target;
       assertx(dest <= destBlock.frontier());
       destBlock.setFrontier(dest);
       src += di.size();
@@ -222,10 +215,6 @@ size_t relocateImpl(RelocationInfo& rel,
         keepNopLow = keepNopHigh = nullptr;
       }
     } // while (src != end)
-
-    if (exitAddr) {
-      *exitAddr = jmpDest;
-    }
 
     rel.recordRange(start, end, destStart, destBlock.frontier());
 
@@ -377,13 +366,12 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 DataBlock& srcBlock,
                 CGMeta& fixups,
-                TCA* exitAddr,
                 AreaIndex codeArea) {
   WideJmpSet wideJmps;
   while (true) {
     try {
       return relocateImpl(rel, destBlock, start, end, srcBlock,
-                          fixups, exitAddr, wideJmps, codeArea);
+                          fixups, wideJmps, codeArea);
     } catch (JmpOutOfRange&) {
     }
   }

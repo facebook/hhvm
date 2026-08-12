@@ -130,6 +130,12 @@ struct CGMeta {
   std::set<TCA> addressImmediates;
 
   /*
+   * Single-bit TST+B.cond pairs whose flags have no other uses. Relocation may
+   * shrink these to TBZ/TBNZ when the final target is in range.
+   */
+  std::set<TCA> testBranches;
+
+  /*
    * Certain addresses are fallthrough to the next vunit.
    * We tag such an address so we can patch a jump over any inserted literal
    * pools/veneers.  This metadata is kept around so the relocator can properly

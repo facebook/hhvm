@@ -425,6 +425,10 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::cbnzl:
     case Vinstr::cbzq:
     case Vinstr::cbnzq:
+    case Vinstr::tbzl:
+    case Vinstr::tbnzl:
+    case Vinstr::tbzq:
+    case Vinstr::tbnzq:
     case Vinstr::conjure:
     case Vinstr::contenter:
     case Vinstr::cqo:

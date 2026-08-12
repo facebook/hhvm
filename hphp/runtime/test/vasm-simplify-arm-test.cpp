@@ -410,12 +410,23 @@ void testArmShiftedBitTestFromShrqi() {
   EXPECT_EQ(code[2].testqi64_.sf, testSf);
 }
 
-template<Vinstr::Opcode testOp>
-void checkArmShrqiTestlFold(const char* name,
-                            int32_t shift,
-                            uint32_t mask,
-                            bool maskFirst,
-                            bool addSecondFlagUse = false) {
+struct ShrqiTestlFold {
+  const Vunit& unit;
+  Vreg64 src;
+  Vreg testSf;
+  Vlabel taken;
+  Vlabel next;
+};
+
+// Emits `shrqi; testl; [setcc;] jcc CC_E`, runs the simplifier, and hands the
+// simplified entry block to `check`.
+template<class Check>
+void runArmShrqiTestlFold(const char* name,
+                          int32_t shift,
+                          uint32_t mask,
+                          bool maskFirst,
+                          bool addSecondFlagUse,
+                          Check check) {
   SCOPED_TRACE(name);
 
   Vunit unit;
@@ -451,24 +462,103 @@ void checkArmShrqiTestlFold(const char* name,
   annotateSFUses(unit);
   simplify(unit);
 
-  auto const& code = unit.blocks[unit.entry].code;
-  ASSERT_EQ(code.size(), addSecondFlagUse ? 3 : 2);
-  ASSERT_EQ(code[0].op, testOp) << stripWhitespace(show(unit));
-  auto const& test = code[0].template get<testOp>();
-  auto const constIt = unit.regToConst.find(test.s0);
-  ASSERT_NE(constIt, unit.regToConst.end());
-  EXPECT_EQ(constIt->second.val, uint64_t{mask} << shift);
-  EXPECT_EQ(Vreg{test.s1}, Vreg{src});
-  EXPECT_EQ(test.sf, testSf);
+  check(ShrqiTestlFold{unit, src, testSf, taken, next},
+        unit.blocks[unit.entry].code);
+}
 
-  if (addSecondFlagUse) {
-    ASSERT_EQ(code[1].op, Vinstr::setcc);
-    EXPECT_EQ(code[1].setcc_.cc, CC_NE);
-    EXPECT_EQ(code[1].setcc_.sf, testSf);
-  }
-  ASSERT_EQ(code.back().op, Vinstr::jcc);
-  EXPECT_EQ(code.back().jcc_.cc, CC_E);
-  EXPECT_EQ(code.back().jcc_.sf, testSf);
+// Covers the shrqi+testl fold stopping at a test, which happens when the
+// folded mask is not a single bit or its flags have a non-branch consumer.
+template<Vinstr::Opcode testOp>
+void checkArmShrqiTestlFold(const char* name,
+                            int32_t shift,
+                            uint32_t mask,
+                            bool maskFirst,
+                            bool addSecondFlagUse = false) {
+  runArmShrqiTestlFold(
+    name, shift, mask, maskFirst, addSecondFlagUse,
+    [&] (const ShrqiTestlFold& f, auto const& code) {
+      ASSERT_EQ(code.size(), addSecondFlagUse ? 3 : 2);
+      ASSERT_EQ(code[0].op, testOp) << stripWhitespace(show(f.unit));
+      auto const& test = code[0].template get<testOp>();
+      auto const constIt = f.unit.regToConst.find(test.s0);
+      ASSERT_NE(constIt, f.unit.regToConst.end());
+      EXPECT_EQ(constIt->second.val, uint64_t{mask} << shift);
+      EXPECT_EQ(Vreg{test.s1}, Vreg{f.src});
+      EXPECT_EQ(test.sf, f.testSf);
+
+      if (addSecondFlagUse) {
+        ASSERT_EQ(code[1].op, Vinstr::setcc);
+        EXPECT_EQ(code[1].setcc_.cc, CC_NE);
+        EXPECT_EQ(code[1].setcc_.sf, f.testSf);
+      }
+      ASSERT_EQ(code.back().op, Vinstr::jcc);
+      EXPECT_EQ(code.back().jcc_.cc, CC_E);
+      EXPECT_EQ(code.back().jcc_.sf, f.testSf);
+    });
+}
+
+// Covers the shrqi+testl fold composing with the test+jcc fold: when the folded
+// mask leaves a single bit, the resulting test and its branch collapse further
+// into a tbz against that bit, leaving no test behind.
+void checkArmShrqiTestlFoldsToTbz(const char* name,
+                                  int32_t shift,
+                                  uint32_t mask,
+                                  int32_t expectedBit) {
+  runArmShrqiTestlFold(
+    name, shift, mask, true, false,
+    [&] (const ShrqiTestlFold& f, auto const& code) {
+      ASSERT_EQ(code.size(), 1) << stripWhitespace(show(f.unit));
+      ASSERT_EQ(code[0].op, Vinstr::tbzq);
+      EXPECT_EQ(code[0].tbzq_.bit.l(), expectedBit);
+      EXPECT_EQ(Vreg{code[0].tbzq_.s}, Vreg{f.src});
+      EXPECT_EQ(code[0].tbzq_.targets[0], f.taken);
+      EXPECT_EQ(code[0].tbzq_.targets[1], f.next);
+    });
+}
+
+// The shifted-bit-test rewrite (shr+xor+test -> xor+test on the unshifted
+// source) and the test+jcc fold compose: the rewritten testqi64 must still
+// collapse into a tbz against the pre-shift bit.
+void testArmShiftedBitTestFoldsBeforeJcc() {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{1}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{1}, xored, testSf, Vflags{}};
+  v << jcc{CC_E, testSf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::shrqi);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi64);
+  EXPECT_EQ(static_cast<uint64_t>(code[1].xorqi64_.s0.q()), 0x20);
+  EXPECT_EQ(code[1].xorqi64_.s1, src);
+
+  ASSERT_EQ(code[2].op, Vinstr::tbzq);
+  EXPECT_EQ(code[2].tbzq_.bit.l(), 5);
+  EXPECT_EQ(code[2].tbzq_.s, xored);
+  EXPECT_EQ(code[2].tbzq_.targets[0], taken);
+  EXPECT_EQ(code[2].tbzq_.targets[1], next);
 }
 
 void testArmShiftedBitTestFromShrqiWithoutXor() {
@@ -492,11 +582,13 @@ void testArmShrqiTestlFoldsEncodableMultiBitMasks() {
   checkArmShrqiTestlFold<Vinstr::testq>(
     "two contiguous high bits", 32, uint32_t{0b11} << 30, true
   );
-  checkArmShrqiTestlFold<Vinstr::testq>(
+  // Mask bit 31 would test bit 71 of the source, which cannot be set, so the
+  // shift drops it. That leaves the single bit 40, which folds on into a tbz.
+  checkArmShrqiTestlFoldsToTbz(
     "shift above 32 drops mask bits beyond the source width",
     40,
     (uint32_t{1} << 31) | 1,
-    true
+    40
   );
 }
 
@@ -733,11 +825,9 @@ void testArmShiftedBitTestRejectsPhysSourceClobber() {
   EXPECT_EQ(code[3].testqi_.sf, testSf);
 }
 
-void testArmShiftedBitTestZeroExtendsBit31Mask() {
-  // Regression test: testqi/xorqi take Immed (int32_t). Without zero-extension,
-  // a mask with bit 31 set sign-extends to fill the upper 32 bits, which
-  // either blocks the fold (high-bits guard trips) or produces a mask that
-  // covers far more bits than intended.
+void testArmShiftedBitTestRejectsSignExtendedMask() {
+  // testqi emits its int32_t immediate sign-extended to 64 bits. A negative
+  // immediate is therefore not a single-bit test and cannot be shifted.
   Vunit unit;
   unit.entry = unit.makeBlock(AreaIndex::Main, 1);
   Vout v(unit, unit.entry);
@@ -749,8 +839,6 @@ void testArmShiftedBitTestZeroExtendsBit31Mask() {
   auto const xorSf = v.makeReg();
   auto const testSf = v.makeReg();
 
-  // shr by 1; xor with bit 31; test bit 31. After folding, bit 31 of the
-  // shifted value corresponds to bit 32 of src.
   v << shrqi{Immed{1}, src, shifted, shiftSf, Vflags{}};
   v << xorqi{Immed{int32_t(0x80000000)}, shifted, xored, xorSf, Vflags{}};
   v << testqi{Immed{int32_t(0x80000000)}, xored, testSf, Vflags{}};
@@ -761,22 +849,22 @@ void testArmShiftedBitTestZeroExtendsBit31Mask() {
   ASSERT_EQ(code.size(), 3);
   ASSERT_EQ(code[0].op, Vinstr::shrqi);
 
-  ASSERT_EQ(code[1].op, Vinstr::xorqi64);
+  ASSERT_EQ(code[1].op, Vinstr::xorqi);
   EXPECT_EQ(
-    static_cast<uint64_t>(code[1].xorqi64_.s0.q()),
-    0x100000000ull
+    static_cast<uint64_t>(code[1].xorqi_.s0.q()),
+    0xffffffff80000000ull
   );
-  EXPECT_EQ(code[1].xorqi64_.s1, src);
-  EXPECT_EQ(code[1].xorqi64_.d, xored);
-  EXPECT_EQ(code[1].xorqi64_.sf, xorSf);
+  EXPECT_EQ(code[1].xorqi_.s1, shifted);
+  EXPECT_EQ(code[1].xorqi_.d, xored);
+  EXPECT_EQ(code[1].xorqi_.sf, xorSf);
 
-  ASSERT_EQ(code[2].op, Vinstr::testqi64);
+  ASSERT_EQ(code[2].op, Vinstr::testqi);
   EXPECT_EQ(
-    static_cast<uint64_t>(code[2].testqi64_.s0.q()),
-    0x100000000ull
+    static_cast<uint64_t>(code[2].testqi_.s0.q()),
+    0xffffffff80000000ull
   );
-  EXPECT_EQ(code[2].testqi64_.s1, xored);
-  EXPECT_EQ(code[2].testqi64_.sf, testSf);
+  EXPECT_EQ(code[2].testqi_.s1, xored);
+  EXPECT_EQ(code[2].testqi_.sf, testSf);
 }
 
 void testArmShiftedBitTestRejectsNonZFlagUse() {
@@ -1222,6 +1310,36 @@ void runTestJccFold(Vunit& unit, ConditionCode cc, EmitTest emitTest,
   simplify(unit);
 }
 
+template<class Branch, class EmitTest>
+void expectTestBranchFold(const char* name,
+                          Vinstr::Opcode opcode,
+                          Branch Vinstr::* branchMember,
+                          ConditionCode cc,
+                          int32_t bit,
+                          Vreg src,
+                          EmitTest emitTest) {
+  SCOPED_TRACE(name);
+
+  Vunit unit;
+  Vlabel taken, next;
+  runTestJccFold(
+    unit,
+    cc,
+    [&] (Vout& v, Vreg sf) { emitTest(unit, v, sf); },
+    taken,
+    next
+  );
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, opcode);
+  auto const& branch = code[0].*branchMember;
+  EXPECT_EQ(branch.bit.l(), bit);
+  EXPECT_EQ(Vreg{branch.s}, src);
+  EXPECT_EQ(branch.targets[0], taken);
+  EXPECT_EQ(branch.targets[1], next);
+}
+
 void testArmFoldTestqEqToCbzq() {
   Vunit unit;
   Vlabel taken, next;
@@ -1304,8 +1422,148 @@ void testArmFoldTestbNeToCbnzl() {
   EXPECT_EQ(code[0].cbnzl_.targets[1], next);
 }
 
-// A non-self-compare (s0 != s1) tests two distinct registers, which cbz/cbnz
-// cannot express; it must be left as test + jcc.
+void testArmFoldTestwEqToCbzl() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg16{Vreg{Reg64{0}}};
+  runTestJccFold(unit, CC_E,
+                 [&] (Vout& v, Vreg sf) { v << testw{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbzl);
+  EXPECT_EQ(Vreg{code[0].cbzl_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbzl_.targets[0], taken);
+  EXPECT_EQ(code[0].cbzl_.targets[1], next);
+}
+
+void testArmFoldSingleBitTestliNeToTbnzl() {
+  auto const r = Vreg32{Vreg{Reg64{0}}};
+  expectTestBranchFold(
+    "testli NE",
+    Vinstr::tbnzl,
+    &Vinstr::tbnzl_,
+    CC_NE,
+    7,
+    r,
+    [&] (Vunit&, Vout& v, Vreg sf) {
+      v << testli{Immed{0x80}, r, sf, Vflags{}};
+    }
+  );
+}
+
+void testArmFoldSingleHighBitTestqi64EqToTbzq() {
+  auto const r = Vreg64{Reg64{0}};
+  expectTestBranchFold(
+    "testqi64 E",
+    Vinstr::tbzq,
+    &Vinstr::tbzq_,
+    CC_E,
+    63,
+    r,
+    [&] (Vunit&, Vout& v, Vreg sf) {
+      v << testqi64{
+        Immed64{static_cast<int64_t>(uint64_t{1} << 63)},
+        r,
+        sf,
+        Vflags{}
+      };
+    }
+  );
+}
+
+// testq's mask can arrive in a constant register rather than an immediate;
+// get_const_int must recover it so the single-bit fold still applies.
+void testArmFoldSingleHighBitTestqEqToTbzq() {
+  auto const r = Vreg64{Reg64{0}};
+  expectTestBranchFold(
+    "testq constant E",
+    Vinstr::tbzq,
+    &Vinstr::tbzq_,
+    CC_E,
+    63,
+    r,
+    [&] (Vunit& unit, Vout& v, Vreg sf) {
+      auto const mask = Vreg64{unit.makeConst(uint64_t{1} << 63)};
+      v << testq{mask, r, sf, Vflags{}};
+    }
+  );
+}
+
+void testArmFoldSelfTestSignCCToTestBranches() {
+  auto const r32 = Vreg32{Vreg{Reg64{0}}};
+  auto const r64 = Vreg64{Reg64{0}};
+
+  // Vasm rejects sign-flag consumers of testb/testw because their x64 and
+  // arm64 sign bits differ. The portable long and quad forms fold here.
+  expectTestBranchFold(
+    "testl S", Vinstr::tbnzl, &Vinstr::tbnzl_, CC_S, 31, r32,
+    [=] (Vunit&, Vout& v, Vreg sf) { v << testl{r32, r32, sf, Vflags{}}; }
+  );
+  expectTestBranchFold(
+    "testl NS", Vinstr::tbzl, &Vinstr::tbzl_, CC_NS, 31, r32,
+    [=] (Vunit&, Vout& v, Vreg sf) { v << testl{r32, r32, sf, Vflags{}}; }
+  );
+  expectTestBranchFold(
+    "testq S", Vinstr::tbnzq, &Vinstr::tbnzq_, CC_S, 63, r64,
+    [=] (Vunit&, Vout& v, Vreg sf) { v << testq{r64, r64, sf, Vflags{}}; }
+  );
+  expectTestBranchFold(
+    "testq NS", Vinstr::tbzq, &Vinstr::tbzq_, CC_NS, 63, r64,
+    [=] (Vunit&, Vout& v, Vreg sf) { v << testq{r64, r64, sf, Vflags{}}; }
+  );
+}
+
+// testqi emits its int32_t immediate sign-extended to 64 bits, so a mask with
+// bit 31 set tests bits 31-63, not a single bit. It must not fold to a tbz.
+void testArmFoldTestqiRejectsSignExtendedMask() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg64{Reg64{0}};
+  runTestJccFold(
+    unit,
+    CC_E,
+    [&] (Vout& v, Vreg sf) {
+      v << testqi{
+        Immed{static_cast<int32_t>(uint32_t{1} << 31)},
+        r,
+        sf,
+        Vflags{}
+      };
+    },
+    taken,
+    next
+  );
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 2) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::testqi);
+  EXPECT_EQ(code[1].op, Vinstr::jcc);
+}
+
+void testArmFoldTestBitJccRejectsMultiBitMask() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg32{Vreg{Reg64{0}}};
+  runTestJccFold(
+    unit,
+    CC_E,
+    [&] (Vout& v, Vreg sf) {
+      v << testli{Immed{0x3}, r, sf, Vflags{}};
+    },
+    taken,
+    next
+  );
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 2) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::testli);
+  EXPECT_EQ(code[1].op, Vinstr::jcc);
+}
+
+// A non-self-compare of two non-constant registers cannot be expressed by
+// cbz/cbnz or tbz/tbnz, so it must be left as test + jcc.
 void testArmFoldTestJccRejectsNonSelfCompare() {
   Vunit unit;
   Vlabel taken, next;
@@ -1321,13 +1579,12 @@ void testArmFoldTestJccRejectsNonSelfCompare() {
   EXPECT_EQ(code[1].op, Vinstr::jcc);
 }
 
-// cbz/cbnz only implement branch-on-(non)zero, so a branch on any other
-// condition (here CC_S) must not be folded.
+// Compare/test branches cannot express signed-less, so it must not be folded.
 void testArmFoldTestJccRejectsNonEqualCC() {
   Vunit unit;
   Vlabel taken, next;
   auto const r = Vreg64{Reg64{0}};
-  runTestJccFold(unit, CC_S,
+  runTestJccFold(unit, CC_L,
                  [&] (Vout& v, Vreg sf) { v << testq{r, r, sf, Vflags{}}; },
                  taken, next);
 
@@ -1431,6 +1688,10 @@ TEST(Vasm, ArmShiftedBitTestFromShrqi) {
   testArmShiftedBitTestFromShrqi();
 }
 
+TEST(Vasm, ArmShiftedBitTestFoldsBeforeJcc) {
+  testArmShiftedBitTestFoldsBeforeJcc();
+}
+
 TEST(Vasm, ArmShiftedBitTestFromShrqiWithoutXor) {
   testArmShiftedBitTestFromShrqiWithoutXor();
 }
@@ -1475,8 +1736,8 @@ TEST(Vasm, ArmShiftedBitTestRejectsPhysSourceClobber) {
   testArmShiftedBitTestRejectsPhysSourceClobber();
 }
 
-TEST(Vasm, ArmShiftedBitTestZeroExtendsBit31Mask) {
-  testArmShiftedBitTestZeroExtendsBit31Mask();
+TEST(Vasm, ArmShiftedBitTestRejectsSignExtendedMask) {
+  testArmShiftedBitTestRejectsSignExtendedMask();
 }
 
 TEST(Vasm, ArmShiftedBitTestRejectsNonZFlagUse) {
@@ -1521,6 +1782,34 @@ TEST(Vasm, ArmFoldTestbEqToCbzl) {
 
 TEST(Vasm, ArmFoldTestbNeToCbnzl) {
   testArmFoldTestbNeToCbnzl();
+}
+
+TEST(Vasm, ArmFoldTestwEqToCbzl) {
+  testArmFoldTestwEqToCbzl();
+}
+
+TEST(Vasm, ArmFoldSingleBitTestliNeToTbnzl) {
+  testArmFoldSingleBitTestliNeToTbnzl();
+}
+
+TEST(Vasm, ArmFoldSingleHighBitTestqi64EqToTbzq) {
+  testArmFoldSingleHighBitTestqi64EqToTbzq();
+}
+
+TEST(Vasm, ArmFoldSingleHighBitTestqEqToTbzq) {
+  testArmFoldSingleHighBitTestqEqToTbzq();
+}
+
+TEST(Vasm, ArmFoldSelfTestSignCCToTestBranches) {
+  testArmFoldSelfTestSignCCToTestBranches();
+}
+
+TEST(Vasm, ArmFoldTestqiRejectsSignExtendedMask) {
+  testArmFoldTestqiRejectsSignExtendedMask();
+}
+
+TEST(Vasm, ArmFoldTestBitJccRejectsMultiBitMask) {
+  testArmFoldTestBitJccRejectsMultiBitMask();
 }
 
 TEST(Vasm, ArmFoldTestJccRejectsNonSelfCompare) {

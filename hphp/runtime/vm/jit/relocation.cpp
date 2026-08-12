@@ -257,6 +257,9 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedAI.swap(meta.addressImmediates);
 
+  // These markers only guide the relocation that just completed.
+  meta.testBranches.clear();
+
   if (meta.fallthru) {
     if (TCA adjusted = rel.adjustedAddressAfter(*meta.fallthru)) {
       meta.fallthru = adjusted;
@@ -378,10 +381,9 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 CodeBlock& srcBlock,
                 CGMeta& fixups,
-                TCA* exitAddr,
                 AreaIndex codeArea) {
   return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, srcBlock,
-                          fixups, exitAddr, codeArea);
+                          fixups, codeArea);
 }
 
 //////////////////////////////////////////////////////////////////////

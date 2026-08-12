@@ -57,10 +57,10 @@ void relocateTranslation(
 
   asm_count += relocate(rel, main_in,
                         main.base(), main.frontier(), main,
-                        meta, nullptr, AreaIndex::Main);
+                        meta, AreaIndex::Main);
   asm_count += relocate(rel, cold_in,
                         cold.base(), cold.frontier(), cold,
-                        meta, nullptr, AreaIndex::Cold);
+                        meta, AreaIndex::Cold);
 
   TRACE(1, "asm %ld\n", asm_count);
 

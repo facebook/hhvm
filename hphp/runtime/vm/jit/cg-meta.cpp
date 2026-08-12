@@ -320,6 +320,7 @@ void CGMeta::clear() {
   veneers.clear();
   alignments.clear();
   addressImmediates.clear();
+  testBranches.clear();
   fallthru.reset();
   codePointers.clear();
   inProgressTailJumps.clear();
@@ -344,6 +345,7 @@ bool CGMeta::empty() const {
     veneers.empty() &&
     alignments.empty() &&
     addressImmediates.empty() &&
+    testBranches.empty() &&
     !fallthru.has_value() &&
     codePointers.empty() &&
     inProgressTailJumps.empty() &&

@@ -24,6 +24,6 @@ void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
-                TCA*, AreaIndex);
+                AreaIndex);
 
 }

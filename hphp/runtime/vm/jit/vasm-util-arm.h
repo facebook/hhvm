@@ -75,6 +75,32 @@ CompareAndBranchDetails getCompareAndBranchDetails(
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * A decoded single-bit register test.
+ */
+struct BitTestDetails {
+  vixl::aarch64::Register reg;
+  uint8_t bit;
+};
+bool getBitTestDetails(const vixl::aarch64::Instruction* test,
+                       BitTestDetails& out);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * A decoded ARM test-and-branch (tbz/tbnz). `reg` uses W for bits 0-31 and X
+ * for bits 32-63, matching the instruction encoding.
+ */
+struct TestAndBranchDetails {
+  vixl::aarch64::Register reg;
+  uint8_t bit;
+  bool isTbnz;
+};
+TestAndBranchDetails getTestAndBranchDetails(
+  const vixl::aarch64::Instruction* tb);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Represents a literal-pool load, either a single LDR (literal) ("near" form,
  * +/-1MB range) or an ADRP/LDR pair ("far" form, +/-4GB range). Encapsulates
  * the two-instruction-vs-one ambiguity so callers don't have to thread a

@@ -431,6 +431,10 @@ struct Vunit;
   O(cbnzl, Inone, U(s), Dn)\
   O(cbzq, Inone, U(s), Dn)\
   O(cbnzq, Inone, U(s), Dn)\
+  O(tbzl, I(bit), U(s), Dn)\
+  O(tbnzl, I(bit), U(s), Dn)\
+  O(tbzq, I(bit), U(s), Dn)\
+  O(tbnzq, I(bit), U(s), Dn)\
   /* */
 
 /*
@@ -1388,6 +1392,10 @@ struct cbzl { Vreg32 s; Vlabel targets[2]; };
 struct cbnzl { Vreg32 s; Vlabel targets[2]; };
 struct cbzq { Vreg64 s; Vlabel targets[2]; };
 struct cbnzq { Vreg64 s; Vlabel targets[2]; };
+struct tbzl { Immed bit; Vreg32 s; Vlabel targets[2]; };
+struct tbnzl { Immed bit; Vreg32 s; Vlabel targets[2]; };
+struct tbzq { Immed bit; Vreg64 s; Vlabel targets[2]; };
+struct tbnzq { Immed bit; Vreg64 s; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

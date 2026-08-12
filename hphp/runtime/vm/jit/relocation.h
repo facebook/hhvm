@@ -133,7 +133,6 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 DataBlock& srcBlock,
                 CGMeta& meta,
-                TCA* exitAddr,
                 AreaIndex codeArea);
 
 }

@@ -58,6 +58,27 @@ struct Veneer {
   TCA literal;
 };
 
+struct DecodedMovWideSequence {
+  uint64_t target;
+  int32_t reg;
+  const Instruction* next;
+};
+
+DecodedMovWideSequence decodeMovWideSequence(const Instruction* mov) {
+  assertx(mov->IsMovz());
+  auto const reg = mov->Rd();
+  auto target = static_cast<uint64_t>(mov->ImmMoveWide())
+                << (16 * mov->ShiftMoveWide());
+  mov = mov->GetNextInstruction();
+  while (mov->IsMovk()) {
+    assertx(mov->Rd() == reg);
+    target |= static_cast<uint64_t>(mov->ImmMoveWide())
+              << (16 * mov->ShiftMoveWide());
+    mov = mov->GetNextInstruction();
+  }
+  return {target, reg, mov};
+}
+
 template<class EmitBranch>
 Veneer emitDirectVeneer(MacroAssembler& a,
                         CodeBlock& main,
@@ -165,28 +186,19 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect !b.cc, movz/movk X and br X where with imm in X
   auto bcc = instr;
   EXPECT_TRUE(bcc->IsCondBranchImm());
   EXPECT_EQ(bcc->ConditionBranch(), InvertCondition(cond));
 
-  auto movz = bcc->GetNextInstruction();
-  EXPECT_TRUE(movz->IsMovz());
-  const auto rd = movz->Rd();
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), rd);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), bccOrig->ImmPCOffsetTarget());
+  auto const mov = decodeMovWideSequence(bcc->GetNextInstruction());
+  EXPECT_EQ(Instruction::Cast(mov.target), bccOrig->ImmPCOffsetTarget());
 
-  auto br = instr;
+  auto const br = mov.next;
   EXPECT_TRUE(br->IsUncondBranchReg());
-  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(br->Rn(), mov.reg);
   EXPECT_EQ(bcc->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
@@ -224,7 +236,7 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect cbnz, movz/movk X and br X where with imm in X
   auto cbnz = instr;
@@ -232,21 +244,12 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
   const auto rt = cbnz->Rt();
   EXPECT_EQ(cbzOrig->Rt(), rt);
 
-  auto movz = cbnz->GetNextInstruction();
-  EXPECT_TRUE(movz->IsMovz());
-  const auto rd = movz->Rd();
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), rd);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), cbzOrig->ImmPCOffsetTarget());
+  auto const mov = decodeMovWideSequence(cbnz->GetNextInstruction());
+  EXPECT_EQ(Instruction::Cast(mov.target), cbzOrig->ImmPCOffsetTarget());
 
-  auto br = instr;
+  auto const br = mov.next;
   EXPECT_TRUE(br->IsUncondBranchReg());
-  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(br->Rn(), mov.reg);
   EXPECT_EQ(cbnz->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
@@ -354,7 +357,7 @@ void checkFarCompareBranchVeneer(const Register& rt, bool is64, bool isCbnz) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // Head: inverted compare-branch of the same width and register as the
   // original compare-branch.
@@ -367,21 +370,12 @@ void checkFarCompareBranchVeneer(const Register& rt, bool is64, bool isCbnz) {
   EXPECT_EQ(cb->GetSixtyFourBits(), is64 ? 1 : 0);
   EXPECT_EQ(cb->Rt(), cbOrig->Rt());
 
-  auto movz = cb->GetNextInstruction();
-  EXPECT_TRUE(movz->IsMovz());
-  const auto rd = movz->Rd();
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), rd);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), cbOrig->ImmPCOffsetTarget());
+  auto const mov = decodeMovWideSequence(cb->GetNextInstruction());
+  EXPECT_EQ(Instruction::Cast(mov.target), cbOrig->ImmPCOffsetTarget());
 
-  auto br = instr;
+  auto const br = mov.next;
   EXPECT_TRUE(br->IsUncondBranchReg());
-  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(br->Rn(), mov.reg);
   EXPECT_EQ(cb->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
@@ -445,7 +439,7 @@ void checkOptimizeFarCompareBranchToDirect(const Register& rt,
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   ASSERT_TRUE(relocated->IsCompareBranch());
   EXPECT_EQ(relocated->Mask(CompareBranchMask),
@@ -505,7 +499,7 @@ void checkOptimizeFarCompareBranchToCompareBranchAndB(
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   ASSERT_TRUE(relocated->IsCompareBranch());
   EXPECT_EQ(
@@ -561,7 +555,7 @@ void checkOptimizeFarBccToBccAndB(Condition cond) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   ASSERT_TRUE(relocated->IsCondBranchImm());
   EXPECT_EQ(static_cast<Condition>(relocated->ConditionBranch()), cond);
@@ -615,18 +609,256 @@ TEST(Relocation, OptimizeFarBccToBccBWithForwardTarget) {
   checkOptimizeFarBccToBccAndB(lt);
 }
 
+void checkRelocateSingleBitTestFarJcc(vixl::Register reg,
+                                      uint8_t bit,
+                                      bool isTbnz,
+                                      bool smashable = false) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+  auto const start = main.frontier();
+  meta.testBranches.insert(start);
+
+  MacroAssembler a { main };
+  a.Tst(reg, uint64_t{1} << bit);
+  if (smashable) meta.smashableLocations.insert(main.frontier());
+  auto const farJump = emitFarBccSequence(
+    a,
+    main,
+    meta,
+    isTbnz ? eq : ne
+  );
+  a.brk(0);
+  auto const target = main.frontier();
+  a.brk(1);
+
+  for (auto i = 0; i < (1024 * 1024) / kInstructionSize + 1024; ++i) {
+    a.nop();
+  }
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, ai);
+
+  if (smashable) {
+    ASSERT_TRUE(relocated->IsLogicalImmediate());
+    EXPECT_EQ(relocated->ImmLogical(), uint64_t{1} << bit);
+
+    auto const branch = relocated->GetNextInstruction();
+    ASSERT_TRUE(branch->IsCondBranchImm());
+    EXPECT_EQ(
+      static_cast<Condition>(branch->ConditionBranch()),
+      isTbnz ? eq : ne
+    );
+    return;
+  }
+
+  ASSERT_TRUE(relocated->IsTestBranch());
+  auto const details = getTestAndBranchDetails(relocated);
+  EXPECT_EQ(details.bit, bit);
+  EXPECT_EQ(details.isTbnz, isTbnz);
+  EXPECT_EQ(details.reg.code(), reg.code());
+  EXPECT_EQ(details.reg.size(), bit < 32 ? kWRegSize : kXRegSize);
+  EXPECT_EQ(
+    relocated->ImmPCOffsetTarget(),
+    Instruction::CastConst(main.toDestAddress(rel.adjustedAddressAfter(target)))
+  );
+}
+
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbzqPreservesBit63) {
+  checkRelocateSingleBitTestFarJcc(x0, 63, false);
+}
+
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbnzq) {
+  checkRelocateSingleBitTestFarJcc(x0, 7, true);
+}
+
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbzlPreservesBit31) {
+  checkRelocateSingleBitTestFarJcc(w0, 31, false);
+}
+
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbnzl) {
+  checkRelocateSingleBitTestFarJcc(w0, 7, true);
+}
+
+TEST(Relocation, PreserveSmashableSingleBitTestFarJcc) {
+  checkRelocateSingleBitTestFarJcc(x0, 63, false, true);
+}
+
+template<class Check>
+void checkRelocateSingleBitTestNearJcc(size_t padding, Check check) {
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(128 * 1024, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+  auto const start = main.frontier();
+  meta.testBranches.insert(start);
+
+  MacroAssembler a { main };
+  vixl::Label targetLabel;
+  a.Tst(x0, uint64_t{1} << 63);
+  a.b(&targetLabel, eq);
+  for (size_t i = 0; i < padding; ++i) a.brk(0);
+  a.bind(&targetLabel);
+  auto const target = main.frontier();
+  a.brk(1);
+  auto const end = main.frontier();
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, ai);
+
+  auto const adjustedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(adjustedTarget, nullptr);
+  check(
+    relocated,
+    Instruction::CastConst(main.toDestAddress(adjustedTarget))
+  );
+  adjustMetaDataForRelocation(rel, nullptr, meta);
+  EXPECT_TRUE(meta.testBranches.empty());
+}
+
+void checkRelocateSingleBitTestNearJccToTbzq(size_t padding) {
+  checkRelocateSingleBitTestNearJcc(
+    padding,
+    [] (const Instruction* relocated, const Instruction* target) {
+      ASSERT_TRUE(relocated->IsTestBranch());
+      auto const details = getTestAndBranchDetails(relocated);
+      EXPECT_FALSE(details.isTbnz);
+      EXPECT_EQ(details.bit, 63);
+      EXPECT_EQ(details.reg.code(), x0.code());
+      EXPECT_EQ(relocated->ImmPCOffsetTarget(), target);
+    }
+  );
+}
+
+// The padding follows the TST and B.cond instructions.
+constexpr size_t kNearJccTargetPrefix = 2;
+constexpr size_t kMaxTestBranchForwardOffset = (1 << 13) - 1;
+
+TEST(Relocation, OptimizeSingleBitTestNearJccToTbzqClearsMetadata) {
+  checkRelocateSingleBitTestNearJccToTbzq(1);
+}
+
+TEST(Relocation, OptimizeSingleBitTestNearJccAtRangeLimit) {
+  checkRelocateSingleBitTestNearJccToTbzq(
+    kMaxTestBranchForwardOffset - kNearJccTargetPrefix
+  );
+}
+
+TEST(Relocation, PreserveSingleBitTestNearJccOutsideTestBranchRange) {
+  checkRelocateSingleBitTestNearJcc(
+    kMaxTestBranchForwardOffset + 1 - kNearJccTargetPrefix,
+    [] (const Instruction* relocated, const Instruction* target) {
+      BitTestDetails test;
+      ASSERT_TRUE(getBitTestDetails(relocated, test));
+      EXPECT_EQ(test.bit, 63);
+      EXPECT_EQ(test.reg.code(), x0.code());
+
+      auto const branch = relocated->GetNextInstruction();
+      ASSERT_TRUE(branch->IsCondBranchImm());
+      EXPECT_EQ(static_cast<Condition>(branch->ConditionBranch()), eq);
+      EXPECT_EQ(branch->ImmPCOffsetTarget(), target);
+    }
+  );
+}
+
+TEST(Relocation, RejectMarkedTestBranchInput) {
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(4096, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+  auto const start = main.frontier();
+  meta.testBranches.insert(start);
+
+  MacroAssembler a { main };
+  a.tbz(x0, 63, 1);
+  auto const end = main.frontier();
+
+  EXPECT_DEATH(
+    {
+      RelocationInfo rel;
+      AreaIndex ai = AreaIndex::Main;
+      relocate(rel, main, start, end, main, meta, ai);
+    },
+    "marked test branch.*must be TST"
+  );
+}
+
+TEST(Relocation, RelocateMarkedTestFarJccRetriesGrowingInternalTarget) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+  MacroAssembler a { main };
+  auto const start = main.frontier();
+  auto const target = start;
+  a.brk(0);
+
+  constexpr auto kExpandingBranches = 4096;
+  for (auto i = 0; i < kExpandingBranches; ++i) {
+    a.b(-0x40000, eq);
+  }
+
+  auto const test = main.frontier();
+  meta.testBranches.insert(test);
+  a.Tst(x0, uint64_t{1} << 63);
+  auto const farJump = emitFarBccSequence(a, main, meta, ne);
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  relocate(rel, main, start, end, main, meta, ai);
+
+  auto const relocatedAddr = rel.adjustedAddressAfter(test);
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedAddr, nullptr);
+  ASSERT_NE(relocatedTarget, nullptr);
+  auto const relocated = Instruction::Cast(main.toDestAddress(relocatedAddr));
+  ASSERT_TRUE(relocated->IsLogicalImmediate());
+  EXPECT_EQ(relocated->ImmLogical(), uint64_t{1} << 63);
+
+  auto const relocatedBranch = relocated->GetNextInstruction();
+  ASSERT_TRUE(relocatedBranch->IsCondBranchImm());
+  EXPECT_EQ(static_cast<Condition>(relocatedBranch->ConditionBranch()), eq);
+  EXPECT_EQ(
+    relocatedBranch->ImmPCOffsetTarget(),
+    Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+}
+
 /*
  * Tests relocating PC relative test bit and branch
  * to a sequence of a test bit and branch and an absolute
  * branch to register. See arm::relocatePCRelativeHelper()
  *
- *     tbz $rt, <bit_pos>, <target>
+ *     tbz $rt, <bit>, <target>
  * to
- *     tbnz $rt, <it_pos>, <past>
+ *     tbnz $rt, <bit>, <past>
  *     movz/movk $tmp, <target>
  *     br $tmp
  */
-TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
+void checkRelocateFarTestBranch(uint8_t bit) {
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -636,45 +868,46 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
   CGMeta meta;
 
   // 2. Emit tbz <imm> of -0x2000 (14-bit int min)
-  auto start = main.frontier();
+  auto const start = main.frontier();
 
   MacroAssembler a { main };
   meta.addressImmediates.insert(main.frontier());
-  a.tbz(x0, 3, -0x2000);
-  auto tbzOrig = Instruction::Cast(start);
+  a.tbz(x0, bit, -0x2000);
+  auto const tbzOrig = Instruction::Cast(start);
 
-  auto end = main.frontier();
+  auto const end = main.frontier();
 
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect tbnz, movz/movk X and br X where with imm in X
-  auto tbnz = instr;
-  EXPECT_TRUE(tbnz->Mask(LoadStoreUnsignedOffsetMask) == TBNZ);
-  const auto rt = tbnz->Rt();
-  EXPECT_EQ(tbzOrig->Rt(), rt);
-  const auto bit_pos = tbnz->ImmTestBranchBit40();
-  EXPECT_EQ(bit_pos, 3);
+  auto const tbnz = instr;
+  ASSERT_TRUE(tbnz->IsTestBranch());
+  auto const details = getTestAndBranchDetails(tbnz);
+  EXPECT_TRUE(details.isTbnz);
+  EXPECT_EQ(details.bit, bit);
+  EXPECT_EQ(details.reg.code(), tbzOrig->Rt());
 
-  auto movz = tbnz->GetNextInstruction();
-  EXPECT_TRUE(movz->IsMovz());
-  const auto rd = movz->Rd();
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), rd);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), tbzOrig->ImmPCOffsetTarget());
+  auto const mov = decodeMovWideSequence(tbnz->GetNextInstruction());
+  EXPECT_EQ(Instruction::Cast(mov.target), tbzOrig->ImmPCOffsetTarget());
 
-  auto br = instr;
+  auto const br = mov.next;
   EXPECT_TRUE(br->IsUncondBranchReg());
-  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(br->Rn(), mov.reg);
   EXPECT_EQ(tbnz->ImmPCOffsetTarget(), br->GetNextInstruction());
+}
+
+TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
+  checkRelocateFarTestBranch(3);
+}
+
+// Bit 63 lives in the b5 field, which is separate from bits 4-0 (b40). A
+// decode that reads only b40 would expand the branch as a test of bit 31.
+TEST(Relocation, RelocateTbz2MovzMovkTbnzRegPreservesBit63) {
+  checkRelocateFarTestBranch(63);
 }
 
 /*
@@ -709,7 +942,7 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end + 8);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect a Ldr Literal to $x0 from addr
   EXPECT_TRUE(instr->IsLoadLiteral());
@@ -744,20 +977,12 @@ TEST(Relocation, RelocateAdjustedMovzMovk) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect movz/movk of new target
-  auto movz = instr + (2 << 20) + 16;
-  EXPECT_TRUE(movz->IsMovz());
-  EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), 17);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end + 8));
+  auto const mov = decodeMovWideSequence(instr + (2 << 20) + 16);
+  EXPECT_EQ(mov.reg, 17);
+  EXPECT_EQ(Instruction::Cast(mov.target), Instruction::Cast(end + 8));
 }
 
 TEST(Relocation, RelocateAdrpLdrLiteral) {
@@ -793,7 +1018,7 @@ TEST(Relocation, RelocateAdrpLdrLiteral) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocatedAdrp = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   auto const relocatedLoad = LoadLiteral::at(relocatedAdrp);
   EXPECT_TRUE(relocatedLoad && relocatedLoad.isFar());
@@ -830,7 +1055,7 @@ TEST(Relocation, RelocateAdrpKeeps4GBRange) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   EXPECT_TRUE(relocated->IsPCRelAddressing());
   EXPECT_EQ(relocated->Mask(PCRelAddressingMask), ADRP);
@@ -871,7 +1096,7 @@ TEST(Relocation, ShrinkAdrpLdrLiteralBackToLdr) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   auto const relocatedLdr = relocated;
   EXPECT_TRUE(relocatedLdr->IsLoadLiteral());
@@ -952,7 +1177,7 @@ TEST(Relocation, RetryMultipleAdrpLdrLiteralsBeyondImm19) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocatedStart = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   auto const relocatedLoad1 = LoadLiteral::at(relocatedStart);
   EXPECT_TRUE(relocatedLoad1 && relocatedLoad1.isFar());
@@ -1006,7 +1231,7 @@ TEST(Relocation, DisableAdrpLdrShorteningKeepsAdrpLdr) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocatedAdrp = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   auto const relocatedLoad = LoadLiteral::at(relocatedAdrp);
   EXPECT_TRUE(relocatedLoad && relocatedLoad.isFar());
@@ -1066,7 +1291,7 @@ TEST(Relocation, OptimizeAdrpLdrBrToB) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   EXPECT_TRUE(relocated->IsUncondBranchImm());
   EXPECT_EQ(relocated->Mask(UnconditionalBranchMask), B);
@@ -1112,7 +1337,7 @@ TEST(Relocation, ShrinkExternalAdrpLdrBrToLdrBr) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   EXPECT_TRUE(relocated->IsLoadLiteral());
   EXPECT_EQ(relocated->Mask(LoadLiteralMask), LDR_w_lit);
@@ -1570,7 +1795,7 @@ TEST(Relocation, OptimizeBccAdrpLdrBrToBcc) {
 
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   auto const relocated =
     Instruction::Cast(main.toDestAddress(rel.adjustedAddressAfter(jcc)));
@@ -1619,7 +1844,7 @@ TEST(Relocation, AdjustAdrpLdrLiteralAndShrinkAdrpToLdr) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
   adjustForRelocation(rel, orig, start);
 
   auto const relocatedLdr = relocated;
@@ -1677,7 +1902,7 @@ TEST(Relocation, ShrinkAdrpLdrSmashableMovqToLdr) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
   adjustMetaDataForRelocation(rel, nullptr, meta);
 
   auto const relocatedLdr = relocated;
@@ -1742,7 +1967,7 @@ TEST(Relocation, RelocateTaggedSmashableMovqWithDistinctLogicalAddress) {
 
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
   adjustMetaDataForRelocation(rel, nullptr, meta);
 
   auto const relocatedAddr = rel.adjustedAddressAfter(movq);
@@ -1803,20 +2028,15 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
   const Instruction* instr = Instruction::Cast(end);
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
 
   // 4. Expect movz/movk of new target
-  auto movz = instr;
-  EXPECT_TRUE(movz->IsMovz());
-  EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), 17);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end + (2 << 20) + 16));
+  auto const mov = decodeMovWideSequence(instr);
+  EXPECT_EQ(mov.reg, 17);
+  EXPECT_EQ(
+    Instruction::Cast(mov.target),
+    Instruction::Cast(end + (2 << 20) + 16)
+  );
 }
 
 /*
@@ -1848,21 +2068,13 @@ TEST(Relocation, AdjustMovzMovk) {
   // 3. Call relocate() and then adjust the mov/movk
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  relocate(rel, main, start, end, main, meta, nullptr, ai);
+  relocate(rel, main, start, end, main, meta, ai);
   adjustForRelocation(rel, orig, start);
 
   // 4. Expect movz/movk of new target
-  auto movz = Instruction::Cast(orig);
-  EXPECT_TRUE(movz->IsMovz());
-  EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  auto instr = movz->GetNextInstruction();
-  while (instr->IsMovk()) {
-    EXPECT_EQ(instr->Rd(), 17);
-    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->GetNextInstruction();
-  }
-  EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end));
+  auto const mov = decodeMovWideSequence(Instruction::Cast(orig));
+  EXPECT_EQ(mov.reg, 17);
+  EXPECT_EQ(Instruction::Cast(mov.target), Instruction::Cast(end));
 }
 
 }}

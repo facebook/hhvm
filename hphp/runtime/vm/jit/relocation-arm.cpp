@@ -82,7 +82,7 @@ struct JmpOutOfRange : std::exception {};
 struct Env {
   explicit Env(RelocationInfo& rel,
                CodeBlock& srcBlock, CodeBlock& destBlock,
-               TCA start, TCA end, CGMeta& meta, TCA* exitAddr, InstrSet& far)
+               TCA start, TCA end, CGMeta& meta, InstrSet& far)
     : rel(rel)
     , srcBlock(srcBlock)
     , destBlock(destBlock)
@@ -90,12 +90,9 @@ struct Env {
     , end(end)
     , srcEndActual(Instruction::Cast(srcBlock.toDestAddress(end)))
     , meta(meta)
-    , exitAddr(exitAddr)
     , updateInternalRefs(false)
     , far(far)
-  {
-    if (exitAddr) *exitAddr = nullptr;
-  }
+  {}
 
   RelocationInfo& rel;
   CodeBlock& srcBlock;
@@ -103,7 +100,6 @@ struct Env {
   const TCA start, end;
   Instruction* const srcEndActual;
   CGMeta& meta;
-  TCA* exitAddr;
   bool updateInternalRefs;
 
   /*
@@ -520,6 +516,164 @@ ConditionCode farJccCond(TCA inst) {
   return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
 }
 
+struct CondBranchDetails {
+  TCA target;
+  TCA adjusted;
+  int64_t imm;
+};
+
+bool getCondBranchDetails(Env& env,
+                          TCA target,
+                          TCA srcAddr,
+                          TCA destAddr,
+                          CondBranchDetails& out) {
+  // Another code block may relocate far enough away to invalidate a shortened
+  // branch, so only rely on targets in the same source block.
+  if (!target || !env.srcBlock.contains(target)) return false;
+
+  auto adjusted = env.rel.adjustedAddressAfter(target);
+  if (!adjusted) adjusted = target;
+  auto imm = static_cast<int64_t>(adjusted - destAddr)
+             >> kInstructionSizeLog2;
+  if (env.start <= adjusted && adjusted < env.end) {
+    imm = static_cast<int64_t>(adjusted - srcAddr)
+          >> kInstructionSizeLog2;
+  }
+
+  out = CondBranchDetails{target, adjusted, imm};
+  return true;
+}
+
+struct FarCondBranchDetails {
+  TCA literal;
+  CondBranchDetails branch;
+};
+
+bool getFarCondBranchDetails(Env& env,
+                             const Instruction* branch,
+                             const Instruction* branchFrom,
+                             TCA srcAddr,
+                             TCA destAddr,
+                             FarCondBranchDetails& out) {
+  if (!isFarCondBranch(branch, env.srcEndActual)) return false;
+
+  auto const literal = farJmpLiteralAddress(
+    branch->GetNextInstruction(), branchFrom->GetNextInstruction()
+  );
+  if (literal < env.start || literal >= env.end) return false;
+
+  auto const target = farJmpTarget32(env, literal);
+  CondBranchDetails details;
+  if (!getCondBranchDetails(env, target, srcAddr, destAddr, details)) {
+    return false;
+  }
+
+  out = FarCondBranchDetails{literal, details};
+  return true;
+}
+
+void recordCondBranchRewrite(Env& env,
+                             const CondBranchDetails& branch,
+                             Instruction* src,
+                             TCA destAddrToRewrite,
+                             size_t srcCount) {
+  if (env.start <= branch.adjusted && branch.adjusted < env.end) {
+    env.rewriteAdjust.emplace_back(Patch{
+      destAddrToRewrite,
+      branch.adjusted,
+      src
+    });
+  }
+  for (auto instr = src;
+       instr < src + (srcCount << kInstructionSizeLog2);
+       instr = instr->GetNextInstruction()) {
+    env.rewrites.insert(instr);
+  }
+  env.updateInternalRefs = true;
+}
+
+void recordFarCondBranchRewrite(Env& env,
+                                const FarCondBranchDetails& branch,
+                                Instruction* src,
+                                TCA destAddrToRewrite,
+                                size_t srcCount) {
+  env.literalsToRemove.insert(Instruction::Cast(branch.literal));
+  recordCondBranchRewrite(
+    env, branch.branch, src, destAddrToRewrite, srcCount
+  );
+}
+
+/*
+ * Shrink a metadata-marked single-bit TST followed by a conditional branch to
+ * TBZ/TBNZ when the final target is in range. The branch may be either direct
+ * or the head of the standard far-JCC sequence.
+ */
+bool optimizeTestBranch(Env& env, TCA srcAddr, TCA destAddr,
+                        size_t& srcCount, size_t& destCount) {
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const test = Instruction::Cast(srcAddrActual);
+  if (!env.meta.testBranches.contains(srcAddr)) return false;
+  if (env.meta.smashableLocations.contains(srcAddr)) return false;
+  if (env.far.contains(test)) return false;
+
+  BitTestDetails testDetails;
+  if (!getBitTestDetails(test, testDetails)) return false;
+
+  auto const branch = test->GetNextInstruction();
+  if (branch >= env.srcEndActual || !branch->IsCondBranchImm()) return false;
+  if (env.far.contains(branch)) return false;
+
+  // Folding the B.cond into TBZ/TBNZ requires both instructions to be
+  // rewritable.
+  auto const branchAddr = srcAddr + kInstructionSize;
+  if (env.meta.smashableLocations.contains(branchAddr)) return false;
+
+  auto const srcFrom = Instruction::Cast(srcAddr);
+  auto const branchFrom = srcFrom->GetNextInstruction();
+  auto const far = isFarCondBranch(branch, env.srcEndActual);
+
+  Condition cond;
+  CondBranchDetails details;
+  FarCondBranchDetails farDetails;
+  if (far) {
+    if (!getFarCondBranchDetails(
+          env, branch, branchFrom, srcAddr, destAddr, farDetails
+        )) {
+      return false;
+    }
+    cond = arm::convertCC(farJccCond(reinterpret_cast<TCA>(branch)));
+    details = farDetails.branch;
+  } else {
+    cond = static_cast<Condition>(branch->ConditionBranch());
+    auto const target = reinterpret_cast<TCA>(
+      branch->GetImmPCOffsetTarget(branchFrom)
+    );
+    if (!getCondBranchDetails(env, target, srcAddr, destAddr, details)) {
+      return false;
+    }
+  }
+
+  if (cond != eq && cond != ne) return false;
+  if (!is_int14(details.imm)) return false;
+
+  vixl::Assembler a { env.destBlock };
+  env.destBlock.setFrontier(destAddr);
+  if (cond == eq) {
+    a.tbz(testDetails.reg, testDetails.bit, details.imm);
+  } else {
+    a.tbnz(testDetails.reg, testDetails.bit, details.imm);
+  }
+
+  srcCount = far ? kFarJccInstrs + 1 : 2;
+  destCount = 1;
+  if (far) {
+    recordFarCondBranchRewrite(env, farDetails, test, destAddr, srcCount);
+  } else {
+    recordCondBranchRewrite(env, details, test, destAddr, srcCount);
+  }
+  return true;
+}
+
 /*
  * Try to shrink a far JCC after relocation has made its target close enough
  * for PC-relative branches.
@@ -541,48 +695,29 @@ ConditionCode farJccCond(TCA inst) {
  * the target points forward in the current relocation range, the final address
  * is not known yet, so this records a rewrite adjustment for the final pass.
  *
- * On success, srcCount covers the full far-JCC sequence, destCount reflects the
- * shortened output, rewritten source instructions are marked, and the pooled
- * literal is scheduled for removal.
+ * On success, srcCount covers the rewritten source sequence, destCount reflects
+ * the shortened output, rewritten source instructions are marked, and any
+ * pooled literal is scheduled for removal.
  */
 bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
                            size_t& srcCount, size_t& destCount) {
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
+  FarCondBranchDetails far;
 
   if (env.meta.smashableLocations.contains(srcAddr)) return false;
   if (env.far.contains(src)) return false;
 
-  if (!isFarCondBranch(src, env.srcEndActual)) return false;
-
-  auto const litAddr =
-    farJmpLiteralAddress(src->GetNextInstruction(),
-                         srcFrom->GetNextInstruction());
-  if (litAddr < env.start || litAddr >= env.end) return false;
-
-  auto const target = farJmpTarget32(env, litAddr);
-  if (!target) return false;
-
-  // We can only rely on the target address to shrink the code sequence if it's
-  // in the same code block.  Otherwise, the target may end up too far after
-  // its code block is relocated.
-  if (!env.srcBlock.contains(target)) return false;
-
-  auto adjusted = env.rel.adjustedAddressAfter(target);
-  if (!adjusted) adjusted = target;
-  auto imm = static_cast<int64_t>(adjusted - destAddr) >> kInstructionSizeLog2;
-  if (env.start <= adjusted && adjusted < env.end) {
-    // adjusted still points in the source range.  It will need to be adjusted
-    // at the end of relocation.
-    imm = static_cast<int64_t>(adjusted - srcAddr) >> kInstructionSizeLog2;
+  if (!getFarCondBranchDetails(
+        env, src, srcFrom, srcAddr, destAddr, far
+      )) {
+    return false;
   }
   // NB: the imm offset was computed relative to destAddr, but the more general
   // case, which handles int26, uses imm-1 because of the extra instruction that
   // it requires.
-  if (!is_int26(imm - 1)) return false;
-
-  env.literalsToRemove.insert(Instruction::Cast(litAddr));
+  if (!is_int26(far.branch.imm - 1)) return false;
 
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
@@ -593,15 +728,15 @@ bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
     // This inverts the condition code for us.
     auto const cc = arm::convertCC(farJccCond(srcAddrActual));
 
-    if (is_int19(imm)) {
-      a.b(imm, cc);
+    if (is_int19(far.branch.imm)) {
+      a.b(far.branch.imm, cc);
     } else {
       // Branch over the next instruction.
       const int nextImm = 2;
       a.b(nextImm, vixl::InvertCondition(cc));
       // NB: the imm offset was computed relative to destAddr, but we emitted an
       // extra branch above, thus the -1 here.
-      a.b(imm - 1);
+      a.b(far.branch.imm - 1);
       destAddrToRewrite += kInstructionSize;
       destCount++;
     }
@@ -610,13 +745,13 @@ bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
     auto const details =
       getCompareAndBranchDetails(Instruction::Cast(srcAddrActual));
 
-    if (is_int19(imm)) {
+    if (is_int19(far.branch.imm)) {
       // Emit the original compare-branch polarity. The far-branch head was
       // inverted to skip the out-of-line jump.
       if (details.isCbnz) {
-        a.cbz(details.reg, imm);
+        a.cbz(details.reg, far.branch.imm);
       } else {
-        a.cbnz(details.reg, imm);
+        a.cbnz(details.reg, far.branch.imm);
       }
     } else {
       // Branch over the next instruction.
@@ -628,31 +763,19 @@ bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
       }
       // NB: the imm offset was computed relative to destAddr, but we emitted an
       // extra branch above, thus the -1 here.
-      a.b(imm - 1);
+      a.b(far.branch.imm - 1);
       destAddrToRewrite += kInstructionSize;
       destCount++;
     }
   }
 
-  if (env.start <= adjusted && adjusted < env.end) {
-    env.rewriteAdjust.emplace_back(Patch {
-      destAddrToRewrite,
-      adjusted,
-      src
-    });
-  }
-
   srcCount = kFarJccInstrs;
-
-  for (const Instruction* i = src;
-       i < src + (srcCount << kInstructionSizeLog2);
-       i = i->GetNextInstruction()) {
-    env.rewrites.insert(i);
-  }
-  env.updateInternalRefs = true;
+  recordFarCondBranchRewrite(env, far, src, destAddrToRewrite, srcCount);
   FTRACE(3,
          "Relocated and optimized a far JCC at src {} with target {} to {}.\n",
-         srcAddrActual, target, env.destBlock.toDestAddress(destAddr));
+         srcAddrActual,
+         far.branch.target,
+         env.destBlock.toDestAddress(destAddr));
 
   return true;
 }
@@ -882,13 +1005,15 @@ bool relocatePCRelative(Env& env,
         destCount--;
 
         vixl::MacroAssembler a { env.destBlock };
-        vixl::Label end;
         auto const cond = static_cast<Condition>(src->ConditionBranch());
-        auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+        vixl::Label end;
         a.B(&end, vixl::InvertCondition(cond));
-        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
-        a.Br(tmp);
+        a.Mov(
+          rVixlScratch0,
+          reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom))
+        );
+        a.Br(rVixlScratch0);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
@@ -947,17 +1072,19 @@ bool relocatePCRelative(Env& env,
         destCount--;
 
         vixl::MacroAssembler a { env.destBlock };
-        vixl::Label end;
-        auto const bit_pos = src->ImmTestBranchBit40();
-        auto const rt = vixl::Register(src->Rt(), kXRegSize);
+        auto const tb = getTestAndBranchDetails(src);
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-        if (src->Mask(TestBranchMask) == TBZ) {
-          a.Tbnz(rt, bit_pos, &end);
+
+        vixl::Label end;
+        if (tb.isTbnz) {
+          a.Tbz(tb.reg, tb.bit, &end);
         } else {
-          a.Tbz(rt, bit_pos, &end);
+          a.Tbnz(tb.reg, tb.bit, &end);
         }
-        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(
+          src->GetImmPCOffsetTarget(srcFrom)
+        ));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -977,15 +1104,6 @@ bool relocatePCRelative(Env& env,
       env.rewrites.insert(src);
       env.updateInternalRefs = true;
     }
-  }
-
-  // Update the exitAddr if it was requested for this translation.
-  if ((src->IsCondBranchImm() ||
-       src->IsUncondBranchImm() ||
-       src->IsCompareBranch() ||
-       src->IsTestBranch()) &&
-      env.exitAddr) {
-    *env.exitAddr = target;
   }
 
   return true;
@@ -1192,6 +1310,11 @@ size_t relocateImpl(Env& env) {
       auto const srcPtr = env.srcBlock.toDestAddress(srcAddr);
       auto const srcFrom = Instruction::Cast(srcAddr);
       auto const src = Instruction::Cast(srcPtr);
+      always_assert_flog(
+        !src->IsTestBranch() || !env.meta.testBranches.contains(srcAddr),
+        "relocateImpl: marked test branch at {} must be TST+B.cond\n",
+        srcAddr
+      );
       srcCount = 1;
       destCount = 1;
       alignCount = 0;
@@ -1252,6 +1375,7 @@ size_t relocateImpl(Env& env) {
         // Relocate functions are needed for correctness, while optimize
         // functions will attempt to improve instruction sequences.
         auto const relocated =
+          optimizeTestBranch(env, srcAddr, destAddr, srcCount, destCount) ||
           optimizeFarCondBranch(env, srcAddr, destAddr, srcCount, destCount) ||
           optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
           relocatePCRelative(
@@ -1801,12 +1925,11 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 CodeBlock& srcBlock,
                 CGMeta& meta,
-                TCA* exitAddr,
                 AreaIndex) {
   InstrSet far;
   while (true) {
     try {
-      Env env(rel, srcBlock, destBlock, start, end, meta, exitAddr, far);
+      Env env(rel, srcBlock, destBlock, start, end, meta, far);
       return relocateImpl(env);
     } catch (JmpOutOfRange&) {
       FTRACE(1, "relocate: JmpOutOfRange caught for [{},{}); retrying with "

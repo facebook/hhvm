@@ -43,6 +43,10 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::cbnzl:
     case Vinstr::cbzq:
     case Vinstr::cbnzq:
+    case Vinstr::tbzl:
+    case Vinstr::tbnzl:
+    case Vinstr::tbzq:
+    case Vinstr::tbnzq:
     case Vinstr::jcc:
     case Vinstr::jmp:
     case Vinstr::jmpr:
@@ -320,6 +324,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmplim:
     case Vinstr::cbzl:
     case Vinstr::cbnzl:
+    case Vinstr::tbzl:
+    case Vinstr::tbnzl:
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
@@ -381,6 +387,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmpqim:
     case Vinstr::cbzq:
     case Vinstr::cbnzq:
+    case Vinstr::tbzq:
+    case Vinstr::tbnzq:
     case Vinstr::testq:
     case Vinstr::testqi:
     case Vinstr::testqi64:

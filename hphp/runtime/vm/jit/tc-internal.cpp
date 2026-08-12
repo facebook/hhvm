@@ -769,12 +769,12 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         }
 
         jit::relocate(rel, dstView.main(), range.main.begin(), range.main.end(),
-                      srcView.main(), fixups, nullptr, AreaIndex::Main);
+                      srcView.main(), fixups, AreaIndex::Main);
         jit::relocate(rel, dstView.cold(), range.cold.begin(), range.cold.end(),
-                      srcView.cold(), fixups, nullptr, AreaIndex::Cold);
+                      srcView.cold(), fixups, AreaIndex::Cold);
         if (&srcView.cold() != &srcView.frozen()) {
           jit::relocate(rel, dstView.frozen(), range.frozen.begin(),
-                        range.frozen.end(), srcView.frozen(), fixups, nullptr,
+                        range.frozen.end(), srcView.frozen(), fixups,
                         AreaIndex::Frozen);
         }
 

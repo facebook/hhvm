@@ -28,6 +28,8 @@
 
 #include "hphp/vixl/hphp-compat.h"
 
+#include <folly/lang/Bits.h>
+
 #include <algorithm>
 
 namespace HPHP::jit::arm {
@@ -216,15 +218,80 @@ XorInfo get_xor_info(const xorqi64& inst) {
                  inst.s1, inst.d, inst.sf, inst.fl};
 }
 
-// Narrow test immediates are logical masks, not sign-extended integers, so
-// zero-extend them. There is no generic fallback: any unhandled test op
-// passed to simplify_shifted_bit_test will fail to compile.
+// Byte, word, and long test immediates are logical masks, so zero-extend them.
+// testqi uses the sign-extended 32-bit immediate emitted by Tst(X, ...), while
+// testqi64 already carries the full 64-bit mask. There is no generic fallback:
+// any unhandled test op passed to simplify_shifted_bit_test will fail to
+// compile.
 uint64_t get_test_imm(const testbi& inst) { return inst.s0.ub(); }
 uint64_t get_test_imm(const testwi& inst) { return inst.s0.uw(); }
 uint64_t get_test_imm(const testli& inst) { return inst.s0.ul(); }
-uint64_t get_test_imm(const testqi& inst) { return inst.s0.ul(); }
+uint64_t get_test_imm(const testqi& inst) {
+  return static_cast<uint64_t>(inst.s0.q());
+}
 uint64_t get_test_imm(const testqi64& inst) {
   return static_cast<uint64_t>(inst.s0.q());
+}
+
+struct TestJccDetails {
+  size_t idx;
+  ConditionCode cc;
+  Vlabel targets[2];
+};
+
+template<class Branch, class... Args>
+Branch makeTestJccBranch(const TestJccDetails& jcc, Args... args) {
+  return Branch{args..., {jcc.targets[0], jcc.targets[1]}};
+}
+
+bool findTestJcc(Env& env,
+                 Vlabel b,
+                 size_t testIdx,
+                 Vreg src,
+                 VregSF sf,
+                 TestJccDetails& out) {
+  if (env.use_counts[sf] != 1) return false;
+
+  auto const& code = env.unit.blocks[b].code;
+  if (code.empty()) return false;
+
+  auto const jccIdx = code.size() - 1;
+  if (code[jccIdx].op != Vinstr::jcc) return false;
+
+  auto const& jcci = code[jccIdx].jcc_;
+  if (jcci.sf != sf) return false;
+  if (phys_source_clobbered(env, b, src, testIdx + 1, jccIdx)) return false;
+
+  out = TestJccDetails{
+    jccIdx,
+    jcci.cc,
+    {jcci.targets[0], jcci.targets[1]}
+  };
+  return true;
+}
+
+template<typename ZeroBranch, typename NonzeroBranch>
+bool replaceTestJcc(Env& env,
+                    Vlabel b,
+                    size_t testIdx,
+                    const TestJccDetails& jcc,
+                    ConditionCode zeroCc,
+                    ConditionCode nonzeroCc,
+                    ZeroBranch zero,
+                    NonzeroBranch nonzero) {
+  // Rewrite the terminator first, because removing the earlier test would
+  // shift the jcc's index.
+  simplify_impl(env, b, jcc.idx, [&] (Vout& v) {
+    if (jcc.cc == zeroCc) {
+      v << zero;
+    } else {
+      assertx(jcc.cc == nonzeroCc);
+      v << nonzero;
+    }
+    return 1;
+  });
+  simplify_impl(env, b, testIdx, [&] (Vout&) { return 1; });
+  return true;
 }
 
 struct TestInfo {
@@ -296,110 +363,144 @@ bool simplify_shifted_bit_test(Env& env,
   return true;
 }
 
+template<typename tbz, typename tbnz>
+bool foldTestBitJcc(Env& env,
+                    const TestInfo& test,
+                    Vlabel b,
+                    size_t i) {
+  if (!test_uses_only_z_flag(env, test.sf, test.fl) ||
+      folly::popcount(test.imm) != 1) {
+    return false;
+  }
+
+  TestJccDetails jcc;
+  if (!findTestJcc(env, b, i, test.src, test.sf, jcc)) return false;
+  if (jcc.cc != CC_E && jcc.cc != CC_NE) return false;
+
+  auto const bit = Immed{safe_cast<int32_t>(folly::findFirstSet(test.imm) - 1)};
+  return replaceTestJcc(
+    env,
+    b,
+    i,
+    jcc,
+    CC_E,
+    CC_NE,
+    makeTestJccBranch<tbz>(jcc, bit, test.src),
+    makeTestJccBranch<tbnz>(jcc, bit, test.src)
+  );
+}
+
+template<typename tbz, typename tbnz, typename Test>
+bool simplifyImmediateTest(Env& env,
+                           const Test& inst,
+                           Vlabel b,
+                           size_t i) {
+  if (simplify_shifted_bit_test(env, inst, b, i)) return true;
+  return foldTestBitJcc<tbz, tbnz>(env, get_test_info(inst), b, i);
+}
+
 bool simplify(Env& env, const testbi& inst, Vlabel b, size_t i) {
-  return simplify_shifted_bit_test(env, inst, b, i);
+  return simplifyImmediateTest<tbzl, tbnzl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testwi& inst, Vlabel b, size_t i) {
-  return simplify_shifted_bit_test(env, inst, b, i);
+  return simplifyImmediateTest<tbzl, tbnzl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testli& inst, Vlabel b, size_t i) {
-  return simplify_shifted_bit_test(env, inst, b, i);
+  return simplifyImmediateTest<tbzl, tbnzl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testqi& inst, Vlabel b, size_t i) {
-  return simplify_shifted_bit_test(env, inst, b, i);
+  return simplifyImmediateTest<tbzq, tbnzq>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testqi64& inst, Vlabel b, size_t i) {
-  return simplify_shifted_bit_test(env, inst, b, i);
+  return simplifyImmediateTest<tbzq, tbnzq>(env, inst, b, i);
 }
 
-template <typename cmpbrz, typename cmpbrnz, typename testop>
-bool foldTestJcc(Env& env, const testop& inst, Vlabel b, size_t i) {
-  if (inst.s0 != inst.s1 || env.use_counts[inst.sf] != 1) {
-    return false;
-  }
+template <typename cmpbrz,
+          typename cmpbrnz,
+          typename testbrz,
+          typename testbrnz,
+          typename testop>
+bool foldSelfTestJcc(Env& env,
+                     const testop& inst,
+                     Vlabel b,
+                     size_t i,
+                     Optional<unsigned> signBit = {}) {
+  if (inst.s0 != inst.s1) return false;
 
-  // A jcc always terminates its block, and the test's sf has exactly one use,
-  // so that consumer is the terminator jcc -- but it need not be adjacent to
-  // the test. cbz/cbnz re-read the register at the branch (not the flags the
-  // test computed), so the fold is only valid if the tested register is not
-  // redefined or clobbered between the test and the jcc.
-  auto const& code = env.unit.blocks[b].code;
-  if (code.empty()) {
-    return false;
-  }
-  auto const j = code.size() - 1;
-  if (code[j].op != Vinstr::jcc) {
-    return false;
-  }
-  auto const& jcci = code[j].jcc_;
-  if (jcci.sf != inst.sf || (jcci.cc != CC_E && jcci.cc != CC_NE)) {
-    return false;
-  }
-  if (phys_source_clobbered(env, b, inst.s0, i + 1, j)) {
-    return false;
-  }
+  TestJccDetails jcc;
+  if (!findTestJcc(env, b, i, inst.s0, inst.sf, jcc)) return false;
 
-  // Capture before mutating -- simplify_impl invalidates `inst` and `jcci`.
-  // emit(test{b,l,q}) already tests the full W/X register (a Vreg8 bool is
+  // emit(test{b,w,l,q}) already tests the full W/X register (a Vreg8 bool is
   // byte-clean on ARM), so rewriting test+jcc as a full-register cbz/cbnz is an
   // exact substitution. Route through Vreg since a narrower Vreg8 (testb) does
   // not convert directly to cbzl's Vreg32.
   Vreg const s = inst.s0;
-  auto const cc = jcci.cc;
-  auto const t0 = jcci.targets[0];
-  auto const t1 = jcci.targets[1];
-
-  // Replace the terminator jcc with the compare-branch, then drop the now-dead
-  // test. Do the jcc (a 1->1 rewrite) first so index `i` stays valid.
-  simplify_impl(env, b, j, [&] (Vout& v) {
-    if (cc == CC_E) {
-      v << cmpbrz{s, {t0, t1}};
-    } else {
-      v << cmpbrnz{s, {t0, t1}};
-    }
-    return 1;
-  });
-  simplify_impl(env, b, i, [&] (Vout&) { return 1; });
-  return true;
+  if (jcc.cc == CC_E || jcc.cc == CC_NE) {
+    return replaceTestJcc(
+      env,
+      b,
+      i,
+      jcc,
+      CC_E,
+      CC_NE,
+      makeTestJccBranch<cmpbrz>(jcc, s),
+      makeTestJccBranch<cmpbrnz>(jcc, s)
+    );
+  }
+  if (signBit && (jcc.cc == CC_NS || jcc.cc == CC_S)) {
+    auto const bit = Immed{safe_cast<int32_t>(*signBit)};
+    return replaceTestJcc(
+      env,
+      b,
+      i,
+      jcc,
+      CC_NS,
+      CC_S,
+      makeTestJccBranch<testbrz>(jcc, bit, s),
+      makeTestJccBranch<testbrnz>(jcc, bit, s)
+    );
+  }
+  return false;
 }
 
 bool simplify(Env& env, const testb& inst, Vlabel b, size_t i) {
-  return foldTestJcc<cbzl, cbnzl>(env, inst, b, i);
+  return foldSelfTestJcc<cbzl, cbnzl, tbzl, tbnzl>(env, inst, b, i);
+}
+
+bool simplify(Env& env, const testw& inst, Vlabel b, size_t i) {
+  return foldSelfTestJcc<cbzl, cbnzl, tbzl, tbnzl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
-  return foldTestJcc<cbzl, cbnzl>(env, inst, b, i);
+  return foldSelfTestJcc<cbzl, cbnzl, tbzl, tbnzl>(env, inst, b, i, 31);
 }
 
-bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
-  if (foldTestJcc<cbzq, cbnzq>(env, inst, b, i)) {
+bool foldTestJcc(Env& env, const testq& inst, Vlabel b, size_t i) {
+  if (foldSelfTestJcc<cbzq, cbnzq, tbzq, tbnzq>(env, inst, b, i, 63)) {
     return true;
   }
 
-  if (env.use_counts[inst.sf] != 1) {
+  uint64_t imm;
+  Vreg src;
+  if (get_const_int(env, inst.s0, imm)) {
+    src = inst.s1;
+  } else if (get_const_int(env, inst.s1, imm)) {
+    src = inst.s0;
+  } else {
     return false;
   }
 
-  uint64_t Val;
-  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
-    return false;
-  }
+  return foldTestBitJcc<tbzq, tbnzq>(
+    env, TestInfo{imm, src, inst.sf, inst.fl}, b, i
+  );
+}
 
-  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
-    if (jcci.sf != inst.sf || jcci.cc != CC_E) {
-      return false;
-    }
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      auto const sf = v.makeReg();
-      v << cmpqi{0, inst.s1, sf, inst.fl};
-      v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
-      return 2;
-    });
-  });
+bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
+  return foldTestJcc(env, inst, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

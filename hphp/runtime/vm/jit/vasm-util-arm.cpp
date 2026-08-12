@@ -16,11 +16,17 @@
 
 #include "hphp/runtime/vm/jit/vasm-util-arm.h"
 
+#include "hphp/util/safe-cast.h"
+
 #include "hphp/vixl/hphp-compat.h"
+
+#include <folly/lang/Bits.h>
 
 namespace HPHP::jit::arm {
 
 using vixl::is_int21;
+using vixl::aarch64::ANDS_w_imm;
+using vixl::aarch64::ANDS_x_imm;
 using vixl::aarch64::Assembler;
 using vixl::aarch64::CBNZ_w;
 using vixl::aarch64::CBNZ_x;
@@ -32,12 +38,16 @@ using vixl::aarch64::LDR_w_unsigned;
 using vixl::aarch64::LDR_x_unsigned;
 using vixl::aarch64::LoadLiteralMask;
 using vixl::aarch64::LoadStoreUnsignedOffsetMask;
+using vixl::aarch64::LogicalImmediateMask;
 using vixl::aarch64::Register;
 using vixl::aarch64::Rt_mask;
+using vixl::aarch64::TBNZ;
+using vixl::aarch64::TestBranchMask;
 using vixl::aarch64::kInstructionSize;
 using vixl::aarch64::kPageSize;
 using vixl::aarch64::kWRegSize;
 using vixl::aarch64::kXRegSize;
+using vixl::aarch64::kZeroRegCode;
 
 static_assert(kPageSize == (1u << 12),
               "ADRP/LDR page-offset encoding assumes 4KB pages");
@@ -84,6 +94,35 @@ CompareAndBranchDetails getCompareAndBranchDetails(const Instruction* cb) {
     Register(cb->Rt(), cb->GetSixtyFourBits() ? kXRegSize : kWRegSize);
   auto const op = cb->Mask(CompareBranchMask);
   return {reg, op == CBNZ_w || op == CBNZ_x};
+}
+
+bool getBitTestDetails(const Instruction* test, BitTestDetails& out) {
+  auto const op = test->Mask(LogicalImmediateMask);
+  if ((op != ANDS_w_imm && op != ANDS_x_imm) ||
+      test->Rd() != kZeroRegCode) {
+    return false;
+  }
+
+  auto const mask = test->ImmLogical();
+  if (folly::popcount(mask) != 1) return false;
+
+  auto const regSize = test->GetSixtyFourBits() ? kXRegSize : kWRegSize;
+  out = BitTestDetails{
+    Register(test->Rn(), regSize),
+    safe_cast<uint8_t>(folly::findFirstSet(mask) - 1)
+  };
+  return true;
+}
+
+TestAndBranchDetails getTestAndBranchDetails(const Instruction* tb) {
+  assertx(tb->IsTestBranch());
+  auto const bit = static_cast<uint8_t>(
+    (tb->ImmTestBranchBit5() << 5) | tb->ImmTestBranchBit40()
+  );
+  constexpr auto kFirstXRegBit = 32;
+  auto const regSize = bit < kFirstXRegBit ? kWRegSize : kXRegSize;
+  auto const reg = Register(tb->Rt(), regSize);
+  return {reg, bit, tb->Mask(TestBranchMask) == TBNZ};
 }
 
 LoadLiteral LoadLiteral::at(Instruction* start, const Instruction* end) {

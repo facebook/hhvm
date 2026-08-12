@@ -335,7 +335,14 @@ let () =
           Decl_folded_class_rupro.fold_classes_in_files
             ~root:(Path.to_string tmpdir)
             (Decl_fold_options.from_global_options tcopt)
-            (Decl_parser_options.from_parser_options popt)
+            (* Fold rupro with the same fully-resolved parser options OCaml uses.
+               `popt` is built from CLI flags only (pre-`--config`); the `--config`
+               overrides are applied to `tcopt` by `ServerConfig.load_config`
+               above. Passing `popt` here made rupro silently ignore every parser
+               option set via `--config`, yielding spurious OCaml-vs-rupro
+               mismatches (e.g. a test passing `--config everything_sdt=true`).
+               `tcopt.GlobalOptions.po` is that resolved option set. *)
+            (Decl_parser_options.from_parser_options tcopt.GlobalOptions.po)
             files
         with
         | Ok rupro_decls -> rupro_decls

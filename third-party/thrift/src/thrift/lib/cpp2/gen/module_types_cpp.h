@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -39,80 +40,127 @@ namespace st {
 //  copy_field_fn
 //  copy_field
 //
-//  Returns a copy of a field. Used by structure copy-cosntructors.
+//  Returns a copy of a field. Used by structure copy-constructors.
 //
 //  Transitively copies through unique-ptr's, which are not copy-constructible.
 template <typename TypeClass>
 struct copy_field_fn;
 template <typename TypeClass>
-inline constexpr copy_field_fn<TypeClass> copy_field{};
+inline constexpr copy_field_fn<TypeClass> copy_field;
 
-template <typename>
-struct copy_field_rec {
-  template <typename T>
-  T operator()(T const& t) const {
-    return t;
-  }
-};
+struct dummy_type {};
 
-template <typename ValueTypeClass>
-struct copy_field_rec<type_class::list<ValueTypeClass>> {
+template <typename TypeClass>
+struct deferred_copy_field_fn {
   template <typename T>
-  T operator()(T const& t) const {
-    T result;
-    folly::reserve_if_available(result, t.size());
-    for (const auto& e : t) {
-      result.push_back(copy_field<ValueTypeClass>(e));
-    }
-    return result;
-  }
-};
+  struct adapter {
+    const T& t;
+    operator T() const { return copy_field<TypeClass>(t); }
+  };
 
-template <typename ValueTypeClass>
-struct copy_field_rec<type_class::set<ValueTypeClass>> {
   template <typename T>
-  T operator()(T const& t) const {
-    T result;
-    folly::reserve_if_available(result, t.size());
-    for (const auto& e : t) {
-      result.emplace_hint(result.end(), copy_field<ValueTypeClass>(e));
-    }
-    return result;
-  }
-};
-
-template <typename KeyTypeClass, typename MappedTypeClass>
-struct copy_field_rec<type_class::map<KeyTypeClass, MappedTypeClass>> {
-  template <typename T>
-  T operator()(T const& t) const {
-    T result;
-    folly::reserve_if_available(result, t.size());
-    for (const auto& pair : t) {
-      result.emplace_hint(
-          result.end(),
-          copy_field<KeyTypeClass>(pair.first),
-          copy_field<MappedTypeClass>(pair.second));
-    }
-    return result;
+  adapter<T> operator()(const T& x) const {
+    static_assert(
+        !std::constructible_from<T, dummy_type>,
+        "one argument unrestricted constructors break thrift internals");
+    return {x};
   }
 };
 
 template <typename TypeClass>
-struct copy_field_fn : copy_field_rec<TypeClass> {
-  using rec = copy_field_rec<TypeClass>;
+inline constexpr deferred_copy_field_fn<TypeClass> deferred_copy_field;
 
-  using rec::operator();
-  template <typename T>
-  std::unique_ptr<T> operator()(const std::unique_ptr<T>& t) const {
-    return !t ? nullptr : std::make_unique<T>((*this)(*t));
+// std::copy_constructible is necessary but not sufficient:
+// standard containers satisfy it regardless of the element type.
+//
+// (This happens because std containers support incomplete types.)
+template <typename TypeClass, typename T>
+constexpr bool copy_constructible_check() {
+  if constexpr (!std::copy_constructible<T>) {
+    return false;
+  } else if constexpr (
+      folly::is_instantiation_of_v<type_class::list, TypeClass> ||
+      folly::is_instantiation_of_v<type_class::set, TypeClass>) {
+    return copy_constructible_check<
+        folly::type_list_element_t<0, TypeClass>,
+        typename T::value_type>();
+  } else if constexpr (folly::
+                           is_instantiation_of_v<type_class::map, TypeClass>) {
+    return copy_constructible_check<
+               folly::type_list_element_t<0, TypeClass>,
+               typename T::key_type>() &&
+        copy_constructible_check<
+               folly::type_list_element_t<1, TypeClass>,
+               typename T::mapped_type>();
+  } else {
+    return true;
   }
+}
 
-  template <typename T, typename Alloc>
-  std::unique_ptr<T, folly::allocator_delete<Alloc>> operator()(
-      const std::unique_ptr<T, folly::allocator_delete<Alloc>>& t) const {
-    return !t ? nullptr
-              : folly::allocate_unique<T>(
-                    t.get_deleter().get_allocator(), (*this)(*t));
+template <typename TypeClass, typename T, typename D>
+std::unique_ptr<T, D> deep_copy_unique_ptr(const std::unique_ptr<T, D>& t) {
+  if (!t) {
+    return nullptr;
+  }
+  if constexpr (folly::is_instantiation_of_v<std::default_delete, D>) {
+    return std::make_unique<T>(deferred_copy_field<TypeClass>(*t));
+  } else {
+    static_assert(
+        folly::is_instantiation_of_v<folly::allocator_delete, D>,
+        "only supported deleters are std::default_delete and folly::allocator_delete");
+    return folly::allocate_unique<T>(
+        t.get_deleter().get_allocator(), deferred_copy_field<TypeClass>(*t));
+  }
+}
+
+template <typename TypeClass>
+struct copy_field_fn {
+  template <template <typename...> class Container>
+  static constexpr bool is_container_v =
+      folly::is_instantiation_of_v<Container, TypeClass>;
+
+  template <typename T>
+  T operator()(const T& t) const {
+    if constexpr (copy_constructible_check<TypeClass, T>()) {
+      return t;
+    } else if constexpr (folly::is_instantiation_of_v<std::unique_ptr, T>) {
+      return deep_copy_unique_ptr<TypeClass>(t);
+    } else if constexpr (is_container_v<type_class::list>) {
+      using ValueTypeClass = folly::type_list_element_t<0, TypeClass>;
+      T result;
+      folly::reserve_if_available(result, t.size());
+      for (const auto& e : t) {
+        result.emplace_back(deferred_copy_field<ValueTypeClass>(e));
+      }
+      return result;
+    } else if constexpr (is_container_v<type_class::set>) {
+      using ValueTypeClass = folly::type_list_element_t<0, TypeClass>;
+      T result;
+      folly::reserve_if_available(result, t.size());
+      for (const auto& e : t) {
+        // Not deferred copy here because it is incompatible with
+        // heterogeneous lookup logic in f14.
+        result.emplace_hint(result.end(), copy_field<ValueTypeClass>(e));
+      }
+      return result;
+    } else if constexpr (is_container_v<type_class::map>) {
+      using KeyTypeClass = folly::type_list_element_t<0, TypeClass>;
+      using MappedTypeClass = folly::type_list_element_t<1, TypeClass>;
+      T result;
+      folly::reserve_if_available(result, t.size());
+      for (const auto& pair : t) {
+        result.emplace_hint(
+            result.end(),
+            // Not deferred copy here because it is incompatible with
+            // heterogeneous lookup logic in f14.
+            copy_field<KeyTypeClass>(pair.first),
+            deferred_copy_field<MappedTypeClass>(pair.second));
+      }
+      return result;
+    } else {
+      static_assert(
+          std::copy_constructible<T>, "field type is not copy-constructible");
+    }
   }
 };
 

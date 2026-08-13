@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/common/Stats.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 
 namespace apache::thrift::fast_thrift {
 
@@ -68,6 +69,12 @@ class ThriftMetricsHandler {
   [[nodiscard]] channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     DCHECK(stats_ != nullptr);
+    if constexpr (Dir == Direction::Server) {
+      if (FOLLY_UNLIKELY(!shouldCount(
+              msg.get<thrift::ThriftServerRequestMessage>().payload))) {
+        return ctx.fireRead(std::move(msg));
+      }
+    }
     stats_->thriftInbound.incrementValue(1);
     if constexpr (Dir == Direction::Server) {
       stats_->thriftActive.incrementValue(1);
@@ -88,6 +95,12 @@ class ThriftMetricsHandler {
   [[nodiscard]] channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     DCHECK(stats_ != nullptr);
+    if constexpr (Dir == Direction::Server) {
+      if (FOLLY_UNLIKELY(!shouldCount(
+              msg.get<thrift::ThriftServerResponseMessage>().payload))) {
+        return ctx.fireWrite(std::move(msg));
+      }
+    }
     stats_->thriftOutbound.incrementValue(1);
     if constexpr (Dir == Direction::Server) {
       stats_->thriftActive.incrementValue(-1);
@@ -104,6 +117,22 @@ class ThriftMetricsHandler {
   void onPipelineInactive(Context& /*ctx*/) noexcept {}
 
  private:
+  // Not every message crossing this handler is an RPC: the connection setup
+  // exchange rides the same pipeline. Count requests and their responses only,
+  // matching the classic server, which counts at request creation and so never
+  // sees connection-level traffic at all.
+  static bool shouldCount(
+      const thrift::ThriftServerInboundPayloadVariant& payload) noexcept {
+    return payload.template is<thrift::ThriftRequestResponsePayload>();
+  }
+  static bool shouldCount(
+      const thrift::ThriftServerOutboundPayloadVariant& payload) noexcept {
+    // A refused connection has its own payload precisely so it is not mistaken
+    // for a request error here — nothing counted it inbound.
+    return payload.template is<thrift::ThriftInitialResponsePayload>() ||
+        payload.template is<thrift::ThriftErrorPayload>();
+  }
+
   Stats* stats_;
 };
 

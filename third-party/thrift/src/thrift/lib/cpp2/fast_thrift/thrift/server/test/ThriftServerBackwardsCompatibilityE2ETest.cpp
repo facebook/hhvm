@@ -49,6 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -73,6 +74,7 @@ HANDLER_TAG(frame_defragmentation_handler);
 HANDLER_TAG(frame_fragmentation_handler);
 HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
+HANDLER_TAG(thrift_server_setup_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
 
@@ -166,11 +168,9 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
 
     auto serverChannel =
         std::make_shared<thrift::ThriftServerChannel>(handler_);
-    auto* channel = serverChannel.get();
     auto transportAdapter =
         std::make_unique<thrift::server::ThriftServerTransportAdapter>(
             std::move(rocketConn));
-    auto* transportAdapterPtr = transportAdapter.get();
     auto& rocketConnRef = transportAdapter->rocketConnection();
 
     // Rocket pipeline; SETUP publishes negotiated metadata protocol into
@@ -209,16 +209,7 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                 rocket_server_message_marshal_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
                                handler::RocketServerSetupFrameHandler>(
-                server_setup_frame_handler_tag,
-                [channel, transportAdapterPtr](
-                    const apache::thrift::fast_thrift::rocket::server::handler::
-                        SetupParameters& p,
-                    std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
-                  channel->setMetadataProtocol(p.metadataProtocol);
-                  transportAdapterPtr->setMetadataProtocol(p.metadataProtocol);
-                  return makeSetupResponseResult(
-                      std::move(setupMetadata), p.metadataProtocol);
-                })
+                server_setup_frame_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
                                handler::RocketServerStreamStateHandler>(
                 server_stream_state_handler_tag)
@@ -239,6 +230,9 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                               .setHead(transportAdapter.get())
                               .setTail(serverChannel.get())
                               .setAllocator(&conn.thriftAllocator)
+                              .addNextDuplex<thrift::ThriftServerSetupHandler<
+                                  channel_pipeline::detail::ContextImpl>>(
+                                  thrift_server_setup_handler_tag)
                               .build();
     transportAdapter->setPipeline(conn.thriftPipeline.get());
     serverChannel->setPipelineRef(*conn.thriftPipeline);

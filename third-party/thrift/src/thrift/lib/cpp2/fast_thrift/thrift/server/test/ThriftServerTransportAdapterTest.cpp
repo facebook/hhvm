@@ -25,21 +25,25 @@
 #include <gtest/gtest.h>
 
 #include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
@@ -78,6 +82,48 @@ TypeErasedBox makeRocketRequestBox(uint32_t streamId = 1) {
   rocket::server::RocketRequestMessage request{
       .frame = frame::read::parseFrame(std::move(frameBuf)),
       .streamId = streamId,
+  };
+  return erase_and_box(std::move(request));
+}
+
+// A SETUP frame with no setup metadata — decodes to a default
+// RequestSetupMetadata, which negotiates to the server floor.
+TypeErasedBox makeSetupRequestBox() {
+  auto frameBuf = frame::write::serialize(
+      frame::write::SetupHeader{
+          .majorVersion = 1,
+          .minorVersion = 0,
+          .keepaliveTime = 30000,
+          .maxLifetime = 60000},
+      nullptr,
+      nullptr);
+
+  rocket::server::RocketRequestMessage request{
+      .frame = frame::read::parseFrame(std::move(frameBuf)),
+      .streamId = 0,
+  };
+  return erase_and_box(std::move(request));
+}
+
+// A SETUP frame carrying setup metadata that cannot be deserialized: a string
+// field whose declared length runs off the end of the buffer.
+TypeErasedBox makeUndecodableSetupRequestBox() {
+  constexpr uint8_t kTruncatedStringField[] = {
+      0x0B, 0x00, 0x01, 0x7F, 0xFF, 0xFF, 0xFF};
+
+  auto frameBuf = frame::write::serialize(
+      frame::write::SetupHeader{
+          .majorVersion = 1,
+          .minorVersion = 0,
+          .keepaliveTime = 30000,
+          .maxLifetime = 60000},
+      folly::IOBuf::copyBuffer(
+          kTruncatedStringField, sizeof(kTruncatedStringField)),
+      nullptr);
+
+  rocket::server::RocketRequestMessage request{
+      .frame = frame::read::parseFrame(std::move(frameBuf)),
+      .streamId = 0,
   };
   return erase_and_box(std::move(request));
 }
@@ -246,6 +292,80 @@ TEST(ThriftServerTransportAdapterTest, OnReadReadyFromThriftReachesRocketHead) {
   thriftPipeline->onReadReady();
 
   EXPECT_EQ(fixture.rocketHead.onReadReadyCount(), 1);
+
+  fixture.adapter->resetPipeline();
+}
+
+// The bridge reports the setup traversal's result as it came back rather than
+// flattening it, so a handler asking to slow down reaches the transport.
+TEST(ThriftServerTransportAdapterTest, SetupTraversalResultIsReportedAsIs) {
+  AdapterWithRocketPipeline fixture;
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&fixture.evb)
+                            .setHead(fixture.adapter.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+  fixture.adapter->setPipeline(thriftPipeline.get());
+  thriftTail.setReadResult(Result::Backpressure);
+
+  auto result = fixture.appAdapter->onRead(
+      channel_pipeline::test::inertEndpointContext(), makeSetupRequestBox());
+
+  EXPECT_EQ(result, Result::Backpressure);
+  EXPECT_EQ(thriftTail.readCount(), 1);
+
+  fixture.adapter->resetPipeline();
+}
+
+TEST(ThriftServerTransportAdapterTest, UndecodableSetupIsRefusedAtTheBridge) {
+  AdapterWithRocketPipeline fixture;
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&fixture.evb)
+                            .setHead(fixture.adapter.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+  fixture.adapter->setPipeline(thriftPipeline.get());
+
+  TypeErasedBox capturedMsg;
+  fixture.rocketHead.setOnWriteCallback([&](TypeErasedBox&& msg) {
+    capturedMsg = std::move(msg);
+    return Result::Success;
+  });
+
+  auto result = fixture.appAdapter->onRead(
+      channel_pipeline::test::inertEndpointContext(),
+      makeUndecodableSetupRequestBox());
+
+  // Non-Success keeps the connection awaiting a setup rather than letting the
+  // next frame be taken for post-setup traffic.
+  EXPECT_EQ(result, Result::Error);
+  EXPECT_EQ(thriftTail.readCount(), 0);
+
+  const auto& frame =
+      capturedMsg.get<rocket::server::RocketResponseMessage>().frame;
+  EXPECT_EQ(
+      frame.frameType, apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(frame.streamId, 0u);
+  EXPECT_EQ(
+      frame.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 
   fixture.adapter->resetPipeline();
 }

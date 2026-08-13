@@ -49,16 +49,6 @@ struct SetupParameters {
   MetadataProtocol metadataProtocol{MetadataProtocol::BINARY};
 };
 
-// Outcome of the SETUP-completion callback. The thrift layer parses the
-// client's setup metadata and returns either the compact-serialized
-// ServerPushMetadata to push back to the client (metadataPush) or a rejection
-// error code. Stays thrift-free: only opaque bytes and a frame-layer error
-// code cross the rocket boundary.
-struct SetupResponseResult {
-  std::unique_ptr<folly::IOBuf> metadataPush;
-  std::optional<apache::thrift::fast_thrift::frame::ErrorCode> reject;
-};
-
 /**
  * RocketServerSetupFrameHandler - Pipeline handler for RSocket SETUP frame
  * validation.
@@ -83,18 +73,7 @@ class RocketServerSetupFrameHandler {
   static constexpr uint16_t kRSocketMajorVersion = 1;
   static constexpr uint16_t kRSocketMinorVersion = 0;
 
-  // Invoked once when the SETUP frame passes RSocket-level validation. Receives
-  // the negotiated parameters and the client's raw setup-metadata IOBuf (may be
-  // null), and returns the SETUP response to emit (or a rejection). The thrift
-  // layer wires this to parse RequestSetupMetadata, negotiate the version, and
-  // build the ServerPushMetadata bytes; the rocket layer stays thrift-free.
-  using OnSetupCompleteFn = folly::Function<SetupResponseResult(
-      const SetupParameters&, std::unique_ptr<folly::IOBuf>) noexcept>;
-
   RocketServerSetupFrameHandler() = default;
-
-  explicit RocketServerSetupFrameHandler(OnSetupCompleteFn onSetupComplete)
-      : onSetupComplete_(std::move(onSetupComplete)) {}
 
   // === HandlerLifecycle ===
 
@@ -124,7 +103,7 @@ class RocketServerSetupFrameHandler {
     auto& frame = request.frame;
 
     if (FOLLY_UNLIKELY(!setupComplete_)) {
-      return handleAwaitingSetup(ctx, std::move(frame));
+      return handleAwaitingSetup(ctx, std::move(msg));
     }
 
     if (FOLLY_UNLIKELY(
@@ -171,7 +150,9 @@ class RocketServerSetupFrameHandler {
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result handleAwaitingSetup(
       Context& ctx,
-      apache::thrift::fast_thrift::frame::read::ParsedFrame&& frame) noexcept {
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    auto& frame = msg.get<RocketRequestMessage>().frame;
     if (frame.type() != apache::thrift::fast_thrift::frame::FrameType::SETUP) {
       XLOG(ERR) << "Expected SETUP frame, got " << frame.typeName();
       return sendError(
@@ -244,37 +225,22 @@ class RocketServerSetupFrameHandler {
           "Invalid setup metadata");
     }
 
-    SetupResponseResult response;
-    if (onSetupComplete_) {
-      response = onSetupComplete_(params_, std::move(frame).extractMetadata());
-    }
-
-    if (response.reject.has_value()) {
-      return sendError(ctx, *response.reject, "SETUP negotiation rejected");
-    }
-
-    if (response.metadataPush) {
-      auto writeResult =
-          emitMetadataPush(ctx, std::move(response.metadataPush));
-      if (writeResult ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
-        return sendError(
-            ctx,
-            apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
-            "SETUP response write failed");
-      }
-      setupComplete_ = true;
-      if (writeResult ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
-        return writeResult;
-      }
-    } else {
+    // What to answer a valid SETUP with needs the setup metadata interpreted,
+    // which is a thrift concern. Forward it up instead and let the layer that
+    // understands it answer; the response comes back down the outbound path
+    // like any other. The negotiated encoding rides along so the layer that
+    // decodes that metadata does not have to re-read the MIME type. Only an
+    // outright refusal leaves the connection still awaiting a setup;
+    // backpressure means the setup was taken and merely asks the connection to
+    // slow down, so the next frame is post-setup traffic.
+    msg.get<RocketRequestMessage>().metadataProtocol = params_.metadataProtocol;
+    const auto result = ctx.fireRead(std::move(msg));
+    if (FOLLY_LIKELY(
+            result !=
+            apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
       setupComplete_ = true;
     }
-
-    // SETUP is a connection-level protocol frame consumed by this handler.
-    // It is not forwarded to downstream handlers.
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+    return result;
   }
 
   // Emits the SETUP response as a connection-level METADATA_PUSH (streamId 0).
@@ -346,7 +312,6 @@ class RocketServerSetupFrameHandler {
 
   bool setupComplete_{false};
   SetupParameters params_;
-  OnSetupCompleteFn onSetupComplete_;
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server::handler

@@ -24,11 +24,14 @@
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
@@ -132,6 +135,10 @@ class ThriftServerTransportAdapter {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<rocket::server::RocketRequestMessage>();
 
+    if (FOLLY_UNLIKELY(request.frame.isConnectionFrame())) {
+      return onConnectionFrame(std::move(request));
+    }
+
     auto decoded = fromRocketFrame(std::move(request.frame), metadataProtocol_);
 
     if (FOLLY_UNLIKELY(!decoded.hasValue())) {
@@ -191,6 +198,14 @@ class ThriftServerTransportAdapter {
   channel_pipeline::Result onWrite(
       channel_pipeline::detail::ContextImpl&,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
+    return writeToRocket(std::move(msg));
+  }
+
+  // The write body, reachable without a pipeline context: the adapter also
+  // emits on its own behalf when it refuses a connection setup, which happens
+  // outside any outbound traversal.
+  channel_pipeline::Result writeToRocket(
+      channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
     rocket::server::RocketResponseMessage rocketMsg{
         .frame = std::move(response.payload).toRocketFrame(metadataProtocol_),
@@ -224,6 +239,24 @@ class ThriftServerTransportAdapter {
   }
 
  private:
+  // Connection-level frames (streamId 0) reach here now that the stream-state
+  // handler forwards them. SETUP is the one this layer answers; anything else
+  // has already been consumed by the handler that owns it, so it is dropped.
+  FOLLY_NOINLINE channel_pipeline::Result onConnectionFrame(
+      rocket::server::RocketRequestMessage&& request) noexcept;
+
+  // Decodes a validated SETUP frame into the inbound setup message. What the
+  // server will speak is negotiated downstream, not here.
+  FOLLY_NOINLINE channel_pipeline::Result onSetupFrame(
+      rocket::server::RocketRequestMessage&& request) noexcept;
+
+  // Refuses the setup exchange when its metadata cannot be decoded at all.
+  // Always non-Success: the connection is left awaiting a setup it will not
+  // get.
+  FOLLY_NOINLINE channel_pipeline::Result rejectSetup(
+      apache::thrift::fast_thrift::frame::ErrorCode code,
+      std::string_view reason) noexcept;
+
   // Rocket pipeline became active — activate the thrift pipeline so
   // handlers can react. Idempotent in connected_; reactivate after
   // disconnect works.

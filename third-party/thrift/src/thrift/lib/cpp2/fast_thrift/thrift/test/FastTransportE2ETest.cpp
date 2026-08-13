@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -95,6 +96,7 @@ HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(rocket_server_setup_frame_handler);
 HANDLER_TAG(rocket_server_request_response_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
+HANDLER_TAG(thrift_server_setup_handler);
 
 /**
  * ConnectCallback - Triggers transportHandler->onConnect() when the
@@ -283,15 +285,19 @@ class FastTransportE2ETest : public ::testing::Test {
 
     ServerConnection conn;
     conn.serverChannel = serverChannel;
-    conn.thriftPipeline = PipelineBuilder<
-                              thrift::server::ThriftServerTransportAdapter,
-                              thrift::ThriftServerChannel,
-                              SimpleBufferAllocator>()
-                              .setEventBase(evb)
-                              .setHead(transportAdapter.get())
-                              .setTail(serverChannel.get())
-                              .setAllocator(&conn.thriftAllocator)
-                              .build();
+    conn.thriftPipeline =
+        PipelineBuilder<
+            thrift::server::ThriftServerTransportAdapter,
+            thrift::ThriftServerChannel,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportAdapter.get())
+            .setTail(serverChannel.get())
+            .setAllocator(&conn.thriftAllocator)
+            .template addNextDuplex<thrift::ThriftServerSetupHandler<
+                channel_pipeline::detail::ContextImpl>>(
+                thrift_server_setup_handler_tag)
+            .build();
 
     transportAdapter->setPipeline(conn.thriftPipeline.get());
     serverChannel->setPipelineRef(*conn.thriftPipeline);

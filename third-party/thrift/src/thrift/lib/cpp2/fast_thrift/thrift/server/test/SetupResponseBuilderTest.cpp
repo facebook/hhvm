@@ -29,7 +29,7 @@
 namespace apache::thrift::fast_thrift::thrift {
 namespace {
 
-// Compact-encode a RequestSetupMetadata to feed makeSetupResponseResult, the
+// Compact-encode a RequestSetupMetadata to feed negotiateSetup, the
 // same way a client's SETUP frame metadata arrives on the wire.
 std::unique_ptr<folly::IOBuf> encodeRequestSetupMetadata(
     std::optional<int32_t> minVersion, std::optional<int32_t> maxVersion) {
@@ -55,6 +55,37 @@ apache::thrift::SetupResponse decodeSetupResponse(folly::IOBuf* buffer) {
   EXPECT_EQ(
       push.getType(), apache::thrift::ServerPushMetadata::Type::setupResponse);
   return *push.setupResponse();
+}
+
+// Parses, negotiates and serializes in one step, mirroring what the pipeline
+// does across the frame decoder and ThriftServerSetupHandler, so these tests
+// keep asserting on a single result.
+struct SetupResult {
+  std::unique_ptr<folly::IOBuf> metadataPush;
+  std::optional<apache::thrift::fast_thrift::frame::ErrorCode> reject;
+};
+
+SetupResult makeSetupResponseResult(
+    std::unique_ptr<folly::IOBuf> setupMetadata,
+    rocket::server::MetadataProtocol protocol) {
+  auto clientSetup = parseSetupMetadata(std::move(setupMetadata), protocol);
+  if (!clientSetup.hasValue()) {
+    return SetupResult{.metadataPush = nullptr, .reject = clientSetup.error()};
+  }
+  auto negotiated = negotiateVersion(*clientSetup);
+  if (!negotiated.hasValue()) {
+    return SetupResult{.metadataPush = nullptr, .reject = negotiated.error()};
+  }
+  apache::thrift::SetupResponse response;
+  response.version() = *negotiated;
+  response.zstdSupported() = false;
+  auto bytes = serializeSetupResponse(std::move(response));
+  if (bytes == nullptr) {
+    return SetupResult{
+        .metadataPush = nullptr,
+        .reject = apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP};
+  }
+  return SetupResult{.metadataPush = std::move(bytes), .reject = std::nullopt};
 }
 
 int32_t negotiatedVersion(

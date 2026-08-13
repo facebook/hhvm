@@ -174,8 +174,6 @@ class ThriftServerConnectionFactory {
       folly::EventBase* evb,
       transport::TransportHandler* transportHandler,
       rocket::server::RocketServerAppAdapter* appAdapter,
-      rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-          onSetupComplete,
       ServerStatsShard* FOLLY_NULLABLE statsShard);
 
   // Hands the configured CPU pool to a user adapter. No-op when no pool is

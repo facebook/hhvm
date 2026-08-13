@@ -99,10 +99,11 @@ class RocketServerStreamStateHandler {
     uint32_t streamId = frame.streamId();
 
     if (frame.isConnectionFrame()) {
-      // Connection-level frames (streamId == 0) like KEEPALIVE are
-      // protocol-level frames handled below this layer. Do not forward
-      // to the application layer.
-      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+      // Connection-level frames (streamId == 0) carry no stream state, so
+      // there is nothing for this handler to track. Forward rather than drop:
+      // SETUP is answered by the layer above, which needs to see it. Frames
+      // consumed below this point (KEEPALIVE) never reach here anyway.
+      return ctx.fireRead(std::move(msg));
     }
 
     auto frameType = frame.type();
@@ -131,6 +132,7 @@ class RocketServerStreamStateHandler {
   /**
    * Handle outbound responses from the application.
    *
+   * - Passes connection-level frames straight through
    * - Validates streamId is an active stream
    * - If complete, removes the stream
    * - Forwards RocketResponseMessage to FrameHandler
@@ -149,6 +151,16 @@ class RocketServerStreamStateHandler {
     // the erase policy.
     uint32_t streamId = response.frame.streamId;
     bool complete = response.frame.isComplete();
+
+    // Connection-level frames — the SETUP answer and its refusal — belong to
+    // the connection, not to a stream, so there is no context to look up. They
+    // are only reachable from above this handler, so an unknown streamId here
+    // still means a stream frame that outlived its stream.
+    if (FOLLY_UNLIKELY(
+            streamId ==
+            apache::thrift::fast_thrift::frame::kConnectionStreamId)) {
+      return ctx.fireWrite(std::move(msg));
+    }
 
     auto it = contexts.streams.find(streamId);
     if (it == contexts.streams.end()) {

@@ -47,6 +47,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestHeadersHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/WriteBufferBackpressureHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
@@ -73,6 +74,7 @@ HANDLER_TAG(thrift_server_request_headers_handler);
 HANDLER_TAG(thrift_server_checksum_handler);
 HANDLER_TAG(thrift_server_connection_close_handler);
 HANDLER_TAG(write_buffer_backpressure_handler);
+HANDLER_TAG(thrift_server_setup_handler);
 } // namespace
 
 ThriftServerConnectionFactory::ThriftServerConnectionFactory(
@@ -224,17 +226,7 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   auto* transportAdapterPtr = conn.thriftTransportAdapter.get();
 
   auto rocketPipeline = buildRocketPipeline(
-      evb,
-      transportHandler.get(),
-      rocketConn.appAdapter.get(),
-      [transportAdapterPtr](
-          const rocket::server::handler::SetupParameters& p,
-          std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
-        transportAdapterPtr->setMetadataProtocol(p.metadataProtocol);
-        return makeSetupResponseResult(
-            std::move(setupMetadata), p.metadataProtocol);
-      },
-      statsShard);
+      evb, transportHandler.get(), rocketConn.appAdapter.get(), statsShard);
   rocketConn.appAdapter->setPipeline(rocketPipeline.get());
   transportHandler->setPipeline(rocketPipeline.get());
 
@@ -266,6 +258,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       ThriftServerConnectionCloseHandler<channel_pipeline::detail::ContextImpl>;
   using WriteBufferHandler =
       WriteBufferBackpressureHandler<channel_pipeline::detail::ContextImpl>;
+  using SetupHandler =
+      ThriftServerSetupHandler<channel_pipeline::detail::ContextImpl>;
   PipelineBuilder<
       ThriftServerTransportAdapter,
       TailAdapter,
@@ -335,6 +329,12 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   for (const auto& factory : config_.thriftPipelineHandlerFactories) {
     thriftPipelineBuilder.addErasedHandler(factory());
   }
+  // Last before the tail, and deliberately after the embedder handlers: this
+  // terminates the connection-lifecycle messages, so everything that might
+  // answer one has to run first. The application tail then only ever sees
+  // requests.
+  thriftPipelineBuilder.template addNextDuplex<SetupHandler>(
+      thrift_server_setup_handler_tag);
   auto thriftPipeline = thriftPipelineBuilder.build();
   transportAdapterPtr->setPipeline(thriftPipeline.get());
   tailAdapter->setPipeline(thriftPipeline.get());
@@ -347,8 +347,6 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
     folly::EventBase* evb,
     transport::TransportHandler* transportHandler,
     rocket::server::RocketServerAppAdapter* appAdapter,
-    rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-        onSetupComplete,
     ServerStatsShard* FOLLY_NULLABLE statsShard) {
   // addState rebinds: it returns a builder of an extended type and leaves the
   // original moved-from, so the chain up to and including it must be bound
@@ -397,7 +395,7 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
           rocket::server::handler::RocketServerMessageMarshalHandler>(
           rocket_server_message_marshal_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-          server_setup_frame_handler_tag, std::move(onSetupComplete))
+          server_setup_frame_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
           server_keepalive_handler_tag)
       .addNextDuplex<

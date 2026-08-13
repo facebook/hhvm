@@ -71,6 +71,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
@@ -87,6 +88,7 @@ using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
 using apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter;
 using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
+HANDLER_TAG(thrift_server_setup_handler);
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
@@ -332,15 +334,19 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
     transportAdapter_ =
         std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
 
-    thriftPipeline_ = PipelineBuilder<
-                          ThriftServerTransportAdapter,
-                          ThriftServerCompositeAppAdapter,
-                          TestAllocator>()
-                          .setEventBase(&evb_)
-                          .setHead(transportAdapter_.get())
-                          .setTail(composite_.get())
-                          .setAllocator(&thriftAllocator_)
-                          .build();
+    thriftPipeline_ =
+        PipelineBuilder<
+            ThriftServerTransportAdapter,
+            ThriftServerCompositeAppAdapter,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(transportAdapter_.get())
+            .setTail(composite_.get())
+            .setAllocator(&thriftAllocator_)
+            .template addNextDuplex<thrift::ThriftServerSetupHandler<
+                channel_pipeline::detail::ContextImpl>>(
+                thrift_server_setup_handler_tag)
+            .build();
 
     transportAdapter_->setPipeline(thriftPipeline_.get());
     // composite's setPipeline fans out to children — children need
@@ -370,6 +376,9 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
   void setupPipelineWithSetup() {
     setupPipeline();
     injectSetupFrame();
+    // Answering the setup puts a frame on the wire; drop it so the response
+    // assertions below read the frame their request produced.
+    testTransport_->clearWrittenData();
   }
 
   void injectFrame(std::unique_ptr<folly::IOBuf> frame) {

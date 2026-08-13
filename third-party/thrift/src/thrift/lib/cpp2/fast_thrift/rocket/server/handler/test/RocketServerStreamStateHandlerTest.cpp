@@ -347,13 +347,14 @@ TEST_F(ServerStreamStateHandlerTest, NonRequestFrameForUnknownStreamIsDropped) {
 // Connection-Level Frame Tests (streamId == 0)
 // =============================================================================
 
-TEST_F(ServerStreamStateHandlerTest, ConnectionLevelFrameIsConsumed) {
+TEST_F(ServerStreamStateHandlerTest, ConnectionLevelFrameIsForwarded) {
   auto result = callOnRead(
       parseTestFrame(apache::thrift::fast_thrift::frame::FrameType::SETUP, 0));
 
   EXPECT_EQ(result, Result::Success);
-  // Connection-level frames are consumed, not forwarded to the app
-  EXPECT_EQ(ctx_.readMessages().size(), 0);
+  // Connection-level frames carry no stream state, so this handler forwards
+  // them rather than dropping: SETUP is answered by the layer above.
+  EXPECT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_EQ(ctx_.activeStreamCount(), 0);
 }
 
@@ -448,6 +449,28 @@ TEST_F(ServerStreamStateHandlerTest, ResponseForUnknownStreamReturnsError) {
 
   EXPECT_EQ(result, Result::Error);
   EXPECT_EQ(ctx_.writeMessages().size(), 0);
+}
+
+// The SETUP answer and its refusal are addressed to the connection, not to a
+// stream, so they have no context to look up and must not be mistaken for a
+// response to a stream that has gone away.
+TEST_F(ServerStreamStateHandlerTest, ConnectionLevelResponseIsForwarded) {
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH,
+              .streamId = 0,
+              .metadata = copyBuffer("setup-response"),
+          },
+  };
+
+  auto result = callOnWrite(std::move(response));
+
+  EXPECT_EQ(result, Result::Success);
+  ASSERT_EQ(ctx_.writeMessages().size(), 1);
+  EXPECT_EQ(
+      ctx_.writeMessages()[0].get<RocketResponseMessage>().frame.streamId, 0u);
 }
 
 // =============================================================================

@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 
 #include <cstdint>
 
@@ -37,12 +38,17 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * REQUEST_FNF). Stamped by RocketServerStreamStateHandler from its per-
  * stream map; downstream per-pattern handlers (RR/Stream/Channel/FNF)
  * use it as a stateless dispatch key.
+ *
+ * `metadataProtocol` is meaningful on the SETUP frame only: the setup handler
+ * stamps what the MIME type negotiated, and the layer that decodes metadata
+ * latches it for the rest of the connection.
  */
 struct RocketRequestMessage {
   apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
   uint32_t streamId{0};
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
+  MetadataProtocol metadataProtocol{MetadataProtocol::BINARY};
 };
 
 /**

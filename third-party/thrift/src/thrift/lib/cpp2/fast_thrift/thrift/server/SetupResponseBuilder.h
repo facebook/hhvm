@@ -19,13 +19,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
-#include <optional>
 
+#include <folly/Expected.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ServerPushMetadata.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -70,55 +69,64 @@ apache::thrift::RequestSetupMetadata readRequestSetupMetadata(
 }
 } // namespace detail
 
-// Parses the client's RequestSetupMetadata, negotiates the thrift version, and
-// builds the SETUP response (ServerPushMetadata{setupResponse}) to push back.
-// Returns a rejection when the client's [minVersion, maxVersion] does not
-// overlap [kMinNegotiableVersion, kMaxNegotiableVersion], or when the metadata
-// cannot be parsed. noexcept: the rocket setup handler invokes this on a
-// noexcept boundary, so all failures map to a rejection rather than escaping.
-//
-// zstdSupported is reported false: fast_thrift has no compression codec yet, so
-// advertising support would be untruthful. Flip to true once per-request
-// compression lands.
-inline rocket::server::handler::SetupResponseResult makeSetupResponseResult(
+// Reads the client's RequestSetupMetadata out of the SETUP frame's metadata
+// region. Decoding only — the version the server will actually speak is
+// negotiated separately, once the pipeline has had its say. noexcept: this
+// runs on a noexcept boundary, so a malformed payload maps to an error code
+// rather than escaping.
+inline folly::Expected<
+    apache::thrift::RequestSetupMetadata,
+    apache::thrift::fast_thrift::frame::ErrorCode>
+parseSetupMetadata(
     std::unique_ptr<folly::IOBuf> setupMetadata,
     rocket::server::MetadataProtocol metadataProtocol) noexcept {
-  using Result = rocket::server::handler::SetupResponseResult;
   using ErrorCode = apache::thrift::fast_thrift::frame::ErrorCode;
   try {
-    apache::thrift::RequestSetupMetadata request;
+    apache::thrift::RequestSetupMetadata clientSetup;
     if (setupMetadata) {
       folly::io::Cursor cursor(setupMetadata.get());
       detail::skipProtocolKey(cursor);
-      request = metadataProtocol == rocket::server::MetadataProtocol::COMPACT
+      clientSetup =
+          metadataProtocol == rocket::server::MetadataProtocol::COMPACT
           ? detail::readRequestSetupMetadata<
                 apache::thrift::CompactProtocolReader>(cursor)
           : detail::readRequestSetupMetadata<
                 apache::thrift::BinaryProtocolReader>(cursor);
     }
+    return clientSetup;
+  } catch (...) {
+    return folly::makeUnexpected(ErrorCode::INVALID_SETUP);
+  }
+}
 
-    const int32_t clientMin = request.minVersion().value_or(0);
-    const int32_t clientMax = request.maxVersion().value_or(
-        request.minVersion().has_value() ? clientMin : kMinNegotiableVersion);
+// Picks the thrift protocol version to speak with this client. Fails when the
+// client's [minVersion, maxVersion] does not overlap
+// [kMinNegotiableVersion, kMaxNegotiableVersion].
+inline folly::Expected<int32_t, apache::thrift::fast_thrift::frame::ErrorCode>
+negotiateVersion(
+    const apache::thrift::RequestSetupMetadata& clientSetup) noexcept {
+  using ErrorCode = apache::thrift::fast_thrift::frame::ErrorCode;
+  const int32_t clientMin = clientSetup.minVersion().value_or(0);
+  const int32_t clientMax = clientSetup.maxVersion().value_or(
+      clientSetup.minVersion().has_value() ? clientMin : kMinNegotiableVersion);
 
-    if (clientMax < kMinNegotiableVersion ||
-        clientMin > kMaxNegotiableVersion) {
-      return Result{
-          .metadataPush = nullptr, .reject = ErrorCode::INVALID_SETUP};
-    }
+  if (clientMax < kMinNegotiableVersion || clientMin > kMaxNegotiableVersion) {
+    return folly::makeUnexpected(ErrorCode::INVALID_SETUP);
+  }
+  return std::min(clientMax, kMaxNegotiableVersion);
+}
 
-    apache::thrift::SetupResponse setupResponse;
-    setupResponse.version() = std::min(clientMax, kMaxNegotiableVersion);
-    setupResponse.zstdSupported() = false;
-
+// Serializes a SETUP response into the ServerPushMetadata bytes to push back.
+// Separate from negotiation so the pipeline can contribute to the response in
+// between. Returns null if serialization fails.
+inline std::unique_ptr<folly::IOBuf> serializeSetupResponse(
+    apache::thrift::SetupResponse setupResponse) noexcept {
+  try {
     apache::thrift::ServerPushMetadata push;
     push.set_setupResponse(std::move(setupResponse));
-
-    return Result{
-        .metadataPush = serializeServerPushMetadata(push),
-        .reject = std::nullopt};
+    return serializeServerPushMetadata(push);
   } catch (...) {
-    return Result{.metadataPush = nullptr, .reject = ErrorCode::INVALID_SETUP};
+    return nullptr;
   }
 }
 

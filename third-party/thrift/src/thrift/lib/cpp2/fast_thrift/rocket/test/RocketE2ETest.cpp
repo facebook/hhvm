@@ -170,6 +170,13 @@ class RocketE2ETest : public ::testing::Test {
       // Wire server callbacks
       serverAppAdapter_->setRequestHandlers(
           [this](TypeErasedBox&& msg) noexcept -> Result {
+            // Connection-level frames travel up to the application now. A
+            // rocket-only server has no thrift layer to answer a SETUP, so
+            // this adapter is where they stop; they are not requests.
+            if (msg.get<rocket::server::RocketRequestMessage>()
+                    .frame.isConnectionFrame()) {
+              return Result::Success;
+            }
             serverRequestCount_++;
             serverRequests_.push_back(std::move(msg));
 

@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -334,8 +335,6 @@ class FastThriftServerT {
       folly::EventBase* evb,
       transport::TransportHandler* transportHandler,
       rocket::server::RocketServerAppAdapter* appAdapter,
-      rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-          onSetupComplete,
       Stats* stats);
 
   const FastThriftServerConfig config_;
@@ -405,6 +404,7 @@ HANDLER_TAG(frame_defragmentation_handler);
 HANDLER_TAG(frame_fragmentation_handler);
 HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
+HANDLER_TAG(thrift_server_setup_handler);
 HANDLER_TAG(server_keepalive_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
@@ -467,10 +467,7 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
     stats = std::make_shared<Stats>();
   }
 
-  // Build the thrift channel first so the rocket pipeline's SETUP handler can
-  // capture a callback that publishes the negotiated metadata protocol into it.
   auto serverChannel = std::make_shared<ThriftServerChannel>(processorFactory_);
-  auto* channelPtr = serverChannel.get();
 
   // Build the rocket pipeline:
   //   TransportHandler → ... → RocketServerAppAdapter
@@ -478,13 +475,6 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
       evb,
       rocketConn->transportHandler.get(),
       rocketConn->appAdapter.get(),
-      [channelPtr](
-          const rocket::server::handler::SetupParameters& p,
-          std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
-        channelPtr->setMetadataProtocol(p.metadataProtocol);
-        return makeSetupResponseResult(
-            std::move(setupMetadata), p.metadataProtocol);
-      },
       stats.get());
   rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
   rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
@@ -521,6 +511,9 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
             .template addNextDuplex<
                 ThriftMetricsHandler<Direction::Server, Stats>>(
                 thrift_metrics_handler_tag, stats.get())
+            .template addNextDuplex<ThriftServerSetupHandler<
+                channel_pipeline::detail::ContextImpl>>(
+                thrift_server_setup_handler_tag)
             .build();
   } else {
     conn.thriftPipeline = channel_pipeline::PipelineBuilder<
@@ -531,6 +524,9 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
                               .setHead(transportAdapter.get())
                               .setTail(serverChannel.get())
                               .setAllocator(&conn.thriftAllocator)
+                              .template addNextDuplex<ThriftServerSetupHandler<
+                                  channel_pipeline::detail::ContextImpl>>(
+                                  thrift_server_setup_handler_tag)
                               .build();
   }
 
@@ -571,8 +567,6 @@ FastThriftServerT<Stats>::buildRocketPipeline(
     folly::EventBase* evb,
     transport::TransportHandler* transportHandler,
     rocket::server::RocketServerAppAdapter* appAdapter,
-    rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-        onSetupComplete,
     Stats* stats) {
   // Single chain for both stats modes. Only addState rebinds the builder
   // type, so bind through it once and append conditionally from there —
@@ -622,7 +616,7 @@ FastThriftServerT<Stats>::buildRocketPipeline(
           rocket::server::handler::RocketServerMessageMarshalHandler>(
           rocket_server_message_marshal_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-          server_setup_frame_handler_tag, std::move(onSetupComplete))
+          server_setup_frame_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
           server_keepalive_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(

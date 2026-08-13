@@ -77,6 +77,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2EPrimaryService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2EPrimaryService.tcc>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2ESecondaryService.h>
@@ -96,6 +97,7 @@ using channel_pipeline::PipelineImpl;
 using channel_pipeline::SimpleBufferAllocator;
 
 // Server handler tags
+HANDLER_TAG(thrift_server_setup_handler);
 HANDLER_TAG(server_frame_length_parser_handler);
 HANDLER_TAG(server_frame_length_encoder_handler);
 HANDLER_TAG(server_frame_codec_handler);
@@ -412,7 +414,12 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
               channel_pipeline::detail::ContextImpl>>(
               thrift_server_checksum_handler_tag);
     }
-    ctx.thriftPipeline = serverBuilder.build();
+    ctx.thriftPipeline =
+        serverBuilder
+            .template addNextDuplex<thrift::ThriftServerSetupHandler<
+                channel_pipeline::detail::ContextImpl>>(
+                thrift_server_setup_handler_tag)
+            .build();
 
     ctx.transportAdapter->setPipeline(ctx.thriftPipeline.get());
     // composite's setPipeline fans out to both children so their

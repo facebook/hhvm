@@ -50,6 +50,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestFastService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestFastServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -78,6 +79,9 @@ HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
 HANDLER_TAG(thrift_client_checksum_handler);
+
+// Server handler tags
+HANDLER_TAG(thrift_server_setup_handler);
 
 /**
  * ConnectCallback - Triggers transportHandler->onConnect() when the

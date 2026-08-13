@@ -241,57 +241,8 @@ makeSetupFrameWithMetadataMimeType(std::string_view metadataMime) {
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
 }
 
-// Build a full SETUP frame carrying a metadata payload (M flag set). Exercises
-// the real on-wire layout the parser must walk: fixed
-// fields, two length-prefixed MIME strings, a 3-byte metadata length, then
-// metadata.
-apache::thrift::fast_thrift::frame::read::ParsedFrame
-makeSetupFrameWithMetadata(std::string_view metadata) {
-  static constexpr std::string_view kMetaMime{
-      "application/x-rocket-metadata+compact"};
-  static constexpr std::string_view kDataMime{"application/x-rocket-payload"};
-  const size_t totalSize = 6 + 12 + 1 + kMetaMime.size() + 1 +
-      kDataMime.size() + 3 + metadata.size();
-  auto buf = folly::IOBuf::create(totalSize);
-  auto* p = buf->writableData();
-  std::memset(p, 0, totalSize);
-
-  // streamId = 0; typeAndFlags = SETUP type with the metadata (M) flag set.
-  const uint16_t typeAndFlags =
-      (static_cast<uint16_t>(
-           apache::thrift::fast_thrift::frame::FrameType::SETUP)
-       << apache::thrift::fast_thrift::frame::detail::kFlagsBits) |
-      apache::thrift::fast_thrift::frame::detail::kMetadataBit;
-  p[4] = static_cast<uint8_t>(typeAndFlags >> 8);
-  p[5] = static_cast<uint8_t>(typeAndFlags & 0xFF);
-
-  // Major version = 1, minor version = 0.
-  p[6] = 0;
-  p[7] = 1;
-  uint32_t keepalive = 30000;
-  uint32_t lifetime = 60000;
-  for (int i = 0; i < 4; ++i) {
-    p[10 + i] = static_cast<uint8_t>((keepalive >> (24 - 8 * i)) & 0xFF);
-    p[14 + i] = static_cast<uint8_t>((lifetime >> (24 - 8 * i)) & 0xFF);
-  }
-
-  size_t off = 18;
-  p[off++] = static_cast<uint8_t>(kMetaMime.size());
-  std::memcpy(p + off, kMetaMime.data(), kMetaMime.size());
-  off += kMetaMime.size();
-  p[off++] = static_cast<uint8_t>(kDataMime.size());
-  std::memcpy(p + off, kDataMime.data(), kDataMime.size());
-  off += kDataMime.size();
-
-  // 3-byte big-endian metadata length, then the metadata bytes.
-  p[off++] = static_cast<uint8_t>((metadata.size() >> 16) & 0xFF);
-  p[off++] = static_cast<uint8_t>((metadata.size() >> 8) & 0xFF);
-  p[off++] = static_cast<uint8_t>(metadata.size() & 0xFF);
-  std::memcpy(p + off, metadata.data(), metadata.size());
-
-  buf->append(totalSize);
-  return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
-}
+// A SETUP frame whose declared metadata length runs past the payload — the
+// parser must reject it rather than read off the end.
 apache::thrift::fast_thrift::frame::read::ParsedFrame
 makeSetupFrameWithTruncatedMetadata() {
   static constexpr std::string_view kMetaMime{
@@ -380,8 +331,9 @@ TEST_F(ServerSetupFrameHandlerTest, ValidSetupFrameCompletesSetup) {
   EXPECT_EQ(params.maxLifetime, 60000);
   EXPECT_FALSE(params.hasLease);
 
-  // SETUP frame is consumed, not forwarded downstream
-  EXPECT_EQ(ctx_.readMessages().size(), 0);
+  // SETUP is forwarded up: what to answer it with is not this layer's
+  // decision.
+  EXPECT_EQ(ctx_.readMessages().size(), 1);
 }
 
 TEST_F(ServerSetupFrameHandlerTest, ValidSetupFrameWithLeaseFlag) {
@@ -431,20 +383,11 @@ TEST_F(ServerSetupFrameHandlerTest, UnknownMimeTypeFallsBackToBinary) {
       apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
 }
 
-TEST_F(
-    ServerSetupFrameHandlerTest, OnSetupCompleteFiresWithNegotiatedProtocol) {
-  // Wire a callback through the handler ctor, simulating what
-  // FastThriftServer's connection factory does. The handler must invoke it
-  // exactly once after SETUP succeeds, with the negotiated parameters.
-  std::optional<rocket::server::handler::SetupParameters> captured;
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters& p,
-          std::unique_ptr<folly::IOBuf>) noexcept {
-        captured = p;
-        return SetupResponseResult{};
-      }};
-
-  auto result = wired.onRead(
+// A valid SETUP is forwarded up rather than consumed: deciding what to answer
+// with needs the setup metadata interpreted, which is not this layer's job.
+// The negotiated parameters are recorded on the way past.
+TEST_F(ServerSetupFrameHandlerTest, ForwardsSetupUpWithNegotiatedParameters) {
+  auto result = handler_.onRead(
       ctx_,
       erase_and_box(
           rocket::server::RocketRequestMessage{
@@ -452,12 +395,14 @@ TEST_F(
                   apache::thrift::fast_thrift::rocket::server::
                       kMetadataCompactMimeType),
           }));
+
   EXPECT_EQ(result, Result::Success);
-  ASSERT_TRUE(captured.has_value());
+  EXPECT_TRUE(handler_.isSetupComplete());
   EXPECT_EQ(
-      captured->metadataProtocol,
+      handler_.setupParameters().metadataProtocol,
       apache::thrift::fast_thrift::rocket::server::MetadataProtocol::COMPACT);
-  // An empty result must not emit any frame.
+  // Forwarded, not answered here: nothing is written at this layer.
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_EQ(ctx_.writeMessages().size(), 0);
 }
 
@@ -730,105 +675,28 @@ TEST_F(ServerSetupFrameHandlerTest, PostSetupBackpressurePropagated) {
   EXPECT_TRUE(handler_.isSetupComplete());
 }
 
-// =============================================================================
-// SETUP Response Tests
-// =============================================================================
+// Backpressure on the SETUP itself means the layer above took it and only
+// asked to slow down. Leaving the connection awaiting a setup would reject
+// the next frame as "Expected SETUP frame" and tear down a live connection.
+TEST_F(ServerSetupFrameHandlerTest, SetupBackpressureStillCompletesSetup) {
+  ctx_.setReadResult(Result::Backpressure);
 
-// When the callback returns metadata bytes, the handler must emit them as a
-// connection-level METADATA_PUSH (streamId 0) via fireWrite. This guards
-// against the response being routed anywhere it would be dropped.
-TEST_F(ServerSetupFrameHandlerTest, EmitsMetadataPushWhenCallbackReturnsBytes) {
-  const std::string kPushBytes = "server-push-metadata";
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters&,
-          std::unique_ptr<folly::IOBuf>) noexcept {
-        return SetupResponseResult{
-            .metadataPush = folly::IOBuf::copyBuffer(kPushBytes),
-            .reject = std::nullopt};
-      }};
+  auto result = callOnRead(makeSetupFrame());
 
-  auto result = wired.onRead(
-      ctx_,
-      erase_and_box(
-          rocket::server::RocketRequestMessage{.frame = makeSetupFrame()}));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_TRUE(wired.isSetupComplete());
+  EXPECT_EQ(result, Result::Backpressure);
+  EXPECT_TRUE(handler_.isSetupComplete());
   EXPECT_FALSE(ctx_.closeCalled());
 
-  ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto& resp =
-      ctx_.writeMessages()[0].get<rocket::server::RocketResponseMessage>();
+  ctx_.reset();
   EXPECT_EQ(
-      resp.frame.frameType,
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
-  EXPECT_EQ(resp.frame.streamId, 0u);
-  ASSERT_NE(resp.frame.metadata, nullptr);
-  const auto bytes = resp.frame.metadata->coalesce();
-  EXPECT_EQ(
-      std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size()),
-      kPushBytes);
-}
-TEST_F(ServerSetupFrameHandlerTest, FailedMetadataPushClosesConnection) {
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters&,
-          std::unique_ptr<folly::IOBuf>) noexcept {
-        return SetupResponseResult{
-            .metadataPush = folly::IOBuf::copyBuffer("server-push-metadata"),
-            .reject = std::nullopt};
-      }};
-  ctx_.setWriteResult(Result::Error);
-
-  auto result = wired.onRead(
-      ctx_,
-      erase_and_box(
-          rocket::server::RocketRequestMessage{.frame = makeSetupFrame()}));
-
-  EXPECT_EQ(result, Result::Error);
-  EXPECT_FALSE(wired.isSetupComplete());
-  EXPECT_TRUE(ctx_.closeCalled());
+      callOnRead(makeTestFrame(
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1)),
+      Result::Success);
+  EXPECT_EQ(ctx_.readMessages().size(), 1);
 }
 
-// When the callback rejects, the handler must send an ERROR frame with the
-// given code and close the connection, leaving setup incomplete.
-TEST_F(ServerSetupFrameHandlerTest, RejectFromCallbackSendsErrorAndCloses) {
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters&,
-          std::unique_ptr<folly::IOBuf>) noexcept {
-        return SetupResponseResult{
-            .metadataPush = nullptr,
-            .reject =
-                apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP};
-      }};
-
-  auto result = wired.onRead(
-      ctx_,
-      erase_and_box(
-          rocket::server::RocketRequestMessage{.frame = makeSetupFrame()}));
-
-  EXPECT_EQ(result, Result::Error);
-  EXPECT_FALSE(wired.isSetupComplete());
-  EXPECT_TRUE(ctx_.closeCalled());
-
-  ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto& errResp =
-      ctx_.writeMessages()[0].get<rocket::server::RocketResponseMessage>();
-  EXPECT_EQ(
-      errResp.frame.frameType,
-      apache::thrift::fast_thrift::frame::FrameType::ERROR);
-  EXPECT_EQ(
-      errResp.frame.errorCode,
-      static_cast<uint32_t>(
-          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
-}
 TEST_F(ServerSetupFrameHandlerTest, InvalidSetupMetadataSendsErrorAndCloses) {
-  bool callbackCalled = false;
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters&,
-          std::unique_ptr<folly::IOBuf>) noexcept {
-        callbackCalled = true;
-        return SetupResponseResult{};
-      }};
+  RocketServerSetupFrameHandler wired;
 
   auto result = wired.onRead(
       ctx_,
@@ -837,7 +705,6 @@ TEST_F(ServerSetupFrameHandlerTest, InvalidSetupMetadataSendsErrorAndCloses) {
               .frame = makeSetupFrameWithTruncatedMetadata()}));
 
   EXPECT_EQ(result, Result::Error);
-  EXPECT_FALSE(callbackCalled);
   EXPECT_FALSE(wired.isSetupComplete());
   EXPECT_TRUE(ctx_.closeCalled());
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
@@ -850,33 +717,6 @@ TEST_F(ServerSetupFrameHandlerTest, InvalidSetupMetadataSendsErrorAndCloses) {
       errResp.frame.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
-}
-
-// The handler must extract the client's setup-metadata payload from the SETUP
-// frame (past the resume token / MIME strings / length prefix) and forward it
-// to the callback verbatim.
-TEST_F(ServerSetupFrameHandlerTest, ForwardsSetupMetadataToCallback) {
-  const std::string kMeta = "request-setup-metadata-bytes";
-  std::unique_ptr<folly::IOBuf> received;
-  RocketServerSetupFrameHandler wired{
-      [&](const rocket::server::handler::SetupParameters&,
-          std::unique_ptr<folly::IOBuf> metadata) noexcept {
-        received = std::move(metadata);
-        return SetupResponseResult{};
-      }};
-
-  auto result = wired.onRead(
-      ctx_,
-      erase_and_box(
-          rocket::server::RocketRequestMessage{
-              .frame = makeSetupFrameWithMetadata(kMeta)}));
-
-  EXPECT_EQ(result, Result::Success);
-  ASSERT_NE(received, nullptr);
-  const auto bytes = received->coalesce();
-  EXPECT_EQ(
-      std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size()),
-      kMeta);
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::handler

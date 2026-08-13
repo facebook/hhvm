@@ -16,7 +16,12 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
+#include <string_view>
+
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/SetupMessages.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
@@ -50,6 +55,56 @@ ThriftServerTransportAdapter::ThriftServerTransportAdapter(
       [this](const rocket::server::RocketWriteCompleteEvent& e) noexcept {
         onWriteComplete(e);
       });
+}
+
+channel_pipeline::Result ThriftServerTransportAdapter::onConnectionFrame(
+    rocket::server::RocketRequestMessage&& request) noexcept {
+  if (FOLLY_LIKELY(
+          request.frame.type() ==
+          apache::thrift::fast_thrift::frame::FrameType::SETUP)) {
+    return onSetupFrame(std::move(request));
+  }
+  XLOG_EVERY_MS(WARN, 60000)
+      << "dropping unhandled connection frame " << request.frame.typeName();
+  return channel_pipeline::Result::Success;
+}
+
+channel_pipeline::Result ThriftServerTransportAdapter::onSetupFrame(
+    rocket::server::RocketRequestMessage&& request) noexcept {
+  using ErrorCode = apache::thrift::fast_thrift::frame::ErrorCode;
+
+  // Latched for the connection: every later request's metadata is decoded with
+  // what this SETUP negotiated.
+  metadataProtocol_ = request.metadataProtocol;
+
+  auto decoded = fromRocketFrame(std::move(request.frame), metadataProtocol_);
+  if (FOLLY_UNLIKELY(!decoded.hasValue())) {
+    return rejectSetup(
+        ErrorCode::INVALID_SETUP, "Could not read the client's SETUP metadata");
+  }
+
+  ThriftServerRequestMessage message;
+  message.payload = std::move(decoded).value();
+  // The traversal is synchronous, so by the time it returns the answer — the
+  // SETUP response, or a refusal from a handler that declined to forward — is
+  // already on the write path.
+  return pipeline_->fireRead(
+      channel_pipeline::erase_and_box(std::move(message)));
+}
+
+channel_pipeline::Result ThriftServerTransportAdapter::rejectSetup(
+    apache::thrift::fast_thrift::frame::ErrorCode code,
+    std::string_view reason) noexcept {
+  const auto writeResult = writeToRocket(
+      channel_pipeline::erase_and_box(makeSetupRejectionMessage(code, reason)));
+  if (FOLLY_UNLIKELY(writeResult != channel_pipeline::Result::Success)) {
+    XLOG(WARN) << "Failed to write setup rejection "
+               << apache::thrift::fast_thrift::frame::toString(code);
+  }
+  // Non-Success whatever the write did: the connection is still awaiting a
+  // setup, and reporting success would leave the rocket setup handler treating
+  // the next frame as post-setup traffic.
+  return channel_pipeline::Result::Error;
 }
 
 ThriftServerTransportAdapter::~ThriftServerTransportAdapter() {

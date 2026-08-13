@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -29,12 +30,26 @@ namespace apache::thrift::fast_thrift::thrift {
 
 // Server-side inbound — what the server pipeline reads from the wire.
 // Today: REQUEST_RESPONSE only.
-using ThriftServerInboundPayloadVariant =
-    ThriftPayloadVariant<ThriftRequestResponsePayload>;
+using ThriftServerInboundPayloadVariant = ThriftPayloadVariant<
+    ThriftRequestResponsePayload,
+    ThriftConnectionSetupPayload>;
 
 // Server-side outbound — what the server pipeline writes to the wire.
 // Today: initial response (RR/Sink terminal) + error.
-using ThriftServerOutboundPayloadVariant =
-    ThriftPayloadVariant<ThriftInitialResponsePayload, ThriftErrorPayload>;
+using ThriftServerOutboundPayloadVariant = ThriftPayloadVariant<
+    ThriftInitialResponsePayload,
+    ThriftErrorPayload,
+    ThriftSetupResponsePayload,
+    ThriftSetupRejectionPayload>;
+
+// The variant is inline storage sized by its largest alternative, and the
+// inbound one sits on every request message. The setup payload therefore holds
+// its state behind a pointer; this pins that, so a field added by value fails
+// here rather than silently widening the request path.
+static_assert(
+    sizeof(ThriftConnectionSetupPayload) <=
+        sizeof(ThriftRequestResponsePayload),
+    "connection-lifecycle payloads must not grow the per-request inbound "
+    "message; put new state in ConnectionSetupData instead");
 
 } // namespace apache::thrift::fast_thrift::thrift

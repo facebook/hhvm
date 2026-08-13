@@ -20,6 +20,7 @@
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -72,6 +73,21 @@ fromRocketFrame(
       auto data = std::move(frame).extractData();
       return ThriftServerInboundPayloadVariant{ThriftRequestResponsePayload{
           .data = std::move(data), .metadata = std::move(metadata)}};
+    }
+
+    case FrameType::SETUP: {
+      auto clientSetup = parseSetupMetadata(
+          std::move(frame).extractMetadata(), metadataProtocol);
+      if (!clientSetup.hasValue()) {
+        return folly::makeUnexpected(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                "Failed to deserialize the client's SETUP metadata"));
+      }
+      auto setup = std::make_unique<ConnectionSetupData>();
+      setup->clientSetup = std::move(clientSetup).value();
+      return ThriftServerInboundPayloadVariant{
+          ThriftConnectionSetupPayload{.setup = std::move(setup)}};
     }
 
     case FrameType::REQUEST_FNF:

@@ -23,6 +23,8 @@
 #include <glog/logging.h>
 #include <folly/ExceptionWrapper.h>
 
+#include <folly/lang/Hint.h>
+
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
@@ -61,6 +63,13 @@ class ThriftServerConnectionContextHandler {
   channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto& request = msg.get<ThriftServerRequestMessage>();
+    // The setup message carries no request context and is answered further
+    // down; nothing here applies to it. Tested positively: a valueless payload
+    // is not a setup message and must still be handled.
+    if (FOLLY_UNLIKELY(
+            request.payload.template is<ThriftConnectionSetupPayload>())) {
+      return ctx.fireRead(std::move(msg));
+    }
     DCHECK(request.requestContext)
         << "request.requestContext not found "
            "ThriftServerRequestContextHandler must run upstream";

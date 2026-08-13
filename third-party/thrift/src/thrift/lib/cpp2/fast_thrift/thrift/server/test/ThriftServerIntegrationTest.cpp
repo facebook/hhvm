@@ -73,6 +73,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
@@ -94,6 +95,7 @@ using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
 using apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter;
 using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
+HANDLER_TAG(thrift_server_setup_handler);
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
@@ -344,15 +346,19 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     transportAdapter_ =
         std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
 
-    thriftPipeline_ = PipelineBuilder<
-                          ThriftServerTransportAdapter,
-                          ThriftServerChannel,
-                          TestAllocator>()
-                          .setEventBase(&evb_)
-                          .setHead(transportAdapter_.get())
-                          .setTail(serverChannel_.get())
-                          .setAllocator(&thriftAllocator_)
-                          .build();
+    thriftPipeline_ =
+        PipelineBuilder<
+            ThriftServerTransportAdapter,
+            ThriftServerChannel,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(transportAdapter_.get())
+            .setTail(serverChannel_.get())
+            .setAllocator(&thriftAllocator_)
+            .template addNextDuplex<thrift::ThriftServerSetupHandler<
+                channel_pipeline::detail::ContextImpl>>(
+                thrift_server_setup_handler_tag)
+            .build();
 
     transportAdapter_->setPipeline(thriftPipeline_.get());
     serverChannel_->setPipelineRef(*thriftPipeline_);
@@ -377,6 +383,9 @@ class ThriftServerIntegrationTest : public ::testing::Test {
   void setupPipelineWithSetup() {
     setupPipeline();
     injectSetupFrame();
+    // Answering the setup puts a frame on the wire; drop it so the response
+    // assertions below read the frame their request produced.
+    testTransport_->clearWrittenData();
   }
 
   void injectFrame(std::unique_ptr<folly::IOBuf> frame) {
@@ -506,6 +515,24 @@ TEST_F(ThriftServerIntegrationTest, SetupFrameConsumedBeforeThriftLayer) {
 
   EXPECT_EQ(processor_->requests().size(), 0u)
       << "SETUP should be consumed by rocket SetupHandler, not dispatched";
+}
+
+// The answer is a connection-level METADATA_PUSH, so it crosses the rocket
+// stream-state handler with a streamId no stream context can match. It still
+// has to reach the wire.
+TEST_F(ThriftServerIntegrationTest, SetupResponseReachesWire) {
+  setupPipeline();
+
+  injectSetupFrame();
+
+  auto written = getWrittenFrame();
+  ASSERT_NE(written, nullptr) << "Expected the SETUP response on the wire";
+  auto parsed = parseWrittenFrame(std::move(written));
+  ASSERT_TRUE(parsed.isValid());
+  EXPECT_EQ(
+      parsed.type(),
+      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  EXPECT_EQ(parsed.streamId(), 0u);
 }
 
 TEST_F(ThriftServerIntegrationTest, OnewayRequestNoResponse) {
@@ -765,6 +792,14 @@ class RocketThriftServerInterfaceHandler {
     auto rocketMsg = msg.take<
         apache::thrift::fast_thrift::rocket::server::RocketRequestMessage>();
 
+    // Connection-level frames now travel up rather than being consumed by the
+    // rocket layer. This shim stands in for the thrift pipeline, and there is
+    // no setup handler behind it to answer one, so drop them here — the real
+    // server answers SETUP in ThriftServerSetupHandler.
+    if (rocketMsg.frame.isConnectionFrame()) {
+      return Result::Success;
+    }
+
     auto decoded = apache::thrift::fast_thrift::thrift::fromRocketFrame(
         std::move(rocketMsg.frame),
         apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
@@ -943,6 +978,9 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
   void setupPipelineWithSetup() {
     setupPipeline();
     injectSetupFrame();
+    // Answering the setup puts a frame on the wire; drop it so the response
+    // assertions below read the frame their request produced.
+    testTransport_->clearWrittenData();
   }
 
   void injectFrame(std::unique_ptr<folly::IOBuf> frame) {

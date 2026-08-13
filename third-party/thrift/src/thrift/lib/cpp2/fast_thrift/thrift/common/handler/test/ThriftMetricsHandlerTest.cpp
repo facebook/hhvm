@@ -58,28 +58,48 @@ class ThriftMetricsHandlerTest : public ::testing::Test {
 // onRead
 // =============================================================================
 
+namespace {
+// A minimal request/response pair — what this handler sees in a real server
+// pipeline. Boxing a bare value no longer stands in, because counting now
+// depends on whether the message is an RPC.
+channel_pipeline::TypeErasedBox makeRequestBox() {
+  thrift::ThriftServerRequestMessage req;
+  req.streamId = 1;
+  req.payload.emplace<thrift::ThriftRequestResponsePayload>();
+  return channel_pipeline::erase_and_box(std::move(req));
+}
+
+channel_pipeline::TypeErasedBox makeResponseBox() {
+  thrift::ThriftServerResponseMessage resp;
+  resp.payload.emplace<thrift::ThriftInitialResponsePayload>();
+  return channel_pipeline::erase_and_box(std::move(resp));
+}
+} // namespace
+
 TEST_F(ThriftMetricsHandlerTest, OnReadIncrementsThriftInbound) {
-  auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftInbound.value(), 1);
 }
 
 TEST_F(ThriftMetricsHandlerTest, OnReadIncrementsThriftActive) {
-  auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 1);
 }
 
 TEST_F(ThriftMetricsHandlerTest, OnReadForwardsMessageUnmodified) {
-  auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
-  EXPECT_EQ(ctx_.readMessages()[0].get<int>(), 42);
+  EXPECT_TRUE(ctx_.readMessages()[0]
+                  .get<thrift::ThriftServerRequestMessage>()
+                  .payload.is<thrift::ThriftRequestResponsePayload>());
 }
 
 TEST_F(ThriftMetricsHandlerTest, OnReadReturnsContextResult) {
   ctx_.setReadResult(channel_pipeline::Result::Backpressure);
-  auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(result, channel_pipeline::Result::Backpressure);
 }
 
@@ -88,23 +108,25 @@ TEST_F(ThriftMetricsHandlerTest, OnReadReturnsContextResult) {
 // =============================================================================
 
 TEST_F(ThriftMetricsHandlerTest, OnWriteIncrementsThriftOutbound) {
-  auto result = handler_->onWrite(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onWrite(ctx_, makeResponseBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftOutbound.value(), 1);
 }
 
 TEST_F(ThriftMetricsHandlerTest, OnWriteDecrementsThriftActive) {
   stats_->thriftActive.incrementValue(1);
-  auto result = handler_->onWrite(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onWrite(ctx_, makeResponseBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 0);
 }
 
 TEST_F(ThriftMetricsHandlerTest, OnWriteForwardsMessageUnmodified) {
-  auto result = handler_->onWrite(ctx_, channel_pipeline::TypeErasedBox(99));
+  auto result = handler_->onWrite(ctx_, makeResponseBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  EXPECT_EQ(ctx_.writeMessages()[0].get<int>(), 99);
+  EXPECT_TRUE(ctx_.writeMessages()[0]
+                  .get<thrift::ThriftServerResponseMessage>()
+                  .payload.is<thrift::ThriftInitialResponsePayload>());
 }
 
 // =============================================================================
@@ -136,17 +158,17 @@ TEST_F(ThriftMetricsHandlerTest, OnExceptionForwardsException) {
 
 TEST_F(ThriftMetricsHandlerTest, MultipleRequestsCountsAccumulate) {
   for (int i = 0; i < 100; ++i) {
-    auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(i));
+    auto result = handler_->onRead(ctx_, makeRequestBox());
     EXPECT_EQ(result, channel_pipeline::Result::Success);
   }
   EXPECT_EQ(stats_->thriftInbound.value(), 100);
 }
 
 TEST_F(ThriftMetricsHandlerTest, RequestResponseCycleActiveReturnsToZero) {
-  auto r1 = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(1));
+  auto r1 = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(r1, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 1);
-  auto r2 = handler_->onWrite(ctx_, channel_pipeline::TypeErasedBox(2));
+  auto r2 = handler_->onWrite(ctx_, makeResponseBox());
   EXPECT_EQ(r2, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 0);
 }
@@ -170,14 +192,14 @@ class ThriftMetricsHandlerClientTest : public ::testing::Test {
 };
 
 TEST_F(ThriftMetricsHandlerClientTest, OnWriteIncrementsThriftActive) {
-  auto result = handler_->onWrite(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onWrite(ctx_, makeResponseBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 1);
 }
 
 TEST_F(ThriftMetricsHandlerClientTest, OnReadDecrementsThriftActive) {
   stats_->thriftActive.incrementValue(1);
-  auto result = handler_->onRead(ctx_, channel_pipeline::TypeErasedBox(42));
+  auto result = handler_->onRead(ctx_, makeRequestBox());
   EXPECT_EQ(result, channel_pipeline::Result::Success);
   EXPECT_EQ(stats_->thriftActive.value(), 0);
 }

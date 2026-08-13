@@ -41,73 +41,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class ResValid : uint8_t {
-  Empty,
-  Valid,
-  Invalid
-};
-
-struct GetMemOp {
-  template<class T> void imm (T) {}
-  template<class T> void def (T) {}
-  template<class T> void use (T) {}
-  void use (Vptr mem) {
-    if (rv != ResValid::Empty) {
-      rv = ResValid::Invalid;
-    } else {
-      mr = mem;
-      rv = ResValid::Valid;
-    }
-  }
-  template<class T> void across (T) {}
-  template<class T, class H> void useHint(T,H) {}
-  template<class T, class H> void defHint(T,H) {}
-  template<Width w> void use(Vp<w> m) { use(static_cast<Vptr>(m)); }
-
-  bool isValid() { return rv == ResValid::Valid;}
-
-  Vptr mr;
-  ResValid rv{ResValid::Empty};
-};
-
-/*
- * Return the Vptr and size for simple insts that read/write memory.
- *
- * Return a size zero to indicate a non-simple inst, e.g. a call.
- */
-std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr& inst) {
-  GetMemOp g;
-  visitOperands(inst, g);
-
-  auto const vop = g.mr;
-  if (!g.isValid()) return {vop, 0};
-
-  auto sz = width(inst.op);
-  // workaround: load and store opcodes report a width of Octa,
-  // while in reality they are Quad.
-  if (inst.op == Vinstr::load || inst.op == Vinstr::store) {
-    sz = Width::Quad;
-  }
-  sz &= Width::AnyNF;
-
-  auto const size = [&] {
-    switch (sz) {
-      case Width::Byte:
-        return sz::byte;
-      case Width::Word: case Width::WordN:
-        return sz::word;
-      case Width::Long: case Width::LongN:
-        return sz::dword;
-      case Width::Quad: case Width::QuadN:
-        return sz::qword;
-      case Width::Octa: case Width::AnyNF:
-        return 16;
-      default: return 0;
-    }
-  }();
-  return {vop, size};
-}
-
 /*
  * Return true if we are sure that `inst1' does not write to the same memory
  * location that `inst2' reads or writes (and vice versa).
@@ -119,22 +52,7 @@ bool cannot_alias_write(const Vinstr& inst1, const Vinstr& inst2) {
   if (!writesMemory(inst1.op) && !writesMemory(inst2.op)) return true;
   auto const p1 = getMemOpAndSize(inst1);
   auto const p2 = getMemOpAndSize(inst2);
-  if (p1.second == 0 || p2.second == 0) return false;
-  auto const v1 = p1.first;
-  auto const v2 = p2.first;
-  auto const size1 = p1.second;
-  auto const size2 = p2.second;
-  if (v1.base != v2.base || v1.seg != v2.seg) return false;
-  if ((v1.index != v2.index) ||
-      (v1.index.isValid() && (v1.scale != v2.scale))) {
-    return false;
-  }
-  if (v1.disp == v2.disp) return false;
-  if (v1.disp < v2.disp) {
-    return v2.disp >= v1.disp + size1;
-  } else {
-    return v1.disp >= v2.disp + size2;
-  }
+  return memRangesDisjoint(p1.first, p1.second, p2.first, p2.second);
 }
 
 /*

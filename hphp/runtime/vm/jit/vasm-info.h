@@ -19,12 +19,16 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
+#include <cstdint>
+#include <utility>
+
 namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vreg;
 struct Vinstr;
+struct Vptr;
 struct AliasClass;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +54,21 @@ bool touchesMemory(Vinstr::Opcode op);
  * Returns true if the instruction writes memory.
  */
 bool writesMemory(Vinstr::Opcode op);
+
+/*
+ * Return the memory operand and access size in bytes for an instruction with
+ * exactly one memory operand. A size of 0 means "unknown location": a call, no
+ * memory operand, or more than one.
+ */
+std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr& inst);
+
+/*
+ * Return true iff [a, a+aSize) and [b, b+bSize) are provably disjoint, from
+ * Vptr addressing alone. False means "unknown", not "overlapping"; a zero size
+ * is unknown.
+ */
+bool memRangesDisjoint(const Vptr& a, uint8_t aSize,
+                       const Vptr& b, uint8_t bSize);
 
 /*
  * Return the abstract memory locations the instruction may write to. This uses

@@ -19,8 +19,10 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 #include "hphp/util/match.h"
 
+#include <cstdint>
 #include <utility>
 
 namespace HPHP::jit {
@@ -73,6 +75,37 @@ template<>
 constexpr bool useMemory<Vptr64>() { return true; }
 template<>
 constexpr bool useMemory<Vptr128>() { return true; }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Operand visitor that captures the single memory operand of an instruction.
+ * Sets rv to Invalid if more than one memory operand is seen, so that callers
+ * can treat multi-memory instructions as "non-simple".
+ */
+struct GetMemOp {
+  template<class T> void imm (T) {}
+  template<class T> void def (T) {}
+  template<class T> void use (T) {}
+  void use (Vptr mem) {
+    if (rv != ResValid::Empty) {
+      rv = ResValid::Invalid;
+    } else {
+      mr = mem;
+      rv = ResValid::Valid;
+    }
+  }
+  template<class T> void across (T) {}
+  template<class T, class H> void useHint(T,H) {}
+  template<class T, class H> void defHint(T,H) {}
+  template<Width w> void use(Vp<w> m) { use(static_cast<Vptr>(m)); }
+
+  bool isValid() { return rv == ResValid::Valid; }
+
+  Vptr mr;
+  enum class ResValid : uint8_t { Empty, Valid, Invalid };
+  ResValid rv{ResValid::Empty};
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -150,6 +183,55 @@ bool touchesMemory(const Vinstr& inst) {
 
 bool writesMemory(const Vinstr& inst) {
   return writesMemory(inst.op);
+}
+
+std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr& inst) {
+  GetMemOp g;
+  visitOperands(inst, g);
+
+  auto const vop = g.mr;
+  if (!g.isValid()) return {vop, 0};
+
+  auto sz = width(inst.op);
+  // workaround: load and store opcodes report a width of Octa,
+  // while in reality they are Quad.
+  if (inst.op == Vinstr::load || inst.op == Vinstr::store) {
+    sz = Width::Quad;
+  }
+  sz &= Width::AnyNF;
+
+  auto const size = [&] {
+    switch (sz) {
+      case Width::Byte:
+        return sz::byte;
+      case Width::Word: case Width::WordN:
+        return sz::word;
+      case Width::Long: case Width::LongN:
+        return sz::dword;
+      case Width::Quad: case Width::QuadN:
+        return sz::qword;
+      case Width::Octa: case Width::AnyNF:
+        return 16;
+      default: return 0;
+    }
+  }();
+  return {vop, static_cast<uint8_t>(size)};
+}
+
+bool memRangesDisjoint(const Vptr& a, uint8_t aSize,
+                       const Vptr& b, uint8_t bSize) {
+  if (aSize == 0 || bSize == 0) return false;
+  if (a.base != b.base || a.seg != b.seg) return false;
+  if ((a.index != b.index) ||
+      (a.index.isValid() && (a.scale != b.scale))) {
+    return false;
+  }
+  if (a.disp == b.disp) return false;
+  if (a.disp < b.disp) {
+    return b.disp >= a.disp + aSize;
+  } else {
+    return a.disp >= b.disp + bSize;
+  }
 }
 
 // Calculate the abstract memory locations that the given instruction

@@ -124,9 +124,9 @@ proxygen_add_library(proxygen_http_coro_client_http_client_connection_cache
   SRCS
     HTTPClientConnectionCache.cpp
   DEPS
-    proxygen_http_coro_client_dns_resolver
     proxygen_http_coro_client_http_client_lib
   EXPORTED_DEPS
+    proxygen_http_coro_client_dns_resolver
     proxygen_http_coro_client_http_connpool
     fizz::fizz
     Folly::folly_container_evicting_cache_map

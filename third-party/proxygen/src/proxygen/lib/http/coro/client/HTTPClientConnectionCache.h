@@ -12,6 +12,7 @@
 #include <fizz/client/SynchronizedLruPskCache.h>
 #include <folly/container/EvictingCacheMap.h>
 #include <folly/logging/xlog.h>
+#include <proxygen/lib/dns/DNSResolver.h>
 
 namespace proxygen::coro {
 
@@ -77,6 +78,10 @@ class HTTPClientConnectionCache : public HTTPSessionFactory {
 
   void setSessionParams(HTTPCoroConnector::SessionParams sessParams) {
     sessionParams_ = std::move(sessParams);
+  }
+
+  void setDNSResolver(DNSResolver::UniquePtr dnsResolver) {
+    dnsResolver_ = std::move(dnsResolver);
   }
 
   folly::coro::Task<GetSessionResult> getSessionWithReservation(
@@ -164,6 +169,7 @@ class HTTPClientConnectionCache : public HTTPSessionFactory {
   std::shared_ptr<HTTPCoroSessionPool> proxyPool_;
   folly::CancellationSource cancellationSource_;
   bool useConnectForProxy_{false};
+  DNSResolver::UniquePtr dnsResolver_;
   folly::EvictingCacheMap<std::string, std::unique_ptr<HTTPCoroSessionPool>>
       pools_;
 };

@@ -111,7 +111,7 @@ HTTPClientConnectionCache::getSessionWithReservation(
     addressStr = serverAddress.value();
   } else {
     auto serverAddresses = co_await CoroDNSResolver::resolveHost(
-        &eventBase_, host, connectTimeout);
+        &eventBase_, host, connectTimeout, dnsResolver_.get());
     // TODO: support happy eyeballs
     addressStr = serverAddresses.primary.getAddressStr();
   }

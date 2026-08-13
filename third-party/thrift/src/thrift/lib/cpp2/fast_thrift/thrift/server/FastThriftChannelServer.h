@@ -333,7 +333,7 @@ class FastThriftServerT {
 
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
-      transport::TransportHandler* transportHandler,
+      rocket::server::RocketServerTransportHandler* transportHandler,
       rocket::server::RocketServerAppAdapter* appAdapter,
       Stats* stats);
 
@@ -458,7 +458,7 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
   // propagates into the adapter.
   auto rocketConn = std::make_unique<rocket::server::RocketServerConnection>();
   rocketConn->transportHandler =
-      transport::TransportHandler::create(std::move(socket));
+      rocket::server::RocketServerTransportHandler::create(std::move(socket));
 
   // Per-connection stats (when enabled). Ownership moves to the connection
   // below; the metrics handlers only reference it.
@@ -565,14 +565,14 @@ template <typename Stats>
 channel_pipeline::PipelineImpl::Ptr
 FastThriftServerT<Stats>::buildRocketPipeline(
     folly::EventBase* evb,
-    transport::TransportHandler* transportHandler,
+    rocket::server::RocketServerTransportHandler* transportHandler,
     rocket::server::RocketServerAppAdapter* appAdapter,
     Stats* stats) {
   // Single chain for both stats modes. Only addState rebinds the builder
   // type, so bind through it once and append conditionally from there —
   // same shape as ThriftServerConnectionFactory::buildRocketPipeline.
   auto builder = channel_pipeline::PipelineBuilder<
-                     transport::TransportHandler,
+                     rocket::server::RocketServerTransportHandler,
                      rocket::server::RocketServerAppAdapter,
                      channel_pipeline::SimpleBufferAllocator>()
                      .setEventBase(evb)

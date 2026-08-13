@@ -268,13 +268,13 @@ std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
       folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(evb));
   *outTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
-  rocketConn->transportHandler =
-      apache::thrift::fast_thrift::transport::TransportHandler::create(
-          std::move(transport));
+  rocketConn->transportHandler = apache::thrift::fast_thrift::rocket::server::
+      RocketServerTransportHandler::create(std::move(transport));
 
   rocketConn->pipeline =
       PipelineBuilder<
-          apache::thrift::fast_thrift::transport::TransportHandler,
+          apache::thrift::fast_thrift::rocket::server::
+              RocketServerTransportHandler,
           rocket::server::RocketServerAppAdapter,
           SimpleBufferAllocator>()
           .setEventBase(evb)

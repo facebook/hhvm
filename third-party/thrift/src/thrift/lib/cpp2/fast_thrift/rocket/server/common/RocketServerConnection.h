@@ -19,10 +19,19 @@
 #include <folly/Function.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/RocketServerEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 namespace apache::thrift::fast_thrift::rocket::server {
+
+// The rocket server's transport handler, bound to the rocket pipeline's event
+// space so socket-level write completions are fired as pipeline events rather
+// than dropped. Everything that builds or holds a rocket server pipeline uses
+// this alias, so the binding is stated once.
+using RocketServerTransportHandler =
+    apache::thrift::fast_thrift::transport::TransportHandlerT<
+        RocketServerEventFactory>;
 
 /**
  * RocketServerConnection — owns the rocket pipeline and its
@@ -60,7 +69,7 @@ struct RocketServerConnection {
 
   rocket::server::RocketServerAppAdapter::Ptr appAdapter{
       new rocket::server::RocketServerAppAdapter()};
-  transport::TransportHandler::Ptr transportHandler;
+  RocketServerTransportHandler::Ptr transportHandler;
   channel_pipeline::PipelineImpl::Ptr pipeline;
   channel_pipeline::SimpleBufferAllocator allocator;
 

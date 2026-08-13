@@ -30,8 +30,11 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/handler/RocketMetricsHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/RocketServerEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerKeepAliveHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -210,7 +213,7 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   }
 
   auto transportHandler =
-      transport::TransportHandler::create(std::move(socket));
+      rocket::server::RocketServerTransportHandler::create(std::move(socket));
 
   ThriftServerConnection conn;
   conn.tail = std::move(tail);
@@ -345,16 +348,17 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
 
 PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
     folly::EventBase* evb,
-    transport::TransportHandler* transportHandler,
+    rocket::server::RocketServerTransportHandler* transportHandler,
     rocket::server::RocketServerAppAdapter* appAdapter,
     ServerStatsShard* FOLLY_NULLABLE statsShard) {
   // addState rebinds: it returns a builder of an extended type and leaves the
   // original moved-from, so the chain up to and including it must be bound
   // here rather than continued on a pre-declared builder.
   auto builder = PipelineBuilder<
-                     transport::TransportHandler,
+                     rocket::server::RocketServerTransportHandler,
                      rocket::server::RocketServerAppAdapter,
-                     SimpleBufferAllocator>()
+                     SimpleBufferAllocator,
+                     rocket::server::RocketServerEventId>()
                      .setEventBase(evb)
                      .setHead(transportHandler)
                      .setTail(appAdapter)
@@ -369,7 +373,13 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
   // stays empty. The choice costs one branch per connection, not per message.
   if (config_.enableBackpressure) {
     builder
-        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandler>(
+        // Batcher composed with the write-completion tracker: the tracker turns
+        // the transport's per-writev completions into one event per
+        // rocket-frame batch, which the app adapter relays up to the thrift
+        // pipeline.
+        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandlerT<
+            frame::write::handler::WriteCompletionTrackerT<
+                rocket::server::RocketServerEventFactory>>>(
             batching_frame_handler_tag, config_.batchingConfig);
   } else {
     builder.addNextOutbound<

@@ -219,15 +219,15 @@ std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
       folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(evb));
   *outTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
-  rocketConn->transportHandler =
-      apache::thrift::fast_thrift::transport::TransportHandler::create(
-          std::move(transport));
+  rocketConn->transportHandler = apache::thrift::fast_thrift::rocket::server::
+      RocketServerTransportHandler::create(std::move(transport));
 
   // addState rebinds the builder and leaves the original moved-from, so the
   // chain through it has to be bound here before anything else is added.
   auto builder =
       PipelineBuilder<
-          apache::thrift::fast_thrift::transport::TransportHandler,
+          apache::thrift::fast_thrift::rocket::server::
+              RocketServerTransportHandler,
           rocket::server::RocketServerAppAdapter,
           SimpleBufferAllocator>()
           .setEventBase(evb)

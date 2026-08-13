@@ -335,14 +335,14 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
     auto rocketConn =
         std::make_unique<rocket::server::RocketServerConnection>();
     rocketConn->transportHandler =
-        transport::TransportHandler::create(std::move(socket));
+        rocket::server::RocketServerTransportHandler::create(std::move(socket));
 
     ServerConnectionContext ctx;
 
     // 1. Rocket pipeline (same as bare-server E2E)
     rocketConn->pipeline =
         PipelineBuilder<
-            transport::TransportHandler,
+            rocket::server::RocketServerTransportHandler,
             rocket::server::RocketServerAppAdapter,
             SimpleBufferAllocator>()
             .setEventBase(evb)

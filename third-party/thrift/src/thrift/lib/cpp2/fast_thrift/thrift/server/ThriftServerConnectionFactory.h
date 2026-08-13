@@ -172,7 +172,7 @@ class ThriftServerConnectionFactory {
   // metrics handler is added.
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
-      transport::TransportHandler* transportHandler,
+      rocket::server::RocketServerTransportHandler* transportHandler,
       rocket::server::RocketServerAppAdapter* appAdapter,
       ServerStatsShard* FOLLY_NULLABLE statsShard);
 

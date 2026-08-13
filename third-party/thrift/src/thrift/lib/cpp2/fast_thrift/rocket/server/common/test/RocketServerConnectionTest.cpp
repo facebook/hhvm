@@ -54,10 +54,10 @@ struct ConnectionFixture {
     auto socket =
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb));
     auto transportHandler =
-        transport::TransportHandler::create(std::move(socket));
+        rocket::server::RocketServerTransportHandler::create(std::move(socket));
 
     auto pipeline = PipelineBuilder<
-                        transport::TransportHandler,
+                        rocket::server::RocketServerTransportHandler,
                         RocketServerAppAdapter,
                         SimpleBufferAllocator>()
                         .setEventBase(&evb)

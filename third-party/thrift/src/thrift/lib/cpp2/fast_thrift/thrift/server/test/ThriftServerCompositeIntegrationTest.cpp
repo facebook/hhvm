@@ -265,14 +265,14 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
 
     auto rocketConn =
         std::make_unique<rocket::server::RocketServerConnection>();
-    rocketConn->transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    rocketConn->transportHandler = apache::thrift::fast_thrift::rocket::server::
+        RocketServerTransportHandler::create(std::move(transport));
 
     // 1. Rocket pipeline (identical to ThriftServerIntegrationTest setup).
     rocketConn->pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::
+                RocketServerTransportHandler,
             RocketServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
@@ -435,7 +435,7 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
   rocket::server::RocketServerConnection& rocketConn_() {
     return transportAdapter_->rocketConnection();
   }
-  apache::thrift::fast_thrift::transport::TransportHandler*
+  apache::thrift::fast_thrift::rocket::server::RocketServerTransportHandler*
   transportHandler_() {
     return rocketConn_().transportHandler.get();
   }

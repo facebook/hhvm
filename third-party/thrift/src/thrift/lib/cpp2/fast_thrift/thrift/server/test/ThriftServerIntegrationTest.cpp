@@ -286,9 +286,8 @@ class ThriftServerIntegrationTest : public ::testing::Test {
 
     auto rocketConn =
         std::make_unique<rocket::server::RocketServerConnection>();
-    rocketConn->transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    rocketConn->transportHandler = apache::thrift::fast_thrift::rocket::server::
+        RocketServerTransportHandler::create(std::move(transport));
 
     auto processorFactory =
         std::make_shared<MockAsyncProcessorFactory>(processor_);
@@ -298,7 +297,8 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     // 1. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
     rocketConn->pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::
+                RocketServerTransportHandler,
             RocketServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
@@ -441,7 +441,7 @@ class ThriftServerIntegrationTest : public ::testing::Test {
   rocket::server::RocketServerConnection& rocketConn_() {
     return transportAdapter_->rocketConnection();
   }
-  apache::thrift::fast_thrift::transport::TransportHandler*
+  apache::thrift::fast_thrift::rocket::server::RocketServerTransportHandler*
   transportHandler_() {
     return rocketConn_().transportHandler.get();
   }
@@ -910,13 +910,13 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    transportHandler_ = apache::thrift::fast_thrift::rocket::server::
+        RocketServerTransportHandler::create(std::move(transport));
 
     pipeline_ =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::
+                RocketServerTransportHandler,
             TestServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
@@ -1023,7 +1023,7 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::rocket::server::RocketServerTransportHandler::Ptr
       transportHandler_;
   TestServerAppAdapter::Ptr adapter_;
   PipelineImpl::Ptr pipeline_;
@@ -1286,9 +1286,8 @@ class ThriftRequestContextIntegrationTest
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    transportHandler_ = apache::thrift::fast_thrift::rocket::server::
+        RocketServerTransportHandler::create(std::move(transport));
 
     using ReqCtxHandler = ThriftServerRequestContextHandler<
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>;
@@ -1297,7 +1296,8 @@ class ThriftRequestContextIntegrationTest
 
     pipeline_ =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::
+                RocketServerTransportHandler,
             TestServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)

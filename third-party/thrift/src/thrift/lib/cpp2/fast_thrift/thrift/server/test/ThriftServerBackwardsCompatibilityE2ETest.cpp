@@ -162,9 +162,8 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
     // so the transport adapter can take ownership of the whole bundle.
     auto rocketConn =
         std::make_unique<rocket::server::RocketServerConnection>();
-    rocketConn->transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(socket));
+    rocketConn->transportHandler = apache::thrift::fast_thrift::rocket::server::
+        RocketServerTransportHandler::create(std::move(socket));
 
     auto serverChannel =
         std::make_shared<thrift::ThriftServerChannel>(handler_);
@@ -178,7 +177,8 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
     // adapter (for inbound request deserialization).
     rocketConnRef.pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::
+                RocketServerTransportHandler,
             apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter,
             SimpleBufferAllocator>()
             .setEventBase(evb)

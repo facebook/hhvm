@@ -404,9 +404,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.method"))]
-    async fn handle_method<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_method(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -414,13 +414,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"method";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.method";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_method = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_method = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -428,6 +429,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.method(
@@ -536,9 +540,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodAndReponse"))]
-    async fn handle_methodAndReponse<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodAndReponse(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -546,13 +550,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodAndReponse";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodAndReponse";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodAndReponse = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodAndReponse = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -560,6 +565,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodAndReponse(
@@ -669,9 +677,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodThrow"))]
-    async fn handle_methodThrow<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodThrow(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -679,13 +687,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodThrow";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodThrow";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodThrow = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodThrow = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -693,6 +702,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodThrow(
@@ -801,9 +813,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodSinkThrow"))]
-    async fn handle_methodSinkThrow<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodSinkThrow(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -811,13 +823,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodSinkThrow";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodSinkThrow";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodSinkThrow = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodSinkThrow = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -825,6 +838,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodSinkThrow(
@@ -933,9 +949,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodFinalThrow"))]
-    async fn handle_methodFinalThrow<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodFinalThrow(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -943,13 +959,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodFinalThrow";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodFinalThrow";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodFinalThrow = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodFinalThrow = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -957,6 +974,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodFinalThrow(
@@ -1077,9 +1097,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodBothThrow"))]
-    async fn handle_methodBothThrow<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodBothThrow(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -1087,13 +1107,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodBothThrow";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodBothThrow";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodBothThrow = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodBothThrow = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -1101,6 +1122,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodBothThrow(
@@ -1221,9 +1245,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "SinkService.methodFast"))]
-    async fn handle_methodFast<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_methodFast(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -1231,13 +1255,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodFast";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SinkService.methodFast";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SinkService_methodFast = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_SinkService_methodFast = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -1245,6 +1270,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.methodFast(
@@ -1388,7 +1416,7 @@ where
     async fn handle_method(
         &self,
         idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
+        _p: P::Deserializer,
         _req: ::fbthrift::ProtocolDecoded<P>,
         _req_ctxt: &R,
         _reply_state: ::std::sync::Arc<RS>,
@@ -1489,11 +1517,11 @@ where
         let idx = match idx {
             ::std::result::Result::Ok(idx) => idx,
             ::std::result::Result::Err(_) => {
+                ::std::mem::drop(p);
                 return self.supa.call(req, req_ctxt, reply_state).await;
             }
         };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
+        self.handle_method(idx, p, req, req_ctxt, reply_state, seqid).await?;
 
         ::std::result::Result::Ok(())
     }

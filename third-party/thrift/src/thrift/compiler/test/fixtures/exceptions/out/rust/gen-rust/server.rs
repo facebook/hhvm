@@ -263,9 +263,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.doBland"))]
-    async fn handle_doBland<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_doBland(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -273,13 +273,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"doBland";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.doBland";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Raiser_doBland = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_Raiser_doBland = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -287,6 +288,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.doBland(
@@ -325,9 +329,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.doRaise"))]
-    async fn handle_doRaise<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_doRaise(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -335,13 +339,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"doRaise";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.doRaise";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Raiser_doRaise = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_Raiser_doRaise = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -349,6 +354,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.doRaise(
@@ -387,9 +395,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.get200"))]
-    async fn handle_get200<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_get200(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -397,13 +405,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"get200";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.get200";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Raiser_get200 = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_Raiser_get200 = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -411,6 +420,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.get200(
@@ -449,9 +461,9 @@ where
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.get500"))]
-    async fn handle_get500<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
+    async fn handle_get500(
+        &self,
+        mut p: P::Deserializer,
         req: ::fbthrift::ProtocolDecoded<P>,
         req_ctxt: &R,
         reply_state: ::std::sync::Arc<RS>,
@@ -459,13 +471,14 @@ where
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
         use ::fbthrift::ExceptionInfo;
+        use ::fbthrift::ProtocolReader as _;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"get500";
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.get500";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Raiser_get500 = ::fbthrift::Deserialize::rs_thrift_read(p)?;
+        let _args: self::Args_Raiser_get500 = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -473,6 +486,9 @@ where
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+        p.read_message_end()?;
+        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
+        ::std::mem::drop(p);
 
         let res = ::std::panic::AssertUnwindSafe(
             self.service.get500(
@@ -543,7 +559,7 @@ where
     async fn handle_method(
         &self,
         idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
+        _p: P::Deserializer,
         _req: ::fbthrift::ProtocolDecoded<P>,
         _req_ctxt: &R,
         _reply_state: ::std::sync::Arc<RS>,
@@ -635,11 +651,11 @@ where
         let idx = match idx {
             ::std::result::Result::Ok(idx) => idx,
             ::std::result::Result::Err(_) => {
+                ::std::mem::drop(p);
                 return self.supa.call(req, req_ctxt, reply_state).await;
             }
         };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
+        self.handle_method(idx, p, req, req_ctxt, reply_state, seqid).await?;
 
         ::std::result::Result::Ok(())
     }

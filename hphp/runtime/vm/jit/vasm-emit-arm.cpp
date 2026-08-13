@@ -2879,6 +2879,7 @@ void optimize(Vunit& unit, const Abi& abi, bool regalloc) {
 
   annotateSFUses(unit);
   lowerForARM(unit);
+  eliminateRedundantLoads(unit, abi);
 
   simplify(unit);
 

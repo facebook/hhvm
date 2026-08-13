@@ -64,6 +64,7 @@ constexpr int kVasmHoistFbccsLevel = 4;
 constexpr int kVasmDCELevel = 4;
 constexpr int kVasmLowerLevel = 4;
 constexpr int kVasmSinkDefsLevel = 4;
+constexpr int kVasmLoadElimLevel = 4;
 constexpr int kVasmUnreachableLevel = 6;
 constexpr int kVasmBlockCountLevel = 5;
 

@@ -138,6 +138,7 @@ void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 void sinkDefs(Vunit&, const Abi&);
+void eliminateRedundantLoads(Vunit&, const Abi&);
 template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
 void postRASimplify(Vunit&, const Abi&);

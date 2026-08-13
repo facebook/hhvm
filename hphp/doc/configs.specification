@@ -2242,6 +2242,17 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   shortening them to a direct LDR literal load when the final literal is in
   range. This is useful for stress-testing ADRP/LDR far literal support.
 
+- bool Jit.ArmLoadElimVerify = false, rehn
+
+  Correctness-checking mode for the ARM vasm load-elimination pass
+  (eliminateRedundantLoads). When true, a redundant load is NOT replaced by a
+  copy of the previously-available value; instead the original load is kept and
+  a runtime check is emitted after it that traps if the loaded value differs
+  from the value the pass would have forwarded. This turns any unsound alias
+  analysis in the pass into an immediate crash at the offending site. Adds a
+  reload, a compare and a branchless faulting store per eliminated load, so it
+  is for debugging only and must stay off in production.
+
 - std::string Jit.LogAllInlineRegions = "", UNKNOWN
 
   Log the sizes and metadata for all translations in the TC broken

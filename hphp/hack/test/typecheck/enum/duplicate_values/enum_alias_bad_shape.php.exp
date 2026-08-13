@@ -1,0 +1,20 @@
+ERROR: File "enum_alias_bad_shape.php", line 15, characters 6-15:
+`AliasMixed` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_bad_shape.php", line 16, characters 3-3:
+  `P` cannot be checked
+ERROR: File "enum_alias_bad_shape.php", line 26, characters 6-18:
+`AliasTwoEnums` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_bad_shape.php", line 27, characters 3-3:
+  `H` cannot be checked
+  File "enum_alias_bad_shape.php", line 28, characters 3-3:
+  `I` cannot be checked
+ERROR: File "enum_alias_bad_shape.php", line 33, characters 6-19:
+`AliasSameTwice` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_bad_shape.php", line 34, characters 3-3:
+  `J` cannot be checked
+  File "enum_alias_bad_shape.php", line 35, characters 3-3:
+  `K` cannot be checked
+ERROR: File "enum_alias_bad_shape.php", line 42, characters 6-17:
+`AliasWithUse` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_bad_shape.php", line 44, characters 3-3:
+  `L` cannot be checked

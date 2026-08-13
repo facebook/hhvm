@@ -331,6 +331,7 @@ impl From<o::typing_defs::EnumMemberValue> for ty::EnumMemberValue {
             O::EMVClassPointer(s) => Self::EMVClassPointer(s),
             O::EMVLabel => Self::EMVLabel,
             O::EMVAbsent => Self::EMVAbsent,
+            O::EMVConstAccess(e, m) => Self::EMVConstAccess(e, m),
         }
     }
 }

@@ -1,0 +1,10 @@
+ERROR: File "enum_alias_opted_out.php", line 13, characters 6-17:
+`UsesOptedOut` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_opted_out.php", line 8, characters 6-17:
+  it uses `OptedOutBase`, which cannot be checked for duplicate values
+ERROR: File "enum_alias_opted_out.php", line 18, characters 6-24:
+`AliasOfUsesOptedOut` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_opted_out.php", line 19, characters 3-3:
+  `T` cannot be checked
+  File "enum_alias_opted_out.php", line 20, characters 3-3:
+  `U` cannot be checked

@@ -1,0 +1,4 @@
+ERROR: File "enum_alias_exempt.php", line 43, characters 6-26:
+`PartlyUncheckableBase` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_alias_exempt.php", line 46, characters 3-4:
+  `PC` cannot be checked

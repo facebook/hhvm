@@ -685,6 +685,7 @@ pub enum EnumMemberValue {
     EMVClassPointer(String),
     EMVLabel,
     EMVAbsent,
+    EMVConstAccess(String, String),
 }
 
 /// Class Constant References:

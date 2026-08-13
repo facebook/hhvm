@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dbdcdba4acb0403c4aa36e6c7ba3f4eb>>
+// @generated SignedSource<<435a9d5ed128f2e579e069b244c80f7a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -263,6 +263,7 @@ pub enum EnumMemberValue {
     EMVClassPointer(String),
     EMVLabel,
     EMVAbsent,
+    EMVConstAccess(String, String),
 }
 
 #[derive(

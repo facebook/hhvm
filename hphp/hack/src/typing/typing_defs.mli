@@ -116,6 +116,13 @@ module Enum_member_value : sig
 
       [member_name] supplies the name for the [EMVLabel] case. *)
   val value_repr : member_name:string -> t -> string
+
+  (** Whether the value cannot be resolved to a concrete, comparable form. *)
+  val is_uncheckable : t -> bool
+
+  (** For an aliasing member [X = E::A], the accessed [(enum, member)]; [None] for
+      any other value. *)
+  val const_access_target : t -> (string * string) option
 end
 
 type class_const = {

@@ -1446,6 +1446,12 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     aast::ClassId(_, _, aast::ClassId_::CI(Id(_, class_name))),
                     (_, const_name),
                 )) if const_name == "class" => Some(EnumMemberValue::EMVClassPointer(class_name)),
+                // `E::A` (accessing another constant): record the accessed enum
+                // and member so an aliasing enum can be checked against it.
+                aast::Expr_::ClassConst(box (
+                    aast::ClassId(_, _, aast::ClassId_::CI(Id(_, class_name))),
+                    (_, const_name),
+                )) => Some(EnumMemberValue::EMVConstAccess(class_name, const_name)),
                 aast::Expr_::Nameof(box aast::ClassId(
                     _,
                     _,

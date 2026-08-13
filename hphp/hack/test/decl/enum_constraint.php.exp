@@ -166,7 +166,8 @@
            scc_name = ([13:18-19], "X");
            scc_type = (Rwitness_from_decl ([13:18-19]), Tany);
            scc_refs = [((Typing_defs.From "\\C"), "X")]; scc_value = None;
-           scc_enum_value = Typing_defs.Enum_member_value.EMVAbsent }
+           scc_enum_value =
+           (Typing_defs.Enum_member_value.EMVConstAccess ("\\C", "X")) }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -152,6 +152,7 @@ module Enum_member_value = struct
     | EMVClassPointer of string
     | EMVLabel
     | EMVAbsent
+    | EMVConstAccess of string * string
   [@@deriving eq, ord, show] [@@warning "-37"]
   (* Every constructor except [EMVAbsent] is built only by the Rust decl parser
      and marshaled in via ocamlrep; OCaml never builds them, so silence the
@@ -180,7 +181,22 @@ module Enum_member_value = struct
     | EMVLabel -> "\"" ^ member_name ^ "\""
     | EMVNameof s -> "nameof " ^ s
     | EMVClassPointer s -> s ^ "::class"
+    | EMVConstAccess (cls, member) -> cls ^ "::" ^ member
     | EMVAbsent -> "<absent>"
+
+  (** Whether the value cannot be resolved to a concrete, comparable form:
+      absent (no recorded value), or a reference to another enum's member
+      (`EMVConstAccess`, resolvable only through the pure-alias exemption). *)
+  let is_uncheckable = function
+    | EMVAbsent
+    | EMVConstAccess _ ->
+      true
+    | _ -> false
+
+  (** For an aliasing member `X = E::A`, the accessed `(enum, member)`. *)
+  let const_access_target = function
+    | EMVConstAccess (base, target) -> Some (base, target)
+    | _ -> None
 end
 
 type class_const = {

@@ -321,6 +321,7 @@ impl ToOxidized for EnumMemberValue {
             Self::EMVClassPointer(s) => O::EMVClassPointer(s),
             Self::EMVLabel => O::EMVLabel,
             Self::EMVAbsent => O::EMVAbsent,
+            Self::EMVConstAccess(e, m) => O::EMVConstAccess(e, m),
         }
     }
 }

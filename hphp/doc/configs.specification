@@ -1880,7 +1880,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Minimum heap growth, in bytes since the last collection,
   before triggering the next collection. See MemoryManager::updateNextGc().
 
-- double GC.TriggerPct = 0.5, UNKNOWN, lookuppath(Eval.GCTriggerPct)
+- bool GC.EnableLazyGC = false, UNKNOWN, lookuppath(Eval.EnableLazyGC)
+
+  Collect less eagerly when GC.Enabled: raises the default GC.TriggerPct and
+  gives requests a default GC.GraceBytes allowance, so a request is not killed
+  while holding garbage the next collection would reclaim. Only affects those
+  two defaults, so an explicitly configured value still wins.
+
+- int64_t GC.GraceBytes, UNKNOWN, lookuppath(Eval.GCGraceBytes)
+
+  How far a request may exceed its memory limit before the OOM check fires.
+  The limit is only enforceable between allocations, so this covers a request
+  that is over it purely on garbage the next collection will reclaim.
+
+- double GC.TriggerPct, UNKNOWN, lookuppath(Eval.GCTriggerPct)|staticdefault(0.5)
 
   Minimum heap growth, as a percent of remaining heap
   space, before triggering the next collection. see updateNextGC().

@@ -364,7 +364,7 @@ inline int64_t MemoryManager::getMemoryLimit() const {
 inline bool MemoryManager::preAllocOOM(int64_t size) {
   if (m_couldOOM) {
     auto stats = getStatsCopy();
-    if (stats.usage() + size > m_usageLimit) {
+    if (stats.usage() + size - Cfg::GC::GraceBytes > m_usageLimit) {
       refreshStatsHelperExceeded();
       return true;
     }

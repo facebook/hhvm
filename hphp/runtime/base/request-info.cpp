@@ -321,6 +321,19 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     }
   }
 
+  if (flags & PendingGCFlag) {
+    stackLimitAndSurprise().clearFlag(PendingGCFlag);
+    if (tl_heap->isGCEnabled()) {
+      tl_heap->collect("surprise");
+      tl_heap->enforceMemoryLimit();
+    } else {
+      tl_heap->checkHeap("surprise");
+    }
+    // flags was snapshotted before the collection ran, so it does not yet
+    // carry a MemExceededFlag that enforceMemoryLimit() just raised.
+    flags |= stackLimitAndSurprise().fetchFlags() & mask & MemExceededFlag;
+  }
+
   if (flags & MemExceededFlag) {
     if (p.hostOOMFlag() && !pendingException) {
       // When the host is running out of memory, don't abort all requests.
@@ -368,14 +381,6 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       stackLimitAndSurprise().setFlag(CLIClientTerminated);
     } else {
       pendingException = generate_cli_client_terminated_exception(wh);
-    }
-  }
-  if (flags & PendingGCFlag) {
-    stackLimitAndSurprise().clearFlag(PendingGCFlag);
-    if (tl_heap->isGCEnabled()) {
-      tl_heap->collect("surprise");
-    } else {
-      tl_heap->checkHeap("surprise");
     }
   }
   if (flags & SignaledFlag) {

@@ -220,6 +220,109 @@ TEST(MemoryManager, GCLeakBig) {
 
 namespace {
 
+struct ScopedMemoryLimit {
+  explicit ScopedMemoryLimit(int64_t clearance) {
+    tl_heap->setMemoryLimit(tl_heap->getStatsCopy().usage() + clearance);
+  }
+
+  ~ScopedMemoryLimit() {
+    Cfg::GC::GraceBytes = m_grace;
+    tl_heap->setGCEnabled(m_gc_enabled);
+    tl_heap->setMemoryLimit(m_limit);
+    stackLimitAndSurprise().clearFlag(MemExceededFlag);
+    RID().clearRequestOOMFlag();
+    tl_heap->resetCouldOOM(true);
+  }
+
+ private:
+  int64_t m_grace{Cfg::GC::GraceBytes};
+  int64_t m_limit{tl_heap->getMemoryLimit()};
+  bool m_gc_enabled{tl_heap->isGCEnabled()};
+};
+
+}
+
+namespace {
+
+Array makeVec(uint32_t n) {
+  VecInit vec{n};
+  for (uint32_t j = 0; j < n; ++j) vec.append(make_tv<KindOfNull>());
+  return vec.toArray();
+}
+
+// detach() drops the reference without decrefing, so the array stays
+// allocated but unreachable -- garbage only a collection can find.
+void leakVecs(int64_t bytes) {
+  auto const before = tl_heap->getStatsCopy().usage();
+  while (tl_heap->getStatsCopy().usage() - before < bytes) {
+    makeVec(1024).detach();
+  }
+}
+
+}
+
+TEST(MemoryManager, GCGraceBytesDelaysOOM) {
+  constexpr int64_t kClearance = 16 << 20;
+  constexpr int64_t kGrace = 8 << 20;
+  ScopedMemoryLimit guard{kClearance};
+  Cfg::GC::GraceBytes = kGrace;
+
+  EXPECT_FALSE(tl_heap->preAllocOOM(kClearance / 2));
+  // Over the limit, but within the grace the next collection has to work in.
+  EXPECT_FALSE(tl_heap->preAllocOOM(kClearance + kGrace / 2));
+  // Past the grace: the ordinary OOM, unchanged.
+  EXPECT_TRUE(tl_heap->preAllocOOM(kClearance + kGrace * 2));
+}
+
+TEST(MemoryManager, GCGraceBytesWithdrawnByCollection) {
+  constexpr int64_t kClearance = 16 << 20;
+  ScopedMemoryLimit guard{kClearance};
+  Cfg::GC::GraceBytes = 64 << 20;
+  tl_heap->setGCEnabled(true);
+  auto const limit = tl_heap->getMemoryLimit();
+
+  // Over the limit but inside the grace: no OOM while allocating.
+  leakVecs(kClearance * 2);
+  ASSERT_GT(tl_heap->getStatsCopy().usage(), limit);
+  ASSERT_FALSE(RID().requestOOMFlag());
+
+  // It was garbage, so the collection puts the request back under.
+  tl_heap->collect("test-grace");
+  tl_heap->enforceMemoryLimit();
+  EXPECT_LT(tl_heap->getStatsCopy().usage(), limit);
+  EXPECT_FALSE(RID().requestOOMFlag());
+}
+
+TEST(MemoryManager, GCGraceBytesDoesNotSurviveCollection) {
+  constexpr int64_t kClearance = 16 << 20;
+  ScopedMemoryLimit guard{kClearance};
+  Cfg::GC::GraceBytes = 64 << 20;
+  tl_heap->setGCEnabled(true);
+  auto const limit = tl_heap->getMemoryLimit();
+
+  // Live data has to hang off a stack local: the C++ stack is conservatively
+  // scanned, a std::vector's buffer is not.
+  constexpr int kMaxOuter = 4096;
+  auto const live = [&] {
+    VecInit outer{kMaxOuter};
+    for (int i = 0; i < kMaxOuter; ++i) {
+      if (tl_heap->getStatsCopy().usage() > limit) break;
+      outer.append(makeVec(16 * 1024));
+    }
+    return outer.toArray();
+  }();
+  ASSERT_LT(live.size(), kMaxOuter);
+  ASSERT_GT(tl_heap->getStatsCopy().usage(), limit);
+  ASSERT_FALSE(RID().requestOOMFlag());
+
+  // Nothing to reclaim, so the grace stops applying.
+  tl_heap->collect("test-grace");
+  tl_heap->enforceMemoryLimit();
+  EXPECT_TRUE(RID().requestOOMFlag());
+}
+
+namespace {
+
 struct BgThreadFreeWorker {
   void allocate(const OptString& s) {
     assertx(!m_buf);

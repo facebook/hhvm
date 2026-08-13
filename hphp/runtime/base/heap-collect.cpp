@@ -711,6 +711,12 @@ void MemoryManager::collect(const char* phase) {
   updateNextGc();
 }
 
+void MemoryManager::enforceMemoryLimit() {
+  if (m_couldOOM && getStatsCopy().usage() > m_usageLimit) {
+    refreshStatsHelperExceeded();
+  }
+}
+
 void MemoryManager::setMemoryLimit(size_t limit) {
   assertx(limit <= (size_t)std::numeric_limits<int64_t>::max());
   m_usageLimit = limit;

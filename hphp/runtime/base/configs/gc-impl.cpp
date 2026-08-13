@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/configs/gc-loader.h"
 
+#include "hphp/util/configs/gc.h"
+
 #include <folly/lang/Bits.h>
 
 namespace HPHP::Cfg {
@@ -36,6 +38,14 @@ bool GCLoader::EagerDefault() {
 
 bool GCLoader::QuarantineDefault() {
   return kEagerGC;
+}
+
+int64_t GCLoader::GraceBytesDefault() {
+  return Cfg::GC::EnableLazyGC && Cfg::GC::Enabled ? Cfg::GC::MinTrigger : 0;
+}
+
+double GCLoader::TriggerPctDefault() {
+  return Cfg::GC::EnableLazyGC && Cfg::GC::Enabled ? 0.8 : 0.5;
 }
 
 void GCLoader::SlabAllocAlignPostProcess(uint32_t& val) {

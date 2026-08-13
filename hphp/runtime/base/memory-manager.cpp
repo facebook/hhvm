@@ -294,7 +294,7 @@ void MemoryManager::refreshStats() {
   auto usage = m_stats.usage();
   s_req_heap_usage.fetch_add(usage - m_lastUsage, std::memory_order_acq_rel);
   m_lastUsage = usage;
-  if (usage > m_usageLimit && m_couldOOM) {
+  if (usage - Cfg::GC::GraceBytes > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
   } else if (usage >= 0 && usage > m_memThresholdCallbackPeakUsage) {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;

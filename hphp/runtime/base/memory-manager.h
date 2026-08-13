@@ -963,6 +963,11 @@ struct MemoryManager {
    * Run the experimental collector.
    */
   void collect(const char* phase);
+
+  /*
+   * Raise the memory-exceeded fatal if the request is over its limit.
+   */
+  void enforceMemoryLimit();
   void resetGC();
 
   /*

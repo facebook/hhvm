@@ -18,7 +18,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -52,6 +54,13 @@ enum class ThriftServerEventType : std::uint32_t {
   // Per-batch write completion relayed up from the rocket pipeline by
   // ThriftServerTransportAdapter. Carries a ThriftServerWriteCompleteEvent.
   WriteComplete,
+  // The SETUP response is on the wire and the connection can carry requests.
+  // Relayed up from the rocket pipeline's setup handler by
+  // ThriftServerTransportAdapter, after the answer has been written and before
+  // any request can arrive. Carries a ThriftServerSetupCompleteEvent*, whose
+  // reject slot a subscriber fills to refuse a connection the server has
+  // already answered.
+  SetupComplete,
   // Sentinel: number of event types. Keep last.
   Count,
 };
@@ -65,6 +74,19 @@ struct ThriftServerWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+};
+
+/**
+ * Payload for ThriftServerEventType::SetupComplete. Fired by pointer so a
+ * subscriber can fill the out-slot in place; the emitter reads it back once
+ * dispatch returns.
+ *
+ * Refusing here is a different act from refusing during the setup exchange:
+ * the client has already been answered, so it sees an error frame following
+ * the SETUP response rather than instead of it.
+ */
+struct ThriftServerSetupCompleteEvent {
+  std::optional<SetupRejection> reject;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

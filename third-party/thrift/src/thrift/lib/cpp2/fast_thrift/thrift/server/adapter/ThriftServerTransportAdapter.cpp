@@ -55,6 +55,25 @@ ThriftServerTransportAdapter::ThriftServerTransportAdapter(
       [this](const rocket::server::RocketWriteCompleteEvent& e) noexcept {
         onWriteComplete(e);
       });
+  // Bridge the rocket setup handler's "answer is on the wire" announcement
+  // into the thrift pipeline, carrying any refusal back down to it.
+  rocketConn_->appAdapter->setOnSetupComplete(
+      [this](rocket::server::RocketSetupCompleteEvent& e) noexcept {
+        onSetupComplete(e);
+      });
+}
+
+void ThriftServerTransportAdapter::onSetupComplete(
+    rocket::server::RocketSetupCompleteEvent& event) noexcept {
+  ThriftServerSetupCompleteEvent thriftEvent;
+  pipeline_->fireEvent(
+      ThriftServerEventType::SetupComplete,
+      channel_pipeline::TypeErasedBox(&thriftEvent));
+  if (FOLLY_UNLIKELY(thriftEvent.reject.has_value())) {
+    event.reject = rocket::server::SetupRejection{
+        .code = thriftEvent.reject->code,
+        .reason = std::move(thriftEvent.reject->reason)};
+  }
 }
 
 channel_pipeline::Result ThriftServerTransportAdapter::onConnectionFrame(

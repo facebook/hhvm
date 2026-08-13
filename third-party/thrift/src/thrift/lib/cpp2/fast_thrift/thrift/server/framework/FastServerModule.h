@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftConnectionExtension.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftExtensionPipelineHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
 
@@ -93,9 +94,19 @@ class FastServerModule {
    */
   template <typename H, typename... Args>
   FastServerModule& addThriftExtension(Args... args) {
+    requiresConnectionContext_ |= ThriftConnectionExtensionHandler<H>;
     return addNativeThriftHandler<server::ThriftExtensionPipelineHandler<H>>(
         std::move(args)...);
   }
+
+  /**
+   * Whether any extension in this module hooks the connection lifecycle, and so
+   * needs the server to build a per-connection context. Checked by
+   * FastThriftServer::addModule against the server's enableRequestContext
+   * setting: without it there is no ThriftConnContext to observe, and a
+   * connection extension would silently see nothing.
+   */
+  bool requiresConnectionContext() const { return requiresConnectionContext_; }
 
   /**
    * The module's handler factories, in call order. FastThriftServer::addModule
@@ -111,6 +122,7 @@ class FastServerModule {
  private:
   std::string name_;
   std::vector<server::ThriftPipelineHandlerFactory> factories_;
+  bool requiresConnectionContext_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

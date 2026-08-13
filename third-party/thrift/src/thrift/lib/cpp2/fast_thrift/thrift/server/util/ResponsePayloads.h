@@ -25,6 +25,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 
+#include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
@@ -122,6 +123,22 @@ inline ThriftServerResponseMessage makeUnknownExceptionMessage(
     apache::thrift::ErrorBlame blame = apache::thrift::ErrorBlame::SERVER) {
   return makeAppErrorMessage(
       streamId, ew.class_name().toStdString(), ew.what().toStdString(), blame);
+}
+
+// A refusal, reported under the thrower's chosen wire name: AppClientError and
+// AppServerError carry a name independent of the C++ type, and say which side
+// is to blame. Anything else falls back to the demangled type name.
+inline ThriftServerResponseMessage makeRejectionMessage(
+    uint32_t streamId, const folly::exception_wrapper& ew) {
+  if (const auto* appError = ew.get_exception<apache::thrift::AppBaseError>()) {
+    return makeAppErrorMessage(
+        streamId,
+        appError->name(),
+        appError->what(),
+        appError->isClientError() ? apache::thrift::ErrorBlame::CLIENT
+                                  : apache::thrift::ErrorBlame::SERVER);
+  }
+  return makeUnknownExceptionMessage(streamId, ew);
 }
 
 // Success: serialize presult into a payload buffer, build success metadata.

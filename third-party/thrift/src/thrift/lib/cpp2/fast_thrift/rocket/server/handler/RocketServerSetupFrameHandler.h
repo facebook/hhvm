@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 
@@ -235,10 +236,29 @@ class RocketServerSetupFrameHandler {
     // slow down, so the next frame is post-setup traffic.
     msg.get<RocketRequestMessage>().metadataProtocol = params_.metadataProtocol;
     const auto result = ctx.fireRead(std::move(msg));
-    if (FOLLY_LIKELY(
-            result !=
+    if (FOLLY_UNLIKELY(
+            result ==
             apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
-      setupComplete_ = true;
+      return result;
+    }
+    setupComplete_ = true;
+    return announceSetupComplete(ctx, result);
+  }
+
+  // The traversal above is synchronous, so by the time it returns the answer
+  // has been written and the connection can carry requests. Announce that, and
+  // honour a subscriber that only decides to refuse once the client has been
+  // answered — the client sees its error frame after the setup response.
+  template <typename Context>
+  apache::thrift::fast_thrift::channel_pipeline::Result announceSetupComplete(
+      Context& ctx,
+      apache::thrift::fast_thrift::channel_pipeline::Result result) noexcept {
+    RocketSetupCompleteEvent event;
+    ctx.fireEvent(
+        RocketServerEventId::SetupComplete,
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(&event));
+    if (FOLLY_UNLIKELY(event.reject.has_value())) {
+      return sendError(ctx, event.reject->code, event.reject->reason.c_str());
     }
     return result;
   }

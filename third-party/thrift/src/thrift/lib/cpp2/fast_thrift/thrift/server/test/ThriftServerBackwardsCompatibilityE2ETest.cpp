@@ -172,15 +172,13 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
             std::move(rocketConn));
     auto& rocketConnRef = transportAdapter->rocketConnection();
 
-    // Rocket pipeline; SETUP publishes negotiated metadata protocol into
-    // both the channel (for response serialization) and the transport
-    // adapter (for inbound request deserialization).
     rocketConnRef.pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::rocket::server::
                 RocketServerTransportHandler,
             apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter,
-            SimpleBufferAllocator>()
+            SimpleBufferAllocator,
+            apache::thrift::fast_thrift::rocket::server::RocketServerEventId>()
             .setEventBase(evb)
             .setHead(rocketConnRef.transportHandler.get())
             .setTail(rocketConnRef.appAdapter.get())

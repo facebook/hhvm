@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -945,6 +946,140 @@ bool addRoundTripFails(const folly::SocketAddress& addr) {
   return failed;
 }
 
+ftt::FastThriftServerConfig makeConnectionContextConfig() {
+  auto config = makeLoopbackConfig();
+  // Connection extensions observe the per-connection context, so the server
+  // must be building one.
+  config.enableRequestContext = true;
+  return config;
+}
+
+// Shared sink for what a connection extension observed. A fresh extension is
+// constructed per connection, so the recorder lives in the test and every
+// instance points at it.
+struct ConnectionRecorder {
+  std::atomic<int> seq{0};
+  std::atomic<int> attempted{-1};
+  std::atomic<int> established{-1};
+  std::atomic<int> request{-1};
+  std::atomic<int> closed{0};
+  std::atomic<int> negotiatedVersion{0};
+  std::atomic<bool> sawClientSetup{false};
+
+  // Stamps `slot` with the next global sequence number, keeping the first
+  // stamp only, so ordering assertions read the first connection's lifecycle
+  // even if the test opens more.
+  void stamp(std::atomic<int>& slot) noexcept {
+    int next = seq.fetch_add(1, std::memory_order_relaxed);
+    int expected = -1;
+    slot.compare_exchange_strong(expected, next);
+  }
+};
+
+// Records every lifecycle point plus the request, so a single connection's
+// callback order can be compared against the first request it carries.
+struct ConnectionLifecycleExtension {
+  ConnectionRecorder* rec{nullptr};
+
+  ftt::ConnectionVerdict onConnectionAttempted(
+      const ftt::ThriftSetupConnectionView& conn) noexcept {
+    rec->stamp(rec->attempted);
+    rec->negotiatedVersion.store(
+        conn.negotiatedVersion(), std::memory_order_relaxed);
+    rec->sawClientSetup.store(
+        conn.clientSetup().maxVersion().has_value(), std::memory_order_relaxed);
+    return ftt::ConnectionVerdict::proceed();
+  }
+
+  ftt::ConnectionVerdict onConnectionEstablished(
+      const ftt::ThriftConnectionView& /*conn*/) noexcept {
+    rec->stamp(rec->established);
+    return ftt::ConnectionVerdict::proceed();
+  }
+
+  void onConnectionClosed(const ftt::ThriftConnectionView& /*conn*/) noexcept {
+    rec->closed.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    rec->stamp(rec->request);
+    return ftt::RequestVerdict::proceed();
+  }
+};
+
+// Refuses at the first decision point. Also records the later points, so a
+// test can assert they never run.
+struct RejectAtAttemptedExtension {
+  ConnectionRecorder* rec{nullptr};
+
+  ftt::ConnectionVerdict onConnectionAttempted(
+      const ftt::ThriftSetupConnectionView& /*conn*/) noexcept {
+    rec->stamp(rec->attempted);
+    return ftt::ConnectionVerdict::reject<std::runtime_error>(
+        "denied at connection attempt");
+  }
+
+  ftt::ConnectionVerdict onConnectionEstablished(
+      const ftt::ThriftConnectionView& /*conn*/) noexcept {
+    rec->stamp(rec->established);
+    return ftt::ConnectionVerdict::proceed();
+  }
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    rec->stamp(rec->request);
+    return ftt::RequestVerdict::proceed();
+  }
+};
+
+// Contributes a security policy to the SETUP response, the way an
+// authorization extension declares its enforcement level to the client.
+struct PolicyContributingExtension {
+  ConnectionRecorder* rec{nullptr};
+
+  ftt::ConnectionVerdict onConnectionAttempted(
+      ftt::ThriftSetupConnectionMutator& /*conn*/) noexcept {
+    rec->stamp(rec->attempted);
+    return ftt::ConnectionVerdict::proceed();
+  }
+
+  // Contributed on the way out: the response does not exist yet at
+  // onConnectionAttempted.
+  void onConnectionAnswering(
+      ftt::ThriftSetupResponseMutator& response) noexcept {
+    apache::thrift::SecurityPolicy policy;
+    policy.authorization() = apache::thrift::SecurityPolicyStatus::ENFORCED;
+    policy.authWall() = apache::thrift::SecurityPolicyStatus::ENABLED;
+    response.setSecurityPolicy(std::move(policy));
+  }
+};
+
+// Hooks only the teardown point — an extension is free to implement any subset
+// of the callbacks, including no request callback at all.
+struct ClosedOnlyExtension {
+  ConnectionRecorder* rec{nullptr};
+
+  void onConnectionClosed(const ftt::ThriftConnectionView& /*conn*/) noexcept {
+    rec->closed.fetch_add(1, std::memory_order_relaxed);
+  }
+};
+
+// Spins until `value` reaches `target` or the deadline passes. Connection
+// teardown completes asynchronously after the client goes away, so tests that
+// assert on it cannot read the counter straight through.
+bool waitFor(const std::atomic<int>& value, int target) {
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds{10};
+  while (std::chrono::steady_clock::now() < deadline) {
+    if (value.load(std::memory_order_relaxed) >= target) {
+      return true;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
+  }
+  return false;
+}
+
 } // namespace
 
 // Embedder pool actually drives accept + dispatch end-to-end.
@@ -1131,6 +1266,142 @@ TEST(FastThriftServerExtensionTest, ModifierRejectionShortCircuitsService) {
 
   EXPECT_TRUE(addRoundTripFails(server.getAddress()));
   EXPECT_GE(rejections.load(), 1);
+}
+
+// The connection callbacks bracket the SETUP exchange: attempted fires once
+// the client's setup metadata is parsed and version-negotiated, established
+// once the SETUP response is away, and both land before the first request.
+// A negotiated version and a non-null client setup prove the events are driven
+// by the real SETUP frame rather than by socket accept.
+TEST(FastThriftServerConnectionExtensionTest, LifecycleBracketsSetupExchange) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  ConnectionRecorder rec;
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("lifecycle")
+          .addThriftExtension<ConnectionLifecycleExtension>(&rec));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  EXPECT_GE(rec.attempted.load(), 0);
+  EXPECT_LT(rec.attempted.load(), rec.established.load());
+  EXPECT_LT(rec.established.load(), rec.request.load());
+  EXPECT_GT(rec.negotiatedVersion.load(), 0);
+  EXPECT_TRUE(rec.sawClientSetup.load());
+}
+
+// Refusing at the first decision point short-circuits: no SETUP response is
+// built, the established callback never runs, and the client's RPC fails.
+TEST(FastThriftServerConnectionExtensionTest, AttemptedRejectionRefusesSetup) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  ConnectionRecorder rec;
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("reject-attempt")
+          .addThriftExtension<RejectAtAttemptedExtension>(&rec));
+  server.start();
+
+  EXPECT_TRUE(addRoundTripFails(server.getAddress()));
+  EXPECT_GE(rec.attempted.load(), 0);
+  EXPECT_EQ(rec.established.load(), -1);
+  EXPECT_EQ(rec.request.load(), -1);
+}
+
+// An extension may hook teardown alone, with no request callback. The closed
+// callback fires once the connection the client dropped has settled.
+TEST(FastThriftServerConnectionExtensionTest, ClosedFiresForSettledConnection) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  ConnectionRecorder rec;
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("closed-only")
+          .addThriftExtension<ClosedOnlyExtension>(&rec));
+  server.start();
+
+  // addRoundTrip tears its client down before returning, so the server-side
+  // close is already in flight by the time we start waiting.
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_TRUE(waitFor(rec.closed, 1));
+}
+
+// An extension can contribute to the SETUP response the client receives, not
+// just accept or refuse the connection. Dispatch must hand it a mutator: the
+// contribution has to land before the response is serialized.
+TEST(FastThriftServerConnectionExtensionTest, ContributesToSetupResponse) {
+  static_assert(
+      ftt::HasConnectionAttemptedMutatorCallback<PolicyContributingExtension>,
+      "a contributing extension must match the mutator form");
+  static_assert(
+      !ftt::HasConnectionAttemptedViewCallback<PolicyContributingExtension>,
+      "a contributing extension must not match the view form, or view-first "
+      "dispatch would strip its write access");
+  static_assert(
+      ftt::HasConnectionAttemptedViewCallback<ConnectionLifecycleExtension>,
+      "a read-only extension must match the view form");
+
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  ConnectionRecorder rec;
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("policy")
+          .addThriftExtension<PolicyContributingExtension>(&rec));
+  server.start();
+
+  // The contribution must not disturb the exchange: the RPC still completes.
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_GE(rec.attempted.load(), 0);
+}
+
+// A connection extension observes the per-connection context, so registering
+// one against a server that builds none is refused outright rather than
+// silently handing the extension an empty connection.
+TEST(FastThriftServerConnectionExtensionTest, RequiresRequestContext) {
+  ConnectionRecorder rec;
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  EXPECT_THROW(
+      server.addModule(
+          ftt::FastServerModule("needs-context")
+              .addThriftExtension<ConnectionLifecycleExtension>(&rec)),
+      std::logic_error);
+}
+
+// Callback families are independent: a teardown-only extension is a valid
+// extension with no request callback, and an extension that hooks no
+// connection event subscribes to nothing, so it is linked into no event list.
+TEST(FastThriftServerConnectionExtensionTest, CallbackFamiliesAreIndependent) {
+  static_assert(
+      !ftt::ThriftExtensionHandler<ClosedOnlyExtension>,
+      "a teardown-only extension has no request callback");
+  static_assert(
+      ftt::ThriftConnectionExtensionHandler<ClosedOnlyExtension>,
+      "a teardown-only extension is still a connection extension");
+  static_assert(
+      !ftt::ThriftConnectionExtensionHandler<CountingExtension>,
+      "a request/response extension hooks no connection event");
+  static_assert(
+      std::is_same_v<
+          std::remove_const_t<
+              decltype(ftt::server::ThriftExtensionPipelineHandler<
+                       CountingExtension>::kSubscribedEvents)>,
+          cp::Subscriptions<>>,
+      "an extension with no connection callback must subscribe to no events");
 }
 
 // Registering two modules with the same name on the server is rejected.

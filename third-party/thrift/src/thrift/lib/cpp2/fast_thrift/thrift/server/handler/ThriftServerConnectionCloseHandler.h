@@ -182,6 +182,10 @@ class ThriftServerConnectionCloseHandler {
     if (FOLLY_UNLIKELY(state_ != State::Open)) {
       return channel_pipeline::Result::Error;
     }
+    if (FOLLY_UNLIKELY(
+            !isRequestWork(msg.get<ThriftServerRequestMessage>().payload))) {
+      return ctx.fireRead(std::move(msg));
+    }
     ++inFlight_;
     return ctx.fireRead(std::move(msg));
   }
@@ -197,6 +201,10 @@ class ThriftServerConnectionCloseHandler {
   channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     DCHECK(state_ != State::Closed) << "no writes expected after Closed";
+    if (FOLLY_UNLIKELY(
+            !isRequestWork(msg.get<ThriftServerResponseMessage>().payload))) {
+      return ctx.fireWrite(std::move(msg));
+    }
     DCHECK_GT(inFlight_, 0u);
     --inFlight_;
     if (FOLLY_UNLIKELY(state_ == State::ClosedReaping)) {
@@ -242,6 +250,23 @@ class ThriftServerConnectionCloseHandler {
   }
 
  private:
+  // The connection setup exchange rides the same pipeline but is not request
+  // work: its answer is a connection-level frame, not a response, so counting
+  // it would leave a count outstanding that no write can ever retire.
+  // Excluding by name rather than admitting by name deliberately: anything
+  // unrecognised is counted, so an unaccounted message delays the close
+  // instead of letting it race ahead of work still in flight.
+  static bool isRequestWork(
+      const ThriftServerInboundPayloadVariant& payload) noexcept {
+    return !payload.template is<ThriftConnectionSetupPayload>();
+  }
+
+  static bool isRequestWork(
+      const ThriftServerOutboundPayloadVariant& payload) noexcept {
+    return !payload.template is<ThriftSetupResponsePayload>() &&
+        !payload.template is<ThriftSetupRejectionPayload>();
+  }
+
   enum class State : uint8_t {
     Open,
     Draining,

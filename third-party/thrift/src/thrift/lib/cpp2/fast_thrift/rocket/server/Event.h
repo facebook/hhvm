@@ -18,7 +18,14 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
 
+#include <folly/io/IOBuf.h>
+
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/SetupParameters.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::rocket::server {
@@ -38,6 +45,13 @@ enum class RocketServerEventId : std::uint32_t {
   // makeRocketWriteComplete) after popping one entry from its frame-count FIFO.
   // Carries RocketWriteCompleteEvent.
   RocketWriteComplete,
+  // Fired by RocketServerSetupFrameHandler once the client's SETUP frame has
+  // passed RSocket validation, to ask the layer above what to answer with.
+  // Carries RocketSetupEvent*.
+  SetupReceived,
+  // Fired by the same handler once that answer is on the write path and the
+  // connection is ready to carry requests. Carries RocketSetupCompleteEvent*.
+  SetupComplete,
   Count,
 };
 
@@ -60,6 +74,52 @@ struct RocketWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+};
+
+/**
+ * A refusal of the setup exchange: the frame-layer code to close with, and a
+ * human-readable reason for it. The reason reaches the client in the ERROR
+ * frame's body, so whoever refuses can say why — the rocket layer never has to
+ * understand it, it only carries it.
+ */
+struct SetupRejection {
+  apache::thrift::fast_thrift::frame::ErrorCode code;
+  std::string reason;
+};
+
+/**
+ * Message for RocketServerEventId::SetupReceived — a validated SETUP frame and
+ * the slots for the answer to it.
+ *
+ * This event is a question, not a notification: the emitter reads the response
+ * slots back once dispatch returns, so a subscriber fills them in place rather
+ * than replying through some other channel. Exactly one of `metadataPush` and
+ * `reject` should be set; leaving both empty accepts the connection without
+ * pushing anything back, which is what an unsubscribed pipeline does.
+ *
+ * The event stays thrift-free: only opaque bytes and a frame-layer error code
+ * cross the rocket boundary, so interpreting the setup metadata remains the
+ * upper layer's business.
+ */
+struct RocketSetupEvent {
+  // In: parameters read off the frame, and the client's opaque setup metadata
+  // (null when the frame carried none).
+  const SetupParameters* params{nullptr};
+  std::unique_ptr<folly::IOBuf> metadata;
+  // Out: the response to push back to the client, or the refusal to close with.
+  std::unique_ptr<folly::IOBuf> metadataPush;
+  std::optional<SetupRejection> reject;
+};
+
+/**
+ * Message for RocketServerEventId::SetupComplete — the second decision point,
+ * once the SETUP response is on the write path and before any request can be
+ * dispatched. `reject` is an out-slot: setting it refuses a connection that
+ * has already been answered, which the client sees as an error frame following
+ * the setup response.
+ */
+struct RocketSetupCompleteEvent {
+  std::optional<SetupRejection> reject;
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server

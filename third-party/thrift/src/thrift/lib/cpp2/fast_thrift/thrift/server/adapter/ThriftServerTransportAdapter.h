@@ -257,6 +257,12 @@ class ThriftServerTransportAdapter {
       apache::thrift::fast_thrift::frame::ErrorCode code,
       std::string_view reason) noexcept;
 
+  // Relays the rocket setup handler's completion announcement up the thrift
+  // pipeline. A subscriber that refuses fills the thrift event's slot; that
+  // refusal is copied back into `event` for the rocket handler to act on.
+  FOLLY_NOINLINE void onSetupComplete(
+      rocket::server::RocketSetupCompleteEvent& event) noexcept;
+
   // Rocket pipeline became active — activate the thrift pipeline so
   // handlers can react. Idempotent in connected_; reactivate after
   // disconnect works.

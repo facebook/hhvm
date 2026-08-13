@@ -63,11 +63,14 @@ class ThriftServerConnectionContextHandler {
   channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto& request = msg.get<ThriftServerRequestMessage>();
-    // The setup message carries no request context and is answered further
-    // down; nothing here applies to it. Tested positively: a valueless payload
-    // is not a setup message and must still be handled.
+    // The setup message carries no request context, but it does carry a slot
+    // for the connection this handler owns: fill it so handlers further down
+    // can present the connection. Tested positively: a valueless payload is
+    // not a setup message and must still be handled.
     if (FOLLY_UNLIKELY(
             request.payload.template is<ThriftConnectionSetupPayload>())) {
+      request.payload.template get<ThriftConnectionSetupPayload>()
+          .setup->connContext = connContext_.get();
       return ctx.fireRead(std::move(msg));
     }
     DCHECK(request.requestContext)

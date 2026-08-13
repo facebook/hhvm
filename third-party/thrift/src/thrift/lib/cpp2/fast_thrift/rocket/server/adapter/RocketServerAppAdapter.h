@@ -95,6 +95,16 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   using OnWriteCompleteFn =
       folly::Function<void(const RocketWriteCompleteEvent&) noexcept>;
 
+  // Setup relays: the rocket pipeline's setup handler asks what to answer a
+  // validated SETUP frame with, then reports once that answer is on the write
+  // path. Both events carry out-slots the relay fills in place — this is how
+  // the layer above (which owns setup-metadata interpretation) gets its
+  // decision back down to the rocket side. Only delivered when the pipeline is
+  // built with RocketServerEventId.
+  using OnSetupReceivedFn = folly::Function<void(RocketSetupEvent&) noexcept>;
+  using OnSetupCompleteFn =
+      folly::Function<void(RocketSetupCompleteEvent&) noexcept>;
+
   RocketServerAppAdapter() = default;
 
   RocketServerAppAdapter(const RocketServerAppAdapter&) = delete;
@@ -147,6 +157,14 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
 
   void setOnWriteComplete(OnWriteCompleteFn fn) noexcept {
     onWriteComplete_ = std::move(fn);
+  }
+
+  void setOnSetupReceived(OnSetupReceivedFn fn) noexcept {
+    onSetupReceived_ = std::move(fn);
+  }
+
+  void setOnSetupComplete(OnSetupCompleteFn fn) noexcept {
+    onSetupComplete_ = std::move(fn);
   }
 
   /**
@@ -216,6 +234,8 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     onDisconnect_ = {};
     onWriteReady_ = {};
     onWriteComplete_ = {};
+    onSetupReceived_ = {};
+    onSetupComplete_ = {};
   }
 
   void onPipelineActive() noexcept {
@@ -251,16 +271,37 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   // pipeline's WriteCompletionTracker. Wired only when the pipeline is built
   // with RocketServerEventId; otherwise the framework compiles this out.
   static constexpr channel_pipeline::Subscriptions<
-      RocketServerEventId::RocketWriteComplete>
+      RocketServerEventId::RocketWriteComplete,
+      RocketServerEventId::SetupReceived,
+      RocketServerEventId::SetupComplete>
       kSubscribedEvents{};
 
   void onEvent(
-      RocketServerEventId /*ev*/,
+      RocketServerEventId ev,
       const channel_pipeline::TypeErasedBox& box) noexcept {
-    if (FOLLY_UNLIKELY(!onWriteComplete_)) {
-      return;
+    switch (ev) {
+      case RocketServerEventId::RocketWriteComplete:
+        if (FOLLY_LIKELY(static_cast<bool>(onWriteComplete_))) {
+          onWriteComplete_(box.get<RocketWriteCompleteEvent>());
+        }
+        break;
+      // The setup events are questions: the relay writes its answer into the
+      // event, and the setup handler reads it back once dispatch returns. With
+      // no relay installed the slots stay empty, which the handler reads as
+      // "accept, nothing to push back".
+      case RocketServerEventId::SetupReceived:
+        if (onSetupReceived_) {
+          onSetupReceived_(*box.get<RocketSetupEvent*>());
+        }
+        break;
+      case RocketServerEventId::SetupComplete:
+        if (onSetupComplete_) {
+          onSetupComplete_(*box.get<RocketSetupCompleteEvent*>());
+        }
+        break;
+      default:
+        break;
     }
-    onWriteComplete_(box.get<RocketWriteCompleteEvent>());
   }
 
  protected:
@@ -278,6 +319,8 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   OnDisconnectFn onDisconnect_;
   OnWriteReadyFn onWriteReady_;
   OnWriteCompleteFn onWriteComplete_;
+  OnSetupReceivedFn onSetupReceived_;
+  OnSetupCompleteFn onSetupComplete_;
   bool disconnected_{true};
 };
 

@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 
@@ -85,6 +86,25 @@ class MockContext {
 
   void close() noexcept { closeCalled_ = true; }
 
+  // Setup completion is announced as an event carrying a pointer, so a
+  // subscriber can fill its reject slot in place. The hook lets a test stand
+  // in for that subscriber.
+  using OnEventFn =
+      std::function<void(RocketServerEventId, const TypeErasedBox&)>;
+
+  void setOnEvent(OnEventFn fn) { onEvent_ = std::move(fn); }
+
+  void fireEvent(RocketServerEventId ev, TypeErasedBox&& evt) noexcept {
+    firedEvents_.push_back(ev);
+    if (onEvent_) {
+      onEvent_(ev, evt);
+    }
+  }
+
+  const std::vector<RocketServerEventId>& firedEvents() const {
+    return firedEvents_;
+  }
+
   // NOLINTNEXTLINE(clang-diagnostic-unused-member-function)
   apache::thrift::fast_thrift::channel_pipeline::BytesPtr allocate(
       size_t size) {
@@ -122,6 +142,8 @@ class MockContext {
     writeResult_ = Result::Success;
     disconnectCalled_ = false;
     closeCalled_ = false;
+    firedEvents_.clear();
+    onEvent_ = nullptr;
     writeReadyCalled_ = false;
   }
 
@@ -133,6 +155,8 @@ class MockContext {
   Result writeResult_{Result::Success};
   bool disconnectCalled_{false};
   bool closeCalled_{false};
+  std::vector<RocketServerEventId> firedEvents_;
+  OnEventFn onEvent_;
   bool writeReadyCalled_{false};
 };
 

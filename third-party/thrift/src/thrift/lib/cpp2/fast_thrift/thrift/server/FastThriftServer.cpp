@@ -136,6 +136,16 @@ void FastThriftServer::addModule(FastServerModule module) {
             "FastThriftServer::addModule: duplicate module name: {}",
             module.name()));
   }
+  // Refuse rather than degrade: without a per-connection context the
+  // connection events carry nothing, and an extension that gates on what it
+  // reads there would silently see an empty connection.
+  if (module.requiresConnectionContext() && !config_.enableRequestContext) {
+    throw std::logic_error(
+        fmt::format(
+            "FastThriftServer::addModule: module '{}' registers a connection "
+            "extension, which requires enableRequestContext",
+            module.name()));
+  }
   auto name = module.name();
   // Splice the module's handlers into the ordered list at the current call
   // position, preserving intra-module order.

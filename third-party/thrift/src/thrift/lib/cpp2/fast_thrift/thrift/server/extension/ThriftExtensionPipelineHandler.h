@@ -17,18 +17,81 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <typeinfo>
 #include <utility>
 
+#include <folly/Demangle.h>
 #include <folly/ExceptionWrapper.h>
 
+#include <fmt/core.h>
+#include <folly/ExceptionString.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftConnectionExtension.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftExtension.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/SetupMessages.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
+
+namespace extension_detail {
+
+template <bool Subscribe, auto Ev>
+using SubscriptionIf = std::conditional_t<
+    Subscribe,
+    channel_pipeline::Subscriptions<Ev>,
+    channel_pipeline::Subscriptions<>>;
+
+template <typename A, typename B>
+struct ConcatSubscriptionsImpl;
+template <auto... A, auto... B>
+struct ConcatSubscriptionsImpl<
+    channel_pipeline::Subscriptions<A...>,
+    channel_pipeline::Subscriptions<B...>> {
+  using type = channel_pipeline::Subscriptions<A..., B...>;
+};
+template <typename A, typename B>
+using ConcatSubscriptions = typename ConcatSubscriptionsImpl<A, B>::type;
+
+/**
+ * The connection events H's adapter listens to. The two after-the-fact points
+ * are events; onConnectionAttempted is a message on the read path. An H that
+ * implements only onConnectionClosed still subscribes to SetupComplete,
+ * because that is where the established latch gating it is set. An H that
+ * hooks no connection point is linked into no event list.
+ */
+template <typename H>
+using ConnectionSubscriptions = ConcatSubscriptions<
+    SubscriptionIf<
+        ThriftConnectionExtensionHandler<H>,
+        ThriftServerEventType::SetupComplete>,
+    SubscriptionIf<
+        HasConnectionClosedCallback<H>,
+        ThriftServerEventType::ConnectionClosed>>;
+
+/**
+ * H's demangled type name, for attributing a refusal to the extension that
+ * made it. Computed once per H and returned by reference, so the event can
+ * hold a view rather than a copy.
+ */
+template <typename H>
+const std::string& extensionName() {
+  static const std::string kName =
+      folly::demangle(typeid(H).name()).toStdString();
+  return kName;
+}
+
+} // namespace extension_detail
 
 /**
  * Adapts a user extension handler H into a duplex channel_pipeline handler.
@@ -57,11 +120,15 @@ namespace apache::thrift::fast_thrift::thrift::server {
 template <typename H>
 class ThriftExtensionPipelineHandler {
   static_assert(
-      ThriftExtensionHandler<H>,
-      "ThriftExtensionPipelineHandler<H>: H must implement onRequest taking "
-      "either const ThriftRequestView& [read-only] or ThriftRequestMutator& "
-      "[read/write], noexcept and returning RequestVerdict. The mutator is a "
-      "view, so a read/write extension still gets every read accessor.");
+      ThriftExtensionHandler<H> || HasResponseCallback<H> ||
+          ThriftConnectionExtensionHandler<H>,
+      "ThriftExtensionPipelineHandler<H>: H must implement at least one "
+      "extension callback — onRequest taking either const ThriftRequestView& "
+      "[read-only] or ThriftRequestMutator& [read/write] and returning "
+      "RequestVerdict; onResponse over the response view or mutator; or one of "
+      "onConnectionAttempted / onConnectionAnswering / "
+      "onConnectionEstablished / onConnectionClosed. Every callback is "
+      "noexcept.");
 
  public:
   template <typename... Args>
@@ -71,6 +138,149 @@ class ThriftExtensionPipelineHandler {
   channel_pipeline::Result onRead(
       ThriftPipelineHandlerContext& ctx,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
+    auto& request = msg.get<ThriftServerRequestMessage>();
+
+    // Lifecycle messages never reach the request callbacks, whatever H
+    // implements: to a request extension the setup exchange is not a request,
+    // and handing it one would run onRequest against a connection.
+    if (FOLLY_UNLIKELY(request.payload.is<ThriftConnectionSetupPayload>())) {
+      if constexpr (ThriftConnectionExtensionHandler<H>) {
+        return onConnectionAttempted(
+            ctx,
+            std::move(msg),
+            *request.payload.get<ThriftConnectionSetupPayload>().setup);
+      } else {
+        return ctx.fireRead(std::move(msg));
+      }
+    }
+    if constexpr (!ThriftExtensionHandler<H>) {
+      return ctx.fireRead(std::move(msg));
+    } else {
+      return onRequest(ctx, std::move(msg));
+    }
+  }
+
+  static constexpr extension_detail::ConnectionSubscriptions<H>
+      kSubscribedEvents{};
+
+  /**
+   * The two lifecycle points that fire after the exchange they report on:
+   * SetupComplete once the answer is on the wire, ConnectionClosed during
+   * teardown. Only onConnectionAttempted stays a message, because it is the
+   * one point that still has an answer to shape.
+   */
+  void onEvent(
+      ThriftPipelineHandlerContext& /*ctx*/,
+      ThriftServerEventType ev,
+      const channel_pipeline::TypeErasedBox& evt) noexcept {
+    if constexpr (ThriftConnectionExtensionHandler<H>) {
+      if (ev == ThriftServerEventType::SetupComplete) {
+        onSetupComplete(*evt.get<ThriftServerSetupCompleteEvent*>());
+        return;
+      }
+    }
+    if (ev != ThriftServerEventType::ConnectionClosed) {
+      return;
+    }
+    if constexpr (HasConnectionClosedCallback<H>) {
+      // Rebuilt from the context latched during setup: the event carries no
+      // payload, and the connection-context handler still owns the context
+      // while the pipeline tears down.
+      if (established_ && connContext_ != nullptr) {
+        const ThriftConnectionView view(*connContext_);
+        handler_.onConnectionClosed(view);
+      }
+    }
+  }
+
+ private:
+  // A refusal stops the message here and answers outbound, exactly as a
+  // rejected request does. Forwarding otherwise lets the next extension
+  // contribute, and finally lets ThriftServerSetupHandler answer.
+  channel_pipeline::Result onConnectionAttempted(
+      ThriftPipelineHandlerContext& ctx,
+      channel_pipeline::TypeErasedBox&& msg,
+      ConnectionSetupData& setup) noexcept
+    requires ThriftConnectionExtensionHandler<H>
+  {
+    connContext_ = setup.connContext;
+    if constexpr (HasConnectionAttemptedCallback<H>) {
+      // View form first: a mutator binds to a const view parameter, so an
+      // extension that only reads is not handed write access it did not ask
+      // for.
+      ConnectionVerdict verdict = [&]() noexcept {
+        if constexpr (HasConnectionAttemptedViewCallback<H>) {
+          const ThriftSetupConnectionView view(setup);
+          return handler_.onConnectionAttempted(view);
+        } else {
+          ThriftSetupConnectionMutator mutator(setup);
+          return handler_.onConnectionAttempted(mutator);
+        }
+      }();
+      if (FOLLY_UNLIKELY(verdict.isRejected())) {
+        return refuse(ctx, "onConnectionAttempted", std::move(verdict));
+      }
+    }
+    return ctx.fireRead(std::move(msg));
+  }
+
+  // The setup answer is on the wire. Nothing is forwarded and nothing can be
+  // contributed here — a refusal at this point reaches the client as an error
+  // frame following the response, which the rocket setup handler emits once
+  // this returns.
+  void onSetupComplete(ThriftServerSetupCompleteEvent& event) noexcept
+    requires ThriftConnectionExtensionHandler<H>
+  {
+    // Latched even when H has no established callback, so an H that only
+    // implements onConnectionClosed can still tell a connection that reached
+    // the established point from one that died during setup.
+    established_ = true;
+    if constexpr (HasConnectionEstablishedCallback<H>) {
+      if (connContext_ == nullptr) {
+        return;
+      }
+      const ThriftConnectionView view(*connContext_);
+      auto verdict = handler_.onConnectionEstablished(view);
+      if (FOLLY_UNLIKELY(verdict.isRejected()) && !event.reject.has_value()) {
+        event.reject = SetupRejection{
+            .code =
+                apache::thrift::fast_thrift::frame::ErrorCode::REJECTED_SETUP,
+            .reason =
+                rejectionReason("onConnectionEstablished", std::move(verdict))};
+      }
+    }
+  }
+
+  // Names the refusing extension and its cause, so an operator can tell which
+  // one closed the connection without server-side logs.
+  static std::string rejectionReason(
+      std::string_view callback, ConnectionVerdict verdict) noexcept {
+    return fmt::format(
+        "ThriftExtension::{} rejected the connection:\n[{}] {}",
+        callback,
+        extension_detail::extensionName<H>(),
+        folly::exceptionStr(std::move(verdict).cause()).toStdString());
+  }
+
+  channel_pipeline::Result refuse(
+      ThriftPipelineHandlerContext& ctx,
+      std::string_view callback,
+      ConnectionVerdict verdict) noexcept {
+    (void)ctx.fireWrite(
+        channel_pipeline::erase_and_box(makeSetupRejectionMessage(
+            apache::thrift::fast_thrift::frame::ErrorCode::REJECTED_SETUP,
+            rejectionReason(callback, std::move(verdict)))));
+    // Non-Success is how a refusal travels back to the transport adapter: it
+    // stops the setup exchange there, so no established point is announced and
+    // the connection is torn down.
+    return channel_pipeline::Result::Error;
+  }
+
+  channel_pipeline::Result onRequest(
+      ThriftPipelineHandlerContext& ctx,
+      channel_pipeline::TypeErasedBox&& msg) noexcept
+    requires ThriftExtensionHandler<H>
+  {
     auto& request = msg.get<ThriftServerRequestMessage>();
     // Capture before any potential reject drops the inbound message: the
     // synthesized response must echo this streamId to correlate on the client.
@@ -95,9 +305,27 @@ class ThriftExtensionPipelineHandler {
     return ctx.fireWrite(channel_pipeline::erase_and_box(std::move(response)));
   }
 
+ public:
   channel_pipeline::Result onWrite(
       ThriftPipelineHandlerContext& ctx,
       channel_pipeline::TypeErasedBox&& msg) noexcept {
+    if constexpr (HasConnectionAnsweringCallback<H>) {
+      auto& outbound = msg.get<ThriftServerResponseMessage>();
+      if (FOLLY_UNLIKELY(
+              outbound.payload.template is<ThriftSetupResponsePayload>())) {
+        // The answer is assembled but not yet serialized: this is the one
+        // window in which an extension can put something in front of the
+        // client.
+        auto& setupResponse =
+            outbound.payload.template get<ThriftSetupResponsePayload>()
+                .response;
+        if (FOLLY_LIKELY(setupResponse != nullptr)) {
+          ThriftSetupResponseMutator mutator(*setupResponse);
+          handler_.onConnectionAnswering(mutator);
+        }
+        return ctx.fireWrite(std::move(msg));
+      }
+    }
     if constexpr (HasResponseCallback<H>) {
       auto& response = msg.get<ThriftServerResponseMessage>();
       if constexpr (HasResponseViewCallback<H>) {
@@ -126,6 +354,13 @@ class ThriftExtensionPipelineHandler {
 
  private:
   H handler_;
+  // Latched from the setup messages so the payload-less ConnectionClosed can
+  // still present the connection. Non-owning: the connection-context handler
+  // outlives this pipeline's teardown.
+  const ThriftConnContext* connContext_{nullptr};
+  // Whether this connection reached ConnectionEstablished. Gates
+  // onConnectionClosed so it never fires for a connection that died mid-setup.
+  bool established_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

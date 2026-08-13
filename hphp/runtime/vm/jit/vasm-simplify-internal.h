@@ -31,9 +31,7 @@ namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Env {
-  Env(Vunit& unit, const jit::vector<Vlabel>& labels)
-      : unit(unit)
-      , preds(computePreds(unit)) {
+  Env(Vunit& unit, const jit::vector<Vlabel>& labels) : unit(unit) {
     init(labels);
   }
 
@@ -50,9 +48,6 @@ struct Env {
 
   // Vregs which are constants, or copies of constants.
   jit::vector<Optional<Vconst>> consts;
-
-  // Predecessors for each block.
-  const PredVector preds;
 };
 
 template<Vinstr::Opcode op>

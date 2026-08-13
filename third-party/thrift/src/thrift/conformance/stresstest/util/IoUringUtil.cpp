@@ -176,7 +176,6 @@ folly::IoUringBackend::Options getIoUringOptions() {
         folly::IoUringArena::arenaIndex());
   }
 
-  options.setNativeAsyncSocketSupport(true);
   return options;
 }
 } // namespace apache::thrift::stress

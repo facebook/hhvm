@@ -64,10 +64,3 @@ let check_string_coercion_point env expr ty =
         end
     end
     | _ -> ()
-
-(* Weaken class-typed expression at runtime string coercion points *)
-let coerce_to_name env ty =
-  let (env, ety) = Typing_env.expand_type env ty in
-  match deref ety with
-  | (r, Tclass_ptr ty_inner) -> (env, Typing_make_type.classname r [ty_inner])
-  | _ -> (env, ty)

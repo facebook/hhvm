@@ -8,7 +8,10 @@
 
 open Hh_prelude
 
-type options = { debug: bool }
+type options = {
+  debug: bool;
+  config: Config_file_common.t;
+}
 
 module Symbol = struct
   type t = Typing_deps.Dep.dependency Typing_deps.Dep.variant
@@ -28,13 +31,16 @@ let popt =
   ParserOptions.
     { default with disable_xhp_element_mangling = false; everything_sdt = true }
 
-let tcopt =
+(* `--config` settings are applied on top, so a test can turn on any `.hhconfig`
+   key without this binary having to know about it. *)
+let tcopt config =
   GlobalOptions.
     {
       default with
       po = popt;
       tco_allow_all_files_for_module_declarations = true;
     }
+  |> ServerConfig.load_config config
 
 let log_section ~name ~content =
   Printf.printf "%s:\n" (String.uppercase name);
@@ -358,13 +364,19 @@ let make_dep_to_symbol_map ctx options (files : Relative_path.Set.t) :
 
 (** Initialize a number of backend structures and global states necessary
   for the typechecker to function. *)
-let init (hhi_root : Path.t) : Provider_context.t =
+let init (hhi_root : Path.t) config : Provider_context.t =
   EventLogger.init_fake ();
   let (_ : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
   init_paths hhi_root;
-  let ctx = Provider_context.empty_for_test ~popt ~tcopt ~deps_mode in
+  let tcopt = tcopt config in
+  let ctx =
+    Provider_context.empty_for_test
+      ~popt:tcopt.GlobalOptions.po
+      ~tcopt
+      ~deps_mode
+  in
   Typing_deps.add_dependency_callback
     ~name:"dep_to_symbol"
     DepToSymbolsMap.callback;
@@ -443,7 +455,7 @@ let process_changed_files options ((repo : Multifile.repo), deleted) :
 let go (test_file : string) options =
   (if not options.debug then Hh_logger.Level.(set_min_level Off));
   Tempfile.with_tempdir @@ fun hhi_root ->
-  let ctx = init hhi_root in
+  let ctx = init hhi_root options.config in
   let { Multifile.States.base; changes } = Multifile.States.parse test_file in
   if options.debug then (
     Printf.printf
@@ -503,9 +515,25 @@ let parse_args () : string * options =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let fn_ref = ref [] in
   let debug = ref false in
-  let options = [("--debug", Arg.Set debug, "print debug information")] in
+  let config_overrides = ref [] in
+  let options =
+    [
+      ("--debug", Arg.Set debug, "print debug information");
+      ( "--config",
+        Arg.String (fun s -> config_overrides := s :: !config_overrides),
+        "<key=value> set a .hhconfig option" );
+    ]
+  in
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
-  let options = { debug = !debug } in
+  let config =
+    List.fold
+      (List.rev !config_overrides)
+      ~init:(Config_file_common.empty ())
+      ~f:(fun config setting ->
+        let overrides = Config_file_common.parse_contents setting in
+        Config_file_common.apply_overrides ~config ~overrides ~log_reason:None)
+  in
+  let options = { debug = !debug; config } in
   let files = !fn_ref in
   match files with
   | [file] -> (file, options)

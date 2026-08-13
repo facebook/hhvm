@@ -121,7 +121,9 @@ struct copy_field_fn {
 
   template <typename T>
   T operator()(const T& t) const {
-    if constexpr (copy_constructible_check<TypeClass, T>()) {
+    if constexpr (
+        copy_constructible_check<TypeClass, T>() &&
+        !is_container_v<type_class::set> && !is_container_v<type_class::map>) {
       return t;
     } else if constexpr (folly::is_instantiation_of_v<std::unique_ptr, T>) {
       return deep_copy_unique_ptr<TypeClass>(t);

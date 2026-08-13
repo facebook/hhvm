@@ -101,8 +101,20 @@ module Enum_member_value : sig
   val is_absent : t -> bool
 
   (** A canonical textual rendering of the value, usable as a comparison key and
-      a human-readable form. [member_name] supplies the name for the [EMVLabel]
-      (value equals member name) case. *)
+      a human-readable form.
+
+      Values that render alike do collide as arraykeys at runtime, mirroring how
+      Hack coerces arraykeys. An "intish" string renders as the bare int: that is
+      a canonical integer like ["0"] or ["-5"], within [i64] range, matching
+      HHVM's [is_strictly_integer] -- ["00"], ["-0"], ["+1"], hex and underscores
+      are not intish and stay quoted. [EMVLabel] (value equals the member name)
+      renders like the equivalent [EMVString].
+
+      The converse does not hold, so a caller cannot read differing renderings as
+      differing values: [EMVNameof] deliberately never matches the equivalent
+      string literal, to avoid relying on name resolution here.
+
+      [member_name] supplies the name for the [EMVLabel] case. *)
   val value_repr : member_name:string -> t -> string
 end
 

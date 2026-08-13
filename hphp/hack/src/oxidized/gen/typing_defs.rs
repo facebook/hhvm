@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da0f1122a04dc4155c5db1da0948c4a3>>
+// @generated SignedSource<<dbdcdba4acb0403c4aa36e6c7ba3f4eb>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -229,12 +229,12 @@ pub enum ClassConstKind {
 
 /// For an enum member, its recorded value. `EMVInt` holds values that fit
 /// OCaml's 63-bit `int`; literals outside that range (including `i64::MIN`)
-/// use `EMVLargeInt`, which stores the literal's source text verbatim (not
-/// canonicalized) so it marshals without truncation -- so different spellings
-/// of the same value compare unequal. `EMVNameof` and `EMVClassPointer` are
-/// kept distinct so `nameof C` (a string) and `C::class` (a class pointer)
-/// never coincide. `EMVLabel` means the value is a string equal to the
-/// member's own name (`FOO = 'FOO'`), recorded without storing the string.
+/// use `EMVLargeInt`, which stores the canonical decimal as a string so it
+/// marshals without truncation and every spelling of one value compares equal.
+/// `EMVNameof` and `EMVClassPointer` are kept distinct so `nameof C` (a
+/// string) and `C::class` (a class pointer) never coincide. `EMVLabel` means
+/// the value is a string equal to the member's own name (`FOO = 'FOO'`),
+/// recorded without storing the string.
 /// `EMVAbsent` represents the "no value" case (computed values and non-enum
 /// consts) inline, so the recorded value needs no `option` wrapper.
 #[derive(

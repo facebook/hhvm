@@ -1466,11 +1466,10 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
     /// The value of an int literal, optionally negated. Literals that fit OCaml's
     /// 63-bit `int` use the compact `EMVInt`; the rest of the `i64` range
     /// (including `i64::MIN`) uses the `EMVLargeInt` slow path, storing the
-    /// literal's source text verbatim (not canonicalized) so no valid Hack
-    /// literal is dropped -- different spellings of the same value (e.g. hex vs
-    /// decimal) therefore don't compare equal. Uses the same `parse_int` the
-    /// lowerer uses. Returns None only when the literal is genuinely out of
-    /// `i64` range (Hack rejects it too).
+    /// canonical decimal so no valid Hack literal is dropped and all spellings
+    /// of one value (hex, octal, underscores) compare equal. Uses the same
+    /// `parse_int` the lowerer uses. Returns None only when the literal is
+    /// genuinely out of `i64` range (Hack rejects it too).
     fn int_enum_value(s: &str, negate: bool) -> Option<EnumMemberValue> {
         // OCaml `int` is 63-bit: [-(2^62), 2^62 - 1].
         const OCAML_MAX_INT: i64 = i64::MAX >> 1;
@@ -1488,11 +1487,10 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         if (OCAML_MIN_INT..=OCAML_MAX_INT).contains(&n) {
             Some(EnumMemberValue::EMVInt(n as isize))
         } else {
-            // Slow path for a literal outside OCaml's 63-bit `int`. We store the
-            // source text as written rather than canonicalising it, so different
-            // spellings of the same large value (e.g. hex vs decimal) won't
-            // compare equal.
-            Some(EnumMemberValue::EMVLargeInt(text))
+            // Slow path for a literal outside OCaml's 63-bit `int`. Its decimal
+            // form is what an intish string canonicalises to, so a large int and
+            // the equivalent intish string coincide (see the intish check).
+            Some(EnumMemberValue::EMVLargeInt(n.to_string()))
         }
     }
 

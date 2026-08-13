@@ -136,12 +136,12 @@ type class_const_kind =
 module Enum_member_value = struct
   (** For an enum member, its recorded value. `EMVInt` holds values that fit
       OCaml's 63-bit `int`; literals outside that range (including `i64::MIN`)
-      use `EMVLargeInt`, which stores the literal's source text verbatim (not
-      canonicalized) so it marshals without truncation -- so different spellings
-      of the same value compare unequal. `EMVNameof` and `EMVClassPointer` are
-      kept distinct so `nameof C` (a string) and `C::class` (a class pointer)
-      never coincide. `EMVLabel` means the value is a string equal to the
-      member's own name (`FOO = 'FOO'`), recorded without storing the string.
+      use `EMVLargeInt`, which stores the canonical decimal as a string so it
+      marshals without truncation and every spelling of one value compares equal.
+      `EMVNameof` and `EMVClassPointer` are kept distinct so `nameof C` (a
+      string) and `C::class` (a class pointer) never coincide. `EMVLabel` means
+      the value is a string equal to the member's own name (`FOO = 'FOO'`),
+      recorded without storing the string.
       `EMVAbsent` represents the "no value" case (computed values and non-enum
       consts) inline, so the recorded value needs no `option` wrapper. *)
   type t =
@@ -164,16 +164,19 @@ module Enum_member_value = struct
     | EMVAbsent -> true
     | _ -> false
 
-  (** A canonical textual rendering of the value: distinct values render to
-      distinct strings and equal values to equal strings, so it serves as both a
-      comparison key and a human-readable form. `EMVLabel` (value equals the
-      member name) renders like the equivalent `EMVString`, so the two compare
-      equal. `EMVAbsent` carries no value and is rendered defensively for
-      totality. `member_name` supplies the name for the `EMVLabel` case. *)
+  let is_intish s =
+    match Int64.of_string_opt s with
+    | Some n -> String.equal (Int64.to_string n) s
+    | None -> false
+
   let value_repr ~member_name = function
     | EMVInt n -> string_of_int n
     | EMVLargeInt s -> s
-    | EMVString s -> "\"" ^ s ^ "\""
+    | EMVString s ->
+      if is_intish s then
+        s
+      else
+        "\"" ^ s ^ "\""
     | EMVLabel -> "\"" ^ member_name ^ "\""
     | EMVNameof s -> "nameof " ^ s
     | EMVClassPointer s -> s ^ "::class"

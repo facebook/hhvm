@@ -4,3 +4,9 @@ This enum has members `A` and `B` with the same value `9223372036854775807`. Dup
   `A` is declared here
   File "enum_dup_large_int_values.php", line 11, characters 3-3:
   `B` is declared here
+ERROR: File "enum_dup_large_int_values.php", line 20, characters 6-20:
+This enum has members `C` and `D` with the same value `9223372036854775807`. Duplicate enum values are not allowed. (Typing[4519])
+  File "enum_dup_large_int_values.php", line 21, characters 3-3:
+  `C` is declared here
+  File "enum_dup_large_int_values.php", line 22, characters 3-3:
+  `D` is declared here

@@ -31,13 +31,12 @@ enum IntForms: int {
 }
 
 // Values beyond OCaml's 63-bit `int` use the EMVLargeInt slow path, storing the
-// literal as written (not canonicalised), so i64::MIN aside, large values are
-// still recorded. Different spellings of the same large value are not
-// normalised. Values within 63 bits stay EMVInt.
+// canonical decimal, so every spelling of one value records identically.
+// Values within 63 bits stay EMVInt.
 enum BigInts: int {
   Fits = 4611686018427387903; // 2^62 - 1 = OCaml max_int -> EMVInt
   Big = 4611686018427387904; // 2^62 -> EMVLargeInt "4611686018427387904"
-  BigHex = 0x4000000000000001; // 2^62 + 1 -> EMVLargeInt "0x4000000000000001" (raw)
+  BigHex = 0x4000000000000001; // 2^62 + 1 -> EMVLargeInt "4611686018427387905"
   Max = 9223372036854775807; // i64::MAX -> EMVLargeInt "9223372036854775807"
 }
 

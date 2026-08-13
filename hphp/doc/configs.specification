@@ -2011,7 +2011,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.MaxTranslations = 10, UNKNOWN
 - uint32_t Jit.MaxProfileTranslations = 30, UNKNOWN
 - uint32_t Jit.TraceletLiveLocsLimit = 2000, UNKNOWN
-- uint32_t Jit.TraceletEagerGuardsLimit = 0, UNKNOWN
 - uint32_t Jit.TraceletGuardsLimit = 5, UNKNOWN
 - uint64_t Jit.GlobalTranslationLimit = -1, UNKNOWN
 - int64_t Jit.MaxRequestTranslationTime = -1, UNKNOWN

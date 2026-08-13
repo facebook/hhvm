@@ -1553,7 +1553,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefFuncPrologueNamedArgs:
   case DefRegSP:
   case DictIterEnd:
-  case EndGuards:
   case EnterPrologue:
   case EnterTranslation:
   case EqBool:

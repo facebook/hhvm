@@ -251,7 +251,6 @@ void emitGuards(irgen::IRGS& irgs,
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
-    irgen::gen(irgs, EndGuards);
     if (RI().m_coverage.m_should_use_per_file_coverage &&
         !sk.trivialDVFuncEntry()) {
       irgen::checkCoverage(irgs);
@@ -715,9 +714,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
     // Emit the type predictions for this region block. If this is the first
-    // instruction in the region, we check inner type eagerly, insert
-    // `EndGuards` after the checks, and generate profiling code in profiling
-    // translations.
+    // instruction in the region, we check inner type eagerly, and generate
+    // profiling code in profiling translations.
     auto const isEntry = &block == region.entry().get() && !inlining;
     emitGuards(irgs, block, isEntry, guardFailBlock);
 

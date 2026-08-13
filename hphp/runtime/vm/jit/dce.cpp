@@ -358,7 +358,6 @@ bool canDCE(const IRInstruction& inst) {
   case CheckInit:
   case CheckInitMem:
   case CheckCold:
-  case EndGuards:
   case CheckNonNull:
   case DivDbl:
   case DivInt:

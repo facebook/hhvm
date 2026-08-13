@@ -360,8 +360,6 @@ void visitGuards(IRUnit& unit, F func) {
   for (auto const block : blocks) {
     for (auto const& inst : *block) {
       switch (inst.op()) {
-        case EndGuards:
-          return;
         case CheckLoc:
           func(&inst,
                Location::Local{inst.extra<LocalId>()->locId},
@@ -467,26 +465,16 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
-  auto const eager =
-    env.ctx.liveTypes.size() <= Cfg::Jit::TraceletEagerGuardsLimit;
-
   Block* guardFailBlock = nullptr;
   for (auto const& lt : env.ctx.liveTypes) {
-    // Local and stack slots are lazily guarded when there are too many live
-    // locations; but MBase is always eagerly guarded.
-    if (eager || lt.location.tag() == LTag::MBase) {
+    // Local and stack slots are lazily guarded, but MBase is eagerly guarded.
+    if (lt.location.tag() == LTag::MBase) {
       auto t = lt.type;
       assertx(t <= TCell);
       if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
       irgen::checkType(env.irgs, lt.location, t, guardFailBlock);
     }
   }
-
-  // EndGuards is used to mark the end of the guards, allowing visitGuards to
-  // avoid scanning through the entire unit.  We only insert EndGuards if all
-  // guards were eagerly inserted because, with lazy guarding, the guards will
-  // be emitted later.
-  if (eager) irgen::gen(env.irgs, EndGuards);
 
   for (bool firstInst = true; true; firstInst = false) {
     assertx(env.numBCInstrs >= 0);

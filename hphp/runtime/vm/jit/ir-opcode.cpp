@@ -670,7 +670,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemDictK:
   case EndBlock:
   case EndCatch:
-  case EndGuards:
   case LeaveInlineFrame:
   case EnterFrame:
   case EnterInlineFrame:

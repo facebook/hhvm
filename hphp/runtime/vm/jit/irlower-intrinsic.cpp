@@ -61,7 +61,6 @@ TRACE_SET_MOD(irlower)
 
 void cgNop(IRLS&, const IRInstruction*) {}
 void cgDefConst(IRLS&, const IRInstruction*) {}
-void cgEndGuards(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 

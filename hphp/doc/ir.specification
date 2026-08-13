@@ -241,11 +241,6 @@ Instruction set
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
 
-| EndGuards, ND, NA, NF
-
-  A no-op at runtime, this instruction serves to mark the end of the initial
-  sequence of guards in a trace.
-
 | CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls OR Func OR Obj OR Str OR Mem OR TCA OR Dict OR Vec), B|P|LA
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or

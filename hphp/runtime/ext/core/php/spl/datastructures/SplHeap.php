@@ -320,9 +320,6 @@ class SplMaxHeap<T> extends SplHeap<T> {
    *                  arbitrary relative position.
    */
   protected function compare(T $value1, T $value2): int {
-    // TODO(T125828814): In practice these can be *any* type.
-    // However, Hack doesn't have a type for "compararable values,"
-    // so we use `dynamic` in order to keep Hack happy.
     $value1 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value1);
     $value2 = HH\FIXME\UNSAFE_CAST<T, dynamic>($value2);
     if ($value1 > $value2) {

@@ -6,6 +6,8 @@
 
 # pyre-unsafe
 
+import time
+
 from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
@@ -37,6 +39,16 @@ class TestMigratedFailover(McrouterTestCase):
 
         mc_a.terminate()
 
-        reply = client.mcGet(b"key")
+        reply = None
+        for _ in range(20):
+            try:
+                reply = client.mcGet(b"key")
+            except Exception:
+                reply = None
+            if reply is not None and reply.result == Result.FOUND:
+                break
+            time.sleep(0.5)
+
+        self.assertIsNotNone(reply)
         self.assertEqual(Result.FOUND, reply.result)
         self.assertEqual(b"b", bytes(reply.value))

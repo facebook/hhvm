@@ -79,6 +79,14 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   void connectError(quic::QuicError error) {
     datagramSocket_->connectError(std::move(error));
   }
+  void setQuicSocketFactory(
+      H3DatagramAsyncSocket::Options::QuicSocketFactory factory) {
+    datagramSocket_->options_.quicSocketFactory_ = std::move(factory);
+  }
+  std::unique_ptr<quic::QuicAsyncUDPSocket> createQuicSocket() {
+    return datagramSocket_->createQuicSocket(
+        std::make_shared<quic::FollyQuicEventBase>(&eventBase_));
+  }
   void onHeadersComplete(std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
     datagramSocket_->onHeadersComplete(std::move(msg));
   }

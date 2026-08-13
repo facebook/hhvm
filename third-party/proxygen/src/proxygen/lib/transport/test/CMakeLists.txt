@@ -17,5 +17,6 @@ proxygen_add_test(TARGET TransportTests
       proxygen
       testmain
       mvfst::mvfst_codec_types
+      mvfst::mvfst_common_udpsocket_folly_async_udp_socket
       mvfst::mvfst_state_machine
 )

@@ -315,7 +315,7 @@ void H3DatagramAsyncSocket::startClient() {
   }
   if (!upstreamSession_) {
     auto qEvb = std::make_shared<quic::FollyQuicEventBase>(evb_);
-    auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
+    auto sock = createQuicSocket(qEvb);
     auto fizzClientContext =
         quic::FizzClientQuicHandshakeContext::Builder()
             .setFizzClientContext(createFizzClientContext())
@@ -354,6 +354,17 @@ void H3DatagramAsyncSocket::startClient() {
     upstreamSession_->startNow();
     client->start(upstreamSession_, upstreamSession_);
   }
+}
+
+std::unique_ptr<quic::QuicAsyncUDPSocket>
+H3DatagramAsyncSocket::createQuicSocket(
+    std::shared_ptr<quic::FollyQuicEventBase> qEvb) {
+  if (options_.quicSocketFactory_) {
+    auto socket = options_.quicSocketFactory_(std::move(qEvb));
+    CHECK(socket);
+    return socket;
+  }
+  return std::make_unique<quic::FollyQuicAsyncUDPSocket>(std::move(qEvb));
 }
 
 std::shared_ptr<fizz::client::FizzClientContext>

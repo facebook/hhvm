@@ -46,6 +46,8 @@ proxygen_add_library(proxygen_transport_h3_datagram_async_socket
     proxygen_http_session_http_transaction
     mvfst::mvfst_api_transport
     mvfst::mvfst_client
+    mvfst::mvfst_common_events_folly_eventbase
+    mvfst::mvfst_common_udpsocket_quic_async_udp_socket
     fizz::fizz
     Folly::folly_io_async_async_socket_exception
     Folly::folly_io_async_async_udp_socket

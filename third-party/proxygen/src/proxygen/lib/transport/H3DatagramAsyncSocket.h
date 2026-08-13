@@ -14,6 +14,8 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/client/QuicClientTransport.h>
+#include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/common/udpsocket/QuicAsyncUDPSocket.h>
 
 namespace proxygen {
 
@@ -41,6 +43,10 @@ class H3DatagramAsyncSocket
   };
 
   struct Options {
+    using QuicSocketFactory =
+        std::function<std::unique_ptr<quic::QuicAsyncUDPSocket>(
+            std::shared_ptr<quic::FollyQuicEventBase>)>;
+
     Mode mode_;
     std::chrono::milliseconds txnTimeout_{10000};
     std::chrono::milliseconds connectTimeout_{3000};
@@ -50,6 +56,7 @@ class H3DatagramAsyncSocket
     uint16_t maxDatagramSize_{1400};
     std::function<void(H3Capsule&&)> capsuleCallback_;
     std::string hostname_; // TLS SNI hostname (if empty, uses connect address)
+    QuicSocketFactory quicSocketFactory_;
   };
 
  public:
@@ -283,6 +290,8 @@ class H3DatagramAsyncSocket
 
  private:
   void startClient();
+  std::unique_ptr<quic::QuicAsyncUDPSocket> createQuicSocket(
+      std::shared_ptr<quic::FollyQuicEventBase> qEvb);
   std::shared_ptr<fizz::client::FizzClientContext> createFizzClientContext();
   void closeWithError(const folly::AsyncSocketException& ex);
   void deliverDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept;

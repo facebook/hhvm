@@ -11,6 +11,7 @@
 #include <proxygen/lib/transport/test/H3DatagramAsyncSocketTest.h>
 
 #include <folly/portability/GTest.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 
 using namespace proxygen;
 using namespace quic;
@@ -94,6 +95,19 @@ ssize_t H3DatagramAsyncSocketTest::sendDatagramUpstream(
 
 TEST_F(H3DatagramAsyncSocketTest, Connect) {
   datagramSocket_->connect(getRemoteAddress());
+}
+
+TEST_F(H3DatagramAsyncSocketTest, UsesInjectedQuicSocketFactory) {
+  quic::QuicAsyncUDPSocket* expectedSocket = nullptr;
+  setQuicSocketFactory([&](std::shared_ptr<quic::FollyQuicEventBase> qEvb) {
+    auto socket =
+        std::make_unique<quic::FollyQuicAsyncUDPSocket>(std::move(qEvb));
+    expectedSocket = socket.get();
+    return socket;
+  });
+
+  auto socket = createQuicSocket();
+  EXPECT_EQ(socket.get(), expectedSocket);
 }
 
 TEST_F(H3DatagramAsyncSocketTest, ConnectAndReady) {

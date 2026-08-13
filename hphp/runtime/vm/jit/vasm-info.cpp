@@ -98,11 +98,17 @@ struct GetMemOp {
   template<class T> void across (T) {}
   template<class T, class H> void useHint(T,H) {}
   template<class T, class H> void defHint(T,H) {}
-  template<Width w> void use(Vp<w> m) { use(static_cast<Vptr>(m)); }
+  // The cast to Vptr erases the width, so record it first. Bare-Vptr operands
+  // leave ptrWidth at None.
+  template<Width w> void use(Vp<w> m) {
+    use(static_cast<Vptr>(m));
+    if (rv == ResValid::Valid) ptrWidth = w;
+  }
 
   bool isValid() { return rv == ResValid::Valid; }
 
   Vptr mr;
+  Width ptrWidth{Width::None};
   enum class ResValid : uint8_t { Empty, Valid, Invalid };
   ResValid rv{ResValid::Empty};
 };
@@ -192,12 +198,11 @@ std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr& inst) {
   auto const vop = g.mr;
   if (!g.isValid()) return {vop, 0};
 
-  auto sz = width(inst.op);
-  // workaround: load and store opcodes report a width of Octa,
-  // while in reality they are Quad.
-  if (inst.op == Vinstr::load || inst.op == Vinstr::store) {
-    sz = Width::Quad;
-  }
+  // The operand's declared width is the access size; width(inst.op) is the
+  // *dest register's* — load/store take a Vptr64 but define an untyped Vreg,
+  // so they land in Width::AnyNF and read as a 16-byte access. Bare-Vptr
+  // instructions (lea, callm, the push/pop-memory family) have no width.
+  auto sz = g.ptrWidth != Width::None ? g.ptrWidth : width(inst.op);
   sz &= Width::AnyNF;
 
   auto const size = [&] {

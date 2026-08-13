@@ -17,6 +17,7 @@
 #include <numeric>
 
 #include <gtest/gtest.h>
+#include <folly/container/small_vector.h>
 
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 
@@ -151,7 +152,8 @@ TYPED_TEST_P(FrozenRange, Zeros) {
 
 REGISTER_TYPED_TEST_CASE_P(
     FrozenRange, ArrayLike, Iterators, IteratorComparisons, Zeros);
-using MyTypes = ::testing::Types<std::vector<int>, folly::fbvector<int>>;
+using MyTypes = ::testing::
+    Types<std::vector<int>, folly::fbvector<int>, folly::small_vector<int>>;
 INSTANTIATE_TYPED_TEST_CASE_P(Ranges, FrozenRange, MyTypes);
 
 template <class T>

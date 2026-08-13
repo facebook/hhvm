@@ -387,3 +387,11 @@ struct Layout<T, typename std::enable_if<IsList<T>::value>::type>
 THRIFT_DECLARE_TRAIT_TEMPLATE(IsList, std::vector)
 THRIFT_DECLARE_TRAIT_TEMPLATE(IsList, std::deque)
 THRIFT_DECLARE_TRAIT_TEMPLATE(IsList, folly::fbvector)
+
+// folly::small_vector has a non-type (size_t) template parameter, so it cannot
+// use THRIFT_DECLARE_TRAIT_TEMPLATE (which only forwards type parameters); it
+// needs an explicit partial specialization.
+namespace apache::thrift {
+template <typename T, std::size_t N, typename... Policy>
+struct IsList<folly::small_vector<T, N, Policy...>> : std::true_type {};
+} // namespace apache::thrift

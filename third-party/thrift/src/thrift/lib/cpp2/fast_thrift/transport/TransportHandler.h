@@ -97,6 +97,11 @@ class TransportHandlerT : public folly::DelayedDestruction,
 
   State state() const noexcept { return state_; }
 
+  /** Invoked once when an open transport reaches Closed. */
+  void setOnClosed(folly::Function<void() noexcept> callback) {
+    onClosed_ = std::move(callback);
+  }
+
   void setPipeline(
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl*
           pipeline) noexcept {
@@ -243,6 +248,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
     folly::DelayedDestruction::DestructorGuard dg(this);
     // Pipeline must not be actively dispatching when we drop it.
     DCHECK(state_ != State::Open);
+    onClosed_ = nullptr;
     pipeline_ = nullptr;
     pipelineGuard_.reset();
   }
@@ -395,6 +401,10 @@ class TransportHandlerT : public folly::DelayedDestruction,
     // see a terminal state and don't re-enter beginClose.
     state_ = State::Closed;
     socket_->closeNow();
+    if (onClosed_) {
+      auto callback = std::move(onClosed_);
+      callback();
+    }
   }
 
   // Owns the drain DestructorGuard and the timeout. start() takes the guard
@@ -445,6 +455,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
   std::chrono::milliseconds drainTimeoutDuration_;
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
+  folly::Function<void() noexcept> onClosed_;
   State state_{State::Created};
   bool readPaused_{true};
   uint32_t writePending_{0};

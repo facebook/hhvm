@@ -457,6 +457,29 @@ TEST_F(TransportHandlerTest, ReadEOFCloseBehavior) {
   EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
 }
 
+TEST_F(TransportHandlerTest, ClosedCallbackFiresOnceAtTerminalTransition) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  size_t closes = 0;
+  handler->setOnClosed([&]() noexcept { ++closes; });
+  handler->onConnect();
+
+  handler->readEOF();
+  handler->readEOF();
+  handler->close(folly::exception_wrapper{});
+
+  EXPECT_EQ(closes, 1);
+}
+
+TEST_F(TransportHandlerTest, ResetPipelineSuppressesClosedCallback) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  size_t closes = 0;
+  handler->setOnClosed([&]() noexcept { ++closes; });
+
+  handler->resetPipeline();
+
+  EXPECT_EQ(closes, 0);
+}
+
 // Test: readErr closes socket and reaches Closed.
 TEST_F(TransportHandlerTest, ReadErrCloseBehavior) {
   auto [handler, pipeline] = createHandlerAndPipeline();

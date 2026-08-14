@@ -211,21 +211,25 @@ struct FrameState {
   /*
    * The values in the eval stack in memory, either above or below the current
    * spValue pointer.  This is keyed by the offset to the base of the eval stack
-   * for the whole function (SBInvOffset).
+   * for the whole function (SBInvOffset). No entry means untracked.
    */
   StackStateMap stack;
 
   /*
-   * Maps the local ids to local variable information.
+   * Maps the local ids to local variable information. No entry means untracked.
    */
   LocalStateMap locals;
 
   /*
-   * Values and types of the member base register, its pointee, the
-   * temp base, or the read-only prop bool.
+   * Member base register pointee information. No value means untracked.
+   */
+  Optional<MBaseState> mbase;
+
+  /*
+   * Values and types of the member base register, the temp base, or the
+   * read-only prop bool.
    */
   MBRState mbr;
-  MBaseState mbase;
   MTempBaseState mTempBase;
   TriBool mROProp{TriBool::Maybe};
 
@@ -384,12 +388,13 @@ struct FrameStateMgr final {
   }
 
   /*
-   * Return the LocationState for local `id' or stack element at `off' in the
-   * most-inlined frame.
+   * Return the LocationState for local `id', stack element at `off' or member
+   * base register pointee in the most-inlined frame.
    */
   LocalState local(uint32_t id) const;
   StackState stack(IRSPRelOffset off) const;
   StackState stack(SBInvOffset off) const;
+  MBaseState mbase() const;
 
   /*
    * Return whether the given location is currently being tracked.
@@ -429,7 +434,6 @@ struct FrameStateMgr final {
    * Return tracked state for the member base register.
    */
   const MBRState& mbr()             const { return cur().mbr; }
-  const MBaseState& mbase()         const { return cur().mbase; }
   const MTempBaseState& mTempBase() const { return cur().mTempBase; }
   TriBool mROProp()                 const { return cur().mROProp; }
 
@@ -502,6 +506,7 @@ private:
   StackState& stackState(IRSPRelOffset);
   StackState& stackState(SBInvOffset);
   StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
+  MBaseState& mbaseState();
 
   AliasClass locationToAliasClass(Location) const;
 

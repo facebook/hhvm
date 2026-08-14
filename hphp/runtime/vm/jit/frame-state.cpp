@@ -129,6 +129,18 @@ bool merge_memory_stack_into(StackStateMap& dst, const StackStateMap& src) {
 }
 
 /*
+ * Merge the MBase states, returning whether anything changed.
+ */
+bool merge_into(Optional<MBaseState>& dst, const Optional<MBaseState>& src) {
+  if (!dst && !src) return false;
+
+  auto changed = !dst;
+  if (changed) dst.emplace();
+  changed |= merge_into(*dst, src ? *src : MBaseState{});
+  return changed;
+}
+
+/*
  * Merge one FrameState into another, returning whether it changed.  Frame
  * pointers and stack depth must match.  If the stack pointer tmps are
  * different, clear the tracked value (we can make a new one, given fp and
@@ -183,16 +195,17 @@ bool merge_into(FrameState& dst, const FrameState& src) {
                         dst.mbaseTempType | src.mbaseTempType);
   // If we clamped the mbase type above, we might need to clamp the
   // location specific types as well.
-  if (!(dst.mbaseLocalType <= dst.mbase.type)) {
-    dst.mbaseLocalType = bound_type(dst.mbaseLocalType, dst.mbase.type);
+  auto const mbaseType = dst.mbase ? dst.mbase->type : TCell;
+  if (!(dst.mbaseLocalType <= mbaseType)) {
+    dst.mbaseLocalType = bound_type(dst.mbaseLocalType, mbaseType);
     changed = true;
   }
-  if (!(dst.mbaseStackType <= dst.mbase.type)) {
-    dst.mbaseStackType = bound_type(dst.mbaseStackType, dst.mbase.type);
+  if (!(dst.mbaseStackType <= mbaseType)) {
+    dst.mbaseStackType = bound_type(dst.mbaseStackType, mbaseType);
     changed = true;
   }
-  if (!(dst.mbaseTempType <= dst.mbase.type)) {
-    dst.mbaseTempType = bound_type(dst.mbaseTempType, dst.mbase.type);
+  if (!(dst.mbaseTempType <= mbaseType)) {
+    dst.mbaseTempType = bound_type(dst.mbaseTempType, mbaseType);
     changed = true;
   }
 
@@ -1116,6 +1129,8 @@ bool FrameState::checkInvariants() const {
       stk.value->toString()
     );
   }
+
+  auto const mbase = this->mbase.value_or(MBaseState{});
   always_assert_flog(
     mbase.value == nullptr || mbase.type <= mbase.value->type(),
     "mbase had incompatible type {} with value {}",
@@ -1272,6 +1287,8 @@ bool FrameState::checkMInstrStateDead() const {
     mbr.ptrType.toString(),
     jit::show(mbr.pointee)
   );
+
+  auto const mbase = this->mbase.value_or(MBaseState{});
   always_assert_flog(
     !mbase.value && mbase.type == TCell,
     "MBase is not dead when it should be ({} {})",
@@ -1355,6 +1372,12 @@ StackState& FrameStateMgr::stackState(Location l) {
   return stackState(l.stackIdx());
 }
 
+MBaseState& FrameStateMgr::mbaseState() {
+  auto& mbase = cur().mbase;
+  if (!mbase) mbase.emplace();
+  return *mbase;
+}
+
 LocalState FrameStateMgr::local(uint32_t id) const {
   auto const& locals = cur().locals;
   auto const it = locals.find(id);
@@ -1370,7 +1393,7 @@ bool FrameStateMgr::tracked(Location l) const {
       return cur().stack.contains(sbRel);
     }
     case LTag::MBase:
-      return true;
+      return cur().mbase.has_value();
   }
   not_reached();
 }
@@ -1418,6 +1441,10 @@ StackState FrameStateMgr::stack(SBInvOffset offset) const {
   auto const& curStack = cur().stack;
   auto const it = curStack.find(offset);
   return it != curStack.end() ? it->second : StackState{};
+}
+
+MBaseState FrameStateMgr::mbase() const {
+  return cur().mbase.value_or(MBaseState{});
 }
 
 #define IMPL_MEMBER_OF(type_t, name)                           \
@@ -1649,7 +1676,7 @@ TriBool FrameStateMgr::isMBase(SSATmp* ptr, const AliasClass& acls) const {
       if (acls.maybe(AMIStateTempBase)) ty |= cur().mbaseTempType;
       return ty;
     }
-    return cur().mbase.type;
+    return mbase().type;
   }();
   if (!knownType.maybe(mbrType)) return TriBool::No;
 
@@ -1817,7 +1844,7 @@ void FrameStateMgr::setValue(Location l, SSATmp* value, bool forLoad) {
       cur().stackModified = true;
       return setValueImpl(l, stackState(l), value, forLoad);
     case LTag::MBase:
-      return setValueImpl(l, cur().mbase, value, forLoad);
+      return setValueImpl(l, mbaseState(), value, forLoad);
   }
   not_reached();
 }
@@ -1898,7 +1925,7 @@ void FrameStateMgr::setType(Location l, Type type) {
       cur().stackModified = true;
       return setTypeImpl(l, stackState(l), type);
     case LTag::MBase:
-      return setTypeImpl(l, cur().mbase, type);
+      return setTypeImpl(l, mbaseState(), type);
   }
   not_reached();
 }
@@ -1926,7 +1953,7 @@ void FrameStateMgr::widenType(Location l, Type type) {
       cur().stackModified = true;
       return widenTypeImpl(l, stackState(l), type);
     case LTag::MBase:
-      return widenTypeImpl(l, cur().mbase, type);
+      return widenTypeImpl(l, mbaseState(), type);
   }
   not_reached();
 }
@@ -1956,7 +1983,7 @@ void FrameStateMgr::refineType(Location l,
   switch (l.tag()) {
     case LTag::Local: return refineTypeImpl(l, localState(l), type, typeSrc);
     case LTag::Stack: return refineTypeImpl(l, stackState(l), type, typeSrc);
-    case LTag::MBase: return refineTypeImpl(l, cur().mbase, type, typeSrc);
+    case LTag::MBase: return refineTypeImpl(l, mbaseState(), type, typeSrc);
   }
   not_reached();
 }
@@ -2037,7 +2064,8 @@ bool FrameStateMgr::refineValue(LocationState<tag>& state,
 }
 
 void FrameStateMgr::refineMBaseValue(SSATmp* oldVal, SSATmp* newVal) {
-  if (!refineValue(cur().mbase, oldVal, newVal)) return;
+  if (!cur().mbase) return;
+  if (!refineValue(*cur().mbase, oldVal, newVal)) return;
   cur().mbaseStackType &= newVal->type();
   cur().mbaseLocalType &= newVal->type();
   cur().mbaseTempType  &= newVal->type();
@@ -2069,7 +2097,7 @@ void FrameStateMgr::clearMInstr() {
   ITRACE(2, "clearMInstr\n");
   auto& c = cur();
   c.mbr = MBRState{};
-  c.mbase = MBaseState{};
+  c.mbase.emplace();  // keep tracking the MBase
   c.mTempBase = MTempBaseState{};
   c.mROProp = TriBool::Maybe;
   c.mbaseStackType = TCell;
@@ -2100,10 +2128,11 @@ void FrameStateMgr::setMBR(SSATmp* mbr, bool forLoad) {
 
   auto const set = [&] (SSATmp* val, Type type) {
     ITRACE(2, "MBase := {} ({})\n", val ? val->toString() : "<>", type);
-    cur().mbase.value = val;
-    cur().mbase.type = type;
-    cur().mbase.maybeChanged = true;
-    cur().mbase.typeSrcs.clear();
+    auto& mbase = mbaseState();
+    mbase.value = val;
+    mbase.type = type;
+    mbase.maybeChanged = true;
+    mbase.typeSrcs.clear();
   };
 
   cur().mbaseLocalType = TBottom;
@@ -2237,17 +2266,16 @@ std::string FrameState::show() const {
       jit::show(mbr.pointee)
     );
   }
-  if (mbase.value ||
-      mbase.type < TCell ||
+  if (mbase ||
       mbaseStackType < TCell ||
       mbaseLocalType < TCell ||
       mbaseTempType < TCell) {
     folly::format(
       &out, "{:-^70}\n  MBase: {} {}{} [L:{}, S:{}, T:{}]\n",
       "",
-      optTmp(mbase.value),
-      mbase.type,
-      mbase.maybeChanged ? " (changed)" : "",
+      optTmp(mbase ? mbase->value : nullptr),
+      mbase ? mbase->type : TCell,
+      mbase && mbase->maybeChanged ? " (changed)" : "",
       mbaseLocalType,
       mbaseStackType,
       mbaseTempType

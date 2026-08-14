@@ -21,6 +21,10 @@ namespace proxygen::huffman {
 constexpr static uint32_t kHuffmanDecodeSpaceNumerator = 3;
 constexpr static uint32_t kHuffmanDecodeSpaceDenominator = 2;
 
+// Decoded characters are batched into a stack buffer of this size before
+// being appended to the output string.
+constexpr static uint32_t kHuffmanDecodeOutputBufferSize = 1024;
+
 HuffTree::HuffTree(const uint32_t* codes, const uint8_t* bits)
     : codes_(codes), bits_(bits) {
   buildTree();
@@ -41,6 +45,9 @@ bool HuffTree::decode(const uint8_t* buf,
   uint32_t w = 0;
   uint32_t wbits = 0;
   uint32_t i = 0;
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init): written before read
+  std::array<char, kHuffmanDecodeOutputBufferSize> outBuf;
+  uint32_t outPos = 0;
   while (i < size || wbits > 0) {
     // decide if we need to load more bits using an 8-bit chunk
     if (i < size && wbits < 8) {
@@ -63,7 +70,11 @@ bool HuffTree::decode(const uint8_t* buf,
     const HuffNode& node = snode->index[key];
     if (node.isLeaf()) {
       // final node, we can emit the character
-      literal.push_back(node.data.ch);
+      outBuf[outPos++] = static_cast<char>(node.data.ch);
+      if (outPos == kHuffmanDecodeOutputBufferSize) {
+        literal.append(outBuf.data(), outPos);
+        outPos = 0;
+      }
       wbits -= node.metadata.bits;
       snode = &table_[0];
     } else {
@@ -73,6 +84,9 @@ bool HuffTree::decode(const uint8_t* buf,
     }
     // remove what we've just used
     w = w & ((1 << wbits) - 1);
+  }
+  if (outPos > 0) {
+    literal.append(outBuf.data(), outPos);
   }
   return true;
 }

@@ -11,9 +11,9 @@ license = "MIT"
 path = "lib.rs"
 
 [dev-dependencies]
-arena_deserializer = { version = "0.0.0", path = "../../arena_deserializer" }
+arena_deserializer = { path = "../../arena_deserializer" }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
-relative_path = { version = "0.0.0", path = "../../rust/relative_path" }
+relative_path = { path = "../../rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

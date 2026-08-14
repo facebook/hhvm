@@ -12,11 +12,11 @@ path = "../../hh24_test.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
-hh24_types = { version = "0.0.0", path = "../../hh24_types" }
-names = { version = "0.0.0", path = "../../../naming/names_rust" }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
-relative_path = { version = "0.0.0", path = "../../rust/relative_path" }
+direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
+hh24_types = { path = "../../hh24_types" }
+names = { path = "../../../naming/names_rust" }
+oxidized = { path = "../../../oxidized" }
+relative_path = { path = "../../rust/relative_path" }
 tempfile = "3.27.0"
 
 [dev-dependencies]

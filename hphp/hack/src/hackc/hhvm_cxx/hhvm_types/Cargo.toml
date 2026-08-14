@@ -13,7 +13,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.194"
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
+oxidized = { path = "../../../oxidized" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 
 [build-dependencies]

@@ -14,9 +14,9 @@ path = "hh_codegen.rs"
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
-hash = { version = "0.0.0", path = "../utils/hash" }
+hash = { path = "../utils/hash" }
 proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
 quote = "1.0.47"
-signed_source = { version = "0.0.0", path = "../utils/rust/signed_source" }
+signed_source = { path = "../utils/rust/signed_source" }
 syn = { version = "3", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.14.0"

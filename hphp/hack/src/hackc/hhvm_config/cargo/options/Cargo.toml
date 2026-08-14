@@ -12,5 +12,5 @@ path = "../../hhvm_config.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
-options = { version = "0.0.0", path = "../../../compile/cargo/options" }
+hhvm_options = { path = "../../../../utils/hhvm_options" }
+options = { path = "../../../compile/cargo/options" }

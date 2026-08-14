@@ -11,11 +11,11 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-instruction_sequence = { version = "0.0.0", path = "../../../emitter/cargo/instruction_sequence" }
-ir = { version = "0.0.0", path = "../.." }
+hash = { path = "../../../../utils/hash" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
+ir = { path = "../.." }
 itertools = "0.15.0"
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
 smallvec = { version = "1.15.2", features = ["const_generics", "impl_bincode", "serde", "specialization", "union", "write"] }
-stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
+stack_depth = { path = "../../../utils/cargo/stack_depth" }

@@ -11,11 +11,11 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-hack_name = { version = "0.0.0", path = "../../utils/hack_name/cargo" }
+hack_name = { path = "../../utils/hack_name/cargo" }
 heapless = "0.9.3"
-operator = { version = "0.0.0", path = "../cargo/operator" }
-parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
+operator = { path = "../cargo/operator" }
+parser_core_types = { path = "../cargo/core_types" }
 smallvec = { version = "1.15.2", features = ["const_generics", "impl_bincode", "serde", "specialization", "union", "write"] }
-smart_constructors = { version = "0.0.0", path = "../cargo/smart_constructors" }
-stack_limit = { version = "0.0.0", path = "../../utils/stack_limit" }
+smart_constructors = { path = "../cargo/smart_constructors" }
+stack_limit = { path = "../../utils/stack_limit" }
 static_assertions = "1.1.0"

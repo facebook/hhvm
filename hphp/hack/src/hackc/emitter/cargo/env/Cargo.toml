@@ -11,17 +11,17 @@ license = "MIT"
 path = "../../env.rs"
 
 [dependencies]
-ast_scope = { version = "0.0.0", path = "../ast_scope" }
+ast_scope = { path = "../ast_scope" }
 bitflags = { version = "2.13.1", features = ["serde", "std"], default-features = false }
-decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
-global_state = { version = "0.0.0", path = "../global_state" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
+decl_provider = { path = "../../../decl_provider" }
+global_state = { path = "../global_state" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
-instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-options = { version = "0.0.0", path = "../../../compile/cargo/options" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-print_expr = { version = "0.0.0", path = "../../../print_expr" }
-relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
-statement_state = { version = "0.0.0", path = "../statement_state" }
+instruction_sequence = { path = "../instruction_sequence" }
+naming_special_names_rust = { path = "../../../../naming" }
+options = { path = "../../../compile/cargo/options" }
+oxidized = { path = "../../../../oxidized" }
+print_expr = { path = "../../../print_expr" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
+statement_state = { path = "../statement_state" }

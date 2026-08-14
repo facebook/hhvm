@@ -12,10 +12,10 @@ path = "../../string_utils.rs"
 
 [dependencies]
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
+escaper = { path = "../../../../utils/escaper" }
 libc = "0.2.186"
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }
+naming_special_names_rust = { path = "../../../../naming" }
+ocaml_helper = { path = "../../../../utils/ocaml_helper" }
 regex = "1.13.1"
 
 [dev-dependencies]

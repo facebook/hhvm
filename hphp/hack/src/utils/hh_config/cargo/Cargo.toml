@@ -12,10 +12,10 @@ path = "../hh_config.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-config_file = { version = "0.0.0", path = "../../config_file/rust" }
+config_file = { path = "../../config_file/rust" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
-packages = { version = "0.0.0", path = "../../../packages/cargo" }
+oxidized = { path = "../../../oxidized" }
+packages = { path = "../../../packages/cargo" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 sha1 = "0.10.7"

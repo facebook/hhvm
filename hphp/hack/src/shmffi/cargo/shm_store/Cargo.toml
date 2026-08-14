@@ -16,18 +16,18 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 anyhow = "1.0.104"
 bincode = { version = "2", features = ["serde"] }
-datastore = { version = "0.0.0", path = "../../../hackrs/datastore" }
-hh24_types = { version = "0.0.0", path = "../../../utils/hh24_types" }
+datastore = { path = "../../../hackrs/datastore" }
+hh24_types = { path = "../../../utils/hh24_types" }
 intern = { version = "0.1.0", path = "../../../utils/intern" }
 lru = { version = "0.16.4", default-features = false }
 lz4 = "1.28.1"
 md-5 = "0.10"
-measure = { version = "0.0.0", path = "../../../utils/rust/measure" }
-ocaml_blob = { version = "0.0.0", path = "../ocaml_blob" }
+measure = { path = "../../../utils/rust/measure" }
+ocaml_blob = { path = "../ocaml_blob" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_marshal = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parking_lot = { version = "0.12.1", features = ["arc_lock", "send_guard"] }
-pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
+pos = { path = "../../../hackrs/pos/cargo/pos" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-shmffi = { version = "0.0.0", path = "../shmffi" }
+shmffi = { path = "../shmffi" }
 zstd = { version = "0.13.3", features = ["experimental", "zstdmt"] }

@@ -11,5 +11,5 @@ license = "MIT"
 path = "../../ast_scope.rs"
 
 [dependencies]
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+oxidized = { path = "../../../../oxidized" }

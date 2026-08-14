@@ -15,13 +15,13 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-deps_rust = { version = "0.0.0", path = "../../../deps/cargo/deps_rust" }
-file_info = { version = "0.0.0", path = "../../../deps/rust/file_info" }
+deps_rust = { path = "../../../deps/cargo/deps_rust" }
+file_info = { path = "../../../deps/rust/file_info" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
-pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
-rust_decl_ffi = { version = "0.0.0", path = "../../../decl/cargo/rust_decl_ffi" }
-rust_provider_backend_ffi_trait = { version = "0.0.0", path = "../rust_provider_backend_ffi_trait" }
-ty = { version = "0.0.0", path = "../../../hackrs/ty/cargo/ty" }
+oxidized = { path = "../../../oxidized" }
+pos = { path = "../../../hackrs/pos/cargo/pos" }
+rust_decl_ffi = { path = "../../../decl/cargo/rust_decl_ffi" }
+rust_provider_backend_ffi_trait = { path = "../rust_provider_backend_ffi_trait" }
+ty = { path = "../../../hackrs/ty/cargo/ty" }

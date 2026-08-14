@@ -11,9 +11,9 @@ license = "MIT"
 path = "eq_modulo_pos.rs"
 
 [dependencies]
-arena_collections = { version = "0.0.0", path = "../../arena_collections" }
+arena_collections = { path = "../../arena_collections" }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-eq_modulo_pos_derive = { version = "0.0.0", path = "../eq_modulo_pos_derive" }
-hcons = { version = "0.0.0", path = "../../hcons" }
+eq_modulo_pos_derive = { path = "../eq_modulo_pos_derive" }
+hcons = { path = "../../hcons" }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
 ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

@@ -15,6 +15,6 @@ doctest = false
 [dependencies]
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-parser_core_types = { version = "0.0.0", path = "../core_types" }
-smart_constructors = { version = "0.0.0", path = "../smart_constructors" }
-syntax_smart_constructors = { version = "0.0.0", path = "../syntax_smart_constructors" }
+parser_core_types = { path = "../core_types" }
+smart_constructors = { path = "../smart_constructors" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors" }

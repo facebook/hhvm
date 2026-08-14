@@ -11,8 +11,8 @@ license = "MIT"
 path = "../../label_rewriter.rs"
 
 [dependencies]
-env = { version = "0.0.0", path = "../env" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+env = { path = "../env" }
+hash = { path = "../../../../utils/hash" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+instruction_sequence = { path = "../instruction_sequence" }
+oxidized = { path = "../../../../oxidized" }

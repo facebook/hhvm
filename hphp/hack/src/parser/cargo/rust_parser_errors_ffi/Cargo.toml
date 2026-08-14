@@ -17,6 +17,6 @@ crate-type = ["lib", "staticlib"]
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
-parser_core_types = { version = "0.0.0", path = "../core_types" }
-rust_parser_errors = { version = "0.0.0", path = "../errors" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../core_types" }
+rust_parser_errors = { path = "../errors" }

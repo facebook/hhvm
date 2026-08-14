@@ -14,8 +14,8 @@ path = "../../options.rs"
 anyhow = "1.0.104"
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 cxx = "1.0.194"
-hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+hhvm_options = { path = "../../../../utils/hhvm_options" }
+oxidized = { path = "../../../../oxidized" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 
 [build-dependencies]

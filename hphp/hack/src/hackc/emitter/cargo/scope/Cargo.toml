@@ -11,8 +11,8 @@ license = "MIT"
 path = "../../scope.rs"
 
 [dependencies]
-env = { version = "0.0.0", path = "../env" }
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+instruction_sequence = { path = "../instruction_sequence" }
+oxidized = { path = "../../../../oxidized" }

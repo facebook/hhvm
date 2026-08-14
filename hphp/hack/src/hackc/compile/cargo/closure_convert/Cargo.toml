@@ -11,16 +11,16 @@ license = "MIT"
 path = "../../closure_convert.rs"
 
 [dependencies]
-decl_vars = { version = "0.0.0", path = "../../../emitter/cargo/decl_vars" }
-env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-global_state = { version = "0.0.0", path = "../../../emitter/cargo/global_state" }
-hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
+decl_vars = { path = "../../../emitter/cargo/decl_vars" }
+env = { path = "../../../emitter/cargo/env" }
+error = { path = "../../../error/cargo/error" }
+global_state = { path = "../../../emitter/cargo/global_state" }
+hack_macros = { path = "../../../../utils/hack_macros/cargo/hack_macros" }
+hash = { path = "../../../../utils/hash" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 itertools = "0.15.0"
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
-unique_id_builder = { version = "0.0.0", path = "../../../utils/cargo/unique_id_builder" }
+naming_special_names_rust = { path = "../../../../naming" }
+oxidized = { path = "../../../../oxidized" }
+stack_limit = { path = "../../../../utils/stack_limit" }
+unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }

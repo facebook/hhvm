@@ -15,12 +15,12 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 crossbeam = "0.8"
-direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
-hh_hash = { version = "0.0.0", path = "../../../utils/hh_hash" }
+direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
+hh_hash = { path = "../../../utils/hh_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
+oxidized = { path = "../../../oxidized" }
 rayon = "1.11.0"
-relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
+relative_path = { path = "../../../utils/rust/relative_path" }

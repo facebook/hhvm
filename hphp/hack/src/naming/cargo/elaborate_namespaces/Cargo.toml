@@ -11,8 +11,8 @@ license = "MIT"
 path = "../../elaborate_namespaces_visitor.rs"
 
 [dependencies]
-core_utils_rust = { version = "0.0.0", path = "../../../utils/core" }
-hash = { version = "0.0.0", path = "../../../utils/hash" }
-namespaces_rust = { version = "0.0.0", path = "../../../parser/cargo/namespaces" }
-naming_special_names_rust = { version = "0.0.0", path = "../.." }
-oxidized = { version = "0.0.0", path = "../../../oxidized" }
+core_utils_rust = { path = "../../../utils/core" }
+hash = { path = "../../../utils/hash" }
+namespaces_rust = { path = "../../../parser/cargo/namespaces" }
+naming_special_names_rust = { path = "../.." }
+oxidized = { path = "../../../oxidized" }

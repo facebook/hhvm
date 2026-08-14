@@ -19,4 +19,4 @@ proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
 quote = "1.0.47"
 
 [dev-dependencies]
-macro_test_util = { version = "0.0.0", path = "../../../../utils/test/macro_test_util" }
+macro_test_util = { path = "../../../../utils/test/macro_test_util" }

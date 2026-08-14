@@ -11,16 +11,16 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-ffi = { version = "0.0.0", path = "../../ffi/ffi" }
-hash = { version = "0.0.0", path = "../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../hhbc/cargo/hhbc" }
-hhvm_types_ffi = { version = "0.0.0", path = "../../hhvm_cxx/hhvm_types" }
+ffi = { path = "../../ffi/ffi" }
+hash = { path = "../../../utils/hash" }
+hhbc = { path = "../../hhbc/cargo/hhbc" }
+hhvm_types_ffi = { path = "../../hhvm_cxx/hhvm_types" }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
 intern = { version = "0.1.0", path = "../../../utils/intern" }
-macros = { version = "0.0.0", path = "../macros" }
+macros = { path = "../macros" }
 maplit = "1.0"
-naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
-newtype = { version = "0.0.0", path = "../../../utils/newtype" }
+naming_special_names_rust = { path = "../../../naming" }
+newtype = { path = "../../../utils/newtype" }
 strum = { version = "0.28.0", features = ["derive"] }
 
 [dev-dependencies]

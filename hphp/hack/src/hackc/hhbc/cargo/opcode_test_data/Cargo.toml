@@ -11,4 +11,4 @@ license = "MIT"
 path = "../../opcode_test_data.rs"
 
 [dependencies]
-hhbc-gen = { version = "0.0.0", path = "../../../../../../tools/hhbc-gen" }
+hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }

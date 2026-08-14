@@ -11,5 +11,5 @@ license = "MIT"
 path = "../../lib.rs"
 
 [dependencies]
-print_opcode_impl = { version = "0.0.0", path = "../print_opcode_impl" }
-print_opcode_macro = { version = "0.0.0", path = "../print_opcode_macro" }
+print_opcode_impl = { path = "../print_opcode_impl" }
+print_opcode_macro = { path = "../print_opcode_macro" }

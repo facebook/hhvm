@@ -12,13 +12,13 @@ path = "../../lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-balanced_partition = { version = "0.0.0", path = "../../../balanced_partition/cargo/balanced_partition" }
+balanced_partition = { path = "../../../balanced_partition/cargo/balanced_partition" }
 bytemuck = { version = "1.25", features = ["const_zeroed", "derive", "min_const_generics", "must_cast", "nightly_portable_simd", "nightly_stdsimd"] }
-depgraph_reader = { version = "0.0.0", path = "../../../cargo/depgraph_reader" }
-depgraph_writer = { version = "0.0.0", path = "../../../cargo/depgraph_writer" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
+depgraph_reader = { path = "../../../cargo/depgraph_reader" }
+depgraph_writer = { path = "../../../cargo/depgraph_writer" }
+hash = { path = "../../../../utils/hash" }
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
-newtype = { version = "0.0.0", path = "../../../../utils/newtype" }
+newtype = { path = "../../../../utils/newtype" }
 rayon = "1.11.0"
 smallvec = { version = "1.15.2", features = ["const_generics", "impl_bincode", "serde", "specialization", "union", "write"] }
 vint64 = "1.0.1"

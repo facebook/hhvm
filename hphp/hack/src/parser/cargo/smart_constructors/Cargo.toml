@@ -12,4 +12,4 @@ path = "../../smart_constructors.rs"
 
 [dependencies]
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-parser_core_types = { version = "0.0.0", path = "../core_types" }
+parser_core_types = { path = "../core_types" }

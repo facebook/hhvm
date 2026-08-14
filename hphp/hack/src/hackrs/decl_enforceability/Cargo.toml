@@ -11,7 +11,7 @@ license = "MIT"
 path = "decl_enforceability.rs"
 
 [dependencies]
-oxidized = { version = "0.0.0", path = "../../oxidized" }
-pos = { version = "0.0.0", path = "../pos/cargo/pos" }
-special_names = { version = "0.0.0", path = "../special_names/cargo/special_names" }
-ty = { version = "0.0.0", path = "../ty/cargo/ty" }
+oxidized = { path = "../../oxidized" }
+pos = { path = "../pos/cargo/pos" }
+special_names = { path = "../special_names/cargo/special_names" }
+ty = { path = "../ty/cargo/ty" }

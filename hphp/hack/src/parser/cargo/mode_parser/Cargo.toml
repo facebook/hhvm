@@ -12,5 +12,5 @@ path = "../../mode_parser.rs"
 
 [dependencies]
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
-parser_core_types = { version = "0.0.0", path = "../core_types" }
-positioned_by_ref_parser = { version = "0.0.0", path = "../../api/cargo/positioned_by_ref_parser" }
+parser_core_types = { path = "../core_types" }
+positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }

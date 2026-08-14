@@ -12,9 +12,9 @@ path = "lib.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-hash = { version = "0.0.0", path = "../../../utils/hash" }
-ir_core = { version = "0.0.0", path = "../ir_core" }
+hash = { path = "../../../utils/hash" }
+ir_core = { path = "../ir_core" }
 itertools = "0.15.0"
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
-naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
-parse_macro_ir = { version = "0.0.0", path = "../cargo/parse_macro" }
+naming_special_names_rust = { path = "../../../naming" }
+parse_macro_ir = { path = "../cargo/parse_macro" }

@@ -11,6 +11,6 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-hash = { version = "0.0.0", path = "../../../utils/hash" }
-ir_core = { version = "0.0.0", path = "../ir_core" }
-print = { version = "0.0.0", path = "../print" }
+hash = { path = "../../../utils/hash" }
+ir_core = { path = "../ir_core" }
+print = { path = "../print" }

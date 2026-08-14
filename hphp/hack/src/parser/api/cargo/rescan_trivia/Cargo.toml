@@ -13,5 +13,5 @@ test = false
 doctest = false
 
 [dependencies]
-parser = { version = "0.0.0", path = "../../../core" }
-positioned_parser = { version = "0.0.0", path = "../positioned_parser" }
+parser = { path = "../../../core" }
+positioned_parser = { path = "../positioned_parser" }

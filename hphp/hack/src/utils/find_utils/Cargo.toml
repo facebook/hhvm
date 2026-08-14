@@ -12,9 +12,9 @@ path = "../find_utils.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-files_to_ignore = { version = "0.0.0", path = "../files_to_ignore" }
+files_to_ignore = { path = "../files_to_ignore" }
 jwalk = "0.8.1"
-relative_path = { version = "0.0.0", path = "../rust/relative_path" }
+relative_path = { path = "../rust/relative_path" }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

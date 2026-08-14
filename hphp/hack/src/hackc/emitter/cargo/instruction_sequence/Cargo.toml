@@ -11,8 +11,8 @@ license = "MIT"
 path = "../../instruction_sequence.rs"
 
 [dependencies]
-emit_opcodes_macro = { version = "0.0.0", path = "../../../hhbc/cargo/emit_opcodes_macro" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
+emit_opcodes_macro = { path = "../../../hhbc/cargo/emit_opcodes_macro" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

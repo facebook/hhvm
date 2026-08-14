@@ -14,5 +14,5 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-emit_opcodes = { version = "0.0.0", path = "../emit_opcodes" }
-hhbc-gen = { version = "0.0.0", path = "../../../../../../tools/hhbc-gen" }
+emit_opcodes = { path = "../emit_opcodes" }
+hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }

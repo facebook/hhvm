@@ -11,38 +11,38 @@ license = "MIT"
 path = "../../emit_unit.rs"
 
 [dependencies]
-ast_scope = { version = "0.0.0", path = "../ast_scope" }
+ast_scope = { path = "../ast_scope" }
 bit-set = "0.9"
 bit-vec = "0.9"
 bitflags = { version = "2.13.1", features = ["serde", "std"], default-features = false }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-constant_folder = { version = "0.0.0", path = "../constant_folder" }
-core_utils_rust = { version = "0.0.0", path = "../../../../utils/core" }
-decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
-decl_vars = { version = "0.0.0", path = "../decl_vars" }
-emit_pos = { version = "0.0.0", path = "../emit_pos" }
-emit_type_hint = { version = "0.0.0", path = "../emit_type_hint" }
-env = { version = "0.0.0", path = "../env" }
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
-hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
-hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
+constant_folder = { path = "../constant_folder" }
+core_utils_rust = { path = "../../../../utils/core" }
+decl_provider = { path = "../../../decl_provider" }
+decl_vars = { path = "../decl_vars" }
+emit_pos = { path = "../emit_pos" }
+emit_type_hint = { path = "../emit_type_hint" }
+env = { path = "../env" }
+error = { path = "../../../error/cargo/error" }
+ffi = { path = "../../../ffi/ffi" }
+hack_macros = { path = "../../../../utils/hack_macros/cargo/hack_macros" }
+hash = { path = "../../../../utils/hash" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
-instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.15.0"
-label_rewriter = { version = "0.0.0", path = "../label_rewriter" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-options = { version = "0.0.0", path = "../../../compile/cargo/options" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-print_expr = { version = "0.0.0", path = "../../../print_expr" }
+label_rewriter = { path = "../label_rewriter" }
+naming_special_names_rust = { path = "../../../../naming" }
+options = { path = "../../../compile/cargo/options" }
+oxidized = { path = "../../../../oxidized" }
+print_expr = { path = "../../../print_expr" }
 priority-queue = "1.4.0"
 regex = "1.13.1"
-scope = { version = "0.0.0", path = "../scope" }
+scope = { path = "../scope" }
 serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 smallvec = { version = "1.15.2", features = ["const_generics", "impl_bincode", "serde", "specialization", "union", "write"] }
-stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
-stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
-statement_state = { version = "0.0.0", path = "../statement_state" }
+stack_depth = { path = "../../../utils/cargo/stack_depth" }
+stack_limit = { path = "../../../../utils/stack_limit" }
+statement_state = { path = "../statement_state" }

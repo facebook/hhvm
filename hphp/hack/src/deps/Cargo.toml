@@ -11,6 +11,6 @@ license = "MIT"
 path = "deps_rust/dep_graph_delta.rs"
 
 [dependencies]
-dep = { version = "0.0.0", path = "../depgraph/cargo/dep" }
-hash = { version = "0.0.0", path = "../utils/hash" }
+dep = { path = "../depgraph/cargo/dep" }
+hash = { path = "../utils/hash" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }

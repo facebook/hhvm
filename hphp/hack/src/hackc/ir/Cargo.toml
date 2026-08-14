@@ -11,12 +11,12 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-analysis = { version = "0.0.0", path = "analysis" }
-assemble_ir = { version = "0.0.0", path = "assemble" }
-ir_core = { version = "0.0.0", path = "ir_core" }
-passes = { version = "0.0.0", path = "passes" }
-print = { version = "0.0.0", path = "print" }
-verify = { version = "0.0.0", path = "verify" }
+analysis = { path = "analysis" }
+assemble_ir = { path = "assemble" }
+ir_core = { path = "ir_core" }
+passes = { path = "passes" }
+print = { path = "print" }
+verify = { path = "verify" }
 
 [dev-dependencies]
-testutils = { version = "0.0.0", path = "testutils" }
+testutils = { path = "testutils" }

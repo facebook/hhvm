@@ -11,6 +11,6 @@ license = "MIT"
 path = "../../special_names.rs"
 
 [dependencies]
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
+hash = { path = "../../../../utils/hash" }
+naming_special_names_rust = { path = "../../../../naming" }
+pos = { path = "../../../pos/cargo/pos" }

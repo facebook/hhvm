@@ -13,11 +13,11 @@ path = "hh24_types.rs"
 [dependencies]
 anyhow = "1.0.104"
 derive_more = { version = "1.0.0", features = ["full"] }
-file_info = { version = "0.0.0", path = "../../deps/rust/file_info" }
-hh_hash = { version = "0.0.0", path = "../hh_hash" }
-relative_path = { version = "0.0.0", path = "../rust/relative_path" }
+file_info = { path = "../../deps/rust/file_info" }
+hh_hash = { path = "../hh_hash" }
+relative_path = { path = "../rust/relative_path" }
 rusqlite = { version = "0.37.0", features = ["backup", "blob", "bundled", "column_decltype", "functions", "limits", "modern_sqlite", "serde_json", "vtab"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 thiserror = "2.0.19"
-typing_deps_hash = { version = "0.0.0", path = "../../deps/cargo/typing_deps_hash" }
+typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

@@ -12,4 +12,4 @@ path = "hh_hash.rs"
 
 [dependencies]
 fnv = "1.0"
-no_pos_hash = { version = "0.0.0", path = "../no_pos_hash" }
+no_pos_hash = { path = "../no_pos_hash" }

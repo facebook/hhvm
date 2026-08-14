@@ -11,5 +11,5 @@ license = "MIT"
 path = "../../statement_state.rs"
 
 [dependencies]
-instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+instruction_sequence = { path = "../instruction_sequence" }
+oxidized = { path = "../../../../oxidized" }

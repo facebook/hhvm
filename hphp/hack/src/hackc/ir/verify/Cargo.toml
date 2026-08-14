@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-analysis = { version = "0.0.0", path = "../analysis" }
-ir_core = { version = "0.0.0", path = "../ir_core" }
+analysis = { path = "../analysis" }
+ir_core = { path = "../ir_core" }
 itertools = "0.15.0"
-print = { version = "0.0.0", path = "../print" }
+print = { path = "../print" }

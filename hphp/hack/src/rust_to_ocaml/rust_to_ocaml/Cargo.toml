@@ -13,12 +13,12 @@ path = "../src/rust_to_ocaml.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-attr_parser = { version = "0.0.0", path = "../attr_parser" }
+attr_parser = { path = "../attr_parser" }
 clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 convert_case = "0.11"
 derive_more = { version = "1.0.0", features = ["full"] }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-signed_source = { version = "0.0.0", path = "../../utils/rust/signed_source" }
+signed_source = { path = "../../utils/rust/signed_source" }
 syn = { version = "3", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 toml = { version = "1.1.3", features = ["preserve_order"] }

@@ -11,12 +11,12 @@ license = "MIT"
 path = "../../ty.rs"
 
 [dependencies]
-eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hcons = { version = "0.0.0", path = "../../../../hcons" }
+eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
+hash = { path = "../../../../utils/hash" }
+hcons = { path = "../../../../hcons" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
+oxidized = { path = "../../../../oxidized" }
+pos = { path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 static_assertions = "1.1.0"
-utils = { version = "0.0.0", path = "../../../utils/cargo/utils" }
+utils = { path = "../../../utils/cargo/utils" }

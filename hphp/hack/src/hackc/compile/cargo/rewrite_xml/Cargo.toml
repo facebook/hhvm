@@ -11,8 +11,8 @@ license = "MIT"
 path = "../../rewrite_xml.rs"
 
 [dependencies]
-env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+env = { path = "../../../emitter/cargo/env" }
+error = { path = "../../../error/cargo/error" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+naming_special_names_rust = { path = "../../../../naming" }
+oxidized = { path = "../../../../oxidized" }

@@ -11,10 +11,10 @@ license = "MIT"
 path = "../../emit_type_hint.rs"
 
 [dependencies]
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
-hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
+error = { path = "../../../error/cargo/error" }
+ffi = { path = "../../../ffi/ffi" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
+naming_special_names_rust = { path = "../../../../naming" }
+oxidized = { path = "../../../../oxidized" }

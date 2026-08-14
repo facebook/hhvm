@@ -14,17 +14,17 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
+aast_parser = { path = "../../../../parser/cargo/aast_parser" }
+naming_special_names_rust = { path = "../../../../naming" }
+oxidized = { path = "../../../../oxidized" }
+parser_core_types = { path = "../../../../parser/cargo/core_types" }
 proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
 quote = "1.0.47"
 regex = "1.13.1"
-relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
+relative_path = { path = "../../../rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 syn = { version = "3", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = "2.0.19"
 
 [dev-dependencies]
-macro_test_util = { version = "0.0.0", path = "../../../test/macro_test_util" }
+macro_test_util = { path = "../../../test/macro_test_util" }

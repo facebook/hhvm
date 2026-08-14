@@ -11,28 +11,28 @@ license = "MIT"
 path = "../../compile.rs"
 
 [dependencies]
-aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser" }
+aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0.104"
-bc_to_ir = { version = "0.0.0", path = "../../../ir/conversions/bc_to_ir" }
+bc_to_ir = { path = "../../../ir/conversions/bc_to_ir" }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-bytecode_printer = { version = "0.0.0", path = "../../../bytecode_printer" }
+bytecode_printer = { path = "../../../bytecode_printer" }
 clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
-decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
-elab = { version = "0.0.0", path = "../../../../elab" }
-emit_unit = { version = "0.0.0", path = "../../../emitter/cargo/emit_unit" }
-env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
-error = { version = "0.0.0", path = "../../../error/cargo/error" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-ir = { version = "0.0.0", path = "../../../ir" }
-ir_to_bc = { version = "0.0.0", path = "../../../ir/conversions/ir_to_bc" }
-options = { version = "0.0.0", path = "../options" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
-print_expr = { version = "0.0.0", path = "../../../print_expr" }
-profile_rust = { version = "0.0.0", path = "../../../../utils/perf/cargo/profile" }
-relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
-rewrite_program = { version = "0.0.0", path = "../rewrite_program" }
+decl_provider = { path = "../../../decl_provider" }
+elab = { path = "../../../../elab" }
+emit_unit = { path = "../../../emitter/cargo/emit_unit" }
+env = { path = "../../../emitter/cargo/env" }
+error = { path = "../../../error/cargo/error" }
+hash = { path = "../../../../utils/hash" }
+hhbc = { path = "../../../hhbc/cargo/hhbc" }
+ir = { path = "../../../ir" }
+ir_to_bc = { path = "../../../ir/conversions/ir_to_bc" }
+options = { path = "../options" }
+oxidized = { path = "../../../../oxidized" }
+parser_core_types = { path = "../../../../parser/cargo/core_types" }
+print_expr = { path = "../../../print_expr" }
+profile_rust = { path = "../../../../utils/perf/cargo/profile" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
+rewrite_program = { path = "../rewrite_program" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
+stack_limit = { path = "../../../../utils/stack_limit" }
 thiserror = "2.0.19"

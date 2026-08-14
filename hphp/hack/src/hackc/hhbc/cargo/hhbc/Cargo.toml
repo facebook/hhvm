@@ -13,16 +13,16 @@ path = "../../lib.rs"
 [dependencies]
 bitflags = { version = "2.13.1", features = ["serde"], default-features = false }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
-emit_opcodes_macro = { version = "0.0.0", path = "../emit_opcodes_macro" }
-ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
-hhvm_hhbc_defs_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
-hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
+emit_opcodes_macro = { path = "../emit_opcodes_macro" }
+ffi = { path = "../../../ffi/ffi" }
+hash = { path = "../../../../utils/hash" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
+hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 intern = { version = "0.1.0", path = "../../../../utils/intern" }
-naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
+naming_special_names_rust = { path = "../../../../naming" }
+oxidized = { path = "../../../../oxidized" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 triomphe = { version = "0.1.16", features = ["arc-swap"] }
-write_bytes = { version = "0.0.0", path = "../../../../utils/write_bytes/write_bytes" }
+write_bytes = { path = "../../../../utils/write_bytes/write_bytes" }

@@ -11,15 +11,15 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-analysis = { version = "0.0.0", path = "../analysis" }
-ir_core = { version = "0.0.0", path = "../ir_core" }
+analysis = { path = "../analysis" }
+ir_core = { path = "../ir_core" }
 itertools = "0.15.0"
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
-newtype = { version = "0.0.0", path = "../../../utils/newtype" }
-print = { version = "0.0.0", path = "../print" }
+newtype = { path = "../../../utils/newtype" }
+print = { path = "../print" }
 
 [dev-dependencies]
-hash = { version = "0.0.0", path = "../../../utils/hash" }
+hash = { path = "../../../utils/hash" }
 rand = "0.10.2"
-testutils = { version = "0.0.0", path = "../testutils" }
-verify = { version = "0.0.0", path = "../verify" }
+testutils = { path = "../testutils" }
+verify = { path = "../verify" }

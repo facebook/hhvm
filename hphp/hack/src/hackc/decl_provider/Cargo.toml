@@ -12,9 +12,9 @@ path = "decl_provider.rs"
 
 [dependencies]
 bincode = { version = "2", features = ["serde"] }
-direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_decl_parser" }
-hash = { version = "0.0.0", path = "../../utils/hash" }
-oxidized = { version = "0.0.0", path = "../../oxidized" }
-parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
+direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
+hash = { path = "../../utils/hash" }
+oxidized = { path = "../../oxidized" }
+parser_core_types = { path = "../../parser/cargo/core_types" }
 sha1 = "0.10.7"
 thiserror = "2.0.19"

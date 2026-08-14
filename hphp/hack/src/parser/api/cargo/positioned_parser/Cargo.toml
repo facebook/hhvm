@@ -13,5 +13,5 @@ test = false
 doctest = false
 
 [dependencies]
-parser = { version = "0.0.0", path = "../../../core" }
-positioned_smart_constructors = { version = "0.0.0", path = "../../../cargo/positioned_smart_constructors" }
+parser = { path = "../../../core" }
+positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }

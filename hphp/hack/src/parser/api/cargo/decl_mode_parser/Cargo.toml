@@ -14,5 +14,5 @@ doctest = false
 
 [dependencies]
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
-decl_mode_smart_constructors = { version = "0.0.0", path = "../../../cargo/decl_mode_parser" }
-parser = { version = "0.0.0", path = "../../../core" }
+decl_mode_smart_constructors = { path = "../../../cargo/decl_mode_parser" }
+parser = { path = "../../../core" }

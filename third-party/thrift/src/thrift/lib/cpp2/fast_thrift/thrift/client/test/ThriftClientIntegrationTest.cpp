@@ -206,8 +206,8 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                 handler::RocketClientConnectionErrorHandler>(
                 rocket_client_connection_error_handler_tag)
-            .addNextInbound<apache::thrift::fast_thrift::rocket::client::
-                                handler::RocketClientStatsHandler>(
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
+                               handler::RocketClientStatsHandler>(
                 rocket_client_stats_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
@@ -1259,6 +1259,11 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
     // Save raw pointer for onConnect() (called after ownership transfer)
     auto* transportHandlerPtr = connection->transportHandler.get();
 
+    auto statsHandler =
+        std::make_unique<apache::thrift::fast_thrift::rocket::client::handler::
+                             RocketClientStatsHandler>();
+    statsHandler_ = statsHandler.get();
+
     connection->pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::rocket::client::
@@ -1290,9 +1295,9 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                 handler::RocketClientConnectionErrorHandler>(
                 rocket_client_connection_error_handler_tag)
-            .addNextInbound<apache::thrift::fast_thrift::rocket::client::
-                                handler::RocketClientStatsHandler>(
-                rocket_client_stats_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
+                               handler::RocketClientStatsHandler>(
+                rocket_client_stats_handler_tag, std::move(statsHandler))
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
@@ -1387,6 +1392,10 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
   IntegrationTestClient client_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;
+  // Borrowed; the pipeline owns it. Lets a test see the handler's per-stream
+  // map, which is otherwise invisible from outside the pipeline.
+  apache::thrift::fast_thrift::rocket::client::handler::
+      RocketClientStatsHandler* statsHandler_{nullptr};
 };
 
 // =============================================================================
@@ -1512,6 +1521,27 @@ TEST_F(
   EXPECT_EQ(capturedStats.responseWireSizeBytes, dataLen);
   EXPECT_EQ(
       capturedStats.responseMetadataAndPayloadSizeBytes, metadataLen + dataLen);
+  // The request sizes come from the stream-state handler's per-stream slot.
+  // Compared against the frame that actually went out rather than a literal,
+  // so the expectation cannot drift with the metadata encoding.
+  EXPECT_EQ(capturedStats.requestWireSizeBytes, parsedRequest.dataSize());
+  EXPECT_EQ(
+      capturedStats.requestMetadataAndPayloadSizeBytes,
+      parsedRequest.payloadSize());
+  // Both latencies are measured from the write-completion mark, and this
+  // pipeline is built on the non-tracking connection, which never fires one.
+  // They must stay at the "not measured" zero rather than being reported as
+  // an interval starting at the clock's epoch.
+  EXPECT_EQ(capturedStats.requestWriteLatency.count(), 0);
+  EXPECT_EQ(capturedStats.responseRoundTripLatency.count(), 0);
+  // The slot the request opened has to close again. This map is per
+  // connection and unbounded, so a missed release on any completion path is a
+  // leak that lasts as long as the connection does.
+  if (statsHandler_ == nullptr) {
+    ADD_FAILURE() << "stats handler was not wired into the pipeline";
+    return;
+  }
+  EXPECT_EQ(statsHandler_->pendingCount(), 0);
 }
 
 // =============================================================================

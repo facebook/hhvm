@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access global constant `ISOLATED_C` defined in package `isolated` which may not be available [1]
 -> `ISOLATED_C` is defined in test_file_cannot_reference_isolated.php--isolated/a.php [2]
--> `ISOLATED_C` belongs to package `isolated` by this package definition [3]
--> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `ISOLATED_C` belongs to package `isolated` by this entry in the package config [3]
+-> package `intern` is available because the current file belongs to it by this entry in the package config [4]
 -> `intern` includes `shared` via its definition [5]
 
 test_file_cannot_reference_isolated.php--intern/__tests__/t.php:5:17

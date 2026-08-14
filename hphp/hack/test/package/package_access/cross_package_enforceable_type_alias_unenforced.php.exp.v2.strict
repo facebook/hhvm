@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access asserted type `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_unenforced.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_unenforced.php--bar.php:13:14
 11 | // Params are `mixed` so the as/?as assertions aren't redundant (Warn[12011]).
@@ -32,8 +32,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access `TShape` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_unenforced.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_unenforced.php--bar.php:45:28
 43 | class WithConstants {

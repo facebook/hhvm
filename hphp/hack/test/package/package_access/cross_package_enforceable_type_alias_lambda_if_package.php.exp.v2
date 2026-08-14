@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:10:9
  8 | // Lambda parameter referring to pkg2 typedef from pkg1 - SHOULD ERROR
@@ -33,8 +33,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
 -> `TInt` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TInt` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TInt` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:15:12
 13 | // Lambda return type referring to pkg2 typedef from pkg1 - SHOULD ERROR
@@ -65,8 +65,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:56:9
 54 |   }
@@ -98,8 +98,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:68:13
 66 |   } else {
@@ -131,8 +131,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:96:7
 94 |   // enforceable position involved. No error expected either way.
@@ -164,8 +164,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:103:37
 101 | // =====================================================================
@@ -197,8 +197,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_lambda_if_package.php--pkg2/foo.php [2]
--> `TShape` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_lambda_if_package.php--bar.php:138:13
 136 |     }

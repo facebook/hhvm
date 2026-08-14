@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access global constant `ALPHA_C` defined in package `prototypes.alpha` which may not be available [1]
 -> `ALPHA_C` is defined in sibling_isolation.php--prototypes/alpha/a.php [2]
--> `ALPHA_C` belongs to package `prototypes.alpha` by this package definition [3]
--> package `prototypes.beta` is available because the current file belongs to it by this package definition [3]
+-> `ALPHA_C` belongs to package `prototypes.alpha` by this entry in the package config [3]
+-> package `prototypes.beta` is available because the current file belongs to it by this entry in the package config [3]
 -> `prototypes.beta` includes `intern` via its definition [4]
 -> `prototypes.beta` includes `shared` via its definition [5]
 

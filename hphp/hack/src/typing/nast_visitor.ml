@@ -117,6 +117,8 @@ class type handler =
     method at_typedef : env -> Nast.typedef -> unit
 
     method at_gconst : env -> Nast.gconst -> unit
+
+    method at_file_attribute : env -> Nast.file_attribute -> unit
   end
 
 class virtual handler_base : handler =
@@ -140,11 +142,26 @@ class virtual handler_base : handler =
     method at_typedef _ _ = ()
 
     method at_gconst _ _ = ()
+
+    method at_file_attribute _ _ = ()
   end
 
 let iter_with (handlers : handler list) : iter =
   object
     inherit iter as super
+
+    (* Visits file attributes through their per-definition copies
+       ([fd_file_attributes] / [c_file_attributes] / etc.). There is no
+       once-per-file alternative: naming strips the top-level [FileAttributes]
+       def (see [Typing_toplevel]), and the pipeline is per-definition — hh_distc
+       and zoncolan typecheck one definition at a time via separate FFI callbacks
+       ([Typecheck.typecheck_def]) with no per-file entry point. A file's
+       attributes are copied onto each of its definitions, so this fires once per
+       definition with identical positions; the error engine deduplicates the
+       resulting diagnostics at display time. *)
+    method! on_file_attribute env x =
+      List.iter handlers ~f:(fun v -> v#at_file_attribute env x);
+      super#on_file_attribute env x
 
     method! on_fun_def env x =
       List.iter handlers ~f:(fun v -> v#at_fun_def env x);

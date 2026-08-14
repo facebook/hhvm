@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access global constant `DEEP_C` defined in package `prototypes.alpha` which may not be available [1]
 -> `DEEP_C` is defined in nested_subdir.php--prototypes/alpha/deep/d.php [2]
--> `DEEP_C` belongs to package `prototypes.alpha` by this package definition [3]
--> package `prototypes.beta` is available because the current file belongs to it by this package definition [3]
+-> `DEEP_C` belongs to package `prototypes.alpha` by this entry in the package config [3]
+-> package `prototypes.beta` is available because the current file belongs to it by this entry in the package config [3]
 -> `prototypes.beta` includes `intern` via its definition [4]
 -> `prototypes.beta` includes `shared` via its definition [5]
 

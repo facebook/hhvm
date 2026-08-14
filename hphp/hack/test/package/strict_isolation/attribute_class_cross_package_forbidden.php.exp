@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access attribute `IsolatedClassAttr` defined in package `isolated` which may not be available [1]
 -> `IsolatedClassAttr` is defined in attribute_class_cross_package_forbidden.php--isolated/cattr.php [2]
--> `IsolatedClassAttr` belongs to package `isolated` by this package definition [3]
--> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `IsolatedClassAttr` belongs to package `isolated` by this entry in the package config [3]
+-> package `intern` is available because the current file belongs to it by this entry in the package config [4]
 -> `intern` includes `shared` via its definition [5]
 
 attribute_class_cross_package_forbidden.php--intern/c.php:3:3

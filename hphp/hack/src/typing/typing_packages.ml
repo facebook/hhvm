@@ -76,7 +76,7 @@ let get_package_profile
       | Some p -> Package.get_package_pos p
       | None -> Pos.none
     in
-    (pkg, Some (pos, pkg_name), "package definition")
+    (pkg, Some (pos, pkg_name), "entry in the package config")
   | Some (Aast_defs.PackageOverride (pkg_pos, pkg_name)) ->
     ( Env.get_package_by_name env pkg_name,
       Some (pkg_pos, pkg_name),

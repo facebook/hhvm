@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TFoo` defined in package `pkg2` which may not be available [1]
 -> `TFoo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `TFoo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TFoo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:47:17
 45 | 
@@ -33,8 +33,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access symbol `IFoo` defined in package `pkg2` which may not be available [1]
 -> `IFoo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `IFoo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `IFoo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:53:23
 51 | 
@@ -65,8 +65,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access generic `Foo` defined in package `pkg2` which may not be available [1]
 -> `Foo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `Foo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `Foo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:65:16
 63 | 
@@ -96,8 +96,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access generic `Foo` defined in package `pkg2` which may not be available [1]
 -> `Foo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `Foo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `Foo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:66:7
 64 | function test(): void {
@@ -127,8 +127,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access generic `Foo` defined in package `pkg2` which may not be available [1]
 -> `Foo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `Foo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `Foo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:67:21
 65 |   $_ = new Bar<Foo>(); // error: explicit targ on new
@@ -158,8 +158,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access generic `Foo` defined in package `pkg2` which may not be available [1]
 -> `Foo` is defined in cross_package_generics.php--pkg2/foo.php [2]
--> `Foo` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `Foo` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_generics.php--bar.php:69:16
 67 |   Bar::staticMethod<Foo>(); // error: explicit targ on static method call

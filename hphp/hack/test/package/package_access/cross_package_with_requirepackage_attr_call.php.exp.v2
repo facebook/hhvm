@@ -1,5 +1,5 @@
 error: NastCheck[3107] Invalid __RequirePackage [1]
--> This function is defined in package `pkg2` by this package config assignment [2]
+-> This function belongs to package `pkg2` by this entry in the package config [2]
 -> The required package `pkg1` must strictly include (i.e. cannot equal) `pkg2` [3]
 
 cross_package_with_requirepackage_attr_call.php--pkg2/a.php:12:3

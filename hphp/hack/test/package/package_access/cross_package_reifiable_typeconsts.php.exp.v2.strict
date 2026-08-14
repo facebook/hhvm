@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access `MyInternClass` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `MyInternClass` is defined in cross_package_reifiable_typeconsts.php--pkg2/bar.php [2]
--> `MyInternClass` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `MyInternClass` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:10:19
  8 | 
@@ -31,8 +31,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access `MyInternClass` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `MyInternClass` is defined in cross_package_reifiable_typeconsts.php--pkg2/bar.php [2]
--> `MyInternClass` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `MyInternClass` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:11:19
  9 | class MyProd extends MyProdBase {
@@ -62,8 +62,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access `MyInternClass` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `MyInternClass` is defined in cross_package_reifiable_typeconsts.php--pkg2/bar.php [2]
--> `MyInternClass` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `MyInternClass` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:15:35
 13 | 

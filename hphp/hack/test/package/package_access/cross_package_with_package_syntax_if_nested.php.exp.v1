@@ -1,5 +1,5 @@
 error: NastCheck[3109] Invalid package expression [1]
--> This code is in package `pkg3` by package config assignment [2]
+-> This code belongs to package `pkg3` by this entry in the package config [2]
 -> The checked package `pkg1` must strictly include (i.e. cannot equal) `pkg3` [3]
 
 cross_package_with_package_syntax_if_nested.php--pkg3/pkg3.php:3:15
@@ -27,8 +27,8 @@ PACKAGES.toml:18:11
 
 error: Typing[4472] Cannot access function `pkg7_call` defined in package `pkg7` which may not be available [1]
 -> `pkg7_call` is defined in cross_package_with_package_syntax_if_nested.php--pkg7/pkg7.php [2]
--> `pkg7_call` belongs to package `pkg7` by this package definition [3]
--> package `pkg3` is available because the current file belongs to it by this package definition [4]
+-> `pkg7_call` belongs to package `pkg7` by this entry in the package config [3]
+-> package `pkg3` is available because the current file belongs to it by this entry in the package config [4]
 -> package `pkg1` is assumed to be deployed here [5]
 -> `pkg3` includes `pkg2` via its definition [6]
 -> `pkg3` includes `pkg2_soft` via its definition [7]

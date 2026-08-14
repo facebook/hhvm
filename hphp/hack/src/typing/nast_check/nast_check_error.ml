@@ -229,6 +229,17 @@ type t =
       def_pos: Pos_or_decl.t;
       construct: strict_isolation_construct;
     }
+  | Package_override_target_not_included of {
+      override_pos: Pos.t;
+      target: string;
+      path_package: string;
+      path_package_pos: Pos_or_decl.t;
+    }
+  | Redundant_package_override of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+    }
 
 (** Context for package strict inclusion errors *)
 type package_strict_inclusion_context =
@@ -900,14 +911,14 @@ let package_strict_inclusion
       ( Error_code.(to_enum RequirePackageStrictInclusion),
         Printf.sprintf "Invalid %s" attribute_name,
         Printf.sprintf
-          "This function is defined in package `%s` by this %s"
+          "This function belongs to package `%s` by this %s"
           current
           current_package_assignment_kind )
     | Ctx_package_expression ->
       ( Error_code.(to_enum PackageExpressionStrictInclusion),
         "Invalid package expression",
         Printf.sprintf
-          "This code is in package `%s` by %s"
+          "This code belongs to package `%s` by this %s"
           current
           current_package_assignment_kind )
   in
@@ -958,6 +969,34 @@ let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
       ( def_pos,
         Printf.sprintf
           "`%s` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed"
+          pkg );
+    ]
+
+let package_override_target_not_included
+    ~override_pos ~target ~path_package ~path_package_pos =
+  User_diagnostic.make_err
+    Error_code.(to_enum PackageOverrideTargetNotIncluded)
+    (override_pos, "Invalid `__PackageOverride`")
+    [
+      ( path_package_pos,
+        Printf.sprintf
+          "This file belongs to package `%s` by this entry in the package config"
+          path_package );
+      ( path_package_pos,
+        Printf.sprintf
+          "A file may only be overridden into a package that its own package includes, but `%s` does not include the override target `%s`"
+          path_package
+          target );
+    ]
+
+let redundant_package_override ~pos ~pkg ~def_pos =
+  User_diagnostic.make_err
+    Error_code.(to_enum RedundantPackageOverride)
+    (pos, "Redundant `__PackageOverride`")
+    [
+      ( def_pos,
+        Printf.sprintf
+          "This file already belongs to package `%s` by this entry in the package config, so this override has no effect and should be removed"
           pkg );
     ]
 
@@ -1107,5 +1146,14 @@ let to_user_diagnostic t =
     | Strict_isolation_package_not_observable { pos; pkg; def_pos; construct }
       ->
       strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct
+    | Package_override_target_not_included
+        { override_pos; target; path_package; path_package_pos } ->
+      package_override_target_not_included
+        ~override_pos
+        ~target
+        ~path_package
+        ~path_package_pos
+    | Redundant_package_override { pos; pkg; def_pos } ->
+      redundant_package_override ~pos ~pkg ~def_pos
   in
   f Explanation.empty

@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access `BarImpl` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `BarImpl` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
--> `BarImpl` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `BarImpl` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_type_consts.php--bar.php:5:19
 3 | 
@@ -33,8 +33,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access `TFoo1` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `TFoo1` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
--> `TFoo1` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TFoo1` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_type_consts.php--bar.php:6:19
 4 | class Bar {
@@ -65,8 +65,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access `TFoo2` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `TFoo2` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
--> `TFoo2` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TFoo2` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_type_consts.php--bar.php:7:19
 5 |   const type T1 = BarImpl;

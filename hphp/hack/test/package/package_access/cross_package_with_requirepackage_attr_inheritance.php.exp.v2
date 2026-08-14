@@ -1,5 +1,5 @@
 error: NastCheck[3107] Invalid __RequirePackage [1]
--> This function is defined in package `pkg1` by this package config assignment [2]
+-> This function belongs to package `pkg1` by this entry in the package config [2]
 -> The required package `pkg1` must strictly include (i.e. cannot equal) `pkg1` [2]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:13:5
@@ -38,7 +38,7 @@ cross_package_with_requirepackage_attr_inheritance.php--a.php:23:19
 25 | 
 
 error: NastCheck[3107] Invalid __RequirePackage [1]
--> This function is defined in package `pkg2` by this package config assignment [2]
+-> This function belongs to package `pkg2` by this entry in the package config [2]
 -> `pkg2` soft-includes the required package `pkg2_soft`, so this requirement is not allowed [2]
 
 cross_package_with_requirepackage_attr_inheritance.php--pkg2/b.php:8:5

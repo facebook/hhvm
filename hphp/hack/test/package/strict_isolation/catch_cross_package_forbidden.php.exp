@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access class `IsolatedException` defined in package `isolated` which may not be available [1]
 -> `IsolatedException` is defined in catch_cross_package_forbidden.php--isolated/exn.php [2]
--> `IsolatedException` belongs to package `isolated` by this package definition [3]
--> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `IsolatedException` belongs to package `isolated` by this entry in the package config [3]
+-> package `intern` is available because the current file belongs to it by this entry in the package config [4]
 -> `intern` includes `shared` via its definition [5]
 
 catch_cross_package_forbidden.php--intern/use.php:6:12

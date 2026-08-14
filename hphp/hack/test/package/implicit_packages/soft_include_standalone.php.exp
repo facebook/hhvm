@@ -1,7 +1,7 @@
 error: Typing[4473] Cannot access global constant `STANDALONE_C` defined in package `standalone` which may not be available [1]
 -> `STANDALONE_C` is defined in soft_include_standalone.php--standalone/s.php [2]
--> `STANDALONE_C` belongs to package `standalone` by this package definition [3]
--> package `prototypes.alpha` is available because the current file belongs to it by this package definition [4]
+-> `STANDALONE_C` belongs to package `standalone` by this entry in the package config [3]
+-> package `prototypes.alpha` is available because the current file belongs to it by this entry in the package config [4]
 -> `prototypes.alpha` includes `intern` via its definition [5]
 -> `prototypes.alpha` includes `shared` via its definition [6]
 

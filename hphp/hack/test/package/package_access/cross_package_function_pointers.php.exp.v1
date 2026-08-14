@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access class `C` defined in package `pkg2` which may not be available [1]
 -> `C` is defined in cross_package_function_pointers.php--pkg2/bar.php [2]
--> `C` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `C` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_function_pointers.php--foo.php:4:3
 2 | // package pkg1 (does not include pkg2)
@@ -33,8 +33,8 @@ PACKAGES.toml:6:11
 
 error: Typing[4472] Cannot access function `bar` defined in package `pkg2` which may not be available [1]
 -> `bar` is defined in cross_package_function_pointers.php--pkg2/bar.php [2]
--> `bar` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `bar` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_function_pointers.php--foo.php:5:3
 3 | function main(): void {

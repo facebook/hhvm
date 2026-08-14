@@ -1,0 +1,77 @@
+error: NastCheck[3111] Invalid `__PackageOverride` [1]
+-> This file belongs to package `pkg1` by this entry in the package config [2]
+-> A file may only be overridden into a package that its own package includes, but `pkg1` does not include the override target `pkg2` [2]
+
+package_override.php--into_including.php:3:9
+1 | <?hh
+2 | // pkg1 does not include pkg2 (pkg2 includes pkg1), so this override is invalid
+3 | <<file: __PackageOverride('pkg2')>>
+  |         ^^^^^^^^^^^^^^^^^ [1]
+4 | function pkg_override_into_including(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [2]
+4 | include_paths=["//"]
+5 | 
+
+error: NastCheck[3111] Invalid `__PackageOverride` [1]
+-> This file belongs to package `pkg1` by this entry in the package config [2]
+-> A file may only be overridden into a package that its own package includes, but `pkg1` does not include the override target `pkg4` [2]
+
+package_override.php--multidef.php:4:9
+2 | // the file attribute is copied onto every definition; the error must be
+3 | // reported exactly once, not once per definition
+4 | <<file: __PackageOverride('pkg4')>>
+  |         ^^^^^^^^^^^^^^^^^ [1]
+5 | function pkg_override_multidef1(): void {}
+6 | function pkg_override_multidef2(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [2]
+4 | include_paths=["//"]
+5 | 
+
+error: NastCheck[3112] Redundant `__PackageOverride` [1]
+-> This file already belongs to package `pkg1` by this entry in the package config, so this override has no effect and should be removed [2]
+
+package_override.php--redundant.php:3:9
+1 | <?hh
+2 | // overriding into the file's own path-derived package is a no-op
+3 | <<file: __PackageOverride('pkg1')>>
+  |         ^^^^^^^^^^^^^^^^^ [1]
+4 | function pkg_override_redundant(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [2]
+4 | include_paths=["//"]
+5 | 
+
+error: NastCheck[3111] Invalid `__PackageOverride` [1]
+-> This file belongs to package `pkg1` by this entry in the package config [2]
+-> A file may only be overridden into a package that its own package includes, but `pkg1` does not include the override target `pkg4` [2]
+
+package_override.php--unrelated.php:3:9
+1 | <?hh
+2 | // pkg1 does not include pkg4 (they are unrelated), so this override is invalid
+3 | <<file: __PackageOverride('pkg4')>>
+  |         ^^^^^^^^^^^^^^^^^ [1]
+4 | function pkg_override_unrelated(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [2]
+4 | include_paths=["//"]
+5 | 
+
+4 errors found

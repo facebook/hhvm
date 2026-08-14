@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06ef49c5cc2ef9aa0134b98a8b9e9db4>>
+// @generated SignedSource<<377ed18716b75cfc2540766fbbb5ff77>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -368,6 +368,19 @@ pub enum NastCheckError {
         pkg: String,
         def_pos: pos_or_decl::PosOrDecl,
         construct: StrictIsolationConstruct,
+    },
+    #[rust_to_ocaml(name = "Package_override_target_not_included")]
+    PackageOverrideTargetNotIncluded {
+        override_pos: pos::Pos,
+        target: String,
+        path_package: String,
+        path_package_pos: pos_or_decl::PosOrDecl,
+    },
+    #[rust_to_ocaml(name = "Redundant_package_override")]
+    RedundantPackageOverride {
+        pos: pos::Pos,
+        pkg: String,
+        def_pos: pos_or_decl::PosOrDecl,
     },
 }
 

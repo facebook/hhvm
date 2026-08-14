@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg2/b.php [2]
--> `pkg2_call` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `pkg2_call` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_with_requirepackage_attr_lambda.php--a.php:56:7
 54 |     // Lambda calling pkg2 without package loaded — error
@@ -58,8 +58,8 @@ PACKAGES.toml:3:11
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg2/b.php [2]
--> `pkg2_call` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `pkg2_call` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_with_requirepackage_attr_lambda.php--a.php:62:7
 60 |     $receiver = new Receiver();
@@ -131,8 +131,8 @@ PACKAGES.toml:3:11
 
 error: Typing[4472] Cannot access function `pkg3_call` defined in package `pkg3` which may not be available [1]
 -> `pkg3_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php [2]
--> `pkg3_call` belongs to package `pkg3` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `pkg3_call` belongs to package `pkg3` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 -> package `pkg2` is assumed to be deployed here [5]
 -> `pkg2` includes `pkg1` via its definition [6]
 
@@ -180,8 +180,8 @@ PACKAGES.toml:18:11
 
 error: Typing[4472] Cannot access function `pkg3_call` defined in package `pkg3` which may not be available [1]
 -> `pkg3_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php [2]
--> `pkg3_call` belongs to package `pkg3` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `pkg3_call` belongs to package `pkg3` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 -> package `pkg2` is assumed to be deployed here [5]
 -> `pkg2` includes `pkg1` via its definition [6]
 

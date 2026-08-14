@@ -27,7 +27,7 @@ let get_current_package_info env current_pkg_membership =
       | Some p -> Package.get_package_pos p
       | None -> Pos.none
     in
-    (pkg, pkg_name, pos, "package config assignment")
+    (pkg, pkg_name, pos, "entry in the package config")
   | Aast_defs.PackageOverride (pkg_pos, pkg_name) ->
     let pkg = lookup_package env pkg_name in
     (pkg, pkg_name, pkg_pos, "package override")
@@ -187,6 +187,64 @@ let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
       | None -> ())
     | _ -> ()
 
+(* The __PackageOverride file attribute relocates every symbol in the file into
+   [target]. An override is only meaningful when the file's path-derived package
+   [P] includes [target]: i.e. you may only override a file down into a package
+   that its own package already depends on (e.g. an `intern` file overriding into
+   `prod`, where `intern` includes `prod`). Every other target is rejected:
+   - Equal: the override targets the file's own package (a no-op).
+   - otherwise ([target] includes [P], or the two are unrelated): [P] does not
+     depend on [target], so the override cannot be meaningful (e.g. a `prod` file
+     overriding into `intern`, or into some unrelated package).
+   A soft-include is treated like an include (still a dependency of [P]). *)
+let package_override_check env ua =
+  match ua.ua_params with
+  | (_, _, String target_name) :: _ ->
+    (match lookup_package env target_name with
+    (* An unbound override target is reported by the naming pass. *)
+    | None -> ()
+    | Some target_package ->
+      let path = Relative_path.suffix (Pos.filename (fst ua.ua_name)) in
+      (match
+         Package_provider.get_package_for_file env.Nast_check_env.ctx ~path
+       with
+      (* A file with no path-derived package uses the override to opt into one,
+         so there is no inclusion relationship to enforce. *)
+      | None -> ()
+      | Some path_package ->
+        (match Package.relationship path_package target_package with
+        (* [path_package] includes (or soft-includes) [target]: a valid demote
+           into a package the file's own package depends on. *)
+        | Package.Includes
+        | Package.Soft_includes ->
+          ()
+        | Package.Equal ->
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Redundant_package_override
+                   {
+                     pos = fst ua.ua_name;
+                     pkg = Package.get_package_name path_package;
+                     def_pos =
+                       Pos_or_decl.of_raw_pos
+                         (Package.get_package_pos path_package);
+                   })
+        | Package.Unrelated ->
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Package_override_target_not_included
+                   {
+                     override_pos = fst ua.ua_name;
+                     target = target_name;
+                     path_package = Package.get_package_name path_package;
+                     path_package_pos =
+                       Pos_or_decl.of_raw_pos
+                         (Package.get_package_pos path_package);
+                   }))))
+  | _ -> ()
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -201,4 +259,19 @@ let handler =
       match e with
       | Package id -> package_expression_strict_inclusion env id
       | _ -> ()
+
+    (* Driven once per definition by [Nast_visitor]'s [on_file_attribute] (see
+       the rationale there); the error engine dedups the identical diagnostics.
+       A file whose only definitions are constants or top-level statements
+       carries no file-attribute copy and is therefore not checked -- the same
+       limitation as the existing __PackageOverride handling in
+       unbound_name_check. *)
+    method! at_file_attribute env fa =
+      match
+        Naming_attributes.find
+          SN.UserAttributes.uaPackageOverride
+          fa.fa_user_attributes
+      with
+      | Some ua -> package_override_check env ua
+      | None -> ()
   end

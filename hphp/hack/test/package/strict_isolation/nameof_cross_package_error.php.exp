@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access class `IsolatedNameof` defined in package `isolated` which may not be available [1]
 -> `IsolatedNameof` is defined in nameof_cross_package_error.php--isolated/c.php [2]
--> `IsolatedNameof` belongs to package `isolated` by this package definition [3]
--> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `IsolatedNameof` belongs to package `isolated` by this entry in the package config [3]
+-> package `intern` is available because the current file belongs to it by this entry in the package config [4]
 -> `intern` includes `shared` via its definition [5]
 
 nameof_cross_package_error.php--intern/use.php:6:15

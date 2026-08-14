@@ -228,5 +228,16 @@ type t =
       def_pos: Pos_or_decl.t;
       construct: strict_isolation_construct;
     }
+  | Package_override_target_not_included of {
+      override_pos: Pos.t;
+      target: string;
+      path_package: string;
+      path_package_pos: Pos_or_decl.t;
+    }
+  | Redundant_package_override of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+    }
 
 val to_user_diagnostic : t -> (Pos.t, Pos_or_decl.t) User_diagnostic.t

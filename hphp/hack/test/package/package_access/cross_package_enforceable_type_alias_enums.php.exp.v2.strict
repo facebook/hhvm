@@ -1,7 +1,7 @@
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
 -> `TInt` is defined in cross_package_enforceable_type_alias_enums.php--pkg2/foo.php [2]
--> `TInt` belongs to package `pkg2` by this package definition [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+-> `TInt` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
 
 cross_package_enforceable_type_alias_enums.php--bar.php:11:25
  9 | // Regular enum base: HHVM's Class::setEnumType runs at class init and fatals

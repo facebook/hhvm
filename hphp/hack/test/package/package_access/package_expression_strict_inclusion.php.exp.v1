@@ -1,5 +1,5 @@
 error: NastCheck[3109] Invalid package expression [1]
--> This code is in package `pkg1` by package config assignment [2]
+-> This code belongs to package `pkg1` by this entry in the package config [2]
 -> The checked package `pkg1` must strictly include (i.e. cannot equal) `pkg1` [2]
 
 package_expression_strict_inclusion.php--b.php:6:15
@@ -19,7 +19,7 @@ PACKAGES.toml:3:11
 5 | 
 
 error: NastCheck[3109] Invalid package expression [1]
--> This code is in package `pkg2` by package config assignment [2]
+-> This code belongs to package `pkg2` by this entry in the package config [2]
 -> The checked package `pkg1` must strictly include (i.e. cannot equal) `pkg2` [3]
 
 package_expression_strict_inclusion.php--pkg2/a.php:6:15
@@ -43,7 +43,7 @@ PACKAGES.toml:6:11
 8 |     "//cross_package_access_internal1_foo.php",
 
 error: NastCheck[3109] Invalid package expression [1]
--> This code is in package `pkg2` by package config assignment [2]
+-> This code belongs to package `pkg2` by this entry in the package config [2]
 -> `pkg2` soft-includes the checked package `pkg2_soft`, so this check is not allowed [2]
 
 package_expression_strict_inclusion.php--pkg2/c.php:6:15

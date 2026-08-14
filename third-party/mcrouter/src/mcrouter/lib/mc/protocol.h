@@ -19,6 +19,7 @@ typedef enum mc_protocol_e {
   mc_binary_protocol = 2,
   mc_caret_protocol = 4,
   mc_thrift_protocol = 5,
+  mc_xdp_protocol = 6,
   mc_nprotocols, // placeholder
 } mc_protocol_t;
 
@@ -31,6 +32,8 @@ static inline mc_protocol_t mc_string_to_protocol(const char* str) {
     return mc_caret_protocol;
   } else if (!strcmp(str, "thrift")) {
     return mc_thrift_protocol;
+  } else if (!strcmp(str, "xdp")) {
+    return mc_xdp_protocol;
   } else {
     return mc_unknown_protocol;
   }
@@ -46,6 +49,8 @@ static inline const char* mc_protocol_to_string(const mc_protocol_t value) {
       return "caret";
     case mc_thrift_protocol:
       return "thrift";
+    case mc_xdp_protocol:
+      return "xdp";
     case mc_unknown_protocol:
     case mc_nprotocols:
     default:

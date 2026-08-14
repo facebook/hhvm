@@ -146,6 +146,13 @@ struct ConnectionOptions {
    * iff thriftCompression is enabled.
    */
   size_t thriftCompressionThreshold{0};
+
+  /**
+   * AF_XDP/XSK client: max request datagram payload in bytes before the
+   * request is rejected with LOCAL_ERROR. 0 means no cap (clamp to the jumbo
+   * buffer size). Plumbed from the xdp_tx_truncate_bytes mcrouter option.
+   */
+  size_t xdpTxTruncateBytes{0};
 };
 } // namespace memcache
 } // namespace facebook

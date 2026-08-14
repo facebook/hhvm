@@ -58,7 +58,7 @@ impl FeatureName {
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
             ExpressionTreeHackArrays => OngoingRelease,
-            ExpressionTreeSubscript => Preview,
+            ExpressionTreeSubscript => OngoingRelease,
             ShapeFieldPunning => Unstable,
             RepresentableAs => Preview,
             ClassAliasesEverywhere => Unstable,

@@ -49,30 +49,34 @@ namespace detail {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Winvalid-offsetof")
 template<>
-constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::TrivialTypesStruct>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+struct OffsetTables<::test::fixtures::tablebased::TrivialTypesStruct> {
+  static constexpr ptrdiff_t fieldOffsets[] = {
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldA),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldB),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldC),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldD),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldE)};
-  return offsets[fieldIndex];
-}
-
-template<>
-constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::TrivialTypesStruct>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+  static constexpr ptrdiff_t issetOffsets[] = {
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __isset) + isset_bitset<5>::get_offset() + 0,
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __isset) + isset_bitset<5>::get_offset() + 1,
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __isset) + isset_bitset<5>::get_offset() + 2,
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __isset) + isset_bitset<5>::get_offset() + 3,
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __isset) + isset_bitset<5>::get_offset() + 4};
-  return offsets[fieldIndex];
+};
+
+template<>
+constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::TrivialTypesStruct>(std::int16_t fieldIndex) {
+  return OffsetTables<::test::fixtures::tablebased::TrivialTypesStruct>::fieldOffsets[fieldIndex];
 }
 
 template<>
-constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::ContainerStruct>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::TrivialTypesStruct>(std::int16_t fieldIndex) {
+  return OffsetTables<::test::fixtures::tablebased::TrivialTypesStruct>::issetOffsets[fieldIndex];
+}
+
+template<>
+struct OffsetTables<::test::fixtures::tablebased::ContainerStruct> {
+  static constexpr ptrdiff_t fieldOffsets[] = {
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldB),
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldC),
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldD),
@@ -81,12 +85,7 @@ constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::ContainerStruct>(s
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldG),
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldH),
     offsetof(::test::fixtures::tablebased::ContainerStruct, __fbthrift_field_fieldA)};
-  return offsets[fieldIndex];
-}
-
-template<>
-constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::ContainerStruct>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+  static constexpr ptrdiff_t issetOffsets[] = {
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 1,
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 2,
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 3,
@@ -95,7 +94,16 @@ constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::ContainerStruct>(s
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 6,
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 7,
     offsetof(::test::fixtures::tablebased::ContainerStruct, __isset) + isset_bitset<8>::get_offset() + 0};
-  return offsets[fieldIndex];
+};
+
+template<>
+constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::ContainerStruct>(std::int16_t fieldIndex) {
+  return OffsetTables<::test::fixtures::tablebased::ContainerStruct>::fieldOffsets[fieldIndex];
+}
+
+template<>
+constexpr ptrdiff_t issetOffset<::test::fixtures::tablebased::ContainerStruct>(std::int16_t fieldIndex) {
+  return OffsetTables<::test::fixtures::tablebased::ContainerStruct>::issetOffsets[fieldIndex];
 }
 
 

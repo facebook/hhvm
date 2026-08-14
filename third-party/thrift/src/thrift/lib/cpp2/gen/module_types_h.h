@@ -76,6 +76,15 @@ constexpr ptrdiff_t issetOffset(std::int16_t fieldIndex);
 template <typename T>
 constexpr ptrdiff_t unionTypeOffset();
 
+// Specialized in generated code. Holds per-struct offset arrays as static
+// members so each array is constant-evaluated exactly once; a function-local
+// constexpr array would be re-materialized on every fieldOffset/issetOffset
+// call during constant evaluation of the StructInfo table, making its
+// initialization O(fields^2) and overflowing clang's constexpr step limit
+// for structs with thousands of fields.
+template <typename T>
+struct OffsetTables;
+
 template <typename Ident, typename Adapter, FieldId Id, typename Ref>
 struct wrapped_struct_argument {
   static_assert(std::is_reference_v<Ref>, "not a reference");

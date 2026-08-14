@@ -372,6 +372,7 @@ class {{#if def.exception?}}FOLLY_EXPORT {{/if}}{{def.cpp_underlying_name}} {{!
         {{#else}}
   friend constexpr ptrdiff_t (::apache::thrift::detail::fieldOffset<{{def.cpp_underlying_name}}>)(std::int16_t fieldIndex);
   friend constexpr ptrdiff_t (::apache::thrift::detail::issetOffset<{{def.cpp_underlying_name}}>)(std::int16_t fieldIndex);
+  friend struct ::apache::thrift::detail::OffsetTables<{{def.cpp_underlying_name}}>;
         {{/if def.union?}}
       {{/if (has_compiler_option? "tablebased")}}
 };

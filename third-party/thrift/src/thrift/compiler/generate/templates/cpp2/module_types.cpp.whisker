@@ -47,23 +47,27 @@ FOLLY_GNU_DISABLE_WARNING("-Winvalid-offsetof")
     {{#each program.current_split_structured_definitions as |struct|}}
       {{#if (not struct.union?)}}
 template<>
-constexpr ptrdiff_t fieldOffset<{{struct.cpp_fullname}}>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+struct OffsetTables<{{struct.cpp_fullname}}> {
+  static constexpr ptrdiff_t fieldOffsets[] = {
         {{#each (array.enumerate struct.fields_id_order with_last=true) as |i field last?|}}
     offsetof({{struct.cpp_fullname}}, {{field.cpp_storage_name}}){{!
     }}{{> common/comma_newline}}{{/each}}};
-  return offsets[fieldIndex];
-}
-
-template<>
-constexpr ptrdiff_t issetOffset<{{struct.cpp_fullname}}>(std::int16_t fieldIndex) {
-  constexpr ptrdiff_t offsets[] = {
+  static constexpr ptrdiff_t issetOffsets[] = {
         {{#each (array.enumerate struct.fields_id_order with_last=true) as |i field last?|}}
     {{#if field.has_isset?}}{{!
     }}offsetof({{struct.cpp_fullname}}, __isset) + isset_bitset<{{struct.isset_fields_size}}>::get_offset() + {{field.isset_index}}{{!
     }}{{#else}}0{{/if field.has_isset?}}{{!
     }}{{> common/comma_newline}}{{/each}}};
-  return offsets[fieldIndex];
+};
+
+template<>
+constexpr ptrdiff_t fieldOffset<{{struct.cpp_fullname}}>(std::int16_t fieldIndex) {
+  return OffsetTables<{{struct.cpp_fullname}}>::fieldOffsets[fieldIndex];
+}
+
+template<>
+constexpr ptrdiff_t issetOffset<{{struct.cpp_fullname}}>(std::int16_t fieldIndex) {
+  return OffsetTables<{{struct.cpp_fullname}}>::issetOffsets[fieldIndex];
 }
       {{/if (not struct.union?)}}
 

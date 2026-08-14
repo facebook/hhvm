@@ -511,6 +511,7 @@ class TrivialTypesStruct final  {
   friend void swap(TrivialTypesStruct& a, TrivialTypesStruct& b);
   friend constexpr ptrdiff_t (::apache::thrift::detail::fieldOffset<TrivialTypesStruct>)(std::int16_t fieldIndex);
   friend constexpr ptrdiff_t (::apache::thrift::detail::issetOffset<TrivialTypesStruct>)(std::int16_t fieldIndex);
+  friend struct ::apache::thrift::detail::OffsetTables<TrivialTypesStruct>;
 };
 
 template <class Protocol_>
@@ -1044,6 +1045,7 @@ class ContainerStruct final  {
   friend void swap(ContainerStruct& a, ContainerStruct& b);
   friend constexpr ptrdiff_t (::apache::thrift::detail::fieldOffset<ContainerStruct>)(std::int16_t fieldIndex);
   friend constexpr ptrdiff_t (::apache::thrift::detail::issetOffset<ContainerStruct>)(std::int16_t fieldIndex);
+  friend struct ::apache::thrift::detail::OffsetTables<ContainerStruct>;
 };
 
 template <class Protocol_>

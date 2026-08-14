@@ -465,17 +465,6 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
-  Block* guardFailBlock = nullptr;
-  for (auto const& lt : env.ctx.liveTypes) {
-    // Local and stack slots are lazily guarded, but MBase is eagerly guarded.
-    if (lt.location.tag() == LTag::MBase) {
-      auto t = lt.type;
-      assertx(t <= TCell);
-      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
-      irgen::checkType(env.irgs, lt.location, t, guardFailBlock);
-    }
-  }
-
   for (bool firstInst = true; true; firstInst = false) {
     assertx(env.numBCInstrs >= 0);
     if (env.numBCInstrs == 0) {

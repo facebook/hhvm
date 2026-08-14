@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 
+#include <glog/logging.h>
+
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
@@ -46,12 +48,22 @@ RequestStateMachine::~RequestStateMachine() {
 }
 
 [[nodiscard]] bool RequestStateMachine::tryTerminate(folly::EventBase* eb) {
+  return tryTerminate(eb, RequestTerminationCause::Unknown);
+}
+
+[[nodiscard]] bool RequestStateMachine::tryTerminate(
+    folly::EventBase* eb, RequestTerminationCause cause) {
   eb->dcheckIsInEventBaseThread();
-  return !terminated_.exchange(true, std::memory_order_relaxed);
+  // The sentinel cannot terminate the request even when the CAS succeeds.
+  CHECK(cause != RequestTerminationCause::NotTerminated)
+      << "tryTerminate() must record a terminal cause";
+  auto expected = RequestTerminationCause::NotTerminated;
+  return terminationCause_.compare_exchange_strong(
+      expected, cause, std::memory_order_relaxed, std::memory_order_relaxed);
 }
 
 [[nodiscard]] bool RequestStateMachine::tryStartProcessing() {
-  if (terminated_.load(std::memory_order_relaxed) ||
+  if (!isActive() ||
       startProcessingOrQueueTimeout_.exchange(
           true, std::memory_order_relaxed)) {
     return false;

@@ -340,7 +340,7 @@ void ThriftRequestCore::sendReply(
     MessageChannel::SendCallback* cb,
     folly::Optional<uint32_t> crc32c) {
   auto cbWrapper = MessageChannel::SendCallbackPtr(cb);
-  if (tryTerminate()) {
+  if (tryTerminate(RequestTerminationCause::RequestFinished)) {
     cancelTimeout();
     // Mark processEnd for the request.
     // Note: this processEnd time unfortunately does not account for the time
@@ -375,7 +375,7 @@ void ThriftRequestCore::sendReply(
 void ThriftRequestCore::sendException(
     ResponsePayload&& response, MessageChannel::SendCallback* cb) {
   auto cbWrapper = MessageChannel::SendCallbackPtr(cb);
-  if (tryTerminate()) {
+  if (tryTerminate(RequestTerminationCause::RequestFinished)) {
     cancelTimeout();
     // Mark processEnd for the request.
     // Note: this processEnd time unfortunately does not account for the time

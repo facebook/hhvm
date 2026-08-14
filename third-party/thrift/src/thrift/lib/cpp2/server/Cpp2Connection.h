@@ -207,9 +207,18 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
 
     bool isActive() const final { return stateMachine_.isActive(); }
 
+    RequestTerminationCause getTerminationCause() const final {
+      return stateMachine_.getTerminationCause();
+    }
+
     bool tryTerminate() {
       return stateMachine_.tryTerminate(
           connection_->getWorker()->getEventBase());
+    }
+
+    bool tryTerminate(RequestTerminationCause cause) {
+      return stateMachine_.tryTerminate(
+          connection_->getWorker()->getEventBase(), cause);
     }
 
     bool isOneway() const override { return req_->isOneway(); }

@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 
 #include <folly/Optional.h>
 #include <folly/Portability.h>
@@ -30,6 +31,16 @@ namespace apache::thrift {
 
 class AdaptiveConcurrencyController;
 class CPUConcurrencyController;
+
+// Why a request stopped requiring processing. `NotTerminated` means no
+// terminal path has won yet.
+enum class RequestTerminationCause : std::uint8_t {
+  NotTerminated = 0,
+  Unknown,
+  TaskTimeout,
+  QueueTimeout,
+  RequestFinished,
+};
 
 class RequestStateMachine {
  public:
@@ -46,9 +57,21 @@ class RequestStateMachine {
   //       presents a data race condition. As such, the isActive() API returning
   //       true should be considered a weak promise that a request is active
   //       and should not be relied upon for the purposes of synchronization.
-  bool isActive() const { return !terminated_.load(std::memory_order_relaxed); }
+  bool isActive() const {
+    return getTerminationCause() == RequestTerminationCause::NotTerminated;
+  }
 
-  // Instruct whether request no longer requires processing.
+  // Why the request stopped requiring processing, or `NotTerminated` if it has
+  // not been terminated yet.
+  RequestTerminationCause getTerminationCause() const {
+    return terminationCause_.load(std::memory_order_relaxed);
+  }
+
+  // Terminate a request when the caller cannot classify the cause.
+  [[nodiscard]] bool tryTerminate(folly::EventBase* eb);
+
+  // Instruct whether request no longer requires processing. The first caller
+  // to win permanently records `cause`, which must not be `NotTerminated`.
   // This API may only be called from IO worker thread of the request.
   // @return: whether this call terminated the request. False means the request
   // had already been terminated before the call.
@@ -56,7 +79,8 @@ class RequestStateMachine {
   // * queue/task timeout has sent load shedding response, and no further
   //   response is needed
   // * client has closed its connection and does not expect a response
-  [[nodiscard]] bool tryTerminate(folly::EventBase* eb);
+  [[nodiscard]] bool tryTerminate(
+      folly::EventBase* eb, RequestTerminationCause cause);
 
   // The tryStartProcessing() API is used to mark the request as started
   // processing. This method is ultimately called by request processors. A
@@ -88,7 +112,8 @@ class RequestStateMachine {
 
  private:
   std::atomic<bool> startProcessingOrQueueTimeout_{false};
-  std::atomic<bool> terminated_{false};
+  std::atomic<RequestTerminationCause> terminationCause_{
+      RequestTerminationCause::NotTerminated};
 
   std::atomic<bool> infoStartedProcessing_{false};
   const bool includeInRecentRequests_;

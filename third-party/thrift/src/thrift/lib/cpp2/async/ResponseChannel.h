@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
+#include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 
 namespace folly {
 class IOBuf;
@@ -75,6 +76,12 @@ class ResponseChannelRequest {
       std::unique_ptr<ResponseChannelRequest, RequestsRegistry::Deleter>;
 
   virtual bool isActive() const = 0;
+
+  // Why the request stopped requiring processing. Transports that do not
+  // track a termination cause report `Unknown`.
+  virtual RequestTerminationCause getTerminationCause() const {
+    return RequestTerminationCause::Unknown;
+  }
 
   virtual bool isOneway() const = 0;
 

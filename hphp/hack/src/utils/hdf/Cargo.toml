@@ -16,6 +16,6 @@ cxx = "1.0.194"
 thiserror = "2.0.19"
 
 [build-dependencies]
-cc = ">=1.0.79"
+cc = "1.2.67"
 cxx-build = "1.0.194"
-glob = ">=0.3.0"
+glob = "0.3.4"

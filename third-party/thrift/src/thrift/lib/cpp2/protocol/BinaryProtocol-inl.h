@@ -574,12 +574,7 @@ inline void BinaryProtocolReader::readBinary(folly::IOBuf& str) {
   int32_t size;
   readI32(size);
   checkStringSize(size);
-
-  in_.clone(str, size);
-  if (sharing_ != SHARE_EXTERNAL_BUFFER && !str.isManaged()) {
-    str = str.cloneCoalescedAsValueWithHeadroomTailroom(0, 0);
-    str.makeManaged();
-  }
+  in_.clone(str, size, apache::thrift::detail::cloneOwnership(sharing_));
 }
 
 template <typename StrType>

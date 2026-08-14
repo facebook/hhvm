@@ -447,6 +447,11 @@ inline void readStringBody(
     protocol::TProtocolException::throwTruncatedData();
   }
 }
+
+inline folly::io::CloneOwnership cloneOwnership(ExternalBufferSharing sharing) {
+  return sharing == SHARE_EXTERNAL_BUFFER ? folly::io::CloneOwnership::Shared
+                                          : folly::io::CloneOwnership::Managed;
+}
 } // namespace detail
 
 template <typename Protocol>

@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
 #include <algorithm>
+#include <memory>
 #include <random>
 #include <gtest/gtest.h>
 #include <folly/String.h>
@@ -436,4 +437,152 @@ TEST_F(ProtocolTest, big_arithmetic_list_compact_shard1) {
   runBigListTest(CompactProtocol{}, uint8_t{});
   runBigListTest(CompactProtocol{}, float{});
   runBigListTest(CompactProtocol{}, double{});
+}
+
+namespace {
+
+template <typename Writer>
+std::string serializeBinaryField(folly::StringPiece payload) {
+  Writer writer;
+  folly::IOBufQueue queue;
+  writer.setOutput(&queue);
+  writer.writeBinary(payload);
+  std::string wire;
+  queue.appendToString(wire);
+  return wire;
+}
+
+enum class ChunkOwnership { AllUnmanaged, AllManaged, ManagedHeadOnly };
+
+// One IOBuf per chunk, so that reads have to walk the chain. Unmanaged chunks
+// wrap `data` in place, managed ones own a copy of it.
+std::unique_ptr<folly::IOBuf> makeChain(
+    folly::StringPiece data, size_t chunkSize, ChunkOwnership ownership) {
+  std::unique_ptr<folly::IOBuf> chain;
+  for (size_t offset = 0; offset < data.size(); offset += chunkSize) {
+    const size_t length = std::min(chunkSize, data.size() - offset);
+    const bool managed = ownership == ChunkOwnership::AllManaged ||
+        (ownership == ChunkOwnership::ManagedHeadOnly && offset == 0);
+    auto buf = managed ? folly::IOBuf::copyBuffer(data.data() + offset, length)
+                       : folly::IOBuf::wrapBuffer(data.data() + offset, length);
+    if (chain) {
+      chain->appendToChain(std::move(buf));
+    } else {
+      chain = std::move(buf);
+    }
+  }
+  return chain;
+}
+
+std::string toString(folly::IOBuf& buf) {
+  const auto bytes = buf.coalesce();
+  return std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+}
+
+// Lays the input out as a single buffer, rather than as a chain.
+constexpr size_t kUnchunked = std::numeric_limits<size_t>::max();
+
+template <typename Writer, typename Reader>
+void runReadBinaryIOBufTest(folly::tag_t<Writer, Reader>, size_t chunkSize) {
+  std::string payload(4096, '\0');
+  for (size_t i = 0; i < payload.size(); ++i) {
+    payload[i] = static_cast<char>(i);
+  }
+  const std::string wire = serializeBinaryField<Writer>(payload);
+  const bool chained = chunkSize < wire.size();
+
+  auto readBinary = [](const folly::IOBuf* input,
+                       ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
+    Reader reader(sharing);
+    reader.setInput(input);
+    folly::IOBuf out;
+    reader.readBinary(out);
+    return out;
+  };
+
+  // Reads from a private copy of the wire bytes, then overwrites that copy: a
+  // result that aliases the input shows up as changed content, rather than as
+  // a use-after-free that only a sanitizer would catch.
+  std::string storage;
+  auto readBinaryFromPoisonedInput = [&](ChunkOwnership ownership) {
+    storage = wire;
+    auto chain = makeChain(storage, chunkSize, ownership);
+    auto out = readBinary(chain.get());
+    chain.reset();
+    std::fill(storage.begin(), storage.end(), '\xff');
+    return out;
+  };
+
+  {
+    // An unmanaged input is copied into a single buffer owned by the result.
+    auto out = readBinaryFromPoisonedInput(ChunkOwnership::AllUnmanaged);
+    EXPECT_TRUE(out.isManaged());
+    EXPECT_FALSE(out.isChained());
+    EXPECT_EQ(payload, toString(out));
+  }
+
+  if (chained) {
+    // Only the unmanaged part of the input is copied out; the managed buffer
+    // it starts in is still shared, so the result is a chain of the two.
+    auto out = readBinaryFromPoisonedInput(ChunkOwnership::ManagedHeadOnly);
+    EXPECT_TRUE(out.isManaged());
+    EXPECT_EQ(2, out.countChainElements());
+    EXPECT_EQ(payload, toString(out));
+  }
+
+  {
+    // A managed input is shared with the result, not copied.
+    auto chain = makeChain(wire, chunkSize, ChunkOwnership::AllManaged);
+    auto out = readBinary(chain.get());
+    EXPECT_EQ(chained, out.isChained());
+    EXPECT_TRUE(out.isShared());
+    EXPECT_EQ(payload, toString(out));
+  }
+
+  {
+    // SHARE_EXTERNAL_BUFFER shares an unmanaged input as well.
+    auto chain = makeChain(wire, chunkSize, ChunkOwnership::AllUnmanaged);
+    auto out = readBinary(chain.get(), SHARE_EXTERNAL_BUFFER);
+    EXPECT_EQ(chained, out.isChained());
+    EXPECT_FALSE(out.isManaged());
+    EXPECT_EQ(payload, toString(out));
+  }
+
+  const std::string emptyWire = serializeBinaryField<Writer>("");
+
+  {
+    auto chain = makeChain(emptyWire, chunkSize, ChunkOwnership::AllUnmanaged);
+    auto out = readBinary(chain.get());
+    EXPECT_EQ("", toString(out));
+  }
+
+  {
+    // An empty field at a buffer boundary: the buffer the cursor sits at is
+    // exhausted, so what a clone would share is the buffer after it.
+    const std::string trailing(16, 'y');
+    auto chain = folly::IOBuf::copyBuffer(emptyWire.data(), emptyWire.size());
+    chain->appendToChain(
+        folly::IOBuf::wrapBuffer(trailing.data(), trailing.size()));
+    auto out = readBinary(chain.get());
+    EXPECT_EQ("", toString(out));
+  }
+
+  const folly::StringPiece truncated{wire.data(), wire.size() - 1};
+  for (auto ownership :
+       {ChunkOwnership::AllUnmanaged, ChunkOwnership::AllManaged}) {
+    auto chain = makeChain(truncated, chunkSize, ownership);
+    EXPECT_THROW(readBinary(chain.get()), std::out_of_range);
+  }
+}
+
+} // namespace
+
+TEST_F(ProtocolTest, read_binary_iobuf_binary) {
+  runReadBinaryIOBufTest(BinaryProtocol{}, kUnchunked);
+  runReadBinaryIOBufTest(BinaryProtocol{}, 100);
+}
+
+TEST_F(ProtocolTest, read_binary_iobuf_compact) {
+  runReadBinaryIOBufTest(CompactProtocol{}, kUnchunked);
+  runReadBinaryIOBufTest(CompactProtocol{}, 100);
 }

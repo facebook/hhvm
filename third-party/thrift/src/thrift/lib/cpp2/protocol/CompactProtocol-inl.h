@@ -764,12 +764,7 @@ inline void CompactProtocolReader::readBinary(
 inline void CompactProtocolReader::readBinary(folly::IOBuf& str) {
   int32_t size = 0;
   readStringSize(size);
-
-  in_.clone(str, size);
-  if (sharing_ != SHARE_EXTERNAL_BUFFER && !str.isManaged()) {
-    str = str.cloneCoalescedAsValueWithHeadroomTailroom(0, 0);
-    str.makeManaged();
-  }
+  in_.clone(str, size, apache::thrift::detail::cloneOwnership(sharing_));
 }
 
 inline TType CompactProtocolReader::getType(int8_t type) {

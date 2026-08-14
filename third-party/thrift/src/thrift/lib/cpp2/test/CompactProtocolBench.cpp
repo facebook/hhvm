@@ -217,6 +217,77 @@ BENCHMARK(CompactProtocolWriter_serialize_deep, kiters) {
   braces.rehire();
 }
 
+namespace {
+
+std::string makeBinaryFieldWire(size_t size) {
+  CompactProtocolWriter writer;
+  IOBufQueue queue;
+  writer.setOutput(&queue);
+  const std::string payload(size, 'x');
+  writer.writeBinary(folly::StringPiece(payload));
+  std::string wire;
+  queue.appendToString(wire);
+  return wire;
+}
+
+// One IOBuf per chunk of `wire`; unmanaged buffers wrap it in place, managed
+// ones own a copy of it.
+std::unique_ptr<IOBuf> makeBinaryFieldInput(
+    const std::string& wire, size_t chunkSize, bool managed) {
+  std::unique_ptr<IOBuf> chain;
+  for (size_t offset = 0; offset < wire.size(); offset += chunkSize) {
+    const size_t length = std::min(chunkSize, wire.size() - offset);
+    auto buf = managed ? IOBuf::copyBuffer(wire.data() + offset, length)
+                       : IOBuf::wrapBuffer(wire.data() + offset, length);
+    if (chain) {
+      chain->appendToChain(std::move(buf));
+    } else {
+      chain = std::move(buf);
+    }
+  }
+  return chain;
+}
+
+void readBinaryBench(
+    size_t iters, size_t size, size_t chunkSize, bool managed) {
+  BenchmarkSuspender braces;
+  const std::string wire = makeBinaryFieldWire(size);
+  auto input = makeBinaryFieldInput(wire, chunkSize, managed);
+  CompactProtocolReader reader;
+  braces.dismiss();
+  while (iters--) {
+    reader.setInput(input.get());
+    IOBuf str;
+    reader.readBinary(str);
+    folly::doNotOptimizeAway(str.length());
+  }
+  braces.rehire();
+}
+
+constexpr size_t kUnchunked = std::numeric_limits<size_t>::max();
+
+} // namespace
+
+BENCHMARK(CompactProtocolReader_readBinary_unmanaged_64, kiters) {
+  readBinaryBench(kiters << kMultExp, 64, kUnchunked, false);
+}
+
+BENCHMARK(CompactProtocolReader_readBinary_unmanaged_4096, kiters) {
+  readBinaryBench(kiters << kMultExp, 4096, kUnchunked, false);
+}
+
+BENCHMARK(CompactProtocolReader_readBinary_unmanaged_chained_4096, kiters) {
+  readBinaryBench(kiters << kMultExp, 4096, 512, false);
+}
+
+BENCHMARK(CompactProtocolReader_readBinary_managed_64, kiters) {
+  readBinaryBench(kiters << kMultExp, 64, kUnchunked, true);
+}
+
+BENCHMARK(CompactProtocolReader_readBinary_managed_chained_4096, kiters) {
+  readBinaryBench(kiters << kMultExp, 4096, 512, true);
+}
+
 int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);

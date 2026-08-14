@@ -19,6 +19,7 @@ include "mcrouter/lib/carbon/test/gen/CarbonThriftTest.thrift"
 include "common/fb303/if/fb303.thrift"
 
 cpp_include "mcrouter/lib/carbon/test/gen/CarbonThriftTestMessages.h"
+cpp_include "mcrouter/lib/carbon/CarbonThriftAdapter.h"
 
 namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
@@ -30,19 +31,19 @@ service CarbonThriftTest extends fb303.FacebookService {
   Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
-@cpp.Type{name = "carbon::test::CustomReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::CustomReply, ::carbon::test::thrift::CustomReply>"}
 typedef CarbonThriftTest.CustomReply CarbonThriftTest_CustomReply
-@cpp.Type{name = "carbon::test::CustomRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::CustomRequest, ::carbon::test::thrift::CustomRequest>"}
 typedef CarbonThriftTest.CustomRequest CarbonThriftTest_CustomRequest
-@cpp.Type{name = "carbon::test::DummyThriftReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::DummyThriftReply, ::carbon::test::thrift::DummyThriftReply>"}
 typedef CarbonThriftTest.DummyThriftReply CarbonThriftTest_DummyThriftReply
-@cpp.Type{name = "carbon::test::DummyThriftRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::DummyThriftRequest, ::carbon::test::thrift::DummyThriftRequest>"}
 typedef CarbonThriftTest.DummyThriftRequest CarbonThriftTest_DummyThriftRequest
-@cpp.Type{name = "carbon::test::ThriftTestReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::ThriftTestReply, ::carbon::test::thrift::ThriftTestReply>"}
 typedef CarbonThriftTest.ThriftTestReply CarbonThriftTest_ThriftTestReply
-@cpp.Type{name = "carbon::test::ThriftTestRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::ThriftTestRequest, ::carbon::test::thrift::ThriftTestRequest>"}
 typedef CarbonThriftTest.ThriftTestRequest CarbonThriftTest_ThriftTestRequest
-@cpp.Type{name = "facebook::memcache::McVersionReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionReply, ::facebook::memcache::thrift::McVersionReply>"}
 typedef Common.McVersionReply Common_McVersionReply
-@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionRequest, ::facebook::memcache::thrift::McVersionRequest>"}
 typedef Common.McVersionRequest Common_McVersionRequest

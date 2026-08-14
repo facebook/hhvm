@@ -19,6 +19,7 @@ include "mcrouter/lib/carbon/test/gen/CarbonTest.thrift"
 include "common/fb303/if/fb303.thrift"
 
 cpp_include "mcrouter/lib/carbon/test/gen/CarbonTestMessages.h"
+cpp_include "mcrouter/lib/carbon/CarbonThriftAdapter.h"
 
 namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
@@ -32,15 +33,15 @@ service CarbonTest extends fb303.FacebookService {
   Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
-@cpp.Type{name = "carbon::test::TestReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::TestReply, ::carbon::test::thrift::TestReply>"}
 typedef CarbonTest.TestReply CarbonTest_TestReply
-@cpp.Type{name = "carbon::test::TestRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::TestRequest, ::carbon::test::thrift::TestRequest>"}
 typedef CarbonTest.TestRequest CarbonTest_TestRequest
-@cpp.Type{name = "carbon::test::TestReplyStringKey"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::TestReplyStringKey, ::carbon::test::thrift::TestReplyStringKey>"}
 typedef CarbonTest.TestReplyStringKey CarbonTest_TestReplyStringKey
-@cpp.Type{name = "carbon::test::TestRequestStringKey"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::TestRequestStringKey, ::carbon::test::thrift::TestRequestStringKey>"}
 typedef CarbonTest.TestRequestStringKey CarbonTest_TestRequestStringKey
-@cpp.Type{name = "facebook::memcache::McVersionReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionReply, ::facebook::memcache::thrift::McVersionReply>"}
 typedef Common.McVersionReply Common_McVersionReply
-@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionRequest, ::facebook::memcache::thrift::McVersionRequest>"}
 typedef Common.McVersionRequest Common_McVersionRequest

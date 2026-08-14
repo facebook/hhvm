@@ -19,6 +19,7 @@ include "mcrouter/lib/carbon/test/gen/B.thrift"
 include "common/fb303/if/fb303.thrift"
 
 cpp_include "mcrouter/lib/carbon/test/gen/AMessages.h"
+cpp_include "mcrouter/lib/carbon/CarbonThriftAdapter.h"
 
 namespace cpp2 carbon.test.A.thrift
 namespace py3 carbon.test.A.thrift
@@ -30,11 +31,11 @@ service A extends fb303.FacebookService {
   Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
-@cpp.Type{name = "carbon::test::A::TestAReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::A::TestAReply, ::carbon::test::A::thrift::TestAReply>"}
 typedef A.TestAReply A_TestAReply
-@cpp.Type{name = "carbon::test::A::TestARequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<carbon::test::A::TestARequest, ::carbon::test::A::thrift::TestARequest>"}
 typedef A.TestARequest A_TestARequest
-@cpp.Type{name = "facebook::memcache::McVersionReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionReply, ::facebook::memcache::thrift::McVersionReply>"}
 typedef Common.McVersionReply Common_McVersionReply
-@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionRequest, ::facebook::memcache::thrift::McVersionRequest>"}
 typedef Common.McVersionRequest Common_McVersionRequest

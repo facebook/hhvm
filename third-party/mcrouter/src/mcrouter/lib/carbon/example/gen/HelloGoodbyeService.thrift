@@ -19,6 +19,7 @@ include "mcrouter/lib/carbon/example/gen/HelloGoodbye.thrift"
 include "common/fb303/if/fb303.thrift"
 
 cpp_include "mcrouter/lib/carbon/example/gen/HelloGoodbyeMessages.h"
+cpp_include "mcrouter/lib/carbon/CarbonThriftAdapter.h"
 
 namespace cpp2 hellogoodbye.thrift
 namespace py3 hellogoodbye.thrift
@@ -32,15 +33,15 @@ service HelloGoodbye extends fb303.FacebookService {
   Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
-@cpp.Type{name = "hellogoodbye::GoodbyeReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<hellogoodbye::GoodbyeReply, ::hellogoodbye::thrift::GoodbyeReply>"}
 typedef HelloGoodbye.GoodbyeReply HelloGoodbye_GoodbyeReply
-@cpp.Type{name = "hellogoodbye::GoodbyeRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<hellogoodbye::GoodbyeRequest, ::hellogoodbye::thrift::GoodbyeRequest>"}
 typedef HelloGoodbye.GoodbyeRequest HelloGoodbye_GoodbyeRequest
-@cpp.Type{name = "hellogoodbye::HelloReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<hellogoodbye::HelloReply, ::hellogoodbye::thrift::HelloReply>"}
 typedef HelloGoodbye.HelloReply HelloGoodbye_HelloReply
-@cpp.Type{name = "hellogoodbye::HelloRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<hellogoodbye::HelloRequest, ::hellogoodbye::thrift::HelloRequest>"}
 typedef HelloGoodbye.HelloRequest HelloGoodbye_HelloRequest
-@cpp.Type{name = "facebook::memcache::McVersionReply"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionReply, ::facebook::memcache::thrift::McVersionReply>"}
 typedef Common.McVersionReply Common_McVersionReply
-@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+@cpp.Adapter{name = "::carbon::util::CarbonThriftAdapter<facebook::memcache::McVersionRequest, ::facebook::memcache::thrift::McVersionRequest>"}
 typedef Common.McVersionRequest Common_McVersionRequest

@@ -84,6 +84,10 @@ class HTTPClientConnectionCache : public HTTPSessionFactory {
     dnsResolver_ = std::move(dnsResolver);
   }
 
+  void setCertVerifyLogFn(CertVerifyLogFn certVerifyLogFn) {
+    certVerifyLogFn_ = std::move(certVerifyLogFn);
+  }
+
   folly::coro::Task<GetSessionResult> getSessionWithReservation(
       std::string url,
       std::chrono::milliseconds timeout,
@@ -166,6 +170,7 @@ class HTTPClientConnectionCache : public HTTPSessionFactory {
   folly::Optional<HTTPCoroSessionPool::PoolParams> poolParams_;
   folly::Optional<HTTPCoroConnector::ConnectionParams> connParams_;
   folly::Optional<HTTPCoroConnector::SessionParams> sessionParams_;
+  CertVerifyLogFn certVerifyLogFn_;
   std::shared_ptr<HTTPCoroSessionPool> proxyPool_;
   folly::CancellationSource cancellationSource_;
   bool useConnectForProxy_{false};

@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -64,9 +65,9 @@ class RocketClientStatsHandler {
   RocketClientStatsHandler() = default;
 
   using EventId = client::RocketClientEventId;
-  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
-      EventId::FrameWriteComplete>
-      kSubscribedEvents{};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::
+      Subscriptions<EventId::FrameWriteComplete, EventId::FirstResponseFrame>
+          kSubscribedEvents{};
 
   // Steady, not system: these marks only ever produce durations, and a wall
   // clock stepping backwards would turn one into a negative latency.
@@ -150,6 +151,7 @@ class RocketClientStatsHandler {
           PendingRequestStats{
               .writeStart = Clock::now(),
               .writeComplete = {},
+              .firstResponseFrame = {},
               .requestWireSizeBytes = dataSize,
               .requestMetadataAndPayloadSizeBytes = dataSize + metadataSize,
           });
@@ -179,9 +181,17 @@ class RocketClientStatsHandler {
   template <typename Context>
   void onEvent(
       Context& /*ctx*/,
-      EventId /*ev*/,
+      EventId ev,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
+    if (ev == EventId::FirstResponseFrame) {
+      const auto& event = box.get<client::FirstResponseFrameEvent>();
+      if (auto it = pending_.find(event.streamId); it != pending_.end()) {
+        it->second.firstResponseFrame = event.arrivalTime;
+      }
+      return;
+    }
+
     const auto& event = box.get<client::FrameWriteCompleteEvent>();
     auto it = pending_.find(event.streamId);
     if (it == pending_.end()) {
@@ -204,6 +214,13 @@ class RocketClientStatsHandler {
     /// the clock epoch on pipelines that never report write completions —
     /// that is the signal to report neither latency.
     Clock::time_point writeComplete;
+    /// Set only for a response the server fragmented, from the event the
+    /// defragmentation handler's tracker fires. Stays at the clock epoch for a
+    /// response that arrived whole, where the terminal frame this handler sees
+    /// *is* the first frame — and on a pipeline whose defragmentation handler
+    /// carries no tracker, which makes a fragmented response indistinguishable
+    /// from a whole one.
+    Clock::time_point firstResponseFrame;
     uint32_t requestWireSizeBytes{0};
     uint32_t requestMetadataAndPayloadSizeBytes{0};
   };
@@ -217,10 +234,12 @@ class RocketClientStatsHandler {
    * Fill the request-side half of a response's stats from its slot and drop
    * the slot.
    *
-   * Both latencies are measured from the write-completion mark, so a pipeline
-   * whose event factory never fires write completions leaves them at zero —
-   * the documented "not measured" value — rather than reporting a duration
-   * measured from the clock's epoch.
+   * Every latency is measured from the write-completion mark, so a pipeline
+   * whose event factory never fires write completions leaves them all at zero
+   * — the documented "not measured" value — rather than reporting a duration
+   * measured from the clock's epoch. This is what makes
+   * `responseRoundTripLatency` the discriminator for the clamped zero below:
+   * it is filled on exactly the responses that were measured at all.
    */
   void stampAndRelease(uint32_t streamId, RocketStats& stats) noexcept {
     auto it = pending_.find(streamId);
@@ -232,8 +251,27 @@ class RocketClientStatsHandler {
     stats.requestMetadataAndPayloadSizeBytes =
         slot.requestMetadataAndPayloadSizeBytes;
     if (slot.writeComplete.time_since_epoch().count() != 0) {
+      const auto now = Clock::now();
       stats.requestWriteLatency = slot.writeComplete - slot.writeStart;
-      stats.responseRoundTripLatency = Clock::now() - slot.writeComplete;
+      stats.responseRoundTripLatency = now - slot.writeComplete;
+      // A whole response has no reported first-fragment time, and the frame in
+      // hand is its first and only one — so `now` is the first-frame instant,
+      // and the field equals the round trip. A fragmented response uses the
+      // earlier stamp, making the difference between the two the reassembly
+      // tail.
+      const auto firstFrame =
+          slot.firstResponseFrame.time_since_epoch().count() != 0
+          ? slot.firstResponseFrame
+          : now;
+      // Clamp rather than report a negative interval: a response that beats
+      // the write-completion event leaves firstFrame behind writeComplete.
+      // Written unconditionally so the clamp yields a *measured* zero, which
+      // `responseRoundTripLatency` being nonzero separates from the unmeasured
+      // zero this whole branch is skipped for.
+      stats.firstResponsePayloadFrameLatency =
+          std::max<std::chrono::nanoseconds>(
+              firstFrame - slot.writeComplete,
+              std::chrono::nanoseconds::zero());
     }
     pending_.erase(it);
   }

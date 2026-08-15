@@ -47,8 +47,16 @@ struct RpcTransportStats {
   // scheduling delay before the response callback runs -- it is NOT a true
   // wire-byte TTFB. Non-negative when populated; zero when unset (e.g. on
   // error/timeout paths or before the first response payload frame is
-  // received). Populated only by `RocketClientChannelBase` today; other
-  // Thrift transports (notably `fast_thrift::ThriftClientChannel`) leave
+  // received).
+  //
+  // Zero is also a legitimate measured value: a first frame observed before
+  // the request's write completes is clamped to zero rather than reported as
+  // a negative interval. Use responseRoundTripLatency to tell the two apart —
+  // it is populated on every response either field is measured on.
+  //
+  // Populated by `RocketClientChannelBase` and by
+  // `fast_thrift::ThriftClientChannel` on pipelines that install the rocket
+  // stats handler and a first-fragment tracker; other Thrift transports leave
   // this field at the default zero value.
   std::chrono::nanoseconds firstResponsePayloadFrameLatency{0};
 };

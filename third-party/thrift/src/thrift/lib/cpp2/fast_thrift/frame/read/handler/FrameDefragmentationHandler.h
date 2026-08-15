@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FragmentState.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/util/ReassemblyTracker.h>
 
 #include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
 
@@ -49,12 +50,19 @@ namespace apache::thrift::fast_thrift::frame::read::handler {
  * - Final fragment: PAYLOAD frame with hasFollows()=false
  * - Only first fragment contains metadata (if any)
  * - Reassembled frame preserves original frame type and flags
+ *
+ * Templated on a `ReassemblyTracker`-satisfying type (see ReassemblyTracker.h).
+ * The default `NoOpReassemblyTracker` makes the single hook site a no-op and is
+ * empty, so the compiler elides the call and the handler does not grow.
+ * Pipelines that need to observe when reassembly began instantiate
+ * `FrameDefragmentationHandlerT<RealTracker>`.
  */
-class FrameDefragmentationHandler {
+template <ReassemblyTracker Tracker = NoOpReassemblyTracker>
+class FrameDefragmentationHandlerT {
  public:
   static constexpr size_t kDefaultMaxPendingBytes = 16 * 1024 * 1024; // 16MB
 
-  explicit FrameDefragmentationHandler(
+  explicit FrameDefragmentationHandlerT(
       size_t maxPendingBytes = kDefaultMaxPendingBytes) noexcept
       : maxPendingBytes_(maxPendingBytes) {}
 
@@ -120,6 +128,8 @@ class FrameDefragmentationHandler {
 
   size_t maxPendingBytes() const noexcept { return maxPendingBytes_; }
 
+  Tracker& tracker() noexcept { return tracker_; }
+
  private:
   /**
    * Handle potentially fragmented frames.
@@ -150,6 +160,9 @@ class FrameDefragmentationHandler {
         return failOversizedReassembly(ctx);
       }
       initPendingFragment(ctx, streamId, frame);
+      // Reported only from here: a frame that arrives whole never reaches this
+      // branch, and the continuation fragments below are not the first.
+      tracker_.onFirstFragment(ctx, streamId);
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
@@ -286,6 +299,22 @@ class FrameDefragmentationHandler {
   // Backpressure configuration and tracking
   size_t maxPendingBytes_;
   size_t totalPendingBytes_{0};
+
+  // Reassembly-observation mixin; NoOp by default.
+  [[no_unique_address]] Tracker tracker_{};
 };
+
+// Default specialization preserves the existing class name for callers that
+// don't opt into reassembly tracking.
+using FrameDefragmentationHandler =
+    FrameDefragmentationHandlerT<NoOpReassemblyTracker>;
+
+// The zero-cost claim: [[no_unique_address]] must actually collapse the empty
+// default tracker away, or every existing pipeline pays for a feature it never
+// asked for.
+static_assert(
+    sizeof(FrameDefragmentationHandler) ==
+        sizeof(DirectStreamMap<FragmentState>) + 2 * sizeof(size_t),
+    "NoOpReassemblyTracker must add no bytes to FrameDefragmentationHandler");
 
 } // namespace apache::thrift::fast_thrift::frame::read::handler

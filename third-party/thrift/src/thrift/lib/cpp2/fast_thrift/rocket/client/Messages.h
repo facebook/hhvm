@@ -96,7 +96,8 @@ struct RocketResponseError {
  * an `apache::thrift::RpcTransportStats` at the pipeline bridge — rocket code
  * carries no thrift types.
  *
- * Zero on any field means "not measured" for that field on this response.
+ * Zero on any field means "not measured" for that field on this response —
+ * except `firstResponsePayloadFrameLatency`, which documents its own reading.
  */
 struct RocketStats {
   uint32_t requestWireSizeBytes{0};
@@ -106,6 +107,18 @@ struct RocketStats {
 
   std::chrono::nanoseconds requestWriteLatency{0};
   std::chrono::nanoseconds responseRoundTripLatency{0};
+
+  // Sub-measurement of responseRoundTripLatency, sharing its start epoch: the
+  // interval until the FIRST response frame arrived rather than the last. The
+  // two are equal for a response that arrives whole, and differ by the
+  // reassembly window for one the server fragmented — which is the only case
+  // where the difference carries information.
+  //
+  // The one field whose zero is not on its own "not measured": a first frame
+  // that arrives before the request's write completes is reported as a clamped
+  // zero rather than a negative interval. Read it against
+  // responseRoundTripLatency, which is zero only when neither was measured.
+  std::chrono::nanoseconds firstResponsePayloadFrameLatency{0};
 };
 
 /**

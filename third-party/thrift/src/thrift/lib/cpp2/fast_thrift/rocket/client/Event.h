@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 
@@ -51,6 +52,14 @@ enum class RocketClientEventId : std::uint32_t {
   // FrameWriteComplete.streamId to the request's context pointer. Carries
   // RocketWriteCompleteEvent.
   RocketWriteComplete,
+  // A response frame for a stream began arriving in fragments. Fired by
+  // FirstFragmentTrackerT from inside the defragmentation handler, which is the
+  // only place the individual wire frames are still observable — above it the
+  // fragments have already been collapsed into one assembled frame. Carries
+  // FirstResponseFrameEvent. Consumed by RocketClientStatsHandler, which needs
+  // the arrival of the FIRST frame, not the last, to report
+  // firstResponsePayloadFrameLatency.
+  FirstResponseFrame,
   // The server sent RSocket ERROR(CONNECTION_CLOSE), the graceful-drain signal.
   // Fired by RocketClientConnectionErrorHandler; the RocketClientAppAdapter
   // (pipeline tail) relays it to the upper (thrift) layer via onClose. The id
@@ -103,6 +112,20 @@ struct FrameWriteCompleteEvent {
 struct RocketWriteCompleteEvent {
   void* requestContext;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+};
+
+/**
+ * Message for RocketClientEventId::FirstResponseFrame — when the first wire
+ * frame of a fragmented response for `streamId` was parsed by the client.
+ *
+ * Only fired for responses the server fragmented. A response that arrives as a
+ * single frame is forwarded whole by the defragmentation handler, so the
+ * subscriber's own observation of that frame is already the first-frame time
+ * and no event is needed.
+ */
+struct FirstResponseFrameEvent {
+  uint32_t streamId{0};
+  std::chrono::steady_clock::time_point arrivalTime{};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::client

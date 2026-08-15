@@ -342,6 +342,7 @@ class ThriftClientTransportAdapterT {
         s.responseMetadataAndPayloadSizeBytes;
     out.requestWriteLatency = s.requestWriteLatency;
     out.responseRoundTripLatency = s.responseRoundTripLatency;
+    out.firstResponsePayloadFrameLatency = s.firstResponsePayloadFrameLatency;
     return out;
   }
 

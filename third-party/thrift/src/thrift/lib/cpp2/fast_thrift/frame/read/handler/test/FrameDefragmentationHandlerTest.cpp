@@ -1059,5 +1059,66 @@ TEST(FrameDefragmentationHandlerTest, ErrorDoesNotAffectOtherStreams) {
   EXPECT_TRUE(handler.hasPendingFragment(2));
 }
 
+// ============================================================================
+// Reassembly Tracking
+// ============================================================================
+
+/**
+ * Records the hook instead of firing a pipeline event, so a test observes
+ * exactly what the handler reports and how often.
+ */
+struct RecordingReassemblyTracker {
+  template <typename Context>
+  void onFirstFragment(Context& /*ctx*/, uint32_t streamId) noexcept {
+    firstFragments.push_back(streamId);
+  }
+
+  std::vector<uint32_t> firstFragments;
+};
+
+// The whole point of the hook is that it fires at the moment reassembly
+// STARTS. Reporting a continuation or the final fragment would time the end of
+// the response, which the layer above can already observe for itself.
+TEST(FrameDefragmentationHandlerTest, TrackerReportsOnlyTheFirstFragment) {
+  FrameDefragmentationHandlerT<RecordingReassemblyTracker> handler;
+  MockContext ctx;
+
+  for (const std::string_view chunk : {"first", "middle"}) {
+    auto fragment =
+        makeFrame(FrameType::PAYLOAD, 7, /*hasFollows=*/true, chunk);
+    (void)handler.onRead(
+        ctx,
+        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+            std::move(fragment)));
+  }
+  auto last = makeFrame(FrameType::PAYLOAD, 7, /*hasFollows=*/false, "last");
+  (void)handler.onRead(
+      ctx,
+      apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+          std::move(last)));
+
+  const std::vector<uint32_t> expected{7};
+  EXPECT_EQ(handler.tracker().firstFragments, expected);
+  ASSERT_EQ(ctx.receivedFrames.size(), 1);
+  EXPECT_EQ(extractData(ctx.receivedFrames[0]), "firstmiddlelast");
+}
+
+// A frame that arrives whole is forwarded untouched and was never reassembled,
+// so there is no reassembly window to report — the layer above times it
+// directly.
+TEST(FrameDefragmentationHandlerTest, TrackerSilentForUnfragmentedFrame) {
+  FrameDefragmentationHandlerT<RecordingReassemblyTracker> handler;
+  MockContext ctx;
+
+  auto frame = makeFrame(FrameType::PAYLOAD, 7, /*hasFollows=*/false, "whole");
+  (void)handler.onRead(
+      ctx,
+      apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+          std::move(frame)));
+
+  EXPECT_TRUE(handler.tracker().firstFragments.empty());
+  ASSERT_EQ(ctx.receivedFrames.size(), 1);
+}
+
 } // namespace
 } // namespace apache::thrift::fast_thrift::frame::read::handler

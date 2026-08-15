@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
@@ -94,6 +95,23 @@ struct RocketClientEventFactory {
             FrameWriteCompleteEvent{
                 .streamId = streamId,
                 .status = status,
+            })};
+  }
+
+  // Fired by FirstFragmentTrackerT from inside the defragmentation handler when
+  // a fragmented response starts arriving.
+  static std::pair<
+      EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
+  makeFirstResponseFrame(
+      uint32_t streamId,
+      std::chrono::steady_clock::time_point arrivalTime) noexcept {
+    return {
+        EventId::FirstResponseFrame,
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+            FirstResponseFrameEvent{
+                .streamId = streamId,
+                .arrivalTime = arrivalTime,
             })};
   }
 };

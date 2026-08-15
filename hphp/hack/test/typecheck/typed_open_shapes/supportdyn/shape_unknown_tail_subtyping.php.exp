@@ -1,0 +1,18 @@
+ERROR: File "shape_unknown_tail_subtyping.php", line 8, characters 29-36:
+Invalid argument (Typing[4110])
+  File "shape_unknown_tail_subtyping.php", line 5, characters 53-55:
+  Expected `int`
+  File "shape_unknown_tail_subtyping.php", line 7, characters 40-45:
+  But got `string`
+ERROR: File "shape_unknown_tail_subtyping.php", line 14, characters 18-25:
+Invalid argument (Typing[4110])
+  File "shape_unknown_tail_subtyping.php", line 3, characters 31-33:
+  Expected `int`
+  File "shape_unknown_tail_subtyping.php", line 12, characters 14-29:
+  But got `string`
+ERROR: File "shape_unknown_tail_subtyping.php", line 20, characters 29-36:
+Invalid argument (Typing[4110])
+  File "shape_unknown_tail_subtyping.php", line 5, characters 53-55:
+  Expected `int`
+  File "shape_unknown_tail_subtyping.php", line 18, characters 14-29:
+  But got `string`

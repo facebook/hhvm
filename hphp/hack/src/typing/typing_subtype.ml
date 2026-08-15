@@ -2999,12 +2999,12 @@ end = struct
       in
       invalid ~fail env
     (* Otherwise, all projections must subtype *)
-    | _ ->
-      if
-        phys_equal fdm_sub fdm_super
-        && phys_equal shape_kind_sub shape_kind_super
+    | (sub_unknown_is_nothing, _) ->
+      let unknown_tails_identical =
+        phys_equal shape_kind_sub shape_kind_super
         && Bool.equal supportdyn_sub supportdyn_super
-      then
+      in
+      if phys_equal fdm_sub fdm_super && unknown_tails_identical then
         (* Fast path: identical field maps and shape kinds *)
         valid env
       else
@@ -3019,6 +3019,21 @@ end = struct
               | _ -> Some ())
             fdm_sub
             fdm_super
+        in
+        let init =
+          if sub_unknown_is_nothing || unknown_tails_identical then
+            (* Either the subtype's unknown-field upper bound is provably
+               [nothing], or both unknown-field projections are identical. *)
+            valid env
+          else
+            (* Otherwise ensure the proposition holds *)
+            simplify_subtype_shape_unknown_fields
+              ~subtype_env
+              ~this_ty
+              ~super_like
+              ~env
+              (supportdyn_sub, r_sub, shape_kind_sub)
+              (supportdyn_super, r_super, shape_kind_super)
         in
         TShapeMap.fold
           (fun field_name () acc ->
@@ -3036,7 +3051,36 @@ end = struct
             | Ok prop -> acc &&& prop
             | Error fail -> acc &&& invalid ~fail)
           fields_to_check
-          (valid env)
+          init
+
+  (* Unknown fields are optional projections at every label absent from both
+     field maps. Comparing their types once represents all of those labels. *)
+  and simplify_subtype_shape_unknown_fields
+      ~subtype_env
+      ~this_ty
+      ~super_like
+      ~env
+      (supportdyn_sub, r_sub, shape_kind_sub)
+      (supportdyn_super, r_super, shape_kind_super) =
+    let ty_sub =
+      shape_projection_type ~supportdyn:supportdyn_sub ~env r_sub shape_kind_sub
+    and ty_super =
+      shape_projection_type
+        ~supportdyn:supportdyn_super
+        ~env
+        r_super
+        shape_kind_super
+    in
+    let ty_super = Sd.liken ~super_like env ty_super in
+    let sub_supportdyn =
+      if supportdyn_sub then
+        Some r_sub
+      else
+        None
+    in
+    let lhs = { sub_supportdyn; ty_sub }
+    and rhs = { super_like = false; super_supportdyn = false; ty_super } in
+    simplify ~subtype_env ~this_ty ~lhs ~rhs env
 
   (* Helper function to project out a field and then simplify subtype *)
   and shape_project_and_simplify_subtype
@@ -3290,20 +3334,21 @@ end = struct
      EXCEPT
      - `?f => nothing` should be ignored, and treated as `Absent`.
      Such a field cannot be given a value, and so is effectively not present. *)
+  and shape_projection_type ~supportdyn ~env r ty =
+    if
+      supportdyn
+      && not
+           (Subtype_ask.is_sub_type_for_union_i
+              env
+              (LoclType ty)
+              (LoclType (MakeType.supportdyn_mixed r)))
+    then
+      MakeType.supportdyn r ty
+    else
+      ty
+
   and shape_projection ~supportdyn ~env field_name shape_kind shape_map r =
-    let make_supportdyn ty =
-      if
-        supportdyn
-        && not
-             (Subtype_ask.is_sub_type_for_union_i
-                env
-                (LoclType ty)
-                (LoclType (MakeType.supportdyn_mixed r)))
-      then
-        MakeType.supportdyn r ty
-      else
-        ty
-    in
+    let make_supportdyn = shape_projection_type ~supportdyn ~env r in
     match TShapeMap.find_opt field_name shape_map with
     | Some { sft_ty; sft_optional } ->
       (match (deref sft_ty, sft_optional) with

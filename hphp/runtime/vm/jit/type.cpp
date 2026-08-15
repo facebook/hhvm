@@ -1070,9 +1070,8 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     assertx(tc.isUnresolved());
     if (interface_supports_non_objects(tc.typeName())) return TInitCell;
 
-    // If the flag is supplied, we want to return TObj this should only be set
-    // true when the call is made from a return type deduction function we are
-    // mimicking the behaviour of TypeConstraint::asSystemlibType()
+    // Native return and inout constraints use an object fallback to match HNI
+    // ABI rules. User type aliases can resolve to non-object types.
     auto const unresolvedFallback = useObjectForUnresolved ? TObj : TCell;
 
     if (auto const cls = Class::lookupKnown(tc.typeName(), ctx)) {
@@ -1179,7 +1178,8 @@ Type typeFromFuncReturn(const Func* func, bool pessimizeForBuiltin) {
 
   auto const& tcs = func->returnTypeConstraints();
   auto const rt =
-    typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
+    typeFromTCImpl(tcs, getThisType, func->cls(), func->isCPPBuiltin()) &
+    TInitCell;
 
   if (func->hasUntrustedReturnType()) {
     assertx(func->isCPPBuiltin());
@@ -1209,7 +1209,9 @@ Type typeFromFuncOut(const Func* func, uint32_t inOutIdx) {
   };
 
   auto const& tcs = func->params()[paramId].typeConstraints;
-  return typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
+  return
+    typeFromTCImpl(tcs, getThisType, func->cls(), func->isCPPBuiltin()) &
+    TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////

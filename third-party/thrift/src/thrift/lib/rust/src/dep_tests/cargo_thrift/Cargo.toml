@@ -24,7 +24,7 @@ ref-cast = "1.0.26"
 rust = { version = "0.0.1", path = "../../../annotation/rust" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_derive = "1.0.229"
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 thrift = { version = "0.0.1", path = "../../../annotation/thrift" }
 
 [build-dependencies]

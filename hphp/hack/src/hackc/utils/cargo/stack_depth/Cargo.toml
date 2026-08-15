@@ -16,4 +16,4 @@ hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { path = "../../../../utils/newtype" }
-thiserror = "2.0.19"
+thiserror = "2.0.20"

@@ -24,7 +24,7 @@ regex = "1.13.1"
 relative_path = { path = "../../../rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 syn = { version = "3", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 
 [dev-dependencies]
 macro_test_util = { path = "../../../test/macro_test_util" }

@@ -17,4 +17,4 @@ hash = { path = "../../utils/hash" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 sha1 = "0.10.7"
-thiserror = "2.0.19"
+thiserror = "2.0.20"

@@ -23,5 +23,5 @@ rc_pos = { path = "../../../utils/rust/pos" }
 relative_path = { path = "../../../utils/rust/relative_path" }
 rusqlite = { version = "0.37.0", features = ["backup", "blob", "bundled", "column_decltype", "functions", "limits", "modern_sqlite", "serde_json", "vtab"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 typing_deps_hash = { path = "../../cargo/typing_deps_hash" }

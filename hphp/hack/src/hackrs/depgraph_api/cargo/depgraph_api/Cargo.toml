@@ -15,5 +15,5 @@ core_utils_rust = { path = "../../../../utils/core" }
 dep = { path = "../../../../depgraph/cargo/dep" }
 hh24_types = { path = "../../../../utils/hh24_types" }
 pos = { path = "../../../pos/cargo/pos" }
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 typing_deps_hash = { path = "../../../../deps/cargo/typing_deps_hash" }

@@ -23,5 +23,5 @@ hhbc_string_utils = { path = "../utils/cargo/hhbc_string_utils" }
 naming_special_names_rust = { path = "../../naming" }
 oxidized = { path = "../../oxidized" }
 regex = "1.13.1"
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 write_bytes = { path = "../../utils/write_bytes/write_bytes" }

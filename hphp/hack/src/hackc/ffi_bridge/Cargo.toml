@@ -31,7 +31,7 @@ parser_core_types = { path = "../../parser/cargo/core_types" }
 relative_path = { path = "../../utils/rust/relative_path" }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 sha1 = "0.10.7"
-thiserror = "2.0.19"
+thiserror = "2.0.20"
 ty = { path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]

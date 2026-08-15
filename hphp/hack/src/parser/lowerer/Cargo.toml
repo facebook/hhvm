@@ -27,4 +27,4 @@ regex = "1.13.1"
 relative_path = { path = "../../utils/rust/relative_path" }
 rescan_trivia = { path = "../api/cargo/rescan_trivia" }
 stack_limit = { path = "../../utils/stack_limit" }
-thiserror = "2.0.19"
+thiserror = "2.0.20"

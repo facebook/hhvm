@@ -58,8 +58,7 @@ class IoUringStatsTimer : public folly::AsyncTimeout {
                 << std::endl
                 << " - enobufCount: " << stats_.providedBuffer.enobufCount
                 << std::endl
-                << " - utilPct: " << prov.utilPct << std::endl
-                << " - areaCount: " << prov.areaCount;
+                << " - utilPct: " << prov.utilPct;
     }
 
     scheduleTimeout(std::chrono::milliseconds(intervalMs_));

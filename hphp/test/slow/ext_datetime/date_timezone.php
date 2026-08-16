@@ -43,16 +43,16 @@ var_dump(timezone_name_get($tz));
 
 $timezone = timezone_open("CET");
 $transitions = timezone_transitions_get($timezone);
-var_dump($transitions[0]['ts']);
-var_dump($transitions[0]['offset']);
-var_dump($transitions[0]['isdst']);
-var_dump($transitions[0]['abbr']);
+var_dump($transitions[0]['ts'] is int);
+var_dump($transitions[0]['offset'] is int);
+var_dump($transitions[0]['isdst'] is bool);
+var_dump($transitions[0]['abbr'] is string);
 
 $tz = timezone_open("EDT");
 var_dump(timezone_name_get($tz));
 $tz = timezone_open("PST");
 var_dump(timezone_name_get($tz));
-$tz = timezone_open("CHAST");
+$tz = timezone_open("Pacific/Chatham");
 var_dump(timezone_name_get($tz));
 $tz = timezone_open("+01:23");
 var_dump(timezone_name_get($tz));

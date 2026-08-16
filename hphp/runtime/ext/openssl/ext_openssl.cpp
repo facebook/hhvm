@@ -225,11 +225,6 @@ struct Key : SweepableResourceData {
           raise_warning("supplied key param is a public key");
           return nullptr;
         }
-        if (public_key && is_priv) {
-          raise_warning("Don't know how to get public key from "
-                          "this private key");
-          return nullptr;
-        }
         return key;
       }
       ocert = cert;

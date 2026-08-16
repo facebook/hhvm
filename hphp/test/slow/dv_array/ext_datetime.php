@@ -3,7 +3,9 @@
 <<__EntryPoint>>
 function main() :mixed{
   $d = new DateTimeZone("America/New_York");
-  var_dump($d->getLocation());
+  $location = $d->getLocation();
+  $location['longitude'] = round($location['longitude'], 4);
+  var_dump($location);
   $invalid_date = "2OO9-02--27 10:00?00.5";
   date_parse($invalid_date);
   var_dump(DateTime::getLastErrors());

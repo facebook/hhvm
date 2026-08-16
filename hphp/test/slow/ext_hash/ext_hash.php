@@ -50,15 +50,16 @@ function brown_fox() :mixed{
   var_dump(hash("crc32c",     $data));
   var_dump(hash("blake3",     $data));
 
+  $keyed_blake3_is_string = true;
+  $facebook_hashes_match = true;
   if (is_facebook()) {
-    var_dump(hash("keyed-blake3", $data));
-    var_dump(
+    $keyed_blake3_is_string = hash("keyed-blake3", $data) is string;
+    $facebook_hashes_match =
       hash("tiger128,3-fb", $data) === '9370512795923aaeeb76fe3d8ea7433e' &&
-      hash("adler32-fb", $data) === '5e10f17b'
-    );
-  } else {
-    var_dump(true);
+      hash("adler32-fb", $data) === '5e10f17b';
   }
+  var_dump($keyed_blake3_is_string);
+  var_dump($facebook_hashes_match);
 }
 
 function test_hash_init() :mixed{

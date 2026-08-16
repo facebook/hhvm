@@ -444,6 +444,7 @@ final class Options {
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
+    public bool $facebook_build = false;
     public ?Servers $servers = null;
 }
 
@@ -748,7 +749,7 @@ function find_tests(
   }
   if ($files == vec['all']) {
     $files = vec['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
-    if (is_facebook_build($options)) {
+    if ($options->facebook_build) {
       $files[] = 'facebook';
     }
   }
@@ -2813,6 +2814,12 @@ function should_skip_test_simple(
   Options $options,
   string $test,
 ): ?string {
+  if (!$options->facebook_build &&
+      (file_exists($test.'.onlyfacebook') ||
+       file_exists(dirname($test).'/onlyfacebook'))) {
+    return 'skip-onlyfacebook';
+  }
+
   if (($options->cli_server || $options->server) &&
       !can_run_server_test($test, $options)) {
     return 'skip-server';
@@ -4504,6 +4511,7 @@ function main(vec<string> $argv): int {
   if ($options->help) {
     error(help());
   }
+  $options->facebook_build = is_facebook_build($options);
 
   Status::createWorkingDir($options->working_dir);
 

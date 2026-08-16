@@ -23,34 +23,34 @@ var_dump( date_sunset($time) );
 
 echo "\n-- Testing date_sunset() function by passing two parameters --\n";
 var_dump( date_sunset($time, SUNFUNCS_RET_STRING) );
-var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE) );
-var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP) );
+var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE) is float );
+var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP) is int );
 
 echo "\n-- Testing date_sunset() function by passing two parameters --\n";
 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $latitude) );
-var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude) );
-var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude) );
+var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude) is float );
+var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude) is int );
 
 echo "\n-- Testing date_sunset() function by passing three  parameters --\n";
 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $latitude, $longitude) );
-var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude) );
-var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude) );
+var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude) is float );
+var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude) is int );
 
 echo "\n-- Testing date_sunset() function by passing four parameters --\n";
 var_dump( date_sunset($time, SUNFUNCS_RET_STRING,
   $latitude, $longitude, $zenith) );
 var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE,
-  $latitude, $longitude, $zenith) );
+  $latitude, $longitude, $zenith) is float );
 var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP,
-  $latitude, $longitude, $zenith) );
+  $latitude, $longitude, $zenith) is int );
 
 echo "\n-- Testing date_sunset() function by passing five parameters --\n";
 var_dump( date_sunset($time, SUNFUNCS_RET_STRING,
   $latitude, $longitude, $zenith, $gmt_offset) );
 var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE,
-  $latitude, $longitude, $zenith, $gmt_offset) );
+  $latitude, $longitude, $zenith, $gmt_offset) is float );
 var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP,
-  $latitude, $longitude, $zenith, $gmt_offset) );
+  $latitude, $longitude, $zenith, $gmt_offset) is int );
 
 echo "===DONE===\n";
 }

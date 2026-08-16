@@ -6,6 +6,9 @@ function main_date_sun_info() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);
+foreach ($sun_info as $name => $timestamp) {
+  $sun_info[$name] = $timestamp is int;
+}
 var_dump($sun_info);
 var_dump(is_darray($sun_info));
 

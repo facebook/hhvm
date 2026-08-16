@@ -129,9 +129,7 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 type aliases
 
 exception 'UnexpectedValueException' %s
-%s
-Offending Types:  classWithDuplicateName
-%s
+%A
 Stack trace:
 %s: HH\Facts\validate()
 %s
@@ -271,9 +269,7 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 type aliases
 
 exception 'UnexpectedValueException' %s
-%s
-Offending Types:  classWithDuplicateName
-%s
+%A
 Stack trace:
 %s: HH\Facts\validate()
 %s

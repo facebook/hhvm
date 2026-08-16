@@ -46,7 +46,7 @@ $csr = openssl_csr_new($dn, inout $keyGenerate, $args);
 
 var_dump($keyGenerate);
 
-$args["digest_alg"] = "sha1";
+$args["digest_alg"] = "sha256";
 echo "Testing openssl_csr_new with existing ecc key\n";
 $csr = openssl_csr_new($dn, inout $key1, $args);
 var_dump($csr);
@@ -54,6 +54,7 @@ var_dump($csr);
 $pubkey1 = openssl_pkey_get_details(openssl_csr_get_public_key($csr));
 var_dump(isset($pubkey1["ec"]["priv_key"]));
 unset($d1["ec"]["priv_key"]);
+unset($d1["ec"]["d"]);
 var_dump(array_diff($d1["ec"], $pubkey1["ec"]));
 
 $x509 = openssl_csr_sign($csr, null, $key1, 365, $args);

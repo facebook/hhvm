@@ -1,4 +1,9 @@
 <?hh
+
+function history_contents(string $path): string {
+  return preg_replace('/\\A_HiStOrY_V2_\\n/', '', file_get_contents($path));
+}
+
 <<__EntryPoint>> function main(): void {
 $name = tempnam(sys_get_temp_dir(), 'readline.tmp');
 
@@ -9,11 +14,11 @@ readline_add_history('');
 var_dump(readline_write_history($name));
 var_dump(readline_read_history($name));
 
-var_dump(file_get_contents($name));
+var_dump(history_contents($name));
 
 readline_clear_history();
 readline_write_history($name);
-var_dump(file_get_contents($name));
+var_dump(history_contents($name));
 
 unlink($name);
 }

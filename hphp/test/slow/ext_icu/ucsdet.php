@@ -43,8 +43,13 @@ function test_cannot_detect() :mixed{
 
   // The detector has no idea what to do with this.
   $detector->setText("\x74\x68\xa1");
-  $match = $detector->detect();
-  VERIFY($match->isValid() == false);
+  try {
+    $match = $detector->detect();
+    VERIFY($match->isValid() == false);
+  } catch (Exception $_) {
+    // Newer ICU versions report the invalid input as an error.
+    VERIFY(true);
+  }
 }
 
 function test_declared_encoding() :mixed{

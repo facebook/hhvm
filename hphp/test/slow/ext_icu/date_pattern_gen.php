@@ -39,6 +39,10 @@ function EXPECT_NO_LOCALE($function) :mixed{
   EXPECT_THROWS_MESSAGE($function, 'No locale provided');
 }
 
+function normalize_best_pattern(string $pattern): string {
+  return str_replace(vec["'at' ", "\u{202f}"], vec['', ' '], $pattern);
+}
+
 const INVALID_STR = "\xe2\x28\xa1";
 const ERA_FIELD = IntlDatePatternGenerator::ERA_PATTERN_FIELD;
 const FIELD_COUNT = IntlDatePatternGenerator::PATTERN_FIELD_COUNT;
@@ -113,7 +117,11 @@ const INVALID_FIELD = -1;
 
   $conflict = $gen->addPattern("dd-MMMM-", false);
   VS($gen->getBestPattern('MMMMdd'), 'dd-MMMM');
-  VS($conflict, IntlDatePatternGenerator::PATTERN_BASE_CONFLICT);
+  VS(
+    $conflict === IntlDatePatternGenerator::PATTERN_BASE_CONFLICT ||
+      $conflict === IntlDatePatternGenerator::PATTERN_CONFLICT,
+    true,
+  );
 
   $conflict = $gen->addPattern("dd-MMMM--", true);
   VS($conflict, IntlDatePatternGenerator::PATTERN_NO_CONFLICT);
@@ -154,7 +162,7 @@ const INVALID_FIELD = -1;
 
 <<__DynamicallyCallable>> function test_append_item_name() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
-  VS($gen->getAppendItemName(ERA_FIELD), "Era");
+  VS(strtolower($gen->getAppendItemName(ERA_FIELD)), "era");
   $gen->setAppendItemName(ERA_FIELD, 'eras');
   VS($gen->getAppendItemName(ERA_FIELD), 'eras');
 
@@ -201,14 +209,15 @@ const INVALID_FIELD = -1;
   $skeleton = 'yyyyMMMMddhhmm';
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
-  VS(
-    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
-    'MMMM dd, yyyy h:mm a'
-  );
-  VS(
-    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
-    'MMMM dd, yyyy h:mm a'
-  );
+  // Repeated best-pattern lookups should return the same normalized result.
+  for ($attempt = 0; $attempt < 2; $attempt++) {
+    VS(
+      normalize_best_pattern(
+        str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
+      ),
+      'MMMM dd, yyyy h:mm a'
+    );
+  }
 
   EXPECT_INVALID_STR($gen, function () use ($gen) {
     $gen->getBestPattern(INVALID_STR);

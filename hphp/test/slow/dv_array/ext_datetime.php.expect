@@ -4,7 +4,7 @@ dict(4) {
   ["latitude"]=>
   float(40.71416)
   ["longitude"]=>
-  float(-74.00639)
+  float(-74.0064)
   ["comments"]=>
   string(20) "Eastern (most areas)"
 }

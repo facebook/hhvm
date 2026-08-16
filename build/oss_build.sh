@@ -40,6 +40,8 @@ GETDEPS_SOURCE_MODE_BASE="public-git-release-train-${RELEASE_TRAIN_TAG}-shadow-m
 GETDEPS_SOURCE_MODE="$GETDEPS_SOURCE_MODE_BASE"
 GETDEPS_MANIFEST_OVERRIDE_DIR="$SCRATCH_DIR/manifest-overrides"
 GETDEPS_RELEASE_TRAIN_SRC_DIR="$SCRATCH_DIR/release-train-src"
+GETDEPS_GNU_URL_ROOT="https://ftpmirror.gnu.org/gnu"
+GETDEPS_GNU_MIRROR_URL_ROOT="https://mirrors.kernel.org/gnu"
 FORCE_REBUILD=false
 MAKE_ONLY=false
 DOWNLOAD_CACHE_DIR="$HHVM_OSS_WORK_ROOT/downloads"
@@ -226,21 +228,118 @@ echo "Log:     $RUN_LOG_FILE"
 echo ""
 
 # ---------------------------------------------------------------------------
+# Helper: find a supported C/C++ compiler pair
+# ---------------------------------------------------------------------------
+DETECTED_C_COMPILER_PATH=""
+DETECTED_CXX_COMPILER_PATH=""
+DETECTED_COMPILER_KIND=""
+GCC_VERSIONED_COMPILER_PAIRS=(
+  "gcc-16|g++-16"
+  "gcc-15|g++-15"
+  "gcc-14|g++-14"
+)
+GCC_TOOLSET_VERSIONS=(14 15 16)
+CLANG_COMPILER_VERSIONS=(21 20)
+
+detect_compiler_pair() {
+  local c_name="$1" cxx_name="$2" minimum_major="$3" compiler_kind="$4"
+  local c_bin cxx_bin compiler_major
+
+  c_bin="$(command -v "$c_name" 2>/dev/null || true)"
+  cxx_bin="$(command -v "$cxx_name" 2>/dev/null || true)"
+  if [ -z "$c_bin" ] || [ -z "$cxx_bin" ]; then
+    return 1
+  fi
+
+  compiler_major="$("$c_bin" -dumpversion | cut -d. -f1)"
+  if [ "$compiler_major" -lt "$minimum_major" ]; then
+    return 1
+  fi
+
+  DETECTED_C_COMPILER_PATH="$c_bin"
+  DETECTED_CXX_COMPILER_PATH="$cxx_bin"
+  DETECTED_COMPILER_KIND="$compiler_kind"
+}
+
+detect_supported_compilers() {
+  local pair c_name cxx_name compiler_version
+
+  DETECTED_C_COMPILER_PATH=""
+  DETECTED_CXX_COMPILER_PATH=""
+  DETECTED_COMPILER_KIND=""
+
+  if detect_compiler_pair gcc g++ 14 gcc; then
+    return 0
+  fi
+
+  for pair in "${GCC_VERSIONED_COMPILER_PAIRS[@]}"; do
+    IFS='|' read -r c_name cxx_name <<< "$pair"
+    if detect_compiler_pair "$c_name" "$cxx_name" 14 gcc; then
+      return 0
+    fi
+  done
+
+  for compiler_version in "${GCC_TOOLSET_VERSIONS[@]}"; do
+    c_name="/opt/rh/gcc-toolset-${compiler_version}/root/usr/bin/gcc"
+    cxx_name="/opt/rh/gcc-toolset-${compiler_version}/root/usr/bin/g++"
+    if detect_compiler_pair "$c_name" "$cxx_name" 14 gcc; then
+      return 0
+    fi
+  done
+
+  for compiler_version in "${CLANG_COMPILER_VERSIONS[@]}"; do
+    if detect_compiler_pair \
+      "clang-${compiler_version}" "clang++-${compiler_version}" 20 clang; then
+      return 0
+    fi
+  done
+
+  if detect_compiler_pair clang clang++ 20 clang; then
+    return 0
+  fi
+
+  return 1
+}
+
+# ---------------------------------------------------------------------------
 # Helper: install required system development packages
 # ---------------------------------------------------------------------------
 ensure_system_dependencies() {
   local package_manager=""
+  local common_packages=(
+    autoconf automake bison bzip2 ca-certificates cmake diffutils file
+    flex gawk gzip libtool make ninja-build openssl patch python3 rsync
+    tar unzip zip
+  )
   local packages=()
   local package_query=()
+  local repository_packages=()
+  local missing_repository_packages=()
   local missing_packages=()
   local root_command=()
+  local install_environment=()
+  local install_command=()
+  local compiler_pair c_package cxx_package dnf_clang_major dnf_gcc_major
+  local gcc_toolset_version=""
   local package
+  local compiler_package_found=false
+  local supported_compiler_found=false
+
+  if detect_supported_compilers; then
+    supported_compiler_found=true
+    if [[ "$DETECTED_C_COMPILER_PATH" =~ ^/opt/rh/gcc-toolset-([0-9]+)/ ]]; then
+      gcc_toolset_version="${BASH_REMATCH[1]}"
+    fi
+  fi
 
   if command -v dnf >/dev/null 2>&1; then
     package_manager="dnf"
     packages=(
-      clang double-conversion-devel libedit-devel brotli-devel bzip2-devel
-      binutils-devel lz4-devel numactl-devel libjpeg-turbo-devel
+      "${common_packages[@]}"
+      gcc gcc-c++ git-core perl-interpreter pkgconf-pkg-config procps-ng which xz
+      double-conversion-devel libedit-devel brotli-devel bzip2-devel
+      binutils-devel libaio-devel lz4-devel numactl-devel openssl-devel
+      python3-devel libjpeg-turbo-devel
       libpng-devel freetype-devel
       libcurl-devel systemd-devel libbpf-devel libunwind-devel libcap-devel
       libzip-devel re2-devel re2c expat-devel fribidi-devel libheif-devel
@@ -251,35 +350,123 @@ ensure_system_dependencies() {
   elif command -v apt-get >/dev/null 2>&1; then
     package_manager="apt-get"
     packages=(
+      "${common_packages[@]}"
+      build-essential git perl pkg-config procps xz-utils
       libdouble-conversion-dev libedit-dev libbrotli-dev libbz2-dev
-      libiberty-dev liblz4-dev libnuma-dev libjpeg-dev libpng-dev
+      libaio-dev libiberty-dev liblz4-dev libnuma-dev libssl-dev
+      libjpeg-dev libpng-dev
       libfreetype-dev libicu-dev libonig-dev
       libcurl4-openssl-dev libsystemd-dev libbpf-dev libunwind-dev libcap-dev
       libzip-dev libre2-dev re2c libexpat1-dev libfribidi-dev libheif-dev
       libc-ares-dev libgmp-dev liblmdb-dev libmemcached-dev libxslt1-dev
       libsqlite3-dev libldap2-dev
     )
-    if apt-cache show tzdata-legacy >/dev/null 2>&1; then
-      packages+=(tzdata-legacy)
-    fi
-    if ! command -v gcc-16 >/dev/null 2>&1 &&
-       ! command -v gcc-15 >/dev/null 2>&1 &&
-       ! command -v gcc-14 >/dev/null 2>&1 &&
-       ! command -v clang-21 >/dev/null 2>&1 &&
-       ! command -v clang-20 >/dev/null 2>&1; then
-      if apt-cache show clang-21 >/dev/null 2>&1; then
-        packages+=(clang-21)
-      elif apt-cache show clang-20 >/dev/null 2>&1; then
-        packages+=(clang-20)
-      else
-        echo "ERROR: GCC >= 14 or Clang >= 20 is required."
-        exit 1
-      fi
-    fi
     package_query=(dpkg-query -W)
   else
     echo "ERROR: A supported system package manager is required (dnf or apt-get)."
     exit 1
+  fi
+
+  if ! command -v curl >/dev/null 2>&1; then
+    packages+=(curl)
+  fi
+
+  if [ "$(id -u)" -eq 0 ]; then
+    root_command=()
+  elif command -v sudo >/dev/null 2>&1; then
+    root_command=(sudo)
+  else
+    echo "ERROR: System dependencies must be installed, but sudo is unavailable."
+    exit 1
+  fi
+
+  if [ "$package_manager" = "apt-get" ]; then
+    install_environment=(DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC)
+    "${root_command[@]}" apt-get update
+    if apt-cache show tzdata-legacy >/dev/null 2>&1; then
+      packages+=(tzdata-legacy)
+    fi
+  fi
+  install_command=(
+    "${root_command[@]}" env "${install_environment[@]}"
+    "$package_manager" install -y
+  )
+
+  if [ "$package_manager" = "dnf" ] &&
+     grep -Eq '^ID=(centos|rhel|rocky|almalinux)$|^ID_LIKE=.*rhel' \
+       /etc/os-release; then
+    repository_packages=(dnf-plugins-core epel-release)
+    for package in "${repository_packages[@]}"; do
+      "${package_query[@]}" "$package" >/dev/null 2>&1 ||
+        missing_repository_packages+=("$package")
+    done
+    if [ "${#missing_repository_packages[@]}" -gt 0 ]; then
+      "${install_command[@]}" "${missing_repository_packages[@]}"
+    fi
+    "${root_command[@]}" dnf config-manager --set-enabled crb
+    "${root_command[@]}" dnf makecache
+  fi
+
+  if [ "$supported_compiler_found" = false ]; then
+    if [ "$package_manager" = "apt-get" ]; then
+      for compiler_pair in "${GCC_VERSIONED_COMPILER_PAIRS[@]}"; do
+        IFS='|' read -r c_package cxx_package <<< "$compiler_pair"
+        if apt-cache show "$c_package" >/dev/null 2>&1 &&
+           apt-cache show "$cxx_package" >/dev/null 2>&1; then
+          packages+=("$c_package")
+          if [ "$cxx_package" != "$c_package" ]; then
+            packages+=("$cxx_package")
+          fi
+          compiler_package_found=true
+          break
+        fi
+      done
+      if [ "$compiler_package_found" = false ]; then
+        for compiler_pair in "${CLANG_COMPILER_VERSIONS[@]}"; do
+          c_package="clang-${compiler_pair}"
+          if apt-cache show "$c_package" >/dev/null 2>&1; then
+            packages+=("$c_package")
+            compiler_package_found=true
+            break
+          fi
+        done
+      fi
+    else
+      dnf_gcc_major="$(dnf -q repoquery --latest-limit 1 --qf '%{version}' gcc 2>/dev/null | tail -1 | cut -d. -f1)"
+      if [ "${dnf_gcc_major:-0}" -ge 14 ]; then
+        compiler_package_found=true
+      else
+        for compiler_pair in "${GCC_TOOLSET_VERSIONS[@]}"; do
+          c_package="gcc-toolset-${compiler_pair}-gcc"
+          cxx_package="${c_package}-c++"
+          if dnf -q list --available "$c_package" "$cxx_package" >/dev/null 2>&1; then
+            gcc_toolset_version="$compiler_pair"
+            compiler_package_found=true
+            break
+          fi
+        done
+        if [ "$compiler_package_found" = false ]; then
+          dnf_clang_major="$(dnf -q repoquery --latest-limit 1 --qf '%{version}' clang 2>/dev/null | tail -1 | cut -d. -f1)"
+          if [ "${dnf_clang_major:-0}" -ge 20 ]; then
+            packages+=(clang)
+            compiler_package_found=true
+          fi
+        fi
+      fi
+    fi
+
+    if [ "$compiler_package_found" = false ]; then
+      echo "ERROR: GCC >= 14 or Clang >= 20 is required."
+      exit 1
+    fi
+  fi
+
+  if [ "$package_manager" = "dnf" ] && [ -n "$gcc_toolset_version" ]; then
+    packages+=(
+      "gcc-toolset-${gcc_toolset_version}-gcc"
+      "gcc-toolset-${gcc_toolset_version}-gcc-c++"
+      "gcc-toolset-${gcc_toolset_version}-libatomic-devel"
+    )
   fi
 
   for package in "${packages[@]}"; do
@@ -287,20 +474,8 @@ ensure_system_dependencies() {
   done
   [ "${#missing_packages[@]}" -gt 0 ] || return 0
 
-  if [ "$(id -u)" -eq 0 ]; then
-    root_command=()
-  elif command -v sudo >/dev/null 2>&1; then
-    root_command=(sudo)
-  else
-    echo "ERROR: ${missing_packages[*]} must be installed, but sudo is unavailable."
-    exit 1
-  fi
-
   echo ">>> Installing required system development packages..."
-  if [ "$package_manager" = "apt-get" ]; then
-    "${root_command[@]}" apt-get update
-  fi
-  "${root_command[@]}" "$package_manager" install -y "${missing_packages[@]}"
+  "${install_command[@]}" "${missing_packages[@]}"
 }
 
 # ---------------------------------------------------------------------------
@@ -369,7 +544,13 @@ download_tarball() {
   echo "    $name: downloading..."
   mkdir -p "$target_dir"
   rm -f "$target"
-  if ! curl -fsSL "$url" -o "$target" 2>/dev/null || [ ! -s "$target" ]; then
+  if ! curl -fsSL \
+       --retry 8 \
+       --retry-all-errors \
+       --retry-delay 2 \
+       "$url" \
+       -o "$target" ||
+     [ ! -s "$target" ]; then
     rm -f "$target"
     echo "    ERROR: Failed to download $url"
     return 1
@@ -395,7 +576,7 @@ extract_source_archive() {
 
   rm -rf "$source_dir"
   mkdir -p "$source_dir"
-  tar xzf "$archive" --strip-components=1 -C "$source_dir"
+  tar --no-same-owner -xzf "$archive" --strip-components=1 -C "$source_dir"
 }
 
 refresh_gnu_config_scripts() {
@@ -485,6 +666,13 @@ show_build_result() {
 
 run_hhvm_build() {
   local build_dir="$1"
+  local libmbfl_eaw_table="$SRC_DIR/third-party/forks/libmbfl/mbfl/eaw_table.h"
+
+  if [ -f "$libmbfl_eaw_table" ] && \
+     ! grep -qF 'mbfl_eaw_table' "$libmbfl_eaw_table"; then
+    echo ">>> Removing an invalid generated libmbfl East Asian width table."
+    rm -f "$libmbfl_eaw_table"
+  fi
 
   cmake --build "$build_dir" --target "$HHVM_BUILD_TARGET" -j"$JOBS" 2>&1 | tee "$build_dir/build.log"
   return "${PIPESTATUS[0]}"
@@ -499,6 +687,25 @@ run_public_getdeps() {
     CFLAGS="${CFLAGS:+$CFLAGS }-std=gnu17" \
       python3 "$GETDEPS" "$@"
   )
+}
+
+build_public_getdeps_target() {
+  local target="$1" cmake_defines="$2"
+  shift 2
+  local extra_args=("$@")
+
+  if [ "$cmake_defines" != "{}" ]; then
+    extra_args+=(--extra-cmake-defines "$cmake_defines")
+  fi
+
+  run_public_getdeps build "$target" \
+    --allow-system-packages \
+    --no-facebook-internal \
+    --no-tests \
+    --scratch-path "$SCRATCH_DIR" \
+    --num-jobs "$JOBS" \
+    "${RELEASE_TRAIN_SRC_ARGS[@]}" \
+    "${extra_args[@]}"
 }
 
 set_getdeps_source_mode() {
@@ -696,6 +903,30 @@ PY
   printf '%s\n' "$override_manifest"
 }
 
+prepare_getdeps_gnu_mirror_overrides() {
+  local base_manifest name override_manifest patch_result
+  local rewritten=0
+
+  mkdir -p "$GETDEPS_MANIFEST_OVERRIDE_DIR"
+  for base_manifest in "$GETDEPS_REAL_ROOT/manifests/"*; do
+    grep -qF "$GETDEPS_GNU_URL_ROOT/" "$base_manifest" || continue
+    name="$(basename "$base_manifest")"
+    override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/$name"
+    cp "$base_manifest" "$override_manifest"
+    patch_result="$(replace_text_once \
+      "$override_manifest" \
+      "$GETDEPS_GNU_URL_ROOT/" \
+      "$GETDEPS_GNU_MIRROR_URL_ROOT/")"
+    if [ "$patch_result" = "patched" ]; then
+      ((rewritten += 1))
+    fi
+  done
+
+  if [ "$rewritten" -gt 0 ]; then
+    echo "    Redirected $rewritten GNU getdeps downloads to mirrors.kernel.org"
+  fi
+}
+
 preseed_getdeps_download() {
   local name="$1" url="$2" archive_name="$3" sha256="$4"
 
@@ -793,7 +1024,8 @@ prepare_release_train_source() {
     download_tarball "$dep-$tag" "$archive_url" "$cache_dir" "$archive_name" >&2
     rm -rf "$src_dir"
     mkdir -p "$src_dir"
-    tar xzf "$cache_dir/$archive_name" --strip-components=1 -C "$src_dir"
+    tar --no-same-owner -xzf \
+      "$cache_dir/$archive_name" --strip-components=1 -C "$src_dir"
     printf '%s\n' "$tag" > "$stamp_file"
   else
     echo "    $dep: cached public release source ($tag)" >&2
@@ -802,36 +1034,49 @@ prepare_release_train_source() {
   printf '%s\n' "$src_dir"
 }
 
-patch_release_train_source() {
-  local dep="$1" src_dir="$2"
+replace_text_once() {
+  local path="$1" needle="$2" replacement="$3"
 
-  case "$dep" in
-    mcrouter)
-      local cmake_file="$src_dir/CMakeLists.txt"
-      if [ -f "$cmake_file" ]; then
-        local patch_result
-        patch_result="$(python3 - "$cmake_file" <<'PY'
+  python3 - "$path" "$needle" "$replacement" <<'PY'
 from pathlib import Path
 import sys
 
 path = Path(sys.argv[1])
+needle = sys.argv[2]
+replacement = sys.argv[3]
 text = path.read_text()
-needle = "  mcrouter/StandaloneUtils.cpp\n"
-replacement = "  mcrouter/StandaloneUtils.cpp\n  mcrouter/Server.cpp\n"
 
-if "  mcrouter/Server.cpp\n" in text:
+if replacement in text:
     print("noop")
-    raise SystemExit(0)
-if needle not in text:
-    raise SystemExit(
-        "ERROR: mcrouter CMakeLists.txt no longer has the expected "
-        "StandaloneUtils.cpp entry"
-    )
-
-path.write_text(text.replace(needle, replacement, 1))
-print("patched")
+elif needle in text:
+    path.write_text(text.replace(needle, replacement, 1))
+    print("patched")
+else:
+    raise SystemExit(f"ERROR: {path} no longer has the expected source text")
 PY
-)"
+}
+
+patch_release_train_source() {
+  local dep="$1" src_dir="$2"
+  local patch_result
+
+  case "$dep" in
+    folly)
+      patch_result="$(replace_text_once \
+        "$src_dir/folly/net/NetOps.cpp" \
+        $'static_assert(folly::to_bool(::recvmmsg));\nstatic_assert(folly::to_bool(::sendmmsg));' \
+        $'static_assert(sizeof(&::recvmmsg) > 0);\nstatic_assert(sizeof(&::sendmmsg) > 0);')"
+      if [ "$patch_result" = "patched" ]; then
+        echo "    folly: patched GCC 14 socket declaration checks" >&2
+      fi
+      ;;
+    mcrouter)
+      local cmake_file="$src_dir/CMakeLists.txt"
+      if [ -f "$cmake_file" ]; then
+        patch_result="$(replace_text_once \
+          "$cmake_file" \
+          $'  mcrouter/StandaloneUtils.cpp\n' \
+          $'  mcrouter/StandaloneUtils.cpp\n  mcrouter/Server.cpp\n')"
         if [ "$patch_result" = "patched" ]; then
           echo "    mcrouter: patched public CMake source list for Server.cpp" >&2
         fi
@@ -1021,9 +1266,6 @@ EOF
 }
 
 choose_cmake_compilers() {
-  local gcc_bin="" gxx_bin="" gcc_major clang_bin clangxx_bin
-  local gcc_name gxx_name candidate_gcc candidate_gxx clang_name clangxx_name
-
   if [ "${#CMAKE_COMPILER_FLAGS[@]}" -gt 0 ]; then
     return 0
   fi
@@ -1053,59 +1295,27 @@ choose_cmake_compilers() {
     return 0
   fi
 
-  for gcc_name in gcc gcc-16 gcc-15 gcc-14; do
-    if [ "$gcc_name" = gcc ]; then
-      gxx_name=g++
-    else
-      gxx_name="g++-${gcc_name#gcc-}"
-    fi
-    candidate_gcc="$(command -v "$gcc_name" 2>/dev/null || true)"
-    candidate_gxx="$(command -v "$gxx_name" 2>/dev/null || true)"
-    [ -n "$candidate_gcc" ] && [ -n "$candidate_gxx" ] || continue
-    gcc_major="$("$candidate_gcc" -dumpversion | cut -d. -f1)"
-    if [ "$gcc_major" -ge 14 ]; then
-      gcc_bin="$candidate_gcc"
-      gxx_bin="$candidate_gxx"
-      break
-    fi
-  done
-  if [ -n "$gcc_bin" ]; then
-    CMAKE_C_COMPILER_PATH="$gcc_bin"
-    CMAKE_CXX_COMPILER_PATH="$gxx_bin"
+  if detect_supported_compilers; then
+    CMAKE_C_COMPILER_PATH="$DETECTED_C_COMPILER_PATH"
+    CMAKE_CXX_COMPILER_PATH="$DETECTED_CXX_COMPILER_PATH"
+  else
+    echo "ERROR: GCC >= 14 or Clang >= 20 is required."
+    exit 1
+  fi
+
+  if [ "$DETECTED_COMPILER_KIND" = "gcc" ]; then
     CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPGccToolchain.cmake"
-    CMAKE_COMPILER_FLAGS=(
-      "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
-      "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
-      "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH"
-    )
     CMAKE_COMPILER_DESCRIPTION="GCC: $("$CMAKE_CXX_COMPILER_PATH" --version | head -1)"
-    return 0
-  fi
-
-  for clang_name in clang-21 clang-20 clang; do
-    if [ "$clang_name" = clang ]; then
-      clangxx_name=clang++
-    else
-      clangxx_name="clang++-${clang_name#clang-}"
-    fi
-    clang_bin="$(command -v "$clang_name" 2>/dev/null || true)"
-    clangxx_bin="$(command -v "$clangxx_name" 2>/dev/null || true)"
-    [ -n "$clang_bin" ] && [ -n "$clangxx_bin" ] && break
-  done
-  if [ -n "$clang_bin" ] && [ -n "$clangxx_bin" ]; then
-    CMAKE_C_COMPILER_PATH="$clang_bin"
-    CMAKE_CXX_COMPILER_PATH="$clangxx_bin"
+  else
     CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPClangToolchain.cmake"
-    CMAKE_COMPILER_FLAGS=(
-      "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
-      "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
-      "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH"
-    )
     CMAKE_COMPILER_DESCRIPTION="Clang: $("$CMAKE_CXX_COMPILER_PATH" --version | head -1)"
-    return 0
   fi
 
-  CMAKE_COMPILER_DESCRIPTION="default toolchain"
+  CMAKE_COMPILER_FLAGS=(
+    "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
+    "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
+    "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH"
+  )
 }
 
 configure_fbmysql_source() {
@@ -1133,6 +1343,7 @@ configure_fbmysql_source() {
 }
 
 ensure_system_dependencies
+GAWK_EXECUTABLE="$(command -v gawk)"
 
 # ---------------------------------------------------------------------------
 # Phase 1: Fetch public git submodules
@@ -1167,7 +1378,7 @@ else
     "SHA256=$LIBURING_SHA256"
   rm -rf "$LIBURING_SRC_DIR" "$LIBURING_PREFIX"
   mkdir -p "$LIBURING_SRC_DIR" "$LIBURING_PREFIX"
-  tar xzf "$DOWNLOAD_CACHE_DIR/$LIBURING_ARCHIVE" \
+  tar --no-same-owner -xzf "$DOWNLOAD_CACHE_DIR/$LIBURING_ARCHIVE" \
     --strip-components=1 \
     -C "$LIBURING_SRC_DIR"
   (
@@ -1197,30 +1408,29 @@ prepare_getdeps_manifest_override proxygen "$PROXYGEN_RELEASE_REV" >/dev/null
 prepare_getdeps_manifest_override mcrouter "$MCROUTER_RELEASE_REV" >/dev/null
 prepare_getdeps_boost_override >/dev/null
 prepare_getdeps_download_manifest_override magic_enum "$MAGIC_ENUM_DOWNLOAD_URL" "$MAGIC_ENUM_DOWNLOAD_SHA256" >/dev/null
+prepare_getdeps_gnu_mirror_overrides
 prepare_getdeps_runner_root
 prepare_release_train_sources
 MCROUTER_INSTALL="$(find_mcrouter_install_prefix || true)"
 BOOST_INSTALL="$(find_boost_install_prefix || true)"
 FATAL_INSTALL="$(find_fatal_install_prefix || true)"
 BLAKE3_INSTALL="$(find_getdeps_prefix blake3 || true)"
-MAGIC_ENUM_INSTALL="$(find_getdeps_prefix magic_enum || true)"
+GETDEPS_CMAKE_DEFINES="$(printf \
+  '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_TOOLCHAIN_FILE":"%s","CMAKE_PREFIX_PATH":"%s"}' \
+  "$CMAKE_C_COMPILER_PATH" \
+  "$CMAKE_CXX_COMPILER_PATH" \
+  "$CMAKE_TOOLCHAIN_FILE_PATH" \
+  "$LIBURING_PREFIX")"
 if [ -d "$GETDEPS_DIR/fbthrift" ] && [ -d "$GETDEPS_DIR/folly" ] && [ -d "$GETDEPS_DIR/proxygen" ] && \
    [ -n "$MCROUTER_INSTALL" ] && [ -n "$BOOST_INSTALL" ] && [ -n "$FATAL_INSTALL" ] && [ -n "$BLAKE3_INSTALL" ] && \
-   [ -n "$MAGIC_ENUM_INSTALL" ] && \
    [ "$FORCE_REBUILD" = false ]; then
   echo ">>> Phase 3: Meta deps already built. Skipping. (use --rebuild to force)"
 else
   echo ">>> Phase 3: Building Meta dependencies with getdeps..."
   echo "    Using $CMAKE_COMPILER_DESCRIPTION"
-  GETDEPS_CMAKE_DEFINES="$(printf \
-    '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_TOOLCHAIN_FILE":"%s","CMAKE_PREFIX_PATH":"%s"}' \
-    "$CMAKE_C_COMPILER_PATH" \
-    "$CMAKE_CXX_COMPILER_PATH" \
-    "$CMAKE_TOOLCHAIN_FILE_PATH" \
-    "$LIBURING_PREFIX")"
 
   # Keep the main Meta C++ stack on one coherent public weekly release train.
-  for dep in boost blake3 fatal folly fizz wangle mvfst fbthrift proxygen ragel mcrouter magic_enum; do
+  for dep in boost blake3 fatal folly fizz wangle mvfst fbthrift proxygen ragel mcrouter; do
     target="$dep"
     label="$dep"
     extra_args=()
@@ -1281,29 +1491,11 @@ print(json.dumps(defines, separators=(",", ":")))
 PY
 )"
         ;;
-      magic_enum)
-        label="$dep ($MAGIC_ENUM_VERSION)"
-        preseed_getdeps_download \
-          "$dep" \
-          "$MAGIC_ENUM_DOWNLOAD_URL" \
-          "$MAGIC_ENUM_DOWNLOAD_ARCHIVE" \
-          "$MAGIC_ENUM_DOWNLOAD_SHA256"
-        ;;
     esac
 
-    if [ "$dep_cmake_defines" != "{}" ]; then
-      extra_args+=(--extra-cmake-defines "$dep_cmake_defines")
-    fi
-
     echo "  --- $label ---"
-    run_public_getdeps build "$target" \
-      --allow-system-packages \
-      --no-facebook-internal \
-      --no-tests \
-      --scratch-path "$SCRATCH_DIR" \
-      --num-jobs "$JOBS" \
-      "${RELEASE_TRAIN_SRC_ARGS[@]}" \
-      "${extra_args[@]}" \
+    build_public_getdeps_target \
+      "$target" "$dep_cmake_defines" "${extra_args[@]}" \
       || { echo "ERROR: Failed to build $dep"; exit 1; }
 
     if [ "$dep" = "boost" ]; then
@@ -1341,6 +1533,28 @@ PY
 
   echo "    boost install: $BOOST_INSTALL"
   echo "    mcrouter install: $MCROUTER_INSTALL"
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 3b: Build the header-only magic_enum dependency
+# ---------------------------------------------------------------------------
+MAGIC_ENUM_INSTALL="$(find_getdeps_prefix magic_enum || true)"
+if [ -n "$MAGIC_ENUM_INSTALL" ] && [ "$FORCE_REBUILD" = false ]; then
+  echo ">>> Phase 3b: magic_enum already built. Skipping."
+else
+  echo ">>> Phase 3b: Building magic_enum $MAGIC_ENUM_VERSION with getdeps..."
+  preseed_getdeps_download \
+    magic_enum \
+    "$MAGIC_ENUM_DOWNLOAD_URL" \
+    "$MAGIC_ENUM_DOWNLOAD_ARCHIVE" \
+    "$MAGIC_ENUM_DOWNLOAD_SHA256"
+  build_public_getdeps_target magic_enum "$GETDEPS_CMAKE_DEFINES" \
+    || { echo "ERROR: Failed to build magic_enum"; exit 1; }
+  MAGIC_ENUM_INSTALL="$(find_getdeps_prefix magic_enum || true)"
+  if [ -z "$MAGIC_ENUM_INSTALL" ]; then
+    echo "ERROR: magic_enum build finished but the getdeps install was not found"
+    exit 1
+  fi
 fi
 
 
@@ -1481,7 +1695,7 @@ build_autotools_dependency \
   "$LIBMCRYPT_PREFIX" \
   "lib/libmcrypt.a" \
   "include/mcrypt.h" \
-  "-include stdlib.h -include string.h -include stdio.h -DHAVE_MEMMOVE=1 -DHAVE_BZERO=1 -DHAVE_MEMSET=1 -DHAVE_STRCHR=1 -DHAVE_STRDUP=1 -DHAVE_STRRCHR=1 -Wno-implicit-int"
+  "-std=gnu17 -include stdlib.h -include string.h -include stdio.h -DHAVE_MEMMOVE=1 -DHAVE_BZERO=1 -DHAVE_MEMSET=1 -DHAVE_STRCHR=1 -DHAVE_STRDUP=1 -DHAVE_STRRCHR=1 -Wno-implicit-int"
 
 # ---------------------------------------------------------------------------
 # Phase 4e: Build PCRE1 for the Hack OCaml dependencies
@@ -1601,7 +1815,7 @@ else
     "" \
     "SHA256=2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa"
   (cd "$JEMALLOC_BUILD_DIR" && \
-    tar xf jemalloc-5.3.0.tar.bz2 && \
+    tar --no-same-owner -xf jemalloc-5.3.0.tar.bz2 && \
     cd jemalloc-5.3.0 && \
     ./configure --prefix="$JEMALLOC_PREFIX" --disable-shared --enable-static --with-jemalloc-prefix= && \
     make -j"$JOBS" && \
@@ -1628,7 +1842,7 @@ else
     "$RUST_FILENAME" \
     "SHA256=$RUST_SHA256"
   RUST_TMP="$(mktemp -d)"
-  tar xzf "$RUST_CACHE/$RUST_FILENAME" -C "$RUST_TMP"
+  tar --no-same-owner -xzf "$RUST_CACHE/$RUST_FILENAME" -C "$RUST_TMP"
   if ! "$RUST_TMP/rust-nightly-${RUST_TARGET}/install.sh" \
       --prefix="$RUST_PREFIX" --without=rust-docs 2>&1; then
     rm -rf "$RUST_TMP"
@@ -1750,6 +1964,16 @@ if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
   RECONFIGURE_CMAKE=true
 fi
 if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
+   ! cmake_cache_matches AWK_EXECUTABLE "$GAWK_EXECUTABLE"; then
+  echo ">>> Phase 8: Existing cmake cache does not point at GNU awk. Reconfiguring."
+  RECONFIGURE_CMAKE=true
+fi
+if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
+   ! cmake_cache_matches ENABLE_LD_GOLD OFF; then
+  echo ">>> Phase 8: Existing cmake cache still enables the gold linker. Reconfiguring."
+  RECONFIGURE_CMAKE=true
+fi
+if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
    { ! cmake_cache_matches LIBMAGICKWAND_LIBRARIES "$IMAGEMAGICK6_WAND_LIBRARY" ||
      ! cmake_cache_matches LIBMAGICKCORE_LIBRARIES "$IMAGEMAGICK6_CORE_LIBRARY"; }; then
   echo ">>> Phase 8: Existing cmake cache does not point at OSS ImageMagick 6. Reconfiguring."
@@ -1815,7 +2039,9 @@ if [ ! -f "$BUILD_DIR/CMakeCache.txt" ] || [ "$RECONFIGURE_CMAKE" = true ]; then
     "${CMAKE_BUILD_TYPE_FLAGS[@]}" \
     -DCMAKE_PREFIX_PATH="$PREFIX_PATH" \
     -DCMAKE_MODULE_PATH="$SRC_DIR/CMake;$GETDEPS_REAL_ROOT/CMake" \
+    -DAWK_EXECUTABLE="$GAWK_EXECUTABLE" \
     -DCMAKE_DISABLE_FIND_PACKAGE_libWatchmanClient=ON \
+    -DENABLE_LD_GOLD=OFF \
     -DHHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX="$THIRD_PARTY_SOURCE_CACHE_PREFIX" \
     -DHHVM_OSS_LIBDWARF_ROOT="$LIBDWARF_OSS_PREFIX" \
     -DHHVM_OSS_FBMYSQL_SOURCE_DIR="$FBMYSQL_OSS_SRC_DIR" \

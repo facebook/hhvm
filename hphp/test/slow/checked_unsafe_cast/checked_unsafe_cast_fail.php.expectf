@@ -1,1 +1,5 @@
-Catchable fatal error: Runtime type-check: Expected num, got string in %s
+Fatal error: Uncaught TypeError: Runtime type-check: Expected num, got string in %s
+Stack trace:
+#0 %s(%d): testit()
+#1 (): main()
+#2 {main}

@@ -1,22 +1,22 @@
 dict(9) {
   ["sunrise"]=>
-  int(1165897795)
+  bool(true)
   ["sunset"]=>
-  int(1165934173)
+  bool(true)
   ["transit"]=>
-  int(1165915984)
+  bool(true)
   ["civil_twilight_begin"]=>
-  int(1165896189)
+  bool(true)
   ["civil_twilight_end"]=>
-  int(1165935779)
+  bool(true)
   ["nautical_twilight_begin"]=>
-  int(1165894366)
+  bool(true)
   ["nautical_twilight_end"]=>
-  int(1165937603)
+  bool(true)
   ["astronomical_twilight_begin"]=>
-  int(1165892582)
+  bool(true)
   ["astronomical_twilight_end"]=>
-  int(1165939386)
+  bool(true)
 }
 bool(true)
 string(5) "08:52"

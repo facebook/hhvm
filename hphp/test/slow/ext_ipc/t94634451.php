@@ -17,14 +17,21 @@ function receive($msg_id) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  $msg_id = msg_get_queue(619158, 0600);
+  // Verify empty, small, and large queue messages use their exact lengths.
+  $filename = tempnam(sys_get_temp_dir(), 'vmmsgqueue');
+  $msg_id = msg_get_queue(ftok($filename, 'a'), 0600);
 
-  send($msg_id, "hello");
-  receive($msg_id);
+  try {
+    send($msg_id, "hello");
+    receive($msg_id);
 
-  send($msg_id, "");
-  receive($msg_id);
+    send($msg_id, "");
+    receive($msg_id);
 
-  send($msg_id, str_repeat("*", 1024));
-  receive($msg_id);
+    send($msg_id, str_repeat("*", 1024));
+    receive($msg_id);
+  } finally {
+    msg_remove_queue($msg_id);
+    unlink($filename);
+  }
 }

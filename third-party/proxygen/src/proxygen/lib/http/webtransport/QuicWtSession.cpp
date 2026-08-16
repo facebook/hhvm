@@ -590,4 +590,49 @@ void H3ConnectStreamCallback::onEvent(WtStreamManager::Event&& ev) noexcept {
   std::visit(visitor, ev);
 }
 
+H3WtCapsuleCallback::H3WtCapsuleCallback(H3WtSession& session) noexcept
+    : h3Wt_(session) {
+}
+
+void H3WtCapsuleCallback::onMaxData(WTMaxDataCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxData=" << c.maximumData;
+  h3Wt_.onConnMaxData({.maxData = c.maximumData});
+}
+
+void H3WtCapsuleCallback::onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxStreams=" << c.maximumStreams;
+  h3Wt_.onMaxStreams(WtStreamManager::MaxStreamsBidi{c.maximumStreams});
+}
+
+void H3WtCapsuleCallback::onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxStreams=" << c.maximumStreams;
+  h3Wt_.onMaxStreams(WtStreamManager::MaxStreamsUni{c.maximumStreams});
+}
+
+void H3WtCapsuleCallback::onDrainSession(
+    DrainWebTransportSessionCapsule) noexcept {
+  XLOG(DBG6) << __func__;
+  h3Wt_.onDrainSession({});
+}
+
+void H3WtCapsuleCallback::onCloseSession(
+    CloseWebTransportSessionCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; err=" << c.applicationErrorCode
+             << "; msg=" << c.applicationErrorMessage;
+  h3Wt_.onCloseSession(
+      {.err = c.applicationErrorCode, .msg = c.applicationErrorMessage});
+}
+
+void H3WtCapsuleCallback::onDatagram(DatagramCapsule c) noexcept {
+  XLOG(DBG6) << __func__;
+  h3Wt_.onDatagram(std::move(c.httpDatagramPayload));
+}
+
+void H3WtCapsuleCallback::onConnectionError(
+    CapsuleCodec::ErrorCode error) noexcept {
+  XLOG(DBG4) << __func__ << "; err=" << uint64_t(error);
+  onCloseSession({.applicationErrorCode = uint32_t(error),
+                  .applicationErrorMessage = "capsule parse error"});
+}
+
 } // namespace proxygen

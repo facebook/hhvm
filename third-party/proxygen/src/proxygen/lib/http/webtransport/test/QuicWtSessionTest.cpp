@@ -8,6 +8,7 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/webtransport/QuicWtSession.h>
 #include <proxygen/lib/http/webtransport/test/Mocks.h>
@@ -919,6 +920,33 @@ TEST_F(H3WtSessionTest, CreateUniBidiStream) {
     auto bidi = session_->createBidiStream();
     CHECK(!uni && !bidi);
   }
+}
+
+/**
+ * A malformed capsule on the CONNECT stream is unrecoverable -- we can no
+ * longer trust the framing -- so H3WtCapsuleCallback tears the wt session down
+ * rather than ignoring it.
+ */
+TEST_F(H3WtSessionTest, CapsuleParseErrorClosesSession) {
+  expectedWtHandlerErr_ = uint32_t(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
+
+  H3WtCapsuleCallback capsuleCb{*session_};
+  WebTransportCapsuleCodec codec{&capsuleCb, CodecVersion::H3};
+
+  // a well formed MAX_DATA capsule whose length byte is rewritten to announce
+  // an 8-byte varint that is not there, so the codec reports a parse error
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  writeWTMaxData(queue, WTMaxDataCapsule{100});
+  auto buf = queue.move();
+  buf->writableData()[5] = 0xFF;
+
+  codec.onIngress(std::move(buf), true);
+
+  // the handler is notified via the fixture's onSessionEnd expectation, and the
+  // session queues a CLOSE_SESSION for the connect stream
+  EXPECT_FALSE(connectStreamCb_.events.empty());
+  EXPECT_TRUE(std::holds_alternative<detail::WtStreamManager::CloseSession>(
+      connectStreamCb_.events.back()));
 }
 
 TEST_F(H3WtSessionTest, AcquireIngressStream) {

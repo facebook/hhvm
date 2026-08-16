@@ -8,66 +8,6 @@
 
 #include <proxygen/lib/http/webtransport/HqWtSession.h>
 
-namespace {
-using namespace proxygen;
-using namespace proxygen::detail;
-
-struct H3CapsuleCodecCb final : public WebTransportCapsuleCodec::Callback {
-  H3WtSession& wtSess;
-  explicit H3CapsuleCodecCb(H3WtSession& wtSess) : wtSess(wtSess) {
-  }
-
-  void onMaxData(WTMaxDataCapsule c) noexcept override {
-    VLOG(4) << __func__;
-    wtSess.onConnMaxData({.maxData = c.maximumData});
-  }
-  void onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept override {
-    VLOG(4) << __func__;
-    wtSess.onMaxStreams(WtStreamManager::MaxStreamsBidi{c.maximumStreams});
-  }
-  void onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept override {
-    VLOG(4) << __func__;
-    wtSess.onMaxStreams(WtStreamManager::MaxStreamsUni{c.maximumStreams});
-  }
-  void onDrainSession(DrainWebTransportSessionCapsule) noexcept override {
-    VLOG(4) << __func__;
-    wtSess.onDrainSession({});
-  }
-  void onCloseSession(CloseWebTransportSessionCapsule c) noexcept override {
-    VLOG(4) << __func__;
-    wtSess.onCloseSession(WtStreamManager::CloseSession{
-        c.applicationErrorCode, std::move(c.applicationErrorMessage)});
-  }
-  void onConnectionError(CapsuleCodec::ErrorCode error) noexcept override {
-    VLOG(4) << __func__;
-    onCloseSession({uint8_t(error), "onConnectionError"});
-  }
-
-  // ignored callbacks
-  void onMaxStreamData(WTMaxStreamDataCapsule) noexcept override {
-  }
-  void onResetStream(WTResetStreamCapsule) noexcept override {
-  }
-  void onStopSending(WTStopSendingCapsule) noexcept override {
-  }
-  void onStream(WTStreamCapsule) noexcept override {
-  }
-  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override {
-  }
-  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override {
-  }
-  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override {
-  }
-  void onPadding(PaddingCapsule) noexcept override {
-  }
-  void onDatagram(DatagramCapsule) noexcept override {
-  }
-  void onDataBlocked(WTDataBlockedCapsule) noexcept override {
-  }
-};
-
-}; // namespace
-
 namespace proxygen::detail {
 
 struct WtReadLooper : public WtLooper {
@@ -86,7 +26,7 @@ struct WtReadLooper : public WtLooper {
   void runLoopCallback() noexcept override;
   HqWtSession& wtSess_;
   WebTransportTxnHandler& wtTxnHandler_;
-  H3CapsuleCodecCb codecCb_;
+  H3WtCapsuleCallback codecCb_;
   WebTransportCapsuleCodec codec_;
 };
 

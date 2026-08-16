@@ -133,11 +133,13 @@
 //////////////////////////////////////////////////////////////////////
 // DECLARE_FRAME_POINTER
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__AARCH64EL__)
 
 # define DECLARE_FRAME_POINTER(fp) \
   auto const fp = (ActRec*) __builtin_frame_address(0)
+# if defined(__x86_64__)
 # define FRAME_POINTER_IS_ACCURATE
+# endif
 
 #elif defined(_M_X64)
 
@@ -146,15 +148,6 @@
 # define DECLARE_FRAME_POINTER(fp) \
   always_assert(false);            \
   ActRec* fp = nullptr;
-
-#elif defined(__AARCH64EL__)
-
-# if defined(__clang__)
-# define DECLARE_FRAME_POINTER(fp) ActRec* fp = (ActRec*) \
-  __builtin_frame_address(0)
-#else
-# define DECLARE_FRAME_POINTER(fp) ActRec* fp asm("x29")
-#endif
 
 #else
 

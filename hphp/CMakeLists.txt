@@ -75,6 +75,8 @@ enable_language(ASM)
 
 if (NOT PCRE_LIBRARY)
   link_libraries(pcre)
+  get_target_property(PCRE_INCLUDE_DIRS pcre INTERFACE_INCLUDE_DIRECTORIES)
+  include_directories(${PCRE_INCLUDE_DIRS})
 endif()
 
 add_subdirectory(compiler)

@@ -114,10 +114,12 @@ endforeach()
 set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)
 
 if(NOT PCRE_LIBRARY)
-  target_include_directories(pcre PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre")
+  target_include_directories(pcre PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre"
+    "${CMAKE_CURRENT_BINARY_DIR}/forks/pcre"
+  )
   target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
 endif()
 
 ##### --- new style, but only depends on old style --- #####
 add_subdirectory(watchman)
-

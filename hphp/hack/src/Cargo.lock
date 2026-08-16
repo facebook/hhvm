@@ -1013,6 +1013,7 @@ dependencies = [
 name = "cxx"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe442a792c7c736eea18b32a7f8a3b63cf8aafabda6760042dc2fdeda456291"
 dependencies = [
  "cc",
  "cxx-build",
@@ -1027,6 +1028,7 @@ dependencies = [
 name = "cxx-build"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3184a94384c663718698311a78a51ac00c484c10b4eeac06fb0a068c5f64fa2"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -1041,6 +1043,7 @@ dependencies = [
 name = "cxxbridge-cmd"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0148d8fd1199329ddf1d157a5e134e51ceff37c6a7ddd38615c399d81cb05d8d"
 dependencies = [
  "clap",
  "codespan-reporting",
@@ -1054,11 +1057,13 @@ dependencies = [
 name = "cxxbridge-flags"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52850339faed2eaadd24e286dc1d8268cc6f8a7bd9524d713adc9099566b4c89"
 
 [[package]]
 name = "cxxbridge-macro"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c77c856545d886c9bd5215409ebb63b925e262135248b50c79e5a5f194ee47c"
 dependencies = [
  "indexmap 2.14.0",
  "proc-macro2",
@@ -1927,10 +1932,10 @@ version = "0.0.0"
 name = "generate_configs_lib"
 version = "0.0.0"
 dependencies = [
- "anyhow",
- "cc",
+ "clap",
  "convert_case 0.4.0",
  "nom",
+ "nom-language",
 ]
 
 [[package]]
@@ -3298,6 +3303,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "bstr",
  "bumpalo",
@@ -3310,6 +3316,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_caml_builtins"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
@@ -3319,6 +3326,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_custom"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
@@ -3327,6 +3335,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_derive"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3337,6 +3346,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_marshal"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "bitflags 2.13.1",
  "cc",
@@ -3355,6 +3365,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_ocamlpool"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#219a6b9cbc00bf190d7eadb3c005690dfa83d184"
 dependencies = [
  "bumpalo",
  "cc",

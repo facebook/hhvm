@@ -130,9 +130,9 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   always_assert(sync == SyncOptions::Sync || Cfg::Jit::ForceVMRegSync);
 
   // Stublogue code operates on behalf of the caller, so it needs an indirect
-  // fixup to obtain the real savedRip from the native frame. The stack base
-  // of stublogues start at the fixup offset of their callers, so the SP offset
-  // of the marker represents the additional SP offset that needs to be added.
+  // fixup to obtain the real savedRip from the native frame. The stack base of
+  // stublogues starts at the fixup offset of their callers, so the marker's SP
+  // offset represents the additional offset to add.
   if (marker.stublogue()) return Fixup::indirect(0, marker.fixupBcSPOff());
 
   // The rest of the prologue cannot throw exceptions, but may execute C++ code

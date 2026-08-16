@@ -14,7 +14,6 @@ export HACK_OPAM_DEPS=(
   fileutils.0.6.4
   fmt.0.9.0
   iomux.0.3
-  landmarks-ppx.1.4
   lru.0.3.1
   lwt.5.7.0
   lwt_log.1.1.2
@@ -50,13 +49,19 @@ export OCAML_COMPILER_NAME="${OCAML_BASE_NAME}.${HACK_OCAML_VERSION}"
 
 UNAME=$(uname -s)
 ARCH=$(uname -m)
-if [ "$UNAME" != "Linux" ] || [ "$ARCH" == "aarch64" ]; then
+if [ "$ARCH" == "x86_64" ]; then
+  HACK_OPAM_DEPS+=(landmarks-ppx.1.4)
+else
+  echo 'Platform is not x86-64, skipping landmarks'
+fi
+
+if [ "$UNAME" == "Linux" ] && [ "$ARCH" == "x86_64" ]; then
+  HACK_OPAM_DEPS+=(ocaml-option-fp)
+else
   # Some variants are not supported on other platforms, so we use the base
   # version instead.
   # +fp is known not to work on Macs or on arm64, but other combinations have not been
   # tested.
-  echo 'Platform is not Linux or is arm64, skipping +fp'
-else
-  HACK_OPAM_DEPS+=(ocaml-option-fp)
-  export HACK_OPAM_DEPS
+  echo 'Platform is not Linux x86-64, skipping +fp'
 fi
+export HACK_OPAM_DEPS

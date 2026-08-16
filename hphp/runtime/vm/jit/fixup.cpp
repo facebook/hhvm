@@ -24,6 +24,11 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/dwarf-reg.h"
+
+#if defined(__aarch64__) && !defined(__clang__)
+#include <unwind.h>
+#endif
 
 TRACE_SET_MOD(fixup)
 
@@ -94,6 +99,44 @@ struct FixupHash {
 TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
 static ServiceData::ExportedCounter* s_fixupmap_counter =
   ServiceData::createCounter("admin.fixup_map_size");
+
+#if defined(__aarch64__) && !defined(__clang__)
+/*
+ * GCC may place padding between an AArch64 native frame record and its CFA.
+ * Use the emitted unwind metadata to recover the caller's actual stack
+ * address instead of deriving it from the frame pointer.
+ */
+struct CFAState {
+  const ActRec* frame;
+  bool found;
+  uintptr_t cfa;
+};
+
+_Unwind_Reason_Code findCFA(_Unwind_Context* context, void* arg) {
+  auto const state = static_cast<CFAState*>(arg);
+  if (state->found) {
+    state->cfa = _Unwind_GetCFA(context);
+    return _URC_NORMAL_STOP;
+  }
+
+  // The context after the matching frame pointer owns the caller CFA we need.
+  auto const frame =
+    reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
+  state->found = frame == state->frame;
+  return _URC_NO_REASON;
+}
+#endif
+
+uintptr_t nativeFrameCFA(const ActRec* frame) {
+#if defined(__aarch64__) && !defined(__clang__)
+  CFAState state{frame, false, 0};
+  _Unwind_Backtrace(findCFA, &state);
+  always_assert(state.cfa != 0);
+  return state.cfa;
+#else
+  return uintptr_t(frame) + kNativeFrameSize;
+#endif
+}
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     SBInvOffset extraSpOffset, VMRegs* outRegs) {
@@ -200,7 +243,7 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->func()->name()->data());
-      auto const cfa = uintptr_t(rbp) + kNativeFrameSize;
+      auto const cfa = nativeFrameCFA(rbp);
       auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
       auto const res = processFixupForVMFrame(frame);
       if (res || LIKELY(soft)) return res;

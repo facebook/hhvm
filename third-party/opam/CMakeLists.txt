@@ -22,12 +22,14 @@ if (NOT "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
   message(FATAL_ERROR "Bundled opam in the OSS build is only supported on Linux")
 endif()
 
-if (IS_X64)
+if (IS_X64 OR CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
   set(OPAM_ARCH "x86_64")
   set(OPAM_LINUX_HASH "03c6a85f13a452749fdb2271731f3624a3993498ff2b304123231a8f2b26ccf1182d12119466e9a85f4de370fca51bd61d0eefe6280d3ca087cf4620fdc59a22")
-elseif (IS_AARCH64)
+elseif (IS_AARCH64 OR CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
   set(OPAM_ARCH "arm64")
   set(OPAM_LINUX_HASH "216185106deb81db0e9cb329dd7f01d097173e1e7a055a1af8525cdb4dde6d443e4bf4ef8377f1cbd4c9fecdc7ea03e6f294dad30b10a0e83959476018e24972")
+else()
+  message(FATAL_ERROR "Bundled opam is not available for ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(

@@ -22,7 +22,7 @@ INCLUDE_KEY = -I
 DEFINE_KEY = -D
 OUTPUT_KEY = -o #
 OUTPUTOBJ_KEY = -o #
-PIC_KEY = #-fPIC
+PIC_KEY = -fPIC
 WARNING_AS_ERROR_KEY = -Werror
 WARNING_KEY = -Wall
 TEST_WARNING_KEY = -Wshadow -Wcast-qual -Woverloaded-virtual -Wnon-virtual-dtor
@@ -67,7 +67,7 @@ endif
 # elimination of stores done outside the object lifetime
 ifneq (,$(shell $(CONLY) -dumpfullversion -dumpversion | egrep  "^([6-9]|1[0-9])"))
     # keep pre-contruction stores for zero initialization
-    DSE_KEY = -flifetime-dse=1
+    DSE_KEY =
 endif
 
 ifeq ($(cfg), release)

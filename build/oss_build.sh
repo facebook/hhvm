@@ -36,7 +36,8 @@ GETDEPS_DIR="$SCRATCH_DIR/installed"
 GETDEPS_PUBLIC_CWD="${HHVM_OSS_GETDEPS_CWD:-${XDG_CACHE_HOME:-$HOME/.cache}/hhvm-getdeps-cwd}"
 GETDEPS_SOURCE_MODE_FILE="$SCRATCH_DIR/.hhvm_getdeps_source_mode"
 RELEASE_TRAIN_TAG="v2026.05.11.00"
-GETDEPS_SOURCE_MODE="public-git-release-train-${RELEASE_TRAIN_TAG}-shadow-manifests-local-sources-v1"
+GETDEPS_SOURCE_MODE_BASE="public-git-release-train-${RELEASE_TRAIN_TAG}-shadow-manifests-local-sources-hhvm-toolchain-v2"
+GETDEPS_SOURCE_MODE="$GETDEPS_SOURCE_MODE_BASE"
 GETDEPS_MANIFEST_OVERRIDE_DIR="$SCRATCH_DIR/manifest-overrides"
 GETDEPS_RELEASE_TRAIN_SRC_DIR="$SCRATCH_DIR/release-train-src"
 FORCE_REBUILD=false
@@ -98,6 +99,7 @@ IMAGEMAGICK6_PREFIX="$HHVM_OSS_WORK_ROOT/installed/ImageMagick6"
 IMAGEMAGICK6_INCLUDE_DIRS="$IMAGEMAGICK6_PREFIX/include/ImageMagick-6;$IMAGEMAGICK6_PREFIX/lib/ImageMagick-${IMAGEMAGICK6_ABI_VERSION}/config-Q16"
 IMAGEMAGICK6_WAND_LIBRARY="$IMAGEMAGICK6_PREFIX/lib/libMagickWand-6.Q16.so"
 IMAGEMAGICK6_CORE_LIBRARY="$IMAGEMAGICK6_PREFIX/lib/libMagickCore-6.Q16.so"
+IMAGEMAGICK6_FORMATS_STAMP="$IMAGEMAGICK6_PREFIX/.hhvm-jpeg-png-formats"
 GNU_CONFIG_REVISION="gcc-14.3.0"
 GNU_CONFIG_URL_ROOT="https://raw.githubusercontent.com/gcc-mirror/gcc/releases/${GNU_CONFIG_REVISION}"
 GNU_CONFIG_GUESS_SHA256="7d1e3c79b86de601c3a0457855ab854dffd15163f53c91edac54a7be2e9c931b"
@@ -109,11 +111,11 @@ OPAM_REPOSITORY_SHA256="7221dd867475707a9e0f423dde137821863dfe6c84b86c3ba802927d
 OPAM_REPOSITORY_SRC_DIR="$HHVM_OSS_WORK_ROOT/sources/opam-repository"
 export HHVM_OSS_OPAM_REPOSITORY="$OPAM_REPOSITORY_SRC_DIR"
 FBMYSQL_OSS_ROCKSDB_SRC=""
-CMAKE_C_COMPILER_PATH=""
-CMAKE_CXX_COMPILER_PATH=""
+CMAKE_C_COMPILER_PATH="${HHVM_OSS_C_COMPILER:-}"
+CMAKE_CXX_COMPILER_PATH="${HHVM_OSS_CXX_COMPILER:-}"
+CMAKE_TOOLCHAIN_FILE_PATH=""
 CMAKE_COMPILER_FLAGS=()
 CMAKE_COMPILER_DESCRIPTION=""
-CMAKE_CXX_COMPAT_FLAGS=""
 CMAKE_BUILD_TYPE_FLAGS=()
 HHVM_CMAKE_ARCHITECTURE=""
 NEED_XED=false
@@ -195,6 +197,8 @@ Environment overrides:
   HHVM_OSS_BUILD_DIR
   HHVM_OSS_SCRATCH_DIR
   HHVM_OSS_GETDEPS_CWD
+  HHVM_OSS_C_COMPILER
+  HHVM_OSS_CXX_COMPILER
   HHVM_OSS_CMAKE_BUILD_TYPE
   HHVM_OSS_BUILD_TARGET
   HHVM_OSS_LOG_FILE
@@ -235,6 +239,9 @@ ensure_system_dependencies() {
   if command -v dnf >/dev/null 2>&1; then
     package_manager="dnf"
     packages=(
+      clang double-conversion-devel libedit-devel brotli-devel bzip2-devel
+      binutils-devel lz4-devel numactl-devel libjpeg-turbo-devel
+      libpng-devel freetype-devel
       libcurl-devel systemd-devel libbpf-devel libunwind-devel libcap-devel
       libzip-devel re2-devel re2c expat-devel fribidi-devel libheif-devel
       c-ares-devel gmp-devel lmdb-devel libmemcached-awesome-devel
@@ -244,11 +251,31 @@ ensure_system_dependencies() {
   elif command -v apt-get >/dev/null 2>&1; then
     package_manager="apt-get"
     packages=(
+      libdouble-conversion-dev libedit-dev libbrotli-dev libbz2-dev
+      libiberty-dev liblz4-dev libnuma-dev libjpeg-dev libpng-dev
+      libfreetype-dev libicu-dev libonig-dev
       libcurl4-openssl-dev libsystemd-dev libbpf-dev libunwind-dev libcap-dev
       libzip-dev libre2-dev re2c libexpat1-dev libfribidi-dev libheif-dev
       libc-ares-dev libgmp-dev liblmdb-dev libmemcached-dev libxslt1-dev
       libsqlite3-dev libldap2-dev
     )
+    if apt-cache show tzdata-legacy >/dev/null 2>&1; then
+      packages+=(tzdata-legacy)
+    fi
+    if ! command -v gcc-16 >/dev/null 2>&1 &&
+       ! command -v gcc-15 >/dev/null 2>&1 &&
+       ! command -v gcc-14 >/dev/null 2>&1 &&
+       ! command -v clang-21 >/dev/null 2>&1 &&
+       ! command -v clang-20 >/dev/null 2>&1; then
+      if apt-cache show clang-21 >/dev/null 2>&1; then
+        packages+=(clang-21)
+      elif apt-cache show clang-20 >/dev/null 2>&1; then
+        packages+=(clang-20)
+      else
+        echo "ERROR: GCC >= 14 or Clang >= 20 is required."
+        exit 1
+      fi
+    fi
     package_query=(dpkg-query -W)
   else
     echo "ERROR: A supported system package manager is required (dnf or apt-get)."
@@ -467,8 +494,24 @@ run_public_getdeps() {
   (
     mkdir -p "$GETDEPS_PUBLIC_CWD"
     cd "$GETDEPS_PUBLIC_CWD"
-    python3 "$GETDEPS" "$@"
+    CC="$CMAKE_C_COMPILER_PATH" \
+    CXX="$CMAKE_CXX_COMPILER_PATH" \
+    CFLAGS="${CFLAGS:+$CFLAGS }-std=gnu17" \
+      python3 "$GETDEPS" "$@"
   )
+}
+
+set_getdeps_source_mode() {
+  local fingerprint_input fingerprint
+
+  fingerprint_input="$CMAKE_C_COMPILER_PATH
+$("$CMAKE_C_COMPILER_PATH" --version)
+$CMAKE_CXX_COMPILER_PATH
+$("$CMAKE_CXX_COMPILER_PATH" --version)
+$CMAKE_TOOLCHAIN_FILE_PATH
+$(sha256sum "$CMAKE_TOOLCHAIN_FILE_PATH" "$SRC_DIR/CMake/HPHPCompiler.cmake")"
+  fingerprint="$(printf '%s' "$fingerprint_input" | sha256sum | cut -c1-16)"
+  GETDEPS_SOURCE_MODE="${GETDEPS_SOURCE_MODE_BASE}-${fingerprint}"
 }
 
 ensure_public_getdeps_source_mode() {
@@ -535,6 +578,52 @@ for line in lines:
 
 if in_git and not inserted:
     output.append(f"rev = {rev}")
+
+override_manifest.write_text("\n".join(output) + "\n")
+PY
+
+  printf '%s\n' "$override_manifest"
+}
+
+prepare_getdeps_boost_override() {
+  local base_manifest="$GETDEPS_REAL_ROOT/manifests/boost"
+  local override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/boost"
+  local user_config="$SCRATCH_DIR/boost-user-config.jam"
+  local toolset
+
+  case "$(basename "$CMAKE_TOOLCHAIN_FILE_PATH")" in
+    HPHPClangToolchain.cmake) toolset="clang" ;;
+    HPHPGccToolchain.cmake) toolset="gcc" ;;
+    *)
+      echo "ERROR: Cannot select a Boost toolset for $CMAKE_COMPILER_DESCRIPTION"
+      exit 1
+      ;;
+  esac
+
+  mkdir -p "$GETDEPS_MANIFEST_OVERRIDE_DIR"
+  printf 'using %s : hhvm : %s ;\n' \
+    "$toolset" "$CMAKE_CXX_COMPILER_PATH" > "$user_config"
+  python3 - \
+    "$base_manifest" "$override_manifest" "$user_config" "$toolset" <<'PY'
+from pathlib import Path
+import sys
+
+base_manifest = Path(sys.argv[1])
+override_manifest = Path(sys.argv[2])
+user_config = sys.argv[3]
+toolset = sys.argv[4]
+
+output = []
+inserted = False
+for line in base_manifest.read_text().splitlines():
+    output.append(line)
+    if line.strip() == "[b2.args.os=linux]":
+        output.append(f"--user-config={user_config}")
+        output.append(f"toolset={toolset}-hhvm")
+        inserted = True
+
+if not inserted:
+    raise SystemExit("ERROR: boost manifest has no Linux b2 args section")
 
 override_manifest.write_text("\n".join(output) + "\n")
 PY
@@ -932,36 +1021,85 @@ EOF
 }
 
 choose_cmake_compilers() {
-  local gcc_bin gxx_bin gcc_major clang_bin clangxx_bin
+  local gcc_bin="" gxx_bin="" gcc_major clang_bin clangxx_bin
+  local gcc_name gxx_name candidate_gcc candidate_gxx clang_name clangxx_name
 
   if [ "${#CMAKE_COMPILER_FLAGS[@]}" -gt 0 ]; then
     return 0
   fi
 
-  gcc_bin="$(command -v gcc 2>/dev/null || true)"
-  gxx_bin="$(command -v g++ 2>/dev/null || true)"
-  gcc_major="${gcc_bin:+$("$gcc_bin" -dumpversion | cut -d. -f1)}"
-  if [ -n "$gcc_bin" ] && [ -n "$gxx_bin" ] && [ "$gcc_major" -ge 14 ]; then
-    CMAKE_C_COMPILER_PATH="$gcc_bin"
-    CMAKE_CXX_COMPILER_PATH="$gxx_bin"
-    CMAKE_CXX_COMPAT_FLAGS="-Wno-changes-meaning"
+  if [ -n "$CMAKE_C_COMPILER_PATH" ] || [ -n "$CMAKE_CXX_COMPILER_PATH" ]; then
+    if [ -z "$CMAKE_C_COMPILER_PATH" ] || [ -z "$CMAKE_CXX_COMPILER_PATH" ]; then
+      echo "ERROR: Set both HHVM_OSS_C_COMPILER and HHVM_OSS_CXX_COMPILER."
+      exit 1
+    fi
+    CMAKE_C_COMPILER_PATH="$(command -v "$CMAKE_C_COMPILER_PATH" 2>/dev/null || true)"
+    CMAKE_CXX_COMPILER_PATH="$(command -v "$CMAKE_CXX_COMPILER_PATH" 2>/dev/null || true)"
+    if [ -z "$CMAKE_C_COMPILER_PATH" ] || [ -z "$CMAKE_CXX_COMPILER_PATH" ]; then
+      echo "ERROR: Requested OSS C/C++ compiler was not found."
+      exit 1
+    fi
     CMAKE_COMPILER_FLAGS=(
       "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
       "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
-      "-DCMAKE_CXX_FLAGS=$CMAKE_CXX_COMPAT_FLAGS"
+    )
+    if "$CMAKE_CXX_COMPILER_PATH" --version | head -1 | grep -qi clang; then
+      CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPClangToolchain.cmake"
+    else
+      CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPGccToolchain.cmake"
+    fi
+    CMAKE_COMPILER_FLAGS+=("-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH")
+    CMAKE_COMPILER_DESCRIPTION="requested toolchain: $("$CMAKE_CXX_COMPILER_PATH" --version | head -1)"
+    return 0
+  fi
+
+  for gcc_name in gcc gcc-16 gcc-15 gcc-14; do
+    if [ "$gcc_name" = gcc ]; then
+      gxx_name=g++
+    else
+      gxx_name="g++-${gcc_name#gcc-}"
+    fi
+    candidate_gcc="$(command -v "$gcc_name" 2>/dev/null || true)"
+    candidate_gxx="$(command -v "$gxx_name" 2>/dev/null || true)"
+    [ -n "$candidate_gcc" ] && [ -n "$candidate_gxx" ] || continue
+    gcc_major="$("$candidate_gcc" -dumpversion | cut -d. -f1)"
+    if [ "$gcc_major" -ge 14 ]; then
+      gcc_bin="$candidate_gcc"
+      gxx_bin="$candidate_gxx"
+      break
+    fi
+  done
+  if [ -n "$gcc_bin" ]; then
+    CMAKE_C_COMPILER_PATH="$gcc_bin"
+    CMAKE_CXX_COMPILER_PATH="$gxx_bin"
+    CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPGccToolchain.cmake"
+    CMAKE_COMPILER_FLAGS=(
+      "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
+      "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
+      "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH"
     )
     CMAKE_COMPILER_DESCRIPTION="GCC: $("$CMAKE_CXX_COMPILER_PATH" --version | head -1)"
     return 0
   fi
 
-  clang_bin="$(command -v clang 2>/dev/null || true)"
-  clangxx_bin="$(command -v clang++ 2>/dev/null || true)"
+  for clang_name in clang-21 clang-20 clang; do
+    if [ "$clang_name" = clang ]; then
+      clangxx_name=clang++
+    else
+      clangxx_name="clang++-${clang_name#clang-}"
+    fi
+    clang_bin="$(command -v "$clang_name" 2>/dev/null || true)"
+    clangxx_bin="$(command -v "$clangxx_name" 2>/dev/null || true)"
+    [ -n "$clang_bin" ] && [ -n "$clangxx_bin" ] && break
+  done
   if [ -n "$clang_bin" ] && [ -n "$clangxx_bin" ]; then
     CMAKE_C_COMPILER_PATH="$clang_bin"
     CMAKE_CXX_COMPILER_PATH="$clangxx_bin"
+    CMAKE_TOOLCHAIN_FILE_PATH="$SRC_DIR/CMake/HPHPClangToolchain.cmake"
     CMAKE_COMPILER_FLAGS=(
       "-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER_PATH"
       "-DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER_PATH"
+      "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE_PATH"
     )
     CMAKE_COMPILER_DESCRIPTION="Clang: $("$CMAKE_CXX_COMPILER_PATH" --version | head -1)"
     return 0
@@ -1028,7 +1166,7 @@ else
     "$LIBURING_ARCHIVE" \
     "SHA256=$LIBURING_SHA256"
   rm -rf "$LIBURING_SRC_DIR" "$LIBURING_PREFIX"
-  mkdir -p "$LIBURING_SRC_DIR"
+  mkdir -p "$LIBURING_SRC_DIR" "$LIBURING_PREFIX"
   tar xzf "$DOWNLOAD_CACHE_DIR/$LIBURING_ARCHIVE" \
     --strip-components=1 \
     -C "$LIBURING_SRC_DIR"
@@ -1047,6 +1185,8 @@ fi
 # ---------------------------------------------------------------------------
 # Phase 3: Build Meta dependencies with getdeps
 # ---------------------------------------------------------------------------
+choose_cmake_compilers
+set_getdeps_source_mode
 ensure_public_getdeps_source_mode
 prepare_getdeps_manifest_override folly "$FOLLY_RELEASE_REV" >/dev/null
 prepare_getdeps_manifest_override wangle "$WANGLE_RELEASE_REV" >/dev/null
@@ -1055,6 +1195,7 @@ prepare_getdeps_manifest_override mvfst "$MVFST_RELEASE_REV" >/dev/null
 prepare_getdeps_manifest_override fbthrift "$FBTHRIFT_RELEASE_REV" >/dev/null
 prepare_getdeps_manifest_override proxygen "$PROXYGEN_RELEASE_REV" >/dev/null
 prepare_getdeps_manifest_override mcrouter "$MCROUTER_RELEASE_REV" >/dev/null
+prepare_getdeps_boost_override >/dev/null
 prepare_getdeps_download_manifest_override magic_enum "$MAGIC_ENUM_DOWNLOAD_URL" "$MAGIC_ENUM_DOWNLOAD_SHA256" >/dev/null
 prepare_getdeps_runner_root
 prepare_release_train_sources
@@ -1070,12 +1211,12 @@ if [ -d "$GETDEPS_DIR/fbthrift" ] && [ -d "$GETDEPS_DIR/folly" ] && [ -d "$GETDE
   echo ">>> Phase 3: Meta deps already built. Skipping. (use --rebuild to force)"
 else
   echo ">>> Phase 3: Building Meta dependencies with getdeps..."
-  choose_cmake_compilers
   echo "    Using $CMAKE_COMPILER_DESCRIPTION"
   GETDEPS_CMAKE_DEFINES="$(printf \
-    '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_PREFIX_PATH":"%s"}' \
+    '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_TOOLCHAIN_FILE":"%s","CMAKE_PREFIX_PATH":"%s"}' \
     "$CMAKE_C_COMPILER_PATH" \
     "$CMAKE_CXX_COMPILER_PATH" \
+    "$CMAKE_TOOLCHAIN_FILE_PATH" \
     "$LIBURING_PREFIX")"
 
   # Keep the main Meta C++ stack on one coherent public weekly release train.
@@ -1395,6 +1536,10 @@ extract_source_archive \
   "$DOWNLOAD_CACHE_DIR/$IMAGEMAGICK6_ARCHIVE" \
   "$IMAGEMAGICK6_SRC_DIR" \
   "configure"
+if [ -f "$IMAGEMAGICK6_PREFIX/include/ImageMagick-6/wand/MagickWand.h" ] &&
+   [ ! -f "$IMAGEMAGICK6_FORMATS_STAMP" ]; then
+  rm -rf "$IMAGEMAGICK6_PREFIX"
+fi
 build_autotools_dependency \
   "ImageMagick6" \
   "$IMAGEMAGICK6_SRC_DIR" \
@@ -1403,6 +1548,15 @@ build_autotools_dependency \
   "include/ImageMagick-6/wand/MagickWand.h" \
   "" \
   "--enable-shared --disable-static --without-magick-plus-plus --without-perl --without-x"
+if ! LD_LIBRARY_PATH="$IMAGEMAGICK6_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+     "$IMAGEMAGICK6_PREFIX/bin/identify" -list format | grep -Eq '^[[:space:]]+JPEG[*[:space:]]' ||
+   ! LD_LIBRARY_PATH="$IMAGEMAGICK6_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+     "$IMAGEMAGICK6_PREFIX/bin/identify" -list format | grep -Eq '^[[:space:]]+PNG[*[:space:]]'; then
+  rm -f "$IMAGEMAGICK6_FORMATS_STAMP"
+  echo "ERROR: ImageMagick6 was built without required JPEG/PNG format support."
+  exit 1
+fi
+touch "$IMAGEMAGICK6_FORMATS_STAMP"
 
 # ---------------------------------------------------------------------------
 # Phase 4g: Pin the public opam package index used by Hack
@@ -1588,9 +1742,11 @@ if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
   echo ">>> Phase 8: Existing cmake cache does not select the host architecture. Reconfiguring."
   RECONFIGURE_CMAKE=true
 fi
-if [ -n "$CMAKE_CXX_COMPAT_FLAGS" ] && [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
-   ! cmake_cache_matches CMAKE_CXX_FLAGS "$CMAKE_CXX_COMPAT_FLAGS"; then
-  echo ">>> Phase 8: Existing cmake cache lacks the GCC compatibility flags. Reconfiguring."
+if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
+   { ! cmake_cache_matches CMAKE_C_COMPILER "$CMAKE_C_COMPILER_PATH" ||
+     ! cmake_cache_matches CMAKE_CXX_COMPILER "$CMAKE_CXX_COMPILER_PATH" ||
+     ! cmake_cache_matches CMAKE_TOOLCHAIN_FILE "$CMAKE_TOOLCHAIN_FILE_PATH"; }; then
+  echo ">>> Phase 8: Existing cmake cache uses a different compiler toolchain. Reconfiguring."
   RECONFIGURE_CMAKE=true
 fi
 if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
@@ -1654,6 +1810,7 @@ if [ ! -f "$BUILD_DIR/CMakeCache.txt" ] || [ "$RECONFIGURE_CMAKE" = true ]; then
   cmake "$SRC_DIR" \
     -DCMAKE_BUILD_TYPE="$HHVM_CMAKE_BUILD_TYPE" \
     -D"$HHVM_CMAKE_ARCHITECTURE"=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     "${CMAKE_COMPILER_FLAGS[@]}" \
     "${CMAKE_BUILD_TYPE_FLAGS[@]}" \
     -DCMAKE_PREFIX_PATH="$PREFIX_PATH" \

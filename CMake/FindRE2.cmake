@@ -1,14 +1,18 @@
-FIND_PATH(SYSTEM_RE2_INCLUDE_DIR re2/re2.h)
-IF (SYSTEM_RE2_INCLUDE_DIR)
-  MESSAGE(STATUS "Found RE2 include dir")
-  FIND_LIBRARY(SYSTEM_RE2_LIBRARY re2)
-  IF (SYSTEM_RE2_LIBRARY)
-    MESSAGE(STATUS "Found RE2 library")
-    SET(RE2_INCLUDE_DIR ${SYSTEM_RE2_INCLUDE_DIR})
-    SET(RE2_LIBRARY ${SYSTEM_RE2_LIBRARY})
-  ELSE ()
-    MESSAGE(FATAL_ERROR "Found RE2 headers, but not the library")
-  ENDIF ()
-ELSE ()
-  MESSAGE(STATUS "Did not find system RE2")
-ENDIF ()
+find_path(RE2_INCLUDE_DIR NAMES re2/re2.h)
+find_library(RE2_LIBRARY NAMES re2)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+  RE2
+  REQUIRED_VARS RE2_LIBRARY RE2_INCLUDE_DIR
+)
+
+if(RE2_FOUND AND NOT TARGET re2::re2)
+  add_library(re2::re2 UNKNOWN IMPORTED)
+  set_target_properties(re2::re2 PROPERTIES
+    IMPORTED_LOCATION "${RE2_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${RE2_INCLUDE_DIR}"
+  )
+endif()
+
+mark_as_advanced(RE2_INCLUDE_DIR RE2_LIBRARY)

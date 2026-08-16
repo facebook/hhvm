@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 # Do this until cmake has a define for ARMv8
 execute_process(COMMAND uname -m
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -32,6 +34,8 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   list(APPEND DISABLED_C_NAMED_WARNINGS
     "missing-field-initializers"
     "sign-compare"
+    "incompatible-pointer-types"
+    "error=incompatible-pointer-types"
   )
 
   # General options to pass to both C & C++ compilers

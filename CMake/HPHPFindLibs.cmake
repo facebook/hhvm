@@ -403,7 +403,10 @@ if (LZ4_INCLUDE_DIR)
   target_include_directories(lz4 INTERFACE ${LZ4_INCLUDE_DIR})
   target_link_libraries(lz4 INTERFACE ${LZ4_LIBRARY})
 endif()
-find_package(re2 CONFIG REQUIRED)
+find_package(re2 CONFIG QUIET)
+if(NOT TARGET re2::re2)
+  find_package(RE2 MODULE REQUIRED)
+endif()
 
 # Use the real xplat/usdt implementation for fbsource OSS builds so
 # verification doesn't silently compile away probes.

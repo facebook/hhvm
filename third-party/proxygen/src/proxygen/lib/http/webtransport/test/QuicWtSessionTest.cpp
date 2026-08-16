@@ -319,6 +319,43 @@ TEST_F(QuicWtSessionTest, StopSending) {
   EXPECT_EQ(writeHandle->exception()->error, WT_ERROR_1);
 }
 
+/**
+ * A local STOP_SENDING must not unregister the quic read callback. The peer
+ * answers STOP_SENDING with a RESET_STREAM, and that has to reach
+ * QuicWtSessionBase::readCb_ for WtStreamManager to observe the ingress side
+ * closing -- otherwise the stream is never reaped and its credit is never
+ * returned to the peer.
+ */
+TEST_F(QuicWtSessionTest, StopSendingKeepsReadCallback) {
+  // id=2 is client-initiated uni, i.e. ingress for us
+  constexpr uint64_t kPeerUniId = 2;
+  WebTransport::StreamReadHandle* readHandle = nullptr;
+  EXPECT_CALL(*handler_, onNewUniStream(_))
+      .WillOnce(
+          [&](WebTransport::StreamReadHandle* handle) { readHandle = handle; });
+  socketDriver_.addReadEvent(kPeerUniId, nullptr, false);
+  eventBase_.loopOnce();
+  ASSERT_NE(readHandle, nullptr);
+
+  // park a read before stopping, so we can observe the peer's reset landing
+  auto readFut = readHandle->readStreamData();
+
+  auto res = session_->stopSending(kPeerUniId, WT_ERROR_1);
+  EXPECT_TRUE(res.hasValue());
+  eventBase_.loopOnce();
+  EXPECT_EQ(socketDriver_.streams_[kPeerUniId].error, WT_ERROR_1);
+  EXPECT_NE(socketDriver_.streams_[kPeerUniId].readCB, nullptr);
+
+  // the peer resets in response; this must still be delivered to us
+  socketDriver_.addReadError(
+      kPeerUniId, quic::QuicErrorCode(quic::ApplicationErrorCode(WT_ERROR_2)));
+  eventBase_.loopOnce();
+
+  EXPECT_TRUE(readFut.isReady());
+  auto result = std::move(readFut).getTry();
+  EXPECT_TRUE(result.hasException());
+}
+
 TEST_F(QuicWtSessionTest, ResetStream) {
   // id=2 is client-initiated uni, so it's not egress for the server
   constexpr uint64_t kClientInitiatedUniId = 2;

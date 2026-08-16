@@ -44,7 +44,9 @@ struct QuicWtEventVisitor {
   }
 
   void operator()(WtStreamManager::StopSending ev) const {
-    quicSocket.setReadCallback(ev.streamId, nullptr, ev.err);
+    // not setReadCallback(id, nullptr, err): that also unregisters the read
+    // callback, so the peer's RESET_STREAM would never close the ingress side
+    quicSocket.stopSending(ev.streamId, ev.err);
   }
 
   // operations need to be serialized on the backing http/3 connect stream (if

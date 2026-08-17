@@ -50,13 +50,16 @@
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
+#include <glog/logging.h>
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <numeric>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/logger/DBEventLogger.h"
@@ -76,6 +79,65 @@ class SyncMysqlClient;
 class Operation;
 class ConnectOperation;
 class ConnectionKey;
+
+// Receives periodic busy/idle timings from an AsyncMysqlClient's IO thread.
+// Register one with AsyncMysqlClient::addStatsTracker, which also fixes the
+// sampling cadence for that registration.
+class StatsTracker {
+ public:
+  virtual ~StatsTracker() = default;
+
+  // Called on the IO thread, once every `sampleRate` loops.  The timings
+  // describe that single loop, not the interval since the last call.
+  virtual void loopSample(int64_t busy_time, int64_t idle_time) = 0;
+};
+
+// Multiplexes a folly::EventBase's single observer slot across any number of
+// StatsTrackers, each sampled at its own registered rate.
+//
+// An EventBase asks for one sample rate, so we ask it for the gcd of the
+// registered rates.  Every tracker's rate is then an exact multiple of ours,
+// and each one can be driven off its own counter.
+class StatsTrackerHandler : public folly::EventBaseObserver {
+ public:
+  void loopSample(int64_t busy_time, int64_t idle_time) override {
+    for (auto& sub : trackers_) {
+      // Each call to us covers rate_ loops.
+      sub.loopsSinceSample += rate_;
+      if (sub.loopsSinceSample >= sub.rate) {
+        sub.loopsSinceSample -= sub.rate;
+        sub.tracker->loopSample(busy_time, idle_time);
+      }
+    }
+  }
+
+  uint32_t getSampleRate() const override {
+    return rate_;
+  }
+
+  // Must run on the event base thread: `trackers_` and `rate_` are read by
+  // loopSample() with no synchronization.
+  //
+  // Lowering rate_ here needs no fixup of the counters below: they are counts
+  // of loops, which don't change meaning when the sampling rate does.
+  void addTracker(std::shared_ptr<StatsTracker> tracker, uint32_t sampleRate) {
+    DCHECK_GT(sampleRate, 0u);
+    // gcd's identity is 0, which is not a sample rate we could hand back, so
+    // the first tracker sets the rate outright rather than folding into it.
+    rate_ = trackers_.empty() ? sampleRate : std::gcd(rate_, sampleRate);
+    trackers_.push_back({std::move(tracker), sampleRate, 0});
+  }
+
+ private:
+  struct Subscription {
+    std::shared_ptr<StatsTracker> tracker;
+    uint32_t rate;
+    uint32_t loopsSinceSample;
+  };
+
+  std::vector<Subscription> trackers_;
+  uint32_t rate_{1}; // every loop, until the first tracker sets it
+};
 
 // The client itself.  As mentioned above, in general, it isn't
 // necessary to create a client; instead, simply call defaultClient()
@@ -174,13 +236,53 @@ class AsyncMysqlClient : public MysqlClientBase {
     return pools_conn_limit_.load(std::memory_order_relaxed);
   }
 
+  // Registers an additional consumer of this client's IO thread loop timings,
+  // sampled once every `sampleRate` loops.  The tracker is installed by the
+  // time this returns, so no samples are missed after the call.
+  //
+  // Blocks until the IO thread picks the registration up, so don't call it
+  // once the client is shut down.
+  void addStatsTracker(
+      std::shared_ptr<StatsTracker> tracker,
+      uint32_t sampleRate = 1) {
+    // ...OrRunInEventBaseThreadAndWait rather than plain
+    // runInEventBaseThreadAndWait: the latter refuses to run the callback at
+    // all when we're already on the IO thread, silently dropping the tracker.
+    getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+        [handler = stats_tracker_handler_,
+         tracker = std::move(tracker),
+         sampleRate]() mutable {
+          handler->addTracker(std::move(tracker), sampleRate);
+        });
+  }
+
+  // The perf counters this client accumulates itself.  The rest of
+  // db::ClientPerfStats is read straight off the EventBase, so it isn't here.
+  //
+  // Written on the IO thread, read by collectPerfStats() from any thread; the
+  // races are benign and long-standing, see the
+  // annotate_ignore_thread_sanitizer guards in callers.
+  struct PerfCounters {
+    // One loop in kSampleRate is sampled, which is also the number of samples
+    // the averages below are smoothed over.  Keeping it a single constant keeps
+    // the EMA weighting in step with the rate DefaultStatsTracker registers at.
+    static constexpr uint32_t kSampleRate = 16;
+
+    // Average time between a callback being scheduled in the IO Thread and the
+    // time it runs.  Fed by runInThread(), not by loop sampling.
+    db::ExponentialMovingAverage callbackDelayAvg{1.0 / kSampleRate};
+
+    db::ExponentialMovingAverage ioThreadBusyTime{1.0 / kSampleRate};
+    db::ExponentialMovingAverage ioThreadIdleTime{1.0 / kSampleRate};
+  };
+
   db::ClientPerfStats collectPerfStats() {
     db::ClientPerfStats ret;
-    ret.callbackDelayMicrosAvg = stats_tracker_->callbackDelayAvg.value();
+    ret.callbackDelayMicrosAvg = perf_counters_->callbackDelayAvg.value();
     ret.ioEventLoopMicrosAvg = getEventBase()->getAvgLoopTime();
     ret.notificationQueueSize = getEventBase()->getNotificationQueueSize();
-    ret.ioThreadBusyTime = stats_tracker_->ioThreadBusyTime.value();
-    ret.ioThreadIdleTime = stats_tracker_->ioThreadIdleTime.value();
+    ret.ioThreadBusyTime = perf_counters_->ioThreadBusyTime.value();
+    ret.ioThreadIdleTime = perf_counters_->ioThreadIdleTime.value();
     return ret;
   }
 
@@ -345,7 +447,7 @@ class AsyncMysqlClient : public MysqlClientBase {
   }
 
   Duration callbackDelayAvg() const override {
-    return Duration((uint64_t)stats_tracker_->callbackDelayAvg.value());
+    return Duration((uint64_t)perf_counters_->callbackDelayAvg.value());
   }
 
   void cleanupCompletedOperations();
@@ -389,25 +491,24 @@ class AsyncMysqlClient : public MysqlClientBase {
   // This only works if you are using AsyncConnectionPool
   std::atomic<uint64_t> pools_conn_limit_;
 
-  class StatsTracker : public folly::EventBaseObserver {
+  // Feeds the loop timings in PerfCounters.  Holds the counters by shared_ptr
+  // so it stays valid however long the EventBase keeps the observer alive.
+  class DefaultStatsTracker : public StatsTracker {
    public:
+    explicit DefaultStatsTracker(std::shared_ptr<PerfCounters> counters)
+        : counters_(std::move(counters)) {}
+
     void loopSample(int64_t busy_time, int64_t idle_time) override {
-      ioThreadBusyTime.addSample(static_cast<double>(busy_time));
-      ioThreadIdleTime.addSample(static_cast<double>(idle_time));
+      counters_->ioThreadBusyTime.addSample(static_cast<double>(busy_time));
+      counters_->ioThreadIdleTime.addSample(static_cast<double>(idle_time));
     }
 
-    uint32_t getSampleRate() const override {
-      // Avoids this being called every loop
-      return 16;
-    }
-
-    // Average time between a callback being scheduled in the IO Thread and the
-    // time it runs
-    db::ExponentialMovingAverage callbackDelayAvg{1.0 / 16.0};
-    db::ExponentialMovingAverage ioThreadBusyTime{1.0 / 16.0};
-    db::ExponentialMovingAverage ioThreadIdleTime{1.0 / 16.0};
+   private:
+    std::shared_ptr<PerfCounters> counters_;
   };
-  std::shared_ptr<StatsTracker> stats_tracker_;
+
+  std::shared_ptr<PerfCounters> perf_counters_;
+  std::shared_ptr<StatsTrackerHandler> stats_tracker_handler_;
 };
 
 // Don't these directly. Used to separate the Connection synchronization

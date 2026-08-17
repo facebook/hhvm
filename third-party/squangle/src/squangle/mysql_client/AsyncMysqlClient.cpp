@@ -51,7 +51,8 @@ AsyncMysqlClient::AsyncMysqlClient(
           std::move(db_stats),
           std::move(exception_builder)),
       pools_conn_limit_(std::numeric_limits<uint64_t>::max()),
-      stats_tracker_(std::make_shared<StatsTracker>()) {
+      perf_counters_(std::make_shared<PerfCounters>()),
+      stats_tracker_handler_(std::make_shared<StatsTrackerHandler>()) {
   init();
 }
 
@@ -60,7 +61,10 @@ AsyncMysqlClient::AsyncMysqlClient()
 
 void AsyncMysqlClient::init() {
   auto eventBase = getEventBase();
-  eventBase->setObserver(stats_tracker_);
+  stats_tracker_handler_->addTracker(
+      std::make_shared<DefaultStatsTracker>(perf_counters_),
+      PerfCounters::kSampleRate);
+  eventBase->setObserver(stats_tracker_handler_);
   thread_ = std::thread([eventBase]() {
 #ifdef __GLIBC__
     folly::setThreadName("async-mysql");
@@ -78,7 +82,7 @@ bool AsyncMysqlClient::runInThread(std::function<void()>&& fn, bool wait) {
     auto delay = std::chrono::duration_cast<std::chrono::microseconds>(
                      std::chrono::steady_clock::now() - scheduleTime)
                      .count();
-    stats_tracker_->callbackDelayAvg.addSample(delay);
+    perf_counters_->callbackDelayAvg.addSample(delay);
     fn();
   };
   if (wait) {

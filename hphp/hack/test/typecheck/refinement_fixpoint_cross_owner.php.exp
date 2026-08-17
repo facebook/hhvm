@@ -1,0 +1,24 @@
+ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
+  But got `IBuilder with { type TChainable = this::T } where this::T as Repro::T`
+  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
+    resulting from expanding the type constant `this::T::TChainable`
+ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
+  But got `Repro::T where \Repro::T super this::T, \Repro::T as IBuilder with { type TChainable = this::T }`
+  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
+    resulting from expanding the type constant `this::T::TChainable`
+ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
+  But got `this::T as Repro::T`
+  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
+    resulting from expanding the type constant `this::T::TChainable`

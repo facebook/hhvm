@@ -240,23 +240,30 @@ struct protocol_methods<type_class::integral, bool, ExpectedTag> {
   }
 };
 
-#define THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(            \
-    Type, Method, WireTag)                                                   \
-  template <typename ExpectedTag>                                            \
-  struct protocol_methods<type_class::floating_point, Type, ExpectedTag> {   \
-    static_assert(                                                           \
-        matches_floating_point_wire_tag_v<ExpectedTag, WireTag>,             \
-        "ExpectedTag does not match the selected floating-point overload");  \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(floating_point, Type, Method) \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(floating_point, Type, Method) \
+#define THRIFT_PROTOCOL_METHODS_REGISTER_OP_FLOATING_POINT(Type, WireTag)   \
+  template <typename ExpectedTag>                                           \
+  struct protocol_methods<type_class::floating_point, Type, ExpectedTag> {  \
+    static_assert(                                                          \
+        matches_floating_point_wire_tag_v<ExpectedTag, WireTag>,            \
+        "ExpectedTag does not match the selected floating-point overload"); \
+    template <typename Protocol>                                            \
+    static void read(Protocol& protocol, Type& out) {                       \
+      op::decode<WireTag>(protocol, out);                                   \
+    }                                                                       \
+    template <typename Protocol>                                            \
+    static std::size_t write(Protocol& protocol, Type in) {                 \
+      return op::encode<WireTag>(protocol, in);                             \
+    }                                                                       \
+    template <bool ZeroCopy, typename Protocol>                             \
+    static std::size_t serializedSize(Protocol& protocol, Type in) {        \
+      return op::serialized_size<ZeroCopy, WireTag>(protocol, in);          \
+    }                                                                       \
   }
 
-THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(
-    double, Double, type::double_t);
-THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(
-    float, Float, type::float_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_FLOATING_POINT(double, type::double_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_OP_FLOATING_POINT(float, type::float_t);
 
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD
+#undef THRIFT_PROTOCOL_METHODS_REGISTER_OP_FLOATING_POINT
 
 template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::string, Type, ExpectedTag> {

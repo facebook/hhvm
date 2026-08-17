@@ -7,6 +7,7 @@ require (
 	github.com/rsocket/rsocket-go v0.8.12
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.6.0
+	golang.org/x/sys v0.30.0
 )
 
 require (

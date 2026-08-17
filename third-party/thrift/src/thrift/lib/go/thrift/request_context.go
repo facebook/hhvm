@@ -46,12 +46,14 @@ type ClientIdentityHook func(tlsState *tls.ConnectionState, peerAddr net.Addr) a
 
 // ConnInfo contains connection information from clients of the Server.
 type ConnInfo struct {
-	LocalAddr        net.Addr
-	RemoteAddr       net.Addr
-	SecurityProtocol string
-	PeerCommonName   string
-	PeerIdentities   any
-	tlsState         tlsConnectionStater // set by thrift tcp servers
+	LocalAddr          net.Addr
+	RemoteAddr         net.Addr
+	SecurityProtocol   string
+	PeerCommonName     string
+	PeerIdentities     any
+	PeerEffectiveCreds *PeerEffectiveCreds // Holds UDS peer-creds, nil for TCP/Windows/Error
+	PeerCredError      error               // Why UDS peer-creds are missing; nil on success and for non-UDS conns.
+	tlsState           tlsConnectionStater // set by thrift tcp servers
 }
 
 // tlsConnectionStater is an abstract interface for types that can return
@@ -108,8 +110,12 @@ type RequestContext struct {
 }
 
 // withConnInfo adds connection info (from a thrift.Transport) to context, if applicable.
-// If a ClientIdentityHook is provided, it is called to extract peer identities,
-// mirroring the C++ Cpp2ConnContext constructor behavior.
+// If a ClientIdentityHook is provided, it is called to extract peer identities from the
+// TLS state into ConnInfo.PeerIdentities, mirroring the C++ Cpp2ConnContext constructor
+// behavior. Peer-creds are extracted from the raw conn into
+// ConnInfo.PeerEffectiveCreds for Unix-domain-socket conns only, mirroring the C++
+// Cpp2ConnContext which gates on AF_UNIX and hardcodes PeerCred::queryFromSocket
+// (no user-configurable hook).
 func withConnInfo(ctx context.Context, conn net.Conn, hook ClientIdentityHook) context.Context {
 	var tlsState tlsConnectionStater
 	if t, ok := conn.(tlsConnectionStater); ok {
@@ -133,6 +139,9 @@ func withConnInfo(ctx context.Context, conn net.Conn, hook ClientIdentityHook) c
 	}
 	if hook != nil {
 		connInfo.PeerIdentities = hook(connInfo.TLS(), connInfo.RemoteAddr)
+	}
+	if connInfo.LocalAddr != nil && connInfo.LocalAddr.Network() == "unix" {
+		connInfo.PeerEffectiveCreds, connInfo.PeerCredError = queryPeerCred(conn)
 	}
 	return context.WithValue(ctx, connInfoKey, connInfo)
 }

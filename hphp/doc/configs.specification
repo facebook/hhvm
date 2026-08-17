@@ -458,6 +458,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::string Autoload.TrustedDBPath = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(TrustedDBPath)
 - std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
+- std::vector<std::string> Autoload.IndexedFunctionAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedFunctionAttributes)
 - std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)
 
 # CodeCache (Eval.Jit)

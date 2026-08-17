@@ -145,6 +145,16 @@ function print_method_attrs(
   print "Attributes of $type::$method: $attrs_json\n";
 }
 
+function print_function_attrs(string $function): void {
+  $attrs = dict[];
+  foreach (HH\Facts\function_attributes($function) as $attr) {
+    $attrs[$attr] = HH\Facts\function_attribute_parameters($function, $attr);
+  }
+  \ksort(inout $attrs);
+  $attrs_json = \json_encode($attrs);
+  print "Attributes of $function: $attrs_json\n";
+}
+
 function print_file_attrs(
   string $file,
 ): void {
@@ -193,6 +203,22 @@ function print_attr_methods(
   \sort(inout $methods);
   $methods_json = \json_encode($methods);
   print "Methods decorated with $attr: $methods_json\n";
+}
+
+function print_attr_functions(
+  classname<\HH\FunctionAttribute> $attr,
+): void {
+  try {
+    $functions = HH\Facts\functions_with_attribute($attr);
+  } catch (Exception $e) {
+    print HH\Lib\Str\format(
+      'Threw %s:"%s" trying to get functions with %s%s',
+      get_class($e), $e->getMessage(), $attr, "\n");
+    return;
+  }
+  \sort(inout $functions);
+  $functions_json = \json_encode($functions);
+  print "Functions decorated with $attr: $functions_json\n";
 }
 
 function print_type_methods_with_attr(
@@ -625,6 +651,9 @@ function facts(): void {
   print_type_alias_attrs(TypeAliasWithAttr::class);
   print_method_attrs(ClassWithMethodAttrs::class, 'methodWithNoArgAttr');
   print_method_attrs(ClassWithMethodAttrs::class, 'methodWithTwoArgAttr');
+  print_function_attrs('functionWithNoArgAttr');
+  print_function_attrs('functionWithTwoArgAttr');
+  print_function_attrs('functionWithUnindexedAttr');
 
   print
     "\nThese should be empty, otherwise we're mixing types and type aliases ".
@@ -638,6 +667,9 @@ function facts(): void {
   print_attr_methods(NoArgMethodAttr::class);
   print_attr_methods(TwoArgMethodAttr::class);
   print_attr_methods(DontIndexThisMethodAttr::class);
+  print_attr_functions(NoArgFunctionAttr::class);
+  print_attr_functions(TwoArgFunctionAttr::class);
+  print_attr_functions(DontIndexThisFunctionAttr::class);
 
   print "\nGetting type methods with attribute\n";
   print_type_methods_with_attr(ClassWithMethodAttrs::class);

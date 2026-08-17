@@ -105,6 +105,7 @@ struct FactsLogger final : public FactsStore,
   Array getTypesWithAttribute(const OptString&) override;
   Array getTypeAliasesWithAttribute(const OptString&) override;
   Array getMethodsWithAttribute(const OptString&) override;
+  Array getFunctionsWithAttribute(const OptString&) override;
   Array getTypeMethodAttributes(const OptString&) override;
   Array getFilesWithAttribute(const OptString&) override;
   Array getFilesAndAttrValsWithAttribute(const OptString&) override;
@@ -115,6 +116,7 @@ struct FactsLogger final : public FactsStore,
   Array getTypeAliasAttributes(const OptString&) override;
   Array getMethodAttributes(const OptString& type, const OptString& method)
       override;
+  Array getFunctionAttributes(const OptString& function) override;
   Array getFileAttributes(const OptString&) override;
   Array getTypeAttrArgs(const OptString& type, const OptString& attr) override;
   Array getTypeAliasAttrArgs(const OptString& type, const OptString& attr)
@@ -123,6 +125,8 @@ struct FactsLogger final : public FactsStore,
       const OptString& type,
       const OptString& method,
       const OptString& attr) override;
+  Array getFunctionAttrArgs(const OptString& function, const OptString& attr)
+      override;
   Array getFileAttrArgs(const OptString& file, const OptString& attr) override;
 
  private:

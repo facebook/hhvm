@@ -103,6 +103,15 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
   else
     Abstract abstr
 
+type recursive_access_scope =
+  | Everywhere
+  | Only_in_refinement
+
+type recursive_access_info = {
+  this_name: string;
+  scope: recursive_access_scope;
+}
+
 (** Recursive class refinements (the "fluent builder" pattern) introduce
     self-referential bounds on abstract type constants:
 
@@ -119,7 +128,7 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
 
     We need to determine a [this_name] prefix so that the replacement
     generic `this_name::T` matches what [type_of_result] / [tp_name]
-    produces. There are two cases, distinguished by what [this_ty] is
+    produces. There are three cases, distinguished by what [this_ty] is
     when we reach this function:
 
     {v
@@ -128,6 +137,7 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
       I $i; $i->next()   | Tclass(I, nonexact)  | wraps in Tdependent   | Tdependent(DTexpr e1, ...)   | Expression_id e1
       this::TB $b;       | Tgeneric("C::TB")    | no-op (has "::")      | Tgeneric("C::TB")            | "C::TB"
         $b->next()       |                      |                       |                              |
+      $this->builder()   | Tgeneric("this")     | no-op                 | Tgeneric("this")             | "this"
     v}
 
     Case 1 — [this_ty] is [Tdependent (DTexpr expr_id, _)]:
@@ -150,37 +160,35 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
       ["C::TBuilder::T"]. We therefore use the generic name [s] as
       [this_name].
 
-    In both cases the replacement generic name is [this_name :: T], which
+    Case 3 — [this_ty] is the bare generic [this]:
+      We only perform the replacement inside a class-refinement bound. Direct
+      self-referential bounds still need to produce a cycle so [to_tys] can
+      restore their implicit SDT bound.
+
+    In all cases the replacement generic name is [this_name :: T], which
     is exactly the name that [type_of_result] will register in the typing
     environment with the refined upper bound, establishing the fixpoint. *)
 let eliminate_recursive_access ty type_const_name this_ty =
-  let this_name_opt =
+  let this_info_opt =
     match get_node this_ty with
-    | Tdependent (DTexpr expr_id, _) -> Some (Expression_id.display expr_id)
+    | Tdependent (DTexpr expr_id, _) ->
+      Some { this_name = Expression_id.display expr_id; scope = Everywhere }
     | Tgeneric s when String.equal s Naming_special_names.Typehints.this ->
-      (* [is_generic_dep_ty] matches "this", so without this guard we'd
-         fall into the case below and replace Taccess(Tthis, T) with
-         Tgeneric "this::T". That substitution is a valid fixpoint, but it
-         prevents cycle detection from firing during localization in
-         [to_tys] below. We rely on cycle detection there to add back
-         supportdyn<mixed> as an upper bound under everything_sdt (see
-         the comment in [to_tys]). Skipping the substitution here keeps
-         the bound as Taccess(Tthis, T), which triggers the cycle and the
-         supportdyn<mixed> fallback.
-
-         A cleaner fix would be to add supportdyn<mixed> at the decl
-         level in [maybe_add_supportdyn_bound] (decl_folded_class.ml) by
-         intersecting it with any existing explicit bound, making this
-         special case unnecessary. *)
-      None
-    | Tgeneric s when DependentKind.is_generic_dep_ty s -> Some s
+      Some { this_name = s; scope = Only_in_refinement }
+    | Tgeneric s when DependentKind.is_generic_dep_ty s ->
+      Some { this_name = s; scope = Everywhere }
     | _ -> None
   in
-  Option.value_map this_name_opt ~default:ty ~f:(fun this_name ->
-      let on_ty ty ~ctx =
+  Option.value_map this_info_opt ~default:ty ~f:(fun { this_name; scope } ->
+      let on_ty ty ~ctx:nested_in_refinement =
+        let in_scope =
+          match scope with
+          | Everywhere -> true
+          | Only_in_refinement -> nested_in_refinement
+        in
         match deref ty with
         | (reason, Taccess (root_ty, (_, name)))
-          when String.equal name type_const_name -> begin
+          when String.equal name type_const_name && in_scope -> begin
           match get_node root_ty with
           | Tthis ->
             let ty =
@@ -189,12 +197,16 @@ let eliminate_recursive_access ty type_const_name this_ty =
                   Tgeneric (Format.sprintf "%s::%s" this_name type_const_name)
                 )
             in
-            (ctx, `Stop ty)
-          | _ -> (ctx, `Continue ty)
+            (nested_in_refinement, `Stop ty)
+          | _ -> (nested_in_refinement, `Continue ty)
         end
-        | _ -> (ctx, `Continue ty)
-      and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
-      Typing_defs_core.transform_top_down_decl_ty ty ~on_ty ~on_rc_bound ~ctx:())
+        | _ -> (nested_in_refinement, `Continue ty)
+      and on_rc_bound rc_bound ~ctx:_ = (true, `Continue rc_bound) in
+      Typing_defs_core.transform_top_down_decl_ty
+        ty
+        ~on_ty
+        ~on_rc_bound
+        ~ctx:false)
 
 (** [create_root_from_type_constant ctx env root class_name class_]
   looks up a type constant in a class and returns a `result`. More precisely, it looks up

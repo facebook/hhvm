@@ -198,6 +198,15 @@ struct MethodDecl {
   }
 };
 
+struct FunctionDecl {
+  Symbol<SymKind::Function> m_name;
+  Path m_path;
+
+  bool operator==(const FunctionDecl& o) const {
+    return m_name == o.m_name && m_path == o.m_path;
+  }
+};
+
 struct FileAttrVal {
   Path m_path;
   HPHP::Optional<folly::dynamic> m_AttrVal;
@@ -240,6 +249,16 @@ struct hash<typename HPHP::Facts::MethodDecl> {
         std::hash<HPHP::Facts::TypeDecl>{}(d.m_type),
         std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Method>>{}(
             d.m_method));
+  }
+};
+
+template <>
+struct hash<typename HPHP::Facts::FunctionDecl> {
+  size_t operator()(const typename HPHP::Facts::FunctionDecl& d) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Function>>{}(
+            d.m_name),
+        std::hash<HPHP::Facts::Path>{}(d.m_path));
   }
 };
 

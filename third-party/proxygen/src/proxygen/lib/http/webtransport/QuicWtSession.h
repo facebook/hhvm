@@ -296,4 +296,54 @@ class H3WtSession final : public QuicWtSessionBase {
   uint64_t connectStreamId_;
 };
 
+/**
+ * H3WtCapsuleCallback receives parsed capsule events from the
+ * WebTransportCapsuleCodec on the http/3 CONNECT stream and forwards the
+ * relevant subset (MaxData, MaxStreams(Uni|Bidi), DrainSession, CloseSession,
+ * Datagram) to the owning H3WtSession.
+ *
+ * A datagram may reach an http/3 endpoint either as a quic datagram (RFC9297)
+ * or as a DATAGRAM capsule on the CONNECT stream, so both paths land on
+ * H3WtSession::onDatagram.
+ */
+struct H3WtCapsuleCallback : WebTransportCapsuleCodec::Callback {
+  explicit H3WtCapsuleCallback(H3WtSession& session) noexcept;
+
+  void onMaxData(WTMaxDataCapsule c) noexcept override;
+  void onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept override;
+  void onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept override;
+  void onDrainSession(DrainWebTransportSessionCapsule) noexcept override;
+  void onCloseSession(CloseWebTransportSessionCapsule c) noexcept override;
+  void onDatagram(DatagramCapsule c) noexcept override;
+  void onConnectionError(CapsuleCodec::ErrorCode error) noexcept override;
+
+  /**
+   * Streams and per-stream flow control are carried by real quic streams over
+   * http/3, so the capsules describing them are only meaningful over http/2.
+   */
+  void onPadding(PaddingCapsule) noexcept override {
+  }
+  void onResetStream(WTResetStreamCapsule) noexcept override {
+  }
+  void onStopSending(WTStopSendingCapsule) noexcept override {
+  }
+  void onStream(WTStreamCapsule) noexcept override {
+  }
+  void onMaxStreamData(WTMaxStreamDataCapsule) noexcept override {
+  }
+  void onDataBlocked(WTDataBlockedCapsule) noexcept override {
+  }
+  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override {
+  }
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override {
+  }
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override {
+  }
+  void onCapsule(uint64_t, uint64_t) noexcept override {
+  }
+
+ private:
+  H3WtSession& h3Wt_;
+};
+
 } // namespace proxygen

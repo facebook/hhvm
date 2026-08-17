@@ -20,7 +20,7 @@ hash = { path = "../../../../utils/hash" }
 indicatif = { version = "0.18.6", features = ["futures", "improved_unicode", "rayon", "tokio"] }
 intern = { version = "0.1.0", path = "../../../../utils/intern" }
 lz4 = "1.28.1"
-moka = { version = "0.12.15", features = ["future", "sync"] }
+moka = { version = "0.12.16", features = ["future", "sync"] }
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }

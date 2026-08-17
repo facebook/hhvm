@@ -8,6 +8,7 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/webtransport/QuicWtSession.h>
 #include <proxygen/lib/http/webtransport/test/Mocks.h>
@@ -316,6 +317,43 @@ TEST_F(QuicWtSessionTest, StopSending) {
 
   EXPECT_NE(writeHandle->exception(), nullptr);
   EXPECT_EQ(writeHandle->exception()->error, WT_ERROR_1);
+}
+
+/**
+ * A local STOP_SENDING must not unregister the quic read callback. The peer
+ * answers STOP_SENDING with a RESET_STREAM, and that has to reach
+ * QuicWtSessionBase::readCb_ for WtStreamManager to observe the ingress side
+ * closing -- otherwise the stream is never reaped and its credit is never
+ * returned to the peer.
+ */
+TEST_F(QuicWtSessionTest, StopSendingKeepsReadCallback) {
+  // id=2 is client-initiated uni, i.e. ingress for us
+  constexpr uint64_t kPeerUniId = 2;
+  WebTransport::StreamReadHandle* readHandle = nullptr;
+  EXPECT_CALL(*handler_, onNewUniStream(_))
+      .WillOnce(
+          [&](WebTransport::StreamReadHandle* handle) { readHandle = handle; });
+  socketDriver_.addReadEvent(kPeerUniId, nullptr, false);
+  eventBase_.loopOnce();
+  ASSERT_NE(readHandle, nullptr);
+
+  // park a read before stopping, so we can observe the peer's reset landing
+  auto readFut = readHandle->readStreamData();
+
+  auto res = session_->stopSending(kPeerUniId, WT_ERROR_1);
+  EXPECT_TRUE(res.hasValue());
+  eventBase_.loopOnce();
+  EXPECT_EQ(socketDriver_.streams_[kPeerUniId].error, WT_ERROR_1);
+  EXPECT_NE(socketDriver_.streams_[kPeerUniId].readCB, nullptr);
+
+  // the peer resets in response; this must still be delivered to us
+  socketDriver_.addReadError(
+      kPeerUniId, quic::QuicErrorCode(quic::ApplicationErrorCode(WT_ERROR_2)));
+  eventBase_.loopOnce();
+
+  EXPECT_TRUE(readFut.isReady());
+  auto result = std::move(readFut).getTry();
+  EXPECT_TRUE(result.hasException());
 }
 
 TEST_F(QuicWtSessionTest, ResetStream) {
@@ -919,6 +957,33 @@ TEST_F(H3WtSessionTest, CreateUniBidiStream) {
     auto bidi = session_->createBidiStream();
     CHECK(!uni && !bidi);
   }
+}
+
+/**
+ * A malformed capsule on the CONNECT stream is unrecoverable -- we can no
+ * longer trust the framing -- so H3WtCapsuleCallback tears the wt session down
+ * rather than ignoring it.
+ */
+TEST_F(H3WtSessionTest, CapsuleParseErrorClosesSession) {
+  expectedWtHandlerErr_ = uint32_t(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
+
+  H3WtCapsuleCallback capsuleCb{*session_};
+  WebTransportCapsuleCodec codec{&capsuleCb, CodecVersion::H3};
+
+  // a well formed MAX_DATA capsule whose length byte is rewritten to announce
+  // an 8-byte varint that is not there, so the codec reports a parse error
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  writeWTMaxData(queue, WTMaxDataCapsule{100});
+  auto buf = queue.move();
+  buf->writableData()[5] = 0xFF;
+
+  codec.onIngress(std::move(buf), true);
+
+  // the handler is notified via the fixture's onSessionEnd expectation, and the
+  // session queues a CLOSE_SESSION for the connect stream
+  EXPECT_FALSE(connectStreamCb_.events.empty());
+  EXPECT_TRUE(std::holds_alternative<detail::WtStreamManager::CloseSession>(
+      connectStreamCb_.events.back()));
 }
 
 TEST_F(H3WtSessionTest, AcquireIngressStream) {

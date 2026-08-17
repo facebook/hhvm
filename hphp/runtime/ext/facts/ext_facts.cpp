@@ -224,12 +224,15 @@ struct SqliteAutoloadMapKey {
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
         .m_indexedMethodAttrs = repoOptions.flags().indexedMethodAttributes(),
+        .m_indexedFunctionAttrs =
+            repoOptions.flags().indexedFunctionAttributes(),
         .m_dbKey = std::move(dbKey)};
   }
 
   bool operator==(const SqliteAutoloadMapKey& rhs) const noexcept {
     return m_root == rhs.m_root && m_queryExpr == rhs.m_queryExpr &&
         m_indexedMethodAttrs == rhs.m_indexedMethodAttrs &&
+        m_indexedFunctionAttrs == rhs.m_indexedFunctionAttrs &&
         m_dbKey == rhs.m_dbKey;
   }
 
@@ -243,11 +246,21 @@ struct SqliteAutoloadMapKey {
     }
     indexedMethodAttrString += '}';
 
+    std::string indexedFunctionAttrString = "{";
+    for (auto const& v : m_indexedFunctionAttrs) {
+      if (indexedFunctionAttrString.size() > 1) {
+        indexedFunctionAttrString += ',';
+      }
+      indexedFunctionAttrString += v;
+    }
+    indexedFunctionAttrString += '}';
+
     return fmt::format(
-        "SqliteAutoloadMapKey({}, {}, {}, {})",
+        "SqliteAutoloadMapKey({}, {}, {}, {}, {})",
         m_root.native(),
         folly::toJson(m_queryExpr),
         indexedMethodAttrString,
+        indexedFunctionAttrString,
         m_dbKey.toString());
   }
 
@@ -257,12 +270,15 @@ struct SqliteAutoloadMapKey {
         m_queryExpr.hash(),
         folly::hash::hash_range(
             m_indexedMethodAttrs.begin(), m_indexedMethodAttrs.end()),
+        folly::hash::hash_range(
+            m_indexedFunctionAttrs.begin(), m_indexedFunctionAttrs.end()),
         m_dbKey.hash());
   }
 
   fs::path m_root;
   folly::dynamic m_queryExpr;
   std::vector<std::string> m_indexedMethodAttrs;
+  std::vector<std::string> m_indexedFunctionAttrs;
   SQLiteKey m_dbKey;
 };
 
@@ -473,7 +489,8 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
              make_trusted_facts(
                  mapKey->m_root,
                  std::move(dbOpener),
-                 mapKey->m_indexedMethodAttrs)})
+                 mapKey->m_indexedMethodAttrs,
+                 mapKey->m_indexedFunctionAttrs)})
         .first->second.get();
   }
 
@@ -497,7 +514,8 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
                make_watcher(*mapKey),
                Cfg::Server::Mode,
                std::move(updateSuppressionPath),
-               mapKey->m_indexedMethodAttrs)})
+               mapKey->m_indexedMethodAttrs,
+               mapKey->m_indexedFunctionAttrs)})
       .first->second.get();
 }
 
@@ -840,6 +858,10 @@ Array HHVM_FUNCTION(facts_methods_with_attribute, const OptString& attr) {
   return Facts::getFactsOrThrow().getMethodsWithAttribute(attr);
 }
 
+Array HHVM_FUNCTION(facts_functions_with_attribute, const OptString& attr) {
+  return Facts::getFactsOrThrow().getFunctionsWithAttribute(attr);
+}
+
 Array HHVM_FUNCTION(facts_type_method_attributes, const OptString& type) {
   return Facts::getFactsOrThrow().getTypeMethodAttributes(type);
 }
@@ -877,6 +899,10 @@ Array HHVM_FUNCTION(
   return Facts::getFactsOrThrow().getMethodAttributes(type, method);
 }
 
+Array HHVM_FUNCTION(facts_function_attributes, const OptString& function) {
+  return Facts::getFactsOrThrow().getFunctionAttributes(function);
+}
+
 Array HHVM_FUNCTION(facts_file_attributes, const OptString& file) {
   return Facts::getFactsOrThrow().getFileAttributes(file);
 }
@@ -901,6 +927,13 @@ Array HHVM_FUNCTION(
     const OptString& method,
     const OptString& attr) {
   return Facts::getFactsOrThrow().getMethodAttrArgs(type, method, attr);
+}
+
+Array HHVM_FUNCTION(
+    facts_function_attribute_parameters,
+    const OptString& function,
+    const OptString& attr) {
+  return Facts::getFactsOrThrow().getFunctionAttrArgs(function, attr);
 }
 
 Array HHVM_FUNCTION(
@@ -989,6 +1022,9 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\methods_with_attribute, HHVM_FN(facts_methods_with_attribute));
   HHVM_NAMED_FE(
+      HH\\Facts\\functions_with_attribute,
+      HHVM_FN(facts_functions_with_attribute));
+  HHVM_NAMED_FE(
       HH\\Facts\\type_method_attributes, HHVM_FN(facts_type_method_attributes));
   HHVM_NAMED_FE(
       HH\\Facts\\files_with_attribute, HHVM_FN(facts_files_with_attribute));
@@ -1002,6 +1038,8 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));
   HHVM_NAMED_FE(HH\\Facts\\method_attributes, HHVM_FN(facts_method_attributes));
+  HHVM_NAMED_FE(
+      HH\\Facts\\function_attributes, HHVM_FN(facts_function_attributes));
   HHVM_NAMED_FE(HH\\Facts\\file_attributes, HHVM_FN(facts_file_attributes));
   HHVM_NAMED_FE(
       HH\\Facts\\type_attribute_parameters,
@@ -1012,6 +1050,9 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\method_attribute_parameters,
       HHVM_FN(facts_method_attribute_parameters));
+  HHVM_NAMED_FE(
+      HH\\Facts\\function_attribute_parameters,
+      HHVM_FN(facts_function_attribute_parameters));
   HHVM_NAMED_FE(
       HH\\Facts\\file_attribute_parameters,
       HHVM_FN(facts_file_attribute_parameters));

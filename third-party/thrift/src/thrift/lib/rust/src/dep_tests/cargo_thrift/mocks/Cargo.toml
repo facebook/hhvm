@@ -20,7 +20,7 @@ anyhow = "1.0.104"
 async-trait = "0.1.92"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 fbthrift = { version = "0.0.1", path = "../../../.." }
-futures = { version = "0.3.31", features = ["async-await", "compat"] }
+futures = { version = "0.3.34", features = ["async-await", "compat"] }
 rust = { version = "0.0.1", path = "../../../../annotation/rust" }
 rust_clients = { version = "0.0.1", path = "../../../../annotation/rust/clients" }
 rust_mocks = { version = "0.0.1", path = "../../../../annotation/rust/mocks" }

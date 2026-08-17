@@ -272,6 +272,11 @@ struct FactsStore : public AutoloadMap {
   virtual Array getMethodsWithAttribute(const OptString& attr) = 0;
 
   /**
+   * Return all functions decorated with the given indexed attribute.
+   */
+  virtual Array getFunctionsWithAttribute(const OptString& attr) = 0;
+
+  /**
    * Return the methods of a given type that have any indexed attribute,
    * mapped to their attribute names.
    */
@@ -314,6 +319,11 @@ struct FactsStore : public AutoloadMap {
   virtual Array getMethodAttributes(const OptString& type, const OptString& method) = 0;
 
   /**
+   * Return all indexed attributes decorating the given function.
+   */
+  virtual Array getFunctionAttributes(const OptString& function) = 0;
+
+  /**
    * Return all attributes decorating the given file.
    */
   virtual Array getFileAttributes(const OptString& file) = 0;
@@ -343,6 +353,12 @@ struct FactsStore : public AutoloadMap {
    */
   virtual Array getMethodAttrArgs(
       const OptString& type, const OptString& method, const OptString& attr) = 0;
+
+  /**
+   * Return the arguments associated with the given function attribute.
+   */
+  virtual Array getFunctionAttrArgs(
+      const OptString& function, const OptString& attr) = 0;
 
   /**
    * Return the arguments associated with the given file and attribute, as a

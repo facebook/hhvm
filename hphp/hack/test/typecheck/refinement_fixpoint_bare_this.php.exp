@@ -1,0 +1,24 @@
+ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
+  But got `Ok with { type TChainable = this::TChainable } where this::TChainable as Ok::TChainable`
+  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
+    resulting from expanding the type constant `this::TChainable::TChainable`
+ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
+  But got `Ok::TChainable where \Ok::TChainable super this::TChainable, \Ok::TChainable as Ok with { type TChainable = this::TChainable }`
+  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
+    resulting from expanding the type constant `this::TChainable::TChainable`
+ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
+Invalid argument (Typing[4110])
+  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
+  Expected `Banana`
+  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
+  But got `this::TChainable as Ok::TChainable`
+  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
+    resulting from expanding the type constant `this::TChainable::TChainable`

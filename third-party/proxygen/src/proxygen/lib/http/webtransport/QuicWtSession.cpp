@@ -44,7 +44,9 @@ struct QuicWtEventVisitor {
   }
 
   void operator()(WtStreamManager::StopSending ev) const {
-    quicSocket.setReadCallback(ev.streamId, nullptr, ev.err);
+    // not setReadCallback(id, nullptr, err): that also unregisters the read
+    // callback, so the peer's RESET_STREAM would never close the ingress side
+    quicSocket.stopSending(ev.streamId, ev.err);
   }
 
   // operations need to be serialized on the backing http/3 connect stream (if
@@ -588,6 +590,51 @@ void H3WtSession::onCloseSession(WtStreamManager::CloseSession&& cs) noexcept {
 
 void H3ConnectStreamCallback::onEvent(WtStreamManager::Event&& ev) noexcept {
   std::visit(visitor, ev);
+}
+
+H3WtCapsuleCallback::H3WtCapsuleCallback(H3WtSession& session) noexcept
+    : h3Wt_(session) {
+}
+
+void H3WtCapsuleCallback::onMaxData(WTMaxDataCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxData=" << c.maximumData;
+  h3Wt_.onConnMaxData({.maxData = c.maximumData});
+}
+
+void H3WtCapsuleCallback::onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxStreams=" << c.maximumStreams;
+  h3Wt_.onMaxStreams(WtStreamManager::MaxStreamsBidi{c.maximumStreams});
+}
+
+void H3WtCapsuleCallback::onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; maxStreams=" << c.maximumStreams;
+  h3Wt_.onMaxStreams(WtStreamManager::MaxStreamsUni{c.maximumStreams});
+}
+
+void H3WtCapsuleCallback::onDrainSession(
+    DrainWebTransportSessionCapsule) noexcept {
+  XLOG(DBG6) << __func__;
+  h3Wt_.onDrainSession({});
+}
+
+void H3WtCapsuleCallback::onCloseSession(
+    CloseWebTransportSessionCapsule c) noexcept {
+  XLOG(DBG6) << __func__ << "; err=" << c.applicationErrorCode
+             << "; msg=" << c.applicationErrorMessage;
+  h3Wt_.onCloseSession(
+      {.err = c.applicationErrorCode, .msg = c.applicationErrorMessage});
+}
+
+void H3WtCapsuleCallback::onDatagram(DatagramCapsule c) noexcept {
+  XLOG(DBG6) << __func__;
+  h3Wt_.onDatagram(std::move(c.httpDatagramPayload));
+}
+
+void H3WtCapsuleCallback::onConnectionError(
+    CapsuleCodec::ErrorCode error) noexcept {
+  XLOG(DBG4) << __func__ << "; err=" << uint64_t(error);
+  onCloseSession({.applicationErrorCode = uint32_t(error),
+                  .applicationErrorMessage = "capsule parse error"});
 }
 
 } // namespace proxygen

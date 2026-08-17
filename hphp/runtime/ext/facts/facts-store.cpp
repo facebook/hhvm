@@ -389,6 +389,14 @@ Array makeVecOfStringString(const std::vector<MethodDecl>& vector) {
   return ret.toArray();
 }
 
+Array makeVecOfFunctionString(const std::vector<FunctionDecl>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto const& function : vector) {
+    ret.append(make_tv<KindOfPersistentString>(function.m_name.get()));
+  }
+  return ret.toArray();
+}
+
 TypedValue tvFromDynamic(folly::dynamic&& dy) {
   if (dy.isBool()) {
     return make_tv<KindOfBoolean>(std::move(dy).getBool());
@@ -520,7 +528,8 @@ struct FactsStoreImpl final
       AutoloadDB::Opener dbOpener,
       std::shared_ptr<Watcher> watcher,
       Optional<std::filesystem::path> suppressionFilePath,
-      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttributes)
       : m_updateExec{std::make_unique<folly::CPUThreadPoolExecutor>(
             1,
             make_thread_factory("Autoload update"))},
@@ -529,6 +538,7 @@ struct FactsStoreImpl final
             m_root,
             std::move(dbOpener),
             std::move(indexedMethodAttributes),
+            std::move(indexedFunctionAttributes),
             Cfg::Autoload::DBEnableBlockingDbWait,
             Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
             std::chrono::milliseconds(Cfg::Autoload::DBBlockingDbWaitTimeoutMs),
@@ -540,12 +550,14 @@ struct FactsStoreImpl final
   FactsStoreImpl(
       fs::path root,
       AutoloadDB::Opener dbOpener,
-      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttributes)
       : m_root{std::move(root)},
         m_symbolMap{
             m_root,
             std::move(dbOpener),
             std::move(indexedMethodAttributes),
+            std::move(indexedFunctionAttributes),
             Cfg::Autoload::DBEnableBlockingDbWait,
             Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
             std::chrono::milliseconds(
@@ -968,6 +980,18 @@ struct FactsStoreImpl final
         m_symbolMap.getMethodsWithAttribute(*attr.get()));
   }
 
+  Array getFunctionsWithAttribute(const OptString& attr) override {
+    if (UNLIKELY(!m_symbolMap.isFunctionAttrIndexed(*attr.get()))) {
+      HPHP::SystemLib::throwRuntimeExceptionObject(
+          fmt::format(
+              "Queried attribute {} not found in IndexedFunctionAttributes={}",
+              attr.get()->data(),
+              m_symbolMap.debugIndexedFunctionAttrs()));
+    }
+    return makeVecOfFunctionString(
+        m_symbolMap.getFunctionsWithAttribute(*attr.get()));
+  }
+
   Array getTypeMethodAttributes(const OptString& type) override {
     return makeDictOfStringVecString(
         m_symbolMap.getTypeMethodAttributes(*type.get()));
@@ -1016,6 +1040,11 @@ struct FactsStoreImpl final
         m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
   }
 
+  Array getFunctionAttributes(const OptString& function) override {
+    return makeVecOfString(
+        m_symbolMap.getAttributesOfFunction(*function.get()));
+  }
+
   Array getFileAttributes(const OptString& file) override {
     return makeVecOfString(m_symbolMap.getAttributesOfFile(Path{*file.get()}));
   }
@@ -1039,6 +1068,13 @@ struct FactsStoreImpl final
       const OptString& attribute) override {
     return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
         *type.get(), *method.get(), *attribute.get()));
+  }
+
+  Array getFunctionAttrArgs(
+      const OptString& function,
+      const OptString& attribute) override {
+    return makeVecOfDynamic(m_symbolMap.getFunctionAttributeArgs(
+        *function.get(), *attribute.get()));
   }
 
   Array getFileAttrArgs(const OptString& file, const OptString& attribute)
@@ -1655,18 +1691,25 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
-    const std::vector<std::string>& indexedMethodAttrsVec) {
+    const std::vector<std::string>& indexedMethodAttrsVec,
+    const std::vector<std::string>& indexedFunctionAttrsVec) {
   hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
+  }
+  hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttrs;
+  indexedFunctionAttrs.reserve(indexedFunctionAttrsVec.size());
+  for (auto& v : indexedFunctionAttrsVec) {
+    indexedFunctionAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
   auto inner = std::make_shared<FactsStoreImpl>(
       std::move(root),
       std::move(dbOpener),
       std::move(watcher),
       std::move(suppressionFilePath),
-      std::move(indexedMethodAttrs));
+      std::move(indexedMethodAttrs),
+      std::move(indexedFunctionAttrs));
   if (shouldSubscribe) {
     inner->subscribe();
   }
@@ -1680,14 +1723,23 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 std::shared_ptr<FactsStore> make_trusted_facts(
     fs::path root,
     AutoloadDB::Opener dbOpener,
-    const std::vector<std::string>& indexedMethodAttrsVec) {
+    const std::vector<std::string>& indexedMethodAttrsVec,
+    const std::vector<std::string>& indexedFunctionAttrsVec) {
   hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
+  hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttrs;
+  indexedFunctionAttrs.reserve(indexedFunctionAttrsVec.size());
+  for (auto& v : indexedFunctionAttrsVec) {
+    indexedFunctionAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
+  }
   auto inner = std::make_unique<FactsStoreImpl>(
-      std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
+      std::move(root),
+      std::move(dbOpener),
+      std::move(indexedMethodAttrs),
+      std::move(indexedFunctionAttrs));
   return FactsLogger::wrap(
       std::move(inner),
       "ext_facts trusted",

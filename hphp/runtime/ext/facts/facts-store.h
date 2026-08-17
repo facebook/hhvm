@@ -40,7 +40,8 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
-    const std::vector<std::string>& indexedMethodAttributes);
+    const std::vector<std::string>& indexedMethodAttributes,
+    const std::vector<std::string>& indexedFunctionAttributes);
 
 /**
  * Create a FactsStore that trusts the DB that `dbOpener` returns, and never
@@ -49,7 +50,8 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 std::shared_ptr<FactsStore> make_trusted_facts(
     std::filesystem::path root,
     AutoloadDB::Opener dbOpener,
-    const std::vector<std::string>& indexedMethodAttributes);
+    const std::vector<std::string>& indexedMethodAttributes,
+    const std::vector<std::string>& indexedFunctionAttributes);
 
 } // namespace Facts
 } // namespace HPHP

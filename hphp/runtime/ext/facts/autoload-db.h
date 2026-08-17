@@ -163,6 +163,13 @@ struct AutoloadDB {
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
+  virtual void insertFunctionAttribute(
+      const std::filesystem::path& path,
+      std::string_view function,
+      std::string_view attributeName,
+      Optional<int> attributePosition,
+      const folly::dynamic* attributeValue) = 0;
+
   virtual void insertFileAttribute(
       const std::filesystem::path& path,
       std::string_view attributeName,
@@ -176,6 +183,10 @@ struct AutoloadDB {
   virtual std::vector<std::string> getAttributesOfMethod(
       std::string_view type,
       std::string_view method,
+      const std::filesystem::path& path) = 0;
+
+  virtual std::vector<std::string> getAttributesOfFunction(
+      std::string_view function,
       const std::filesystem::path& path) = 0;
 
   virtual std::vector<std::string> getAttributesOfFile(
@@ -197,6 +208,11 @@ struct AutoloadDB {
       std::string_view path,
       std::string_view attributeName) = 0;
 
+  virtual std::vector<folly::dynamic> getFunctionAttributeArgs(
+      std::string_view function,
+      std::string_view path,
+      std::string_view attributeName) = 0;
+
   virtual std::vector<folly::dynamic> getFileAttributeArgs(
       std::string_view path,
       std::string_view attributeName) = 0;
@@ -209,6 +225,9 @@ struct AutoloadDB {
   virtual std::vector<MethodPath> getPathMethods(std::string_view path) = 0;
 
   virtual std::vector<MethodPath> getMethodsWithAttribute(
+      std::string_view attributeName) = 0;
+
+  virtual std::vector<SymbolPath> getFunctionsWithAttribute(
       std::string_view attributeName) = 0;
 
   virtual std::vector<std::pair<std::string, std::string>>

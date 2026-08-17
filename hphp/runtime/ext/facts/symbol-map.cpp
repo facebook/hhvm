@@ -150,6 +150,7 @@ SymbolMap::SymbolMap(
     fs::path root,
     AutoloadDB::Opener dbOpener,
     hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs,
+    hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttrs,
     bool enableBlockingDbWait,
     bool useSymbolMapForGetFilesWithAttrAndAnyVal,
     std::chrono::milliseconds blockingDbWaitTimeout)
@@ -159,6 +160,7 @@ SymbolMap::SymbolMap(
       m_root{std::move(root)},
       m_dbVault{std::move(dbOpener)},
       m_indexedMethodAttrs{std::move(indexedMethodAttrs)},
+      m_indexedFunctionAttrs{std::move(indexedFunctionAttrs)},
       m_enableBlockingDbWait{enableBlockingDbWait},
       m_blockingDbWaitTimeout{blockingDbWaitTimeout},
       m_useSymbolMapForGetFilesWithAttrAndAnyVal{
@@ -815,6 +817,87 @@ std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
   return getMethodsWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfFunction(
+    Symbol<SymKind::Function> function) {
+  auto path = getSymbolPath(function);
+  if (path == nullptr) {
+    return {};
+  }
+  using AttrVec = std::vector<Symbol<SymKind::Type>>;
+  auto makeVec = [](auto const& attrs) -> AttrVec {
+    AttrVec result;
+    result.reserve(attrs.size());
+    for (auto const& attr : attrs) {
+      result.emplace_back(attr);
+    }
+    return result;
+  };
+  FunctionDecl functionDecl{.m_name = function, .m_path = path};
+  return readOrUpdate<AttrVec>(
+      [&](const Data& data) -> Optional<AttrVec> {
+        auto attrs = data.m_functionAttrs.getAttributes(functionDecl);
+        return attrs ? Optional<AttrVec>{makeVec(*attrs)} : std::nullopt;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> AttrVec {
+        auto const attrStrs = db->getAttributesOfFunction(
+            function.slice(), fs::path{std::string{path.slice()}});
+        AttrVec attrs;
+        attrs.reserve(attrStrs.size());
+        for (auto const& attr : attrStrs) {
+          attrs.emplace_back(attr);
+        }
+        return attrs;
+      },
+      [&](Data& data, AttrVec attrsFromDB) -> AttrVec {
+        return makeVec(data.m_functionAttrs.getAttributes(
+            functionDecl, std::move(attrsFromDB)));
+      });
+}
+
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfFunction(
+    const StringData& function) {
+  return getAttributesOfFunction(Symbol<SymKind::Function>{function});
+}
+
+std::vector<FunctionDecl> SymbolMap::getFunctionsWithAttribute(
+    Symbol<SymKind::Type> attr) {
+  using FunctionVec = std::vector<FunctionDecl>;
+  auto makeVec = [](auto&& functions) -> FunctionVec {
+    FunctionVec result;
+    result.reserve(functions.size());
+    for (auto&& function : std::move(functions)) {
+      result.push_back(std::move(function));
+    }
+    return result;
+  };
+  return readOrUpdate<FunctionVec>(
+      [&](const Data& data) -> Optional<FunctionVec> {
+        auto functions = data.m_functionAttrs.getKeysWithAttribute(attr);
+        return functions ? Optional<FunctionVec>{makeVec(*functions)}
+                         : std::nullopt;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> FunctionVec {
+        auto const dbFunctions = db->getFunctionsWithAttribute(attr.slice());
+        FunctionVec functions;
+        functions.reserve(dbFunctions.size());
+        for (auto const& [function, path] : dbFunctions) {
+          functions.push_back(
+              {.m_name = Symbol<SymKind::Function>{function},
+               .m_path = Path{std::string_view{path}}});
+        }
+        return functions;
+      },
+      [&](Data& data, FunctionVec functionsFromDB) -> FunctionVec {
+        return makeVec(data.m_functionAttrs.getKeysWithAttribute(
+            attr, std::move(functionsFromDB)));
+      });
+}
+
+std::vector<FunctionDecl> SymbolMap::getFunctionsWithAttribute(
+    const StringData& attr) {
+  return getFunctionsWithAttribute(Symbol<SymKind::Type>{attr});
+}
+
 std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
 SymbolMap::getTypeMethodAttributes(Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);
@@ -1120,6 +1203,42 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
       Symbol<SymKind::Type>{attribute});
 }
 
+std::vector<folly::dynamic> SymbolMap::getFunctionAttributeArgs(
+    Symbol<SymKind::Function> function,
+    Symbol<SymKind::Type> attr) {
+  auto const attrs = getAttributesOfFunction(function);
+  if (std::find(attrs.begin(), attrs.end(), attr) == attrs.end()) {
+    return {};
+  }
+  auto path = getSymbolPath(function);
+  if (path == nullptr) {
+    return {};
+  }
+  using ArgVec = std::vector<folly::dynamic>;
+  FunctionDecl functionDecl{.m_name = function, .m_path = path};
+  return readOrUpdate<ArgVec>(
+      [&](const Data& data) -> Optional<ArgVec> {
+        auto const* args =
+            data.m_functionAttrs.getAttributeArgs(functionDecl, attr);
+        return args ? Optional<ArgVec>{*args} : std::nullopt;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getFunctionAttributeArgs(
+            function.slice(), path.slice(), attr.slice());
+      },
+      [&](Data& data, ArgVec argsFromDB) -> ArgVec {
+        return data.m_functionAttrs.getAttributeArgs(
+            functionDecl, attr, std::move(argsFromDB));
+      });
+}
+
+std::vector<folly::dynamic> SymbolMap::getFunctionAttributeArgs(
+    const StringData& function,
+    const StringData& attribute) {
+  return getFunctionAttributeArgs(
+      Symbol<SymKind::Function>{function}, Symbol<SymKind::Type>{attribute});
+}
+
 std::vector<folly::dynamic> SymbolMap::getFileAttributeArgs(
     Path path,
     Symbol<SymKind::Type> attr) {
@@ -1188,12 +1307,31 @@ bool SymbolMap::isAttrIndexed(const StringData& attr) const {
   return m_indexedMethodAttrs.contains(Symbol<SymKind::Type>{attr});
 }
 
+bool SymbolMap::isFunctionAttrIndexed(const StringData& attr) const {
+  return m_indexedFunctionAttrs.contains(Symbol<SymKind::Type>{attr});
+}
+
 std::string SymbolMap::debugIndexedAttrs() const {
   std::stringstream s;
   s << '[';
   auto delim = "";
   auto const& set = m_indexedMethodAttrs;
   for (auto it = set.rbegin(), end = set.rend(); it != end; ++it) {
+    s << delim << it->slice();
+    delim = ",";
+  }
+  s << ']';
+  return s.str();
+}
+
+std::string SymbolMap::debugIndexedFunctionAttrs() const {
+  std::stringstream s;
+  s << '[';
+  auto delim = "";
+  for (auto it = m_indexedFunctionAttrs.rbegin(),
+            end = m_indexedFunctionAttrs.rend();
+       it != end;
+       ++it) {
     s << delim << it->slice();
     delim = ",";
   }
@@ -1316,7 +1454,10 @@ void SymbolMap::update(
   // Write information about base and derived types
   for (auto i = 0; i < alteredPaths.size(); i++) {
     wlock->updatePath(
-        Path{alteredPaths[i]}, alteredPathFacts[i], m_indexedMethodAttrs);
+        Path{alteredPaths[i]},
+        alteredPathFacts[i],
+        m_indexedMethodAttrs,
+        m_indexedFunctionAttrs);
   }
 
   for (auto const& path : deletedPaths) {
@@ -1616,6 +1757,29 @@ void SymbolMap::updateDBPath(
     db.insertFunction(as_slice(function), path);
   }
 
+  for (auto const& function : facts.function_attributes) {
+    for (auto const& attribute : function.attributes) {
+      if (!m_indexedFunctionAttrs.count(
+              Symbol<SymKind::Type>{as_slice(attribute.name)})) {
+        continue;
+      }
+      if (attribute.args.empty()) {
+        db.insertFunctionAttribute(
+            path,
+            as_slice(function.name),
+            as_slice(attribute.name),
+            std::nullopt,
+            nullptr);
+      } else {
+        for (auto i = 0; i < attribute.args.size(); ++i) {
+          folly::dynamic arg = std::string{attribute.args[i]};
+          db.insertFunctionAttribute(
+              path, as_slice(function.name), as_slice(attribute.name), i, &arg);
+        }
+      }
+    }
+  }
+
   for (auto const& constant : facts.constants) {
     db.insertConstant(as_slice(constant), path);
   }
@@ -1805,12 +1969,14 @@ SymbolMap::Data::Data()
       m_typeAttrs{m_versions},
       m_typeAliasAttrs{m_versions},
       m_methodAttrs{m_versions},
+      m_functionAttrs{m_versions},
       m_fileAttrs{m_versions} {}
 
 void SymbolMap::Data::updatePath(
     Path path,
     FileFacts facts,
-    const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
+    const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs,
+    const hphp_vector_set<Symbol<SymKind::Type>>& indexedFunctionAttrs) {
   m_versions->bumpVersion(getVersionKey<Path>(path));
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
@@ -1896,9 +2062,28 @@ void SymbolMap::Data::updatePath(
   }
 
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
+  const rust::Vec<AttrFacts> noFunctionAttributes;
   for (auto const& function : facts.functions) {
     always_assert(!function.empty());
-    functions.push_back(Symbol<SymKind::Function>{as_slice(function)});
+    auto const functionName = Symbol<SymKind::Function>{as_slice(function)};
+    functions.push_back(functionName);
+    m_functionAttrs.setAttributes(
+        {.m_name = functionName, .m_path = path}, noFunctionAttributes);
+  }
+
+  for (auto& function : facts.function_attributes) {
+    auto& attrs = function.attributes;
+    auto iter = std::partition(attrs.begin(), attrs.end(), [&](auto& attr) {
+      return indexedFunctionAttrs.contains(
+          Symbol<SymKind::Type>{as_slice(attr.name)});
+    });
+    if (iter != attrs.end()) {
+      attrs.truncate(std::distance(attrs.begin(), iter));
+    }
+    m_functionAttrs.setAttributes(
+        {.m_name = Symbol<SymKind::Function>{as_slice(function.name)},
+         .m_path = path},
+        std::move(attrs));
   }
 
   typename PathToSymbolsMap<SymKind::Constant>::Symbols constants;

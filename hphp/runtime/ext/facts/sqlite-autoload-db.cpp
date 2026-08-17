@@ -122,7 +122,10 @@ constexpr int toDBEnum(DeriveKind kind) {
   return -1;
 }
 
-void createSchema(SQLiteTxn& txn, bool excludePackageMembership) {
+void createSchema(
+    SQLiteTxn& txn,
+    bool excludePackageMembership,
+    bool includeFunctionAttributes) {
   // Basically copied wholesale from FlibAutoloadMapSQL.php in WWW.
 
   // Common DB
@@ -159,6 +162,18 @@ void createSchema(SQLiteTxn& txn, bool excludePackageMembership) {
       " function TEXT NOT NULL,"
       " UNIQUE (pathid, function)"
       ")");
+
+  if (includeFunctionAttributes) {
+    txn.exec(
+        "CREATE TABLE IF NOT EXISTS function_attributes ("
+        " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+        " function TEXT NOT NULL,"
+        " attribute_name TEXT NOT NULL,"
+        " attribute_position INTEGER NULL,"
+        " attribute_value TEXT NULL,"
+        " UNIQUE (pathid, function, attribute_name, attribute_position)"
+        ")");
+  }
 
   txn.exec(
       "CREATE TABLE IF NOT EXISTS constant_paths ("
@@ -238,7 +253,7 @@ void createSchema(SQLiteTxn& txn, bool excludePackageMembership) {
   }
 }
 
-void rebuildIndices(SQLiteTxn& txn) {
+void rebuildIndices(SQLiteTxn& txn, bool includeFunctionAttributes) {
   // Basically copied wholesale from FlibAutoloadMapSQL.php in WWW.
 
   // all_paths
@@ -261,6 +276,18 @@ void rebuildIndices(SQLiteTxn& txn) {
   txn.exec(
       "CREATE INDEX IF NOT EXISTS function_paths__function"
       " ON function_paths (function)");
+
+  if (includeFunctionAttributes) {
+    // function_attributes
+    txn.exec(
+        "CREATE INDEX IF NOT EXISTS "
+        "function_attributes__attribute_name__function__attribute_position"
+        " ON function_attributes ("
+        "  attribute_name,"
+        "  function,"
+        "  attribute_position"
+        ")");
+  }
 
   // constant_paths
   txn.exec(
@@ -501,7 +528,8 @@ struct TypeStmts {
             " WHERE name = @type"
             " AND method = @method"
             " AND path = @path"
-            " AND attribute_name = @attribute_name")},
+            " AND attribute_name = @attribute_name"
+            " ORDER BY attribute_position")},
         m_getTypesWithAttribute{db.prepare(
             "SELECT name, path FROM ("
             " SELECT DISTINCT typeid FROM type_attributes"
@@ -605,8 +633,49 @@ struct FileStmts {
   SQLiteStmt m_getFilesAndAttrValsWithAttribute;
 };
 
+struct FunctionAttributeStmts {
+  explicit FunctionAttributeStmts(SQLite& db)
+      : m_insert{db.prepare(
+            "INSERT OR IGNORE INTO function_attributes ("
+            " pathid,"
+            " function,"
+            " attribute_name,"
+            " attribute_position,"
+            " attribute_value"
+            ") VALUES ("
+            " (SELECT pathid FROM all_paths WHERE path=@path),"
+            " @function,"
+            " @attribute_name,"
+            " @attribute_position,"
+            " @attribute_value"
+            ")")},
+        m_getAttributes{db.prepare(
+            "SELECT DISTINCT attribute_name"
+            " FROM function_attributes"
+            " JOIN all_paths USING (pathid)"
+            " WHERE function=@function AND path=@path")},
+        m_getAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM function_attributes"
+            " JOIN all_paths USING (pathid)"
+            " WHERE function=@function"
+            " AND path=@path"
+            " AND attribute_name=@attribute_name"
+            " ORDER BY attribute_position")},
+        m_getFunctionsWithAttribute{db.prepare(
+            "SELECT DISTINCT function, path"
+            " FROM function_attributes"
+            " JOIN all_paths USING (pathid)"
+            " WHERE attribute_name=@attribute_name")} {}
+
+  SQLiteStmt m_insert;
+  SQLiteStmt m_getAttributes;
+  SQLiteStmt m_getAttributeArgs;
+  SQLiteStmt m_getFunctionsWithAttribute;
+};
+
 struct FunctionStmts {
-  explicit FunctionStmts(SQLite& db)
+  explicit FunctionStmts(SQLite& db, bool includeFunctionAttributes)
       : m_insert{db.prepare(
             "INSERT OR IGNORE INTO function_paths (function, pathid) VALUES ("
             " @function,"
@@ -619,11 +688,16 @@ struct FunctionStmts {
         m_getPathFunctions{db.prepare(
             "SELECT function FROM function_paths"
             " JOIN all_paths USING (pathid)"
-            " WHERE path=@path")} {}
+            " WHERE path=@path")},
+        m_attributes{
+            includeFunctionAttributes
+                ? std::make_unique<FunctionAttributeStmts>(db)
+                : nullptr} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getFunctionPath;
   SQLiteStmt m_getPathFunctions;
+  std::unique_ptr<FunctionAttributeStmts> m_attributes;
 };
 
 struct ConstantStmts {
@@ -738,14 +812,17 @@ struct ClockStmts {
 };
 
 struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
-  explicit SQLiteAutoloadDBImpl(SQLite db, bool excludePackageMembership)
+  explicit SQLiteAutoloadDBImpl(
+      SQLite db,
+      bool excludePackageMembership,
+      bool includeFunctionAttributes)
       : m_db{std::move(db)},
         m_txn{m_db.begin()},
         m_pathStmts{m_db},
         m_sha1HexStmts{m_db},
         m_typeStmts{m_db},
         m_fileStmts{m_db},
-        m_functionStmts{m_db},
+        m_functionStmts{m_db, includeFunctionAttributes},
         m_constantStmts{m_db},
         m_validateSmts{m_db},
         m_moduleStmts{m_db},
@@ -816,14 +893,16 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       // we can't do package overrides.
       bool excludePackageMembership = db.isReadOnly() &&
           (!db.hasTable("packages") || !db.hasTable("file_package_membership"));
+      bool includeFunctionAttributes = db.hasTable("function_attributes") ||
+          key.m_mode == SQLite::OpenMode::ReadWriteCreate;
 
       {
         XLOGF(INFO, "Trying to open SQLite DB at {}", key.m_path.native());
         auto txn = db.begin();
 
-        createSchema(txn, excludePackageMembership);
+        createSchema(txn, excludePackageMembership, includeFunctionAttributes);
         if (!db.isReadOnly()) {
-          rebuildIndices(txn);
+          rebuildIndices(txn, includeFunctionAttributes);
         }
         db.setBusyTimeout(60'000);
         txn.commit();
@@ -831,7 +910,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       }
 
       return std::make_shared<SQLiteAutoloadDBImpl>(
-          std::move(db), excludePackageMembership);
+          std::move(db), excludePackageMembership, includeFunctionAttributes);
     } catch (const SQLiteExc& e) {
       auto action = (key.m_mode == SQLite::OpenMode::ReadWriteCreate)
           ? "open or create"
@@ -1374,6 +1453,92 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.bindString("@path", path.native());
     XLOGF(DBG9, "Running {}", query.sql());
     query.step();
+  }
+
+  void insertFunctionAttribute(
+      const fs::path& path,
+      std::string_view function,
+      std::string_view attributeName,
+      Optional<int> attributePosition,
+      const folly::dynamic* attributeValue) override {
+    if (!m_functionStmts.m_attributes) {
+      return;
+    }
+    std::string attrValueJson;
+    auto query = m_txn.query(m_functionStmts.m_attributes->m_insert);
+    if (attributeValue) {
+      attrValueJson = folly::toJson(*attributeValue);
+      query.bindString("@attribute_value", attrValueJson);
+    } else {
+      query.bindNull("@attribute_value");
+    }
+    if (attributePosition) {
+      query.bindInt("@attribute_position", *attributePosition);
+    } else {
+      query.bindNull("@attribute_position");
+    }
+    query.bindString("@function", function);
+    query.bindString("@path", path.native());
+    query.bindString("@attribute_name", attributeName);
+    XLOGF(DBG9, "Running {}", query.sql());
+    query.step();
+  }
+
+  std::vector<std::string> getAttributesOfFunction(
+      std::string_view function,
+      const fs::path& path) override {
+    if (!m_functionStmts.m_attributes) {
+      return {};
+    }
+    auto query = m_txn.query(m_functionStmts.m_attributes->m_getAttributes);
+    query.bindString("@function", function);
+    query.bindString("@path", path.native());
+    std::vector<std::string> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.emplace_back(query.getString(0));
+    }
+    return results;
+  }
+
+  std::vector<folly::dynamic> getFunctionAttributeArgs(
+      std::string_view function,
+      std::string_view path,
+      std::string_view attributeName) override {
+    if (!m_functionStmts.m_attributes) {
+      return {};
+    }
+    auto query = m_txn.query(m_functionStmts.m_attributes->m_getAttributeArgs);
+    query.bindString("@function", function);
+    query.bindString("@path", path);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<folly::dynamic> args;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      auto arg = query.getNullableString(0);
+      if (arg) {
+        args.push_back(folly::parseJson(*arg));
+      }
+    }
+    return args;
+  }
+
+  std::vector<SymbolPath> getFunctionsWithAttribute(
+      std::string_view attributeName) override {
+    if (!m_functionStmts.m_attributes) {
+      return {};
+    }
+    auto query =
+        m_txn.query(m_functionStmts.m_attributes->m_getFunctionsWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<SymbolPath> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(
+          {.m_symbol = std::string{query.getString(0)},
+           .m_path = std::string{query.getString(1)}});
+    }
+    return results;
   }
 
   std::vector<std::pair<fs::path, std::string>> getFunctionPath(

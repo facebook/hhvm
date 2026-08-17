@@ -65,6 +65,11 @@ inline StringPtr getVersionKey<MethodDecl>(const MethodDecl& method) {
   return method.m_type.m_path.m_path;
 }
 
+template <>
+inline StringPtr getVersionKey<FunctionDecl>(const FunctionDecl& function) {
+  return function.m_path.m_path;
+}
+
 struct UpdateDBWorkItem {
   Clock m_since;
   Clock m_clock;
@@ -116,6 +121,7 @@ struct SymbolMap {
       std::filesystem::path root,
       AutoloadDB::Opener dbOpener,
       hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttributes,
       bool enableBlockingDbWait,
       bool useSymbolMapForGetFilesWithAttrAndAnyVal,
       std::chrono::milliseconds blockingDbWaitTimeout);
@@ -274,6 +280,21 @@ struct SymbolMap {
   std::vector<MethodDecl> getMethodsWithAttribute(const StringData& attr);
 
   /**
+   * Return the indexed attributes of a function.
+   */
+  std::vector<Symbol<SymKind::Type>> getAttributesOfFunction(
+      Symbol<SymKind::Function> function);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfFunction(
+      const StringData& function);
+
+  /**
+   * Return the functions with a given indexed attribute.
+   */
+  std::vector<FunctionDecl> getFunctionsWithAttribute(
+      Symbol<SymKind::Type> attr);
+  std::vector<FunctionDecl> getFunctionsWithAttribute(const StringData& attr);
+
+  /**
    * Return the methods of a given type that have any indexed attribute,
    * as (method, attribute) pairs.
    */
@@ -356,6 +377,13 @@ struct SymbolMap {
       const StringData& method,
       const StringData& attribute);
 
+  std::vector<folly::dynamic> getFunctionAttributeArgs(
+      Symbol<SymKind::Function> function,
+      Symbol<SymKind::Type> attribute);
+  std::vector<folly::dynamic> getFunctionAttributeArgs(
+      const StringData& function,
+      const StringData& attribute);
+
   std::vector<folly::dynamic> getFileAttributeArgs(
       Path path,
       Symbol<SymKind::Type> attribute);
@@ -380,6 +408,8 @@ struct SymbolMap {
 
   bool isAttrIndexed(const StringData& attr) const;
   std::string debugIndexedAttrs() const;
+  bool isFunctionAttrIndexed(const StringData& attr) const;
+  std::string debugIndexedFunctionAttrs() const;
 
   /**
    * Return a hash representing the given path's last-known checksum.
@@ -604,6 +634,11 @@ struct SymbolMap {
     AttributeMap<MethodDecl> m_methodAttrs;
 
     /**
+     * Maps between functions and their explicitly indexed attributes.
+     */
+    AttributeMap<FunctionDecl> m_functionAttrs;
+
+    /**
      * Maps between files and the attributes that decorate them.
      */
     AttributeMap<Path> m_fileAttrs;
@@ -620,7 +655,8 @@ struct SymbolMap {
     void updatePath(
         Path path,
         FileFacts facts,
-        const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs);
+        const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs,
+        const hphp_vector_set<Symbol<SymKind::Type>>& indexedFunctionAttrs);
 
     /**
      * Remove the given path from the map, along with all data associated with
@@ -708,6 +744,7 @@ struct SymbolMap {
   const std::string m_schemaHash;
   AutoloadDBVault m_dbVault;
   const hphp_vector_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
+  const hphp_vector_set<Symbol<SymKind::Type>> m_indexedFunctionAttrs;
   const bool m_enableBlockingDbWait;
   const std::chrono::milliseconds m_blockingDbWaitTimeout;
   const bool m_useSymbolMapForGetFilesWithAttrAndAnyVal;

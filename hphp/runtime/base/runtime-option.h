@@ -137,6 +137,14 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
     return IndexedMethodAttributes;
   }
 
+  /**
+   * Allowlist consisting of the attributes, marking functions, which Facts
+   * should index
+   */
+  const Cfg::StringVector& indexedFunctionAttributes() const {
+    return IndexedFunctionAttributes;
+  }
+
   // NB: Everything serialized here affects the cache for RE. Do not
   // put anything unnecessary or that changes spuriously.
   template <typename SerDe> void serde(SerDe& sd) {

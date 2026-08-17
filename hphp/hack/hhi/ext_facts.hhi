@@ -237,6 +237,16 @@ namespace HH\Facts {
   )[]: vec<(classname<nonnull>, string)>;
 
   /**
+   * Get all functions decorated with an indexed attribute.
+   *
+   * Throws a RuntimeException if the attribute is not listed in
+   * `Autoload.IndexedFunctionAttributes`.
+   */
+  function functions_with_attribute(
+    classname<\HH\FunctionAttribute> $attribute,
+  )[]: vec<string>;
+
+  /**
    * Get all methods of a given type that have any indexed attribute,
    * returning a dict mapping method name to its attribute names.
    *
@@ -313,6 +323,11 @@ namespace HH\Facts {
     string $method,
   )[]: vec<classname<\HH\MethodAttribute>>;
 
+  /** Get all indexed attributes on the given function. */
+  function function_attributes(
+    string $function,
+  )[]: vec<classname<\HH\FunctionAttribute>>;
+
   /**
    * Get all attributes on the given file.
    *
@@ -358,6 +373,12 @@ namespace HH\Facts {
     classname<mixed> $type,
     string $method,
     classname<\HH\MethodAttribute> $attribute,
+  )[]: vec<dynamic>;
+
+  /** Get all parameters for the given indexed attribute on a function. */
+  function function_attribute_parameters(
+    string $function,
+    classname<\HH\FunctionAttribute> $attribute,
   )[]: vec<dynamic>;
 
   /**

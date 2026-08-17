@@ -341,6 +341,12 @@ Array FactsLogger::getMethodsWithAttribute(const OptString& name) {
   });
 }
 
+Array FactsLogger::getFunctionsWithAttribute(const OptString& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getFunctionsWithAttribute(name);
+  });
+}
+
 Array FactsLogger::getTypeMethodAttributes(const OptString& type) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getTypeMethodAttributes(type);
@@ -387,6 +393,12 @@ Array FactsLogger::getMethodAttributes(
   });
 }
 
+Array FactsLogger::getFunctionAttributes(const OptString& function) {
+  return logPerf(__func__, function.slice(), [&]() {
+    return m_inner->getFunctionAttributes(function);
+  });
+}
+
 Array FactsLogger::getFileAttributes(const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileAttributes(path);
@@ -415,6 +427,14 @@ Array FactsLogger::getMethodAttrArgs(
     const OptString& attr) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getMethodAttrArgs(type, method, attr);
+  });
+}
+
+Array FactsLogger::getFunctionAttrArgs(
+    const OptString& function,
+    const OptString& attr) {
+  return logPerf(__func__, function.slice(), [&]() {
+    return m_inner->getFunctionAttrArgs(function, attr);
   });
 }
 

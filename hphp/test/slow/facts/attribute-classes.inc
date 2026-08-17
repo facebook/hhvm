@@ -6,6 +6,15 @@ new module someModule {};
 
 function outOfClassFunction(): void {}
 
+<<NoArgFunctionAttr>>
+function functionWithNoArgAttr(): void {}
+
+<<TwoArgFunctionAttr("first", 42)>>
+function functionWithTwoArgAttr(): void {}
+
+<<DontIndexThisFunctionAttr>>
+function functionWithUnindexedAttr(): void {}
+
 type AnAlias = someModule;
 
 class BaseClassForAttributeFiltering implements IBaseForAttributeFiltering {}
@@ -26,6 +35,15 @@ class TwoArgMethodAttr implements HH\MethodAttribute {
 class DontIndexThisMethodAttr implements HH\MethodAttribute {
   public function __construct()[] {}
 }
+
+class NoArgFunctionAttr implements HH\FunctionAttribute {}
+
+class TwoArgFunctionAttr implements HH\FunctionAttribute {
+  public function __construct(dynamic $arg0, dynamic $arg1)[] {}
+}
+
+// Not included in the `IndexedFunctionAttributes` list in `.hhvmconfig.hdf`
+class DontIndexThisFunctionAttr implements HH\FunctionAttribute {}
 
 class NoArgFileAttr implements HH\FileAttribute {}
 

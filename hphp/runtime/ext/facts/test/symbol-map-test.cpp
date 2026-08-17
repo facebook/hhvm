@@ -38,6 +38,7 @@
 #include "hphp/runtime/ext/facts/test/string-data-fake.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/sqlite-wrapper.h"
 
 using ::testing::_;
 using ::testing::AllOf;
@@ -202,6 +203,16 @@ struct MockAutoloadDB : public AutoloadDB {
 
   MOCK_METHOD(
       void,
+      insertFunctionAttribute,
+      (const std::filesystem::path& path,
+       std::string_view function,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      void,
       insertFileAttribute,
       (const std::filesystem::path& path,
        std::string_view attributeName,
@@ -221,6 +232,12 @@ struct MockAutoloadDB : public AutoloadDB {
       (std::string_view type,
        std::string_view method,
        const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfFunction,
+      (std::string_view function, const std::filesystem::path& path),
       (override));
 
   MOCK_METHOD(
@@ -256,6 +273,14 @@ struct MockAutoloadDB : public AutoloadDB {
 
   MOCK_METHOD(
       std::vector<folly::dynamic>,
+      getFunctionAttributeArgs,
+      (std::string_view function,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
       getFileAttributeArgs,
       (std::string_view path, std::string_view attributeName),
       (override));
@@ -280,6 +305,12 @@ struct MockAutoloadDB : public AutoloadDB {
   MOCK_METHOD(
       std::vector<MethodPath>,
       getMethodsWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getFunctionsWithAttribute,
       (std::string_view attributeName),
       (override));
 
@@ -446,6 +477,7 @@ class TestingSymbolMap : public SymbolMap {
       std::filesystem::path root,
       AutoloadDB::Opener dbOpener,
       hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttributes,
       bool enableBlockingDbWait,
       bool useSymbolMapForGetFilesWithAttrAndAnyVal,
       std::chrono::milliseconds blockingDbWaitTimeout,
@@ -454,6 +486,7 @@ class TestingSymbolMap : public SymbolMap {
             root,
             std::move(dbOpener),
             indexedMethodAttributes,
+            indexedFunctionAttributes,
             enableBlockingDbWait,
             useSymbolMapForGetFilesWithAttrAndAnyVal,
             blockingDbWaitTimeout) {
@@ -489,16 +522,23 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
       std::string root,
       AutoloadDB::Opener dbOpener,
       bool useManualExecutor,
-      std::vector<std::string> indexedMethodAttributesVec) {
+      std::vector<std::string> indexedMethodAttributesVec,
+      std::vector<std::string> indexedFunctionAttributesVec = {}) {
     hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
     indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
     for (auto& attr : indexedMethodAttributesVec) {
       indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
     }
+    hphp_vector_set<Symbol<SymKind::Type>> indexedFunctionAttributes;
+    indexedFunctionAttributes.reserve(indexedFunctionAttributesVec.size());
+    for (auto& attr : indexedFunctionAttributesVec) {
+      indexedFunctionAttributes.insert(Symbol<SymKind::Type>{attr});
+    }
     return TestingSymbolMap(
         std::move(root),
         std::move(dbOpener),
         std::move(indexedMethodAttributes),
+        std::move(indexedFunctionAttributes),
         true,
         true,
         std::chrono::milliseconds(5000),
@@ -508,7 +548,8 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
   TestingSymbolMap make(
       std::string root,
       bool useManualExecutor = false,
-      std::vector<std::string> indexedMethodAttributesVec = {}) {
+      std::vector<std::string> indexedMethodAttributesVec = {},
+      std::vector<std::string> indexedFunctionAttributesVec = {}) {
     auto dbPath = m_tmpdir->path() /
         folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
@@ -517,20 +558,67 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
           SQLiteKey::readWriteCreate(
               fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
     };
-    return make(root, dbOpener, useManualExecutor, indexedMethodAttributesVec);
+    return make(
+        root,
+        dbOpener,
+        useManualExecutor,
+        indexedMethodAttributesVec,
+        indexedFunctionAttributesVec);
   }
 
   TestingSymbolMap make(
       std::string root,
       std::shared_ptr<MockAutoloadDB> db,
       bool useManualExecutor = false,
-      std::vector<std::string> indexedMethodAttributesVec = {}) {
+      std::vector<std::string> indexedMethodAttributesVec = {},
+      std::vector<std::string> indexedFunctionAttributesVec = {}) {
     auto dbOpener = [&db]() -> std::shared_ptr<AutoloadDB> { return db; };
-    return make(root, dbOpener, useManualExecutor, indexedMethodAttributesVec);
+    return make(
+        root,
+        dbOpener,
+        useManualExecutor,
+        indexedMethodAttributesVec,
+        indexedFunctionAttributesVec);
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
 };
+
+TEST_F(SymbolMapTest, OpensDatabaseWithoutFunctionAttributeTable) {
+  auto dbPath = m_tmpdir->path() / "legacy_db.sql3";
+  fs::path path{"some/functions.php"};
+
+  {
+    auto db = SQLiteAutoloadDB::get(
+        SQLiteKey::readWriteCreate(
+            fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
+    db->insertPath(path);
+    db->insertFunction("legacy_function", path);
+    db->commit();
+  }
+
+  {
+    auto db = SQLite::connect(dbPath.native(), SQLite::OpenMode::ReadWrite);
+    auto txn = db.begin();
+    txn.exec("DROP TABLE function_attributes");
+    txn.commit();
+  }
+
+  {
+    auto db =
+        SQLiteAutoloadDB::get(SQLiteKey::readWrite(fs::path{dbPath.native()}));
+    EXPECT_THAT(db->getPathFunctions(path), ElementsAre("legacy_function"));
+    EXPECT_THAT(
+        db->getAttributesOfFunction("legacy_function", path), IsEmpty());
+    EXPECT_THAT(db->getFunctionsWithAttribute("LegacyAttribute"), IsEmpty());
+    db->insertFunctionAttribute(
+        path, "legacy_function", "LegacyAttribute", std::nullopt, nullptr);
+    db->commit();
+  }
+
+  auto db = SQLite::connect(dbPath.native(), SQLite::OpenMode::ReadOnly);
+  EXPECT_FALSE(db.hasTable("function_attributes"));
+}
 
 TEST_F(SymbolMapTest, NewModules) {
   auto db = std::make_shared<MockAutoloadDB>();
@@ -2017,6 +2105,79 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   auto m2 = make("/var/www");
   update(m2, "1", "1", {}, {}, {});
   testMap(m2);
+}
+
+TEST_F(SymbolMapTest, FunctionAttributesRespectAllowlistAndPersistOrder) {
+  auto m1 = make(
+      "/var/www",
+      /* useManualExecutor = */ false,
+      /* indexedMethodAttributesVec = */ {},
+      /* indexedFunctionAttributesVec = */ {"A2"});
+
+  FileFacts facts{
+      .functions = {"f1", "f2"},
+      .function_attributes = {
+          {.name = "f1",
+           .attributes =
+               {{.name = "A1", .args = {"ignored"}},
+                {.name = "A2", .args = {"first", "second"}}}},
+          {.name = "f2", .attributes = {{.name = "A2"}}}}};
+  fs::path path{"some/functions.php"};
+  update(m1, "", "1", {path}, {}, {facts});
+
+  auto check = [](SymbolMap& map) {
+    EXPECT_THAT(map.getAttributesOfFunction("f1"), ElementsAre("A2"));
+    EXPECT_THAT(
+        map.getFunctionAttributeArgs("f1", "A2"),
+        ElementsAre("first", "second"));
+    EXPECT_THAT(map.getFunctionAttributeArgs("f1", "A1"), IsEmpty());
+
+    auto functions = map.getFunctionsWithAttribute("A2");
+    std::vector<std::string_view> names;
+    names.reserve(functions.size());
+    for (auto const& function : functions) {
+      names.push_back(function.m_name.slice());
+    }
+    EXPECT_THAT(names, UnorderedElementsAre("f1", "f2"));
+    EXPECT_THAT(map.getFunctionsWithAttribute("A1"), IsEmpty());
+  };
+  check(m1);
+
+  m1.waitForDBUpdate();
+  auto m2 = make(
+      "/var/www",
+      /* useManualExecutor = */ false,
+      /* indexedMethodAttributesVec = */ {},
+      /* indexedFunctionAttributesVec = */ {"A2"});
+  update(m2, "1", "1", {}, {}, {});
+  check(m2);
+
+  FileFacts updatedFacts{
+      .functions = {"f1", "f2"},
+      .function_attributes = {{.name = "f2", .attributes = {{.name = "A2"}}}}};
+  update(m2, "1", "2", {path}, {}, {updatedFacts});
+  auto checkRefreshed = [](SymbolMap& map) {
+    EXPECT_THAT(map.getAttributesOfFunction("f1"), IsEmpty());
+    EXPECT_THAT(map.getFunctionAttributeArgs("f1", "A2"), IsEmpty());
+    auto functions = map.getFunctionsWithAttribute("A2");
+    ASSERT_EQ(functions.size(), 1);
+    EXPECT_EQ(functions[0].m_name.slice(), "f2");
+  };
+  checkRefreshed(m2);
+
+  m2.waitForDBUpdate();
+  auto m3 = make(
+      "/var/www",
+      /* useManualExecutor = */ false,
+      /* indexedMethodAttributesVec = */ {},
+      /* indexedFunctionAttributesVec = */ {"A2"});
+  update(m3, "2", "2", {}, {}, {});
+  checkRefreshed(m3);
+
+  auto emptyAllowlist = make("/var/empty");
+  update(emptyAllowlist, "", "1", {path}, {}, {facts});
+  EXPECT_THAT(emptyAllowlist.getAttributesOfFunction("f1"), IsEmpty());
+  EXPECT_THAT(emptyAllowlist.getFunctionsWithAttribute("A2"), IsEmpty());
 }
 
 TEST_F(SymbolMapTest, GetTypeMethodAttributes) {

@@ -280,6 +280,18 @@ function methods_with_attribute(
 )[]: vec<(classname<nonnull>, string)>;
 
 /**
+ * Get all functions decorated with an indexed attribute.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ * Throws a RuntimeException if the attribute is not listed in
+ * `Autoload.IndexedFunctionAttributes`.
+ */
+<<__Native>>
+function functions_with_attribute(
+  /* classname<\HH\FunctionAttribute> */ string $attribute,
+)[]: vec<string>;
+
+/**
  * Get all methods of a given type that have any indexed attribute,
  * returning a dict mapping method name to its attribute names.
  *
@@ -360,6 +372,16 @@ function method_attributes(
 )[]: vec<string>; /* vec<classname<\HH\MethodAttribute>> */
 
 /**
+ * Get all indexed attributes on the given function.
+ *
+ * Return an empty vec if the function doesn't exist.
+ */
+<<__Native>>
+function function_attributes(
+  string $function,
+)[]: vec<string>; /* vec<classname<\HH\FunctionAttribute>> */
+
+/**
  * Get all attributes on the given file.
  *
  * Throw InvalidOperationException if Facts is not enabled.
@@ -410,6 +432,17 @@ function method_attribute_parameters(
   /* classname<nonnull> */ string $type,
   string $method,
   /* classname<\HH\MethodAttribute> */ string $attribute,
+)[]: vec<dynamic>;
+
+/**
+ * Get all parameters for the given indexed attribute on a function.
+ *
+ * Return an empty vec if the function or attribute doesn't exist.
+ */
+<<__Native>>
+function function_attribute_parameters(
+  string $function,
+  /* classname<\HH\FunctionAttribute> */ string $attribute,
 )[]: vec<dynamic>;
 
 /**

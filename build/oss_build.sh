@@ -338,8 +338,8 @@ ensure_system_dependencies() {
       "${common_packages[@]}"
       gcc gcc-c++ git-core perl-interpreter pkgconf-pkg-config procps-ng which xz
       double-conversion-devel libedit-devel brotli-devel bzip2-devel
-      binutils-devel glibc-gconv-extra libaio-devel lz4-devel numactl-devel
-      openssl-devel
+      binutils-devel glibc-gconv-extra libaio-devel libatomic lz4-devel
+      numactl-devel openssl-devel
       python3-devel libjpeg-turbo-devel
       libpng-devel freetype-devel
       libcurl-devel systemd-devel libbpf-devel libunwind-devel libcap-devel

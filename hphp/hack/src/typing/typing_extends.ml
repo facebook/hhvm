@@ -1215,6 +1215,11 @@ let check_override
       | Vprivate _ -> true
       | _ -> false
     in
+    let is_public_child =
+      match class_elt.ce_visibility with
+      | Vpublic -> true
+      | _ -> false
+    in
     (* Private members marked `<<__TestsBypassVisibility>>` are kept during
        inheritance, so they reach normal override checking. A concrete private
        member with the attribute must remain unique in its hierarchy; otherwise
@@ -1234,7 +1239,10 @@ let check_override
           apply_reasons ~on_error
           @@ Secondary.Override_tests_bypass_visibility
                { pos; member_name; parent_pos })
-    end else if not (get_ce_tests_bypass_visibility class_elt) then begin
+    end else if
+          (not is_public_child)
+          && not (get_ce_tests_bypass_visibility class_elt)
+        then begin
       (* Abstract private methods may be implemented in subclasses, but the
          implementation must opt in as well so the inherited test-only access
          contract is preserved. *)

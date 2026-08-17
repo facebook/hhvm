@@ -20,6 +20,12 @@ internal class InternalConcrete extends InternalAbstract {
   internal function secret(): int { return 42; }
 }
 
+<<__TestsBypassVisibility>>
+internal class PublicConcrete extends InternalAbstract {
+  <<__Override>>
+  public function secret(): int { return 42; }
+}
+
 //// test.php
 <?hh
 

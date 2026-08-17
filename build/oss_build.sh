@@ -77,12 +77,6 @@ LIBURING_SHA256="8d052f2622dcb3678cbaee5ff582a87572672a6c0a56533cdda5b65cb636120
 LIBURING_SRC_DIR="$HHVM_OSS_WORK_ROOT/sources/liburing"
 LIBURING_PREFIX="$HHVM_OSS_WORK_ROOT/installed/liburing"
 LIBURING_REVISION_STAMP="$LIBURING_PREFIX/.hhvm-revision"
-LIBMCRYPT_VERSION="2.5.8"
-LIBMCRYPT_URL="https://downloads.sourceforge.net/project/mcrypt/Libmcrypt/${LIBMCRYPT_VERSION}/libmcrypt-${LIBMCRYPT_VERSION}.tar.gz"
-LIBMCRYPT_ARCHIVE="libmcrypt-${LIBMCRYPT_VERSION}.tar.gz"
-LIBMCRYPT_SHA256="e4eb6c074bbab168ac47b947c195ff8cef9d51a211cdd18ca9c9ef34d27a373e"
-LIBMCRYPT_SRC_DIR="$HHVM_OSS_WORK_ROOT/sources/libmcrypt"
-LIBMCRYPT_PREFIX="$HHVM_OSS_WORK_ROOT/installed/libmcrypt"
 PCRE1_VERSION="8.45"
 PCRE1_URL="https://downloads.sourceforge.net/project/pcre/pcre/${PCRE1_VERSION}/pcre-${PCRE1_VERSION}.tar.gz"
 PCRE1_ARCHIVE="pcre-${PCRE1_VERSION}.tar.gz"
@@ -102,10 +96,6 @@ IMAGEMAGICK6_INCLUDE_DIRS="$IMAGEMAGICK6_PREFIX/include/ImageMagick-6;$IMAGEMAGI
 IMAGEMAGICK6_WAND_LIBRARY="$IMAGEMAGICK6_PREFIX/lib/libMagickWand-6.Q16.so"
 IMAGEMAGICK6_CORE_LIBRARY="$IMAGEMAGICK6_PREFIX/lib/libMagickCore-6.Q16.so"
 IMAGEMAGICK6_FORMATS_STAMP="$IMAGEMAGICK6_PREFIX/.hhvm-jpeg-png-formats"
-GNU_CONFIG_REVISION="gcc-14.3.0"
-GNU_CONFIG_URL_ROOT="https://raw.githubusercontent.com/gcc-mirror/gcc/releases/${GNU_CONFIG_REVISION}"
-GNU_CONFIG_GUESS_SHA256="7d1e3c79b86de601c3a0457855ab854dffd15163f53c91edac54a7be2e9c931b"
-GNU_CONFIG_SUB_SHA256="71b8d73e46e0c31b1dc91ba5306f5ef0af009273b3bb283f31d8dad69666fa9e"
 OPAM_REPOSITORY_REVISION="588f3130c1513932f63440010a91796ce12d54fa"
 OPAM_REPOSITORY_URL="https://github.com/ocaml/opam-repository/archive/${OPAM_REPOSITORY_REVISION}.tar.gz"
 OPAM_REPOSITORY_ARCHIVE="opam-repository-${OPAM_REPOSITORY_REVISION}.tar.gz"
@@ -629,26 +619,6 @@ extract_source_archive() {
   rm -rf "$source_dir"
   mkdir -p "$source_dir"
   tar --no-same-owner -xzf "$archive" --strip-components=1 -C "$source_dir"
-}
-
-refresh_gnu_config_scripts() {
-  local source_dir="$1" config_name config_sha256
-
-  for config_name in config.guess config.sub; do
-    case "$config_name" in
-      config.guess) config_sha256="$GNU_CONFIG_GUESS_SHA256" ;;
-      config.sub) config_sha256="$GNU_CONFIG_SUB_SHA256" ;;
-    esac
-    download_tarball \
-      "$config_name" \
-      "$GNU_CONFIG_URL_ROOT/$config_name" \
-      "$DOWNLOAD_CACHE_DIR" \
-      "$config_name-$GNU_CONFIG_REVISION" \
-      "SHA256=$config_sha256"
-    install -m755 \
-      "$DOWNLOAD_CACHE_DIR/$config_name-$GNU_CONFIG_REVISION" \
-      "$source_dir/$config_name"
-  done
 }
 
 autotools_install_complete() {
@@ -1751,35 +1721,6 @@ if ! download_tarball \
 fi
 
 # ---------------------------------------------------------------------------
-# Phase 4d: Build libmcrypt for the mcrypt extension
-# ---------------------------------------------------------------------------
-echo ">>> Phase 4d: Ensuring OSS libmcrypt..."
-
-if ! download_tarball \
-  "libmcrypt-${LIBMCRYPT_VERSION}" \
-  "$LIBMCRYPT_URL" \
-  "$DOWNLOAD_CACHE_DIR" \
-  "$LIBMCRYPT_ARCHIVE" \
-  "SHA256=$LIBMCRYPT_SHA256"; then
-  echo "ERROR: Failed to download OSS libmcrypt source."
-  exit 1
-fi
-
-extract_source_archive \
-  "libmcrypt" \
-  "$DOWNLOAD_CACHE_DIR/$LIBMCRYPT_ARCHIVE" \
-  "$LIBMCRYPT_SRC_DIR" \
-  "configure"
-refresh_gnu_config_scripts "$LIBMCRYPT_SRC_DIR"
-build_autotools_dependency \
-  "libmcrypt" \
-  "$LIBMCRYPT_SRC_DIR" \
-  "$LIBMCRYPT_PREFIX" \
-  "lib/libmcrypt.a" \
-  "include/mcrypt.h" \
-  "-std=gnu17 -include stdlib.h -include string.h -include stdio.h -DHAVE_MEMMOVE=1 -DHAVE_BZERO=1 -DHAVE_MEMSET=1 -DHAVE_STRCHR=1 -DHAVE_STRDUP=1 -DHAVE_STRRCHR=1 -Wno-implicit-int"
-
-# ---------------------------------------------------------------------------
 # Phase 4e: Build PCRE1 for the Hack OCaml dependencies
 # ---------------------------------------------------------------------------
 echo ">>> Phase 4e: Ensuring OSS PCRE1..."
@@ -1973,7 +1914,6 @@ if [ -d "$GETDEPS_DIR" ]; then
   done
 fi
 PREFIX_PATH="${PREFIX_PATH:+$PREFIX_PATH;}$LIBURING_PREFIX"
-PREFIX_PATH="$PREFIX_PATH;$LIBMCRYPT_PREFIX"
 PREFIX_PATH="$PREFIX_PATH;$PCRE1_PREFIX"
 PREFIX_PATH="$PREFIX_PATH;$IMAGEMAGICK6_PREFIX"
 

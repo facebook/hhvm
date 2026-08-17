@@ -636,6 +636,125 @@ TEST(HTTP1xCodecTest, TestBadTransferEncodingHeader) {
   EXPECT_EQ(callbacks.messageBegin, 1);
   EXPECT_EQ(callbacks.headersComplete, 0);
   EXPECT_EQ(callbacks.lastParseError->getHttpStatusCode(), 400);
+
+  // A request rejected by one of onHeadersComplete()'s validation gates never
+  // reaches the code that stamps the version, method and URL onto the message,
+  // so the partial message handed to onError() has to be backfilled for it to
+  // be worth logging or attributing to a request handler.
+  auto* partialMsg = callbacks.lastParseError->getPartialMsg();
+  ASSERT_NE(partialMsg, nullptr);
+  EXPECT_EQ(partialMsg->getMethodString(), "POST");
+  EXPECT_EQ(partialMsg->getURL(), "/www.facebook.com");
+  EXPECT_EQ(partialMsg->getHTTPVersion(),
+            std::make_pair(uint8_t(1), uint8_t(1)));
+  // Headers were already present without the backfill; assert they survive it.
+  EXPECT_EQ(partialMsg->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST),
+            "www.facebook.com");
+}
+
+// url_ accumulates per message, so a rejection on a pipelined request must
+// report that request's URL rather than one carried over from its predecessor.
+TEST(HTTP1xCodecTest, TestPartialMsgBackfilledForPipelinedRequest) {
+  HTTP1xCodec downstream(TransportDirection::DOWNSTREAM);
+  FakeHTTPCodecCallback callbacks;
+  downstream.setCallback(&callbacks);
+
+  auto reqBuf = folly::IOBuf::copyBuffer(
+      "GET /first HTTP/1.1\r\n"
+      "Host: www.facebook.com\r\n"
+      "\r\n"
+      "POST /second HTTP/1.1\r\n"
+      "Host: www.facebook.com\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "\r\n");
+  downstream.onIngress(*reqBuf);
+
+  EXPECT_EQ(callbacks.headersComplete, 1);
+  EXPECT_EQ(callbacks.streamErrors, 1);
+  ASSERT_NE(callbacks.lastParseError, nullptr);
+  auto* partialMsg = callbacks.lastParseError->getPartialMsg();
+  ASSERT_NE(partialMsg, nullptr);
+  EXPECT_EQ(partialMsg->getMethodString(), "POST");
+  EXPECT_EQ(partialMsg->getURL(), "/second");
+}
+
+// Header name/value rejections fire before onHeadersComplete() is entered at
+// all, so they take the same backfill path.
+TEST(HTTP1xCodecTest, TestPartialMsgBackfilledOnContentValidationFailure) {
+  HTTP1xCodec downstream(TransportDirection::DOWNSTREAM,
+                         /*force1_1=*/true,
+                         /*strictValidation=*/true);
+  FakeHTTPCodecCallback callbacks;
+  downstream.setCallback(&callbacks);
+
+  auto reqBuf = folly::IOBuf::copyBuffer(
+      string("GET /yeah?id=7 HTTP/1.1\r\nUser-Agent: ꪶ𝛸ꫂ_𝐹𝛩𝑅𝐶𝛯_𝑉2\r\n\r\n"));
+  downstream.onIngress(*reqBuf);
+
+  EXPECT_EQ(callbacks.streamErrors, 1);
+  ASSERT_NE(callbacks.lastParseError, nullptr);
+  EXPECT_EQ(callbacks.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
+  auto* partialMsg = callbacks.lastParseError->getPartialMsg();
+  ASSERT_NE(partialMsg, nullptr);
+  EXPECT_EQ(partialMsg->getMethodString(), "GET");
+  EXPECT_EQ(partialMsg->getURL(), "/yeah?id=7");
+  // The backfill parses the URL rather than just storing it, so a rule matching
+  // on path or query has something to match against.
+  EXPECT_EQ(partialMsg->getPathAsStringPiece(), "/yeah");
+  EXPECT_EQ(partialMsg->getQueryStringAsStringPiece(), "id=7");
+}
+
+// When the request line itself never parsed, url_ is empty and parser_.method
+// still holds its default of 0 (HTTP_DELETE).  Backfilling here would invent a
+// method the client never sent, so the partial message must be left as-is.
+TEST(HTTP1xCodecTest, TestPartialMsgNotBackfilledWhenRequestLineUnparsed) {
+  HTTP1xCodec downstream(TransportDirection::DOWNSTREAM,
+                         /*force1_1=*/true,
+                         /*strictValidation=*/true);
+  FakeHTTPCodecCallback callbacks;
+  downstream.setCallback(&callbacks);
+
+  auto reqBuf = folly::IOBuf::copyBuffer(string("GET /Ñoño HTTP/1.1\r\n\r\n"));
+  downstream.onIngress(*reqBuf);
+
+  EXPECT_EQ(callbacks.streamErrors, 1);
+  ASSERT_NE(callbacks.lastParseError, nullptr);
+  auto* partialMsg = callbacks.lastParseError->getPartialMsg();
+  ASSERT_NE(partialMsg, nullptr);
+  EXPECT_TRUE(partialMsg->getMethodString().empty());
+  EXPECT_TRUE(partialMsg->getURL().empty());
+}
+
+// Upstream responses have no method or URL to recover; the backfill must not
+// invent a request shape on them.
+TEST(HTTP1xCodecTest, TestPartialMsgNotBackfilledUpstream) {
+  HTTP1xCodec upstream(TransportDirection::UPSTREAM);
+  FakeHTTPCodecCallback callbacks;
+  upstream.setCallback(&callbacks);
+
+  // Prime the codec with a request so that it expects a response.
+  HTTPMessage req = getGetRequest("/foo");
+  folly::IOBufQueue writeBuf(folly::IOBufQueue::cacheChainLength());
+  upstream.generateHeader(writeBuf, upstream.createStream(), req);
+
+  auto respBuf = folly::IOBuf::copyBuffer(
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Length: 5\r\n"
+      "Content-Length: 9\r\n"
+      "\r\n");
+  upstream.onIngress(*respBuf);
+
+  EXPECT_EQ(callbacks.streamErrors, 1);
+  ASSERT_NE(callbacks.lastParseError, nullptr);
+  auto* partialMsg = callbacks.lastParseError->getPartialMsg();
+  ASSERT_NE(partialMsg, nullptr);
+  EXPECT_TRUE(partialMsg->getMethodString().empty());
+  EXPECT_TRUE(partialMsg->getURL().empty());
+  // The parsed headers still come through; both duplicates are present, which
+  // is why getSingleOrEmpty() would not serve here.
+  EXPECT_TRUE(partialMsg->getHeaders().exists(HTTP_HEADER_CONTENT_LENGTH));
 }
 
 TEST(HTTP1xCodecTest, TestMalformedChunkDelimiter) {

@@ -180,6 +180,12 @@ class HTTP1xCodec : public HTTPCodec {
            (headerParseState_ == HeaderParseState::kParsingTrailerName);
   }
 
+  /** Stamps the version, method and URL onto a downstream msg_ that failed
+      before onHeadersComplete() got around to doing so, so the partial message
+      handed to callback_ is worth logging. No-op once onHeadersComplete() has
+      consumed url_. */
+  void backfillPartialRequest();
+
   /** Invoked when a parsing error occurs. It will send an exception to
       the callback object to report the error and do any other cleanup
       needed. It optionally takes a message to pass to the generated

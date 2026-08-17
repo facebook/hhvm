@@ -301,6 +301,30 @@ void HTTP1xCodec::onIngressEOF() {
   }
 }
 
+void HTTP1xCodec::backfillPartialRequest() {
+  // onHeadersComplete() stamps the version, method and URL onto msg_ only after
+  // its validation gates have passed, so a request rejected by one of those
+  // gates -- or during header name/value parsing -- yields a partial message
+  // carrying headers and nothing else.  That is the difference between a log
+  // line that says "someone sent us a bad request" and one that names the
+  // method and path, which is also what any handler attribution needs.
+  //
+  // url_ holds this message's URL and nothing else: onMessageBegin() clears it
+  // and onHeadersComplete() clears it once consumed.  Non-empty therefore means
+  // the request line parsed far enough for parser_.method to be meaningful --
+  // without it method defaults to 0 (HTTP_DELETE) and we would be inventing an
+  // attribution -- and means we are parsing a request at all, since on_url only
+  // fires on a HTTP_REQUEST parser.
+  if (url_.empty()) {
+    return;
+  }
+  msg_->setHTTPVersion(parser_.http_major, parser_.http_minor);
+  msg_->setMethod(http_method_str(static_cast<http_method>(parser_.method)));
+  // Deliberately non-strict: the URL is being recorded for diagnostics on a
+  // request that is already being rejected, so it must not itself reject.
+  msg_->setURL(url_, /*strict=*/false);
+}
+
 void HTTP1xCodec::onParserError(const char* what) {
   inRecvLastChunk_ = false;
   http_errno parser_errno = HTTP_PARSER_ERRNO(&parser_);
@@ -311,6 +335,7 @@ void HTTP1xCodec::onParserError(const char* what) {
                                     http_errno_description(parser_errno)));
   // generate a string of parsed headers so that we can pass it to callback
   if (msg_) {
+    backfillPartialRequest();
     error.setPartialMsg(std::move(msg_));
   }
   if (isDownstream(transportDirection_) && egressTxnID_ < ingressTxnID_) {
@@ -868,6 +893,7 @@ int HTTP1xCodec::onMessageBegin() {
   headerSize_.uncompressed = 0;
   headerSize_.compressed = 0;
   headerParseState_ = HeaderParseState::kParsingHeaderStart;
+  url_.clear();
   msg_ = std::make_unique<HTTPMessage>();
   trailers_.reset();
   if (isDownstream(transportDirection_)) {
@@ -1019,11 +1045,13 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
     headRequest_ = (msg_->getMethod() == HTTPMethod::HEAD);
 
     ParseURL parseUrl = msg_->setURL(std::move(url_), strictValidation_);
+    // Cleared ahead of the validity check: a moved-from std::string is valid
+    // but unspecified, and backfillPartialRequest() reads url_ on the -1 path.
+    url_.clear();
     if (strictValidation_ && !parseUrl.valid()) {
       LOG(ERROR) << "Invalid URL: " << msg_->getURL();
       return -1;
     }
-    url_.clear();
 
     if (parseUrl.hasHost()) {
       // RFC 2616 5.2.1 states "If Request-URI is an absoluteURI, the host

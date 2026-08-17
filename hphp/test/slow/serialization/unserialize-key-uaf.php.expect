@@ -1,0 +1,13 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+--- valid inputs round-trip unchanged ---
+bool(true)
+bool(true)
+dict(2) {
+  [0]=>
+  string(5) "hello"
+  ["key"]=>
+  int(7)
+}

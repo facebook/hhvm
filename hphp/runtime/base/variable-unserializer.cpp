@@ -137,6 +137,27 @@ void throwInvalidKey() {
   throw Exception("Invalid key");
 }
 
+bool isAggregateSerializationType(char type) {
+  switch (type) {
+    case 'a': // PHP array
+    case 'D': // Dict
+    case 'X': // MarkedDArray
+    case 'Y': // DArray
+    case 'x': // MarkedVArray
+    case 'y': // VArray
+    case 'v': // Vec
+    case 'k': // Keyset
+    case 'T': // BespokeTypeStructure
+    case 'L': // Resource
+    case 'O': // Object
+    case 'V': // Collection (Vector/Set)
+    case 'K': // Collection (Map)
+      return true;
+    default:
+      return false;
+  }
+}
+
 [[noreturn]] NEVER_INLINE
 void throwUnterminatedElement() {
   throw Exception("Array element not terminated properly");
@@ -739,6 +760,12 @@ void VariableUnserializerImpl<Source>::unserializeVariant(
 
   char type = readChar();
   char sep = readChar();
+
+  // T267373869
+  if (UNLIKELY(mode != UnserializeMode::Value) &&
+      isAggregateSerializationType(type)) {
+    throwInvalidKey();
+  }
 
   if (type != 'R') {
     add(self, mode);

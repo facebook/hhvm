@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/test/AdapterTest.h>
 #include <thrift/test/gen-cpp2/SerializationInFieldIdOrder_types.h>
+#include <thrift/test/gen-cpp2/structs_terse_types.h>
 #include <thrift/test/testset/Testset.h>
 
 using namespace ::apache::thrift::conformance;
@@ -859,6 +860,42 @@ TEST(EncodeTest, EncodeMethod) {
   EXPECT_EQ(encodeJSONMockStruct(simpleJson, jsonMock), UseWrite);
   EXPECT_EQ(encodeJSONMockStruct(json, jsonMock), UseStructEncode);
   EXPECT_EQ(encodeJSONMockStruct(debug, jsonMock), UseStructEncode);
+}
+
+TEST(EncodeTest, DeprecatedTerseWrite) {
+  auto expectGenericEncodeMatchesGenerated = []<typename T>(const T& value) {
+    SCOPED_TRACE(folly::pretty_name<T>());
+    struct GenericCompactProtocolWriter : CompactProtocolWriter {};
+
+    folly::IOBufQueue generatedOutput;
+    CompactProtocolWriter generatedWriter;
+    generatedWriter.setOutput(&generatedOutput);
+    value.write(&generatedWriter);
+
+    folly::IOBufQueue genericOutput;
+    GenericCompactProtocolWriter genericWriter;
+    genericWriter.setOutput(&genericOutput);
+    op::encode<type::struct_t<T>>(genericWriter, value);
+
+    auto generated = generatedOutput.move();
+    auto generic = genericOutput.move();
+    EXPECT_TRUE(folly::IOBufEqualTo{}(*generated, *generic));
+  };
+
+  test::EmptiableTerseFieldsStruct intrinsicDefaults;
+  intrinsicDefaults.int_field() = 42;
+  expectGenericEncodeMatchesGenerated(intrinsicDefaults);
+
+  test::TerseFieldsWithCustomDefault customDefaults;
+  customDefaults.int_field() = 0;
+  customDefaults.cpp_shared_ref_exception_field() =
+      std::make_shared<test::NestedException>();
+  expectGenericEncodeMatchesGenerated(customDefaults);
+
+  test::RefsWithStringAndContainerTerseWrites emptyRefs;
+  emptyRefs.string_list_field() = std::make_shared<std::vector<std::string>>();
+  emptyRefs.string_field() = std::make_shared<std::string>();
+  expectGenericEncodeMatchesGenerated(emptyRefs);
 }
 
 TEST(EncodeTest, keyOrder) {

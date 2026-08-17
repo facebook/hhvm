@@ -556,8 +556,28 @@ struct ShouldWrite {
   }
 };
 
-template <class Tag>
-inline constexpr ShouldWrite<Tag> should_write{};
+template <typename T, typename Id>
+struct ShouldWriteField {
+  template <typename Field>
+  bool operator()(const T& value, const Field& field) const {
+    using Ident = op::get_ident<T, Id>;
+    using Tag = op::get_field_tag<T, Id>;
+    if constexpr (apache::thrift::detail::st::private_access::
+                      is_deprecated_terse_field<T, Ident>) {
+      if (!apache::thrift::detail::st::private_access::
+              should_write_deprecated_terse_field<T, Ident>(value)) {
+        return false;
+      }
+    }
+    return ShouldWrite<Tag>{}(field);
+  }
+};
+
+template <typename Tag>
+struct ShouldWriteField<Tag, void> : ShouldWrite<Tag> {};
+
+template <typename T, typename Id = void>
+inline constexpr ShouldWriteField<T, Id> should_write{};
 
 template <typename T>
 struct StructEncode {
@@ -593,9 +613,10 @@ struct StructEncode {
     template <typename Id>
     FOLLY_ALWAYS_INLINE void operator()(Id) const {
       using TypeTag = op::get_type_tag<T, Id>;
-      using FieldTag = op::get_field_tag<T, Id>;
+      // The generated deprecated-terse predicate reads storage directly, so
+      // materialize lazy fields before consulting it.
       auto&& field = op::get<Id>(t);
-      if (!should_write<FieldTag>(field)) {
+      if (!should_write<T, Id>(t, field)) {
         return;
       }
       s += prot.writeFieldBegin(

@@ -251,7 +251,10 @@ detect_compiler_pair() {
     return 1
   fi
 
-  compiler_major="$("$c_bin" -dumpversion | cut -d. -f1)"
+  compiler_major="$("$c_bin" -dumpversion 2>/dev/null | cut -d. -f1)"
+  case "$compiler_major" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
   if [ "$compiler_major" -lt "$minimum_major" ]; then
     return 1
   fi
@@ -302,6 +305,60 @@ detect_supported_compilers() {
 }
 
 # ---------------------------------------------------------------------------
+# Helper: query /etc/os-release without inheriting its quoting
+# ---------------------------------------------------------------------------
+os_release_field() {
+  local field="$1"
+
+  [ -r /etc/os-release ] || return 0
+  # Values in /etc/os-release are shell-quoted (ID="rhel"), so sourcing the
+  # file is the only reliable way to read them back unquoted.
+  (
+    . /etc/os-release
+    printf '%s\n' "${!field:-}"
+  )
+}
+
+is_rhel_family() {
+  local id id_like word
+
+  id="$(os_release_field ID)"
+  id_like="$(os_release_field ID_LIKE)"
+  # RHEL itself reports ID=rhel with ID_LIKE=fedora, so both fields matter.
+  for word in $id $id_like; do
+    case "$word" in
+      centos|rhel|rocky|almalinux) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Helper: report which of the given packages are not installed yet
+#
+# Uses the caller's "package_query" array, which ensure_system_dependencies
+# sets once for the detected package manager.
+# ---------------------------------------------------------------------------
+collect_missing_packages() {
+  local package
+
+  for package in "$@"; do
+    "${package_query[@]}" "$package" >/dev/null 2>&1 || printf '%s\n' "$package"
+  done
+}
+
+# ---------------------------------------------------------------------------
+# Helper: latest major version of a package offered by the dnf repositories
+# ---------------------------------------------------------------------------
+dnf_available_major() {
+  local name="$1" version
+
+  version="$(dnf -q repoquery --latest-limit 1 --qf '%{version}' "$name" \
+    2>/dev/null | tail -1 | cut -d. -f1)"
+  printf '%s\n' "${version:-0}"
+}
+
+# ---------------------------------------------------------------------------
 # Helper: install required system development packages
 # ---------------------------------------------------------------------------
 ensure_system_dependencies() {
@@ -319,9 +376,8 @@ ensure_system_dependencies() {
   local root_command=()
   local install_environment=()
   local install_command=()
-  local compiler_pair c_package cxx_package dnf_clang_major dnf_gcc_major
+  local compiler_pair compiler_version c_package cxx_package
   local gcc_toolset_version=""
-  local package
   local compiler_package_found=false
   local supported_compiler_found=false
 
@@ -397,14 +453,10 @@ ensure_system_dependencies() {
     "$package_manager" install -y
   )
 
-  if [ "$package_manager" = "dnf" ] &&
-     grep -Eq '^ID=(centos|rhel|rocky|almalinux)$|^ID_LIKE=.*rhel' \
-       /etc/os-release; then
+  if [ "$package_manager" = "dnf" ] && is_rhel_family; then
     repository_packages=(dnf-plugins-core epel-release)
-    for package in "${repository_packages[@]}"; do
-      "${package_query[@]}" "$package" >/dev/null 2>&1 ||
-        missing_repository_packages+=("$package")
-    done
+    readarray -t missing_repository_packages < <(
+      collect_missing_packages "${repository_packages[@]}")
     if [ "${#missing_repository_packages[@]}" -gt 0 ]; then
       "${install_command[@]}" "${missing_repository_packages[@]}"
     fi
@@ -427,8 +479,8 @@ ensure_system_dependencies() {
         fi
       done
       if [ "$compiler_package_found" = false ]; then
-        for compiler_pair in "${CLANG_COMPILER_VERSIONS[@]}"; do
-          c_package="clang-${compiler_pair}"
+        for compiler_version in "${CLANG_COMPILER_VERSIONS[@]}"; do
+          c_package="clang-${compiler_version}"
           if apt-cache show "$c_package" >/dev/null 2>&1; then
             packages+=("$c_package")
             compiler_package_found=true
@@ -437,25 +489,22 @@ ensure_system_dependencies() {
         done
       fi
     else
-      dnf_gcc_major="$(dnf -q repoquery --latest-limit 1 --qf '%{version}' gcc 2>/dev/null | tail -1 | cut -d. -f1)"
-      if [ "${dnf_gcc_major:-0}" -ge 14 ]; then
+      if [ "$(dnf_available_major gcc)" -ge 14 ]; then
         compiler_package_found=true
       else
-        for compiler_pair in "${GCC_TOOLSET_VERSIONS[@]}"; do
-          c_package="gcc-toolset-${compiler_pair}-gcc"
+        for compiler_version in "${GCC_TOOLSET_VERSIONS[@]}"; do
+          c_package="gcc-toolset-${compiler_version}-gcc"
           cxx_package="${c_package}-c++"
           if dnf -q list --available "$c_package" "$cxx_package" >/dev/null 2>&1; then
-            gcc_toolset_version="$compiler_pair"
+            gcc_toolset_version="$compiler_version"
             compiler_package_found=true
             break
           fi
         done
-        if [ "$compiler_package_found" = false ]; then
-          dnf_clang_major="$(dnf -q repoquery --latest-limit 1 --qf '%{version}' clang 2>/dev/null | tail -1 | cut -d. -f1)"
-          if [ "${dnf_clang_major:-0}" -ge 20 ]; then
-            packages+=(clang)
-            compiler_package_found=true
-          fi
+        if [ "$compiler_package_found" = false ] &&
+           [ "$(dnf_available_major clang)" -ge 20 ]; then
+          packages+=(clang)
+          compiler_package_found=true
         fi
       fi
     fi
@@ -474,9 +523,7 @@ ensure_system_dependencies() {
     )
   fi
 
-  for package in "${packages[@]}"; do
-    "${package_query[@]}" "$package" >/dev/null 2>&1 || missing_packages+=("$package")
-  done
+  readarray -t missing_packages < <(collect_missing_packages "${packages[@]}")
   [ "${#missing_packages[@]}" -gt 0 ] || return 0
 
   echo ">>> Installing required system development packages..."
@@ -608,6 +655,17 @@ autotools_install_complete() {
   local prefix="$1" library="$2" header="$3"
 
   [ -f "$prefix/$library" ] && [ -f "$prefix/$header" ]
+}
+
+# Report whether the freshly built ImageMagick6 picked up a delegate library.
+# HHVM's imagick extension is useless without at least JPEG and PNG, and a
+# missing delegate only shows up at runtime otherwise.
+imagemagick6_supports_format() {
+  local format="$1"
+
+  LD_LIBRARY_PATH="$IMAGEMAGICK6_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+    "$IMAGEMAGICK6_PREFIX/bin/identify" -list format |
+    grep -Eq "^[[:space:]]+${format}[*[:space:]]"
 }
 
 build_autotools_dependency() {
@@ -909,7 +967,7 @@ PY
 }
 
 prepare_getdeps_gnu_mirror_overrides() {
-  local base_manifest name override_manifest patch_result
+  local base_manifest name override_manifest source_manifest
   local rewritten=0
 
   mkdir -p "$GETDEPS_MANIFEST_OVERRIDE_DIR"
@@ -917,14 +975,17 @@ prepare_getdeps_gnu_mirror_overrides() {
     grep -qF "$GETDEPS_GNU_URL_ROOT/" "$base_manifest" || continue
     name="$(basename "$base_manifest")"
     override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/$name"
-    cp "$base_manifest" "$override_manifest"
-    patch_result="$(replace_text_once \
-      "$override_manifest" \
-      "$GETDEPS_GNU_URL_ROOT/" \
-      "$GETDEPS_GNU_MIRROR_URL_ROOT/")"
-    if [ "$patch_result" = "patched" ]; then
-      ((rewritten += 1))
+    # Rewrite on top of an override another prepare_* function already wrote,
+    # so this never discards its edits. A plain substitution also covers
+    # manifests that list more than one GNU download.
+    source_manifest="$base_manifest"
+    if [ -f "$override_manifest" ]; then
+      source_manifest="$override_manifest"
     fi
+    sed "s|$GETDEPS_GNU_URL_ROOT/|$GETDEPS_GNU_MIRROR_URL_ROOT/|g" \
+      "$source_manifest" > "$override_manifest.tmp"
+    mv "$override_manifest.tmp" "$override_manifest"
+    ((rewritten += 1))
   done
 
   if [ "$rewritten" -gt 0 ]; then
@@ -1358,7 +1419,13 @@ configure_fbmysql_source() {
 }
 
 ensure_system_dependencies
-GAWK_EXECUTABLE="$(command -v gawk)"
+# HHVM's build scripts rely on GNU awk extensions, so mawk/busybox awk on PATH
+# is not a usable substitute.
+GAWK_EXECUTABLE="$(command -v gawk || true)"
+if [ -z "$GAWK_EXECUTABLE" ]; then
+  echo "ERROR: gawk is required but was not found on PATH."
+  exit 1
+fi
 
 # ---------------------------------------------------------------------------
 # Phase 1: Fetch public git submodules
@@ -1777,15 +1844,18 @@ build_autotools_dependency \
   "include/ImageMagick-6/wand/MagickWand.h" \
   "" \
   "--enable-shared --disable-static --without-magick-plus-plus --without-perl --without-x"
-if ! LD_LIBRARY_PATH="$IMAGEMAGICK6_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
-     "$IMAGEMAGICK6_PREFIX/bin/identify" -list format | grep -Eq '^[[:space:]]+JPEG[*[:space:]]' ||
-   ! LD_LIBRARY_PATH="$IMAGEMAGICK6_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
-     "$IMAGEMAGICK6_PREFIX/bin/identify" -list format | grep -Eq '^[[:space:]]+PNG[*[:space:]]'; then
-  rm -f "$IMAGEMAGICK6_FORMATS_STAMP"
-  echo "ERROR: ImageMagick6 was built without required JPEG/PNG format support."
-  exit 1
+# The stamp is only absent when the block above wiped an unverified prefix, so
+# this re-reads the delegate list exactly once per ImageMagick6 build.
+if [ ! -f "$IMAGEMAGICK6_FORMATS_STAMP" ]; then
+  for imagemagick6_format in JPEG PNG; do
+    if ! imagemagick6_supports_format "$imagemagick6_format"; then
+      echo "ERROR: ImageMagick6 was built without required" \
+        "$imagemagick6_format format support."
+      exit 1
+    fi
+  done
+  touch "$IMAGEMAGICK6_FORMATS_STAMP"
 fi
-touch "$IMAGEMAGICK6_FORMATS_STAMP"
 
 # ---------------------------------------------------------------------------
 # Phase 4g: Pin the public opam package index used by Hack

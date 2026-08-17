@@ -26,7 +26,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <string>
 #include <type_traits>
 
@@ -398,11 +397,10 @@ typename std::enable_if<
   std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
 >::type make_tv() {
-  TypedValue ret;
-  constexpr auto typeOffset = offsetof(TypedValue, m_type);
-  auto const typeAndAux = static_cast<uint64_t>(DType);
-  memcpy(reinterpret_cast<char*>(&ret) + typeOffset,
-         &typeAndAux, sizeof(typeAndAux));
+  // Writing only m_type leaves the aux bytes indeterminate, which GCC is
+  // entitled to propagate into the 16-byte copy of the return value. Build the
+  // whole TypedValue instead, the same way make_tv_of_type() does below.
+  auto const ret = TypedValue { Value{}, DType, {0}, {0} };
   assertx(tvIsPlausible(ret));
   return ret;
 }

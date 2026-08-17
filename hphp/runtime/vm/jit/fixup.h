@@ -190,11 +190,25 @@ private:
  * CFA of the child frame. Note that m_actRec and m_rip are stored separately
  * (instead of simply storing the child ActRec), as C++ frames need not lay out
  * their frames with these fields adjacent.
+ *
+ * Only indirect fixups consult the child CFA, and deriving one from a
+ * compiler-generated AArch64 frame costs a stack unwind (see nativeFrameCFA),
+ * so it is captured lazily. Callers that already hold a CFA -- the unwinder,
+ * which gets one from _Unwind_GetCFA, and stub frames, whose layout HHVM
+ * controls -- fill in m_prevCfa. Callers that would have to derive one leave
+ * m_prevCfa zero and set m_nativeChild instead. Use prevCfa() to read it.
  */
 struct VMFrame {
   ActRec* m_actRec;
   TCA m_rip;
-  uintptr_t m_prevCfa;
+  uintptr_t m_prevCfa{0};
+  const ActRec* m_nativeChild{nullptr};
+
+  /*
+   * The CFA of the child frame, unwinding to find it if necessary. Not a cheap
+   * accessor: only call it once a fixup is known to be indirect.
+   */
+  uintptr_t prevCfa() const;
 };
 
 namespace FixupMap {

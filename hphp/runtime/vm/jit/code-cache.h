@@ -237,6 +237,10 @@ struct CodeCache {
 
   protected:
     struct State { size_t m_used{0}; CodeBlock* m_last{nullptr}; };
+    // Explicit even though C++20 value-initializes atomic's default ctor:
+    // State is wider than a pointer, so this lowers to a libatomic store and
+    // the initializer is what keeps that store from reading indeterminate
+    // bytes under GCC's -Wmaybe-uninitialized on AArch64.
     std::atomic<State> m_state{State{}};
     size_t m_hugePageBudget{0};
   };

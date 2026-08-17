@@ -225,6 +225,12 @@ struct Key : SweepableResourceData {
           raise_warning("supplied key param is a public key");
           return nullptr;
         }
+        // A private key is deliberately accepted where a public key was asked
+        // for: OpenSSL 3 hands back keys that retain their private components
+        // even from public-only accessors such as openssl_csr_get_public_key(),
+        // so rejecting is_priv here would break every such caller. EVP_PKEY
+        // carries the public half too, so public operations still do the right
+        // thing. Covered by slow/ext_openssl/private_key_as_public.php.
         return key;
       }
       ocert = cert;

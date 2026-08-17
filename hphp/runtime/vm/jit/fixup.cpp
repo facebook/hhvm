@@ -77,35 +77,18 @@ std::string Fixup::show() const {
   }
 }
 
-//////////////////////////////////////////////////////////////////////
-
-namespace FixupMap { namespace {
-
-constexpr unsigned kInitCapac = 128;
-
-struct VMRegs {
-  PC pc;
-  TypedValue* sp;
-  const ActRec* fp;
-  TCA retAddr;
-};
-
-struct FixupHash {
-  size_t operator()(uint32_t k) const {
-    return hash_int64(k);
-  }
-};
-
-TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
-static ServiceData::ExportedCounter* s_fixupmap_counter =
-  ServiceData::createCounter("admin.fixup_map_size");
+namespace {
 
 #if defined(__aarch64__)
 /*
- * Compilers may place padding between an AArch64 native frame record and its
- * CFA.
- * Use the emitted unwind metadata to recover the caller's actual stack
- * address instead of deriving it from the frame pointer.
+ * Both GCC and Clang may leave padding between an AArch64 native frame record
+ * and its CFA, so frame + kNativeFrameSize is not a reliable CFA for a
+ * compiler-generated frame on either. Recover the caller's actual stack
+ * address from the emitted unwind metadata instead.
+ *
+ * This walks the whole native stack, so it is far too expensive to run on
+ * every VM register sync. VMFrame keeps it off that path by deriving the CFA
+ * only when an indirect fixup actually asks for one.
  */
 struct CFAState {
   const ActRec* frame;
@@ -139,6 +122,37 @@ uintptr_t nativeFrameCFA(const ActRec* frame) {
 #endif
 }
 
+}
+
+uintptr_t VMFrame::prevCfa() const {
+  if (m_nativeChild == nullptr) return m_prevCfa;
+  assertx(m_prevCfa == 0);
+  return nativeFrameCFA(m_nativeChild);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace FixupMap { namespace {
+
+constexpr unsigned kInitCapac = 128;
+
+struct VMRegs {
+  PC pc;
+  TypedValue* sp;
+  const ActRec* fp;
+  TCA retAddr;
+};
+
+struct FixupHash {
+  size_t operator()(uint32_t k) const {
+    return hash_int64(k);
+  }
+};
+
+TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
+static ServiceData::ExportedCounter* s_fixupmap_counter =
+  ServiceData::createCounter("admin.fixup_map_size");
+
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     SBInvOffset extraSpOffset, VMRegs* outRegs) {
   assertx(!fixup.isIndirect());
@@ -169,7 +183,7 @@ bool getFrameRegs(VMFrame frame, VMRegs* outVMRegs) {
 
   auto extraSpOffset = SBInvOffset{0};
   if (fixup->isIndirect()) {
-    auto const ar = frame.m_prevCfa - kNativeFrameSize;
+    auto const ar = frame.prevCfa() - kNativeFrameSize;
     TRACE(3, "getFrameRegs: fp %p -> %s\n", (void*) ar, fixup->show().c_str());
     auto const ripAddr = ar + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);
@@ -244,8 +258,9 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->func()->name()->data());
-      auto const cfa = nativeFrameCFA(rbp);
-      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
+      // Leave the CFA to VMFrame: deriving one here would unwind the native
+      // stack on every sync, and only an indirect fixup will ever read it.
+      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), 0, rbp};
       auto const res = processFixupForVMFrame(frame);
       if (res || LIKELY(soft)) return res;
       always_assert(false && "Fixup expected for leafmost VM frame");

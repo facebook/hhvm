@@ -60,8 +60,8 @@ ActRec* findVMFrameForDebug(uintptr_t start = 0);
  *     that was called, but did not set up a full frame, as it is operating on
  *     behalf of the caller. This mode is used in prologues and some shared
  *     stubs on architectures, where the callee's frame is stored immediately
- *     under the caller's sp. On AArch64, fixupWork uses unwind metadata to
- *     account for padding between the native frame record and the caller sp.
+ *     under the caller's sp. On AArch64, the call site saves the native sp in
+ *     RDS because the frame record need not have a fixed offset from it.
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
  *     a call to a shared stub or prologue, and then that code called C++. The
@@ -190,25 +190,11 @@ private:
  * CFA of the child frame. Note that m_actRec and m_rip are stored separately
  * (instead of simply storing the child ActRec), as C++ frames need not lay out
  * their frames with these fields adjacent.
- *
- * Only indirect fixups consult the child CFA, and deriving one from a
- * compiler-generated AArch64 frame costs a stack unwind (see nativeFrameCFA),
- * so it is captured lazily. Callers that already hold a CFA -- the unwinder,
- * which gets one from _Unwind_GetCFA, and stub frames, whose layout HHVM
- * controls -- fill in m_prevCfa. Callers that would have to derive one leave
- * m_prevCfa zero and set m_nativeChild instead. Use prevCfa() to read it.
  */
 struct VMFrame {
   ActRec* m_actRec;
   TCA m_rip;
-  uintptr_t m_prevCfa{0};
-  const ActRec* m_nativeChild{nullptr};
-
-  /*
-   * The CFA of the child frame, unwinding to find it if necessary. Not a cheap
-   * accessor: only call it once a fixup is known to be indirect.
-   */
-  uintptr_t prevCfa() const;
+  uintptr_t m_prevCfa;
 };
 
 namespace FixupMap {

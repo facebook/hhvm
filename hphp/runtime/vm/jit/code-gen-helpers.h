@@ -55,6 +55,9 @@ struct Vout;
  */
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 
+/* Record the native CFA consumed by an indirect fixup. */
+void emitStoreCFAForIndirectFixup(Vout& v);
+
 /**
  * Load a ptr from src to dst
  * If bits are 35 the ptr is packed and shifting will be done

@@ -88,6 +88,14 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   }
 }
 
+void emitStoreCFAForIndirectFixup(Vout& v) {
+#ifdef __aarch64__
+  // BL does not adjust sp, so its value immediately before the call is the
+  // callee's CFA.
+  v << store{rsp(), rvmtl()[rds::kVmJitCfaOff]};
+#endif
+}
+
 template <>
 void emitDecodePtr<32>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};

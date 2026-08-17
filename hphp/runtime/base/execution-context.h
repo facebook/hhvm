@@ -69,6 +69,9 @@ struct VMState {
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
+#ifdef __aarch64__
+  uintptr_t jitCfa;
+#endif
   Either<ObjectData*, Exception*> exn;
 };
 

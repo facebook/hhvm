@@ -88,6 +88,11 @@ struct VMRegs {
      TC frame in this VM nesting. */
   jit::TCA jitReturnAddr;
 
+#ifdef __aarch64__
+  /* Native CFA recorded before an indirect JIT-to-C++ call. */
+  uintptr_t jitCfa;
+#endif
+
   TYPE_SCAN_CUSTOM() {
     // ActRecs are always interior pointers so the type-scanner won't
     // automatically enqueue them.
@@ -153,6 +158,10 @@ constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
                                            offsetof(VMRegs, mInstrState);
 constexpr ptrdiff_t kVmJitReturnAddrOff = kVmRegsOff +
                                            offsetof(VMRegs, jitReturnAddr);
+#ifdef __aarch64__
+constexpr ptrdiff_t kVmJitCfaOff        = kVmRegsOff +
+                                           offsetof(VMRegs, jitCfa);
+#endif
 constexpr ptrdiff_t kVmRegStateOff     = offsetof(Header, regState);
 
 static_assert((kVmMInstrStateOff % 16) == 0,

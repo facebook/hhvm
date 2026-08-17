@@ -1342,6 +1342,9 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
       vmMInstrState(),
       vmJitCalledFrame(),
       vmJitReturnAddr(),
+#ifdef __aarch64__
+      vmJitCfa(),
+#endif
       jit::g_unwind_rds->exn,
     }
   );
@@ -1383,6 +1386,9 @@ void ExecutionContext::popVMState() {
   vmMInstrState() = savedVM.mInstrState;
   vmJitCalledFrame() = savedVM.jitCalledFrame;
   vmJitReturnAddr() = savedVM.jitReturnAddr;
+#ifdef __aarch64__
+  vmJitCfa() = savedVM.jitCfa;
+#endif
   jit::g_unwind_rds->exn = savedVM.exn;
 
   if (debug) {

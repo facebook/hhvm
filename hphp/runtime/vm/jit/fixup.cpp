@@ -24,11 +24,6 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/dwarf-reg.h"
-
-#if defined(__aarch64__)
-#include <unwind.h>
-#endif
 
 TRACE_SET_MOD(fixup)
 
@@ -75,59 +70,6 @@ std::string Fixup::show() const {
     return fmt::format("direct pcOff={} spOff={}",
                           pcOffset(), spOffset().offset);
   }
-}
-
-namespace {
-
-#if defined(__aarch64__)
-/*
- * Both GCC and Clang may leave padding between an AArch64 native frame record
- * and its CFA, so frame + kNativeFrameSize is not a reliable CFA for a
- * compiler-generated frame on either. Recover the caller's actual stack
- * address from the emitted unwind metadata instead.
- *
- * This walks the whole native stack, so it is far too expensive to run on
- * every VM register sync. VMFrame keeps it off that path by deriving the CFA
- * only when an indirect fixup actually asks for one.
- */
-struct CFAState {
-  const ActRec* frame;
-  bool found;
-  uintptr_t cfa;
-};
-
-_Unwind_Reason_Code findCFA(_Unwind_Context* context, void* arg) {
-  auto const state = static_cast<CFAState*>(arg);
-  if (state->found) {
-    state->cfa = _Unwind_GetCFA(context);
-    return _URC_NORMAL_STOP;
-  }
-
-  // The context after the matching frame pointer owns the caller CFA we need.
-  auto const frame =
-    reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
-  state->found = frame == state->frame;
-  return _URC_NO_REASON;
-}
-#endif
-
-uintptr_t nativeFrameCFA(const ActRec* frame) {
-#if defined(__aarch64__)
-  CFAState state{frame, false, 0};
-  _Unwind_Backtrace(findCFA, &state);
-  always_assert(state.cfa != 0);
-  return state.cfa;
-#else
-  return uintptr_t(frame) + kNativeFrameSize;
-#endif
-}
-
-}
-
-uintptr_t VMFrame::prevCfa() const {
-  if (m_nativeChild == nullptr) return m_prevCfa;
-  assertx(m_prevCfa == 0);
-  return nativeFrameCFA(m_nativeChild);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -183,7 +125,7 @@ bool getFrameRegs(VMFrame frame, VMRegs* outVMRegs) {
 
   auto extraSpOffset = SBInvOffset{0};
   if (fixup->isIndirect()) {
-    auto const ar = frame.prevCfa() - kNativeFrameSize;
+    auto const ar = frame.m_prevCfa - kNativeFrameSize;
     TRACE(3, "getFrameRegs: fp %p -> %s\n", (void*) ar, fixup->show().c_str());
     auto const ripAddr = ar + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);
@@ -258,9 +200,12 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->func()->name()->data());
-      // Leave the CFA to VMFrame: deriving one here would unwind the native
-      // stack on every sync, and only an indirect fixup will ever read it.
-      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), 0, rbp};
+#ifdef __aarch64__
+      auto const cfa = vmJitCfa();
+#else
+      auto const cfa = uintptr_t(rbp) + kNativeFrameSize;
+#endif
+      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
       auto const res = processFixupForVMFrame(frame);
       if (res || LIKELY(soft)) return res;
       always_assert(false && "Fixup expected for leafmost VM frame");
@@ -280,8 +225,6 @@ void syncVMRegsWork(bool soft) {
   auto fp = regState() >= VMRegState::GUARDED_THRESHOLD ?
     (ActRec*)regState() : framePtr;
 
-  // TODO(mcolavita): This is incorrect for C++ routines with padding after
-  // their CFA.
   auto const synced = FixupMap::fixupWork(fp, soft);
 
   if (synced) regState() = VMRegState::CLEAN;

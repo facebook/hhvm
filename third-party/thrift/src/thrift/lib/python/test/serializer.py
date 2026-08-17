@@ -448,7 +448,6 @@ class SerializerTests(unittest.TestCase):
             val_iobuf=IOBuf(b"\xe5\x9b\x9b\xe5\x8d\x81\xe4\xba\x8c"),
             val_enum=self.Color.green,
             val_union=self.ComplexUnion(double_val=1.234),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             val_set=(
                 # pyrefly: ignore [bad-argument-type]
                 {easy(val=42)}
@@ -457,7 +456,6 @@ class SerializerTests(unittest.TestCase):
             ),
             # pyre-ignore[6]: TODO: Thrift-Container init
             val_map=self.to_map({"foo": b"foovalue"}),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             val_complex_map=(
                 # pyrefly: ignore [bad-argument-type]
                 {"bar": [{self.easy(val=42), self.easy(val_list=[1, 2, 3])}]}
@@ -527,7 +525,6 @@ class SerializerTests(unittest.TestCase):
             binarySet=self.to_set({b"foo", b"bar"}),
             # pyre-ignore[6]: TODO: Thrift-Container init
             iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
                 # pyrefly: ignore [bad-argument-type]
                 {self.Foo(value=1), self.Foo(value=2)}
@@ -559,7 +556,6 @@ class SerializerTests(unittest.TestCase):
             iobufMap=self.to_map(
                 {IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")}
             ),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             structMap=(
                 # pyrefly: ignore [bad-argument-type]
                 {

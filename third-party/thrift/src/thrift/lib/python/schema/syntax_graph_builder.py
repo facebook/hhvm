@@ -165,7 +165,6 @@ class IncrementalGraphBuilder:
 @functools.cache
 def _typename_to_primitive_map() -> dict[int, Primitive]:
     _TN = _standard_types.TypeName.Type
-    # pyrefly: ignore [bad-return]
     return {
         # pyrefly: ignore [bad-assignment]
         _TN.boolType.value: Primitive.BOOL,

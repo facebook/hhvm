@@ -50,7 +50,6 @@ except ImportError:
                 TTransportException.INVALID_TRANSFORM, "snappy module not available"
             )
 
-    # pyre-fixme[31]: Expression `thrift.transport.THeaderTransport.DummySnappy()`
     #  is not a valid type.
     snappy = DummySnappy()
 
@@ -72,7 +71,6 @@ except ImportError:
                 TTransportException.INVALID_TRANSFORM, "zstd module not available"
             )
 
-    # pyre-fixme[31]: Expression `thrift.transport.THeaderTransport.DummyZstd()` is
     #  not a valid type.
     zstd = DummyZstd()
 
@@ -95,7 +93,6 @@ except ImportError:
     class _DummyLz4:
         block = DummyLz4Block()
 
-    # pyre-fixme[31]: Expression `thrift.transport.THeaderTransport._DummyLz4()` is
     #  not a valid type.
     lz4 = _DummyLz4()
 

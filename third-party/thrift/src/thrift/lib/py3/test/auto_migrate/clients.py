@@ -67,7 +67,6 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
             TestingService.annotations = {}
 
         with self.assertRaises(TypeError):
-            # pyre-ignore[16]: for test
             TestingService.annotations["new_annotation"] = "no"
 
     async def test_client_keyword_arguments(self) -> None:

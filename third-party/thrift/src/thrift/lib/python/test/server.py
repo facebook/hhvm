@@ -37,7 +37,7 @@ from thrift.python.server_impl import python_async_processor
 
 # Typed alias for the same runtime set object (the Cython module has no stub).
 _inflight_lifecycle_tasks: set[asyncio.Task[object]] = (
-    python_async_processor._inflight_lifecycle_tasks  # pyre-ignore[16]
+    python_async_processor._inflight_lifecycle_tasks
 )
 
 

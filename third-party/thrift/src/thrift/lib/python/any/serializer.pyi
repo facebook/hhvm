@@ -39,7 +39,6 @@ def serialize_primitive(
 ) -> IOBuf: ...
 def deserialize_primitive(
     cls: typing.Type[TPrimitive],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
     thrift_type: typing.Optional[Type] = ...,
@@ -50,7 +49,6 @@ def serialize_list(
 ) -> IOBuf: ...
 def deserialize_list(
     elem_cls: typing.Type[TSerializable],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> typing.Sequence[TSerializable]: ...
@@ -60,7 +58,6 @@ def serialize_set(
 ) -> IOBuf: ...
 def deserialize_set(
     elem_cls: typing.Type[TSerializable],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> typing.AbstractSet[TSerializable]: ...
@@ -71,7 +68,6 @@ def serialize_map(
 def deserialize_map(
     key_cls: typing.Type[TKey],
     value_cls: typing.Type[TValue],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> typing.Mapping[TKey, TValue]: ...

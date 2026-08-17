@@ -359,7 +359,6 @@ class MapTests(unittest.TestCase):
             iobufMap=self.to_map(
                 {IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")}
             ),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             structMap=(
                 # pyrefly: ignore [bad-argument-type]
                 to_thrift_map({})

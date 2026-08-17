@@ -358,7 +358,6 @@ class MutableSetTest(unittest.TestCase):
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
             # the list is necessary to guarantee the order of the elements
-            # pyre-ignore[6]: Intentional for test
             mutable_set |= [10, 11, "Not an Integer", 13, 14]
 
         self.assertEqual(5, len(mutable_set))
@@ -452,7 +451,6 @@ class MutableSetTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
-            # pyre-ignore[6]: Intentional for test
             mutable_set ^= {10, 11, "Not an Integer", 13, 14}
 
         self.assertEqual(4, len(mutable_set))

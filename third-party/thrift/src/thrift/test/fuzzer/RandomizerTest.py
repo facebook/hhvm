@@ -133,7 +133,6 @@ class TestIntRandomizer(TestRandomizer):
         if delta is None:
             # Find the default `fuzz_max_delta` constraint
             randomizer_cls = randomizer.RandomizerState().get_randomizer(
-                # pyrefly: ignore [missing-attribute]
                 cls.ttype,
                 None,
                 {},
@@ -145,34 +144,28 @@ class TestIntRandomizer(TestRandomizer):
     @property
     def min(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         n_bits = cls.n_bits
         return -(2 ** (n_bits - 1))
 
     @property
     def max(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         n_bits = cls.n_bits
         return (2 ** (n_bits - 1)) - 1
 
     def testInRange(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
         min_ = self.min
         max_ = self.max
         gen = self.get_randomizer(ttype, None, {})
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertGreaterEqual(val, min_)
-            # pyrefly: ignore [missing-attribute]
             self.assertLessEqual(val, max_)
 
     def testConstant(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
 
         constant = 17
@@ -182,12 +175,10 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertEqual(val, constant)
 
     def testChoices(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
 
         choices = [11, 17, 19]
@@ -197,12 +188,10 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, choices)
 
     def testRange(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
 
         range_ = [45, 55]
@@ -212,14 +201,11 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertGreaterEqual(val, range_[0])
-            # pyrefly: ignore [missing-attribute]
             self.assertLessEqual(val, range_[1])
 
     def testRangeChoicePrecedence(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
 
         range_ = [45, 55]
@@ -230,12 +216,10 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, choices)
 
     def testSeeded(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
 
         seeds = [11, 17, 19]
@@ -245,12 +229,10 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, seeds)
 
     def testFuzzing(self):
         cls = self.__class__
-        # pyrefly: ignore [missing-attribute]
         ttype = cls.ttype
         min_ = self.min
         max_ = self.max
@@ -268,11 +250,8 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertGreaterEqual(val, min_)
-            # pyrefly: ignore [missing-attribute]
             self.assertLessEqual(val, max_)
-            # pyrefly: ignore [missing-attribute]
             self.assertTrue(cls.is_fuzzed(seeds, val, max_delta))
 
 
@@ -307,7 +286,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertEqual(val, 0.0)
 
     def testNonZero(self):
@@ -318,7 +296,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertNotEqual(val, 0.0)
 
     def testUnreal(self):
@@ -327,7 +304,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertTrue(math.isnan(val) or math.isinf(val))
 
     def testReal(self):
@@ -336,7 +312,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertFalse(math.isnan(val) or math.isinf(val))
 
     def testConstant(self):
@@ -346,7 +321,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertEqual(val, constant)
 
     def testChoices(self):
@@ -356,7 +330,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, choices)
 
     def testSeeded(self):
@@ -366,7 +339,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, seeds)
 
     def testIntSeeded(self):
@@ -376,7 +348,6 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in range(cls.iterations):
             val = gen.generate()
-            # pyrefly: ignore [missing-attribute]
             self.assertIn(val, seeds)
 
 
@@ -681,7 +652,6 @@ class TestStructRandomizer(TestRandomizer, unittest.TestCase):
 
     def struct_randomizer(self, ttype=None, constraints=None):
         if ttype is None:
-            # pyrefly: ignore [missing-attribute]
             ttype = self.__class__.ttype
         return self.get_randomizer(
             Thrift.TType.STRUCT, self.get_spec_args(ttype), constraints or {}

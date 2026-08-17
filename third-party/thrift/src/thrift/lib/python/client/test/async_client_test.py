@@ -78,7 +78,6 @@ def test_proxy_factory(
     #  `typing.Callable[([thrift.python.client.async_client.AsyncClient], ...)]` is not a
     #  valid type.
 ) -> typing.Callable[[AsyncClient], ...]:
-    # pyrefly: ignore [bad-return]
     return ThriftClientTestProxy
 
 
@@ -129,7 +128,6 @@ async def _record_vhost_route(
 
 class AsyncClientTests(IsolatedAsyncioTestCase):
     async def test_basic(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 sum_ = await client.add(1, 2)
@@ -141,7 +139,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         # We could `await self._connect_future`, but this encourages bad behavior
         # like storing clients, which could lead to exit handlers not running
         # or a stored client becoming invalid after used in async context manager
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             with self.assertRaisesRegex(
                 RuntimeError,
@@ -150,7 +147,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 await get_client(TestService, host=addr.ip, port=addr.port).add(1, 2)
 
     async def test_client_type_and_protocol(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -163,7 +159,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(3, sum)
 
     async def test_http2_client(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -248,14 +243,12 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
             await server.wait_closed()
 
     async def test_void_return(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 res = await client.noop()
                 self.assertIsNone(res)
 
     async def test_exception(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 res = await client.divide(6, 3)
@@ -264,14 +257,12 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                     await client.divide(1, 0)
 
     async def test_void_return_with_exception(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 with self.assertRaises(EmptyException):
                     await client.oops()
 
     async def test_oneway(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 res = await client.oneway()
@@ -279,7 +270,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 await asyncio.sleep(1)  # wait for server to clear the queue
 
     async def test_oneway_with_rocket(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -292,7 +282,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 await asyncio.sleep(1)  # wait for server to clear the queue
 
     async def test_keep_alive_timeout_ms_with_rocket(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -304,7 +293,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(3, await client.add(1, 2))
 
     async def test_unexpected_exception(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 with self.assertRaises(ApplicationError) as ex:
@@ -313,7 +301,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(ex.exception.type, ApplicationErrorType.UNKNOWN)
 
     async def test_derived_service(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(EchoService, host=addr.ip, port=addr.port) as client:
                 out = await client.echo("hello")
@@ -322,7 +309,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(3, sum)
 
     async def test_deriving_from_external_service(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(LeafService, host=addr.ip, port=addr.port) as client:
                 rev = await client.reverse([1, 2, 3])
@@ -339,7 +325,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
             self.assertEqual(TransportErrorType.UNKNOWN, ex.exception.type)
 
     async def test_hostname(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService, host="localhost", port=addr.port
@@ -348,7 +333,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(3, sum)
 
     async def test_persistent_header(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService, host="localhost", port=addr.port
@@ -358,7 +342,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(TEST_HEADER_VALUE, value)
 
     async def test_stream_nums(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -375,7 +358,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 )
 
     async def test_stream_nums_throws_inside(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -394,7 +376,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(e.exception.msg, "from inside of stream")
 
     async def test_stream_nums_throws_undeclared(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -416,7 +397,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 )
 
     async def test_stream_nums_throws_outside(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -429,7 +409,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(e.exception.msg, "from outside of stream")
 
     async def test_stream_sumAndNums(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -447,7 +426,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 )
 
     async def test_stream_sumAndNums_throws(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -464,10 +442,8 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         self.assertEqual(get_proxy_factory(), None)
 
         # Should be able to assign/get a test factory
-        # pyrefly: ignore [bad-argument-type]
         install_proxy_factory(test_proxy_factory)
         self.assertEqual(get_proxy_factory(), test_proxy_factory)
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             self.assertIsInstance(
                 get_client(TestService, host=addr.ip, port=addr.port),
@@ -513,7 +489,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         cb1 = Callback()
         cb2 = Callback()
 
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 client._at_aexit(cb1.trigger)
@@ -533,7 +508,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
             self.assertTrue(test_helper.is_handler_called())
 
     async def test_exception_in_client_event_handler(self) -> None:
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             with self.assertRaises(RuntimeError):
                 with client_handler_that_throws():
@@ -548,7 +522,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         This verifies that the folly::Try<uint16_t> return type from
         getChannelProtocolId() is properly handled in the Cython layer.
         """
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -567,7 +540,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         This verifies that the folly::Try<uint16_t> return type from
         getChannelProtocolId() is properly handled in the Cython layer.
         """
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(
                 TestService,
@@ -596,7 +568,6 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         RPC over the asyncio bridge catches any regression of the signature
         mismatch.
         """
-        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 # First RPC reads the freshly bound channel; a channel_ that

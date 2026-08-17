@@ -27,7 +27,7 @@ from thrift.python.reflection.services_reflection import ServiceSpec
 
 
 def _client_spec() -> ServiceSpec:
-    spec = inspect(TestingService)  # pyre-ignore[6]: client is inspectable
+    spec = inspect(TestingService)
     assert isinstance(spec, ServiceSpec)
     return spec
 

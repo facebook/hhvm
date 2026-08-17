@@ -345,7 +345,6 @@ class EnumTests(unittest.TestCase):
 
     def test_adding_member(self) -> None:
         with self.assertRaises(AttributeError):
-            # pyre-fixme[16]: `Type` has no attribute `black`.
             self.Color.black = 3
 
     def test_delete(self) -> None:

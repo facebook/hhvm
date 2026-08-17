@@ -72,7 +72,6 @@ def catch_thread_exception(*args, **kwds):
             self.exc_traceback = None
             self.thread = None
 
-    # pyre-ignore[2]:
     def scoped_excepthook(args, /) -> None:
         context.exc_type = args.exc_type
         context.exc_value = args.exc_value

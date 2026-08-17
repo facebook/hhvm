@@ -306,7 +306,6 @@ class SetTests(unittest.TestCase):
             binarySet=self.to_set({b"foo", b"bar"}),
             # pyre-ignore[6]: TODO: Thrift-Container init
             iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
-            # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
                 # pyrefly: ignore [bad-argument-type]
                 to_thrift_set(set())

@@ -102,7 +102,6 @@ def _shallow_copy_struct(src: CopyT, is_mutable_run: bool) -> CopyT:
     if not is_mutable_run:
         return copy.copy(src)
     dst = type(src)()
-    # pyre-ignore[16]: mutable-struct-only method
     dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
     return dst
 
@@ -177,7 +176,6 @@ class StructTestsParameterized(unittest.TestCase):
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
-        # pyre-ignore[8]: Intentional for test
         self._Reserved: Type[_Reserved] = (
             # pyrefly: ignore [bad-assignment]
             _Reserved if not self.is_mutable_run else _ReservedMutable
@@ -314,7 +312,6 @@ class StructTestsParameterized(unittest.TestCase):
             self.easy(val=1, an_int=self.Integers(small=300), name=1)
 
     def test_iterate(self) -> None:
-        # pyre-ignore[28]: proving __mangled_str works
         x = self.Reserved(
             from_="hello",
             nonlocal_=3,
@@ -400,7 +397,6 @@ class StructTestsParameterized(unittest.TestCase):
                 x = copy.replace(x, bad_key="foo")
 
     def test_reserved(self) -> None:
-        # pyre-ignore[28]: proving the mangling is optional
         x = self.Reserved(
             from_="hello",
             nonlocal_=3,
@@ -1094,9 +1090,7 @@ class StructDeepcopyTests(unittest.TestCase):
             self.assertIsNot(n.c, easy_copy)
 
         assert isinstance(easy_copy, mutable_test_types.easy)
-        # pyrefly: ignore [bad-assignment]
         easy_copy.name = "bar"
-        # pyrefly: ignore [bad-assignment]
         easy_copy.val = 128
 
         json_copy = json.loads(
@@ -1126,7 +1120,6 @@ class StructDeepcopyTests(unittest.TestCase):
         # shallow-copy API aliases the source's internal data (shared nested
         # struct), reassignment does not leak back to the source -- only
         # in-place mutation of the shared instance does.
-        # pyrefly: ignore [bad-assignment]
         n_copy.c = self.easy(name="bar", val=128)
 
         self.assertIsNot(n.c, n_copy.c)
@@ -1171,9 +1164,7 @@ class StructDeepcopyTests(unittest.TestCase):
             self.assertIsNot(n.easy_list[0], e_copy)
 
         assert isinstance(e_copy, mutable_test_types.easy)
-        # pyrefly: ignore [bad-assignment]
         e_copy.name = "bar"
-        # pyrefly: ignore [bad-assignment]
         e_copy.val = 128
 
         json_copy = json.loads(
@@ -1208,9 +1199,7 @@ class StructDeepcopyTests(unittest.TestCase):
             self.assertIsNot(n.easy_map["baz"], e_copy)
 
         assert isinstance(e_copy, mutable_test_types.easy)
-        # pyrefly: ignore [bad-assignment]
         e_copy.name = "bar"
-        # pyrefly: ignore [bad-assignment]
         e_copy.val = 128
 
         json_copy = json.loads(

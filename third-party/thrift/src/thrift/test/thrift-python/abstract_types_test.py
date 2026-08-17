@@ -166,7 +166,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         u = make_abstract(TestUnionImmutable(string_field="hello"))
         # This fixme is required due to the Pyre limitation that it does not recognize nested
         # type aliases as types for type annotations.
-        # pyre-fixme[9]: expected has type `TestUnionAbstract.FbThriftUnionFieldEnum`; used as
         #  `TestUnionImmutable.FbThriftUnionFieldEnum`.
         expected: TestUnionAbstract.FbThriftUnionFieldEnum = (
             # pyrefly: ignore [bad-assignment]
@@ -204,7 +203,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         u = make_abstract(TestUnionMutable(string_field="hello"))
         # This fixme is required due to the Pyre limitation that it does not recognize nested
         # type aliases as types for type annotations.
-        # pyre-fixme[9]: expected has type `TestUnionAbstract.FbThriftUnionFieldEnum`; used as
         #  `TestUnionMutable.FbThriftUnionFieldEnum`.
         expected: TestUnionAbstract.FbThriftUnionFieldEnum = (
             # pyrefly: ignore [bad-assignment]
@@ -520,7 +518,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignoress will flag these as unused.
-        # pyre-ignore[9]: unqualified_bool_incorrect_type has type `incorrect_type`;
         #  used as `bool`.
         unqualified_bool_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -529,7 +526,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         unqualified_bool: bool = (  # noqa F841
             test_struct_all_thrift_primitive_types_abstract.unqualified_bool
         )
-        # pyre-ignore[9]: optional_bool_incorrect_type has type `incorrect_type`;
         #  used as `Optional[bool]`.
         optional_bool_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -539,7 +535,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_bool
         )
 
-        # pyre-ignore[9]: unqualified_byte_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_byte_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -549,7 +544,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_byte
         )
 
-        # pyre-ignore[9]: optional_byte_incorrect_type has type `incorrect_type`;
         #  used as `Optional[int]`.
         optional_byte_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -559,7 +553,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_byte
         )
 
-        # pyre-ignore[9]: unqualified_i16_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i16_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -569,7 +562,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_i16
         )
 
-        # pyre-ignore[9]: optional_i16_incorrect_type has type `incorrect_type`;
         #  used as `Optional[int]`.
         optional_i16_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -579,7 +571,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_i16
         )
 
-        # pyre-ignore[9]: unqualified_i32_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -589,7 +580,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_i32
         )
 
-        # pyre-ignore[9]: optional_i32_incorrect_type has type `incorrect_type`;
         #  used as `Optional[int]`.
         optional_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -599,7 +589,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_i32
         )
 
-        # pyre-ignore[9]: unqualified_i64_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i64_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -609,7 +598,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_i64
         )
 
-        # pyre-ignore[9]: optional_i64_incorrect_type has type `incorrect_type`;
         #  used as `Optional[int]`.
         optional_i64_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -619,7 +607,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_i64
         )
 
-        # pyre-ignore[9]: unqualified_float_incorrect_type has type `incorrect_type`;
         #  used as `float`.
         unqualified_float_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -629,7 +616,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_float
         )
 
-        # pyre-ignore[9]: optional_float_incorrect_type has type `incorrect_type`;
         #  used as `Optional[float]`.
         optional_float_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -639,7 +625,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_float
         )
 
-        # pyre-ignore[9]: unqualified_double_incorrect_type has type `incorrect_type`;
         #  used as `float`.
         unqualified_double_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -649,7 +634,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_double
         )
 
-        # pyre-ignore[9]: optional_double_incorrect_type has type `incorrect_type`;
         #  used as `Optional[float]`.
         optional_double_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -659,7 +643,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.optional_double
         )
 
-        # pyre-ignore[9]: unqualified_string_incorrect_type has type `incorrect_type`;
         #  used as `str`.
         unqualified_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -669,7 +652,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_primitive_types_abstract.unqualified_string
         )
 
-        # pyre-ignore[9]: optional_string_incorrect_type has type `incorrect_type`;
         #  used as `Optional[str]`.
         optional_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -702,7 +684,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignoress will flag these as unused.
-        # pyre-ignore[9]: unqualified_list_i32_incorrect_type has type
         #  `incorrect_type`; used as `Sequence[int]`.
         unqualified_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -711,7 +692,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         unqualified_list_i32: typing.Sequence[int] = (  # noqa F841
             test_struct_all_thrift_container_types_abstract.unqualified_list_i32
         )
-        # pyre-ignore[9]: optional_list_i32_incorrect_type has type `incorrect_type`;
         #  used as `Optional[Sequence[int]]`.
         optional_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -721,7 +701,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_container_types_abstract.optional_list_i32
         )
 
-        # pyre-ignore[9]: unqualified_set_string_incorrect_type has type
         #  `incorrect_type`; used as `AbstractSet[str]`.
         unqualified_set_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -731,7 +710,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_container_types_abstract.unqualified_set_string
         )
 
-        # pyre-ignore[9]: optional_set_string_incorrect_type has type
         #  `incorrect_type`; used as `Optional[AbstractSet[str]]`.
         optional_set_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -741,7 +719,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_container_types_abstract.optional_set_string
         )
 
-        # pyre-ignore[9]: unqualified_map_string_i32_incorrect_type has type
         #  `incorrect_type`; used as `Mapping[str, int]`.
         unqualified_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -751,7 +728,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_all_thrift_container_types_abstract.unqualified_map_string_i32
         )
 
-        # pyre-ignore[9]: optional_map_string_i32_incorrect_type has type
         #  `incorrect_type`; used as `Optional[Mapping[str, int]]`.
         optional_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -784,7 +760,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignores will flag these as unused.
-        # pyre-ignore[9]: empty_struct_incorrect_type has type `incorrect_type`; used
         #  as `TestStructEmptyAbstract`.
         empty_struct_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -794,7 +769,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_typedef_field_abstract.empty_struct
         )
 
-        # pyre-ignore[9]: empty_struct_alias_incorrect_type has type
         #  `incorrect_type`; used as `TestStructEmptyAbstract`.
         empty_struct_alias_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -836,7 +810,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignores will flag these as unused.
-        # pyre-ignore[9]: nested_0_incorrect_type has type `incorrect_type`; used as
         #  `TestStructNested_1Abstract`.
         nested_0_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -846,7 +819,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_nested_0_abstract.nested_1
         )
 
-        # pyre-ignore[9]: nested_1_incorrect_type has type `incorrect_type`; used as
         #  `TestStructNested_2Abstract`.
         nested_1_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -856,7 +828,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_nested_1_abstract.nested_2
         )
 
-        # pyre-ignore[9]: recursive_struct_incorrect_type has type `incorrect_type`;
         #  used as `Optional[TestStructCopyAbstract]`.
         recursive_struct_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -866,7 +837,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_copy_abstract.recursive_struct
         )
 
-        # pyre-ignore[9]: recursive_exception_incorrect_type has type
         #  `incorrect_type`; used as `Optional[TestExceptionCopyAbstract]`.
         recursive_exception_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -899,7 +869,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignores will flag these as unused.
-        # pyre-ignore[9]: list_list_i32_incorrect_type has type `incorrect_type`;
         #  used as `Sequence[Sequence[int]]`.
         list_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -909,7 +878,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.list_list_i32
         )
 
-        # pyre-ignore[9]: list_set_i32_incorrect_type has type `incorrect_type`; used
         #  as `Sequence[AbstractSet[int]]`.
         list_set_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -919,7 +887,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.list_set_i32
         )
 
-        # pyre-ignore[9]: list_map_string_i32_incorrect_type has type
         #  `incorrect_type`; used as `Sequence[Mapping[str, int]]`.
         list_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -929,7 +896,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.list_map_string_i32
         )
 
-        # pyre-ignore[9]: list_map_string_list_i32_incorrect_type has type
         #  `incorrect_type`; used as `Sequence[Mapping[str, Sequence[int]]]`.
         list_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -939,7 +905,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             typing.Mapping[str, typing.Sequence[int]]
         ] = test_struct_with_nested_containers_abstract.list_map_string_list_i32
 
-        # pyre-ignore[9]: list_map_string_set_i32_incorrect_type has type
         #  `incorrect_type`; used as `Sequence[Mapping[str, AbstractSet[int]]]`.
         list_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -949,7 +914,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             typing.Mapping[str, typing.AbstractSet[int]]
         ] = test_struct_with_nested_containers_abstract.list_map_string_set_i32
 
-        # pyre-ignore[9]: set_list_i32_incorrect_type has type `incorrect_type`; used
         #  as `AbstractSet[Sequence[int]]`.
         set_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -959,7 +923,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.set_list_i32
         )
 
-        # pyre-ignore[9]: set_set_i32_incorrect_type has type `incorrect_type`; used
         #  as `AbstractSet[AbstractSet[int]]`.
         set_set_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -969,7 +932,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.set_set_i32
         )
 
-        # pyre-ignore[9]: map_i32_list_i32_incorrect_type has type `incorrect_type`;
         #  used as `Mapping[int, Sequence[int]]`.
         map_i32_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -979,7 +941,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.map_i32_list_i32
         )
 
-        # pyre-ignore[9]: map_i32_set_i32_incorrect_type has type `incorrect_type`;
         #  used as `Mapping[int, AbstractSet[int]]`.
         map_i32_set_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -989,7 +950,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.map_i32_set_i32
         )
 
-        # pyre-ignore[9]: map_i32_map_string_i32_incorrect_type has type
         #  `incorrect_type`; used as `Mapping[int, Mapping[str, int]]`.
         map_i32_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -999,7 +959,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_nested_containers_abstract.map_i32_map_string_i32
         )
 
-        # pyre-ignore[9]: map_i32_map_string_list_i32_incorrect_type has type
         #  `incorrect_type`; used as `Mapping[int, Mapping[str, Sequence[int]]]`.
         map_i32_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1009,7 +968,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             int, typing.Mapping[str, typing.Sequence[int]]
         ] = test_struct_with_nested_containers_abstract.map_i32_map_string_list_i32
 
-        # pyre-ignore[9]: map_i32_map_string_set_i32_incorrect_type has type
         #  `incorrect_type`; used as `Mapping[int, Mapping[str, AbstractSet[int]]]`.
         map_i32_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1019,7 +977,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             int, typing.Mapping[str, typing.AbstractSet[int]]
         ] = test_struct_with_nested_containers_abstract.map_i32_map_string_set_i32
 
-        # pyre-ignore[9]: many_nested_incorrect_type has type `incorrect_type`; used
         #  as `Sequence[Sequence[Mapping[int, Sequence[Mapping[str,
         #  Sequence[AbstractSet[int]]]]]]]`.
         many_nested_incorrect_type: incorrect_type = (  # noqa F841
@@ -1060,7 +1017,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignores will flag these as unused.
-        # pyre-ignore[9]: unqualified_bool_incorrect_type has type `incorrect_type`;
         #  used as `bool`.
         unqualified_bool_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1069,7 +1025,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         unqualified_bool: bool = (  # noqa F841
             test_exception_all_thrift_primitive_types_abstract.unqualified_bool
         )
-        # pyre-ignore[9]: optional_bool_incorrect_type has type `incorrect_type`;
         #  used as `Optional[bool]`.
         optional_bool_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1079,7 +1034,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_bool
         )
 
-        # pyre-ignore[9]: unqualified_byte_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_byte_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1089,7 +1043,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_byte
         )
 
-        # pyre-ignore[9]: optional_byte_incorrect_type has type `incorrect_type`;
         #  used as `Optional[int]`.
         optional_byte_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1099,7 +1052,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_byte
         )
 
-        # pyre-ignore[9]: unqualified_i16_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i16_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1109,7 +1061,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_i16
         )
 
-        # pyre-ignore[9]: optional_i16_incorrect_type has type `incorrect_type`; used
         #  as `Optional[int]`.
         optional_i16_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1119,7 +1070,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_i16
         )
 
-        # pyre-ignore[9]: unqualified_i32_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1129,7 +1079,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_i32
         )
 
-        # pyre-ignore[9]: optional_i32_incorrect_type has type `incorrect_type`; used
         #  as `Optional[int]`.
         optional_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1139,7 +1088,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_i32
         )
 
-        # pyre-ignore[9]: unqualified_i64_incorrect_type has type `incorrect_type`;
         #  used as `int`.
         unqualified_i64_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1149,7 +1097,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_i64
         )
 
-        # pyre-ignore[9]: optional_i64_incorrect_type has type `incorrect_type`; used
         #  as `Optional[int]`.
         optional_i64_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1159,7 +1106,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_i64
         )
 
-        # pyre-ignore[9]: unqualified_float_incorrect_type has type `incorrect_type`;
         #  used as `float`.
         unqualified_float_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1169,7 +1115,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_float
         )
 
-        # pyre-ignore[9]: optional_float_incorrect_type has type `incorrect_type`;
         #  used as `Optional[float]`.
         optional_float_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1178,7 +1123,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         optional_float: typing.Optional[float] = (  # noqa F841
             test_exception_all_thrift_primitive_types_abstract.optional_float
         )
-        # pyre-ignore[9]: unqualified_double_incorrect_type has type
         #  `incorrect_type`; used as `float`.
         unqualified_double_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1188,7 +1132,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_double
         )
 
-        # pyre-ignore[9]: optional_double_incorrect_type has type `incorrect_type`;
         #  used as `Optional[float]`.
         optional_double_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1198,7 +1141,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.optional_double
         )
 
-        # pyre-ignore[9]: unqualified_string_incorrect_type has type
         #  `incorrect_type`; used as `str`.
         unqualified_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1208,7 +1150,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_exception_all_thrift_primitive_types_abstract.unqualified_string
         )
 
-        # pyre-ignore[9]: optional_string_incorrect_type has type `incorrect_type`;
         #  used as `Optional[str]`.
         optional_string_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1242,7 +1183,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         class incorrect_type:
             pass
 
-        # pyre-ignore[9]: exception_field_incorrect_type has type `incorrect_type`; used
         #  as `TestExceptionAllThriftPrimitiveTypesAbstract`.
         exception_field_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1252,7 +1192,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_exception_field_abstract.exception_field
         )
 
-        # pyre-ignore[9]: union_field_incorrect_type has type `incorrect_type`; used as
         #  `TestUnion`.
         union_field_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1262,7 +1201,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             test_struct_with_union_field_abstract.union_field
         )
 
-        # pyre-ignore[9]: union_field_from_included_incorrect_type has type
         #  `incorrect_type`; used as `TestUnion`.
         union_field_from_included_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1308,7 +1246,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             string_union.fbthrift_current_field,
             TestUnionAbstract.FbThriftUnionFieldEnum.string_field,
         )
-        # pyre-ignore[9]: string_field_incorrect_type has type `incorrect_type`; used as
         #  `str`.
         string_field_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1323,7 +1260,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             int_union.fbthrift_current_field,
             TestUnionAbstract.FbThriftUnionFieldEnum.int_field,
         )
-        # pyre-ignore[9]: int_field_incorrect_type has type `incorrect_type`; used as `int`.
         int_field_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
             int_union.int_field
@@ -1337,7 +1273,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             struct_union.fbthrift_current_field,
             TestUnionAbstract.FbThriftUnionFieldEnum.struct_field,
         )
-        # pyre-ignore[9]: struct_field_incorrect_type has type `incorrect_type`; used as
         #  `TestStruct`.
         struct_field_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1386,7 +1321,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignoress will flag these as unused.
-        # pyre-ignore[9]: unqualified_adapted_i32_to_datetime_incorrect_type has type `incorrect_type`;
         #  used as `datetime`.
         unqualified_adapted_i32_to_datetime_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1398,7 +1332,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignoress will flag these as unused.
-        # pyre-ignore[9]: optional_adapted_i32_to_datetime_incorrect_type has type `incorrect_type`;
         #  used as `Optional[datetime]`.
         optional_adapted_i32_to_datetime_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]
@@ -1410,7 +1343,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # If type-checks don't detect a type mismatch, then the CI check for
         # unused ignoress will flag these as unused.
-        # pyre-ignore[9]: unqualified_adapted_string_to_i32_incorrect_type is declared to have type `incorrect_type`
         # but is used as type `int`
         unqualified_adapted_string_to_i32_incorrect_type: incorrect_type = (  # noqa F841
             # pyrefly: ignore [bad-assignment]

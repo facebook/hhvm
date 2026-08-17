@@ -92,7 +92,6 @@ class BuilderTest(unittest.TestCase):
 
     def test_build_with_wrong_type_field(self) -> None:
         easy_builder = easy_Builder()
-        # pyre-fixme[8]: Attribute has type `Optional[int]`; used as `str`.
         easy_builder.val = "123"
         with self.assertRaises(TypeError):
             easy_builder()  # caught at build step

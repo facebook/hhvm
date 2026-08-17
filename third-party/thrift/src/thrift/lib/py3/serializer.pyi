@@ -41,13 +41,11 @@ def serialize(tstruct: sT, protocol: Protocol = ...) -> bytes: ...
 def serialize_iobuf(tstruct: sT, protocol: Protocol = ...) -> IOBuf: ...
 def deserialize(
     structKlass: Type[sT],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> sT: ...
 def deserialize_with_length(
     structKlass: Type[sT],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> Tuple[sT, int]: ...
@@ -59,6 +57,5 @@ def serialize_with_header_iobuf(
 ) -> IOBuf: ...
 def deserialize_from_header(
     structKlass: Type[sT],
-    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: Union[bytes, bytearray, IOBuf, memoryview],
 ) -> sT: ...

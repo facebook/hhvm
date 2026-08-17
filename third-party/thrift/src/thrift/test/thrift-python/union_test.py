@@ -200,7 +200,6 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             fields_enum_type.__members__.keys(),
         )
 
-        # pyrefly: ignore [missing-attribute]
         self.assertIs(fields_enum_type(0), fields_enum_type.EMPTY)
 
         enum_names_and_values = {
@@ -800,7 +799,6 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             fields_enum_type.__members__.keys(),
         )
 
-        # pyrefly: ignore [missing-attribute]
         self.assertIs(fields_enum_type(0), fields_enum_type.EMPTY)
 
         enum_names_and_values = {

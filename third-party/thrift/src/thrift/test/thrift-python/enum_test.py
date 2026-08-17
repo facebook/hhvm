@@ -133,7 +133,7 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, r"Thrift enum type 'Color': cannot assign member \('foo'\)"
         ):
-            enums.Color.foo = 42  # pyre-ignore[16]: Check runtime behavior
+            enums.Color.foo = 42
 
         with self.assertRaisesRegex(
             AttributeError, r"Thrift enum type 'Color': cannot assign member \('red'\)"

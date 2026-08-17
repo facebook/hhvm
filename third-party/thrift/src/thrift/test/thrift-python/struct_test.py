@@ -369,7 +369,6 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
     def test_iteration(self) -> None:
         # Iterating over the class yields tuples of (field_name, None).
         self.assertSetEqual(
-            # pyre-ignore[6]: Fixme: type error to be addressed later
             set(TestStructImmutable),
             {("unqualified_string", None), ("optional_string", None)},
         )

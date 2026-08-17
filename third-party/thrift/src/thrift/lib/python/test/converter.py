@@ -334,7 +334,6 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         )._to_python()
         self.assertIsInstance(simple.color, BadEnum)
         self.assertEqual(
-            # pyre-ignore[16]: `python_types.Color` has no attribute `enum`. It's actually a BadEnum.
             simple.color.enum,
             python_types.Color,
         )
@@ -563,7 +562,6 @@ class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
         )._to_mutable_python()
         self.assertIsInstance(simple.color, BadEnum)
         self.assertEqual(
-            # pyre-ignore[16]: `python_mutable_types.Color` has no attribute `enum`. It's actually a BadEnum.
             simple.color.enum,
             python_mutable_types.Color,
         )

@@ -162,9 +162,7 @@ class _MapTypedefBase(Map, metaclass=_MapTypedefMeta):
     def __init__(self, values: object = None) -> None:
         if values is None:
             values = {}
-        # pyre-ignore[19]: Cython __init__ not visible to Pyre
         super().__init__(
-            # pyrefly: ignore [bad-argument-count]
             self._fbthrift_map_key_type_info,
             # pyrefly: ignore [bad-argument-count]
             self._fbthrift_map_val_type_info,

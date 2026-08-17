@@ -45,7 +45,6 @@ class LoadHandler(LoadTest.Iface):
         super().__init__()
         self.loop = loop or asyncio.get_event_loop()
         self.pool = ProcessPoolExecutor()
-        # pyrefly: ignore [bad-assignment]
         pickle.DEFAULT_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
     def noop(self):

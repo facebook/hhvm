@@ -39,7 +39,6 @@ class SpecialCasesTest(unittest.TestCase):
         class incorrect_type:
             pass
 
-        # pyre-ignore[9]: break_unless_used_with_renamed_built_in_property is declared to have type `incorrect_type` but is used as type `str`
         _: incorrect_type = (  # noqa: F841
             # pyrefly: ignore [bad-assignment]
             make_abstract(

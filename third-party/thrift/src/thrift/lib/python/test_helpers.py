@@ -25,8 +25,6 @@ from thrift.py3.types import Struct as py3_Struct
 from thrift.python.exceptions import GeneratedError
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import MutableStruct, MutableUnion
-
-# pyre-ignore[21]: no pyre annotations for internal types
 from thrift.python.types import (
     # pyrefly: ignore [missing-module-attribute]
     _fbthrift_internal_DO_NOT_USE_get_List_typeinfo,
@@ -367,7 +365,6 @@ def assert_thrift_almost_equal(
         result, (Struct, GeneratedError, MutableStruct, MutableGeneratedError)
     ):
         _assert_struct_almost_equal(
-            # pyrefly: ignore [bad-argument-type]
             unittest,
             result,
             # pyrefly: ignore [bad-argument-type]
@@ -379,7 +376,6 @@ def assert_thrift_almost_equal(
 
     elif isinstance(result, (Union, MutableUnion)):
         _assert_union_almost_equal(
-            # pyrefly: ignore [bad-argument-type]
             unittest,
             result,
             # pyrefly: ignore [bad-argument-type]
@@ -391,7 +387,6 @@ def assert_thrift_almost_equal(
 
     elif isinstance(result, Mapping):
         _assert_mapping_almost_equal(
-            # pyrefly: ignore [bad-argument-type]
             unittest,
             result,
             expected,
@@ -402,7 +397,6 @@ def assert_thrift_almost_equal(
 
     elif isinstance(result, abcSet):
         _assert_set_almost_equal(
-            # pyrefly: ignore [bad-argument-type]
             unittest,
             result,
             expected,
@@ -413,7 +407,6 @@ def assert_thrift_almost_equal(
 
     elif isinstance(result, Sequence):
         _assert_sequence_almost_equal(
-            # pyrefly: ignore [bad-argument-type]
             unittest,
             result,
             expected,

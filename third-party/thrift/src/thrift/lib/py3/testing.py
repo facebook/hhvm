@@ -42,7 +42,7 @@ def mock_client(client_klass: Type[Client]) -> mock.AsyncMock:
                 thing.__class__.__name__ == "cython_function_or_method"
                 and not thing.__name__.startswith(  # pyrefly: ignore [missing-attribute]
                     "__"
-                )  # pyrefly: ignore [missing-attribute]
+                )
             ):
                 # The only cython function that makes it into here is one that
                 # is on the thrift client class that is being mocked.  As such

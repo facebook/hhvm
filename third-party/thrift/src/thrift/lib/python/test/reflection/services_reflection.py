@@ -73,11 +73,11 @@ class InspectServiceBasicTest(unittest.TestCase):
         self.assertIsInstance(inspect(TestingServiceInterface), ServiceSpec)
 
     def test_client_returns_service_spec(self) -> None:
-        self.assertIsInstance(inspect(TestingService), ServiceSpec)  # pyre-ignore[6]
+        self.assertIsInstance(inspect(TestingService), ServiceSpec)
 
     def test_service_and_client_same_name(self) -> None:
         service_spec = inspect(TestingServiceInterface)
-        client_spec = inspect(TestingService)  # pyre-ignore[6]
+        client_spec = inspect(TestingService)
         assert isinstance(service_spec, ServiceSpec)
         assert isinstance(client_spec, ServiceSpec)
         self.assertEqual(service_spec.name, client_spec.name)
@@ -262,7 +262,7 @@ class InheritanceTest(unittest.TestCase):
         self.assertIn("getName", parent.functions)
 
     def test_child_client_has_parent(self) -> None:
-        spec = inspect(TestingServiceChild)  # pyre-ignore[6]
+        spec = inspect(TestingServiceChild)
         assert isinstance(spec, ServiceSpec)
         self.assertIsNotNone(spec.parent)
 
@@ -346,7 +346,7 @@ class ContainerTypeInspectabilityTest(unittest.TestCase):
         assert arg is not None
         self.assertTrue(issubclass(arg.type, _fbthrift_Set))
         self.assertTrue(inspectable(arg.type))
-        spec = inspect(arg.type)  # pyre-ignore[6]
+        spec = inspect(arg.type)
         self.assertIsInstance(spec, SetSpec)
         assert isinstance(spec, SetSpec)
         self.assertEqual(spec.value, str)
@@ -356,7 +356,7 @@ class ContainerTypeInspectabilityTest(unittest.TestCase):
         func = _get_func("echoSetNoTypedef")
         assert func.return_type is not None
         self.assertTrue(issubclass(func.return_type, _fbthrift_Set))
-        spec = inspect(func.return_type)  # pyre-ignore[6]
+        spec = inspect(func.return_type)
         self.assertIsInstance(spec, SetSpec)
         assert isinstance(spec, SetSpec)
         self.assertEqual(spec.value, str)

@@ -600,7 +600,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Get the ResourcePoolSet used by this ThriftServer. There is always one, but
    * it may be empty if ResourcePools are not in use.
    */
-  const ResourcePoolSet& resourcePoolSet() const override {
+  const ResourcePoolSet& resourcePoolSet() const final {
     return resourcePoolSet_;
   }
 
@@ -608,7 +608,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Get the ResourcePoolSet used by this ThriftServer. There is always one, but
    * it may be empty if ResourcePools are not in use.
    */
-  ResourcePoolSet& resourcePoolSet() override { return resourcePoolSet_; }
+  ResourcePoolSet& resourcePoolSet() final { return resourcePoolSet_; }
 
   // Used to disable resource pool at run time. This
   // should only be used by thrift team.
@@ -880,7 +880,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * @return a shared pointer to the thread manager
    */
   std::shared_ptr<concurrency::ThreadManager> getThreadManager_deprecated()
-      const override {
+      const final {
     std::shared_lock lock(threadManagerMutex_);
     return tmLoggingWrapper_;
   }

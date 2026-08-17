@@ -2,13 +2,8 @@
 
 function VS($x, $y) :mixed{
   var_dump($x === $y);
-  if ($x !== $y) {
-    echo "Failed:\n";
-    var_dump($y);
-    echo "Got:\n";
-    var_dump($x);
-    var_dump(debug_backtrace());
-  }
+  if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
+                   var_dump(debug_backtrace()); }
 }
 function VERIFY($x) :mixed{ VS($x, true); }
 
@@ -23,16 +18,16 @@ function test_SpoofChecker_issuspicious(): void {
   VS($checker->isSuspicious("facebook", inout $issues), false);
 
   // facebook with Cyrillic spoof characters
-  VS($checker->isSuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), inout $issues), false);
+  VS($checker->isSuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), inout $issues), true);
 
   // "Russia" in Cyrillic with Latin spoof characters
-  VS($checker->isSuspicious(u('Pocc\u0438\u044f'), inout $issues), false);
+  VS($checker->isSuspicious(u('Pocc\u0438\u044f'), inout $issues), true);
 
   // paypal with Cyrillic spoof characters
-  VS($checker->isSuspicious(u('http://www.payp\u0430l.com'), inout $issues), false);
+  VS($checker->isSuspicious(u('http://www.payp\u0430l.com'), inout $issues), true);
 
   // certain all-uppercase Latin sequences can be spoof of Greek
-  VS($checker->isSuspicious('NAPKIN PEZ', inout $issues), false);
+  VS($checker->isSuspicious('NAPKIN PEZ', inout $issues), true);
   VS($checker->isSuspicious('napkin pez', inout $issues), false);
 
   // English with Japanese characters
@@ -62,7 +57,7 @@ function test_SpoofChecker_areconfusable(): void {
      true);
 
   VS($checker->areConfusable("facebook", "\xf0\x9d\x90\x9faceboo".u('\u1d0b'), inout $issues),
-     false);
+     true);
 
   VS($checker->areConfusable("facebook", u('\u017facebook'), inout $issues), true);
 
@@ -93,12 +88,12 @@ function test_SpoofChecker_issuesfound(): void {
   $ret = null;
   $checker = new SpoofChecker();
 
-  VS($checker->isSuspicious("NAPKIN PEZ", inout $ret), false);
-  VS($ret, 0);
+  VS($checker->isSuspicious("NAPKIN PEZ", inout $ret), true);
+  VS($ret, SpoofChecker::WHOLE_SCRIPT_CONFUSABLE);
 
   VS($checker->isSuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), inout $ret),
-     false);
-  VS($ret, 0);
+     true);
+  VS($ret, SpoofChecker::MIXED_SCRIPT_CONFUSABLE);
 
   VS($checker->areConfusable("hello, world", "he11o, wor1d", inout $ret), true);
   VS($ret, SpoofChecker::SINGLE_SCRIPT_CONFUSABLE);
@@ -119,7 +114,7 @@ function test_SpoofChecker_setchecks(): void {
     SpoofChecker::WHOLE_SCRIPT_CONFUSABLE |
     SpoofChecker::SINGLE_SCRIPT_CONFUSABLE
   );
-  VS($checker->areConfusable("HELLO", u('H\u0415LLO'), inout $issues), true);
+  VS($checker->areConfusable("HELLO", u('H\u0415LLO'), inout $issues), false);
   VS($checker->areConfusable("hello", u('h\u0435llo'), inout $issues), true);
 
   $checker = new SpoofChecker();

@@ -13,7 +13,9 @@ resource(%d) of type (OpenSSL key)
 Testing openssl_csr_new with existing ecc key
 resource(%d) of type (OpenSSL X.509 CSR)
 bool(false)
-dict(0) {
+dict(1) {
+  ["d"]=>
+  string(%d) "%a"
 }
 resource(%d) of type (OpenSSL X.509)
 Testing openssl_x509_check_private_key

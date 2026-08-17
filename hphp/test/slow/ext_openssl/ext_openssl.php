@@ -239,55 +239,18 @@ function test_openssl_seal() :mixed{
   $sealed = null;
   $ekeys = null;
   $iv = null;
-  $method = 'AES-256-CBC';
   VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
-                      $method, inout $iv));
+                      '', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
   VERIFY(strlen($ekeys[0]) > 0);
 
   $open_data = null;
-  VERIFY(openssl_open(
-    $sealed,
-    inout $open_data,
-    $ekeys[0],
-    $privkey,
-    $method,
-    $iv,
-  ));
+  VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey));
   VS($open_data, $data);
 
-  $cipher_methods = openssl_get_cipher_methods();
-  $has_rc4 =
-    in_array('RC4', $cipher_methods) ||
-    in_array('rc4', $cipher_methods);
-  $rc4_sealed = null;
-  $rc4_keys = null;
-  $rc4_iv = null;
-  $rc4_opened = true;
-  $rc4_open_data = $data;
-  if ($has_rc4) {
-    $rc4_sealed_ok = openssl_seal(
-      $data,
-      inout $rc4_sealed,
-      inout $rc4_keys,
-      vec[$pubkey],
-      'RC4',
-      inout $rc4_iv,
-    );
-    if ($rc4_sealed_ok) {
-      $rc4_opened = openssl_open(
-        $rc4_sealed,
-        inout $rc4_open_data,
-        $rc4_keys[0],
-        $privkey,
-        'RC4',
-        $rc4_iv,
-      );
-    }
-  }
-  VERIFY($rc4_opened);
-  VS($rc4_open_data, $data);
+  VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey, 'RC4'));
+  VS($open_data, $data);
 
   VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
                       'AES-256-ECB', inout $iv));
@@ -310,8 +273,8 @@ function test_openssl_sign() :mixed{
 
   $data = "some secret messages";
   $signature = null;
-  VERIFY(openssl_sign($data, inout $signature, $privkey, 'sha256'));
-  VS(openssl_verify($data, $signature, $pubkey, 'sha256'), 1);
+  VERIFY(openssl_sign($data, inout $signature, $privkey));
+  VS(openssl_verify($data, $signature, $pubkey), 1);
 
 }
 

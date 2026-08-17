@@ -7,7 +7,7 @@ BAR
 --- Not in PATH
 STDERR: /bin/sh:%scat: %s
 --- Bad STDOUT
-STDERR: closed
+STDERR: %s: Bad file descriptor
 --- Custom ARGV[0]
 STDERR: myshell
 --- Explicitly write to different handles

@@ -54,15 +54,10 @@ function main(): void {
   _OS\close($r);
 
   print("--- Bad STDOUT\n");
-  // An unmapped standard descriptor should be closed in the child.
   list($r, $w) = _OS\pipe();
   $pid = _OS\fork_and_execve(
-    '/bin/sh',
-    vec[
-      '/bin/sh',
-      '-c',
-      'if [ -e /proc/self/fd/1 ]; then echo open >&2; else echo closed >&2; fi',
-    ],
+    '/bin/echo',
+    vec['/bin/echo', 'foo'],
     vec[],
     dict[_OS\STDERR_FILENO => $w],
     shape(),

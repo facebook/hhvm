@@ -74,9 +74,6 @@ Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
 Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
 Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
-Attributes of functionWithNoArgAttr: {"NoArgFunctionAttr":[]}
-Attributes of functionWithTwoArgAttr: {"TwoArgFunctionAttr":["first","42"]}
-Attributes of functionWithUnindexedAttr: {}
 
 These should be empty, otherwise we're mixing types and type aliases up again
 Attributes of ClassWithTwoAttrs: {}
@@ -88,9 +85,6 @@ Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThe
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
 Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
 Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes=[NoArgMethodAttr,TwoArgMethodAttr]" trying to get methods with DontIndexThisMethodAttr
-Functions decorated with NoArgFunctionAttr: ["functionWithNoArgAttr"]
-Functions decorated with TwoArgFunctionAttr: ["functionWithTwoArgAttr"]
-Threw RuntimeException:"Queried attribute DontIndexThisFunctionAttr not found in IndexedFunctionAttributes=[NoArgFunctionAttr,TwoArgFunctionAttr]" trying to get functions with DontIndexThisFunctionAttr
 
 Getting type methods with attribute
 Methods with attributes for ClassWithMethodAttrs: {"methodWithNoArgAttr":["NoArgMethodAttr"],"methodWithTwoArgAttr":["TwoArgMethodAttr"]}
@@ -135,7 +129,9 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 type aliases
 
 exception 'UnexpectedValueException' %s
-%A
+%s
+Offending Types:  classWithDuplicateName
+%s
 Stack trace:
 %s: HH\Facts\validate()
 %s
@@ -220,9 +216,6 @@ Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
 Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
 Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
-Attributes of functionWithNoArgAttr: {"NoArgFunctionAttr":[]}
-Attributes of functionWithTwoArgAttr: {"TwoArgFunctionAttr":["first","42"]}
-Attributes of functionWithUnindexedAttr: {}
 
 These should be empty, otherwise we're mixing types and type aliases up again
 Attributes of ClassWithTwoAttrs: {}
@@ -234,9 +227,6 @@ Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThe
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
 Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
 Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes=[NoArgMethodAttr,TwoArgMethodAttr]" trying to get methods with DontIndexThisMethodAttr
-Functions decorated with NoArgFunctionAttr: ["functionWithNoArgAttr"]
-Functions decorated with TwoArgFunctionAttr: ["functionWithTwoArgAttr"]
-Threw RuntimeException:"Queried attribute DontIndexThisFunctionAttr not found in IndexedFunctionAttributes=[NoArgFunctionAttr,TwoArgFunctionAttr]" trying to get functions with DontIndexThisFunctionAttr
 
 Getting type methods with attribute
 Methods with attributes for ClassWithMethodAttrs: {"methodWithNoArgAttr":["NoArgMethodAttr"],"methodWithTwoArgAttr":["TwoArgMethodAttr"]}
@@ -281,7 +271,9 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 type aliases
 
 exception 'UnexpectedValueException' %s
-%A
+%s
+Offending Types:  classWithDuplicateName
+%s
 Stack trace:
 %s: HH\Facts\validate()
 %s

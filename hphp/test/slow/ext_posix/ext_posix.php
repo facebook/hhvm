@@ -25,8 +25,7 @@ VERIFY(count(darray($ret)) != 0);
 $bynam = posix_getgrnam($ret['name']);
 VS($ret, $bynam);
 
-// Verify name and gid lookups agree for a universally available group.
-$ret = posix_getgrnam("root");
+$ret = posix_getgrnam("wheel");
 VERIFY($ret != false);
 VERIFY(count(darray($ret)) != 0);
 

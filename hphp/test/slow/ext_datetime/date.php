@@ -79,8 +79,7 @@ var_dump(date("H:i:s", $d));
 $d = strtotime("1955-03-10 05:16:18");
 var_dump(date("Ymd", $d));
 
-$historical_date = date("r", -5000000000);
-var_dump(substr($historical_date, 0, 16));
+var_dump(date("r", -5000000000));
 
 var_dump(mktime(0, 0, 0, 2, 26 - 91, 2010));
 

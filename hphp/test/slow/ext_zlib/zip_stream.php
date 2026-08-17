@@ -21,7 +21,7 @@ fclose($tfh);
 
 $tfz = tempnam(sys_get_temp_dir(), 'data.txt.zip');
 $zf = new ZipArchive();
-$zf->open($tfz, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+$zf->open($tfz);
 try {
   $zf->addFile($tf, 'foobar');
 } finally {

@@ -2809,6 +2809,26 @@ function runif_should_skip_test(
   return shape('valid' => true, 'match' => true);
 }
 
+// A test is fbcode-only when it carries a "$test.onlyfacebook" marker, or when
+// any directory between it and hphp/test carries an "onlyfacebook" marker.
+// Whole trees are marked at their root, so the walk has to cover ancestors and
+// not just the immediately enclosing directory.
+function is_onlyfacebook_test(string $test): bool {
+  if (file_exists($test.'.onlyfacebook')) return true;
+
+  // Test paths may be relative to the cwd, so bound the walk by comparing
+  // resolved paths against the test root rather than by string prefix.
+  $root = realpath(test_dir());
+  $dir = dirname($test);
+  while (true) {
+    if (file_exists($dir.'/onlyfacebook')) return true;
+    if (realpath($dir) === $root) return false;
+    $parent = dirname($dir);
+    if ($parent === $dir) return false;
+    $dir = $parent;
+  }
+}
+
 // should_skip_test_simple handles generating skips in ways that are purely
 // based on options passed to run.php, and test names/exclusion files (eg.
 // norepo).  The benefit of should_skip_test_simple is that it can factor in to
@@ -2817,9 +2837,7 @@ function should_skip_test_simple(
   Options $options,
   string $test,
 ): ?string {
-  if (!$options->facebook_build &&
-      (file_exists($test.'.onlyfacebook') ||
-       file_exists(dirname($test).'/onlyfacebook'))) {
+  if (!$options->facebook_build && is_onlyfacebook_test($test)) {
     return 'skip-onlyfacebook';
   }
 

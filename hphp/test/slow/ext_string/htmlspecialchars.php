@@ -65,7 +65,14 @@ function test_htmlspecialchars() :mixed{
      $sanitized);
 
   VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", vec[]),
-     fb_htmlspecialchars($sanitized, ENT_FB_UTF8, "utf-8", vec[]));
+     '&#xa1;&#xfffd;A'.
+     '&#x561;&#xfffd;&#xfffd;'.
+     '&#x3862;&#xfffd;&#xfffd;'.
+     '&#x218a3;&#xfffd;A'.
+     'hello&#xfffd;world'.
+     '&#xfffd;'.
+     '&#xfffd;'.
+     '&#xfffd;');
 
   VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", vec[]),
      $sanitized);

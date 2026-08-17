@@ -1,11 +1,5 @@
 <?hh
 
-function normalize_number_format(mixed $value): mixed {
-  if ($value is string) {
-    return str_replace(vec["\u{200f}", "$\u{00a0}"], vec['', '$'], $value);
-  }
-  return $value;
-}
 
 <<__EntryPoint>>
 function main_numberformat_other() :mixed{
@@ -28,9 +22,14 @@ foreach ($locales as $locale) {
   foreach ($styles as $style) {
     echo "$locale -- $style\n";
     $formatter = new NumberFormatter($locale, $style);
-    foreach (vec[100, 100.00, '100', 'not a number', true, false, vec[], vec[5]] as $value) {
-      var_dump(normalize_number_format($formatter->format($value)));
-    }
+    var_dump($formatter->format(100));
+    var_dump($formatter->format(100.00));
+    var_dump($formatter->format('100'));
+    var_dump($formatter->format('not a number'));
+    var_dump($formatter->format(true));
+    var_dump($formatter->format(false));
+    var_dump($formatter->format(vec[]));
+    var_dump($formatter->format(vec[5]));
   }
 }
 

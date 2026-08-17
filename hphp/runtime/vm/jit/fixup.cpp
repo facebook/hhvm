@@ -26,7 +26,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/dwarf-reg.h"
 
-#if defined(__aarch64__) && !defined(__clang__)
+#if defined(__aarch64__)
 #include <unwind.h>
 #endif
 
@@ -100,9 +100,10 @@ TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
 static ServiceData::ExportedCounter* s_fixupmap_counter =
   ServiceData::createCounter("admin.fixup_map_size");
 
-#if defined(__aarch64__) && !defined(__clang__)
+#if defined(__aarch64__)
 /*
- * GCC may place padding between an AArch64 native frame record and its CFA.
+ * Compilers may place padding between an AArch64 native frame record and its
+ * CFA.
  * Use the emitted unwind metadata to recover the caller's actual stack
  * address instead of deriving it from the frame pointer.
  */
@@ -128,7 +129,7 @@ _Unwind_Reason_Code findCFA(_Unwind_Context* context, void* arg) {
 #endif
 
 uintptr_t nativeFrameCFA(const ActRec* frame) {
-#if defined(__aarch64__) && !defined(__clang__)
+#if defined(__aarch64__)
   CFAState state{frame, false, 0};
   _Unwind_Backtrace(findCFA, &state);
   always_assert(state.cfa != 0);

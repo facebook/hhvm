@@ -150,6 +150,13 @@ function check_executable(string $path): string {
   return $rpath;
 }
 
+function find_executable(string $name): ?string {
+  $output = vec[];
+  $return_var = -1;
+  exec("which ".escapeshellarg($name)." 2> /dev/null", inout $output, inout $return_var);
+  return $return_var === 0 && isset($output[0]) ? $output[0] : null;
+}
+
 function hhvm_binary_routes(): dict<string, string> {
   return dict[
     "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
@@ -250,12 +257,8 @@ function hhvm_path(): string {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      $output = null;
-      $return_var = -1;
-      exec("which hhvm 2> /dev/null", inout $output, inout $return_var);
-      if (isset($output[0]) && $output[0]) {
-        return $output[0];
-      }
+      $candidate = find_executable('hhvm');
+      if ($candidate is nonnull) return $candidate;
       error("You need to specify hhvm bin with env HHVM_BIN");
     }
 
@@ -926,7 +929,7 @@ function sbcc_binary_routes(): dict<string, string> {
   ];
 }
 
-function sbcc_build_binary(): string {
+function sbcc_build_binary(): ?string {
   // SBCC_BUILD is set by the buck2 test infrastructure in DEFS.bzl via
   // $(location //hphp/runtime/ext/sbcc:sbcc-build).
   $env = getenv('SBCC_BUILD');
@@ -938,9 +941,7 @@ function sbcc_build_binary(): string {
   // Probe build routes — same infrastructure as bin_root() / hhvm_path().
   $found = find_build_binary('sbcc-build', sbcc_binary_routes());
   if ($found is nonnull) return $found;
-  // Bare fallback — unlike hhvm_path() which errors, sbcc-build is optional;
-  // tests that need it call sbcc_enabled() first and skip when inapplicable.
-  return 'sbcc-build';
+  return find_executable('sbcc-build');
 }
 
 function sbcc_working_artifact(string $test): string {
@@ -1049,8 +1050,10 @@ function sbcc_mode_setup_impl(Options $options, string $test): (string, bool) {
     }
 
     $artifact = sbcc_working_artifact($test);
+    $builder = sbcc_build_binary();
+    invariant($builder is nonnull, 'SBCC builder availability checked earlier');
     $cmd_parts = vec[];
-    $cmd_parts[] = escapeshellarg(sbcc_build_binary());
+    $cmd_parts[] = escapeshellarg($builder);
     $cmd_parts[] = '--output';
     $cmd_parts[] = escapeshellarg($artifact);
     $cmd_parts[] = '--root';
@@ -3866,6 +3869,10 @@ function run_test(Options $options, string $test): mixed {
       invariant(Shapes::keyExists($result, 'skip_reason'), 'missing skip_reason');
       return $result['skip_reason'];
     }
+  }
+
+  if (sbcc_uses_builder($test) && sbcc_build_binary() is null) {
+    return 'skip-sbcc-build';
   }
 
   // SBCC pre-test setup: build or copy the .sbcc artifact before HHVM starts.

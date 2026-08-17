@@ -23,8 +23,10 @@
 #include "hphp/util/type-scan.h"
 #include "hphp/util/type-traits.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <type_traits>
 
@@ -397,7 +399,10 @@ typename std::enable_if<
   TypedValue
 >::type make_tv() {
   TypedValue ret;
-  ret.m_type = DType;
+  constexpr auto typeOffset = offsetof(TypedValue, m_type);
+  auto const typeAndAux = static_cast<uint64_t>(DType);
+  memcpy(reinterpret_cast<char*>(&ret) + typeOffset,
+         &typeAndAux, sizeof(typeAndAux));
   assertx(tvIsPlausible(ret));
   return ret;
 }

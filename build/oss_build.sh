@@ -338,7 +338,8 @@ ensure_system_dependencies() {
       "${common_packages[@]}"
       gcc gcc-c++ git-core perl-interpreter pkgconf-pkg-config procps-ng which xz
       double-conversion-devel libedit-devel brotli-devel bzip2-devel
-      binutils-devel libaio-devel lz4-devel numactl-devel openssl-devel
+      binutils-devel glibc-gconv-extra libaio-devel lz4-devel numactl-devel
+      openssl-devel
       python3-devel libjpeg-turbo-devel
       libpng-devel freetype-devel
       libcurl-devel systemd-devel libbpf-devel libunwind-devel libcap-devel
@@ -365,6 +366,10 @@ ensure_system_dependencies() {
   else
     echo "ERROR: A supported system package manager is required (dnf or apt-get)."
     exit 1
+  fi
+
+  if [ "$HHVM_CMAKE_ARCHITECTURE" = "IS_AARCH64" ]; then
+    packages+=(lld)
   fi
 
   if ! command -v curl >/dev/null 2>&1; then
@@ -1072,6 +1077,7 @@ patch_release_train_source() {
       ;;
     mcrouter)
       local cmake_file="$src_dir/CMakeLists.txt"
+      local compression_header="$src_dir/mcrouter/lib/Compression.h"
       if [ -f "$cmake_file" ]; then
         patch_result="$(replace_text_once \
           "$cmake_file" \
@@ -1079,6 +1085,15 @@ patch_release_train_source() {
           $'  mcrouter/StandaloneUtils.cpp\n  mcrouter/Server.cpp\n')"
         if [ "$patch_result" = "patched" ]; then
           echo "    mcrouter: patched public CMake source list for Server.cpp" >&2
+        fi
+      fi
+      if [ -f "$compression_header" ]; then
+        patch_result="$(replace_text_once \
+          "$compression_header" \
+          $'#include <sys/uio.h>\n#include <limits>' \
+          $'#include <sys/uio.h>\n#include <cstdint>\n#include <limits>')"
+        if [ "$patch_result" = "patched" ]; then
+          echo "    mcrouter: added the missing cstdint include" >&2
         fi
       fi
       ;;

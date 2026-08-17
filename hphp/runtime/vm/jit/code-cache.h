@@ -237,7 +237,7 @@ struct CodeCache {
 
   protected:
     struct State { size_t m_used{0}; CodeBlock* m_last{nullptr}; };
-    std::atomic<State> m_state;
+    std::atomic<State> m_state{State{}};
     size_t m_hugePageBudget{0};
   };
 

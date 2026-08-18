@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/AnotherTestService.h>
@@ -216,10 +218,13 @@ TEST_F(ServiceMetadataTest, SimpleStructsTest) {
   m.cv_map().ensure().push_back(pair(0, "0"));
   m.cv_map()->push_back(pair(1, "1"));
   cs.fields()->emplace("value", std::move(m));
-  EXPECT_EQ(
-      findStructuredAnnotationOrThrow(
-          *s2.fields()[0].structured_annotations(), "simple_structs_test.Map"),
-      cs);
+  // Entry order of a map annotation is not preserved, so sort before
+  // comparing.
+  auto mapAnnotation = findStructuredAnnotationOrThrow(
+      *s2.fields()[0].structured_annotations(), "simple_structs_test.Map");
+  auto& mapEntries = mapAnnotation.fields()->at("value").cv_map().value();
+  std::sort(mapEntries.begin(), mapEntries.end());
+  EXPECT_EQ(mapAnnotation, cs);
 
   EXPECT_EQ(*s2.fields()[1].id(), 2);
   EXPECT_EQ(*s2.fields()[1].name(), "country");

@@ -140,6 +140,20 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 }
 
 /**
+ * Mark `node' and all of its incoming and outgoing arcs as covered without
+ * forming a region for it.
+ */
+void markNodeAndArcsCovered(const TransCFG& cfg, TransID node,
+                            TransIDSet& coveredNodes,
+                            TransCFG::ArcPtrSet& coveredArcs) {
+  coveredNodes.insert(node);
+  auto const& inArcs = cfg.inArcs(node);
+  coveredArcs.insert(inArcs.begin(), inArcs.end());
+  auto const& outArcs = cfg.outArcs(node);
+  coveredArcs.insert(outArcs.begin(), outArcs.end());
+}
+
+/**
  * Returns the sum of the weights of the arcs going from srcs to dst.
  */
 int64_t interRegionWeight(const TransIDVec& srcs,
@@ -377,11 +391,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       if (cfg.weight(node) < cfg.weight(nodes[0]) * minBlkPerc / 100) {
         FTRACE(3, "regionizeFunc: skipping forming a region to cover node {}\n",
                newHead);
-        coveredNodes.insert(node);
-        auto const& inArcs = cfg.inArcs(node);
-        coveredArcs.insert(inArcs.begin(), inArcs.end());
-        auto const& outArcs = cfg.outArcs(node);
-        coveredArcs.insert(outArcs.begin(), outArcs.end());
+        markNodeAndArcsCovered(cfg, node, coveredNodes, coveredArcs);
         continue;
       }
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);
@@ -403,6 +413,16 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
 
         case PGORegionMode::Hotblock:
           always_assert(0 && "Invalid value for Cfg::Jit::PGORegionSelector");
+      }
+      if (!region) {
+        // selectHotCFG() returns null when it ends up with an empty region.
+        // Treat the node like the low-weight case above — mark it and its arcs
+        // covered and move on — rather than dereferencing null below. Offline
+        // retranslateAll over a prod profile reaches this.
+        FTRACE(3, "regionizeFunc: no region selected to cover node {}\n",
+               newHead);
+        markNodeAndArcsCovered(cfg, node, coveredNodes, coveredArcs);
+        continue;
       }
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));

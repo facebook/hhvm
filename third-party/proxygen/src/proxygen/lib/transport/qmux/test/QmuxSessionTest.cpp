@@ -436,6 +436,32 @@ TEST_F(QmuxSessionTest, SendDatagram_AppearsOnWire) {
             "ping-payload");
 }
 
+// 6a) Two datagrams that each fit but together exceed max_record_size are
+//     split across records instead of overflowing one.
+TEST_F(QmuxSessionTest, TwoDatagrams_SplitAcrossRecords) {
+  const std::string first(kDefaultMaxRecordSize * 2 / 3, 'a');
+  const std::string second(kDefaultMaxRecordSize * 2 / 3, 'b');
+  ASSERT_TRUE(
+      session_->sendDatagram(folly::IOBuf::copyBuffer(first)).hasValue());
+  ASSERT_TRUE(
+      session_->sendDatagram(folly::IOBuf::copyBuffer(second)).hasValue());
+  drain();
+  parseWrites();
+
+  EXPECT_TRUE(wire_.cb.connectionErrors.empty());
+  ASSERT_EQ(wire_.cb.datagrams.size(), 2);
+  EXPECT_EQ(wire_.cb.datagrams[0]
+                .httpDatagramPayload->cloneCoalescedAsValue()
+                .moveToFbString()
+                .toStdString(),
+            first);
+  EXPECT_EQ(wire_.cb.datagrams[1]
+                .httpDatagramPayload->cloneCoalescedAsValue()
+                .moveToFbString()
+                .toStdString(),
+            second);
+}
+
 // 7) Large stream writes are split into peer-sized QMUX records.
 TEST_F(QmuxSessionTest, LargeStreamWrite_SplitsIntoPeerSizedRecords) {
   auto created = session_->createBidiStream();

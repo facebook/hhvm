@@ -365,11 +365,16 @@ folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
     }
 
     while (!pendingDatagrams_.empty()) {
-      writeDatagram(recordBuf,
+      folly::IOBufQueue frameBuf{folly::IOBufQueue::cacheChainLength()};
+      writeDatagram(frameBuf,
                     DatagramCapsule{.httpDatagramPayload =
                                         std::move(pendingDatagrams_.front())},
                     FrameProtocol::QMUX);
       pendingDatagrams_.pop_front();
+      // Returns false only for a datagram too large for any record, which it
+      // logs and drops.
+      std::ignore = appendFrameToRecord(
+          recordBuf, egressBuf, frameBuf, recordPayloadLimit);
     }
 
     // Flush all accumulated QMux records in one transport write.

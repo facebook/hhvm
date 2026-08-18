@@ -127,6 +127,42 @@ TEST(FrozenHashMap, Basic) {
   testFrozenHashMapBasic<folly::F14FastMap<int, int>>();
 }
 
+TEST(FrozenHashMap, PrehashAndPrefetch) {
+  auto fmap = freeze(usquares);
+
+  // The pipelined form -- prehash, prefetch, then find with the token -- must
+  // agree with a plain find() for both present and absent keys. prefetch() is
+  // only a timing hint, so it can never change the outcome.
+  for (const auto& [key, value] : usquares) {
+    const auto token = fmap.prehash(key);
+    fmap.prefetch(token);
+    auto found = fmap.find(token, key);
+    ASSERT_FALSE(found == fmap.end());
+    EXPECT_EQ(value, found->second());
+    EXPECT_EQ(fmap.find(key), found);
+  }
+
+  const int absent = 999;
+  const auto absentToken = fmap.prehash(absent);
+  fmap.prefetch(absentToken);
+  EXPECT_TRUE(fmap.find(absentToken, absent) == fmap.end());
+
+  // Tokens carry no state of their own beyond the hash, so a default-
+  // constructed one is usable as a placeholder before being assigned.
+  decltype(fmap)::HashToken token;
+  token = fmap.prehash(1);
+  EXPECT_EQ(1, fmap.find(token, 1)->second());
+}
+
+TEST(FrozenHashMap, PrefetchEmpty) {
+  // prefetch() must not compute an address when there are no buckets to
+  // index into.
+  std::unordered_map<int, int> empty;
+  auto fmap = freeze(empty);
+  fmap.prefetch(fmap.prehash(1));
+  EXPECT_TRUE(fmap.find(1) == fmap.end());
+}
+
 TEST(FrozenHashMap, Iteration) {
   auto& map = usquares;
   auto fmap = freeze(map);

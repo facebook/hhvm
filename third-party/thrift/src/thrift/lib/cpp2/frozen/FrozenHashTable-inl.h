@@ -284,10 +284,76 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
       }
     }
 
-    iterator find(const KeyView& key) const {
-      size_t hash = KeyLayout::hash(key);
-      return findImpl(key, hash);
+    /// An opaquely-wrapped hash of a key, produced by prehash() and accepted
+    /// by prefetch() and find() in place of rehashing the key.
+    ///
+    /// Mirrors folly::F14HashToken.
+    class HashToken final {
+     public:
+      constexpr HashToken() = default;
+
+     private:
+      friend class View;
+      constexpr explicit HashToken(size_t hash) noexcept : hash_(hash) {}
+      size_t hash_{};
+    };
+
+    /// Hashes `key` and returns a token carrying that hash, so that a later
+    /// find() on the same key can skip rehashing it.
+    ///
+    /// Useful whenever a hash would otherwise be recomputed: looking one key
+    /// up in several maps, storing tokens alongside keys held in an auxiliary
+    /// structure and looked up repeatedly, or composing with prefetch() to
+    /// pipeline a batch of lookups.
+    HashToken prehash(const KeyView& key) const {
+      return HashToken{KeyLayout::hash(key)};
     }
+
+    /// Same, for a key that has not been frozen. Mirrors the find() overload
+    /// set so that both accept exactly the same key types.
+    template <
+        typename K,
+        class = std::enable_if_t<!std::is_convertible_v<K, KeyView>, void>>
+    HashToken prehash(const K& key) const {
+      return HashToken{Layout<K>::hash(key)};
+    }
+
+    /// Issues a hardware prefetch for the sparse-table block that a subsequent
+    /// find(token, ...) will probe first, without reading that block.
+    ///
+    /// Composes with prehash(): hash each key once, prefetch each token, then
+    /// find each (token, key). The first probe's address is arithmetic over
+    /// the token plus the array's own size and address -- no part of the array
+    /// itself is read -- so the prefetches for a batch of keys can all be
+    /// issued up front and their cache misses overlapped, in place of one
+    /// dependent memory stall per key. Only the first probe is prefetched:
+    /// later probes and the item fetch depend on the block's contents, and on
+    /// a miss (the common case) the first block is the only line touched.
+    ///
+    /// Purely a performance hint -- it never faults and cannot change what
+    /// find() returns.
+    ///
+    /// Example:
+    ///
+    ///   auto tok = map.prehash(key);
+    ///   map.prefetch(tok);
+    ///   ... other work here ...
+    ///   ... perhaps this next find() is accelerated ...
+    ///   auto it = map.find(tok, key);
+    ///   if (it != map.end()) {
+    ///     utilize(it->second);
+    ///   }
+    void prefetch(HashToken token) const {
+      const auto buckets = table_.size() * Block::bits;
+      if (buckets == 0) {
+        return;
+      }
+      const auto bucket =
+          remainderCalculator_.remainder(token.hash_ * 5, buckets);
+      table_.prefetchItem(bucket / Block::bits);
+    }
+
+    iterator find(const KeyView& key) const { return find(prehash(key), key); }
 
     /// Finds an element with key that compares equivalent to the value `key`.
     /// This allows finding a frozen element in the hash table without freezing
@@ -296,8 +362,21 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
         typename K,
         class = std::enable_if_t<!std::is_convertible_v<K, KeyView>, void>>
     iterator find(const K& key) const {
-      size_t hash = Layout<K>::hash(key);
-      return findImpl(key, hash);
+      return find(prehash(key), key);
+    }
+
+    /// Finds using a hash already computed by prehash(). `token` must be the
+    /// result of prehash(key) for this same `key` -- it is not a hint, and
+    /// passing a token belonging to a different key is a bug.
+    iterator find(HashToken token, const KeyView& key) const {
+      return findImpl(key, token.hash_);
+    }
+
+    template <
+        typename K,
+        class = std::enable_if_t<!std::is_convertible_v<K, KeyView>, void>>
+    iterator find(HashToken token, const K& key) const {
+      return findImpl(key, token.hash_);
     }
 
     size_t count(const KeyView& key) const { return count<KeyView, void>(key); }

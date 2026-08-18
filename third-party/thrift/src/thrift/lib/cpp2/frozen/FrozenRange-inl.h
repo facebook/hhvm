@@ -18,6 +18,8 @@
 #include <bit>
 #include <deque>
 
+#include <folly/lang/Builtin.h>
+
 namespace apache {
 namespace thrift {
 namespace frozen {
@@ -197,6 +199,18 @@ struct ArrayLayout : public LayoutBase {
 
     ItemView operator[](size_t index) const {
       return itemLayout().view(indexPosition(data_, index, itemLayout()));
+    }
+
+    /**
+     * Issue a hardware prefetch for the memory backing item `index`, without
+     * reading it. Lets a caller that knows several indices up front overlap
+     * their cache misses instead of taking them one dependent load at a time.
+     * Purely a performance hint: it never faults and never changes any result,
+     * so an out-of-range index is harmless.
+     */
+    void prefetchItem(size_t index) const {
+      FOLLY_BUILTIN_PREFETCH(
+          indexPosition(data_, index, itemLayout()).start, 0, 3);
     }
 
     ItemView front() const {

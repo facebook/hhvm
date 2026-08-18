@@ -103,6 +103,14 @@ class ProxyDestinationMap {
    */
   void setResetTimer(std::chrono::milliseconds interval);
 
+  void disableProbes() {
+    probesDisabled_ = true;
+  }
+
+  bool probesDisabled() const {
+    return probesDisabled_;
+  }
+
   /**
    * Calls f(const ProxyDestination&) for each destination stored
    * in ProxyDestinationMap. The whole map is locked during the call.
@@ -145,6 +153,7 @@ class ProxyDestinationMap {
 
   uint32_t inactivityTimeout_;
   std::unique_ptr<folly::AsyncTimeout> resetTimer_;
+  bool probesDisabled_{false};
 
   /**
    * Schedules timeout for resetting inactive connections.

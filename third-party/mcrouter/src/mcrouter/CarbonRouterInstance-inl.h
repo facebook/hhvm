@@ -406,6 +406,12 @@ CarbonRouterInstance<RouterInfo>::CarbonRouterInstance(
 template <class RouterInfo>
 void CarbonRouterInstance<RouterInfo>::shutdownImpl() noexcept {
   joinAuxiliaryThreads();
+  for (size_t i = 0; i < proxies_.size(); ++i) {
+    proxyEvbs_[i]->runInEventBaseThread(
+        [destinationMap = proxies_[i]->destinationMap()] {
+          destinationMap->disableProbes();
+        });
+  }
   proxyEvbs_.clear();
   resetMetadata();
   resetAxonProxyClientFactory();

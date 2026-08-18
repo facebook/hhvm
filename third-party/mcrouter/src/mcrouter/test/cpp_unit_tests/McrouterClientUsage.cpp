@@ -10,16 +10,20 @@
 #include <utility>
 #include <vector>
 
+#include <fmt/core.h>
+#include <glog/logging.h>
 #include <gtest/gtest.h>
 
 #include <folly/fibers/Baton.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/ExecutorObserver.h"
 #include "mcrouter/McReqUtil.h"
 #include "mcrouter/Proxy.h"
+#include "mcrouter/ProxyDestinationMap.h"
 #include "mcrouter/config.h"
 #include "mcrouter/lib/carbon/RequestReplyUtil.h"
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"
@@ -28,6 +32,7 @@
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"
 #include "mcrouter/lib/network/McServerRequestContext.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
+#include "mcrouter/lib/network/gen/gen-cpp2/Memcache.h"
 
 #include "mcrouter/stats.h"
 
@@ -35,6 +40,8 @@ using facebook::memcache::McGetReply;
 using facebook::memcache::McGetRequest;
 using facebook::memcache::McStatsReply;
 using facebook::memcache::McStatsRequest;
+using facebook::memcache::McVersionReply;
+using facebook::memcache::McVersionRequest;
 using facebook::memcache::MemcacheRouterInfo;
 using facebook::memcache::mcrouter::CarbonRouterClient;
 using facebook::memcache::mcrouter::CarbonRouterInstance;
@@ -755,4 +762,60 @@ TEST(CarbonRouterClient, requestExpiryTestWithLatencyInjectionRoute) {
   router->shutdown();
   server.shutdown();
   EXPECT_TRUE(replyReceived);
+}
+
+class TkoProbeHandler final : public apache::thrift::ServiceHandler<
+                                  facebook::memcache::thrift::Memcache> {
+ public:
+  void async_eb_mcGet(
+      apache::thrift::HandlerCallbackPtr<McGetReply> callback,
+      const McGetRequest&) override final {
+    callback->result(McGetReply(carbon::Result::TIMEOUT));
+  }
+
+  void async_eb_mcVersion(
+      apache::thrift::HandlerCallbackPtr<McVersionReply> callback,
+      const McVersionRequest&) override final {
+    versionRequested_.post();
+    callback->result(McVersionReply(carbon::Result::OK));
+  }
+
+  folly::fibers::Baton& versionRequested() {
+    return versionRequested_;
+  }
+
+ private:
+  folly::fibers::Baton versionRequested_;
+};
+
+TEST(CarbonRouterInstance, disableProbesPreventsScheduledTkoProbe) {
+  auto handler = std::make_shared<TkoProbeHandler>();
+  apache::thrift::ScopedServerInterfaceThread server(handler, "127.0.0.1", 0);
+
+  auto opts = defaultTestOptions();
+  opts.failures_until_tko = 1;
+  opts.probe_delay_initial_ms = 1;
+  opts.config_str = fmt::format(
+      R"({{"route":{{"type":"PoolRoute","pool":{{"name":"A","servers":["127.0.0.1:{}"],"protocol":"thrift"}}}}}})",
+      server.getPort());
+  auto router = CarbonRouterInstance<MemcacheRouterInfo>::init(
+      "disableProbesPreventsScheduledTkoProbe", opts);
+
+  auto& proxy = *CHECK_NOTNULL(router->getProxy(0));
+  auto client = router->createClient(0, false);
+  auto& clientRef = *CHECK_NOTNULL(client.get());
+  folly::fibers::Baton replyReceived;
+  const McGetRequest request("key");
+  clientRef.send(
+      request,
+      [&proxy, &replyReceived](const McGetRequest&, McGetReply&& reply) {
+        EXPECT_EQ(carbon::Result::TIMEOUT, *reply.result());
+        proxy.destinationMap()->disableProbes();
+        replyReceived.post();
+      });
+  replyReceived.wait();
+
+  EXPECT_FALSE(
+      handler->versionRequested().try_wait_for(std::chrono::seconds(1)));
+  router->shutdown();
 }

@@ -224,11 +224,19 @@ void ProxyDestinationBase::scheduleNextProbe() {
 }
 
 void ProxyDestinationBase::startSendingProbes() {
+  if (proxy().destinationMap()->probesDisabled()) {
+    return;
+  }
+
   // Reset the RequestContext before scheduling repeated tasks.
   folly::RequestContextScopeGuard guard{nullptr};
   probeDelayNextMs = proxy().router().opts().probe_delay_initial_ms;
   probeTimer_ =
       folly::AsyncTimeout::make(proxy().eventBase(), [this]() noexcept {
+        if (proxy().destinationMap()->probesDisabled()) {
+          return;
+        }
+
         // Note that the previous probe might still be in flight
         if (!probeInflight_) {
           probeInflight_ = true;

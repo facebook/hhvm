@@ -390,6 +390,20 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
+  // Promote eligible constants to persistent RDS while still under the
+  // initial-merge lock (which every request must pass through before it can
+  // finish merging this unit). Doing it here -- rather than at per-request merge
+  // time -- means the persistent handle is bound and AttrPersistent is recorded
+  // together, exactly once, so a constant's attributes always match its handle's
+  // mode and there is no race on the shared Constant.
+  if (Cfg::Eval::ForceAllPersistent && Cfg::Eval::ConstantPersistence) {
+    for (auto& constant : m_constants) {
+      if (!(constant.attrs & AttrPersistent)) {
+        Constant::tryPromotePersistent(&constant);
+      }
+    }
+  }
+
   m_mergeState.store(MergeState::InitialMerged, std::memory_order_release);
 }
 
@@ -854,8 +868,18 @@ void Unit::mergeImpl() {
     Stats::inc(Stats::UnitMerge_mergeable);
     Stats::inc(Stats::UnitMerge_mergeable_define);
 
-    assertx((!!(constant.attrs & AttrPersistent)) ==
-        (this->isSystemLib() || Cfg::Repo::Authoritative));
+    // sys/repo constants are persistent at compile time. Under
+    // Eval.ForceAllPersistent + Eval.ConstantPersistence a concrete constant may
+    // also have been promoted to persistent during initialMerge; a dynamic
+    // (KindOfUninit-valued) constant never is. So a non-sys/repo persistent
+    // constant must be a concrete one promoted in that mode.
+    assertx(IMPLIES(this->isSystemLib() || Cfg::Repo::Authoritative,
+                    constant.attrs & AttrPersistent));
+    assertx(IMPLIES((constant.attrs & AttrPersistent) &&
+                    !this->isSystemLib() && !Cfg::Repo::Authoritative,
+                    Cfg::Eval::ForceAllPersistent &&
+                    Cfg::Eval::ConstantPersistence &&
+                    constant.val.m_type != KindOfUninit));
     Constant::def(&constant);
   }
 

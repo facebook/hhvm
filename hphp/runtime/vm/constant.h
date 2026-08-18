@@ -49,6 +49,17 @@ struct Constant {
    */
   static void def(const Constant* constant);
 
+  /*
+   * Attempt to promote `constant' to persistent RDS for Eval.ForceAllPersistent
+   * + Eval.ConstantPersistence. Succeeds -- binding a persistent handle and
+   * setting AttrPersistent on `constant' -- only if the constant has a concrete
+   * (non-dynamic) value and no normal handle is already bound for it. Must be
+   * called during the unit's initial merge (under its lock), so the attribute
+   * and handle stay consistent without racing concurrent merges. Returns whether
+   * the constant was promoted.
+   */
+  static bool tryPromotePersistent(Constant* constant);
+
   static Variant get(const StringData* name);
 
   /*

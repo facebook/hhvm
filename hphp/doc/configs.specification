@@ -1247,6 +1247,16 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   When ForceAllPersistent is enabled also mark type aliases as persistent.
 
+- bool Eval.ConstantPersistence = true, paulbiss
+
+  When ForceAllPersistent is enabled, also promote top-level constants to
+  persistent RDS during the unit's initial merge. A constant is promoted only if
+  it has a concrete (non-dynamic) value -- a constant whose value is computed by
+  running Hack (stored as KindOfUninit) cannot live in persistent RDS -- and no
+  normal RDS handle has already been bound for it. Promotion binds the persistent
+  handle and sets AttrPersistent together under the initial-merge lock, so a
+  constant's attributes always match its handle's mode.
+
 - uint32_t Eval.StaticContentsLogRate = 100, UNKNOWN
 
 - uint32_t Eval.LogUnitLoadRate = 0, UNKNOWN

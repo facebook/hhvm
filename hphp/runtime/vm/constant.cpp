@@ -155,6 +155,26 @@ Variant Constant::get(const StringData* name) {
   );
 }
 
+bool Constant::tryPromotePersistent(Constant* constant) {
+  // Called once per unit, under the initial-merge lock, for Eval.ForceAllPersistent
+  // + Eval.ConstantPersistence. Binding the persistent handle and recording
+  // AttrPersistent together keeps the constant's attributes in lockstep with its
+  // RDS handle's mode, and the lock makes the mutation race-free.
+  assertx(!(constant->attrs & Attr::AttrPersistent));
+
+  // A KindOfUninit value denotes a dynamic constant whose value is produced by
+  // running its 86cinit; it can't live in persistent RDS.
+  if (constant->val.m_type == KindOfUninit) return false;
+
+  // Don't change the mode of a handle that has already been bound as normal.
+  auto const handle = lookupCnsHandle(constant->name);
+  if (rds::isHandleBound(handle) && rds::isNormalHandle(handle)) return false;
+
+  if (!bindPersistentCns(constant->name, constant->val)) return false;
+  constant->attrs |= Attr::AttrPersistent;
+  return true;
+}
+
 void Constant::def(const Constant* constant) {
   auto const cnsName = constant->name;
   FTRACE(3, "  Defining def {}\n", cnsName->data());

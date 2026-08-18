@@ -1,0 +1,13 @@
+checksum=233
+C_INT=42
+C_STR=hello
+C_FLOAT=1.5
+C_BOOL=true
+C_NULL_is_null=yes
+C_VEC=1,2,3
+C_DICT=1,2
+C_KEYSET=x,y
+C_FOLDED=13
+C_DYNAMIC=123
+C_REFS_OTHER=43
+done

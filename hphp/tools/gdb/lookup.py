@@ -27,7 +27,6 @@ class LookupCommand(gdb.Command):
 
 LookupCommand()
 
-# TODO T136489519
 _first_lookup = True
 
 

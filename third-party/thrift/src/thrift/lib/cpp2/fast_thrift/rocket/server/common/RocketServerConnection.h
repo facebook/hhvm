@@ -102,6 +102,15 @@ struct RocketServerConnection {
       return;
     }
     disconnected_ = true;
+    // Frames written on the way here (CONNECTION_CLOSE, a setup refusal) are
+    // still buffered in the batcher. Move them to the socket while the
+    // transport accepts writes; its drain then puts them on the wire ahead of
+    // the FIN. A pipeline that is already closed, or a batcher with nothing
+    // buffered, makes this a no-op.
+    if (pipeline) {
+      pipeline->fireEvent(
+          RocketServerEventId::FlushWrites, channel_pipeline::TypeErasedBox{});
+    }
     if (transportHandler) {
       transportHandler->close(std::move(ew));
     }

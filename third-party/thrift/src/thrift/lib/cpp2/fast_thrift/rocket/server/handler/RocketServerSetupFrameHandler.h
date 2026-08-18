@@ -324,7 +324,12 @@ class RocketServerSetupFrameHandler {
                 << apache::thrift::fast_thrift::frame::toString(errorCode);
     }
 
-    // Per RSocket spec, setup errors require connection termination.
+    // Per RSocket spec, setup errors require connection termination. The ERROR
+    // frame is still buffered downstream, so ask for it to be pushed to the
+    // socket before the close deactivates the batcher and discards it.
+    ctx.fireEvent(
+        RocketServerEventId::FlushWrites,
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
     ctx.close();
 
     return apache::thrift::fast_thrift::channel_pipeline::Result::Error;

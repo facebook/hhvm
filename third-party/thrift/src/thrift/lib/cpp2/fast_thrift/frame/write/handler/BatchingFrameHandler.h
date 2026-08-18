@@ -45,6 +45,7 @@
 
 #include <functional>
 #include <stdexcept>
+#include <type_traits>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
@@ -62,7 +63,8 @@ namespace apache::thrift::fast_thrift::frame::write::handler {
  */
 template <
     WriteCompletionTracker Tracker = NoOpWriteCompletionTracker,
-    BackpressurePolicy Backpressure = BackpressureEnabled>
+    BackpressurePolicy Backpressure = BackpressureEnabled,
+    typename Ev = typename Tracker::EventId>
 class BatchingFrameHandlerT : public Backpressure {
  public:
   // Backpressure state (writeReadyHook_, backpressured_) is inherited from the
@@ -162,23 +164,39 @@ class BatchingFrameHandlerT : public Backpressure {
     }
   }
 
-  // Event subscription is sourced from the tracker, which owns the per-pipeline
-  // event type via its templated EventFactory. With NoOpWriteCompletionTracker
-  // EventId is NoEvent and kSubscribedEvents is empty, so nothing is wired and
-  // the event path compiles out.
-  using EventId = typename Tracker::EventId;
-  static constexpr auto kSubscribedEvents = Tracker::kSubscribedEvents;
+  // The tracker's own subscriptions plus FlushWrites when the pipeline's event
+  // enum defines it. A pipeline with neither wires nothing and the whole event
+  // path compiles out.
+  using EventId = Ev;
+  static constexpr auto kSubscribedEvents =
+      makeBatcherSubscriptions<Tracker, Ev>();
 
-  // Receives the per-pipeline event fired by TransportHandlerT on each
-  // socket-level write completion. The tracker discriminates on the event's
-  // kind and drives per-batch attribution (see WriteCompletionTracker.h).
+  // FlushWrites: teardown is imminent, so push the batch downstream now, while
+  // the transport still accepts writes. A refused write means the socket is
+  // already gone and there is nothing left to preserve, so the result is
+  // dropped rather than raised as an exception into a pipeline being torn down.
+  //
+  // Anything else is a write completion, which the tracker turns into per-batch
+  // attribution (see WriteCompletionTracker.h).
   template <typename Context>
   void onEvent(
       Context& ctx,
       EventId ev,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
-    tracker_.onEvent(ctx, ev, box);
+    if constexpr (HasFlushWritesEvent<EventId>) {
+      if (ev == EventId::FlushWrites) {
+        if (batch_) {
+          (void)flushNow(ctx);
+        }
+        return;
+      }
+    }
+    if constexpr (!std::is_same_v<
+                      typename Tracker::EventId,
+                      apache::thrift::fast_thrift::channel_pipeline::NoEvent>) {
+      tracker_.onEvent(ctx, ev, box);
+    }
   }
 
   // ===========================================================================

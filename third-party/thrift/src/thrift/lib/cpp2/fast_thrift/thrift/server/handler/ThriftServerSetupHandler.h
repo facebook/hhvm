@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ConnectionPayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/SetupMessages.h>
 
@@ -128,19 +129,23 @@ class ThriftServerSetupHandler {
     return channel_pipeline::Result::Success;
   }
 
-  // Answers the setup exchange with a refusal. Non-Success whatever the write
-  // did: the refusal stands, and the exchange stops here either way.
+  // Answers the setup exchange with a refusal. The refusal rides the same
+  // terminal path as any other close, so the connection close handler owns
+  // writing the frame and sequencing the teardown behind it — both run
+  // synchronously here, before this returns.
+  //
+  // Error, not Success: the layer below reads a successful setup as the
+  // exchange having completed and announces the connection as established.
+  // A refused connection must never be announced.
   channel_pipeline::Result refuseSetup(
       Context& ctx,
       apache::thrift::fast_thrift::frame::ErrorCode errorCode,
       std::string_view reason) noexcept {
-    const auto writeResult = ctx.fireWrite(
-        channel_pipeline::erase_and_box(
-            makeSetupRejectionMessage(errorCode, reason)));
-    if (FOLLY_UNLIKELY(writeResult == channel_pipeline::Result::Error)) {
-      XLOG(WARN) << "Failed to deliver setup rejection "
-                 << apache::thrift::fast_thrift::frame::toString(errorCode);
-    }
+    ctx.fireEvent(
+        ThriftServerEventType::CloseConnection,
+        channel_pipeline::TypeErasedBox(
+            ThriftServerCloseConnectionEvent{
+                .rejection = SetupRejection{errorCode, std::string(reason)}}));
     return channel_pipeline::Result::Error;
   }
 };

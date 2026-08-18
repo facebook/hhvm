@@ -52,6 +52,11 @@ enum class RocketServerEventId : std::uint32_t {
   // Fired by the same handler once that answer is on the write path and the
   // connection is ready to carry requests. Carries RocketSetupCompleteEvent*.
   SetupComplete,
+  // Fired before the connection is torn down: buffered outbound frames must
+  // reach the socket now, while the transport still accepts writes. Carries no
+  // message — the id is the whole signal. Subscribers must not close or
+  // deactivate in response; the teardown follows once dispatch returns.
+  FlushWrites,
   Count,
 };
 

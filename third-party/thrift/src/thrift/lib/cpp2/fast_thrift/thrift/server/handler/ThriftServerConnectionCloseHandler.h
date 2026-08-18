@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/SetupMessages.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -220,21 +221,23 @@ class ThriftServerConnectionCloseHandler {
     ctx.fireException(std::move(e));
   }
 
-  // The single pipeline event this handler subscribes to: the outbound
-  // CloseConnection emitted by the tail adapter's close().
+  // The single pipeline event this handler subscribes to: CloseConnection,
+  // emitted by the tail adapter's close() or by a handler refusing the
+  // connection. The subscription means only CloseConnection reaches us; our own
+  // emitted ConnectionClosed is never self-delivered.
   static constexpr channel_pipeline::Subscriptions<
       ThriftServerEventType::CloseConnection>
       kSubscribedEvents{};
 
-  // Handles CloseConnection — kicks off the terminal drain/reap state
-  // machine. The subscription means only CloseConnection reaches us; our own
-  // emitted ConnectionClosed is never self-delivered.
+  // Kicks off the terminal drain/reap state machine, answering the client with
+  // whatever the event names.
   void onEvent(
       Context& ctx,
       ThriftServerEventType ev,
-      const channel_pipeline::TypeErasedBox& /*evt*/) noexcept {
+      const channel_pipeline::TypeErasedBox& evt) noexcept {
     DCHECK(ev == ThriftServerEventType::CloseConnection);
-    handleCloseConnectionEvent(ctx);
+    handleCloseConnectionEvent(
+        ctx, evt.get<ThriftServerCloseConnectionEvent>());
   }
 
   // === Test accessors ===
@@ -274,14 +277,35 @@ class ThriftServerConnectionCloseHandler {
     Closed,
   };
 
-  void handleCloseConnectionEvent(Context& ctx) noexcept {
+  void handleCloseConnectionEvent(
+      Context& ctx, const ThriftServerCloseConnectionEvent& evt) noexcept {
     if (state_ != State::Open) {
       return;
     }
     state_ = State::Draining;
     drainTimer_->scheduleTimeout(drainTimeout_);
-    (void)ctx.fireWrite(
-        channel_pipeline::erase_and_box(makeConnectionCloseMessage()));
+    const auto writeResult = ctx.fireWrite(
+        channel_pipeline::erase_and_box(
+            evt.rejection ? makeSetupRejectionMessage(
+                                evt.rejection->code, evt.rejection->reason)
+                          : makeConnectionCloseMessage()));
+    if (FOLLY_UNLIKELY(writeResult == channel_pipeline::Result::Error)) {
+      // The client will never learn the connection is going away, so there is
+      // nothing to drain for and nothing to reap: close outright. In-flight
+      // requests are failed — ConnectionClosed clears the adapter's
+      // pipelineActive_ flag, so their responses are dropped there.
+      XLOGF(
+          WARN,
+          "ThriftServerConnectionCloseHandler failed to write the {} frame; "
+          "failing {} in-flight request(s) and closing.",
+          evt.rejection ? "setup rejection" : "connection close",
+          inFlight_);
+      transitionToClosed(ctx);
+      // We still own the socket — a failed write does not imply a dead
+      // transport, so deactivate to make the teardown happen.
+      ctx.deactivate();
+      return;
+    }
     maybeFinalize(ctx);
   }
 

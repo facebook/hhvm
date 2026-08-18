@@ -381,8 +381,10 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/handler/RocketMetricsHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerKeepAliveHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
@@ -574,7 +576,8 @@ FastThriftServerT<Stats>::buildRocketPipeline(
   auto builder = channel_pipeline::PipelineBuilder<
                      rocket::server::RocketServerTransportHandler,
                      rocket::server::RocketServerAppAdapter,
-                     channel_pipeline::SimpleBufferAllocator>()
+                     channel_pipeline::SimpleBufferAllocator,
+                     rocket::server::RocketServerEventId>()
                      .setEventBase(evb)
                      .setHead(transportHandler)
                      .setTail(appAdapter)
@@ -588,12 +591,15 @@ FastThriftServerT<Stats>::buildRocketPipeline(
   // makeHandlerNode never registers them and the pipeline's writeReadyList_
   // stays empty. The choice costs one branch per connection, not per message.
   if (config_.enableBackpressure) {
-    builder.addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-        batching_frame_handler_tag);
+    builder.addNextOutbound<frame::write::handler::BatchingFrameHandlerT<
+        frame::write::handler::NoOpWriteCompletionTracker,
+        frame::write::handler::BackpressureEnabled,
+        rocket::server::RocketServerEventId>>(batching_frame_handler_tag);
   } else {
-    builder.addNextOutbound<
-        frame::write::handler::BatchingFrameHandlerNoBackpressure>(
-        batching_frame_handler_tag);
+    builder.addNextOutbound<frame::write::handler::BatchingFrameHandlerT<
+        frame::write::handler::NoOpWriteCompletionTracker,
+        frame::write::handler::BackpressureDisabled,
+        rocket::server::RocketServerEventId>>(batching_frame_handler_tag);
   }
   builder
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(

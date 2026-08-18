@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
@@ -105,6 +106,8 @@ class MockContext {
     return firedEvents_;
   }
 
+  folly::EventBase* eventBase() noexcept { return &evb_; }
+
   // NOLINTNEXTLINE(clang-diagnostic-unused-member-function)
   apache::thrift::fast_thrift::channel_pipeline::BytesPtr allocate(
       size_t size) {
@@ -157,6 +160,7 @@ class MockContext {
   bool closeCalled_{false};
   std::vector<RocketServerEventId> firedEvents_;
   OnEventFn onEvent_;
+  folly::EventBase evb_;
   bool writeReadyCalled_{false};
 };
 
@@ -717,6 +721,21 @@ TEST_F(ServerSetupFrameHandlerTest, SetupBackpressureStillCompletesSetup) {
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1)),
       Result::Success);
   EXPECT_EQ(ctx_.readMessages().size(), 1);
+}
+
+// A refusal from the layer above ends the exchange. The connection is being
+// torn down, so it must be left unset-up and never announced as established —
+// subscribers to SetupComplete would otherwise see an established connection
+// after they had already been told it closed.
+TEST_F(ServerSetupFrameHandlerTest, UpstreamRefusalIsNotAnnouncedAsComplete) {
+  ctx_.setReadResult(Result::Error);
+
+  auto result = callOnRead(makeSetupFrame(1, 0, 30000, 60000));
+
+  EXPECT_EQ(result, Result::Error);
+  EXPECT_FALSE(handler_.isSetupComplete());
+  EXPECT_TRUE(ctx_.firedEvents().empty())
+      << "a refused connection must not be announced as established";
 }
 
 TEST_F(ServerSetupFrameHandlerTest, InvalidSetupMetadataSendsErrorAndCloses) {

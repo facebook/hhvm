@@ -382,9 +382,15 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
                 rocket::server::RocketServerEventFactory>>>(
             batching_frame_handler_tag, config_.batchingConfig);
   } else {
-    builder.addNextOutbound<
-        frame::write::handler::IntervalBatchingFrameHandlerNoBackpressure>(
-        batching_frame_handler_tag, config_.batchingConfig);
+    // No tracker, but still bound to the rocket event space: the batcher has
+    // to hear FlushWrites either way, or a connection closing in this
+    // configuration would drop whatever it had buffered.
+    builder
+        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandlerT<
+            frame::write::handler::NoOpWriteCompletionTracker,
+            frame::write::handler::BackpressureDisabled,
+            rocket::server::RocketServerEventId>>(
+            batching_frame_handler_tag, config_.batchingConfig);
   }
   builder
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(

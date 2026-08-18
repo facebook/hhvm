@@ -30,10 +30,11 @@
  * Response tests use (void) on write() results (matching client test pattern)
  * and call evb_.loopOnce() to drain the deferred callback.
  *
- * Setup error tests (invalid version, request-before-setup) are covered
- * in handler unit tests. They cannot be tested here because the deferred
- * writeSuccess() callback fires after closeInternal() nullifies the pipeline
- * pointer in TransportHandler.
+ * Setup error tests for the bare pipeline below are covered in handler unit
+ * tests. RocketServerSetupRejectionTest at the bottom of this file covers
+ * rejection end-to-end on a pipeline that mirrors production (batcher present,
+ * built with RocketServerEventId), where the buffered ERROR frame has to reach
+ * the socket ahead of the close.
  */
 
 #include <cstring>
@@ -58,9 +59,14 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/RocketServerEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -98,6 +104,7 @@ HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(rocket_server_setup_handler);
 HANDLER_TAG(rocket_server_request_response_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
+HANDLER_TAG(batching_frame_handler);
 
 class RocketServerIntegrationTest : public ::testing::Test {
  protected:
@@ -585,6 +592,201 @@ TEST_F(RocketServerIntegrationTest, EmptyPayloadResponse) {
   EXPECT_EQ(
       parsed.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
   EXPECT_EQ(parsed.streamId(), 1u);
+}
+
+// =============================================================================
+// Setup rejection must reach the wire
+//
+// Mirrors the production rocket pipeline from
+// ThriftServerConnectionFactory::buildRocketPipeline: the outbound batcher is
+// present and the pipeline is built with RocketServerEventId, so write
+// completions actually fire. That combination is what makes a rejected SETUP
+// observable end-to-end.
+// =============================================================================
+
+using RejectionTransportHandler =
+    apache::thrift::fast_thrift::transport::TransportHandlerT<
+        RocketServerEventFactory>;
+// Both batcher specializations a production rocket pipeline can be built with.
+// The refusal has to survive either: the batcher hears FlushWrites through the
+// pipeline's event enum, which is independent of whether it tracks write
+// completions or participates in backpressure.
+using BackpressureBatcher = apache::thrift::fast_thrift::frame::write::handler::
+    IntervalBatchingFrameHandlerT<
+        apache::thrift::fast_thrift::frame::write::handler::
+            WriteCompletionTrackerT<RocketServerEventFactory>>;
+using NoBackpressureBatcher = apache::thrift::fast_thrift::frame::write::
+    handler::IntervalBatchingFrameHandlerT<
+        apache::thrift::fast_thrift::frame::write::handler::
+            NoOpWriteCompletionTracker,
+        apache::thrift::fast_thrift::frame::write::handler::
+            BackpressureDisabled,
+        RocketServerEventId>;
+
+template <typename RejectionBatcher>
+class RocketServerSetupRejectionTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    allocator_.reset();
+
+    auto transport =
+        folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
+    testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
+    transportHandler_ = RejectionTransportHandler::create(std::move(transport));
+
+    pipeline_ =
+        PipelineBuilder<
+            RejectionTransportHandler,
+            rocket::server::RocketServerAppAdapter,
+            TestAllocator,
+            RocketServerEventId>()
+            .setEventBase(&evb_)
+            .setHead(transportHandler_.get())
+            .setTail(appAdapter_.get())
+            .setAllocator(&allocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<RejectionBatcher>(batching_frame_handler_tag)
+            // The batcher is the fixture's type parameter, so everything
+            // chained after it is a dependent call.
+            .template addNextOutbound<
+                apache::thrift::fast_thrift::frame::write::handler::
+                    FrameLengthEncoderHandler>(frame_length_encoder_handler_tag)
+            .template addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)
+            .template addNextInbound<FrameDefragmentationHandler>(
+                frame_defragmentation_handler_tag)
+            .template addNextOutbound<FrameFragmentationHandler>(
+                frame_fragmentation_handler_tag,
+                frame::write::FragmentationHandlerConfig{})
+            .template addNextDuplex<RocketServerMessageMarshalHandler>(
+                rocket_server_message_marshal_handler_tag)
+            .template addNextDuplex<RocketServerSetupFrameHandler>(
+                rocket_server_setup_handler_tag)
+            .build();
+
+    appAdapter_->setPipeline(pipeline_.get());
+    transportHandler_->setPipeline(pipeline_.get());
+    transportHandler_->onConnect();
+  }
+
+  // A test that hands the pieces to a RocketServerConnection leaves these
+  // empty; that connection owns the teardown from then on.
+  void TearDown() override {
+    evb_.loopOnce();
+    if (transportHandler_) {
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
+    }
+    if (appAdapter_) {
+      appAdapter_->resetPipeline();
+    }
+    pipeline_.reset();
+    testTransport_ = nullptr;
+  }
+
+  // keepaliveTime == 0 is rejected by the setup handler with INVALID_SETUP.
+  void injectRejectedSetupFrame() {
+    auto setupFrame = apache::thrift::fast_thrift::frame::write::serialize(
+        apache::thrift::fast_thrift::frame::write::SetupHeader{
+            .majorVersion = 1,
+            .minorVersion = 0,
+            .keepaliveTime = 0,
+            .maxLifetime = 60000},
+        nullptr,
+        nullptr);
+    size_t frameLength = setupFrame->computeChainDataLength();
+    auto lengthPrefix = folly::IOBuf::create(
+        apache::thrift::fast_thrift::frame::kMetadataLengthSize);
+    uint8_t* data = lengthPrefix->writableData();
+    data[0] = static_cast<uint8_t>((frameLength >> 16) & 0xFF);
+    data[1] = static_cast<uint8_t>((frameLength >> 8) & 0xFF);
+    data[2] = static_cast<uint8_t>(frameLength & 0xFF);
+    lengthPrefix->append(
+        apache::thrift::fast_thrift::frame::kMetadataLengthSize);
+    lengthPrefix->appendChain(std::move(setupFrame));
+    testTransport_->injectReadData(std::move(lengthPrefix));
+  }
+
+  folly::EventBase evb_;
+  TestAsyncTransport* testTransport_{nullptr};
+  rocket::server::RocketServerAppAdapter::Ptr appAdapter_{
+      new rocket::server::RocketServerAppAdapter()};
+  RejectionTransportHandler::Ptr transportHandler_;
+  PipelineImpl::Ptr pipeline_;
+  TestAllocator allocator_;
+};
+
+using RejectionBatchers =
+    ::testing::Types<BackpressureBatcher, NoBackpressureBatcher>;
+TYPED_TEST_SUITE(RocketServerSetupRejectionTest, RejectionBatchers);
+
+// The bug this guards: the ERROR frame used to be discarded by the batcher
+// when the setup handler closed the pipeline inline, so the peer saw a bare
+// FIN with no bytes on the wire. No loop turn here on purpose — the frame has
+// to be out by the time the close returns, not at the batcher's convenience.
+TYPED_TEST(
+    RocketServerSetupRejectionTest, RejectedSetupWritesErrorFrameToWire) {
+  this->injectRejectedSetupFrame();
+
+  auto written = this->testTransport_->getWrittenData();
+  ASSERT_NE(written, nullptr) << "ERROR frame never reached the transport";
+
+  folly::IOBufQueue queue;
+  queue.append(std::move(written));
+  queue.trimStart(apache::thrift::fast_thrift::frame::kMetadataLengthSize);
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(queue.move());
+
+  ASSERT_TRUE(parsed.isValid());
+  EXPECT_EQ(
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 0u);
+}
+
+// Getting the frame out must not leave the rejected connection open.
+TYPED_TEST(RocketServerSetupRejectionTest, RejectedSetupClosesTheConnection) {
+  this->injectRejectedSetupFrame();
+
+  EXPECT_EQ(
+      this->transportHandler_->state(),
+      RejectionTransportHandler::State::Closed)
+      << "a rejected connection must not survive the refusal";
+}
+
+// The same guarantee for the other terminal path: a frame written on the way
+// out is still buffered when the owner tears the connection down, and
+// disconnect() has to get it to the socket before the transport closes.
+TYPED_TEST(RocketServerSetupRejectionTest, DisconnectFlushesBufferedFrames) {
+  rocket::server::RocketServerConnection conn;
+  conn.appAdapter = std::move(this->appAdapter_);
+  conn.transportHandler = std::move(this->transportHandler_);
+  conn.pipeline = std::move(this->pipeline_);
+
+  ASSERT_EQ(
+      conn.appAdapter->write(
+          RocketResponseMessage{
+              .frame =
+                  apache::thrift::fast_thrift::frame::ComposedFrame{
+                      .frameType =
+                          apache::thrift::fast_thrift::frame::FrameType::ERROR,
+                      .streamId = 0,
+                      .errorCode = static_cast<uint32_t>(
+                          apache::thrift::fast_thrift::frame::ErrorCode::
+                              CONNECTION_CLOSE),
+                  }}),
+      Result::Success);
+  ASSERT_EQ(this->testTransport_->getWrittenData(), nullptr)
+      << "batched, not yet flushed — otherwise this proves nothing";
+
+  conn.disconnect();
+
+  EXPECT_NE(this->testTransport_->getWrittenData(), nullptr)
+      << "buffered frame was discarded instead of flushed on disconnect";
+
+  conn.destroy();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::test

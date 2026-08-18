@@ -230,7 +230,7 @@ void ThriftServerAppAdapter::close() noexcept {
   }
   pipeline_->fireEvent(
       ThriftServerEventType::CloseConnection,
-      channel_pipeline::TypeErasedBox{});
+      channel_pipeline::TypeErasedBox(ThriftServerCloseConnectionEvent{}));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

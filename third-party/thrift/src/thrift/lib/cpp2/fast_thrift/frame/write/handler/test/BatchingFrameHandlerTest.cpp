@@ -936,6 +936,20 @@ struct CapturingTracker {
 
 static_assert(WriteCompletionTracker<CapturingTracker>);
 
+// An event enum for a pipeline that asks its buffering handlers to flush ahead
+// of a teardown. A batcher bound to it subscribes to FlushWrites whether or not
+// it tracks write completions.
+enum class FlushableEventId : std::uint32_t {
+  WriteComplete,
+  FlushWrites,
+  Count,
+};
+
+static_assert(
+    !HasFlushWritesEvent<CapturingEventId>,
+    "an enum without FlushWrites must not opt its batcher into the flush path");
+static_assert(HasFlushWritesEvent<FlushableEventId>);
+
 class BatchingFrameHandlerTrackerTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -969,6 +983,49 @@ TEST_F(BatchingFrameHandlerTrackerTest, TrackerHooksFireOnWriteAndFlush) {
 
   EXPECT_EQ(handler.tracker().onWriteCount, 3u);
   EXPECT_EQ(handler.tracker().onFlushCount, 1u);
+}
+
+// A teardown is imminent and the batch is still buffered: FlushWrites has to
+// push it downstream there and then, or the frame dies with the connection.
+TEST_F(BatchingFrameHandlerTrackerTest, FlushWritesEventFlushesPendingBatch) {
+  BatchingFrameHandlerT<
+      NoOpWriteCompletionTracker,
+      BackpressureEnabled,
+      FlushableEventId>
+      handler;
+  handler.handlerAdded(*ctx_);
+
+  ASSERT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(64))),
+      apache::thrift::fast_thrift::channel_pipeline::Result::Success);
+  ASSERT_TRUE(handler.hasPendingData());
+  ASSERT_TRUE(ctx_->writtenBatches().empty()) << "batched, not yet downstream";
+
+  handler.onEvent(
+      *ctx_,
+      FlushableEventId::FlushWrites,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
+
+  EXPECT_FALSE(handler.hasPendingData());
+  EXPECT_EQ(ctx_->writtenBatches().size(), 1u)
+      << "batch never reached the next handler";
+}
+
+// Nothing buffered is not an error, and must not manufacture an empty write.
+TEST_F(BatchingFrameHandlerTrackerTest, FlushWritesEventOnEmptyBatchIsNoOp) {
+  BatchingFrameHandlerT<
+      NoOpWriteCompletionTracker,
+      BackpressureEnabled,
+      FlushableEventId>
+      handler;
+  handler.handlerAdded(*ctx_);
+
+  handler.onEvent(
+      *ctx_,
+      FlushableEventId::FlushWrites,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
+
+  EXPECT_TRUE(ctx_->writtenBatches().empty());
 }
 
 TEST_F(BatchingFrameHandlerTrackerTest, OnEventDelegatesToTracker) {

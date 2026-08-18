@@ -160,7 +160,9 @@ TEST(
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
   ASSERT_TRUE(f.handler.isDraining());
 
   EXPECT_EQ(
@@ -212,12 +214,91 @@ TEST(
   Fixture f;
 
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
 
   ASSERT_EQ(f.ctx.writes.size(), 1u);
   expectConnectionCloseFrame(f.ctx.writes.front());
   EXPECT_TRUE(f.handler.isClosed());
   EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
+  ASSERT_EQ(f.ctx.events.size(), 1u);
+  expectConnectionClosedEvent(f.ctx.events.front());
+}
+
+// A refusal takes the same terminal path, answered with its own error code and
+// reason instead of CONNECTION_CLOSE.
+TEST(ThriftServerConnectionCloseHandlerTest, RejectionIsAnsweredWithItsReason) {
+  Fixture f;
+
+  f.handler.onEvent(
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(
+          ThriftServerCloseConnectionEvent{
+              .rejection = SetupRejection{
+                  .code = apache::thrift::fast_thrift::frame::ErrorCode::
+                      REJECTED_SETUP,
+                  .reason = "not welcome here"}}));
+
+  ASSERT_EQ(f.ctx.writes.size(), 1u);
+  const auto& payload =
+      f.ctx.writes.front().get<ThriftServerResponseMessage>().payload;
+  ASSERT_TRUE(payload.is<ThriftSetupRejectionPayload>());
+  const auto& rejection = payload.get<ThriftSetupRejectionPayload>();
+  EXPECT_EQ(
+      rejection.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::REJECTED_SETUP));
+  EXPECT_EQ(rejection.reason->to<std::string>(), "not welcome here");
+  EXPECT_TRUE(f.handler.isClosed());
+  EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
+}
+
+// A CONNECTION_CLOSE that never reaches the wire leaves nothing to drain for:
+// the client cannot act on a frame it will not see. Idle, that closes outright.
+TEST(
+    ThriftServerConnectionCloseHandlerTest,
+    FailedCloseWriteClosesImmediatelyWhenIdle) {
+  Fixture f;
+  f.ctx.writeResult = Result::Error;
+
+  f.handler.onEvent(
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
+
+  EXPECT_TRUE(f.handler.isClosed());
+  EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
+  ASSERT_EQ(f.ctx.events.size(), 1u);
+  expectConnectionClosedEvent(f.ctx.events.front());
+}
+
+// In-flight work does not buy a drain window when the frame never went out:
+// close anyway and let the in-flight requests fail. This is the same close the
+// reap timer performs with stragglers outstanding.
+TEST(
+    ThriftServerConnectionCloseHandlerTest,
+    FailedCloseWriteClosesWithInFlightOutstanding) {
+  Fixture f;
+
+  ASSERT_EQ(
+      f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
+  ASSERT_EQ(
+      f.handler.onRead(f.ctx, erase_and_box(makeRequest(2))), Result::Success);
+  ASSERT_EQ(f.handler.inFlight(), 2u);
+
+  f.ctx.writeResult = Result::Error;
+  f.handler.onEvent(
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
+
+  EXPECT_TRUE(f.handler.isClosed());
+  EXPECT_FALSE(f.handler.isDraining()) << "no point draining for a lost frame";
+  EXPECT_EQ(f.handler.inFlight(), 2u) << "the requests are failed, not awaited";
+  EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1)
+      << "the socket is still ours to tear down";
   ASSERT_EQ(f.ctx.events.size(), 1u);
   expectConnectionClosedEvent(f.ctx.events.front());
 }
@@ -234,7 +315,9 @@ TEST(
   ASSERT_EQ(f.handler.inFlight(), 2u);
 
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
 
   ASSERT_EQ(f.ctx.writes.size(), 1u);
   expectConnectionCloseFrame(f.ctx.writes.front());
@@ -262,12 +345,16 @@ TEST(ThriftServerConnectionCloseHandlerTest, CloseConnectionEventIsIdempotent) {
   Fixture f;
 
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
   EXPECT_EQ(f.ctx.writes.size(), 1u);
   EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
 
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
   EXPECT_EQ(f.ctx.writes.size(), 1u);
   EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
 }
@@ -289,7 +376,9 @@ TEST(
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
   ASSERT_TRUE(f.handler.isDraining());
 
   // Drive the EventBase past the drain deadline. Reap timer is long
@@ -323,7 +412,9 @@ TEST(
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
   f.handler.onEvent(
-      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
+      f.ctx,
+      ThriftServerEventType::CloseConnection,
+      TypeErasedBox(ThriftServerCloseConnectionEvent{}));
   ASSERT_TRUE(f.handler.isDraining());
 
   // Drive past both drain and reap deadlines. Drain → reap → force-close.

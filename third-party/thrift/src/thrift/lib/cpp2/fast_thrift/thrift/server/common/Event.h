@@ -39,10 +39,11 @@ namespace apache::thrift::fast_thrift::thrift {
  * at compile time and must remain the last enumerator.
  */
 enum class ThriftServerEventType : std::uint32_t {
-  // Owning connection initiating connection close. The
-  // pipeline-resident ThriftServerConnectionCloseHandler picks this up
-  // and runs the terminal state machine (drain → reap → LOG(FATAL) on
-  // stuck callbacks). Emitted outbound by the tail adapter's close().
+  // Connection close requested. The pipeline-resident
+  // ThriftServerConnectionCloseHandler picks this up and runs the terminal
+  // state machine (drain → reap → LOG(FATAL) on stuck callbacks). Emitted by
+  // the tail adapter's close(), and by any handler refusing the connection.
+  // Carries a ThriftServerCloseConnectionEvent naming what to tell the client.
   CloseConnection,
   // Emitted inbound by ThriftServerConnectionCloseHandler when the
   // connection has finished settling — all in-flight handler
@@ -63,6 +64,16 @@ enum class ThriftServerEventType : std::uint32_t {
   SetupComplete,
   // Sentinel: number of event types. Keep last.
   Count,
+};
+
+/**
+ * Payload for ThriftServerEventType::CloseConnection — what the client is told
+ * on the way out. Empty means an orderly shutdown, answered with
+ * CONNECTION_CLOSE; a rejection means the connection is refused, answered with
+ * that error code and reason.
+ */
+struct ThriftServerCloseConnectionEvent {
+  std::optional<SetupRejection> rejection;
 };
 
 /**

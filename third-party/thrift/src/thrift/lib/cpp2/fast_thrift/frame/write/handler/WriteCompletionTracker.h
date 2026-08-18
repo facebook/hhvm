@@ -79,6 +79,42 @@ static_assert(
     "NoOpWriteCompletionTracker must satisfy WriteCompletionTracker concept");
 
 /**
+ * Whether a pipeline's event enum defines FlushWrites — the request to push
+ * buffered outbound bytes downstream immediately, ahead of a teardown.
+ */
+template <typename E>
+concept HasFlushWritesEvent = requires { E::FlushWrites; };
+
+namespace detail {
+template <auto... A, auto... B>
+constexpr apache::thrift::fast_thrift::channel_pipeline::
+    Subscriptions<A..., B...>
+    concatSubscriptions(
+        apache::thrift::fast_thrift::channel_pipeline::Subscriptions<A...>,
+        apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+            B...>) noexcept {
+  return {};
+}
+} // namespace detail
+
+/**
+ * A batching handler's subscription list: whatever its tracker subscribes to,
+ * plus FlushWrites when the pipeline's event enum defines it. A pipeline whose
+ * enum has neither gets an empty list and no event wiring at all.
+ */
+template <typename Tracker, typename Ev>
+constexpr auto makeBatcherSubscriptions() noexcept {
+  if constexpr (HasFlushWritesEvent<Ev>) {
+    return detail::concatSubscriptions(
+        Tracker::kSubscribedEvents,
+        apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+            Ev::FlushWrites>{});
+  } else {
+    return Tracker::kSubscribedEvents;
+  }
+}
+
+/**
  * Event factory contract for WriteCompletionTrackerT. Pins the member types the
  * tracker reads off and the exact `(status, count, bytes)` argument order and
  * `pair<EventId, TypeErasedBox>` result of the batch factory method, so a

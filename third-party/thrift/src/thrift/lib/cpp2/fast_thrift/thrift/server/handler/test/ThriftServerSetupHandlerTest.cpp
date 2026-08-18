@@ -57,11 +57,28 @@ class FakeContext {
     exception = std::move(e);
   }
 
+  void fireEvent(ThriftServerEventType ev, TypeErasedBox&& msg) noexcept {
+    events.emplace_back(ev, std::move(msg));
+  }
+
   std::vector<TypeErasedBox> forwarded;
   std::vector<TypeErasedBox> written;
+  std::vector<std::pair<ThriftServerEventType, TypeErasedBox>> events;
   folly::exception_wrapper exception;
   Result writeResult{Result::Success};
 };
+
+// The rejection carried by the handler's single CloseConnection event.
+const SetupRejection& expectRejectionEvent(const FakeContext& ctx) {
+  EXPECT_TRUE(ctx.written.empty())
+      << "the close handler owns writing the refusal";
+  EXPECT_EQ(ctx.events.size(), 1);
+  EXPECT_EQ(ctx.events.front().first, ThriftServerEventType::CloseConnection);
+  const auto& evt =
+      ctx.events.front().second.get<ThriftServerCloseConnectionEvent>();
+  EXPECT_TRUE(evt.rejection.has_value());
+  return *evt.rejection;
+}
 
 ThriftServerRequestMessage makeSetupMessage(
     int32_t clientMinVersion,
@@ -133,19 +150,15 @@ TEST(ThriftServerSetupHandlerTest, UpstreamRejectionBecomesTheAnswer) {
                   .reason = "not welcome here"}))),
       Result::Error);
 
-  ASSERT_EQ(ctx.written.size(), 1);
-  auto& response = ctx.written.front().get<ThriftServerResponseMessage>();
-  ASSERT_TRUE(response.payload.is<ThriftSetupRejectionPayload>());
-  const auto& rejection = response.payload.get<ThriftSetupRejectionPayload>();
+  const auto& rejection = expectRejectionEvent(ctx);
   EXPECT_EQ(
-      rejection.errorCode,
-      static_cast<uint32_t>(
-          apache::thrift::fast_thrift::frame::ErrorCode::REJECTED_SETUP));
-  EXPECT_EQ(rejection.reason->to<std::string>(), "not welcome here");
+      rejection.code,
+      apache::thrift::fast_thrift::frame::ErrorCode::REJECTED_SETUP);
+  EXPECT_EQ(rejection.reason, "not welcome here");
 }
 
-// No overlap with the server's range is a refusal: a rejection payload out,
-// and non-Success so the exchange stops here.
+// No overlap with the server's range is a refusal, requested through the same
+// terminal path so the frame is written and flushed before the socket goes.
 TEST(ThriftServerSetupHandlerTest, VersionRangeOutsideServerRangeIsRefused) {
   ThriftServerSetupHandler<FakeContext> handler;
   FakeContext ctx;
@@ -158,13 +171,9 @@ TEST(ThriftServerSetupHandlerTest, VersionRangeOutsideServerRangeIsRefused) {
       Result::Error);
 
   EXPECT_TRUE(ctx.forwarded.empty());
-  ASSERT_EQ(ctx.written.size(), 1);
-  auto& response = ctx.written.front().get<ThriftServerResponseMessage>();
-  ASSERT_TRUE(response.payload.is<ThriftSetupRejectionPayload>());
   EXPECT_EQ(
-      response.payload.get<ThriftSetupRejectionPayload>().errorCode,
-      static_cast<uint32_t>(
-          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
+      expectRejectionEvent(ctx).code,
+      apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP);
 }
 
 // The point of answering with a structured response: a handler on the write

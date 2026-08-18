@@ -205,6 +205,14 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   set(CMAKE_CXX_FLAGS_DEBUG_INIT          "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_DEBUGOPT_INIT         "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_CXX_FLAGS_DEBUGOPT_INIT       "-O2 -g${GDB_SUBOPTION}")
+  # CMake seeds flags from _INIT only for its builtin configurations, so the
+  # custom DebugOpt configuration needs explicit cache entries.
+  foreach(lang C CXX)
+    if(NOT DEFINED CMAKE_${lang}_FLAGS_DEBUGOPT)
+      set(CMAKE_${lang}_FLAGS_DEBUGOPT "${CMAKE_${lang}_FLAGS_DEBUGOPT_INIT}"
+          CACHE STRING "Flags used by the ${lang} compiler during DebugOpt builds.")
+    endif()
+  endforeach()
   set(CMAKE_C_FLAGS_MINSIZEREL_INIT       "-Os")
   set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "-Os")
   set(CMAKE_C_FLAGS_RELEASE_INIT          "-O3")

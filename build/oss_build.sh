@@ -30,16 +30,14 @@ RUN_LOG_FILE="${HHVM_OSS_LOG_FILE:-$HHVM_OSS_WORK_ROOT/oss_build.log}"
 GETDEPS_REAL_ROOT="$SRC_DIR/build/fbcode_builder"
 GETDEPS="$GETDEPS_REAL_ROOT/getdeps.py"
 SCRATCH_DIR="${HHVM_OSS_SCRATCH_DIR:-$HHVM_OSS_WORK_ROOT/getdeps}"
-GETDEPS_SHADOW_ROOT="$SCRATCH_DIR/fbcode_builder-release-train"
+GETDEPS_SHADOW_ROOT="$SCRATCH_DIR/fbcode_builder-hhvm"
 GETDEPS_SHADOW_MANIFESTS_DIR="$GETDEPS_SHADOW_ROOT/manifests"
 GETDEPS_DIR="$SCRATCH_DIR/installed"
 GETDEPS_PUBLIC_CWD="${HHVM_OSS_GETDEPS_CWD:-${XDG_CACHE_HOME:-$HOME/.cache}/hhvm-getdeps-cwd}"
 GETDEPS_SOURCE_MODE_FILE="$SCRATCH_DIR/.hhvm_getdeps_source_mode"
-RELEASE_TRAIN_TAG="v2026.05.11.00"
-GETDEPS_SOURCE_MODE_BASE="public-git-release-train-${RELEASE_TRAIN_TAG}-shadow-manifests-local-sources-hhvm-toolchain-v2"
+GETDEPS_SOURCE_MODE_BASE="public-git-shipit-sources-shadow-manifests-hhvm-toolchain-v3"
 GETDEPS_SOURCE_MODE="$GETDEPS_SOURCE_MODE_BASE"
 GETDEPS_MANIFEST_OVERRIDE_DIR="$SCRATCH_DIR/manifest-overrides"
-GETDEPS_RELEASE_TRAIN_SRC_DIR="$SCRATCH_DIR/release-train-src"
 GETDEPS_GNU_URL_ROOT="https://ftpmirror.gnu.org/gnu"
 GETDEPS_GNU_MIRROR_URL_ROOT="https://mirrors.kernel.org/gnu"
 FORCE_REBUILD=false
@@ -56,14 +54,14 @@ FBMYSQL_OSS_BOOST_PACKAGE="boost_1_77_0"
 FBMYSQL_OSS_BOOST_URL="https://archives.boost.io/release/1.77.0/source/${FBMYSQL_OSS_BOOST_PACKAGE}.tar.bz2"
 FBMYSQL_OSS_BOOST_ARCHIVE="${FBMYSQL_OSS_BOOST_PACKAGE}.tar.bz2"
 FBMYSQL_OSS_BOOST_SHA256="fc9f85fc030e233142908241af7a846e60630aa7388de9a5fafb1f3a26840854"
-LIBDWARF_OSS_VERSION="20180809"
+LIBDWARF_OSS_VERSION="20210528"
 LIBDWARF_OSS_URL="https://www.prevanders.net/libdwarf-${LIBDWARF_OSS_VERSION}.tar.gz"
 LIBDWARF_OSS_ARCHIVE="libdwarf-${LIBDWARF_OSS_VERSION}.tar.gz"
-LIBDWARF_OSS_SHA256="63e5947fbd8f342240d25bed2081251f8ec5428ee09e24dfad3b6956168bc400"
+LIBDWARF_OSS_SHA256="b8ba0ee9b70d2052d45272489d79bf456c4d342fc8c3bba45038afc50ec6e28b"
 LIBDWARF_OSS_ARCHIVE_PATH="$DOWNLOAD_CACHE_DIR/$LIBDWARF_OSS_ARCHIVE"
 LIBDWARF_OSS_CACHE_DIR="$DOWNLOAD_CACHE_DIR"
-LIBDWARF_OSS_SRC_DIR="$HHVM_OSS_WORK_ROOT/sources/libdwarf"
-LIBDWARF_OSS_PREFIX="$HHVM_OSS_WORK_ROOT/installed/libdwarf"
+LIBDWARF_OSS_SRC_DIR="$HHVM_OSS_WORK_ROOT/sources/libdwarf-${LIBDWARF_OSS_VERSION}"
+LIBDWARF_OSS_PREFIX="$HHVM_OSS_WORK_ROOT/installed/libdwarf-${LIBDWARF_OSS_VERSION}"
 TIMELIB_VERSION="2021.07"
 TIMELIB_URL="https://github.com/derickr/timelib/archive/refs/tags/${TIMELIB_VERSION}.tar.gz"
 TIMELIB_ARCHIVE="timelib-${TIMELIB_VERSION}.tar.gz"
@@ -108,28 +106,26 @@ CMAKE_CXX_COMPILER_PATH="${HHVM_OSS_CXX_COMPILER:-}"
 CMAKE_TOOLCHAIN_FILE_PATH=""
 CMAKE_COMPILER_FLAGS=()
 CMAKE_COMPILER_DESCRIPTION=""
-CMAKE_BUILD_TYPE_FLAGS=()
 HHVM_CMAKE_ARCHITECTURE=""
 NEED_XED=false
-FOLLY_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-FOLLY_RELEASE_REV="548b16da0b3cc887d69cdb6ae06496ad8a2a9276"
-WANGLE_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-WANGLE_RELEASE_REV="6ae150bd74432eca9a0f266db75ea7ecead0b818"
-FIZZ_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-FIZZ_RELEASE_REV="5aff5cde855d66e81fcd84b750834b7f8a0590da"
-MVFST_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-MVFST_RELEASE_REV="d30c7b83e6b8c2eb366d09b9e79c171cb9c02ec7"
-FBTHRIFT_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-FBTHRIFT_RELEASE_REV="ab6f712453befaf03a4e7083e781d3356b4ff961"
-PROXYGEN_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-PROXYGEN_RELEASE_REV="90339714c2c843bba6755567ac0c29866d860c16"
-MCROUTER_RELEASE_TAG="$RELEASE_TRAIN_TAG"
-MCROUTER_RELEASE_REV="962d0ff2fa35654a7a64b128fff7596d781738ea"
 MAGIC_ENUM_VERSION="v0.9.7"
 MAGIC_ENUM_DOWNLOAD_URL="https://github.com/Neargye/magic_enum/releases/download/${MAGIC_ENUM_VERSION}/magic_enum-${MAGIC_ENUM_VERSION}.tar.gz"
 MAGIC_ENUM_DOWNLOAD_ARCHIVE="magic_enum-${MAGIC_ENUM_VERSION}.tar.gz"
 MAGIC_ENUM_DOWNLOAD_SHA256="c047bc7ca0b76752168140e7ae9a4a30d72bf6530c196fdfbf5105a39d40cc46"
-RELEASE_TRAIN_SRC_ARGS=()
+SHIPIT_SOURCE_MAPPINGS=(
+  "folly:$SRC_DIR/third-party/folly/src"
+  "fizz:$SRC_DIR/third-party/fizz/src"
+  "wangle:$SRC_DIR/third-party/wangle/src"
+  "fbthrift:$SRC_DIR/third-party/thrift/src"
+  "proxygen:$SRC_DIR/third-party/proxygen/src"
+  "mcrouter:$SRC_DIR/third-party/mcrouter/src"
+  "fatal:$SRC_DIR/third-party/fatal"
+)
+SHIPIT_SOURCE_ARGS=()
+for source_mapping in "${SHIPIT_SOURCE_MAPPINGS[@]}"; do
+  SHIPIT_SOURCE_ARGS+=(--src-dir "$source_mapping")
+done
+unset source_mapping
 
 case "$(uname -m)" in
   x86_64|amd64)
@@ -701,6 +697,9 @@ run_hhvm_build() {
   local build_dir="$1"
   local libmbfl_eaw_table="$SRC_DIR/third-party/forks/libmbfl/mbfl/eaw_table.h"
 
+  # The libmbfl generator writes into the source tree. An interrupted build
+  # can leave a truncated header which the generator then mistakes for a
+  # completed output, so remove it before retrying the build.
   if [ -f "$libmbfl_eaw_table" ] && \
      ! grep -qF 'mbfl_eaw_table' "$libmbfl_eaw_table"; then
     echo ">>> Removing an invalid generated libmbfl East Asian width table."
@@ -737,19 +736,29 @@ build_public_getdeps_target() {
     --no-tests \
     --scratch-path "$SCRATCH_DIR" \
     --num-jobs "$JOBS" \
-    "${RELEASE_TRAIN_SRC_ARGS[@]}" \
+    "${SHIPIT_SOURCE_ARGS[@]}" \
     "${extra_args[@]}"
 }
 
 set_getdeps_source_mode() {
-  local fingerprint_input fingerprint
+  local fingerprint_input fingerprint mapping source_dir source_path
+  local shipit_source_versions=""
+
+  for mapping in "${SHIPIT_SOURCE_MAPPINGS[@]}"; do
+    source_dir="${mapping#*:}"
+    source_path="${source_dir#"$SRC_DIR/"}"
+    shipit_source_versions+="$(git -C "$SRC_DIR" rev-parse "HEAD:$source_path")"$'\n'
+    shipit_source_versions+="$(git -C "$SRC_DIR" diff --binary HEAD -- "$source_path")"$'\n'
+  done
 
   fingerprint_input="$CMAKE_C_COMPILER_PATH
 $("$CMAKE_C_COMPILER_PATH" --version)
 $CMAKE_CXX_COMPILER_PATH
 $("$CMAKE_CXX_COMPILER_PATH" --version)
 $CMAKE_TOOLCHAIN_FILE_PATH
-$(sha256sum "$CMAKE_TOOLCHAIN_FILE_PATH" "$SRC_DIR/CMake/HPHPCompiler.cmake")"
+$(sha256sum "$CMAKE_TOOLCHAIN_FILE_PATH" "$SRC_DIR/CMake/HPHPCompiler.cmake")
+${shipit_source_versions}
+$(find "$SRC_DIR/build/deps/github_hashes" -type f -name '*-rev.txt' -print0 | sort -z | xargs -0 -r sha256sum)"
   fingerprint="$(printf '%s' "$fingerprint_input" | sha256sum | cut -c1-16)"
   GETDEPS_SOURCE_MODE="${GETDEPS_SOURCE_MODE_BASE}-${fingerprint}"
 }
@@ -772,57 +781,6 @@ ensure_public_getdeps_source_mode() {
 
   mkdir -p "$SCRATCH_DIR"
   printf '%s\n' "$GETDEPS_SOURCE_MODE" > "$GETDEPS_SOURCE_MODE_FILE"
-}
-
-prepare_getdeps_manifest_override() {
-  local name="$1" rev="$2"
-  local base_manifest="$GETDEPS_REAL_ROOT/manifests/$name"
-  local override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/$name"
-
-  if [ ! -f "$base_manifest" ]; then
-    echo "ERROR: getdeps manifest not found: $base_manifest"
-    exit 1
-  fi
-
-  mkdir -p "$GETDEPS_MANIFEST_OVERRIDE_DIR"
-  python3 - "$base_manifest" "$override_manifest" "$rev" <<'PY'
-from pathlib import Path
-import sys
-
-base_manifest = Path(sys.argv[1])
-override_manifest = Path(sys.argv[2])
-rev = sys.argv[3]
-
-lines = base_manifest.read_text().splitlines()
-output = []
-in_git = False
-inserted = False
-
-for line in lines:
-    stripped = line.strip()
-    if in_git and stripped.startswith("[") and stripped.endswith("]"):
-        if not inserted:
-            output.append(f"rev = {rev}")
-            inserted = True
-        in_git = False
-
-    if in_git and stripped.startswith("rev ="):
-        if not inserted:
-            output.append(f"rev = {rev}")
-            inserted = True
-        continue
-
-    output.append(line)
-    if stripped == "[git]":
-        in_git = True
-
-if in_git and not inserted:
-    output.append(f"rev = {rev}")
-
-override_manifest.write_text("\n".join(output) + "\n")
-PY
-
-  printf '%s\n' "$override_manifest"
 }
 
 prepare_getdeps_boost_override() {
@@ -979,6 +937,7 @@ prepare_getdeps_runner_root() {
   local source_root="$GETDEPS_REAL_ROOT"
   local shadow_root="$GETDEPS_SHADOW_ROOT"
   local shadow_manifests="$GETDEPS_SHADOW_MANIFESTS_DIR"
+  local shadow_deps="$SCRATCH_DIR/deps"
   local entry base
 
   mkdir -p "$shadow_root"
@@ -1007,140 +966,12 @@ prepare_getdeps_runner_root() {
     cp "$entry" "$shadow_manifests/$base"
   done
 
+  # getdeps reads ShipIt revision files from ../deps/github_hashes relative to
+  # its fbcode_builder root, so expose HHVM's generated files beside the shadow.
+  rm -rf "$shadow_deps"
+  ln -s "$SRC_DIR/build/deps" "$shadow_deps"
+
   GETDEPS="$shadow_root/getdeps.py"
-}
-
-release_train_repo_for_dep() {
-  case "$1" in
-    folly) printf '%s\n' "facebook/folly" ;;
-    wangle) printf '%s\n' "facebook/wangle" ;;
-    fizz) printf '%s\n' "facebookincubator/fizz" ;;
-    mvfst) printf '%s\n' "facebook/mvfst" ;;
-    fbthrift) printf '%s\n' "facebook/fbthrift" ;;
-    proxygen) printf '%s\n' "facebook/proxygen" ;;
-    mcrouter) printf '%s\n' "facebook/mcrouter" ;;
-    *)
-      echo "ERROR: Unknown release train dependency: $1"
-      exit 1
-      ;;
-  esac
-}
-
-release_train_tag_for_dep() {
-  case "$1" in
-    folly) printf '%s\n' "$FOLLY_RELEASE_TAG" ;;
-    wangle) printf '%s\n' "$WANGLE_RELEASE_TAG" ;;
-    fizz) printf '%s\n' "$FIZZ_RELEASE_TAG" ;;
-    mvfst) printf '%s\n' "$MVFST_RELEASE_TAG" ;;
-    fbthrift) printf '%s\n' "$FBTHRIFT_RELEASE_TAG" ;;
-    proxygen) printf '%s\n' "$PROXYGEN_RELEASE_TAG" ;;
-    mcrouter) printf '%s\n' "$MCROUTER_RELEASE_TAG" ;;
-    *)
-      echo "ERROR: Unknown release train dependency: $1"
-      exit 1
-      ;;
-  esac
-}
-
-prepare_release_train_source() {
-  local dep="$1"
-  local repo tag src_dir cache_dir archive_name archive_url stamp_file
-
-  repo="$(release_train_repo_for_dep "$dep")"
-  tag="$(release_train_tag_for_dep "$dep")"
-  src_dir="$GETDEPS_RELEASE_TRAIN_SRC_DIR/$dep"
-  cache_dir="$DOWNLOAD_CACHE_DIR/release-train"
-  archive_name="${dep}-${tag}.tar.gz"
-  archive_url="https://github.com/${repo}/archive/refs/tags/${tag}.tar.gz"
-  stamp_file="$src_dir/.hhvm_release_train_tag"
-
-  if [ "$FORCE_REBUILD" = true ] || [ ! -f "$stamp_file" ] || \
-     [ "$(cat "$stamp_file" 2>/dev/null)" != "$tag" ]; then
-    echo "    $dep: preparing public release source ($tag)..." >&2
-    download_tarball "$dep-$tag" "$archive_url" "$cache_dir" "$archive_name" >&2
-    rm -rf "$src_dir"
-    mkdir -p "$src_dir"
-    tar --no-same-owner -xzf \
-      "$cache_dir/$archive_name" --strip-components=1 -C "$src_dir"
-    printf '%s\n' "$tag" > "$stamp_file"
-  else
-    echo "    $dep: cached public release source ($tag)" >&2
-  fi
-
-  printf '%s\n' "$src_dir"
-}
-
-replace_text_once() {
-  local path="$1" needle="$2" replacement="$3"
-
-  python3 - "$path" "$needle" "$replacement" <<'PY'
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-needle = sys.argv[2]
-replacement = sys.argv[3]
-text = path.read_text()
-
-if replacement in text:
-    print("noop")
-elif needle in text:
-    path.write_text(text.replace(needle, replacement, 1))
-    print("patched")
-else:
-    raise SystemExit(f"ERROR: {path} no longer has the expected source text")
-PY
-}
-
-patch_release_train_source() {
-  local dep="$1" src_dir="$2"
-  local patch_result
-
-  case "$dep" in
-    folly)
-      patch_result="$(replace_text_once \
-        "$src_dir/folly/net/NetOps.cpp" \
-        $'static_assert(folly::to_bool(::recvmmsg));\nstatic_assert(folly::to_bool(::sendmmsg));' \
-        $'static_assert(sizeof(&::recvmmsg) > 0);\nstatic_assert(sizeof(&::sendmmsg) > 0);')"
-      if [ "$patch_result" = "patched" ]; then
-        echo "    folly: patched GCC 14 socket declaration checks" >&2
-      fi
-      ;;
-    mcrouter)
-      local cmake_file="$src_dir/CMakeLists.txt"
-      local compression_header="$src_dir/mcrouter/lib/Compression.h"
-      if [ -f "$cmake_file" ]; then
-        patch_result="$(replace_text_once \
-          "$cmake_file" \
-          $'  mcrouter/StandaloneUtils.cpp\n' \
-          $'  mcrouter/StandaloneUtils.cpp\n  mcrouter/Server.cpp\n')"
-        if [ "$patch_result" = "patched" ]; then
-          echo "    mcrouter: patched public CMake source list for Server.cpp" >&2
-        fi
-      fi
-      if [ -f "$compression_header" ]; then
-        patch_result="$(replace_text_once \
-          "$compression_header" \
-          $'#include <sys/uio.h>\n#include <limits>' \
-          $'#include <sys/uio.h>\n#include <cstdint>\n#include <limits>')"
-        if [ "$patch_result" = "patched" ]; then
-          echo "    mcrouter: added the missing cstdint include" >&2
-        fi
-      fi
-      ;;
-  esac
-}
-
-prepare_release_train_sources() {
-  local dep src_dir
-
-  RELEASE_TRAIN_SRC_ARGS=()
-  mkdir -p "$GETDEPS_RELEASE_TRAIN_SRC_DIR"
-  for dep in folly fizz wangle mvfst fbthrift proxygen mcrouter; do
-    src_dir="$(prepare_release_train_source "$dep")"
-    patch_release_train_source "$dep" "$src_dir"
-    RELEASE_TRAIN_SRC_ARGS+=(--src-dir "$dep:$src_dir")
-  done
 }
 
 # --make: skip all setup, just run make
@@ -1232,32 +1063,6 @@ find_boost_install_prefix() {
 
   [ -n "$best_prefix" ] || return 1
   printf '%s\n' "$best_prefix"
-}
-
-find_public_fbcode_builder_cmake() {
-  local candidate repo
-
-  candidate="$GETDEPS_RELEASE_TRAIN_SRC_DIR/fbthrift/build/fbcode_builder/CMake"
-  if [ -f "$candidate/FBBuildOptions.cmake" ] && \
-     [ -f "$candidate/FBThriftCppLibrary.cmake" ]; then
-    printf '%s\n' "$candidate"
-    return 0
-  fi
-
-  for repo in \
-    github.com-facebookincubator-fizz.git \
-    github.com-facebook-wangle.git \
-    github.com-facebook-mvfst.git \
-    github.com-facebook-fbthrift.git; do
-    candidate="$SCRATCH_DIR/repos/$repo/build/fbcode_builder/CMake"
-    if [ -f "$candidate/FBBuildOptions.cmake" ] && \
-       [ -f "$candidate/FBThriftCppLibrary.cmake" ]; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
-  done
-
-  return 1
 }
 
 find_fatal_install_prefix() {
@@ -1451,28 +1256,22 @@ fi
 choose_cmake_compilers
 set_getdeps_source_mode
 ensure_public_getdeps_source_mode
-prepare_getdeps_manifest_override folly "$FOLLY_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override wangle "$WANGLE_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override fizz "$FIZZ_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override mvfst "$MVFST_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override fbthrift "$FBTHRIFT_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override proxygen "$PROXYGEN_RELEASE_REV" >/dev/null
-prepare_getdeps_manifest_override mcrouter "$MCROUTER_RELEASE_REV" >/dev/null
+rm -rf "$GETDEPS_MANIFEST_OVERRIDE_DIR"
 prepare_getdeps_boost_override >/dev/null
 prepare_getdeps_download_manifest_override magic_enum "$MAGIC_ENUM_DOWNLOAD_URL" "$MAGIC_ENUM_DOWNLOAD_SHA256" >/dev/null
 prepare_getdeps_gnu_mirror_overrides
 prepare_getdeps_runner_root
-prepare_release_train_sources
 MCROUTER_INSTALL="$(find_mcrouter_install_prefix || true)"
 BOOST_INSTALL="$(find_boost_install_prefix || true)"
 FATAL_INSTALL="$(find_fatal_install_prefix || true)"
 BLAKE3_INSTALL="$(find_getdeps_prefix blake3 || true)"
 GETDEPS_CMAKE_DEFINES="$(printf \
-  '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_TOOLCHAIN_FILE":"%s","CMAKE_PREFIX_PATH":"%s"}' \
+  '{"CMAKE_C_COMPILER":"%s","CMAKE_CXX_COMPILER":"%s","CMAKE_TOOLCHAIN_FILE":"%s","CMAKE_PREFIX_PATH":"%s","CMAKE_MODULE_PATH":"%s"}' \
   "$CMAKE_C_COMPILER_PATH" \
   "$CMAKE_CXX_COMPILER_PATH" \
   "$CMAKE_TOOLCHAIN_FILE_PATH" \
-  "$LIBURING_PREFIX")"
+  "$LIBURING_PREFIX" \
+  "$GETDEPS_REAL_ROOT/CMake")"
 if [ -d "$GETDEPS_DIR/fbthrift" ] && [ -d "$GETDEPS_DIR/folly" ] && [ -d "$GETDEPS_DIR/proxygen" ] && \
    [ -n "$MCROUTER_INSTALL" ] && [ -n "$BOOST_INSTALL" ] && [ -n "$FATAL_INSTALL" ] && [ -n "$BLAKE3_INSTALL" ] && \
    [ "$FORCE_REBUILD" = false ]; then
@@ -1481,7 +1280,8 @@ else
   echo ">>> Phase 3: Building Meta dependencies with getdeps..."
   echo "    Using $CMAKE_COMPILER_DESCRIPTION"
 
-  # Keep the main Meta C++ stack on one coherent public weekly release train.
+  # Use the ShipIt-synchronized sources bundled with HHVM. Dependencies which
+  # are external cells, such as mvfst, use the exported ShipIt revision files.
   for dep in boost blake3 fatal folly fizz wangle mvfst fbthrift proxygen ragel mcrouter; do
     target="$dep"
     label="$dep"
@@ -1489,32 +1289,15 @@ else
     dep_cmake_defines="$GETDEPS_CMAKE_DEFINES"
 
     case "$dep" in
-      folly)
-        label="$dep ($FOLLY_RELEASE_TAG)"
-        ;;
-      wangle)
-        label="$dep ($WANGLE_RELEASE_TAG)"
-        ;;
-      fizz)
-        label="$dep ($FIZZ_RELEASE_TAG)"
+      folly|fizz|wangle|fbthrift|proxygen|fatal)
+        label="$dep (ShipIt source)"
         ;;
       mvfst)
-        label="$dep ($MVFST_RELEASE_TAG)"
+        label="$dep (ShipIt revision)"
         extra_args+=(--no-deps)
         ;;
-      fbthrift)
-        label="$dep ($FBTHRIFT_RELEASE_TAG)"
-        ;;
-      proxygen)
-        label="$dep ($PROXYGEN_RELEASE_TAG)"
-        ;;
       mcrouter)
-        label="$dep ($MCROUTER_RELEASE_TAG)"
-        MCROUTER_FBCODE_BUILDER_CMAKE="$(find_public_fbcode_builder_cmake || true)"
-        if [ -z "$MCROUTER_FBCODE_BUILDER_CMAKE" ]; then
-          echo "ERROR: public fbcode_builder CMake modules were not found in the getdeps repo cache"
-          exit 1
-        fi
+        label="$dep (ShipIt source)"
         BOOST_INSTALL="${BOOST_INSTALL:-$(find_boost_install_prefix || true)}"
         if [ -z "$BOOST_INSTALL" ]; then
           echo "ERROR: boost install was not found before configuring mcrouter"
@@ -1527,17 +1310,15 @@ else
         fi
         dep_cmake_defines="$(python3 - \
           "$dep_cmake_defines" \
-          "$MCROUTER_FBCODE_BUILDER_CMAKE" \
           "$BOOST_INSTALL" \
           "$MCROUTER_BOOST_CMAKE_DIR" <<'PY'
 import json
 import sys
 
 defines = json.loads(sys.argv[1])
-defines["CMAKE_MODULE_PATH"] = sys.argv[2]
-defines["BOOST_ROOT"] = sys.argv[3]
-defines["Boost_ROOT"] = sys.argv[3]
-defines["Boost_DIR"] = sys.argv[4]
+defines["BOOST_ROOT"] = sys.argv[2]
+defines["Boost_ROOT"] = sys.argv[2]
+defines["Boost_DIR"] = sys.argv[3]
 defines["Boost_NO_SYSTEM_PATHS"] = "ON"
 print(json.dumps(defines, separators=(",", ":")))
 PY
@@ -1919,14 +1700,6 @@ PREFIX_PATH="$PREFIX_PATH;$IMAGEMAGICK6_PREFIX"
 
 mkdir -p "$BUILD_DIR"
 
-DEBUGOPT_FLAGS="-O2 -g"
-if [ "$HHVM_CMAKE_BUILD_TYPE" = "DebugOpt" ]; then
-  CMAKE_BUILD_TYPE_FLAGS=(
-    "-DCMAKE_C_FLAGS_DEBUGOPT=$DEBUGOPT_FLAGS"
-    "-DCMAKE_CXX_FLAGS_DEBUGOPT=$DEBUGOPT_FLAGS"
-  )
-fi
-
 RECONFIGURE_CMAKE="$FORCE_REBUILD"
 cmake_cache_matches() {
   local variable="$1" expected="$2" cache_type
@@ -1967,13 +1740,6 @@ fi
 if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
    ! cmake_cache_matches CMAKE_BUILD_TYPE "$HHVM_CMAKE_BUILD_TYPE"; then
   echo ">>> Phase 8: Existing cmake cache uses a different CMAKE_BUILD_TYPE. Reconfiguring."
-  RECONFIGURE_CMAKE=true
-fi
-if [ "$HHVM_CMAKE_BUILD_TYPE" = "DebugOpt" ] && \
-   [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
-   { ! cmake_cache_matches CMAKE_C_FLAGS_DEBUGOPT "$DEBUGOPT_FLAGS" ||
-     ! cmake_cache_matches CMAKE_CXX_FLAGS_DEBUGOPT "$DEBUGOPT_FLAGS"; }; then
-  echo ">>> Phase 8: Existing cmake cache lacks the DebugOpt optimization flags. Reconfiguring."
   RECONFIGURE_CMAKE=true
 fi
 if [ -f "$BUILD_DIR/CMakeCache.txt" ] && \
@@ -2061,7 +1827,6 @@ if [ ! -f "$BUILD_DIR/CMakeCache.txt" ] || [ "$RECONFIGURE_CMAKE" = true ]; then
     -D"$HHVM_CMAKE_ARCHITECTURE"=ON \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     "${CMAKE_COMPILER_FLAGS[@]}" \
-    "${CMAKE_BUILD_TYPE_FLAGS[@]}" \
     -DCMAKE_PREFIX_PATH="$PREFIX_PATH" \
     -DCMAKE_MODULE_PATH="$SRC_DIR/CMake;$GETDEPS_REAL_ROOT/CMake" \
     -DAWK_EXECUTABLE="$GAWK_EXECUTABLE" \

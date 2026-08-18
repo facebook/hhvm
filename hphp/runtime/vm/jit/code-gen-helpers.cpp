@@ -710,7 +710,7 @@ void emitIncStat(Vout& v, Stats::StatCounter stat) {
   auto datum = tls_datum(rds::local::detail::rl_hotSection.rdslocal_base);
   auto offset = Stats::rl_counters.getRawOffset() +
                 offsetof(Stats::StatCounters, counters) +
-                sizeof(decltype(stat))*stat;
+                sizeof(Stats::StatCounters::counters[0])*stat;
   v << load{emitTLSAddr(v, datum), rdslocalBase};
   v << incqm{rdslocalBase[offset], v.makeReg()};
 }

@@ -22,11 +22,8 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/perf-cputime-ns.h"
 #include "hphp/util/trace.h"
-
-#ifdef HHVM_FACEBOOK
-#include "common/time/ClockGettimeNS.h" // nolint
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,7 +161,6 @@ int gettime(clockid_t clock, timespec* ts) {
 
   constexpr uint64_t sec_to_ns = 1000000000;
 
-#ifdef HHVM_FACEBOOK
   uint64_t time;
   if (!fb_perf_get_thread_cputime_ns(&time)) {
     time += s_extra_request_nanoseconds;
@@ -172,7 +168,6 @@ int gettime(clockid_t clock, timespec* ts) {
     ts->tv_nsec = time % sec_to_ns;
     return 0;
   }
-#endif
 
   auto const ret = folly::chrono::clock_gettime(clock, ts);
   always_assert(ts->tv_nsec < sec_to_ns);
@@ -193,12 +188,10 @@ int64_t gettime_ns(clockid_t clock) {
     return folly::chrono::clock_gettime_ns(clock);
   }
 
-#ifdef HHVM_FACEBOOK
   uint64_t time;
   if (!fb_perf_get_thread_cputime_ns(&time)) {
     return time + s_extra_request_nanoseconds;
   }
-#endif
 
   return folly::chrono::clock_gettime_ns(clock) + s_extra_request_nanoseconds;
 }

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,8 @@ struct MockFieldInfo {
   std::string tableName;
   enum_field_types type = MYSQL_TYPE_STRING;
   uint64_t flags = 0;
+  // 63 is `binary`; `std::nullopt` mocks a protocol that carries no charset.
+  std::optional<unsigned int> charsetnr = 63;
 };
 
 /**
@@ -72,6 +75,13 @@ class MockInternalRowMetadata : public InternalRowMetadata {
       return 0;
     }
     return fields_[field].flags;
+  }
+
+  std::optional<unsigned int> getFieldCharsetnr(size_t field) const override {
+    if (field >= fields_.size()) {
+      return std::nullopt;
+    }
+    return fields_[field].charsetnr;
   }
 
  private:

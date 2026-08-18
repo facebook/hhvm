@@ -128,13 +128,15 @@ class RowFields {
       std::vector<std::string>&& field_names,
       std::vector<std::string>&& table_names,
       std::vector<uint64_t>&& mysql_field_flags,
-      std::vector<enum_field_types>&& mysql_field_types)
+      std::vector<enum_field_types>&& mysql_field_types,
+      std::vector<unsigned int>&& mysql_field_charsetnrs = {})
       : num_fields_(field_names.size()),
         field_name_map_(std::move(field_name_map)),
         field_names_(std::move(field_names)),
         table_names_(std::move(table_names)),
         mysql_field_flags_(std::move(mysql_field_flags)),
-        mysql_field_types_(std::move(mysql_field_types)) {}
+        mysql_field_types_(std::move(mysql_field_types)),
+        mysql_field_charsetnrs_(std::move(mysql_field_charsetnrs)) {}
   // Get the MySQL type of the field.
   enum_field_types getFieldType(size_t field_num) const {
     return mysql_field_types_[field_num];
@@ -153,6 +155,29 @@ class RowFields {
   // Ditto, but by name.
   uint64_t getFieldFlags(folly::StringPiece field_name) const {
     return mysql_field_flags_[fieldIndex(field_name)];
+  }
+
+  // Whether this result set carries `MYSQL_FIELD::charsetnr` per column. False
+  // on Thrift — see `ThriftRowMetadata::getFieldCharsetnr`.
+  bool hasFieldCharsetnrs() const noexcept {
+    return !mysql_field_charsetnrs_.empty();
+  }
+
+  // `MYSQL_FIELD::charsetnr`: the collation of the bytes this field's values
+  // arrive in. Throws when `hasFieldCharsetnrs()` is false — 63 (`binary`) is
+  // the only in-band fallback and a decoder cannot tell it from a real binary
+  // column, so it would hand back raw bytes for text and call it correct.
+  unsigned int getFieldCharsetnr(size_t field_num) const {
+    if (mysql_field_charsetnrs_.empty()) {
+      throw std::runtime_error(
+          "column charsets are unavailable on this connection's protocol");
+    }
+    return mysql_field_charsetnrs_[field_num];
+  }
+
+  // Ditto, but by name.
+  unsigned int getFieldCharsetnr(folly::StringPiece field_name) const {
+    return getFieldCharsetnr(fieldIndex(field_name));
   }
 
   // Check if the row contains the field name.
@@ -201,6 +226,7 @@ class RowFields {
   const std::vector<std::string> table_names_;
   const std::vector<uint64_t> mysql_field_flags_;
   const std::vector<enum_field_types> mysql_field_types_;
+  const std::vector<unsigned int> mysql_field_charsetnrs_;
 
   friend class RowBlock;
 };

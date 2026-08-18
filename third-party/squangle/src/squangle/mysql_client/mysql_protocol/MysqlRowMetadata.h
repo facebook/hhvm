@@ -43,6 +43,12 @@ class MysqlRowMetadata : public InternalRowMetadata {
     return fields_[index].flags;
   }
 
+  [[nodiscard]] std::optional<unsigned int> getFieldCharsetnr(
+      size_t index) const override {
+    DCHECK_LT(index, num_fields_);
+    return fields_[index].charsetnr;
+  }
+
  private:
   size_t num_fields_;
   const MYSQL_FIELD* fields_;

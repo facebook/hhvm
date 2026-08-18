@@ -24,11 +24,13 @@ std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   folly::F14NodeMap<std::string, int> field_name_map;
   std::vector<uint64_t> field_flags;
   std::vector<enum_field_types> field_types;
+  std::vector<unsigned int> field_charsetnrs;
 
   field_names.reserve(num_fields);
   table_names.reserve(num_fields);
   field_flags.reserve(num_fields);
   field_types.reserve(num_fields);
+  field_charsetnrs.reserve(num_fields);
   for (int i = 0; i < num_fields; ++i) {
     std::string field_name(metadata_->getFieldName(i));
     field_name_map[field_name] = i;
@@ -36,13 +38,21 @@ std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
     table_names.emplace_back(metadata_->getTableName(i));
     field_flags.push_back(metadata_->getFieldFlags(i));
     field_types.push_back(metadata_->getFieldType(i));
+    if (auto charsetnr = metadata_->getFieldCharsetnr(i)) {
+      field_charsetnrs.push_back(*charsetnr);
+    }
+  }
+  // All or none: a partial vector misaligns every column past the gap.
+  if (field_charsetnrs.size() != num_fields) {
+    field_charsetnrs.clear();
   }
   return std::make_shared<RowFields>(
       std::move(field_name_map),
       std::move(field_names),
       std::move(table_names),
       std::move(field_flags),
-      std::move(field_types));
+      std::move(field_types),
+      std::move(field_charsetnrs));
 }
 
 InternalRow::Type EphemeralRow::getType(size_t col) const {

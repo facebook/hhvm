@@ -75,14 +75,14 @@ def serialize(
 ) -> bytes: ...
 def deserialize_with_length(
     klass: typing.Type[sT],
-    buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
+    buf: typing.Union[bytes, bytearray, IOBuf, memoryview[int]],
     protocol: Protocol = Protocol.COMPACT,
     *,
     fully_populate_cache: bool = False,
 ) -> typing.Tuple[sT, int]: ...
 def deserialize(
     klass: typing.Type[sT],
-    buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
+    buf: typing.Union[bytes, bytearray, IOBuf, memoryview[int]],
     protocol: Protocol = Protocol.COMPACT,
     *,
     fully_populate_cache: bool = False,

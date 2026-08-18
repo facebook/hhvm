@@ -405,7 +405,7 @@ cdef int combinedHandler(
     reset_token = PyContextVar_Set(THRIFT_REQUEST_CONTEXT, RequestContext._fbthrift_create(ctx))
 
     try:
-        asyncio.get_event_loop().create_task(
+        asyncio.get_running_loop().create_task(
             serverCallback_coro(
                 call_func,
                 funcName.decode('UTF-8'),
@@ -566,7 +566,7 @@ cdef _schedule_termination(object handler, Promise_cFollyUnit promise):
     it isn't GC'd mid-flight. Must be called on the loop thread (GIL held)."""
     cdef object task
     try:
-        task = asyncio.get_event_loop().create_task(termination_coro(handler, promise))
+        task = asyncio.get_running_loop().create_task(termination_coro(handler, promise))
     except Exception:
         # Loop already gone (typically shutdown). Complete the promise (when
         # present) so an awaiting co_onTermination resumes; else drop best-effort.

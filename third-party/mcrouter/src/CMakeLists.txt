@@ -60,11 +60,12 @@ add_compile_options(
   -Wno-missing-field-initializers
   -Wno-deprecated-declarations
 )
-add_compile_definitions(
+set(MCROUTER_OSS_COMPILE_DEFINITIONS
   LIBMC_FBTRACE_DISABLE
   DISABLE_COMPRESSION
   MCROUTER_OSS_BUILD
 )
+add_compile_definitions(${MCROUTER_OSS_COMPILE_DEFINITIONS})
 
 # =============================================================================
 # Create header copies for OSS implementations
@@ -153,6 +154,9 @@ message(STATUS "Found Ragel: ${RAGEL_EXECUTABLE}")
 # Create mcrouter_deps INTERFACE library for dependencies
 # =============================================================================
 add_library(mcrouter_deps INTERFACE)
+target_compile_definitions(mcrouter_deps INTERFACE
+  ${MCROUTER_OSS_COMPILE_DEFINITIONS}
+)
 target_link_libraries(mcrouter_deps INTERFACE
   Folly::folly
   wangle::wangle

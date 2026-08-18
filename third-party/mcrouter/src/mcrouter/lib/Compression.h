@@ -8,6 +8,7 @@
 #pragma once
 
 #include <sys/uio.h>
+#include <cstdint>
 #include <limits>
 #include <memory>
 

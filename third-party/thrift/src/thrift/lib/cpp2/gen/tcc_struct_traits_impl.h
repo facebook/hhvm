@@ -18,6 +18,9 @@
 
 #include <type_traits>
 
+#include <folly/CppAttributes.h>
+#include <folly/Indestructible.h>
+
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 #include <thrift/lib/cpp2/gen/tcc_struct_traits.h>
 
@@ -35,12 +38,13 @@ void TccStructTraits<T>::translateFieldName(
       (data::fields_size <= 12),
       st::translate_field_name_table,
       st::translate_field_name_hash_table>;
-  static const auto& table = *new Table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name_or_id(_fname, fid, _ftype, table);
+  [[FOLLY_ATTR_CLANG_NO_DESTROY]] static const folly::Indestructible<Table>
+      table{Table{
+          data::fields_size,
+          data::fields_names.data(),
+          data::fields_ids.data(),
+          data::fields_types.data()}};
+  st::translate_field_name_or_id(_fname, fid, _ftype, *table);
 }
 
 } // namespace apache::thrift::detail

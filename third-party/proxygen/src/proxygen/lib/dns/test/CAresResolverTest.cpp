@@ -79,12 +79,14 @@ class MockQueryWithCob : public MockQuery {
 class MockResolutionCallback : public CAresResolver::ResolutionCallback {
  public:
   using CAresResolver::ResolutionCallback::ResolutionCallback;
-  void resolutionSuccess(
-      std::vector<DNSResolver::Answer> /*answers*/) noexcept override {
-  }
-  void resolutionError(
-      const folly::exception_wrapper& /*ew*/) noexcept override {
-  }
+  MOCK_METHOD(void,
+              resolutionSuccess,
+              (std::vector<DNSResolver::Answer>),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              resolutionError,
+              (const folly::exception_wrapper&),
+              (noexcept, override));
 };
 
 TEST_F(CAresResolverTest, ScheduleFallbackOnTimeout) {
@@ -99,12 +101,21 @@ TEST_F(CAresResolverTest, ScheduleFallbackOnTimeout) {
                                          nullptr,
                                          std::move(teContext),
                                          cb.get());
+
+  EXPECT_CALL(*resolver, queryFinished());
+  folly::exception_wrapper capturedError;
+  EXPECT_CALL(*cb, resolutionError(_)).WillOnce(SaveArg<0>(&capturedError));
+
   query->timeoutExpired();
+
+  ASSERT_TRUE(capturedError);
+  auto* dnsException = capturedError.get_exception<DNSResolver::Exception>();
+  ASSERT_NE(dnsException, nullptr);
+  EXPECT_EQ(dnsException->status(), DNSResolver::TIMEOUT);
 }
 
 TEST_F(CAresResolverTest, DontScheduleFallbackOnTimeoutNoCob) {
   TraceEvent te(TraceEventType::DnsResolution);
-  auto cb = std::make_unique<MockResolutionCallback>();
   auto query =
       std::make_unique<MockQueryWithCob>(resolver.get(),
                                          CAresResolver::RecordType::kTXT,
@@ -114,13 +125,18 @@ TEST_F(CAresResolverTest, DontScheduleFallbackOnTimeoutNoCob) {
                                          nullptr,
                                          std::move(teContext),
                                          nullptr);
+
+  // queryFinished() is invoked unconditionally by timeoutExpired() so the
+  // c-ares channel refcount stays balanced, even when no callback is attached.
+  EXPECT_CALL(*resolver, queryFinished());
+
   query->timeoutExpired();
 }
 
 TEST_F(CAresResolverTest, ScheduleFallbackOnFailureDnscr) {
   TraceEvent te(TraceEventType::DnsResolution);
   TimeUtil tu;
-  auto cb = std::make_unique<MockResolutionCallback>();
+  auto cb = std::make_unique<NiceMock<MockResolutionCallback>>();
   auto query = new MockQueryWithCob(resolver.get(),
                                     CAresResolver::RecordType::kTXT,
                                     name,
@@ -141,6 +157,12 @@ TEST_F(CAresResolverTest, ScheduleFallbackOnFailureDnscrNoCob) {
                                     std::move(te),
                                     nullptr,
                                     std::move(teContext));
+
+  // When no callback is attached, fail() must skip queryFinished() — the
+  // callback-guarded branch owns the resolver-side bookkeeping. The query
+  // still self-deletes; a leak would surface under ASAN.
+  EXPECT_CALL(*resolver, queryFinished()).Times(0);
+
   query->fail(static_cast<DNSResolver::ResolutionStatus>(1), "error");
 }
 
@@ -352,7 +374,7 @@ TEST_F(CAresResolverTest, CheckForCNameSynchronousCallbackNoUAF) {
 
   TraceEvent te(TraceEventType::DnsResolution);
   TimeUtil timeUtil;
-  auto cb = std::make_unique<MockResolutionCallback>();
+  auto cb = std::make_unique<NiceMock<MockResolutionCallback>>();
 
   // Create a Query for an A record lookup with the name that matches
   // the question in our crafted CNAME response.

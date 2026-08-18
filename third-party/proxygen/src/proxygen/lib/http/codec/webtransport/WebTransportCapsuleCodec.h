@@ -69,8 +69,11 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
       case folly::to_underlying(CapsuleType::WT_STREAMS_BLOCKED_UNI):
       case folly::to_underlying(CapsuleType::CLOSE_WEBTRANSPORT_SESSION):
       case folly::to_underlying(CapsuleType::DRAIN_WEBTRANSPORT_SESSION):
+      // RFC9297 defines the DATAGRAM capsule for any HTTP version; over http/3
+      // a datagram may arrive either as a quic datagram or as this capsule
+      case folly::to_underlying(CapsuleType::DATAGRAM):
         return true;
-      // H2 only capsule types
+      // H2 only capsule types -- over http/3 these are carried by quic streams
       case folly::to_underlying(CapsuleType::PADDING):
       case folly::to_underlying(CapsuleType::WT_RESET_STREAM):
       case folly::to_underlying(CapsuleType::WT_STOP_SENDING):
@@ -78,7 +81,6 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
       case folly::to_underlying(CapsuleType::WT_STREAM_WITH_FIN):
       case folly::to_underlying(CapsuleType::WT_MAX_STREAM_DATA):
       case folly::to_underlying(CapsuleType::WT_STREAM_DATA_BLOCKED):
-      case folly::to_underlying(CapsuleType::DATAGRAM):
         return version_ == CodecVersion::H2;
       default:
         return false;

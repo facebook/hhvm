@@ -472,7 +472,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStreamDataBlockedCapsuleError) {
                      CodecVersion::H2);
 }
 
-TEST_F(WebTransportCapsuleCodecTest, OnDatagramCapsule) {
+TEST_F(WebTransportCapsuleCodecTest, H2OnDatagramCapsule) {
   DatagramCapsule capsule{folly::IOBuf::copyBuffer("breakfast special")};
   writeDatagram(queue_, capsule);
 
@@ -484,6 +484,22 @@ TEST_F(WebTransportCapsuleCodecTest, OnDatagramCapsule) {
       }));
   EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
   h2_codec_->onIngress(std::move(buf), true);
+}
+
+// RFC9297 defines the DATAGRAM capsule for any HTTP version, so it must parse
+// over http/3 too rather than being skipped as an unknown capsule
+TEST_F(WebTransportCapsuleCodecTest, H3OnDatagramCapsule) {
+  DatagramCapsule capsule{folly::IOBuf::copyBuffer("breakfast special")};
+  writeDatagram(queue_, capsule);
+
+  auto buf = queue_.move();
+  EXPECT_CALL(callback_, onDatagram(_))
+      .WillOnce(Invoke([&](DatagramCapsule capsule) {
+        EXPECT_EQ(capsule.httpDatagramPayload->moveToFbString().toStdString(),
+                  "breakfast special");
+      }));
+  EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
+  h3_codec_->onIngress(std::move(buf), true);
 }
 
 TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsule) {

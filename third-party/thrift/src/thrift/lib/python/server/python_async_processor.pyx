@@ -422,8 +422,17 @@ cdef int combinedHandler(
 cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
     cdef object task
+    cdef object loop
     try:
-        task = asyncio.get_event_loop().create_task(
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop: a task scheduled here would never execute, so
+        # lifecycle_coro would never complete the promise and its destructor
+        # would raise BrokenPromise into the C++ collector.
+        __promise.complete(c_unit)
+        return
+    try:
+        task = loop.create_task(
             lifecycle_coro(func, funcName.decode('UTF-8'), __promise)
         )
     except Exception:

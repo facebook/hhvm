@@ -21,6 +21,7 @@
 
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/dynamic_types.h>
 #include <thrift/test/gen-cpp2/DynamicTestService.h>
@@ -126,6 +127,55 @@ TEST_P(RoundtripTestFixture, RoundtripDynamics) {
   Cpp2Ops<SerializableDynamic>::read(&protReader, &actual);
   EXPECT_EQ(expected, actual)
       << "Expected: " << toJson(*expected) << " Actual: " << toJson(*actual);
+}
+
+TEST(SerializableDynamicAdapterTest, SkipsMismatchedWireType) {
+  folly::IOBufQueue queue;
+  BinaryProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin("Dynamic");
+  writer.writeFieldBegin("boolean", protocol::T_I64, 1);
+  writer.writeI64(42);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  auto buf = queue.move();
+  auto size = buf->computeChainDataLength();
+  BinaryProtocolReader reader;
+  reader.setInput(buf.get());
+  SerializableDynamic value(dynamic(true));
+  Cpp2Ops<SerializableDynamic>::read(&reader, &value);
+  EXPECT_TRUE(value->isBool());
+  EXPECT_TRUE(value->asBool());
+  EXPECT_EQ(size, reader.getCursorPosition());
+}
+
+TEST(SerializableDynamicAdapterTest, SupportsShortUnionFieldNames) {
+  using Adapter = BasicSerializableDynamicAdapter<ShortDynamic>;
+  dynamic expectedValue = dynamic::object("bool", true)("integer", 42)(
+      "array", dynamic::array("value"));
+  const SerializableDynamic expected(std::move(expectedValue));
+  EXPECT_EQ(expected, Adapter::fromThrift(Adapter::toThrift(expected)));
+}
+
+TEST(SerializableDynamicAdapterTest, PreservesSimpleJsonEncoding) {
+  Container expected;
+  *expected.data() = "value";
+
+  auto serialized = SimpleJSONSerializer::serialize<std::string>(expected);
+  EXPECT_EQ("value", folly::parseJson(serialized)["data"]["str"]);
+
+  Container actual;
+  SimpleJSONSerializer::deserialize(serialized, actual);
+  EXPECT_EQ(expected, actual);
+
+  for (const auto& value : kDynamics) {
+    *expected.data() = value;
+    serialized = SimpleJSONSerializer::serialize<std::string>(expected);
+    SimpleJSONSerializer::deserialize(serialized, actual);
+    EXPECT_EQ(expected, actual);
+  }
 }
 
 TEST_P(RoundtripTestFixture, RoundtripContainer) {

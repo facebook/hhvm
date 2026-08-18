@@ -24,6 +24,15 @@ struct Container {
   1: dynamic.DynamicType data;
 }
 
+union ShortDynamic {
+  1: bool b;
+  2: i64 i;
+  3: double d;
+  4: string s;
+  5: list<ShortDynamic> l;
+  6: map<string, ShortDynamic> o;
+}
+
 service DynamicTestService {
   dynamic.DynamicType echo(1: dynamic.DynamicType input);
 }

@@ -12,7 +12,7 @@ path = "../../emit_unit.rs"
 
 [dependencies]
 ast_scope = { path = "../ast_scope" }
-bit-set = "0.9"
+bit-set = "0.10.0"
 bit-vec = "0.9"
 bitflags = { version = "2.13.1", features = ["serde", "std"], default-features = false }
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }

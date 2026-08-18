@@ -1243,6 +1243,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   When enabled, all Func and PreClass objects will be marked as persistent
   (AttrPersistent) during Unit construction from UnitEmitters.
 
+- bool Eval.TypeAliasPersistence = true, paulbiss
+
+  When ForceAllPersistent is enabled also mark type aliases as persistent.
+
 - uint32_t Eval.StaticContentsLogRate = 100, UNKNOWN
 
 - uint32_t Eval.LogUnitLoadRate = 0, UNKNOWN

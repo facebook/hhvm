@@ -897,7 +897,9 @@ void Unit::mergeImpl() {
       Stats::UnitMerge_mergeable_typealias,
       [&](const PreTypeAlias& typeAlias) {
         assertx(typeAlias.isPersistent() ==
-              (this->isSystemLib() || Cfg::Repo::Authoritative));
+              ((Cfg::Eval::ForceAllPersistent &&
+                Cfg::Eval::TypeAliasPersistence) ||
+               this->isSystemLib() || Cfg::Repo::Authoritative));
         return TypeAlias::def(&typeAlias, failIsFatal);
       });
 

@@ -56,8 +56,12 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
 }
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
+  auto attrs = Cfg::Eval::ForceAllPersistent && Cfg::Eval::TypeAliasPersistence
+    ? m_attrs | AttrPersistent
+    : m_attrs;
+
   return PreTypeAlias {
-    &unit, m_name, m_attrs, m_value, m_line0, m_line1,
+    &unit, m_name, attrs, m_value, m_line0, m_line1,
     m_kind, m_userAttributes,
     m_typeStructure, m_resolvedTypeStructure
   };

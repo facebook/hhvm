@@ -21,6 +21,10 @@ abstract final class ThriftFrameworkMetadataUtils {
   const string EXPERIMENT_IDS_IN_INCOMING_RESPONSE_HEADER_KEY =
     "experiment_ids_in_incoming_response";
 
+  // Must match ContextPropUtil::getOutgoingRequestExperimentIdsKey().
+  const string EXPERIMENT_IDS_IN_OUTGOING_REQUEST_KEY =
+    "experiment_ids_in_outgoing_request";
+
   public static function decodeAndJoinExperimentIds(
     KeyedContainer<string, ?string> $propagated_response_headers,
   ): ?string {

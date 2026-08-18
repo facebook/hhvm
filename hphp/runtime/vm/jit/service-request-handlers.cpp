@@ -38,6 +38,7 @@
 
 #include "hphp/util/data-block.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
@@ -107,6 +108,19 @@ RegionContext getContext(SrcKey sk, bool profiling) {
 }
 
 /*
+ * If Eval.AsyncJitWaitForTranslate is set, wait for the worker to produce the
+ * translation just enqueued for `sk' off the request thread and return it, so
+ * that it can be run as though async JITing were disabled. Returns nullptr if
+ * the option is off or the worker didn't publish a translation.
+ */
+TCA waitForAsyncTranslation(SrcKey sk) {
+  if (!Cfg::Eval::AsyncJitWaitForTranslate) return nullptr;
+  mcgen::waitForAsyncTranslationWorkerThreadsToEmpty();
+  auto const sr = tc::findSrcRec(sk);
+  return sr ? sr->getTopTranslation() : nullptr;
+}
+
+/*
  * Create a translation for the SrcKey specified in args.
  *
  * If a translation for this SrcKey already exists it will be returned. The kind
@@ -157,6 +171,10 @@ TranslationResult getTranslation(SrcKey sk) {
     mcgen::enqueueAsyncTranslateRequest(args.kind, args.sk, [&] {
       return getContext(args.sk, args.kind == TransKind::Profile);
     }, 0);
+    if (auto const tca = waitForAsyncTranslation(sk)) {
+      SKTRACE(2, sk, "getTranslation: found %p after async wait\n", tca);
+      return TranslationResult{tca};
+    }
     return TranslationResult::failTransiently();
   }
 
@@ -303,6 +321,9 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
     mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
       return getContext(sk, isProfile);
     }, currNumTrans);
+    if (auto const tca = waitForAsyncTranslation(sk)) {
+      return resume(sk, TranslationResult{tca});
+    }
     return resume(sk, TranslationResult::failTransiently());
   }
   auto const context = getContext(sk, isProfile);
@@ -341,6 +362,9 @@ TCA handleRetranslateAnyFuncEntry(uint32_t numArgs, bool optionalNamedParams) no
     mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
       return getContext(sk, isProfile);
     }, currNumTrans);
+    if (auto const tca = waitForAsyncTranslation(sk)) {
+      return resume(sk, TranslationResult{tca});
+    }
     return resume(sk, TranslationResult::failTransiently());
   }
   auto const context = getContext(sk, isProfile);

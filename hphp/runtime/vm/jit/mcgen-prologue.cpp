@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg)
@@ -174,6 +175,14 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing func {} for prologue generation\n", func->name());
     mcgen::enqueueAsyncPrologueRequest(kind, func, nPassed, pthread_self());
+    if (Cfg::Eval::AsyncJitWaitForTranslate) {
+      // Wait for the worker to produce the prologue off the request thread,
+      // then run it as though async JITing were disabled.
+      mcgen::waitForAsyncTranslationWorkerThreadsToEmpty();
+      if (auto const tcAddr = translator.getCached()) {
+        return *tcAddr;
+      }
+    }
     return TranslationResult::failTransiently();
   }
 

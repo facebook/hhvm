@@ -1,0 +1,3 @@
+# Marks this directory as the repo root so the native autoloader + facts are
+# enabled for the test, allowing the main file to resolve symbols defined in
+# sibling files without including them.

@@ -1,0 +1,8 @@
+sandbox_add resolved from: def_function.inc
+sandbox_add(0..199) = 19900
+SandboxWidget resolved from: def_class.inc
+SandboxWidget->label() = widget
+SANDBOX_GREETING resolved from: def_constant.inc
+SANDBOX_GREETING = hello-from-constant
+SandboxLimits resolved from: def_class_constant.inc
+SandboxLimits::MAX = 42

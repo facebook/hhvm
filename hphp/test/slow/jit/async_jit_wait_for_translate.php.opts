@@ -1,0 +1,3 @@
+-vEval.EnableAsyncJIT=true
+-vEval.AsyncJitWorkerThreads=1
+-vEval.AsyncJitWaitForTranslate=true

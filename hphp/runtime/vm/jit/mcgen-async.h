@@ -128,6 +128,14 @@ void enqueueAsyncTranslateOptRequest(const Func* func);
  */
 void joinAsyncTranslationWorkerThreads();
 
+/*
+ * Block until all currently-enqueued async JIT work has drained from the worker
+ * queue, without stopping the dispatcher. Used to implement
+ * Eval.AsyncJitWaitForTranslate: after a request thread enqueues a translation
+ * it can wait for the worker to finish producing it off the request thread,
+ * then run the result as though async JITing were disabled. This keeps tests
+ * deterministic while still exercising the off-thread translation path.
+ */
 void waitForAsyncTranslationWorkerThreadsToEmpty();
 
 }

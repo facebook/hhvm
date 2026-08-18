@@ -850,6 +850,14 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Defer computing the context for the translation in the async JIT until we're
   certain we will be enqueuing a translation request.
 
+- bool Eval.AsyncJitWaitForTranslate = false, paulbiss
+
+  Testing aid for the async JIT. When set, a request thread that enqueues work
+  on the async JIT will block until the enqueued translation has been produced
+  off the request thread, then run the resulting translation as though async
+  JITing were disabled. This exercises the off-request-thread translation code
+  paths while keeping request execution deterministic.
+
 - bool Eval.EnableSBProfSerialize = false, arnabde
 - bool Eval.EnableSBProfDeserialize = false, arnabde
 

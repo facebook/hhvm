@@ -1262,7 +1262,6 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
     a = arch(target)
 
     if a == "aarch64":
-        # pyre-fixme[7]: Expected `Dict[str, str]` but got `Dict[str, Union[str,
         #  str, str, List[str]]]`.
         return {
             "fp": "fp",
@@ -1291,7 +1290,6 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
             ],
         }
     else:
-        # pyre-fixme[7]: Expected `Dict[str, str]` but got `Dict[str, Union[str,
         #  str, str, List[str]]]`.
         return {
             "fp": "rbp",

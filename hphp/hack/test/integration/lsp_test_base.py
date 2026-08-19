@@ -92,7 +92,6 @@ class LspTestBase(TestCase[LspTestDriver]):
     def repo_file_uri(self, file: str) -> str:
         return urllib.parse.urljoin("file://", self.repo_file(file))
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def parse_test_data(self, file: str, variables: Mapping[str, str]) -> Json:
         text = self.read_repo_file(file)
         data: Json = json.loads(text)
@@ -116,7 +115,6 @@ class LspTestBase(TestCase[LspTestDriver]):
         with open(file, "w") as f:
             f.write(text)
 
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
     def order_response(self, response: JsonObject) -> str:
         if "id" in response:
             return str(response["id"])
@@ -196,7 +194,7 @@ class LspTestBase(TestCase[LspTestDriver]):
         # pyrefly: ignore [bad-argument-type]
         expected_items = self.prepare_responses(expected)
         observed_items = self.prepare_responses(
-            # pyrefly: ignore [bad-argument-type, no-matching-overload]
+            # pyrefly: ignore [bad-argument-type]
             list(self.get_important_received_items(observed_transcript))
         )
 

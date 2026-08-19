@@ -97,12 +97,9 @@ class DiffHandler:
 
         def unified_diff():
             return difflib.unified_diff(
-                # pyrefly: ignore [bad-argument-type]
                 exp_lines,
                 act_lines,
-                # pyrefly: ignore [bad-argument-type]
                 fromfile=exp_filename,
-                # pyrefly: ignore [bad-argument-type]
                 tofile=act_filename,
             )
 

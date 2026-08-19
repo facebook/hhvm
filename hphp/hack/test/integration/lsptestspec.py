@@ -47,7 +47,6 @@ _MessageSpec = Union[
 ]
 
 
-# pyre-fixme[5]: Global expression must be annotated.
 _LspIdMap = Mapping[_MessageSpec, Json]
 
 _Traceback = Sequence[inspect.FrameInfo]
@@ -96,7 +95,6 @@ class LspTestSpec:
         self.name = name
         self._messages: Sequence["_MessageSpec"] = []
         self._ignored_notification_methods: AbstractSet[str] = set()
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         self._ignored_requests: Sequence[Tuple[str, Optional[Json]]] = []
 
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
@@ -316,7 +314,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
     def _get_json_commands(
         self,
         variables: VariableMap,
-        # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
     ) -> Tuple[Sequence[Json], "_LspIdMap"]:
         """Transforms this test spec into something the LSP command processor
         can interpret."""
@@ -464,7 +461,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 )
                 entry = transcript[transcript_id]
                 error_description = self._render_telemetry_rage(
-                    # pyrefly: ignore [bad-index, unsupported-operation]
                     debug_request=message,
                     # pyrefly: ignore [bad-index, unsupported-operation]
                     result=entry.received["result"],
@@ -954,19 +950,12 @@ class _RequestSpec:
         powered_by: Optional[str],
         call_site_info: _CallSiteInfo,
     ) -> None:
-        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
-        # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
-        # pyre-fixme[4]: Attribute must be annotated.
         self.result = result
-        # pyre-fixme[4]: Attribute must be annotated.
         self.wait_id = wait_id
-        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
-        # pyre-fixme[4]: Attribute must be annotated.
         self.powered_by = powered_by
-        # pyre-fixme[4]: Attribute must be annotated.
         self.call_site_info = call_site_info
 
 
@@ -978,11 +967,8 @@ class _NotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
-        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
-        # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
-        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -997,13 +983,9 @@ class _WaitForRequestSpec:
         result: Union[Json, NoResponse],
         comment: Optional[str],
     ) -> None:
-        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
-        # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
-        # pyre-fixme[4]: Attribute must be annotated.
         self.result = result
-        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -1011,11 +993,8 @@ class _WaitForNotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
-        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
-        # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
-        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -1023,7 +1002,6 @@ class _WaitForResponseSpec:
     __slots__ = ["wait_id"]
 
     def __init__(self, *, wait_id: str) -> None:
-        # pyre-fixme[4]: Attribute must be annotated.
         self.wait_id = wait_id
 
 

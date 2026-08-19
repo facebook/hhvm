@@ -22,7 +22,6 @@ JsonObject = Mapping[str, ForwardRef("Json")]
 # pyre-fixme[16]: `Iterable` has no attribute `__getitem__`.
 JsonArray = Iterable[ForwardRef("Json")]
 JsonScalar = Union[str, int, float, bool, None]
-# pyre-fixme[5]: Global expression must be annotated.
 Json = Union[JsonObject, JsonArray, JsonScalar]
 
 VariableMap = Mapping[str, str]
@@ -52,7 +51,6 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
     """
     lines = []
 
-    # pyre-fixme[53]: Captured variable `lines` is not annotated.
     def handler(signo: int, frame: FrameType) -> None:
         raise AssertionError(
             "Failed to find %s in the following output: %s" % (s, "".join(lines))
@@ -71,8 +69,6 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
         signal.alarm(0)
 
 
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
 def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
     if isinstance(json, dict):
         return {
@@ -126,7 +122,7 @@ def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
     )
 
     for variable, value in variable_bindings:
-        # pyre-fixme[53]: Captured variable `value` is not annotated.
+
         def uninterpolate(json: JsonScalar) -> JsonScalar:
             if isinstance(json, str):
                 return json.replace(value, "${" + variable + "}")

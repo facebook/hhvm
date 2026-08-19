@@ -13,8 +13,6 @@ from hphp.hack.test.integration.utils import Json
 class JsonRpcStreamReader:
     def __init__(self, stream: BinaryIO) -> None:
         self.stream = stream
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         self.queue: Queue[Json] = Queue()
         # daemon ensures the reading thread will get cleaned up when
         # the main program exits.  no need to explicitly manage it.

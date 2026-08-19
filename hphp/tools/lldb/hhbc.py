@@ -183,7 +183,7 @@ def subop_to_name(
         "HPHP::SpecialClsRef": ("SpecialClsRef", "SelfCls"),
         "HPHP::ReadonlyOp": ("ReadonlyOp", "Any"),
     }
-    # pyrefly: ignore [bad-index, bad-typed-dict-key]
+    # pyrefly: ignore [bad-index]
     enum_name, member = subop_names_and_table_starting_indices[enum_type_name]
     ix = (
         subop.unsigned - utils.Enum("HPHP::" + enum_name, member, subop.target).unsigned
@@ -279,7 +279,6 @@ class HHBC:
         if small.unsigned & 0x80:  # i.e int8_t(*pc) < 0
             utils.debug_print("decode_iva(): large IVA immediate")
             large = pc.Cast(utils.Type("uint32_t", pc.target).GetPointerType()).deref
-            # pyrefly: ignore [no-matching-overload]
             info["value"] = large.CreateValueFromExpression(
                 "tmp",
                 # pyre-fixme[6]: LLDB auto-converts int expression to str
@@ -856,7 +855,6 @@ the previous call left off.
             self.bcoff = 0
             if argv[1].unsigned > 0xFFFFFFFF:
                 self.end = argv[1].Cast(utils.Type("void", target).GetPointerType())
-                # pyre-fixme[16]: `Optional` has no attribute `unsigned`.
                 self.count = self.end.unsigned - self.bcpos.unsigned
             else:
                 self.end = None
@@ -877,7 +875,6 @@ the previous call left off.
             f"Unable to cast bcpos: {self.bcpos.GetError()}"
         )
 
-        # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
         bcstart = utils.ptr_add(self.bcpos, -self.bcoff)
 
         for _i in range(0, self.count):
@@ -889,7 +886,6 @@ the previous call left off.
                 break
 
             try:
-                # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
                 instr = HHBC.instr_info(self.bcpos)
             except Exception as e:
                 if utils._Debug:
@@ -906,7 +902,6 @@ the previous call left off.
                 out += " " + imm_to_str(imm)
             result.write(out + "\n")
 
-            # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
             self.bcpos = utils.ptr_add(self.bcpos, instr.len)
             self.bcoff += instr.len
 

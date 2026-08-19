@@ -345,7 +345,6 @@ class CommonTestDriver(TestDriver):
         if retcode != 0:
             print("check returned non-zero code: " + str(retcode), file=sys.stderr)
         if expected_output is not None:
-            # pyre-fixme[8]: Attribute has type `int`; used as `None`.
             self.maxDiff = None
             expected_lines = [x.format(root=root) for x in expected_output]
             try:

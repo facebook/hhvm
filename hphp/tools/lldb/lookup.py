@@ -219,7 +219,6 @@ class LookupCommand(utils.Command):
         command_args = shlex.split(command)
         try:
             options = self.parser.parse_args(command_args, namespace=namespace)
-            # pyre-fixme[16]: func does exists
             options.func(options)
         except SystemExit:
             result.SetError("option parsing failed")

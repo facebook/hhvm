@@ -31,11 +31,7 @@ from hphp.hack.test.integration.jsonrpc_stream import (
 from hphp.hack.test.integration.utils import Json
 
 
-# pyre-fixme[4]: Attribute must be annotated.
 class TranscriptEntry(NamedTuple):
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     sent: Optional[Json]
     received: Optional[Json]
 
@@ -132,7 +128,6 @@ class LspCommandProcessor:
                 )
             elif command["method"] == "$test/waitForResponse":
                 transcript = self._wait_for_response(
-                    # pyrefly: ignore [bad-index, unsupported-operation]
                     transcript,
                     # pyrefly: ignore [bad-index, unsupported-operation]
                     command["params"]["id"],
@@ -313,7 +308,6 @@ Transcript of all the messages we saw:
                 "jsonrpc": 2.0,
                 # pyrefly: ignore [bad-index, unsupported-operation]
                 "id": message["id"],
-                # pyrefly: ignore [bad-index, unsupported-operation]
                 "result": command["params"]["result"],
             }
             self.writer.write(response)

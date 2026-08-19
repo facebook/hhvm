@@ -33,5 +33,4 @@ class AdapterTestStructToDict:
     # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
     def to_thrift(py_value):
-        # pyre-fixme[16]: Module `thrift.test.py` has no attribute `adapter_bar`.
         return Bar(**py_value)

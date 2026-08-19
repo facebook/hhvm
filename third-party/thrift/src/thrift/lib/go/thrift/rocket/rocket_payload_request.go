@@ -44,7 +44,7 @@ func EncodeRequestPayload(
 		SetOtherMetadata(maps.Clone(headers))
 
 	frameworkMetadata := getFrameworkMetadata(ctx)
-	if frameworkMetadata != nil {
+	if len(frameworkMetadata) > 0 {
 		metadata.SetFrameworkMetadata(frameworkMetadata)
 	}
 

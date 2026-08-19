@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"maps"
 	"math"
 	"net"
 	"runtime"
@@ -1089,11 +1090,26 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	}
 	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
 
-	reqHeaders := rocket.GetRequestRpcMetadataHeaders(metadata)
 	reqCtx := &RequestContext{
 		ServiceName: processor.FunctionServiceMap()[rpcFuncName],
 		MethodName:  rpcFuncName,
 		ConnInfo:    s.connInfo,
+	}
+
+	// Request headers extraction
+	reqHeaders := make(map[string]string)
+	maps.Copy(reqHeaders, metadata.GetOtherMetadata())
+	if metadata.IsSetClientId() {
+		reqHeaders["client_id"] = metadata.GetClientId()
+	}
+	if metadata.IsSetLoadMetric() {
+		reqHeaders["load"] = metadata.GetLoadMetric()
+	}
+	if metadata.IsSetClientTimeoutMs() {
+		reqHeaders["client_timeout"] = fmt.Sprintf("%d", metadata.GetClientTimeoutMs())
+	}
+	if metadata.IsSetServiceTraceMeta() {
+		reqHeaders["service_trace_meta"] = metadata.GetServiceTraceMeta()
 	}
 	reqCtx.SetReadHeaders(reqHeaders)
 

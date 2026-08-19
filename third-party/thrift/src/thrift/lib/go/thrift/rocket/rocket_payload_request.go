@@ -18,7 +18,6 @@ package rocket
 
 import (
 	"context"
-	"fmt"
 	"maps"
 	"math"
 
@@ -69,24 +68,6 @@ func EncodeRequestPayload(
 	}
 
 	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
-}
-
-func GetRequestRpcMetadataHeaders(metadata *rpcmetadata.RequestRpcMetadata) map[string]string {
-	headersMap := make(map[string]string)
-	maps.Copy(headersMap, metadata.GetOtherMetadata())
-	if metadata.IsSetClientId() {
-		headersMap["client_id"] = metadata.GetClientId()
-	}
-	if metadata.IsSetLoadMetric() {
-		headersMap["load"] = metadata.GetLoadMetric()
-	}
-	if metadata.IsSetClientTimeoutMs() {
-		headersMap["client_timeout"] = fmt.Sprintf("%d", metadata.GetClientTimeoutMs())
-	}
-	if metadata.IsSetServiceTraceMeta() {
-		headersMap["service_trace_meta"] = metadata.GetServiceTraceMeta()
-	}
-	return headersMap
 }
 
 func CompressionAlgorithmFromCompressionConfig(compressionConfig *rpcmetadata.CompressionConfig) rpcmetadata.CompressionAlgorithm {

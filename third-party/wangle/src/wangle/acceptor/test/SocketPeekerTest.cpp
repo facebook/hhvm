@@ -16,6 +16,8 @@
 
 #include <wangle/acceptor/SocketPeeker.h>
 
+#include <string>
+
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
@@ -150,6 +152,21 @@ TEST_F(SocketPeekerTest, TestNoPeekSuccess) {
   char buf = '\0';
   EXPECT_CALL(callback, peekSuccess_(BufMatches(&buf, 0)));
   peeker->start();
+}
+
+TEST_F(SocketPeekerTest, TestReadBufferAvailableOversized) {
+  constexpr size_t kPeekSize = 13;
+  const std::string data = std::string(kPeekSize, '\xAB') + "suffix";
+
+  EXPECT_CALL(*sock, setReadCB(_));
+  SocketPeeker::UniquePtr peeker(new SocketPeeker(*sock, &callback, kPeekSize));
+  peeker->start();
+
+  EXPECT_CALL(*sock, setReadCB(nullptr));
+  EXPECT_CALL(
+      *sock, _setPreReceivedData(IOBufMatches(data.data(), data.size())));
+  EXPECT_CALL(callback, peekSuccess_(BufMatches(data.data(), kPeekSize)));
+  peeker->readBufferAvailable(folly::IOBuf::copyBuffer(data));
 }
 
 TEST(TransportPeekerTest, TestReadBufferAvailableExactSize) {

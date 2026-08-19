@@ -165,7 +165,11 @@ class SocketPeeker : public TransportPeeker, private TransportPeeker::Callback {
 
  private:
   void peekSuccess(std::vector<uint8_t> data) noexcept override {
-    socket_.setPreReceivedData(folly::IOBuf::copyBuffer(data));
+    if (auto readData = moveReadData()) {
+      socket_.setPreReceivedData(std::move(readData));
+    } else {
+      socket_.setPreReceivedData(folly::IOBuf::copyBuffer(data));
+    }
     socketCallback_->peekSuccess(std::move(data));
   }
 

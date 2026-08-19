@@ -137,7 +137,6 @@ class McrouterTestCase(unittest.TestCase):
         start_time = time.time()
         interval = 0.5
         while retries > 0:
-            # pyrefly: ignore [missing-attribute]
             if self.mc.get(key) == expVal:
                 return True
             time.sleep(interval)

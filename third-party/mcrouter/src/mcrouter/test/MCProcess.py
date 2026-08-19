@@ -92,9 +92,7 @@ class ProcessBase:
             self.proc.send_signal(signal.SIGCONT)
 
     def is_alive(self):
-        # pyrefly: ignore [missing-attribute]
         self.proc.poll()
-        # pyrefly: ignore [missing-attribute]
         return self.proc.returncode is None
 
     def get_log(self):
@@ -115,7 +113,6 @@ class ProcessBase:
         default) so we can debug better."""
 
         try:
-            # pyrefly: ignore [missing-attribute]
             stdout, stderr = self.proc.communicate()
         except Exception:
             stdout, stderr = b"", b""
@@ -187,24 +184,20 @@ class MCProcess(ProcessBase):
                 addr="::1", port=thriftPort
             )
         else:
-            # pyrefly: ignore [bad-assignment]
             self.thrift_client = None
 
     def _sendall(self, s):
         if type(s) is not bytes:
             s = s.encode("utf8")
-        # pyrefly: ignore [missing-attribute]
         self.socket.sendall(s)
 
     def _fdread(self, n):
-        # pyrefly: ignore [missing-attribute]
         data = self.fd.read(n)
         if data is not None and type(data) is not str:
             data = data.decode("utf8", errors="backslashreplace")
         return data
 
     def _fdreadline(self):
-        # pyrefly: ignore [missing-attribute]
         data = self.fd.readline()
         if data is not None and type(data) is not str:
             data = data.decode("utf8")
@@ -250,7 +243,6 @@ class MCProcess(ProcessBase):
                 except Exception as e:
                     retry_count += 1
                     print(
-                        # pyrefly: ignore [missing-attribute]
                         f"Cannot connect (errno: {e.errno}). Retry {retry_count} of {self.max_retries}."
                     )
                     self.disconnect()
@@ -362,10 +354,8 @@ class MCProcess(ProcessBase):
                 payload = self._fdread(n)
                 self._fdread(2)
                 if return_all_info:
-                    # pyrefly: ignore [unsupported-operation]
                     res[k] = dict({"key": k, "flags": f, "size": n, "value": payload})
                     if expect_cas:
-                        # pyrefly: ignore [unsupported-operation]
                         res[k]["cas"] = int(parts[4])
                 else:
                     res[k] = payload
@@ -436,20 +426,16 @@ class MCProcess(ProcessBase):
             elif line.startswith("VALUE"):
                 v, k, f, n = line.split()
                 assert k in keys
-                # pyrefly: ignore [unsupported-operation]
                 res[k] = {"value": self._fdread(int(n)), "token": None}
                 self._fdread(2)
             elif line.startswith("LVALUE"):
                 v, k, t, f, n = line.split()
                 assert k in keys
-                # pyrefly: ignore [unsupported-operation]
                 res[k] = {"value": self._fdread(int(n)), "token": int(t)}
 
     def expectNoReply(self):
-        # pyrefly: ignore [missing-attribute]
         self.socket.settimeout(0.5)
         try:
-            # pyrefly: ignore [missing-attribute]
             self.socket.recv(1)
             return False
         except TimeoutError:
@@ -965,9 +951,7 @@ class Mcrouter(McrouterBase):
                     return os.path.exists(f"/proc/{pid}")
                 return False
 
-            # pyrefly: ignore [bad-assignment, bad-override]
             self.terminate = terminate
-            # pyrefly: ignore [bad-assignment, bad-override]
             self.is_alive = is_alive
 
         if substitute_config_smc_ports and sr_mock_smc_config:
@@ -1075,10 +1059,8 @@ class MockMemcachedDual(MCProcess):
 
         MCProcess.__init__(self, args, asyncPort, pass_fds=pass_fds)
 
-        # pyrefly: ignore [unbound-name]
         if listenSocketThrift is not None:
             listenSocketThrift.close()
-        # pyrefly: ignore [unbound-name]
         if listenSocketAsyncMc is not None:
             listenSocketAsyncMc.close()
 
@@ -1100,9 +1082,7 @@ class Mcpiper(ProcessBase):
 
     def output(self):
         if not hasattr(self, "stdout"):
-            # pyrefly: ignore [missing-attribute]
             self.proc.terminate()
-            # pyrefly: ignore [missing-attribute]
             self.stdout = self.proc.stdout.read().decode("ascii", errors="ignore")
         return self.stdout
 

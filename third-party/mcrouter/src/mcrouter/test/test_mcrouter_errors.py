@@ -354,7 +354,6 @@ class TestMcrouterParseError(McrouterTestCase):
                 sock.connect(addr)
                 return sock
             except Exception as e:
-                # pyrefly: ignore [missing-attribute]
                 if e.errno == errno.ECONNREFUSED:
                     pass
                 else:

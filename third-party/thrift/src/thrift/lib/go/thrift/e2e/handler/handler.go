@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	"thrift/lib/go/thrift/e2e/service"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/e2e/service"
 )
 
 type E2EHandler struct{}

@@ -25,8 +25,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	"thrift/lib/go/thrift/e2e/service"
-
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/e2e/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

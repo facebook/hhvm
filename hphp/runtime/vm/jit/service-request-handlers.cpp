@@ -183,6 +183,9 @@ TranslationResult getTranslation(SrcKey sk) {
 
   if (auto const s = tc::shouldTranslate(args.sk, args.kind);
       s != TranslationResult::Scope::Success) {
+    if (s == TranslationResult::Scope::Request) {
+      writer.setDropHint(std::chrono::milliseconds{0});
+    }
     return TranslationResult{s};
   }
 
@@ -199,7 +202,11 @@ TranslationResult getTranslation(SrcKey sk) {
   }
 
   auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
-  return mcgen::retranslate(args, ctx);
+  auto const result = mcgen::retranslate(args, ctx);
+  if (result.scope() == TranslationResult::Scope::Request) {
+    writer.setDropHint(std::chrono::milliseconds{0});
+  }
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

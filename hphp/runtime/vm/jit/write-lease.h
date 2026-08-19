@@ -74,6 +74,10 @@ struct LeaseHolder {
    */
   bool checkKind(TransKind kind);
 
+  void setDropHint(std::chrono::milliseconds dropHint) {
+    if (m_viewer) m_viewer->setDropHint(dropHint);
+  }
+
  private:
   bool acquireKind(TransKind kind);
   void dropLocks();

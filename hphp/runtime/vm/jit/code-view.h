@@ -69,6 +69,7 @@ private:
   std::atomic<std::chrono::steady_clock::time_point> m_lastStealTime{};
   std::atomic<int> m_numSlots{0};
   std::atomic<int> m_maxViews;
+  std::atomic_flag m_stealInProgress = ATOMIC_FLAG_INIT;
   std::mutex m_cvMutex;
   std::condition_variable m_cv;
 };

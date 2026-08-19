@@ -597,6 +597,9 @@ Translator::acquireLeaseAndRequisitePaperwork() {
                                      false /*noSizeLimit*/);
       s != TranslationResult::Scope::Success) {
     if (s == TranslationResult::Scope::Process) setCachedForProcessFail();
+    if (s == TranslationResult::Scope::Request) {
+      m_lease->setDropHint(std::chrono::milliseconds{0});
+    }
     return TranslationResult{s};
   }
 

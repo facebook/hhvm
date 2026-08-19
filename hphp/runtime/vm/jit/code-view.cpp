@@ -21,6 +21,8 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/service-data.h"
 
+#include <folly/ScopeGuard.h>
+
 namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg)
@@ -73,6 +75,11 @@ bool CodeCacheViews::doTryAcquire(pthread_t tid) {
   }
 
   // At capacity. Try to steal a slot.
+  if (m_stealInProgress.test_and_set(std::memory_order_acquire)) return false;
+  SCOPE_EXIT {
+    m_stealInProgress.clear(std::memory_order_release);
+  };
+
   auto last = m_lastStealTime.load(std::memory_order_relaxed);
   if (now < last + std::chrono::milliseconds(Cfg::CodeCache::StealIntervalMs) ||
       !m_lastStealTime.compare_exchange_strong(
@@ -201,9 +208,15 @@ void CodeCacheViews::release(pthread_t tid, std::chrono::milliseconds dropHint) 
     assertx(it != m_slots.end() && it->second.activeCount > 0);
     auto state = it->second;
     if (state.activeCount == 1) {
-      auto deadlineMs = SlotState::toMs(std::chrono::steady_clock::now() + dropHint);
+      auto const dropImmediately = dropHint == std::chrono::milliseconds::zero();
+      auto const deadlineMs = dropImmediately
+        ? 0
+        : SlotState::toMs(std::chrono::steady_clock::now() + dropHint);
       SlotState next{0, deadlineMs};
       if (m_slots.assign_if_equal(tid, state, next)) {
+        if (dropImmediately) {
+          m_lastStealTime.store({}, std::memory_order_relaxed);
+        }
         m_cv.notify_one();
         return;
       }

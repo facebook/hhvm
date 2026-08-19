@@ -7,6 +7,7 @@ modernize-use-override,
 modernize-use-using,
 modernize-raw-string-literal,
 readability-identifier-naming,
+-facebook-hte-CArray,
 '
 CheckOptions:
   - key: readability-identifier-naming.NamespaceCase

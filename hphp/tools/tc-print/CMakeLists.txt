@@ -39,14 +39,7 @@ if (NOT WINDOWS)
     tc-print ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES} ${ZLIB_LIBRARIES}
   )
 endif()
-if (ENABLE_LD_GOLD)
-  find_package(Gold)
-  if (GOLD_FOUND)
-    target_link_options(
-      tc-print PRIVATE -fuse-ld=gold -Wl,--icf=all,--gc-sections
-    )
-  endif()
-endif()
+
 embed_all_systemlibs(tc-print "${CMAKE_CURRENT_BINARY_DIR}/../.."
                               "${CMAKE_CURRENT_BINARY_DIR}/tc-print")
 

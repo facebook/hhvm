@@ -37,6 +37,7 @@ pub enum ExampleUnion {
     UnknownField(::std::primitive::i32),
 }
 
+#[allow(deprecated)]
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::User {
     fn default() -> Self {
@@ -51,6 +52,7 @@ impl ::std::default::Default for self::User {
     }
 }
 
+#[allow(deprecated)]
 impl ::std::fmt::Debug for self::User {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
@@ -99,6 +101,7 @@ impl ::fbthrift::ThriftStruct for self::User {
     }
 }
 
+#[allow(deprecated)]
 impl<P> ::fbthrift::Serialize<P> for self::User
 where
     P: ::fbthrift::ProtocolWriter,
@@ -130,6 +133,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P> ::fbthrift::Deserialize<P> for self::User
 where
     P: ::fbthrift::ProtocolReader,
@@ -282,6 +286,7 @@ impl ::fbthrift::GetTypeNameType for self::ExampleUnion {
     }
 }
 
+#[allow(deprecated)]
 impl<P> ::fbthrift::Serialize<P> for ExampleUnion
 where
     P: ::fbthrift::ProtocolWriter,
@@ -312,6 +317,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P> ::fbthrift::Deserialize<P> for ExampleUnion
 where
     P: ::fbthrift::ProtocolReader,
@@ -356,6 +362,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl ExampleUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
     pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {

@@ -67,6 +67,9 @@ _dot_dot_Default_default: {{#if structured.has_adapter?}}super{{#else}}self{{/if
 {{/let partial}}
 
 {{#if (not structured.union?)}}
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this struct's own deprecated fields are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::{{structured.rust_name}} {
     fn default() -> Self {
@@ -81,6 +84,9 @@ impl ::std::default::Default for self::{{structured.rust_name}} {
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this struct's own deprecated fields are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl ::std::fmt::Debug for self::{{structured.rust_name}} {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
@@ -131,6 +137,9 @@ impl ::fbthrift::ThriftStruct for self::{{structured.rust_name}} {
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this struct's own deprecated fields are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl<P> ::fbthrift::Serialize<P> for self::{{structured.rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,
@@ -160,6 +169,9 @@ where
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this struct's own deprecated fields are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl<P> ::fbthrift::Deserialize<P> for self::{{structured.rust_name}}
 where
     P: ::fbthrift::ProtocolReader,

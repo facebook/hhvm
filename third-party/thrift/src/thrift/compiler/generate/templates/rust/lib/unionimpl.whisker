@@ -41,6 +41,9 @@ impl ::fbthrift::GetTypeNameType for self::{{structured.rust_name}} {
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this union's own deprecated variants are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl<P> ::fbthrift::Serialize<P> for {{structured.rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,
@@ -67,6 +70,9 @@ where
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this union's own deprecated variants are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl<P> ::fbthrift::Deserialize<P> for {{structured.rust_name}}
 where
     P: ::fbthrift::ProtocolReader,
@@ -109,6 +115,9 @@ where
     }
 }
 
+{{#if structured.has_deprecated_fields?}}
+#[allow(deprecated)]{{! this union's own deprecated variants are unavoidable here }}
+{{/if structured.has_deprecated_fields?}}
 impl {{structured.rust_name}} {
     /// Return current union variant name as a tuple of (Rust name, original name).
     pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {

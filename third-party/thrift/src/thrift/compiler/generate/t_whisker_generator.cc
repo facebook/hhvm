@@ -26,6 +26,7 @@
 #include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/standard_library.h>
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 
@@ -238,6 +239,12 @@ prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
       [](const t_structured& self) {
         return self.has_structured_annotation(kSerializeInFieldIdOrderUri);
       });
+  def.property("has_deprecated_fields?", [](const t_structured& self) {
+    return std::any_of(
+        self.fields().begin(), self.fields().end(), [](const t_field& field) {
+          return field.has_structured_annotation(kDeprecatedUri);
+        });
+  });
   return std::move(def).make();
 }
 

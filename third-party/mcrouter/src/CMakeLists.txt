@@ -488,7 +488,7 @@ set(MCPIPER_SOURCES
 )
 
 add_executable(mcpiper ${MCPIPER_SOURCES})
-target_link_libraries(mcpiper PRIVATE mcrouter_lib)
+target_link_libraries(mcpiper PRIVATE mcroutercore)
 set_target_properties(mcpiper PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
 )

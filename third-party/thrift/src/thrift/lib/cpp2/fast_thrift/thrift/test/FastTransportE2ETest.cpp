@@ -397,6 +397,8 @@ class FastTransportE2ETest : public ::testing::Test {
               .setHead(connection->transportHandler.get())
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
+              .addState<apache::thrift::fast_thrift::rocket::client::
+                            RocketClientStreamContexts>()
               .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                   handler::FrameLengthParserHandler>(
                   client_frame_length_parser_handler_tag)

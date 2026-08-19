@@ -203,6 +203,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .setHead(transportHandler_.get())
                     .setTail(appAdapter_.get())
                     .setAllocator(&allocator_)
+                    .addState<apache::thrift::fast_thrift::rocket::client::
+                                  RocketClientStreamContexts>()
                     .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                         handler::FrameLengthParserHandler>(
                         frame_length_parser_handler_tag)
@@ -272,6 +274,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .setHead(transportHandler_.get())
                     .setTail(appAdapter_.get())
                     .setAllocator(&allocator_)
+                    .addState<apache::thrift::fast_thrift::rocket::client::
+                                  RocketClientStreamContexts>()
                     .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                         handler::FrameLengthParserHandler>(
                         frame_length_parser_handler_tag)
@@ -342,6 +346,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .setHead(transportHandler_.get())
                     .setTail(appAdapter_.get())
                     .setAllocator(&allocator_)
+                    .addState<apache::thrift::fast_thrift::rocket::client::
+                                  RocketClientStreamContexts>()
                     .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                         handler::FrameLengthParserHandler>(
                         frame_length_parser_handler_tag)

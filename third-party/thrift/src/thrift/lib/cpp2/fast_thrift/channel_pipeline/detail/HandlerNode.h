@@ -178,9 +178,11 @@ struct HandlerNode {
 /**
  * Typed dispatch thunk for one subscription: casts the global event id back to
  * the subscriber's layer enum E and invokes onEvent. Internal handlers receive
- * the context; endpoints (Endpoint == true) do not.
+ * the same ContextFor<StateTuple> every other callback hands them, so state is
+ * reachable from onEvent too; endpoints (Endpoint == true) receive no context
+ * and ignore StateTuple.
  */
-template <typename H, typename E, bool Endpoint>
+template <typename H, typename E, bool Endpoint, typename StateTuple>
 inline constexpr EventHook::DispatchFn kSubThunk =
     +[](void* h,
         ContextImpl* ctx,
@@ -189,7 +191,8 @@ inline constexpr EventHook::DispatchFn kSubThunk =
       if constexpr (Endpoint) {
         static_cast<H*>(h)->onEvent(static_cast<E>(id), evt);
       } else {
-        static_cast<H*>(h)->onEvent(*ctx, static_cast<E>(id), evt);
+        decltype(auto) c = contextFor<StateTuple>(*ctx);
+        static_cast<H*>(h)->onEvent(c, static_cast<E>(id), evt);
       }
     };
 
@@ -201,17 +204,17 @@ inline constexpr EventHook::DispatchFn kSubThunk =
  * Endpoints pass Endpoint == true (no context). Layer enums share one anchored
  * id space, so each value is already its global id.
  */
-template <typename H, bool Endpoint, auto... Evs>
+template <typename H, bool Endpoint, typename StateTuple, auto... Evs>
 constexpr std::array<EventSubscription, sizeof...(Evs)> makeSubscriptions(
     Subscriptions<Evs...>) {
   return {EventSubscription{
       static_cast<std::uint32_t>(Evs),
-      kSubThunk<H, decltype(Evs), Endpoint>}...};
+      kSubThunk<H, decltype(Evs), Endpoint, StateTuple>}...};
 }
 
-template <typename H, bool Endpoint>
+template <typename H, bool Endpoint, typename StateTuple = std::tuple<>>
 inline constexpr auto kHandlerSubscriptions =
-    makeSubscriptions<H, Endpoint>(H::kSubscribedEvents);
+    makeSubscriptions<H, Endpoint, StateTuple>(H::kSubscribedEvents);
 
 /**
  * Creates a HandlerNode from a concrete handler type.
@@ -351,10 +354,11 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
   // and implements onEvent(ctx, E, box); the framework records the dispatch
   // thunk and subscription ids so PipelineImpl can link one hook per event.
   // Non-subscribers leave the fields null and are never iterated.
-  if constexpr (kEventsEnabled<E> && EventSubscriber<H, ContextImpl>) {
-    node.subscriptions = kHandlerSubscriptions<H, /*Endpoint=*/false>.data();
+  if constexpr (kEventsEnabled<E> && EventSubscriber<H, Ctx>) {
+    node.subscriptions =
+        kHandlerSubscriptions<H, /*Endpoint=*/false, StateTuple>.data();
     node.subscriptionCount =
-        kHandlerSubscriptions<H, /*Endpoint=*/false>.size();
+        kHandlerSubscriptions<H, /*Endpoint=*/false, StateTuple>.size();
   }
 
   return node;

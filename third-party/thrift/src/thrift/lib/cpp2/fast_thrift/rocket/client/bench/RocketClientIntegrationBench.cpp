@@ -192,6 +192,8 @@ struct BenchmarkFixture {
                    .setHead(transportHandler.get())
                    .setTail(appAdapter.get())
                    .setAllocator(&allocator)
+                   .addState<apache::thrift::fast_thrift::rocket::client::
+                                 RocketClientStreamContexts>()
                    .addNextInbound<FrameLengthParserHandler>(
                        frame_length_parser_handler_tag)
                    .addNextOutbound<FrameLengthEncoderHandler>(
@@ -360,6 +362,8 @@ BENCHMARK(Rocket_SetupFrame, iters) {
             .setHead(fixture.transportHandler.get())
             .setTail(fixture.appAdapter.get())
             .setAllocator(&fixture.allocator)
+            .addState<apache::thrift::fast_thrift::rocket::client::
+                          RocketClientStreamContexts>()
             .addNextInbound<FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
             .addNextOutbound<FrameLengthEncoderHandler>(

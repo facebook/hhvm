@@ -186,6 +186,8 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .setHead(connection->transportHandler.get())
             .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
+            .addState<apache::thrift::fast_thrift::rocket::client::
+                          RocketClientStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -1259,10 +1261,10 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
     // Save raw pointer for onConnect() (called after ownership transfer)
     auto* transportHandlerPtr = connection->transportHandler.get();
 
-    auto statsHandler =
+    auto streamStateHandler =
         std::make_unique<apache::thrift::fast_thrift::rocket::client::handler::
-                             RocketClientStatsHandler>();
-    statsHandler_ = statsHandler.get();
+                             RocketClientStreamStateHandler>();
+    streamStateHandler_ = streamStateHandler.get();
 
     connection->pipeline =
         PipelineBuilder<
@@ -1275,6 +1277,8 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .setHead(connection->transportHandler.get())
             .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
+            .addState<apache::thrift::fast_thrift::rocket::client::
+                          RocketClientStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -1297,10 +1301,11 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
                 rocket_client_connection_error_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStatsHandler>(
-                rocket_client_stats_handler_tag, std::move(statsHandler))
+                rocket_client_stats_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
-                rocket_client_stream_state_handler_tag)
+                rocket_client_stream_state_handler_tag,
+                std::move(streamStateHandler))
             .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                 handler::RocketClientRequestResponseHandler>(
                 rocket_client_request_response_handler_tag)
@@ -1392,10 +1397,10 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
   IntegrationTestClient client_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;
-  // Borrowed; the pipeline owns it. Lets a test see the handler's per-stream
+  // Borrowed; the pipeline owns it. Lets a test see the shared per-stream
   // map, which is otherwise invisible from outside the pipeline.
   apache::thrift::fast_thrift::rocket::client::handler::
-      RocketClientStatsHandler* statsHandler_{nullptr};
+      RocketClientStreamStateHandler* streamStateHandler_{nullptr};
 };
 
 // =============================================================================
@@ -1521,9 +1526,9 @@ TEST_F(
   EXPECT_EQ(capturedStats.responseWireSizeBytes, dataLen);
   EXPECT_EQ(
       capturedStats.responseMetadataAndPayloadSizeBytes, metadataLen + dataLen);
-  // The request sizes come from the stream-state handler's per-stream slot.
-  // Compared against the frame that actually went out rather than a literal,
-  // so the expectation cannot drift with the metadata encoding.
+  // The request sizes are parked on the stream's entry in the shared context
+  // map. Compared against the frame that actually went out rather than a
+  // literal, so the expectation cannot drift with the metadata encoding.
   EXPECT_EQ(capturedStats.requestWireSizeBytes, parsedRequest.dataSize());
   EXPECT_EQ(
       capturedStats.requestMetadataAndPayloadSizeBytes,
@@ -1534,14 +1539,14 @@ TEST_F(
   // an interval starting at the clock's epoch.
   EXPECT_EQ(capturedStats.requestWriteLatency.count(), 0);
   EXPECT_EQ(capturedStats.responseRoundTripLatency.count(), 0);
-  // The slot the request opened has to close again. This map is per
-  // connection and unbounded, so a missed release on any completion path is a
+  // The entry the request opened has to close again. This map is per
+  // connection and unbounded, so a missed erase on any completion path is a
   // leak that lasts as long as the connection does.
-  if (statsHandler_ == nullptr) {
-    ADD_FAILURE() << "stats handler was not wired into the pipeline";
+  if (streamStateHandler_ == nullptr) {
+    ADD_FAILURE() << "stream state handler was not wired into the pipeline";
     return;
   }
-  EXPECT_EQ(statsHandler_->pendingCount(), 0);
+  EXPECT_EQ(streamStateHandler_->activeStreamCount(), 0);
 }
 
 // =============================================================================

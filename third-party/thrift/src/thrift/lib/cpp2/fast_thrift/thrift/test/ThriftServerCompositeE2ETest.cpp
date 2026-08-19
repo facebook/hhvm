@@ -556,6 +556,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
               .setHead(connection->transportHandler.get())
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
+              .addState<rocket::client::RocketClientStreamContexts>()
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   client_frame_length_parser_handler_tag)
               .addNextOutbound<

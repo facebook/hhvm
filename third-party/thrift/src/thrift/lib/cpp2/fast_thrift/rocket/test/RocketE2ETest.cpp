@@ -217,6 +217,8 @@ class RocketE2ETest : public ::testing::Test {
               .setHead(clientTransport_.get())
               .setTail(clientAppAdapter_.get())
               .setAllocator(&clientAllocator_)
+              .addState<apache::thrift::fast_thrift::rocket::client::
+                            RocketClientStreamContexts>()
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   c_frame_length_parser_tag)
               .addNextOutbound<

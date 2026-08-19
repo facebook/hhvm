@@ -82,6 +82,7 @@ class ThriftClientChannelTest : public ::testing::Test {
             .setHead(connection->transportHandler.get())
             .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
+            .addState<rocket::client::RocketClientStreamContexts>()
             .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
             .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(

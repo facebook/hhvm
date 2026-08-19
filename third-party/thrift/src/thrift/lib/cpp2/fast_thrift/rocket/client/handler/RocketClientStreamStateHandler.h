@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientStreamContext.h>
 
 #include <cstdint>
 #include <vector>
@@ -43,6 +44,15 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
  *
  * This handler sits between the application layer and the FrameHandler,
  * managing stream IDs, storing request callbacks, and correlating responses.
+ *
+ * Per-stream state lives in the pipeline-level `RocketClientStreamContexts`
+ * state, registered once per connection via
+ * `PipelineBuilder::addState<RocketClientStreamContexts>()` and reached here
+ * through `ctx.state<RocketClientStreamContexts>()`. This handler owns the
+ * entry lifecycle (insert on stream-open, erase on terminal) so the other
+ * client rocket handlers can share the same map without their own
+ * bookkeeping. The pipeline owns the map's lifetime; this handler does not
+ * clear it on removal.
  *
  * Pipeline position:
  *   App <-> StreamHandler <-> FrameHandler <-> Transport
@@ -77,19 +87,20 @@ class RocketClientStreamStateHandler {
 
   // === HandlerLifecycle ===
 
+  // The state pointer is cached rather than re-derived per callback so the
+  // stream-id generator and the test accessors, which take no context, can
+  // still reach the map. build() propagates pipeline state before it calls
+  // handlerAdded, so the state is live by the time this runs.
   template <typename Context>
-  void handlerAdded(Context& /*ctx*/) noexcept {}
+  void handlerAdded(Context& ctx) noexcept {
+    contexts_ = &ctx.template state<RocketClientStreamContexts>();
+  }
 
+  // The shared stream map is owned by the pipeline and destroyed with it; this
+  // handler does not clear it on removal.
   template <typename Context>
   void handlerRemoved(Context& /*ctx*/) noexcept {
-    // The fan-out (onException / onPipelineInactive) should have drained
-    // before we get here. Auto-detach via ~TypeErasedPtr fires
-    // std::logic_error, not a TTransportException — production callers
-    // catching TTransportException& would miss it.
-    DCHECK(activeStreams_.empty())
-        << "handlerRemoved called with " << activeStreams_.size()
-        << " in-flight streams; per-stream fan-out missed";
-    activeStreams_.clear();
+    contexts_ = nullptr;
   }
 
   // === InboundHandler ===
@@ -99,8 +110,8 @@ class RocketClientStreamStateHandler {
     // RSocket clients start every connection at streamId 1. On a
     // reactivate (disconnect → reconnect) the slot map should already be
     // empty thanks to onPipelineInactive's drain.
-    DCHECK(activeStreams_.empty())
-        << "onPipelineActive called with " << activeStreams_.size()
+    DCHECK(streams().empty())
+        << "onPipelineActive called with " << streams().size()
         << " leftover streams; previous disconnect did not drain";
     nextStreamId_ = 1;
   }
@@ -133,8 +144,8 @@ class RocketClientStreamStateHandler {
         return ctx.fireRead(std::move(msg));
       }
 
-      auto it = activeStreams_.find(parsed.streamId());
-      if (it == activeStreams_.end()) {
+      auto it = streams().find(parsed.streamId());
+      if (it == streams().end()) {
         XLOG(ERR) << "Received frame for unknown stream: streamId="
                   << parsed.streamId() << ", frameType=" << parsed.typeName();
         return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
@@ -152,7 +163,7 @@ class RocketClientStreamStateHandler {
       response.streamType = it->second.streamType;
       if (parsed.isTerminalFrame()) {
         response.requestContext = std::move(it->second.requestContext);
-        activeStreams_.erase(it);
+        streams().erase(it);
       }
 
       return ctx.fireRead(std::move(msg));
@@ -161,15 +172,15 @@ class RocketClientStreamStateHandler {
     // Cold path: in-process per-request error (e.g. from codec serialize
     // failure). Always terminal; clean up the stream and stamp identity.
     auto& err = response.payload.get<RocketResponseError>();
-    auto it = activeStreams_.find(err.streamId);
-    if (it == activeStreams_.end()) {
+    auto it = streams().find(err.streamId);
+    if (it == streams().end()) {
       XLOG(ERR) << "Received per-request error for unknown stream: streamId="
                 << err.streamId;
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
     response.streamType = it->second.streamType;
     response.requestContext = std::move(it->second.requestContext);
-    activeStreams_.erase(it);
+    streams().erase(it);
     return ctx.fireRead(std::move(msg));
   }
 
@@ -219,7 +230,7 @@ class RocketClientStreamStateHandler {
 
     request.frame.streamId = generateStreamId();
     const uint32_t sid = request.frame.streamId;
-    DCHECK(!activeStreams_.contains(sid))
+    DCHECK(!streams().contains(sid))
         << "Stream ID " << sid << " already exists in active streams";
 
     // Insert into the slot BEFORE fireWrite so the codec's synthesized
@@ -229,11 +240,12 @@ class RocketClientStreamStateHandler {
     // the slot, which destructs the TypeErasedPtr and fires the
     // rescue deleter so the caller's handler resolves promptly rather
     // than waiting for connection teardown.
-    activeStreams_.emplace(
+    streams().emplace(
         sid,
-        ClientStreamContext{
+        RocketClientStreamContext{
             .requestContext = std::move(request.requestContext),
             .streamType = request.streamType,
+            .stats = {},
         });
 
     auto result = ctx.fireWrite(std::move(msg));
@@ -277,8 +289,8 @@ class RocketClientStreamStateHandler {
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
     const auto& event = box.get<client::FrameWriteCompleteEvent>();
-    auto it = activeStreams_.find(event.streamId);
-    if (it == activeStreams_.end()) {
+    auto it = streams().find(event.streamId);
+    if (it == streams().end()) {
       return;
     }
     ctx.fireEvent(
@@ -297,20 +309,20 @@ class RocketClientStreamStateHandler {
    *
    * Client generates odd IDs: 1, 3, 5, ... Caps at the RSocket 31-bit
    * limit; wraps back to 1 and latches `hitMaxStreamId_` so subsequent
-   * allocations skip IDs still live in `activeStreams_`. The collision
-   * loop is bounded by `activeStreams_.size() + 1` — a contiguous run
+   * allocations skip IDs still live in the shared stream table. The
+   * collision loop is bounded by `streams().size() + 1` — a contiguous run
    * of collisions cannot exceed the number of live streams.
    */
   uint32_t generateStreamId() noexcept {
     uint32_t id;
     size_t iter = 0;
-    const size_t maxIter = activeStreams_.size() + 1;
+    const size_t maxIter = streams().size() + 1;
     do {
       id = nextStreamId_;
       nextStreamId_ += 2;
       XCHECK_LE(++iter, maxIter)
           << "generateStreamId collision loop exceeded live-stream bound";
-    } while (hitMaxStreamId_ && activeStreams_.contains(id));
+    } while (hitMaxStreamId_ && streams().contains(id));
     if (FOLLY_UNLIKELY(id == kMaxStreamId)) {
       nextStreamId_ = 1;
       hitMaxStreamId_ = true;
@@ -322,16 +334,25 @@ class RocketClientStreamStateHandler {
 
   uint32_t nextStreamId() const noexcept { return nextStreamId_; }
 
-  size_t activeStreamCount() const noexcept { return activeStreams_.size(); }
+  size_t activeStreamCount() const noexcept { return streams().size(); }
 
   bool hasActiveStream(uint32_t streamId) const noexcept {
-    return activeStreams_.find(streamId) != activeStreams_.end();
+    return streams().find(streamId) != streams().end();
   }
 
   // For testing only - allows setting the next stream ID to simulate collisions
   void setNextStreamIdForTest(uint32_t id) noexcept { nextStreamId_ = id; }
 
  private:
+  using StreamMap = apache::thrift::fast_thrift::frame::read::DirectStreamMap<
+      RocketClientStreamContext>;
+
+  /// The connection's shared stream table. Valid between handlerAdded and
+  /// handlerRemoved, which is every point a handler callback or a test
+  /// accessor can run.
+  StreamMap& streams() noexcept { return contexts_->streams; }
+  const StreamMap& streams() const noexcept { return contexts_->streams; }
+
   /**
    * Fail one stream whose outbound write returned Result::Error from a
    * downstream handler before reaching the wire. Mirrors legacy
@@ -372,12 +393,12 @@ class RocketClientStreamStateHandler {
   template <typename Context>
   void failAllActiveStreams(
       Context& ctx, const folly::exception_wrapper& ew) noexcept {
-    if (activeStreams_.empty()) {
+    if (streams().empty()) {
       return;
     }
     std::vector<uint32_t> ids;
-    ids.reserve(activeStreams_.size());
-    activeStreams_.forEach([&](uint32_t key, ClientStreamContext& /*val*/) {
+    ids.reserve(streams().size());
+    streams().forEach([&](uint32_t key, RocketClientStreamContext& /*val*/) {
       ids.push_back(key);
     });
     for (uint32_t sid : ids) {
@@ -402,8 +423,8 @@ class RocketClientStreamStateHandler {
   template <typename Context>
   void failStream(
       Context& ctx, uint32_t streamId, folly::exception_wrapper ew) noexcept {
-    auto it = activeStreams_.find(streamId);
-    if (it == activeStreams_.end()) {
+    auto it = streams().find(streamId);
+    if (it == streams().end()) {
       return;
     }
     RocketResponseMessage msg;
@@ -413,33 +434,20 @@ class RocketClientStreamStateHandler {
     };
     msg.streamType = it->second.streamType;
     msg.requestContext = std::move(it->second.requestContext);
-    activeStreams_.erase(it);
+    streams().erase(it);
     (void)ctx.fireRead(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
             std::move(msg)));
   }
 
-  /**
-   * ClientStreamContext - State stored for each pending request stream.
-   *
-   * `requestContext` is a type-erased owning handle to the AppAdapter's
-   * heap-allocated per-request context. The rocket layer never
-   * dereferences the pointer; it only routes the handle and runs the
-   * deleter the AppAdapter supplied on any cleanup path (terminal frame,
-   * activeStreams_.clear() on connection teardown, ~DirectStreamMap on
-   * pipeline destruction). The slot map never holds a stale pointer.
-   */
-  struct ClientStreamContext {
-    TypeErasedPtr requestContext;
-    apache::thrift::fast_thrift::frame::FrameType streamType;
-  };
-
   static constexpr uint32_t kMaxStreamId = (1u << 31) - 1;
 
   uint32_t nextStreamId_{1};
   bool hitMaxStreamId_{false};
-  apache::thrift::fast_thrift::frame::read::DirectStreamMap<ClientStreamContext>
-      activeStreams_;
+
+  /// The connection's shared stream table, owned by the pipeline. Non-null
+  /// between handlerAdded and handlerRemoved.
+  RocketClientStreamContexts* contexts_{nullptr};
 };
 
 static_assert(

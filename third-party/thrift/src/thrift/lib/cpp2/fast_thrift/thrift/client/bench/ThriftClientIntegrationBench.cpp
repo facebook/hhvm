@@ -293,6 +293,8 @@ std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
           .setHead(connection->transportHandler.get())
           .setTail(connection->appAdapter.get())
           .setAllocator(&connection->allocator)
+          .addState<apache::thrift::fast_thrift::rocket::client::
+                        RocketClientStreamContexts>()
           .addNextInbound<FrameLengthParserHandler>(
               frame_length_parser_handler_tag)
           .addNextOutbound<FrameLengthEncoderHandler>(

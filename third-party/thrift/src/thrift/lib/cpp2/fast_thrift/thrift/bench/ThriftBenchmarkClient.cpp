@@ -260,6 +260,8 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
             .setHead(connection->transportHandler.get())
             .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
+            .addState<apache::thrift::fast_thrift::rocket::client::
+                          RocketClientStreamContexts>()
             .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                 batching_frame_handler_tag)
             .addNextInbound<frame::read::handler::FrameLengthParserHandler>(

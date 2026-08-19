@@ -299,6 +299,8 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .setHead(connection->transportHandler.get())
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
+              .addState<apache::thrift::fast_thrift::rocket::client::
+                            RocketClientStreamContexts>()
               .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                   handler::FrameLengthParserHandler>(
                   frame_length_parser_handler_tag)
@@ -731,6 +733,7 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .setHead(connection->transportHandler.get())
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
+              .addState<rocket::client::RocketClientStreamContexts>()
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   frame_length_parser_handler_tag)
               .addNextOutbound<

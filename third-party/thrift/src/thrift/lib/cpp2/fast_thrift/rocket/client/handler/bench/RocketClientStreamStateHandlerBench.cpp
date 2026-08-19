@@ -27,6 +27,7 @@
  * - Read path: Map lookup/erase with varying number of active streams
  */
 
+#include <glog/logging.h>
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>
@@ -53,6 +54,29 @@ using namespace apache::thrift::fast_thrift::rocket::client::handler;
 namespace {
 
 using rocket::bench::BenchContext;
+
+// Extends the shared bench context with the pipeline-level
+// RocketClientStreamContexts the handler reaches through state<T>(), owned per
+// context.
+struct StreamBenchContext : BenchContext {
+  template <typename T>
+  T& state() noexcept {
+    return contexts_;
+  }
+  apache::thrift::fast_thrift::rocket::client::RocketClientStreamContexts
+      contexts_;
+};
+
+// The pipeline binds every handler to its context's state before any callback
+// runs; the parallel-vector benches have to do the same by hand.
+void bindHandlers(
+    std::vector<RocketClientStreamStateHandler>& handlers,
+    std::vector<StreamBenchContext>& contexts) {
+  CHECK_EQ(handlers.size(), contexts.size());
+  for (size_t i = 0; i < handlers.size(); ++i) {
+    handlers[i].handlerAdded(contexts[i]);
+  }
+}
 
 // =============================================================================
 // Helper Functions
@@ -99,7 +123,8 @@ BENCHMARK(Write_StreamState_StreamIdGenerationAndMapInsert, iters) {
   suspender.dismiss();
 
   RocketClientStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
+  handler.handlerAdded(ctx);
 
   for (size_t i = 0; i < iters; ++i) {
     auto result = handler.onWrite(ctx, erase_and_box(std::move(requests[i])));
@@ -119,7 +144,8 @@ BENCHMARK(Read_StreamState_FewActiveStreams_10, iters) {
   constexpr size_t kActiveStreams = 10;
 
   std::vector<RocketClientStreamStateHandler> handlers(iters);
-  std::vector<BenchContext> contexts(iters);
+  std::vector<StreamBenchContext> contexts(iters);
+  bindHandlers(handlers, contexts);
   std::vector<std::vector<RocketResponseMessage>> responsesList;
   responsesList.reserve(iters);
 
@@ -163,7 +189,8 @@ BENCHMARK(Read_StreamState_ManyActiveStreams_100, iters) {
   constexpr size_t kActiveStreams = 100;
 
   std::vector<RocketClientStreamStateHandler> handlers(iters);
-  std::vector<BenchContext> contexts(iters);
+  std::vector<StreamBenchContext> contexts(iters);
+  bindHandlers(handlers, contexts);
   std::vector<std::vector<RocketResponseMessage>> responsesList;
   responsesList.reserve(iters);
 
@@ -206,7 +233,8 @@ BENCHMARK(Read_StreamState_ManyActiveStreams_1000, iters) {
   constexpr size_t kActiveStreams = 1000;
 
   std::vector<RocketClientStreamStateHandler> handlers(iters);
-  std::vector<BenchContext> contexts(iters);
+  std::vector<StreamBenchContext> contexts(iters);
+  bindHandlers(handlers, contexts);
   std::vector<std::vector<RocketResponseMessage>> responsesList;
   responsesList.reserve(iters);
 

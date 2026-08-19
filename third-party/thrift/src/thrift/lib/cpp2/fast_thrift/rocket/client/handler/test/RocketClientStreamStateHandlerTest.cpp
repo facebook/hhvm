@@ -71,10 +71,18 @@ uint32_t getStreamId(const RocketRequestMessage& msg) {
  * MockStreamContext for testing RocketClientStreamStateHandler.
  *
  * Captures frames and messages fired via fireRead() and fireWrite(),
- * and exceptions via fireException().
+ * and exceptions via fireException(). Owns the pipeline-level
+ * RocketClientStreamContexts state that the handler reaches through state<T>().
  */
 class MockStreamContext {
  public:
+  // Stands in for the pipeline-level state accessor. The handler only ever
+  // requests RocketClientStreamContexts.
+  template <typename T>
+  T& state() noexcept {
+    return contexts_;
+  }
+
   Result fireRead(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
@@ -149,6 +157,7 @@ class MockStreamContext {
   }
 
  private:
+  RocketClientStreamContexts contexts_;
   std::vector<apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
       readMessages_;
   std::vector<apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
@@ -224,7 +233,12 @@ RocketResponseMessage makeRocketResponse(
 
 class ClientStreamStateHandlerTest : public ::testing::Test {
  protected:
-  void SetUp() override { ctx_.reset(); }
+  // The handler caches the pipeline state pointer on add, exactly as
+  // PipelineBuilder::build() would before any callback runs.
+  void SetUp() override {
+    ctx_.reset();
+    handler_.handlerAdded(ctx_);
+  }
 
   MockStreamContext ctx_;
   RocketClientStreamStateHandler handler_;
@@ -592,10 +606,11 @@ TEST_F(ClientStreamStateHandlerTest, ConnectionFramesPassThrough) {
 // Handler Lifecycle
 // =============================================================================
 
-TEST_F(ClientStreamStateHandlerTest, HandlerRemovedRequiresDrainedSlotMap) {
+TEST_F(ClientStreamStateHandlerTest, HandlerRemovedLeavesDrainedSlotMap) {
   // Contract: by the time handlerRemoved runs, the slot map must be
   // empty — onException or onPipelineInactive should have already done
-  // the fan-out. handlerRemoved DCHECKs that.
+  // the fan-out. The map itself belongs to the pipeline, so handlerRemoved
+  // only drops this handler's view of it.
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"));

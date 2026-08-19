@@ -23,12 +23,11 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"net"
 	"os"
-	"os/exec"
-	"strconv"
-	"strings"
+	"runtime"
 	"testing"
 	"time"
 
@@ -36,14 +35,22 @@ import (
 )
 
 func getNumFileDesciptors(t *testing.T) int {
-	cmd := exec.Command("lsof", "-p", strconv.Itoa(os.Getpid()))
-	output, err := cmd.CombinedOutput()
+	// Read the FD directory directly instead of shelling out to lsof: lsof
+	// performs blocking kernel/name lookups that can hang for a very long time
+	// when the process holds many open network sockets (as TestFDRelease does).
+	fdPath := fmt.Sprintf("/proc/%d/fd", os.Getpid())
+	if runtime.GOOS == "darwin" {
+		fdPath = "/dev/fd"
+	}
+
+	fdDir, err := os.Open(fdPath)
+	require.NoError(t, err)
+	defer fdDir.Close()
+
+	names, err := fdDir.Readdirnames(-1)
 	require.NoError(t, err)
 
-	lines := strings.Split(string(output), "\n")
-	require.Greater(t, len(lines), 1)
-
-	return len(lines) - 1 // -1 to account for header line
+	return len(names)
 }
 
 func generateSelfSignedCerts() (clientConfig *tls.Config, serverConfig *tls.Config, err error) {

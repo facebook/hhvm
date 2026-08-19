@@ -23,7 +23,7 @@ namespace java.swift org.apache.thrift.dynamic
 namespace js thrift
 namespace go thrift.lib.thrift.dynamic
 
-cpp_include "thrift/lib/thrift/SerializableDynamic.h"
+cpp_include "thrift/lib/thrift/SerializableDynamicAdapter.h"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
@@ -45,5 +45,8 @@ union Dynamic {
   6: map<string, Dynamic> object;
 }
 
-@cpp.Type{name = "::apache::thrift::SerializableDynamic"}
+@cpp.Adapter{
+  name = "::apache::thrift::SerializableDynamicAdapter",
+  adaptedType = "::apache::thrift::SerializableDynamic",
+}
 typedef Dynamic DynamicType

@@ -37,17 +37,36 @@ namespace channel_pipeline_rust {
  * Construct with a `rust::Box<RustHandlerOpaque>` obtained from a Rust
  * factory function exposed through the CXX bridge:
  *
- *   // In your ffi.rs (exposed via extern "Rust"):
+ *   // In thrift/lib/rust/channel_pipeline/src/ffi.rs (extern "Rust"):
  *   fn rust_handler_new_my_handler() -> Box<RustHandlerOpaque>
  *
  *   // On the C++ side:
  *   rust::Box<RustHandlerOpaque> box = rust_handler_new_my_handler();
  *   RustHandler<Context> shim(std::move(box));
  *
+ * A handler defined in another crate imports the opaque type into its own CXX
+ * bridge and exposes a direct factory:
+ *
+ *   unsafe extern "C++" {
+ *     include!("thrift/lib/rust/channel_pipeline/src/ffi.rs.h");
+ *     #[namespace = "channel_pipeline_rust"]
+ *     type RustHandlerOpaque = channel_pipeline::RustHandlerOpaque;
+ *   }
+ *   extern "Rust" {
+ *     fn new_my_handler() -> Box<RustHandlerOpaque>;
+ *   }
+ *
+ *   fn new_my_handler() -> Box<channel_pipeline::RustHandlerOpaque> {
+ *     channel_pipeline::box_handler(MyHandler)
+ *   }
+ *
+ *   // On the C++ side:
+ *   RustHandler<Context> shim(my_crate::new_my_handler());
+ *
  * Add the shim to a pipeline at build time:
  *
  *   PipelineBuilder<Head, Tail, Allocator>()
- *       .addHandler<RustHandler<Context>>(my_handler_tag, std::move(shim))
+ *       .addNextDuplex<RustHandler<Context>>(my_handler_tag, std::move(shim))
  *       .build();
  *
  * The `rust::Box<RustHandlerOpaque>` owns the Rust handler for the pipeline

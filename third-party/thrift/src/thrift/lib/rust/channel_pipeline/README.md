@@ -46,11 +46,35 @@ impl RustHandler for CountingHandler {
 }
 ```
 
-Expose a factory through your CXX bridge, wrap the returned
-`rust::Box<RustHandlerOpaque>` in the C++ `RustHandler<Context>` shim, and add it
-to a `PipelineBuilder`. See
+Expose a factory from the handler's own CXX bridge:
+
+```rust
+#[cxx::bridge(namespace = "my_crate")]
+mod ffi {
+    unsafe extern "C++" {
+        include!("thrift/lib/rust/channel_pipeline/src/ffi.rs.h");
+        #[namespace = "channel_pipeline_rust"]
+        type RustHandlerOpaque = channel_pipeline::RustHandlerOpaque;
+    }
+
+    extern "Rust" {
+        fn new_counting_handler() -> Box<RustHandlerOpaque>;
+    }
+}
+
+pub fn new_counting_handler() -> Box<channel_pipeline::RustHandlerOpaque> {
+    channel_pipeline::box_handler(CountingHandler { reads: 0 })
+}
+```
+
+```cpp
+channel_pipeline_rust::RustHandler<Context> shim(
+    my_crate::new_counting_handler());
+```
+
+The alias reuses the owning bridge's allocation and drop glue. See
 [`rust/RustHandler.h`](../../cpp2/fast_thrift/channel_pipeline/rust/RustHandler.h)
-for the shim and the registration snippet.
+for the C++ shim.
 
 ## Three ways a handler can answer
 

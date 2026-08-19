@@ -107,17 +107,40 @@
 //! });
 //! ```
 //!
-//! On the C++ side, expose a factory function via the CXX bridge, wrap the
-//! returned `rust::Box<RustHandlerOpaque>` in a `RustHandler<Context>` shim,
-//! and add it to a `PipelineBuilder`. See
-//! `thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustHandler.h` for the
-//! C++ shim that satisfies handler concepts with zero virtual dispatch.
+//! To reach C++, expose a direct factory from the handler's own CXX bridge. The
+//! bridge imports [`RustHandlerOpaque`] as an `extern "C++"` alias, and
+//! [`box_handler`] constructs the box:
+//!
+//! ```rust,ignore
+//! #[cxx::bridge(namespace = "my_crate")]
+//! mod ffi {
+//!     unsafe extern "C++" {
+//!         include!("thrift/lib/rust/channel_pipeline/src/ffi.rs.h");
+//!         #[namespace = "channel_pipeline_rust"]
+//!         type RustHandlerOpaque = channel_pipeline::RustHandlerOpaque;
+//!     }
+//!
+//!     extern "Rust" {
+//!         fn new_my_handler() -> Box<RustHandlerOpaque>;
+//!     }
+//! }
+//!
+//! pub fn new_my_handler() -> Box<channel_pipeline::RustHandlerOpaque> {
+//!     channel_pipeline::box_handler(MyHandler)
+//! }
+//! ```
+//!
+//! ```cpp
+//! channel_pipeline_rust::RustHandler<Context> shim(
+//!     my_crate::new_my_handler());
+//! ```
 //!
 //! # Public API
 //!
 //! | Item | Role |
 //! |------|------|
 //! | [`RustHandler`] | Trait to implement for your handler |
+//! | [`box_handler`] | Type-erases a handler for a downstream CXX factory |
 //! | [`CallbackContext`] | Borrowed pipeline context — `!Send`, `!Sync`, non-escapable |
 //! | [`ContextHandle`] | Move-only captured pipeline position; consuming `fire_read`/`fire_write`/`fire_exception` |
 //! | [`RustTypeErasedBox`] | Borrowed, type-erased message box; recover the value with `take::<T>()` |
@@ -238,6 +261,8 @@ pub use coro_handler::CoroReadHandle;
 pub use coro_handler::CoroWriteHandle;
 pub use erased::ErasedCheck;
 pub use erased::RustTypeErasedBox;
+pub use ffi::RustHandlerOpaque;
+pub use ffi::box_handler;
 pub use handler::HandlerResult;
 pub use handler::NoopHandler;
 pub use handler::RustHandler;

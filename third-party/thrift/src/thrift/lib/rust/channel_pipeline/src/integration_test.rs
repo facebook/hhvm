@@ -17,9 +17,14 @@
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
-use channel_pipeline as _;
+use channel_pipeline::BytesPtr;
+use channel_pipeline::CallbackContext;
 use channel_pipeline::ContextHandle;
 use channel_pipeline::HandlerResult;
+use channel_pipeline::RustHandler;
+use channel_pipeline::RustHandlerOpaque;
+use channel_pipeline::RustTypeErasedBox;
+use channel_pipeline::box_handler;
 
 static NATIVE_DESTRUCTION_CALLS: AtomicUsize = AtomicUsize::new(0);
 static NATIVE_DESTRUCTION_DROPS: AtomicUsize = AtomicUsize::new(0);
@@ -42,6 +47,22 @@ fn run_with_timeout(test: impl FnOnce() + Send + 'static) {
         Ok(Ok(())) => {}
         Ok(Err(panic)) => std::panic::resume_unwind(panic),
         Err(error) => panic!("test exceeded five-second deadline: {error}"),
+    }
+}
+
+static DOWNSTREAM_READS: AtomicUsize = AtomicUsize::new(0);
+
+struct DownstreamHandler;
+
+impl RustHandler for DownstreamHandler {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        DOWNSTREAM_READS.fetch_add(1, Ordering::Relaxed);
+        let bytes = msg.take::<BytesPtr>();
+        ctx.fire_read(bytes)
     }
 }
 
@@ -281,9 +302,17 @@ mod ffi {
         pointer_identity_preserved: bool,
     }
 
+    unsafe extern "C++" {
+        include!("thrift/lib/rust/channel_pipeline/src/ffi.rs.h");
+
+        #[namespace = "channel_pipeline_rust"]
+        type RustHandlerOpaque = channel_pipeline::RustHandlerOpaque;
+    }
+
     extern "Rust" {
         fn native_destruction_call(task: usize);
         fn native_destruction_drop(task: usize);
+        fn new_downstream_handler() -> Box<RustHandlerOpaque>;
     }
 
     unsafe extern "C++" {
@@ -320,8 +349,13 @@ mod ffi {
         fn run_context_handle_fire_test(scenario: u32) -> ContextHandleFireResult;
         fn run_context_handle_sandwich_test(scenario: u32) -> ContextHandleSandwichResult;
         fn run_context_handle_exception_test(scenario: u32) -> ContextHandleExceptionResult;
+        fn run_downstream_handler_test() -> bool;
         unsafe fn run_event_base_destruction_test(task: usize, call: fn(usize), drop: fn(usize));
     }
+}
+
+fn new_downstream_handler() -> Box<RustHandlerOpaque> {
+    box_handler(DownstreamHandler)
 }
 
 #[test]
@@ -352,6 +386,17 @@ fn rust_callbacks_drive_real_cpp_pipeline() {
     assert_eq!(result.written_first_byte, 0xcd);
     assert_eq!(result.rust_reads, 1);
     assert_eq!(result.rust_writes, 1);
+}
+
+#[test]
+fn handler_from_another_crate_runs_in_a_native_pipeline() {
+    DOWNSTREAM_READS.store(0, Ordering::Relaxed);
+
+    assert!(
+        ffi::run_downstream_handler_test(),
+        "the downstream handler should forward the read"
+    );
+    assert_eq!(DOWNSTREAM_READS.load(Ordering::Relaxed), 1);
 }
 
 #[test]

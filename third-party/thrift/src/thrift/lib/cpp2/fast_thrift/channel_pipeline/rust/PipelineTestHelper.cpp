@@ -349,6 +349,10 @@ PipelineImpl::Ptr buildSingleRust(
 
 } // namespace
 
+bool run_downstream_handler_test() noexcept {
+  return runReadWithHandler(new_downstream_handler()) == Result::Success;
+}
+
 BehaviorTestResult run_behavior_test() noexcept {
   TestWatchdog watchdog{"synchronous handler behavior"};
   rust_handler_reset_test_counts();

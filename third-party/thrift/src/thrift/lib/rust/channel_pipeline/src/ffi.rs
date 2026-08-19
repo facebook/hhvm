@@ -262,6 +262,15 @@ use crate::handler::ReadinessProbeHandler;
 use crate::handler::RustHandler;
 
 fn boxed(handler: impl RustHandler) -> Box<RustHandlerOpaque> {
+    box_handler(handler)
+}
+
+/// Type-erases a handler into the box owned by the C++ `RustHandler<Context>`
+/// shim.
+///
+/// A downstream CXX bridge can return this box through an `extern "C++"` type
+/// alias to [`RustHandlerOpaque`].
+pub fn box_handler(handler: impl RustHandler) -> Box<RustHandlerOpaque> {
     Box::new(RustHandlerOpaque {
         inner: Box::new(handler),
     })
@@ -278,9 +287,18 @@ pub struct RustHandlerOpaque {
     inner: Box<dyn RustHandler>,
 }
 
+// SAFETY: this is the same opaque Rust type declared by the owning CXX bridge
+// as `channel_pipeline_rust::RustHandlerOpaque`; it is only passed behind
+// `rust::Box` and never by value across the boundary.
+unsafe impl cxx::ExternType for RustHandlerOpaque {
+    type Id = cxx::type_id!("channel_pipeline_rust::RustHandlerOpaque");
+    type Kind = cxx::kind::Opaque;
+}
+
 pub fn rust_handler_new_noop() -> Box<RustHandlerOpaque> {
     boxed(NoopHandler)
 }
+
 pub fn rust_handler_new_counting_test() -> Box<RustHandlerOpaque> {
     boxed(CountingTestHandler)
 }

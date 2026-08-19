@@ -86,6 +86,7 @@ ContextHandleSandwichResult run_context_handle_sandwich_test(
     uint32_t scenario) noexcept;
 ContextHandleExceptionResult run_context_handle_exception_test(
     uint32_t scenario) noexcept;
+bool run_downstream_handler_test() noexcept;
 void run_event_base_destruction_test(
     uintptr_t task,
     rust::Fn<void(uintptr_t)> call,

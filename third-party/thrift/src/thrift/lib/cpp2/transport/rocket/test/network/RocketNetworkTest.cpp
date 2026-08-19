@@ -26,6 +26,7 @@
 #include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
+#include <folly/Function.h>
 #include <folly/Range.h>
 #include <folly/SocketAddress.h>
 #include <folly/Try.h>
@@ -111,25 +112,43 @@ class RocketNetworkTest : public testing::Test {
 
   void unsetExpectedSetupMetadata() { server_->setExpectedSetupMetadata({}); }
 
-  // Returns the server connection once it is established.
-  // After reconnect(), the old server-side connection may linger briefly while
-  // the new one is already created, so we retry until exactly 1 remains.
-  RocketServerConnection* getServerConnection() {
+  // Recreates the server and the client, so that the server-side connection
+  // latches the current value of the THRIFT_FLAGs it reads at construction
+  // time. Starting from a fresh server also means the connection established
+  // here is the only one that server will ever see, unlike reconnecting the
+  // client, which leaves the previous connection lingering for a while.
+  void restartServerAndClient() {
+    client_.reset();
+    server_.reset();
+    SetUp();
+  }
+
+  // Runs `f` against the server-side connection, on the EventBase thread that
+  // owns it. The connection may be torn down by that thread at any point, so
+  // touching it from anywhere else races with its destruction.
+  void withServerConnection(
+      folly::FunctionRef<void(RocketServerConnection&)> f) {
     for (int i = 0, numTries = 50; i < numTries; ++i) {
-      auto connCount = 0;
-      RocketServerConnection* conn = nullptr;
+      bool invoked = false;
       this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-        connCount = 0;
+        auto connCount = 0;
+        RocketServerConnection* conn = nullptr;
         server_->getConnectionManager()->forEachConnection(
             [&](wangle::ManagedConnection* connection) {
-              conn = dynamic_cast<RocketServerConnection*>(connection);
-              if (conn) {
+              if (auto* rconn =
+                      dynamic_cast<RocketServerConnection*>(connection)) {
+                conn = rconn;
                 connCount += 1;
               }
             });
+        if (connCount != 1) {
+          return;
+        }
+        f(*conn);
+        invoked = true;
       });
-      if (connCount == 1) {
-        return conn;
+      if (invoked) {
+        return;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -1525,12 +1544,13 @@ TEST_F(RocketNetworkTest, CloseNowWithPendingWriteCallback) {
 
 TEST_F(RocketNetworkTest, ObserverIsNotInstalledWhenFlagIsFalse) {
   THRIFT_FLAG_SET_MOCK(enable_rocket_connection_observers, false);
-  client_->reconnect();
+  restartServerAndClient();
   auto observer = NiceMock<MockRocketServerConnectionObserver>();
-  auto conn = getServerConnection();
-  EXPECT_EQ(conn->numObservers(), 0);
-  conn->addObserver(&observer);
-  EXPECT_EQ(conn->numObservers(), 0);
+  withServerConnection([&](RocketServerConnection& conn) {
+    EXPECT_EQ(conn.numObservers(), 0);
+    conn.addObserver(&observer);
+    EXPECT_EQ(conn.numObservers(), 0);
+  });
 }
 
 MATCHER_P3(WriteStartingMatcher, id, bytes, offset, "") {
@@ -1554,16 +1574,17 @@ MATCHER_P2(WriteEventContextMatcher, startRawOffset, endRawOffset, "") {
 
 TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
   THRIFT_FLAG_SET_MOCK(enable_rocket_connection_observers, true);
-  client_->reconnect();
+  restartServerAndClient();
   this->withClient([&](RocketTestClient& client) {
     RocketServerConnection::ManagedObserver::EventSet eventSet;
     eventSet.enable(
         RocketServerConnection::ManagedObserver::Events::WriteEvents);
     auto observer = NiceMock<MockRocketServerConnectionObserver>(eventSet);
-    auto conn = getServerConnection();
-    EXPECT_EQ(conn->numObservers(), 0);
-    conn->addObserver(&observer);
-    EXPECT_EQ(conn->numObservers(), 1);
+    withServerConnection([&](RocketServerConnection& conn) {
+      EXPECT_EQ(conn.numObservers(), 0);
+      conn.addObserver(&observer);
+      EXPECT_EQ(conn.numObservers(), 1);
+    });
 
     const size_t setupFrameSize = 14;
     const size_t setupFrameStreamId = 0;
@@ -1658,30 +1679,26 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
           std::chrono::milliseconds(250) /* timeout */);
     }
 
-    server_->getEventBase().runInEventBaseThreadAndWait([&] {
-      server_->getConnectionManager()->forEachConnection(
-          [&](wangle::ManagedConnection* connection) {
-            if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              conn->removeObserver(&observer);
-              EXPECT_EQ(conn->numObservers(), 0);
-            }
-          });
+    withServerConnection([&](RocketServerConnection& conn) {
+      conn.removeObserver(&observer);
+      EXPECT_EQ(conn.numObservers(), 0);
     });
   });
 }
 
 TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
   THRIFT_FLAG_SET_MOCK(enable_rocket_connection_observers, true);
-  client_->reconnect();
+  restartServerAndClient();
   this->withClient([this](RocketTestClient& client) {
     RocketServerConnection::ManagedObserver::EventSet eventSet;
     eventSet.enable(
         RocketServerConnection::ManagedObserver::Events::WriteEvents);
     auto observer = NiceMock<MockRocketServerConnectionObserver>(eventSet);
-    auto conn = getServerConnection();
-    EXPECT_EQ(conn->numObservers(), 0);
-    conn->addObserver(&observer);
-    EXPECT_EQ(conn->numObservers(), 1);
+    withServerConnection([&](RocketServerConnection& conn) {
+      EXPECT_EQ(conn.numObservers(), 0);
+      conn.addObserver(&observer);
+      EXPECT_EQ(conn.numObservers(), 1);
+    });
 
     const size_t setupFrameSize = 14;
     const size_t setupFrameStreamId = 0;
@@ -1733,14 +1750,9 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
     auto stream = client.sendRequestStreamSync(
         Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
 
-    server_->getEventBase().runInEventBaseThreadAndWait([&] {
-      server_->getConnectionManager()->forEachConnection(
-          [&](wangle::ManagedConnection* connection) {
-            if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              conn->removeObserver(&observer);
-              EXPECT_EQ(conn->numObservers(), 0);
-            }
-          });
+    withServerConnection([&](RocketServerConnection& conn) {
+      conn.removeObserver(&observer);
+      EXPECT_EQ(conn.numObservers(), 0);
     });
   });
 }

@@ -271,7 +271,6 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         # pyrefly: ignore [bad-argument-type]
         self.assertEqual(1, len(sub_data))
         self.assertFileListsEqual(
-            # pyrefly: ignore [unsupported-operation]
             [".hg/wlock"],
             # pyrefly: ignore [unsupported-operation]
             [d["name"] for d in sub_data[0]["files"]],
@@ -693,7 +692,6 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.watchmanCommand("flush-subscriptions", root, {"sync_timeout": 1000})
         # disconnect from the socket -- the next command will reconnect the
         # socket, but sub2 should have disappeared
-        # pyre-fixme[16]: `TestSubscribe` has no attribute `client`.
         self.client.close()
 
         # It might take a while for watchman to realize its connection has been

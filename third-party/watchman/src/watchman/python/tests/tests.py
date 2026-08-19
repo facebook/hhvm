@@ -433,7 +433,6 @@ class TestBSERDump(unittest.TestCase):
             try:
                 document = b"\x00\x01\x05" + struct.pack("@i", len(ex)) + ex
                 print("encoded", document)
-                # pyre-fixme[16]: `TestBSERDump` has no attribute `bser_mod`.
                 self.bser_mod.loads(document)
             except Exception:
                 # Exceptions are okay - abort is not.

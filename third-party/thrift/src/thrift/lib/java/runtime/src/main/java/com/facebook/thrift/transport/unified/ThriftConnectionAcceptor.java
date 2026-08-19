@@ -128,19 +128,13 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       NiftyConnectionContext connectionContext,
       ByteBuf byteBuf) {
     ThriftFrame requestFrame = null;
-    // Rollout flag: when enabled, the payload owns the frame and the generated handler releases it
-    // eagerly right after the read; when disabled, the frame is released at response completion
-    // below
-    // (historical behavior).
-    boolean releaseFrameAfterDecode = RpcResources.isReleaseHeaderFrameAfterDecode();
     try {
       // Decode ByteBuf to ThriftFrame
       requestFrame = ReactiveHeaderCodec.decodeFrame(out.alloc(), byteBuf);
 
       NettyNiftyRequestContext requestContext =
           new NettyNiftyRequestContext(requestFrame.getHeaders(), connectionContext);
-      ServerRequestPayload serverRequestPayload =
-          decodeMessage(requestFrame, requestContext, releaseFrameAfterDecode);
+      ServerRequestPayload serverRequestPayload = decodeMessage(requestFrame, requestContext);
       RequestRpcMetadata metadata = serverRequestPayload.getRequestRpcMetadata();
 
       // Dispatch based on request type
@@ -174,15 +168,10 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       return result
           .doFinally(
               __ -> {
-                if (releaseFrameAfterDecode) {
-                  // Eager path: the generated handler released the frame right after the read. This
-                  // is the idempotent backstop for paths where it never runs (unsupported RpcKind
-                  // above, or the off-loop scheduler rejecting the request).
-                  serverRequestPayload.releaseRequestData();
-                } else if (finalRequestFrame.refCnt() > 0) {
-                  // Flag disabled: release the frame at response completion (historical behavior).
-                  finalRequestFrame.release();
-                }
+                // The generated handler released the frame right after the read. This is the
+                // idempotent backstop for paths where it never runs (unsupported RpcKind above, or
+                // the off-loop scheduler rejecting the request).
+                serverRequestPayload.releaseRequestData();
               })
           .onErrorResume(
               t -> {
@@ -449,8 +438,7 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
    * @param requestContext the request context
    * @return the decoded ServerRequestPayload
    */
-  private ServerRequestPayload decodeMessage(
-      ThriftFrame frame, RequestContext requestContext, boolean releaseFrameAfterDecode) {
+  private ServerRequestPayload decodeMessage(ThriftFrame frame, RequestContext requestContext) {
     try {
       TProtocolType protocol = frame.getProtocol();
       TProtocol byteBufTProtocol = protocol.apply(frame.getMessage());
@@ -460,10 +448,8 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       RpcKind kind =
           message.seqid == -1 ? SINGLE_REQUEST_NO_RESPONSE : SINGLE_REQUEST_SINGLE_RESPONSE;
 
-      // When eager release is enabled, hand the frame to the payload so the generated handler can
-      // release it (via releaseRequestData()) right after reading the request args. Otherwise the
-      // transport keeps ownership and releases the frame at response completion (historical
-      // behavior).
+      // Hand the frame to the payload so the generated handler can release it (via
+      // releaseRequestData()) right after reading the request args.
       return ServerRequestPayload.create(
           createReaderFunction(byteBufTProtocol),
           new RequestRpcMetadata.Builder()
@@ -473,7 +459,7 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
               .build(),
           requestContext,
           message.seqid,
-          releaseFrameAfterDecode ? frame : null);
+          frame);
     } catch (Throwable t) {
       throw new RuntimeException("Failed to decode message", t);
     }

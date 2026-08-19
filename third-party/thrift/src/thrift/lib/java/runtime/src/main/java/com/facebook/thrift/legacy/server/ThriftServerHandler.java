@@ -129,17 +129,11 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
     RequestContext currentContext = RequestContexts.getCurrentContext();
     RequestContexts.setCurrentContext(nettyNiftyRequestContext);
 
-    // Rollout flag: when enabled, the payload owns the frame and the generated handler releases it
-    // eagerly right after the read; when disabled, the frame is released at response completion
-    // below
-    // (historical behavior).
-    boolean releaseFrameAfterDecode = RpcResources.isReleaseHeaderFrameAfterDecode();
     ServerRequestPayload serverRequestPayload = null;
     RequestRpcMetadata metadata;
     Mono<Void> response;
     try {
-      serverRequestPayload =
-          decodeMessage(frame, nettyNiftyRequestContext, releaseFrameAfterDecode);
+      serverRequestPayload = decodeMessage(frame, nettyNiftyRequestContext);
       metadata = serverRequestPayload.getRequestRpcMetadata();
       if (metadata.getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE) {
         response =
@@ -178,16 +172,10 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
           .doFinally(
               __ -> {
                 RequestContexts.setCurrentContext(currentContext);
-                if (releaseFrameAfterDecode) {
-                  // Eager path: the generated handler released the frame right after the read. This
-                  // is
-                  // the idempotent backstop for the paths where it never runs (e.g. the off-loop
-                  // scheduler rejecting the request under load shedding).
-                  payload.releaseRequestData();
-                } else if (frame.refCnt() > 0) {
-                  // Flag disabled: release the frame at response completion (historical behavior).
-                  frame.release();
-                }
+                // The generated handler released the frame right after the read. This is the
+                // idempotent backstop for the paths where it never runs (e.g. the off-loop
+                // scheduler rejecting the request under load shedding).
+                payload.releaseRequestData();
               })
           .subscribe();
 
@@ -196,11 +184,12 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
       // doFinally below never runs on this path, so release the frame here (idempotent with
       // decodeMessage's own release) to avoid leaking the underlying direct buffer, restore the
       // request context, then surface the error as before.
-      if (releaseFrameAfterDecode && serverRequestPayload != null) {
-        // Eager path with payload ownership: route through the payload's idempotent release so the
-        // catch and success paths stay consistent and the payload's internal frame ref is cleared.
+      if (serverRequestPayload != null) {
+        // Payload took ownership of the frame: route through its idempotent release so the catch
+        // and success paths stay consistent and the payload's internal frame ref is cleared.
         serverRequestPayload.releaseRequestData();
       } else if (frame.refCnt() > 0) {
+        // Decode failed before the payload took ownership; release the frame directly.
         frame.release();
       }
       RequestContexts.setCurrentContext(currentContext);
@@ -342,8 +331,7 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
     }
   }
 
-  ServerRequestPayload decodeMessage(
-      ThriftFrame frame, RequestContext requestContext, boolean releaseFrameAfterDecode) {
+  ServerRequestPayload decodeMessage(ThriftFrame frame, RequestContext requestContext) {
     try {
       TProtocolType protocol = frame.getProtocol();
       final TProtocol byteBufTProtocol = protocol.apply(frame.getMessage());
@@ -355,10 +343,8 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
               ? RpcKind.SINGLE_REQUEST_NO_RESPONSE
               : RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
-      // When eager release is enabled, hand the frame to the payload so the generated handler can
-      // release it (via releaseRequestData()) right after reading the request args. Otherwise the
-      // transport keeps ownership and releases the frame at response completion (historical
-      // behavior).
+      // Hand the frame to the payload so the generated handler can release it (via
+      // releaseRequestData()) right after reading the request args.
       return ServerRequestPayload.create(
           createReaderFunction(byteBufTProtocol),
           new RequestRpcMetadata.Builder()
@@ -368,7 +354,7 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
               .build(),
           requestContext,
           message.seqid,
-          releaseFrameAfterDecode ? frame : null);
+          frame);
     } catch (Throwable t) {
       // Decode failed before the payload took ownership; release the frame here.
       ReferenceCountUtil.safeRelease(frame);

@@ -481,6 +481,14 @@ BytesPtr PipelineImpl::allocate(size_t size) noexcept {
   return allocateFn_(allocator_, size);
 }
 
+BytesPtr PipelineImpl::copyBuffer(const void* data, size_t size) noexcept {
+  if (!copyBufferFn_ || !allocator_) {
+    // Fallback to simple allocation
+    return folly::IOBuf::copyBuffer(data, size);
+  }
+  return copyBufferFn_(allocator_, data, size);
+}
+
 size_t PipelineImpl::lookupHandler(HandlerId handlerId) const noexcept {
   auto it = handlerMap_.find(handlerId);
   return it != handlerMap_.end() ? it->second : handlers_.size();

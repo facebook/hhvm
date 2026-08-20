@@ -132,16 +132,16 @@ class TransportHandlerT : public folly::DelayedDestruction,
   // --- AsyncTransport::ReadCallback interface ---
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
-    auto tail = readBufQueue_.tailroom();
-    if (tail < minBufferSize_) {
-      const auto ret =
-          readBufQueue_.preallocate(minBufferSize_, maxBufferSize_);
-      *bufReturn = ret.first;
-      *lenReturn = ret.second;
-    } else {
-      *bufReturn = readBufQueue_.writableTail();
-      *lenReturn = tail;
+    if (readBufQueue_.tailroom() < minBufferSize_) {
+      // Grow through the pipeline's allocator rather than
+      // IOBufQueue::preallocate, which is hardwired to IOBuf::create. pack is
+      // off: the new buffer is empty, so there is nothing to pack and the
+      // append must chain it as the tail we hand to the socket.
+      DCHECK(pipeline_);
+      readBufQueue_.append(pipeline_->allocate(maxBufferSize_), /*pack=*/false);
     }
+    *bufReturn = readBufQueue_.writableTail();
+    *lenReturn = readBufQueue_.tailroom();
   }
 
   void readDataAvailable(size_t len) noexcept override {

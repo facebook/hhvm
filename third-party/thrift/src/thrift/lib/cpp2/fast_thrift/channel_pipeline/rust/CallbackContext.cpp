@@ -314,12 +314,12 @@ std::unique_ptr<folly::IOBuf> CallbackContext::copyBuffer(
     const uint8_t* data, size_t size) noexcept {
   try {
     if (size == 0) {
-      return folly::IOBuf::create(0);
+      return context_.allocate(0);
     }
     if (!data) {
       return nullptr;
     }
-    return folly::IOBuf::copyBuffer(data, size);
+    return context_.copyBuffer(data, size);
   } catch (...) {
     return nullptr;
   }
@@ -348,9 +348,12 @@ std::unique_ptr<folly::IOBuf> CallbackContext::coalescedCopy(
   try {
     const size_t total = buffer.computeChainDataLength();
     if (total == 0) {
-      return folly::IOBuf::create(0);
+      return context_.allocate(0);
     }
-    auto out = folly::IOBuf::create(total);
+    auto out = context_.allocate(total);
+    if (!out) {
+      return nullptr;
+    }
     out->append(total);
     size_t offset = 0;
     for (auto* curr = &buffer;; curr = curr->next()) {

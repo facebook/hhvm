@@ -55,7 +55,7 @@ BytesPtr ContextImpl::allocate(size_t size) noexcept {
 }
 
 BytesPtr ContextImpl::copyBuffer(const void* data, size_t size) noexcept {
-  return folly::IOBuf::copyBuffer(data, size);
+  return pipeline_->copyBuffer(data, size);
 }
 
 void ContextImpl::close() noexcept {

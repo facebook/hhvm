@@ -350,6 +350,10 @@ class PipelineBuilder {
     pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
       return static_cast<Allocator*>(alloc)->allocate(size);
     };
+    pipeline->copyBufferFn_ =
+        [](void* alloc, const void* data, size_t size) noexcept -> BytesPtr {
+      return static_cast<Allocator*>(alloc)->copyBuffer(data, size);
+    };
 
     // Link per-event subscriber lists now that endpoints are wired (endpoints
     // subscribe too). No-op when events are disabled.

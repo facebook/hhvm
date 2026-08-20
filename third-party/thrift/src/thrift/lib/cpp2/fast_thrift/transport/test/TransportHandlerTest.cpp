@@ -441,6 +441,55 @@ TEST_F(TransportHandlerTest, MultipleReadBufferAvailableCalls) {
   EXPECT_EQ(appHandler_.readCount(), 5);
 }
 
+// Test: the socket read buffer is sourced from the pipeline's allocator, and
+// a partially consumed buffer is reused rather than re-allocated.
+TEST_F(TransportHandlerTest, ReadBufferComesFromPipelineAllocator) {
+  auto socket = folly::AsyncTransport::UniquePtr(
+      new NiceMock<folly::test::MockAsyncTransport>());
+  ON_CALL(
+      *static_cast<folly::test::MockAsyncTransport*>(socket.get()),
+      getEventBase())
+      .WillByDefault(Return(&evb_));
+
+  constexpr size_t kMinBufferSize = 256;
+  constexpr size_t kMaxBufferSize = 4096;
+  auto handler = TransportHandler::create(
+      std::move(socket), kMinBufferSize, kMaxBufferSize);
+
+  TestAllocator allocator;
+  auto pipeline =
+      PipelineBuilder<TransportHandler, MockAppHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(handler.get())
+          .setTail(&appHandler_)
+          .setAllocator(&allocator)
+          .build();
+  handler->setPipeline(pipeline.get());
+
+  void* buf = nullptr;
+  size_t len = 0;
+  handler->getReadBuffer(&buf, &len);
+
+  EXPECT_EQ(allocator.allocationCount(), 1);
+  EXPECT_EQ(allocator.totalBytesAllocated(), kMaxBufferSize);
+  EXPECT_NE(buf, nullptr);
+  EXPECT_GE(len, kMaxBufferSize);
+
+  // Ample tailroom remains, so a repeated request reuses the same buffer.
+  void* second = nullptr;
+  handler->getReadBuffer(&second, &len);
+  EXPECT_EQ(allocator.allocationCount(), 1);
+  EXPECT_EQ(second, buf);
+
+  // readDataAvailable moves the whole chain to the pipeline, so the next
+  // request starts over with a fresh buffer from the allocator.
+  handler->readDataAvailable(16);
+  EXPECT_EQ(appHandler_.readCount(), 1);
+
+  handler->getReadBuffer(&buf, &len);
+  EXPECT_EQ(allocator.allocationCount(), 2);
+}
+
 // --- Lifecycle Tests ---
 
 // --- Close Behavior Tests ---

@@ -237,6 +237,11 @@ class PipelineImpl : public folly::DelayedDestruction {
   BytesPtr allocate(size_t size) noexcept;
 
   /**
+   * Copy data into a buffer obtained from the pipeline's allocator.
+   */
+  BytesPtr copyBuffer(const void* data, size_t size) noexcept;
+
+  /**
    * Get the EventBase this pipeline runs on.
    */
   folly::EventBase* eventBase() const noexcept { return eventBase_; }
@@ -416,6 +421,7 @@ class PipelineImpl : public folly::DelayedDestruction {
 
   // Allocator callbacks
   BytesPtr (*allocateFn_)(void*, size_t) noexcept {nullptr};
+  BytesPtr (*copyBufferFn_)(void*, const void*, size_t) noexcept {nullptr};
 
   // Cached entry-point dispatch for fireRead/fireWrite hot paths.
   // Points directly to the read-entry/write-entry handler's function pointer,

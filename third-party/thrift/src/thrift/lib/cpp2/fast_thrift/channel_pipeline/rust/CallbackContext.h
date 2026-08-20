@@ -54,13 +54,14 @@ namespace channel_pipeline_rust {
  *   IOBuf::create fallback). noexcept, returns null on failure (None in Rust).
  *   Zero and boundary sizes valid and produce an empty chain when underlying
  *   allocator honors them.
- * - copyBuffer(data,size): deep copy via IOBuf::copyBuffer, cost allocation +
- *   memcpy, ignores pipeline allocator, zero-length returns empty IOBuf, null
- *   data with nonzero size returns null (None in Rust).
+ * - copyBuffer(data,size): deep copy through the pipeline allocator, cost
+ *   allocation + memcpy, zero-length returns empty IOBuf, null data with
+ *   nonzero size returns null (None in Rust).
  * - cloneBufferChain / cloneOne: shallow share (refcount increment), cheap, no
  *   payload copy.
- * - coalescedCopy: deep copy of whole chain into single contiguous IOBuf, cost
- *   allocation + memcpy of chainDataLength. Use only when contiguous needed.
+ * - coalescedCopy: deep copy of whole chain into a single contiguous IOBuf from
+ *   the pipeline allocator, cost allocation + memcpy of chainDataLength. Use
+ *   only when contiguous needed.
  * - close(): idempotent terminal close, clears ready lists + event lists and
  *   fires handlerRemoved reverse; noexcept.
  * - isClosed(): true after close or when owning pipeline pointer null.

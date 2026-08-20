@@ -597,6 +597,20 @@ TEST_F(PipelineImplTest, ContextAllocate) {
   EXPECT_EQ(allocator_.totalBytesAllocated(), 1024);
 }
 
+TEST_F(PipelineImplTest, ContextCopyBuffer) {
+  createHandlers();
+  auto pipeline = buildPipeline();
+
+  constexpr folly::StringPiece kData{"payload"};
+  auto* ctx = pipeline->context(head_tag);
+  auto buf = ctx->copyBuffer(kData.data(), kData.size());
+
+  ASSERT_NE(buf.get(), nullptr);
+  EXPECT_EQ(folly::StringPiece(buf->coalesce()), kData);
+  EXPECT_EQ(allocator_.allocationCount(), 1);
+  EXPECT_EQ(allocator_.totalBytesAllocated(), kData.size());
+}
+
 TEST_F(PipelineImplTest, ContextPipeline) {
   createHandlers();
   auto pipeline = buildPipeline();

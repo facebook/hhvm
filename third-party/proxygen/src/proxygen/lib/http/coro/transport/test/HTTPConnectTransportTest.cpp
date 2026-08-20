@@ -289,6 +289,25 @@ TEST_F(HTTPConnectTransportTest, ConnectCancelled) {
   });
 }
 
+TEST_F(HTTPConnectTransportTest, ConnectCancelledBeforeIngressAssigned) {
+  run([&]() -> Task<> {
+    auto session = co_await HTTPCoroConnector::connect(
+        &evb, *srv->address(), 0ms, getConnParams());
+    auto reservation = session->reserveRequest();
+    // Cancel after the session exists so connectUnique constructs the stream.
+    cancelSource.requestCancellation();
+    auto result = co_await folly::coro::co_awaitTry(co_withCancellation(
+        cancelSource.getToken(),
+        HTTPConnectStream::connectUnique(session,
+                                         std::move(*reservation),
+                                         kAuthority,
+                                         std::chrono::seconds(1),
+                                         {{"Foo", "Bar"}},
+                                         egressBufferSize)));
+    EXPECT_TRUE(result.hasException());
+  });
+}
+
 TEST_F(HTTPConnectTransportTest, SimpleReadWrite) {
   run([&]() -> Task<> {
     // Should fill window

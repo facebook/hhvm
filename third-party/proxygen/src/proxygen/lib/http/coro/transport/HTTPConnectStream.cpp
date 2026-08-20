@@ -167,7 +167,7 @@ void HTTPConnectStream::close() {
 }
 
 bool HTTPConnectStream::canRead() const {
-  return *ingressSource_;
+  return ingressSource_ && *ingressSource_;
 }
 
 bool HTTPConnectStream::canWrite() const {

@@ -688,6 +688,7 @@ struct ExtTSPImpl {
         // Get candidates for merging with the current chain
         for (auto edgeIter : chainPred->edges) {
           Chain* chainSucc = edgeIter.first;
+          if (chainSucc == nullptr) continue;
           ChainEdge* chainEdge = edgeIter.second;
           // Ignore loop edges
           if (chainPred == chainSucc) continue;

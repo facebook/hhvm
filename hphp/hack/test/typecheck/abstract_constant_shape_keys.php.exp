@@ -1,0 +1,44 @@
+ERROR: File "abstract_constant_shape_keys.php", line 6, characters 37-47:
+Cannot reference abstract constant `MagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 12, characters 37-55:
+Cannot reference abstract constant `MagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 13, characters 18-36:
+Cannot reference abstract constant `MagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 20, characters 44-54:
+Cannot reference abstract constant `AbstractMagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 21, characters 18-28:
+Cannot reference abstract constant `AbstractMagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 29, characters 5-31:
+Cannot reference abstract constant `AbstractMagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 31, characters 18-44:
+Cannot reference abstract constant `AbstractMagicFactory::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 38, characters 44-54:
+Cannot reference abstract constant `MagicFactoryTrait::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 39, characters 18-28:
+Cannot reference abstract constant `MagicFactoryTrait::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 49, characters 5-28:
+Cannot reference abstract constant `MagicFactoryTrait::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
+  Declaration is here
+ERROR: File "abstract_constant_shape_keys.php", line 51, characters 18-41:
+Cannot reference abstract constant `MagicFactoryTrait::MAGIC` directly (Typing[4129])
+  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
+  Declaration is here

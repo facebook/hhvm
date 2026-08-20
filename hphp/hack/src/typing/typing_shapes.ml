@@ -607,7 +607,19 @@ let check_shape_keys_validity env keys =
           let (env, ty) = Env.fresh_type_error env p in
 
           (env, key_pos, Some (cls, ty))
-        | Some { cc_type; _ } ->
+        | Some { cc_type; cc_abstract; cc_pos; _ } ->
+          (match cc_abstract with
+          | CCAbstract _ ->
+            Typing_error_utils.add_typing_error ~env
+            @@ Typing_error.(
+                 primary
+                 @@ Primary.Abstract_const_usage
+                      {
+                        pos = key_pos;
+                        decl_pos = cc_pos;
+                        name = cls ^ "::" ^ y;
+                      })
+          | CCConcrete -> ());
           let ((env, ty_err_opt), ty) =
             Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
           in

@@ -293,7 +293,12 @@ void ConnectionHandler::setConnectionFactory(
   // (hot-reload safe).
   if (sslPolicy_ != fast_security::SSLPolicy::DISABLED) {
     builder.template addNextDuplex<handler::ConnectionTLSHandler>(
-        connection_tls_tag, *evb_, sslPolicy_, tlsParamsObserver_, &allocator_);
+        connection_tls_tag,
+        *evb_,
+        sslPolicy_,
+        tlsParamsObserver_,
+        &allocator_,
+        socketOptions_.maxPendingConnections);
   }
 
   builder.template addNextInbound<Builder>(

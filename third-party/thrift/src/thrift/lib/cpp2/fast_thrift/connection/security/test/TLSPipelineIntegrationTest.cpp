@@ -23,6 +23,7 @@
 #include <chrono>
 #include <memory>
 #include <string_view>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -192,7 +193,11 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
   }
 
   // Build outer pipeline NoopHead → ConnectionTLSHandler → CapturingTail.
-  void buildPipeline(fts::SSLPolicy policy, CapturingTail::OnRead onRead) {
+  // maxPending of zero leaves the pending-connection limit off.
+  void buildPipeline(
+      fts::SSLPolicy policy,
+      CapturingTail::OnRead onRead,
+      uint32_t maxPending) {
     head_ = std::make_unique<NoopHead>();
     tail_ = std::make_unique<CapturingTail>(std::move(onRead));
 
@@ -211,23 +216,67 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
               *evb_,
               policy,
               tlsParamsObservable_->getObserver(),
-              &allocator_);
+              &allocator_,
+              maxPending);
       pipeline_ = builder.build();
       pipeline_->activate();
     });
   }
 
-  // Feed a server-side socket into the pipeline.
-  void feedSocket(folly::NetworkSocket fd) {
+  // Feed a server-side socket into the pipeline. Admission is synchronous, so
+  // the returned Result and any pending-count change are settled on return.
+  channel_pipeline::Result feedSocket(folly::NetworkSocket fd) {
+    auto result = channel_pipeline::Result::Success;
     evb_->runInEventBaseThreadAndWait([&] {
       auto sock = folly::AsyncSocket::newSocket(evb_, fd);
       conn::ConnectionMessage msg{
           .transport = folly::AsyncTransport::UniquePtr(sock.release()),
           .clientAddr = folly::SocketAddress{"127.0.0.1", 0},
       };
-      (void)pipeline_->fireRead(
-          channel_pipeline::erase_and_box(std::move(msg)));
+      result =
+          pipeline_->fireRead(channel_pipeline::erase_and_box(std::move(msg)));
     });
+    return result;
+  }
+
+  // Keep offering connections until one is admitted.
+  //
+  // A parked connection is given up on asynchronous terminal paths — handshake
+  // failure, peek timeout — that deliberately notify nobody, so there is no
+  // event to wait on. The peer's socket close is not a usable substitute
+  // either: fizz can close on error before the stage lets go of the
+  // connection. Retrying the accept is the observation, and each attempt round
+  // trips through the EventBase, yielding to the socket event that ends the
+  // failing handshake.
+  bool waitForAdmission() {
+    const auto deadline =
+        std::chrono::steady_clock::now() + std::chrono::seconds{5};
+    do {
+      auto sp = makeSocketPair();
+      const auto result = feedSocket(sp.server);
+      ::close(sp.client.toFd());
+      if (result == channel_pipeline::Result::Success) {
+        return true;
+      }
+    } while (std::chrono::steady_clock::now() < deadline);
+    return false;
+  }
+
+  // A peer that opens a connection and then says nothing occupies whichever
+  // stage parked it until it gives up. Once the limit is reached the next
+  // connection is refused rather than queued behind it.
+  void expectSilentPeerRefusedAtLimit(fts::SSLPolicy policy) {
+    buildPipeline(
+        policy, [](conn::ConnectionMessage&&) noexcept {}, /*maxPending=*/1);
+
+    auto first = makeSocketPair();
+    EXPECT_EQ(feedSocket(first.server), channel_pipeline::Result::Success);
+
+    auto second = makeSocketPair();
+    EXPECT_EQ(feedSocket(second.server), channel_pipeline::Result::Error);
+
+    ::close(first.client.toFd());
+    ::close(second.client.toFd());
   }
 
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;
@@ -249,13 +298,15 @@ TEST_F(TLSPipelineIntegrationTest, RequiredTLSHandshakeSucceeds) {
   folly::AsyncTransport::UniquePtr transport;
 
   buildPipeline(
-      fts::SSLPolicy::REQUIRED, [&](conn::ConnectionMessage&& m) noexcept {
+      fts::SSLPolicy::REQUIRED,
+      [&](conn::ConnectionMessage&& m) noexcept {
         transport = std::move(m.transport);
         emitted.post();
-      });
+      },
+      /*maxPending=*/0);
 
   auto sp = makeSocketPair();
-  feedSocket(sp.server);
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
 
   std::unique_ptr<TestFizzClient> client;
   folly::Baton<> clientDone;
@@ -288,13 +339,15 @@ TEST_F(TLSPipelineIntegrationTest, PermittedPlaintextBypassesHandshake) {
   folly::AsyncTransport::UniquePtr transport;
 
   buildPipeline(
-      fts::SSLPolicy::PERMITTED, [&](conn::ConnectionMessage&& m) noexcept {
+      fts::SSLPolicy::PERMITTED,
+      [&](conn::ConnectionMessage&& m) noexcept {
         transport = std::move(m.transport);
         emitted.post();
-      });
+      },
+      /*maxPending=*/0);
 
   auto sp = makeSocketPair();
-  feedSocket(sp.server);
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
 
   // Write 9+ bytes of non-TLS — enough for the classifier to make a decision.
   constexpr std::string_view garbage =
@@ -321,13 +374,15 @@ TEST_F(TLSPipelineIntegrationTest, PermittedTLSPathCompletesHandshake) {
   folly::AsyncTransport::UniquePtr transport;
 
   buildPipeline(
-      fts::SSLPolicy::PERMITTED, [&](conn::ConnectionMessage&& m) noexcept {
+      fts::SSLPolicy::PERMITTED,
+      [&](conn::ConnectionMessage&& m) noexcept {
         transport = std::move(m.transport);
         emitted.post();
-      });
+      },
+      /*maxPending=*/0);
 
   auto sp = makeSocketPair();
-  feedSocket(sp.server);
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
 
   std::unique_ptr<TestFizzClient> client;
   folly::Baton<> clientDone;
@@ -359,10 +414,11 @@ TEST_F(TLSPipelineIntegrationTest, RequiredGarbageInputDropsConnection) {
   folly::Baton<> emitted;
   buildPipeline(
       fts::SSLPolicy::REQUIRED,
-      [&](conn::ConnectionMessage&&) noexcept { emitted.post(); });
+      [&](conn::ConnectionMessage&&) noexcept { emitted.post(); },
+      /*maxPending=*/0);
 
   auto sp = makeSocketPair();
-  feedSocket(sp.server);
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
 
   // Garbage that doesn't parse as a TLS ClientHello.
   constexpr std::string_view garbage =
@@ -376,6 +432,89 @@ TEST_F(TLSPipelineIntegrationTest, RequiredGarbageInputDropsConnection) {
   EXPECT_FALSE(emitted.try_wait_for(std::chrono::milliseconds{500}));
 
   ::close(sp.client.toFd());
+}
+
+// Under REQUIRED a silent peer sits in the handshake stage.
+TEST_F(TLSPipelineIntegrationTest, RefusesConnectionsBeyondPendingLimit) {
+  expectSilentPeerRefusedAtLimit(fts::SSLPolicy::REQUIRED);
+}
+
+// Capacity must come back when a handshake fails, not only when it succeeds.
+// Failures are absorbed inside FizzHandshakeHandler without any downstream
+// notification, so a limit that relied on an explicit release would strand
+// capacity on exactly the input an attacker controls.
+TEST_F(TLSPipelineIntegrationTest, FailedHandshakeFreesPendingCapacity) {
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [&](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/1);
+
+  auto doomed = makeSocketPair();
+  ASSERT_EQ(feedSocket(doomed.server), channel_pipeline::Result::Success);
+
+  auto spare = makeSocketPair();
+  ASSERT_EQ(feedSocket(spare.server), channel_pipeline::Result::Error);
+  ::close(spare.client.toFd());
+
+  constexpr std::string_view garbage =
+      "definitely not a TLS ClientHello frame ........";
+  ASSERT_EQ(
+      ::write(doomed.client.toFd(), garbage.data(), garbage.size()),
+      ssize_t(garbage.size()));
+
+  EXPECT_TRUE(waitForAdmission());
+
+  ::close(doomed.client.toFd());
+}
+
+// Under PERMITTED it sits one stage earlier, in the classifier, waiting for
+// enough bytes to classify — the same exposure, capped the same way.
+TEST_F(TLSPipelineIntegrationTest, PeekAwaitingClassificationHoldsPendingSlot) {
+  expectSilentPeerRefusedAtLimit(fts::SSLPolicy::PERMITTED);
+}
+
+// The classifier releases its slot on a different path from the handshake
+// stage — its helper reports terminal before the callback runs rather than
+// after — and peek failures are absorbed with no downstream notification. So
+// the release contract needs proving on this stage too, not just on fizz.
+TEST_F(TLSPipelineIntegrationTest, FailedPeekFreesPendingCapacity) {
+  buildPipeline(
+      fts::SSLPolicy::PERMITTED,
+      [&](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/1);
+
+  auto doomed = makeSocketPair();
+  ASSERT_EQ(feedSocket(doomed.server), channel_pipeline::Result::Success);
+
+  auto spare = makeSocketPair();
+  ASSERT_EQ(feedSocket(spare.server), channel_pipeline::Result::Error);
+  ::close(spare.client.toFd());
+
+  // EOF before the classifier has its 9-byte prefix ends the peek in error.
+  ::close(doomed.client.toFd());
+
+  EXPECT_TRUE(waitForAdmission());
+}
+
+// A zero limit is the off switch: silent peers pile up and none are refused.
+TEST_F(TLSPipelineIntegrationTest, ZeroLimitLeavesAcceptsUnbounded) {
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [&](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/0);
+
+  constexpr size_t kConnections = 4;
+  std::vector<SocketPair> pairs;
+  for (size_t i = 0; i < kConnections; ++i) {
+    pairs.push_back(makeSocketPair());
+    EXPECT_EQ(
+        feedSocket(pairs.back().server), channel_pipeline::Result::Success)
+        << "connection " << i;
+  }
+
+  for (auto& pair : pairs) {
+    ::close(pair.client.toFd());
+  }
 }
 
 } // namespace apache::thrift::fast_thrift::connection::security::test

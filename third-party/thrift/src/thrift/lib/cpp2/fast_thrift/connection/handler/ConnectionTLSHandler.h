@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -86,6 +87,10 @@ HANDLER_TAG(tls_inner_stoptls_v1);
  * Hot-reload of TLS state is pull-based: the Observer passed at construction
  * is threaded into the pipeline and snapshotted there per accepted connection.
  *
+ * The pending-connection limit is configured here and enforced by each parking
+ * stage against the connections it holds itself; see SocketOptions.h for what
+ * that bounds.
+ *
  * Lifecycle:
  *   - The pipeline and its endpoints are built once in the constructor.
  *   - onPipelineActive / onPipelineInactive cascade activate() / deactivate()
@@ -97,13 +102,15 @@ class ConnectionTLSHandler {
   // sslPolicy must not be DISABLED — caller (ConnectionHandler) doesn't
   // install this handler at all in that case. tlsParamsObserver supplies
   // fizz context + thrift extension params + handshake timeout per accept.
-  // allocator is shared with the outer pipeline.
+  // allocator is shared with the outer pipeline. maxPendingConnections caps
+  // how many connections each TLS stage will park; zero is unlimited.
   ConnectionTLSHandler(
       folly::EventBase& evb,
       fast_security::SSLPolicy sslPolicy,
       folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
           tlsParamsObserver,
-      channel_pipeline::SimpleBufferAllocator* allocator) {
+      channel_pipeline::SimpleBufferAllocator* allocator,
+      uint32_t maxPendingConnections) {
     DCHECK(sslPolicy != fast_security::SSLPolicy::DISABLED)
         << "ConnectionTLSHandler should not be installed for DISABLED policy";
 
@@ -119,12 +126,12 @@ class ConnectionTLSHandler {
     // flows TLSConfigHandler → [TLSClassifier] → FizzHandshakeHandler →
     // StopTLSV1Handler → TLSFinalizer.
     builder.template addNextDuplex<tls_handler::StopTLSV1Handler>(
-        tls_inner_stoptls_v1_tag);
+        tls_inner_stoptls_v1_tag, maxPendingConnections);
     builder.template addNextDuplex<tls_handler::FizzHandshakeHandler>(
-        tls_inner_fizz_handshake_tag);
+        tls_inner_fizz_handshake_tag, maxPendingConnections);
     if (sslPolicy == fast_security::SSLPolicy::PERMITTED) {
       builder.template addNextDuplex<tls_handler::TLSClassifier>(
-          tls_inner_classifier_tag);
+          tls_inner_classifier_tag, maxPendingConnections);
     }
     // TLSConfigHandler stamps the current TLSParams snapshot onto every
     // accepted message; downstream stages read it via msg.tlsParams and

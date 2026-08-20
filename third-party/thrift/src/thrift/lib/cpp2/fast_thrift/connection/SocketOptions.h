@@ -21,9 +21,9 @@
 namespace apache::thrift::fast_thrift::connection {
 
 /**
- * Listening-socket tuning knobs applied by ConnectionHandler at
- * startAccepting time. Pure data — set on the embedder via the server's
- * setSocketOptions and forwarded through ConnectionManager.
+ * Listening-socket and accept-path tuning knobs. Pure data — set on the
+ * embedder via the server's setSocketOptions and forwarded through
+ * ConnectionManager to every IO thread's ConnectionHandler.
  */
 struct SocketOptions {
   // Accept queue depth (kernel listen backlog).
@@ -39,6 +39,18 @@ struct SocketOptions {
   // read() syscalls one socket does per EVB callback before yielding.
   // Matches legacy ThriftServer's socketMaxReadsPerEvent_ default.
   uint32_t maxReadsPerEvent{16};
+
+  // Cap on the connections an IO thread will hold parked in a TLS stage —
+  // accepted, but not yet resolved to an established connection: awaiting
+  // peek classification, the fizz handshake, or a StopTLS V1 downgrade. Past
+  // the cap a connection is closed straight away rather than parked, bounding
+  // what a peer that stalls one of those steps can pin. Zero disables the cap.
+  //
+  // Each parking stage carries the cap separately, so a thread's ceiling is
+  // this many per stage the policy installs: two under SSLPolicy::REQUIRED,
+  // three under PERMITTED. Has no effect under DISABLED, where a connection
+  // is established on the accept itself and is never parked.
+  uint32_t maxPendingConnections{0};
 };
 
 } // namespace apache::thrift::fast_thrift::connection

@@ -149,8 +149,12 @@ class ConnectionListener : public folly::DelayedDestruction,
             << clientAddr.describe();
         return;
       case channel_pipeline::Result::Error:
-        XLOG(WARN) << "Acceptance pipeline rejected connection from "
-                   << clientAddr.describe();
+        // Rate-limited: rejection is a routine outcome once an accept-path
+        // limit is in force, and a peer must not be able to drive the log
+        // one line per connection attempt.
+        XLOG_EVERY_MS(WARN, 1000)
+            << "Acceptance pipeline rejected connection from "
+            << clientAddr.describe();
         return;
     }
   }

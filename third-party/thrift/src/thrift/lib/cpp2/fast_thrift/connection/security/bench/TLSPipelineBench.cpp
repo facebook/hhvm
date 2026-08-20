@@ -177,7 +177,8 @@ struct Harness {
               *evb,
               policy,
               tlsParamsObservable->getObserver(),
-              &allocator);
+              &allocator,
+              /*maxPendingConnections=*/0);
       pipeline = builder.build();
       pipeline->activate();
     });

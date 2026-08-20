@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -53,10 +54,17 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  *
  * Handshake failures are logged at DBG3 and the connection is dropped —
  * the message is absorbed (no downstream fire).
+ *
+ * The handshakes parked here are capped: past the cap a connection is refused
+ * rather than started, so a peer that never finishes its handshake cannot pin
+ * an unbounded number of sockets.
  */
 class FizzHandshakeHandler {
  public:
-  FizzHandshakeHandler() = default;
+  // maxPendingConnections caps the handshakes in flight at once; zero is
+  // unbounded.
+  explicit FizzHandshakeHandler(uint32_t maxPendingConnections) noexcept
+      : maxPendingConnections_{maxPendingConnections} {}
 
   ~FizzHandshakeHandler() = default;
   FizzHandshakeHandler(const FizzHandshakeHandler&) = delete;
@@ -86,6 +94,15 @@ class FizzHandshakeHandler {
     if (FOLLY_UNLIKELY(asyncSocket == nullptr)) {
       return ctx.fireWrite(
           channel_pipeline::erase_and_box(std::move(incoming)));
+    }
+
+    if (FOLLY_UNLIKELY(atCapacity())) {
+      // Dropping `incoming` closes the socket; no handshake is started.
+      XLOG_EVERY_MS(WARN, 1000)
+          << "Refusing connection from " << incoming.clientAddr.describe()
+          << ": already handshaking " << maxPendingConnections_
+          << " connections on this thread";
+      return channel_pipeline::Result::Error;
     }
 
     (void)incoming.transport.release();
@@ -200,11 +217,23 @@ class FizzHandshakeHandler {
     }
   }
 
+  bool atCapacity() const noexcept {
+    return maxPendingConnections_ != 0 &&
+        inFlight_.size() >= maxPendingConnections_;
+  }
+
+  // Doubles as the pending count the cap is enforced against: every way a
+  // handshake can end — completion, failure, timeout, shutdown cancellation —
+  // erases its entry, so capacity comes back without a release site of its
+  // own. The helper reports terminal after the user callback has run, so an
+  // entry outlives the downstream fire by the tail of that call stack; no
+  // accept can interleave there, since it is all one EventBase.
   folly::F14FastMap<
       fast_security::FizzHandshakeHelper*,
       fast_security::FizzHandshakeHelper::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  uint32_t maxPendingConnections_{0};
 };
 
 } // namespace apache::thrift::fast_thrift::connection::security::handler

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -62,10 +63,16 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  *
  * Peek errors and timeouts are logged at DBG3 and the connection is
  * dropped — matches FizzHandshakeHandler error policy.
+ *
+ * The connections parked here awaiting classification are capped: past the
+ * cap a connection is refused rather than parked, so a peer that opens a
+ * socket and then says nothing cannot pin an unbounded number of them.
  */
 class TLSClassifier {
  public:
-  TLSClassifier() = default;
+  // maxPendingConnections caps the peeks in flight at once; zero is unbounded.
+  explicit TLSClassifier(uint32_t maxPendingConnections) noexcept
+      : maxPendingConnections_{maxPendingConnections} {}
 
   ~TLSClassifier() = default;
   TLSClassifier(const TLSClassifier&) = delete;
@@ -95,6 +102,15 @@ class TLSClassifier {
     if (FOLLY_UNLIKELY(asyncSocket == nullptr)) {
       return ctx.fireWrite(
           channel_pipeline::erase_and_box(std::move(incoming)));
+    }
+
+    if (FOLLY_UNLIKELY(atCapacity())) {
+      // Dropping `incoming` closes the socket; no peek is started.
+      XLOG_EVERY_MS(WARN, 1000)
+          << "Refusing connection from " << incoming.clientAddr.describe()
+          << ": already classifying " << maxPendingConnections_
+          << " connections on this thread";
+      return channel_pipeline::Result::Error;
     }
 
     (void)incoming.transport.release();
@@ -207,18 +223,33 @@ class TLSClassifier {
             << clientAddr.describe();
         return;
       case channel_pipeline::Result::Error:
-        XLOG(WARN) << "Downstream rejected "
-                   << (looksLikeTLS ? "TLS-bound" : "plaintext")
-                   << " connection from " << clientAddr.describe();
+        // Rate-limited: the handshake stage refuses routinely once its own
+        // pending limit is in force, and a peer must not be able to drive this
+        // one line per connection attempt.
+        XLOG_EVERY_MS(WARN, 1000)
+            << "Downstream rejected "
+            << (looksLikeTLS ? "TLS-bound" : "plaintext") << " connection from "
+            << clientAddr.describe();
         return;
     }
   }
 
+  bool atCapacity() const noexcept {
+    return maxPendingConnections_ != 0 &&
+        inFlight_.size() >= maxPendingConnections_;
+  }
+
+  // Doubles as the pending count the cap is enforced against: every way a peek
+  // can end — classification, error, timeout, shutdown cancellation — erases
+  // its entry, so capacity comes back without a release site of its own. The
+  // peeker reports terminal before the user callback runs, so the entry is
+  // already gone before the connection is routed on to the handshake stage.
   folly::F14FastMap<
       fast_security::TLSPrefixPeeker*,
       fast_security::TLSPrefixPeeker::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  uint32_t maxPendingConnections_{0};
 };
 
 } // namespace apache::thrift::fast_thrift::connection::security::handler

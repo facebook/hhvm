@@ -242,10 +242,10 @@ class FastThriftServer {
   void setEnableReusePortBpfSpread(bool enable);
 
   /**
-   * Listening-socket tuning knobs (listen backlog, TCP Fast Open, max
-   * accepts per event). Applied by ConnectionHandler at startAccepting
-   * time on every IO thread's listening socket. When unset, defaults
-   * from connection/SocketOptions.h apply.
+   * Listening-socket and accept-path tuning knobs (listen backlog, TCP Fast
+   * Open, max reads per event, max pending connections). Applied by
+   * ConnectionHandler on every IO thread. When unset, defaults from
+   * connection/SocketOptions.h apply.
    *
    * Must be called before start()/serve().
    */

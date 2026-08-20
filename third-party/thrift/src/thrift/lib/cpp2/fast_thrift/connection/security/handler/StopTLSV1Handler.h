@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <utility>
 
 #include <fizz/server/AsyncFizzServer.h>
@@ -47,10 +48,19 @@ namespace apache::thrift::fast_thrift::connection::security::handler {
  *     retain access to negotiated parameters).
  *
  * StopTLS failures are logged at DBG3 and the connection is dropped.
+ *
+ * The downgrades parked here are capped: past the cap a connection is refused
+ * rather than started. The exchange has no timeout of its own, so a peer that
+ * negotiates StopTLS V1 and then stalls the downgrade holds its socket until
+ * it disconnects.
  */
 class StopTLSV1Handler {
  public:
-  StopTLSV1Handler() = default;
+  // maxPendingConnections caps the downgrades in flight at once; zero is
+  // unbounded.
+  explicit StopTLSV1Handler(uint32_t maxPendingConnections) noexcept
+      : maxPendingConnections_{maxPendingConnections} {}
+
   ~StopTLSV1Handler() = default;
 
   StopTLSV1Handler(const StopTLSV1Handler&) = delete;
@@ -93,6 +103,15 @@ class StopTLSV1Handler {
           << incoming.clientAddr.describe();
       return ctx.fireWrite(
           channel_pipeline::erase_and_box(std::move(incoming)));
+    }
+
+    if (FOLLY_UNLIKELY(atCapacity())) {
+      // Dropping `incoming` closes the transport; no downgrade is started.
+      XLOG_EVERY_MS(WARN, 1000)
+          << "Refusing connection from " << incoming.clientAddr.describe()
+          << ": already downgrading " << maxPendingConnections_
+          << " connections on this thread";
+      return channel_pipeline::Result::Error;
     }
 
     (void)incoming.transport.release();
@@ -185,9 +204,21 @@ class StopTLSV1Handler {
     }
   }
 
+  bool atCapacity() const noexcept {
+    return maxPendingConnections_ != 0 &&
+        inFlight_.size() >= maxPendingConnections_;
+  }
+
+  // Doubles as the pending count the cap is enforced against: every way a
+  // downgrade can end — success, error, shutdown cancellation — erases its
+  // entry, so capacity comes back without a release site of its own. The
+  // helper reports terminal after the user callback has run, so an entry
+  // outlives the downstream fire by the tail of that call stack; no accept
+  // can interleave there, since it is all one EventBase.
   folly::F14FastMap<util::StopTLSHelper*, util::StopTLSHelper::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  uint32_t maxPendingConnections_{0};
 };
 
 } // namespace apache::thrift::fast_thrift::connection::security::handler

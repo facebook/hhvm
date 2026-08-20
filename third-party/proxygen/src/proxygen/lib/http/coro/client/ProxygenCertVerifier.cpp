@@ -162,11 +162,15 @@ std::optional<folly::IPAddress> ExpectedIdentity::getIp() const {
   return std::nullopt;
 }
 
-std::shared_ptr<fizz::CertificateVerifier> makeVerifier(
+std::shared_ptr<const fizz::CertificateVerifier> makeVerifier(
     std::shared_ptr<const fizz::CertificateVerifier> verifier,
     ExpectedIdentity expectedIdentity,
     ValidationPolicy policy,
     CertVerifyLogFn logFn) {
+  if (std::dynamic_pointer_cast<const fizz::InsecureCertificateVerifier>(
+          verifier)) {
+    return verifier;
+  }
   return std::make_shared<ProxygenCertVerifier>(std::move(verifier),
                                                 std::move(expectedIdentity),
                                                 policy,

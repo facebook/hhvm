@@ -15,8 +15,12 @@ namespace proxygen::coro::test {
 // used in production. Using it in production would mean that this will
 // leave everyone insecure.
 class InsecureVerifierDangerousDoNotUseInProduction
-    : public fizz::CertificateVerifier {
+    : public fizz::InsecureCertificateVerifier {
  public:
+  InsecureVerifierDangerousDoNotUseInProduction()
+      : fizz::InsecureCertificateVerifier(fizz::VerificationContext::Client) {
+  }
+
   ~InsecureVerifierDangerousDoNotUseInProduction() override = default;
 
   fizz::Status verify(std::shared_ptr<const fizz::Cert>& ret,

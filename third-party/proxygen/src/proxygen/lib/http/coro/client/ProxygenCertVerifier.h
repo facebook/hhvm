@@ -67,11 +67,13 @@ struct ExpectedIdentity {
  * Creates a fizz::CertificateVerifier that validates the peer certificate chain
  * with `verifier` and, on top of that, verifies that the leaf certificate
  * matches `expectedIdentity`, handling a mismatch according to `policy`.
+ * An InsecureCertificateVerifier is returned directly without identity
+ * verification.
  *
  * `verifier` must not be null. `logFn`, if set, is invoked with
  * CertVerifyResult and error message if applicable.
  */
-std::shared_ptr<fizz::CertificateVerifier> makeVerifier(
+std::shared_ptr<const fizz::CertificateVerifier> makeVerifier(
     std::shared_ptr<const fizz::CertificateVerifier> verifier,
     ExpectedIdentity expectedIdentity,
     ValidationPolicy policy,

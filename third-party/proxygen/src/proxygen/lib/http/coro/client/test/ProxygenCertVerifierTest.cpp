@@ -34,7 +34,7 @@ class ProxygenCertVerifierTest : public testing::Test {
   }
 
  protected:
-  std::shared_ptr<fizz::CertificateVerifier> makeVerifier(
+  std::shared_ptr<const fizz::CertificateVerifier> makeVerifier(
       ExpectedIdentity expectedIdentity, ValidationPolicy policy) {
     folly::ssl::X509StoreUniquePtr store(X509_STORE_new());
     EXPECT_EQ(X509_STORE_add_cert(store.get(), rootCertAndKey_.cert.get()), 1);
@@ -107,6 +107,18 @@ TEST_F(ProxygenCertVerifierTest, UnderlyingVerifierFailure) {
   std::shared_ptr<const Cert> verifiedCert;
   EXPECT_EQ(verifier->verify(verifiedCert, err, {getPeerCert(untrustedLeaf)}),
             Status::Fail);
+}
+
+TEST_F(ProxygenCertVerifierTest, InsecureVerifierReturnedDirectly) {
+  auto insecureVerifier = std::make_shared<InsecureCertificateVerifier>(
+      VerificationContext::Client);
+
+  auto verifier = coro::makeVerifier(insecureVerifier,
+                                     ExpectedIdentity::expectDNS("example.com"),
+                                     ValidationPolicy::Enforcing,
+                                     nullptr);
+
+  EXPECT_EQ(verifier, insecureVerifier);
 }
 
 TEST_F(ProxygenCertVerifierTest, NullInnerVerifierFailsAtConstruction) {

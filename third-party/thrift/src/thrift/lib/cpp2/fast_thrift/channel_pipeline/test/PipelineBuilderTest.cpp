@@ -55,7 +55,10 @@ TEST_F(PipelineBuilderTest, BuildEmptyPipeline) {
           .setAllocator(&allocator_)
           .build();
 
-  EXPECT_NE(pipeline.get(), nullptr);
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
   EXPECT_EQ(pipeline->handlerCount(), 0);
   EXPECT_EQ(pipeline->eventBase(), &evb_);
 }
@@ -73,6 +76,10 @@ TEST_F(PipelineBuilderTest, BuildSingleHandlerPipeline) {
           .addNextDuplex<MockHandler>(codec_tag, std::move(handler))
           .build();
 
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
   EXPECT_EQ(pipeline->handlerCount(), 1);
   EXPECT_EQ(handler_ptr->handlerAddedCount(), 1);
 }
@@ -97,6 +104,10 @@ TEST_F(PipelineBuilderTest, BuildMultiHandlerPipeline) {
           .addNextDuplex<MockHandler>(logging_tag, std::move(logging))
           .build();
 
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
   EXPECT_EQ(pipeline->handlerCount(), 3);
 
   // All handlers should have handlerAdded called
@@ -143,13 +154,66 @@ TEST_F(PipelineBuilderTest, ContextLookupByTag) {
           .addNextDuplex<MockHandler>(codec_tag, std::move(codec))
           .build();
 
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
   auto* ctx = pipeline->context(codec_tag);
-  EXPECT_NE(ctx, nullptr);
+  if (ctx == nullptr) {
+    ADD_FAILURE() << "context lookup returned null";
+    return;
+  }
   EXPECT_EQ(ctx->handlerId(), codec_tag.id);
 
   // Non-existent handler returns nullptr
   auto* missing_ctx = pipeline->context(thrift_tag);
   EXPECT_EQ(missing_ctx, nullptr);
+}
+
+TEST_F(PipelineBuilderTest, ContextLookupByRuntimeId) {
+  constexpr HandlerId kInboundConstructed = fnv1a_hash("inbound_constructed");
+  constexpr HandlerId kInboundOwned = fnv1a_hash("inbound_owned");
+  constexpr HandlerId kOutboundConstructed = fnv1a_hash("outbound_constructed");
+  constexpr HandlerId kOutboundOwned = fnv1a_hash("outbound_owned");
+  constexpr HandlerId kDuplexConstructed = fnv1a_hash("duplex_constructed");
+  constexpr HandlerId kDuplexOwned = fnv1a_hash("duplex_owned");
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(&transport_)
+          .setTail(&app_)
+          .setAllocator(&allocator_)
+          .addNextInbound<MockHandler>(kInboundConstructed)
+          .addNextInbound<MockHandler>(
+              kInboundOwned, std::make_unique<MockHandler>())
+          .addNextOutbound<MockHandler>(kOutboundConstructed)
+          .addNextOutbound<MockHandler>(
+              kOutboundOwned, std::make_unique<MockHandler>())
+          .addNextDuplex<MockHandler>(kDuplexConstructed)
+          .addNextDuplex<MockHandler>(
+              kDuplexOwned, std::make_unique<MockHandler>())
+          .build();
+
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
+  for (const auto id : {
+           kInboundConstructed,
+           kInboundOwned,
+           kOutboundConstructed,
+           kOutboundOwned,
+           kDuplexConstructed,
+           kDuplexOwned,
+       }) {
+    auto* ctx = pipeline->context(id);
+    if (ctx == nullptr) {
+      ADD_FAILURE() << "context lookup returned null for id " << id;
+      continue;
+    }
+    EXPECT_EQ(ctx->handlerId(), id);
+  }
 }
 
 TEST_F(PipelineBuilderTest, BuildThrowsWithoutEventBase) {
@@ -284,6 +348,10 @@ TEST_F(PipelineBuilderTest, AddNextDuplexWithInPlaceConstruction) {
           .addNextDuplex<TestHandler>(codec_tag, "my_codec")
           .build();
 
+  if (pipeline == nullptr) {
+    ADD_FAILURE() << "build() returned a null pipeline";
+    return;
+  }
   EXPECT_EQ(pipeline->handlerCount(), 1);
 }
 

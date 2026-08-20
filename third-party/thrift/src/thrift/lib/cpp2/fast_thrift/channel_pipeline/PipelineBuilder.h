@@ -162,6 +162,14 @@ class PipelineBuilder {
     return addHandler<H>(tag.id, std::forward<Args>(args)...);
   }
 
+  /** Add the next inbound handler with an id selected at runtime. */
+  template <typename H, typename... Args>
+  PipelineBuilder& addNextInbound(HandlerId id, Args&&... args) {
+    static_assert(
+        InboundHandler<H, Ctx>, "Handler must satisfy InboundHandler concept");
+    return addHandler<H>(id, std::forward<Args>(args)...);
+  }
+
   /**
    * Add an existing inbound handler in head-to-tail order.
    *
@@ -178,6 +186,13 @@ class PipelineBuilder {
     return addHandler<H>(tag.id, std::move(handler));
   }
 
+  template <typename H>
+  PipelineBuilder& addNextInbound(HandlerId id, std::unique_ptr<H> handler) {
+    static_assert(
+        InboundHandler<H, Ctx>, "Handler must satisfy InboundHandler concept");
+    return addHandler<H>(id, std::move(handler));
+  }
+
   /**
    * Add the next outbound handler in head-to-tail order.
    *
@@ -192,6 +207,15 @@ class PipelineBuilder {
         OutboundHandler<H, Ctx>,
         "Handler must satisfy OutboundHandler concept");
     return addHandler<H>(tag.id, std::forward<Args>(args)...);
+  }
+
+  /** Add the next outbound handler with an id selected at runtime. */
+  template <typename H, typename... Args>
+  PipelineBuilder& addNextOutbound(HandlerId id, Args&&... args) {
+    static_assert(
+        OutboundHandler<H, Ctx>,
+        "Handler must satisfy OutboundHandler concept");
+    return addHandler<H>(id, std::forward<Args>(args)...);
   }
 
   /**
@@ -211,6 +235,14 @@ class PipelineBuilder {
     return addHandler<H>(tag.id, std::move(handler));
   }
 
+  template <typename H>
+  PipelineBuilder& addNextOutbound(HandlerId id, std::unique_ptr<H> handler) {
+    static_assert(
+        OutboundHandler<H, Ctx>,
+        "Handler must satisfy OutboundHandler concept");
+    return addHandler<H>(id, std::move(handler));
+  }
+
   /**
    * Add the next duplex handler in head-to-tail order.
    *
@@ -227,6 +259,20 @@ class PipelineBuilder {
   }
 
   /**
+   * Add the next duplex handler with an id selected at runtime.
+   *
+   * This is the config-driven counterpart to the `HandlerTag` overload. The
+   * concrete handler type is still known here and remains concept-checked;
+   * only the id used for `PipelineImpl::context()` lookup is dynamic.
+   */
+  template <typename H, typename... Args>
+  PipelineBuilder& addNextDuplex(HandlerId id, Args&&... args) {
+    static_assert(
+        DuplexHandler<H, Ctx>, "Handler must satisfy DuplexHandler concept");
+    return addHandler<H>(id, std::forward<Args>(args)...);
+  }
+
+  /**
    * Add an existing duplex handler in head-to-tail order.
    *
    * @tparam H Handler type (must satisfy DuplexHandler concept)
@@ -240,6 +286,13 @@ class PipelineBuilder {
     static_assert(
         DuplexHandler<H, Ctx>, "Handler must satisfy DuplexHandler concept");
     return addHandler<H>(tag.id, std::move(handler));
+  }
+
+  template <typename H>
+  PipelineBuilder& addNextDuplex(HandlerId id, std::unique_ptr<H> handler) {
+    static_assert(
+        DuplexHandler<H, Ctx>, "Handler must satisfy DuplexHandler concept");
+    return addHandler<H>(id, std::move(handler));
   }
 
   /**

@@ -22,8 +22,6 @@
 #include <vector>
 
 #include <thrift/lib/cpp/protocol/TType.h>
-#include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
-#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/thrift/SerializableDynamic.h>
 
 namespace apache::thrift {
@@ -365,64 +363,5 @@ struct BasicSerializableDynamicAdapter {
 };
 
 using SerializableDynamicAdapter = BasicSerializableDynamicAdapter<Dynamic>;
-
-} // namespace apache::thrift
-
-namespace apache::thrift::detail::pm {
-
-template <typename ExpectedTag>
-struct protocol_methods<type_class::variant, SerializableDynamic, ExpectedTag> {
-  template <typename Protocol>
-  static void read(Protocol& protocol, SerializableDynamic& value) {
-    SerializableDynamicAdapter::read(protocol, value);
-  }
-
-  template <typename Protocol>
-  static std::size_t write(
-      Protocol& protocol, const SerializableDynamic& value) {
-    return SerializableDynamicAdapter::write(protocol, value);
-  }
-
-  template <bool ZeroCopy, typename Protocol>
-  static std::size_t serializedSize(
-      Protocol& protocol, const SerializableDynamic& value) {
-    return SerializableDynamicAdapter::template serializedSize<ZeroCopy>(
-        protocol, value);
-  }
-};
-
-} // namespace apache::thrift::detail::pm
-
-namespace apache::thrift {
-
-template <>
-class Cpp2Ops<SerializableDynamic> {
- public:
-  static constexpr protocol::TType thriftType() { return protocol::T_STRUCT; }
-
-  template <typename Protocol>
-  static uint32_t write(Protocol* protocol, const SerializableDynamic* value) {
-    return SerializableDynamicAdapter::write(*protocol, *value);
-  }
-
-  template <typename Protocol>
-  static void read(Protocol* protocol, SerializableDynamic* value) {
-    SerializableDynamicAdapter::read(*protocol, *value);
-  }
-
-  template <typename Protocol>
-  static uint32_t serializedSize(
-      Protocol* protocol, const SerializableDynamic* value) {
-    return SerializableDynamicAdapter::template serializedSize<false>(
-        *protocol, *value);
-  }
-
-  template <typename Protocol>
-  static uint32_t serializedSizeZC(
-      Protocol* protocol, const SerializableDynamic* value) {
-    return SerializableDynamicAdapter::template serializedSize<true>(
-        *protocol, *value);
-  }
-};
 
 } // namespace apache::thrift

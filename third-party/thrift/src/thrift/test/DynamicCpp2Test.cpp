@@ -20,6 +20,7 @@
 #include <folly/json.h>
 
 #include <folly/io/async/EventBaseManager.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -31,6 +32,9 @@ namespace apache::thrift::test {
 using dynamic = folly::dynamic;
 using std::numeric_limits;
 using namespace cpp2;
+
+using SerializableDynamicTag = type::
+    adapted<SerializableDynamicAdapter, type::union_t<apache::thrift::Dynamic>>;
 
 static dynamic kDynamics[] = {
     // NULL
@@ -114,17 +118,15 @@ class RoundtripTestFixture : public ::testing::TestWithParam<dynamic> {};
 TEST_P(RoundtripTestFixture, RoundtripDynamics) {
   const SerializableDynamic expected = GetParam();
   BinaryProtocolWriter protWriter;
-  size_t bufSize =
-      Cpp2Ops<SerializableDynamic>::serializedSize(&protWriter, &expected);
   folly::IOBufQueue queue;
-  protWriter.setOutput(&queue, bufSize);
-  Cpp2Ops<SerializableDynamic>::write(&protWriter, &expected);
+  protWriter.setOutput(&queue);
+  op::encode<SerializableDynamicTag>(protWriter, expected);
 
   auto buf = queue.move();
   BinaryProtocolReader protReader;
   protReader.setInput(buf.get());
   SerializableDynamic actual;
-  Cpp2Ops<SerializableDynamic>::read(&protReader, &actual);
+  op::decode<SerializableDynamicTag>(protReader, actual);
   EXPECT_EQ(expected, actual)
       << "Expected: " << toJson(*expected) << " Actual: " << toJson(*actual);
 }
@@ -145,7 +147,7 @@ TEST(SerializableDynamicAdapterTest, SkipsMismatchedWireType) {
   BinaryProtocolReader reader;
   reader.setInput(buf.get());
   SerializableDynamic value(dynamic(true));
-  Cpp2Ops<SerializableDynamic>::read(&reader, &value);
+  op::decode<SerializableDynamicTag>(reader, value);
   EXPECT_TRUE(value->isBool());
   EXPECT_TRUE(value->asBool());
   EXPECT_EQ(size, reader.getCursorPosition());

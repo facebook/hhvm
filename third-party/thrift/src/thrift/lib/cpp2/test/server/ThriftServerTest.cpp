@@ -1302,7 +1302,6 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterOverSimpleTMUpstreamPriorities) {
     tm->start();
     ts.setThreadManager(tm);
   });
-  std::make_shared<TestHandler>();
   auto client = makeClient(runner, nullptr);
 
   folly::Baton baton1;

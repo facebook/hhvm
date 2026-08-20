@@ -213,7 +213,15 @@ class TransportHandlerT : public folly::DelayedDestruction,
       return Result::Error;
     }
 
-    return writePending_ > 0 ? Result::Backpressure : Result::Success;
+    // writeChain can complete inline, in which case writeSuccess has already
+    // run and writePending_ is back to 0: the bytes are on the wire and
+    // nothing is saturated. Otherwise the socket buffered them and upstream
+    // is being told to stop, which is what arms the wake-up in writeSuccess.
+    if (writePending_ == 0) {
+      return Result::Success;
+    }
+    writeSaturated_ = true;
+    return Result::Backpressure;
   }
 
   void pauseRead() noexcept {
@@ -261,7 +269,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
     if (state_ == State::Open) {
       DCHECK(pipeline_);
       signalWriteComplete(WriteCompletionStatus::Success, 0);
-      pipeline_->onWriteReady();
+      maybeSignalWriteReady();
       return;
     }
     maybeReleaseDrainer();
@@ -322,6 +330,23 @@ class TransportHandlerT : public folly::DelayedDestruction,
         auto [eventId, eventMsg] = Factory::make(status, bytes);
         pipeline_->fireEvent(eventId, std::move(eventMsg));
       }
+    }
+  }
+
+  // onWriteReady is an edge signal — "the socket has room again" — so it
+  // fires only for handlers that were previously told to stop, and only once
+  // every queued write has landed. Waking on each completion instead would
+  // let an absorber drain one message before its next write re-saturated the
+  // socket, so a queue would trickle out at one message per completion.
+  //
+  // This rests on handlers arming ctx.awaitWriteReady() only after a
+  // downstream write returned Result::Backpressure, which transitively
+  // originates here. A handler that arms on its own internal state instead
+  // would never be woken.
+  void maybeSignalWriteReady() noexcept {
+    if (writeSaturated_ && writePending_ == 0) {
+      writeSaturated_ = false;
+      pipeline_->onWriteReady();
     }
   }
 
@@ -458,6 +483,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
   folly::Function<void() noexcept> onClosed_;
   State state_{State::Created};
   bool readPaused_{true};
+  bool writeSaturated_{false};
   uint32_t writePending_{0};
   SocketDrainer socketDrainer_;
 };

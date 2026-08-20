@@ -330,6 +330,107 @@ TEST_F(TransportHandlerTest, WriteBackpressureWhenWritePending) {
   capturedCallback->writeSuccess();
 }
 
+// Test: a write that lands inline never saturated the socket, so nothing
+// upstream was told to stop and the pipeline must not be woken.
+TEST_F(TransportHandlerTest, SynchronousWriteDoesNotSignalWriteReady) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .WillOnce(DoAll(SaveArg<0>(&capturedCallback), InvokeWithoutArgs([&]() {
+                        if (capturedCallback) {
+                          capturedCallback->writeSuccess();
+                        }
+                      })));
+
+  auto bytes = folly::IOBuf::copyBuffer("inline write");
+  Result result = handler->onWrite(
+      channel_pipeline::test::inertEndpointContext(),
+      TypeErasedBox(std::move(bytes)));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(handler->writePending_, 0);
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 0);
+}
+
+// Test: a write the socket buffered signals Backpressure, and the wake-up
+// arrives once it completes.
+TEST_F(TransportHandlerTest, QueuedWriteSignalsWriteReadyOnceDrained) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .WillOnce(SaveArg<0>(&capturedCallback));
+
+  auto bytes = folly::IOBuf::copyBuffer("queued write");
+  Result result = handler->onWrite(
+      channel_pipeline::test::inertEndpointContext(),
+      TypeErasedBox(std::move(bytes)));
+
+  EXPECT_EQ(result, Result::Backpressure);
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 0);
+
+  capturedCallback->writeSuccess();
+
+  EXPECT_EQ(handler->writePending_, 0);
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 1);
+}
+
+// Test: with several writes outstanding only the final completion wakes the
+// pipeline, so an absorber drains its queue in one pass instead of making one
+// message of progress per completion.
+TEST_F(TransportHandlerTest, MultipleInFlightWritesSignalWriteReadyOnce) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .Times(3)
+      .WillRepeatedly(SaveArg<0>(&capturedCallback));
+
+  for (int i = 0; i < 3; ++i) {
+    auto bytes = folly::IOBuf::copyBuffer("queued write");
+    EXPECT_EQ(
+        handler->onWrite(
+            channel_pipeline::test::inertEndpointContext(),
+            TypeErasedBox(std::move(bytes))),
+        Result::Backpressure);
+  }
+  EXPECT_EQ(handler->writePending_, 3);
+
+  capturedCallback->writeSuccess();
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 0);
+  capturedCallback->writeSuccess();
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 0);
+  capturedCallback->writeSuccess();
+  EXPECT_EQ(appHandler_.onWriteReadyCount(), 1);
+}
+
+// Test: the saturation latch re-arms, so a later queued write gets its own
+// wake-up rather than the signal being delivered only once per connection.
+TEST_F(TransportHandlerTest, WriteReadySignalReArmsAfterDrain) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .Times(2)
+      .WillRepeatedly(SaveArg<0>(&capturedCallback));
+
+  for (int expected = 1; expected <= 2; ++expected) {
+    auto bytes = folly::IOBuf::copyBuffer("queued write");
+    EXPECT_EQ(
+        handler->onWrite(
+            channel_pipeline::test::inertEndpointContext(),
+            TypeErasedBox(std::move(bytes))),
+        Result::Backpressure);
+    capturedCallback->writeSuccess();
+    EXPECT_EQ(appHandler_.onWriteReadyCount(), expected);
+  }
+}
+
 // Test: Write Success Clears Pending State
 TEST_F(TransportHandlerTest, WriteSuccessClearsPendingState) {
   auto [handler, pipeline] = createHandlerAndPipeline();

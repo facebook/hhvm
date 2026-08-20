@@ -120,8 +120,16 @@ class ExecutorToThreadManagerAdaptor : public concurrency::ThreadManager {
   }
 
   [[nodiscard]] KeepAlive<> getKeepAlive(
-      ExecutionScope, Source) const override {
-    return folly::getKeepAliveToken(defaultAsyncExecutor_);
+      ExecutionScope executionScope, Source) const override {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    auto executor =
+        resourcePoolSet_
+            .resourcePoolByPriority_deprecated(executionScope.getPriority())
+            .executor();
+#pragma clang diagnostic pop
+    CHECK(executor);
+    return folly::getKeepAliveToken(executor->get());
   }
 
  private:

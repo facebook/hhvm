@@ -21,6 +21,7 @@
 
 #include <fmt/core.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/portability/SysResource.h>
 #include <folly/synchronization/Latch.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
@@ -449,6 +450,49 @@ TEST(ResourcePoolSetTest, PriorityMapping_customPriorityHint_routesCorrectly) {
       &set.resourcePoolByPriority_deprecated(concurrency::BEST_EFFORT),
       &asyncPool);
 #pragma clang diagnostic pop
+}
+
+TEST(
+    ResourcePoolSetTest,
+    SetThreadManagerPrioritiesAndPoolSizes_ResourcePools_PreservesPriorityRouting) {
+  ThriftServer server;
+  server.setThreadManagerType(ThriftServer::ThreadManagerType::PRIORITY);
+  server.setThreadManagerPrioritiesAndPoolSizes({{
+      {concurrency::PosixThreadFactory::HIGHER_PRI, 1},
+      {concurrency::PosixThreadFactory::HIGH_PRI, 1},
+      {concurrency::PosixThreadFactory::HIGH_PRI, 1},
+      {concurrency::PosixThreadFactory::NORMAL_PRI, 1},
+      {concurrency::PosixThreadFactory::LOWEST_PRI, 1},
+  }});
+  server.requireResourcePools();
+  server.setupThreadManager();
+  server.resourcePoolSet().lock();
+
+  // NORMAL routes to the defaultAsync pool (NORMAL_PRI -> nice 0); BEST_EFFORT
+  // routes to the generated "BE" pool (LOWEST_PRI -> nice 19). Verify routing
+  // by running a task on the executor the adaptor hands back for each priority
+  // and observing the worker thread's nice value, rather than comparing
+  // pointers. Both values are non-negative, so a non-root process can reach
+  // them (it may only lower its priority / raise its nice value).
+  constexpr int kNormalNice = 0;
+  constexpr int kBestEffortNice = 19;
+
+  auto threadManager = server.getThreadManager_deprecated();
+  auto observeNice = [&](concurrency::PRIORITY priority) {
+    auto keepAlive = threadManager->getKeepAlive(
+        priority, concurrency::ThreadManager::Source::INTERNAL);
+    int nice = 0;
+    folly::Latch done(1);
+    keepAlive->add([&] {
+      nice = getpriority(PRIO_PROCESS, 0);
+      done.count_down();
+    });
+    done.wait();
+    return nice;
+  };
+
+  EXPECT_EQ(observeNice(concurrency::PRIORITY::NORMAL), kNormalNice);
+  EXPECT_EQ(observeNice(concurrency::PRIORITY::BEST_EFFORT), kBestEffortNice);
 }
 
 // Phase 7: Empty, Size, Describe & Debug

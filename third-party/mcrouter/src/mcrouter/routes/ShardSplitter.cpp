@@ -53,46 +53,53 @@ ShardSplitter::ShardSplitInfo parseSplit(
     auto splitCnt = checkShardSplitSize(id, json, "shard_splits");
     return ShardSplitter::ShardSplitInfo(splitCnt);
   } else if (json.isObject()) {
-    auto oldSplitJson = json.getDefault("old_split_size", 1);
-    auto oldSplit = checkShardSplitSize(id, oldSplitJson, "old_split_size");
-    auto newSplitJson = json.getDefault("new_split_size", 1);
-    auto newSplit = checkShardSplitSize(id, newSplitJson, "new_split_size");
-    auto startTimeJson = json.getDefault("split_start", 0);
-    checkLogic(
-        startTimeJson.isInt(),
-        "ShardSplitter: split_start is not an int for {}",
-        id);
-    checkLogic(
-        startTimeJson.asInt() >= 0,
-        "ShardSplitter: split_start is negative for {}",
-        id);
-    std::chrono::system_clock::time_point startTime(
-        std::chrono::seconds(startTimeJson.asInt()));
-    auto migrationPeriodJson = json.getDefault("migration_period", 0);
-    checkLogic(
-        migrationPeriodJson.isInt(),
-        "ShardSplitter: migration_period is not an int for {}",
-        id);
-    checkLogic(
-        migrationPeriodJson.asInt() >= 0,
-        "ShardSplitter: migration_period is negative for {}",
-        id);
-    std::chrono::duration<double> migrationPeriod(migrationPeriodJson.asInt());
-    auto fanoutDeletesJson = json.getDefault("fanout_deletes", false);
-    checkLogic(
-        fanoutDeletesJson.isBool(),
-        "ShardSplitter: fanout_deletes is not bool for {}",
-        id);
+    size_t oldSplit = 1;
+    if (const auto* oldSplitJson = json.get_ptr("old_split_size")) {
+      oldSplit = checkShardSplitSize(id, *oldSplitJson, "old_split_size");
+    }
+    size_t newSplit = 1;
+    if (const auto* newSplitJson = json.get_ptr("new_split_size")) {
+      newSplit = checkShardSplitSize(id, *newSplitJson, "new_split_size");
+    }
+    std::chrono::system_clock::time_point startTime{};
+    if (const auto* startTimeJson = json.get_ptr("split_start")) {
+      checkLogic(
+          startTimeJson->isInt(),
+          "ShardSplitter: split_start is not an int for {}",
+          id);
+      checkLogic(
+          startTimeJson->asInt() >= 0,
+          "ShardSplitter: split_start is negative for {}",
+          id);
+      startTime = std::chrono::system_clock::time_point(
+          std::chrono::seconds(startTimeJson->asInt()));
+    }
+    std::chrono::duration<double> migrationPeriod(0);
+    if (const auto* migrationPeriodJson = json.get_ptr("migration_period")) {
+      checkLogic(
+          migrationPeriodJson->isInt(),
+          "ShardSplitter: migration_period is not an int for {}",
+          id);
+      checkLogic(
+          migrationPeriodJson->asInt() >= 0,
+          "ShardSplitter: migration_period is negative for {}",
+          id);
+      migrationPeriod =
+          std::chrono::duration<double>(migrationPeriodJson->asInt());
+    }
+    bool fanoutDeletes = false;
+    if (const auto* fanoutDeletesJson = json.get_ptr("fanout_deletes")) {
+      checkLogic(
+          fanoutDeletesJson->isBool(),
+          "ShardSplitter: fanout_deletes is not bool for {}",
+          id);
+      fanoutDeletes = fanoutDeletesJson->asBool();
+    }
     if (now > startTime + migrationPeriod || newSplit == oldSplit) {
-      return ShardSplitter::ShardSplitInfo(
-          newSplit, fanoutDeletesJson.asBool());
+      return ShardSplitter::ShardSplitInfo(newSplit, fanoutDeletes);
     } else {
       return ShardSplitter::ShardSplitInfo(
-          oldSplit,
-          newSplit,
-          startTime,
-          migrationPeriod,
-          fanoutDeletesJson.asBool());
+          oldSplit, newSplit, startTime, migrationPeriod, fanoutDeletes);
     }
   }
   // Should never reach here

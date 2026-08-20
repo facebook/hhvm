@@ -36,16 +36,26 @@ type ServerOption func(*serverConfig)
 // ConnContextFunc is the type for connection context modifier functions.
 type ConnContextFunc func(context.Context, net.Conn) context.Context
 
+// FrameworkMetadataHook decides what a server does with the opaque framework
+// metadata (RequestRpcMetadata.frameworkMetadata) of an incoming request. It is
+// called once per request that carries framework metadata, and the context it
+// returns is the one handed to the handler.
+//
+// This mirrors the C++ handleFrameworkMetadata pluggable function: the runtime
+// itself never interprets or forwards the bytes, it only offers them to the hook.
+type FrameworkMetadataHook func(ctx context.Context, frameworkMetadata []byte) context.Context
+
 // serverConfig is config needed to run a thrift server
 type serverConfig struct {
-	numWorkers         int
-	log                func(format string, args ...any)
-	userConnContext    ConnContextFunc
-	clientIdentityHook ClientIdentityHook
-	serverObserver     ServerObserver
-	maxRequests        int64
-	loadFn             func() uint32
-	interceptors       []ServiceInterceptor
+	numWorkers            int
+	log                   func(format string, args ...any)
+	userConnContext       ConnContextFunc
+	clientIdentityHook    ClientIdentityHook
+	serverObserver        ServerObserver
+	maxRequests           int64
+	loadFn                func() uint32
+	interceptors          []ServiceInterceptor
+	frameworkMetadataHook FrameworkMetadataHook
 }
 
 func newServerConfig(options ...ServerOption) *serverConfig {
@@ -121,6 +131,17 @@ func WithServerObserver(serverObserver ServerObserver) ServerOption {
 func WithMaxRequests(maxRequests int64) ServerOption {
 	return func(config *serverConfig) {
 		config.maxRequests = maxRequests
+	}
+}
+
+// WithFrameworkMetadataHook installs a hook that is called with the opaque framework
+// metadata of every incoming request that carries it. There is no hook by default, in
+// which case the metadata is left on the RequestContext and is not forwarded anywhere.
+// To propagate it to outbound calls, the hook should return
+// WithFrameworkMetadata(ctx, frameworkMetadata).
+func WithFrameworkMetadataHook(hook FrameworkMetadataHook) ServerOption {
+	return func(config *serverConfig) {
+		config.frameworkMetadataHook = hook
 	}
 }
 

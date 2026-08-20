@@ -31,7 +31,10 @@ func WithFrameworkMetadata(ctx context.Context, metadata []byte) context.Context
 	return context.WithValue(ctx, frameworkMetadataKey, metadata)
 }
 
-func getFrameworkMetadata(ctx context.Context) []byte {
+// GetFrameworkMetadata returns the framework metadata staged for the RPC, or nil if
+// unset. This is what the request encoder will put on the wire, so callers that need to
+// augment it should read it here rather than from the inbound RequestContext.
+func GetFrameworkMetadata(ctx context.Context) []byte {
 	metadata, ok := ctx.Value(frameworkMetadataKey).([]byte)
 	if ok {
 		return metadata

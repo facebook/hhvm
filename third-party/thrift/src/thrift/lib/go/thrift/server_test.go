@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"math"
 	"net"
@@ -33,8 +34,11 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
+	"github.com/rsocket/rsocket-go/payload"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -1340,6 +1344,159 @@ func TestStreamingSinkExceptionObserver(t *testing.T) {
 			if tt.expectDeclared {
 				mockObserver.AssertCalled(t, "DeclaredExceptionForFunction", tt.functionName)
 			}
+		})
+	}
+}
+
+func newFrameworkMetadataPayload(
+	t *testing.T,
+	processor Processor,
+	frameworkMetadata []byte,
+	headers map[string]string,
+) payload.Payload {
+	t.Helper()
+	args, ok := processor.ProcessorFunctionMap()["Ping"].NewReqArgs().(types.WritableStruct)
+	require.True(t, ok)
+	dataBytes, err := EncodeCompact(args)
+	require.NoError(t, err)
+	ctx := context.Background()
+	if frameworkMetadata != nil {
+		ctx = rocket.WithFrameworkMetadata(ctx, frameworkMetadata)
+	}
+	msg, err := rocket.EncodeRequestPayload(
+		ctx,
+		"Ping",
+		rpcmetadata.ProtocolId_COMPACT,
+		rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
+	require.NoError(t, err)
+	return msg
+}
+
+func newFrameworkMetadataSocket(t *testing.T, processor Processor, options ...ServerOption) *rocketServerSocket {
+	t.Helper()
+	listener, err := net.Listen("tcp", "[::]:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { listener.Close() })
+
+	srv, ok := NewServer(processor, listener, TransportIDRocket, options...).(*server)
+	require.True(t, ok)
+	return newRocketServerSocket(srv, ConnInfo{})
+}
+
+func TestPreprocessRequestFrameworkMetadata(t *testing.T) {
+	frameworkMetadata := []byte{1, 2, 3, 4}
+
+	tests := []struct {
+		name           string
+		installHook    bool
+		hookReturnsNil bool
+		sentMetadata   []byte
+		// expectHooked is what the hook should be handed, if anything.
+		expectHooked []byte
+	}{
+		{
+			name:         "no hook",
+			sentMetadata: frameworkMetadata,
+		},
+		{
+			name:         "hook",
+			installHook:  true,
+			sentMetadata: frameworkMetadata,
+			expectHooked: frameworkMetadata,
+		},
+		{
+			name:        "hook without framework metadata",
+			installHook: true,
+		},
+		{
+			name:           "hook returning nil context",
+			installHook:    true,
+			hookReturnsNil: true,
+			sentMetadata:   frameworkMetadata,
+			expectHooked:   frameworkMetadata,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var hooked []byte
+			var options []ServerOption
+			if tt.installHook {
+				options = append(options, WithFrameworkMetadataHook(
+					func(ctx context.Context, frameworkMetadata []byte) context.Context {
+						hooked = frameworkMetadata
+						if tt.hookReturnsNil {
+							return nil
+						}
+						return ctx
+					},
+				))
+			}
+
+			processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+			socket := newFrameworkMetadataSocket(t, processor, options...)
+
+			msg := newFrameworkMetadataPayload(t, processor, tt.sentMetadata, nil)
+			_, _, _, reqCtx, err := socket.preprocessRequest(msg)
+			require.NoError(t, err)
+			// Ingestion onto the RequestContext is unconditional.
+			require.Equal(t, tt.sentMetadata, reqCtx.FrameworkMetadata)
+
+			ctx := socket.withRequestContext(context.Background(), reqCtx)
+			require.Equal(t, tt.expectHooked, hooked)
+			require.Equal(t, reqCtx, GetRequestContext(ctx))
+			require.NotContains(t, GetRequestHeadersFromContext(ctx), "frameworkMetadata")
+		})
+	}
+}
+
+// TestPreprocessRequestFrameworkMetadataHeader covers clients that carry framework
+// metadata in a base64 header instead of the binary frameworkMetadata field.
+func TestPreprocessRequestFrameworkMetadataHeader(t *testing.T) {
+	headerMetadata := []byte{1, 2, 3, 4}
+	fieldMetadata := []byte{5, 6, 7, 8}
+	encodedHeader := base64.StdEncoding.EncodeToString(headerMetadata)
+
+	tests := []struct {
+		name         string
+		headers      map[string]string
+		sentMetadata []byte
+		expected     []byte
+	}{
+		{
+			name:     "header only",
+			headers:  map[string]string{frameworkMetadataHeaderKey: encodedHeader},
+			expected: headerMetadata,
+		},
+		{
+			name:         "header takes priority over field",
+			headers:      map[string]string{frameworkMetadataHeaderKey: encodedHeader},
+			sentMetadata: fieldMetadata,
+			expected:     headerMetadata,
+		},
+		{
+			name:         "malformed header",
+			headers:      map[string]string{frameworkMetadataHeaderKey: "not base64!"},
+			sentMetadata: fieldMetadata,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+			socket := newFrameworkMetadataSocket(t, processor, WithLog(func(string, ...any) {}))
+
+			msg := newFrameworkMetadataPayload(t, processor, tt.sentMetadata, tt.headers)
+			metadata, _, _, reqCtx, err := socket.preprocessRequest(msg)
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, reqCtx.FrameworkMetadata)
+			// The header is consumed, not surfaced to the handler.
+			require.NotContains(t, reqCtx.GetReadHeaders(), frameworkMetadataHeaderKey)
+			require.NotContains(t, metadata.GetOtherMetadata(), frameworkMetadataHeaderKey)
 		})
 	}
 }

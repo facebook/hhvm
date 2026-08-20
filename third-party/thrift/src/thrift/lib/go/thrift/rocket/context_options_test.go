@@ -25,13 +25,13 @@ import (
 
 func TestContextOptions(t *testing.T) {
 	t.Run("empty context", func(t *testing.T) {
-		frameworkMetadata := getFrameworkMetadata(context.TODO())
+		frameworkMetadata := GetFrameworkMetadata(context.TODO())
 		assert.Nil(t, frameworkMetadata)
 	})
 	t.Run("non-empty context", func(t *testing.T) {
 		frameworkMetadata := []byte{1, 2, 3}
 		ctx := WithFrameworkMetadata(context.TODO(), frameworkMetadata)
-		frameworkMetadataPrime := getFrameworkMetadata(ctx)
+		frameworkMetadataPrime := GetFrameworkMetadata(ctx)
 		assert.Equal(t, frameworkMetadata, frameworkMetadataPrime)
 	})
 }

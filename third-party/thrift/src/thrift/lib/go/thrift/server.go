@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"iter"
 	"maps"
@@ -77,6 +78,11 @@ type processorFunctionBiDi interface {
 	NewSinkElem() ReadableResult
 }
 
+// frameworkMetadataHeaderKey is the header used to carry framework metadata, base64
+// encoded, by clients that cannot set the binary RequestRpcMetadata.frameworkMetadata
+// field. It matches the key the C++ runtime looks for by default.
+const frameworkMetadataHeaderKey = "thrift_fmhk"
+
 var loadSheddingError = NewApplicationException(
 	LOADSHEDDING,
 	"load shedding due to max request limit",
@@ -129,6 +135,8 @@ func NewServer(proc Processor, listener net.Listener, transportType TransportID,
 		observer:     config.serverObserver,
 		maxRequests:  config.maxRequests,
 		interceptors: config.interceptors,
+
+		frameworkMetadataHook: config.frameworkMetadataHook,
 	}
 	if config.loadFn != nil {
 		result.loadFn = config.loadFn
@@ -153,6 +161,7 @@ type server struct {
 	totalActiveRequestCount atomic.Int64
 	loadFn                  func() uint32
 	interceptors            []ServiceInterceptor
+	frameworkMetadataHook   FrameworkMetadataHook
 }
 
 func (s *server) ServeContext(ctx context.Context) error {
@@ -444,7 +453,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		if metadata.InteractionCreate != nil {
 			ctx = types.WithInteractionCreateContext(ctx)
 		}
-		ctx = WithRequestContext(ctx, reqCtx)
+		ctx = s.withRequestContext(ctx, reqCtx)
 
 		// Run OnRequest interceptors before the handler.
 		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
@@ -535,7 +544,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	// Oneway requests have no per-request scheduler context; derive one from the
 	// background context so the handler can access the RequestContext.
-	ctx := WithRequestContext(context.Background(), reqCtx)
+	ctx := s.withRequestContext(context.Background(), reqCtx)
 
 	// Run OnRequest interceptors before the handler.
 	ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
@@ -593,7 +602,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 
 	return flux.Create(
 		func(ctx context.Context, sink flux.Sink) {
-			ctx = WithRequestContext(ctx, reqCtx)
+			ctx = s.withRequestContext(ctx, reqCtx)
 
 			onFirstResponse := func(respRes WritableResult, respErr error) {
 				// NOTE: we do not yet honor OnResponse interceptor errors here:
@@ -678,7 +687,7 @@ func (s *rocketServerSocket) requestChannelSink(
 	}
 
 	return flux.Create(func(ctx context.Context, sink flux.Sink) {
-		ctx = WithRequestContext(ctx, reqCtx)
+		ctx = s.withRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
 		onFirstResponse := func(respRes WritableResult, respErr error) {
@@ -820,7 +829,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 	}
 
 	return flux.Create(func(ctx context.Context, sink flux.Sink) {
-		ctx = WithRequestContext(ctx, reqCtx)
+		ctx = s.withRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
 		onFirstResponse := func(respRes WritableResult, respErr error) {
@@ -1016,6 +1025,20 @@ func (s *rocketServerSocket) makeResponsePayload(
 	return rocket.EncodePayloadMetadataAndData(streamMetadata, dataBytes, compression)
 }
 
+// withRequestContext attaches reqCtx to ctx and, when the server has a framework
+// metadata hook installed, gives it a chance to act on the framework metadata that
+// arrived with the request. The runtime does nothing with those bytes on its own.
+func (s *rocketServerSocket) withRequestContext(ctx context.Context, reqCtx *RequestContext) context.Context {
+	ctx = WithRequestContext(ctx, reqCtx)
+	if s.frameworkMetadataHook != nil && len(reqCtx.FrameworkMetadata) > 0 {
+		// A hook returning a nil context must not strip the RequestContext.
+		if hookedCtx := s.frameworkMetadataHook(ctx, reqCtx.FrameworkMetadata); hookedCtx != nil {
+			ctx = hookedCtx
+		}
+	}
+	return ctx
+}
+
 // preprocessRequest performs the shared per-request setup for the streaming RPC
 // paths: it clones and decodes the rocket payload, builds the request protocol
 // buffer, applies overload protection, resolves the processor function, and
@@ -1096,9 +1119,24 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 		ConnInfo:    s.connInfo,
 	}
 
+	// Framework metadata extraction
+	otherMetadata := metadata.GetOtherMetadata()
+	if encoded, ok := otherMetadata[frameworkMetadataHeaderKey]; ok {
+		delete(otherMetadata, frameworkMetadataHeaderKey)
+		decoded, err := base64.StdEncoding.DecodeString(encoded)
+		if err != nil {
+			// A malformed header is dropped rather than failing the request, matching C++.
+			s.log("unable to decode %s header: %v", frameworkMetadataHeaderKey, err)
+		} else {
+			reqCtx.FrameworkMetadata = decoded
+		}
+	} else if metadata.IsSetFrameworkMetadata() {
+		reqCtx.FrameworkMetadata = metadata.GetFrameworkMetadata()
+	}
+
 	// Request headers extraction
 	reqHeaders := make(map[string]string)
-	maps.Copy(reqHeaders, metadata.GetOtherMetadata())
+	maps.Copy(reqHeaders, otherMetadata)
 	if metadata.IsSetClientId() {
 		reqHeaders["client_id"] = metadata.GetClientId()
 	}

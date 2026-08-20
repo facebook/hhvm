@@ -105,6 +105,11 @@ type RequestContext struct {
 
 	ConnInfo ConnInfo
 
+	// FrameworkMetadata holds the opaque framework-specific bytes from
+	// RequestRpcMetadata.frameworkMetadata. The runtime never interprets them; a server
+	// FrameworkMetadataHook decides whether they are propagated any further.
+	FrameworkMetadata []byte
+
 	// For sending and receiving headers.
 	contextHeaders
 }

@@ -136,3 +136,20 @@ func TestWithServiceInterceptor(t *testing.T) {
 	)
 	require.Equal(t, []ServiceInterceptor{first, second}, customConfig.interceptors)
 }
+
+func TestWithFrameworkMetadataHook(t *testing.T) {
+	defaultConfig := newServerConfig()
+	require.Nil(t, defaultConfig.frameworkMetadataHook)
+
+	var observed []byte
+	hook := func(ctx context.Context, frameworkMetadata []byte) context.Context {
+		observed = frameworkMetadata
+		return ctx
+	}
+	customConfig := newServerConfig(WithFrameworkMetadataHook(hook))
+	require.NotNil(t, customConfig.frameworkMetadataHook)
+
+	frameworkMetadata := []byte{1, 2, 3}
+	customConfig.frameworkMetadataHook(context.TODO(), frameworkMetadata)
+	require.Equal(t, frameworkMetadata, observed)
+}

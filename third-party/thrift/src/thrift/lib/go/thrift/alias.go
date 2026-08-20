@@ -184,6 +184,14 @@ func WithFrameworkMetadata(ctx context.Context, metadata []byte) context.Context
 	return rocket.WithFrameworkMetadata(ctx, metadata)
 }
 
+// GetFrameworkMetadata returns the framework metadata staged for outbound calls on ctx,
+// or nil if unset. This is what the request encoder will put on the wire; it is not the
+// same as the inbound RequestContext.FrameworkMetadata, which is set even when a server
+// does not propagate.
+func GetFrameworkMetadata(ctx context.Context) []byte {
+	return rocket.GetFrameworkMetadata(ctx)
+}
+
 // THIS FUNCTION IS FOR INTERNAL USE ONLY.
 // InternalRegisterClientConstructor registers a constructor function for a client type.
 // This is intended to be called from generated code's init() function.

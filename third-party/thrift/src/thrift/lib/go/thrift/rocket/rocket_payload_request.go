@@ -43,7 +43,7 @@ func EncodeRequestPayload(
 		SetCompression(&compression).
 		SetOtherMetadata(maps.Clone(headers))
 
-	frameworkMetadata := getFrameworkMetadata(ctx)
+	frameworkMetadata := GetFrameworkMetadata(ctx)
 	if len(frameworkMetadata) > 0 {
 		metadata.SetFrameworkMetadata(frameworkMetadata)
 	}

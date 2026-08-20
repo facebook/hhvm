@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a4ff7fdc7cd8e2f89954aae5cbc968c0>>
+// @generated SignedSource<<6a82b4e9fa8b14253daa0ac63aa1f868>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -214,6 +214,8 @@ pub struct GlobalOptions {
     pub tco_only_fetch_remote_old_decl_during_init: bool,
     /// Preserve Rust shallow decls when invalidating folded decls.
     pub tco_disable_rust_provider_shallow_decl_invalidation: bool,
+    /// Ignore user-defined class attributes when computing fanout.
+    pub tco_enable_annotation_agnostic_decl_diffing: bool,
     /// Populate the member signature heaps.
     ///
     /// If disabled, instead load lazily from shallow classes.

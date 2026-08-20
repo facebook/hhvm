@@ -286,6 +286,8 @@ type t = {
       (** Restrict remote old decl fetches to init-time fanout. *)
   disable_rust_provider_shallow_decl_invalidation: bool;
       (** Preserve Rust shallow decls when invalidating folded decls. *)
+  enable_annotation_agnostic_decl_diffing: bool;
+      (** Ignore user-defined class attributes when computing fanout. *)
   skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
       Set to true only for debugging purposes! *)

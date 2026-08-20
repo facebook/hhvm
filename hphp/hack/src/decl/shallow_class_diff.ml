@@ -473,6 +473,14 @@ let remove_consistent_construct_attribute sc =
                SN.UserAttributes.uaConsistentConstruct));
   }
 
+let remove_user_defined_attributes sc =
+  {
+    sc with
+    sc_user_attributes =
+      List.filter sc.sc_user_attributes ~f:(fun ua ->
+          SN.UserAttributes.is_reserved (snd ua.Typing_defs.ua_name));
+  }
+
 (* Normalize module if the class is public *)
 let remove_modules_if_public sc =
   if sc.sc_internal then
@@ -497,6 +505,8 @@ let remove_members_except_to_string sc =
 (* To normalize classes for comparison, we:
 
    - Remove the ConsistentConstruct attribute
+   - When annotation-agnostic decl diffing is enabled, remove user-defined
+     attributes
    - Remove module if class itself is public
    - Remove all members (except for the toString method, which results in the
      implicit inclusion of the Stringish interface),
@@ -512,9 +522,15 @@ let remove_members_except_to_string sc =
    There are certainly opportunities for us to be cleverer about some kinds of
    changes, but any kind of cleverness in reducing fanout must be implemented
    with great care. *)
-let normalize sc =
+let normalize ~enable_annotation_agnostic_decl_diffing sc =
+  let sc = remove_consistent_construct_attribute sc in
+  let sc =
+    if enable_annotation_agnostic_decl_diffing then
+      remove_user_defined_attributes sc
+    else
+      sc
+  in
   sc
-  |> remove_consistent_construct_attribute
   |> remove_members_except_to_string
   |> Decl_pos_utils.NormalizeSig.shallow_class
   |> remove_modules_if_public
@@ -795,8 +811,12 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 
-let diff_class (c1 : shallow_class) (c2 : shallow_class) : Class_diff.t option =
-  let class_shell1 = normalize c1 and class_shell2 = normalize c2 in
+let diff_class
+    ~(enable_annotation_agnostic_decl_diffing : bool)
+    (c1 : shallow_class)
+    (c2 : shallow_class) : Class_diff.t option =
+  let class_shell1 = normalize ~enable_annotation_agnostic_decl_diffing c1
+  and class_shell2 = normalize ~enable_annotation_agnostic_decl_diffing c2 in
   let member_diff = diff_class_members c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
     Some

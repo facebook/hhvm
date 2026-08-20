@@ -84,6 +84,8 @@ type rollout_flags = {
       (** POC: @mojpc2, whether remote old decl fetches are restricted to init *)
   disable_rust_provider_shallow_decl_invalidation: bool;
       (** POC: @mojpc2, preserve Rust shallow decls when invalidating folded decls *)
+  enable_annotation_agnostic_decl_diffing: bool;
+      (** Whether user-defined class attributes are ignored when computing fanout. *)
   specify_manifold_api_key: bool;
       (** POC: @nzthomas, whether the API key in hh.conf should be used for saved state downloads *)
   populate_member_heaps: bool;

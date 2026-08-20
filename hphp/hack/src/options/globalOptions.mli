@@ -117,6 +117,8 @@ type t = {
       (** Restrict remote old decl fetching to init-time fanout. *)
   tco_disable_rust_provider_shallow_decl_invalidation: bool;
       (** Preserve Rust shallow decls when invalidating folded decls. *)
+  tco_enable_annotation_agnostic_decl_diffing: bool;
+      (** Ignore user-defined class attributes when computing fanout. *)
   tco_populate_member_heaps: bool;
       (** Populate the member signature heaps.
 
@@ -326,6 +328,7 @@ val set :
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_only_fetch_remote_old_decl_during_init:bool ->
   ?tco_disable_rust_provider_shallow_decl_invalidation:bool ->
+  ?tco_enable_annotation_agnostic_decl_diffing:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?tco_silence_errors_under_dynamic:bool ->

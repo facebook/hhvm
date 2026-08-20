@@ -192,6 +192,9 @@ let optimized_member_fanout t =
   GlobalOptions.(t.tco_saved_state.rollouts)
     .Saved_state_rollouts.optimized_member_fanout
 
+let enable_annotation_agnostic_decl_diffing t =
+  t.GlobalOptions.tco_enable_annotation_agnostic_decl_diffing
+
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions
 

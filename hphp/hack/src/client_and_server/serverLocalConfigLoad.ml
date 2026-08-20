@@ -70,6 +70,7 @@ let default =
     fetch_remote_old_decls = true;
     only_fetch_remote_old_decl_during_init = true;
     disable_rust_provider_shallow_decl_invalidation = false;
+    enable_annotation_agnostic_decl_diffing = false;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     silence_errors_under_dynamic = false;
@@ -601,6 +602,13 @@ let load_
       ~current_version
       config
   in
+  let enable_annotation_agnostic_decl_diffing =
+    bool_if_min_version
+      Config_keys.Hhconf.enable_annotation_agnostic_decl_diffing
+      ~default:default.enable_annotation_agnostic_decl_diffing
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       Config_keys.Hhconf.skip_hierarchy_checks
@@ -1115,6 +1123,7 @@ let load_
     fetch_remote_old_decls;
     only_fetch_remote_old_decl_during_init;
     disable_rust_provider_shallow_decl_invalidation;
+    enable_annotation_agnostic_decl_diffing;
     skip_hierarchy_checks;
     skip_tast_checks;
     silence_errors_under_dynamic;
@@ -1221,6 +1230,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.only_fetch_remote_old_decl_during_init;
       disable_rust_provider_shallow_decl_invalidation =
         options.disable_rust_provider_shallow_decl_invalidation;
+      enable_annotation_agnostic_decl_diffing =
+        options.enable_annotation_agnostic_decl_diffing;
       specify_manifold_api_key = options.specify_manifold_api_key;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;

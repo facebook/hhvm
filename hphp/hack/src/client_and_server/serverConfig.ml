@@ -745,6 +745,8 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
         ~tco_disable_rust_provider_shallow_decl_invalidation:
           local_config
             .ServerLocalConfig.disable_rust_provider_shallow_decl_invalidation
+        ~tco_enable_annotation_agnostic_decl_diffing:
+          local_config.ServerLocalConfig.enable_annotation_agnostic_decl_diffing
         ~tco_populate_member_heaps:
           local_config.ServerLocalConfig.populate_member_heaps
         ~tco_skip_hierarchy_checks:

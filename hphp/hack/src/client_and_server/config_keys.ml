@@ -529,6 +529,9 @@ module Hhconf = struct
   let disable_rust_provider_shallow_decl_invalidation =
     hhconf_key "disable_rust_provider_shallow_decl_invalidation"
 
+  let enable_annotation_agnostic_decl_diffing =
+    hhconf_key "enable_annotation_agnostic_decl_diffing"
+
   let heartbeat_interval = hhconf_key "heartbeat_interval"
 
   let prefetch_decls_enabled = hhconf_key "prefetch_decls_enabled"

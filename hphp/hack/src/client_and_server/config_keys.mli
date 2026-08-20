@@ -479,6 +479,8 @@ module Hhconf : sig
 
   val disable_rust_provider_shallow_decl_invalidation : string
 
+  val enable_annotation_agnostic_decl_diffing : string
+
   val heartbeat_interval : string
 
   val prefetch_decls_enabled : string

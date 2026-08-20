@@ -1118,6 +1118,7 @@ void RocketClientChannelBase::sendThriftRequest(
       timeout,
       getInteractionHandle(rpcOptions),
       getRocketClientImpl().getServerZstdSupported(),
+      getRocketClientImpl().getServerLz4Supported(),
       bufLength,
       *header,
       std::move(frameworkMetadata),

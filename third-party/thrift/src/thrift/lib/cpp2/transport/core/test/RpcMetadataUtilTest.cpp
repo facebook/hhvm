@@ -28,6 +28,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::detail;
 
 THRIFT_FLAG_DECLARE_bool(thrift_client_custom_compression_fallback_to_zstd);
+THRIFT_FLAG_DECLARE_bool(thrift_client_lz4_downgrade_when_unsupported);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET_TEST(
@@ -61,7 +62,8 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
       std::move(methodMetadata),
       timeout,
       interactionHandle,
-      false,
+      /*serverZstdSupported=*/false,
+      /*serverLz4Supported=*/false,
       3000,
       header,
       nullptr,
@@ -92,7 +94,8 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
       std::move(methodMetadata),
       timeout,
       interactionHandle,
-      false,
+      /*serverZstdSupported=*/false,
+      /*serverLz4Supported=*/false,
       3000,
       header,
       folly::IOBuf::copyBuffer(std::string("interceptor_metadata")),
@@ -129,6 +132,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,
+        /*serverLz4Supported=*/false,
         3000,
         header,
         folly::IOBuf::copyBuffer(std::string("")),
@@ -161,6 +165,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/true,
+        /*serverLz4Supported=*/false,
         3000,
         header,
         folly::IOBuf::copyBuffer(std::string("")),
@@ -191,6 +196,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,
+        /*serverLz4Supported=*/false,
         3000,
         header,
         folly::IOBuf::copyBuffer(std::string("")),
@@ -221,6 +227,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         timeout,
         interactionHandle,
         /*serverZstdSupported=*/false,
+        /*serverLz4Supported=*/false,
         3000,
         header,
         folly::IOBuf::copyBuffer(std::string("")),
@@ -269,6 +276,7 @@ TEST(RpcMetadataUtil, CustomCompressionFallbackToZlibWhenFlagDisabled) {
       timeout,
       interactionHandle,
       /*serverZstdSupported=*/false,
+      /*serverLz4Supported=*/false,
       3000,
       header,
       folly::IOBuf::copyBuffer(std::string("")),
@@ -284,6 +292,114 @@ TEST(RpcMetadataUtil, CustomCompressionFallbackToZlibWhenFlagDisabled) {
                   .has_value());
   EXPECT_EQ(
       requestRpcMetadata.compression().value(), CompressionAlgorithm::ZLIB);
+}
+
+namespace {
+// Builds the metadata a client would send for a request that asked for LZ4.
+RequestRpcMetadata makeLz4RequestMetadata(
+    bool serverLz4Supported, bool serverZstdSupported) {
+  RpcOptions rpcOptions;
+  std::string methodName = "foo";
+  std::string serviceName = "bar";
+  std::chrono::milliseconds timeout(100);
+  std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
+      std::monostate{};
+
+  transport::THeader header;
+  header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
+
+  CompressionConfig compressionConfig;
+  compressionConfig.codecConfig().ensure().lz4Config().emplace();
+  header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+  MethodMetadata methodMetadata(
+      MethodMetadata::Data(
+          methodName, FunctionQualifier::Unspecified, serviceName));
+  return makeRequestRpcMetadata(
+      rpcOptions,
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      std::move(methodMetadata),
+      timeout,
+      interactionHandle,
+      serverZstdSupported,
+      serverLz4Supported,
+      3000,
+      header,
+      folly::IOBuf::copyBuffer(std::string("")),
+      /*customCompressionEnabled=*/false);
+}
+} // namespace
+
+// The peer never advertised LZ4, so the request is downgraded. It advertised
+// zstd, so the zlib -> zstd upgrade carries the downgrade on to zstd -- which
+// is what a zlib-configured service was already sent before the LZ4 migration.
+TEST(RpcMetadataUtil, Lz4DowngradedToZstdWhenPeerSupportsZstd) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_lz4_downgrade_when_unsupported, true);
+  SCOPE_EXIT {
+    THRIFT_FLAG_UNMOCK(thrift_client_lz4_downgrade_when_unsupported);
+  };
+
+  auto metadata = makeLz4RequestMetadata(
+      /*serverLz4Supported=*/false, /*serverZstdSupported=*/true);
+
+  EXPECT_TRUE(metadata.compressionConfig()
+                  .value()
+                  .codecConfig()
+                  ->zstdConfig()
+                  .has_value());
+  EXPECT_EQ(metadata.compression().value(), CompressionAlgorithm::ZSTD);
+}
+
+// A peer that advertised neither codec gets zlib: the downgrade lands there and
+// there is no zstd to upgrade it to.
+TEST(RpcMetadataUtil, Lz4DowngradedToZlibWhenPeerSupportsNeither) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_lz4_downgrade_when_unsupported, true);
+  SCOPE_EXIT {
+    THRIFT_FLAG_UNMOCK(thrift_client_lz4_downgrade_when_unsupported);
+  };
+
+  auto metadata = makeLz4RequestMetadata(
+      /*serverLz4Supported=*/false, /*serverZstdSupported=*/false);
+
+  EXPECT_TRUE(metadata.compressionConfig()
+                  .value()
+                  .codecConfig()
+                  ->zlibConfig()
+                  .has_value());
+  EXPECT_EQ(metadata.compression().value(), CompressionAlgorithm::ZLIB);
+}
+
+// A peer that advertises LZ4 keeps it.
+TEST(RpcMetadataUtil, Lz4PreservedWhenPeerAdvertisesSupport) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_lz4_downgrade_when_unsupported, true);
+  SCOPE_EXIT {
+    THRIFT_FLAG_UNMOCK(thrift_client_lz4_downgrade_when_unsupported);
+  };
+
+  auto metadata = makeLz4RequestMetadata(
+      /*serverLz4Supported=*/true, /*serverZstdSupported=*/true);
+
+  EXPECT_TRUE(metadata.compressionConfig()
+                  .value()
+                  .codecConfig()
+                  ->lz4Config()
+                  .has_value());
+  EXPECT_EQ(metadata.compression().value(), CompressionAlgorithm::LZ4);
+}
+
+// At the flag's default the downgrade is inert, so landing this cannot change
+// what any client sends until the flag is turned on. Deliberately does not mock
+// the flag, so it asserts the shipped default.
+TEST(RpcMetadataUtil, Lz4KeptWhenFlagDisabled) {
+  auto metadata = makeLz4RequestMetadata(
+      /*serverLz4Supported=*/false, /*serverZstdSupported=*/true);
+
+  EXPECT_TRUE(metadata.compressionConfig()
+                  .value()
+                  .codecConfig()
+                  ->lz4Config()
+                  .has_value());
+  EXPECT_EQ(metadata.compression().value(), CompressionAlgorithm::LZ4);
 }
 
 // A normal-sized exception message is copied through unchanged.

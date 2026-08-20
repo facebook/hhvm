@@ -306,6 +306,8 @@ void RocketClient::handleSetupResponse(const ServerPushMetadata& serverMeta) {
           (int32_t)std::numeric_limits<int16_t>::max()));
   serverZstdSupported_ =
       serverMeta.setupResponse()->zstdSupported().value_or(false);
+  serverLz4Supported_ =
+      serverMeta.setupResponse()->lz4Supported().value_or(false);
 
   if (auto ref = serverMeta.setupResponse()->compressionSetupResponse()) {
     auto customCompressionRes = handleSetupResponseCustomCompression(*ref);

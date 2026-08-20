@@ -255,6 +255,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   bool getServerZstdSupported() const { return serverZstdSupported_; }
 
+  bool getServerLz4Supported() const { return serverLz4Supported_; }
+
   folly::EventBase* getEventBase() { return evb_; }
 
  private:
@@ -281,6 +283,10 @@ class RocketClient : public virtual folly::DelayedDestruction,
   } clientState_;
   int16_t serverVersion_{-1};
   bool serverZstdSupported_{false};
+  // False both when the peer omits SetupResponse.lz4Supported and before its
+  // SetupResponse has been processed, so a connection starts out assuming the
+  // peer cannot decode LZ4.
+  bool serverLz4Supported_{false};
   StreamId nextStreamId_{1};
 
   // Client requests + internal requests (requestN, cancel, etc).

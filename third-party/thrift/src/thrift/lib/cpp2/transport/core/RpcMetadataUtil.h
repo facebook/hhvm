@@ -84,6 +84,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     bool serverZstdSupported,
+    bool serverLz4Supported,
     ssize_t payloadSize,
     transport::THeader& header,
     std::unique_ptr<folly::IOBuf> frameworkMetadata,

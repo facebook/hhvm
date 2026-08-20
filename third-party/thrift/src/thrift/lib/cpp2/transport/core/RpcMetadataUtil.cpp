@@ -39,6 +39,13 @@
 THRIFT_FLAG_DEFINE_bool(
     thrift_client_custom_compression_fallback_to_zstd, true);
 
+// Controls whether a client downgrades LZ4 to zlib when the peer has not
+// advertised LZ4 support. Disabled by default and intended to be enabled only
+// once SetupResponse.lz4Supported has propagated across the server fleet:
+// enabling it earlier would treat every not-yet-rebuilt server as LZ4-incapable
+// at once, reverting the LZ4 rollout (T278225134) to zlib fleet-wide.
+THRIFT_FLAG_DEFINE_bool(thrift_client_lz4_downgrade_when_unsupported, false);
+
 namespace apache::thrift::detail {
 
 RequestRpcMetadata makeRequestRpcMetadata(
@@ -48,6 +55,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     bool serverZstdSupported,
+    bool serverLz4Supported,
     ssize_t payloadSize,
     transport::THeader& header,
     std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata,
@@ -92,6 +100,23 @@ RequestRpcMetadata makeRequestRpcMetadata(
         } else {
           codec->zlibConfig().emplace();
         }
+      }
+
+      // Downgrade LZ4 to zlib when the peer has not advertised that it can
+      // decode LZ4. A server lacking the codec may drop the request without
+      // replying, which the caller sees as RECV_TIMEOUT rather than
+      // INVALID_TRANSFORM, so the failure is not attributable after the fact
+      // and the advertised capability is the only usable signal.
+      //
+      // Must stay ABOVE the zlib->zstd upgrade below, which then carries the
+      // downgrade on to zstd whenever the peer supports it. That reproduces
+      // what the service had before the LZ4 migration: a zlib-configured
+      // service was already upgraded to zstd on any zstd-capable peer, so zlib
+      // remains the final codec only for a peer advertising neither.
+      if (THRIFT_FLAG(thrift_client_lz4_downgrade_when_unsupported) &&
+          codec->getType() == CodecConfig::Type::lz4Config &&
+          !serverLz4Supported) {
+        codec->zlibConfig().emplace();
       }
 
       if (codec->getType() == CodecConfig::Type::zlibConfig &&

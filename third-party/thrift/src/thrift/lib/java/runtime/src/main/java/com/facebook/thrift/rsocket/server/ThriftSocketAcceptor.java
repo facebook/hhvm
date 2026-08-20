@@ -64,9 +64,14 @@ public class ThriftSocketAcceptor implements SocketAcceptor {
   /**
    * Sends a ServerPushMetadata with SetupResponse to the client, advertising compression support.
    * Matches C++ ThriftRocketServerHandler which sends zstdSupported=true during connection setup.
+   *
+   * <p>lz4Supported is unconditionally true: the Java runtime's CompressionManager always resolves
+   * LZ4/LZ4_LESS/LZ4_MORE to Lz4Compressor, so support is not build-dependent as it is in C++.
+   * Legacy Swift/Nifty servers never reach this acceptor and so correctly advertise nothing.
    */
   private static Mono<Void> sendSetupResponse(RSocket sendingSocket) {
-    SetupResponse setupResponse = new SetupResponse.Builder().setZstdSupported(true).build();
+    SetupResponse setupResponse =
+        new SetupResponse.Builder().setZstdSupported(true).setLz4Supported(true).build();
     ServerPushMetadata serverPushMetadata = ServerPushMetadata.fromSetupResponse(setupResponse);
 
     ByteBuf metadata = RpcResources.getByteBufAllocator().buffer();

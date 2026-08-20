@@ -127,4 +127,14 @@ std::unique_ptr<folly::IOBuf> CompressionManager::uncompressBuffer(
   return rocket::uncompressBuffer(std::move(buffer), compressionAlgorithm);
 }
 
+bool isLz4Supported() {
+  // Derived from the selector rather than naming a CodecType directly, so this
+  // cannot drift from the algorithm actually used on the wire.
+  static const bool supported = folly::compression::hasCodec(
+      CompressionAlgorithmSelector::toCodecTypeAndLevel(
+          CompressionAlgorithm::LZ4)
+          .first);
+  return supported;
+}
+
 } // namespace apache::thrift::rocket

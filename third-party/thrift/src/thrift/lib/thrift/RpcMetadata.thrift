@@ -662,6 +662,9 @@ struct SetupResponse {
   3: optional CompressionSetupResponse compressionSetupResponse;
   // Describes the server's security policies and their enforcement levels.
   4: optional SecurityPolicy securityPolicy;
+  // Whether LZ4 compression for requests and responses is supported by the
+  // server. If not set, considered not to be supported.
+  5: optional bool lz4Supported;
 }
 
 struct StreamHeadersPush {

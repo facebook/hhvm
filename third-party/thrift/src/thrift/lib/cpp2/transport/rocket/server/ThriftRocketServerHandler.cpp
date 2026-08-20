@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
@@ -310,6 +311,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.set_setupResponse();
     serverMeta.setupResponse()->version() = version_;
     serverMeta.setupResponse()->zstdSupported() = true;
+    serverMeta.setupResponse()->lz4Supported() = isLz4Supported();
 
     if (THRIFT_FLAG(client_authwall_server_enabled)) {
       if (auto securityPolicy =

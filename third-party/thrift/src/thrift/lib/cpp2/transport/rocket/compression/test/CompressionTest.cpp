@@ -131,6 +131,36 @@ TEST(CompressionTest, lz4UncompressSucceeds) {
 }
 #endif
 
+// isLz4Supported() is what a server advertises in SetupResponse.lz4Supported,
+// so it has to track the build. Over-reporting makes servers advertise a codec
+// they cannot decode; under-reporting makes clients downgrade to zlib for no
+// reason.
+TEST(CompressionTest, isLz4SupportedTracksBuild) {
+#if FOLLY_HAVE_LIBLZ4
+  EXPECT_TRUE(isLz4Supported());
+#else
+  EXPECT_FALSE(isLz4Supported());
+#endif
+}
+
+// The invariant that actually matters, asserted against observed behaviour
+// rather than the build macro: if we claim LZ4, a round trip must work; if we
+// do not claim it, using it must fail rather than silently corrupt.
+TEST(CompressionTest, isLz4SupportedAgreesWithCodecUsability) {
+  if (isLz4Supported()) {
+    auto buffer = CompressionManager().compressBuffer(
+        baseBuffer->clone(), CompressionAlgorithm::LZ4);
+    buffer = CompressionManager().uncompressBuffer(
+        std::move(buffer), CompressionAlgorithm::LZ4);
+    EXPECT_TRUE(folly::IOBufEqualTo()(buffer, baseBuffer));
+  } else {
+    EXPECT_THROW(
+        CompressionManager().compressBuffer(
+            baseBuffer->clone(), CompressionAlgorithm::LZ4),
+        TApplicationException);
+  }
+}
+
 // Test setCompressionCodec.
 
 template <typename Metadata, typename Config>

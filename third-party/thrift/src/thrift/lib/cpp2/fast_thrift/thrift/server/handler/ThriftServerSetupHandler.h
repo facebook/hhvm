@@ -113,6 +113,7 @@ class ThriftServerSetupHandler {
     // fast_thrift has no compression codec yet, so advertising support would
     // be untruthful. Flip once per-request compression lands.
     response->zstdSupported() = false;
+    response->lz4Supported() = false;
 
     const auto writeResult = ctx.fireWrite(
         channel_pipeline::erase_and_box(

@@ -61,4 +61,9 @@ class CompressionManager {
       CompressionAlgorithm compressionAlgorithm);
 };
 
+/**
+ * Whether this build can decompress LZ4 payloads.
+ */
+bool isLz4Supported();
+
 } // namespace apache::thrift::rocket

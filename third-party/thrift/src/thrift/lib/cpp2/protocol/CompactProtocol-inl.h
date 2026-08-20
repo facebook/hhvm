@@ -619,9 +619,22 @@ inline void CompactProtocolReader::readMapBegin(
   int8_t kvType = 0;
   int32_t msize = 0;
 
-  apache::thrift::util::readVarint(in_, msize);
-  if (msize != 0) {
-    readByte(kvType);
+  const uint8_t* p = in_.data();
+  if (in_.length() >= 2 && !(*p & 0x80)) {
+    // Fast path: single-byte varint size (0-127) and the kv-type byte are
+    // both resident in the current buffer.
+    msize = *p;
+    if (msize != 0) {
+      kvType = static_cast<int8_t>(p[1]);
+      in_.skipNoAdvance(2);
+    } else {
+      in_.skipNoAdvance(1);
+    }
+  } else {
+    apache::thrift::util::readVarint(in_, msize);
+    if (msize != 0) {
+      readByte(kvType);
+    }
   }
 
   if (msize < 0) {

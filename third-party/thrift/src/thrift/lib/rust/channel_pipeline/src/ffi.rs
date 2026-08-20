@@ -246,6 +246,8 @@ pub(crate) mod ffi {
     }
 }
 
+pub use ffi::TypeErasedBox as FfiTypeErasedBox;
+
 use crate::context::CallbackContext;
 use crate::erased::RustTypeErasedBox;
 use crate::ffi::ffi::TypeErasedBox;

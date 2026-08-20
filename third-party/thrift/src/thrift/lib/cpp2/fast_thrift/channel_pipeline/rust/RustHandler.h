@@ -107,9 +107,10 @@ namespace channel_pipeline_rust {
  * ## Supported message type
  *
  * The inbound `TypeErasedBox` is handed to Rust borrowed; the Rust handler
- * recovers the concrete message itself via `RustTypeErasedBox::take` (the
- * message type is the identity -- no numeric type id, no registry), or
- * forwards the box whole without ever inspecting it. Empty boxes are rejected
+ * recovers the concrete message itself via `RustTypeErasedBox::take`, borrows
+ * an opaque inline message via `BorrowedMessageAdapter`, or forwards the box
+ * whole without inspecting it. Borrowed views are callback-scoped and leave
+ * the box intact for `forward_read`/`forward_write`. Empty boxes are rejected
  * before invoking Rust, returning `Result::Error`.
  *
  * ## Composition

@@ -45,6 +45,32 @@ use crate::adapter::RustMessageAdapter;
 use crate::ffi::ffi;
 use crate::ffi::ffi::TypeErasedBox;
 
+/// Adapter for inspecting a C++ pipeline message without taking it out of its
+/// [`TypeErasedBox`].
+///
+/// This is the zero-allocation path for opaque inline C++ messages. The view is
+/// tied to the callback-scoped box borrow and must not be retained. After the
+/// view is dropped, the handler can forward the original box unchanged.
+///
+/// # Safety
+///
+/// Implementations must return a view of the exact C++ type checked by
+/// `holds`, and the view must not outlive or move the value in `message`.
+pub unsafe trait BorrowedMessageAdapter {
+    type View<'a>
+    where
+        Self: 'a;
+
+    fn holds(message: &TypeErasedBox) -> bool;
+
+    /// # Safety
+    ///
+    /// `message` must currently contain the exact C++ type recognized by
+    /// [`Self::holds`]. The contained value must not be moved, replaced, or
+    /// otherwise invalidated for the lifetime of the returned view.
+    unsafe fn borrow<'a>(message: Pin<&'a mut TypeErasedBox>) -> Self::View<'a>;
+}
+
 /// Provides the dev-mode type check used by [`RustTypeErasedBox::take`].
 /// Implemented once per message type via a tiny per-type C++ thunk that compares
 /// `typeid` — exactly like the per-type C++ `RustMessageAdapter<T>`. In release
@@ -119,6 +145,23 @@ impl<'a> RustTypeErasedBox<'a> {
         // no-op), matching the `reset()` inside C++ `take<T>()`.
         ffi::rust_teb_reset(self.inner.as_mut());
         M::from_cpp(cpp)
+    }
+
+    /// Borrow a typed view of the message while leaving the box intact.
+    ///
+    /// Drop the returned view before forwarding `self` with
+    /// [`CallbackContext::forward_read`](crate::CallbackContext::forward_read)
+    /// or [`CallbackContext::forward_write`](crate::CallbackContext::forward_write).
+    pub fn borrow<M: BorrowedMessageAdapter>(&mut self) -> M::View<'_> {
+        assert!(
+            M::holds(self.inner.as_ref().get_ref()),
+            "RustTypeErasedBox::borrow: box does not hold the requested type"
+        );
+        // SAFETY: the unconditional `M::holds` check establishes that the box
+        // contains the adapter's exact C++ type. The returned view is tied to
+        // this exclusive pinned borrow, so the value cannot be moved or
+        // replaced while the view is live.
+        unsafe { M::borrow(self.inner.as_mut()) }
     }
 
     /// True if the box currently holds no value.

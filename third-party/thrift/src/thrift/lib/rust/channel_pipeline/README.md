@@ -46,6 +46,12 @@ impl RustHandler for CountingHandler {
 }
 ```
 
+Opaque inline C++ messages can be inspected without taking them out of the
+pipeline box. Implement `BorrowedMessageAdapter`, borrow the callback-scoped
+view with `msg.borrow::<Adapter>()`, drop the view, and call
+`ctx.forward_read(msg)` or `ctx.forward_write(msg)` to forward the original box
+unchanged. This path performs no message allocation or copy.
+
 Expose a factory from the handler's own CXX bridge:
 
 ```rust

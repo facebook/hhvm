@@ -148,6 +148,7 @@
 //! | [`PipelineError`] | Owned Rust error converted to `folly::exception_wrapper` |
 //! | [`HandlerResult`] | FFI-stable return value (`Success`, `Backpressure`, `Error`) |
 //! | [`RustMessageAdapter`] | Trait describing how a message type crosses the FFI boundary |
+//! | [`BorrowedMessageAdapter`] | Callback-scoped view of an opaque inline C++ message without taking it from the box |
 //! | [`CoroReadHandle`] / [`CoroWriteHandle`] / [`CoroExceptionHandle`] | Adapters from a pipeline callback to an `async` handler body |
 //! | [`ContextReadMessage`] / [`ContextWriteMessage`] | Message traits describing how to resume a captured continuation |
 //! | [`ErasedCheck`] | Dev-build type check for erased message recovery |
@@ -217,9 +218,11 @@
 //!
 //! # Message adapter extension
 //!
-//! Any type implementing [`RustMessageAdapter`] can flow through a Rust
-//! handler; the message type itself is the identity, so there is no numeric
-//! type id and no central registry. A future Rust handler at the framing layer
+//! An owned type implementing [`RustMessageAdapter`] can flow through a Rust
+//! handler. An opaque inline C++ type can instead implement
+//! [`BorrowedMessageAdapter`] and forward the original box unchanged after the
+//! view is dropped. The message type itself is the identity, so there is no
+//! numeric type id and no central registry. A future Rust handler at the framing layer
 //! that needs `ParsedFrame`/`ComposedFrame` should use an opaque
 //! `UniquePtr<ParsedFrame>` boxed via CXX methods (never mirror the C++ layout)
 //! or serialize via `cxx-thrift-utils`. The single-message-type-per-layer
@@ -259,8 +262,10 @@ pub use coro_handler::ContextWriteMessage;
 pub use coro_handler::CoroExceptionHandle;
 pub use coro_handler::CoroReadHandle;
 pub use coro_handler::CoroWriteHandle;
+pub use erased::BorrowedMessageAdapter;
 pub use erased::ErasedCheck;
 pub use erased::RustTypeErasedBox;
+pub use ffi::FfiTypeErasedBox;
 pub use ffi::RustHandlerOpaque;
 pub use ffi::box_handler;
 pub use handler::HandlerResult;

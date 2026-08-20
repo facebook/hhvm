@@ -337,6 +337,15 @@ computation and then pass the result to the `DefLabel` at the join point,
 B4. This is equivalent to the following phi-node: `t5:{Int|Dbl} = phi(B2 ->
 t2:Int, B3 -> t4:Dbl)`
 
+### Function Prologues & Stack Boundary Alignment
+
+When translating function prologues (`irgen-func-prologue.cpp`), HHIR manages argument arity checks, reified generics verification, and prologue flag flags (such as `PrologueFlags::HasGenerics`).
+
+Key considerations during prologue IR generation include:
+- **Stack Boundary Synchronization**: When conditional control flow (e.g. `ifThenElse`) is emitted in prologue generation, markers and BC stack offsets must be explicitly synchronized with `updateStackOffsetAndExceptionBoundary(env)`. This ensures catch blocks and exception unwinding retain accurate stack state when unwinding through prologue boundaries.
+- **Reified Generics Checking**: For functions expecting reified generics, prologue checks verify presence and layout. If unexpected generics are passed via the prologue register/stack path, `apparate` and `popDecRef` properly track and release the `TVec` cell to prevent runtime memory leaks.
+
+
 ## Optimizations
 
 Two types of basic optimizations are performed on each instruction by

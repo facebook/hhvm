@@ -193,7 +193,7 @@ Channel Pipeline is built on top of **folly**, Meta's foundational C++ library:
 |-----------|-------|
 | `folly::EventBase` | Event loop for async I/O — accessed via `ctx.eventBase()` |
 | `folly::IOBuf` | Zero-copy buffer chains — `BytesPtr = std::unique_ptr<folly::IOBuf>` |
-| `folly::DelayedDestructionBase` | Keeps the Pipeline and its owned Contexts alive during callbacks and ContextHandle handoffs |
+| `folly::DelayedDestructionBase` | Keeps Pipeline/Contexts alive during callbacks and ContextHandle handoffs |
 | `folly::exception_wrapper` | Type-erased exception propagation |
 
 Future transport integration will use:
@@ -222,7 +222,7 @@ Channel Pipeline follows a **single-threaded model**:
 
 | Rule | Description |
 |------|-------------|
-| **All operations on one thread** | Pipeline construction and all message processing must occur on the owning EventBase thread |
+| **All operations on one thread** | Build and process messages on the owning EventBase thread |
 | **No cross-thread access** | Never call pipeline methods from another thread without explicit synchronization |
 | **No internal locks** | The pipeline has no mutexes — thread safety is the caller's responsibility |
 | **Use runInEventBaseThread** | To interact with a pipeline from another thread, schedule work on its EventBase |
@@ -492,7 +492,7 @@ Concepts for data flow between transport and pipeline:
 | Concept | Direction | Purpose |
 |---------|-----------|---------|
 | `InboundTransportHandler` | Network → Pipeline | Receives bytes from transport (`onRead`, `onError`, `onClose`) |
-| `OutboundTransportHandler` | Pipeline → Network | Sends bytes to transport (`write`), backpressure control (`pauseRead`, `resumeRead`) |
+| `OutboundTransportHandler` | Pipeline → Network | Sends bytes and controls backpressure (`pauseRead`, `resumeRead`) |
 
 ### App Adapters
 
@@ -614,12 +614,14 @@ Result on_write(Context& ctx, TypeErasedBox&& msg) noexcept {
 
 ```cpp
 template <typename B>
-concept BufferAllocator = requires(B b, size_t size) {
+concept BufferAllocator = requires(B b, size_t size, const void* data) {
   { b.allocate(size) } -> std::same_as<BytesPtr>;
+  { b.copyBuffer(data, size) } -> std::same_as<BytesPtr>;
 };
 ```
 
-Implementations provide the allocator to the pipeline; handlers just call `ctx.allocate(size)`.
+Implementations provide allocation to the pipeline; handlers just call `ctx.allocate(size)` or
+`ctx.copyBuffer(data, size)`.
 
 ---
 
@@ -1052,7 +1054,7 @@ exists to avoid.
 
 | Method | Description |
 |--------|-------------|
-| `PipelineBuilder::addState<T>(args...)` | Register a pipeline-scoped `T` (chain for multiple distinct types; `T` must be move-constructible) |
+| `PipelineBuilder::addState<T>(args...)` | Register a pipeline-scoped `T`; `T` must be move-constructible |
 | `ctx.state<T>()` | Reference to the registered `T` (available in every handler callback) |
 
 ---

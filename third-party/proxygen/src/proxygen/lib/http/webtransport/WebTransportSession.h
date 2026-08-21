@@ -151,6 +151,8 @@ class H2WtSession
               WtStreamManager& sm,
               WebTransportHandler::Ptr& wtHandler) noexcept;
 
+  IoBufPtr frameDatagram(IoBufPtr datagram) noexcept override;
+
   WtStreamManager& sm_;
   WebTransportHandler::Ptr& wtHandler_;
 };

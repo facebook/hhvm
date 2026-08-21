@@ -201,7 +201,11 @@ QuicWtSessionBase::awaitBidiStreamCredit() noexcept {
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 QuicWtSessionBase::sendDatagram(IoBufPtr datagram) noexcept {
   XCHECK(quicSocket_);
-  auto writeRes = quicSocket_->writeDatagram(std::move(datagram));
+  auto framed = frameDatagram(std::move(datagram));
+  if (!framed) {
+    return folly::makeUnexpected(ErrorCode::GENERIC_ERROR);
+  }
+  auto writeRes = quicSocket_->writeDatagram(std::move(framed));
   if (writeRes.hasError()) {
     XLOG(ERR) << __func__ << "; err= " << writeRes.error();
     return folly::makeUnexpected(ErrorCode::GENERIC_ERROR);
@@ -511,8 +515,7 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::closeSession(
   return folly::unit;
 }
 
-folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::sendDatagram(
-    IoBufPtr datagram) noexcept {
+H3WtSession::IoBufPtr H3WtSession::frameDatagram(IoBufPtr datagram) noexcept {
   /**
    * RFC9297:
    * HTTP/3 Datagram {
@@ -528,7 +531,7 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::sendDatagram(
       quarterStreamId, [&appender](auto val) { appender.writeBE(val); });
   XCHECK(encodeRes);
   queue.append(std::move(datagram));
-  return QuicWtSessionBase::sendDatagram(queue.move());
+  return queue.move();
 }
 
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>

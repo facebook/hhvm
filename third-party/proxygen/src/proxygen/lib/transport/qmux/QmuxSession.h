@@ -61,6 +61,8 @@ class QmuxSession
   proxygen::detail::WtExpected<folly::Unit>::Type sendDatagram(
       std::unique_ptr<folly::IOBuf> datagram) noexcept override;
 
+  IoBufPtr frameDatagram(IoBufPtr datagram) noexcept override;
+
   [[nodiscard]] const folly::SocketAddress& getLocalAddress()
       const noexcept override {
     return localAddr_;

@@ -225,8 +225,15 @@ class WtSessionBase : public WebTransport {
   std::vector<IoBufPtr> moveIngressDatagrams() noexcept {
     return std::move(datagrams_.ingress);
   }
+  // Egress datagrams are framed on the way in, so what is queued is already
+  // on-wire bytes.
   std::vector<IoBufPtr> moveEgressDatagrams() noexcept {
     return std::move(datagrams_.egress);
+  }
+
+  // Applies this transport's per-datagram framing. Returns null to reject.
+  virtual IoBufPtr frameDatagram(IoBufPtr datagram) noexcept {
+    return datagram;
   }
 
  private:

@@ -501,7 +501,11 @@ WtExpected<folly::Unit>::Type WtSessionBase::stopSending(
 
 WtExpected<folly::Unit>::Type WtSessionBase::sendDatagram(
     IoBufPtr datagram) noexcept {
-  datagrams_.egress.push_back(std::move(datagram));
+  auto framed = frameDatagram(std::move(datagram));
+  if (!framed) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  datagrams_.egress.push_back(std::move(framed));
   return folly::unit;
 }
 

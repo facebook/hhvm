@@ -122,6 +122,8 @@ class CoroWtSession
   void start(Ptr self);
 
  private:
+  IoBufPtr frameDatagram(IoBufPtr datagram) noexcept override;
+
   folly::coro::Task<void> readLoop(Ptr self);
   folly::coro::Task<void> writeLoop(Ptr self);
 

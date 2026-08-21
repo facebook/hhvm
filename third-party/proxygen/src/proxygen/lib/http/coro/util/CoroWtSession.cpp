@@ -50,11 +50,33 @@ WtExpected<folly::Unit>::Type CoroWtSession::closeSession(
 
 WtExpected<folly::Unit>::Type CoroWtSession::sendDatagram(
     IoBufPtr datagram) noexcept {
-  if (!writeLoopDone_) {
-    std::ignore = WtSessionBase::sendDatagram(std::move(datagram));
+  if (writeLoopDone_) {
+    return folly::unit;
+  }
+  auto res = WtSessionBase::sendDatagram(std::move(datagram));
+  if (res.hasValue()) {
     wtSmEgressCb.waitForEvent.signal(); // wake up write loop
   }
-  return folly::unit;
+  return res;
+}
+
+CoroWtSession::IoBufPtr CoroWtSession::frameDatagram(
+    IoBufPtr datagram) noexcept {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  if (!writeDatagram(
+          queue,
+          DatagramCapsule{.httpDatagramPayload = std::move(datagram)},
+          FrameProtocol::WT_CAPSULE)) {
+    return nullptr;
+  }
+  // A datagram larger than a whole write chunk could never fit, so reject it
+  // here rather than letting the write loop discover it every pass.
+  if (queue.chainLength() > kMaxWriteSize) {
+    XLOG(ERR) << "datagram exceeds max write size; len=" << queue.chainLength()
+              << " kMaxWriteSize=" << kMaxWriteSize;
+    return nullptr;
+  }
+  return queue.move();
 }
 
 using WtCapsuleCallback = proxygen::detail::WtCapsuleCallback;
@@ -116,7 +138,7 @@ folly::coro::Task<void> CoroWtSession::writeLoop(Ptr self) {
     // TODO: currently datagrams can indefinitely preempt stream data
     auto datagrams = moveEgressDatagrams();
     for (auto& dgram : datagrams) {
-      writeDatagram(egressBuf, DatagramCapsule{std::move(dgram)});
+      egressBuf.append(std::move(dgram));
     }
 
     auto* wh = sm.nextWritable();

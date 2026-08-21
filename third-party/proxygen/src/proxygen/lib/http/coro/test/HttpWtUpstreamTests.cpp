@@ -777,6 +777,18 @@ CO_TEST_P_X(WtTest, MaxStreamsBidiUni) {
   wt->closeSession();
 }
 
+// A datagram too large to ever fit in a write chunk is rejected up front
+// rather than left for the write loop to rediscover on every pass.
+CO_TEST_P_X(WtTest, SendDatagramExceedsMaxWriteSize) {
+  XCHECK(wt);
+  auto res = wt->sendDatagram(makeBuf(65'535));
+  EXPECT_TRUE(res.hasError());
+  co_await rescheduleN(2);
+  EXPECT_TRUE(wtCodecCb.dgrams.empty());
+
+  wt->closeSession();
+}
+
 CO_TEST_P_X(WtTest, Datagrams) {
   XCHECK(wt);
   // tx datagram to peer

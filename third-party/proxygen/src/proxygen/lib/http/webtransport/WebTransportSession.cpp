@@ -124,6 +124,17 @@ H2WtSession::H2WtSession(folly::EventBase* evb,
       wtHandler_(wtHandler) {
 }
 
+H2WtSession::IoBufPtr H2WtSession::frameDatagram(IoBufPtr datagram) noexcept {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  if (!writeDatagram(
+          queue,
+          DatagramCapsule{.httpDatagramPayload = std::move(datagram)},
+          FrameProtocol::WT_CAPSULE)) {
+    return nullptr;
+  }
+  return queue.move();
+}
+
 H2WtSession::~H2WtSession() noexcept {
   // abort txn and detach handler if applicable
   if (auto* txn = std::exchange(txnHandler_.txn_, nullptr)) {

@@ -462,6 +462,18 @@ TEST_F(QmuxSessionTest, TwoDatagrams_SplitAcrossRecords) {
             second);
 }
 
+// 6b) A datagram too large for any record is rejected up front rather than
+//     accepted and dropped by the writeLoop.
+TEST_F(QmuxSessionTest, SendDatagram_ExceedsPeerMaxRecordSize_Rejected) {
+  std::string payload(kDefaultMaxRecordSize, 'x');
+  auto res = session_->sendDatagram(folly::IOBuf::copyBuffer(payload));
+  ASSERT_TRUE(res.hasError());
+  drain();
+  parseWrites();
+
+  EXPECT_TRUE(wire_.cb.datagrams.empty());
+}
+
 // 7) Large stream writes are split into peer-sized QMUX records.
 TEST_F(QmuxSessionTest, LargeStreamWrite_SplitsIntoPeerSizedRecords) {
   auto created = session_->createBidiStream();

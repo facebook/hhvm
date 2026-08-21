@@ -174,9 +174,32 @@ folly::AsyncTransport* QmuxSession::getUnderlyingTransport() const noexcept {
 
 proxygen::detail::WtExpected<folly::Unit>::Type QmuxSession::sendDatagram(
     std::unique_ptr<folly::IOBuf> datagram) noexcept {
-  pendingDatagrams_.emplace_back(std::move(datagram));
+  auto framed = frameDatagram(std::move(datagram));
+  if (!framed) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  pendingDatagrams_.emplace_back(std::move(framed));
   wtSmEgressCb.waitForEvent.signal();
   return folly::unit;
+}
+
+QmuxSession::IoBufPtr QmuxSession::frameDatagram(IoBufPtr datagram) noexcept {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  if (!writeDatagram(
+          queue,
+          DatagramCapsule{.httpDatagramPayload = std::move(datagram)},
+          FrameProtocol::QMUX)) {
+    return nullptr;
+  }
+  // A datagram that cannot fit in a single record is unsendable, so reject it
+  // here rather than letting the write loop discover it and drop it.
+  if (queue.chainLength() > peerMaxRecordSize_) {
+    XLOG(ERR)
+        << "datagram exceeds peer max_record_size; len=" << queue.chainLength()
+        << " peerMaxRecordSize=" << peerMaxRecordSize_;
+    return nullptr;
+  }
+  return queue.move();
 }
 
 void QmuxSession::start(Ptr self) {
@@ -366,15 +389,11 @@ folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
 
     while (!pendingDatagrams_.empty()) {
       folly::IOBufQueue frameBuf{folly::IOBufQueue::cacheChainLength()};
-      writeDatagram(frameBuf,
-                    DatagramCapsule{.httpDatagramPayload =
-                                        std::move(pendingDatagrams_.front())},
-                    FrameProtocol::QMUX);
+      frameBuf.append(std::move(pendingDatagrams_.front()));
       pendingDatagrams_.pop_front();
-      // Returns false only for a datagram too large for any record, which it
-      // logs and drops.
-      std::ignore = appendFrameToRecord(
-          recordBuf, egressBuf, frameBuf, recordPayloadLimit);
+      // Cannot fail; frameDatagram rejects anything too large for a record.
+      XCHECK(appendFrameToRecord(
+          recordBuf, egressBuf, frameBuf, recordPayloadLimit));
     }
 
     // Flush all accumulated QMux records in one transport write.

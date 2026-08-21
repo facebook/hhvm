@@ -115,7 +115,9 @@ const std::string& extensionName() {
  *
  * Lifetime: one instance per connection (constructed by the pipeline handler
  * factory); H is owned by value and its constructor arguments are forwarded
- * from addThriftExtension.
+ * from addThriftExtension. An H declaring a ConnState additionally receives
+ * that connection's shared state as its first constructor argument, resolved
+ * once here so the extension never handles the store itself.
  */
 template <typename H>
 class ThriftExtensionPipelineHandler {
@@ -132,8 +134,9 @@ class ThriftExtensionPipelineHandler {
 
  public:
   template <typename... Args>
-  explicit ThriftExtensionPipelineHandler(Args&&... args)
-      : handler_(std::forward<Args>(args)...) {}
+  explicit ThriftExtensionPipelineHandler(
+      ExtensionStateStore& store, Args&&... args)
+      : handler_(makeHandler(store, std::forward<Args>(args)...)) {}
 
   channel_pipeline::Result onRead(
       ThriftPipelineHandlerContext& ctx,
@@ -353,6 +356,25 @@ class ThriftExtensionPipelineHandler {
   void handlerRemoved(ThriftPipelineHandlerContext&) noexcept {}
 
  private:
+  // Returned as a prvalue so H is built directly into handler_ — H needs no
+  // move constructor, and its shared state is resolved exactly once per
+  // connection, before any callback can run.
+  template <typename... Args>
+  static H makeHandler(ExtensionStateStore& store, Args&&... args) {
+    if constexpr (HasConnState<H>) {
+      static_assert(
+          std::is_default_constructible_v<typename H::ConnState>,
+          "H::ConnState must be default-constructible: the connection's state "
+          "is created by whichever extension names it first, so there is no "
+          "one extension whose arguments could construct it.");
+      return H(
+          store.getOrCreate<typename H::ConnState>(),
+          std::forward<Args>(args)...);
+    } else {
+      return H(std::forward<Args>(args)...);
+    }
+  }
+
   H handler_;
   // Latched from the setup messages so the payload-less ConnectionClosed can
   // still present the connection. Non-owning: the connection-context handler
@@ -362,5 +384,36 @@ class ThriftExtensionPipelineHandler {
   // onConnectionClosed so it never fires for a connection that died mid-setup.
   bool established_{false};
 };
+
+/**
+ * Build a factory that splices extension H into a connection's thrift pipeline.
+ *
+ * The peer of makeThriftPipelineHandlerFactory for the extension API: it wraps
+ * H in the adapter and threads the connection's ExtensionStateStore into it, so
+ * an H declaring a ConnState is handed that state at construction. `args` are
+ * copied and forwarded to every per-connection instance, after the state.
+ */
+template <typename H, typename... Args>
+ThriftPipelineHandlerFactory makeThriftExtensionHandlerFactory(
+    channel_pipeline::HandlerId id, Args... args) {
+  using Adapter = ThriftExtensionPipelineHandler<H>;
+  // The adapter is framework-owned, so this can only fire if the adapter itself
+  // stops being a pipeline handler — the same named diagnostic the native path
+  // gets from makeThriftPipelineHandlerFactory, rather than a failure deep
+  // inside makeHandlerNode.
+  static_assert(
+      channel_pipeline::InboundHandler<Adapter, ThriftPipelineHandlerContext> ||
+          channel_pipeline::
+              OutboundHandler<Adapter, ThriftPipelineHandlerContext> ||
+          channel_pipeline::
+              DuplexHandler<Adapter, ThriftPipelineHandlerContext>,
+      "ThriftExtensionPipelineHandler<H> must satisfy the Inbound, Outbound, or "
+      "Duplex handler concept over ThriftPipelineHandlerContext");
+  return [id, args...](ExtensionStateStore& store) {
+    return channel_pipeline::detail::
+        makeHandlerNode<Adapter, ThriftServerEventType>(
+            id, std::make_unique<Adapter>(store, args...));
+  };
+}
 
 } // namespace apache::thrift::fast_thrift::thrift::server

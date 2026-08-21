@@ -307,4 +307,22 @@ template <typename H>
 concept HasResponseCallback =
     HasResponseViewCallback<H> || HasResponseMutatorCallback<H>;
 
+/**
+ * True iff H shares per-connection state with its peer extensions, by defining
+ *
+ *   using ConnState = SomeType;
+ *
+ * The adapter then resolves the connection's `ConnState` from the
+ * ExtensionStateStore and passes it as H's first constructor argument, ahead of
+ * the arguments given to addThriftExtension. Extensions naming the same type
+ * share one object per connection; an extension that declares none is
+ * constructed from its own arguments alone.
+ *
+ * The state is default-constructed — whichever extension names it first brings
+ * it into being, so no one extension's arguments could construct it. A
+ * ConnState that is not default-constructible is a compile error.
+ */
+template <typename H>
+concept HasConnState = requires { typename H::ConnState; };
+
 } // namespace apache::thrift::fast_thrift::thrift

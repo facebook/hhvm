@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ExtensionStateStore.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
@@ -76,6 +77,12 @@ struct ThriftServerConnection {
 
   // Buffer allocator used by the thrift pipeline.
   channel_pipeline::SimpleBufferAllocator thriftAllocator;
+
+  // Per-connection state shared between this connection's extensions. Handlers
+  // hold references into it, so it must outlive thriftPipeline — as a value
+  // member it is destroyed after the dtor body, which is where the pipeline
+  // goes.
+  ExtensionStateStore extensionStates;
 
   // Head of the thrift pipeline. Owns the rocket connection (transport
   // handler, app adapter, rocket pipeline) via its rocketConnection()

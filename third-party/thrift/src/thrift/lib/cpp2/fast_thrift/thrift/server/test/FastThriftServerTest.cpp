@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -26,6 +27,7 @@
 #include <string>
 #include <string_view>
 #include <thread>
+#include <vector>
 
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/FizzClientContext.h>
@@ -853,6 +855,110 @@ struct CountingExtension {
   }
 };
 
+// Identity for a state object that outlives the object itself, so a test can
+// still tell two of them apart. An address cannot do this job: a connection's
+// store is destroyed with the connection, and the next one may be handed the
+// same address.
+int nextStateId() noexcept {
+  static std::atomic<int> next{0};
+  return next.fetch_add(1, std::memory_order_relaxed) + 1;
+}
+
+// What the extensions observed, published to the test body. Extensions run on
+// the server's IO threads, so every field crosses a thread boundary and is
+// atomic. Slots are claimed in call order, which is deterministic here:
+// extensions on one connection run in pipeline order, and the tests' round
+// trips are sequential.
+struct StateObservations {
+  static constexpr size_t kCapacity = 4;
+
+  void record(int stateId, int requestsSeen) noexcept {
+    const size_t slot = claimed.fetch_add(1, std::memory_order_relaxed);
+    if (slot >= kCapacity) {
+      return;
+    }
+    ids[slot].store(stateId, std::memory_order_relaxed);
+    counts[slot].store(requestsSeen, std::memory_order_relaxed);
+    // Bumped only after the payload is written, and it is the counter size()
+    // reads: a reader that sees N observations sees the N payloads too. The
+    // claim counter cannot serve this role — it is bumped before the stores.
+    published.fetch_add(1, std::memory_order_release);
+  }
+
+  // Observations whose payload is readable. Never exceeds kCapacity: a claim
+  // past the end publishes nothing.
+  size_t size() const noexcept {
+    return published.load(std::memory_order_acquire);
+  }
+  int id(size_t slot) const noexcept {
+    return ids[slot].load(std::memory_order_relaxed);
+  }
+  int count(size_t slot) const noexcept {
+    return counts[slot].load(std::memory_order_relaxed);
+  }
+
+  std::array<std::atomic<int>, kCapacity> ids{};
+  std::array<std::atomic<int>, kCapacity> counts{};
+  std::atomic<size_t> claimed{0};
+  std::atomic<size_t> published{0};
+};
+
+// Per-connection state two cooperating extensions share by naming the same
+// type. The writer stamps the caller it resolved; the reader authorizes against
+// it, which is the SAP shape in miniature.
+struct SharedCallerState {
+  int id{nextStateId()};
+  int requestsSeen{0};
+};
+
+// Reports which state object it was handed and the running count it saw, so a
+// test can tell whether the two extensions on a connection got the same one.
+// The count is published here rather than read back later: the store dies with
+// the connection, which the client's teardown can close first.
+struct SharedStateExtension {
+  using ConnState = SharedCallerState;
+
+  SharedStateExtension(SharedCallerState& state, StateObservations* observed)
+      : state_(&state), observed_(observed) {}
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    ++state_->requestsSeen;
+    if (observed_) {
+      observed_->record(state_->id, state_->requestsSeen);
+    }
+    return ftt::RequestVerdict::proceed();
+  }
+
+  SharedCallerState* state_{nullptr};
+  StateObservations* observed_{nullptr};
+};
+
+// A second extension type naming a different ConnState, to prove the slots do
+// not alias. Ids come from the one counter both state types share, so an id
+// from here can be compared against one from SharedCallerState.
+struct OtherConnState {
+  int id{nextStateId()};
+};
+
+struct OtherStateExtension {
+  using ConnState = OtherConnState;
+
+  OtherStateExtension(OtherConnState& state, StateObservations* observed)
+      : state_(&state), observed_(observed) {}
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    if (observed_) {
+      observed_->record(state_->id, 0);
+    }
+    return ftt::RequestVerdict::proceed();
+  }
+
+  OtherConnState* state_{nullptr};
+  StateObservations* observed_{nullptr};
+};
+
 // Read/write extension that rejects every request. Reads the method name and
 // stamps a header (exercising both halves of the mutator's access) then returns
 // a rejecting verdict, which short-circuits the pipeline: the service handler
@@ -1216,6 +1322,82 @@ TEST(FastThriftServerExtensionTest, ExtensionsSplicedInRegistrationOrder) {
   EXPECT_GE(seqC.load(), 0);
   EXPECT_LT(seqA.load(), seqB.load());
   EXPECT_LT(seqB.load(), seqC.load());
+}
+
+// Two extensions on one connection that name the same ConnState are handed the
+// same object — the property that lets an identity resolved by one gate be
+// authorized against by the next without either reaching into a shared slot on
+// the connection context.
+TEST(FastThriftServerExtensionTest, ExtensionsShareConnStateOnAConnection) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  StateObservations observed;
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("shared")
+          .addThriftExtension<SharedStateExtension>(&observed)
+          .addThriftExtension<SharedStateExtension>(&observed));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  ASSERT_EQ(observed.size(), 2);
+  EXPECT_EQ(observed.id(0), observed.id(1));
+  // Both extensions incremented the one object: the second saw the first's
+  // write.
+  EXPECT_EQ(observed.count(0), 1);
+  EXPECT_EQ(observed.count(1), 2);
+}
+
+// Different ConnState types are different slots, so unrelated extensions on the
+// same connection cannot alias however they are composed.
+TEST(FastThriftServerExtensionTest, DistinctConnStateTypesDoNotAlias) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  StateObservations observed;
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("mixed")
+          .addThriftExtension<SharedStateExtension>(&observed)
+          .addThriftExtension<OtherStateExtension>(&observed));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  ASSERT_EQ(observed.size(), 2);
+  EXPECT_NE(observed.id(0), observed.id(1));
+}
+
+// The state is per connection, not per server: a second connection gets its own
+// object, so nothing an extension caches can bleed between callers.
+TEST(FastThriftServerExtensionTest, ConnStateIsPerConnection) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  StateObservations observed;
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("percon").addThriftExtension<SharedStateExtension>(
+          &observed));
+  server.start();
+
+  // addRoundTrip tears its client down before returning, so these are two
+  // distinct connections rather than two requests on one.
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  ASSERT_EQ(observed.size(), 2);
+  EXPECT_NE(observed.id(0), observed.id(1));
+  // A fresh object, not a reused one carrying the first connection's count.
+  EXPECT_EQ(observed.count(1), 1);
 }
 
 // The native-handler allowlist denies arbitrary user types and always permits

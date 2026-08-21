@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/HandlerNode.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ExtensionStateStore.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/NativeThriftHandlerAllowlist.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
@@ -43,9 +44,13 @@ using ThriftPipelineHandlerContext = channel_pipeline::detail::ContextImpl;
  * the thrift pipeline. The factory is invoked once per accepted connection when
  * that connection's thrift pipeline is built, so each connection gets its own
  * handler instance (handlers may hold per-connection state).
+ *
+ * The store is that connection's shared extension state. Every factory for a
+ * connection is passed the same one, which is how cooperating extensions reach
+ * a common object; a handler that needs none ignores it.
  */
 using ThriftPipelineHandlerFactory =
-    std::function<channel_pipeline::detail::HandlerNode()>;
+    std::function<channel_pipeline::detail::HandlerNode(ExtensionStateStore&)>;
 
 /**
  * Derive a pipeline handler id from a namespace (e.g. a module name, or empty
@@ -101,7 +106,7 @@ ThriftPipelineHandlerFactory makeThriftPipelineHandlerFactory(
       "basis in framework/NativeThriftHandlerAllowlist.h (Thrift-owned). Prefer "
       "the constrained observer/modifier extension API "
       "(FastServerModule::addThriftExtension) for user handlers.");
-  return [id, args...]() {
+  return [id, args...](ExtensionStateStore&) {
     return channel_pipeline::detail::makeHandlerNode<T, ThriftServerEventType>(
         id, std::make_unique<T>(args...));
   };

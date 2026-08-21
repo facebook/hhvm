@@ -330,7 +330,7 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   // order — the first sits closest to the head, the last immediately above
   // the tail adapter. Each factory constructs a fresh per-connection instance.
   for (const auto& factory : config_.thriftPipelineHandlerFactories) {
-    thriftPipelineBuilder.addErasedHandler(factory());
+    thriftPipelineBuilder.addErasedHandler(factory(conn.extensionStates));
   }
   // Last before the tail, and deliberately after the embedder handlers: this
   // terminates the connection-lifecycle messages, so everything that might

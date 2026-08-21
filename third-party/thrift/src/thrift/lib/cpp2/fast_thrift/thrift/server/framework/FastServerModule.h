@@ -70,14 +70,10 @@ class FastServerModule {
    */
   template <typename T, typename... Args>
   FastServerModule& addNativeThriftHandler(Args... args) {
-    // Two-level id keyed on the module name (its namespace) and the handler's
-    // within-module index — distinct modules get non-overlapping id streams.
-    // Empty module names are rejected at FastThriftServer::addModule, so the
-    // empty namespace stays reserved for top-level (loose) handlers.
-    auto id = server::deriveThriftPipelineHandlerId(name_, factories_.size());
-    factories_.push_back(
-        server::makeThriftPipelineHandlerFactory<T>(id, std::move(args)...));
-    return *this;
+    return addFactory([&](channel_pipeline::HandlerId id) {
+      return server::makeThriftPipelineHandlerFactory<T>(
+          id, std::move(args)...);
+    });
   }
 
   /**
@@ -87,16 +83,21 @@ class FastServerModule {
    * request/response path. `args` are copied and used to construct a fresh H
    * per connection. Returns *this for chaining.
    *
-   * Sugar over addNativeThriftHandler that wraps H in the framework's extension
-   * adapter, which owns message lifetime and enforces the forwarding /
-   * rejection contract on H's behalf. The adapter is always allowlisted, so
+   * H is wrapped in the framework's extension adapter, which owns message
+   * lifetime and enforces the forwarding / rejection contract on H's behalf.
+   * The factory is built directly rather than through addNativeThriftHandler,
+   * because the adapter also needs the connection's shared extension state.
+   * H is constrained by the adapter's own static_assert on the extension
+   * callback contract rather than by the native-handler allowlist, so
    * extensions never need an allowlist entry.
    */
   template <typename H, typename... Args>
   FastServerModule& addThriftExtension(Args... args) {
     requiresConnectionContext_ |= ThriftConnectionExtensionHandler<H>;
-    return addNativeThriftHandler<server::ThriftExtensionPipelineHandler<H>>(
-        std::move(args)...);
+    return addFactory([&](channel_pipeline::HandlerId id) {
+      return server::makeThriftExtensionHandlerFactory<H>(
+          id, std::move(args)...);
+    });
   }
 
   /**
@@ -120,6 +121,21 @@ class FastServerModule {
   }
 
  private:
+  // Append the factory `makeFactory` builds for the next registration slot.
+  //
+  // The id is two-level, keyed on the module name (its namespace) and the
+  // handler's within-module index, so distinct modules get non-overlapping id
+  // streams. Empty module names are rejected at FastThriftServer::addModule, so
+  // the empty namespace stays reserved for top-level (loose) handlers. Every
+  // registration path derives its id here, which is what keeps the indices
+  // dense and in registration order.
+  template <typename MakeFactory>
+  FastServerModule& addFactory(MakeFactory&& makeFactory) {
+    auto id = server::deriveThriftPipelineHandlerId(name_, factories_.size());
+    factories_.push_back(std::forward<MakeFactory>(makeFactory)(id));
+    return *this;
+  }
+
   std::string name_;
   std::vector<server::ThriftPipelineHandlerFactory> factories_;
   bool requiresConnectionContext_{false};

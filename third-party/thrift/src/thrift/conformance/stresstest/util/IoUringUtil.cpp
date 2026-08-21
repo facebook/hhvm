@@ -59,6 +59,10 @@ DEFINE_bool(
     io_prov_buffs_use_incremental,
     false,
     "Enable the use of incremental buffers usage for recv operations. false by default.");
+DEFINE_bool(
+    io_prov_buffs_use_dynamic,
+    false,
+    "Use the dynamic io_uring provided buffer ring. Off by default.");
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {
@@ -139,6 +143,11 @@ void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& options) {
 
   if (FLAGS_io_prov_buffs_use_incremental) {
     options.setEnableIncrementalBuffers(true);
+  }
+
+  if (FLAGS_io_prov_buffs_use_dynamic) {
+    options.setProvidedBufferRingMode(
+        folly::IoUringOptions::ProvidedBufferRingMode::Dynamic);
   }
 }
 

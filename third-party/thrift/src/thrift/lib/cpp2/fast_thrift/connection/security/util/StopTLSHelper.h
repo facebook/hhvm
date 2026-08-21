@@ -16,7 +16,9 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
+#include <optional>
 
 #include <fizz/server/AsyncFizzServer.h>
 #include <folly/ExceptionWrapper.h>
@@ -36,7 +38,11 @@ namespace apache::thrift::fast_thrift::connection::security::util {
  *   - Constructed on the EventBase thread that owns the fizz transport. Held
  *     by the owner (typically StopTLSV1Handler) via a unique_ptr with a
  *     folly::DelayedDestruction::Destructor deleter.
- *   - start() kicks off the StopTLS exchange.
+ *   - start() kicks off the StopTLS exchange, bounded by the timeout passed
+ *     at construction. Nothing else bounds it: the exchange completes only
+ *     when the peer answers our close_notify with its own, so without a
+ *     deadline a peer that stops responding holds the transport open until
+ *     it disconnects.
  *   - On success/error, invokes the user Callback exactly once and then
  *     synchronously invokes onTerminal(this) so the owner can drop its
  *     unique_ptr. The deleter triggers destroy(); DelayedDestruction defers
@@ -60,8 +66,13 @@ class StopTLSHelper : private apache::thrift::AsyncStopTLS::Callback,
   // Receives `this`; owner uses it to drop its owning UniquePtr.
   using OnTerminal = folly::Function<void(StopTLSHelper*) noexcept>;
 
+  // timeout bounds the whole exchange; std::nullopt is unbounded. A
+  // non-positive value is misuse and is logged and treated as unbounded —
+  // zero reads as "no timeout" to AsyncStopTLS, the opposite of what a zero
+  // deadline means elsewhere in this pipeline.
   StopTLSHelper(
       fizz::server::AsyncFizzServer::UniquePtr fizzServer,
+      std::optional<std::chrono::milliseconds> timeout,
       OnTerminal onTerminal,
       Callback callback);
 
@@ -97,6 +108,8 @@ class StopTLSHelper : private apache::thrift::AsyncStopTLS::Callback,
       folly::exception_wrapper ex) noexcept;
 
   fizz::server::AsyncFizzServer::UniquePtr fizzServer_;
+  // Resolved for AsyncStopTLS, whose contract is zero-means-unbounded.
+  std::chrono::milliseconds timeout_;
   apache::thrift::AsyncStopTLS::UniquePtr stopTlsFrame_;
   OnTerminal onTerminal_;
   Callback callback_;

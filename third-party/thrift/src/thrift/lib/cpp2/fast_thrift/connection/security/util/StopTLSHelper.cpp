@@ -24,11 +24,31 @@
 
 namespace apache::thrift::fast_thrift::connection::security::util {
 
+namespace {
+
+// Zero already means "unbounded" to AsyncStopTLS, so a non-positive budget
+// cannot be honoured as a deadline. Degrade to unbounded — the documented
+// behavior for an absent budget — and shout, since the only way to arrive
+// here is misuse.
+std::chrono::milliseconds resolveTimeout(
+    std::optional<std::chrono::milliseconds> timeout) {
+  if (timeout && timeout->count() <= 0) {
+    XLOG(DFATAL) << "StopTLSHelper: pass std::nullopt for unbounded, not "
+                 << timeout->count() << "ms; treating as unbounded.";
+    return std::chrono::milliseconds{0};
+  }
+  return timeout.value_or(std::chrono::milliseconds{0});
+}
+
+} // namespace
+
 StopTLSHelper::StopTLSHelper(
     fizz::server::AsyncFizzServer::UniquePtr fizzServer,
+    std::optional<std::chrono::milliseconds> timeout,
     OnTerminal onTerminal,
     Callback callback)
     : fizzServer_(std::move(fizzServer)),
+      timeout_(resolveTimeout(timeout)),
       onTerminal_(std::move(onTerminal)),
       callback_(std::move(callback)) {}
 
@@ -49,12 +69,12 @@ void StopTLSHelper::start() {
 
   XLOG(DBG3) << "Beginning StopTLS V1 negotiation";
   stopTlsFrame_.reset(new apache::thrift::AsyncStopTLS(*this));
-  // 0ms = no internal timeout. Matches legacy FizzPeeker.cpp convention;
-  // shutdown lifetime is managed by the owner via cancel().
+  // AsyncStopTLS arms its own timer when this is non-zero, and routes expiry
+  // through stopTLSError like any other failure. Zero leaves the exchange
+  // unbounded, which is only safe for an owner that imposes a deadline of its
+  // own; nothing here does, so the budget is passed through instead.
   stopTlsFrame_->start(
-      fizzServer_.get(),
-      apache::thrift::AsyncStopTLS::Role::Server,
-      std::chrono::milliseconds{0});
+      fizzServer_.get(), apache::thrift::AsyncStopTLS::Role::Server, timeout_);
 }
 
 void StopTLSHelper::stopTLSSuccess(std::unique_ptr<folly::IOBuf> postTLSData) {

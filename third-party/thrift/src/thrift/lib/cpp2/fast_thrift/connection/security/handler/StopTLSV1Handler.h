@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <utility>
 
 #include <fizz/server/AsyncFizzServer.h>
@@ -50,9 +51,9 @@ namespace apache::thrift::fast_thrift::connection::security::handler {
  * StopTLS failures are logged at DBG3 and the connection is dropped.
  *
  * The downgrades parked here are capped: past the cap a connection is refused
- * rather than started. The exchange has no timeout of its own, so a peer that
- * negotiates StopTLS V1 and then stalls the downgrade holds its socket until
- * it disconnects.
+ * rather than started. Each one is also bounded by the handshake-timeout
+ * budget off the incoming message, so a peer that negotiates StopTLS V1 and
+ * then stalls the downgrade is dropped rather than parked indefinitely.
  */
 class StopTLSV1Handler {
  public:
@@ -118,9 +119,13 @@ class StopTLSV1Handler {
     fizz::server::AsyncFizzServer::UniquePtr fizzServer(fizzPtr);
     auto clientAddr = std::move(incoming.clientAddr);
     auto extension = std::move(incoming.extension);
+    auto stopTLSTimeout = incoming.tlsParams
+        ? incoming.tlsParams->handshakeTimeout
+        : std::nullopt;
 
     util::StopTLSHelper::UniquePtr helper(new util::StopTLSHelper(
         std::move(fizzServer),
+        stopTLSTimeout,
         [this](util::StopTLSHelper* h) noexcept { inFlight_.erase(h); },
         [this, clientAddr, extension](
             folly::AsyncTransport::UniquePtr plaintext,

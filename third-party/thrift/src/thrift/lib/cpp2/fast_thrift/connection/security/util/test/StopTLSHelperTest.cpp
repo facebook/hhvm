@@ -18,7 +18,10 @@
 
 #include <sys/socket.h>
 #include <array>
+#include <chrono>
 #include <memory>
+#include <optional>
+#include <string>
 
 #include <gtest/gtest.h>
 
@@ -26,6 +29,7 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
@@ -97,6 +101,7 @@ TEST_F(StopTLSHelperTest, CancelBeforeStart) {
     auto fizzServer = makeFizzServer(sp.server);
     current_.reset(new StopTLSHelper(
         std::move(fizzServer),
+        /*timeout=*/std::nullopt,
         [this](StopTLSHelper*) noexcept {
           ++terminalCount_;
           current_.reset();
@@ -117,6 +122,58 @@ TEST_F(StopTLSHelperTest, CancelBeforeStart) {
 
   EXPECT_TRUE(callbackFired.load());
   EXPECT_TRUE(cancelEx);
+
+  ::close(sp.client.toFd());
+}
+
+// A peer that never answers our close_notify would otherwise hold the
+// transport open until it disconnects — nothing else bounds the exchange.
+TEST_F(StopTLSHelperTest, TimesOutWhenPeerNeverAnswers) {
+  constexpr auto kTimeout = std::chrono::milliseconds{50};
+  auto sp = makeSocketPair();
+  folly::Baton<> done;
+  folly::exception_wrapper timeoutEx;
+  // Both stamped on the EventBase thread, ordered before done.post().
+  std::chrono::steady_clock::time_point startedAt;
+  std::chrono::steady_clock::duration elapsed{};
+
+  ASSERT_NE(evb_, nullptr);
+  evb_->runInEventBaseThreadAndWait([&] {
+    auto fizzServer = makeFizzServer(sp.server);
+    current_.reset(new StopTLSHelper(
+        std::move(fizzServer),
+        kTimeout,
+        // Posted from the terminal callback, not the user callback: the
+        // terminal fires last, so waking the main thread any earlier races it
+        // against the writes below.
+        [this, &done, &startedAt, &elapsed](StopTLSHelper*) noexcept {
+          ++terminalCount_;
+          elapsed = std::chrono::steady_clock::now() - startedAt;
+          current_.reset();
+          done.post();
+        },
+        [&](folly::AsyncTransport::UniquePtr,
+            folly::exception_wrapper ex) noexcept {
+          timeoutEx = std::move(ex);
+        }));
+    startedAt = std::chrono::steady_clock::now();
+    current_->start();
+  });
+
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{5}));
+  EXPECT_EQ(terminalCount_, 1u);
+  // Assert on the timer's own error: any other failure would satisfy a bare
+  // "did it fail" check without proving the deadline fired.
+  EXPECT_NE(
+      timeoutEx.what().toStdString().find("timeout expired"), std::string::npos)
+      << "expected AsyncStopTLS timeout, got: " << timeoutEx.what();
+  // Independent of the message: a terminal that arrived before the budget
+  // elapsed cannot have been driven by the deadline. Only a lower bound is
+  // checked — the timer is armed after startedAt, and scheduling slack only
+  // ever pushes the terminal later.
+  const auto elapsedMs =
+      std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+  EXPECT_GE(elapsedMs.count(), kTimeout.count());
 
   ::close(sp.client.toFd());
 }

@@ -43,11 +43,6 @@ class DeclaredAfterStruct;
 } // namespace detail
 class UnderlyingRenamedStruct;
 class UnderlyingSameNamespaceStruct;
-namespace detail {
-class HeapAllocated;
-} // namespace detail
-class MoveOnly;
-class AlsoMoveOnly;
 class ApplyAdapter;
 namespace detail {
 class TransitiveAdapted;

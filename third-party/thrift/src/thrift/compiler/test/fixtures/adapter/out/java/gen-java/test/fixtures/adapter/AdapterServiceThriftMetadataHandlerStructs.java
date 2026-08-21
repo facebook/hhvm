@@ -46,12 +46,6 @@ class AdapterServiceThriftMetadataHandlerStructs_0 {
             ))
             .setIsUnion(false)
             .build());
-        structs.put("test.fixtures.adapter.HeapAllocated", new ThriftStruct.Builder()
-            .setName("test.fixtures.adapter.HeapAllocated")
-            .setFields(Arrays.asList(
-            ))
-            .setIsUnion(false)
-            .build());
     }
 }
 

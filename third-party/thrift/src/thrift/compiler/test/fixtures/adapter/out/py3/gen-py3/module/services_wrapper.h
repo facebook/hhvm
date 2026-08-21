@@ -48,9 +48,6 @@ class AdapterServiceWrapper : virtual public AdapterServiceSvIf {
   public:
     explicit AdapterServiceWrapper(PyObject *if_object, folly::Executor *exc);
     void async_tm_count(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>> callback) override;
-    void async_tm_adaptedTypes(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> callback
-        , std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> arg
-    ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

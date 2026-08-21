@@ -43,10 +43,6 @@ const MsgNoTransitive string = "hello, world 2"
 var PersonNoTransitive *Person2 = NewPerson2().
     SetNameNonCompat("DefaultName 2")
 const TypeAdapted AdaptedBool = true
-var NestedAdapted *MoveOnly = NewMoveOnly().
-    SetPtrNonCompat(
-        NewHeapAllocated(),
-    )
 var ContainerOfAdapted []AdaptedByte = []AdaptedByte{
     int8(1),
     int8(2),

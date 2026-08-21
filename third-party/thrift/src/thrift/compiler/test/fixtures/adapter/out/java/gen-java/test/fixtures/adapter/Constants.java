@@ -63,12 +63,6 @@ public final class Constants {
 
     public static final boolean TYPE_ADAPTED = true;
 
-    public static final test.fixtures.adapter.MoveOnly NESTED_ADAPTED = construct_NESTED_ADAPTED();
-
-    private static test.fixtures.adapter.MoveOnly construct_NESTED_ADAPTED() {
-        return new test.fixtures.adapter.MoveOnly.Builder().setPtr(new test.fixtures.adapter.HeapAllocated.Builder().build()).build();
-    }
-
     public static final List<Byte> CONTAINER_OF_ADAPTED = construct_CONTAINER_OF_ADAPTED();
 
     private static List<Byte> construct_CONTAINER_OF_ADAPTED() {

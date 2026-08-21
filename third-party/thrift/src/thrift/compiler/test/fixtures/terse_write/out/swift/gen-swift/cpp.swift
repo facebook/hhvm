@@ -327,7 +327,6 @@ public struct Adapter: ThriftSerializable, Hashable {
     public var adaptedType: String = ""
     public var underlyingName: String = ""
     public var extraNamespace: String = ""
-    public var moveOnly: Bool = false
 
     public init() {}
 
@@ -339,7 +338,6 @@ public struct Adapter: ThriftSerializable, Hashable {
         self.adaptedType = ""
         self.underlyingName = ""
         self.extraNamespace = ""
-        self.moveOnly = false
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
@@ -351,8 +349,6 @@ public struct Adapter: ThriftSerializable, Hashable {
         self.underlyingName.thriftWrite(to: writer)
         writer.writeFieldBegin(.string, 4)
         self.extraNamespace.thriftWrite(to: writer)
-        writer.writeFieldBegin(.bool, 5)
-        self.moveOnly.thriftWrite(to: writer)
         writer.writeFieldStop()
     }
 
@@ -385,12 +381,6 @@ public struct Adapter: ThriftSerializable, Hashable {
             case 4:
                 if fieldType == .string {
                     self.extraNamespace = try String.thriftRead(from: reader)
-                } else {
-                    try reader.skip(fieldType)
-                }
-            case 5:
-                if fieldType == .bool {
-                    self.moveOnly = try Bool.thriftRead(from: reader)
                 } else {
                     try reader.skip(fieldType)
                 }

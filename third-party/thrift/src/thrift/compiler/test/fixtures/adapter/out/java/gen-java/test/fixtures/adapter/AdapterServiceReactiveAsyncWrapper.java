@@ -40,23 +40,4 @@ public class AdapterServiceReactiveAsyncWrapper
       return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.countWrapper( rpcOptions));
   }
 
-  @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg) {
-      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.adaptedTypes(arg));
-  }
-
-  @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<test.fixtures.adapter.HeapAllocated> adaptedTypes(
-    final test.fixtures.adapter.HeapAllocated arg,
-    com.facebook.thrift.client.RpcOptions rpcOptions) {
-      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.adaptedTypes(arg, rpcOptions));
-  }
-
-  @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.adapter.HeapAllocated>> adaptedTypesWrapper(
-    final test.fixtures.adapter.HeapAllocated arg,
-    com.facebook.thrift.client.RpcOptions rpcOptions) {
-      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.adaptedTypesWrapper(arg, rpcOptions));
-  }
-
 }

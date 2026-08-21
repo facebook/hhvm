@@ -95,17 +95,6 @@ namespace detail {
 
 
 
-namespace detail {
-
-
-} // namespace detail
-
-
-
-
-
-
-
 
 
 

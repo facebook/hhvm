@@ -180,156 +180,6 @@ determineInvocationType:
 //
 
 //
-// Method 'adaptedTypes'
-//
-
-void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/) {
-  apache::thrift::detail::si::throw_app_exn_unimplemented("adaptedTypes");
-}
-
-void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::sync_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  return adaptedTypes(_return, std::move(p_arg));
-}
-
-folly::SemiFuture<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::semifuture_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-  __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-      expected,
-      apache::thrift::detail::si::InvocationType::Sync,
-      std::memory_order_relaxed);
-  auto ret = std::make_unique<::facebook::thrift::test::fixtures::adapter::HeapAllocated>();
-  sync_adaptedTypes(*ret, std::move(p_arg));
-  return folly::makeSemiFuture(std::move(ret));
-}
-
-folly::Future<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::future_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  auto expected{apache::thrift::detail::si::InvocationType::Future};
-  __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-      expected,
-      apache::thrift::detail::si::InvocationType::SemiFuture,
-      std::memory_order_relaxed);
-  return apache::thrift::detail::si::future(
-      semifuture_adaptedTypes(std::move(p_arg)),
-      getInternalKeepAlive());
-}
-
-#if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  auto expected{apache::thrift::detail::si::InvocationType::Coro};
-  __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-      expected,
-      apache::thrift::detail::si::InvocationType::Future,
-      std::memory_order_relaxed);
-  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
-                             withCapturedArgs<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/>(std::move(p_arg)));
-}
-
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_adaptedTypes(
-    apache::thrift::RequestParams /* params */, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
-  __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-      expected,
-      apache::thrift::detail::si::InvocationType::Coro,
-      std::memory_order_relaxed);
-  return co_adaptedTypes(std::move(p_arg));
-}
-#endif // FOLLY_HAS_COROUTINES
-
-void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::async_tm_adaptedTypes(
-    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> callback, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
-  // It's possible the coroutine versions will delegate to a future-based
-  // version. If that happens, we need the RequestParams arguments to be
-  // available to the future through the thread-local backchannel, so we create
-  // a RAII object that sets up RequestParams and clears them on destruction.
-  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
-#if FOLLY_HAS_COROUTINES
-determineInvocationType:
-#endif // FOLLY_HAS_COROUTINES
-  auto invocationType =
-      __fbthrift_invocation_adaptedTypes.load(std::memory_order_relaxed);
-  try {
-    switch (invocationType) {
-      case apache::thrift::detail::si::InvocationType::AsyncTm: {
-#if FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-            invocationType,
-            apache::thrift::detail::si::InvocationType::CoroParam,
-            std::memory_order_relaxed);
-        apache::thrift::RequestParams params{
-            callback->getRequestContext(),
-            callback->getThreadManager_deprecated(),
-            callback->getEventBase(),
-            callback->getHandlerExecutor()};
-        auto task = co_adaptedTypes(params, std::move(p_arg));
-        apache::thrift::detail::si::async_tm_coro(
-            std::move(callback), std::move(task));
-        return;
-#else // FOLLY_HAS_COROUTINES
-        __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
-            invocationType,
-            apache::thrift::detail::si::InvocationType::Future,
-            std::memory_order_relaxed);
-        [[fallthrough]];
-#endif // FOLLY_HAS_COROUTINES
-      }
-      case apache::thrift::detail::si::InvocationType::Future: {
-        auto fut = future_adaptedTypes(std::move(p_arg));
-        apache::thrift::detail::si::async_tm_future(
-            std::move(callback), std::move(fut));
-        return;
-      }
-      case apache::thrift::detail::si::InvocationType::SemiFuture: {
-        auto fut = semifuture_adaptedTypes(std::move(p_arg));
-        apache::thrift::detail::si::async_tm_semifuture(
-            std::move(callback), std::move(fut));
-        return;
-      }
-#if FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::CoroParam: {
-        apache::thrift::RequestParams params{
-            callback->getRequestContext(),
-            callback->getThreadManager_deprecated(),
-            callback->getEventBase(),
-            callback->getHandlerExecutor()};
-        auto task = co_adaptedTypes(params, std::move(p_arg));
-        apache::thrift::detail::si::async_tm_coro(
-            std::move(callback), std::move(task));
-        return;
-      }
-      case apache::thrift::detail::si::InvocationType::Coro: {
-        auto task = co_adaptedTypes(std::move(p_arg));
-        apache::thrift::detail::si::async_tm_coro(
-            std::move(callback), std::move(task));
-        return;
-      }
-#endif // FOLLY_HAS_COROUTINES
-      case apache::thrift::detail::si::InvocationType::Sync: {
-        ::facebook::thrift::test::fixtures::adapter::HeapAllocated _return;
-        sync_adaptedTypes(_return, std::move(p_arg));
-        callback->result(std::move(_return));
-        return;
-      }
-      default: {
-        folly::assume_unreachable();
-      }
-    }
-#if FOLLY_HAS_COROUTINES
-  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
-    std::tie(p_arg) = std::move(ex).restoreArgs<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/>();
-    goto determineInvocationType;
-#endif // FOLLY_HAS_COROUTINES
-  } catch (...) {
-    callback->exception(std::current_exception());
-  }
-}
-//
-// End of Method 'adaptedTypes'
-//
-
-//
 // End of Service Methods
 //
 
@@ -337,8 +187,6 @@ determineInvocationType:
 namespace facebook::thrift::test::fixtures::adapter {
 
 void AdapterServiceSvNull::count(::facebook::thrift::test::fixtures::adapter::CountingStruct& /*_return*/) {}
-
-void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/) {}
 
 
 std::string_view AdapterServiceAsyncProcessor::getServiceName() {
@@ -367,11 +215,6 @@ const AdapterServiceAsyncProcessor::ProcessMap AdapterServiceAsyncProcessor::kOw
      &AdapterServiceAsyncProcessor::setUpAndProcess_count<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &AdapterServiceAsyncProcessor::executeRequest_count<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &AdapterServiceAsyncProcessor::executeRequest_count<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
-  {"adaptedTypes",
-    {&AdapterServiceAsyncProcessor::setUpAndProcess_adaptedTypes<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &AdapterServiceAsyncProcessor::setUpAndProcess_adaptedTypes<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &AdapterServiceAsyncProcessor::executeRequest_adaptedTypes<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &AdapterServiceAsyncProcessor::executeRequest_adaptedTypes<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
 apache::thrift::ServiceRequestInfoMap const& AdapterServiceServiceInfoHolder::requestInfoMap() const {
@@ -389,14 +232,6 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
      apache::thrift::concurrency::NORMAL,
      std::nullopt,
      ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::adapter::AdapterService>("count")}},
-  {"adaptedTypes",
-    { false,
-     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-     "AdapterService.adaptedTypes",
-     std::nullopt,
-     apache::thrift::concurrency::NORMAL,
-     std::nullopt,
-     ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::adapter::AdapterService>("adaptedTypes")}},
   };
 
   return requestInfoMap;

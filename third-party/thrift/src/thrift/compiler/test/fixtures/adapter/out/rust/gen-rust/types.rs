@@ -425,38 +425,6 @@ pub struct SameNamespaceStruct {
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct HeapAllocated {
-    // This field forces `..Default::default()` when instantiating this
-    // struct, to make code future-proof against new fields added later to
-    // the definition in Thrift. If you don't want this, add the annotation
-    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-    #[doc(hidden)]
-    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-}
-
-#[derive(Clone, PartialEq)]
-pub struct MoveOnly {
-    pub ptr: crate::types::HeapAllocated,
-    // This field forces `..Default::default()` when instantiating this
-    // struct, to make code future-proof against new fields added later to
-    // the definition in Thrift. If you don't want this, add the annotation
-    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-    #[doc(hidden)]
-    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-}
-
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct AlsoMoveOnly {
-    pub ptr: ::std::primitive::i64,
-    // This field forces `..Default::default()` when instantiating this
-    // struct, to make code future-proof against new fields added later to
-    // the definition in Thrift. If you don't want this, add the annotation
-    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-    #[doc(hidden)]
-    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-}
-
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ApplyAdapter {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -1378,7 +1346,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1440,7 +1407,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1502,7 +1468,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1564,7 +1529,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1626,7 +1590,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1688,7 +1651,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1739,7 +1701,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2071,7 +2032,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2133,7 +2093,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2195,7 +2154,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2499,7 +2457,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         adaptedType: "::my::Cpp::Type1".to_owned(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2532,7 +2489,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2565,7 +2521,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2598,7 +2553,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2740,7 +2694,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2905,7 +2858,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IndependentDirectlyAdapted {
                 adaptedType: "::my::Type".to_owned(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3116,7 +3068,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3184,7 +3135,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3227,7 +3177,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3289,7 +3238,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3483,7 +3431,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3515,7 +3462,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3547,7 +3493,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3948,7 +3893,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4442,7 +4386,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4464,7 +4407,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4486,7 +4428,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4508,7 +4449,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4530,7 +4470,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4552,7 +4491,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5051,7 +4989,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5073,7 +5010,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5095,7 +5031,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5117,7 +5052,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5151,7 +5085,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5185,7 +5118,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5758,7 +5690,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdaptedStruct {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -5965,7 +5896,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -6526,7 +6456,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DeclaredAfterStruct {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -6676,7 +6605,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStruct {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: "UnderlyingRenamedStruct".to_owned(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -6826,7 +6754,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: "UnderlyingSameNamespaceStruct".to_owned(),
                 extraNamespace: ::std::string::String::new(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -6847,427 +6774,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            _ => {}
-        }
-
-        ::std::option::Option::None
-    }
-}
-
-
-#[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::HeapAllocated {
-    fn default() -> Self {
-        Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        }
-    }
-}
-
-impl ::std::fmt::Debug for self::HeapAllocated {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        formatter
-            .debug_struct("HeapAllocated")
-            .finish()
-    }
-}
-
-unsafe impl ::std::marker::Send for self::HeapAllocated {}
-unsafe impl ::std::marker::Sync for self::HeapAllocated {}
-impl ::std::marker::Unpin for self::HeapAllocated {}
-impl ::std::panic::RefUnwindSafe for self::HeapAllocated {}
-impl ::std::panic::UnwindSafe for self::HeapAllocated {}
-
-impl ::fbthrift::GetTType for self::HeapAllocated {
-    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-}
-
-impl ::fbthrift::GetUri for self::HeapAllocated {
-    fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/fixtures/adapter/HeapAllocated"
-    }
-}
-
-impl ::fbthrift::GetTypeNameType for self::HeapAllocated {
-    fn type_name_type() -> fbthrift::TypeNameType {
-        ::fbthrift::TypeNameType::StructType
-    }
-}
-
-impl ::fbthrift::ThriftStruct for self::HeapAllocated {
-    fn fields() -> &'static [::fbthrift::Field] {
-        static FIELDS: &[::fbthrift::Field] = &[
-        ];
-        FIELDS
-    }
-}
-
-impl<P> ::fbthrift::Serialize<P> for self::HeapAllocated
-where
-    P: ::fbthrift::ProtocolWriter,
-{
-    #[inline]
-    fn rs_thrift_write(&self, p: &mut P) {
-        p.write_struct_begin("HeapAllocated");
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
-impl<P> ::fbthrift::Deserialize<P> for self::HeapAllocated
-where
-    P: ::fbthrift::ProtocolReader,
-{
-    #[inline]
-    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        static FIELDS: &[::fbthrift::Field] = &[
-        ];
-
-        #[allow(unused_mut)]
-        let mut output = HeapAllocated::default();
-        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a HeapAllocated")?;
-        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-        #[allow(unused_labels)]
-        let fallback  = 'fastpath: {
-
-            fty != ::fbthrift::TType::Stop
-        };
-
-        if fallback {
-            loop {
-                match (fty, fid) {
-                    (::fbthrift::TType::Stop, _) => break,
-                    (fty, _) => p.skip(fty)?,
-                }
-                p.read_field_end()?;
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            }
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(output)
-
-    }
-}
-
-
-impl ::fbthrift::metadata::ThriftAnnotations for HeapAllocated {
-    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                name: "::apache::thrift::test::MoveOnlyAdapter".to_owned(),
-                adaptedType: ::std::default::Default::default(),
-                underlyingName: ::std::default::Default::default(),
-                extraNamespace: ::std::default::Default::default(),
-                moveOnly: true,
-                ..::std::default::Default::default()
-            });
-            let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-            return r.take();
-        }
-
-        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return ::std::option::Option::Some(r);
-        }
-
-        ::std::option::Option::None
-    }
-
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        #[allow(clippy::match_single_binding)]
-        match field_id {
-            _ => {}
-        }
-
-        ::std::option::Option::None
-    }
-}
-
-
-#[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MoveOnly {
-    fn default() -> Self {
-        Self {
-            ptr: ::std::default::Default::default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        }
-    }
-}
-
-impl ::std::fmt::Debug for self::MoveOnly {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        formatter
-            .debug_struct("MoveOnly")
-            .field("ptr", &self.ptr)
-            .finish()
-    }
-}
-
-unsafe impl ::std::marker::Send for self::MoveOnly {}
-unsafe impl ::std::marker::Sync for self::MoveOnly {}
-impl ::std::marker::Unpin for self::MoveOnly {}
-impl ::std::panic::RefUnwindSafe for self::MoveOnly {}
-impl ::std::panic::UnwindSafe for self::MoveOnly {}
-
-impl ::fbthrift::GetTType for self::MoveOnly {
-    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-}
-
-impl ::fbthrift::GetUri for self::MoveOnly {
-    fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/fixtures/adapter/MoveOnly"
-    }
-}
-
-impl ::fbthrift::GetTypeNameType for self::MoveOnly {
-    fn type_name_type() -> fbthrift::TypeNameType {
-        ::fbthrift::TypeNameType::StructType
-    }
-}
-
-impl ::fbthrift::ThriftStruct for self::MoveOnly {
-    fn fields() -> &'static [::fbthrift::Field] {
-        static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("ptr", ::fbthrift::TType::Struct, 1),
-        ];
-        FIELDS
-    }
-}
-
-impl<P> ::fbthrift::Serialize<P> for self::MoveOnly
-where
-    P: ::fbthrift::ProtocolWriter,
-{
-    #[inline]
-    fn rs_thrift_write(&self, p: &mut P) {
-        p.write_struct_begin("MoveOnly");
-        p.write_field_begin("ptr", ::fbthrift::TType::Struct, 1);
-        ::fbthrift::Serialize::rs_thrift_write(&self.ptr, p);
-        p.write_field_end();
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
-impl<P> ::fbthrift::Deserialize<P> for self::MoveOnly
-where
-    P: ::fbthrift::ProtocolReader,
-{
-    #[inline]
-    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("ptr", ::fbthrift::TType::Struct, 1),
-        ];
-
-        #[allow(unused_mut)]
-        let mut output = MoveOnly::default();
-        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MoveOnly")?;
-        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-        #[allow(unused_labels)]
-        let fallback  = 'fastpath: {
-            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                output.ptr = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ptr", strct: "MoveOnly"})?;
-                p.read_field_end()?;
-            } else {
-                break 'fastpath true;
-            }
-            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-
-            fty != ::fbthrift::TType::Stop
-        };
-
-        if fallback {
-            loop {
-                match (fty, fid) {
-                    (::fbthrift::TType::Stop, _) => break,
-                    (::fbthrift::TType::Struct, 1) => output.ptr = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ptr", strct: "MoveOnly"})?,
-                    (fty, _) => p.skip(fty)?,
-                }
-                p.read_field_end()?;
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            }
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(output)
-
-    }
-}
-
-
-impl ::fbthrift::metadata::ThriftAnnotations for MoveOnly {
-    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        ::std::option::Option::None
-    }
-
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        #[allow(clippy::match_single_binding)]
-        match field_id {
-            _ => {}
-        }
-
-        ::std::option::Option::None
-    }
-}
-
-
-#[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::AlsoMoveOnly {
-    fn default() -> Self {
-        Self {
-            ptr: ::std::default::Default::default(),
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        }
-    }
-}
-
-impl ::std::fmt::Debug for self::AlsoMoveOnly {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        formatter
-            .debug_struct("AlsoMoveOnly")
-            .field("ptr", &self.ptr)
-            .finish()
-    }
-}
-
-unsafe impl ::std::marker::Send for self::AlsoMoveOnly {}
-unsafe impl ::std::marker::Sync for self::AlsoMoveOnly {}
-impl ::std::marker::Unpin for self::AlsoMoveOnly {}
-impl ::std::panic::RefUnwindSafe for self::AlsoMoveOnly {}
-impl ::std::panic::UnwindSafe for self::AlsoMoveOnly {}
-
-impl ::fbthrift::GetTType for self::AlsoMoveOnly {
-    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-}
-
-impl ::fbthrift::GetUri for self::AlsoMoveOnly {
-    fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/fixtures/adapter/AlsoMoveOnly"
-    }
-}
-
-impl ::fbthrift::GetTypeNameType for self::AlsoMoveOnly {
-    fn type_name_type() -> fbthrift::TypeNameType {
-        ::fbthrift::TypeNameType::StructType
-    }
-}
-
-impl ::fbthrift::ThriftStruct for self::AlsoMoveOnly {
-    fn fields() -> &'static [::fbthrift::Field] {
-        static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("ptr", ::fbthrift::TType::I64, 1),
-        ];
-        FIELDS
-    }
-}
-
-impl<P> ::fbthrift::Serialize<P> for self::AlsoMoveOnly
-where
-    P: ::fbthrift::ProtocolWriter,
-{
-    #[inline]
-    fn rs_thrift_write(&self, p: &mut P) {
-        p.write_struct_begin("AlsoMoveOnly");
-        p.write_field_begin("ptr", ::fbthrift::TType::I64, 1);
-        ::fbthrift::Serialize::rs_thrift_write(&self.ptr, p);
-        p.write_field_end();
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
-impl<P> ::fbthrift::Deserialize<P> for self::AlsoMoveOnly
-where
-    P: ::fbthrift::ProtocolReader,
-{
-    #[inline]
-    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("ptr", ::fbthrift::TType::I64, 1),
-        ];
-
-        #[allow(unused_mut)]
-        let mut output = AlsoMoveOnly::default();
-        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AlsoMoveOnly")?;
-        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-        #[allow(unused_labels)]
-        let fallback  = 'fastpath: {
-            if (fty, fid) == (::fbthrift::TType::I64, 1) {
-                output.ptr = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ptr", strct: "AlsoMoveOnly"})?;
-                p.read_field_end()?;
-            } else {
-                break 'fastpath true;
-            }
-            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-
-            fty != ::fbthrift::TType::Stop
-        };
-
-        if fallback {
-            loop {
-                match (fty, fid) {
-                    (::fbthrift::TType::Stop, _) => break,
-                    (::fbthrift::TType::I64, 1) => output.ptr = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ptr", strct: "AlsoMoveOnly"})?,
-                    (fty, _) => p.skip(fty)?,
-                }
-                p.read_field_end()?;
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-            }
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(output)
-
-    }
-}
-
-
-impl ::fbthrift::metadata::ThriftAnnotations for AlsoMoveOnly {
-    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        ::std::option::Option::None
-    }
-
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-        #[allow(unused_variables)]
-        let type_id = ::std::any::TypeId::of::<T>();
-
-        #[allow(clippy::match_single_binding)]
-        match field_id {
-            1 => {
-
-                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
-                if matches_type {
-                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                        name: "::apache::thrift::test::MoveOnlyAdapter".to_owned(),
-                        adaptedType: ::std::default::Default::default(),
-                        underlyingName: ::std::default::Default::default(),
-                        extraNamespace: ::std::default::Default::default(),
-                        moveOnly: true,
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
-
-                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
-                if let ::std::option::Option::Some(r) = r {
-                    return ::std::option::Option::Some(r);
-                }
-            },
             _ => {}
         }
 
@@ -7382,7 +6888,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -7719,7 +7224,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -7741,7 +7245,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -7883,7 +7386,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -8174,7 +7676,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStructWithStructAdapterA
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: "Renamed".to_owned(),
                 extraNamespace: ::std::default::Default::default(),
-                moveOnly: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -8204,7 +7705,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStructWithStructAdapterA
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

@@ -21,5 +21,4 @@ timeout_no_transitive: int
 msg_no_transitive: str
 person_no_transitive: Person2
 type_adapted: bool
-nested_adapted: MoveOnly
 container_of_adapted: __T.List[int]

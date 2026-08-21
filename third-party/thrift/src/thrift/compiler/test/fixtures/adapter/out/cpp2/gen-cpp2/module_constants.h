@@ -53,15 +53,12 @@ namespace module_constants {
   /** Glean {"constant": "type_adapted"} */
   ::facebook::thrift::test::fixtures::adapter::AdaptedBool const& type_adapted();
 
-  /** Glean {"constant": "nested_adapted"} */
-  ::facebook::thrift::test::fixtures::adapter::MoveOnly const& nested_adapted();
-
   /** Glean {"constant": "container_of_adapted"} */
   ::std::vector<::facebook::thrift::test::fixtures::adapter::AdaptedByte> const& container_of_adapted();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_45faf1bb1b36ce2e();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_45faf1bb1b36ce2e_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_45faf1bb1b36ce2e_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_9ea8bd6ec8caf297();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9ea8bd6ec8caf297_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9ea8bd6ec8caf297_uris();
 
 } // namespace module_constants
 } // namespace facebook::thrift::test::fixtures::adapter

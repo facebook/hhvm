@@ -22,7 +22,7 @@ except ImportError:
         pass
 
 
-from .ttypes import UTF8STRINGS, Color, ThriftAdaptedEnum, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, IndependentDirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, AdaptTestStruct, AdaptTemplatedTestStruct, AdaptTemplatedNestedTestStruct, AdaptTestUnion, AdaptedStruct, DirectlyAdaptedStruct, StructFieldAdaptedStruct, CircularAdaptee, CircularStruct, ReorderedStruct, DeclaredAfterStruct, RenamedStruct, SameNamespaceStruct, HeapAllocated, MoveOnly, AlsoMoveOnly, ApplyAdapter, TransitiveAdapted, CountingStruct, Person, Person2, RenamedStructWithStructAdapterAndFieldAdapter, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, ListOfFooTypedef, StructWithAdapter, UnionWithAdapter, AdaptedA, StringWithCppAdapter, DurationMs, AdaptedBool, AdaptedByte, AdaptedShort, AdaptedInteger, AdaptedLong, AdaptedDouble, AdaptedString, DoubleTypedefBool, IOBuf, CustomProtocolType, IndirectionString, AdaptedEnum, AdaptedTypedef, TypedefOfDirect, AdaptedCircularAdaptee, CountingInt, FooWithAdapter_9317, ListWithElemAdapter_withAdapter_2312, MyI32_4873, StringWithAdapter_7208, Baz_7352, Foo_3943, Foo_6868, binary_5673, i32_5137, map_string_ListWithElemAdapter_withAdapter_8454
+from .ttypes import UTF8STRINGS, Color, ThriftAdaptedEnum, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, IndependentDirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, AdaptTestStruct, AdaptTemplatedTestStruct, AdaptTemplatedNestedTestStruct, AdaptTestUnion, AdaptedStruct, DirectlyAdaptedStruct, StructFieldAdaptedStruct, CircularAdaptee, CircularStruct, ReorderedStruct, DeclaredAfterStruct, RenamedStruct, SameNamespaceStruct, ApplyAdapter, TransitiveAdapted, CountingStruct, Person, Person2, RenamedStructWithStructAdapterAndFieldAdapter, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, ListOfFooTypedef, StructWithAdapter, UnionWithAdapter, AdaptedA, StringWithCppAdapter, DurationMs, AdaptedBool, AdaptedByte, AdaptedShort, AdaptedInteger, AdaptedLong, AdaptedDouble, AdaptedString, DoubleTypedefBool, IOBuf, CustomProtocolType, IndirectionString, AdaptedEnum, AdaptedTypedef, TypedefOfDirect, AdaptedCircularAdaptee, CountingInt, FooWithAdapter_9317, ListWithElemAdapter_withAdapter_2312, MyI32_4873, StringWithAdapter_7208, Baz_7352, Foo_3943, Foo_6868, binary_5673, i32_5137, map_string_ListWithElemAdapter_withAdapter_8454
 warn_thrift_py_deprecated(__name__)
 
 var1 = 10
@@ -66,11 +66,6 @@ person_no_transitive = Person2(**{
 })
 
 type_adapted = True
-
-nested_adapted = MoveOnly(**{
-  "ptr" : HeapAllocated(**{
-  }),
-})
 
 container_of_adapted = [
   1,

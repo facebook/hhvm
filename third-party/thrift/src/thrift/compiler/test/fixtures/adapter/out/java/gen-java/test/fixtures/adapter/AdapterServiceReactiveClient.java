@@ -32,8 +32,6 @@ public class AdapterServiceReactiveClient
   protected final Set<Long> _activeInteractions;
 
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _count_EXCEPTION_READERS = java.util.Collections.emptyMap();
-  private static final TField _adaptedTypes_ARG_FIELD_DESC = new TField("arg", TType.STRUCT, (short)1);
-  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _adaptedTypes_EXCEPTION_READERS = java.util.Collections.emptyMap();
 
   static {
   }
@@ -122,63 +120,6 @@ public class AdapterServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<test.fixtures.adapter.CountingStruct> count() {
     return count( com.facebook.thrift.client.RpcOptions.EMPTY);
-  }
-
-  private com.facebook.thrift.payload.Writer _createadaptedTypesWriter(final test.fixtures.adapter.HeapAllocated arg) {
-    return oprot -> {
-      try {
-        {
-          oprot.writeFieldBegin(_adaptedTypes_ARG_FIELD_DESC);
-
-          test.fixtures.adapter.HeapAllocated _fbthriftVar0 = arg;
-
-          _fbthriftVar0.write0(oprot);
-          oprot.writeFieldEnd();
-        }
-
-
-      } catch (Throwable _e) {
-        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
-        throw reactor.core.Exceptions.propagate(_e);
-      }
-    };
-  }
-
-  private static final com.facebook.thrift.payload.Reader _adaptedTypes_READER = Readers.wrap(test.fixtures.adapter.HeapAllocated.asReader());
-
-  @java.lang.Override
-  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<test.fixtures.adapter.HeapAllocated>> adaptedTypesWrapper(final test.fixtures.adapter.HeapAllocated arg,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _clientBinding.acquire()
-      .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
-        org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
-                .setName("adaptedTypes")
-                .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
-                .setOtherMetadata(headers)
-                .setProtocol(_protocolId)
-                .build();
-
-            com.facebook.thrift.payload.ClientRequestPayload<test.fixtures.adapter.HeapAllocated> _crp =
-                com.facebook.thrift.payload.ClientRequestPayload.create(
-                    "AdapterService",
-                    _createadaptedTypesWriter(arg),
-                    _adaptedTypes_READER,
-                    _adaptedTypes_EXCEPTION_READERS,
-                    _metadata,
-                    java.util.Collections.emptyMap());
-
-            return _rpc
-                .singleRequestSingleResponse(_crp, rpcOptions).transform(com.facebook.thrift.util.MonoPublishingTransformer.getInstance()).doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());});
-      }));
-  }
-
-  @java.lang.Override
-  public reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return adaptedTypesWrapper(arg,  rpcOptions).map(_p -> _p.getData());
-  }
-
-  @java.lang.Override
-  public reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg) {
-    return adaptedTypes(arg,  com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
 

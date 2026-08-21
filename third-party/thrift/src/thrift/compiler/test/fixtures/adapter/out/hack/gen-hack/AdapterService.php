@@ -20,13 +20,6 @@ interface AdapterServiceAsyncIf extends \IThriftAsyncIf {
    *   count();
    */
   public function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct>;
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated>;
 }
 
 /**
@@ -49,13 +42,6 @@ interface AdapterServiceClientIf extends \IThriftSyncIf {
    *   count();
    */
   public function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct>;
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated>;
 }
 
 /**
@@ -76,21 +62,6 @@ trait AdapterServiceClientBase {
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
     $currentseqid = $this->sendImplHelper($args, "count", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
     return (await $this->genAwaitResponse(AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
-  }
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public async function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated> {
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = AdapterService_adaptedTypes_args::fromShape(shape(
-      'arg' => $arg,
-    ));
-    await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "adaptedTypes", $args);
-    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -279,232 +250,6 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
 
 }
 
-class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'arg',
-      'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::class,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'arg' => 1,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'arg' => ?\facebook\thrift\test\fixtures\adapter\HeapAllocated,
-  );
-
-  const type TShape = shape(
-    ?'arg' => ?\facebook\thrift\test\fixtures\adapter\HeapAllocated::TShape,
-  );
-  const int STRUCTURAL_ID = 992428035330363413;
-  public ?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg;
-
-  public function __construct(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg = null)[] {
-    $this->arg = $arg;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'arg'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'AdapterService_adaptedTypes_args';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.adaptedTypes_args",
-        "fields" => vec[
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.HeapAllocated",
-                    )
-                  ),
-                )
-              ),
-              "name" => "arg",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-        'arg' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
-              shape(
-                "name" => "::apache::thrift::test::MoveOnlyAdapter",
-                "moveOnly" => true,
-              )
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'arg') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\HeapAllocated::__fromShape($$)),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'arg' => $this->arg?->__toShape(),
-    );
-  }
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = PHP\json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'arg') !== null) {
-      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['arg']));
-      $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
-      $_tmp1->readFromJson($_tmp0);
-      $this->arg = $_tmp1;
-    }
-  }
-
-}
-
-class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const type TResult = \facebook\thrift\test\fixtures\adapter\HeapAllocated;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    0 => shape(
-      'var' => 'success',
-      'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::class,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'success' => 0,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'success' => ?this::TResult,
-  );
-
-  const int STRUCTURAL_ID = 4974608069773454437;
-  public ?this::TResult $success;
-
-  public function __construct(?this::TResult $success = null)[] {
-    $this->success = $success;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'success'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'AdapterService_adaptedTypes_result';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.AdapterService_adaptedTypes_result",
-        "fields" => vec[
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 0,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.HeapAllocated",
-                    )
-                  ),
-                )
-              ),
-              "name" => "success",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-        'success' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
-              shape(
-                "name" => "::apache::thrift::test::MoveOnlyAdapter",
-                "moveOnly" => true,
-              )
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = PHP\json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['success']));
-      $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
-      $_tmp1->readFromJson($_tmp0);
-      $this->success = $_tmp1;
-    }
-  }
-
-}
-
 class AdapterServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'AdapterService';
 
@@ -525,37 +270,6 @@ class AdapterServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                   ),
                 )
               ),
-            )
-          ),
-          \tmeta_ThriftFunction::fromShape(
-            shape(
-              "name" => "adaptedTypes",
-              "return_type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.HeapAllocated",
-                    )
-                  ),
-                )
-              ),
-              "arguments" => vec[
-                \tmeta_ThriftField::fromShape(
-                  shape(
-                    "id" => 1,
-                    "type" => \tmeta_ThriftType::fromShape(
-                      shape(
-                        "t_struct" => \tmeta_ThriftStructType::fromShape(
-                          shape(
-                            "name" => "module.HeapAllocated",
-                          )
-                        ),
-                      )
-                    ),
-                    "name" => "arg",
-                  )
-                ),
-              ],
             )
           ),
         ],
@@ -582,7 +296,6 @@ class AdapterServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             ],
             'structs' => dict[
               'module.CountingStruct' => \facebook\thrift\test\fixtures\adapter\CountingStruct::getStructMetadata(),
-              'module.HeapAllocated' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

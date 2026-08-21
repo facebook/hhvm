@@ -141,23 +141,6 @@ template uint32_t UnderlyingSameNamespaceStruct::write<>(apache::thrift::BinaryP
 template uint32_t UnderlyingSameNamespaceStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t UnderlyingSameNamespaceStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-namespace detail {
-template void HeapAllocated::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t HeapAllocated::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t HeapAllocated::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t HeapAllocated::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-} // namespace detail
-
-template void MoveOnly::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MoveOnly::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MoveOnly::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MoveOnly::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-
-template void AlsoMoveOnly::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t AlsoMoveOnly::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t AlsoMoveOnly::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AlsoMoveOnly::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-
 template void ApplyAdapter::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ApplyAdapter::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ApplyAdapter::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;

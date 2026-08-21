@@ -141,23 +141,6 @@ template uint32_t UnderlyingSameNamespaceStruct::write<>(apache::thrift::Compact
 template uint32_t UnderlyingSameNamespaceStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t UnderlyingSameNamespaceStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-namespace detail {
-template void HeapAllocated::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t HeapAllocated::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t HeapAllocated::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t HeapAllocated::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-} // namespace detail
-
-template void MoveOnly::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MoveOnly::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MoveOnly::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MoveOnly::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-template void AlsoMoveOnly::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AlsoMoveOnly::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AlsoMoveOnly::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AlsoMoveOnly::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
 template void ApplyAdapter::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ApplyAdapter::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ApplyAdapter::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

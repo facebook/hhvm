@@ -47,7 +47,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
   private static final TField ADAPTED_TYPE_FIELD_DESC = new TField("adaptedType", TType.STRING, (short)2);
   private static final TField UNDERLYING_NAME_FIELD_DESC = new TField("underlyingName", TType.STRING, (short)3);
   private static final TField EXTRA_NAMESPACE_FIELD_DESC = new TField("extraNamespace", TType.STRING, (short)4);
-  private static final TField MOVE_ONLY_FIELD_DESC = new TField("moveOnly", TType.BOOL, (short)5);
 
   /**
    * The name of a C++ adapter type used to convert between Thrift and native
@@ -92,27 +91,20 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
    */
   public final String underlyingName;
   public final String extraNamespace;
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public final Boolean moveOnly;
   public static final int NAME = 1;
   public static final int ADAPTEDTYPE = 2;
   public static final int UNDERLYINGNAME = 3;
   public static final int EXTRANAMESPACE = 4;
-  public static final int MOVEONLY = 5;
 
   public Adapter(
       String name,
       String adaptedType,
       String underlyingName,
-      String extraNamespace,
-      Boolean moveOnly) {
+      String extraNamespace) {
     this.name = name;
     this.adaptedType = adaptedType;
     this.underlyingName = underlyingName;
     this.extraNamespace = extraNamespace;
-    this.moveOnly = moveOnly;
   }
 
   /**
@@ -138,11 +130,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
       this.extraNamespace = TBaseHelper.deepCopy(other.extraNamespace);
     } else {
       this.extraNamespace = null;
-    }
-    if (other.isSetMoveOnly()) {
-      this.moveOnly = TBaseHelper.deepCopy(other.moveOnly);
-    } else {
-      this.moveOnly = null;
     }
   }
 
@@ -225,18 +212,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
     return this.extraNamespace != null;
   }
 
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public Boolean isMoveOnly() {
-    return this.moveOnly;
-  }
-
-  // Returns true if field moveOnly is set (has been assigned a value) and false otherwise
-  public boolean isSetMoveOnly() {
-    return this.moveOnly != null;
-  }
-
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -255,14 +230,12 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetExtraNamespace(), that.isSetExtraNamespace(), this.extraNamespace, that.extraNamespace)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetMoveOnly(), that.isSetMoveOnly(), this.moveOnly, that.moveOnly)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {name, adaptedType, underlyingName, extraNamespace, moveOnly});
+    return Arrays.deepHashCode(new Object[] {name, adaptedType, underlyingName, extraNamespace});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -275,7 +248,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
     String tmp_adaptedType = null;
     String tmp_underlyingName = null;
     String tmp_extraNamespace = null;
-    Boolean tmp_moveOnly = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -314,13 +286,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case MOVEONLY:
-          if (__field.type == TType.BOOL) {
-            tmp_moveOnly = iprot.readBool();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -335,7 +300,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
       ,tmp_adaptedType
       ,tmp_underlyingName
       ,tmp_extraNamespace
-      ,tmp_moveOnly
     );
     _that.validate();
     return _that;
@@ -363,11 +327,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
     if (this.extraNamespace != null) {
       oprot.writeFieldBegin(EXTRA_NAMESPACE_FIELD_DESC);
       oprot.writeString(this.extraNamespace);
-      oprot.writeFieldEnd();
-    }
-    if (this.moveOnly != null) {
-      oprot.writeFieldBegin(MOVE_ONLY_FIELD_DESC);
-      oprot.writeBool(this.moveOnly);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

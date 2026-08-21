@@ -101,15 +101,15 @@ public class Baz extends TUnion<Baz> {
         if (__field.type == SET_FIELD_FIELD_DESC.type) {
           Set<String> setField;
           {
-            TSet _set55 = iprot.readSetBegin();
-            setField = new HashSet<String>(Math.max(0, 2*_set55.size));
-            for (int _i56 = 0; 
-                 (_set55.size < 0) ? iprot.peekSet() : (_i56 < _set55.size); 
-                 ++_i56)
+            TSet _set54 = iprot.readSetBegin();
+            setField = new HashSet<String>(Math.max(0, 2*_set54.size));
+            for (int _i55 = 0; 
+                 (_set54.size < 0) ? iprot.peekSet() : (_i55 < _set54.size); 
+                 ++_i55)
             {
-              String _elem57;
-              _elem57 = iprot.readString();
-              setField.add(_elem57);
+              String _elem56;
+              _elem56 = iprot.readString();
+              setField.add(_elem56);
             }
             iprot.readSetEnd();
           }
@@ -120,29 +120,29 @@ public class Baz extends TUnion<Baz> {
         if (__field.type == MAP_FIELD_FIELD_DESC.type) {
           Map<String,List<String>> mapField;
           {
-            TMap _map58 = iprot.readMapBegin();
-            mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map58.size));
-            for (int _i59 = 0; 
-                 (_map58.size < 0) ? iprot.peekMap() : (_i59 < _map58.size); 
-                 ++_i59)
+            TMap _map57 = iprot.readMapBegin();
+            mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map57.size));
+            for (int _i58 = 0; 
+                 (_map57.size < 0) ? iprot.peekMap() : (_i58 < _map57.size); 
+                 ++_i58)
             {
-              String _key60;
-              List<String> _val61;
-              _key60 = iprot.readString();
+              String _key59;
+              List<String> _val60;
+              _key59 = iprot.readString();
               {
-                TList _list62 = iprot.readListBegin();
-                _val61 = new ArrayList<String>(Math.max(0, _list62.size));
-                for (int _i63 = 0; 
-                     (_list62.size < 0) ? iprot.peekList() : (_i63 < _list62.size); 
-                     ++_i63)
+                TList _list61 = iprot.readListBegin();
+                _val60 = new ArrayList<String>(Math.max(0, _list61.size));
+                for (int _i62 = 0; 
+                     (_list61.size < 0) ? iprot.peekList() : (_i62 < _list61.size); 
+                     ++_i62)
                 {
-                  String _elem64;
-                  _elem64 = iprot.readString();
-                  _val61.add(_elem64);
+                  String _elem63;
+                  _elem63 = iprot.readString();
+                  _val60.add(_elem63);
                 }
                 iprot.readListEnd();
               }
-              mapField.put(_key60, _val61);
+              mapField.put(_key59, _val60);
             }
             iprot.readMapEnd();
           }
@@ -179,8 +179,8 @@ public class Baz extends TUnion<Baz> {
         Set<String> setField = (Set<String>)getFieldValue();
         {
           oprot.writeSetBegin(new TSet(TType.STRING, setField.size()));
-          for (String _iter65 : setField)          {
-            oprot.writeString(_iter65);
+          for (String _iter64 : setField)          {
+            oprot.writeString(_iter64);
           }
           oprot.writeSetEnd();
         }
@@ -189,12 +189,12 @@ public class Baz extends TUnion<Baz> {
         Map<String,List<String>> mapField = (Map<String,List<String>>)getFieldValue();
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, mapField.size()));
-          for (Map.Entry<String, List<String>> _iter66 : mapField.entrySet())          {
-            oprot.writeString(_iter66.getKey());
+          for (Map.Entry<String, List<String>> _iter65 : mapField.entrySet())          {
+            oprot.writeString(_iter65.getKey());
             {
-              oprot.writeListBegin(new TList(TType.STRING, _iter66.getValue().size()));
-              for (String _iter67 : _iter66.getValue())              {
-                oprot.writeString(_iter67);
+              oprot.writeListBegin(new TList(TType.STRING, _iter65.getValue().size()));
+              for (String _iter66 : _iter65.getValue())              {
+                oprot.writeString(_iter66);
               }
               oprot.writeListEnd();
             }

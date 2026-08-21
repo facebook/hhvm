@@ -689,17 +689,12 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
       'var' => 'extraNamespace',
       'type' => \TType::STRING,
     ),
-    5 => shape(
-      'var' => 'moveOnly',
-      'type' => \TType::BOOL,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'name' => 1,
     'adaptedType' => 2,
     'underlyingName' => 3,
     'extraNamespace' => 4,
-    'moveOnly' => 5,
   ];
 
   const type TConstructorShape = shape(
@@ -707,10 +702,9 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'adaptedType' => ?string,
     ?'underlyingName' => ?string,
     ?'extraNamespace' => ?string,
-    ?'moveOnly' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 1598934288211608189;
+  const int STRUCTURAL_ID = 6544787720541072745;
   /**
    * The name of a C++ adapter type used to convert between Thrift and native
    * C++ representation.
@@ -767,20 +761,12 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 4: string extraNamespace
    */
   public string $extraNamespace;
-  /**
-   * Must set to true when adapted type is not copyable.
-   * 
-   * Original thrift field:-
-   * 5: bool moveOnly
-   */
-  public bool $moveOnly;
 
-  public function __construct(?string $name = null, ?string $adaptedType = null, ?string $underlyingName = null, ?string $extraNamespace = null, ?bool $moveOnly = null)[] {
+  public function __construct(?string $name = null, ?string $adaptedType = null, ?string $underlyingName = null, ?string $extraNamespace = null)[] {
     $this->name = $name ?? '';
     $this->adaptedType = $adaptedType ?? '';
     $this->underlyingName = $underlyingName ?? '';
     $this->extraNamespace = $extraNamespace ?? '';
-    $this->moveOnly = $moveOnly ?? false;
   }
 
   public static function withDefaultValues()[]: this {
@@ -793,7 +779,6 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
       Shapes::idx($shape, 'adaptedType'),
       Shapes::idx($shape, 'underlyingName'),
       Shapes::idx($shape, 'extraNamespace'),
-      Shapes::idx($shape, 'moveOnly'),
     );
   }
 
@@ -850,17 +835,6 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "extraNamespace",
             )
           ),
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 5,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-                )
-              ),
-              "name" => "moveOnly",
-            )
-          ),
         ],
         "is_union" => false,
       )
@@ -902,9 +876,6 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
     if (idx($parsed, 'extraNamespace') !== null) {
       $this->extraNamespace = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['extraNamespace']);
-    }
-    if (idx($parsed, 'moveOnly') !== null) {
-      $this->moveOnly = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['moveOnly']);
     }
   }
 

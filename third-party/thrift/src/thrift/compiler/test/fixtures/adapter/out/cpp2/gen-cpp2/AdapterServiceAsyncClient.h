@@ -29,8 +29,7 @@ struct ServiceMethodTypesFootprint<::facebook::thrift::test::fixtures::adapter::
   // e.g. if it appears as a type of an input, output, exception sink or stream
   // parameter of a client stub, it appears here,
   using TypesInMethods = folly::tag_t<
-  ::facebook::thrift::test::fixtures::adapter::CountingStruct,
-  ::facebook::thrift::test::fixtures::adapter::HeapAllocated>;
+  ::facebook::thrift::test::fixtures::adapter::CountingStruct>;
 };
 
 } // namespace detail
@@ -170,129 +169,6 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> countCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::facebook::thrift::test::fixtures::adapter::CountingStruct> fbthrift_semifuture_count(apache::thrift::RpcOptions& rpcOptions);
- public:
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void adaptedTypes(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
- protected:
-  void fbthrift_serialize_and_send_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg, bool stealRpcOptions = false);
- public:
-
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void sync_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void sync_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, ::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated> future_adaptedTypes(const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::fixtures::adapter::HeapAllocated> semifuture_adaptedTypes(const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated> future_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::fixtures::adapter::HeapAllocated> semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-
-#if FOLLY_HAS_COROUTINES
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::fixtures::adapter::HeapAllocated> co_adaptedTypes(const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg) {
-    return co_adaptedTypes<false>(nullptr, p_arg);
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::fixtures::adapter::HeapAllocated> co_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg) {
-    return co_adaptedTypes<true>(&rpcOptions, p_arg);
-  }
- private:
-  template <bool hasRpcOptions>
-  folly::coro::Task<::facebook::thrift::test::fixtures::adapter::HeapAllocated> co_adaptedTypes(apache::thrift::RpcOptions* rpcOptions, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg) {
-    const folly::CancellationToken& cancelToken =
-        co_await folly::coro::co_current_cancellation_token;
-    const bool cancellable = cancelToken.canBeCancelled();
-    apache::thrift::ClientReceiveState returnState;
-    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channelShared->getProtocolId();
-    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
-    auto [ctx, header] = adaptedTypesCtx(rpcOptions);
-    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
-    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
-    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    if (ctx != nullptr) {
-      auto argsAsRefs = std::tie(p_arg);
-      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
-      if (interceptorTry.hasException()) {
-        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
-      }
-    }
-    if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_adaptedTypes(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_arg);
-    } else {
-      fbthrift_serialize_and_send_adaptedTypes(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_arg);
-    }
-    if (cancellable) {
-      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
-      co_await callback.co_waitUntilDone();
-    } else {
-      co_await callback.co_waitUntilDone();
-    }
-    if (returnState.isException()) {
-      co_yield folly::coro::co_error(std::move(returnState.exception()));
-    }
-    returnState.resetProtocolId(protocolId);
-    returnState.resetCtx(std::move(ctx));
-    ::facebook::thrift::test::fixtures::adapter::HeapAllocated _return;
-    SCOPE_EXIT {
-      if (hasRpcOptions && returnState.header()) {
-        auto* rheader = returnState.header();
-        if (!rheader->getHeaders().empty()) {
-          rpcOptions->setReadHeaders(rheader->releaseHeaders());
-        }
-        rpcOptions->setRoutingData(rheader->releaseRoutingData());
-      }
-    };
-    if (auto channel = channelWeak.lock()) {
-      channel->decompressResponse(returnState);
-    }
-    auto ew = recv_wrapped_adaptedTypes(_return, returnState);
-    if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      folly::Try<void> interceptorTry;
-      if (!apache::thrift::ContextStack::tryResolveInterceptorResultSync(interceptorResult, interceptorTry)) {
-        interceptorTry = co_await std::get<folly::coro::Task<folly::Try<void>>>(std::move(interceptorResult));
-      }
-      interceptorTry.throwUnlessValue();
-    }
-    if (ew) {
-      co_yield folly::coro::co_error(std::move(ew));
-    }
-    co_return _return;
-  }
- public:
-#endif // FOLLY_HAS_COROUTINES
-
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void adaptedTypes(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-
-
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  static folly::exception_wrapper recv_wrapped_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, ::apache::thrift::ClientReceiveState& state);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  static void recv_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, ::apache::thrift::ClientReceiveState& state);
-  // Mock friendly virtual instance method
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual void recv_instance_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, ::apache::thrift::ClientReceiveState& state);
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, ::apache::thrift::ClientReceiveState& state);
- private:
-  apache::thrift::SerializedRequest fbthrift_serialize_adaptedTypes(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
-  template <typename RpcOptions>
-  void fbthrift_send_adaptedTypes(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
-  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> adaptedTypesCtx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<::facebook::thrift::test::fixtures::adapter::HeapAllocated> fbthrift_semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg);
  public:
 };
 

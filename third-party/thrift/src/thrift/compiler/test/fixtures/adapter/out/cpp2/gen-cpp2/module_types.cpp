@@ -64,12 +64,6 @@ template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Under
     std::string_view, int16_t&, apache::thrift::protocol::TType&);
 template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>::translateFieldName(
     std::string_view, int16_t&, apache::thrift::protocol::TType&);
-template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>::translateFieldName(
-    std::string_view, int16_t&, apache::thrift::protocol::TType&);
-template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MoveOnly>::translateFieldName(
-    std::string_view, int16_t&, apache::thrift::protocol::TType&);
-template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>::translateFieldName(
-    std::string_view, int16_t&, apache::thrift::protocol::TType&);
 template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>::translateFieldName(
     std::string_view, int16_t&, apache::thrift::protocol::TType&);
 template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>::translateFieldName(
@@ -2706,169 +2700,6 @@ void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] Un
 
 
 namespace facebook::thrift::test::fixtures::adapter {
-namespace detail {
-
-std::string_view HeapAllocated::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<HeapAllocated>::fields_names[folly::to_underlying(ord) - 1];
-}
-std::string_view HeapAllocated::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<HeapAllocated>::name;
-}
-
-
-HeapAllocated::HeapAllocated(apache::thrift::FragileConstructor) {}
-
-void HeapAllocated::__fbthrift_clear() {
-  // clear all fields
-}
-
-bool HeapAllocated::__fbthrift_is_empty() const {
-  return true;
-}
-
-bool HeapAllocated::operator==([[maybe_unused]] const HeapAllocated& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
-}
-
-std::partial_ordering HeapAllocated::operator<=>([[maybe_unused]] const HeapAllocated& rhs) const {
-  return ::apache::thrift::op::compare<HeapAllocated>(*this, rhs);
-}
-
-
-void swap([[maybe_unused]] HeapAllocated& a, [[maybe_unused]] HeapAllocated& b) {
-  using ::std::swap;
-}
-
-
-} // namespace detail
-} // namespace facebook::thrift::test::fixtures::adapter
-
-
-namespace facebook::thrift::test::fixtures::adapter {
-
-std::string_view MoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MoveOnly>::fields_names[folly::to_underlying(ord) - 1];
-}
-std::string_view MoveOnly::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<MoveOnly>::name;
-}
-
-MoveOnly::MoveOnly(const MoveOnly& srcObj) :
-    __fbthrift_field_ptr(srcObj.__fbthrift_field_ptr),
-    __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
-}
-
-static void __fbthrift_swap(MoveOnly& lhs, MoveOnly& rhs) { swap(lhs, rhs); }
-MoveOnly& MoveOnly::operator=(const MoveOnly& other) {
-  MoveOnly tmp(other);
-  __fbthrift_swap(*this, tmp);
-  return *this;
-}
-
-
-MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::HeapAllocated ptr__arg) :
-    __fbthrift_field_ptr(std::move(ptr__arg)) { 
-  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
-  __isset.set(folly::index_constant<0>(), true);
-}
-
-void MoveOnly::__fbthrift_clear() {
-  // clear all fields
-  __isset = {};
-}
-
-bool MoveOnly::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool MoveOnly::operator==([[maybe_unused]] const MoveOnly& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
-}
-
-std::partial_ordering MoveOnly::operator<=>([[maybe_unused]] const MoveOnly& rhs) const {
-  return ::apache::thrift::op::compare<MoveOnly>(*this, rhs);
-}
-
-
-void swap([[maybe_unused]] MoveOnly& a, [[maybe_unused]] MoveOnly& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_ptr, b.__fbthrift_field_ptr);
-  swap(a.__isset, b.__isset);
-}
-
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MoveOnly,
-        ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>,
-    "inconsistent use of json option");
-
-} // namespace facebook::thrift::test::fixtures::adapter
-
-
-namespace facebook::thrift::test::fixtures::adapter {
-
-std::string_view AlsoMoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<AlsoMoveOnly>::fields_names[folly::to_underlying(ord) - 1];
-}
-std::string_view AlsoMoveOnly::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<AlsoMoveOnly>::name;
-}
-
-AlsoMoveOnly::AlsoMoveOnly(const AlsoMoveOnly& srcObj) :
-    __fbthrift_field_ptr(srcObj.__fbthrift_field_ptr),
-    __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
-}
-
-static void __fbthrift_swap(AlsoMoveOnly& lhs, AlsoMoveOnly& rhs) { swap(lhs, rhs); }
-AlsoMoveOnly& AlsoMoveOnly::operator=(const AlsoMoveOnly& other) {
-  AlsoMoveOnly tmp(other);
-  __fbthrift_swap(*this, tmp);
-  return *this;
-}
-
-
-AlsoMoveOnly::AlsoMoveOnly(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, AlsoMoveOnly> ptr__arg) :
-    __fbthrift_field_ptr(std::move(ptr__arg)) { 
-  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
-  __isset.set(folly::index_constant<0>(), true);
-}
-
-void AlsoMoveOnly::__fbthrift_clear() {
-  // clear all fields
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
-  __isset = {};
-}
-
-bool AlsoMoveOnly::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool AlsoMoveOnly::operator==([[maybe_unused]] const AlsoMoveOnly& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
-}
-
-std::partial_ordering AlsoMoveOnly::operator<=>([[maybe_unused]] const AlsoMoveOnly& rhs) const {
-  return ::apache::thrift::op::compare<AlsoMoveOnly>(*this, rhs);
-}
-
-
-void swap([[maybe_unused]] AlsoMoveOnly& a, [[maybe_unused]] AlsoMoveOnly& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_ptr, b.__fbthrift_field_ptr);
-  swap(a.__isset, b.__isset);
-}
-
-
-} // namespace facebook::thrift::test::fixtures::adapter
-
-
-namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view ApplyAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3310,8 +3141,6 @@ namespace facebook::thrift::test::fixtures::adapter { namespace {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MemberAccessAdapter, 1, ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook::thrift::test::fixtures::adapter::CircularStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1, ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook::thrift::test::fixtures::adapter::ReorderedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook::thrift::test::fixtures::adapter::MoveOnly>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<true, int>, 2, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();

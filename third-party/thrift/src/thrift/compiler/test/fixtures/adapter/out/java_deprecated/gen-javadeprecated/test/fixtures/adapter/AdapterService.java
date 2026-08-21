@@ -33,15 +33,11 @@ public class AdapterService {
 
     public CountingStruct count() throws TException;
 
-    public HeapAllocated adaptedTypes(HeapAllocated arg) throws TException;
-
   }
 
   public interface AsyncIface {
 
     public void count(AsyncMethodCallback resultHandler) throws TException;
-
-    public void adaptedTypes(HeapAllocated arg, AsyncMethodCallback resultHandler) throws TException;
 
   }
 
@@ -118,51 +114,6 @@ public class AdapterService {
       throw new TApplicationException(TApplicationException.MISSING_RESULT, "count failed: unknown result");
     }
 
-    public HeapAllocated adaptedTypes(HeapAllocated arg) throws TException
-    {
-      ContextStack ctx = getContextStack("AdapterService.adaptedTypes", null);
-      this.setContextStack(ctx);
-      send_adaptedTypes(arg);
-      return recv_adaptedTypes();
-    }
-
-    public void send_adaptedTypes(HeapAllocated arg) throws TException
-    {
-      ContextStack ctx = this.getContextStack();
-      super.preWrite(ctx, "AdapterService.adaptedTypes", null);
-      oprot_.writeMessageBegin(new TMessage("adaptedTypes", TMessageType.CALL, seqid_));
-      adaptedTypes_args args = new adaptedTypes_args();
-      args.arg = arg;
-      args.write(oprot_);
-      oprot_.writeMessageEnd();
-      oprot_.getTransport().flush();
-      super.postWrite(ctx, "AdapterService.adaptedTypes", args);
-      return;
-    }
-
-    public HeapAllocated recv_adaptedTypes() throws TException
-    {
-      ContextStack ctx = super.getContextStack();
-      long bytes;
-      TMessageType mtype;
-      super.preRead(ctx, "AdapterService.adaptedTypes");
-      TMessage msg = iprot_.readMessageBegin();
-      if (msg.type == TMessageType.EXCEPTION) {
-        TApplicationException x = TApplicationException.read(iprot_);
-        iprot_.readMessageEnd();
-        throw x;
-      }
-      adaptedTypes_result result = new adaptedTypes_result();
-      result.read(iprot_);
-      iprot_.readMessageEnd();
-      super.postRead(ctx, "AdapterService.adaptedTypes", result);
-
-      if (result.isSetSuccess()) {
-        return result.success;
-      }
-      throw new TApplicationException(TApplicationException.MISSING_RESULT, "adaptedTypes failed: unknown result");
-    }
-
   }
   public static class AsyncClient extends TAsyncClient implements AsyncIface {
     public static class Factory implements TAsyncClientFactory<AsyncClient> {
@@ -181,16 +132,16 @@ public class AdapterService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void count(AsyncMethodCallback resultHandler125) throws TException {
+    public void count(AsyncMethodCallback resultHandler123) throws TException {
       checkReady();
-      count_call method_call = new count_call(resultHandler125, this, ___protocolFactory, ___transport);
+      count_call method_call = new count_call(resultHandler123, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class count_call extends TAsyncMethodCall {
-      public count_call(AsyncMethodCallback resultHandler126, TAsyncClient client122, TProtocolFactory protocolFactory123, TNonblockingTransport transport124) throws TException {
-        super(client122, protocolFactory123, transport124, resultHandler126, false);
+      public count_call(AsyncMethodCallback resultHandler124, TAsyncClient client120, TProtocolFactory protocolFactory121, TNonblockingTransport transport122) throws TException {
+        super(client120, protocolFactory121, transport122, resultHandler124, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -210,38 +161,6 @@ public class AdapterService {
       }
     }
 
-    public void adaptedTypes(HeapAllocated arg, AsyncMethodCallback resultHandler130) throws TException {
-      checkReady();
-      adaptedTypes_call method_call = new adaptedTypes_call(arg, resultHandler130, this, ___protocolFactory, ___transport);
-      this.___currentMethod = method_call;
-      ___manager.call(method_call);
-    }
-
-    public static class adaptedTypes_call extends TAsyncMethodCall {
-      private HeapAllocated arg;
-      public adaptedTypes_call(HeapAllocated arg, AsyncMethodCallback resultHandler131, TAsyncClient client127, TProtocolFactory protocolFactory128, TNonblockingTransport transport129) throws TException {
-        super(client127, protocolFactory128, transport129, resultHandler131, false);
-        this.arg = arg;
-      }
-
-      public void write_args(TProtocol prot) throws TException {
-        prot.writeMessageBegin(new TMessage("adaptedTypes", TMessageType.CALL, 0));
-        adaptedTypes_args args = new adaptedTypes_args();
-        args.setArg(arg);
-        args.write(prot);
-        prot.writeMessageEnd();
-      }
-
-      public HeapAllocated getResult() throws TException {
-        if (getState() != State.RESPONSE_READ) {
-          throw new IllegalStateException("Method call not finished!");
-        }
-        TMemoryInputTransport memoryTransport = new TMemoryInputTransport(getFrameBuffer().array());
-        TProtocol prot = super.client.getProtocolFactory().getProtocol(memoryTransport);
-        return (new Client(prot)).recv_adaptedTypes();
-      }
-    }
-
   }
 
   public static class Processor implements TProcessor {
@@ -251,7 +170,6 @@ public class AdapterService {
       iface_ = iface;
       event_handler_ = new TProcessorEventHandler(); // Empty handler
       processMap_.put("count", new count());
-      processMap_.put("adaptedTypes", new adaptedTypes());
     }
 
     protected static interface ProcessFunction {
@@ -301,27 +219,6 @@ public class AdapterService {
         oprot.writeMessageEnd();
         oprot.getTransport().flush();
         event_handler_.postWrite(handler_ctx, "AdapterService.count", result);
-      }
-
-    }
-
-    private class adaptedTypes implements ProcessFunction {
-      public void process(int seqid, TProtocol iprot, TProtocol oprot, TConnectionContext server_ctx) throws TException
-      {
-        Object handler_ctx = event_handler_.getContext("AdapterService.adaptedTypes", server_ctx);
-        adaptedTypes_args args = new adaptedTypes_args();
-        event_handler_.preRead(handler_ctx, "AdapterService.adaptedTypes");
-        args.read(iprot);
-        iprot.readMessageEnd();
-        event_handler_.postRead(handler_ctx, "AdapterService.adaptedTypes", args);
-        adaptedTypes_result result = new adaptedTypes_result();
-        result.success = iface_.adaptedTypes(args.arg);
-        event_handler_.preWrite(handler_ctx, "AdapterService.adaptedTypes", result);
-        oprot.writeMessageBegin(new TMessage("adaptedTypes", TMessageType.REPLY, seqid));
-        result.write(oprot);
-        oprot.writeMessageEnd();
-        oprot.getTransport().flush();
-        event_handler_.postWrite(handler_ctx, "AdapterService.adaptedTypes", result);
       }
 
     }
@@ -652,441 +549,6 @@ public class AdapterService {
       String newLine = prettyPrint ? "\n" : "";
       String space = prettyPrint ? " " : "";
       StringBuilder sb = new StringBuilder("count_result");
-      sb.append(space);
-      sb.append("(");
-      sb.append(newLine);
-      boolean first = true;
-
-      sb.append(indentStr);
-      sb.append("success");
-      sb.append(space);
-      sb.append(":").append(space);
-      if (this.getSuccess() == null) {
-        sb.append("null");
-      } else {
-        sb.append(TBaseHelper.toString(this.getSuccess(), indent + 1, prettyPrint));
-      }
-      first = false;
-      sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
-      sb.append(")");
-      return sb.toString();
-    }
-
-    public void validate() throws TException {
-      // check for required fields
-    }
-
-  }
-
-  public static class adaptedTypes_args implements TBase, java.io.Serializable, Cloneable, Comparable<adaptedTypes_args>   {
-    private static final TStruct STRUCT_DESC = new TStruct("adaptedTypes_args");
-    private static final TField ARG_FIELD_DESC = new TField("arg", TType.STRUCT, (short)1);
-
-    public HeapAllocated arg;
-    public static final int ARG = 1;
-
-    // isset id assignments
-
-    public static final Map<Integer, FieldMetaData> metaDataMap;
-
-    static {
-      Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-      tmpMetaDataMap.put(ARG, new FieldMetaData("arg", TFieldRequirementType.DEFAULT, 
-          new StructMetaData(TType.STRUCT, HeapAllocated.class)));
-      metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
-    }
-
-    static {
-      FieldMetaData.addStructMetaDataMap(adaptedTypes_args.class, metaDataMap);
-    }
-
-    public adaptedTypes_args() {
-    }
-
-    public adaptedTypes_args(
-        HeapAllocated arg) {
-      this();
-      this.arg = arg;
-    }
-
-    /**
-     * Performs a deep copy on <i>other</i>.
-     */
-    public adaptedTypes_args(adaptedTypes_args other) {
-      if (other.isSetArg()) {
-        this.arg = TBaseHelper.deepCopy(other.arg);
-      }
-    }
-
-    public adaptedTypes_args deepCopy() {
-      return new adaptedTypes_args(this);
-    }
-
-    public HeapAllocated getArg() {
-      return this.arg;
-    }
-
-    public adaptedTypes_args setArg(HeapAllocated arg) {
-      this.arg = arg;
-      return this;
-    }
-
-    public void unsetArg() {
-      this.arg = null;
-    }
-
-    // Returns true if field arg is set (has been assigned a value) and false otherwise
-    public boolean isSetArg() {
-      return this.arg != null;
-    }
-
-    public void setArgIsSet(boolean __value) {
-      if (!__value) {
-        this.arg = null;
-      }
-    }
-
-    public void setFieldValue(int fieldID, Object __value) {
-      switch (fieldID) {
-      case ARG:
-        if (__value == null) {
-          unsetArg();
-        } else {
-          setArg((HeapAllocated)__value);
-        }
-        break;
-
-      default:
-        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
-      }
-    }
-
-    public Object getFieldValue(int fieldID) {
-      switch (fieldID) {
-      case ARG:
-        return getArg();
-
-      default:
-        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
-      }
-    }
-
-    @Override
-    public boolean equals(Object _that) {
-      if (_that == null)
-        return false;
-      if (this == _that)
-        return true;
-      if (!(_that instanceof adaptedTypes_args))
-        return false;
-      adaptedTypes_args that = (adaptedTypes_args)_that;
-
-      if (!TBaseHelper.equalsNobinary(this.isSetArg(), that.isSetArg(), this.arg, that.arg)) { return false; }
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      return Arrays.deepHashCode(new Object[] {arg});
-    }
-
-    @Override
-    public int compareTo(adaptedTypes_args other) {
-      if (other == null) {
-        // See java.lang.Comparable docs
-        throw new NullPointerException();
-      }
-
-      if (other == this) {
-        return 0;
-      }
-      int lastComparison = 0;
-
-      lastComparison = Boolean.valueOf(isSetArg()).compareTo(other.isSetArg());
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-      lastComparison = TBaseHelper.compareTo(arg, other.arg);
-      if (lastComparison != 0) { 
-        return lastComparison;
-      }
-      return 0;
-    }
-
-    public void read(TProtocol iprot) throws TException {
-      TField __field;
-      iprot.readStructBegin(metaDataMap);
-      while (true)
-      {
-        __field = iprot.readFieldBegin();
-        if (__field.type == TType.STOP) {
-          break;
-        }
-        switch (__field.id)
-        {
-          case ARG:
-            if (__field.type == TType.STRUCT) {
-              this.arg = new HeapAllocated();
-              this.arg.read(iprot);
-            } else {
-              TProtocolUtil.skip(iprot, __field.type);
-            }
-            break;
-          default:
-            TProtocolUtil.skip(iprot, __field.type);
-            break;
-        }
-        iprot.readFieldEnd();
-      }
-      iprot.readStructEnd();
-
-
-      // check for required fields of primitive type, which can't be checked in the validate method
-      validate();
-    }
-
-    public void write(TProtocol oprot) throws TException {
-      validate();
-
-      oprot.writeStructBegin(STRUCT_DESC);
-      if (this.arg != null) {
-        oprot.writeFieldBegin(ARG_FIELD_DESC);
-        this.arg.write(oprot);
-        oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
-    }
-
-    @Override
-    public String toString() {
-      return toString(1, true);
-    }
-
-    @Override
-    public String toString(int indent, boolean prettyPrint) {
-      String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
-      String newLine = prettyPrint ? "\n" : "";
-      String space = prettyPrint ? " " : "";
-      StringBuilder sb = new StringBuilder("adaptedTypes_args");
-      sb.append(space);
-      sb.append("(");
-      sb.append(newLine);
-      boolean first = true;
-
-      sb.append(indentStr);
-      sb.append("arg");
-      sb.append(space);
-      sb.append(":").append(space);
-      if (this.getArg() == null) {
-        sb.append("null");
-      } else {
-        sb.append(TBaseHelper.toString(this.getArg(), indent + 1, prettyPrint));
-      }
-      first = false;
-      sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
-      sb.append(")");
-      return sb.toString();
-    }
-
-    public void validate() throws TException {
-      // check for required fields
-    }
-
-  }
-
-  public static class adaptedTypes_result implements TBase, java.io.Serializable, Cloneable, Comparable<adaptedTypes_result>   {
-    private static final TStruct STRUCT_DESC = new TStruct("adaptedTypes_result");
-    private static final TField SUCCESS_FIELD_DESC = new TField("success", TType.STRUCT, (short)0);
-
-    public HeapAllocated success;
-    public static final int SUCCESS = 0;
-
-    // isset id assignments
-
-    public static final Map<Integer, FieldMetaData> metaDataMap;
-
-    static {
-      Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-      tmpMetaDataMap.put(SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
-          new StructMetaData(TType.STRUCT, HeapAllocated.class)));
-      metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
-    }
-
-    static {
-      FieldMetaData.addStructMetaDataMap(adaptedTypes_result.class, metaDataMap);
-    }
-
-    public adaptedTypes_result() {
-    }
-
-    public adaptedTypes_result(
-        HeapAllocated success) {
-      this();
-      this.success = success;
-    }
-
-    /**
-     * Performs a deep copy on <i>other</i>.
-     */
-    public adaptedTypes_result(adaptedTypes_result other) {
-      if (other.isSetSuccess()) {
-        this.success = TBaseHelper.deepCopy(other.success);
-      }
-    }
-
-    public adaptedTypes_result deepCopy() {
-      return new adaptedTypes_result(this);
-    }
-
-    public HeapAllocated getSuccess() {
-      return this.success;
-    }
-
-    public adaptedTypes_result setSuccess(HeapAllocated success) {
-      this.success = success;
-      return this;
-    }
-
-    public void unsetSuccess() {
-      this.success = null;
-    }
-
-    // Returns true if field success is set (has been assigned a value) and false otherwise
-    public boolean isSetSuccess() {
-      return this.success != null;
-    }
-
-    public void setSuccessIsSet(boolean __value) {
-      if (!__value) {
-        this.success = null;
-      }
-    }
-
-    public void setFieldValue(int fieldID, Object __value) {
-      switch (fieldID) {
-      case SUCCESS:
-        if (__value == null) {
-          unsetSuccess();
-        } else {
-          setSuccess((HeapAllocated)__value);
-        }
-        break;
-
-      default:
-        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
-      }
-    }
-
-    public Object getFieldValue(int fieldID) {
-      switch (fieldID) {
-      case SUCCESS:
-        return getSuccess();
-
-      default:
-        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
-      }
-    }
-
-    @Override
-    public boolean equals(Object _that) {
-      if (_that == null)
-        return false;
-      if (this == _that)
-        return true;
-      if (!(_that instanceof adaptedTypes_result))
-        return false;
-      adaptedTypes_result that = (adaptedTypes_result)_that;
-
-      if (!TBaseHelper.equalsNobinary(this.isSetSuccess(), that.isSetSuccess(), this.success, that.success)) { return false; }
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      return Arrays.deepHashCode(new Object[] {success});
-    }
-
-    @Override
-    public int compareTo(adaptedTypes_result other) {
-      if (other == null) {
-        // See java.lang.Comparable docs
-        throw new NullPointerException();
-      }
-
-      if (other == this) {
-        return 0;
-      }
-      int lastComparison = 0;
-
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-      lastComparison = TBaseHelper.compareTo(success, other.success);
-      if (lastComparison != 0) { 
-        return lastComparison;
-      }
-      return 0;
-    }
-
-    public void read(TProtocol iprot) throws TException {
-      TField __field;
-      iprot.readStructBegin(metaDataMap);
-      while (true)
-      {
-        __field = iprot.readFieldBegin();
-        if (__field.type == TType.STOP) {
-          break;
-        }
-        switch (__field.id)
-        {
-          case SUCCESS:
-            if (__field.type == TType.STRUCT) {
-              this.success = new HeapAllocated();
-              this.success.read(iprot);
-            } else {
-              TProtocolUtil.skip(iprot, __field.type);
-            }
-            break;
-          default:
-            TProtocolUtil.skip(iprot, __field.type);
-            break;
-        }
-        iprot.readFieldEnd();
-      }
-      iprot.readStructEnd();
-
-
-      // check for required fields of primitive type, which can't be checked in the validate method
-      validate();
-    }
-
-    public void write(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-
-      if (this.isSetSuccess()) {
-        oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-        this.success.write(oprot);
-        oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
-    }
-
-    @Override
-    public String toString() {
-      return toString(1, true);
-    }
-
-    @Override
-    public String toString(int indent, boolean prettyPrint) {
-      String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
-      String newLine = prettyPrint ? "\n" : "";
-      String space = prettyPrint ? " " : "";
-      StringBuilder sb = new StringBuilder("adaptedTypes_result");
       sb.append(space);
       sb.append("(");
       sb.append(newLine);

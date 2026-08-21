@@ -370,26 +370,6 @@ inline void reset_field<::facebook::thrift::test::fixtures::adapter::ReorderedSt
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::fixtures::adapter::MoveOnly>(
-    ::facebook::thrift::test::fixtures::adapter::MoveOnly& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.ptr_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::adapter::MoveOnly>().ptr_ref());
-      return;
-  }
-}
-
-template<>
-inline void reset_field<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(
-    ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.ptr_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>().ptr_ref());
-      return;
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>(
     ::facebook::thrift::test::fixtures::adapter::ApplyAdapter& obj, uint16_t index) {
   switch (index) {
@@ -615,26 +595,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::fixtures::adapter::ReorderedStruct>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::fixtures::adapter::MoveOnly>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

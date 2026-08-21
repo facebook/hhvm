@@ -40,25 +40,6 @@ public class AdapterServiceThriftMetadataHandler implements com.facebook.thrift.
                   .setIsOneway(false)
                   .build());
             }
-            {
-              List<ThriftField> args = new ArrayList<>();
-              args.add(new ThriftField.Builder()
-                  .setId(1)
-                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
-                  .setName("arg")
-                  .setIsOptional(false)
-                  .build());
-
-              List<ThriftField> exceptions = new ArrayList<>();
-
-              functions.add(new ThriftFunction.Builder()
-                  .setName("adaptedTypes")
-                  .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
-                  .setArguments(args)
-                  .setExceptions(exceptions)
-                  .setIsOneway(false)
-                  .build());
-            }
     }
 
     private static final ThriftService THRIFT_SERVICE;

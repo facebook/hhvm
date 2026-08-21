@@ -597,9 +597,6 @@ namespace facebook.thrift.annotation.cpp
             }
         }
 
-        /// <summary>Gets or sets the moveOnly field.</summary>
-        public bool @moveOnly { get; set; }
-
         public @Adapter()
         {
             @name = string.Empty;
@@ -614,7 +611,6 @@ namespace facebook.thrift.annotation.cpp
             @adaptedType = string.Empty;
             @underlyingName = string.Empty;
             @extraNamespace = string.Empty;
-            @moveOnly = default;
         }
 
         public bool __fbthrift_is_empty()
@@ -623,7 +619,6 @@ namespace facebook.thrift.annotation.cpp
             if (@adaptedType != null && @adaptedType.Length != 0) { return false; }
             if (@underlyingName != null && @underlyingName.Length != 0) { return false; }
             if (@extraNamespace != null && @extraNamespace.Length != 0) { return false; }
-            if (@moveOnly != default) { return false; }
             return true;
         }
 
@@ -641,9 +636,6 @@ namespace facebook.thrift.annotation.cpp
             // Field 4: extraNamespace (string)
             writer.WriteFieldBegin(ThriftWireType.String, 4);
             writer.WriteString(@extraNamespace);
-            // Field 5: moveOnly (bool)
-            writer.WriteFieldBegin(ThriftWireType.Bool, 5);
-            writer.WriteBool(@moveOnly);
             writer.WriteFieldStop();
         }
 
@@ -699,16 +691,6 @@ namespace facebook.thrift.annotation.cpp
                             reader.Skip(fieldType);
                         }
                         break;
-                    case 5: // moveOnly
-                        if (fieldType == ThriftWireType.Bool)
-                        {
-                            @moveOnly = reader.ReadBool();
-                        }
-                        else
-                        {
-                            reader.Skip(fieldType);
-                        }
-                        break;
                     default:
                         reader.Skip(fieldType);
                         break;
@@ -738,10 +720,6 @@ namespace facebook.thrift.annotation.cpp
             {
                 return false;
             }
-            if (!Equals(@moveOnly, other.@moveOnly))
-            {
-                return false;
-            }
             return true;
         }
 
@@ -752,7 +730,6 @@ namespace facebook.thrift.annotation.cpp
             hashCode.Add(@adaptedType);
             hashCode.Add(@underlyingName);
             hashCode.Add(@extraNamespace);
-            hashCode.Add(@moveOnly);
             return hashCode.ToHashCode();
         }
 
@@ -771,9 +748,6 @@ namespace facebook.thrift.annotation.cpp
             sb.Append(", ");
             sb.Append("extraNamespace=");
             sb.Append(@extraNamespace);
-            sb.Append(", ");
-            sb.Append("moveOnly=");
-            sb.Append(@moveOnly);
             sb.Append(")");
             return sb.ToString();
         }

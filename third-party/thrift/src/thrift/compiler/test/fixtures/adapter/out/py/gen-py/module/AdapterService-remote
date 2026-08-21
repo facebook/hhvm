@@ -43,7 +43,6 @@ from thrift.remote import Remote
 
 FUNCTIONS = {
     'count': Function('count', 'AdapterService', 'CountingStruct', []),
-    'adaptedTypes': Function('adaptedTypes', 'AdapterService', 'HeapAllocated', [('HeapAllocated', 'arg', 'HeapAllocated')]),
 }
 
 SERVICE_NAMES = ['AdapterService', ]

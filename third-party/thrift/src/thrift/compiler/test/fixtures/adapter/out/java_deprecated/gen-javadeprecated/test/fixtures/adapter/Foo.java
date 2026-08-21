@@ -1157,15 +1157,15 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case SETFIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set3 = iprot.readSetBegin();
-              this.setField = new HashSet<String>(Math.max(0, 2*_set3.size));
-              for (int _i4 = 0; 
-                   (_set3.size < 0) ? iprot.peekSet() : (_i4 < _set3.size); 
-                   ++_i4)
+              TSet _set2 = iprot.readSetBegin();
+              this.setField = new HashSet<String>(Math.max(0, 2*_set2.size));
+              for (int _i3 = 0; 
+                   (_set2.size < 0) ? iprot.peekSet() : (_i3 < _set2.size); 
+                   ++_i3)
               {
-                String _elem5;
-                _elem5 = iprot.readString();
-                this.setField.add(_elem5);
+                String _elem4;
+                _elem4 = iprot.readString();
+                this.setField.add(_elem4);
               }
               iprot.readSetEnd();
             }
@@ -1176,15 +1176,15 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case OPTIONALSETFIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set6 = iprot.readSetBegin();
-              this.optionalSetField = new HashSet<String>(Math.max(0, 2*_set6.size));
-              for (int _i7 = 0; 
-                   (_set6.size < 0) ? iprot.peekSet() : (_i7 < _set6.size); 
-                   ++_i7)
+              TSet _set5 = iprot.readSetBegin();
+              this.optionalSetField = new HashSet<String>(Math.max(0, 2*_set5.size));
+              for (int _i6 = 0; 
+                   (_set5.size < 0) ? iprot.peekSet() : (_i6 < _set5.size); 
+                   ++_i6)
               {
-                String _elem8;
-                _elem8 = iprot.readString();
-                this.optionalSetField.add(_elem8);
+                String _elem7;
+                _elem7 = iprot.readString();
+                this.optionalSetField.add(_elem7);
               }
               iprot.readSetEnd();
             }
@@ -1195,29 +1195,29 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case MAPFIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map9 = iprot.readMapBegin();
-              this.mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map9.size));
-              for (int _i10 = 0; 
-                   (_map9.size < 0) ? iprot.peekMap() : (_i10 < _map9.size); 
-                   ++_i10)
+              TMap _map8 = iprot.readMapBegin();
+              this.mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map8.size));
+              for (int _i9 = 0; 
+                   (_map8.size < 0) ? iprot.peekMap() : (_i9 < _map8.size); 
+                   ++_i9)
               {
-                String _key11;
-                List<String> _val12;
-                _key11 = iprot.readString();
+                String _key10;
+                List<String> _val11;
+                _key10 = iprot.readString();
                 {
-                  TList _list13 = iprot.readListBegin();
-                  _val12 = new ArrayList<String>(Math.max(0, _list13.size));
-                  for (int _i14 = 0; 
-                       (_list13.size < 0) ? iprot.peekList() : (_i14 < _list13.size); 
-                       ++_i14)
+                  TList _list12 = iprot.readListBegin();
+                  _val11 = new ArrayList<String>(Math.max(0, _list12.size));
+                  for (int _i13 = 0; 
+                       (_list12.size < 0) ? iprot.peekList() : (_i13 < _list12.size); 
+                       ++_i13)
                   {
-                    String _elem15;
-                    _elem15 = iprot.readString();
-                    _val12.add(_elem15);
+                    String _elem14;
+                    _elem14 = iprot.readString();
+                    _val11.add(_elem14);
                   }
                   iprot.readListEnd();
                 }
-                this.mapField.put(_key11, _val12);
+                this.mapField.put(_key10, _val11);
               }
               iprot.readMapEnd();
             }
@@ -1228,29 +1228,29 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case OPTIONALMAPFIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map16 = iprot.readMapBegin();
-              this.optionalMapField = new HashMap<String,List<String>>(Math.max(0, 2*_map16.size));
-              for (int _i17 = 0; 
-                   (_map16.size < 0) ? iprot.peekMap() : (_i17 < _map16.size); 
-                   ++_i17)
+              TMap _map15 = iprot.readMapBegin();
+              this.optionalMapField = new HashMap<String,List<String>>(Math.max(0, 2*_map15.size));
+              for (int _i16 = 0; 
+                   (_map15.size < 0) ? iprot.peekMap() : (_i16 < _map15.size); 
+                   ++_i16)
               {
-                String _key18;
-                List<String> _val19;
-                _key18 = iprot.readString();
+                String _key17;
+                List<String> _val18;
+                _key17 = iprot.readString();
                 {
-                  TList _list20 = iprot.readListBegin();
-                  _val19 = new ArrayList<String>(Math.max(0, _list20.size));
-                  for (int _i21 = 0; 
-                       (_list20.size < 0) ? iprot.peekList() : (_i21 < _list20.size); 
-                       ++_i21)
+                  TList _list19 = iprot.readListBegin();
+                  _val18 = new ArrayList<String>(Math.max(0, _list19.size));
+                  for (int _i20 = 0; 
+                       (_list19.size < 0) ? iprot.peekList() : (_i20 < _list19.size); 
+                       ++_i20)
                   {
-                    String _elem22;
-                    _elem22 = iprot.readString();
-                    _val19.add(_elem22);
+                    String _elem21;
+                    _elem21 = iprot.readString();
+                    _val18.add(_elem21);
                   }
                   iprot.readListEnd();
                 }
-                this.optionalMapField.put(_key18, _val19);
+                this.optionalMapField.put(_key17, _val18);
               }
               iprot.readMapEnd();
             }
@@ -1292,15 +1292,15 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case ADAPTED_LIST:
           if (__field.type == TType.LIST) {
             {
-              TList _list23 = iprot.readListBegin();
-              this.adapted_list = new ArrayList<Integer>(Math.max(0, _list23.size));
-              for (int _i24 = 0; 
-                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
-                   ++_i24)
+              TList _list22 = iprot.readListBegin();
+              this.adapted_list = new ArrayList<Integer>(Math.max(0, _list22.size));
+              for (int _i23 = 0; 
+                   (_list22.size < 0) ? iprot.peekList() : (_i23 < _list22.size); 
+                   ++_i23)
               {
-                int _elem25;
-                _elem25 = iprot.readI32();
-                this.adapted_list.add(_elem25);
+                int _elem24;
+                _elem24 = iprot.readI32();
+                this.adapted_list.add(_elem24);
               }
               iprot.readListEnd();
             }
@@ -1311,15 +1311,15 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case ADAPTED_SET:
           if (__field.type == TType.SET) {
             {
-              TSet _set26 = iprot.readSetBegin();
-              this.adapted_set = new HashSet<Integer>(Math.max(0, 2*_set26.size));
-              for (int _i27 = 0; 
-                   (_set26.size < 0) ? iprot.peekSet() : (_i27 < _set26.size); 
-                   ++_i27)
+              TSet _set25 = iprot.readSetBegin();
+              this.adapted_set = new HashSet<Integer>(Math.max(0, 2*_set25.size));
+              for (int _i26 = 0; 
+                   (_set25.size < 0) ? iprot.peekSet() : (_i26 < _set25.size); 
+                   ++_i26)
               {
-                int _elem28;
-                _elem28 = iprot.readI32();
-                this.adapted_set.add(_elem28);
+                int _elem27;
+                _elem27 = iprot.readI32();
+                this.adapted_set.add(_elem27);
               }
               iprot.readSetEnd();
             }
@@ -1330,17 +1330,17 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case ADAPTED_MAP:
           if (__field.type == TType.MAP) {
             {
-              TMap _map29 = iprot.readMapBegin();
-              this.adapted_map = new HashMap<String,Integer>(Math.max(0, 2*_map29.size));
-              for (int _i30 = 0; 
-                   (_map29.size < 0) ? iprot.peekMap() : (_i30 < _map29.size); 
-                   ++_i30)
+              TMap _map28 = iprot.readMapBegin();
+              this.adapted_map = new HashMap<String,Integer>(Math.max(0, 2*_map28.size));
+              for (int _i29 = 0; 
+                   (_map28.size < 0) ? iprot.peekMap() : (_i29 < _map28.size); 
+                   ++_i29)
               {
-                String _key31;
-                int _val32;
-                _key31 = iprot.readString();
-                _val32 = iprot.readI32();
-                this.adapted_map.put(_key31, _val32);
+                String _key30;
+                int _val31;
+                _key30 = iprot.readString();
+                _val31 = iprot.readI32();
+                this.adapted_map.put(_key30, _val31);
               }
               iprot.readMapEnd();
             }
@@ -1351,41 +1351,41 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         case ADAPTED_LIST_NESTED:
           if (__field.type == TType.LIST) {
             {
-              TList _list33 = iprot.readListBegin();
-              this.adapted_list_nested = new ArrayList<List<Map<Integer,Integer>>>(Math.max(0, _list33.size));
-              for (int _i34 = 0; 
-                   (_list33.size < 0) ? iprot.peekList() : (_i34 < _list33.size); 
-                   ++_i34)
+              TList _list32 = iprot.readListBegin();
+              this.adapted_list_nested = new ArrayList<List<Map<Integer,Integer>>>(Math.max(0, _list32.size));
+              for (int _i33 = 0; 
+                   (_list32.size < 0) ? iprot.peekList() : (_i33 < _list32.size); 
+                   ++_i33)
               {
-                List<Map<Integer,Integer>> _elem35;
+                List<Map<Integer,Integer>> _elem34;
                 {
-                  TList _list36 = iprot.readListBegin();
-                  _elem35 = new ArrayList<Map<Integer,Integer>>(Math.max(0, _list36.size));
-                  for (int _i37 = 0; 
-                       (_list36.size < 0) ? iprot.peekList() : (_i37 < _list36.size); 
-                       ++_i37)
+                  TList _list35 = iprot.readListBegin();
+                  _elem34 = new ArrayList<Map<Integer,Integer>>(Math.max(0, _list35.size));
+                  for (int _i36 = 0; 
+                       (_list35.size < 0) ? iprot.peekList() : (_i36 < _list35.size); 
+                       ++_i36)
                   {
-                    Map<Integer,Integer> _elem38;
+                    Map<Integer,Integer> _elem37;
                     {
-                      TMap _map39 = iprot.readMapBegin();
-                      _elem38 = new HashMap<Integer,Integer>(Math.max(0, 2*_map39.size));
-                      for (int _i40 = 0; 
-                           (_map39.size < 0) ? iprot.peekMap() : (_i40 < _map39.size); 
-                           ++_i40)
+                      TMap _map38 = iprot.readMapBegin();
+                      _elem37 = new HashMap<Integer,Integer>(Math.max(0, 2*_map38.size));
+                      for (int _i39 = 0; 
+                           (_map38.size < 0) ? iprot.peekMap() : (_i39 < _map38.size); 
+                           ++_i39)
                       {
-                        int _key41;
-                        int _val42;
-                        _key41 = iprot.readI32();
-                        _val42 = iprot.readI32();
-                        _elem38.put(_key41, _val42);
+                        int _key40;
+                        int _val41;
+                        _key40 = iprot.readI32();
+                        _val41 = iprot.readI32();
+                        _elem37.put(_key40, _val41);
                       }
                       iprot.readMapEnd();
                     }
-                    _elem35.add(_elem38);
+                    _elem34.add(_elem37);
                   }
                   iprot.readListEnd();
                 }
-                this.adapted_list_nested.add(_elem35);
+                this.adapted_list_nested.add(_elem34);
               }
               iprot.readListEnd();
             }
@@ -1425,8 +1425,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.setField.size()));
-        for (String _iter43 : this.setField)        {
-          oprot.writeString(_iter43);
+        for (String _iter42 : this.setField)        {
+          oprot.writeString(_iter42);
         }
         oprot.writeSetEnd();
       }
@@ -1437,8 +1437,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         oprot.writeFieldBegin(OPTIONAL_SET_FIELD_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.optionalSetField.size()));
-          for (String _iter44 : this.optionalSetField)          {
-            oprot.writeString(_iter44);
+          for (String _iter43 : this.optionalSetField)          {
+            oprot.writeString(_iter43);
           }
           oprot.writeSetEnd();
         }
@@ -1449,12 +1449,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.mapField.size()));
-        for (Map.Entry<String, List<String>> _iter45 : this.mapField.entrySet())        {
-          oprot.writeString(_iter45.getKey());
+        for (Map.Entry<String, List<String>> _iter44 : this.mapField.entrySet())        {
+          oprot.writeString(_iter44.getKey());
           {
-            oprot.writeListBegin(new TList(TType.STRING, _iter45.getValue().size()));
-            for (String _iter46 : _iter45.getValue())            {
-              oprot.writeString(_iter46);
+            oprot.writeListBegin(new TList(TType.STRING, _iter44.getValue().size()));
+            for (String _iter45 : _iter44.getValue())            {
+              oprot.writeString(_iter45);
             }
             oprot.writeListEnd();
           }
@@ -1468,12 +1468,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         oprot.writeFieldBegin(OPTIONAL_MAP_FIELD_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.optionalMapField.size()));
-          for (Map.Entry<String, List<String>> _iter47 : this.optionalMapField.entrySet())          {
-            oprot.writeString(_iter47.getKey());
+          for (Map.Entry<String, List<String>> _iter46 : this.optionalMapField.entrySet())          {
+            oprot.writeString(_iter46.getKey());
             {
-              oprot.writeListBegin(new TList(TType.STRING, _iter47.getValue().size()));
-              for (String _iter48 : _iter47.getValue())              {
-                oprot.writeString(_iter48);
+              oprot.writeListBegin(new TList(TType.STRING, _iter46.getValue().size()));
+              for (String _iter47 : _iter46.getValue())              {
+                oprot.writeString(_iter47);
               }
               oprot.writeListEnd();
             }
@@ -1501,8 +1501,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.adapted_list.size()));
-        for (int _iter49 : this.adapted_list)        {
-          oprot.writeI32(_iter49);
+        for (int _iter48 : this.adapted_list)        {
+          oprot.writeI32(_iter48);
         }
         oprot.writeListEnd();
       }
@@ -1512,8 +1512,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I32, this.adapted_set.size()));
-        for (int _iter50 : this.adapted_set)        {
-          oprot.writeI32(_iter50);
+        for (int _iter49 : this.adapted_set)        {
+          oprot.writeI32(_iter49);
         }
         oprot.writeSetEnd();
       }
@@ -1523,9 +1523,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, this.adapted_map.size()));
-        for (Map.Entry<String, Integer> _iter51 : this.adapted_map.entrySet())        {
-          oprot.writeString(_iter51.getKey());
-          oprot.writeI32(_iter51.getValue());
+        for (Map.Entry<String, Integer> _iter50 : this.adapted_map.entrySet())        {
+          oprot.writeString(_iter50.getKey());
+          oprot.writeI32(_iter50.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1535,15 +1535,15 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_LIST_NESTED_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.LIST, this.adapted_list_nested.size()));
-        for (List<Map<Integer,Integer>> _iter52 : this.adapted_list_nested)        {
+        for (List<Map<Integer,Integer>> _iter51 : this.adapted_list_nested)        {
           {
-            oprot.writeListBegin(new TList(TType.MAP, _iter52.size()));
-            for (Map<Integer,Integer> _iter53 : _iter52)            {
+            oprot.writeListBegin(new TList(TType.MAP, _iter51.size()));
+            for (Map<Integer,Integer> _iter52 : _iter51)            {
               {
-                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter53.size()));
-                for (Map.Entry<Integer, Integer> _iter54 : _iter53.entrySet())                {
-                  oprot.writeI32(_iter54.getKey());
-                  oprot.writeI32(_iter54.getValue());
+                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter52.size()));
+                for (Map.Entry<Integer, Integer> _iter53 : _iter52.entrySet())                {
+                  oprot.writeI32(_iter53.getKey());
+                  oprot.writeI32(_iter53.getValue());
                 }
                 oprot.writeMapEnd();
               }

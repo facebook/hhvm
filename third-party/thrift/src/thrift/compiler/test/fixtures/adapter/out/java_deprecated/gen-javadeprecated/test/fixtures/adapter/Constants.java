@@ -66,13 +66,6 @@ public class Constants {
 
   public static final boolean type_adapted = true;
 
-  public static final MoveOnly nested_adapted = new MoveOnly();
-  static {
-    HeapAllocated tmp2 = new HeapAllocated();
-
-    nested_adapted.setPtr(tmp2);
-  }
-
   public static final List<Byte> container_of_adapted = new ArrayList<Byte>();
   static {
     container_of_adapted.add((byte)1);

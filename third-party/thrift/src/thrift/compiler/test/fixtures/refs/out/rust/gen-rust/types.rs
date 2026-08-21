@@ -3466,7 +3466,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3498,7 +3497,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3684,7 +3682,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3726,7 +3723,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
                         extraNamespace: ::std::default::Default::default(),
-                        moveOnly: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

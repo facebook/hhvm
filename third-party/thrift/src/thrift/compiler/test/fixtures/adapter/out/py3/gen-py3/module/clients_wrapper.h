@@ -50,9 +50,6 @@ class AdapterServiceClientWrapper : public ::thrift::py3::ClientWrapper {
 
     folly::Future<::facebook::thrift::test::fixtures::adapter::CountingStruct> count(
       apache::thrift::RpcOptions& rpcOptions);
-    folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated> adaptedTypes(
-      apache::thrift::RpcOptions& rpcOptions,
-      ::facebook::thrift::test::fixtures::adapter::HeapAllocated arg_arg);
 };
 
 

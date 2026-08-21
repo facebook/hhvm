@@ -77,13 +77,6 @@ pub static person_no_transitive: ::std::sync::LazyLock<crate::types::Person2> = 
 
 pub const type_adapted: crate::types::AdaptedBool = true;
 
-pub static nested_adapted: ::std::sync::LazyLock<crate::types::MoveOnly> = ::std::sync::LazyLock::new(|| crate::types::MoveOnly {
-    ptr: crate::types::HeapAllocated {
-        ..::std::default::Default::default()
-    },
-    ..::std::default::Default::default()
-});
-
 pub static container_of_adapted: ::std::sync::LazyLock<::std::vec::Vec<crate::types::AdaptedByte>> = ::std::sync::LazyLock::new(|| {
     let mut list = ::std::vec::Vec::new();
     {

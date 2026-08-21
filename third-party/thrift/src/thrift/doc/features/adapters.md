@@ -213,7 +213,6 @@ Thrift Adapter allows further customization points to avoid calling `fromThrift`
 
  * `adaptedType`: normally the runtime can determine the result of `Adapter::fromThrift`, but sometimes doing so would result in a circular dependency or declaration order error. Setting this annotation to the result type breaks the dependency.
  * `underlyingName` and `extraNamespace`: when directly adapting a Thrift type, the name of Thrft type may need to be mangled to avoid colliding with the name of adapted type. If neither is specified, Thrift will use the `detail` namespace and the same name.
- * `moveOnly`: indicates that structs with this adapted type as a field should not have copy constructors.
 
 ## Hack
 

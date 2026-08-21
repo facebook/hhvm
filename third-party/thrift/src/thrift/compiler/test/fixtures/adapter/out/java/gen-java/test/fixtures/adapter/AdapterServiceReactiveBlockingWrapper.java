@@ -43,27 +43,5 @@ public class AdapterServiceReactiveBlockingWrapper
             throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
         }
     }
-    @java.lang.Override
-    public test.fixtures.adapter.HeapAllocated adaptedTypes( final test.fixtures.adapter.HeapAllocated arg) throws org.apache.thrift.TException {
-        return adaptedTypesWrapper(arg, com.facebook.thrift.client.RpcOptions.EMPTY).getData();
-    }
-
-    @java.lang.Override
-    public test.fixtures.adapter.HeapAllocated adaptedTypes(
-          final test.fixtures.adapter.HeapAllocated arg,
-          com.facebook.thrift.client.RpcOptions rpcOptions) throws org.apache.thrift.TException {
-        return adaptedTypesWrapper(arg,rpcOptions).getData();
-    }
-
-    @java.lang.Override
-    public com.facebook.thrift.client.ResponseWrapper<test.fixtures.adapter.HeapAllocated> adaptedTypesWrapper(
-      final test.fixtures.adapter.HeapAllocated arg,
-      com.facebook.thrift.client.RpcOptions rpcOptions) throws org.apache.thrift.TException {
-        try {
-            return _delegate.adaptedTypesWrapper(arg, rpcOptions).block();
-        } catch (Throwable t) {
-            throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
-        }
-    }
 
 }

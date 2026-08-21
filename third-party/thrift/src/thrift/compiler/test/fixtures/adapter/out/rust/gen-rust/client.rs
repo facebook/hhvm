@@ -361,11 +361,6 @@ pub trait AdapterService: ::std::marker::Send {
     fn count(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>>;
-
-    fn adaptedTypes(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>>;
 }
 
 pub trait AdapterServiceExt<T>: AdapterService
@@ -376,11 +371,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>>;
-    fn adaptedTypes_with_rpc_opts(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>>;
 
     fn transport(&self) -> &T;
 }
@@ -397,14 +387,6 @@ where
         self.as_ref().count(
         )
     }
-    fn adaptedTypes(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        self.as_ref().adaptedTypes(
-            arg_arg,
-        )
-    }
 }
 
 #[allow(deprecated)]
@@ -419,16 +401,6 @@ where
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
         <Self as ::std::convert::AsRef<dyn AdapterServiceExt<T>>>::as_ref(self).count_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn adaptedTypes_with_rpc_opts(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        <Self as ::std::convert::AsRef<dyn AdapterServiceExt<T>>>::as_ref(self).adaptedTypes_with_rpc_opts(
-            arg_arg,
             rpc_options,
         )
     }
@@ -511,52 +483,6 @@ where
         .instrument(::tracing::info_span!("stream", method = "AdapterService.count"))
         .boxed()
     }
-
-    fn _adaptedTypes_impl(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        use ::tracing::Instrument as _;
-        use ::futures::FutureExt as _;
-
-        let service_name = c"AdapterService";
-        let service_method_name = c"AdapterService.adaptedTypes";
-
-        let args = self::Args_AdapterService_adaptedTypes {
-            arg: arg_arg,
-            _phantom: ::std::marker::PhantomData,
-        };
-
-        let transport = self.transport();
-
-        // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("adaptedTypes", &args) {
-            ::std::result::Result::Ok(res) => res,
-            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-        };
-
-        let call = transport
-            .call(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "AdapterService.adaptedTypes"));
-
-        async move {
-            let reply_env = call.await?;
-
-            let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::adapter_service::AdaptedTypesReader, S>(de).await?;
-
-            let res = match res {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err(crate::errors::adapter_service::AdaptedTypesError::ApplicationException(aexn))
-                }
-            };
-            res
-        }
-        .instrument(::tracing::info_span!("stream", method = "AdapterService.adaptedTypes"))
-        .boxed()
-    }
 }
 
 impl<P, T, S> ::fbthrift::help::GetTransport<T> for AdapterServiceImpl<P, T, S>
@@ -584,24 +510,6 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
-struct Args_AdapterService_adaptedTypes<'a> {
-    arg: &'a crate::types::HeapAllocated,
-    _phantom: ::std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_AdapterService_adaptedTypes<'a> {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "AdapterService.adaptedTypes"))]
-    fn rs_thrift_write(&self, p: &mut P) {
-        p.write_struct_begin("args");
-        p.write_field_begin("arg", ::fbthrift::TType::Struct, 1i16);
-        ::fbthrift::Serialize::rs_thrift_write(&self.arg, p);
-        p.write_field_end();
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
 impl<P, T, S> AdapterService for AdapterServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -616,16 +524,6 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
         let rpc_options = T::RpcOptions::default();
         self._count_impl(
-            rpc_options,
-        )
-    }
-    fn adaptedTypes(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        let rpc_options = T::RpcOptions::default();
-        self._adaptedTypes_impl(
-            arg_arg,
             rpc_options,
         )
     }
@@ -645,16 +543,6 @@ where
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
         self._count_impl(
-            rpc_options,
-        )
-    }
-    fn adaptedTypes_with_rpc_opts(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        self._adaptedTypes_impl(
-            arg_arg,
             rpc_options,
         )
     }

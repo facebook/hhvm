@@ -110,11 +110,6 @@ namespace module_constants {
   return *instance;
 }
 
-::facebook::thrift::test::fixtures::adapter::MoveOnly const& nested_adapted() {
-  static folly::Indestructible<::facebook::thrift::test::fixtures::adapter::MoveOnly> const instance{ ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::MoveOnly>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::ptr, ::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::FieldId{ 1 }>(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>())) };
-  return *instance;
-}
-
 ::std::vector<::facebook::thrift::test::fixtures::adapter::AdaptedByte> const& container_of_adapted() {
   static folly::Indestructible<::std::vector<::facebook::thrift::test::fixtures::adapter::AdaptedByte>> const instance{ std::initializer_list<::facebook::thrift::test::fixtures::adapter::AdaptedByte>{ ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(1))),
   ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(2))),
@@ -123,13 +118,13 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_45faf1bb1b36ce2e() {
+::std::string_view _fbthrift_schema_9ea8bd6ec8caf297() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_45faf1bb1b36ce2e_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_9ea8bd6ec8caf297_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_45faf1bb1b36ce2e_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_9ea8bd6ec8caf297_uris() {
   return {};
 }
 

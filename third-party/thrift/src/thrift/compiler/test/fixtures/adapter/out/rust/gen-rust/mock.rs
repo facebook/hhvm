@@ -173,7 +173,6 @@ where
 
 pub struct AdapterService<'mock> {
     pub count: r#impl::adapter_service::count<'mock>,
-    pub adaptedTypes: r#impl::adapter_service::adaptedTypes<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
@@ -182,7 +181,6 @@ impl crate::DynClient for dyn ::::AdapterService {
     fn mock<'mock>() -> Self::Mock<'mock> {
         AdapterService {
             count: r#impl::adapter_service::count::unimplemented(),
-            adaptedTypes: r#impl::adapter_service::adaptedTypes::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
     }
@@ -196,14 +194,6 @@ impl<'mock> ::::AdapterService for AdapterService<'mock> {
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
     }
-    fn adaptedTypes(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        let mut closure = self.adaptedTypes.closure.lock().unwrap();
-        let closure: &mut dyn ::std::ops::FnMut(crate::types::HeapAllocated) -> _ = &mut **closure;
-        ::std::boxed::Box::pin(::futures::future::ready(closure(arg_arg.clone())))
-    }
 }
 
 impl<'mock, T> ::::AdapterServiceExt<T> for AdapterService<'mock>
@@ -216,16 +206,6 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
         <Self as ::::AdapterService>::count(
             self,
-        )
-    }
-    fn adaptedTypes_with_rpc_opts(
-        &self,
-        arg_arg: &crate::types::HeapAllocated,
-        _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        <Self as ::::AdapterService>::adaptedTypes(
-            self,
-            arg_arg,
         )
     }
 
@@ -335,51 +315,6 @@ pub mod r#impl {
             {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
-            }
-        }
-
-        pub struct adaptedTypes<'mock> {
-            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
-                dyn ::std::ops::FnMut(crate::types::HeapAllocated) -> ::std::result::Result<
-                    crate::types::HeapAllocated,
-                    ::::errors::adapter_service::AdaptedTypesError,
-                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
-            >>,
-        }
-
-        #[allow(clippy::redundant_closure)]
-        impl<'mock> adaptedTypes<'mock> {
-            pub(crate) fn unimplemented() -> Self {
-                Self {
-                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::HeapAllocated| panic!(
-                        "{}::{} is not mocked",
-                        "AdapterService",
-                        "adaptedTypes",
-                    ))),
-                }
-            }
-
-            pub fn ret(&self, value: crate::types::HeapAllocated) {
-                self.mock(move |_: crate::types::HeapAllocated| value.clone());
-            }
-
-            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(crate::types::HeapAllocated) -> crate::types::HeapAllocated + ::std::marker::Send + ::std::marker::Sync + 'mock) {
-                let mut closure = self.closure.lock().unwrap();
-                *closure = ::std::boxed::Box::new(move |arg| ::std::result::Result::Ok(mock(arg)));
-            }
-
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(crate::types::HeapAllocated) -> ::std::result::Result<crate::types::HeapAllocated, ::::errors::adapter_service::AdaptedTypesError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
-                let mut closure = self.closure.lock().unwrap();
-                *closure = ::std::boxed::Box::new(move |arg| mock(arg));
-            }
-
-            pub fn throw<E>(&self, exception: E)
-            where
-                E: ::std::convert::Into<::::errors::adapter_service::AdaptedTypesError>,
-                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
-            {
-                let mut closure = self.closure.lock().unwrap();
-                *closure = ::std::boxed::Box::new(move |_: crate::types::HeapAllocated| ::std::result::Result::Err(exception.clone().into()));
             }
         }
     }

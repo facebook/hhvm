@@ -19,7 +19,6 @@ public class AdapterServiceRpcServerHandler
   private final AdapterService.Reactive _delegate;
 
   private final java.util.List<com.facebook.thrift.payload.Reader> _countReaders;
-  private final java.util.List<com.facebook.thrift.payload.Reader> _adaptedTypesReaders;
 
   private final java.util.List<com.facebook.swift.service.ThriftEventHandler> _eventHandlers;
 
@@ -42,8 +41,6 @@ public class AdapterServiceRpcServerHandler
 
     _methodMap.put("count", this);
     _countReaders = _create_count_request_readers();
-    _methodMap.put("adaptedTypes", this);
-    _adaptedTypesReaders = _create_adaptedTypes_request_readers();
 
 
   }
@@ -142,101 +139,6 @@ public class AdapterServiceRpcServerHandler
 
           return _internalResponse;
   }
-  private static java.util.List<com.facebook.thrift.payload.Reader> _create_adaptedTypes_request_readers() {
-    java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
-
-    _readerList.add(Readers.wrap(test.fixtures.adapter.HeapAllocated.asReader()));
-
-    return _readerList;
-  }
-
-  private static com.facebook.thrift.payload.Writer _create_adaptedTypes_response_writer(
-      final java.lang.Object _r,
-      final com.facebook.swift.service.ContextChain _chain,
-      final int _seqId) {
-      return oprot -> {
-      try {
-        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
-
-        test.fixtures.adapter.HeapAllocated _fbthriftVar0 = (test.fixtures.adapter.HeapAllocated)_r;
-        oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
-        _fbthriftVar0.write0(oprot);
-        oprot.writeFieldEnd();
-
-        oprot.writeFieldStop();
-        oprot.writeStructEnd();
-
-        _chain.postWrite(_r);
-      } catch (Throwable _e) {
-        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
-        throw reactor.core.Exceptions.propagate(_e);
-      }
-    };
-  }
-
-
-  private static reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload>
-    _doadaptedTypes(
-    AdapterService.Reactive _delegate,
-    com.facebook.thrift.payload.ServerRequestPayload _payload,
-    java.util.List<com.facebook.thrift.payload.Reader> _readers,
-    com.facebook.swift.service.ContextChain _chain) {
-          _chain.preRead();
-          java.util.List<java.lang.Object> _data;
-          try {
-            _data = _payload.getData(_readers);
-          } finally {
-            // getData has fully read the request bytes; release the request buffer now. This lives in
-            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
-            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
-            // without reading, so releasing there would free the buffer before the parent reads it.
-            // Idempotent; no-op for payloads constructed without an owned buffer.
-            _payload.releaseRequestData();
-          }
-          java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
-
-          test.fixtures.adapter.HeapAllocated arg = (test.fixtures.adapter.HeapAllocated) _iterator.next();
-
-          _chain.postRead(_data);
-
-          reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> _delegateResponse =
-            _delegate
-              .adaptedTypes(arg);
-
-          reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
-            _delegateResponse.map(_response -> {
-              _chain.preWrite(_response);
-              com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
-                com.facebook.thrift.util.RpcPayloadUtil.createServerResponsePayload(
-                  _payload,
-                  _create_adaptedTypes_response_writer(_response, _chain, _payload.getMessageSeqId()));
-
-                return _serverResponsePayload;
-            })
-            .switchIfEmpty(
-              reactor.core.publisher.Mono.fromSupplier(
-                () -> {
-                  org.apache.thrift.TApplicationException _tApplicationException =
-                    new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "method adaptedTypes returned null");
-                  return com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
-                }
-              )
-            )
-            .<com.facebook.thrift.payload.ServerResponsePayload>onErrorResume(_t -> {
-                _chain.preWriteException(_t);
-                // exception is not of user declared type
-                String _errorMessage = String.format("Internal error processing adaptedTypes: %s", _t.getMessage() == null ? "<null>" : _t.getMessage());
-                org.apache.thrift.TApplicationException _tApplicationException =
-                    new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, _errorMessage);
-                _tApplicationException.initCause(_t);
-                com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
-                    com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
-
-                return reactor.core.publisher.Mono.just(_serverResponsePayload);
-            });
-
-          return _internalResponse;
-  }
 
 
   @java.lang.Override
@@ -322,9 +224,6 @@ public class AdapterServiceRpcServerHandler
       switch (_name) {
         case "count":
           _result = _docount(_delegate, _payload, _countReaders, _chain);
-        break;
-        case "adaptedTypes":
-          _result = _doadaptedTypes(_delegate, _payload, _adaptedTypesReaders, _chain);
         break;
         default: {
             _chain.preRead();

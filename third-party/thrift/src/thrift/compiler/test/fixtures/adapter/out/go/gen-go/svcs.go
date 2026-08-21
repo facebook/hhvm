@@ -152,13 +152,11 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.R
 
 type AdapterService interface {
     Count(ctx context.Context) (*CountingStruct, error)
-    AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
 type AdapterServiceClient interface {
     io.Closer
     Count(ctx context.Context) (*CountingStruct, error)
-    AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
 type adapterServiceClientImpl struct {
@@ -198,24 +196,6 @@ func (c *adapterServiceClientImpl) Count(ctx context.Context) (*CountingStruct, 
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *adapterServiceClientImpl) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
-    fbthriftReq := &reqAdapterServiceAdaptedTypes{
-        Arg: arg,
-    }
-    fbthriftChannel := c.ch
-    fbthriftResp := newRespAdapterServiceAdaptedTypes()
-    fbthriftErr := fbthriftChannel.SendRequestResponse(
-        ctx,
-        "adaptedTypes",
-        fbthriftReq,
-        fbthriftResp,
-    )
-    if fbthriftErr != nil {
-        return nil, fbthriftErr
-    }
-    return fbthriftResp.GetSuccess(), nil
-}
-
 
 type AdapterServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
@@ -230,9 +210,7 @@ func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor
         functionServiceMap:   make(map[string]string),
     }
     p.AddToProcessorFunctionMap("count", &procFuncAdapterServiceCount{handler: handler})
-    p.AddToProcessorFunctionMap("adaptedTypes", &procFuncAdapterServiceAdaptedTypes{handler: handler})
     p.AddToFunctionServiceMap("count", "AdapterService")
-    p.AddToFunctionServiceMap("adaptedTypes", "AdapterService")
 
     return p
 }
@@ -279,28 +257,6 @@ func (p *procFuncAdapterServiceCount) NewReqArgs() thrift.ReadableStruct {
 func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespAdapterServiceCount()
     retval, err := p.handler.Count(ctx)
-    if err != nil {
-        return nil, err
-    }
-
-    result.Success = retval
-    return result, nil
-}
-
-type procFuncAdapterServiceAdaptedTypes struct {
-    handler AdapterService
-}
-// Compile time interface enforcer
-var _ thrift.ProcessorFunction = (*procFuncAdapterServiceAdaptedTypes)(nil)
-
-func (p *procFuncAdapterServiceAdaptedTypes) NewReqArgs() thrift.ReadableStruct {
-    return newReqAdapterServiceAdaptedTypes()
-}
-
-func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
-    args := reqStruct.(*reqAdapterServiceAdaptedTypes)
-    result := newRespAdapterServiceAdaptedTypes()
-    retval, err := p.handler.AdaptedTypes(ctx, args.Arg)
     if err != nil {
         return nil, err
     }

@@ -280,13 +280,6 @@ var (
                     Name: "module.CountingStruct",
                 },
         }
-    premadeThriftType_module_HeapAllocated =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.HeapAllocated",
-                },
-        }
     premadeThriftType_module_Color =
         &metadata.ThriftType{
             TEnum:
@@ -1636,20 +1629,6 @@ var (
                     Name: "module.SameNamespaceStruct",
                 },
         }
-    premadeThriftType_module_MoveOnly =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.MoveOnly",
-                },
-        }
-    premadeThriftType_module_AlsoMoveOnly =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.AlsoMoveOnly",
-                },
-        }
     premadeThriftType_module_ApplyAdapter =
         &metadata.ThriftType{
             TStruct:
@@ -2773,56 +2752,6 @@ var (
                 },
             },
         }
-    premadeStructMetadata_HeapAllocated =
-        &metadata.ThriftStruct{
-            Name:    "module.HeapAllocated",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "cpp.Adapter",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                        "name":
-                            &metadata.ThriftConstValue{
-                                CvString: new("::apache::thrift::test::MoveOnlyAdapter"),
-                            },
-                        "moveOnly":
-                            &metadata.ThriftConstValue{
-                                CvBool: new(true),
-                            },
-                    },
-                },
-            },
-        }
-    premadeStructMetadata_MoveOnly =
-        &metadata.ThriftStruct{
-            Name:    "module.MoveOnly",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "ptr",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_HeapAllocated,
-                },
-            },
-        }
-    premadeStructMetadata_AlsoMoveOnly =
-        &metadata.ThriftStruct{
-            Name:    "module.AlsoMoveOnly",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "ptr",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-            },
-        }
     premadeStructMetadata_ApplyAdapter =
         &metadata.ThriftStruct{
             Name:    "module.ApplyAdapter",
@@ -2980,7 +2909,6 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.StringWithCppAdapter"] = premadeThriftType_module_StringWithCppAdapter
     fbthriftThriftTypesMap["module.Foo"] = premadeThriftType_module_Foo
     fbthriftThriftTypesMap["module.CountingStruct"] = premadeThriftType_module_CountingStruct
-    fbthriftThriftTypesMap["module.HeapAllocated"] = premadeThriftType_module_HeapAllocated
     fbthriftThriftTypesMap["module.Color"] = premadeThriftType_module_Color
     fbthriftThriftTypesMap["module.MyAnnotation"] = premadeThriftType_module_MyAnnotation
     fbthriftThriftTypesMap["module.i32_5137"] = premadeThriftType_module_i32_5137
@@ -3045,8 +2973,6 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.ReorderedStruct"] = premadeThriftType_module_ReorderedStruct
     fbthriftThriftTypesMap["module.RenamedStruct"] = premadeThriftType_module_RenamedStruct
     fbthriftThriftTypesMap["module.SameNamespaceStruct"] = premadeThriftType_module_SameNamespaceStruct
-    fbthriftThriftTypesMap["module.MoveOnly"] = premadeThriftType_module_MoveOnly
-    fbthriftThriftTypesMap["module.AlsoMoveOnly"] = premadeThriftType_module_AlsoMoveOnly
     fbthriftThriftTypesMap["module.ApplyAdapter"] = premadeThriftType_module_ApplyAdapter
     fbthriftThriftTypesMap["module.TransitiveAdapted"] = premadeThriftType_module_TransitiveAdapted
     fbthriftThriftTypesMap["module.CountingInt"] = premadeThriftType_module_CountingInt
@@ -3085,9 +3011,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_DeclaredAfterStruct)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_RenamedStruct)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_SameNamespaceStruct)
-    fbthriftResults = append(fbthriftResults, premadeStructMetadata_HeapAllocated)
-    fbthriftResults = append(fbthriftResults, premadeStructMetadata_MoveOnly)
-    fbthriftResults = append(fbthriftResults, premadeStructMetadata_AlsoMoveOnly)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_ApplyAdapter)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_TransitiveAdapted)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_CountingStruct)
@@ -3169,19 +3092,6 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "count",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_module_CountingStruct,
-                },
-                &metadata.ThriftFunction{
-                    Name:       "adaptedTypes",
-                    IsOneway:   false,
-                    ReturnType: premadeThriftType_module_HeapAllocated,
-                    Arguments:  []*metadata.ThriftField{
-                        &metadata.ThriftField{
-                            Id:         1,
-                            Name:       "arg",
-                            IsOptional: false,
-                            Type:       premadeThriftType_module_HeapAllocated,
-                        },
-                    },
                 },
             },
         },

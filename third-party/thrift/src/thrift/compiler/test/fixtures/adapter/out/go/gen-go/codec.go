@@ -91,15 +91,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewCountingStruct() },
             },
     }
-    premadeCodecTypeSpec_module_HeapAllocated = &thrift.TypeSpec{
-        FullName: "module.HeapAllocated",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.HeapAllocated",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewHeapAllocated() },
-            },
-    }
     premadeCodecTypeSpec_module_Color = &thrift.TypeSpec{
         FullName: "module.Color",
         CodecEnumSpec:
@@ -780,24 +771,6 @@ var (
                 ScopedName: "module.SameNamespaceStruct",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewSameNamespaceStruct() },
-            },
-    }
-    premadeCodecTypeSpec_module_MoveOnly = &thrift.TypeSpec{
-        FullName: "module.MoveOnly",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.MoveOnly",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewMoveOnly() },
-            },
-    }
-    premadeCodecTypeSpec_module_AlsoMoveOnly = &thrift.TypeSpec{
-        FullName: "module.AlsoMoveOnly",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.AlsoMoveOnly",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewAlsoMoveOnly() },
             },
     }
     premadeCodecTypeSpec_module_ApplyAdapter = &thrift.TypeSpec{
@@ -2180,67 +2153,6 @@ var (
                 "data": 0,
             },
         }
-    premadeStructSpec_HeapAllocated =
-        &thrift.StructSpec{
-            Name:                 "HeapAllocated",
-            ScopedName:           "module.HeapAllocated",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-            },
-            FieldSpecNameToIndex: map[string]int{
-            },
-        }
-    premadeStructSpec_MoveOnly =
-        &thrift.StructSpec{
-            Name:                 "MoveOnly",
-            ScopedName:           "module.MoveOnly",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.STRUCT,
-                    Name:                 "ptr",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_HeapAllocated,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "ptr": 0,
-            },
-        }
-    premadeStructSpec_AlsoMoveOnly =
-        &thrift.StructSpec{
-            Name:                 "AlsoMoveOnly",
-            ScopedName:           "module.AlsoMoveOnly",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.I64,
-                    Name:                 "ptr",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
-                    MustBeSetToSerialize: false,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "ptr": 0,
-            },
-        }
     premadeStructSpec_ApplyAdapter =
         &thrift.StructSpec{
             Name:                 "ApplyAdapter",
@@ -2492,54 +2404,6 @@ var (
                 "success": 0,
             },
         }
-    premadeStructSpec_reqAdapterServiceAdaptedTypes =
-        &thrift.StructSpec{
-            Name:                 "reqAdapterServiceAdaptedTypes",
-            ScopedName:           "module.reqAdapterServiceAdaptedTypes",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   1,
-                    WireType:             thrift.STRUCT,
-                    Name:                 "arg",
-                    ReflectIndex:         0,
-                    IsOptional:           false,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_HeapAllocated,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                1: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "arg": 0,
-            },
-        }
-    premadeStructSpec_respAdapterServiceAdaptedTypes =
-        &thrift.StructSpec{
-            Name:                 "respAdapterServiceAdaptedTypes",
-            ScopedName:           "module.respAdapterServiceAdaptedTypes",
-            IsUnion:              false,
-            IsException:          false,
-            FieldSpecs:           []thrift.FieldSpec{
-                {
-                    ID:                   0,
-                    WireType:             thrift.STRUCT,
-                    Name:                 "success",
-                    ReflectIndex:         0,
-                    IsOptional:           true,
-                    ValueTypeSpec:        premadeCodecTypeSpec_module_HeapAllocated,
-                    MustBeSetToSerialize: true,
-                },
-            },
-            FieldSpecIDToIndex:   map[int16]int{
-                0: 0,
-            },
-            FieldSpecNameToIndex: map[string]int{
-                "success": 0,
-            },
-        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -2553,7 +2417,6 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithCppAdapter.FullName] = premadeCodecTypeSpec_module_StringWithCppAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo.FullName] = premadeCodecTypeSpec_module_Foo
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingStruct.FullName] = premadeCodecTypeSpec_module_CountingStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_HeapAllocated.FullName] = premadeCodecTypeSpec_module_HeapAllocated
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyAnnotation.FullName] = premadeCodecTypeSpec_module_MyAnnotation
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_5137.FullName] = premadeCodecTypeSpec_module_i32_5137
@@ -2618,8 +2481,6 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ReorderedStruct.FullName] = premadeCodecTypeSpec_module_ReorderedStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStruct.FullName] = premadeCodecTypeSpec_module_RenamedStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SameNamespaceStruct.FullName] = premadeCodecTypeSpec_module_SameNamespaceStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MoveOnly.FullName] = premadeCodecTypeSpec_module_MoveOnly
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AlsoMoveOnly.FullName] = premadeCodecTypeSpec_module_AlsoMoveOnly
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ApplyAdapter.FullName] = premadeCodecTypeSpec_module_ApplyAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TransitiveAdapted.FullName] = premadeCodecTypeSpec_module_TransitiveAdapted
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingInt.FullName] = premadeCodecTypeSpec_module_CountingInt

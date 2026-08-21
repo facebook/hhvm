@@ -94,29 +94,6 @@ void AdapterServiceWrapper::async_tm_count(
         });
     });
 }
-void AdapterServiceWrapper::async_tm_adaptedTypes(
-  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> callback
-    , std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> arg
-) {
-  auto ctx = callback->getRequestContext();
-  folly::via(
-    this->executor,
-    [this, ctx,
-     callback = std::move(callback),
-     arg = std::move(arg)
-    ]() mutable {
-        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>();
-        call_cy_AdapterService_adaptedTypes(
-            this->if_object,
-            ctx,
-            std::move(promise),
-            std::move(arg)        );
-        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>&& t) {
-          (void)t;
-          callback->complete(std::move(t));
-        });
-    });
-}
 std::shared_ptr<apache::thrift::ServerInterface> AdapterServiceInterface(PyObject *if_object, folly::Executor *exc) {
   return std::make_shared<AdapterServiceWrapper>(if_object, exc);
 }

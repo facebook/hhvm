@@ -85,9 +85,6 @@ inline void reset_field<::facebook::thrift::annotation::cpp::Adapter>(
     case 3:
       obj.extraNamespace_ref().copy_from(default_inst<::facebook::thrift::annotation::cpp::Adapter>().extraNamespace_ref());
       return;
-    case 4:
-      obj.moveOnly_ref().copy_from(default_inst<::facebook::thrift::annotation::cpp::Adapter>().moveOnly_ref());
-      return;
   }
 }
 

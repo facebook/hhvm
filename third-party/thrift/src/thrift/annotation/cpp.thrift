@@ -176,9 +176,6 @@ struct Adapter {
    */
   3: string underlyingName;
   4: string extraNamespace;
-
-  /** Must set to true when adapted type is not copyable. */
-  5: bool moveOnly;
 }
 
 /**

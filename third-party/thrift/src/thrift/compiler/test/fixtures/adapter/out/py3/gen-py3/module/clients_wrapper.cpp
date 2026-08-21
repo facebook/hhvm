@@ -60,28 +60,4 @@ AdapterServiceClientWrapper::count(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated>
-AdapterServiceClientWrapper::adaptedTypes(
-    apache::thrift::RpcOptions& rpcOptions,
-    ::facebook::thrift::test::fixtures::adapter::HeapAllocated arg_arg) {
-  auto* client = static_cast<::facebook::thrift::test::fixtures::adapter::AdapterServiceAsyncClient*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::fixtures::adapter::HeapAllocated>;
-  folly::Promise<CallbackHelper::PromiseResult> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>(
-    std::move(_promise), rpcOptions, client->recv_wrapped_adaptedTypes, channel_);
-  try {
-    client->adaptedTypes(
-      rpcOptions,
-      std::move(callback),
-      arg_arg
-    );
-  } catch (...) {
-    return folly::makeFuture<::facebook::thrift::test::fixtures::adapter::HeapAllocated>(folly::exception_wrapper(
-      std::current_exception()
-    ));
-  }
-  return std::move(_future).thenValue(CallbackHelper::extractResult);
-}
-
 } // namespace facebook::thrift::test::fixtures::adapter

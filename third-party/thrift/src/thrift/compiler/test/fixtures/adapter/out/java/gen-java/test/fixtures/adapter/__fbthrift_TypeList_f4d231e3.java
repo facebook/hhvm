@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_05c0305e implements TypeList {
+public class __fbthrift_TypeList_f4d231e3 implements TypeList {
 
     private static List<TypeMapping> list = new ArrayList<>();
 
@@ -45,9 +45,6 @@ public class __fbthrift_TypeList_05c0305e implements TypeList {
         add("facebook.com/thrift/test/fixtures/adapter/DeclaredAfterStruct", "test.fixtures.adapter.DeclaredAfterStruct");
         add("facebook.com/thrift/test/fixtures/adapter/RenamedStruct", "test.fixtures.adapter.RenamedStruct");
         add("facebook.com/thrift/test/fixtures/adapter/SameNamespaceStruct", "test.fixtures.adapter.SameNamespaceStruct");
-        add("facebook.com/thrift/test/fixtures/adapter/HeapAllocated", "test.fixtures.adapter.HeapAllocated");
-        add("facebook.com/thrift/test/fixtures/adapter/MoveOnly", "test.fixtures.adapter.MoveOnly");
-        add("facebook.com/thrift/test/fixtures/adapter/AlsoMoveOnly", "test.fixtures.adapter.AlsoMoveOnly");
         add("facebook.com/thrift/test/fixtures/adapter/ApplyAdapter", "test.fixtures.adapter.ApplyAdapter");
         add("facebook.com/thrift/test/fixtures/adapter/TransitiveAdapted", "test.fixtures.adapter.TransitiveAdapted");
         add("facebook.com/thrift/test/fixtures/adapter/CountingStruct", "test.fixtures.adapter.CountingStruct");

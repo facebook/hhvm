@@ -29,9 +29,4 @@ public class AdapterServiceAsyncReactiveWrapper
         return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.count());
     }
 
-    @java.lang.Override
-    public reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg) {
-        return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.adaptedTypes(arg));
-    }
-
 }

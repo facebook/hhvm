@@ -34,8 +34,6 @@ namespace facebook::thrift::test::fixtures::adapter {
   ::apache::thrift::detail::md::StructMetadata<CircularAdaptee>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CircularStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReorderedStruct>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<MoveOnly>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<AlsoMoveOnly>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ApplyAdapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CountingStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Person>::gen(metadata);

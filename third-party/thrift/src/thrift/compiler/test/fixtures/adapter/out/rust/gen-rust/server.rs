@@ -429,17 +429,6 @@ pub trait AdapterService: ::std::marker::Send + ::std::marker::Sync + 'static {
             ),
         ))
     }
-    async fn adaptedTypes(
-        &self,
-        _arg: crate::types::HeapAllocated,
-    ) -> ::std::result::Result<crate::types::HeapAllocated, crate::services::adapter_service::AdaptedTypesExn> {
-        ::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "AdapterService",
-                "adaptedTypes",
-            ),
-        ))
-    }
 }
 
 #[::async_trait::async_trait]
@@ -453,14 +442,6 @@ where
         (**self).count(
         ).await
     }
-    async fn adaptedTypes(
-        &self,
-        arg: crate::types::HeapAllocated,
-    ) -> ::std::result::Result<crate::types::HeapAllocated, crate::services::adapter_service::AdaptedTypesExn> {
-        (**self).adaptedTypes(
-            arg,
-        ).await
-    }
 }
 
 #[::async_trait::async_trait]
@@ -472,14 +453,6 @@ where
         &self,
     ) -> ::std::result::Result<crate::types::CountingStruct, crate::services::adapter_service::CountExn> {
         (**self).count(
-        ).await
-    }
-    async fn adaptedTypes(
-        &self,
-        arg: crate::types::HeapAllocated,
-    ) -> ::std::result::Result<crate::types::HeapAllocated, crate::services::adapter_service::AdaptedTypesExn> {
-        (**self).adaptedTypes(
-            arg,
         ).await
     }
 }
@@ -512,36 +485,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ad
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-
-struct Args_AdapterService_adaptedTypes {
-    arg: crate::types::HeapAllocated,
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AdapterService_adaptedTypes {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AdapterService.adaptedTypes"))]
-    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("arg", ::fbthrift::TType::Struct, 1),
-        ];
-        let mut field_arg = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "adaptedTypes"})?),
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            arg: field_arg.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "AdapterService.adaptedTypes", "arg"))?,
         })
     }
 }
@@ -636,73 +579,6 @@ where
         reply_state.send_reply(env);
         ::std::result::Result::Ok(())
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "AdapterService.adaptedTypes"))]
-    async fn handle_adaptedTypes(
-        &self,
-        mut p: P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-        use ::fbthrift::ExceptionInfo;
-        use ::fbthrift::ProtocolReader as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
-        const METHOD_NAME: &::std::ffi::CStr = c"adaptedTypes";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AdapterService.adaptedTypes";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_AdapterService_adaptedTypes = ::fbthrift::Deserialize::rs_thrift_read(&mut p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-        p.read_message_end()?;
-        // drop the deserializer buffer since we already have the relevant data pulled out and placed into the _args variable
-        ::std::mem::drop(p);
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.adaptedTypes(
-                _args.arg,
-            )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "AdapterService.adaptedTypes", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "AdapterService.adaptedTypes", exception = ?exn, error = exn.exn_value());
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.adaptedTypes", exn);
-                ::tracing::error!(method = "AdapterService.adaptedTypes", panic = ?aexn, error = aexn.exn_value());
-                ::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::adapter_service::AdaptedTypesExn>(
-            "adaptedTypes",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
 }
 
 #[::async_trait::async_trait]
@@ -726,7 +602,6 @@ where
     fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
         match name {
             b"count" => ::std::result::Result::Ok(0usize),
-            b"adaptedTypes" => ::std::result::Result::Ok(1usize),
             _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
         }
     }
@@ -744,9 +619,6 @@ where
         match idx {
             0usize => {
                 self.handle_count(_p, _req, _req_ctxt, _reply_state, _seqid).await
-            }
-            1usize => {
-                self.handle_adaptedTypes(_p, _req, _req_ctxt, _reply_state, _seqid).await
             }
             bad => panic!(
                 "{}: unexpected method idx {}",
@@ -854,13 +726,6 @@ where
               interaction_type: ::fbthrift::processor::InteractionType::None,
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "count",
-              starts_interaction: false,
-              interaction_name: None,
-            },
-            ::fbthrift::processor::MethodMetadata{
-              interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-              name: "adaptedTypes",
               starts_interaction: false,
               interaction_name: None,
             },

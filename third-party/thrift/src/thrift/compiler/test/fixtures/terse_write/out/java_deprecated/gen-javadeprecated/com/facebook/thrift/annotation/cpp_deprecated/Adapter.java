@@ -47,7 +47,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
   private static final TField ADAPTED_TYPE_FIELD_DESC = new TField("adaptedType", TType.STRING, (short)2);
   private static final TField UNDERLYING_NAME_FIELD_DESC = new TField("underlyingName", TType.STRING, (short)3);
   private static final TField EXTRA_NAMESPACE_FIELD_DESC = new TField("extraNamespace", TType.STRING, (short)4);
-  private static final TField MOVE_ONLY_FIELD_DESC = new TField("moveOnly", TType.BOOL, (short)5);
 
   /**
    * The name of a C++ adapter type used to convert between Thrift and native
@@ -92,19 +91,12 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
    */
   public String underlyingName;
   public String extraNamespace;
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public boolean moveOnly;
   public static final int NAME = 1;
   public static final int ADAPTEDTYPE = 2;
   public static final int UNDERLYINGNAME = 3;
   public static final int EXTRANAMESPACE = 4;
-  public static final int MOVEONLY = 5;
 
   // isset id assignments
-  private static final int __MOVEONLY_ISSET_ID = 0;
-  private BitSet __isset_bit_vector = new BitSet(1);
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -118,8 +110,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
         new FieldValueMetaData(TType.STRING)));
     tmpMetaDataMap.put(EXTRANAMESPACE, new FieldMetaData("extraNamespace", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(MOVEONLY, new FieldMetaData("moveOnly", TFieldRequirementType.DEFAULT, 
-        new FieldValueMetaData(TType.BOOL)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -134,15 +124,12 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
       String name,
       String adaptedType,
       String underlyingName,
-      String extraNamespace,
-      boolean moveOnly) {
+      String extraNamespace) {
     this();
     this.name = name;
     this.adaptedType = adaptedType;
     this.underlyingName = underlyingName;
     this.extraNamespace = extraNamespace;
-    this.moveOnly = moveOnly;
-    setMoveOnlyIsSet(true);
   }
 
   public static class Builder {
@@ -150,9 +137,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     private String adaptedType;
     private String underlyingName;
     private String extraNamespace;
-    private boolean moveOnly;
-
-    BitSet __optional_isset = new BitSet(1);
 
     public Builder() {
     }
@@ -177,21 +161,12 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
       return this;
     }
 
-    public Builder setMoveOnly(final boolean moveOnly) {
-      this.moveOnly = moveOnly;
-      __optional_isset.set(__MOVEONLY_ISSET_ID, true);
-      return this;
-    }
-
     public Adapter build() {
       Adapter result = new Adapter();
       result.setName(this.name);
       result.setAdaptedType(this.adaptedType);
       result.setUnderlyingName(this.underlyingName);
       result.setExtraNamespace(this.extraNamespace);
-      if (__optional_isset.get(__MOVEONLY_ISSET_ID)) {
-        result.setMoveOnly(this.moveOnly);
-      }
       return result;
     }
   }
@@ -204,8 +179,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
    * Performs a deep copy on <i>other</i>.
    */
   public Adapter(Adapter other) {
-    __isset_bit_vector.clear();
-    __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetName()) {
       this.name = TBaseHelper.deepCopy(other.name);
     }
@@ -218,7 +191,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     if (other.isSetExtraNamespace()) {
       this.extraNamespace = TBaseHelper.deepCopy(other.extraNamespace);
     }
-    this.moveOnly = TBaseHelper.deepCopy(other.moveOnly);
   }
 
   public Adapter deepCopy() {
@@ -399,35 +371,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     }
   }
 
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public boolean isMoveOnly() {
-    return this.moveOnly;
-  }
-
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public Adapter setMoveOnly(boolean moveOnly) {
-    this.moveOnly = moveOnly;
-    setMoveOnlyIsSet(true);
-    return this;
-  }
-
-  public void unsetMoveOnly() {
-    __isset_bit_vector.clear(__MOVEONLY_ISSET_ID);
-  }
-
-  // Returns true if field moveOnly is set (has been assigned a value) and false otherwise
-  public boolean isSetMoveOnly() {
-    return __isset_bit_vector.get(__MOVEONLY_ISSET_ID);
-  }
-
-  public void setMoveOnlyIsSet(boolean __value) {
-    __isset_bit_vector.set(__MOVEONLY_ISSET_ID, __value);
-  }
-
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case NAME:
@@ -462,14 +405,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
       }
       break;
 
-    case MOVEONLY:
-      if (__value == null) {
-        unsetMoveOnly();
-      } else {
-        setMoveOnly((Boolean)__value);
-      }
-      break;
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -488,9 +423,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
 
     case EXTRANAMESPACE:
       return getExtraNamespace();
-
-    case MOVEONLY:
-      return new Boolean(isMoveOnly());
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -515,14 +447,12 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
 
     if (!TBaseHelper.equalsNobinary(this.isSetExtraNamespace(), that.isSetExtraNamespace(), this.extraNamespace, that.extraNamespace)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.moveOnly, that.moveOnly)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {name, adaptedType, underlyingName, extraNamespace, moveOnly});
+    return Arrays.deepHashCode(new Object[] {name, adaptedType, underlyingName, extraNamespace});
   }
 
   @Override
@@ -569,14 +499,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetMoveOnly()).compareTo(other.isSetMoveOnly());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(moveOnly, other.moveOnly);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     return 0;
   }
 
@@ -619,14 +541,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case MOVEONLY:
-          if (__field.type == TType.BOOL) {
-            this.moveOnly = iprot.readBool();
-            setMoveOnlyIsSet(true);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -664,9 +578,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
       oprot.writeString(this.extraNamespace);
       oprot.writeFieldEnd();
     }
-    oprot.writeFieldBegin(MOVE_ONLY_FIELD_DESC);
-    oprot.writeBool(this.moveOnly);
-    oprot.writeFieldEnd();
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -729,13 +640,6 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     } else {
       sb.append(TBaseHelper.toString(this.getExtraNamespace(), indent + 1, prettyPrint));
     }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("moveOnly");
-    sb.append(space);
-    sb.append(":").append(space);
-    sb.append(TBaseHelper.toString(this.isMoveOnly(), indent + 1, prettyPrint));
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
     sb.append(")");

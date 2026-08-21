@@ -81,22 +81,6 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
-
-        @ThriftMethod(value = "adaptedTypes")
-        ListenableFuture<test.fixtures.adapter.HeapAllocated> adaptedTypes(
-            @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg);
-
-        default ListenableFuture<test.fixtures.adapter.HeapAllocated> adaptedTypes(
-            @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg,
-            RpcOptions rpcOptions) {
-            throw new UnsupportedOperationException();
-        }
-
-        default ListenableFuture<ResponseWrapper<test.fixtures.adapter.HeapAllocated>> adaptedTypesWrapper(
-            @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg,
-            RpcOptions rpcOptions) {
-            throw new UnsupportedOperationException();
-        }
     }
     @java.lang.Override void close();
 
@@ -109,22 +93,6 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
     }
 
     default ResponseWrapper<test.fixtures.adapter.CountingStruct> countWrapper(
-        RpcOptions rpcOptions) throws org.apache.thrift.TException {
-        throw new UnsupportedOperationException();
-    }
-
-    @ThriftMethod(value = "adaptedTypes")
-    test.fixtures.adapter.HeapAllocated adaptedTypes(
-        @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg) throws org.apache.thrift.TException;
-
-    default test.fixtures.adapter.HeapAllocated adaptedTypes(
-        @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg,
-        RpcOptions rpcOptions) throws org.apache.thrift.TException {
-        throw new UnsupportedOperationException();
-    }
-
-    default ResponseWrapper<test.fixtures.adapter.HeapAllocated> adaptedTypesWrapper(
-        @com.facebook.swift.codec.ThriftField(value=1, name="arg", requiredness=Requiredness.NONE) final test.fixtures.adapter.HeapAllocated arg,
         RpcOptions rpcOptions) throws org.apache.thrift.TException {
         throw new UnsupportedOperationException();
     }
@@ -157,17 +125,6 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         }
 
         default reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.adapter.CountingStruct>> countWrapper(RpcOptions rpcOptions) {
-            throw new UnsupportedOperationException();
-        }
-
-        @ThriftMethod(value = "adaptedTypes")
-        reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg);
-
-        default reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> adaptedTypes(final test.fixtures.adapter.HeapAllocated arg, RpcOptions rpcOptions) {
-            throw new UnsupportedOperationException();
-        }
-
-        default reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.adapter.HeapAllocated>> adaptedTypesWrapper(final test.fixtures.adapter.HeapAllocated arg, RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 

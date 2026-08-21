@@ -16,11 +16,11 @@ ERROR: File "enum_hint.php", line 17, characters 10-11:
 Invalid return type (Typing[4110])
   File "enum_hint.php", line 16, characters 49-51:
   Expected `int`
-  File "BuiltinEnum.hhi", line 77, characters 44-44:
+  File "BuiltinEnum.hhi", line 78, characters 44-44:
     via this generic `T`
   File "enum_hint.php", line 16, characters 24-29:
   But got `arraykey`
-  File "BuiltinEnum.hhi", line 77, characters 44-44:
+  File "BuiltinEnum.hhi", line 78, characters 44-44:
     via this generic `T`
   File "enum_hint.php", line 16, characters 24-29:
     by the definition of `Opaque` arising from an implicit `as arraykey` constraint on this type

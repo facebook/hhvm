@@ -13,6 +13,7 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
+<<file: __EnableUnstableFeatures('class_type')>>
 namespace HH {
 
   /**
@@ -76,7 +77,7 @@ namespace HH {
 
   type enumname<T> = classname<BuiltinEnum<T>>;
 
-  const enumname<arraykey> BUILTIN_ENUM;
+  const enum<arraykey> BUILTIN_ENUM;
 
   /**
    * Wrapper for enum class

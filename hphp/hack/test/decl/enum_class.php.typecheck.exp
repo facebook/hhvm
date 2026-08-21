@@ -8,7 +8,7 @@ Wrong type hint (Typing[4338])
   But got `arraykey`
   File "enum_class.php", line 12, characters 3-10:
     by the definition of `HH\MemberOf`
-  File "BuiltinEnum.hhi", line 84, characters 44-48:
+  File "BuiltinEnum.hhi", line 85, characters 44-48:
     via this generic `TType`
 ERROR: File "enum_class.php", line 8, characters 7-7:
 Wrong type hint (Typing[4338])
@@ -18,7 +18,7 @@ Wrong type hint (Typing[4338])
   But got `arraykey`
   File "enum_class.php", line 12, characters 3-10:
     by the definition of `HH\MemberOf`
-  File "BuiltinEnum.hhi", line 84, characters 44-48:
+  File "BuiltinEnum.hhi", line 85, characters 44-48:
     via this generic `TType`
 ERROR: File "enum_class.php", line 12, characters 12-12:
 Constant does not match the type of the enum it is in (Typing[4328])

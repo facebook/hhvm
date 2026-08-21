@@ -2,8 +2,8 @@
 
 namespace HH {
 
-const string BUILTIN_ENUM = "HH\\BuiltinEnum";
-const string BUILTIN_ENUM_CLASS = "HH\\BuiltinEnumClass";
+const enum<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
+const class<BuiltinEnumClass<mixed>> BUILTIN_ENUM_CLASS = BuiltinEnumClass::class;
 
 /**
  * BuiltinEnum contains the utility methods provided by enums.

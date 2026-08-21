@@ -1337,7 +1337,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 51,
+                                "line": 52,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },
@@ -1358,7 +1358,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 34,
+                                "line": 35,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },
@@ -1379,7 +1379,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 43,
+                                "line": 44,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },
@@ -1400,7 +1400,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 58,
+                                "line": 59,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },
@@ -1421,7 +1421,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 72,
+                                "line": 73,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },
@@ -1442,7 +1442,7 @@ class TestLsp(LspTestBase):
                             "data": {
                                 "fullname": "assert",
                                 "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
-                                "line": 65,
+                                "line": 66,
                                 "char": 34,
                                 "base_class": "\\Elsa",
                             },

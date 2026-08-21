@@ -14,7 +14,7 @@ namespace NS;
 function foo(mixed $in): void {
   /* HH_FIXME[4016] isset() is unsafe, but still defined */
   \var_dump(isset($in));
-  /* HH_FIXME[4135] unsset() is also banned */
-  unset($in);
+  $d = dict[];
+  unset($d['key']);
   exit(0);
 }

@@ -35,15 +35,15 @@ Invalid assignment to an `inout` parameter (Typing[4337])
   File "soundness.hhi", line 32, characters 3-5:
     via this generic `Tin`
 ERROR: File "pseudofunction_etc.php", line 6, characters 3-18:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
 ERROR: File "pseudofunction_etc.php", line 8, characters 3-13:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
 ERROR: File "pseudofunction_etc.php", line 9, characters 3-13:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
 ERROR: File "pseudofunction_etc.php", line 10, characters 3-17:

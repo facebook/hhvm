@@ -1,6 +1,6 @@
 Errors:
   [16:3-12] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode
-  [17:3-13] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing
+  [17:3-13] The argument to `unset` must be an array access.
 [(Class
     { c_span = [3:1-6:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

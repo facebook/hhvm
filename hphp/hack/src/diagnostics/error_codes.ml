@@ -816,6 +816,7 @@ module Typing = struct
     | StrictIsolationExcludedPathAccess [@value 4518]
     | EnumDuplicateValue [@value 4519]
     | EnumUncheckableValue [@value 4520]
+    | InvalidUnsetTarget [@value 4521]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

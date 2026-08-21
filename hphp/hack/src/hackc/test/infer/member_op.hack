@@ -229,20 +229,6 @@ function mop_basel_unset_ei(dict<int, int> $a): void {
   unset($a[5]);
 }
 
-// TEST-CHECK-BAL: define $root.mop_basel_unset_pt
-// CHECK: define $root.mop_basel_unset_pt($this: *void, $a: *C) : *void {
-// CHECK: #b0:
-// CHECK: // .column 1
-// CHECK:   n0: *HackMixed = load &$a
-// CHECK:   store n0.?.foo <- null: *HackMixed
-// CHECK: // .column 2
-// CHECK:   ret null
-// CHECK: }
-function mop_basel_unset_pt(C $a): void {
-  /* HH_FIXME[4135] Allow unset */
-  unset($a->foo);
-}
-
 // TEST-CHECK-BAL: define $root.mop_basec_querym_cget(
 // CHECK: define $root.mop_basec_querym_cget($this: *void, $d: .notnull *HackDict) : .notnull *HackInt {
 // CHECK: #b0:

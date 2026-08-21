@@ -4288,6 +4288,12 @@ end = struct
       ~reasons
       ()
 
+  let invalid_unset_target pos =
+    create
+      ~code:Error_code.InvalidUnsetTarget
+      ~claim:(lazy (pos, "The argument to `unset` must be an array access."))
+      ()
+
   let unpacking_disallowed_builtin_function pos name =
     create
       ~code:Error_code.UnpackingDisallowed
@@ -5099,6 +5105,7 @@ end = struct
     | Invalid_substring { pos; ty_name } -> invalid_substring pos ty_name
     | Unset_nonidx_in_strict { pos; reason } ->
       unset_nonidx_in_strict pos reason
+    | Invalid_unset_target pos -> invalid_unset_target pos
     | Nullable_cast { pos; ty_pos; ty_name } -> nullable_cast pos ty_pos ty_name
     | Hh_expect { pos; equivalent } -> hh_expect pos equivalent
     | Null_member { pos; obj_pos_opt; ctxt; kind; member_name; reason } ->

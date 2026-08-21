@@ -6168,6 +6168,18 @@ end = struct
             @@ Some
                  Typing_error.(
                    primary @@ Primary.Unset_nonidx_in_strict { pos = p; reason })
+          | ([Aast_defs.Anormal (_, _, Array_get (_, None))], None) ->
+            let ty_err =
+              Typing_error.(
+                primary
+                @@ Primary.Unset_nonidx_in_strict { pos = p; reason = lazy [] })
+            in
+            (env, Some ty_err)
+          | ([Aast_defs.Anormal _], None) ->
+            let ty_err =
+              Typing_error.(primary @@ Primary.Invalid_unset_target p)
+            in
+            (env, Some ty_err)
           | _ ->
             let ty_err =
               Typing_error.(

@@ -140,6 +140,7 @@ void HTTPServer::start(
     }
     return;
   }
+  loopKeepAlive_ = folly::getKeepAliveToken(eventBase_);
   run(std::move(onSuccess));
   // Blocks until all IO Threads have terminated and joined
   threadPool.stop();
@@ -355,8 +356,7 @@ void HTTPServer::drain() {
   XLOG(DBG4) << __func__;
   if (state_ == State::RUNNING) {
     state_ = State::DRAINING;
-    eventBase_.runImmediatelyOrRunInEventBaseThread(
-        [this] { globalDrainImpl(); });
+    eventBase_.runImmediatelyOrRunInEventBaseThread([this] { teardownImpl(); });
     for (auto& it : acceptors_) {
       for (auto& acceptor : it.second) {
         if (auto evb = acceptor.getEventBaseKeepalive()) {
@@ -366,9 +366,14 @@ void HTTPServer::drain() {
           // drain/forceStop
       }
     }
-    eventBase_.runImmediatelyOrRunInEventBaseThread(
-        [this] { unregisterSignalHandlers(); });
   }
+}
+
+void HTTPServer::teardownImpl() {
+  XLOG(DBG4) << __func__;
+  globalDrainImpl();
+  unregisterSignalHandlers();
+  loopKeepAlive_.reset();
 }
 
 void HTTPServer::globalDrainImpl() {
@@ -402,15 +407,7 @@ void HTTPServer::forceStop() {
   auto state = state_.load();
   if (state == State::RUNNING) {
     state_ = state = State::DRAINING;
-    folly::ExecutorKeepAlive keepAlive(&eventBase_);
-    eventBase_.runImmediatelyOrRunInEventBaseThread([this] {
-      for (const auto& serverSocket : serverSockets_) {
-        XCHECK(serverSocket);
-        serverSocket->stopAccepting();
-      }
-    });
-    eventBase_.runImmediatelyOrRunInEventBaseThread(
-        [this] { unregisterSignalHandlers(); });
+    eventBase_.runImmediatelyOrRunInEventBaseThread([this] { teardownImpl(); });
   }
   if (state == State::DRAINING) {
     if (quicServer_) {

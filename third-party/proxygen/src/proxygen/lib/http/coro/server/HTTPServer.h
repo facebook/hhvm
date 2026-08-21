@@ -268,6 +268,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     XLOG(ERR) << "Failed to accept QUIC connection: " << error.message;
   }
   void run(std::function<void()> onSuccess);
+  void teardownImpl();
   void globalDrainImpl();
   void unregisterSignalHandlers();
   void drainImpl(HTTPCoroAcceptor& acceptor);
@@ -276,6 +277,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   std::shared_ptr<HTTPHandler> handler_;
   folly::F14FastSet<Observer*> observers_;
   folly::EventBase eventBase_;
+  folly::Executor::KeepAlive<folly::EventBase> loopKeepAlive_;
   std::vector<folly::AsyncServerSocket::UniquePtr> serverSockets_;
   bool setReusePortSocketOption_{false};
   folly::F14NodeMap<folly::EventBase*, std::list<HTTPCoroAcceptor>> acceptors_;

@@ -66,6 +66,10 @@ class cpp_name_resolver {
   // Returns C++ type name for the given Thrift field.
   const std::string& get_native_type(
       const t_field& field, const t_structured& parent);
+  // Like get_native_type(field, parent) but namespace-qualifies a field-level
+  // @cpp.Adapter's enclosing-struct parameter (see get_qualified_storage_type).
+  const std::string& get_qualified_native_type(
+      const t_field& field, const t_structured& parent);
 
   const std::string& get_native_type(const t_const& cnst);
 
@@ -158,6 +162,12 @@ class cpp_name_resolver {
   const std::string& get_storage_type(
       const t_field& field, const t_structured& parent);
 
+  // Like get_storage_type, but namespace-qualifies a field-level @cpp.Adapter's
+  // enclosing-struct parameter so the storage type is valid when emitted
+  // outside the struct's own namespace.
+  const std::string& get_qualified_storage_type(
+      const t_field& field, const t_structured& parent);
+
   // Returns the C++ reference type of the field.
   const std::string& get_reference_type(const t_field& node);
 
@@ -195,6 +205,8 @@ class cpp_name_resolver {
   std::unordered_map<const t_stream*, std::string> stream_cache_;
   std::unordered_map<const t_const*, std::string> const_cache_;
   std::unordered_map<const t_field*, std::string> field_type_cache_;
+  std::unordered_map<const t_field*, std::string> qualified_field_type_cache_;
+  std::unordered_map<const t_field*, std::string> qualified_storage_type_cache_;
   std::unordered_map<const t_type*, std::string> standard_type_cache_;
   std::unordered_map<const t_field*, std::string> field_standard_type_cache_;
   std::unordered_map<const t_type*, std::string> underlying_type_cache_;
@@ -240,9 +252,16 @@ class cpp_name_resolver {
       int16_t field_id,
       const t_type& type,
       const t_structured& parent,
-      const std::string* adapter) {
-    return gen_adapted_type(adapter, field_id, gen_type(type), parent);
+      const std::string* adapter,
+      bool qualify_parent = false) {
+    return gen_adapted_type(
+        adapter, field_id, gen_type(type), parent, qualify_parent);
   }
+  // Shared body behind get_native_type / get_qualified_native_type. When
+  // qualify_parent is set, a field-level @cpp.Adapter's enclosing-struct param
+  // is namespace-qualified.
+  std::string gen_field_native_type(
+      const t_field& field, const t_structured& parent, bool qualify_parent);
   std::string gen_standard_type(const t_type& node);
   std::string gen_standard_type(const t_type& node, type_resolve_fn resolve_fn);
   std::string gen_standard_type(const t_field& node);
@@ -254,11 +273,18 @@ class cpp_name_resolver {
       const std::string* templte = nullptr);
   static std::string gen_adapted_type(
       const std::string* adapter, const std::string& standard_type);
-  static std::string gen_adapted_type(
+
+  // Generates the storage type for a field-level @cpp.Adapter
+  // (adapted_field_t<Adapter, FieldId, ThriftType, EnclosingStruct>). The
+  // enclosing-struct parameter is unqualified by default (readable where the
+  // type is emitted inside the struct's own namespace); set qualify_parent to
+  // namespace-qualify it for emission elsewhere.
+  std::string gen_adapted_type(
       const std::string* adapter,
       int16_t field_id,
       const std::string& standard_type,
-      const t_structured& parent);
+      const t_structured& parent,
+      bool qualify_parent = false);
 
   std::string gen_thrift_type_tag(const t_type&);
   // TODO(dokwon): Remove ignored_cpp_type once cpp.type lowering migration is

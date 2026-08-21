@@ -66,6 +66,25 @@ std::string gen_template_type(
 
 const std::string& cpp_name_resolver::get_native_type(
     const t_field& field, const t_structured& parent) {
+  return detail::get_or_gen(field_type_cache_, &field, [&]() {
+    return gen_field_native_type(field, parent, /*qualify_parent=*/false);
+  });
+}
+
+const std::string& cpp_name_resolver::get_qualified_native_type(
+    const t_field& field, const t_structured& parent) {
+  // Only a field-level @cpp.Adapter names its enclosing struct; every other
+  // field resolves identically to get_native_type.
+  if (field.find_structured_annotation_or_null(kCppAdapterUri) == nullptr) {
+    return get_native_type(field, parent);
+  }
+  return detail::get_or_gen(qualified_field_type_cache_, &field, [&]() {
+    return gen_field_native_type(field, parent, /*qualify_parent=*/true);
+  });
+}
+
+std::string cpp_name_resolver::gen_field_native_type(
+    const t_field& field, const t_structured& parent, bool qualify_parent) {
   const t_type& type = *field.type();
 
   // Handle @cpp.Adapter on field.
@@ -78,32 +97,36 @@ const std::string& cpp_name_resolver::get_native_type(
     }
     const auto& adapter_on_field =
         annotation->get_value_from_structured_annotation("name").get_string();
-    return detail::get_or_gen(field_type_cache_, &field, [&]() {
-      // When the field also has @cpp.Type, use that as the base type for the
-      // adapter wrapping instead of resolving from the type node.
-      if (auto* cpp_type_annot =
-              field.find_structured_annotation_or_null(kCppTypeUri)) {
-        if (auto* name =
-                cpp_type_annot->get_value_from_structured_annotation_or_null(
-                    "name")) {
-          return gen_adapted_type(
-              &adapter_on_field, field.id(), name->get_string(), parent);
-        }
-        if (auto* tmpl =
-                cpp_type_annot->get_value_from_structured_annotation_or_null(
-                    "template")) {
-          return gen_adapted_type(
-              &adapter_on_field,
-              field.id(),
-              gen_container_type(
-                  type.get_true_type()->as<t_container>(),
-                  &cpp_name_resolver::get_native_type,
-                  &tmpl->get_string()),
-              parent);
-        }
+    // When the field also has @cpp.Type, use that as the base type for the
+    // adapter wrapping instead of resolving from the type node.
+    if (auto* cpp_type_annot =
+            field.find_structured_annotation_or_null(kCppTypeUri)) {
+      if (auto* name =
+              cpp_type_annot->get_value_from_structured_annotation_or_null(
+                  "name")) {
+        return gen_adapted_type(
+            &adapter_on_field,
+            field.id(),
+            name->get_string(),
+            parent,
+            qualify_parent);
       }
-      return gen_field_type(field.id(), type, parent, &adapter_on_field);
-    });
+      if (auto* tmpl =
+              cpp_type_annot->get_value_from_structured_annotation_or_null(
+                  "template")) {
+        return gen_adapted_type(
+            &adapter_on_field,
+            field.id(),
+            gen_container_type(
+                type.get_true_type()->as<t_container>(),
+                &cpp_name_resolver::get_native_type,
+                &tmpl->get_string()),
+            parent,
+            qualify_parent);
+      }
+    }
+    return gen_field_type(
+        field.id(), type, parent, &adapter_on_field, qualify_parent);
   }
 
   // Handle @cpp.Type on field.
@@ -111,17 +134,14 @@ const std::string& cpp_name_resolver::get_native_type(
           field.find_structured_annotation_or_null(kCppTypeUri)) {
     if (auto name =
             annotation->get_value_from_structured_annotation_or_null("name")) {
-      return detail::get_or_gen(
-          field_type_cache_, &field, [&]() { return name->get_string(); });
+      return name->get_string();
     } else {
       auto& tmplate =
           annotation->get_value_from_structured_annotation("template");
-      return detail::get_or_gen(field_type_cache_, &field, [&]() {
-        return gen_container_type(
-            type.get_true_type()->as<t_container>(),
-            &cpp_name_resolver::get_native_type,
-            &tmplate.get_string());
-      });
+      return gen_container_type(
+          type.get_true_type()->as<t_container>(),
+          &cpp_name_resolver::get_native_type,
+          &tmplate.get_string());
     }
   }
 
@@ -318,6 +338,18 @@ const std::string& cpp_name_resolver::get_storage_type(
     return native_type;
   }
   return detail::get_or_gen(storage_type_cache_, &field, [&]() {
+    return gen_storage_type(native_type, ref_type);
+  });
+}
+
+const std::string& cpp_name_resolver::get_qualified_storage_type(
+    const t_field& field, const t_structured& parent) {
+  auto ref_type = gen::cpp::find_ref_type(field);
+  const std::string& native_type = get_qualified_native_type(field, parent);
+  if (ref_type == cpp_reference_type::none) {
+    return native_type;
+  }
+  return detail::get_or_gen(qualified_storage_type_cache_, &field, [&]() {
     return gen_storage_type(native_type, ref_type);
   });
 }
@@ -609,17 +641,18 @@ std::string cpp_name_resolver::gen_adapted_type(
     const std::string* adapter,
     int16_t field_id,
     const std::string& standard_type,
-    const t_structured& parent) {
-  return adapter == nullptr
-      ? standard_type
-      : detail::gen_template_type(
-            "::apache::thrift::adapt_detail::adapted_field_t",
-            {
-                *adapter,
-                std::to_string(field_id),
-                standard_type,
-                get_underlying_name(parent),
-            });
+    const t_structured& parent,
+    bool qualify_parent) {
+  if (adapter == nullptr) {
+    return standard_type;
+  }
+  return detail::gen_template_type(
+      "::apache::thrift::adapt_detail::adapted_field_t",
+      {*adapter,
+       std::to_string(field_id),
+       standard_type,
+       qualify_parent ? get_underlying_namespaced_name(parent)
+                      : get_underlying_name(parent)});
 }
 
 std::string cpp_name_resolver::gen_type_tag(

@@ -37,11 +37,11 @@ FROZEN_EXCLUDE_TYPE({{def.cpp_fullname}})
       {{#if (not def.union?)}}
 FROZEN_TYPE({{def.cpp_fullname}},{{!
 }}{{#each def.fields as |field|}}
-  FROZEN_FIELD{{#partial module_layouts.field_suffix field=field}}({{field.cpp_name}}, {{field.id}}, {{field.cpp_storage_type}}){{!
+  FROZEN_FIELD{{#partial module_layouts.field_suffix field=field}}({{field.cpp_name}}, {{field.id}}, {{field.cpp_frozen2_storage_type}}){{!
 }}{{/each}}
   FROZEN_VIEW({{!
 }}{{#each def.fields as |field|}}
-    FROZEN_VIEW_FIELD{{#partial module_layouts.field_suffix field=field}}({{field.cpp_name}}, {{field.cpp_storage_type}}){{!
+    FROZEN_VIEW_FIELD{{#partial module_layouts.field_suffix field=field}}({{field.cpp_name}}, {{field.cpp_frozen2_storage_type}}){{!
 }}{{/each}})
   FROZEN_SAVE_INLINE({{!
 }}{{#each def.fields as |field|}}
@@ -56,7 +56,7 @@ FROZEN_TYPE({{def.cpp_fullname}},{{!
 }}
   FROZEN_FIELD(fbthrift_type_, 0, {{def.cpp_fullname}}::Type){{!
 }}{{#each def.fields as |field|}}
-  FROZEN_FIELD{{#partial module_layouts.frozen2_union_field_suffix field=field}}({{field.cpp_name}}, {{field.id}}, {{field.cpp_storage_type}}){{!
+  FROZEN_FIELD{{#partial module_layouts.frozen2_union_field_suffix field=field}}({{field.cpp_name}}, {{field.id}}, {{field.cpp_frozen2_storage_type}}){{!
 }}{{/each}}
   struct View : public ViewBase<View, LayoutSelf, {{def.cpp_fullname}}> {
     {{def.cpp_fullname}}::Type fbthrift_type_;

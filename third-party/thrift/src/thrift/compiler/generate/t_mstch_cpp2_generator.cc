@@ -1741,6 +1741,15 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
       assert(parent != nullptr);
       return cpp_context_->resolver().get_storage_type(field, *parent);
     });
+    // Storage type for frozen2 codegen (*_layouts.h): namespace-qualifies a
+    // field-level @cpp.Adapter's enclosing-struct parameter so it resolves
+    // under namespace apache::thrift::frozen.
+    def.property("cpp_frozen2_storage_type", [this](const t_field& field) {
+      const t_structured* parent = context().get_field_parent(&field);
+      assert(parent != nullptr);
+      return cpp_context_->resolver().get_qualified_storage_type(
+          field, *parent);
+    });
     def.property("cpp_standard_type", [this](const t_field& field) {
       return cpp_context_->resolver().get_standard_type(field);
     });

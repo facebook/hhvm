@@ -83,6 +83,10 @@ class CppNameResolverTest : public ::testing::Test {
     return resolver_.get_storage_type(node, struct_);
   }
 
+  const std::string& get_qualified_storage_type(const t_field& node) {
+    return resolver_.get_qualified_storage_type(node, struct_);
+  }
+
   const std::string& get_reference_type(const t_field& node) {
     return resolver_.get_reference_type(node);
   }
@@ -570,6 +574,40 @@ TEST_F(CppNameResolverTest, adapted_field_type) {
       get_storage_type(field),
       "::apache::thrift::adapt_detail::adapted_field_t<"
       "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
+}
+
+TEST_F(CppNameResolverTest, adapted_field_qualified_storage_type) {
+  // get_qualified_storage_type namespace-qualifies the enclosing-struct
+  // parameter so the storage type is valid when emitted outside the struct's
+  // own namespace, while the default (get_storage_type) keeps the readable
+  // unqualified name.
+  const auto& i64 = t_primitive_type::t_i64();
+  auto cpp_ref = gen::cpp_ref_builder(program_);
+  auto adapter = gen::adapter_builder(program_, "cpp");
+
+  auto field = t_field(i64, "n", 42);
+  field.add_structured_annotation(adapter.make("MyAdapter"));
+  EXPECT_EQ(
+      get_storage_type(field),
+      "::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
+  EXPECT_EQ(
+      get_qualified_storage_type(field),
+      "::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ::path::to::ThriftStruct>");
+
+  // Reference wrapping is applied around the qualified adapted type too.
+  auto unique_field = t_field(i64, "n", 42);
+  unique_field.add_structured_annotation(adapter.make("MyAdapter"));
+  unique_field.add_structured_annotation(cpp_ref.unique());
+  EXPECT_EQ(
+      get_qualified_storage_type(unique_field),
+      "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ::path::to::ThriftStruct>>");
+
+  // A field with no adapter resolves identically to get_storage_type.
+  auto plain_field = t_field(i64, "n", 42);
+  EXPECT_EQ(get_qualified_storage_type(plain_field), "::std::int64_t");
 }
 
 TEST_F(CppNameResolverTest, adapted_field_storage_type) {

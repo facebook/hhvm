@@ -13,18 +13,18 @@ stream state for inbound requests and outbound responses.
 
 | Handler | Purpose |
 |---------|---------|
-| `RocketServerMessageMarshalHandler` | Wraps inbound `ParsedFrame` into `RocketRequestMessage`; unwraps outbound `RocketResponseMessage` into `ComposedFrame`. Wire bytes are handled by the shared `frame::handler::FrameCodecHandler` upstream. |
+| `RocketServerMessageMarshalHandler` | Wraps inbound requests and unwraps outbound responses at the frame boundary. |
 | `RocketServerSetupFrameHandler` | Validates and consumes the RSocket SETUP frame on connection establishment |
-| `RocketServerStreamStateHandler` | Manages stream IDs and request/response routing for client-initiated streams; consumes connection-level frames |
-| `RocketServerRequestResponseHandler` | Duplex handler for REQUEST_RESPONSE interactions (inbound request tracking + outbound response serialization) |
+| `RocketServerStreamStateHandler` | Manages stream IDs and request/response routing; consumes connection-level frames |
+| `RocketServerRequestResponseHandler` | Tracks REQUEST_RESPONSE streams and serializes responses. |
 
 ---
 
 ## Pipeline Architecture
 
 ```
-Inbound:  Transport -> FrameHandler -> FrameCodecHandler -> FrameDefragmentationHandler -> RocketServerMessageMarshalHandler -> RocketServerSetupFrameHandler -> RocketServerRequestResponseHandler -> RocketServerStreamStateHandler -> App
-Outbound: Transport <- FrameHandler <- FrameCodecHandler <- FrameFragmentationHandler <- RocketServerMessageMarshalHandler <- RocketServerSetupFrameHandler <- RocketServerRequestResponseHandler <- RocketServerStreamStateHandler <- App
+Inbound:  Transport -> [Framing handlers] -> [Rocket server handlers] -> App
+Outbound: Transport <- [Framing handlers] <- [Rocket server handlers] <- App
 ```
 
 Note: `frame::handler::FrameCodecHandler` parses raw IOBuf into ParsedFrame and
@@ -59,7 +59,7 @@ It uses a two-phase design:
    keepalive, lifetime, lease) for access by other components
 3. **Error Reporting**: Sends ERROR frames with appropriate error codes for
    invalid or unsupported setups
-4. **Connection Termination**: Closes the connection after sending setup errors,
+4. **Connection Termination**: Flushes setup errors before closing the connection,
    per RSocket spec
 5. **SETUP Consumption**: Consumes valid SETUP frames (does not forward them
    downstream), since SETUP is a connection-level protocol frame
@@ -136,7 +136,7 @@ RocketServerSetupFrameHandler handler;
 ┌─────────────────────────────────────────┐
 │ RocketServerSetupFrameHandler::sendError      │
 │ 1. Serialize ERROR frame                │
-│ 2. Fire write to send ERROR to client   │
+│ 2. Write ERROR, then fire FlushWrites   │
 │ 3. Close the connection                 │
 └─────────────────────────────────────────┘
 ```
@@ -302,7 +302,7 @@ properly serialize outbound response frames.
 ### Pipeline Position
 
 ```
-App <-> RocketServerStreamStateHandler <-> RocketServerRequestResponseHandler <-> RocketServerSetupFrameHandler <-> FrameHandler <-> Transport
+App <-> StreamStateHandler <-> RequestResponseHandler <-> SetupFrameHandler <-> FrameHandler <-> Transport
 ```
 
 The handler receives `ParsedFrame` from `RocketServerSetupFrameHandler` on the inbound

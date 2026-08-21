@@ -92,6 +92,18 @@ struct WtStreamManager {
   struct EgressCallback {
     virtual ~EgressCallback() = default;
     virtual void eventsAvailable() noexcept = 0;
+    /**
+     * Invoked when the application reprioritizes an egress stream. The
+     * manager's own queue has already been updated; this is only for transports
+     * that also schedule wt streams somewhere else -- quic ranks them against
+     * wt datagram flows in the connection write queue. For the capsule
+     * transports the manager's queue is the schedule, so the default no-op is
+     * correct.
+     */
+    virtual void onStreamPriority(
+        uint64_t /*streamId*/,
+        quic::PriorityQueue::Priority /*priority*/) noexcept {
+    }
   };
   /**
    * IngressCallback::onNewPeerStream is invoked whenever a new peer stream has

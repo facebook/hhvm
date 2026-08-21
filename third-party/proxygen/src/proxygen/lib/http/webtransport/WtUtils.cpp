@@ -475,7 +475,10 @@ WtExpected<folly::Unit>::Type WtSessionBase::resetStream(
 
 WtExpected<folly::Unit>::Type WtSessionBase::setPriority(
     uint64_t streamId, quic::PriorityQueue::Priority priority) noexcept {
-  return folly::unit;
+  if (auto* wh = sm_.getBidiHandle(streamId).writeHandle) {
+    return wh->setPriority(priority);
+  }
+  return folly::makeUnexpected(WtErrCode::INVALID_STREAM_ID);
 }
 
 WtExpected<folly::Unit>::Type WtSessionBase::setPriorityQueue(

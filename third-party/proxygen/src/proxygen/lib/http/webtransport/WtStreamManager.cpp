@@ -93,6 +93,7 @@ struct WtStreamManager::Accessor {
                    uint32_t err,
                    uint64_t reliableSize) noexcept;
   void onStreamWritable(WriteHandle& wh) noexcept;
+  void onStreamPriority(WriteHandle& wh) noexcept;
   // invoked when write handle or read handle are done
   void done(WriteHandle& wh) noexcept;
   void done(ReadHandle& rh) noexcept;
@@ -290,6 +291,10 @@ void Accessor::resetStream(WriteHandle& wh,
 
 void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
   sm_.onStreamWritable(wh);
+}
+
+void Accessor::onStreamPriority(WriteHandle& wh) noexcept {
+  sm_.egressCb_.onStreamPriority(wh.getID(), wh.getPriority());
 }
 
 void Accessor::done(WriteHandle& wh) noexcept {
@@ -1085,6 +1090,7 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
   }
   StreamWriteHandle::setPriority(priority);
   smAccessor_.writableStreams().update(getID(), getPriority());
+  smAccessor_.onStreamPriority(*this);
   return folly::unit;
 }
 

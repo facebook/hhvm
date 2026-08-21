@@ -420,6 +420,72 @@ TEST_F(QuicWtSessionTest, SetPriority) {
   EXPECT_EQ(httpPriority->incremental, true);
 }
 
+// The priority must reach the QuicSocket, otherwise the stream sits at default
+// priority in the connection's write queue and is never compared against the
+// other streams (or the wt datagram flows) sharing it.
+TEST_F(QuicWtSessionTest, SetPriorityPropagatesToQuicSocket) {
+  auto handle = session_->createUniStream();
+  ASSERT_TRUE(handle.hasValue());
+  auto id = handle.value()->getID();
+
+  // deliberately every field differs from HTTPPriorityQueue's default
+  // (u=3, i=true, o=0), so this cannot pass on an unpropagated priority
+  quic::HTTPPriorityQueue::Priority priority(/*u=*/5,
+                                             /*i=*/false,
+                                             /*o=*/42);
+  socketDriver_.expectSetPriority(id, priority);
+
+  EXPECT_TRUE(session_->setPriority(id, priority).hasValue());
+  // the local egress schedule is updated too
+  EXPECT_EQ(quic::HTTPPriorityQueue::Priority(handle.value()->getPriority()),
+            priority);
+}
+
+// Applications reprioritize through the write handle they already hold rather
+// than by stream id, so this is the path that has to reach the socket.
+TEST_F(QuicWtSessionTest, WriteHandleSetPriorityPropagatesToQuicSocket) {
+  auto handle = session_->createUniStream();
+  ASSERT_TRUE(handle.hasValue());
+  auto id = handle.value()->getID();
+
+  quic::HTTPPriorityQueue::Priority priority(/*u=*/5,
+                                             /*i=*/false,
+                                             /*o=*/42);
+  socketDriver_.expectSetPriority(id, priority);
+
+  EXPECT_TRUE(handle.value()->setPriority(priority).hasValue());
+  EXPECT_EQ(quic::HTTPPriorityQueue::Priority(handle.value()->getPriority()),
+            priority);
+}
+
+TEST_F(QuicWtSessionTest, SetPriorityUnknownStreamId) {
+  // no stream has been created, so there is nothing to prioritize
+  constexpr uint64_t kUnknownStreamId = 4;
+  EXPECT_CALL(*socketDriver_.getSocket(), setStreamPriority(_, _)).Times(0);
+
+  auto res = session_->setPriority(kUnknownStreamId,
+                                   quic::HTTPPriorityQueue::Priority(5, false));
+  ASSERT_TRUE(res.hasError());
+  EXPECT_EQ(res.error(), WebTransport::ErrorCode::INVALID_STREAM_ID);
+}
+
+// The socket half is best effort -- a transport that no longer has the stream
+// does not make the call a failure, and the local schedule still applies.
+TEST_F(QuicWtSessionTest, SetPriorityQuicSocketErrorIgnored) {
+  auto handle = session_->createUniStream();
+  ASSERT_TRUE(handle.hasValue());
+  auto id = handle.value()->getID();
+
+  quic::HTTPPriorityQueue::Priority priority(/*u=*/5, /*i=*/false, /*o=*/42);
+  EXPECT_CALL(*socketDriver_.getSocket(), setStreamPriority(id, _))
+      .WillOnce(Return(
+          quic::make_unexpected(quic::LocalErrorCode::STREAM_NOT_EXISTS)));
+
+  EXPECT_TRUE(session_->setPriority(id, priority).hasValue());
+  EXPECT_EQ(quic::HTTPPriorityQueue::Priority(handle.value()->getPriority()),
+            priority);
+}
+
 TEST_F(QuicWtSessionTest, AwaitWritable) {
   // Note: This test verifies basic functionality but doesn't test the blocking
   // scenario where awaitWritable returns a "not ready" future.
@@ -984,6 +1050,22 @@ TEST_F(H3WtSessionTest, CapsuleParseErrorClosesSession) {
   EXPECT_FALSE(connectStreamCb_.events.empty());
   EXPECT_TRUE(std::holds_alternative<detail::WtStreamManager::CloseSession>(
       connectStreamCb_.events.back()));
+}
+
+// H3WtSession shares the QuicSocket with the http/3 session, so its wt streams
+// have to be ranked in that shared write queue like any other quic stream.
+TEST_F(H3WtSessionTest, SetPriorityPropagatesToQuicSocket) {
+  socketDriver_.setMaxUniStreams(1);
+  auto handle = session_->createUniStream();
+  ASSERT_TRUE(handle.hasValue());
+  auto id = handle.value()->getID();
+
+  quic::HTTPPriorityQueue::Priority priority(/*u=*/5,
+                                             /*i=*/false,
+                                             /*o=*/42);
+  socketDriver_.expectSetPriority(id, priority);
+
+  EXPECT_TRUE(handle.value()->setPriority(priority).hasValue());
 }
 
 TEST_F(H3WtSessionTest, AcquireIngressStream) {

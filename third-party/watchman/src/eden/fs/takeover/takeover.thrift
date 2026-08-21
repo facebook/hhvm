@@ -37,6 +37,8 @@ struct SerializedInodeMapEntry {
   // string as a valid ID.
   6: optional string hash;
   7: i32 mode;
+  // EdenTimestamp persistent wire encoding.
+  8: optional ui64 lastFsRequestTime;
 }
 
 struct SerializedInodeMap {

@@ -545,65 +545,6 @@ struct adapter_serialized_size<
   }
 };
 
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, bool /*unused*/) {
-  return protocol.serializedSizeBool();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int8_t /*unused*/) {
-  return protocol.serializedSizeByte();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int16_t /*unused*/) {
-  return protocol.serializedSizeI16();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int32_t /*unused*/) {
-  return protocol.serializedSizeI32();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int64_t /*unused*/) {
-  return protocol.serializedSizeI64();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, double /*unused*/) {
-  return protocol.serializedSizeDouble();
-}
-template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, float /*unused*/) {
-  return protocol.serializedSizeFloat();
-}
-
-template <
-    bool ZeroCopy,
-    typename Tag,
-    typename Adapter,
-    typename AdaptedT,
-    typename Protocol,
-    typename FallbackF>
-struct adapter_serialized_size<
-    ZeroCopy,
-    Tag,
-    Adapter,
-    AdaptedT,
-    Protocol,
-    FallbackF,
-    std::enable_if_t<
-        !folly::is_detected_v<
-            serialized_size_type,
-            Tag,
-            Adapter,
-            AdaptedT,
-            Protocol> &&
-        std::is_arithmetic_v<decltype(Adapter::toThrift(
-            std::declval<AdaptedT&>()))>>> {
-  uint32_t operator()(
-      Protocol& prot, const AdaptedT& /*unused*/, FallbackF /*unused*/) {
-    return serializedSizeFixed(
-        prot, decltype(Adapter::toThrift(std::declval<AdaptedT&>()))(0));
-  }
-};
-
 template <
     bool ZeroCopy,
     typename Tag,

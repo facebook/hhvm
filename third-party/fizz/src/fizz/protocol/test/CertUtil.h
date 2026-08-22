@@ -36,6 +36,7 @@ void throwIfNull(const A& a, const std::string& msg) {
 struct CreateCertOptions {
   std::string cn;
   std::vector<std::string> sans;
+  std::vector<std::string> ipSans = {};
   bool ca{false};
   CertAndKey* issuer{nullptr};
   std::optional<std::chrono::system_clock::time_point> notBefore;
@@ -97,6 +98,7 @@ inline void generateRSAKey(folly::ssl::EvpPkeyUniquePtr& pk) {
 inline CertAndKey createCert(CreateCertOptions options) {
   const auto& cn = options.cn;
   const auto& sans = options.sans;
+  const auto& ipSans = options.ipSans;
   bool ca = options.ca;
   const auto& issuer = options.issuer;
   const auto& keyType = options.keyType;
@@ -181,6 +183,9 @@ authorityKeyIdentifier  = keyid:always, issuer
   for (const auto& san : sans) {
     std::string dnsSan = "DNS:" + san;
     subjectAltNames.push_back(std::move(dnsSan));
+  }
+  for (const auto& ipSan : ipSans) {
+    subjectAltNames.push_back("IP:" + ipSan);
   }
   if (!subjectAltNames.empty()) {
     std::string sansConfigRow = fmt::format(

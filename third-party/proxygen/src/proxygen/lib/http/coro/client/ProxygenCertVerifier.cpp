@@ -17,7 +17,16 @@
 namespace proxygen::coro {
 namespace {
 static std::string getErrorMsg(X509* leaf, const std::string& expected) {
-  auto sans = folly::ssl::OpenSSLCertUtils::getSubjectAltNames(*leaf);
+  auto entries = folly::ssl::OpenSSLCertUtils::getSubjectAltNameEntries(*leaf);
+  std::vector<std::string> sans;
+  sans.reserve(entries.size());
+  for (const auto& entry : entries) {
+    if (const auto* dnsName = std::get_if<folly::ssl::DnsName>(&entry)) {
+      sans.emplace_back(dnsName->value);
+    } else if (const auto* ipAddress = std::get_if<folly::IPAddress>(&entry)) {
+      sans.emplace_back(ipAddress->str());
+    }
+  }
   return fmt::format(
       "certificate identity verification failed: expected={}, "
       "cert_sans=[{}]",

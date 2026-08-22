@@ -95,6 +95,26 @@ TEST_F(ProxygenCertVerifierTest, MismatchedIpFails) {
   EXPECT_THAT(err.msg(), HasSubstr("expected=127.0.0.1"));
 }
 
+TEST_F(ProxygenCertVerifierTest, ErrorIncludesDnsAndIpSans) {
+  auto leafWithIp = createCert({
+      .cn = "example.com",
+      .sans = {"example.com"},
+      .ipSans = {"127.0.0.1"},
+      .ca = false,
+      .issuer = &rootCertAndKey_,
+      .keyType = KeyType::P256,
+  });
+
+  auto verifier =
+      makeVerifier(ExpectedIdentity::expectIP(folly::IPAddress("127.0.0.2")),
+                   ValidationPolicy::Enforcing);
+  Error err;
+  std::shared_ptr<const Cert> verifiedCert;
+  EXPECT_NE(verifier->verify(verifiedCert, err, {getPeerCert(leafWithIp)}),
+            Status::Success);
+  EXPECT_THAT(err.msg(), HasSubstr("cert_sans=[example.com, 127.0.0.1]"));
+}
+
 TEST_F(ProxygenCertVerifierTest, UnderlyingVerifierFailure) {
   auto untrustedRoot = createCert(
       "untrusted-root", /*ca=*/true, /*issuer=*/nullptr, KeyType::P256);

@@ -16,9 +16,10 @@
 
 // IWYU pragma: private, include "thrift/lib/cpp2/frozen/Frozen.h"
 
+#include <cstdint>
 #include <type_traits>
+#include <folly/math/Division.h>
 #include <thrift/lib/cpp2/FieldRef.h>
-#include <thrift/lib/cpp2/frozen/Fast64BitRemainderCalculator.h>
 
 namespace apache {
 namespace thrift {
@@ -260,7 +261,7 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
     typedef typename Layout<std::vector<Block>>::View TableView;
 
     TableView table_;
-    Fast64BitRemainderCalculator remainderCalculator_;
+    folly::uint_divisor<std::uint64_t>::calc remainderCalculator_;
 
    public:
     View() {}
@@ -348,8 +349,9 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
       if (buckets == 0) {
         return;
       }
+      // The condition and Block::bits == 64 guarantee buckets > 1.
       const auto bucket =
-          remainderCalculator_.remainder(token.hash_ * 5, buckets);
+          remainderCalculator_.rem_gt1(token.hash_ * 5, buckets);
       table_.prefetchItem(bucket / Block::bits);
     }
 
@@ -404,7 +406,8 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
       const auto buckets = table_.size() * Block::bits;
       auto bucket = keyHash * 5; // spread out clumped values
       for (size_t p = 0; p < buckets; bucket += ++p) { // quadratic probing
-        bucket = remainderCalculator_.remainder(bucket, buckets);
+        // The loop condition and Block::bits == 64 guarantee buckets > 1.
+        bucket = remainderCalculator_.rem_gt1(bucket, buckets);
         const auto& block = table_[bucket / Block::bits]; // major block
         auto mask = block.mask();
         auto offset = block.offset();

@@ -137,6 +137,7 @@ class ConnectionListener : public folly::DelayedDestruction,
     ConnectionMessage msg{
         .transport = std::move(transport),
         .clientAddr = clientAddr,
+        .peerSecurity = nullptr,
     };
     auto result =
         pipeline_->fireRead(channel_pipeline::erase_and_box(std::move(msg)));

@@ -134,21 +134,26 @@ class TLSFinalizerTest : public ::testing::Test {
 };
 
 // A request driven through the finalizer emerges as a response carrying the
-// same transport and peer address. Negotiation state (tlsParams/extension) is
-// dropped by construction — TLSResponseMessage has no such fields.
+// same transport, peer address, and what the peer proved. Negotiation state
+// (tlsParams/extension) is dropped by construction — TLSResponseMessage has no
+// such fields.
 TEST_F(TLSFinalizerTest, ConvertsRequestToResponse) {
   folly::Baton<> emitted;
   folly::AsyncTransport::UniquePtr captured;
   folly::SocketAddress capturedAddr;
+  std::shared_ptr<const PeerSecurityInfo> capturedPeerSecurity;
 
   buildPipeline([&](TLSResponseMessage&& resp) noexcept {
     captured = std::move(resp.transport);
     capturedAddr = resp.clientAddr;
+    capturedPeerSecurity = std::move(resp.peerSecurity);
     emitted.post();
   });
 
   folly::AsyncTransport* rawTransport = nullptr;
   const folly::SocketAddress addr{"127.0.0.1", 4321};
+  auto peerSecurity = std::make_shared<const PeerSecurityInfo>(
+      PeerSecurityInfo{.peerCertificate = nullptr, .securityProtocol = "TLS"});
   evb_->runInEventBaseThreadAndWait([&] {
     auto sock = folly::AsyncSocket::newSocket(evb_, makeSocketFd());
     rawTransport = sock.get();
@@ -157,6 +162,7 @@ TEST_F(TLSFinalizerTest, ConvertsRequestToResponse) {
         .clientAddr = addr,
         .tlsParams = nullptr,
         .extension = nullptr,
+        .peerSecurity = peerSecurity,
     };
     (void)pipeline_->fireWrite(channel_pipeline::erase_and_box(std::move(req)));
   });
@@ -164,6 +170,7 @@ TEST_F(TLSFinalizerTest, ConvertsRequestToResponse) {
   ASSERT_TRUE(emitted.try_wait_for(std::chrono::seconds{5}));
   EXPECT_EQ(captured.get(), rawTransport); // same transport, moved through
   EXPECT_EQ(capturedAddr, addr);
+  EXPECT_EQ(capturedPeerSecurity, peerSecurity);
 
   evb_->runInEventBaseThreadAndWait([&] { captured.reset(); });
 }

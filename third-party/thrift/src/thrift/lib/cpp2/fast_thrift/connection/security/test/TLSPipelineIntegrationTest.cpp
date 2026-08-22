@@ -232,6 +232,7 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
       conn::ConnectionMessage msg{
           .transport = folly::AsyncTransport::UniquePtr(sock.release()),
           .clientAddr = folly::SocketAddress{"127.0.0.1", 0},
+          .peerSecurity = nullptr,
       };
       result =
           pipeline_->fireRead(channel_pipeline::erase_and_box(std::move(msg)));
@@ -292,15 +293,18 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
 };
 
 // REQUIRED + TLS: pipeline = FizzHandshakeHandler → StopTLSV1Handler (no-op).
-// Handshake succeeds → tail receives AsyncFizzServer.
+// Handshake succeeds → tail receives AsyncFizzServer, and what the peer proved
+// rides out alongside it.
 TEST_F(TLSPipelineIntegrationTest, RequiredTLSHandshakeSucceeds) {
   folly::Baton<> emitted;
   folly::AsyncTransport::UniquePtr transport;
+  std::shared_ptr<const conn::PeerSecurityInfo> peerSecurity;
 
   buildPipeline(
       fts::SSLPolicy::REQUIRED,
       [&](conn::ConnectionMessage&& m) noexcept {
         transport = std::move(m.transport);
+        peerSecurity = std::move(m.peerSecurity);
         emitted.post();
       },
       /*maxPending=*/0);
@@ -325,6 +329,10 @@ TEST_F(TLSPipelineIntegrationTest, RequiredTLSHandshakeSucceeds) {
   ASSERT_NE(transport, nullptr);
   EXPECT_NE(
       dynamic_cast<fizz::server::AsyncFizzServer*>(transport.get()), nullptr);
+  // Snapshotted at handshake completion, so it rides the message the outer
+  // pipeline sees rather than being asked of the transport later.
+  ASSERT_NE(peerSecurity, nullptr);
+  EXPECT_FALSE(peerSecurity->securityProtocol.empty());
 
   evb_->runInEventBaseThreadAndWait([&] {
     transport.reset();
@@ -333,15 +341,18 @@ TEST_F(TLSPipelineIntegrationTest, RequiredTLSHandshakeSucceeds) {
 }
 
 // PERMITTED + plaintext: classifier peeks, sees non-TLS, fires to tail.
-// Bypasses Fizz + StopTLS → tail receives a plaintext AsyncSocket.
+// Bypasses Fizz + StopTLS → tail receives a plaintext AsyncSocket, and nothing
+// was proved about the peer.
 TEST_F(TLSPipelineIntegrationTest, PermittedPlaintextBypassesHandshake) {
   folly::Baton<> emitted;
   folly::AsyncTransport::UniquePtr transport;
+  std::shared_ptr<const conn::PeerSecurityInfo> peerSecurity;
 
   buildPipeline(
       fts::SSLPolicy::PERMITTED,
       [&](conn::ConnectionMessage&& m) noexcept {
         transport = std::move(m.transport);
+        peerSecurity = std::move(m.peerSecurity);
         emitted.post();
       },
       /*maxPending=*/0);
@@ -362,6 +373,7 @@ TEST_F(TLSPipelineIntegrationTest, PermittedPlaintextBypassesHandshake) {
   EXPECT_EQ(
       dynamic_cast<fizz::server::AsyncFizzServer*>(transport.get()), nullptr);
   EXPECT_NE(dynamic_cast<folly::AsyncSocket*>(transport.get()), nullptr);
+  EXPECT_EQ(peerSecurity, nullptr);
 
   evb_->runInEventBaseThreadAndWait([&] { transport.reset(); });
   ::close(sp.client.toFd());

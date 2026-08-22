@@ -270,7 +270,10 @@ class FastThriftBenchmarkServer {
         : server_(server) {}
     BenchmarkConnection getConnection(
         folly::AsyncTransport::UniquePtr socket,
-        const folly::SocketAddress& /*clientAddr*/) {
+        const folly::SocketAddress& /*clientAddr*/,
+        const std::shared_ptr<
+            const apache::thrift::fast_thrift::connection::PeerSecurityInfo>&
+        /*peerSecurity*/) {
       return server_->buildConnection(std::move(socket));
     }
 

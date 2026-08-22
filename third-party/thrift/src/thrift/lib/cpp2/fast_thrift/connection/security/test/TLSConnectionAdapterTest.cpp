@@ -49,16 +49,19 @@ channel_pipeline::detail::ContextImpl& endpointContext() noexcept {
 struct RecordingOwner {
   bool resolvedCalled{false};
   folly::SocketAddress resolvedAddr;
+  std::shared_ptr<const PeerSecurityInfo> resolvedPeerSecurity;
   bool exceptionCalled{false};
   folly::exception_wrapper caught;
 
   static channel_pipeline::Result onResolved(
       void* self,
       folly::AsyncTransport::UniquePtr /*transport*/,
-      folly::SocketAddress clientAddr) noexcept {
+      folly::SocketAddress clientAddr,
+      std::shared_ptr<const PeerSecurityInfo> peerSecurity) noexcept {
     auto* owner = static_cast<RecordingOwner*>(self);
     owner->resolvedCalled = true;
     owner->resolvedAddr = std::move(clientAddr);
+    owner->resolvedPeerSecurity = std::move(peerSecurity);
     return channel_pipeline::Result::Success;
   }
 
@@ -72,7 +75,7 @@ struct RecordingOwner {
 } // namespace
 
 // A resolved response arriving on the read path is dispatched to the owner's
-// resolved trampoline with the peer address intact.
+// resolved trampoline with the peer address and what the peer proved intact.
 TEST(TLSConnectionAdapterTest, DispatchesResolvedToOwner) {
   RecordingOwner owner;
   TLSConnectionAdapter adapter;
@@ -80,7 +83,10 @@ TEST(TLSConnectionAdapterTest, DispatchesResolvedToOwner) {
       &owner, &RecordingOwner::onResolved, &RecordingOwner::onException);
 
   const folly::SocketAddress addr{"127.0.0.1", 4321};
-  TLSResponseMessage resp{.transport = nullptr, .clientAddr = addr};
+  auto peerSecurity = std::make_shared<const PeerSecurityInfo>(
+      PeerSecurityInfo{.peerCertificate = nullptr, .securityProtocol = "TLS"});
+  TLSResponseMessage resp{
+      .transport = nullptr, .clientAddr = addr, .peerSecurity = peerSecurity};
   const auto result = adapter.onRead(
       endpointContext(), channel_pipeline::erase_and_box(std::move(resp)));
 
@@ -88,6 +94,7 @@ TEST(TLSConnectionAdapterTest, DispatchesResolvedToOwner) {
   EXPECT_TRUE(owner.resolvedCalled);
   EXPECT_FALSE(owner.exceptionCalled);
   EXPECT_EQ(owner.resolvedAddr, addr);
+  EXPECT_EQ(owner.resolvedPeerSecurity, peerSecurity);
 }
 
 // An exception is dispatched to the owner's exception trampoline rather than

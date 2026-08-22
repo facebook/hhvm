@@ -204,6 +204,7 @@ class TLSClassifier {
         .clientAddr = clientAddr,
         .tlsParams = std::move(tlsParams),
         .extension = nullptr,
+        .peerSecurity = nullptr,
     };
 
     auto result = looksLikeTLS

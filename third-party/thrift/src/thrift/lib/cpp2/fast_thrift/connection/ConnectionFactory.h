@@ -17,11 +17,13 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
 
 namespace apache::thrift::fast_thrift::connection {
 
@@ -52,25 +54,30 @@ concept Connection = requires(C& c, std::function<void()> cb) {
 };
 
 /**
- * ConnectionFactory — anything that, given a ready transport and the peer
- * address observed when the socket was accepted, produces a Connection. The
- * returned type is up to the factory; the connection layer doesn't care, as
- * long as it satisfies the Connection concept.
+ * ConnectionFactory — anything that, given a ready transport plus what was
+ * observed about the peer when the socket was accepted and secured, produces a
+ * Connection. The returned type is up to the factory; the connection layer
+ * doesn't care, as long as it satisfies the Connection concept.
  *
- * clientAddr is passed rather than re-derived from the transport: the
- * transport can no longer report a peer once that peer has gone away.
+ * clientAddr and peerSecurity are passed rather than re-derived from the
+ * transport because the transport can no longer report either: the peer
+ * address is gone once the peer is, and a StopTLS downgrade replaces the
+ * secured transport with a plaintext one. peerSecurity is null on a connection
+ * that negotiated no security.
  */
 template <typename F>
 concept ConnectionFactory =
     requires(
         F& f,
         folly::AsyncTransport::UniquePtr socket,
-        const folly::SocketAddress& clientAddr) {
-      { f.getConnection(std::move(socket), clientAddr) };
+        const folly::SocketAddress& clientAddr,
+        const std::shared_ptr<const PeerSecurityInfo>& peerSecurity) {
+      { f.getConnection(std::move(socket), clientAddr, peerSecurity) };
     } &&
     Connection<std::decay_t<decltype(std::declval<F&>().getConnection(
         std::declval<folly::AsyncTransport::UniquePtr>(),
-        std::declval<const folly::SocketAddress&>()))>>;
+        std::declval<const folly::SocketAddress&>(),
+        std::declval<const std::shared_ptr<const PeerSecurityInfo>&>()))>>;
 
 /**
  * The connection type produced by a given factory.
@@ -79,6 +86,7 @@ template <ConnectionFactory F>
 using FactoryConnectionType =
     std::decay_t<decltype(std::declval<F&>().getConnection(
         std::declval<folly::AsyncTransport::UniquePtr>(),
-        std::declval<const folly::SocketAddress&>()))>;
+        std::declval<const folly::SocketAddress&>(),
+        std::declval<const std::shared_ptr<const PeerSecurityInfo>&>()))>;
 
 } // namespace apache::thrift::fast_thrift::connection

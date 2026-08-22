@@ -214,6 +214,7 @@ struct Harness {
       conn::ConnectionMessage msg{
           .transport = folly::AsyncTransport::UniquePtr(serverSock.release()),
           .clientAddr = folly::SocketAddress{"127.0.0.1", 0},
+          .peerSecurity = nullptr,
       };
       (void)pipeline->fireRead(channel_pipeline::erase_and_box(std::move(msg)));
 

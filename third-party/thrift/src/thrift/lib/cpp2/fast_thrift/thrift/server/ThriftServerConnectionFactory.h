@@ -26,6 +26,7 @@
 #include <folly/CppAttributes.h>
 #include <folly/Executor.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -157,15 +158,17 @@ class ThriftServerConnectionFactory {
 
   /**
    * Build a connection for `socket`, whose peer was at `clientAddr` when the
-   * socket was accepted. Constructs the per-connection ThriftConnContext (when
-   * enableRequestContext is set), builds the rocket + thrift pipelines, and
-   * fires `onConnect()` before returning.
+   * socket was accepted and proved `peerSecurity` (null if it proved nothing).
+   * Constructs the per-connection ThriftConnContext (when enableRequestContext
+   * is set), builds the rocket + thrift pipelines, and fires `onConnect()`
+   * before returning.
    *
    * Satisfies the connection::ConnectionFactory concept.
    */
   ThriftServerConnection getConnection(
       folly::AsyncTransport::UniquePtr socket,
-      const folly::SocketAddress& clientAddr);
+      const folly::SocketAddress& clientAddr,
+      const std::shared_ptr<const connection::PeerSecurityInfo>& peerSecurity);
 
  private:
   // Builds the rocket pipeline (TransportHandler ... RocketServerAppAdapter).

@@ -88,8 +88,10 @@ class TestConnectionFactory {
 
   TestConnection getConnection(
       folly::AsyncTransport::UniquePtr socket,
-      const folly::SocketAddress& clientAddr) {
+      const folly::SocketAddress& clientAddr,
+      const std::shared_ptr<const PeerSecurityInfo>& peerSecurity) {
     lastClientAddr = clientAddr;
+    lastPeerSecurity = peerSecurity;
     return TestConnection{
         .transport = std::move(socket),
         .closeCount = closeCount_,
@@ -99,6 +101,7 @@ class TestConnectionFactory {
 
   // Written on the accepting EVB; read back through that EVB.
   folly::SocketAddress lastClientAddr;
+  std::shared_ptr<const PeerSecurityInfo> lastPeerSecurity;
 
  private:
   std::shared_ptr<std::atomic<size_t>> closeCount_;

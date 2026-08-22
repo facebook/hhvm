@@ -122,15 +122,19 @@ class StopTLSV1Handler {
     auto stopTLSTimeout = incoming.tlsParams
         ? incoming.tlsParams->handshakeTimeout
         : std::nullopt;
+    // The downgrade hands back a plaintext transport that can no longer report
+    // the peer, so the handshake's record of it has to ride the callback.
+    auto peerSecurity = std::move(incoming.peerSecurity);
 
     util::StopTLSHelper::UniquePtr helper(new util::StopTLSHelper(
         std::move(fizzServer),
         stopTLSTimeout,
         [this](util::StopTLSHelper* h) noexcept { inFlight_.erase(h); },
-        [this, clientAddr, extension](
+        [this, clientAddr, extension, peerSecurity](
             folly::AsyncTransport::UniquePtr plaintext,
             const folly::exception_wrapper& ex) noexcept {
-          onStopTLSComplete(std::move(plaintext), ex, clientAddr, extension);
+          onStopTLSComplete(
+              std::move(plaintext), ex, clientAddr, extension, peerSecurity);
         }));
     auto* raw = helper.get();
     inFlight_.emplace(raw, std::move(helper));
@@ -177,7 +181,8 @@ class StopTLSV1Handler {
       const folly::exception_wrapper& ex,
       const folly::SocketAddress& clientAddr,
       std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
-          extension) noexcept {
+          extension,
+      std::shared_ptr<const PeerSecurityInfo> peerSecurity) noexcept {
     if (ex || !plaintext) {
       XLOG(DBG3) << "StopTLS V1 failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
@@ -191,6 +196,7 @@ class StopTLSV1Handler {
         .clientAddr = clientAddr,
         .tlsParams = nullptr,
         .extension = std::move(extension),
+        .peerSecurity = std::move(peerSecurity),
     };
     auto result =
         ctx_->fireWrite(channel_pipeline::erase_and_box(std::move(downgraded)));

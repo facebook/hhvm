@@ -55,8 +55,8 @@ class ConnectionBuilderHandler {
   channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto ready = msg.take<ConnectionMessage>();
-    auto conn =
-        factory_.getConnection(std::move(ready.transport), ready.clientAddr);
+    auto conn = factory_.getConnection(
+        std::move(ready.transport), ready.clientAddr, ready.peerSecurity);
     return ctx.fireRead(channel_pipeline::erase_and_box(std::move(conn)));
   }
 

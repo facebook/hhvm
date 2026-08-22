@@ -194,11 +194,18 @@ class FizzHandshakeHandler {
     if (FOLLY_UNLIKELY(!ctx_)) {
       return;
     }
+    // Snapshot what the peer proved while the fizz session is still the
+    // transport: a StopTLS downgrade downstream leaves nothing to read it from.
+    auto peerSecurity =
+        std::make_shared<const PeerSecurityInfo>(PeerSecurityInfo{
+            .peerCertificate = fizzServer->getState().clientCert(),
+            .securityProtocol = fizzServer->getSecurityProtocol()});
     TLSRequestMessage upgraded{
         .transport = folly::AsyncTransport::UniquePtr(fizzServer.release()),
         .clientAddr = clientAddr,
         .tlsParams = std::move(tlsParams),
         .extension = std::move(extension),
+        .peerSecurity = std::move(peerSecurity),
     };
     auto result =
         ctx_->fireWrite(channel_pipeline::erase_and_box(std::move(upgraded)));

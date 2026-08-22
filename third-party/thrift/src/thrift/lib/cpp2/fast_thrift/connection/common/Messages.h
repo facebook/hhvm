@@ -16,10 +16,27 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>
 
 namespace apache::thrift::fast_thrift::connection {
+
+// What the peer proved about itself during the security handshake.
+//
+// Captured once, when it is negotiated, and carried alongside the transport
+// rather than re-read from it later: a StopTLS downgrade replaces the
+// transport with a plaintext one that can report neither. Null on a connection
+// that negotiated no security.
+//
+// Held behind a shared_ptr so the messages carrying it stay inside the
+// pipeline's inline-message budget; the allocation is once per handshake.
+struct PeerSecurityInfo {
+  std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate;
+  std::string securityProtocol;
+};
 
 // Single message type that flows through the acceptance pipeline. Each
 // accepted socket enters the pipeline as one ConnectionMessage at the head;
@@ -30,6 +47,7 @@ namespace apache::thrift::fast_thrift::connection {
 struct ConnectionMessage {
   folly::AsyncTransport::UniquePtr transport;
   folly::SocketAddress clientAddr;
+  std::shared_ptr<const PeerSecurityInfo> peerSecurity;
 };
 
 } // namespace apache::thrift::fast_thrift::connection

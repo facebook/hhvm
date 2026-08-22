@@ -146,9 +146,12 @@ class ConnectionTLSHandler {
         this,
         [](void* self,
            folly::AsyncTransport::UniquePtr transport,
-           folly::SocketAddress clientAddr) noexcept {
+           folly::SocketAddress clientAddr,
+           std::shared_ptr<const PeerSecurityInfo> peerSecurity) noexcept {
           return static_cast<ConnectionTLSHandler*>(self)->onResolved(
-              std::move(transport), std::move(clientAddr));
+              std::move(transport),
+              std::move(clientAddr),
+              std::move(peerSecurity));
         },
         [](void* self, folly::exception_wrapper&& e) noexcept {
           static_cast<ConnectionTLSHandler*>(self)->onInnerException(
@@ -181,6 +184,7 @@ class ConnectionTLSHandler {
         .clientAddr = std::move(incoming.clientAddr),
         .tlsParams = nullptr,
         .extension = nullptr,
+        .peerSecurity = nullptr,
     };
     return tail_.submit(std::move(request));
   }
@@ -217,13 +221,15 @@ class ConnectionTLSHandler {
   // here and is fired onto the outer pipeline as a ConnectionMessage.
   channel_pipeline::Result onResolved(
       folly::AsyncTransport::UniquePtr transport,
-      folly::SocketAddress clientAddr) noexcept {
+      folly::SocketAddress clientAddr,
+      std::shared_ptr<const PeerSecurityInfo> peerSecurity) noexcept {
     if (FOLLY_UNLIKELY(!outerCtx_)) {
       return channel_pipeline::Result::Success;
     }
     ConnectionMessage out{
         .transport = std::move(transport),
         .clientAddr = std::move(clientAddr),
+        .peerSecurity = std::move(peerSecurity),
     };
     return outerCtx_->fireRead(channel_pipeline::erase_and_box(std::move(out)));
   }

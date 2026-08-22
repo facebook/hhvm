@@ -23,6 +23,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
@@ -96,7 +97,9 @@ class TestServerConnectionFactory {
 
   TestServerConnection getConnection(
       folly::AsyncTransport::UniquePtr socket,
-      const folly::SocketAddress& /*clientAddr*/) {
+      const folly::SocketAddress& /*clientAddr*/,
+      const std::shared_ptr<const connection::PeerSecurityInfo>&
+      /*peerSecurity*/) {
     return build_(std::move(socket));
   }
 

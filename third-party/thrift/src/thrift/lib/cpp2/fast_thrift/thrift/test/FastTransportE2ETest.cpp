@@ -213,7 +213,9 @@ class FastTransportE2ETest : public ::testing::Test {
         : fixture_(fixture) {}
     ServerConnection getConnection(
         folly::AsyncTransport::UniquePtr socket,
-        const folly::SocketAddress& /*clientAddr*/) {
+        const folly::SocketAddress& /*clientAddr*/,
+        const std::shared_ptr<const connection::PeerSecurityInfo>&
+        /*peerSecurity*/) {
       return fixture_->buildServerConnection(std::move(socket));
     }
 

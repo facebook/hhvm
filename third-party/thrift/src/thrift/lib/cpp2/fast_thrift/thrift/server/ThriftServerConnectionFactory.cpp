@@ -95,7 +95,8 @@ ThriftServerConnectionFactory::ThriftServerConnectionFactory(
 
 ThriftServerConnection ThriftServerConnectionFactory::getConnection(
     folly::AsyncTransport::UniquePtr socket,
-    const folly::SocketAddress& clientAddr) {
+    const folly::SocketAddress& clientAddr,
+    const std::shared_ptr<const connection::PeerSecurityInfo>& peerSecurity) {
   // Per-connection context — only built when enableRequestContext is set.
   // When unset, the thrift pipeline below skips the context-propagation
   // handlers and the embedder accept hook (wired at the connection-layer
@@ -104,6 +105,10 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   if (config_.enableRequestContext) {
     connContext.reset(new ThriftConnContext());
     connContext->setPeerAddress(clientAddr);
+    if (peerSecurity != nullptr) {
+      connContext->setPeerCertificate(peerSecurity->peerCertificate);
+      connContext->setSecurityProtocol(peerSecurity->securityProtocol);
+    }
   }
 
   auto conn = needsComposite_

@@ -33,6 +33,7 @@
 #include <fizz/client/FizzClientContext.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/SocketAddress.h>
+#include <folly/Synchronized.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
@@ -562,6 +563,30 @@ TEST(
 // TLS coverage — FastThriftServer with FizzServerConfig.
 // ---------------------------------------------------------------------------
 
+// What the connection context reports about the peer, sampled once the
+// connection is established. A fresh extension is built per connection, so the
+// sink lives in the fixture and every instance points at it.
+struct PeerSecurityRecorder {
+  std::atomic<bool> established{false};
+  std::atomic<bool> hadCertificate{false};
+  folly::Synchronized<std::string> securityProtocol;
+};
+
+// Inert observer: samples the connection context and always proceeds, so it
+// can sit in a fixture shared with tests that are not about peer security.
+struct PeerSecurityRecordingExtension {
+  PeerSecurityRecorder* rec{nullptr};
+
+  ftt::ConnectionVerdict onConnectionEstablished(
+      const ftt::ThriftConnectionView& conn) noexcept {
+    rec->hadCertificate.store(
+        conn.peerCertificate() != nullptr, std::memory_order_relaxed);
+    *rec->securityProtocol.wlock() = std::string(conn.securityProtocol());
+    rec->established.store(true, std::memory_order_relaxed);
+    return ftt::ConnectionVerdict::proceed();
+  }
+};
+
 class FastThriftServerTlsTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -573,6 +598,8 @@ class FastThriftServerTlsTest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    // The peer-security assertions read the per-connection context.
+    config.enableRequestContext = true;
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
 
@@ -582,6 +609,10 @@ class FastThriftServerTlsTest : public ::testing::Test {
     // Skip mTLS — covered by the unit tests on FizzServerContextBuilder.
     sslConfig.clientAuth = fizz::server::ClientAuthMode::None;
     server_->setSSLConfig(std::move(sslConfig));
+
+    server_->addModule(
+        ftt::FastServerModule("peer_security_recorder")
+            .addThriftExtension<PeerSecurityRecordingExtension>(&recorder_));
 
     server_->setInterface(handler_);
     server_->start();
@@ -597,6 +628,7 @@ class FastThriftServerTlsTest : public ::testing::Test {
 
   security::test::TestCert cert_;
   std::shared_ptr<TestHandler> handler_;
+  PeerSecurityRecorder recorder_;
   std::unique_ptr<ftt::FastThriftServer> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
 };
@@ -633,6 +665,44 @@ TEST_F(FastThriftServerTlsTest, RoundTripOverTls) {
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
   EXPECT_FALSE(rpcErr) << rpcErr.what();
   EXPECT_EQ(*echoed.message(), "echoed:over fizz");
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// What the peer proved during the handshake reaches the per-connection
+// context, rather than being left for someone to ask the transport for later.
+TEST_F(FastThriftServerTlsTest, ConnectionContextCarriesNegotiatedSecurity) {
+  auto* evb = clientThread_->getEventBase();
+  auto transport = connectFizz(evb, server_->getAddress());
+  ASSERT_NE(transport, nullptr);
+
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(transport));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  folly::exception_wrapper rpcErr;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_ping()
+        .via(evb)
+        .thenValue([&](auto&&) { done.post(); })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          rpcErr = ew;
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_FALSE(rpcErr) << rpcErr.what();
+
+  EXPECT_TRUE(recorder_.established.load(std::memory_order_relaxed));
+  EXPECT_FALSE(recorder_.securityProtocol.rlock()->empty());
+  // clientAuth is None in this fixture, so the peer presents no certificate.
+  EXPECT_FALSE(recorder_.hadCertificate.load(std::memory_order_relaxed));
 
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }
@@ -685,6 +755,8 @@ class FastThriftServerStopTlsTest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    // The peer-security assertions read the per-connection context.
+    config.enableRequestContext = true;
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
 
@@ -697,6 +769,10 @@ class FastThriftServerStopTlsTest : public ::testing::Test {
     security::ThriftTlsConfig thriftConfig;
     thriftConfig.enableStopTLS = true;
     server_->setThriftConfig(std::move(thriftConfig));
+
+    server_->addModule(
+        ftt::FastServerModule("peer_security_recorder")
+            .addThriftExtension<PeerSecurityRecordingExtension>(&recorder_));
 
     server_->setInterface(handler_);
     server_->start();
@@ -712,6 +788,7 @@ class FastThriftServerStopTlsTest : public ::testing::Test {
 
   security::test::TestCert cert_;
   std::shared_ptr<TestHandler> handler_;
+  PeerSecurityRecorder recorder_;
   std::unique_ptr<ftt::FastThriftServer> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
 };
@@ -795,6 +872,12 @@ TEST_F(FastThriftServerStopTlsTest, RoundTripAfterStopTLSDowngrade) {
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
   EXPECT_FALSE(rpcErr) << rpcErr.what();
   EXPECT_EQ(*echoed.message(), "echoed:after stoptls");
+
+  // The connection is plaintext by the time it is established, so the only
+  // reason the context can still report what the peer proved is that it was
+  // captured at handshake and carried across the downgrade.
+  EXPECT_TRUE(recorder_.established.load(std::memory_order_relaxed));
+  EXPECT_FALSE(recorder_.securityProtocol.rlock()->empty());
 
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }

@@ -320,7 +320,9 @@ class FastThriftServerT {
         : server_(server) {}
     ThriftServerChannelConnection getConnection(
         folly::AsyncTransport::UniquePtr socket,
-        const folly::SocketAddress& /*clientAddr*/) {
+        const folly::SocketAddress& /*clientAddr*/,
+        const std::shared_ptr<const connection::PeerSecurityInfo>&
+        /*peerSecurity*/) {
       return server_->buildConnection(std::move(socket));
     }
 

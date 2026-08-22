@@ -295,7 +295,10 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
 
     ServerConnectionContext getConnection(
         folly::AsyncTransport::UniquePtr socket,
-        const folly::SocketAddress& /*clientAddr*/) {
+        const folly::SocketAddress& /*clientAddr*/,
+        const std::shared_ptr<
+            const apache::thrift::fast_thrift::connection::PeerSecurityInfo>&
+        /*peerSecurity*/) {
       return build_(std::move(socket));
     }
 

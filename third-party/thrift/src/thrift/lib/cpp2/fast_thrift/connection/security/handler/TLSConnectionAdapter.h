@@ -47,7 +47,10 @@ class TLSConnectionAdapter {
   // completes. Returns the downstream Result so backpressure / errors
   // propagate to the caller.
   using ResolvedFn = channel_pipeline::Result (*)(
-      void*, folly::AsyncTransport::UniquePtr, folly::SocketAddress) noexcept;
+      void*,
+      folly::AsyncTransport::UniquePtr,
+      folly::SocketAddress,
+      std::shared_ptr<const PeerSecurityInfo>) noexcept;
   // Dispatches an exception raised inside the pipeline back to the owner.
   using ExceptionFn = void (*)(void*, folly::exception_wrapper&&) noexcept;
 
@@ -88,7 +91,10 @@ class TLSConnectionAdapter {
     auto resolved = msg.take<TLSResponseMessage>();
     DCHECK(onResolved_);
     return onResolved_(
-        owner_, std::move(resolved.transport), std::move(resolved.clientAddr));
+        owner_,
+        std::move(resolved.transport),
+        std::move(resolved.clientAddr),
+        std::move(resolved.peerSecurity));
   }
 
   void onException(folly::exception_wrapper&& e) noexcept {

@@ -20,6 +20,7 @@
 
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
@@ -41,21 +42,28 @@ namespace apache::thrift::fast_thrift::connection::security {
 //
 // `extension` is null until the fizz handshake completes, then read by
 // StopTLSV1Handler to decide whether to downgrade.
+//
+// `peerSecurity` is null until the handshake completes, and every stage after
+// it must carry it forward: it is the only surviving record of what the peer
+// proved once StopTLS has swapped the fizz transport for a plaintext one.
 struct TLSRequestMessage {
   folly::AsyncTransport::UniquePtr transport;
   folly::SocketAddress clientAddr;
   std::shared_ptr<const apache::thrift::fast_thrift::security::TLSParams>
       tlsParams;
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension> extension;
+  std::shared_ptr<const PeerSecurityInfo> peerSecurity;
 };
 
 // Inbound (read/return path). TLSFinalizer collapses a resolved
 // TLSRequestMessage down to this at the head; the stages pass it through
 // untouched to the tail adapter, which hands the resolved transport off.
-// Carries only what handoff needs — no negotiation state.
+// Carries only what handoff needs — the negotiated peer identity, but no
+// negotiation state.
 struct TLSResponseMessage {
   folly::AsyncTransport::UniquePtr transport;
   folly::SocketAddress clientAddr;
+  std::shared_ptr<const PeerSecurityInfo> peerSecurity;
 };
 
 } // namespace apache::thrift::fast_thrift::connection::security

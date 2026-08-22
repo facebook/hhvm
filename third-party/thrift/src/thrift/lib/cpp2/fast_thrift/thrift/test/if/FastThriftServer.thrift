@@ -55,6 +55,16 @@ service FastThriftServer {
   );
 }
 
+// Stand-in service for tests that need a second FastServer handler on an
+// auxiliary interface slot. Method names are disjoint from FastThriftServer
+// so composite routing is unambiguous. No @cpp.FastClient: these tests drive
+// the server through the classic generated client.
+@cpp.FastServer
+service AuxInterfaceProbeService {
+  void probePing();
+  string probeGreet(1: string name);
+}
+
 // Same shape as FastThriftServer but without @cpp.FastServer — generates
 // apache::thrift::ServiceHandler<FastThriftChannelServer> for the
 // ThriftServerChannel side of the integration benchmark.

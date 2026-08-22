@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/security/SecurityServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -57,9 +58,10 @@ struct ThriftServerConnectionFactoryConfig {
   // Executor that handler methods are dispatched to. Null keeps dispatch
   // inline on the connection's EventBase.
   //
-  // Applied to the user handler and to the monitoring / status / debug aux
-  // interfaces alike. Methods that must stay on the EventBase — the liveness
-  // probe and the counter scrapes — are pinned per-method in their IDLs with
+  // Applied to the user handler and to the monitoring / status / debug /
+  // security aux interfaces alike. Methods that must stay on the EventBase —
+  // the liveness probe and the counter scrapes — are pinned per-method in
+  // their IDLs with
   // @cpp.ProcessInEbThreadUnsafe, mirroring what the legacy stack pins in
   // common/thrift/thrift/status.thrift and fb303/thrift/fb303_core.thrift.
   //
@@ -70,6 +72,7 @@ struct ThriftServerConnectionFactoryConfig {
   std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler;
   std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler;
   std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler;
+  std::shared_ptr<fast_thrift::SecurityServerInterface> securityHandler;
   std::shared_ptr<const apache::thrift::metadata::ThriftServiceMetadataResponse>
       metadataResponse;
   // Per-connection MSG_ZEROCOPY threshold; 0 disables zero-copy.

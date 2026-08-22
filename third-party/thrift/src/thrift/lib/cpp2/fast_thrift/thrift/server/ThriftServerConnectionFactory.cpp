@@ -87,6 +87,7 @@ ThriftServerConnectionFactory::ThriftServerConnectionFactory(
           static_cast<bool>(config_.monitoringHandler) ||
           static_cast<bool>(config_.statusHandler) ||
           static_cast<bool>(config_.debugHandler) ||
+          static_cast<bool>(config_.securityHandler) ||
           static_cast<bool>(config_.metadataResponse)) {
   CHECK(config_.handler)
       << "ThriftServerConnectionFactory requires a non-null handler";
@@ -167,6 +168,11 @@ ThriftServerConnection ThriftServerConnectionFactory::buildCompositeConnection(
   if (config_.debugHandler) {
     tail.children.push_back(
         config_.debugHandler->getAppAdapter(config_.debugHandler));
+    attachCPUExecutor(*tail.children.back());
+  }
+  if (config_.securityHandler) {
+    tail.children.push_back(
+        config_.securityHandler->getAppAdapter(config_.securityHandler));
     attachCPUExecutor(*tail.children.back());
   }
   // Deliberately not offloaded: MetadataAppAdapter is hand-written rather

@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/security/SecurityServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
@@ -133,6 +134,22 @@ class FastThriftServer {
    */
   void setDebugInterface(
       std::shared_ptr<fast_thrift::DebugServerInterface> handler);
+
+  /**
+   * Attach a Security handler. Methods on the security handler are dispatched
+   * on the same connection as the user handler; routing is by method name
+   * with the user handler winning on conflict (mirrors
+   * ThriftServer::setSecurityInterface). Must be called before
+   * start()/serve().
+   *
+   * Security-metadata introspection clients call into this interface.
+   *
+   * The handler must derive from fast_thrift::SecurityServerInterface — a
+   * marker base that exists purely as a type-system guardrail. See that
+   * header for the service-naming contract an authorization gate relies on.
+   */
+  void setSecurityInterface(
+      std::shared_ptr<fast_thrift::SecurityServerInterface> handler);
 
   /**
    * Attach server counters. Wires the rocket- and thrift-layer metrics
@@ -352,6 +369,9 @@ class FastThriftServer {
   bool hasDebugHandler() const noexcept {
     return static_cast<bool>(auxInterfaces_.debugHandler);
   }
+  bool hasSecurityHandler() const noexcept {
+    return static_cast<bool>(auxInterfaces_.securityHandler);
+  }
 
  private:
   // Lifecycle states. Transitions are linear: kNotStarted → kRunning →
@@ -373,6 +393,8 @@ class FastThriftServer {
         nullptr};
     std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler{nullptr};
     std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler{nullptr};
+    std::shared_ptr<fast_thrift::SecurityServerInterface> securityHandler{
+        nullptr};
   };
 
   const FastThriftServerConfig config_;

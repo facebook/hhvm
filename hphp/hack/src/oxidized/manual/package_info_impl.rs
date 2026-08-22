@@ -168,6 +168,19 @@ static MULTIFILE_PREFIX: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"^.*--").expect("should compile: the pattern is a literal")
 });
 
+/// Where a file sits relative to the implicit package families. The illegal
+/// placements carry the family's positioned name, so the caller can point at its
+/// declaration in PACKAGES.toml.
+pub enum ImplicitFamilyPlacement<'a> {
+    /// Belongs to a member package, or is not under any family at all.
+    Valid,
+    /// Lies directly under a family `path` with no member directory in between.
+    DirectlyUnderFamily(&'a PosId),
+    /// Lies under a directory whose name is not a valid Hack identifier, so that
+    /// directory names no member package. Carries the offending name.
+    InvalidMemberDir(&'a PosId, String),
+}
+
 /// The path rewriting every package lookup applies before prefix-matching. All
 /// lookups must go through this, so they prefix-match the same string.
 fn normalize(support_multifile_tests: bool, path: &str) -> Cow<'_, str> {
@@ -209,25 +222,32 @@ impl PackageInfo {
         }
     }
 
-    /// The implicit family (its positioned name) if `path` lies directly under
-    /// that family's `path`, with no member directory in between -- e.g.
-    /// `//prototypes/loose.php` under a family declared at `//prototypes/`.
+    /// Where `path` sits relative to the implicit package families.
     ///
-    /// `None` means the file is legally placed: either it belongs to a member,
-    /// or it is under no family at all.
-    pub fn file_directly_under_implicit_family(
+    /// - `Valid` -- belongs to a member package, or lies under no family at all.
+    /// - `DirectlyUnderFamily` -- lies directly under a family `path` with no
+    ///   member directory in between, e.g. `prototypes/loose.php` under a family
+    ///   declared at `prototypes/`.
+    /// - `InvalidMemberDir` -- the member directory is not a valid Hack
+    ///   identifier, so it names no member package.
+    pub fn check_implicit_family_placement(
         &self,
         support_multifile_tests: bool,
         path: &str,
-    ) -> Option<&PosId> {
+    ) -> ImplicitFamilyPlacement<'_> {
         let path = normalize(support_multifile_tests, path);
-        let (package, remainder) = self.match_include_path(&path)?;
+        let Some((package, remainder)) = self.match_include_path(&path) else {
+            return ImplicitFamilyPlacement::Valid;
+        };
         if !package.is_implicit {
-            return None;
+            return ImplicitFamilyPlacement::Valid;
         }
         match remainder.split_once('/') {
-            Some((dir, _)) if !dir.is_empty() => None,
-            _ => Some(&package.name),
+            Some((dir, _)) if hack_name::is_valid_identifier(dir) => ImplicitFamilyPlacement::Valid,
+            Some((dir, _)) if !dir.is_empty() => {
+                ImplicitFamilyPlacement::InvalidMemberDir(&package.name, dir.to_owned())
+            }
+            _ => ImplicitFamilyPlacement::DirectlyUnderFamily(&package.name),
         }
     }
 }
@@ -292,6 +312,57 @@ mod test {
 
         // A file outside the family path belongs to no package.
         assert!(info.get_package_for_file(false, "other/x.php").is_none());
+
+        // Resolution does NOT reject a badly-named member directory; it
+        // synthesizes a member like any other.
+        for bad in [
+            "www/prototypes/proto.v1/a.php",
+            "www/prototypes/1bad/a.php",
+            "www/prototypes/:xhp/a.php",
+        ] {
+            assert!(
+                info.get_package_for_file(false, bad).is_some(),
+                "{bad} should still resolve; rejecting it is the placement check's job"
+            );
+        }
+    }
+
+    // Identifier validity is decided only by the placement classifier.
+    #[test]
+    fn placement_rejects_badly_named_member_dirs() {
+        let family = Package {
+            name: pos_id("prototypes"),
+            includes: vec![],
+            soft_includes: vec![],
+            include_paths: vec![pos_id("www/prototypes/")],
+            enable_strict_isolation: true,
+            is_implicit: true,
+        };
+        let info = PackageInfo {
+            existing_packages: Default::default(),
+            include_path_to_package_map: vec![("www/prototypes/".to_string(), family)],
+        };
+
+        for (path, expected_dir) in [
+            ("www/prototypes/proto.v1/a.php", "proto.v1"),
+            ("www/prototypes/1bad/a.php", "1bad"),
+            ("www/prototypes/:xhp/a.php", ":xhp"),
+        ] {
+            match info.check_implicit_family_placement(false, path) {
+                ImplicitFamilyPlacement::InvalidMemberDir(_, dir) => {
+                    assert_eq!(dir, expected_dir, "wrong directory reported for {path}")
+                }
+                _ => panic!("{path} should be reported as a badly-named member directory"),
+            }
+        }
+
+        // A validly-named directory, and a file outside any family, are fine.
+        for ok in ["www/prototypes/alpha/a.php", "other/x.php"] {
+            assert!(matches!(
+                info.check_implicit_family_placement(false, ok),
+                ImplicitFamilyPlacement::Valid
+            ));
+        }
     }
 
     // A container path with directories in it must be dropped whole; a

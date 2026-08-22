@@ -91,6 +91,7 @@ members = [
     "utils/escaper",
     "utils/ffi_cbindgen",
     "utils/find_utils",
+    "utils/hack_name/cargo",
     "utils/hash",
     "utils/hh24_types",
     "utils/html_entities",

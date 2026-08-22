@@ -6266,25 +6266,30 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMemb
 /// subdirectory; one placed directly under the family path belongs to no member
 /// package, so it is illegal.
 fn check_implicit_package_placement(env: &mut Env<'_>) {
+    use oxidized::package_info_impl::ImplicitFamilyPlacement;
+
     let parser_options = env.parser_options;
     let file_path = env.source_text().file_path_rc();
-    let Some(family) = parser_options
-        .package_info
-        .file_directly_under_implicit_family(
-            parser_options.package_support_multifile_tests,
-            file_path.path_str(),
-        )
-    else {
-        return;
-    };
-    let (family_pos, family_name) = (family.0.clone(), family.1.clone());
-    // Zero-width, at the start of the file: nothing the file contains is at
-    // fault, and a `.hack` file has no `<?hh` pragma to point at.
-    let file_top_pos = Pos::from_lnum_bol_offset(file_path, (1, 0, 0), (1, 0, 0));
-    raise_hh_error(
-        env,
-        Naming::implicit_package_file_directly_under_path(file_top_pos, &family_name, family_pos),
+    let placement = parser_options.package_info.check_implicit_family_placement(
+        parser_options.package_support_multifile_tests,
+        file_path.path_str(),
     );
+    // Both errors are anchored at a zero-width position at the start of the
+    // file: a `.hack` file has no `<?hh` pragma to point at.
+    let error = match placement {
+        ImplicitFamilyPlacement::Valid => return,
+        ImplicitFamilyPlacement::DirectlyUnderFamily(family) => {
+            let (family_pos, family_name) = (family.0.clone(), family.1.clone());
+            let pos = Pos::from_lnum_bol_offset(file_path, (1, 0, 0), (1, 0, 0));
+            Naming::implicit_package_file_directly_under_path(pos, &family_name, family_pos)
+        }
+        ImplicitFamilyPlacement::InvalidMemberDir(family, member_dir) => {
+            let (family_pos, family_name) = (family.0.clone(), family.1.clone());
+            let pos = Pos::from_lnum_bol_offset(file_path, (1, 0, 0), (1, 0, 0));
+            Naming::implicit_package_invalid_member_dir(pos, &family_name, family_pos, &member_dir)
+        }
+    };
+    raise_hh_error(env, error);
 }
 
 fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {

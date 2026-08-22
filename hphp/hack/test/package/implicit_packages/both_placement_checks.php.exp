@@ -1,0 +1,35 @@
+error: Naming[2136] The directory `1bad` cannot name a member of the implicit package family `prototypes`; an implicit package member directory must be a valid identifier [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+both_placement_checks.php--prototypes/1bad/b.php:1:1
+ 1 | <?hh
+   | ^ [1]
+ 2 | // Under a directory that cannot name a member: reported by
+ 3 | // check_invalid_member_dir.
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+error: Naming[2135] A Hack file cannot be placed directly under the implicit package family `prototypes`; move it into a subdirectory so it belongs to a member package `prototypes.<dir>` [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+both_placement_checks.php--prototypes/loose.php:1:1
+ 1 | <?hh
+   | ^ [1]
+ 2 | // Directly under the family path: reported by check_directly_under_family.
+ 3 | const int LOOSE_C = 1;
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+2 errors found

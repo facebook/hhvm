@@ -174,6 +174,7 @@ module Naming = struct
     | NamedVariadicTypeDisallowed [@value 2133]
     | VariadicNamedParameterDisallowed [@value 2134]
     | ImplicitPackageFileDirectlyUnderPath [@value 2135]
+    | ImplicitPackageInvalidMemberDir [@value 2136]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

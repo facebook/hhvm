@@ -174,6 +174,38 @@ impl Naming {
         )
     }
 
+    /// A file under an implicit package family sits in a directory whose name
+    /// is not a valid Hack identifier, so that directory can name no member
+    /// package.
+    ///
+    /// `family_pos` points at the family's declaration in PACKAGES.toml.
+    pub fn implicit_package_invalid_member_dir(
+        pos: Pos,
+        family: &str,
+        family_pos: Pos,
+        member_dir: &str,
+    ) -> Diagnostic {
+        UserDiagnostic::new(
+            Severity::Err,
+            Self::ImplicitPackageInvalidMemberDir as isize,
+            Message(
+                pos,
+                format!(
+                    "The directory `{}` cannot name a member of the implicit package family `{}`; an implicit package member directory must be a valid identifier",
+                    member_dir, family
+                )
+                .into(),
+            ),
+            vec![Message(
+                family_pos,
+                format!("The implicit package family `{}` is declared here", family).into(),
+            )],
+            Explanation::Empty,
+            vec![],
+            vec![],
+        )
+    }
+
     pub fn bad_builtin_type(p: Pos, name: &str, correct_name: &str) -> Diagnostic {
         UserDiagnostic::new(
             Severity::Err,

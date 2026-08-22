@@ -1,0 +1,18 @@
+error: Naming[2136] The directory `1bad` cannot name a member of the implicit package family `prototypes`; an implicit package member directory must be a valid identifier [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+no_defs_invalid_member_dir.php--prototypes/1bad/no_defs.php:1:1
+ 1 | <?hh
+   | ^ [1]
+ 2 | // `1bad` is not a valid identifier, and this file declares nothing at all.
+ 3 | // The invalid-member-dir check is registered as a whole-file check, so it still
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

@@ -1,0 +1,18 @@
+error: Naming[2136] The directory `proto.v1` cannot name a member of the implicit package family `prototypes`; an implicit package member directory must be a valid identifier [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+dotted_member_dir.php--prototypes/proto.v1/a.php:1:1
+ 1 | <?hh
+   | ^ [1]
+ 2 | // `proto.v1` contains a dot, so it is not a valid identifier and cannot name an
+ 3 | // implicit package member. Supporting it would also produce the member name
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

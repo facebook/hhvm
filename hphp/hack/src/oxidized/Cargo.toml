@@ -20,6 +20,7 @@ bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
 file_info = { path = "../deps/rust/file_info" }
+hack_name = { path = "../utils/hack_name/cargo" }
 hash = { path = "../utils/hash" }
 hh24_types = { path = "../utils/hh24_types" }
 hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }

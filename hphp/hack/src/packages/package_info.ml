@@ -52,12 +52,14 @@ let synthesize_member (family : Package.t) (member_dir : string) : Package.t =
     Package.is_implicit = true;
   }
 
-(* Splits a (possibly synthesized) name [F.D] into family [F] and member [D],
- * splitting on the *first* [.]. The member [D] is a single directory name that
- * may itself contain [.] (e.g. [proto.v1]), so we keep the remainder after the
- * first [.] as the member. Family names are forbidden from containing [.] (see
- * the family-name validation in config.rs), so this split is unambiguous.
- * Returns None unless both the family and the member are non-empty. *)
+(* Splits a (possibly synthesized) name [F.D] into family [F] and member [D].
+ * In a well-formed repo a member directory is a valid Hack identifier and so
+ * contains no [.], and family names are forbidden from containing [.] (see the
+ * family-name validation in config.rs), so [F.D] contains exactly one [.].
+ * Resolution does not re-verify that: a directory that is not a valid identifier
+ * is reported by the lowerer's placement check, and this code is only meaningful
+ * for a repo that type-checks clean. Returns None unless both sides are
+ * non-empty. *)
 let split_member_name (pkg : string) : (string * string) option =
   match String.lsplit2 pkg ~on:'.' with
   | Some (family, member)

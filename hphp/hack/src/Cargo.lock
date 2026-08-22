@@ -3427,6 +3427,7 @@ dependencies = [
  "bumpalo",
  "eq_modulo_pos",
  "file_info",
+ "hack_name",
  "hash",
  "hh24_types",
  "hh_autoimport_rust",

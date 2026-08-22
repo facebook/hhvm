@@ -1,0 +1,17 @@
+error: Naming[2135] A Hack file cannot be placed directly under the implicit package family `prototypes`; move it into a subdirectory so it belongs to a member package `prototypes.<dir>` [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+dothack_file_directly_under_path.php--prototypes/loose.hack:1:1
+ 1 | // A `.hack` file has no `<?hh` pragma, so line 1 is ordinary code.
+   | ^ [1]
+ 2 | const int LOOSE_HACK_C = 1;
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

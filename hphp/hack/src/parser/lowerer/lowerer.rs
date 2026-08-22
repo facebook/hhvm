@@ -6262,6 +6262,31 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMemb
     package
 }
 
+/// A file under an implicit package family's `path` must sit inside a member
+/// subdirectory; one placed directly under the family path belongs to no member
+/// package, so it is illegal.
+fn check_implicit_package_placement(env: &mut Env<'_>) {
+    let parser_options = env.parser_options;
+    let file_path = env.source_text().file_path_rc();
+    let Some(family) = parser_options
+        .package_info
+        .file_directly_under_implicit_family(
+            parser_options.package_support_multifile_tests,
+            file_path.path_str(),
+        )
+    else {
+        return;
+    };
+    let (family_pos, family_name) = (family.0.clone(), family.1.clone());
+    // Zero-width, at the start of the file: nothing the file contains is at
+    // fault, and a `.hack` file has no `<?hh` pragma to point at.
+    let file_top_pos = Pos::from_lnum_bol_offset(file_path, (1, 0, 0), (1, 0, 0));
+    raise_hh_error(
+        env,
+        Naming::implicit_package_file_directly_under_path(file_top_pos, &family_name, family_pos),
+    );
+}
+
 fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
     let doc_comment_opt = extract_docblock(node, env);
     match &node.children {
@@ -7081,6 +7106,8 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
 }
 
 fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
+    // Once per file, so a file declaring nothing is still checked.
+    check_implicit_package_placement(env);
     match &node.children {
         Script(c) => p_program(&c.declarations, env),
         _ => {

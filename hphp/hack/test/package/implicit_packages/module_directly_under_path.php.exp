@@ -1,0 +1,18 @@
+error: Naming[2135] A Hack file cannot be placed directly under the implicit package family `prototypes`; move it into a subdirectory so it belongs to a member package `prototypes.<dir>` [1]
+-> The implicit package family `prototypes` is declared here [2]
+
+module_directly_under_path.php--prototypes/mod.php:1:1
+ 1 | <?hh
+   | ^ [1]
+ 2 | // The only top-level definition is a module declaration.
+ 3 | new module foo {}
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [2]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+
+1 error found

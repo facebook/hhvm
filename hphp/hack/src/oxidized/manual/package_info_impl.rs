@@ -168,34 +168,66 @@ static MULTIFILE_PREFIX: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"^.*--").expect("should compile: the pattern is a literal")
 });
 
+/// The path rewriting every package lookup applies before prefix-matching. All
+/// lookups must go through this, so they prefix-match the same string.
+fn normalize(support_multifile_tests: bool, path: &str) -> Cow<'_, str> {
+    if support_multifile_tests {
+        MULTIFILE_PREFIX.replace(path, "")
+    } else {
+        Cow::Borrowed(path)
+    }
+}
+
 impl PackageInfo {
+    /// The most precise package whose `include_path` prefixes `path`, together
+    /// with the part of `path` lying below that `include_path`.
+    fn match_include_path<'a, 'p>(&'a self, path: &'p str) -> Option<(&'a Package, &'p str)> {
+        let (include_path, package) = self
+            .include_path_to_package_map
+            .iter()
+            .find(|(include_path, _)| path.starts_with(include_path))?;
+        Some((package, &path[include_path.len()..]))
+    }
+
     pub fn get_package_for_file(
         &self,
         support_multifile_tests: bool,
         path: &str,
     ) -> Option<Cow<'_, Package>> {
-        let path = if support_multifile_tests {
-            MULTIFILE_PREFIX.replace(path, "")
-        } else {
-            Cow::Borrowed(path)
-        };
-        let (include_path, package) = self
-            .include_path_to_package_map
-            .iter()
-            .find(|(include_path, _)| path.starts_with(include_path))?;
+        let path = normalize(support_multifile_tests, path);
+        let (package, remainder) = self.match_include_path(&path)?;
         if !package.is_implicit {
             // Common case: the stored package is returned by reference, no clone.
             return Some(Cow::Borrowed(package));
         }
-        // Implicit family match: the member directory `D` is the first path
-        // segment after the family `path`. Only direct child *directories*
-        // denote members, so a file lying directly in the family path (no `/`
-        // after the prefix) belongs to no package. The member is synthesized on
-        // demand, hence owned.
-        let remainder = &path[include_path.len()..];
+        // The member directory `D` is the first segment after the family
+        // `path`. Only child directories denote members, so a file lying
+        // directly in the family path belongs to no package.
         match remainder.split_once('/') {
             Some((dir, _)) if !dir.is_empty() => Some(Cow::Owned(synthesize_member(package, dir))),
             _ => None,
+        }
+    }
+
+    /// The implicit family (its positioned name) if `path` lies directly under
+    /// that family's `path`, with no member directory in between -- e.g.
+    /// `//prototypes/loose.php` under a family declared at `//prototypes/`.
+    ///
+    /// `None` means the file is legally placed: either it belongs to a member,
+    /// or it is under no family at all.
+    pub fn file_directly_under_implicit_family(
+        &self,
+        support_multifile_tests: bool,
+        path: &str,
+    ) -> Option<&PosId> {
+        let path = normalize(support_multifile_tests, path);
+        let (package, remainder) = self.match_include_path(&path)?;
+        if !package.is_implicit {
+            return None;
+        }
+        match remainder.split_once('/') {
+            Some((dir, _)) if !dir.is_empty() => None,
+            _ => Some(&package.name),
         }
     }
 }

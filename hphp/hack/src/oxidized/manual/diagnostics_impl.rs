@@ -144,6 +144,36 @@ impl Naming {
         )
     }
 
+    /// A Hack file placed directly under an implicit package family's `path`,
+    /// with no member directory in between, belongs to no member package.
+    ///
+    /// `family_pos` points at the family's declaration in PACKAGES.toml.
+    pub fn implicit_package_file_directly_under_path(
+        pos: Pos,
+        family: &str,
+        family_pos: Pos,
+    ) -> Diagnostic {
+        UserDiagnostic::new(
+            Severity::Err,
+            Self::ImplicitPackageFileDirectlyUnderPath as isize,
+            Message(
+                pos,
+                format!(
+                    "A Hack file cannot be placed directly under the implicit package family `{}`; move it into a subdirectory so it belongs to a member package `{}.<dir>`",
+                    family, family
+                )
+                .into(),
+            ),
+            vec![Message(
+                family_pos,
+                format!("The implicit package family `{}` is declared here", family).into(),
+            )],
+            Explanation::Empty,
+            vec![],
+            vec![],
+        )
+    }
+
     pub fn bad_builtin_type(p: Pos, name: &str, correct_name: &str) -> Diagnostic {
         UserDiagnostic::new(
             Severity::Err,

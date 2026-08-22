@@ -16,6 +16,13 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <mutex>
+#include <utility>
+#include <vector>
+
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/DecoratedAsyncTransportWrapper.h>
@@ -34,11 +41,56 @@ namespace {
 
 using iua = folly::IoUringArena;
 
+// A malloc-backed arena that records its allocations so the integration test
+// can verify buffers were sourced from our IOBufFactory. Always available, so
+// the test runs on hosts without io_uring support instead of skipping (a
+// GTEST_SKIP is scored as a test failure by the fleet test runner).
+// SIZED_FREE-safe because the buffers come from malloc.
+class TrackingArena {
+ public:
+  static bool initialized() { return true; }
+
+  static void* allocate(size_t size) {
+    void* p = std::malloc(size);
+    if (p) {
+      auto addr = reinterpret_cast<uintptr_t>(p);
+      std::lock_guard<std::mutex> g(state().mutex);
+      state().ranges.emplace_back(addr, size);
+    }
+    return p;
+  }
+
+  static bool addressInArena(const uint8_t* address) {
+    auto a = reinterpret_cast<uintptr_t>(address);
+    std::lock_guard<std::mutex> g(state().mutex);
+    for (const auto& [start, size] : state().ranges) {
+      if (a >= start && a < start + size) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+ private:
+  struct State {
+    std::mutex mutex;
+    std::vector<std::pair<uintptr_t, size_t>> ranges;
+  };
+  static State& state() {
+    static State s;
+    return s;
+  }
+};
+
 class ArenaCheckingTransport
     : public folly::DecoratedAsyncTransportWrapper<folly::AsyncTransport> {
  public:
   using Base = folly::DecoratedAsyncTransportWrapper<folly::AsyncTransport>;
-  using Base::Base;
+
+  ArenaCheckingTransport(
+      folly::AsyncTransport::UniquePtr socket,
+      std::function<bool(const uint8_t*)> inArena)
+      : Base(std::move(socket)), inArena_(std::move(inArena)) {}
 
   size_t writesChecked{0};
   size_t bufsChecked{0};
@@ -58,8 +110,7 @@ class ArenaCheckingTransport
     const auto* curr = buf.get();
     do {
       bufsChecked++;
-      auto inArena = iua::addressInArena(const_cast<uint8_t*>(curr->data()));
-      if (!inArena) {
+      if (!inArena_(curr->data())) {
         allInArena = false;
       }
       curr = curr->next();
@@ -67,27 +118,38 @@ class ArenaCheckingTransport
 
     Base::writeChain(cb, std::move(buf), flags);
   }
+
+ private:
+  std::function<bool(const uint8_t*)> inArena_;
 };
 
 } // namespace
 
 TEST(IOBufFactoryIntegrationTest, FrameInArena) {
   constexpr size_t kArenaSize = 4 * 1024 * 1024;
-  if (!iua::ioUringArenaSupported()) {
-    GTEST_SKIP() << "IoUringArena not supported";
+
+  // Prefer the real io_uring arena; fall back to a malloc-backed tracking arena
+  // on hosts without io_uring support. Both exercise the same contract: frames
+  // written by RocketClientChannel are allocated through our IOBufFactory.
+  folly::IOBufFactory factoryFn;
+  std::function<bool(const uint8_t*)> inArena;
+  if (iua::ioUringArenaSupported() && iua::init(kArenaSize)) {
+    factoryFn = folly::memory::makeIOBufArenaFactory<iua>();
+    inArena = [](const uint8_t* p) {
+      return iua::addressInArena(const_cast<uint8_t*>(p));
+    };
+  } else {
+    factoryFn = folly::memory::makeIOBufArenaFactory<TrackingArena>();
+    inArena = [](const uint8_t* p) { return TrackingArena::addressInArena(p); };
   }
-  if (!iua::init(kArenaSize)) {
-    GTEST_SKIP() << "IoUringArena initialization not supported";
-  }
+  auto factory = std::make_shared<folly::IOBufFactory>(std::move(factoryFn));
 
   auto server = ScopedServerInterfaceThread(std::make_shared<TestHandler>());
-  auto factory = std::make_shared<folly::IOBufFactory>(
-      folly::memory::makeIOBufArenaFactory<iua>());
 
   folly::EventBase evb;
   auto socket = folly::AsyncSocket::newSocket(&evb, server.getAddress());
   auto transport = ArenaCheckingTransport::UniquePtr(
-      new ArenaCheckingTransport(std::move(socket)));
+      new ArenaCheckingTransport(std::move(socket), std::move(inArena)));
   auto* checker = static_cast<ArenaCheckingTransport*>(transport.get());
 
   auto channel = RocketClientChannel::newChannel(std::move(transport));

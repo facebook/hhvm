@@ -200,7 +200,11 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->func()->name()->data());
+#ifdef __aarch64__
+      auto const cfa = vmJitCfa();
+#else
       auto const cfa = uintptr_t(rbp) + kNativeFrameSize;
+#endif
       auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
       auto const res = processFixupForVMFrame(frame);
       if (res || LIKELY(soft)) return res;
@@ -221,8 +225,6 @@ void syncVMRegsWork(bool soft) {
   auto fp = regState() >= VMRegState::GUARDED_THRESHOLD ?
     (ActRec*)regState() : framePtr;
 
-  // TODO(mcolavita): This is incorrect for C++ routines with padding after
-  // their CFA.
   auto const synced = FixupMap::fixupWork(fp, soft);
 
   if (synced) regState() = VMRegState::CLEAN;

@@ -394,7 +394,6 @@ class RowBlock {
     row.appendValue(std::forward<T>(value));
   }
   // Special override for folly::StringPiece to match existing code
-  template <>
   void appendValue(folly::StringPiece value) {
     auto& row = rows_.back();
     CHECK_LT(row.count(), row_fields_info_->numFields());

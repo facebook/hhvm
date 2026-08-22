@@ -117,6 +117,12 @@ inline jit::TCA& vmJitReturnAddr() {
   return vmRegsUnsafe().jitReturnAddr;
 }
 
+#ifdef __aarch64__
+inline uintptr_t& vmJitCfa() {
+  return vmRegsUnsafe().jitCfa;
+}
+#endif
+
 inline void assert_native_stack_aligned() {
   assertx(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 }

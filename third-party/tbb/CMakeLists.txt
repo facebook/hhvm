@@ -27,8 +27,6 @@ ExternalProject_Add(
   EXCLUDE_FROM_ALL
   SOURCE_DIR "${TBB_ROOT}"
   CONFIGURE_COMMAND ""
-  PATCH_COMMAND
-    patch -p4 < "${CMAKE_CURRENT_SOURCE_DIR}/pic_compile.patch"
   BUILD_COMMAND
     cd <SOURCE_DIR> && make
       work_dir=<INSTALL_DIR>
@@ -40,10 +38,6 @@ ExternalProject_Add(
   INSTALL_COMMAND ""
   BUILD_BYPRODUCTS "<INSTALL_DIR>${TBB_STATIC_LIB_PATH}"
 )
-
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
- execute_process(COMMAND "patch" "-p1" "-f" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/clang_fix.patch")
-endif()
 
 add_dependencies(tbb bundled_tbb)
 

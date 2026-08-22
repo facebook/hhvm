@@ -3304,7 +3304,7 @@ void HHVM_METHOD(DOMDocument, __construct,
   const OptString& str_encoding = encoding.isNull()
     ? null_string : encoding.toString();
   if (str_encoding.size() > 0) {
-    docp->encoding = (const xmlChar*)xmlStrdup((xmlChar*)str_encoding.data());
+    docp->encoding = xmlStrdup((const xmlChar*)str_encoding.data());
   }
   auto* data = Native::data<DOMNode>(this_);
   data->setNode((xmlNodePtr)docp);
@@ -3673,7 +3673,7 @@ bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const OptString& source) {
 Variant HHVM_METHOD(DOMDocument, save,
                     const OptString& file,
                     int64_t options /* = 0 */) {
-  VMRegGuard _;
+  VMRegAnchor _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0, saveempty = 0;

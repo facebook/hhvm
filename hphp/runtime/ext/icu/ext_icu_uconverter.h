@@ -39,6 +39,8 @@ struct IntlUConverter : IntlError, SystemLib::ClassLoader<"UConverter"> {
 
   UConverter* src() const { return m_src; }
   UConverter* dest() const { return m_dest; }
+  bool isDisposing() const { return m_disposing; }
+  void beginDispose() { m_disposing = true; }
   bool setSrc(UConverter* src) {
     if (m_src) {
       ucnv_close(m_src);
@@ -64,8 +66,8 @@ struct IntlUConverter : IntlError, SystemLib::ClassLoader<"UConverter"> {
 
 private:
   UConverter *m_src{nullptr}, *m_dest{nullptr};
+  bool m_disposing{false};
 };
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::Intl
-

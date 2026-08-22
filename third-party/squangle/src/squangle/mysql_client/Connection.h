@@ -181,7 +181,6 @@ class Connection {
       QueryGenerator& query_generator,
       Args&&... args);
 
-  template <>
   DbQueryResult queryWithGenerator(
       QueryGenerator& query_generator,
       QueryCallback&& cb,

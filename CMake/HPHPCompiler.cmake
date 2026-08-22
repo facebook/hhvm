@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 # Do this until cmake has a define for ARMv8
 execute_process(COMMAND uname -m
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -32,6 +34,11 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   list(APPEND DISABLED_C_NAMED_WARNINGS
     "missing-field-initializers"
     "sign-compare"
+    # GCC 14 promoted this to an error by default, which the vendored C in
+    # third-party/ does not build under. Demote it back to a warning rather
+    # than silencing it, so the diagnostic stays visible in build logs.
+    # TODO: fix the vendored sources and scope this to those targets.
+    "error=incompatible-pointer-types"
   )
 
   # General options to pass to both C & C++ compilers
@@ -198,6 +205,14 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   set(CMAKE_CXX_FLAGS_DEBUG_INIT          "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_DEBUGOPT_INIT         "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_CXX_FLAGS_DEBUGOPT_INIT       "-O2 -g${GDB_SUBOPTION}")
+  # CMake seeds flags from _INIT only for its builtin configurations, so the
+  # custom DebugOpt configuration needs explicit cache entries.
+  foreach(lang C CXX)
+    if(NOT DEFINED CMAKE_${lang}_FLAGS_DEBUGOPT)
+      set(CMAKE_${lang}_FLAGS_DEBUGOPT "${CMAKE_${lang}_FLAGS_DEBUGOPT_INIT}"
+          CACHE STRING "Flags used by the ${lang} compiler during DebugOpt builds.")
+    endif()
+  endforeach()
   set(CMAKE_C_FLAGS_MINSIZEREL_INIT       "-Os")
   set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "-Os")
   set(CMAKE_C_FLAGS_RELEASE_INIT          "-O3")
@@ -232,6 +247,28 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   foreach(opt ${RELEASE_CXX_OPTIONS})
     set(CMAKE_CXX_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT} -${opt}")
   endforeach()
+
+  # BFD overflows AArch64 branch relocations once a link gets into the
+  # multi-gigabyte range, which every non-trivial HHVM link does. Prefer lld
+  # for all link types rather than patching individual targets. A target that
+  # selects its own linker (see ENABLE_LD_GOLD in hphp/hhvm) still wins, since
+  # target-level flags land later on the link line.
+  if(IS_AARCH64)
+    find_program(LLD_EXECUTABLE ld.lld)
+    mark_as_advanced(LLD_EXECUTABLE)
+    if(LLD_EXECUTABLE)
+      foreach(linker_flags
+              CMAKE_EXE_LINKER_FLAGS_INIT
+              CMAKE_SHARED_LINKER_FLAGS_INIT
+              CMAKE_MODULE_LINKER_FLAGS_INIT)
+        set(${linker_flags} "${${linker_flags}} -fuse-ld=lld")
+      endforeach()
+    else()
+      message(WARNING
+        "ld.lld not found; large AArch64 links may fail with BFD relocation "
+        "overflows. Install lld to avoid this.")
+    endif()
+  endif()
 else()
   message("Warning: unknown/unsupported compiler, things may go wrong")
 endif()

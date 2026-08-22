@@ -60,7 +60,8 @@ ActRec* findVMFrameForDebug(uintptr_t start = 0);
  *     that was called, but did not set up a full frame, as it is operating on
  *     behalf of the caller. This mode is used in prologues and some shared
  *     stubs on architectures, where the callee's frame is stored immediately
- *     under the caller's sp (currently true on x64, but not arm or ppc).
+ *     under the caller's sp. On AArch64, the call site saves the native sp in
+ *     RDS because the frame record need not have a fixed offset from it.
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
  *     a call to a shared stub or prologue, and then that code called C++. The

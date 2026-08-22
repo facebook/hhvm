@@ -35,6 +35,12 @@ const StaticString
   s_toUCallback("toUCallback"),
   s_fromUCallback("fromUCallback");
 
+static IntlUConverter* getCallbackData(ObjectData* objval) {
+  if (MemoryManager::sweeping()) return nullptr;
+  auto data = Native::data<IntlUConverter>(objval);
+  return data->isDisposing() ? nullptr : data;
+}
+
 template<class T>
 bool checkLimits(IntlUConverter* data, T* args, int64_t needed) {
   if (needed > (args->targetLimit - args->target)) {
@@ -93,8 +99,8 @@ static void ucnvToUCallback(ObjectData *objval,
                             const char *codeUnits, int32_t length,
                             UConverterCallbackReason reason,
                             UErrorCode *pErrorCode) {
-  if (MemoryManager::sweeping()) return;
-  auto data = Native::data<IntlUConverter>(objval);
+  auto data = getCallbackData(objval);
+  if (!data) return;
   OptString source(args->source, args->sourceLimit - args->source, CopyString);
   Variant ret = objval->o_invoke_few_args(
     s_toUCallback, RuntimeCoeffects::fixme(), 4,
@@ -148,8 +154,8 @@ static void ucnvFromUCallback(ObjectData *objval,
                               UChar32 codePoint,
                               UConverterCallbackReason reason,
                               UErrorCode *pErrorCode) {
-  if (MemoryManager::sweeping()) return;
-  auto data = Native::data<IntlUConverter>(objval);
+  auto data = getCallbackData(objval);
+  if (!data) return;
   Array source = Array::CreateVec();
   for(int i = 0; i < length; i++) {
     UChar32 c;
@@ -262,8 +268,9 @@ static void HHVM_METHOD(UConverter, __construct, const OptString& toEncoding,
 
 static void HHVM_METHOD(UConverter, __dispose) {
   FETCH_CNV(data, this_,);
-  if (data->src()) ucnv_close(data->src());
-  if (data->dest()) ucnv_close(data->dest());
+  data->beginDispose();
+  data->setSrc(nullptr);
+  data->setDest(nullptr);
 }
 
 /* Get algorithmic types */

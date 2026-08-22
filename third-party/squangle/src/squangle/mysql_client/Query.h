@@ -471,7 +471,7 @@ class Query {
 
   QueryText query_text_;
   bool unsafe_query_ = false;
-  std::vector<QueryArgument> params_{};
+  std::vector<QueryArgument> params_;
 };
 
 // Wraps many queries and holds a buffer that contains the rendered multi query

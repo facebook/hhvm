@@ -196,6 +196,10 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   doArgs(vargs.simdArgs, rarg_simd, nullptr);
 
   // Emit the appropriate call instruction sequence.
+  if (inst.fixup.isValid() && inst.fixup.isIndirect()) {
+    emitStoreCFAForIndirectFixup(v);
+  }
+  // Do not adjust rsp between saving the CFA above and emitting the call.
   emitCall(v, inst.call, argRegs);
 
   // Handle fixup and unwind information.

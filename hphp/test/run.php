@@ -150,6 +150,13 @@ function check_executable(string $path): string {
   return $rpath;
 }
 
+function find_executable(string $name): ?string {
+  $output = vec[];
+  $return_var = -1;
+  exec("which ".escapeshellarg($name)." 2> /dev/null", inout $output, inout $return_var);
+  return $return_var === 0 && isset($output[0]) ? $output[0] : null;
+}
+
 function hhvm_binary_routes(): dict<string, string> {
   return dict[
     "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
@@ -250,12 +257,8 @@ function hhvm_path(): string {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      $output = null;
-      $return_var = -1;
-      exec("which hhvm 2> /dev/null", inout $output, inout $return_var);
-      if (isset($output[0]) && $output[0]) {
-        return $output[0];
-      }
+      $candidate = find_executable('hhvm');
+      if ($candidate is nonnull) return $candidate;
       error("You need to specify hhvm bin with env HHVM_BIN");
     }
 
@@ -444,6 +447,7 @@ final class Options {
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
+    public bool $facebook_build = false;
     public ?Servers $servers = null;
 }
 
@@ -748,7 +752,7 @@ function find_tests(
   }
   if ($files == vec['all']) {
     $files = vec['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
-    if (is_facebook_build($options)) {
+    if ($options->facebook_build) {
       $files[] = 'facebook';
     }
   }
@@ -925,7 +929,7 @@ function sbcc_binary_routes(): dict<string, string> {
   ];
 }
 
-function sbcc_build_binary(): string {
+function sbcc_build_binary(): ?string {
   // SBCC_BUILD is set by the buck2 test infrastructure in DEFS.bzl via
   // $(location //hphp/runtime/ext/sbcc:sbcc-build).
   $env = getenv('SBCC_BUILD');
@@ -937,9 +941,7 @@ function sbcc_build_binary(): string {
   // Probe build routes — same infrastructure as bin_root() / hhvm_path().
   $found = find_build_binary('sbcc-build', sbcc_binary_routes());
   if ($found is nonnull) return $found;
-  // Bare fallback — unlike hhvm_path() which errors, sbcc-build is optional;
-  // tests that need it call sbcc_enabled() first and skip when inapplicable.
-  return 'sbcc-build';
+  return find_executable('sbcc-build');
 }
 
 function sbcc_working_artifact(string $test): string {
@@ -1048,8 +1050,10 @@ function sbcc_mode_setup_impl(Options $options, string $test): (string, bool) {
     }
 
     $artifact = sbcc_working_artifact($test);
+    $builder = sbcc_build_binary();
+    invariant($builder is nonnull, 'SBCC builder availability checked earlier');
     $cmd_parts = vec[];
-    $cmd_parts[] = escapeshellarg(sbcc_build_binary());
+    $cmd_parts[] = escapeshellarg($builder);
     $cmd_parts[] = '--output';
     $cmd_parts[] = escapeshellarg($artifact);
     $cmd_parts[] = '--root';
@@ -2805,6 +2809,26 @@ function runif_should_skip_test(
   return shape('valid' => true, 'match' => true);
 }
 
+// A test is fbcode-only when it carries a "$test.onlyfacebook" marker, or when
+// any directory between it and hphp/test carries an "onlyfacebook" marker.
+// Whole trees are marked at their root, so the walk has to cover ancestors and
+// not just the immediately enclosing directory.
+function is_onlyfacebook_test(string $test): bool {
+  if (file_exists($test.'.onlyfacebook')) return true;
+
+  // Test paths may be relative to the cwd, so bound the walk by comparing
+  // resolved paths against the test root rather than by string prefix.
+  $root = realpath(test_dir());
+  $dir = dirname($test);
+  while (true) {
+    if (file_exists($dir.'/onlyfacebook')) return true;
+    if (realpath($dir) === $root) return false;
+    $parent = dirname($dir);
+    if ($parent === $dir) return false;
+    $dir = $parent;
+  }
+}
+
 // should_skip_test_simple handles generating skips in ways that are purely
 // based on options passed to run.php, and test names/exclusion files (eg.
 // norepo).  The benefit of should_skip_test_simple is that it can factor in to
@@ -2813,6 +2837,10 @@ function should_skip_test_simple(
   Options $options,
   string $test,
 ): ?string {
+  if (!$options->facebook_build && is_onlyfacebook_test($test)) {
+    return 'skip-onlyfacebook';
+  }
+
   if (($options->cli_server || $options->server) &&
       !can_run_server_test($test, $options)) {
     return 'skip-server';
@@ -3861,6 +3889,10 @@ function run_test(Options $options, string $test): mixed {
     }
   }
 
+  if (sbcc_uses_builder($test) && sbcc_build_binary() is null) {
+    return 'skip-sbcc-build';
+  }
+
   // SBCC pre-test setup: build or copy the .sbcc artifact before HHVM starts.
   if (sbcc_enabled($test)) {
     list($sbcc_output, $sbcc_success) = sbcc_mode_setup($options, $test);
@@ -4504,6 +4536,7 @@ function main(vec<string> $argv): int {
   if ($options->help) {
     error(help());
   }
+  $options->facebook_build = is_facebook_build($options);
 
   Status::createWorkingDir($options->working_dir);
 

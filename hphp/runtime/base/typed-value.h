@@ -23,6 +23,7 @@
 #include "hphp/util/type-scan.h"
 #include "hphp/util/type-traits.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <string>
@@ -396,8 +397,10 @@ typename std::enable_if<
   std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
 >::type make_tv() {
-  TypedValue ret;
-  ret.m_type = DType;
+  // Writing only m_type leaves the aux bytes indeterminate, which GCC is
+  // entitled to propagate into the 16-byte copy of the return value. Build the
+  // whole TypedValue instead, the same way make_tv_of_type() does below.
+  auto const ret = TypedValue { Value{}, DType, {0}, {0} };
   assertx(tvIsPlausible(ret));
   return ret;
 }

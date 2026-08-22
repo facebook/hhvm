@@ -50,6 +50,7 @@ function (HHVM_RENDER_CONFIG_SPECIFICATION TARGET)
       CARGO_HOME=${HHVM_RENDER_CONFIG_SPEC_CARGO_HOME}
       ${CARGO_EXE}
       run
+      --locked
       --target-dir ${CMAKE_BINARY_DIR}/hphp/tools/configs
       --quiet
       --bin generate_configs

@@ -61,7 +61,7 @@ BUILD_PARAMS+=("$profile_flags")
   if [ -z "$bin" ]; then
     cargo build "${BUILD_PARAMS[@]}"
   else
-    cargo run --bin "$bin" -- "$@"
+    cargo run "${BUILD_PARAMS[@]}" --bin "$bin" -- "$@"
   fi
 ) &&
 if [ -z "$exe" ] && [ -z "$bin" ]; then

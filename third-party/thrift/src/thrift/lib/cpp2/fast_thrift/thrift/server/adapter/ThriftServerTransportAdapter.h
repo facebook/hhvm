@@ -164,20 +164,18 @@ class ThriftServerTransportAdapter {
     pipeline_->fireException(std::move(e));
   }
 
-  // Called when the rocket pipeline reports a completed write batch. Relays it
-  // up the thrift pipeline as a ThriftServerEventType::WriteComplete event
-  // carrying the batch's status / frame count / bytes. Precondition: pipeline
-  // is wired (the rocket connection that fires this is torn down before
-  // pipeline_ is cleared).
+  // Called when the rocket pipeline reports a completed frame write. Relays it
+  // up the thrift pipeline as a ThriftServerEventType::WriteComplete event.
+  // Precondition: pipeline is wired (the rocket connection that fires this is
+  // torn down before pipeline_ is cleared).
   void onWriteComplete(
       const rocket::server::RocketWriteCompleteEvent& event) noexcept {
     pipeline_->fireEvent(
         ThriftServerEventType::WriteComplete,
         channel_pipeline::TypeErasedBox(
             ThriftServerWriteCompleteEvent{
+                .streamId = event.streamId,
                 .status = event.status,
-                .frameCount = event.frameCount,
-                .bytes = event.bytes,
             }));
   }
 

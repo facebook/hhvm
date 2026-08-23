@@ -31,13 +31,23 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * `make(status, bytes)` satisfies the WriteCompleteEventFactory concept used
  * by TransportHandlerT — produces a TransportWriteComplete event per writev.
  *
- * `makeRocketWriteComplete(status, frameCount, bytes)` is used by
- * WriteCompletionTrackerT to fire the enriched per-rocket-batch event
- * upstream after popping its frame-count FIFO.
+ * `makeBatchWriteComplete(status, frameCount, bytes)` is used by
+ * WriteCompletionTrackerT to fire the enriched per-batch event upstream after
+ * popping its frame-count FIFO.
+ *
+ * `makeFrameWriteComplete(status, streamId)` is used by
+ * FragmentCompletionTrackerT to fan that batch event back out into one event
+ * per original frame.
  */
 struct RocketServerEventFactory {
   using EventId = RocketServerEventId;
   using TransportWriteCompleteEventType = TransportWriteCompleteEvent;
+
+  // Batch-level event consumed by the fragmentation handler's tracker: the
+  // event it subscribes to, plus the message type carried.
+  using BatchWriteCompleteEventType = BatchWriteCompleteEvent;
+  static constexpr EventId kBatchWriteCompleteEvent =
+      EventId::BatchWriteComplete;
 
   static std::pair<
       EventId,
@@ -57,17 +67,32 @@ struct RocketServerEventFactory {
   static std::pair<
       EventId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
-  makeRocketWriteComplete(
+  makeBatchWriteComplete(
       apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
       size_t frameCount,
       size_t bytes) noexcept {
     return {
-        EventId::RocketWriteComplete,
+        EventId::BatchWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-            RocketWriteCompleteEvent{
+            BatchWriteCompleteEvent{
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
+            })};
+  }
+
+  static std::pair<
+      EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
+  makeFrameWriteComplete(
+      apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
+      uint32_t streamId) noexcept {
+    return {
+        EventId::FrameWriteComplete,
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+            FrameWriteCompleteEvent{
+                .streamId = streamId,
+                .status = status,
             })};
   }
 };

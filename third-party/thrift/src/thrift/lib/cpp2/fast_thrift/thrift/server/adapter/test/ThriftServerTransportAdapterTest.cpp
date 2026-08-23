@@ -301,16 +301,14 @@ TEST(
       rocket::server::RocketServerEventId::RocketWriteComplete,
       TypeErasedBox(
           rocket::server::RocketWriteCompleteEvent{
+              .streamId = 4,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 4,
-              .bytes = 256,
           }));
 
   ASSERT_EQ(thriftTail.events.size(), 1u);
   EXPECT_EQ(
       thriftTail.events[0].status, transport::WriteCompletionStatus::Success);
-  EXPECT_EQ(thriftTail.events[0].frameCount, 4u);
-  EXPECT_EQ(thriftTail.events[0].bytes, 256u);
+  EXPECT_EQ(thriftTail.events[0].streamId, 4u);
 
   thriftPipeline->deactivate();
   thriftPipeline->close();

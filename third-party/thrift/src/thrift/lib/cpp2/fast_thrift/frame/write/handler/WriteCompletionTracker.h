@@ -122,13 +122,13 @@ constexpr auto makeBatcherSubscriptions() noexcept {
  * inside the tracker body.
  */
 template <typename T>
-concept RocketWriteCompleteEventFactory = requires(
+concept BatchWriteCompleteEventFactory = requires(
     typename T::TransportWriteCompleteEventType transportEvent,
     size_t frameCount) {
   typename T::EventId;
   typename T::TransportWriteCompleteEventType;
   {
-    T::makeRocketWriteComplete(
+    T::makeBatchWriteComplete(
         transportEvent.status, frameCount, transportEvent.bytes)
   } noexcept -> std::same_as<std::pair<
       typename T::EventId,
@@ -138,29 +138,34 @@ concept RocketWriteCompleteEventFactory = requires(
 /**
  * Concrete tracker — counts outbound frames per batch and, on each raw
  * TransportWriteComplete from transport, pops the front batch's frame count
- * and fires a RocketWriteComplete (enriched with frameCount) upstream
- * via `EventFactory::makeRocketWriteComplete(status, count, bytes)`.
+ * and fires a BatchWriteComplete (enriched with frameCount) upstream
+ * via `EventFactory::makeBatchWriteComplete(status, count, bytes)`.
+ *
+ * Batch-level is as far as this tracker's knowledge goes. Turning a batch
+ * completion into whatever the pipeline's upper layers want — per-frame, or
+ * per-connection — belongs to the handler above, which is the first one that
+ * knows what the batch was made of.
  *
  * Templated on the pipeline's event factory (see
- * RocketWriteCompleteEventFactory). The factory must expose:
+ * BatchWriteCompleteEventFactory). The factory must expose:
  *   - `using EventId = ...;` with `TransportWriteComplete` and
- *     `RocketWriteComplete` values.
+ *     `BatchWriteComplete` values.
  *   - `using TransportWriteCompleteEventType = ...;` — the message carried by
  *     the TransportWriteComplete event, with `status` and `bytes` fields.
- *   - `static TypeErasedBox makeRocketWriteComplete(status, count, bytes)
+ *   - `static TypeErasedBox makeBatchWriteComplete(status, count, bytes)
  * noexcept;`
  *
  * EB-thread only — no synchronization. The batch-count FIFO stays in
  * lockstep with the transport's writeSuccess/writeErr FIFO ordering
  * (per AsyncSocket's structural write-queue guarantee).
  */
-template <RocketWriteCompleteEventFactory EventFactory>
+template <BatchWriteCompleteEventFactory EventFactory>
 class WriteCompletionTrackerT {
  public:
   // The tracker subscribes to the raw transport event and re-fires the
   // enriched one. Sourced from the factory so the tracker stays agnostic of
   // the concrete protocol enum. Subscribing only to TransportWriteComplete
-  // means its own RocketWriteComplete re-fires are never routed back to it.
+  // means its own BatchWriteComplete re-fires are never routed back to it.
   using EventId = typename EventFactory::EventId;
   static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
       EventId::TransportWriteComplete>
@@ -192,7 +197,7 @@ class WriteCompletionTrackerT {
     auto count = batchFrameCounts_.front();
     batchFrameCounts_.pop_front();
     auto [eventId, eventMsg] =
-        EventFactory::makeRocketWriteComplete(evt.status, count, evt.bytes);
+        EventFactory::makeBatchWriteComplete(evt.status, count, evt.bytes);
     ctx.fireEvent(eventId, std::move(eventMsg));
   }
 

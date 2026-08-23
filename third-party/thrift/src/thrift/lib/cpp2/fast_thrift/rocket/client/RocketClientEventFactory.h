@@ -33,11 +33,9 @@ namespace apache::thrift::fast_thrift::rocket::client {
  * `make(status, bytes)` satisfies the WriteCompleteEventFactory concept used
  * by TransportHandlerT — produces a TransportWriteComplete event per writev.
  *
- * `makeRocketWriteComplete(status, frameCount, bytes)` is used by
- * WriteCompletionTrackerT to fire the enriched per-rocket-batch event
- * (BatchWriteComplete) upstream after popping its frame-count FIFO. (The method
- * name is fixed by the shared tracker's factory contract; the event it produces
- * is the batch-level one.)
+ * `makeBatchWriteComplete(status, frameCount, bytes)` is used by
+ * WriteCompletionTrackerT to fire the enriched per-rocket-batch event upstream
+ * after popping its frame-count FIFO.
  */
 struct RocketClientEventFactory {
   using EventId = RocketClientEventId;
@@ -67,7 +65,7 @@ struct RocketClientEventFactory {
   static std::pair<
       EventId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
-  makeRocketWriteComplete(
+  makeBatchWriteComplete(
       apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
       size_t frameCount,
       size_t bytes) noexcept {

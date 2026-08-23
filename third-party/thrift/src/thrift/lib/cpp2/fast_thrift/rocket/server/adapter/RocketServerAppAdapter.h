@@ -88,8 +88,8 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   // onWriteReady().
   using OnWriteReadyFn = folly::Function<void() noexcept>;
 
-  // Write-completion relay: invoked once per completed rocket-frame batch
-  // with the enriched RocketWriteCompleteEvent (status, frameCount, bytes).
+  // Write-completion relay: invoked once per completed outbound rocket frame
+  // with the RocketWriteCompleteEvent (streamId, status).
   // Only delivered when the pipeline is built with RocketServerEventId; for
   // a default (NoEvent) pipeline the subscription compiles out entirely.
   using OnWriteCompleteFn =

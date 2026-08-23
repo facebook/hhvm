@@ -36,7 +36,7 @@ struct TestTransportWriteCompleteEvent {
   size_t bytes;
 };
 
-struct TestRocketWriteCompleteEvent {
+struct TestBatchWriteCompleteEvent {
   transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
@@ -45,7 +45,7 @@ struct TestRocketWriteCompleteEvent {
 // Event enum mirroring a rocket pipeline's EventId — one value per message.
 enum class TestEventId : std::uint32_t {
   TransportWriteComplete,
-  RocketWriteComplete,
+  BatchWriteComplete,
   Count,
 };
 
@@ -65,14 +65,14 @@ struct TestEventFactory {
   }
 
   static std::pair<EventId, channel_pipeline::TypeErasedBox>
-  makeRocketWriteComplete(
+  makeBatchWriteComplete(
       transport::WriteCompletionStatus status,
       size_t frameCount,
       size_t bytes) noexcept {
     return {
-        EventId::RocketWriteComplete,
+        EventId::BatchWriteComplete,
         channel_pipeline::TypeErasedBox(
-            TestRocketWriteCompleteEvent{
+            TestBatchWriteCompleteEvent{
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
@@ -86,15 +86,15 @@ class CapturingContext {
  public:
   void fireEvent(
       TestEventId /*ev*/, channel_pipeline::TypeErasedBox box) noexcept {
-    events_.push_back(std::move(box).take<TestRocketWriteCompleteEvent>());
+    events_.push_back(std::move(box).take<TestBatchWriteCompleteEvent>());
   }
 
-  const std::vector<TestRocketWriteCompleteEvent>& events() const noexcept {
+  const std::vector<TestBatchWriteCompleteEvent>& events() const noexcept {
     return events_;
   }
 
  private:
-  std::vector<TestRocketWriteCompleteEvent> events_;
+  std::vector<TestBatchWriteCompleteEvent> events_;
 };
 
 // Helper: build a TransportWriteComplete box (what transport would fire).

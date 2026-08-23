@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
@@ -40,6 +41,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerWriteCompletionHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/handler/ThriftMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
@@ -66,6 +68,7 @@ HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
 HANDLER_TAG(frame_fragmentation_handler);
+HANDLER_TAG(server_write_completion_handler);
 HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
 HANDLER_TAG(server_keepalive_handler);
@@ -386,7 +389,8 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
     builder
         // Batcher composed with the write-completion tracker: the tracker turns
         // the transport's per-writev completions into one event per
-        // rocket-frame batch, which the app adapter relays up to the thrift
+        // rocket-frame batch. The fragmentation handler below turns that into
+        // the rocket-level completion the app adapter relays up to the thrift
         // pipeline.
         .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandlerT<
             frame::write::handler::WriteCompletionTrackerT<
@@ -410,14 +414,29 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
       .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
           frame_defragmentation_handler_tag);
   if (config_.enableBackpressure) {
-    builder.addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
+    // Fragmenter composed with the fragment-completion tracker, same as the
+    // client pipeline. It records each frame's streamId on the way down — below
+    // this handler the frame is serialized bytes and the stream is no longer
+    // recoverable — and fans the batcher's batch event back out into one
+    // completion per original frame. Paired with the batcher's tracker above;
+    // a NoOp here would strand the batch events with no subscriber.
+    builder.addNextOutbound<frame::write::handler::FrameFragmentationHandlerT<
+        frame::write::handler::FragmentCompletionTrackerT<
+            rocket::server::RocketServerEventFactory>>>(
         frame_fragmentation_handler_tag, config_.fragmentationConfig);
   } else {
+    // Matches the batcher above: no tracker there means no batch events, so
+    // there is nothing for a relay to forward.
     builder.addNextOutbound<
         frame::write::handler::FrameFragmentationHandlerNoBackpressure>(
         frame_fragmentation_handler_tag, config_.fragmentationConfig);
   }
   builder
+      // Restates the fragmenter's frame-layer completion as the rocket layer's
+      // own, so nothing above the rocket boundary subscribes to a frame event.
+      .addNextDuplex<
+          rocket::server::handler::RocketServerWriteCompletionHandler>(
+          server_write_completion_handler_tag)
       .addNextDuplex<
           rocket::server::handler::RocketServerMessageMarshalHandler>(
           rocket_server_message_marshal_handler_tag)

@@ -208,28 +208,24 @@ TEST(RocketServerAppAdapterTest, OnEventInvokesOnWriteCompleteCallback) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   int count = 0;
   transport::WriteCompletionStatus status{};
-  size_t frameCount = 0;
-  size_t bytes = 0;
+  uint32_t streamId = 0;
   adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
     count++;
     status = e.status;
-    frameCount = e.frameCount;
-    bytes = e.bytes;
+    streamId = e.streamId;
   });
 
   adapter->onEvent(
       RocketServerEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .streamId = 3,
               .status = transport::WriteCompletionStatus::Error,
-              .frameCount = 3,
-              .bytes = 128,
           }));
 
   EXPECT_EQ(count, 1);
   EXPECT_EQ(status, transport::WriteCompletionStatus::Error);
-  EXPECT_EQ(frameCount, 3u);
-  EXPECT_EQ(bytes, 128u);
+  EXPECT_EQ(streamId, 3u);
 }
 
 TEST(RocketServerAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
@@ -239,9 +235,8 @@ TEST(RocketServerAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
       RocketServerEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .streamId = 1,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 1,
-              .bytes = 0,
           }));
 }
 
@@ -256,9 +251,8 @@ TEST(RocketServerAppAdapterTest, HandlerRemovedClearsOnWriteCompleteCallback) {
       RocketServerEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .streamId = 1,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 1,
-              .bytes = 0,
           }));
 
   EXPECT_EQ(count, 0);
@@ -342,10 +336,10 @@ TEST(RocketServerAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
 
   int count = 0;
-  size_t frameCount = 0;
+  uint32_t streamId = 0;
   adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
     count++;
-    frameCount = e.frameCount;
+    streamId = e.streamId;
   });
 
   // Built with RocketServerEventId so the adapter's subscription is wired; a
@@ -366,12 +360,11 @@ TEST(RocketServerAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
       RocketServerEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .streamId = 4,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 4,
-              .bytes = 256,
           }));
   EXPECT_EQ(count, 1);
-  EXPECT_EQ(frameCount, 4u);
+  EXPECT_EQ(streamId, 4u);
 
   // The raw transport event is not delivered — the adapter subscribes only to
   // RocketWriteComplete.

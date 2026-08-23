@@ -41,9 +41,18 @@ enum class RocketServerEventId : std::uint32_t {
   // RocketServerEventFactory::make) once per writev. Carries
   // TransportWriteCompleteEvent.
   TransportWriteComplete,
-  // Enriched per-rocket-batch completion fired by WriteCompletionTrackerT (via
-  // makeRocketWriteComplete) after popping one entry from its frame-count FIFO.
-  // Carries RocketWriteCompleteEvent.
+  // Enriched per-batch completion fired by WriteCompletionTrackerT (via
+  // makeBatchWriteComplete) after popping one entry from its frame-count FIFO.
+  // One per flushed batch. Carries BatchWriteCompleteEvent. Consumed by the
+  // fragmentation handler's tracker, which is the first handler above the
+  // batcher that knows what the batch was made of.
+  BatchWriteComplete,
+  // Per-frame write completion — one per original outbound frame, carrying the
+  // streamId. Fired by FragmentCompletionTracker, which reassembles the batch
+  // into the frames it was made of. Carries FrameWriteCompleteEvent.
+  FrameWriteComplete,
+  // The rocket layer's view of the completion. Carries
+  // RocketWriteCompleteEvent.
   RocketWriteComplete,
   // Fired by RocketServerSetupFrameHandler once the client's SETUP frame has
   // passed RSocket validation, to ask the layer above what to answer with.
@@ -70,15 +79,36 @@ struct TransportWriteCompleteEvent {
 };
 
 /**
- * Message for RocketServerEventId::RocketWriteComplete — the completion of one
- * rocket-frame batch. `frameCount` is the number of rocket frames in that batch
- * (> 0); consumers that need per-request attribution pop `frameCount` entries
- * from their own outbound FIFO per event.
+ * Message for RocketServerEventId::BatchWriteComplete — the completion of one
+ * batch as the batcher saw it. `frameCount` is the number of rocket frames in
+ * that batch (> 0).
  */
-struct RocketWriteCompleteEvent {
+struct BatchWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+};
+
+/**
+ * Message for RocketServerEventId::FrameWriteComplete — the completion of one
+ * original outbound frame, whether it went out whole or in fragments. The
+ * streamId is the one the fragmentation handler recorded at write time: below
+ * it the frame is serialized bytes and the stream is no longer recoverable.
+ */
+struct FrameWriteCompleteEvent {
+  uint32_t streamId;
+  apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+};
+
+/**
+ * Message for RocketServerEventId::RocketWriteComplete — one outbound rocket
+ * frame reached the socket. The streamId identifies it; unlike the client there
+ * is no request context to resolve against, because the server's is carried on
+ * the request message rather than held in a per-stream table.
+ */
+struct RocketWriteCompleteEvent {
+  uint32_t streamId;
+  apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
 };
 
 /**

@@ -37,7 +37,7 @@ enum class RocketClientEventId : std::uint32_t {
   // TransportWriteCompleteEvent.
   TransportWriteComplete,
   // Enriched per-rocket-batch completion fired by WriteCompletionTrackerT (via
-  // makeRocketWriteComplete) after popping one entry from its frame-count FIFO.
+  // makeBatchWriteComplete) after popping one entry from its frame-count FIFO.
   // One per flushed batch. Carries BatchWriteCompleteEvent. Consumed by the
   // WriteCompletionRouter (or FragmentCompletionTracker when fragmentation is
   // enabled), which fans it out into per-frame FrameWriteComplete events.

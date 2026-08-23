@@ -77,14 +77,13 @@ struct ThriftServerCloseConnectionEvent {
 };
 
 /**
- * Payload for ThriftServerEventType::WriteComplete — the completion of one
- * rocket-frame batch, relayed up from the rocket pipeline. `frameCount` is the
- * number of frames in the batch.
+ * Payload for ThriftServerEventType::WriteComplete — one outbound rocket frame
+ * reached the socket, relayed up from the rocket pipeline. See
+ * RocketWriteCompleteEvent; relayed through unchanged.
  */
 struct ThriftServerWriteCompleteEvent {
+  uint32_t streamId;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
-  size_t frameCount;
-  size_t bytes;
 };
 
 /**

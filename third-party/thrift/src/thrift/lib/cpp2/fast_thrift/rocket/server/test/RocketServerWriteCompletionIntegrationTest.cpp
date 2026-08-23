@@ -24,14 +24,14 @@
  *   TransportHandlerT<RocketServerEventFactory>
  *     -> IntervalBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketServerEventFactory>>
- *     -> EventCapturingAppHandler  (subscribes to RocketWriteComplete via
+ *     -> EventCapturingAppHandler  (subscribes to BatchWriteComplete via
  * onEvent)
  *
  * Each test drives outbound writes, lets the loop / interval timer flush,
  * then triggers writeSuccess / writeErr on the mocked AsyncTransport and
- * verifies the RocketWriteCompleteEvent(s) the tracker fans out carry the
+ * verifies the BatchWriteCompleteEvent(s) the tracker fans out carry the
  * correct (status, frameCount, bytes). The app handler subscribes only to the
- * tracker-fired RocketWriteComplete; the raw transport TransportWriteComplete
+ * tracker-fired BatchWriteComplete; the raw transport TransportWriteComplete
  * never reaches it.
  */
 
@@ -89,22 +89,22 @@ class EventCapturingAppHandler {
   void onPipelineInactive() noexcept {}
   void onWriteReady() noexcept {}
 
-  // Subscribes only to the enriched RocketWriteComplete event the tracker
+  // Subscribes only to the enriched BatchWriteComplete event the tracker
   // fires; the raw TransportWriteComplete never reaches this handler.
-  static constexpr cp::Subscriptions<RocketServerEventId::RocketWriteComplete>
+  static constexpr cp::Subscriptions<RocketServerEventId::BatchWriteComplete>
       kSubscribedEvents{};
 
   void onEvent(
       RocketServerEventId /*ev*/, const cp::TypeErasedBox& box) noexcept {
-    events_.push_back(box.get<RocketWriteCompleteEvent>());
+    events_.push_back(box.get<BatchWriteCompleteEvent>());
   }
 
-  const std::vector<RocketWriteCompleteEvent>& events() const noexcept {
+  const std::vector<BatchWriteCompleteEvent>& events() const noexcept {
     return events_;
   }
 
  private:
-  std::vector<RocketWriteCompleteEvent> events_;
+  std::vector<BatchWriteCompleteEvent> events_;
 };
 
 class RocketServerWriteCompletionIntegrationTest : public ::testing::Test {

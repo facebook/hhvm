@@ -27,9 +27,21 @@
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransportCertificate.h>
 
+#include <folly/CppAttributes.h>
+
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
+#include <thrift/lib/cpp2/util/TypeErasedValue.h>
 
 namespace apache::thrift::fast_thrift::thrift {
+
+namespace detail {
+
+// The classic server's internal-fields slot, which fast_thrift points at
+// rather than owning: the object lives inline in whichever context owns it, so
+// two contexts can only reach one object by one of them holding a pointer.
+using InternalFieldsT = apache::thrift::util::TypeErasedValue<128>;
+
+} // namespace detail
 
 // Per-connection context. Lives for the duration of one accepted connection.
 //
@@ -75,10 +87,40 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   }
 
   // Opaque per-connection slot. The deleter runs at connection close.
+  //
+  // There is one, so it has one owner. Anything shared between handlers, or
+  // published from a handler to the service, belongs in the connection's
+  // ExtensionStateStore instead — that is keyed by type and so cannot be
+  // claimed twice.
   void setUserData(rocket::TypeErasedPtr userData) noexcept {
     userData_ = std::move(userData);
   }
   void* getUserData() const noexcept { return userData_.get(); }
+
+  // Points this context at the per-connection fields the security layer keeps
+  // for this connection. Non-owning: the fields live on the Cpp2ConnContext
+  // built for the connection, which outlives this call, and nothing is copied
+  // — both contexts hand out the one object.
+  void setInternalFields(detail::InternalFieldsT* fields) noexcept {
+    internalFields_ = fields;
+  }
+
+  // The security layer's per-connection fields, or null while nothing holds
+  // any — a server with no security layer never fills the slot, unlike the
+  // classic server, where the fields always exist.
+  //
+  // Unchecked: only valid for the `T` the owner constructed.
+  template <class T>
+  T* FOLLY_NULLABLE getInternalFields() noexcept {
+    return hasInternalFields() ? &internalFields_->value_unchecked<T>()
+                               : nullptr;
+  }
+
+  template <class T>
+  const T* FOLLY_NULLABLE getInternalFields() const noexcept {
+    return hasInternalFields() ? &internalFields_->value_unchecked<T>()
+                               : nullptr;
+  }
 
   void setPeerAddress(folly::SocketAddress addr) noexcept {
     peerAddress_ = std::move(addr);
@@ -92,10 +134,15 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   }
 
  private:
+  bool hasInternalFields() const noexcept {
+    return internalFields_ != nullptr && internalFields_->has_value();
+  }
+
   folly::SocketAddress peerAddress_{};
   std::string securityProtocol_;
   std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate_;
   rocket::TypeErasedPtr userData_{};
+  detail::InternalFieldsT* internalFields_{nullptr};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

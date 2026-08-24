@@ -22,7 +22,10 @@ from unittest import IsolatedAsyncioTestCase
 from thrift.python.client.py_bridge.py_bridge_channel import get_bridged_async_client
 from thrift.python.serializer import Protocol, serialize
 from thrift.python.test.thrift_clients import EchoService, TestService
-from thrift.python.test.thrift_types import _fbthrift_EchoService_echo_result
+from thrift.python.test.thrift_types import (
+    _fbthrift_EchoService_echo_args,
+    _fbthrift_EchoService_echo_result,
+)
 
 
 # Test-only Compact message-envelope helpers (production enveloping is C++).
@@ -69,6 +72,12 @@ def _compact_method(data: bytes) -> str:
     return data[pos : pos + name_len].decode("utf-8")
 
 
+def _compact_body(data: bytes) -> bytes:
+    _seqid, pos = _read_varint(data, 2)
+    name_len, pos = _read_varint(data, pos)
+    return data[pos + name_len :]
+
+
 class _CannedHandler:
     """A ChannelHandler that records requests and returns a fixed reply."""
 
@@ -93,8 +102,15 @@ class PyBridgeChannelTest(IsolatedAsyncioTestCase):
         async with get_bridged_async_client(EchoService, handler) as client:
             result = await client.echo("hi")
         self.assertEqual(result, "HELLO")
-        # The C++ channel enveloped the request as a CALL carrying the method.
-        self.assertEqual(_compact_method(handler.requests[0][0]), "echo")
+        request = handler.requests[0][0]
+        self.assertEqual(_compact_method(request), "echo")
+        self.assertEqual(
+            _compact_body(request),
+            serialize(
+                _fbthrift_EchoService_echo_args(input="hi"),
+                protocol=Protocol.COMPACT,
+            ),
+        )
 
     async def test_oneway_fire_and_forget(self) -> None:
         handler = _CannedHandler()

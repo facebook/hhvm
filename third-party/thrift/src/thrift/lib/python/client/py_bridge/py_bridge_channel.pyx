@@ -71,7 +71,7 @@ async def _run_handler(
     object handler, IOBuf request, int rpc_kind, Promise_IOBuf promise
 ):
     try:
-        reply = await handler.send_request(bytes(request), rpc_kind)
+        reply = await handler.send_request(request.chain_bytes(), rpc_kind)
         # Convert inside the try so a non-bytes reply is reported through the
         # promise rather than escaping as an uncompleted (broken) promise.
         iobuf = _bytes_to_iobuf(reply)

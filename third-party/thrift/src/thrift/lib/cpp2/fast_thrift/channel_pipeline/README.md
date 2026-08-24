@@ -463,7 +463,7 @@ A handler's view into the pipeline.
 
 ### Handler IDs
 
-Compile-time integer IDs for zero-overhead lookup:
+Use `HANDLER_TAG` for static pipelines; use `HandlerId` overloads for config-selected IDs:
 
 ```cpp
 HANDLER_TAG(decoder);  // "decoder"_hid → uint64_t at compile time

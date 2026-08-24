@@ -1063,9 +1063,9 @@ TEST_F(AsyncFizzBaseTest, TestWriteBufferingCloseInCallback) {
         bool deliverErrorReturned = false;
         EXPECT_CALL(cb2, writeErr_(0, _))
             .InSequence(this->writeSeq_)
-            .WillOnce(InvokeWithoutArgs([&deliverErrorReturned]() {
+            .WillOnce([&deliverErrorReturned]() {
               EXPECT_FALSE(deliverErrorReturned);
-            }));
+            });
         this->deliverError(this->ase_);
         deliverErrorReturned = true;
       }));

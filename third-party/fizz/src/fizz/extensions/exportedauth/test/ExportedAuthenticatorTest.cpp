@@ -125,16 +125,15 @@ class AuthenticatorTest : public ::testing::Test {
 
 TEST_F(AuthenticatorTest, TestValidAuthenticator) {
   auto mockCert = std::make_shared<MockSelfCert>();
-  EXPECT_CALL(*mockCert, _getCertMessage(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*mockCert, _getCertMessage(_)).WillOnce([]() {
     return TestMessages::certificate();
-  }));
+  });
   EXPECT_CALL(*mockCert, getSigSchemes())
       .WillOnce(Return(
           std::vector<SignatureScheme>(
               1, SignatureScheme::ecdsa_secp256r1_sha256)));
   EXPECT_CALL(*mockCert, _sign(_, CertificateVerifyContext::Authenticator, _))
-      .WillOnce(
-          InvokeWithoutArgs([]() { return IOBuf::copyBuffer("signature"); }));
+      .WillOnce([]() { return IOBuf::copyBuffer("signature"); });
 
   Buf reencodedAuthenticator;
   Error err;

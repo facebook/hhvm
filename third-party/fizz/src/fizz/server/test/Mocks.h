@@ -126,22 +126,21 @@ class MockTicketCipher : public TicketCipher {
   void setDefaults(
       std::chrono::system_clock::time_point ticketIssued =
           std::chrono::system_clock::now()) {
-    ON_CALL(*this, _decrypt(_))
-        .WillByDefault(InvokeWithoutArgs([ticketIssued]() {
-          ResumptionState res;
-          res.version = ProtocolVersion::tls_1_3;
-          res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-          res.resumptionSecret = folly::IOBuf::copyBuffer("resumesecret");
-          res.alpn = "h2";
-          res.ticketAgeAdd = 0;
-          res.ticketIssueTime = ticketIssued;
-          res.handshakeTime = ticketIssued;
-          return std::make_pair(PskType::Resumption, std::move(res));
-        }));
-    ON_CALL(*this, _encrypt(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _decrypt(_)).WillByDefault([ticketIssued]() {
+      ResumptionState res;
+      res.version = ProtocolVersion::tls_1_3;
+      res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
+      res.resumptionSecret = folly::IOBuf::copyBuffer("resumesecret");
+      res.alpn = "h2";
+      res.ticketAgeAdd = 0;
+      res.ticketIssueTime = ticketIssued;
+      res.handshakeTime = ticketIssued;
+      return std::make_pair(PskType::Resumption, std::move(res));
+    });
+    ON_CALL(*this, _encrypt(_)).WillByDefault([]() {
       return std::make_pair(
           folly::IOBuf::copyBuffer("ticket"), std::chrono::seconds(100));
-    }));
+    });
   }
 };
 

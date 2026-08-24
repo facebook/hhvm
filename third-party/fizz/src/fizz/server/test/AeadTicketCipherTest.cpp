@@ -160,9 +160,9 @@ TEST_F(AeadTicketCipherTest, TestEncrypt) {
   useMockRandom();
   updatePolicy(std::chrono::seconds(5));
   rebuildCipher();
-  EXPECT_CALL(codec_, _encode(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(codec_, _encode(_)).WillOnce([]() {
     return folly::IOBuf::copyBuffer("encodedticket");
-  }));
+  });
   ResumptionState state;
   auto result = cipher_.encrypt(std::move(state)).get();
   EXPECT_TRUE(result.has_value());
@@ -177,16 +177,14 @@ TEST_F(AeadTicketCipherTest, TestHandshakeExpiration) {
   auto time = std::chrono::system_clock::now();
   EXPECT_CALL(*clock_, getCurrentTime()).WillOnce(Return(time));
 
-  EXPECT_CALL(codec_, _encode(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(codec_, _encode(_)).WillOnce([]() {
     return folly::IOBuf::copyBuffer("encodedticket");
-  }));
-  EXPECT_CALL(codec_, _decode(_, _, _))
-      .Times(2)
-      .WillRepeatedly(InvokeWithoutArgs([time]() {
-        ResumptionState res;
-        res.handshakeTime = time;
-        return res;
-      }));
+  });
+  EXPECT_CALL(codec_, _decode(_, _, _)).Times(2).WillRepeatedly([time]() {
+    ResumptionState res;
+    res.handshakeTime = time;
+    return res;
+  });
   auto result = cipher_.encrypt(makeState(time)).get();
   EXPECT_TRUE(result.has_value());
   EXPECT_TRUE(folly::IOBufEqualTo()(result->first, toIOBuf(ticket1)));
@@ -209,10 +207,9 @@ TEST_F(AeadTicketCipherTest, TestTicketLifetime) {
   rebuildCipher();
   auto time = std::chrono::system_clock::now();
 
-  EXPECT_CALL(codec_, _encode(_))
-      .Times(2)
-      .WillRepeatedly(InvokeWithoutArgs(
-          []() { return folly::IOBuf::copyBuffer("encodedticket"); }));
+  EXPECT_CALL(codec_, _encode(_)).Times(2).WillRepeatedly([]() {
+    return folly::IOBuf::copyBuffer("encodedticket");
+  });
 
   // At handshake time, expect ticket validity.
   EXPECT_CALL(*clock_, getCurrentTime()).WillOnce(Return(time));
@@ -255,9 +252,9 @@ TEST_F(AeadTicketCipherTest, TestEncryptTicketFromFuture) {
   auto time = std::chrono::system_clock::now();
   EXPECT_CALL(*clock_, getCurrentTime()).WillOnce(Return(time));
 
-  EXPECT_CALL(codec_, _encode(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(codec_, _encode(_)).WillOnce([]() {
     return folly::IOBuf::copyBuffer("encodedticket");
-  }));
+  });
   // Ticket was created in the future. Validity period should be equal
   // to maximum (as we can't be sure how old it really is)
   auto result =

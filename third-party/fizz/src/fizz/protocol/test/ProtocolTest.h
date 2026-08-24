@@ -167,15 +167,14 @@ class ProtocolTest : public testing::Test {
   }
 
   void expectAeadCreation(std::map<std::string, MockAead**> keys) {
-    EXPECT_CALL(*factory_, _makeAead(_))
-        .WillRepeatedly(InvokeWithoutArgs([=]() {
-          auto ret = std::make_unique<MockAead>();
-          EXPECT_CALL(*ret, _setKey(_))
-              .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
-                *keys.at(key.key->clone()->to<std::string>()) = ptr;
-              }));
-          return ret;
-        }));
+    EXPECT_CALL(*factory_, _makeAead(_)).WillRepeatedly([=]() {
+      auto ret = std::make_unique<MockAead>();
+      EXPECT_CALL(*ret, _setKey(_))
+          .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
+            *keys.at(key.key->clone()->to<std::string>()) = ptr;
+          }));
+      return ret;
+    });
   }
 
   void expectAeadCreation(MockAead** clientAead, MockAead** serverAead) {

@@ -154,20 +154,18 @@ class MockKeyScheduler : public KeyScheduler {
   void setDefaults() {
     ON_CALL(*this, deriveEarlySecret(_, _))
         .WillByDefault(Return(Status::Success));
-    ON_CALL(*this, _getTrafficKey(_, _, _))
-        .WillByDefault(InvokeWithoutArgs([]() {
-          return TrafficKey{
-              folly::IOBuf::copyBuffer("key"), folly::IOBuf::copyBuffer("iv")};
-        }));
-    ON_CALL(*this, _getTrafficKeyWithLabel(_, _, _, _, _))
-        .WillByDefault(InvokeWithoutArgs([]() {
-          return TrafficKey{
-              folly::IOBuf::copyBuffer("key_with_label"),
-              folly::IOBuf::copyBuffer("iv_with_label")};
-        }));
-    ON_CALL(*this, _getResumptionSecret(_, _))
-        .WillByDefault(InvokeWithoutArgs(
-            []() { return folly::IOBuf::copyBuffer("resumesecret"); }));
+    ON_CALL(*this, _getTrafficKey(_, _, _)).WillByDefault([]() {
+      return TrafficKey{
+          folly::IOBuf::copyBuffer("key"), folly::IOBuf::copyBuffer("iv")};
+    });
+    ON_CALL(*this, _getTrafficKeyWithLabel(_, _, _, _, _)).WillByDefault([]() {
+      return TrafficKey{
+          folly::IOBuf::copyBuffer("key_with_label"),
+          folly::IOBuf::copyBuffer("iv_with_label")};
+    });
+    ON_CALL(*this, _getResumptionSecret(_, _)).WillByDefault([]() {
+      return folly::IOBuf::copyBuffer("resumesecret");
+    });
     ON_CALL(*this, _getSecret(An<EarlySecrets>(), _))
         .WillByDefault(Invoke([](EarlySecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
@@ -177,17 +175,17 @@ class MockKeyScheduler : public KeyScheduler {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
     ON_CALL(*this, _getSecret(EarlySecrets::ECHAcceptConfirmation, _))
-        .WillByDefault(InvokeWithoutArgs([]() {
+        .WillByDefault([]() {
           return DerivedSecret(
               std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
               EarlySecrets::ECHAcceptConfirmation);
-        }));
+        });
     ON_CALL(*this, _getSecret(EarlySecrets::HRRECHAcceptConfirmation, _))
-        .WillByDefault(InvokeWithoutArgs([]() {
+        .WillByDefault([]() {
           return DerivedSecret(
               std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
               EarlySecrets::HRRECHAcceptConfirmation);
-        }));
+        });
     ON_CALL(*this, _getSecret(An<MasterSecrets>(), _))
         .WillByDefault(Invoke([](MasterSecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
@@ -232,19 +230,19 @@ class MockHandshakeContext : public HandshakeContext {
   }
 
   void setDefaults() {
-    ON_CALL(*this, _getHandshakeContext())
-        .WillByDefault(InvokeWithoutArgs(
-            []() { return folly::IOBuf::copyBuffer("context"); }));
+    ON_CALL(*this, _getHandshakeContext()).WillByDefault([]() {
+      return folly::IOBuf::copyBuffer("context");
+    });
 
-    ON_CALL(*this, _getFinishedData(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _getFinishedData(_)).WillByDefault([]() {
       return folly::IOBuf::copyBuffer("verifydata");
-    }));
+    });
 
-    ON_CALL(*this, _clone()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _clone()).WillByDefault([]() {
       auto ret = std::make_unique<MockHandshakeContext>();
       ret->setDefaults();
       return ret;
-    }));
+    });
   }
 };
 
@@ -460,18 +458,15 @@ class MockFactory : public ::fizz::DefaultFactory {
   }
 
   void setDefaults() {
-    ON_CALL(*this, makePlaintextReadRecordLayer())
-        .WillByDefault(InvokeWithoutArgs([]() {
-          return std::make_unique<NiceMock<MockPlaintextReadRecordLayer>>();
-        }));
+    ON_CALL(*this, makePlaintextReadRecordLayer()).WillByDefault([]() {
+      return std::make_unique<NiceMock<MockPlaintextReadRecordLayer>>();
+    });
 
-    ON_CALL(*this, makePlaintextWriteRecordLayer())
-        .WillByDefault(InvokeWithoutArgs([]() {
-          auto ret =
-              std::make_unique<NiceMock<MockPlaintextWriteRecordLayer>>();
-          ret->setDefaults();
-          return ret;
-        }));
+    ON_CALL(*this, makePlaintextWriteRecordLayer()).WillByDefault([]() {
+      auto ret = std::make_unique<NiceMock<MockPlaintextWriteRecordLayer>>();
+      ret->setDefaults();
+      return ret;
+    });
     ON_CALL(*this, makeEncryptedReadRecordLayer(_))
         .WillByDefault(Invoke([](EncryptionLevel encryptionLevel) {
           return std::make_unique<NiceMock<MockEncryptedReadRecordLayer>>(
@@ -486,40 +481,37 @@ class MockFactory : public ::fizz::DefaultFactory {
           return ret;
         }));
 
-    ON_CALL(*this, _makeKeyScheduler(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _makeKeyScheduler(_)).WillByDefault([]() {
       auto ret = std::make_unique<NiceMock<MockKeyScheduler>>();
       ret->setDefaults();
       return ret;
-    }));
-    ON_CALL(*this, _makeHandshakeContext(_))
-        .WillByDefault(InvokeWithoutArgs([]() {
-          auto ret = std::make_unique<NiceMock<MockHandshakeContext>>();
-          ret->setDefaults();
-          return ret;
-        }));
-    ON_CALL(*this, _makeKeyExchange(_, _))
-        .WillByDefault(InvokeWithoutArgs([]() {
-          auto ret = std::make_unique<NiceMock<MockKeyExchange>>();
-          ret->setDefaults();
-          return ret;
-        }));
+    });
+    ON_CALL(*this, _makeHandshakeContext(_)).WillByDefault([]() {
+      auto ret = std::make_unique<NiceMock<MockHandshakeContext>>();
+      ret->setDefaults();
+      return ret;
+    });
+    ON_CALL(*this, _makeKeyExchange(_, _)).WillByDefault([]() {
+      auto ret = std::make_unique<NiceMock<MockKeyExchange>>();
+      ret->setDefaults();
+      return ret;
+    });
     ON_CALL(*this, _makeHasherFactory(_))
-        .WillByDefault(
-            InvokeWithoutArgs([]() -> const fizz::HasherFactoryWithMetadata* {
-              const static HasherFactoryWithMetadata instance =
-                  HasherFactoryWithMetadata::bind<::fizz::Sha256>(
-                      [](std::unique_ptr<::fizz::Hasher>& ret,
-                         Error& /*err*/) -> Status {
-                        ret = std::make_unique<NiceMock<MockHasher>>();
-                        return Status::Success;
-                      });
-              return &instance;
-            }));
-    ON_CALL(*this, _makeAead(_)).WillByDefault(InvokeWithoutArgs([]() {
+        .WillByDefault([]() -> const fizz::HasherFactoryWithMetadata* {
+          const static HasherFactoryWithMetadata instance =
+              HasherFactoryWithMetadata::bind<::fizz::Sha256>(
+                  [](std::unique_ptr<::fizz::Hasher>& ret,
+                     Error& /*err*/) -> Status {
+                    ret = std::make_unique<NiceMock<MockHasher>>();
+                    return Status::Success;
+                  });
+          return &instance;
+        });
+    ON_CALL(*this, _makeAead(_)).WillByDefault([]() {
       auto ret = std::make_unique<NiceMock<MockAead>>();
       ret->setDefaults();
       return ret;
-    }));
+    });
     ON_CALL(*this, makeRandomBytes(_)).WillByDefault(Invoke([](size_t count) {
       auto random = folly::IOBuf::create(count);
       memset(random->writableData(), 0x44, count);
@@ -536,9 +528,9 @@ class MockFactory : public ::fizz::DefaultFactory {
         .WillByDefault(Invoke([](unsigned char* out, size_t count) {
           memset(out, 0x44, count);
         }));
-    ON_CALL(*this, _makePeerCert(_, _)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _makePeerCert(_, _)).WillByDefault([]() {
       return std::make_unique<NiceMock<MockPeerCert>>();
-    }));
+    });
   }
 };
 

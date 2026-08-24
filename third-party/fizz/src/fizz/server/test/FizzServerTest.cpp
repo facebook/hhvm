@@ -60,7 +60,7 @@ class FizzServerTest : public Test {
   void accept() {
     EXPECT_CALL(
         *MockServerStateMachineInstance::instance, _processAccept(_, _, _, _))
-        .WillOnce(InvokeWithoutArgs([] { return AsyncActions(Actions()); }));
+        .WillOnce([] { return AsyncActions(Actions()); });
     fizzServer_->fizzServer_.accept(&evb_, context_);
   }
 
@@ -95,10 +95,10 @@ TEST_F(FizzServerTest, TestSSLV2NoVersionFallback) {
   fizzServer_->queue_.append(getV2ClientHello());
   EXPECT_CALL(
       *MockServerStateMachineInstance::instance, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([this]() {
+      .WillOnce([this]() {
         fizzServer_->fizzServer_.waitForData();
         return AsyncActions(Actions());
-      }));
+      });
   fizzServer_->fizzServer_.newTransportData();
 }
 
@@ -108,10 +108,10 @@ TEST_F(FizzServerTest, TestNotSSLV2) {
   fizzServer_->queue_.append(folly::IOBuf::copyBuffer("ClientHello"));
   EXPECT_CALL(
       *MockServerStateMachineInstance::instance, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([this]() {
+      .WillOnce([this]() {
         fizzServer_->fizzServer_.waitForData();
         return AsyncActions(Actions());
-      }));
+      });
   fizzServer_->fizzServer_.newTransportData();
 }
 
@@ -121,19 +121,19 @@ TEST_F(FizzServerTest, TestSSLV2AfterData) {
   fizzServer_->queue_.append(folly::IOBuf::copyBuffer("ClientHello"));
   EXPECT_CALL(
       *MockServerStateMachineInstance::instance, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([this]() {
+      .WillOnce([this]() {
         fizzServer_->fizzServer_.waitForData();
         return AsyncActions(Actions());
-      }));
+      });
   fizzServer_->fizzServer_.newTransportData();
   fizzServer_->queue_.reset();
   fizzServer_->queue_.append(getV2ClientHello());
   EXPECT_CALL(
       *MockServerStateMachineInstance::instance, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([this]() {
+      .WillOnce([this]() {
         fizzServer_->fizzServer_.waitForData();
         return AsyncActions(Actions());
-      }));
+      });
   fizzServer_->fizzServer_.newTransportData();
 }
 

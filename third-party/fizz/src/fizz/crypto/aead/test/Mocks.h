@@ -144,18 +144,18 @@ class MockAead : public Aead {
   MOCK_METHOD(folly::Optional<TrafficKey>, getKey, (), (const));
 
   void setDefaults() {
-    ON_CALL(*this, _encrypt(_, _, _, _)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _encrypt(_, _, _, _)).WillByDefault([]() {
       return folly::IOBuf::copyBuffer("ciphertext");
-    }));
-    ON_CALL(*this, _encryptNonce(_, _, _, _))
-        .WillByDefault(InvokeWithoutArgs(
-            []() { return folly::IOBuf::copyBuffer("ciphertext"); }));
-    ON_CALL(*this, _decrypt(_, _, _, _)).WillByDefault(InvokeWithoutArgs([]() {
+    });
+    ON_CALL(*this, _encryptNonce(_, _, _, _)).WillByDefault([]() {
+      return folly::IOBuf::copyBuffer("ciphertext");
+    });
+    ON_CALL(*this, _decrypt(_, _, _, _)).WillByDefault([]() {
       return folly::IOBuf::copyBuffer("plaintext");
-    }));
-    ON_CALL(*this, _tryDecrypt(_, _, _, _))
-        .WillByDefault(InvokeWithoutArgs(
-            []() { return folly::IOBuf::copyBuffer("plaintext"); }));
+    });
+    ON_CALL(*this, _tryDecrypt(_, _, _, _)).WillByDefault([]() {
+      return folly::IOBuf::copyBuffer("plaintext");
+    });
   }
 };
 } // namespace test

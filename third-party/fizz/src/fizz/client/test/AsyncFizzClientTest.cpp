@@ -79,41 +79,40 @@ class AsyncFizzClientTest : public Test {
   }
 
   void expectAppClose() {
-    EXPECT_CALL(*machine_, _processAppClose(_))
-        .WillOnce(InvokeWithoutArgs([]() {
-          WriteToSocket write;
-          TLSContent record;
-          record.contentType = ContentType::alert;
-          record.encryptionLevel = EncryptionLevel::Handshake;
-          record.data = IOBuf::copyBuffer("closenotify");
-          write.contents.emplace_back(std::move(record));
-          return detail::actions(
-              MutateState(
-                  [](State& newState) { newState.state() = StateEnum::Error; }),
-              std::move(write));
-        }));
+    EXPECT_CALL(*machine_, _processAppClose(_)).WillOnce([]() {
+      WriteToSocket write;
+      TLSContent record;
+      record.contentType = ContentType::alert;
+      record.encryptionLevel = EncryptionLevel::Handshake;
+      record.data = IOBuf::copyBuffer("closenotify");
+      write.contents.emplace_back(std::move(record));
+      return detail::actions(
+          MutateState(
+              [](State& newState) { newState.state() = StateEnum::Error; }),
+          std::move(write));
+    });
   }
 
   void expectAppCloseImmediate() {
-    EXPECT_CALL(*machine_, _processAppCloseImmediate(_))
-        .WillOnce(InvokeWithoutArgs([]() {
-          TLSContent record;
-          record.contentType = ContentType::handshake;
-          record.data = IOBuf::copyBuffer("closenotify");
-          record.encryptionLevel = EncryptionLevel::Handshake;
-          WriteToSocket write;
-          write.contents.emplace_back(std::move(record));
-          return detail::actions(
-              MutateState(
-                  [](State& newState) { newState.state() = StateEnum::Error; }),
-              std::move(write));
-        }));
+    EXPECT_CALL(*machine_, _processAppCloseImmediate(_)).WillOnce([]() {
+      TLSContent record;
+      record.contentType = ContentType::handshake;
+      record.data = IOBuf::copyBuffer("closenotify");
+      record.encryptionLevel = EncryptionLevel::Handshake;
+      WriteToSocket write;
+      write.contents.emplace_back(std::move(record));
+      return detail::actions(
+          MutateState(
+              [](State& newState) { newState.state() = StateEnum::Error; }),
+          std::move(write));
+    });
   }
 
   void connect() {
     expectTransportReadCallback();
-    EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _))
-        .WillOnce(InvokeWithoutArgs([]() { return Actions(); }));
+    EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _)).WillOnce([]() {
+      return Actions();
+    });
     const auto sni = std::string("www.example.com");
     client_->connect(
         &handshakeCallback_, nullptr, sni, pskIdentity_, echConfigs_);
@@ -129,55 +128,54 @@ class AsyncFizzClientTest : public Test {
       bool pskResumed = false,
       ECHMode echMode = ECHMode::NotRequested,
       folly::Optional<ECHRetryAvailable> expectedECHRetry = {}) {
-    EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-        .WillOnce(InvokeWithoutArgs([=]() {
-          MutateState addToState([=](State& newState) {
-            newState.exporterMasterSecret() =
-                folly::IOBuf::copyBuffer("12345678901234567890123456789012");
-            newState.cipher() = CipherSuite::TLS_AES_128_GCM_SHA256;
-            newState.version() = ProtocolVersion::tls_1_3;
-            if (alpn.empty()) {
-              newState.alpn() = none;
-            } else {
-              newState.alpn() = alpn;
-            }
-            newState.clientCert() = clientCert;
-            newState.serverCert() = serverCert;
+    EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([=]() {
+      MutateState addToState([=](State& newState) {
+        newState.exporterMasterSecret() =
+            folly::IOBuf::copyBuffer("12345678901234567890123456789012");
+        newState.cipher() = CipherSuite::TLS_AES_128_GCM_SHA256;
+        newState.version() = ProtocolVersion::tls_1_3;
+        if (alpn.empty()) {
+          newState.alpn() = none;
+        } else {
+          newState.alpn() = alpn;
+        }
+        newState.clientCert() = clientCert;
+        newState.serverCert() = serverCert;
 
-            if (acceptEarlyData || pskResumed) {
-              newState.pskMode() = PskKeyExchangeMode::psk_ke;
-              newState.pskType() = PskType::Resumption;
-              newState.handshakeTime() =
-                  std::chrono::system_clock::now() - std::chrono::hours(1);
-            } else {
-              newState.handshakeTime() = std::chrono::system_clock::now();
-            }
-            if (echMode != ECHMode::NotRequested) {
-              newState.echState().emplace();
-              if (echMode == ECHMode::Accepted) {
-                newState.echState()->status = ECHStatus::Accepted;
-              } else {
-                newState.echState()->status = ECHStatus::Rejected;
-                newState.echState()->retryConfigs.emplace(
-                    {ech::test::getParsedECHConfig()});
-              }
-            }
-          });
-          ReportHandshakeSuccess reportSuccess;
-          reportSuccess.earlyDataAccepted = acceptEarlyData;
-          ECHRetryAvailable echRetryAvailable;
-          if (expectedECHRetry.has_value()) {
-            echRetryAvailable = expectedECHRetry.value();
-            return detail::actions(
-                std::move(addToState),
-                std::move(echRetryAvailable),
-                std::move(reportSuccess),
-                WaitForData());
+        if (acceptEarlyData || pskResumed) {
+          newState.pskMode() = PskKeyExchangeMode::psk_ke;
+          newState.pskType() = PskType::Resumption;
+          newState.handshakeTime() =
+              std::chrono::system_clock::now() - std::chrono::hours(1);
+        } else {
+          newState.handshakeTime() = std::chrono::system_clock::now();
+        }
+        if (echMode != ECHMode::NotRequested) {
+          newState.echState().emplace();
+          if (echMode == ECHMode::Accepted) {
+            newState.echState()->status = ECHStatus::Accepted;
           } else {
-            return detail::actions(
-                std::move(addToState), std::move(reportSuccess), WaitForData());
+            newState.echState()->status = ECHStatus::Rejected;
+            newState.echState()->retryConfigs.emplace(
+                {ech::test::getParsedECHConfig()});
           }
-        }));
+        }
+      });
+      ReportHandshakeSuccess reportSuccess;
+      reportSuccess.earlyDataAccepted = acceptEarlyData;
+      ECHRetryAvailable echRetryAvailable;
+      if (expectedECHRetry.has_value()) {
+        echRetryAvailable = expectedECHRetry.value();
+        return detail::actions(
+            std::move(addToState),
+            std::move(echRetryAvailable),
+            std::move(reportSuccess),
+            WaitForData());
+      } else {
+        return detail::actions(
+            std::move(addToState), std::move(reportSuccess), WaitForData());
+      }
+    });
     socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ServerData"));
   }
 
@@ -197,19 +195,16 @@ class AsyncFizzClientTest : public Test {
 
   void completeEarlyHandshake(EarlyDataParams params = getEarlyDataParams()) {
     connect();
-    EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-        .WillOnce(InvokeWithoutArgs([&params]() {
-          MutateState addParamsToState(
-              [params = std::move(params)](State& newState) mutable {
-                newState.earlyDataParams() = std::move(params);
-              });
-          ReportEarlyHandshakeSuccess reportSuccess;
-          reportSuccess.maxEarlyDataSize = 1000;
-          return detail::actions(
-              std::move(addParamsToState),
-              std::move(reportSuccess),
-              WaitForData());
-        }));
+    EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([&params]() {
+      MutateState addParamsToState(
+          [params = std::move(params)](State& newState) mutable {
+            newState.earlyDataParams() = std::move(params);
+          });
+      ReportEarlyHandshakeSuccess reportSuccess;
+      reportSuccess.maxEarlyDataSize = 1000;
+      return detail::actions(
+          std::move(addParamsToState), std::move(reportSuccess), WaitForData());
+    });
     EXPECT_CALL(handshakeCallback_, _fizzHandshakeSuccess());
     socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ServerData"));
     EXPECT_FALSE(client_->isReplaySafe());
@@ -241,33 +236,33 @@ TEST_F(AsyncFizzClientTest, TestConnect) {
 
 TEST_F(AsyncFizzClientTest, TestReadSingle) {
   connect();
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([]() { return detail::actions(WaitForData()); }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(WaitForData());
+  });
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
 
 TEST_F(AsyncFizzClientTest, TestReadMulti) {
   connect();
   EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }))
-      .WillOnce(
-          InvokeWithoutArgs([]() { return detail::actions(WaitForData()); }));
+      .WillOnce([]() { return detail::actions(); })
+      .WillOnce([]() { return detail::actions(WaitForData()); });
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
 
 TEST_F(AsyncFizzClientTest, TestWrite) {
   completeHandshake();
-  EXPECT_CALL(*machine_, _processAppWrite(_, _))
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processAppWrite(_, _)).WillOnce([]() {
+    return detail::actions();
+  });
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP GET"));
 }
 
 TEST_F(AsyncFizzClientTest, TestWriteMulti) {
   completeHandshake();
-  EXPECT_CALL(*machine_, _processAppWrite(_, _))
-      .Times(2)
-      .WillRepeatedly(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processAppWrite(_, _)).Times(2).WillRepeatedly([]() {
+    return detail::actions();
+  });
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP GET"));
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP POST"));
 }
@@ -280,7 +275,7 @@ TEST_F(AsyncFizzClientTest, TestWriteQueuePendingHandshakeWithEarlyData) {
   EXPECT_CALL(*machine_, _processAppWrite(_, _))
       .Times(2)
       .InSequence(s)
-      .WillRepeatedly(InvokeWithoutArgs([]() { return detail::actions(); }));
+      .WillRepeatedly([]() { return detail::actions(); });
   // writes will skip queue and be written directly to fizz client, which hasn't
   // been connected yet
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP GET"));
@@ -301,11 +296,11 @@ TEST_F(AsyncFizzClientTest, TestWriteQueuePendingHandshakeWithoutEarlyData) {
   EXPECT_CALL(*machine_, _processAppWrite(_, _))
       .Times(2)
       .InSequence(s)
-      .WillRepeatedly(InvokeWithoutArgs([]() { return detail::actions(); }));
+      .WillRepeatedly([]() { return detail::actions(); });
   fullHandshakeSuccess(true);
-  EXPECT_CALL(*machine_, _processAppWrite(_, _))
-      .InSequence(s)
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processAppWrite(_, _)).InSequence(s).WillOnce([]() {
+    return detail::actions();
+  });
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP PUT"));
 }
 
@@ -320,9 +315,9 @@ TEST_F(AsyncFizzClientTest, TestPendingHandshakeQueueErrorCallback) {
   Sequence s;
   EXPECT_CALL(*machine_, _processSocketData(_, _, _))
       .InSequence(s)
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return detail::actions(ReportError("unit test"), WaitForData());
-      }));
+      });
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeError(_)).InSequence(s);
   // two of three write callbacks were registered
   EXPECT_CALL(writeCallback_, writeErr_(0, _)).Times(2).InSequence(s);
@@ -359,33 +354,31 @@ TEST_F(AsyncFizzClientTest, TestExporterAPI) {
 
 TEST_F(AsyncFizzClientTest, TestHandshakeError) {
   connect();
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(ReportError("unit test"), WaitForData());
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(ReportError("unit test"), WaitForData());
+  });
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeError(_));
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
 
 TEST_F(AsyncFizzClientTest, TestHandshakeErrorDelete) {
   connect();
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(ReportError("unit test"), WaitForData());
-      }));
-  EXPECT_CALL(handshakeCallback_, _fizzHandshakeError(_))
-      .WillOnce(InvokeWithoutArgs([this]() { client_.reset(); }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(ReportError("unit test"), WaitForData());
+  });
+  EXPECT_CALL(handshakeCallback_, _fizzHandshakeError(_)).WillOnce([this]() {
+    client_.reset();
+  });
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
 
 TEST_F(AsyncFizzClientTest, TestDeliverAppData) {
   completeHandshake();
   client_->setReadCB(&readCallback_);
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(
-            DeliverAppData{IOBuf::copyBuffer("HI")}, WaitForData());
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(
+        DeliverAppData{IOBuf::copyBuffer("HI")}, WaitForData());
+  });
   EXPECT_CALL(readCallback_, readBufferAvailable_(_));
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
@@ -393,16 +386,15 @@ TEST_F(AsyncFizzClientTest, TestDeliverAppData) {
 TEST_F(AsyncFizzClientTest, TestWriteToSocket) {
   completeHandshake();
   client_->setReadCB(&readCallback_);
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        TLSContent record;
-        record.contentType = ContentType::handshake;
-        record.data = IOBuf::copyBuffer("XYZ");
-        record.encryptionLevel = EncryptionLevel::Handshake;
-        WriteToSocket write;
-        write.contents.emplace_back(std::move(record));
-        return detail::actions(std::move(write), WaitForData());
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    TLSContent record;
+    record.contentType = ContentType::handshake;
+    record.data = IOBuf::copyBuffer("XYZ");
+    record.encryptionLevel = EncryptionLevel::Handshake;
+    WriteToSocket write;
+    write.contents.emplace_back(std::move(record));
+    return detail::actions(std::move(write), WaitForData());
+  });
   EXPECT_CALL(*socket_, writeChain(_, _, _));
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
 }
@@ -412,14 +404,14 @@ TEST_F(AsyncFizzClientTest, TestMutateState) {
   client_->setReadCB(&readCallback_);
   uint32_t numTimesRun = 0;
   EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([&numTimesRun]() {
+      .WillOnce([&numTimesRun]() {
         return detail::actions(
             MutateState([&numTimesRun](State& newState) {
               numTimesRun++;
               newState.state() = StateEnum::Error;
             }),
             WaitForData());
-      }));
+      });
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
   EXPECT_EQ(client_->getState().state(), StateEnum::Error);
   EXPECT_EQ(numTimesRun, 1);
@@ -460,10 +452,9 @@ TEST_F(AsyncFizzClientTest, TestConnecting) {
   ON_CALL(*socket_, connecting()).WillByDefault(Return(false));
   connect();
   EXPECT_TRUE(client_->connecting());
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(ReportHandshakeSuccess(), WaitForData());
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(ReportHandshakeSuccess(), WaitForData());
+  });
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeSuccess());
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
   EXPECT_FALSE(client_->connecting());
@@ -481,11 +472,10 @@ TEST_F(AsyncFizzClientTest, TestGoodState) {
   completeHandshake();
   ON_CALL(*socket_, good()).WillByDefault(Return(true));
   EXPECT_TRUE(client_->good());
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(MutateState(
-            [](State& newState) { newState.state() = StateEnum::Error; }));
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(MutateState(
+        [](State& newState) { newState.state() = StateEnum::Error; }));
+  });
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("Data"));
   EXPECT_FALSE(client_->good());
 }
@@ -499,10 +489,9 @@ TEST_F(AsyncFizzClientTest, TestSocketConnect) {
   machine_ = MockClientStateMachineInstance::instance;
   auto server = std::make_unique<TestServer>();
   EXPECT_CALL(cb, _preConnect(_)).Times(1);
-  EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(ReportHandshakeSuccess(), WaitForData());
-      }));
+  EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _)).WillOnce([]() {
+    return detail::actions(ReportHandshakeSuccess(), WaitForData());
+  });
   EXPECT_CALL(cb, _connectSuccess()).WillOnce(Invoke([&evbClient]() {
     evbClient->closeNow();
   }));
@@ -675,14 +664,16 @@ TEST_F(AsyncFizzClientTest, TestEarlyApplicationProtocolNone) {
 TEST_F(AsyncFizzClientTest, TestEarlyHandshakeWrite) {
   completeEarlyHandshake();
 
-  EXPECT_CALL(*machine_, _processEarlyAppWrite(_, _))
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processEarlyAppWrite(_, _)).WillOnce([]() {
+    return detail::actions();
+  });
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP GET"));
 
   fullHandshakeSuccess(true);
 
-  EXPECT_CALL(*machine_, _processAppWrite(_, _))
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processAppWrite(_, _)).WillOnce([]() {
+    return detail::actions();
+  });
   client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP POST"));
 }
 
@@ -690,8 +681,9 @@ TEST_F(AsyncFizzClientTest, TestEarlyHandshakeReplaySafeCallback) {
   completeEarlyHandshake();
   client_->setReplaySafetyCallback(&mockReplayCallback_);
 
-  EXPECT_CALL(*machine_, _processAppWrite(_, _))
-      .WillOnce(InvokeWithoutArgs([]() { return detail::actions(); }));
+  EXPECT_CALL(*machine_, _processAppWrite(_, _)).WillOnce([]() {
+    return detail::actions();
+  });
   EXPECT_CALL(mockReplayCallback_, onReplaySafe_()).WillOnce(Invoke([this]() {
     client_->writeChain(nullptr, IOBuf::copyBuffer("HTTP POST"));
   }));
@@ -1105,13 +1097,12 @@ TEST_F(AsyncFizzClientTest, TestEarlyWriteRejectedNullCallback) {
 TEST_F(AsyncFizzClientTest, TestErrorStopsActions) {
   completeHandshake();
   client_->setReadCB(&readCallback_);
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return detail::actions(
-            MutateState(
-                [](State& newState) { newState.state() = StateEnum::Error; }),
-            ReportError("unit test"));
-      }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(
+        MutateState(
+            [](State& newState) { newState.state() = StateEnum::Error; }),
+        ReportError("unit test"));
+  });
   EXPECT_FALSE(client_->error());
   EXPECT_TRUE(client_->good());
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("Data"));
@@ -1176,9 +1167,9 @@ TEST_F(AsyncFizzClientTest, TestECHRetryAvailableAction) {
 TEST_F(AsyncFizzClientTest, TestNewCachedPskActions) {
   completeHandshake();
   client_->setReadCB(&readCallback_);
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs(
-          []() { return detail::actions(NewCachedPsk(), WaitForData()); }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(NewCachedPsk(), WaitForData());
+  });
   EXPECT_CALL(*mockPskCache_, putPsk(*pskIdentity_, _));
   socketReadCallback_->readBufferAvailable(
       IOBuf::copyBuffer("NewSessionTicket"));
@@ -1188,9 +1179,9 @@ TEST_F(AsyncFizzClientTest, TestNewCachedPskActionsWithEmptyPskIdentity) {
   pskIdentity_ = folly::none;
   completeHandshake();
   client_->setReadCB(&readCallback_);
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(InvokeWithoutArgs(
-          []() { return detail::actions(NewCachedPsk(), WaitForData()); }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([]() {
+    return detail::actions(NewCachedPsk(), WaitForData());
+  });
   EXPECT_CALL(*mockPskCache_, putPsk(_, _)).Times(0);
   socketReadCallback_->readBufferAvailable(
       IOBuf::copyBuffer("NewSessionTicket"));
@@ -1221,9 +1212,9 @@ TEST_F(AsyncFizzClientTest, TestHandshakeRecordAlignedReads) {
   // record header.
   EXPECT_EQ(len, 5);
 
-  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
-      .WillOnce(
-          InvokeWithoutArgs([] { return detail::actions(WaitForData{10}); }));
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _)).WillOnce([] {
+    return detail::actions(WaitForData{10});
+  });
   socketReadCallback_->readDataAvailable(5);
 
   socketReadCallback_->getReadBuffer(&buf, &len);

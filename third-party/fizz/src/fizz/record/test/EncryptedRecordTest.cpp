@@ -569,9 +569,7 @@ TEST_F(EncryptedRecordTest, TestRecordState) {
     key.key = IOBuf::copyBuffer("key");
     key.iv = IOBuf::copyBuffer("iv");
 
-    EXPECT_CALL(aead, getKey()).WillOnce(InvokeWithoutArgs([&] {
-      return key.clone();
-    }));
+    EXPECT_CALL(aead, getKey()).WillOnce([&] { return key.clone(); });
     rlayer.setSequenceNumber(10);
 
     state = rlayer.getRecordLayerState();

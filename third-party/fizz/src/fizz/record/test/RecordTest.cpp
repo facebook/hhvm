@@ -71,9 +71,9 @@ class RecordTest : public testing::Test {
 };
 
 TEST_F(RecordTest, TestNoData) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::none();
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -85,10 +85,10 @@ TEST_F(RecordTest, TestNoData) {
 }
 
 TEST_F(RecordTest, TestReadAppData) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::application_data, IOBuf::copyBuffer("hi")});
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -99,10 +99,10 @@ TEST_F(RecordTest, TestReadAppData) {
 }
 
 TEST_F(RecordTest, TestAlert) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::alert, getBuf("0202")});
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -112,10 +112,10 @@ TEST_F(RecordTest, TestAlert) {
 }
 
 TEST_F(RecordTest, TestHandshake) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("140000023232")});
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -127,10 +127,10 @@ TEST_F(RecordTest, TestHandshake) {
 }
 
 TEST_F(RecordTest, TestHandshakeTooLong) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("14400000")});
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
@@ -139,14 +139,14 @@ TEST_F(RecordTest, TestHandshakeTooLong) {
 
 TEST_F(RecordTest, TestHandshakeFragmentedImmediate) {
   EXPECT_CALL(read_, _read(_, _))
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000008aabbccdd")});
-      }))
-      .WillOnce(InvokeWithoutArgs([]() {
+      })
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("11223344")});
-      }));
+      });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -159,11 +159,11 @@ TEST_F(RecordTest, TestHandshakeFragmentedImmediate) {
 
 TEST_F(RecordTest, TestHandshakeFragmentedDelayed) {
   EXPECT_CALL(read_, _read(_, _))
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000008aabbccdd")});
-      }))
-      .WillOnce(InvokeWithoutArgs([]() { return folly::none; }));
+      })
+      .WillOnce([]() { return folly::none; });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -171,10 +171,10 @@ TEST_F(RecordTest, TestHandshakeFragmentedDelayed) {
       Status::Success);
   EXPECT_FALSE(param.has_value());
   EXPECT_TRUE(read_.hasUnparsedHandshakeData());
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("11223344")});
-  }));
+  });
   EXPECT_EQ(
       read_.readEvent(param, err, queue_, Aead::AeadOptions()),
       Status::Success);
@@ -183,10 +183,10 @@ TEST_F(RecordTest, TestHandshakeFragmentedDelayed) {
 }
 
 TEST_F(RecordTest, TestHandshakeCoalesced) {
-  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("14000002aabb14000002ccdd")});
-  }));
+  });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(
@@ -205,14 +205,14 @@ TEST_F(RecordTest, TestHandshakeCoalesced) {
 
 TEST_F(RecordTest, TestHandshakeSpliced) {
   EXPECT_CALL(read_, _read(_, _))
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("01000010abcd")});
-      }))
-      .WillOnce(InvokeWithoutArgs([]() {
+      })
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::application_data, IOBuf::copyBuffer("hi")});
-      }));
+      });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
@@ -221,11 +221,11 @@ TEST_F(RecordTest, TestHandshakeSpliced) {
 
 TEST_F(RecordTest, TestMultipleHandshakeMessages) {
   EXPECT_CALL(read_, _read(_, _))
-      .WillOnce(InvokeWithoutArgs([]() {
+      .WillOnce([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000002aabb14000002")});
-      }))
-      .WillOnce(InvokeWithoutArgs([]() {
+      })
+      .WillOnce([]() {
         // Really large message to force the record layer to
         // allocate more space as well the tail end of the previous
         // finished message
@@ -236,7 +236,7 @@ TEST_F(RecordTest, TestMultipleHandshakeMessages) {
         message->coalesce();
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, std::move(message)});
-      }));
+      });
   ReadRecordLayer::ReadResult<Param> param;
   Error err;
   EXPECT_EQ(

@@ -47,42 +47,42 @@ class MockKeyExchange : public KeyExchange {
   int keyGenerated = 0;
 
   void setDefaults() {
-    ON_CALL(*this, _getKeyShare()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _getKeyShare()).WillByDefault([]() {
       return folly::IOBuf::copyBuffer("keyshare");
-    }));
-    ON_CALL(*this, _generateSharedSecret(_))
-        .WillByDefault(InvokeWithoutArgs(
-            []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
+    });
+    ON_CALL(*this, _generateSharedSecret(_)).WillByDefault([]() {
+      return folly::IOBuf::copyBuffer("sharedsecret");
+    });
     // Excluding \n
     ON_CALL(*this, getExpectedKeyShareSize())
         .WillByDefault(Return(sizeof("keyshare") - 1));
   }
 
   void setForHybridKeyExchange() {
-    ON_CALL(*this, _generateKeyPair())
-        .WillByDefault(InvokeWithoutArgs([this]() { keyGenerated = 1; }));
-    ON_CALL(*this, _getKeyShare()).WillByDefault(InvokeWithoutArgs([this]() {
+    ON_CALL(*this, _generateKeyPair()).WillByDefault([this]() {
+      keyGenerated = 1;
+    });
+    ON_CALL(*this, _getKeyShare()).WillByDefault([this]() {
       if (!keyGenerated) {
         throw std::runtime_error("Key not generated");
       }
       return folly::IOBuf::copyBuffer("keyshare");
-    }));
-    ON_CALL(*this, _generateSharedSecret(_))
-        .WillByDefault(InvokeWithoutArgs([this]() {
-          if (!keyGenerated) {
-            throw std::runtime_error("Key not generated");
-          }
-          return folly::IOBuf::copyBuffer("sharedsecret");
-        }));
+    });
+    ON_CALL(*this, _generateSharedSecret(_)).WillByDefault([this]() {
+      if (!keyGenerated) {
+        throw std::runtime_error("Key not generated");
+      }
+      return folly::IOBuf::copyBuffer("sharedsecret");
+    });
     // Excluding \n
     ON_CALL(*this, getExpectedKeyShareSize())
         .WillByDefault(Return(sizeof("keyshare") - 1));
-    ON_CALL(*this, _clone()).WillByDefault(InvokeWithoutArgs([this]() {
+    ON_CALL(*this, _clone()).WillByDefault([this]() {
       auto copy = std::make_unique<MockKeyExchange>();
       copy->setDefaults();
       copy->keyGenerated = keyGenerated;
       return copy;
-    }));
+    });
   }
 
   void setReturnZeroKeyLength() {

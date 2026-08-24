@@ -36,10 +36,10 @@ TEST(DualCipherTest, DecryptSuccess) {
   auto fallbackCipher = std::make_unique<MockTicketCipher>();
   ResumptionState resState;
 
-  EXPECT_CALL(*cipher, _decrypt(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*cipher, _decrypt(_)).WillOnce([]() {
     ResumptionState res;
     return std::make_pair(PskType::Resumption, std::move(res));
-  }));
+  });
   EXPECT_CALL(*fallbackCipher, _decrypt(_)).Times(0);
 
   auto dualCipher =
@@ -54,14 +54,14 @@ TEST(DualCipherTest, DecryptSuccessWithFallback) {
   auto fallbackCipher = std::make_unique<MockTicketCipher>();
   ResumptionState resState;
 
-  EXPECT_CALL(*cipher, _decrypt(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*cipher, _decrypt(_)).WillOnce([]() {
     ResumptionState res;
     return std::make_pair(PskType::Rejected, std::move(res));
-  }));
-  EXPECT_CALL(*fallbackCipher, _decrypt(_)).WillOnce(InvokeWithoutArgs([]() {
+  });
+  EXPECT_CALL(*fallbackCipher, _decrypt(_)).WillOnce([]() {
     ResumptionState res;
     return std::make_pair(PskType::Resumption, std::move(res));
-  }));
+  });
 
   auto dualCipher =
       DualTicketCipher(std::move(cipher), std::move(fallbackCipher));

@@ -926,9 +926,9 @@ TEST(EncryptionTest, TestSetShloAcceptance) {
       *scheduler,
       _getSecret(
           EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
-      .WillOnce(InvokeWithoutArgs([&]() {
+      .WillOnce([&]() {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
-      }));
+      });
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
   Error err;
   EXPECT_EQ(
@@ -963,10 +963,10 @@ TEST(EncryptionTest, TestSetHRRAcceptance) {
       *scheduler,
       _getSecret(
           EarlySecrets::HRRECHAcceptConfirmation, RangeMatches("dummyhrr")))
-      .WillOnce(InvokeWithoutArgs([&]() {
+      .WillOnce([&]() {
         return DerivedSecret(
             acceptSecret, EarlySecrets::HRRECHAcceptConfirmation);
-      }));
+      });
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
   Error err;
   EXPECT_EQ(
@@ -996,9 +996,9 @@ TEST(EncryptionTest, TestCheckShloAcceptance) {
       *scheduler,
       _getSecret(
           EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
-      .WillOnce(InvokeWithoutArgs([&]() {
+      .WillOnce([&]() {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
-      }));
+      });
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
   bool accepted = false;
   Error err;
@@ -1023,10 +1023,10 @@ TEST(EncryptionTest, TestCheckHrrAcceptance) {
       *scheduler,
       _getSecret(
           EarlySecrets::HRRECHAcceptConfirmation, RangeMatches("dummyhrr")))
-      .WillOnce(InvokeWithoutArgs([&]() {
+      .WillOnce([&]() {
         return DerivedSecret(
             acceptSecret, EarlySecrets::HRRECHAcceptConfirmation);
-      }));
+      });
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
   bool accepted = false;
   Error err;

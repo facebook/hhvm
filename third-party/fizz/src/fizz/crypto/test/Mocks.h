@@ -36,11 +36,11 @@ class MockHasher : public Hasher {
   void setDefaults() {
     ON_CALL(*this, getHashLen()).WillByDefault(::testing::Return(32));
     ON_CALL(*this, getBlockSize()).WillByDefault(::testing::Return(64));
-    ON_CALL(*this, _clone()).WillByDefault(::testing::InvokeWithoutArgs([] {
+    ON_CALL(*this, _clone()).WillByDefault([] {
       auto h = std::make_unique<::testing::NiceMock<MockHasher>>();
       h->setDefaults();
       return h;
-    }));
+    });
   }
 };
 

@@ -24,8 +24,9 @@ class KeySchedulerTest : public testing::Test {
     auto kd = std::make_unique<MockKeyDerivation>();
     kd_ = kd.get();
     ON_CALL(*kd_, hashLength()).WillByDefault(Return(4));
-    ON_CALL(*kd_, _expandLabel(_, _, _, _))
-        .WillByDefault(InvokeWithoutArgs([]() { return IOBuf::create(0); }));
+    ON_CALL(*kd_, _expandLabel(_, _, _, _)).WillByDefault([]() {
+      return IOBuf::create(0);
+    });
     ks_ = std::make_unique<KeyScheduler>(std::move(kd));
   }
 
@@ -274,11 +275,11 @@ TEST_F(KeySchedulerTest, TestClonability) {
   StringPiece ecdhe{"ecdhe"};
 
   MockKeyDerivation* newKeyDerivation = nullptr;
-  EXPECT_CALL(*kd_, clone()).WillOnce(InvokeWithoutArgs([&]() {
+  EXPECT_CALL(*kd_, clone()).WillOnce([&]() {
     auto kd = std::make_unique<MockKeyDerivation>();
     newKeyDerivation = kd.get();
     return kd;
-  }));
+  });
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   Error err;
   EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);

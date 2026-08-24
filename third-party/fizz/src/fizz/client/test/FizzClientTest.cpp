@@ -64,7 +64,7 @@ TEST_F(FizzClientTest, TestConnect) {
   EXPECT_CALL(
       *MockClientStateMachineInstance::instance,
       _processConnect(_, _, _, _, _, _, _))
-      .WillOnce(InvokeWithoutArgs([] { return Actions(); }));
+      .WillOnce([] { return Actions(); });
   const auto sni = std::string("www.example.com");
   fizzClient_->fizzClient_.connect(
       context_, nullptr, sni, folly::none, folly::none);

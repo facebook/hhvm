@@ -27,9 +27,9 @@ class MockCertificateCompressor : public CertificateCompressor {
     FIZZ_THROW_TO_ERROR(ret, _compress(cert));
   }
   void setDefaults() {
-    ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, getAlgorithm()).WillByDefault([]() {
       return CertificateCompressionAlgorithm::zlib;
-    }));
+    });
   }
 };
 
@@ -44,9 +44,9 @@ class MockCertificateDecompressor : public CertificateDecompressor {
     FIZZ_THROW_TO_ERROR(ret, _decompress(cc));
   }
   void setDefaults() {
-    ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, getAlgorithm()).WillByDefault([]() {
       return CertificateCompressionAlgorithm::zlib;
-    }));
+    });
   }
 };
 } // namespace test

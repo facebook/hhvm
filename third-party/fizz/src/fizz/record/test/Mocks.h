@@ -164,14 +164,13 @@ class MockPlaintextWriteRecordLayer : public PlaintextWriteRecordLayer {
 
   void setDefaults() {
     setWriteDefaults(this);
-    ON_CALL(*this, _writeInitialClientHello(_))
-        .WillByDefault(InvokeWithoutArgs([]() {
-          TLSContent record;
-          record.contentType = ContentType::handshake;
-          record.data = folly::IOBuf::copyBuffer("handshake");
-          record.encryptionLevel = EncryptionLevel::Plaintext;
-          return record;
-        }));
+    ON_CALL(*this, _writeInitialClientHello(_)).WillByDefault([]() {
+      TLSContent record;
+      record.contentType = ContentType::handshake;
+      record.data = folly::IOBuf::copyBuffer("handshake");
+      record.encryptionLevel = EncryptionLevel::Plaintext;
+      return record;
+    });
   }
 };
 

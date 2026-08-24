@@ -61,9 +61,9 @@ TEST_F(GetCookieStateTest, TestBasic) {
   EXPECT_CALL(
       factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(seq)
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce([=]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext);
-      }));
+      });
   EXPECT_CALL(
       *mockHandshakeContext,
       _appendToTranscript(BufMatches("clienthelloencoding")))
@@ -116,11 +116,11 @@ TEST_F(GetCookieStateTest, TestVersionMismatch) {
 TEST_F(GetCookieStateTest, TestCipherNegotiate) {
   EXPECT_CALL(
       factory_, _makeHandshakeContext(CipherSuite::TLS_AES_256_GCM_SHA384))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce([=]() {
         auto ret = std::make_unique<MockHandshakeContext>();
         ret->setDefaults();
         return ret;
-      }));
+      });
   auto state = getCookieState(
       factory_,
       {TestProtocolVersion},
@@ -135,11 +135,11 @@ TEST_F(GetCookieStateTest, TestCipherNegotiate) {
 TEST_F(GetCookieStateTest, TestCipherNegotiateTie) {
   EXPECT_CALL(
       factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce([=]() {
         auto ret = std::make_unique<MockHandshakeContext>();
         ret->setDefaults();
         return ret;
-      }));
+      });
   auto state = getCookieState(
       factory_,
       {TestProtocolVersion},

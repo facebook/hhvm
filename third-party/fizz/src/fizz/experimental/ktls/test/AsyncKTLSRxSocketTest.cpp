@@ -254,7 +254,7 @@ TEST_F(KTLSReadTest, BasicReadWrite) {
           *size = buf.size();
         }));
     EXPECT_CALL(mockReadCB_, readDataAvailable_(strlen("hello world")))
-        .WillOnce(InvokeWithoutArgs([&] { serverConn_->setReadCB(nullptr); }));
+        .WillOnce([&] { serverConn_->setReadCB(nullptr); });
     serverConn_->setReadCB(&mockReadCB_);
     evb_.loop();
 

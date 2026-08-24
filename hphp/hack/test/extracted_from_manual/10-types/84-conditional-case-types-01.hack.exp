@@ -1,0 +1,6 @@
+ERROR: File "84-conditional-case-types-01.hack", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+  File "84-conditional-case-types-01.hack", line 12, characters 36-42:
+  Expected `CT<int>`
+  File "84-conditional-case-types-01.hack", line 12, characters 25-29:
+  But got `float`

@@ -155,3 +155,5 @@ function takes_case_type(MyCaseType $x): void {
   }
 }
 ```
+
+A variant can also carry a `where` clause that conditions the variant's inclusion. See [conditional case types](/hack/types/conditional-case-types).

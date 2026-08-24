@@ -1,0 +1,6 @@
+ERROR: File "84-conditional-case-types-04.hack", line 12, characters 12-22:
+Invalid return type (Typing[4110])
+  File "84-conditional-case-types-04.hack", line 10, characters 43-43:
+  Expected `T`
+  File "84-conditional-case-types-04.hack", line 12, characters 16-20:
+  But got `MyInt`

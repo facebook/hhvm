@@ -146,6 +146,10 @@ class McRouteHandleProvider
     return std::move(accessPoints_);
   }
 
+  ExtraRouteHandleProviderIf<RouterInfo>* extraProvider() {
+    return extraProvider_.get();
+  }
+
   ~McRouteHandleProvider() override;
 
  private:

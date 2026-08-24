@@ -15,11 +15,17 @@
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/PoolFactory.h"
 #include "mcrouter/Proxy.h"
+#include "mcrouter/lib/RouteHandleTraverser.h"
+#include "mcrouter/lib/config/RouteHandleBuilder.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/options.h"
+#include "mcrouter/routes/McExtraRouteHandleProvider.h"
 #include "mcrouter/routes/McRouteHandleProvider.h"
 #include "mcrouter/routes/McrouterRouteHandle.h"
+#include "mcrouter/routes/PrefixSelectorRoute.h"
+#include "mcrouter/routes/ProxyRoute.h"
+#include "mcrouter/routes/RouteSelectorMap.h"
 
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
@@ -113,6 +119,14 @@ struct TestSetup {
     return rhProvider_;
   }
 
+  RouteHandleFactory<McrouterRouteHandleIf>& factory() {
+    return rhFactory_;
+  }
+
+  Proxy<MemcacheRouterInfo>& proxy() {
+    return *router_->getProxy(0);
+  }
+
   McrouterRouteHandlePtr getRoute(const char* jsonStr) {
     return rhFactory_.create(parseJsonString(jsonStr));
   }
@@ -130,6 +144,63 @@ struct TestSetup {
     return opts;
   }
 };
+
+// Recognizable pass-through handle, so a traversal can tell whether the root
+// of the tree is the one ProxyRoute built or one an extra provider put there.
+template <class RouteHandleIf>
+class MarkerRoute {
+ public:
+  static std::string routeName() {
+    return "marker";
+  }
+
+  explicit MarkerRoute(std::shared_ptr<RouteHandleIf> child)
+      : child_(std::move(child)) {}
+
+  template <class Request>
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
+    return t(*child_, req);
+  }
+
+  template <class Request>
+  ReplyT<Request> route(const Request& req) const {
+    return child_->route(req);
+  }
+
+ private:
+  std::shared_ptr<RouteHandleIf> child_;
+};
+
+class MarkerExtraProvider
+    : public McExtraRouteHandleProvider<MemcacheRouterInfo> {
+ public:
+  McrouterRouteHandlePtr wrapRoot(McrouterRouteHandlePtr root) override {
+    return makeRouteHandle<McrouterRouteHandleIf, MarkerRoute>(std::move(root));
+  }
+};
+
+// Single-entry selector map, enough to build a ProxyRoute.
+RouteSelectorMap<McrouterRouteHandleIf> nullRouteSelectors(TestSetup& setup) {
+  RouteSelectorMap<McrouterRouteHandleIf> selectors;
+  selectors[setup.proxy().getRouterOptions().default_route] =
+      std::make_shared<PrefixSelectorRoute<McrouterRouteHandleIf>>(
+          setup.factory(), parseJsonString(R"("NullRoute")"));
+  return selectors;
+}
+
+// Name of the first route handle a traversal of `proxyRoute` reaches.
+std::string rootRouteName(ProxyRoute<MemcacheRouterInfo>& proxyRoute) {
+  std::string name;
+  RouteHandleTraverser<McrouterRouteHandleIf> t{
+      [&name](const McrouterRouteHandleIf& rh) {
+        if (name.empty()) {
+          name = rh.routeName();
+        }
+      }};
+  proxyRoute.traverse(McGetRequest("key"), t);
+  return name;
+}
 
 } // namespace
 
@@ -209,4 +280,32 @@ TEST(McRouteHandleProvider, bucketized_pool_route_and_mcreplay_asynclogRoutes) {
   EXPECT_EQ(
       "bucketize|total_buckets=1000|bucketization_keyspace=tst|prefix_map_enabled=false",
       asynclogRoutes["test.asynclog"]->routeName());
+}
+
+// A provider that does not override wrapRoot leaves the tree alone, so
+// existing routers keep the root that ProxyRoute built for them.
+TEST(McRouteHandleProvider, wrap_root_defaults_to_identity) {
+  TestSetup setup;
+  auto rh = setup.getRoute(kConstShard);
+  ASSERT_TRUE(setup.provider().extraProvider() != nullptr);
+  EXPECT_EQ(rh, setup.provider().extraProvider()->wrapRoot(rh));
+}
+
+TEST(McRouteHandleProvider, proxy_route_without_provider_is_unwrapped) {
+  TestSetup setup;
+  auto selectors = nullRouteSelectors(setup);
+  ProxyRoute<MemcacheRouterInfo> proxyRoute(
+      setup.proxy(), selectors, RootRouteRolloutOpts{});
+  EXPECT_EQ("root", rootRouteName(proxyRoute));
+}
+
+// The handle an extra provider returns from wrapRoot ends up above the root,
+// so it sees every request no matter how the config selects routes.
+TEST(McRouteHandleProvider, proxy_route_applies_wrap_root) {
+  TestSetup setup;
+  auto selectors = nullRouteSelectors(setup);
+  MarkerExtraProvider extraProvider;
+  ProxyRoute<MemcacheRouterInfo> proxyRoute(
+      setup.proxy(), selectors, RootRouteRolloutOpts{}, &extraProvider);
+  EXPECT_EQ("marker", rootRouteName(proxyRoute));
 }

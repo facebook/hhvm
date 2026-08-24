@@ -31,6 +31,9 @@ namespace mcrouter {
 template <class RouterInfo>
 class Proxy;
 
+template <class RouterInfo>
+class ExtraRouteHandleProviderIf;
+
 /**
  * This is the top-most level of Mcrouter's RouteHandle tree.
  */
@@ -45,7 +48,8 @@ class ProxyRoute {
       Proxy<RouterInfo>& proxy,
       const RouteSelectorMap<typename RouterInfo::RouteHandleIf>&
           routeSelectors,
-      RootRouteRolloutOpts rolloutOpts);
+      RootRouteRolloutOpts rolloutOpts,
+      ExtraRouteHandleProviderIf<RouterInfo>* extraProvider = nullptr);
 
   template <class Request>
   bool traverse(

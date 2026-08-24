@@ -12,6 +12,7 @@
 #include "mcrouter/Proxy.h"
 #include "mcrouter/lib/config/RouteHandleBuilder.h"
 #include "mcrouter/routes/BigValueRoute.h"
+#include "mcrouter/routes/ExtraRouteHandleProviderIf.h"
 #include "mcrouter/routes/LoggingRoute.h"
 #include "mcrouter/routes/McRouteHandleBuilder.h"
 
@@ -42,7 +43,8 @@ template <class RouterInfo>
 ProxyRoute<RouterInfo>::ProxyRoute(
     Proxy<RouterInfo>& proxy,
     const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors,
-    RootRouteRolloutOpts rolloutOpts)
+    RootRouteRolloutOpts rolloutOpts,
+    ExtraRouteHandleProviderIf<RouterInfo>* extraProvider)
     : proxy_(proxy),
       root_(
           makeRouteHandleWithInfo<RouterInfo, RootRoute>(
@@ -56,6 +58,11 @@ ProxyRoute<RouterInfo>::ProxyRoute(
   }
   if (proxy_.getRouterOptions().enable_logging_route) {
     root_ = createLoggingRoute<RouterInfo>(std::move(root_));
+  }
+  // Applied last so the injected handle sees every request, before routing
+  // prefix selection and before any of the wrappers above.
+  if (extraProvider) {
+    root_ = extraProvider->wrapRoot(std::move(root_));
   }
 }
 

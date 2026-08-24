@@ -152,7 +152,8 @@ ProxyConfig<RouterInfo>::ProxyConfig(
           .enableAsyncDlBroadcast = enableAsyncDlBroadcast,
           .enableSetDistribution = enableSetDistribution,
           .enableCrossRegionSetRpc = enableCrossRegionSetRpc,
-          .enableGlobalBigValueRoute = enableGlobalBigValueRoute});
+          .enableGlobalBigValueRoute = enableGlobalBigValueRoute},
+      provider.extraProvider());
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

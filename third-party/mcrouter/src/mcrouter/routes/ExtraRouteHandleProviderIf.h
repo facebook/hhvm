@@ -43,6 +43,20 @@ class ExtraRouteHandleProviderIf {
       folly::StringPiece type,
       const folly::dynamic& json) = 0;
 
+  /**
+   * Wraps the root of the route handle tree, after the config's entry point
+   * has been turned into route handles.
+   *
+   * Lets a binary inject a route handle that must see every request no matter
+   * how the config expresses its entry point (route vs routes, aliases,
+   * prefix selectors). The wrapper sits above routing prefix selection, so it
+   * is created exactly once per proxy.
+   */
+  virtual std::shared_ptr<RouteHandleIf> wrapRoot(
+      std::shared_ptr<RouteHandleIf> root) {
+    return root;
+  }
+
   virtual ~ExtraRouteHandleProviderIf() {}
 };
 } // namespace mcrouter

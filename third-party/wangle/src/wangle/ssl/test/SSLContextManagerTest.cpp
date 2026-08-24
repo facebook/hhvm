@@ -22,7 +22,6 @@
 #include <wangle/ssl/SSLContextManager.h>
 #include <wangle/ssl/ServerSSLContext.h>
 #include <wangle/ssl/TLSTicketKeyManager.h>
-#include <wangle/util/Logging.h>
 
 #if defined(WANGLE_USE_FOLLY_TESTUTIL)
 #include <folly/io/async/test/TestSSLServer.h>

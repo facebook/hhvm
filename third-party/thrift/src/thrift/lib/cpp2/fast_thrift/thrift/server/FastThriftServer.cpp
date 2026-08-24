@@ -159,6 +159,18 @@ void FastThriftServer::addModule(FastServerModule module) {
             "extension, which requires enableRequestContext",
             module.name()));
   }
+  // Two independent things pausing and resuming the same connection's reads,
+  // with nothing arbitrating between them: WriteBufferBackpressureHandler
+  // resumes as soon as its own buffer drains, which would lift a pause the
+  // extension still wants held. Fail loudly rather than intermittently.
+  if (module.controlsReads() && config_.enableWriteBufferBackpressure) {
+    throw std::logic_error(
+        fmt::format(
+            "FastThriftServer::addModule: module '{}' registers an extension "
+            "that controls reads, which cannot be combined with "
+            "enableWriteBufferBackpressure",
+            module.name()));
+  }
   auto name = module.name();
   // Splice the module's handlers into the ordered list at the current call
   // position, preserving intra-module order.

@@ -73,7 +73,31 @@ class RequestVerdict {
         folly::make_exception_wrapper<Ex>(std::forward<Args>(args)...));
   }
 
+  /**
+   * Serve this request, then stop admitting further ones on the connection
+   * until the extension resumes it.
+   *
+   * Backpressure is expressed here, on the request itself, because this is
+   * where the result can still reach the transport: the verdict travels back
+   * out of the pipeline as Result::Backpressure and stops the socket being
+   * read before the next request arrives. An extension deciding out-of-band
+   * instead — off a write completion, say — could not take effect until a
+   * request had already been let through.
+   *
+   * Only honoured for an extension wired for backpressure (one declaring
+   * onBackpressureAttached, so it holds a ReadResumer); returning it from any
+   * other extension is a programming error and fails a DCHECK, since nothing
+   * would ever lift the pause.
+   */
+  static RequestVerdict backpressure() noexcept {
+    RequestVerdict verdict;
+    verdict.backpressure_ = true;
+    return verdict;
+  }
+
   bool isRejected() const noexcept { return bool(cause_); }
+
+  bool appliesBackpressure() const noexcept { return backpressure_; }
 
   // Empty unless isRejected().
   const folly::exception_wrapper& cause() const& noexcept { return cause_; }
@@ -85,6 +109,7 @@ class RequestVerdict {
       : cause_(std::move(cause)) {}
 
   folly::exception_wrapper cause_;
+  bool backpressure_{false};
 };
 
 /**

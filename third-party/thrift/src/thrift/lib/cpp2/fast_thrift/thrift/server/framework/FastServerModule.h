@@ -93,7 +93,9 @@ class FastServerModule {
    */
   template <typename H, typename... Args>
   FastServerModule& addThriftExtension(Args... args) {
-    requiresConnectionContext_ |= ThriftConnectionExtensionHandler<H>;
+    requiresConnectionContext_ |= ThriftConnectionExtensionHandler<H> ||
+        ThriftBackpressureExtensionHandler<H>;
+    controlsReads_ |= ThriftBackpressureExtensionHandler<H>;
     return addFactory([&](channel_pipeline::HandlerId id) {
       return server::makeThriftExtensionHandlerFactory<H>(
           id, std::move(args)...);
@@ -108,6 +110,15 @@ class FastServerModule {
    * connection extension would silently see nothing.
    */
   bool requiresConnectionContext() const { return requiresConnectionContext_; }
+
+  /**
+   * Whether any extension in this module pauses and resumes reads on a
+   * connection. Checked by FastThriftServer::addModule against
+   * enableWriteBufferBackpressure, which resumes reads the moment its own
+   * buffer drains: the two arbitrate nothing between them, so a write-buffer
+   * drain would silently lift an extension's pause.
+   */
+  bool controlsReads() const { return controlsReads_; }
 
   /**
    * The module's handler factories, in call order. FastThriftServer::addModule
@@ -139,6 +150,7 @@ class FastServerModule {
   std::string name_;
   std::vector<server::ThriftPipelineHandlerFactory> factories_;
   bool requiresConnectionContext_{false};
+  bool controlsReads_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

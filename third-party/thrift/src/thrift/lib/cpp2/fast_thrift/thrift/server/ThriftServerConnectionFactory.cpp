@@ -17,11 +17,13 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerConnectionFactory.h>
 
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 #include <folly/io/IOBuf.h>
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
@@ -63,12 +65,13 @@ using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::SimpleBufferAllocator;
 
-// The batcher always carries the write-completion tracker. The transport fires
-// TransportWriteComplete on every write whatever the configuration, and the
-// tracker is the only thing that turns those into the per-batch
-// RocketWriteComplete the layer above consumes; without it the transport's
-// events reach an empty subscriber list. Backpressure participation is the one
-// axis that varies. Both bind the rocket event space through the tracker's own
+// Both write-path handlers always carry their completion tracker; backpressure
+// participation is the one axis that varies. The trackers form a chain — the
+// transport's per-writev completion becomes the batcher's per-batch event,
+// which the fragmenter resolves into the per-frame completion the rocket layer
+// consumes — and each stage's only subscriber is the next one, so a NoOp
+// tracker anywhere strands every event below it with nowhere to go. The
+// batching aliases bind the rocket event space through the tracker's own
 // EventId, so the batcher still hears FlushWrites either way.
 using ServerBatchingFrameHandler =
     frame::write::handler::IntervalBatchingFrameHandlerT<
@@ -79,6 +82,29 @@ using ServerBatchingFrameHandlerNoBackpressure =
         frame::write::handler::WriteCompletionTrackerT<
             rocket::server::RocketServerEventFactory>,
         frame::write::handler::BackpressureDisabled>;
+using ServerFragmentationFrameHandler =
+    frame::write::handler::FrameFragmentationHandlerT<
+        frame::write::handler::FragmentCompletionTrackerT<
+            rocket::server::RocketServerEventFactory>>;
+using ServerFragmentationFrameHandlerNoBackpressure =
+    frame::write::handler::FrameFragmentationHandlerT<
+        frame::write::handler::FragmentCompletionTrackerT<
+            rocket::server::RocketServerEventFactory>,
+        frame::write::handler::BackpressureDisabled>;
+
+// A NoOp tracker collapses the handler's EventId to NoEvent and empties its
+// subscription list, which is silent at runtime: the batcher keeps firing and
+// PipelineImpl::fireEvent walks an empty list. Catch that at build time here
+// instead, on the seam where the chain is actually assembled.
+static_assert(
+    !std::is_same_v<
+        ServerFragmentationFrameHandler::EventId,
+        channel_pipeline::NoEvent> &&
+        !std::is_same_v<
+            ServerFragmentationFrameHandlerNoBackpressure::EventId,
+            channel_pipeline::NoEvent>,
+    "the fragmenter is the batcher's only BatchWriteComplete subscriber in "
+    "both backpressure configurations; a NoOp tracker here would strand it");
 
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
@@ -422,22 +448,17 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
       .addNextDuplex<frame::handler::FrameCodecHandler>(frame_codec_handler_tag)
       .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
           frame_defragmentation_handler_tag);
+  // Fragmenter composed with the fragment-completion tracker. It records each
+  // frame's streamId on the way down — below this handler the frame is
+  // serialized bytes and the stream is no longer recoverable — and fans the
+  // batcher's batch event back out into one completion per original frame. It
+  // is also the only handler that can narrow the batcher's quiescence verdict,
+  // since the frames it is still holding are invisible from below.
   if (config_.enableBackpressure) {
-    // Fragmenter composed with the fragment-completion tracker, same as the
-    // client pipeline. It records each frame's streamId on the way down — below
-    // this handler the frame is serialized bytes and the stream is no longer
-    // recoverable — and fans the batcher's batch event back out into one
-    // completion per original frame. Paired with the batcher's tracker above;
-    // a NoOp here would strand the batch events with no subscriber.
-    builder.addNextOutbound<frame::write::handler::FrameFragmentationHandlerT<
-        frame::write::handler::FragmentCompletionTrackerT<
-            rocket::server::RocketServerEventFactory>>>(
+    builder.addNextOutbound<ServerFragmentationFrameHandler>(
         frame_fragmentation_handler_tag, config_.fragmentationConfig);
   } else {
-    // Matches the batcher above: no tracker there means no batch events, so
-    // there is nothing for a relay to forward.
-    builder.addNextOutbound<
-        frame::write::handler::FrameFragmentationHandlerNoBackpressure>(
+    builder.addNextOutbound<ServerFragmentationFrameHandlerNoBackpressure>(
         frame_fragmentation_handler_tag, config_.fragmentationConfig);
   }
   builder

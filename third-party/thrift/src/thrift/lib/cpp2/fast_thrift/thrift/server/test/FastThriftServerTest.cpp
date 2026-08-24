@@ -27,6 +27,7 @@
 #include <string>
 #include <string_view>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include <fizz/client/AsyncFizzClient.h>
@@ -1254,6 +1255,145 @@ struct ClosedOnlyExtension {
   }
 };
 
+// What a backpressure extension observed. One extension is built per
+// connection, so the sink lives in the test.
+struct BackpressureRecorder {
+  std::atomic<int> drained{0};
+  std::atomic<int> attached{0};
+  std::atomic<void*> userData{nullptr};
+  // Set by the test to make the next request pause the connection once.
+  std::atomic<bool> pauseOnce{false};
+  // Whether that pause is ever lifted. A test that leaves it false pins what a
+  // pause actually stops.
+  std::atomic<bool> resumeAfterPause{true};
+
+  std::mutex resumerMutex;
+  ftt::ReadResumer resumer;
+};
+
+// Pauses from the request path, which is the only point the decision can still
+// reach the transport, and resumes the way a real consumer must: from a later
+// turn of the event loop, never inline, since onEgressDrained runs on the
+// socket's write-completion path.
+struct BackpressureExtension {
+  explicit BackpressureExtension(BackpressureRecorder* r) noexcept : rec(r) {}
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    if (rec->pauseOnce.exchange(false, std::memory_order_relaxed)) {
+      return ftt::RequestVerdict::backpressure();
+    }
+    return ftt::RequestVerdict::proceed();
+  }
+
+  void onBackpressureAttached(ftt::ReadResumer resumer) noexcept {
+    {
+      std::lock_guard<std::mutex> lock(rec->resumerMutex);
+      rec->resumer = std::move(resumer);
+    }
+    rec->attached.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  void onEgressDrained(const ftt::ThriftConnectionView& conn) noexcept {
+    rec->userData.store(conn.userData(), std::memory_order_relaxed);
+    rec->drained.fetch_add(1, std::memory_order_relaxed);
+    if (!rec->resumeAfterPause.load(std::memory_order_relaxed)) {
+      return;
+    }
+    ftt::ReadResumer resumer;
+    {
+      std::lock_guard<std::mutex> lock(rec->resumerMutex);
+      resumer = rec->resumer;
+    }
+    folly::EventBaseManager::get()->getEventBase()->runInLoop(
+        [resumer]() mutable noexcept { resumer.resume(); });
+  }
+
+  BackpressureRecorder* rec{nullptr};
+};
+
+// Hooks only the admission-control points — an extension that never inspects a
+// request still gets the drain notification and a resumer.
+struct DrainOnlyExtension {
+  void onBackpressureAttached(const ftt::ReadResumer& /*resumer*/) noexcept {}
+  void onEgressDrained(const ftt::ThriftConnectionView& /*conn*/) noexcept {}
+};
+
+// One extension, both families: the request callback and the admission-control
+// callback land on the same per-connection instance.
+struct ObservingBackpressureExtension {
+  explicit ObservingBackpressureExtension(BackpressureRecorder* r) noexcept
+      : rec(r) {}
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& /*request*/) noexcept {
+    ++requests;
+    return ftt::RequestVerdict::proceed();
+  }
+
+  void onBackpressureAttached(const ftt::ReadResumer& /*resumer*/) noexcept {
+    rec->attached.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  void onEgressDrained(const ftt::ThriftConnectionView& /*conn*/) noexcept {
+    // Reads its own request count: proof the two callbacks share one instance.
+    if (requests > 0) {
+      rec->drained.fetch_add(1, std::memory_order_relaxed);
+    }
+  }
+
+  BackpressureRecorder* rec{nullptr};
+  int requests{0};
+};
+
+// `count` sequential RPCs over one connection, returning false rather than
+// hanging if one stops landing.
+//
+// Two trips are enough to observe a pause taken on the first request: the
+// verdict reaches the transport on the traversal that carried that request, so
+// the second never arrives. If pausing ever regressed to being applied
+// out-of-band it would take three, which is what these tests would catch.
+bool roundTripsOnOneConnection(
+    const folly::SocketAddress& addr,
+    int count,
+    std::chrono::seconds callTimeout = std::chrono::seconds{10}) {
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, addr);
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            apache::thrift::RocketClientChannel::newChannel(std::move(socket)));
+  });
+
+  bool ok = true;
+  for (int i = 0; i < count && ok; ++i) {
+    folly::Baton<> done;
+    int64_t sum = 0;
+    evb->runInEventBaseThread([&] {
+      // Bound the call itself, not just the wait below. A request the server
+      // is holding would otherwise sit until Thrift's default client timeout
+      // and keep the client loop alive for that long, whatever this waits for.
+      apache::thrift::RpcOptions options;
+      options.setTimeout(callTimeout);
+      client->semifuture_add(options, 7, 35)
+          .via(evb)
+          .thenValue([&](int64_t v) {
+            sum = v;
+            done.post();
+          })
+          .thenError(
+              folly::tag_t<std::exception>{},
+              [&](const std::exception&) { done.post(); });
+    });
+    ok = done.try_wait_for(callTimeout + std::chrono::seconds{5}) && sum == 42;
+  }
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  return ok;
+}
+
 // Spins until `value` reaches `target` or the deadline passes. Connection
 // teardown completes asynchronously after the client goes away, so tests that
 // assert on it cannot read the counter straight through.
@@ -1667,6 +1807,191 @@ TEST(FastThriftServerConnectionExtensionTest, CallbackFamiliesAreIndependent) {
                        CountingExtension>::kSubscribedEvents)>,
           cp::Subscriptions<>>,
       "an extension with no connection callback must subscribe to no events");
+}
+
+// Egress going idle reaches the extension, and the view hands it the
+// per-connection slot the embedder populated at accept time — the state a
+// service's admission decision is actually made against.
+TEST(FastThriftServerBackpressureExtensionTest, EgressDrainedSeesUserData) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  int marker = 0;
+  BackpressureRecorder rec;
+  auto handler = std::make_shared<TestHandler>();
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.setOnConnectionAccepted([&](ftt::ThriftConnContext* conn) {
+    conn->setUserData(
+        apache::thrift::fast_thrift::rocket::with_custom_deleter(
+            &marker, +[](void*) noexcept {}));
+  });
+  server.addModule(
+      ftt::FastServerModule("backpressure")
+          .addThriftExtension<BackpressureExtension>(&rec));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  EXPECT_TRUE(waitFor(rec.drained, 1));
+  EXPECT_EQ(rec.attached.load(), 1);
+  EXPECT_EQ(rec.userData.load(), &marker);
+}
+
+// A pause that is never lifted stops the connection admitting requests. This
+// is the test that pins the mechanism actually working — without it the
+// resume test below would pass whether or not the pause ever engaged.
+TEST(
+    FastThriftServerBackpressureExtensionTest, PauseWithoutResumeStopsServing) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  BackpressureRecorder rec;
+  rec.pauseOnce.store(true, std::memory_order_relaxed);
+  rec.resumeAfterPause.store(false, std::memory_order_relaxed);
+  auto handler = std::make_shared<TestHandler>();
+
+  // The connection is deliberately left wedged, so shut the terminal-phase
+  // deadlines right down — otherwise teardown waits out the full drain and
+  // reap before the test can finish.
+  auto config = makeConnectionContextConfig();
+  config.drainTimeout = std::chrono::milliseconds{100};
+  config.reapTimeout = std::chrono::milliseconds{200};
+
+  ftt::FastThriftServer server(std::move(config));
+  server.setInterface(handler);
+  server.setIOThreadPool(makeFixedSizePool(1));
+  server.addModule(
+      ftt::FastServerModule("backpressure")
+          .addThriftExtension<BackpressureExtension>(&rec));
+  server.start();
+
+  EXPECT_FALSE(roundTripsOnOneConnection(
+      server.getAddress(), 2, std::chrono::seconds{5}));
+  EXPECT_GE(rec.drained.load(), 1);
+}
+
+// The resumer lifts it again. Same shape as above, so the only difference is
+// whether the deferred resume runs — which makes this a direct check that
+// resume is what recovers the connection, not that the pause never took.
+TEST(FastThriftServerBackpressureExtensionTest, PauseThenResumeKeepsServing) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  BackpressureRecorder rec;
+  rec.pauseOnce.store(true, std::memory_order_relaxed);
+  auto handler = std::make_shared<TestHandler>();
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.setIOThreadPool(makeFixedSizePool(1));
+  server.addModule(
+      ftt::FastServerModule("backpressure")
+          .addThriftExtension<BackpressureExtension>(&rec));
+  server.start();
+
+  EXPECT_TRUE(roundTripsOnOneConnection(server.getAddress(), 2));
+  EXPECT_GE(rec.drained.load(), 1);
+}
+
+// The extension outlives the connection, so a resume that arrives after
+// teardown must do nothing rather than reach a dead pipeline. Deferred resume
+// makes this ordinary, not exotic.
+TEST(FastThriftServerBackpressureExtensionTest, ResumerIsInertAfterClose) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  BackpressureRecorder rec;
+  auto handler = std::make_shared<TestHandler>();
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("backpressure")
+          .addThriftExtension<BackpressureExtension>(&rec));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+  EXPECT_TRUE(waitFor(rec.attached, 1));
+
+  ftt::ReadResumer resumer;
+  {
+    std::lock_guard<std::mutex> lock(rec.resumerMutex);
+    resumer = rec.resumer;
+  }
+  server.stop();
+
+  EXPECT_FALSE(static_cast<bool>(resumer));
+  resumer.resume(); // must not reach the torn-down pipeline
+}
+
+// One extension implementing both families gets one instance per connection:
+// the drain callback can read state the request callback wrote. Registering
+// the same extension twice to get both would give two instances and split that
+// state, which is why there is a single registration entry point.
+TEST(FastThriftServerBackpressureExtensionTest, OneInstanceServesBothFamilies) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  BackpressureRecorder rec;
+  auto handler = std::make_shared<TestHandler>();
+
+  ftt::FastThriftServer server(makeConnectionContextConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("both")
+          .addThriftExtension<ObservingBackpressureExtension>(&rec));
+  server.start();
+
+  EXPECT_EQ(addRoundTrip(server.getAddress()), 42);
+
+  // Only counted when the drain callback saw the request the same instance
+  // handled.
+  EXPECT_TRUE(waitFor(rec.drained, 1));
+}
+
+// The families are independent concepts: an observer is not an
+// admission-control extension and vice versa, and an extension can be both.
+TEST(FastThriftServerBackpressureExtensionTest, ConceptsAreIndependent) {
+  static_assert(
+      !ftt::ThriftBackpressureExtensionHandler<CountingExtension>,
+      "a request/response extension does not control reads");
+  static_assert(
+      ftt::ThriftBackpressureExtensionHandler<DrainOnlyExtension>,
+      "declaring onEgressDrained opts in to admission control");
+  static_assert(
+      !ftt::ThriftExtensionHandler<DrainOnlyExtension>,
+      "an admission-control extension needs no request callback");
+  static_assert(
+      ftt::ThriftBackpressureExtensionHandler<ObservingBackpressureExtension> &&
+          ftt::ThriftExtensionHandler<ObservingBackpressureExtension>,
+      "one extension may implement both families");
+}
+
+// An admission-control extension decides against per-connection state, so a
+// server that builds no connection context is refused rather than handing it
+// an empty connection.
+TEST(FastThriftServerBackpressureExtensionTest, RequiresRequestContext) {
+  BackpressureRecorder rec;
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  EXPECT_THROW(
+      server.addModule(
+          ftt::FastServerModule("backpressure")
+              .addThriftExtension<BackpressureExtension>(&rec)),
+      std::logic_error);
+}
+
+// WriteBufferBackpressureHandler resumes reads the moment its own buffer
+// drains, with nothing arbitrating against the extension's pause. Refuse the
+// combination outright instead of letting it lift the pause intermittently.
+TEST(
+    FastThriftServerBackpressureExtensionTest, RejectsWriteBufferBackpressure) {
+  BackpressureRecorder rec;
+  auto config = makeConnectionContextConfig();
+  config.enableWriteBufferBackpressure = true;
+
+  ftt::FastThriftServer server(std::move(config));
+  EXPECT_THROW(
+      server.addModule(
+          ftt::FastServerModule("backpressure")
+              .addThriftExtension<BackpressureExtension>(&rec)),
+      std::logic_error);
 }
 
 // Registering two modules with the same name on the server is rejected.

@@ -129,6 +129,11 @@ class ThriftConnectionView {
     return connContext_.getPeerCertificate();
   }
 
+  // The opaque per-connection slot the embedder populated at accept time via
+  // ThriftConnContext::setUserData, or null if it set none. This is where a
+  // service hangs the state its per-connection decisions are made against.
+  void* userData() const noexcept { return connContext_.getUserData(); }
+
  private:
   const ThriftConnContext& connContext_;
 };

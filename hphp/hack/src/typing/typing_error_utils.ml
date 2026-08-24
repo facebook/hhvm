@@ -6983,9 +6983,6 @@ end = struct
         (fun_param_required_but_expected_optional pos decl_pos param_names)
     | Type_arity_mismatch { pos; actual; decl_pos; expected } ->
       Eval_result.single (type_arity_mismatch pos actual decl_pos expected)
-    | Violated_constraint { cstrs; ty_sub; ty_sup; is_coeffect } ->
-      Eval_result.single
-        (violated_constraint cstrs is_coeffect ~ty_sub ~ty_sup env)
     | Concrete_const_interface_override { pos; parent_pos; name; parent_origin }
       ->
       Eval_result.single
@@ -7164,8 +7161,13 @@ end = struct
            ~member_parent_origin_type)
     | Bad_prop_override { pos; member_name } ->
       Eval_result.single (bad_prop_override pos member_name)
-    | Subtyping_error { ty_sub; ty_sup; is_coeffect } ->
-      Eval_result.single (subtyping_error is_coeffect ~ty_sub ~ty_sup env)
+    | Subtyping_error { cstrs; ty_sub; ty_sup; is_coeffect } ->
+      (match Lazy.force cstrs with
+      | [] ->
+        Eval_result.single (subtyping_error is_coeffect ~ty_sub ~ty_sup env)
+      | cstrs ->
+        Eval_result.single
+          (violated_constraint cstrs is_coeffect ~ty_sub ~ty_sup env))
     | Method_not_dynamically_callable { pos; parent_pos } ->
       Eval_result.single (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->
@@ -7470,6 +7472,13 @@ end = struct
       | Drop_reasons_on_apply t ->
         let st = Error_state.{ st with reasons_opt = Some (lazy []) } in
         aux t st
+      | Choose (condition, if_true, if_false) ->
+        aux
+          (if Lazy.force condition then
+            if_true
+          else
+            if_false)
+          st
       [@@ocaml.warning "-3"]
     and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
         =
@@ -7581,8 +7590,7 @@ let discard_outermost (err : Typing_error.t) : Typing_error.t =
 let rec get_arg_idx_secondary (second : Typing_error.Secondary.t) =
   let open Typing_error.Secondary in
   match second with
-  | Subtyping_error { ty_sub; _ }
-  | Violated_constraint { ty_sub; _ } ->
+  | Subtyping_error { ty_sub; _ } ->
     Typing_reason.get_top_fun_param_prj_idx
       (Typing_defs_constraints.get_reason_i ty_sub)
   | Of_error err -> get_arg_idx err

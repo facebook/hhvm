@@ -1546,13 +1546,6 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
       }
-    (* == Secondary only ====================================================== *)
-    | Violated_constraint of {
-        cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        ty_sub: Typing_defs_constraints.internal_type;
-        ty_sup: Typing_defs_constraints.internal_type;
-        is_coeffect: bool;
-      }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -1774,6 +1767,7 @@ and Secondary : sig
         dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Subtyping_error of {
+        cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list Lazy.t;
         ty_sub: Typing_defs_constraints.internal_type;
         ty_sup: Typing_defs_constraints.internal_type;
         is_coeffect: bool;
@@ -1953,6 +1947,7 @@ and Reasons_callback : sig
     | Prepend_on_apply of t * Secondary.t
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
     | Drop_reasons_on_apply of t
+    | Choose of bool Lazy.t * t * t
   [@@deriving show]
 
   (* -- Constructors -------------------------------------------------------- *)
@@ -1980,6 +1975,9 @@ and Reasons_callback : sig
        to `of_error @@ primary err`
   *)
   val of_primary_error : Primary.t -> t
+
+  (** Select a callback when the error is evaluated. *)
+  val choose : bool Lazy.t -> if_true:t -> if_false:t -> t
 
   (** Replace the current default claim with the claim from the supplied
       `Pos.t Message.t` *)

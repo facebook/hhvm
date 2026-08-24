@@ -179,28 +179,115 @@ let test_pkg_error ~kind ~file_suffix ~patt_use_file ~patt_decl_file ~expected _
   | `Match msg -> assert_matches_message msg config ~err
   | `NoMatch -> assert_no_match config ~err
 
-(* Pattern match over a `Violated_constraint` error matching exactly the tparam
-   name for which the constraint is violated *)
+let mk_lazy_subtyping_error_with_types ~cstrs ~ty_sub ~ty_sup =
+  let secondary_error =
+    Typing_error.Secondary.Subtyping_error
+      { is_coeffect = false; cstrs; ty_sub; ty_sup }
+  in
+  Typing_error.(
+    apply_reasons
+      ~on_error:(Reasons_callback.unify_error_at Pos.none)
+      secondary_error)
+
+let mk_lazy_subtyping_error cstrs =
+  let dynamic_ty = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None)) in
+  mk_lazy_subtyping_error_with_types
+    ~cstrs
+    ~ty_sub:dynamic_ty
+    ~ty_sup:dynamic_ty
+
+let mk_secondary_custom_config patt_secondary message =
+  let patt =
+    Custom_error.Error_v1
+      Patt_typing_error.(
+        Apply_reasons { patt_rsns_cb = Any_reasons_callback; patt_secondary })
+  in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit message] }
+  in
+  let custom_err = Custom_error.{ name = message; patt; error_message } in
+  mk_custom_config custom_err
+
+let test_lazy_violated_constraint_pattern _ =
+  let name = "Tviolated" in
+  let pod_none = Pos_or_decl.none in
+  let err = mk_lazy_subtyping_error (lazy [(pod_none, (pod_none, name))]) in
+  let patt_secondary =
+    Patt_typing_error.Violated_constraint
+      {
+        patt_cstr = Patt_string.Exactly name;
+        patt_ty_sub = Patt_locl_ty.Any;
+        patt_ty_sup = Patt_locl_ty.Any;
+      }
+  in
+  assert_matches_message
+    "violated"
+    (mk_secondary_custom_config patt_secondary "violated")
+    ~err
+
+let test_lazy_subtyping_error_pattern _ =
+  let err = mk_lazy_subtyping_error (lazy []) in
+  let patt_secondary =
+    Patt_typing_error.Subtyping_error
+      { patt_ty_sub = Patt_locl_ty.Any; patt_ty_sup = Patt_locl_ty.Any }
+  in
+  assert_matches_message
+    "subtyping"
+    (mk_secondary_custom_config patt_secondary "subtyping")
+    ~err
+
+let test_lazy_subtyping_error_patterns_do_not_cross_match _ =
+  let pod_none = Pos_or_decl.none in
+  let name = "Tviolated" in
+  let empty_err = mk_lazy_subtyping_error (lazy []) in
+  let nonempty_err =
+    mk_lazy_subtyping_error (lazy [(pod_none, (pod_none, name))])
+  in
+  let violated_config =
+    mk_secondary_custom_config
+      (Patt_typing_error.Violated_constraint
+         {
+           patt_cstr = Patt_string.Exactly name;
+           patt_ty_sub = Patt_locl_ty.Any;
+           patt_ty_sup = Patt_locl_ty.Any;
+         })
+      "violated"
+  in
+  let subtyping_config =
+    mk_secondary_custom_config
+      (Patt_typing_error.Subtyping_error
+         { patt_ty_sub = Patt_locl_ty.Any; patt_ty_sup = Patt_locl_ty.Any })
+      "subtyping"
+  in
+  assert_no_match violated_config ~err:empty_err;
+  assert_no_match subtyping_config ~err:nonempty_err
+
+let test_any_secondary_does_not_force_lazy_constraints _ =
+  let err =
+    mk_lazy_subtyping_error
+      (lazy (assert_failure "Any_snd forced the constraint payload"))
+  in
+  assert_matches_message
+    "any"
+    (mk_secondary_custom_config Patt_typing_error.Any_snd "any")
+    ~err
+
+(* Match a [Violated_constraint] pattern against exactly the tparam name for
+   which the constraint is violated. *)
 let test_patt_string_exactly _ =
   let open Patt_typing_error in
   let open Patt_locl_ty in
   let name = "Tviolated" in
   let pod_none = Pos_or_decl.none in
-  let snd_err =
-    Typing_error.Secondary.Violated_constraint
-      {
-        is_coeffect = false;
-        cstrs = [(pod_none, (pod_none, name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
-      }
-  in
+  let dynamic_ty = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None)) in
   let err =
-    Typing_error.(
-      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
+    mk_lazy_subtyping_error_with_types
+      ~cstrs:(lazy [(pod_none, (pod_none, name))])
+      ~ty_sub:dynamic_ty
+      ~ty_sup:dynamic_ty
   in
   (* Matches [Apply_reasons] error with any callback, applied to
-     [Violated_constraint] secondary error with contrained tparam `Tviolated` *)
+     a constrained subtyping error with tparam `Tviolated`. *)
   let patt =
     Custom_error.Error_v1
       (Apply_reasons
@@ -228,10 +315,9 @@ let test_patt_string_exactly _ =
     (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Ok"]]
 
-(* Pattern match over the [tysub] contained in a `Violated_constraint` error;
-   the type match requires an exact match on the class name and for it to
-   have exactly one type param. The type param must be a shape containing
-   a field name "a" which can be of any type *)
+(* Match the [tysub] of a constrained subtyping error. The type match requires
+   an exact class name and one type parameter: a shape containing a field named
+   "a" of any type. *)
 let test_patt_tysub _ =
   let open Patt_typing_error in
   let open Patt_locl_ty in
@@ -260,18 +346,13 @@ let test_patt_tysub _ =
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
   in
-  let snd_err =
-    Typing_error.Secondary.Violated_constraint
-      {
-        is_coeffect = false;
-        cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
-      }
-  in
+  let ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub)) in
+  let ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None)) in
   let err =
-    Typing_error.(
-      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
+    mk_lazy_subtyping_error_with_types
+      ~cstrs:(lazy [(pod_none, (pod_none, param_name))])
+      ~ty_sub
+      ~ty_sup
   in
 
   (* Matches a class with exactly one parameter where that param has a shape
@@ -332,11 +413,9 @@ let test_patt_tysub _ =
     (Eval.eval_typing_error custom_config ~err)
     [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.(Tdynamic None)))]]
 
-(* Pattern match over the [tysub] contained in a `Violated_constraint` error;
-   the type match requires an exact match on the class name and for it to
-   have exactly one type param. The type parameter may _either_ be an
-   arraykey (which we bind to `x`) or a shape with a field named `a` (whose
-   type we bind to `x`) *)
+(* Match the [tysub] of a constrained subtyping error. The type match requires
+   an exact class name and one type parameter. The parameter may be an arraykey
+   or a shape with a field named "a"; either result is bound to [x]. *)
 let test_patt_tysub_or_pattern _ =
   let open Patt_typing_error in
   let open Patt_locl_ty in
@@ -365,18 +444,13 @@ let test_patt_tysub_or_pattern _ =
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
   in
-  let snd_err =
-    Typing_error.Secondary.Violated_constraint
-      {
-        is_coeffect = false;
-        cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
-      }
-  in
+  let ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub)) in
+  let ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None)) in
   let err =
-    Typing_error.(
-      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
+    mk_lazy_subtyping_error_with_types
+      ~cstrs:(lazy [(pod_none, (pod_none, param_name))])
+      ~ty_sub
+      ~ty_sup
   in
 
   (* Matches a class with exactly one parameter where that param has a shape
@@ -481,18 +555,13 @@ let test_namespace _ =
                 };
           })
   in
-  let snd_err =
-    Typing_error.Secondary.Violated_constraint
-      {
-        is_coeffect = false;
-        cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
-      }
-  in
+  let ty_sub = LoclType (Ty.mk (Typing_reason.none, ty)) in
+  let ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None)) in
   let err =
-    Typing_error.(
-      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
+    mk_lazy_subtyping_error_with_types
+      ~cstrs:(lazy [(pod_none, (pod_none, param_name))])
+      ~ty_sub
+      ~ty_sup
   in
   let error_message =
     Custom_error.Message_v1 Error_message.{ message = [Lit "Ok"] }
@@ -2026,6 +2095,13 @@ let test_expr_tree_unsupported_operator _ =
 (* ~~ Test suite ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 let tests =
   [
+    "test_lazy_violated_constraint_pattern"
+    >:: test_lazy_violated_constraint_pattern;
+    "test_lazy_subtyping_error_pattern" >:: test_lazy_subtyping_error_pattern;
+    "test_lazy_subtyping_error_patterns_do_not_cross_match"
+    >:: test_lazy_subtyping_error_patterns_do_not_cross_match;
+    "test_any_secondary_does_not_force_lazy_constraints"
+    >:: test_any_secondary_does_not_force_lazy_constraints;
     "test_patt_string_exactly" >:: test_patt_string_exactly;
     "test_patt_tysub" >:: test_patt_tysub;
     "test_patt_tysub_or_pattern" >:: test_patt_tysub_or_pattern;

@@ -209,6 +209,11 @@ end = struct
 end
 
 module Subtype_env = struct
+  type tparam_constraint_candidate = {
+    r_sub: Reason.t;
+    r_super: Reason.t;
+  }
+
   type t = {
     require_soundness: bool;
         (** If set, requires the simplification of subtype constraints to be sound,
@@ -233,9 +238,9 @@ module Subtype_env = struct
           types that implement dynamic are considered sub-types of dynamic. *)
     on_error: Typing_error.Reasons_callback.t option;
     has_member_arg_posl: Pos.t list option;
-    tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
-        (** This is used for better error reporting to flag violated
-          constraints on type parameters, if any. *)
+    tparam_constraint_candidates: tparam_constraint_candidate list;
+        (** The reason pairs along this subtype path. They are inspected only
+          if an error is evaluated. *)
     is_coeffect: bool;
         (** A flag which, if set, indicates that coeffects are being subtyped.
           Note: this is a short-term solution to provide coeffects.pretty-printing of
@@ -257,7 +262,12 @@ module Subtype_env = struct
     recursion_tracker: Subtype_recursion_tracker.t;
   }
 
-  let set_on_error t on_error = { t with on_error }
+  (* Callback presence is fixed by [create]. Descendants may only contextualize
+     an existing callback. *)
+  let map_on_error t ~f =
+    match t.on_error with
+    | None -> t
+    | Some on_error -> { t with on_error = Some (f on_error) }
 
   let set_visited t visited = { t with visited }
 
@@ -289,7 +299,7 @@ module Subtype_env = struct
       is_coeffect;
       on_error;
       has_member_arg_posl;
-      tparam_constraints = [];
+      tparam_constraint_candidates = [];
       log_level;
       in_transitive_closure;
       ignore_likes;
@@ -298,81 +308,76 @@ module Subtype_env = struct
     }
 
   let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
-    {
-      subtype_env with
-      tparam_constraints =
-        (match
-           ( Reason.Predicates.unpack_cstr_on_generics_opt r_super,
-             Reason.Predicates.unpack_cstr_on_generics_opt r_sub )
-         with
-        | (Some (p, tparam), _)
-        | (_, Some (p, tparam)) ->
-          (match subtype_env.tparam_constraints with
-          | (p_prev, tparam_prev) :: _
-            when Pos_or_decl.equal p p_prev
-                 && Typing_defs.equal_pos_id tparam tparam_prev ->
-            (* since tparam_constraints is used for error reporting, it's
-             * unnecessary to add duplicates. *)
-            subtype_env.tparam_constraints
-          | _ -> (p, tparam) :: subtype_env.tparam_constraints)
-        | _ -> subtype_env.tparam_constraints);
-    }
+    match subtype_env.on_error with
+    (* Callback presence is fixed by [create], and descendants only transform
+       an existing callback through [map_on_error]. *)
+    | None -> subtype_env
+    | Some _ ->
+      {
+        subtype_env with
+        tparam_constraint_candidates =
+          { r_sub; r_super } :: subtype_env.tparam_constraint_candidates;
+      }
 
-  let mk_secondary_error { tparam_constraints; is_coeffect; _ } ty_sub ty_super
-      =
-    match tparam_constraints with
-    | [] ->
-      Typing_error.Secondary.Subtyping_error
-        { ty_sub; ty_sup = ty_super; is_coeffect }
-    | cstrs ->
-      Typing_error.Secondary.Violated_constraint
-        { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }
+  let resolve_tparam_constraints candidates =
+    let add_candidate constraints { r_sub; r_super } =
+      let candidate =
+        match Reason.Predicates.unpack_cstr_on_generics_opt r_super with
+        | Some candidate -> Some candidate
+        | None -> Reason.Predicates.unpack_cstr_on_generics_opt r_sub
+      in
+      match candidate with
+      | None -> constraints
+      | Some ((p, tparam) as candidate) ->
+        (match constraints with
+        | (p_prev, tparam_prev) :: _
+          when Pos_or_decl.equal p p_prev
+               && Typing_defs.equal_pos_id tparam tparam_prev ->
+          constraints
+        | _ -> candidate :: constraints)
+    in
+    List.fold_left (List.rev candidates) ~init:[] ~f:add_candidate
+
+  let lazy_tparam_constraints { tparam_constraint_candidates; _ } =
+    lazy (resolve_tparam_constraints tparam_constraint_candidates)
+
+  let choose_on_error cstrs on_error =
+    let has_constraints =
+      Lazy.map cstrs ~f:(fun cstrs -> not (List.is_empty cstrs))
+    in
+    Typing_error.Reasons_callback.choose
+      has_constraints
+      ~if_true:on_error
+      ~if_false:(Typing_error.Reasons_callback.retain_code on_error)
+
+  let mk_secondary_error cstrs { is_coeffect; _ } ty_sub ty_super =
+    Typing_error.Secondary.Subtyping_error
+      { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }
 
   let fail_with_secondary_error t secondary_error =
-    match t.tparam_constraints with
-    | [] ->
-      Option.map
-        t.on_error
-        ~f:
-          Typing_error.(
-            fun on_error ->
-              apply_reasons
-                ~on_error:(Reasons_callback.retain_code on_error)
-                secondary_error)
-    | _ ->
-      Option.map
-        t.on_error
-        ~f:
-          Typing_error.(
-            (fun on_error -> apply_reasons ~on_error secondary_error))
+    Option.map t.on_error ~f:(fun on_error ->
+        let cstrs = lazy_tparam_constraints t in
+        let on_error = choose_on_error cstrs on_error in
+        Typing_error.apply_reasons ~on_error secondary_error)
 
   let fail t ~ty_sub ~ty_super =
-    fail_with_secondary_error t (mk_secondary_error t ty_sub ty_super)
+    Option.map t.on_error ~f:(fun on_error ->
+        let cstrs = lazy_tparam_constraints t in
+        let secondary_error = mk_secondary_error cstrs t ty_sub ty_super in
+        let on_error = choose_on_error cstrs on_error in
+        Typing_error.apply_reasons ~on_error secondary_error)
 
   let fail_with_suffix t ~ty_sub ~ty_super suffix =
-    let secondary_error = mk_secondary_error t ty_sub ty_super in
-    match t.tparam_constraints with
-    | [] ->
-      Option.map
-        t.on_error
-        ~f:
-          Typing_error.(
-            fun on_error ->
-              apply_reasons
-                ~on_error:
-                  Reasons_callback.(
-                    prepend_on_apply (retain_code on_error) secondary_error)
-                suffix)
-    | _ ->
-      Option.map
-        t.on_error
-        ~f:
-          Typing_error.(
-            fun on_error ->
-              apply_reasons
-                ~on_error:
-                  Reasons_callback.(prepend_on_apply on_error secondary_error)
-                suffix)
+    Option.map t.on_error ~f:(fun on_error ->
+        let cstrs = lazy_tparam_constraints t in
+        let secondary_error = mk_secondary_error cstrs t ty_sub ty_super in
+        let on_error = choose_on_error cstrs on_error in
+        Typing_error.apply_reasons
+          ~on_error:
+            (Typing_error.Reasons_callback.prepend_on_apply
+               on_error
+               secondary_error)
+          suffix)
 
   let check_infinite_recursion (subtype_env : t) op =
     Subtype_recursion_tracker.add_op_and_check_infinite_recursion
@@ -1603,12 +1608,11 @@ end = struct
             cap_expected = Typing_coeffects.pretty env expected;
           }
       in
-      let on_error =
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+      let subtype_env =
+        Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
             let err = Typing_error.apply_reasons ~on_error reasons in
             Typing_error.(Reasons_callback.always err))
       in
-      let subtype_env = Subtype_env.set_on_error subtype_env on_error in
       match (sub_cap, super_cap) with
       | (CapTy sub, CapTy super) ->
         simplify
@@ -2157,14 +2161,12 @@ end = struct
           | _ -> subtype_env
         in
         let subtype_env_for_param =
-          match (subtype_env_for_param.on_error, arg_pos) with
-          | (Some cb, Some pos) ->
-            Subtype_env.set_on_error
-              subtype_env_for_param
-              (Some
-                 (Typing_error.Reasons_callback.With_claim
-                    (cb, lazy (pos, "Invalid argument"))))
-          | _ -> subtype_env_for_param
+          match arg_pos with
+          | Some pos ->
+            Subtype_env.map_on_error subtype_env_for_param ~f:(fun on_error ->
+                Typing_error.Reasons_callback.With_claim
+                  (on_error, lazy (pos, "Invalid argument")))
+          | None -> subtype_env_for_param
         in
         let subtype_env_for_param =
           if
@@ -8183,28 +8185,27 @@ end = struct
       ConstraintType (mk_constraint_type (r, Thas_type_member htm))
     in
     let ity_sub = LoclType ty_sub in
+    let cstrs = Subtype_env.lazy_tparam_constraints subtype_env in
     let secondary_error =
-      Subtype_env.mk_secondary_error subtype_env ity_sub ity_super
+      Subtype_env.mk_secondary_error cstrs subtype_env ity_sub ity_super
     in
     (* Contextualize errors that may be generated when
                          * checking refinement bounds. *)
-    let on_error =
-      Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+    let subtype_env =
+      Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
           let open Typing_error.Reasons_callback in
           prepend_on_apply on_error secondary_error)
     in
-    let subtype_env = Subtype_env.{ subtype_env with on_error } in
 
     let simplify_subtype_bound kind ~bound ty env =
-      let on_error =
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+      let subtype_env =
+        Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
             let open Typing_error in
             let pos = Reason.to_pos (get_reason bound) in
             Reasons_callback.prepend_on_apply
               on_error
               (Secondary.Violated_refinement_constraint { cstr = (kind, pos) }))
       in
-      let subtype_env = Subtype_env.set_on_error subtype_env on_error in
       let this_ty = None in
       match kind with
       | `As ->
@@ -8286,13 +8287,10 @@ end = struct
          * doing this check are usually unhelpful, so we drop them. *)
         let is_exact = phys_equal memloty memupty in
         (if is_exact then
-          let drop_sub_reasons =
-            Option.map
-              subtype_env.Subtype_env.on_error
-              ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
-          in
           let subtype_env =
-            Subtype_env.set_on_error subtype_env drop_sub_reasons
+            Subtype_env.map_on_error
+              subtype_env
+              ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
           in
           Subtype.(
             simplify
@@ -8794,7 +8792,6 @@ end = struct
                      || Cls.has_typeconst cls name))
           in
           let fail =
-            let open Option.Let_syntax in
             let open Typing_error in
             let pos_opt =
               Pos_or_decl.fill_in_filename_if_in_current_decl
@@ -8820,12 +8817,10 @@ end = struct
               match quickfixes_opt with
               | None -> subtype_env
               | Some quickfixes ->
-                Subtype_env.set_on_error subtype_env
-                @@ let* on_error = subtype_env.Subtype_env.on_error in
-                   return
-                   @@ Typing_error.Reasons_callback.add_quickfixes
-                        on_error
-                        quickfixes
+                Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
+                    Typing_error.Reasons_callback.add_quickfixes
+                      on_error
+                      quickfixes)
             in
             Subtype_env.fail_with_suffix
               subtype_env

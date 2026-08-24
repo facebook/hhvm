@@ -629,19 +629,25 @@ let matches_typing_error t ~scrut ~env =
     | (Of_error _, _) -> Match.no_match
     (* We don't expose our internal `constraint_ty` so we handle this here *)
     | ( Violated_constraint { patt_cstr; patt_ty_sub; patt_ty_sup },
-        Typing_error.Secondary.Violated_constraint { cstrs; ty_sub; ty_sup; _ }
-      ) ->
+        Typing_error.Secondary.Subtyping_error { cstrs; ty_sub; ty_sup; _ } ) ->
       Match.(
-        match_exists patt_cstr ~matches:aux_param ~scruts:cstrs ~env
+        match_exists
+          patt_cstr
+          ~matches:aux_param
+          ~scruts:(Lazy.force cstrs)
+          ~env
         >>= fun env ->
         aux_internal_ty patt_ty_sub ty_sub ~env >>= fun env ->
         aux_internal_ty patt_ty_sup ty_sup ~env)
     | (Violated_constraint _, _) -> Match.no_match
     | ( Subtyping_error { patt_ty_sub; patt_ty_sup },
-        Typing_error.Secondary.Subtyping_error { ty_sub; ty_sup; _ } ) ->
-      Match.(
-        aux_internal_ty patt_ty_sub ty_sub ~env >>= fun env ->
-        aux_internal_ty patt_ty_sup ty_sup ~env)
+        Typing_error.Secondary.Subtyping_error { cstrs; ty_sub; ty_sup; _ } ) ->
+      if List.is_empty (Lazy.force cstrs) then
+        Match.(
+          aux_internal_ty patt_ty_sub ty_sub ~env >>= fun env ->
+          aux_internal_ty patt_ty_sup ty_sup ~env)
+      else
+        Match.no_match
     | (Subtyping_error _, _) -> Match.no_match
     | (Any_snd, _) -> Match.matched env
   (* -- Primary callbacks --------------------------------------------------- *)

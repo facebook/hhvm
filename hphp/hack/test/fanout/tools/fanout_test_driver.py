@@ -19,6 +19,13 @@ from .fanout_test_parser import FanoutTest
 # pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 WHITESPACE_SPLITTER: re.Pattern = re.compile(r"\s+")
 
+DEFAULT_HH_SINGLE_FANOUT_FLAGS: List[str] = [
+    "--config",
+    "include_enum_member_values=true",
+    "--config",
+    "check_duplicate_enum_values=true",
+]
+
 DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "hg_aware=false",
@@ -44,7 +51,7 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "fetch_remote_old_decls=false",
     "--config",
     "current_saved_state_rollout_flag_index=7",
-]
+] + DEFAULT_HH_SINGLE_FANOUT_FLAGS
 
 FANOUT_LOG_POLL_INTERVAL_SECONDS = 0.1
 FANOUT_LOG_TIMEOUT_SECONDS = 10.0
@@ -123,7 +130,9 @@ class Binaries:
     def exec_hh_single_fanout(
         self, input_file: str
     ) -> subprocess.CompletedProcess[str]:
-        return _exec([self.hh_single_fanout, input_file])
+        return _exec(
+            [self.hh_single_fanout] + DEFAULT_HH_SINGLE_FANOUT_FLAGS + [input_file]
+        )
 
 
 @attr.s(auto_attribs=True)

@@ -1445,7 +1445,7 @@ let daemon_main
      } :
       ClientIdeMessage.daemon_args)
     (channels : ('a, 'b) Daemon.channel_pair) : unit =
-  Folly.ensure_folly_init ();
+  Startup_initializer.init ();
   Printexc.record_backtrace true;
   dbg_set_activity ~key:"main" "daemon_main";
   let (ic, oc) = channels in

@@ -21,6 +21,7 @@
   server_env_build
   server_go_to
   server_rewrite
+  startup_initializer_stubs
   ide_diagnostics
   ide_search
   ide_top_level_def_name_at_pos

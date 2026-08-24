@@ -98,10 +98,16 @@ using util::AllocationColocator;
 class ContextStack::EmbeddedClientRequestContext
     : public apache::thrift::server::TConnectionContext {
  public:
-  explicit EmbeddedClientRequestContext(transport::THeader* header)
-      : TConnectionContext(header) {}
+  EmbeddedClientRequestContext(
+      transport::THeader* header, ClientRuntime clientRuntime)
+      : TConnectionContext(header), clientRuntime_(clientRuntime) {}
 
   void resetRequestHeader() { header_ = nullptr; }
+
+  ClientRuntime getClientRuntime() const override { return clientRuntime_; }
+
+ private:
+  ClientRuntime clientRuntime_;
 };
 
 ContextStack::ContextStack(
@@ -189,7 +195,8 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
         clientInterceptors,
     std::string_view serviceName,
     std::string_view method,
-    transport::THeader& header) {
+    transport::THeader& header,
+    ClientRuntime clientRuntime) {
   if ((!handlers || handlers->empty()) &&
       (!clientInterceptors || clientInterceptors->empty())) {
     return nullptr;
@@ -218,7 +225,7 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
             method,
             make(std::move(contexts)),
             EmbeddedClientContextPtr(
-                make(std::move(embeddedClientContext), &header)),
+                make(std::move(embeddedClientContext), &header, clientRuntime)),
             make(std::move(clientInterceptorsStorage), [] {
               return detail::ClientInterceptorOnRequestStorage();
             }));
@@ -232,7 +239,8 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
         clientInterceptors,
     const std::string& serviceName,
     const std::string& methodName,
-    transport::THeader& header) {
+    transport::THeader& header,
+    ClientRuntime clientRuntime) {
   if ((!handlers || handlers->empty()) &&
       (!clientInterceptors || clientInterceptors->empty())) {
     return nullptr;
@@ -278,7 +286,7 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
             methodNamePtr,
             make(std::move(contexts)),
             EmbeddedClientContextPtr(
-                make(std::move(embeddedClientContext), &header)),
+                make(std::move(embeddedClientContext), &header, clientRuntime)),
             make(std::move(clientInterceptorsStorage), [] {
               return detail::ClientInterceptorOnRequestStorage();
             }));

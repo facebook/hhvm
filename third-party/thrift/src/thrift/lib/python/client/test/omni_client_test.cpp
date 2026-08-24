@@ -15,6 +15,7 @@
  */
 
 #include <chrono>
+#include <optional>
 #include <stdexcept>
 
 #include <gmock/gmock.h>
@@ -430,6 +431,49 @@ class OmniClientTest : public ::testing::Test {
   std::shared_ptr<folly::IOExecutor> ioThread_{
       std::make_shared<folly::ScopedEventBaseThread>()};
 };
+
+// The whole point of the marker: a legacy event handler shared with generated
+// C++ clients can still tell that this request came from thrift-python.
+TEST_F(OmniClientTest, RequestsReportThePythonClientRuntime) {
+  class RuntimeRecordingHandler : public TProcessorEventHandler {
+   public:
+    std::optional<ClientRuntime> observed;
+
+   private:
+    void* getServiceContext(
+        std::string_view,
+        std::string_view,
+        TConnectionContext* connectionContext) override {
+      observed = connectionContext->getClientRuntime();
+      return nullptr;
+    }
+  };
+
+  auto recorder = std::make_shared<RuntimeRecordingHandler>();
+  AddRequest request;
+  request.num1() = 1;
+  request.num2() = 41;
+
+  connectToServer<CompactSerializer>(
+      [&](OmniClient& client) -> folly::coro::Task<void> {
+        // Per-instance, so the test does not depend on what the global handler
+        // list happens to hold.
+        client.clearEventHandlers();
+        client.addEventHandler(recorder);
+        auto resp = co_await client.semifuture_send(
+            "TestService",
+            "add",
+            CompactSerializer::serialize<std::string>(request),
+            apache::thrift::MethodMetadata::Data(
+                "add", apache::thrift::FunctionQualifier::Unspecified),
+            {},
+            {},
+            co_await folly::coro::co_current_executor);
+        testContains<CompactSerializer>(std::move(resp.buf.value()), 42);
+      });
+
+  EXPECT_EQ(recorder->observed, ClientRuntime::Python);
+}
 
 TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
   AddRequest request;

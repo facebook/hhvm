@@ -22,6 +22,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/memory/SanitizeLeak.h>
+#include <thrift/lib/cpp/ClientRuntime.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
@@ -63,7 +64,12 @@ makeOmniClientRequestContext(
   header->setProtocolId(protocolId);
   header->setHeaders(std::move(headers));
   auto ctx = apache::thrift::ContextStack::createWithClientContextCopyNames(
-      handlers, clientInterceptors, serviceName, functionName, *header);
+      handlers,
+      clientInterceptors,
+      serviceName,
+      functionName,
+      *header,
+      apache::thrift::ClientRuntime::Python);
 
   return {std::move(ctx), std::move(header)};
 }

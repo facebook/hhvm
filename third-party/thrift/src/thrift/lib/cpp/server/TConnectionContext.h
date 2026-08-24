@@ -24,6 +24,7 @@
 #include <folly/Memory.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/async/EventBaseManager.h>
+#include <thrift/lib/cpp/ClientRuntime.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
 namespace apache::thrift::server {
@@ -70,6 +71,12 @@ class TConnectionContext {
   const transport::THeader::StringToStringMap* getHeadersPtr() const {
     return header_ ? &header_->getHeaders() : nullptr;
   }
+
+  /**
+   * The language binding that issued this request. Only client-side contexts
+   * carry a meaningful value.
+   */
+  virtual ClientRuntime getClientRuntime() const { return ClientRuntime::Cpp; }
 
   virtual folly::EventBaseManager* getEventBaseManager() { return nullptr; }
 

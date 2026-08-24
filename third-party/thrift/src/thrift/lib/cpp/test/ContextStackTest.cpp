@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp/ContextStack.h>
@@ -129,6 +131,73 @@ TEST(ContextStack, ClientHeaders) {
     auto writeHeaders = header.releaseWriteHeaders();
     EXPECT_EQ(writeHeaders.at("preRead"), "1");
     EXPECT_EQ(writeHeaders.at("preWrite"), "1");
+  }
+}
+
+TEST(ContextStack, ClientRuntimeReachesEventHandlers) {
+  class RuntimeRecordingEventHandler : public TrackingTProcessorEventHandler {
+   public:
+    std::optional<ClientRuntime> observed;
+
+   private:
+    void* getServiceContext(
+        std::string_view serviceName,
+        std::string_view methodName,
+        apache::thrift::TConnectionContext* connectionContext) override {
+      observed = connectionContext->getClientRuntime();
+      return TrackingTProcessorEventHandler::getServiceContext(
+          serviceName, methodName, connectionContext);
+    }
+  };
+
+  auto stackFor = [](ClientRuntime clientRuntime,
+                     const std::shared_ptr<TProcessorEventHandler>& handler,
+                     transport::THeader& header) {
+    return ContextStack::createWithClientContextCopyNames(
+        std::make_shared<EventHandlerList>(EventHandlerList{handler}),
+        nullptr /* clientInterceptors */,
+        "Service",
+        "method",
+        header,
+        clientRuntime);
+  };
+
+  {
+    transport::THeader header;
+    auto handler = std::make_shared<RuntimeRecordingEventHandler>();
+    auto contextStack = stackFor(ClientRuntime::Python, handler, header);
+    ASSERT_NE(contextStack, nullptr);
+    EXPECT_EQ(handler->observed, ClientRuntime::Python);
+  }
+
+  // A C++ client sharing the same handler must not inherit the marker.
+  {
+    transport::THeader header;
+    auto handler = std::make_shared<RuntimeRecordingEventHandler>();
+    auto contextStack = ContextStack::createWithClientContext(
+        std::make_shared<EventHandlerList>(EventHandlerList{handler}),
+        nullptr /* clientInterceptors */,
+        "Service",
+        "Service.method",
+        header);
+    ASSERT_NE(contextStack, nullptr);
+    EXPECT_EQ(handler->observed, ClientRuntime::Cpp);
+  }
+
+  // CopyNames is not thrift-python's alone -- thriftdbg's C++ omniclient (which
+  // backs the polyglot thrift proxy) uses it too and passes no runtime. The
+  // default must stay `Cpp` or that traffic gets attributed to Python.
+  {
+    transport::THeader header;
+    auto handler = std::make_shared<RuntimeRecordingEventHandler>();
+    auto contextStack = ContextStack::createWithClientContextCopyNames(
+        std::make_shared<EventHandlerList>(EventHandlerList{handler}),
+        nullptr /* clientInterceptors */,
+        "Service",
+        "method",
+        header);
+    ASSERT_NE(contextStack, nullptr);
+    EXPECT_EQ(handler->observed, ClientRuntime::Cpp);
   }
 }
 

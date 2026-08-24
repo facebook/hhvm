@@ -75,7 +75,8 @@ class ContextStack {
           clientInterceptors,
       std::string_view serviceName,
       std::string_view method,
-      transport::THeader& header);
+      transport::THeader& header,
+      ClientRuntime clientRuntime = ClientRuntime::Cpp);
 
   static ContextStack::UniquePtr createWithClientContextCopyNames(
       const std::shared_ptr<
@@ -85,7 +86,8 @@ class ContextStack {
           clientInterceptors,
       const std::string& serviceName,
       const std::string& methodName,
-      transport::THeader& header);
+      transport::THeader& header,
+      ClientRuntime clientRuntime = ClientRuntime::Cpp);
 
   ContextStack(ContextStack&&) = delete;
   ContextStack& operator=(ContextStack&&) = delete;

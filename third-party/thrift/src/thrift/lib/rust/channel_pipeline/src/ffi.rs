@@ -136,6 +136,12 @@ pub(crate) mod ffi {
         #[cxx_name = "initContextHandle"]
         unsafe fn init_context_handle(self: Pin<&mut FfiCallbackContext>, storage: *mut u8);
 
+        /// SAFETY: `storage` must point to one pointer-sized, pointer-aligned,
+        /// uninitialized word. On success it contains one live token until
+        /// resumed or destroyed.
+        #[cxx_name = "initDeferredRead"]
+        unsafe fn init_deferred_read(self: Pin<&mut FfiCallbackContext>, storage: *mut u8) -> bool;
+
         #[namespace = "folly"]
         type EventBase;
         #[cxx_name = "eventBase"]
@@ -222,6 +228,19 @@ pub(crate) mod ffi {
         /// live guard back to the originating EventBase when necessary.
         #[cxx_name = "destroyContextHandle"]
         unsafe fn destroy_context_handle(storage: *mut u8);
+
+        /// SAFETY: `storage` must contain one live token constructed by
+        /// `init_deferred_read`. Both functions consume it exactly once.
+        #[cxx_name = "resumeDeferredRead"]
+        unsafe fn resume_deferred_read(storage: *mut u8);
+        /// SAFETY: same token contract as `resume_deferred_read`.
+        #[cxx_name = "destroyDeferredRead"]
+        unsafe fn destroy_deferred_read(storage: *mut u8);
+        /// SAFETY: `storage` must contain a live deferred-read token. The
+        /// returned pointer is non-null only on its originating EventBase and
+        /// remains borrowed from that token.
+        #[cxx_name = "deferredReadMessage"]
+        unsafe fn deferred_read_message(storage: *mut u8) -> *mut TypeErasedBox;
     }
 
     #[namespace = "folly"]

@@ -1623,8 +1623,8 @@ ContextHandleSandwichResult run_context_handle_sandwich_test(
   MockHeadHandler head;
   MockTailHandler tail;
   TestAllocator allocator;
-  const bool read =
-      scenario == 8 || scenario == 10 || scenario == 20 || scenario == 21;
+  const bool read = scenario == 8 || scenario == 10 || scenario == 20 ||
+      scenario == 21 || scenario == 27 || scenario == 28 || scenario == 29;
   const folly::IOBuf* received = nullptr;
   if (read) {
     tail.setOnReadCallback([&](TypeErasedBox&& message) noexcept {

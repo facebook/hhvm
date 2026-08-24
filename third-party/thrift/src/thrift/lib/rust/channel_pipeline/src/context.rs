@@ -25,6 +25,7 @@ use std::rc::Rc;
 
 use crate::adapter::BytesPtr;
 use crate::adapter::RustMessageAdapter;
+use crate::erased::BorrowedMessageAdapter;
 use crate::event_base::EventBaseTask;
 use crate::event_base::FirstPoll;
 use crate::ffi::ffi::FfiCallbackContext;
@@ -135,6 +136,74 @@ impl Drop for ContextHandle {
     }
 }
 
+/// Move-only ownership of an inbound message suspended at its pipeline
+/// position.
+///
+/// The original type-erased C++ message remains intact inside this token. It
+/// may be inspected or mutated on the originating EventBase and then resumed
+/// exactly once. Dropping the token cancels the read. Resume and cancellation
+/// are safe from any thread; native code performs delivery and destruction on
+/// the EventBase that owns the pipeline.
+pub struct DeferredRead {
+    storage: MaybeUninit<usize>,
+    _not_sync: PhantomData<Cell<()>>,
+}
+
+// SAFETY: the native token has unique ownership of both the message and its
+// pipeline guard. Cross-thread resume and destruction consume the token and
+// enqueue it onto the originating EventBase before touching or destroying the
+// EventBase-owned values.
+unsafe impl Send for DeferredRead {}
+
+impl DeferredRead {
+    /// Borrow a typed view of the intact message on its originating EventBase.
+    ///
+    /// Returns `None` off the owning EventBase. The returned borrow prevents
+    /// this token from being resumed or dropped while the message is in use.
+    pub fn borrow<M: BorrowedMessageAdapter>(&mut self) -> Option<M::View<'_>> {
+        // SAFETY: this token uniquely owns one live native deferred-read token.
+        // Native code returns its message only when called on the owning
+        // EventBase, and the resulting borrow is tied to `&mut self`.
+        let message =
+            unsafe { crate::ffi::ffi::deferred_read_message(self.storage.as_mut_ptr().cast()) };
+        if message.is_null() {
+            return None;
+        }
+        // SAFETY: native code returned the address of the live message owned by
+        // this token. `&mut self` guarantees exclusive access for the lifetime
+        // of the pinned borrow and the token cannot move or be consumed then.
+        let message = unsafe { &mut *message };
+        assert!(
+            M::holds(message),
+            "DeferredRead::borrow: box does not hold the requested type"
+        );
+        // SAFETY: the unconditional `M::holds` check establishes the adapter's
+        // exact C++ type, and the view remains tied to this exclusive borrow.
+        Some(unsafe { M::borrow(Pin::new_unchecked(message)) })
+    }
+
+    /// Resume the original inbound message from its captured pipeline
+    /// position. Delivery is suppressed if the pipeline has closed.
+    pub fn resume(self) {
+        let mut deferred = std::mem::ManuallyDrop::new(self);
+        // SAFETY: `deferred` owns one live token and ManuallyDrop prevents its
+        // destructor from consuming that token a second time.
+        unsafe {
+            crate::ffi::ffi::resume_deferred_read(deferred.storage.as_mut_ptr().cast());
+        }
+    }
+}
+
+impl Drop for DeferredRead {
+    fn drop(&mut self) {
+        // SAFETY: `DeferredRead` uniquely owns one token initialized by
+        // `CallbackContext::defer_read`; native code consumes it exactly once.
+        unsafe {
+            crate::ffi::ffi::destroy_deferred_read(self.storage.as_mut_ptr().cast());
+        }
+    }
+}
+
 /// Borrowed, callback-scoped view of the live C++ pipeline context.
 ///
 /// Each data or lifecycle callback receives an exclusive mutable reference to a
@@ -218,6 +287,20 @@ impl<'callback> CallbackContext<'callback> {
         });
     }
 
+    /// Poll a future now and capture the pipeline continuation only if it suspends.
+    ///
+    /// The future is first placed at its final pinned address and polled inline on
+    /// the current EventBase callback. If it is ready, `ready` runs immediately
+    /// with this borrowed context and its [`HandlerResult`] becomes the callback's
+    /// result; no [`ContextHandle`] is created. If it is pending, the task takes a
+    /// new one-shot `ContextHandle`, later polls remain on the same EventBase, and
+    /// `complete` receives that handle with the output. The current callback then
+    /// returns [`HandlerResult::Success`] because ownership of its in-flight work
+    /// has moved into the task.
+    ///
+    /// Panics are contained by [`EventBaseTask`]. A panic does not invoke either
+    /// completion callback and is reported here as [`HandlerResult::Success`] so
+    /// unwinding never crosses the C++ FFI boundary.
     pub(crate) fn spawn_deferred<T, Fut, Ready, Complete>(
         &mut self,
         future: Fut,
@@ -255,6 +338,67 @@ impl<'callback> CallbackContext<'callback> {
                 .init_context_handle(handle.storage.as_mut_ptr().cast());
         }
         handle
+    }
+
+    /// Suspend the current inbound message without unpacking or copying it.
+    ///
+    /// Returns `None` if this callback has no message, the message is empty, or
+    /// it was already forwarded. Dropping the returned token cancels delivery;
+    /// [`DeferredRead::resume`] continues it from this handler's exact position.
+    pub fn defer_read(
+        &mut self,
+        message: crate::erased::RustTypeErasedBox<'_>,
+    ) -> Option<DeferredRead> {
+        let _ = &message;
+        let mut deferred = DeferredRead {
+            storage: MaybeUninit::uninit(),
+            _not_sync: PhantomData,
+        };
+        // SAFETY: storage is one pointer-aligned word and remains
+        // exclusively owned by `deferred`. On false, native code constructed
+        // nothing, so mem::forget prevents running a destructor on garbage.
+        let initialized = unsafe {
+            self.inner
+                .as_mut()
+                .init_deferred_read(deferred.storage.as_mut_ptr().cast())
+        };
+        if initialized {
+            Some(deferred)
+        } else {
+            std::mem::forget(deferred);
+            None
+        }
+    }
+
+    /// Suspend the current inbound message while a future runs on this
+    /// pipeline's EventBase.
+    ///
+    /// Completion receives the intact message token and may borrow, mutate,
+    /// resume, or cancel it. The task owns the token throughout suspension, so
+    /// panic or task destruction safely cancels the read.
+    ///
+    /// If the current callback has no live message, the message is empty, or it
+    /// was already forwarded, this returns HandlerResult::Error without
+    /// polling future or invoking complete.
+    pub fn spawn_deferred_read<T, Fut, Complete>(
+        &mut self,
+        message: crate::erased::RustTypeErasedBox<'_>,
+        future: Fut,
+        complete: Complete,
+    ) -> HandlerResult
+    where
+        T: Send + 'static,
+        Fut: Future<Output = T> + Send + 'static,
+        Complete: FnOnce(DeferredRead, T) + Send + 'static,
+    {
+        let Some(deferred) = self.defer_read(message) else {
+            return HandlerResult::Error;
+        };
+        let event_base = self.inner.as_ref().get_ref().event_base();
+        EventBaseTask::start(event_base, async move {
+            complete(deferred, future.await);
+        });
+        HandlerResult::Success
     }
 
     /// Forward the inbound buffer downstream and return the result.

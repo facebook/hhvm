@@ -20,6 +20,7 @@ use std::sync::atomic::Ordering;
 use channel_pipeline::BytesPtr;
 use channel_pipeline::CallbackContext;
 use channel_pipeline::ContextHandle;
+use channel_pipeline::DeferredRead;
 use channel_pipeline::HandlerResult;
 use channel_pipeline::RustHandler;
 use channel_pipeline::RustHandlerOpaque;
@@ -721,6 +722,18 @@ fn context_handle_is_send_not_sync_clone_or_copy() {
 }
 
 #[test]
+fn deferred_read_is_send_not_sync_clone_or_copy() {
+    run_with_timeout(|| {
+        static_assertions::assert_impl_all!(DeferredRead: Send);
+        static_assertions::assert_not_impl_any!(DeferredRead: Sync, Clone, Copy);
+        assert_eq!(
+            std::mem::size_of::<DeferredRead>(),
+            std::mem::size_of::<usize>()
+        );
+    });
+}
+
+#[test]
 fn native_context_handle_token_traits_match_rust_abi() {
     run_with_timeout(|| {
         assert_eq!(
@@ -894,6 +907,35 @@ fn coro_read_ready_future_polls_inline_and_resumes_read() {
 #[test]
 fn coro_read_worker_wake_repolls_and_resumes_read() {
     assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(21), false);
+}
+
+#[test]
+fn deferred_read_worker_wake_resumes_original_erased_message() {
+    assert_context_handle_read_sandwich(&ffi::run_context_handle_sandwich_test(27), false);
+}
+
+#[test]
+fn deferred_read_resume_after_close_is_suppressed() {
+    let result = ffi::run_context_handle_sandwich_test(28);
+    assert_eq!(result.before_reads_before_fence, 1);
+    assert_eq!(result.before_reads_after_fence, 1);
+    assert_eq!(result.after_reads_before_fence, 0);
+    assert_eq!(result.after_reads_after_fence, 0);
+    assert_eq!(result.endpoint_calls_before_fence, 0);
+    assert_eq!(result.endpoint_calls_after_fence, 0);
+    assert!(!result.pointer_identity_preserved);
+}
+
+#[test]
+fn deferred_read_off_thread_drop_cancels_safely() {
+    let result = ffi::run_context_handle_sandwich_test(29);
+    assert_eq!(result.before_reads_before_fence, 1);
+    assert_eq!(result.before_reads_after_fence, 1);
+    assert_eq!(result.after_reads_before_fence, 0);
+    assert_eq!(result.after_reads_after_fence, 0);
+    assert_eq!(result.endpoint_calls_before_fence, 0);
+    assert_eq!(result.endpoint_calls_after_fence, 0);
+    assert!(!result.pointer_identity_preserved);
 }
 
 #[test]

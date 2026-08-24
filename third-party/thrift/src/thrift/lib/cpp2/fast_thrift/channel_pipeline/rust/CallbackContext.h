@@ -87,6 +87,11 @@ class CallbackContext final {
   // caller-provided storage. Must be destroyed with destroyContextHandle().
   void initContextHandle(uint8_t* storage) noexcept;
 
+  // Moves the current inbound message and its continuation into an opaque
+  // token referenced by caller-provided pointer storage. Returns false if no
+  // live message is available, allocation fails, or it was already forwarded.
+  bool initDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept;
+
   folly::EventBase* eventBase() const noexcept;
 
   int32_t fireRead(std::unique_ptr<folly::IOBuf> message) noexcept;
@@ -144,5 +149,15 @@ void fireContextHandleException(
 // Consumes a token previously constructed by initContextHandle(). Destruction
 // is inline on its EventBase and otherwise scheduled back to that EventBase.
 void destroyContextHandle(uint8_t* storage) noexcept;
+
+// Consume a deferred inbound message and continue from its captured context.
+// Delivery and destruction occur on the originating EventBase. Delivery is
+// suppressed when the pipeline has closed.
+void resumeDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept;
+void destroyDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept;
+
+// Returns the deferred box only on its originating EventBase, otherwise null.
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox*
+deferredReadMessage(uint8_t* FOLLY_NONNULL storage) noexcept;
 
 } // namespace channel_pipeline_rust

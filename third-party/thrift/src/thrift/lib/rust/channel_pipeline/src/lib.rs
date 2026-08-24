@@ -53,6 +53,10 @@
 //!   later wakes schedule further polls back onto that same EventBase. The task
 //!   owns a [`ContextHandle`], which retains the pipeline until the task
 //!   completes or is cancelled.
+//! - [`CallbackContext::defer_read`] moves the intact inbound erased message
+//!   and its continuation into a one-word [`DeferredRead`] token. Typed opaque
+//!   views can be borrowed on the owning EventBase, and consuming `resume`
+//!   forwards the original box without copying the message payload.
 //! - [`CoroReadHandle`], [`CoroWriteHandle`], and [`CoroExceptionHandle`] wrap
 //!   an `async` handler body so the message or error round-trips through a
 //!   future and resumes the pipeline on completion.
@@ -143,6 +147,7 @@
 //! | [`box_handler`] | Type-erases a handler for a downstream CXX factory |
 //! | [`CallbackContext`] | Borrowed pipeline context — `!Send`, `!Sync`, non-escapable |
 //! | [`ContextHandle`] | Move-only captured pipeline position; consuming `fire_read`/`fire_write`/`fire_exception` |
+//! | [`DeferredRead`] | Move-only suspended inbound message plus its exact pipeline continuation |
 //! | [`RustTypeErasedBox`] | Borrowed, type-erased message box; recover the value with `take::<T>()` |
 //! | [`BytesPtr`] | Zero-copy `unique_ptr<folly::IOBuf>` adapter |
 //! | [`PipelineError`] | Owned Rust error converted to `folly::exception_wrapper` |
@@ -256,6 +261,7 @@ pub use adapter::BytesPtr;
 pub use adapter::RustMessageAdapter;
 pub use context::CallbackContext;
 pub use context::ContextHandle;
+pub use context::DeferredRead;
 pub use context::PipelineError;
 pub use coro_handler::ContextReadMessage;
 pub use coro_handler::ContextWriteMessage;

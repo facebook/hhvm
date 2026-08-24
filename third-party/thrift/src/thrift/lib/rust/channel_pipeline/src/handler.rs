@@ -360,6 +360,25 @@ impl RustHandler for ContextHandleTestHandler {
                 });
                 return handler.fire_read(ctx, msg);
             }
+            27 | 28 => {
+                let (wake, woke) = WorkerWakeFuture::new();
+                let result = ctx.spawn_deferred_read(msg, wake, |deferred, ()| {
+                    deferred.resume();
+                });
+                woke.recv().expect("worker should issue the EventBase wake");
+                if self.scenario == 28 {
+                    ctx.close();
+                }
+                return result;
+            }
+            29 => {
+                let deferred = ctx
+                    .defer_read(msg)
+                    .expect("the callback should own one live inbound message");
+                std::thread::spawn(move || drop(deferred))
+                    .join()
+                    .expect("off-thread DeferredRead cancellation should not panic");
+            }
             24 => {
                 drop(msg.take::<BytesPtr>());
                 let mut handler = CoroExceptionHandle::new(|error| async move { error });

@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <folly/Executor.h>
 #include <folly/io/async/DelayedDestruction.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustMessageAdapter.h>
@@ -55,6 +56,37 @@ struct RustContextHandleToken final {
   folly::DelayedDestruction::DestructorGuard pipelineGuard;
 };
 
+struct RustDeferredReadToken final {
+  explicit RustDeferredReadToken(
+      ContextImpl& context,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+          message) noexcept
+      : context(context),
+        eventBase(*CHECK_NOTNULL(context.eventBase())),
+        eventBaseKeepAlive(folly::getKeepAliveToken(&eventBase)),
+        pipeline(*CHECK_NOTNULL(context.pipeline())),
+        pipelineGuard(&pipeline),
+        message(std::move(message)) {}
+
+  RustDeferredReadToken(const RustDeferredReadToken&) = delete;
+  RustDeferredReadToken& operator=(const RustDeferredReadToken&) = delete;
+
+  RustDeferredReadToken(RustDeferredReadToken&&) = delete;
+  RustDeferredReadToken& operator=(RustDeferredReadToken&&) = delete;
+
+  ~RustDeferredReadToken() { CHECK(eventBase.isInEventBaseThread()); }
+
+  ContextImpl& context;
+  folly::EventBase& eventBase;
+  folly::Executor::KeepAlive<folly::EventBase> eventBaseKeepAlive;
+  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl& pipeline;
+  folly::DelayedDestruction::DestructorGuard pipelineGuard;
+  apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox message;
+};
+
+static_assert(!std::is_copy_constructible_v<RustDeferredReadToken>);
+static_assert(!std::is_move_constructible_v<RustDeferredReadToken>);
+
 static_assert(sizeof(RustContextHandleToken) == 2 * sizeof(void*));
 static_assert(alignof(RustContextHandleToken) == alignof(void*));
 static_assert(folly::IsRelocatable<RustContextHandleToken>::value);
@@ -77,6 +109,19 @@ RustContextHandleToken consumeContextHandle(uint8_t* storage) noexcept {
   auto consumed = std::move(*token);
   token->~RustContextHandleToken();
   return consumed;
+}
+
+std::unique_ptr<RustDeferredReadToken> consumeDeferredRead(
+    uint8_t* FOLLY_NONNULL storage) noexcept {
+  CHECK_EQ(
+      reinterpret_cast<uintptr_t>(storage) % alignof(RustDeferredReadToken*),
+      0);
+  RustDeferredReadToken* token = nullptr;
+  std::memcpy(&token, storage, sizeof(RustDeferredReadToken*));
+  token = CHECK_NOTNULL(token);
+  RustDeferredReadToken* empty = nullptr;
+  std::memcpy(storage, &empty, sizeof(RustDeferredReadToken*));
+  return std::unique_ptr<RustDeferredReadToken>(token);
 }
 
 template <typename Fire>
@@ -118,6 +163,25 @@ void CallbackContext::initContextHandle(uint8_t* storage) noexcept {
       reinterpret_cast<uintptr_t>(storage) % alignof(RustContextHandleToken) ==
       0);
   ::new (storage) RustContextHandleToken(context_);
+}
+
+bool CallbackContext::initDeferredRead(
+    uint8_t* FOLLY_NONNULL storage) noexcept {
+  CHECK_NOTNULL(context_.eventBase())->dcheckIsInEventBaseThread();
+  CHECK_EQ(
+      reinterpret_cast<uintptr_t>(storage) % alignof(RustDeferredReadToken*),
+      0);
+  if (!message_ || forwarded_ || message_->empty()) {
+    return false;
+  }
+  auto* token =
+      new (std::nothrow) RustDeferredReadToken(context_, std::move(*message_));
+  if (!token) {
+    return false;
+  }
+  std::memcpy(storage, &token, sizeof(RustDeferredReadToken*));
+  forwarded_ = true;
+  return true;
 }
 
 folly::EventBase* CallbackContext::eventBase() const noexcept {
@@ -224,6 +288,51 @@ void destroyContextHandle(uint8_t* storage) noexcept {
 
   eventBase->runInEventBaseThread(
       [token = std::move(token)]() mutable noexcept {});
+}
+
+void resumeDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept {
+  auto token = consumeDeferredRead(storage);
+  auto& deferred = *CHECK_NOTNULL(token.get());
+  if (deferred.eventBase.isInEventBaseThread()) {
+    folly::RequestContextSaverScopeGuard requestContextGuard;
+    if (!deferred.pipeline.isClosed()) {
+      (void)deferred.context.fireRead(std::move(deferred.message));
+    }
+    return;
+  }
+
+  deferred.eventBase.runInEventBaseThreadAlwaysEnqueue(
+      [token = std::move(token)]() mutable noexcept {
+        auto& deferred = *CHECK_NOTNULL(token.get());
+        if (!deferred.pipeline.isClosed()) {
+          (void)deferred.context.fireRead(std::move(deferred.message));
+        }
+      });
+}
+
+void destroyDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept {
+  auto token = consumeDeferredRead(storage);
+  auto& deferred = *CHECK_NOTNULL(token.get());
+  if (deferred.eventBase.isInEventBaseThread()) {
+    return;
+  }
+
+  deferred.eventBase.runInEventBaseThreadAlwaysEnqueue(
+      [token = std::move(token)]() mutable noexcept {});
+}
+
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox* FOLLY_NULLABLE
+deferredReadMessage(uint8_t* FOLLY_NONNULL storage) noexcept {
+  CHECK_EQ(
+      reinterpret_cast<uintptr_t>(storage) % alignof(RustDeferredReadToken*),
+      0);
+  RustDeferredReadToken* token = nullptr;
+  std::memcpy(&token, storage, sizeof(RustDeferredReadToken*));
+  auto& deferred = *CHECK_NOTNULL(token);
+  if (!deferred.eventBase.isInEventBaseThread()) {
+    return nullptr;
+  }
+  return &deferred.message;
 }
 
 int32_t CallbackContext::fireRead(

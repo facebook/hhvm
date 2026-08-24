@@ -44,6 +44,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/rds-local.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace HPHP {
@@ -216,9 +217,12 @@ OptString VariableSerializerImpl<Buffer>::serialize(const_variant_ref v, bool re
   m_buf = &buf;
   if (ret) {
     if (m_ignoreStringSizeLimit) {
-      auto limit = std::min<int64_t>(
-        StringData::MaxSize,
-        tl_heap->getMemoryLimit() - tl_heap->getStats().usage());
+      auto const currentUsage = std::max<int64_t>(
+        0, tl_heap->getStats().usage());
+      auto const remainingMemory = std::max<int64_t>(
+        0, tl_heap->getMemoryLimit() - currentUsage);
+      auto const limit =
+        std::min<int64_t>(StringData::MaxSize, remainingMemory);
       buf.setOutputLimit(safe_cast<uint32_t>(limit));
     } else {
       buf.setOutputLimit(serializationSizeLimit->value);

@@ -10175,76 +10175,81 @@ end = struct
       (r_sup, var)
       ty_sub
       (on_error : Typing_error.Reasons_callback.t option) =
-    let ty_sub =
-      Typing_env.update_reason env ty_sub ~f:(fun bound ->
-          Typing_reason.trans_lower_bound ~bound ~of_:r_sup)
-    in
     let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
-    let env =
-      Env.add_tyvar_lower_bound_and_update_variances
-        ~union:(Subtype_simplify.try_union_i env)
-        env
-        var
-        (LoclType ty_sub)
-    in
-    let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
-    (* We have the invariant that lower bounds _must_ be the lhs of a constraint
-       and this is always a [LoclType] *)
-    let added_lower_bounds =
-      List.filter_map ~f:(function
-          | LoclType ty -> Some ty
-          | _ -> failwith "constraint_type in added lowerbounds")
-      @@ ITySet.elements
-      @@ ITySet.diff lower_bounds_after lower_bounds_before
-    in
-    let upper_bounds = Env.get_tyvar_upper_bounds env var in
-    let subtype_env =
-      Subtype_env.create
-        ~is_dynamic_aware
-        ~log_level:2
-        ~in_transitive_closure:true
-        ~class_sub_classname:(should_cls_sub_cn env)
-        on_error
-    in
-    let (env, prop) =
-      List.fold
-        ~f:(fun (env, prop) lower_bound ->
-          let (env, ty_err_opt) =
-            Typing_subtype_tconst.make_all_type_consts_equal
-              env
-              var
-              (LoclType lower_bound)
-              ~on_error
-              ~as_tyvar_with_cnstr:false
-          in
-          let (env, prop) =
-            Option.value_map
-              ~default:(env, prop)
-              ~f:(fun err -> invalid ~fail:(Some err) env)
-              ty_err_opt
-          in
-          ITySet.fold
-            (fun upper_bound (env, prop1) ->
-              (* Since we can have either the rhs of a subtype constraint or
-                 the rhs of any other constraint in the upper bounds we
-                 have to inspect the upper bound and dispatch to the
-                 appropriate top-level handler *)
-              let (env, prop2) =
-                Common.dispatch_constraint
-                  ~subtype_env
-                  ~this_ty:None
-                  ~sub_supportdyn:None
-                  (LoclType lower_bound)
-                  upper_bound
-                  env
-              in
-              (env, TL.conj prop1 prop2))
-            upper_bounds
-            (env, prop))
-        added_lower_bounds
-        ~init:(env, prop)
-    in
-    (env, prop)
+    (* If the type is already in the lower bounds of the type variable, then we
+       already know that this subtype assertion is valid. *)
+    if ITySet.mem (LoclType ty_sub) lower_bounds_before then
+      valid env
+    else
+      let ty_sub =
+        Typing_env.update_reason env ty_sub ~f:(fun bound ->
+            Typing_reason.trans_lower_bound ~bound ~of_:r_sup)
+      in
+      let env =
+        Env.add_tyvar_lower_bound_and_update_variances
+          ~union:(Subtype_simplify.try_union_i env)
+          env
+          var
+          (LoclType ty_sub)
+      in
+      let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
+      (* We have the invariant that lower bounds _must_ be the lhs of a constraint
+         and this is always a [LoclType] *)
+      let added_lower_bounds =
+        List.filter_map ~f:(function
+            | LoclType ty -> Some ty
+            | _ -> failwith "constraint_type in added lowerbounds")
+        @@ ITySet.elements
+        @@ ITySet.diff lower_bounds_after lower_bounds_before
+      in
+      let upper_bounds = Env.get_tyvar_upper_bounds env var in
+      let subtype_env =
+        Subtype_env.create
+          ~is_dynamic_aware
+          ~log_level:2
+          ~in_transitive_closure:true
+          ~class_sub_classname:(should_cls_sub_cn env)
+          on_error
+      in
+      let (env, prop) =
+        List.fold
+          ~f:(fun (env, prop) lower_bound ->
+            let (env, ty_err_opt) =
+              Typing_subtype_tconst.make_all_type_consts_equal
+                env
+                var
+                (LoclType lower_bound)
+                ~on_error
+                ~as_tyvar_with_cnstr:false
+            in
+            let (env, prop) =
+              Option.value_map
+                ~default:(env, prop)
+                ~f:(fun err -> invalid ~fail:(Some err) env)
+                ty_err_opt
+            in
+            ITySet.fold
+              (fun upper_bound (env, prop1) ->
+                (* Since we can have either the rhs of a subtype constraint or
+                   the rhs of any other constraint in the upper bounds we
+                   have to inspect the upper bound and dispatch to the
+                   appropriate top-level handler *)
+                let (env, prop2) =
+                  Common.dispatch_constraint
+                    ~subtype_env
+                    ~this_ty:None
+                    ~sub_supportdyn:None
+                    (LoclType lower_bound)
+                    upper_bound
+                    env
+                in
+                (env, TL.conj prop1 prop2))
+              upper_bounds
+              (env, prop))
+          added_lower_bounds
+          ~init:(env, prop)
+      in
+      (env, prop)
 
   (* Traverse a list of disjuncts and remove obviously redundant ones.
        t1 <: #1 is considered redundant if t2 <: #1 is also a disjunct and t2 <: t1.

@@ -17,6 +17,7 @@
 #include <folly/synchronization/CallOnce.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
+#include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 
 namespace apache::thrift {
 
@@ -128,8 +129,8 @@ class ExecutorToThreadManagerAdaptor : public concurrency::ThreadManager {
             .resourcePoolByPriority_deprecated(executionScope.getPriority())
             .executor();
 #pragma clang diagnostic pop
-    CHECK(executor);
-    return folly::getKeepAliveToken(executor->get());
+    return folly::getKeepAliveToken(
+        executor ? executor->get() : defaultAsyncExecutor_);
   }
 
  private:

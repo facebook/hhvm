@@ -23,6 +23,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/portability/SysResource.h>
 #include <folly/synchronization/Latch.h>
+#include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 #include <thrift/lib/cpp2/server/ResourcePoolHandle.h>
@@ -493,6 +494,33 @@ TEST(
 
   EXPECT_EQ(observeNice(concurrency::PRIORITY::NORMAL), kNormalNice);
   EXPECT_EQ(observeNice(concurrency::PRIORITY::BEST_EFFORT), kBestEffortNice);
+}
+
+TEST(
+    ResourcePoolSetTest,
+    GetKeepAlive_ExecutorlessPriorityPool_FallsBackToDefaultAsync) {
+  ResourcePoolSet set;
+  AsyncPoolComponents defaultPool;
+  auto* defaultExecutor = defaultPool.executor.get();
+  set.setResourcePool(
+      ResourcePoolHandle::defaultAsync(),
+      std::move(defaultPool.requestPile),
+      defaultPool.executor,
+      std::move(defaultPool.concurrencyController));
+  set.addResourcePool(
+      "Executorless",
+      nullptr,
+      nullptr,
+      nullptr,
+      concurrency::PRIORITY::IMPORTANT);
+  set.lock();
+
+  ExecutorToThreadManagerAdaptor adaptor(set);
+  auto keepAlive = adaptor.getKeepAlive(
+      concurrency::PRIORITY::IMPORTANT,
+      concurrency::ThreadManager::Source::INTERNAL);
+
+  EXPECT_EQ(keepAlive.get(), defaultExecutor);
 }
 
 // Phase 7: Empty, Size, Describe & Debug

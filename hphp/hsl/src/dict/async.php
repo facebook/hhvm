@@ -53,8 +53,9 @@ async function from_keys_async<Tk as arraykey, Tv>(
   foreach ($keys as $key) {
     $awaitables[$key] ??= $async_func($key);
   }
-  /* HH_FIXME[4135] Unset local variable to reduce peak memory. */
-  unset($keys);
+
+  /* Clear local variable to reduce peak memory. */
+  $keys = null;
 
   /* HH_FIXME[4390] Magic Function */
   await AwaitAllWaitHandle::fromDict($awaitables);

@@ -18,6 +18,7 @@
 #pragma once
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
@@ -26,6 +27,8 @@
 #include <glog/logging.h>
 #include <re2/re2.h>
 #include <chrono>
+#include <stdexcept>
+#include <string_view>
 #include <vector>
 
 #include "squangle/mysql_client/InternalConnection.h"
@@ -35,6 +38,25 @@
 namespace facebook::common::mysql_client {
 
 class RowBlock;
+
+namespace detail {
+
+[[noreturn]] void
+throwIndexOutOfRange(std::string_view what, size_t value, size_t size);
+
+// Throws std::out_of_range when `value` is not a valid index into a container
+// of the given `size` (i.e. value >= size). The message includes both `value`
+// and `size` so an out-of-bounds row/field/column index -- e.g. from a
+// malformed server response -- fails the query with a diagnosable error
+// instead of aborting the process.
+inline void
+checkIndexInRange(std::string_view what, size_t value, size_t size) {
+  if (FOLLY_UNLIKELY(value >= size)) {
+    throwIndexOutOfRange(what, value, size);
+  }
+}
+
+} // namespace detail
 
 // A row of returned data.  This makes the columns available either
 // positionally or by name, both via operator[].  In addition, the raw
@@ -98,7 +120,8 @@ class Row {
       ++current_column_number_;
     }
     const folly::StringPiece dereference() const {
-      CHECK_LT(current_column_number_, row_->size());
+      detail::checkIndexInRange(
+          "column index", current_column_number_, row_->size());
       return row_->get<folly::StringPiece>(current_column_number_);
     }
     bool equal(const Iterator& other) const {
@@ -276,7 +299,9 @@ class RowBlock {
 
   // Is this field NULL?
   bool isNull(size_t row, size_t field_num) const {
-    CHECK_LT(row, rows_.size());
+    detail::checkIndexInRange("row index", row, rows_.size());
+    detail::checkIndexInRange(
+        "field index", field_num, row_fields_info_->numFields());
     return rows_[row].isNull(field_num);
   }
 
@@ -381,29 +406,68 @@ class RowBlock {
   }
 
   // Functions called when building a RowBlock.  Not for general use.
+  //
+  // Contract: each startRow() is paired with exactly one finishRow(), with
+  // exactly numFields() values appended in between.  Violations throw rather
+  // than abort:
+  //   - startRow() twice without an intervening finishRow()
+  //   - appendValue()/appendNull()/finishRow() before startRow()
+  //   - appending more than numFields() values (std::out_of_range)
+  //   - finishRow() with fewer than numFields() values appended
+  //
+  // A row becomes visible to readers only once finishRow() succeeds, so a
+  // partially built row is never observable.  This is a behavior change: these
+  // misuses previously either aborted the process or (for a row abandoned
+  // without finishRow()) left the partial row in place.
+  //
+  // KNOWN GAP: omitting finishRow() on the final row is not detected -- that
+  // row is silently dropped.  Omitting it on any earlier row is caught by the
+  // next startRow().  An RAII-scoped builder that makes the pairing automatic
+  // is planned to replace this API; prefer it once available.
   void startRow() {
-    rows_.emplace_back(row_fields_info_->numFields());
+    if (current_row_) {
+      throw std::logic_error(
+          "Attempting to start a row without finishing the previous one.  "
+          "Call finishRow() for each startRow()");
+    }
+
+    current_row_ = StorageRow(row_fields_info_->numFields());
   }
+
   void finishRow() {
-    CHECK_EQ(rows_.back().count(), row_fields_info_->numFields());
+    if (!current_row_) {
+      throw std::logic_error(
+          "Attempting to finish a row that hasn't been started.  "
+          "Call startRow() before finishRow()");
+    }
+
+    auto count = current_row_->count();
+    auto expected = row_fields_info_->numFields();
+    if (count != expected) {
+      throw std::logic_error(
+          fmt::format("row has {} fields, expected {}", count, expected));
+    }
+
+    rows_.push_back(std::move(*current_row_));
+    current_row_ = std::nullopt;
   }
+
   template <typename T>
   void appendValue(T value) {
-    auto& row = rows_.back();
-    CHECK_LT(row.count(), row_fields_info_->numFields());
-    row.appendValue(std::forward<T>(value));
+    checkRowStartedAndCapacity();
+    current_row_->appendValue(std::forward<T>(value));
   }
+
   // Special override for folly::StringPiece to match existing code
   template <>
   void appendValue(folly::StringPiece value) {
-    auto& row = rows_.back();
-    CHECK_LT(row.count(), row_fields_info_->numFields());
-    row.appendValue(value);
+    checkRowStartedAndCapacity();
+    current_row_->appendValue(value);
   }
+
   void appendNull() {
-    auto& row = rows_.back();
-    CHECK_LT(row.count(), row_fields_info_->numFields());
-    row.appendNull();
+    checkRowStartedAndCapacity();
+    current_row_->appendNull();
   }
 
   // Let the compiler make our move operations.  We disallow copies below.
@@ -419,7 +483,21 @@ class RowBlock {
         (fieldType == MYSQL_TYPE_DATETIME) || (fieldType == MYSQL_TYPE_DATE);
   }
 
+  void checkRowStartedAndCapacity() {
+    if (FOLLY_UNLIKELY(!current_row_)) {
+      throwRowNotStarted();
+    }
+    if (FOLLY_UNLIKELY(
+            current_row_->count() >= row_fields_info_->numFields())) {
+      throwNoMoreCapacity();
+    }
+  }
+
+  [[noreturn]] static void throwRowNotStarted();
+  [[noreturn]] void throwNoMoreCapacity();
+
   std::vector<StorageRow> rows_;
+  std::optional<StorageRow> current_row_;
 
   // Storage for strings when we convert a column to std::string_view or
   // folly::StringPiece.  Must be `mutable` because this can occur on a
@@ -488,7 +566,7 @@ class EphemeralRowFields {
   }
 
   enum_field_types fieldType(size_t index) const {
-    CHECK_LT(index, metadata_->numFields());
+    detail::checkIndexInRange("field index", index, metadata_->numFields());
     return metadata_->getFieldType(index);
   }
 

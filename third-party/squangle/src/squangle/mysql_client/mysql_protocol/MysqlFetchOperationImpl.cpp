@@ -13,6 +13,7 @@
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/Flags.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/OperationHelpers.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
@@ -212,7 +213,16 @@ void MysqlFetchOperationImpl::actionable() {
       if (hasQueryFinished()) {
         setActiveFetchAction(FetchAction::CompleteQuery);
       } else {
-        op.notifyRowsReady();
+        try {
+          op.notifyRowsReady();
+        } catch (const MalformedResultError& ex) {
+          // Catch row building errors - which are separate from consumer
+          // exceptions in the callbacks.  Stashed to preserve the error when
+          // snapshotMysqlErrors() overwrites mysql_errno_.
+          malformed_result_error_ = ex.what();
+          setFetchAction(FetchAction::CompleteQuery);
+          continue;
+        }
       }
     }
 
@@ -234,6 +244,15 @@ void MysqlFetchOperationImpl::actionable() {
           mysql_conn->getErrno(),
           mysql_conn->getErrorMessage(),
           conn().getConnIdleTime());
+
+      // Since snapshotMysqlErrors() overwrites mysql_errno_, reapply a
+      // malformed result error if we have one.
+      if (malformed_result_error_) {
+        setAsyncClientError(
+            static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_MALFORMED_RESULT),
+            *malformed_result_error_);
+        setActiveFetchAction(FetchAction::CompleteOperation);
+      }
 
       bool more_results = false;
       if (mysql_errno() != 0 || cancel_) {

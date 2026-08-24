@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <optional>
+#include <string>
+
 #include "squangle/mysql_client/FetchOperation.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlOperationImpl.h"
 
@@ -60,6 +63,7 @@ class MysqlFetchOperationImpl : public MysqlOperationImpl,
   void killRunningQuery();
 
   bool cancel_ = false;
+  std::optional<std::string> malformed_result_error_;
   std::atomic<bool> resume_scheduled_{false};
 };
 

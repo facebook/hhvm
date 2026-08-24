@@ -8,11 +8,22 @@
 
 #include "squangle/mysql_client/Row.h"
 
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <re2/re2.h>
 #include <chrono>
+#include <stdexcept>
 
 namespace facebook::common::mysql_client {
+
+namespace detail {
+
+void throwIndexOutOfRange(std::string_view what, size_t value, size_t size) {
+  throw std::out_of_range(
+      fmt::format("{} {} out of range (size {})", what, value, size));
+}
+
+} // namespace detail
 
 std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   auto num_fields = metadata_->numFields();
@@ -114,7 +125,7 @@ size_t EphemeralRow::calculateRowLength() const {
 
 Row::Row(const RowBlock* row_block, size_t row_number)
     : row_block_(row_block), row_number_(row_number) {
-  CHECK_LT(row_number, row_block->numRows());
+  detail::checkIndexInRange("row index", row_number, row_block->numRows());
 }
 
 size_t Row::size() const {
@@ -194,8 +205,9 @@ folly::dynamic Row::getDynamic(size_t l) const {
 
 template <>
 bool RowBlock::getField(size_t row, size_t field_num) const {
-  CHECK_LT(row, rows_.size());
-  CHECK_LT(field_num, row_fields_info_->numFields());
+  detail::checkIndexInRange("row index", row, rows_.size());
+  detail::checkIndexInRange(
+      "field index", field_num, row_fields_info_->numFields());
 
   return rows_[row].as<bool>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;
@@ -215,8 +227,9 @@ bool RowBlock::getField(size_t row, size_t field_num) const {
 
 template <>
 int64_t RowBlock::getField(size_t row, size_t field_num) const {
-  CHECK_LT(row, rows_.size());
-  CHECK_LT(field_num, row_fields_info_->numFields());
+  detail::checkIndexInRange("row index", row, rows_.size());
+  detail::checkIndexInRange(
+      "field index", field_num, row_fields_info_->numFields());
 
   if (isDate(row, field_num)) {
     return getDateField(row, field_num);
@@ -239,8 +252,9 @@ int64_t RowBlock::getField(size_t row, size_t field_num) const {
 
 template <>
 uint64_t RowBlock::getField(size_t row, size_t field_num) const {
-  CHECK_LT(row, rows_.size());
-  CHECK_LT(field_num, row_fields_info_->numFields());
+  detail::checkIndexInRange("row index", row, rows_.size());
+  detail::checkIndexInRange(
+      "field index", field_num, row_fields_info_->numFields());
 
   return rows_[row].as<uint64_t>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;
@@ -259,8 +273,9 @@ uint64_t RowBlock::getField(size_t row, size_t field_num) const {
 
 template <>
 double RowBlock::getField(size_t row, size_t field_num) const {
-  CHECK_LT(row, rows_.size());
-  CHECK_LT(field_num, row_fields_info_->numFields());
+  detail::checkIndexInRange("row index", row, rows_.size());
+  detail::checkIndexInRange(
+      "field index", field_num, row_fields_info_->numFields());
 
   return rows_[row].as<double>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;
@@ -279,10 +294,13 @@ double RowBlock::getField(size_t row, size_t field_num) const {
 
 template <>
 folly::StringPiece RowBlock::getField(size_t row, size_t field_num) const {
-  CHECK_LT(row, rows_.size());
-  CHECK_LT(field_num, row_fields_info_->numFields());
+  detail::checkIndexInRange("row index", row, rows_.size());
+  detail::checkIndexInRange(
+      "field index", field_num, row_fields_info_->numFields());
 
-  if (isNull(row, field_num)) {
+  // Both indices are validated above, so go straight to storage rather than
+  // paying for isNull()'s bounds checks again on this hot path.
+  if (rows_[row].isNull(field_num)) {
     return folly::StringPiece();
   }
 
@@ -341,6 +359,22 @@ time_t RowBlock::getDateField(size_t row, size_t field_num) const {
     throw std::range_error("Calendar time cannot be represented as time_t");
   }
   return field_timet;
+}
+
+void RowBlock::throwNoMoreCapacity() {
+  throw std::out_of_range(
+      fmt::format(
+          "attempted to add a field to a row that was already full "
+          "({}/{} columns already present)",
+          current_row_->count(),
+          row_fields_info_->numFields()));
+}
+
+/* static */
+void RowBlock::throwRowNotStarted() {
+  throw std::logic_error(
+      "Attempting to append a value to a row that hasn't been started.  "
+      "Call startRow() before attempting to append a value");
 }
 
 std::chrono::microseconds parseTimeOnly(

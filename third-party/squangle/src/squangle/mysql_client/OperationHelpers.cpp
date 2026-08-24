@@ -49,10 +49,18 @@ RowBlock makeRowBlockFromStream(
     std::shared_ptr<RowFields> row_fields,
     RowStream* row_stream) {
   RowBlock row_block(std::move(row_fields));
-  // Consume row_stream
-  while (row_stream->hasNext()) {
-    auto eph_row = row_stream->consumeRow();
-    copyRowToRowBlock(&row_block, eph_row);
+  try {
+    // Consume row_stream
+    while (row_stream->hasNext()) {
+      auto eph_row = row_stream->consumeRow();
+      copyRowToRowBlock(&row_block, eph_row);
+    }
+  } catch (const std::exception& ex) {
+    // Retag as MalformedResultError so the fetch loop can tell a bad result
+    // set apart from an exception thrown by a consumer callback. The
+    // underlying throws are std::out_of_range (index/capacity) and
+    // std::logic_error (row lifecycle) from Row.h.
+    throw MalformedResultError(ex.what());
   }
   return row_block;
 }

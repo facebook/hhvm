@@ -504,7 +504,7 @@ abstract class TProtocol {
   }
 
   public function readRPCMessage<TMessageStruct as IThriftStruct>(
-    classname<TMessageStruct> $message_struct_class,
+    class<TMessageStruct> $message_struct_class,
     string $fname,
     ?int $expected_seq_id,
     int $options = 0,
@@ -520,10 +520,7 @@ abstract class TProtocol {
       inout $recv_seqid,
     );
     if ($recv_type === TMessageType::EXCEPTION) {
-      throw $this->readRPCStruct(
-        HH\class_to_classname(TApplicationException::class),
-        $options,
-      );
+      throw $this->readRPCStruct(TApplicationException::class, $options);
     }
     $result = $this->readRPCStruct($message_struct_class, $options);
     $this->readMessageEnd();
@@ -545,7 +542,7 @@ abstract class TProtocol {
   }
 
   public function readRPCStruct<TStruct as IThriftStruct>(
-    classname<TStruct> $struct_class,
+    class<TStruct> $struct_class,
     int $_options = 0,
   ): TStruct {
     $struct = $struct_class::withDefaultValues();

@@ -59,7 +59,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
    * Helper method to be used in the generated {Sync,Async}ProcessorBase classes
    */
   final protected function readHelper<TResult as IThriftStruct>(
-    classname<TResult> $request_args_class,
+    class<TResult> $request_args_class,
     TProtocol $input,
     string $request_name,
     mixed $handler_ctx,
@@ -480,7 +480,7 @@ trait GetThriftServiceMetadata {
     int $seqid,
     TProtocol $input,
     TProtocol $output,
-    classname<IThriftServiceStaticMetadata> $service_metadata_class,
+    class<IThriftServiceStaticMetadata> $service_metadata_class,
   ): void {
     $reply_type = TMessageType::REPLY;
 

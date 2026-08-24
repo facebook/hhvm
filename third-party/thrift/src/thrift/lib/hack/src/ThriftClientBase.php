@@ -197,7 +197,7 @@ abstract class ThriftClientBase implements IThriftClient {
     TResulttype as IResultThriftStruct with { type TResult = TRet },
     TRet,
   >(
-    classname<TResulttype> $result,
+    class<TResulttype> $result,
     string $name,
     bool $is_return_void,
     ?int $expectedsequenceid,
@@ -293,7 +293,7 @@ abstract class ThriftClientBase implements IThriftClient {
     TResulttype as IResultThriftStruct with { type TResult = TRet },
     TRet,
   >(
-    classname<TResulttype> $result,
+    class<TResulttype> $result,
     string $name,
     bool $is_return_void,
     int $expectedsequenceid,
@@ -349,7 +349,7 @@ abstract class ThriftClientBase implements IThriftClient {
       type TResult = TStreamType },
     TStreamType,
   >(
-    classname<TFirstResponseType> $first_response_type,
+    class<TFirstResponseType> $first_response_type,
     class<TStreamResponseType> $stream_response_type,
     string $name,
     bool $is_first_response_null,
@@ -463,7 +463,7 @@ abstract class ThriftClientBase implements IThriftClient {
       type TResult = TSinkFinalType },
     TSinkFinalType,
   >(
-    classname<TSinkFirstResponseType> $first_response_type,
+    class<TSinkFirstResponseType> $first_response_type,
     class<TSinkPayloadType> $sink_payload_type,
     class<TSinkFinalResponseType> $final_response_type,
     string $name,
@@ -556,7 +556,7 @@ abstract class ThriftClientBase implements IThriftClient {
     TBiDiStreamType,
     TBiDiSinkType,
   >(
-    classname<TBiDiFirstResponseType> $first_response_type,
+    class<TBiDiFirstResponseType> $first_response_type,
     class<TBiDiSinkPayloadType> $sink_payload_type,
     class<TBiDiStreamResponseType> $stream_response_type,
     string $name,

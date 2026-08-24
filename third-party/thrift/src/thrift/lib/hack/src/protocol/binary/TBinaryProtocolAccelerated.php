@@ -43,7 +43,7 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
 
   <<__Override>>
   public function readRPCMessage<TMessageStruct as IThriftStruct>(
-    classname<TMessageStruct> $message_struct_class,
+    class<TMessageStruct> $message_struct_class,
     string $fname,
     ?int $expected_seq_id,
     int $options = 0,

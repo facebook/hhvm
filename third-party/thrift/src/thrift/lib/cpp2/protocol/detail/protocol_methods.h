@@ -151,28 +151,6 @@ template <typename ExpectedTag, typename WireTag>
 inline constexpr bool matches_floating_point_wire_tag_v =
     matches_wire_tag_v<ExpectedTag, WireTag>;
 
-#define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method) \
-  template <typename Protocol>                                          \
-  static void read(Protocol& protocol, Type& out) {                     \
-    protocol.read##Method(out);                                         \
-  }                                                                     \
-  template <typename Protocol>                                          \
-  static std::size_t write(Protocol& protocol, const Type& in) {        \
-    if constexpr (                                                      \
-        std::is_same<type_class::Class, type_class::binary>::value ||   \
-        std::is_same<type_class::Class, type_class::string>::value) {   \
-      return checked_container_size(protocol.write##Method(in));        \
-    } else {                                                            \
-      return protocol.write##Method(in);                                \
-    }                                                                   \
-  }
-
-#define THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(Class, Type, Method)   \
-  template <bool, typename Protocol>                                      \
-  static std::size_t serializedSize(Protocol& protocol, const Type& in) { \
-    return protocol.serializedSize##Method(in);                           \
-  }
-
 #define THRIFT_PROTOCOL_METHODS_REGISTER_OP_INTEGRAL(Type, WireTag)   \
   template <typename ExpectedTag>                                     \
   struct protocol_methods<type_class::integral, Type, ExpectedTag> {  \
@@ -270,8 +248,18 @@ struct protocol_methods<type_class::string, Type, ExpectedTag> {
   static_assert(
       matches_wire_tag_v<ExpectedTag, type::string_t>,
       "ExpectedTag does not match the string wire tag");
-  THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(string, Type, String)
-  THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(string, Type, String)
+  template <typename Protocol>
+  static void read(Protocol& protocol, Type& out) {
+    op::decode<type::string_t>(protocol, out);
+  }
+  template <typename Protocol>
+  static std::size_t write(Protocol& protocol, const Type& in) {
+    return op::encode<type::string_t>(protocol, in);
+  }
+  template <bool ZeroCopy, typename Protocol>
+  static std::size_t serializedSize(Protocol& protocol, const Type& in) {
+    return op::serialized_size<ZeroCopy, type::string_t>(protocol, in);
+  }
 };
 
 template <typename Type, typename ExpectedTag>
@@ -279,22 +267,19 @@ struct protocol_methods<type_class::binary, Type, ExpectedTag> {
   static_assert(
       matches_wire_tag_v<ExpectedTag, type::binary_t>,
       "ExpectedTag does not match the binary wire tag");
-  THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(binary, Type, Binary)
-
-  template <bool ZeroCopy, typename Protocol>
-  static std::enable_if_t<ZeroCopy, std::size_t> serializedSize(
-      Protocol& protocol, const Type& in) {
-    return protocol.serializedSizeZCBinary(in);
+  template <typename Protocol>
+  static void read(Protocol& protocol, Type& out) {
+    op::decode<type::binary_t>(protocol, out);
+  }
+  template <typename Protocol>
+  static std::size_t write(Protocol& protocol, const Type& in) {
+    return op::encode<type::binary_t>(protocol, in);
   }
   template <bool ZeroCopy, typename Protocol>
-  static std::enable_if_t<!ZeroCopy, std::size_t> serializedSize(
-      Protocol& protocol, const Type& in) {
-    return protocol.serializedSizeBinary(in);
+  static std::size_t serializedSize(Protocol& protocol, const Type& in) {
+    return op::serialized_size<ZeroCopy, type::binary_t>(protocol, in);
   }
 };
-
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON
 
 /*
  * Enum Specialization

@@ -252,6 +252,10 @@ void FetchOperationImpl::logQueryCompletion(
   logging_data.per_query_rows_affected = std::move(per_query_rows_affected_);
   logging_data.per_query_last_insert_id = std::move(per_query_last_insert_id_);
   logging_data.per_query_rows_matched = std::move(per_query_rows_matched_);
+  // This reads the member directly and does not use currentRecvGtid(). That
+  // accessor asserts that stream access is available, but completion does not
+  // give this guarantee on all paths. The two reads above also use the member.
+  logging_data.recv_gtid = current_recv_gtid_;
 
   if (result == OperationResult::Succeeded) {
     connection.resetLastActivityTime();

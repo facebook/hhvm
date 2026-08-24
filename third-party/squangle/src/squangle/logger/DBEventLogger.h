@@ -212,6 +212,12 @@ struct QueryLoggingData : CommonLoggingData {
   std::optional<uint64_t> rows_matched;
   uint64_t rows_affected;
 
+  // GTID the server returned for the (last) committed transaction, via
+  // SESSION_TRACK_GTIDS. Empty for reads or when GTID tracking is off. Logged
+  // so a committed write can be joined directly to the binlog, and so a
+  // reported success with no gtid (i.e. nothing committed) is detectable.
+  std::string recv_gtid;
+
   // Per-statement stats for multi-queries. One entry per successfully
   // completed statement (so on a mid-multi-query failure, length is
   // number-of-statements-that-succeeded-before-the-failing-one, matching

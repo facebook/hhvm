@@ -28,8 +28,8 @@ const std::string kMcrouterOptionPrefix = "mcr_opts-";
 
 template <class T>
 bool tryToString(const boost::any& value, std::string& res) {
-  if (boost::any_cast<T*>(&value) != nullptr) {
-    res = folly::to<std::string>(*boost::any_cast<T*>(value));
+  if (const auto* valueStr = boost::any_cast<T*>(&value)) {
+    res = folly::to<std::string>(**valueStr);
     return true;
   }
   return false;

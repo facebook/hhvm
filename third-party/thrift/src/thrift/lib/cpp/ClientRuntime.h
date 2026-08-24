@@ -31,14 +31,14 @@ namespace apache::thrift {
  * in a process, so only the request knows which binding issued it.
  *
  * Only bindings that need to be distinguished appear here. thrift-py3 wraps a
- * generated C++ client and reports `Cpp`. Rust is not listed yet; its channel
- * appends the global TClientBase handlers to its own, which needs untangling
- * first.
+ * generated C++ client and reports `Cpp`.
  */
 enum class ClientRuntime {
   Cpp,
   /// thrift-python, via OmniClient.
   Python,
+  /// Rust, via srclient / bareclient.
+  Rust,
 };
 
 } // namespace apache::thrift

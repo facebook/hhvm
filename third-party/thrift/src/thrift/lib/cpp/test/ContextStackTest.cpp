@@ -184,6 +184,21 @@ TEST(ContextStack, ClientRuntimeReachesEventHandlers) {
     EXPECT_EQ(handler->observed, ClientRuntime::Cpp);
   }
 
+  // The Rust channel goes through the plain factory, not CopyNames.
+  {
+    transport::THeader header;
+    auto handler = std::make_shared<RuntimeRecordingEventHandler>();
+    auto contextStack = ContextStack::createWithClientContext(
+        std::make_shared<EventHandlerList>(EventHandlerList{handler}),
+        nullptr /* clientInterceptors */,
+        "Service",
+        "Service.method",
+        header,
+        ClientRuntime::Rust);
+    ASSERT_NE(contextStack, nullptr);
+    EXPECT_EQ(handler->observed, ClientRuntime::Rust);
+  }
+
   // CopyNames is not thrift-python's alone -- thriftdbg's C++ omniclient (which
   // backs the polyglot thrift proxy) uses it too and passes no runtime. The
   // default must stay `Cpp` or that traffic gets attributed to Python.

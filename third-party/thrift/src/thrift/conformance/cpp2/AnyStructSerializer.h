@@ -26,19 +26,16 @@ namespace apache::thrift::conformance {
 
 // A serializer base class any thrift struct and protocol.
 template <typename T, typename Reader, typename Writer>
-class BaseAnyStructSerializer
-    : public BaseTypedAnySerializer<
-          T,
-          BaseAnyStructSerializer<T, Reader, Writer>> {
-  using Base =
-      BaseTypedAnySerializer<T, BaseAnyStructSerializer<T, Reader, Writer>>;
+class BaseAnyStructSerializer : public BaseTypedAnySerializer<T> {
+  using Base = BaseTypedAnySerializer<T>;
 
  public:
   using Base::encode;
-  void encode(const T& value, folly::io::QueueAppender&& appender) const;
+  void encode(
+      const T& value, folly::io::QueueAppender&& appender) const override;
 
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, T& value) const;
+  void decode(folly::io::Cursor& cursor, T& value) const override;
 };
 
 // A standard protocol serializer for any thrift struct.

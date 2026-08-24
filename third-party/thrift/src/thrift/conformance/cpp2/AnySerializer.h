@@ -71,28 +71,27 @@ class AnySerializer {
 
 // A helper base class for a serializer of a single type.
 //
-// Type specific calls are forward to the following functions, required to
-// be publicially accessible on Derived:
+// Implementations provide the following type-specific functions:
 // - void encode(const T&, folly::io::QueueAppender&&) const
-// - T decode(folly::io::Cursor& cursor) const
-template <typename T, typename Derived>
+// - void decode(folly::io::Cursor&, T&) const
+template <typename T>
 class BaseTypedAnySerializer : public AnySerializer {
   using Base = AnySerializer;
 
  public:
   using Base::encode;
   void encode(any_ref value, folly::io::QueueAppender&& appender) const final {
-    derived().encode(any_cast<const T&>(value), std::move(appender));
+    encode(any_cast<const T&>(value), std::move(appender));
   }
+  virtual void encode(
+      const T& value, folly::io::QueueAppender&& appender) const = 0;
 
   using Base::decode;
   void decode(
       const std::type_info& typeInfo,
       folly::io::Cursor& cursor,
       any_ref value) const final;
-
- private:
-  const Derived& derived() const { return static_cast<const Derived&>(*this); }
+  virtual void decode(folly::io::Cursor& cursor, T& value) const = 0;
 };
 
 // Implementation.
@@ -104,17 +103,17 @@ T AnySerializer::decode(folly::io::Cursor& cursor) const {
   return result;
 }
 
-template <typename T, typename Derived>
-void BaseTypedAnySerializer<T, Derived>::decode(
+template <typename T>
+void BaseTypedAnySerializer<T>::decode(
     const std::type_info& typeInfo,
     folly::io::Cursor& cursor,
     any_ref value) const {
   checkType(typeInfo, typeid(T));
   if (auto* obj = any_cast_exact<T>(&value)) {
-    derived().decode(cursor, *obj);
+    decode(cursor, *obj);
   } else {
     auto& any = any_cast_exact<std::any&>(value);
-    derived().decode(cursor, any.emplace<T>());
+    decode(cursor, any.emplace<T>());
   }
 }
 

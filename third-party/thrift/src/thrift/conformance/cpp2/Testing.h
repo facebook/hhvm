@@ -87,9 +87,8 @@ void checkRoundTrip(const T& value) {
 }
 
 // Always serializes integers to the number 1.
-class Number1Serializer
-    : public BaseTypedAnySerializer<int, Number1Serializer> {
-  using Base = BaseTypedAnySerializer<int, Number1Serializer>;
+class Number1Serializer : public BaseTypedAnySerializer<int> {
+  using Base = BaseTypedAnySerializer<int>;
 
  public:
   static const Protocol kProtocol;
@@ -97,13 +96,13 @@ class Number1Serializer
   const Protocol& getProtocol() const override { return kProtocol; }
 
   using Base::encode;
-  void encode(const int&, folly::io::QueueAppender&& appender) const {
+  void encode(const int&, folly::io::QueueAppender&& appender) const override {
     std::string data = "number 1!!";
     appender.push(reinterpret_cast<const uint8_t*>(data.data()), data.size());
   }
 
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, int& value) const {
+  void decode(folly::io::Cursor& cursor, int& value) const override {
     cursor.readFixedString(10);
     value = 1;
   }
@@ -113,21 +112,21 @@ extern const Protocol kFollyToStringProtocol;
 
 // A serializer based on `folly::to<std::string>`.
 template <typename T>
-class FollyToStringSerializer
-    : public BaseTypedAnySerializer<T, FollyToStringSerializer<T>> {
-  using Base = BaseTypedAnySerializer<T, FollyToStringSerializer<T>>;
+class FollyToStringSerializer : public BaseTypedAnySerializer<T> {
+  using Base = BaseTypedAnySerializer<T>;
 
  public:
   const Protocol& getProtocol() const override {
     return kFollyToStringProtocol;
   }
   using Base::encode;
-  void encode(const T& value, folly::io::QueueAppender&& appender) const {
+  void encode(
+      const T& value, folly::io::QueueAppender&& appender) const override {
     std::string data = folly::to<std::string>(value);
     appender.push(reinterpret_cast<const uint8_t*>(data.data()), data.size());
   }
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, T& value) const {
+  void decode(folly::io::Cursor& cursor, T& value) const override {
     value = folly::to<T>(cursor.readFixedString(cursor.totalLength()));
   }
 };

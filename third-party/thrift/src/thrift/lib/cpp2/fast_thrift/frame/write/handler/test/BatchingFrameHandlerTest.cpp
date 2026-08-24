@@ -919,10 +919,12 @@ struct CapturingTracker {
 
   size_t onWriteCount{0};
   size_t onFlushCount{0};
+  size_t onDiscardCount{0};
   size_t onEventCount{0};
 
   void onWrite() noexcept { ++onWriteCount; }
   void onFlush() noexcept { ++onFlushCount; }
+  void onDiscard() noexcept { ++onDiscardCount; }
 
   template <typename Context>
   void onEvent(
@@ -1026,6 +1028,22 @@ TEST_F(BatchingFrameHandlerTrackerTest, FlushWritesEventOnEmptyBatchIsNoOp) {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
 
   EXPECT_TRUE(ctx_->writtenBatches().empty());
+}
+
+// Going inactive throws the buffered batch away instead of flushing it. The
+// tracker has to hear about that, or it keeps counting frames that will never
+// reach the socket.
+TEST_F(BatchingFrameHandlerTrackerTest, DiscardedBatchNotifiesTracker) {
+  BatchingFrameHandlerT<CapturingTracker> handler;
+  handler.handlerAdded(*ctx_);
+
+  ASSERT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(64))),
+      apache::thrift::fast_thrift::channel_pipeline::Result::Success);
+  handler.onPipelineInactive(*ctx_);
+
+  EXPECT_EQ(handler.tracker().onFlushCount, 0u);
+  EXPECT_EQ(handler.tracker().onDiscardCount, 1u);
 }
 
 TEST_F(BatchingFrameHandlerTrackerTest, OnEventDelegatesToTracker) {

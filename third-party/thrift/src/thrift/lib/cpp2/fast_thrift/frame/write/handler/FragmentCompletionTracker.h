@@ -26,6 +26,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
@@ -41,6 +42,10 @@ namespace apache::thrift::fast_thrift::frame::write::handler {
  * The concrete tracker maintains a per-fragment FIFO and subscribes to
  * BatchWriteComplete; on each batch completion it pops `frameCount` records
  * and fires FrameWriteComplete for every completed original frame.
+ *
+ * onEvent additionally receives whether the handler is still holding frames it
+ * has not handed downstream, which is the term the layer below cannot see when
+ * it reports the connection caught up.
  */
 template <typename T>
 concept FragmentCompletionTracker =
@@ -67,7 +72,8 @@ struct NoOpFragmentCompletionTracker {
       Context& /*ctx*/,
       EventId /*ev*/,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
-      /*box*/) noexcept {}
+      /*box*/,
+      bool /*handlerHasPendingWrites*/) noexcept {}
 };
 
 static_assert(
@@ -76,18 +82,20 @@ static_assert(
 
 /**
  * Event factory contract for FragmentCompletionTrackerT. Pins the member types
- * the tracker reads off and the exact `(status, streamId)` argument order and
- * `pair<EventId, TypeErasedBox>` result of the per-frame factory method, so a
- * mismatched factory is rejected at the point of instantiation rather than deep
- * inside the tracker body.
+ * the tracker reads off and the exact `(status, streamId, quiesced)` argument
+ * order and `pair<EventId, TypeErasedBox>` result of the per-frame factory
+ * method, so a mismatched factory is rejected at the point of instantiation
+ * rather than deep inside the tracker body.
  */
 template <typename T>
 concept FrameWriteCompleteEventFactory = requires(
-    typename T::BatchWriteCompleteEventType batchEvent, uint32_t streamId) {
+    typename T::BatchWriteCompleteEventType batchEvent,
+    uint32_t streamId,
+    bool quiesced) {
   typename T::EventId;
   typename T::BatchWriteCompleteEventType;
   {
-    T::makeFrameWriteComplete(batchEvent.status, streamId)
+    T::makeFrameWriteComplete(batchEvent.status, streamId, quiesced)
   } noexcept -> std::same_as<std::pair<
       typename T::EventId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>;
@@ -99,13 +107,21 @@ concept FrameWriteCompleteEventFactory = requires(
  * pops `frameCount` fragment records and fires FrameWriteComplete{streamId}
  * for every record where isLastFragment is true.
  *
+ * Also narrows the quiescence the batch event carries. The batcher can only
+ * speak for itself, and this handler sits above it holding frames the batcher
+ * never saw, so egress is idle only if both are empty. Since quiescence
+ * describes the connection rather than any one frame, it rides on the last
+ * completion of the batch alone — otherwise a batch of N frames would report
+ * the same edge N times.
+ *
  * Templated on the pipeline's event factory (see
  * FrameWriteCompleteEventFactory). The factory must expose:
  *   - `using EventId = ...;` with `BatchWriteComplete` and
  *     `FrameWriteComplete` values.
  *   - `using BatchWriteCompleteEventType = ...;` — the message carried by
- *     the BatchWriteComplete event, with `status`, `frameCount`, and `bytes`.
- *   - `static makeFrameWriteComplete(status, streamId) noexcept;`
+ *     the BatchWriteComplete event, with `status`, `frameCount`, `bytes`, and
+ *     `quiesced`.
+ *   - `static makeFrameWriteComplete(status, streamId, quiesced) noexcept;`
  *
  * EB-thread only — no synchronization.
  */
@@ -127,20 +143,37 @@ class FragmentCompletionTrackerT {
   void onEvent(
       Context& ctx,
       EventId /*ev*/,
-      const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
-          box) noexcept {
+      const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox& box,
+      bool handlerHasPendingWrites) noexcept {
     using BatchEvent = typename EventFactory::BatchWriteCompleteEventType;
     auto& evt = box.template get<BatchEvent>();
     size_t remaining = evt.frameCount;
+    // Held back one completion so the last one — and only it — can carry the
+    // quiescence edge; which frame is last is not known until the pop ends.
+    bool deferred = false;
+    uint32_t deferredStreamId = 0;
     while (remaining > 0 && !fragments_.empty()) {
       auto rec = fragments_.front();
       fragments_.pop_front();
       --remaining;
-      if (rec.isLastFragment) {
-        auto [eventId, eventMsg] =
-            EventFactory::makeFrameWriteComplete(evt.status, rec.streamId);
-        ctx.fireEvent(eventId, std::move(eventMsg));
+      if (!rec.isLastFragment) {
+        continue;
       }
+      if (deferred) {
+        fire(ctx, evt.status, deferredStreamId, /*quiesced=*/false);
+      }
+      deferredStreamId = rec.streamId;
+      deferred = true;
+    }
+    if (deferred) {
+      // A leftover `remaining` means the FIFO drifted from the batch, so the
+      // batch's quiescence verdict no longer describes what actually drained;
+      // the edge is dropped rather than reported out of that state.
+      fire(
+          ctx,
+          evt.status,
+          deferredStreamId,
+          evt.quiesced && !handlerHasPendingWrites && remaining == 0);
     }
     // frameCount must be matched by exactly that many tracked fragments. A
     // leftover count means the FIFO held fewer records than the batch reported,
@@ -152,6 +185,17 @@ class FragmentCompletionTrackerT {
   }
 
  private:
+  template <typename Context>
+  void fire(
+      Context& ctx,
+      apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
+      uint32_t streamId,
+      bool quiesced) noexcept {
+    auto [eventId, eventMsg] =
+        EventFactory::makeFrameWriteComplete(status, streamId, quiesced);
+    ctx.fireEvent(eventId, std::move(eventMsg));
+  }
+
   struct FragmentRecord {
     uint32_t streamId;
     bool isLastFragment;

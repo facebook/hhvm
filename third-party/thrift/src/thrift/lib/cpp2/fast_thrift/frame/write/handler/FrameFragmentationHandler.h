@@ -209,6 +209,13 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback,
     return streams_.contains(streamId);
   }
 
+  // Whether this handler is still holding frames it has not handed downstream.
+  // The layer below cannot see these, so anything it concludes about the
+  // connection being caught up has to be qualified by this.
+  bool hasPendingWrites() const noexcept {
+    return !streams_.empty() || !immediateQueue_.empty();
+  }
+
   Tracker& tracker() noexcept { return tracker_; }
 
   using EventId = typename Tracker::EventId;
@@ -220,7 +227,7 @@ class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback,
       EventId ev,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
-    tracker_.onEvent(ctx, ev, box);
+    tracker_.onEvent(ctx, ev, box, hasPendingWrites());
   }
 
  private:

@@ -29,10 +29,13 @@ namespace apache::thrift::fast_thrift::frame::write::handler {
 
 /**
  * Composable tracker mixin for batching frame handlers. The batcher invokes
- * the tracker's hooks at three points:
+ * the tracker's hooks at four points:
  *   - onWrite()           — per outbound frame entering the current batch.
  *   - onFlush()           — when the current batch is handed off downstream
  *                           (the batch boundary).
+ *   - onDiscard()         — when the batcher abandons its buffered writes
+ *                           instead of flushing them, so the tracker's counts
+ *                           don't outlive the frames they stand for.
  *   - onEvent(ctx, box)   — when the pipeline's per-pipeline event arrives
  *                           via the batcher's onEvent. The tracker subscribes
  *                           only to the raw transport-fired
@@ -47,6 +50,7 @@ template <typename T>
 concept WriteCompletionTracker = requires(T tracker) {
   { tracker.onWrite() } noexcept;
   { tracker.onFlush() } noexcept;
+  { tracker.onDiscard() } noexcept;
 };
 
 /**
@@ -65,6 +69,7 @@ struct NoOpWriteCompletionTracker {
 
   void onWrite() noexcept {}
   void onFlush() noexcept {}
+  void onDiscard() noexcept {}
 
   template <typename Context>
   void onEvent(
@@ -116,20 +121,21 @@ constexpr auto makeBatcherSubscriptions() noexcept {
 
 /**
  * Event factory contract for WriteCompletionTrackerT. Pins the member types the
- * tracker reads off and the exact `(status, count, bytes)` argument order and
- * `pair<EventId, TypeErasedBox>` result of the batch factory method, so a
- * mismatched factory is rejected at the point of instantiation rather than deep
- * inside the tracker body.
+ * tracker reads off and the exact `(status, count, bytes, quiesced)` argument
+ * order and `pair<EventId, TypeErasedBox>` result of the batch factory method,
+ * so a mismatched factory is rejected at the point of instantiation rather than
+ * deep inside the tracker body.
  */
 template <typename T>
 concept BatchWriteCompleteEventFactory = requires(
     typename T::TransportWriteCompleteEventType transportEvent,
-    size_t frameCount) {
+    size_t frameCount,
+    bool quiesced) {
   typename T::EventId;
   typename T::TransportWriteCompleteEventType;
   {
     T::makeBatchWriteComplete(
-        transportEvent.status, frameCount, transportEvent.bytes)
+        transportEvent.status, frameCount, transportEvent.bytes, quiesced)
   } noexcept -> std::same_as<std::pair<
       typename T::EventId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>;
@@ -138,13 +144,24 @@ concept BatchWriteCompleteEventFactory = requires(
 /**
  * Concrete tracker — counts outbound frames per batch and, on each raw
  * TransportWriteComplete from transport, pops the front batch's frame count
- * and fires a BatchWriteComplete (enriched with frameCount) upstream
- * via `EventFactory::makeBatchWriteComplete(status, count, bytes)`.
+ * and fires a BatchWriteComplete (enriched with frameCount and whether egress
+ * has gone idle) upstream via
+ * `EventFactory::makeBatchWriteComplete(status, count, bytes, quiesced)`.
  *
  * Batch-level is as far as this tracker's knowledge goes. Turning a batch
  * completion into whatever the pipeline's upper layers want — per-frame, or
  * per-connection — belongs to the handler above, which is the first one that
  * knows what the batch was made of.
+ *
+ * The tracker is the only place that can decide quiescence: it owns both the
+ * queue of batches handed to the socket and the count of frames still buffered
+ * for the next flush.
+ *
+ * Quiescence is an edge carried on a completion, not a state to be polled, and
+ * the edge is not guaranteed to arrive: only a completion that pops a batch
+ * reports it, and a connection torn down with batches still outstanding stops
+ * receiving completions altogether. A consumer that releases a resource on
+ * quiescence must release it on teardown too.
  *
  * Templated on the pipeline's event factory (see
  * BatchWriteCompleteEventFactory). The factory must expose:
@@ -152,8 +169,8 @@ concept BatchWriteCompleteEventFactory = requires(
  *     `BatchWriteComplete` values.
  *   - `using TransportWriteCompleteEventType = ...;` — the message carried by
  *     the TransportWriteComplete event, with `status` and `bytes` fields.
- *   - `static TypeErasedBox makeBatchWriteComplete(status, count, bytes)
- * noexcept;`
+ *   - `static TypeErasedBox makeBatchWriteComplete(status, count, bytes,
+ * quiesced) noexcept;`
  *
  * EB-thread only — no synchronization. The batch-count FIFO stays in
  * lockstep with the transport's writeSuccess/writeErr FIFO ordering
@@ -181,6 +198,16 @@ class WriteCompletionTrackerT {
     framesInCurrentBatch_ = 0;
   }
 
+  // The batcher threw away what it had buffered, so the counts standing for
+  // those frames have to go too — otherwise the partial batch is charged to
+  // whatever flushes next and quiescence can never be reached again. The
+  // batcher only discards on teardown, which is also the point past which no
+  // completion arrives for the batches already handed to the socket.
+  void onDiscard() noexcept {
+    framesInCurrentBatch_ = 0;
+    batchFrameCounts_.clear();
+  }
+
   template <typename Context>
   void onEvent(
       Context& ctx,
@@ -196,8 +223,15 @@ class WriteCompletionTrackerT {
     }
     auto count = batchFrameCounts_.front();
     batchFrameCounts_.pop_front();
-    auto [eventId, eventMsg] =
-        EventFactory::makeBatchWriteComplete(evt.status, count, evt.bytes);
+    // Egress has gone idle when this completion leaves nothing else handed to
+    // the socket and nothing buffered awaiting a flush. Both halves are load
+    // bearing: with backpressure disabled the batcher keeps flushing without
+    // waiting for completions, so an empty FIFO on its own can still be
+    // followed immediately by a batch that is only buffered.
+    const bool quiesced =
+        batchFrameCounts_.empty() && framesInCurrentBatch_ == 0;
+    auto [eventId, eventMsg] = EventFactory::makeBatchWriteComplete(
+        evt.status, count, evt.bytes, quiesced);
     ctx.fireEvent(eventId, std::move(eventMsg));
   }
 

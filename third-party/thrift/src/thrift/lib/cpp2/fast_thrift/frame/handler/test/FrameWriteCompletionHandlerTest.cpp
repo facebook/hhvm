@@ -49,10 +49,12 @@ struct FakeEventFactory {
   struct BatchEvent {
     WriteCompletionStatus status;
     size_t frameCount;
+    bool quiesced;
   };
   struct FrameEvent {
     uint32_t streamId;
     WriteCompletionStatus status;
+    bool quiesced;
   };
 
   using BatchWriteCompleteEventType = BatchEvent;
@@ -62,10 +64,12 @@ struct FakeEventFactory {
       EventId::BatchWriteComplete;
 
   static std::pair<EventId, cp::TypeErasedBox> makeFrameWriteComplete(
-      WriteCompletionStatus status, uint32_t streamId) noexcept {
+      WriteCompletionStatus status, uint32_t streamId, bool quiesced) noexcept {
     return {
         EventId::FrameWriteComplete,
-        cp::TypeErasedBox(FrameEvent{.streamId = streamId, .status = status})};
+        cp::TypeErasedBox(
+            FrameEvent{
+                .streamId = streamId, .status = status, .quiesced = quiesced})};
   }
 };
 
@@ -151,9 +155,10 @@ cp::TypeErasedBox makeInboundFrame(
 }
 
 cp::TypeErasedBox batchComplete(
-    WriteCompletionStatus status, size_t frameCount) {
+    WriteCompletionStatus status, size_t frameCount, bool quiesced) {
   return cp::TypeErasedBox(
-      FakeEventFactory::BatchEvent{.status = status, .frameCount = frameCount});
+      FakeEventFactory::BatchEvent{
+          .status = status, .frameCount = frameCount, .quiesced = quiesced});
 }
 
 } // namespace
@@ -171,7 +176,7 @@ TEST(FrameWriteCompletionHandlerTest, BatchFansOutPerFrameInOrder) {
   handler.onEvent(
       ctx,
       FakeEventFactory::EventId::BatchWriteComplete,
-      batchComplete(WriteCompletionStatus::Success, 2));
+      batchComplete(WriteCompletionStatus::Success, 2, /*quiesced=*/false));
 
   ASSERT_EQ(ctx.frameFired().size(), 2u);
   EXPECT_EQ(ctx.frameFired()[0].streamId, 1u);
@@ -216,7 +221,7 @@ TEST(
   handler.onEvent(
       ctx,
       FakeEventFactory::EventId::BatchWriteComplete,
-      batchComplete(WriteCompletionStatus::Success, 1));
+      batchComplete(WriteCompletionStatus::Success, 1, /*quiesced=*/false));
 
   EXPECT_EQ(ctx.frameFired().size(), 1u);
   EXPECT_EQ(handler.pendingCount(), 0u);
@@ -259,6 +264,103 @@ TEST(
   EXPECT_EQ(ctx.frameFired()[1].streamId, 3u);
   EXPECT_EQ(ctx.frameFired()[1].status, WriteCompletionStatus::Error);
   EXPECT_EQ(handler.pendingCount(), 0u);
+}
+
+// A quiesced batch fans out into one edge, on its last frame — the earlier
+// frames of the same batch report the write, not the idle transition.
+TEST(FrameWriteCompletionHandlerTest, QuiescenceRidesOnlyOnTheLastFrame) {
+  Handler handler;
+  MockContext ctx;
+
+  (void)handler.onWrite(ctx, makeOutboundFrame(1));
+  (void)handler.onWrite(ctx, makeOutboundFrame(3));
+
+  handler.onEvent(
+      ctx,
+      FakeEventFactory::EventId::BatchWriteComplete,
+      batchComplete(WriteCompletionStatus::Success, 2, /*quiesced=*/true));
+
+  ASSERT_EQ(ctx.frameFired().size(), 2u);
+  EXPECT_FALSE(ctx.frameFired()[0].quiesced);
+  EXPECT_TRUE(ctx.frameFired()[1].quiesced);
+}
+
+// The edge rides on the last frame that actually fires, which is not the last
+// frame of the batch when the tail was already completed early.
+TEST(FrameWriteCompletionHandlerTest, QuiescenceRidesOnLastNonTombstonedFrame) {
+  Handler handler;
+  MockContext ctx;
+
+  (void)handler.onWrite(ctx, makeOutboundFrame(1));
+  (void)handler.onWrite(ctx, makeOutboundFrame(3));
+
+  // The last-written frame's response beats its batch completion, so its
+  // early fire carries no edge — the response says nothing about egress.
+  (void)handler.onRead(
+      ctx, makeInboundFrame(FrameType::PAYLOAD, 3, detail::kCompleteBit));
+  ASSERT_EQ(ctx.frameFired().size(), 1u);
+  EXPECT_EQ(ctx.frameFired()[0].streamId, 3u);
+  EXPECT_FALSE(ctx.frameFired()[0].quiesced);
+
+  handler.onEvent(
+      ctx,
+      FakeEventFactory::EventId::BatchWriteComplete,
+      batchComplete(WriteCompletionStatus::Success, 2, /*quiesced=*/true));
+
+  ASSERT_EQ(ctx.frameFired().size(), 2u);
+  EXPECT_EQ(ctx.frameFired()[1].streamId, 1u);
+  EXPECT_TRUE(ctx.frameFired()[1].quiesced);
+}
+
+// Every frame of the batch was completed early, so nothing fires and the edge
+// is dropped. Quiescence is not guaranteed to be delivered; a consumer that
+// releases a resource on it must also release it on teardown.
+TEST(FrameWriteCompletionHandlerTest, FullyTombstonedBatchDropsQuiescence) {
+  Handler handler;
+  MockContext ctx;
+
+  (void)handler.onWrite(ctx, makeOutboundFrame(1));
+  (void)handler.onRead(
+      ctx, makeInboundFrame(FrameType::PAYLOAD, 1, detail::kCompleteBit));
+  ASSERT_EQ(ctx.frameFired().size(), 1u);
+
+  handler.onEvent(
+      ctx,
+      FakeEventFactory::EventId::BatchWriteComplete,
+      batchComplete(WriteCompletionStatus::Success, 1, /*quiesced=*/true));
+
+  EXPECT_EQ(ctx.frameFired().size(), 1u);
+  EXPECT_FALSE(ctx.frameFired()[0].quiesced);
+  EXPECT_EQ(handler.pendingCount(), 0u);
+}
+
+// A batch claiming more frames than the FIFO holds means the two have drifted.
+// The batch's verdict no longer describes this handler's state, so the edge is
+// dropped rather than reported out of a state already declared corrupt.
+TEST(FrameWriteCompletionHandlerTest, FifoExhaustedDropsQuiescence) {
+  Handler handler;
+  MockContext ctx;
+
+  (void)handler.onWrite(ctx, makeOutboundFrame(1));
+
+#ifndef NDEBUG
+  // The drift is an XLOG(DFATAL), fatal in debug builds.
+  EXPECT_DEATH(
+      handler.onEvent(
+          ctx,
+          FakeEventFactory::EventId::BatchWriteComplete,
+          batchComplete(WriteCompletionStatus::Success, 2, /*quiesced=*/true)),
+      "FIFO exhausted before frameCount");
+#else
+  handler.onEvent(
+      ctx,
+      FakeEventFactory::EventId::BatchWriteComplete,
+      batchComplete(WriteCompletionStatus::Success, 2, /*quiesced=*/true));
+
+  ASSERT_EQ(ctx.frameFired().size(), 1u);
+  EXPECT_EQ(ctx.frameFired()[0].streamId, 1u);
+  EXPECT_FALSE(ctx.frameFired()[0].quiesced);
+#endif
 }
 
 // An inbound exception is forwarded downstream unchanged.

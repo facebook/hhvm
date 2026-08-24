@@ -52,9 +52,12 @@ class CapturingContext {
 };
 
 cp::TypeErasedBox frameWriteComplete(
-    uint32_t streamId, transport::WriteCompletionStatus status) noexcept {
+    uint32_t streamId,
+    transport::WriteCompletionStatus status,
+    bool quiesced = false) noexcept {
   return cp::TypeErasedBox(
-      FrameWriteCompleteEvent{.streamId = streamId, .status = status});
+      FrameWriteCompleteEvent{
+          .streamId = streamId, .status = status, .quiesced = quiesced});
 }
 
 } // namespace
@@ -110,6 +113,20 @@ TEST(RocketServerWriteCompletionHandlerTest, EachFrameFiresItsOwnEvent) {
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[0].streamId, 1u);
   EXPECT_EQ(ctx.events()[1].streamId, 3u);
+}
+
+TEST(RocketServerWriteCompletionHandlerTest, QuiescenceIsRelayed) {
+  RocketServerWriteCompletionHandler handler;
+  CapturingContext ctx;
+
+  handler.onEvent(
+      ctx,
+      RocketServerEventId::FrameWriteComplete,
+      frameWriteComplete(
+          5, transport::WriteCompletionStatus::Success, /*quiesced=*/true));
+
+  ASSERT_EQ(ctx.events().size(), 1u);
+  EXPECT_TRUE(ctx.events()[0].quiesced);
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::handler

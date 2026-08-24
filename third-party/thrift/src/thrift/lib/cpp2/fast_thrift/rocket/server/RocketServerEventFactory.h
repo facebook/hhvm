@@ -31,11 +31,11 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * `make(status, bytes)` satisfies the WriteCompleteEventFactory concept used
  * by TransportHandlerT — produces a TransportWriteComplete event per writev.
  *
- * `makeBatchWriteComplete(status, frameCount, bytes)` is used by
+ * `makeBatchWriteComplete(status, frameCount, bytes, quiesced)` is used by
  * WriteCompletionTrackerT to fire the enriched per-batch event upstream after
  * popping its frame-count FIFO.
  *
- * `makeFrameWriteComplete(status, streamId)` is used by
+ * `makeFrameWriteComplete(status, streamId, quiesced)` is used by
  * FragmentCompletionTrackerT to fan that batch event back out into one event
  * per original frame.
  */
@@ -70,7 +70,8 @@ struct RocketServerEventFactory {
   makeBatchWriteComplete(
       apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
       size_t frameCount,
-      size_t bytes) noexcept {
+      size_t bytes,
+      bool quiesced) noexcept {
     return {
         EventId::BatchWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
@@ -78,6 +79,7 @@ struct RocketServerEventFactory {
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
+                .quiesced = quiesced,
             })};
   }
 
@@ -86,13 +88,15 @@ struct RocketServerEventFactory {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
   makeFrameWriteComplete(
       apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
-      uint32_t streamId) noexcept {
+      uint32_t streamId,
+      bool quiesced) noexcept {
     return {
         EventId::FrameWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             FrameWriteCompleteEvent{
                 .streamId = streamId,
                 .status = status,
+                .quiesced = quiesced,
             })};
   }
 };

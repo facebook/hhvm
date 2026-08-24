@@ -180,6 +180,7 @@ class LoopBatchingFrameHandlerT {
   void clearPendingState() noexcept {
     cancelLoopCallbackIfScheduled();
     bufferedWritesQueue_.move(); // discard
+    tracker_.onDiscard();
   }
 
   template <typename Context>

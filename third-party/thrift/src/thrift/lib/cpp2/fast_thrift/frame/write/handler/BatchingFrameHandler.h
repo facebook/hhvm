@@ -271,6 +271,7 @@ class BatchingFrameHandlerT : public Backpressure {
     batch_.reset();
     pendingBytes_ = 0;
     pendingFrames_ = 0;
+    tracker_.onDiscard();
     if constexpr (Backpressure::kBackpressureEnabled) {
       this->backpressured_ = false;
     }

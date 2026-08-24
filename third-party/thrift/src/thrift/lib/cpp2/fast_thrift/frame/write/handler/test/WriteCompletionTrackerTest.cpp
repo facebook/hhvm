@@ -40,6 +40,7 @@ struct TestBatchWriteCompleteEvent {
   transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+  bool quiesced;
 };
 
 // Event enum mirroring a rocket pipeline's EventId — one value per message.
@@ -68,7 +69,8 @@ struct TestEventFactory {
   makeBatchWriteComplete(
       transport::WriteCompletionStatus status,
       size_t frameCount,
-      size_t bytes) noexcept {
+      size_t bytes,
+      bool quiesced) noexcept {
     return {
         EventId::BatchWriteComplete,
         channel_pipeline::TypeErasedBox(
@@ -76,6 +78,7 @@ struct TestEventFactory {
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
+                .quiesced = quiesced,
             })};
   }
 };
@@ -122,6 +125,8 @@ TEST(WriteCompletionTrackerTest, SingleBatchFiresOneEnrichedEvent) {
   EXPECT_EQ(ctx.events()[0].status, transport::WriteCompletionStatus::Success);
   EXPECT_EQ(ctx.events()[0].frameCount, 3u);
   EXPECT_EQ(ctx.events()[0].bytes, 0u);
+  // Nothing else outstanding and nothing buffered: egress is idle.
+  EXPECT_TRUE(ctx.events()[0].quiesced);
 }
 
 TEST(WriteCompletionTrackerTest, MultipleInFlightBatchesPreserveFifoOrder) {
@@ -161,6 +166,43 @@ TEST(WriteCompletionTrackerTest, MultipleInFlightBatchesPreserveFifoOrder) {
   EXPECT_EQ(ctx.events()[0].frameCount, 2u);
   EXPECT_EQ(ctx.events()[1].frameCount, 5u);
   EXPECT_EQ(ctx.events()[2].frameCount, 1u);
+  // Only the last completion drains the queue, so it alone reports quiescence.
+  EXPECT_FALSE(ctx.events()[0].quiesced);
+  EXPECT_FALSE(ctx.events()[1].quiesced);
+  EXPECT_TRUE(ctx.events()[2].quiesced);
+}
+
+TEST(WriteCompletionTrackerTest, BufferedFramesAwaitingFlushDeferQuiescence) {
+  WriteCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  tracker.onWrite();
+  tracker.onFlush();
+
+  // More frames buffered for the next batch, not yet flushed. The socket has
+  // nothing left outstanding, but the connection is not idle — this is the
+  // case an in-flight-count-only predicate would get wrong.
+  tracker.onWrite();
+  tracker.onWrite();
+
+  tracker.onEvent(
+      ctx,
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
+
+  ASSERT_EQ(ctx.events().size(), 1u);
+  EXPECT_FALSE(ctx.events()[0].quiesced);
+
+  // Once that buffered batch flushes and completes, egress really is idle.
+  tracker.onFlush();
+  tracker.onEvent(
+      ctx,
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
+
+  ASSERT_EQ(ctx.events().size(), 2u);
+  EXPECT_EQ(ctx.events()[1].frameCount, 2u);
+  EXPECT_TRUE(ctx.events()[1].quiesced);
 }
 
 TEST(WriteCompletionTrackerTest, ErrorStatusAndBytesPropagateToEvent) {
@@ -199,6 +241,31 @@ TEST(WriteCompletionTrackerTest, EmptyBatchOnFlushIsIgnored) {
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].frameCount, 1u);
+}
+
+TEST(WriteCompletionTrackerTest, DiscardDropsCountsForFramesThatNeverFlush) {
+  WriteCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  // One batch on the wire and a partial batch still buffered, then the batcher
+  // throws the buffered frames away. Without onDiscard the partial batch would
+  // be charged to whatever flushes next and quiescence would never be reached.
+  tracker.onWrite();
+  tracker.onFlush();
+  tracker.onWrite();
+  tracker.onWrite();
+  tracker.onDiscard();
+
+  tracker.onWrite();
+  tracker.onFlush();
+  tracker.onEvent(
+      ctx,
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
+
+  ASSERT_EQ(ctx.events().size(), 1u);
+  EXPECT_EQ(ctx.events()[0].frameCount, 1u);
+  EXPECT_TRUE(ctx.events()[0].quiesced);
 }
 
 TEST(WriteCompletionTrackerTest, WriteCompleteWithEmptyFifoIsNoop) {

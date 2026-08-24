@@ -84,6 +84,9 @@ struct ThriftServerCloseConnectionEvent {
 struct ThriftServerWriteCompleteEvent {
   uint32_t streamId;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  // Whether this completion left the connection's egress idle. See
+  // RocketWriteCompleteEvent::quiesced — relayed through unchanged.
+  bool quiesced;
 };
 
 /**

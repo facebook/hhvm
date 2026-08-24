@@ -107,6 +107,7 @@ class RocketServerWriteCompletionHandler {
             RocketWriteCompleteEvent{
                 .streamId = event.streamId,
                 .status = event.status,
+                .quiesced = event.quiesced,
             }));
   }
 };

@@ -64,7 +64,8 @@ namespace apache::thrift::fast_thrift::frame::handler {
  *   - static constexpr EventId kBatchWriteCompleteEvent;
  *   - using BatchWriteCompleteEventType = ...;  // fields: status, frameCount
  *   - static std::pair<EventId, TypeErasedBox> makeFrameWriteComplete(
- *         transport::WriteCompletionStatus status, uint32_t streamId) noexcept;
+ *         transport::WriteCompletionStatus status, uint32_t streamId,
+ *         bool quiesced) noexcept;
  *
  * EB-thread only — no synchronization.
  */
@@ -161,7 +162,8 @@ class FrameWriteCompletionHandlerT {
             ctx,
             streamId,
             apache::thrift::fast_thrift::transport::WriteCompletionStatus::
-                Error);
+                Error,
+            /*quiesced=*/false);
       }
     }
     order_.clear();
@@ -181,11 +183,18 @@ class FrameWriteCompletionHandlerT {
           box) noexcept {
     const auto& batch =
         box.get<typename EventFactory::BatchWriteCompleteEventType>();
+    // Held back one completion so the last one — and only it — can carry the
+    // quiescence edge; which frame is last is not known until the pop ends.
+    // This handler buffers nothing of its own, so the batch's verdict stands.
+    bool deferred = false;
+    bool fifoExhausted = false;
+    uint32_t deferredStreamId = 0;
     for (size_t i = 0; i < batch.frameCount; ++i) {
       if (FOLLY_UNLIKELY(order_.empty())) {
         XLOG(DFATAL) << "FrameWriteCompletionHandler FIFO exhausted before "
                         "frameCount";
-        return;
+        fifoExhausted = true;
+        break;
       }
       const uint32_t streamId = order_.front();
       order_.pop_front();
@@ -194,9 +203,26 @@ class FrameWriteCompletionHandlerT {
       if (it != live_.end()) {
         live_.erase(it);
       }
-      if (!tombstoned) {
-        fireFrameWriteComplete(ctx, streamId, batch.status);
+      if (tombstoned) {
+        continue;
       }
+      if (deferred) {
+        fireFrameWriteComplete(
+            ctx, deferredStreamId, batch.status, /*quiesced=*/false);
+      }
+      deferredStreamId = streamId;
+      deferred = true;
+    }
+    if (deferred) {
+      // The batch's quiescence verdict only stands if its whole frameCount
+      // drained through here. Once the FIFO has drifted from the batch it no
+      // longer does, so the edge is dropped rather than reported out of a
+      // state the handler has already declared corrupt.
+      fireFrameWriteComplete(
+          ctx,
+          deferredStreamId,
+          batch.status,
+          batch.quiesced && !fifoExhausted);
     }
   }
 
@@ -214,20 +240,23 @@ class FrameWriteCompletionHandlerT {
       return;
     }
     it->second = true;
+    // Not a socket completion — the response proved the request reached the
+    // wire, which says nothing about whether egress has caught up.
     fireFrameWriteComplete(
         ctx,
         streamId,
-        apache::thrift::fast_thrift::transport::WriteCompletionStatus::Success);
+        apache::thrift::fast_thrift::transport::WriteCompletionStatus::Success,
+        /*quiesced=*/false);
   }
 
   template <typename Context>
   void fireFrameWriteComplete(
       Context& ctx,
       uint32_t streamId,
-      apache::thrift::fast_thrift::transport::WriteCompletionStatus
-          status) noexcept {
+      apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
+      bool quiesced) noexcept {
     auto [eventId, eventMsg] =
-        EventFactory::makeFrameWriteComplete(status, streamId);
+        EventFactory::makeFrameWriteComplete(status, streamId, quiesced);
     ctx.fireEvent(eventId, std::move(eventMsg));
   }
 

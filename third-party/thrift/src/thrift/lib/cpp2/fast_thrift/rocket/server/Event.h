@@ -87,6 +87,13 @@ struct BatchWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+  // Whether this completion left the connection's egress idle: nothing further
+  // handed to the socket, and nothing buffered awaiting a flush. Intended for
+  // per-connection admission control, as the point at which the server has
+  // caught up on what it owed this client; nothing consumes it yet. Reported
+  // only as an edge on a completion, and a connection torn down mid-write never
+  // reports it, so a consumer needs its own teardown path.
+  bool quiesced;
 };
 
 /**
@@ -98,6 +105,10 @@ struct BatchWriteCompleteEvent {
 struct FrameWriteCompleteEvent {
   uint32_t streamId;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  // See BatchWriteCompleteEvent::quiesced, narrowed by whatever the
+  // fragmentation handler was still holding back. Set on at most one frame per
+  // batch — it describes the connection, not this frame.
+  bool quiesced;
 };
 
 /**
@@ -109,6 +120,8 @@ struct FrameWriteCompleteEvent {
 struct RocketWriteCompleteEvent {
   uint32_t streamId;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  // See FrameWriteCompleteEvent::quiesced — relayed through unchanged.
+  bool quiesced;
 };
 
 /**

@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BackpressurePolicy.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
@@ -61,6 +62,23 @@ namespace {
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::SimpleBufferAllocator;
+
+// The batcher always carries the write-completion tracker. The transport fires
+// TransportWriteComplete on every write whatever the configuration, and the
+// tracker is the only thing that turns those into the per-batch
+// RocketWriteComplete the layer above consumes; without it the transport's
+// events reach an empty subscriber list. Backpressure participation is the one
+// axis that varies. Both bind the rocket event space through the tracker's own
+// EventId, so the batcher still hears FlushWrites either way.
+using ServerBatchingFrameHandler =
+    frame::write::handler::IntervalBatchingFrameHandlerT<
+        frame::write::handler::WriteCompletionTrackerT<
+            rocket::server::RocketServerEventFactory>>;
+using ServerBatchingFrameHandlerNoBackpressure =
+    frame::write::handler::IntervalBatchingFrameHandlerT<
+        frame::write::handler::WriteCompletionTrackerT<
+            rocket::server::RocketServerEventFactory>,
+        frame::write::handler::BackpressureDisabled>;
 
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
@@ -392,20 +410,11 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
         // rocket-frame batch. The fragmentation handler below turns that into
         // the rocket-level completion the app adapter relays up to the thrift
         // pipeline.
-        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandlerT<
-            frame::write::handler::WriteCompletionTrackerT<
-                rocket::server::RocketServerEventFactory>>>(
+        .addNextOutbound<ServerBatchingFrameHandler>(
             batching_frame_handler_tag, config_.batchingConfig);
   } else {
-    // No tracker, but still bound to the rocket event space: the batcher has
-    // to hear FlushWrites either way, or a connection closing in this
-    // configuration would drop whatever it had buffered.
-    builder
-        .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandlerT<
-            frame::write::handler::NoOpWriteCompletionTracker,
-            frame::write::handler::BackpressureDisabled,
-            rocket::server::RocketServerEventId>>(
-            batching_frame_handler_tag, config_.batchingConfig);
+    builder.addNextOutbound<ServerBatchingFrameHandlerNoBackpressure>(
+        batching_frame_handler_tag, config_.batchingConfig);
   }
   builder
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(

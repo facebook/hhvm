@@ -221,6 +221,7 @@ TEST(RocketServerAppAdapterTest, OnEventInvokesOnWriteCompleteCallback) {
           RocketWriteCompleteEvent{
               .streamId = 3,
               .status = transport::WriteCompletionStatus::Error,
+              .quiesced = false,
           }));
 
   EXPECT_EQ(count, 1);
@@ -237,6 +238,7 @@ TEST(RocketServerAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
           RocketWriteCompleteEvent{
               .streamId = 1,
               .status = transport::WriteCompletionStatus::Success,
+              .quiesced = false,
           }));
 }
 
@@ -253,6 +255,7 @@ TEST(RocketServerAppAdapterTest, HandlerRemovedClearsOnWriteCompleteCallback) {
           RocketWriteCompleteEvent{
               .streamId = 1,
               .status = transport::WriteCompletionStatus::Success,
+              .quiesced = false,
           }));
 
   EXPECT_EQ(count, 0);
@@ -362,6 +365,7 @@ TEST(RocketServerAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
           RocketWriteCompleteEvent{
               .streamId = 4,
               .status = transport::WriteCompletionStatus::Success,
+              .quiesced = false,
           }));
   EXPECT_EQ(count, 1);
   EXPECT_EQ(streamId, 4u);

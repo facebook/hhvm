@@ -89,6 +89,11 @@ struct BatchWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+  // Whether this completion left the connection's egress idle: nothing further
+  // handed to the socket, and nothing buffered awaiting a flush. Computed by
+  // the shared tracker for both directions; no client-side consumer reads it
+  // today.
+  bool quiesced;
 };
 
 /**
@@ -100,6 +105,10 @@ struct BatchWriteCompleteEvent {
 struct FrameWriteCompleteEvent {
   uint32_t streamId;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  // See BatchWriteCompleteEvent::quiesced, narrowed by whatever the handler
+  // that fired this was still holding back. Set on at most one frame per batch
+  // — it describes the connection, not this frame.
+  bool quiesced;
 };
 
 /**

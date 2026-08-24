@@ -995,6 +995,7 @@ TEST_F(
               .streamId = 1,
               .status = apache::thrift::fast_thrift::transport::
                   WriteCompletionStatus::Success,
+              .quiesced = false,
           }));
 
   ASSERT_EQ(ctx_.firedEvents().size(), 1);
@@ -1021,6 +1022,7 @@ TEST_F(ClientStreamStateHandlerTest, OnEventForUnknownStreamFiresNothing) {
               .streamId = 999,
               .status = apache::thrift::fast_thrift::transport::
                   WriteCompletionStatus::Success,
+              .quiesced = false,
           }));
 
   EXPECT_TRUE(ctx_.firedEvents().empty());

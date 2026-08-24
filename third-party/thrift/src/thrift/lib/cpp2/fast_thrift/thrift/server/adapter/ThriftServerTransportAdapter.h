@@ -176,6 +176,7 @@ class ThriftServerTransportAdapter {
             ThriftServerWriteCompleteEvent{
                 .streamId = event.streamId,
                 .status = event.status,
+                .quiesced = event.quiesced,
             }));
   }
 

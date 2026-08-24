@@ -303,12 +303,14 @@ TEST(
           rocket::server::RocketWriteCompleteEvent{
               .streamId = 4,
               .status = transport::WriteCompletionStatus::Success,
+              .quiesced = true,
           }));
 
   ASSERT_EQ(thriftTail.events.size(), 1u);
   EXPECT_EQ(
       thriftTail.events[0].status, transport::WriteCompletionStatus::Success);
   EXPECT_EQ(thriftTail.events[0].streamId, 4u);
+  EXPECT_TRUE(thriftTail.events[0].quiesced);
 
   thriftPipeline->deactivate();
   thriftPipeline->close();

@@ -321,6 +321,7 @@ class IntervalBatchingFrameHandlerT : public Backpressure {
     bufferedWritesQueue_.move(); // discard
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
+    tracker_.onDiscard();
     if constexpr (Backpressure::kBackpressureEnabled) {
       this->backpressured_ = false;
     }

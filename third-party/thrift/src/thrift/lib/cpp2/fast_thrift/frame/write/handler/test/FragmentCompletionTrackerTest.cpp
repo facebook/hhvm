@@ -35,11 +35,13 @@ struct TestBatchWriteCompleteEvent {
   transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
+  bool quiesced;
 };
 
 struct TestFrameWriteCompleteEvent {
   uint32_t streamId;
   transport::WriteCompletionStatus status;
+  bool quiesced;
 };
 
 // Event enum mirroring a rocket pipeline's EventId — one value per message.
@@ -57,13 +59,16 @@ struct TestEventFactory {
 
   static std::pair<EventId, channel_pipeline::TypeErasedBox>
   makeFrameWriteComplete(
-      transport::WriteCompletionStatus status, uint32_t streamId) noexcept {
+      transport::WriteCompletionStatus status,
+      uint32_t streamId,
+      bool quiesced) noexcept {
     return {
         EventId::FrameWriteComplete,
         channel_pipeline::TypeErasedBox(
             TestFrameWriteCompleteEvent{
                 .streamId = streamId,
                 .status = status,
+                .quiesced = quiesced,
             })};
   }
 };
@@ -94,12 +99,14 @@ class CapturingContext {
 channel_pipeline::TypeErasedBox batchWriteComplete(
     transport::WriteCompletionStatus status,
     size_t frameCount,
-    size_t bytes) noexcept {
+    size_t bytes,
+    bool quiesced = false) noexcept {
   return channel_pipeline::TypeErasedBox(
       TestBatchWriteCompleteEvent{
           .status = status,
           .frameCount = frameCount,
           .bytes = bytes,
+          .quiesced = quiesced,
       });
 }
 
@@ -116,7 +123,8 @@ TEST(FragmentCompletionTrackerTest, FragmentedFrameFiresOnceOnLastFragment) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 3, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 3, 0),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].streamId, 7u);
@@ -133,7 +141,8 @@ TEST(FragmentCompletionTrackerTest, UnfragmentedFramesEachFireOnce) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 2, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 2, 0),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[0].streamId, 1u);
@@ -153,7 +162,8 @@ TEST(FragmentCompletionTrackerTest, MixedFragmentsResolveToOriginalFrames) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[0].streamId, 1u);
@@ -174,14 +184,16 @@ TEST(FragmentCompletionTrackerTest, BatchBoundaryPopsExactlyFrameCount) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 1, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 1, 0),
+      /*handlerHasPendingWrites=*/false);
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].streamId, 1u);
 
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 2, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 2, 0),
+      /*handlerHasPendingWrites=*/false);
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[1].streamId, 2u);
 }
@@ -194,7 +206,8 @@ TEST(FragmentCompletionTrackerTest, ErrorStatusPropagatesToFrameEvent) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Error, 1, 42));
+      batchWriteComplete(transport::WriteCompletionStatus::Error, 1, 42),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].streamId, 9u);
@@ -215,7 +228,8 @@ TEST(FragmentCompletionTrackerTest, InterleavedFragmentsCompleteInFifoOrder) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[0].streamId, 1u);
@@ -235,7 +249,8 @@ TEST(FragmentCompletionTrackerTest, InterleavedFragmentsCompleteInWireOrder) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 4, 0),
+      /*handlerHasPendingWrites=*/false);
 
   ASSERT_EQ(ctx.events().size(), 2u);
   EXPECT_EQ(ctx.events()[0].streamId, 2u);
@@ -256,7 +271,87 @@ TEST(FragmentCompletionTrackerTest, ErrorBeforeLastFragmentFiresNoCompletion) {
   tracker.onEvent(
       ctx,
       TestEventId::BatchWriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Error, 2, 0));
+      batchWriteComplete(transport::WriteCompletionStatus::Error, 2, 0),
+      /*handlerHasPendingWrites=*/false);
+
+  EXPECT_TRUE(ctx.events().empty());
+}
+
+// The batcher can only speak for itself. When this handler is still holding
+// frames the batcher never saw, the connection is not caught up and the
+// batch's verdict has to be overridden.
+TEST(FragmentCompletionTrackerTest, PendingWritesInHandlerSuppressQuiescence) {
+  FragmentCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  tracker.onFragment(1, /*isLastFragment=*/true);
+  tracker.onEvent(
+      ctx,
+      TestEventId::BatchWriteComplete,
+      batchWriteComplete(
+          transport::WriteCompletionStatus::Success, 1, 0, /*quiesced=*/true),
+      /*handlerHasPendingWrites=*/true);
+
+  ASSERT_EQ(ctx.events().size(), 1u);
+  EXPECT_FALSE(ctx.events()[0].quiesced);
+}
+
+TEST(FragmentCompletionTrackerTest, QuiescenceReportedWhenBothAreDrained) {
+  FragmentCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  tracker.onFragment(1, /*isLastFragment=*/true);
+  tracker.onEvent(
+      ctx,
+      TestEventId::BatchWriteComplete,
+      batchWriteComplete(
+          transport::WriteCompletionStatus::Success, 1, 0, /*quiesced=*/true),
+      /*handlerHasPendingWrites=*/false);
+
+  ASSERT_EQ(ctx.events().size(), 1u);
+  EXPECT_TRUE(ctx.events()[0].quiesced);
+}
+
+// Quiescence describes the connection, not a frame, so a batch carrying
+// several frames must not repeat the edge once per frame.
+TEST(FragmentCompletionTrackerTest, QuiescenceRidesOnlyOnTheLastFrameOfABatch) {
+  FragmentCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  tracker.onFragment(1, /*isLastFragment=*/true);
+  tracker.onFragment(3, /*isLastFragment=*/true);
+  tracker.onFragment(5, /*isLastFragment=*/true);
+  tracker.onEvent(
+      ctx,
+      TestEventId::BatchWriteComplete,
+      batchWriteComplete(
+          transport::WriteCompletionStatus::Success, 3, 0, /*quiesced=*/true),
+      /*handlerHasPendingWrites=*/false);
+
+  ASSERT_EQ(ctx.events().size(), 3u);
+  EXPECT_FALSE(ctx.events()[0].quiesced);
+  EXPECT_FALSE(ctx.events()[1].quiesced);
+  EXPECT_TRUE(ctx.events()[2].quiesced);
+  // Order is still write order — deferring the last fire must not reorder.
+  EXPECT_EQ(ctx.events()[0].streamId, 1u);
+  EXPECT_EQ(ctx.events()[1].streamId, 3u);
+  EXPECT_EQ(ctx.events()[2].streamId, 5u);
+}
+
+// A batch whose fragments all belong to frames still mid-fragmentation
+// completes no frame, so there is no event to carry the edge on. That is
+// consistent: unfinished fragments mean the handler is holding writes.
+TEST(FragmentCompletionTrackerTest, BatchCompletingNoFrameFiresNothing) {
+  FragmentCompletionTrackerT<TestEventFactory> tracker;
+  CapturingContext ctx;
+
+  tracker.onFragment(1, /*isLastFragment=*/false);
+  tracker.onEvent(
+      ctx,
+      TestEventId::BatchWriteComplete,
+      batchWriteComplete(
+          transport::WriteCompletionStatus::Success, 1, 0, /*quiesced=*/true),
+      /*handlerHasPendingWrites=*/true);
 
   EXPECT_TRUE(ctx.events().empty());
 }

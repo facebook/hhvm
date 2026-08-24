@@ -31,7 +31,8 @@ NegotiationParameters ThriftParametersServerExtension::negotiate(
   uint64_t serverPSP = [&] {
     const auto& clientExtension = clientParameters.params;
     uint64_t clientSupports = 0;
-    if (auto clientPSP = clientExtension.get_pspUpgradeProtocol()) {
+    if (auto clientPSP =
+            apache::thrift::get_pointer(clientExtension.pspUpgradeProtocol())) {
       clientSupports |= *clientPSP;
     }
 

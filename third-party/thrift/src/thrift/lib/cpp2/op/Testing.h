@@ -180,21 +180,20 @@ void expectRoundTrip(const S& serializer, const T& expected) {
 }
 
 // Always serializes integers to the number 1.
-class Number1Serializer
-    : public op::TagSerializer<type::i32_t, Number1Serializer> {
-  using Base = op::TagSerializer<type::i32_t, Number1Serializer>;
+class Number1Serializer : public op::TagSerializer<type::i32_t> {
+  using Base = op::TagSerializer<type::i32_t>;
 
  public:
   const type::Protocol& getProtocol() const override;
 
   using Base::encode;
-  void encode(const int&, folly::io::QueueAppender&& appender) const {
+  void encode(const int&, folly::io::QueueAppender&& appender) const override {
     std::string data = "number 1!!";
     appender.push(reinterpret_cast<const uint8_t*>(data.data()), data.size());
   }
 
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, int& value) const {
+  void decode(folly::io::Cursor& cursor, int& value) const override {
     cursor.readFixedString(10);
     value = 1;
   }
@@ -204,9 +203,8 @@ extern const type::Protocol kFollyToStringProtocol;
 
 // A serializer based on `folly::to<std::string>`.
 template <typename Tag>
-class FollyToStringSerializer
-    : public op::TagSerializer<Tag, FollyToStringSerializer<Tag>> {
-  using Base = op::TagSerializer<Tag, FollyToStringSerializer>;
+class FollyToStringSerializer : public op::TagSerializer<Tag> {
+  using Base = op::TagSerializer<Tag>;
   using T = type::native_type<Tag>;
 
  public:
@@ -214,12 +212,13 @@ class FollyToStringSerializer
     return kFollyToStringProtocol;
   }
   using Base::encode;
-  void encode(const T& value, folly::io::QueueAppender&& appender) const {
+  void encode(
+      const T& value, folly::io::QueueAppender&& appender) const override {
     std::string data = folly::to<std::string>(value);
     appender.push(reinterpret_cast<const uint8_t*>(data.data()), data.size());
   }
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, T& value) const {
+  void decode(folly::io::Cursor& cursor, T& value) const override {
     value = folly::to<T>(cursor.readFixedString(cursor.totalLength()));
   }
 };

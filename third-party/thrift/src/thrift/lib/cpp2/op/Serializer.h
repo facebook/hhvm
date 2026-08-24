@@ -89,30 +89,32 @@ class Serializer {
 
 // A base class for a serializer of a single type Tag.
 //
-// Type specific calls are forward to the following functions, required to
-// be publicly accessible on Derived:
+// Implementations provide the following type-specific functions:
 // - void encode(const T&, folly::io::QueueAppender&&) const
-// - T decode(folly::io::Cursor& cursor) const
+// - void decode(folly::io::Cursor&, T&) const
 // where T = type::native_type<Tag>
-template <typename Tag, typename Derived>
+template <typename Tag>
 class TagSerializer : public Serializer {
   using Base = Serializer;
+  using T = type::native_type<Tag>;
 
  public:
   using Base::encode;
   void encode(
       type::ConstRef value, folly::io::QueueAppender&& appender) const final {
-    derived().encode(value.as<Tag>(), std::move(appender));
+    encode(value.as<Tag>(), std::move(appender));
   }
   void encode(type::AnyConstRef value, folly::io::QueueAppender&& appender)
       const final {
-    derived().encode(value.as<Tag>(), std::move(appender));
+    encode(value.as<Tag>(), std::move(appender));
   }
+  virtual void encode(
+      const T& value, folly::io::QueueAppender&& appender) const = 0;
 
   using Base::decode;
   void decode(folly::io::Cursor& cursor, type::Ref value) const final {
     checkType(value.type(), type::Type::get<Tag>());
-    derived().decode(cursor, value.mut<Tag>());
+    decode(cursor, value.mut<Tag>());
   }
   void decode(
       const type::Type& type,
@@ -120,40 +122,38 @@ class TagSerializer : public Serializer {
       type::AnyValue& value) const final {
     checkType(type, type::Type::get<Tag>());
     if (auto* obj = value.try_as<Tag>()) {
-      derived().decode(cursor, *obj);
+      decode(cursor, *obj);
     } else {
       value = type::AnyValue::create<Tag>();
-      derived().decode(cursor, value.as<Tag>());
+      decode(cursor, value.as<Tag>());
     }
   }
 
   void decode(folly::io::Cursor& cursor, type::AnyRef value) const final {
     checkType(value.type(), type::Type::get<Tag>());
-    derived().decode(cursor, value.as<Tag>());
+    decode(cursor, value.as<Tag>());
   }
-
- private:
-  const Derived& derived() const { return static_cast<const Derived&>(*this); }
+  virtual void decode(folly::io::Cursor& cursor, T& value) const = 0;
 };
 
 // A serializer for any class that knows how to read and write itself using a
 // Thrift protocol.
 template <typename Tag, typename Reader, typename Writer>
-class ProtocolSerializer
-    : public TagSerializer<Tag, ProtocolSerializer<Tag, Reader, Writer>> {
-  using Base = TagSerializer<Tag, ProtocolSerializer>;
+class ProtocolSerializer : public TagSerializer<Tag> {
+  using Base = TagSerializer<Tag>;
   using T = type::native_type<Tag>;
 
  public:
   using Base::encode;
-  void encode(const T& value, folly::io::QueueAppender&& appender) const {
+  void encode(
+      const T& value, folly::io::QueueAppender&& appender) const override {
     Writer writer;
     writer.setOutput(std::move(appender));
     op::encode<Tag>(writer, value);
   }
 
   using Base::decode;
-  void decode(folly::io::Cursor& cursor, T& value) const {
+  void decode(folly::io::Cursor& cursor, T& value) const override {
     Reader reader;
     reader.setInput(cursor);
     op::decode<Tag>(reader, value);

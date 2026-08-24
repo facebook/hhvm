@@ -82,7 +82,7 @@ The alias reuses the owning bridge's allocation and drop glue. See
 [`rust/RustHandler.h`](../../cpp2/fast_thrift/channel_pipeline/rust/RustHandler.h)
 for the C++ shim.
 
-## Three ways a handler can answer
+## Ways a handler can answer
 
 A callback owes the pipeline an answer. How quickly it gives one determines which
 tool to reach for — and the cost ladder below is real, measured, and worth
@@ -124,6 +124,11 @@ let mut read = CoroReadHandle::<BytesPtr, _>::new(|message: BytesPtr| async move
     transform(message).await
 });
 ```
+
+**4. Defer the current read.** Use
+`ctx.spawn_deferred_read(msg, future, complete)` when async work needs the
+original erased message after suspension; the completion gets a `DeferredRead`
+instead of a `ContextHandle`.
 
 ## Futures are polled where they live
 
@@ -237,8 +242,8 @@ Available: `on_read`, `on_write`, the lifecycle callbacks (`handler_added`,
 readiness hooks (`await_read_ready` / `await_write_ready` and their
 `cancel_*` / `is_awaiting_*` companions), buffer allocation helpers
 (`allocate`, `copy_from_slice`, `clone_chain`, `clone_one`, `coalesced_copy`),
-`close` / `is_closed`, `handler_id`, plus the `ContextHandle` and coroutine
-continuations above.
+`close` / `is_closed`, `handler_id`, plus the `ContextHandle`, `DeferredRead`,
+and coroutine continuations above.
 
 Not available:
 
@@ -307,6 +312,7 @@ the bridge exchanges only opaque types: raw `TypeErasedBox`, `ContextImpl`, and
 EventBase layouts never cross the boundary.
 
 [`CallbackContext`]: src/context.rs
+[`DeferredRead`]: src/context.rs
 [`HandlerResult`]: src/handler.rs
 [`RustMessageAdapter`]: src/adapter.rs
 [`CoroReadHandle`]: src/coro_handler.rs

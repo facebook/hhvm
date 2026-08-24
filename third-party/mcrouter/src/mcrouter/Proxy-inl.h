@@ -264,29 +264,31 @@ Proxy<RouterInfo>* Proxy<RouterInfo>::createProxy(
 }
 
 template <class RouterInfo>
-std::shared_ptr<ProxyConfig<RouterInfo>> Proxy<RouterInfo>::getConfigUnsafe()
-    const {
-  std::shared_lock lg(configLock_);
-  return config_;
+std::shared_ptr<const ProxyConfig<RouterInfo>>
+Proxy<RouterInfo>::getConfigUnsafe() const {
+  return config_.load(std::memory_order_acquire);
 }
 
 template <class RouterInfo>
-std::pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>
+std::pair<std::shared_lock<folly::SharedMutex>, const ProxyConfig<RouterInfo>&>
 Proxy<RouterInfo>::getConfigLocked() const {
-  auto lock = std::shared_lock(configLock_);
+  std::shared_lock<folly::SharedMutex> lock(configLock_);
+  // Holding the shared lock blocks swapConfig(), so the config stays alive
+  // (reference stays valid) and its destruction stays on the proxy thread.
+  const ProxyConfig<RouterInfo>& cfgRef =
+      *config_.load(std::memory_order_acquire);
   /* make_pair strips the reference, so construct directly */
-  return std::
-      pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>(
-          std::move(lock), *config_);
+  return std::pair<
+      std::shared_lock<folly::SharedMutex>,
+      const ProxyConfig<RouterInfo>&>(std::move(lock), cfgRef);
 }
 
 template <class RouterInfo>
 std::shared_ptr<ProxyConfig<RouterInfo>> Proxy<RouterInfo>::swapConfig(
     std::shared_ptr<ProxyConfig<RouterInfo>> newConfig) {
-  std::unique_lock lg(configLock_);
-  auto old = std::move(config_);
-  config_ = std::move(newConfig);
-  return old;
+  // Exclude outstanding getConfigLocked() references before swapping.
+  std::unique_lock<folly::SharedMutex> lock(configLock_);
+  return config_.exchange(std::move(newConfig), std::memory_order_acq_rel);
 }
 
 /** drain and delete proxy object */

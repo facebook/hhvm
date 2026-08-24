@@ -24,6 +24,7 @@
 #include <folly/Range.h>
 #include <folly/SharedMutex.h>
 #include <folly/Synchronized.h>
+#include <folly/concurrency/AtomicSharedPtr.h>
 #include <folly/concurrency/CacheLocality.h>
 
 #include "mcrouter/ExponentialSmoothData.h"
@@ -113,7 +114,7 @@ class Proxy : public ProxyBase {
    * Access to config - can only be called on the proxy thread
    * and the resulting shared_ptr can only be detroyed on the proxy thread.
    */
-  std::shared_ptr<ProxyConfig<RouterInfo>> getConfigUnsafe() const;
+  std::shared_ptr<const ProxyConfig<RouterInfo>> getConfigUnsafe() const;
 
   /**
    * Can be called from any thread.
@@ -122,8 +123,9 @@ class Proxy : public ProxyBase {
    * The caller may only access the config through the reference
    * while the lock is held.
    */
-  std::pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>
-  getConfigLocked() const;
+  std::
+      pair<std::shared_lock<folly::SharedMutex>, const ProxyConfig<RouterInfo>&>
+      getConfigLocked() const;
 
   /**
    * Thread-safe config swap; returns the previous contents of
@@ -189,9 +191,12 @@ class Proxy : public ProxyBase {
   // If true, processing new requests is not safe.
   bool beingDestroyed_{false};
 
-  /** Read/write lock for config pointer */
+  /**
+   * Serializes getConfigLocked() references against swapConfig(); the hot
+   * getConfigUnsafe() path is lock-free.
+   */
   mutable folly::SharedMutex configLock_;
-  std::shared_ptr<ProxyConfig<RouterInfo>> config_;
+  folly::atomic_shared_ptr<ProxyConfig<RouterInfo>> config_;
 
   typename RouterInfo::RouterStats requestStats_;
 

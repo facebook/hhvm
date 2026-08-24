@@ -21,6 +21,133 @@
 #include <thrift/lib/cpp2/op/Clear.h>
 
 namespace apache::thrift {
+
+template <typename Adapter, typename ThriftT>
+concept ThriftConstAdapter =
+    requires { typename adapt_detail::adapted_t<Adapter, ThriftT>; };
+
+template <typename Adapter, typename ThriftT>
+concept ThriftTypeAdapter = adapt_detail::TypeAdapter<Adapter, ThriftT>;
+
+// Field adapters can omit fromThrift because fromThriftField determines their
+// adapted type from the containing struct and field id.
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept ThriftFieldAdapter =
+    adapt_detail::FieldAdapter<Adapter, FieldId, ThriftT, Struct> && requires {
+      Adapter::toThrift(
+          std::declval<
+              const adapt_detail::
+                  FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>&>());
+    };
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept ThriftAdapter = ThriftTypeAdapter<Adapter, ThriftT> ||
+    ThriftFieldAdapter<Adapter, ThriftT, Struct, FieldId>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithConstruct =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::ConstructAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>,
+        FieldContext<Struct, FieldId>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithClear =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::ClearAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithIsEmpty =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::EmptyAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithEqual =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::EqualAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithLess =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::LessAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithCompareThreeWay =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::CompareThreeWayAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept AdapterWithHash =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::HashAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
+template <
+    typename Adapter,
+    typename ThriftT,
+    typename Struct,
+    int16_t FieldId,
+    bool ZeroCopy,
+    typename Tag,
+    typename Protocol>
+concept AdapterWithSerializedSize =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::SerializedSizeAdapter<
+        Adapter,
+        ZeroCopy,
+        Tag,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>,
+        Protocol>;
+
+template <
+    typename Adapter,
+    typename ThriftT,
+    typename Struct,
+    int16_t FieldId,
+    typename Tag,
+    typename Protocol>
+concept AdapterWithEncode =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::EncodeAdapter<
+        Adapter,
+        Tag,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>,
+        Protocol>;
+
+template <
+    typename Adapter,
+    typename ThriftT,
+    typename Struct,
+    int16_t FieldId,
+    typename Tag,
+    typename Protocol>
+concept AdapterWithDecode =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::DecodeAdapter<
+        Adapter,
+        Tag,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>,
+        Protocol>;
+
+template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
+concept InplaceThriftAdapter =
+    ThriftAdapter<Adapter, ThriftT, Struct, FieldId> &&
+    adapt_detail::InplaceAdapter<
+        Adapter,
+        adapt_detail::adapted_field_t<Adapter, FieldId, ThriftT, Struct>>;
+
 namespace adapt_detail {
 
 // Used to detect if an adapted type has a reset method.

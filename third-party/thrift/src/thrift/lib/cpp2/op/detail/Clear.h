@@ -199,28 +199,26 @@ struct GetDefault<
     type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>> {
   using Tag =
       type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
-  template <typename AdapterT = Adapter>
-  const adapt_detail::
-      if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
-      operator()() const {
-    return GetDefault<type::adapted<Adapter, UTag>>{}();
-  }
-
-  template <typename AdapterT = Adapter>
-  const adapt_detail::
-      if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
-      operator()() const {
-    static const auto& obj = *[] {
-      // TODO(afuller): Remove or move this logic to the adapter.
-      auto* s = new Struct{};
-      SCOPE_FAIL {
-        delete s;
-      };
-      auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
-      folly::lsan_ignore_object(s);
-      return adapted;
-    }();
-    return obj;
+  const type::native_type<Tag>& operator()() const {
+    if constexpr (adapt_detail::FieldAdapter<
+                      Adapter,
+                      FieldId,
+                      type::native_type<UTag>,
+                      Struct>) {
+      static const auto& obj = *[] {
+        // TODO(afuller): Remove or move this logic to the adapter.
+        auto* s = new Struct{};
+        SCOPE_FAIL {
+          delete s;
+        };
+        auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
+        folly::lsan_ignore_object(s);
+        return adapted;
+      }();
+      return obj;
+    } else {
+      return GetDefault<type::adapted<Adapter, UTag>>{}();
+    }
   }
 };
 template <typename Adapter, typename UTag>
@@ -237,35 +235,33 @@ struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
 template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
-  template <typename AdapterT = Adapter>
-  const adapt_detail::
-      if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
-      operator()() const {
-    return GetIntrinsicDefault<type::adapted<Adapter, UTag>>{}();
-  }
-
-  template <typename AdapterT = Adapter>
-  const adapt_detail::
-      if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
-      operator()() const {
-    static const auto& obj = *[] {
-      // TODO(afuller): Remove or move this logic to the adapter.
-      auto* s = new Struct{};
-      SCOPE_FAIL {
-        delete s;
-      };
-      apache::thrift::clear(*s);
-      auto adapted = new type::native_type<Tag>(AdapterT::fromThriftField(
-          folly::copy(GetIntrinsicDefault<UTag>{}()),
-          FieldContext<Struct, FieldId>{*s}));
-      SCOPE_FAIL {
-        delete adapted;
-      };
-      adapt_detail::construct<Adapter, FieldId>(adapted, *s);
-      folly::lsan_ignore_object(s);
-      return adapted;
-    }();
-    return obj;
+  const type::native_type<Tag>& operator()() const {
+    if constexpr (adapt_detail::FieldAdapter<
+                      Adapter,
+                      FieldId,
+                      type::native_type<UTag>,
+                      Struct>) {
+      static const auto& obj = *[] {
+        // TODO(afuller): Remove or move this logic to the adapter.
+        auto* s = new Struct{};
+        SCOPE_FAIL {
+          delete s;
+        };
+        apache::thrift::clear(*s);
+        auto adapted = new type::native_type<Tag>(Adapter::fromThriftField(
+            folly::copy(GetIntrinsicDefault<UTag>{}()),
+            FieldContext<Struct, FieldId>{*s}));
+        SCOPE_FAIL {
+          delete adapted;
+        };
+        adapt_detail::construct<Adapter, FieldId>(adapted, *s);
+        folly::lsan_ignore_object(s);
+        return adapted;
+      }();
+      return obj;
+    } else {
+      return GetIntrinsicDefault<type::adapted<Adapter, UTag>>{}();
+    }
   }
 };
 
@@ -283,16 +279,15 @@ struct IsEmpty<type::adapted<Adapter, UTag>> {
   using Tag = type::adapted<Adapter, UTag>;
 
   template <typename AdapterT = Adapter>
-  constexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>
-  operator()(const type::native_type<Tag>& value) const {
+    requires adapt_detail::EmptyAdapter<AdapterT, type::native_type<Tag>>
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
     return AdapterT::isEmpty(value);
   }
 
   // Delegate to op::identical.
   template <typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>
-      operator()(const type::native_type<Tag>& value) const {
+    requires(!adapt_detail::EmptyAdapter<AdapterT, type::native_type<Tag>>)
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
 };
@@ -301,15 +296,14 @@ struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
 
   template <typename AdapterT = Adapter>
-  constexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>
-  operator()(const type::native_type<Tag>& value) const {
+    requires adapt_detail::EmptyAdapter<AdapterT, type::native_type<Tag>>
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
     return AdapterT::isEmpty(value);
   }
 
   template <typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>
-      operator()(const type::native_type<Tag>& value) const {
+    requires(!adapt_detail::EmptyAdapter<AdapterT, type::native_type<Tag>>)
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
 };

@@ -829,13 +829,10 @@ TEST_F(AdapterTest, StructAdapter) {
 }
 
 TEST(AdaptTest, AdapterWithContext) {
-  static_assert(folly::is_detected_v<
-                adapt_detail::FromThriftFieldType,
-                AdapterWithContext,
-                int64_t,
-                basic::AdaptTestStruct>);
-  static_assert(folly::is_detected_v<
-                adapt_detail::ConstructType,
+  static_assert(
+      adapt_detail::
+          FieldAdapter<AdapterWithContext, 1, int64_t, basic::AdaptTestStruct>);
+  static_assert(adapt_detail::ConstructAdapter<
                 AdapterWithContext,
                 AdaptedWithContext<int64_t, basic::AdaptTestStruct, 0>,
                 FieldContext<basic::AdaptTestStruct, 0>>);

@@ -169,21 +169,20 @@ struct Create<
       type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
   static_assert(type::is_concrete_v<field_adapted_tag>);
 
-  template <typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct>
-      operator()(Struct&) const {
-    return AdapterT::fromThrift(Create<Tag>{}());
-  }
-
-  template <typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct>
-      operator()(Struct& object) const {
-    auto obj = AdapterT::fromThriftField(
-        Create<Tag>{}(), FieldContext<Struct, FieldId>{object});
-    adapt_detail::construct<Adapter, FieldId>(obj, object);
-    return obj;
+  constexpr type::native_type<field_adapted_tag> operator()(
+      Struct& object) const {
+    if constexpr (adapt_detail::FieldAdapter<
+                      Adapter,
+                      FieldId,
+                      type::native_type<Tag>,
+                      Struct>) {
+      auto obj = Adapter::fromThriftField(
+          Create<Tag>{}(), FieldContext<Struct, FieldId>{object});
+      adapt_detail::construct<Adapter, FieldId>(obj, object);
+      return obj;
+    } else {
+      return Adapter::fromThrift(Create<Tag>{}());
+    }
   }
 };
 

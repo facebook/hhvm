@@ -697,7 +697,7 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
-    if constexpr (adapt_detail::is_equal_adapter_v<Adapter, T>) {
+    if constexpr (adapt_detail::EqualAdapter<Adapter, T>) {
       return Adapter::equal(lhs, rhs);
     } else if constexpr (std::is_invocable_v<
                              std::equal_to<>,
@@ -720,7 +720,7 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>, ComparePolicy> {
   static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
   constexpr std::partial_ordering operator()(const T& lhs, const T& rhs) const {
-    if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {
+    if constexpr (adapt_detail::CompareThreeWayAdapter<Adapter, T>) {
       return Adapter::compareThreeWay(lhs, rhs);
     } else {
       return compareWithAdapterHooks(lhs, rhs);
@@ -731,7 +731,7 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>, ComparePolicy> {
   template <typename T>
   static constexpr std::partial_ordering compareWithAdapterHooks(
       const T& lhs, const T& rhs) {
-    if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
+    if constexpr (adapt_detail::LessAdapter<Adapter, T>) {
       return compareWithAdapterLess(lhs, rhs);
     } else if constexpr (std::is_invocable_v<std::less<>, const T&, const T&>) {
       return compareWithNativeLess(lhs, rhs);

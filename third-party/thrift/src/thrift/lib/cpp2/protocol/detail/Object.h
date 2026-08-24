@@ -1167,22 +1167,24 @@ struct ProtocolValueToThriftValue<
       type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
   static_assert(type::is_concrete_v<field_adapted_tag>);
 
-  template <typename ObjectOrValue, typename U, typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, bool>
-      operator()(const ObjectOrValue& value, U& m, Struct& /*unused*/) const {
-    return ProtocolValueToThriftValue<type::adapted<Adapter, Tag>>{}(value, m);
-  }
-
-  template <typename ObjectOrValue, typename U, typename AdapterT = Adapter>
-  constexpr adapt_detail::
-      if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, bool>
-      operator()(const ObjectOrValue& value, U& m, Struct& strct) const {
-    // TODO: Optimize in-place adapter
-    type::native_type<Tag> orig;
-    bool ret = ProtocolValueToThriftValue<Tag>{}(value, orig);
-    m = adapt_detail::fromThriftField<Adapter, FieldId>(std::move(orig), strct);
-    return ret;
+  template <typename ObjectOrValue, typename U>
+  constexpr bool operator()(
+      const ObjectOrValue& value, U& m, Struct& strct) const {
+    if constexpr (adapt_detail::FieldAdapter<
+                      Adapter,
+                      FieldId,
+                      type::native_type<Tag>,
+                      Struct>) {
+      // TODO: Optimize in-place adapter
+      type::native_type<Tag> orig;
+      bool ret = ProtocolValueToThriftValue<Tag>{}(value, orig);
+      m = adapt_detail::fromThriftField<Adapter, FieldId>(
+          std::move(orig), strct);
+      return ret;
+    } else {
+      return ProtocolValueToThriftValue<type::adapted<Adapter, Tag>>{}(
+          value, m);
+    }
   }
 };
 

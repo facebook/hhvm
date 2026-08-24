@@ -77,12 +77,10 @@ TEST(ClearTest, RefFields) {
 }
 
 TEST(AdaptTest, ThriftClearTestStruct) {
-  static_assert(!folly::is_detected_v<
-                adapt_detail::ClearType,
+  static_assert(!adapt_detail::ClearAdapter<
                 AdapterWithContext,
                 AdaptedWithContext<int64_t, ThriftClearTestStruct, 1>>);
-  static_assert(!folly::is_detected_v<
-                adapt_detail::IsEmptyType,
+  static_assert(!adapt_detail::EmptyAdapter<
                 AdapterWithContext,
                 AdaptedWithContext<int64_t, ThriftClearTestStruct, 1>>);
 
@@ -103,12 +101,10 @@ TEST(AdaptTest, ThriftClearTestStruct) {
 }
 
 TEST(AdaptTest, AdapterClearTestStruct) {
-  static_assert(folly::is_detected_v<
-                adapt_detail::ClearType,
+  static_assert(adapt_detail::ClearAdapter<
                 AdapterWithContextOptimized,
                 AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
-  static_assert(folly::is_detected_v<
-                adapt_detail::IsEmptyType,
+  static_assert(adapt_detail::EmptyAdapter<
                 AdapterWithContextOptimized,
                 AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
 
@@ -129,8 +125,7 @@ TEST(AdaptTest, AdapterClearTestStruct) {
 }
 
 TEST(AdaptTest, AdapterClearTestStructOpClear) {
-  static_assert(folly::is_detected_v<
-                adapt_detail::ClearType,
+  static_assert(adapt_detail::ClearAdapter<
                 AdapterWithContextOptimized,
                 AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
   using namespace apache::thrift;

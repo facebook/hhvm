@@ -364,6 +364,8 @@ struct CountingAdapter {
 };
 
 struct SerializedSizeAdapter {
+  SerializedSizeAdapter() = delete;
+
   template <typename T>
   static T fromThrift(T i) {
     return i;
@@ -382,6 +384,8 @@ struct SerializedSizeAdapter {
 };
 
 struct EncodeAdapter {
+  EncodeAdapter() = delete;
+
   static Num fromThrift(int64_t val) {
     ADD_FAILURE()
         << "Adapter::decode should be called instead of deserializing with fromThrift.";

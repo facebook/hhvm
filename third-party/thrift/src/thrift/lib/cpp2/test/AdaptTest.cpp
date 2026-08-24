@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/Adapter.h>
 
 #include <functional>
 #include <optional>
@@ -122,6 +122,338 @@ struct FullAdapter : MinAdapter {
   }
 };
 
+struct ConceptStruct {};
+struct ConceptProtocol {};
+struct OtherConceptProtocol {};
+
+struct ConceptAdapter {
+  template <typename = void>
+  static FullType fromThrift(int);
+  template <typename = void>
+  static int toThrift(const FullType&);
+  template <typename = void>
+  static int& toThrift(FullType&);
+
+  template <typename = void>
+  static void clear(FullType&);
+  template <typename = void>
+  static bool isEmpty(const FullType&);
+  template <typename = void>
+  static bool equal(const FullType&, const FullType&);
+  template <typename = void>
+  static bool less(const FullType&, const FullType&);
+  template <typename = void>
+  static folly::ordering compareThreeWay(const FullType&, const FullType&);
+  template <typename = void>
+  static size_t hash(const FullType&);
+  template <typename = void>
+  static void construct(FullType&, FieldContext<ConceptStruct, 1>);
+
+  template <bool, typename>
+  static uint32_t serializedSize(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static uint32_t encode(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static void decode(ConceptProtocol&, FullType&);
+};
+
+struct ConceptFieldAdapter {
+  template <typename Struct, int16_t FieldId>
+  static FullType fromThriftField(int, FieldContext<Struct, FieldId>);
+  template <typename = void>
+  static int toThrift(const FullType&);
+  template <typename = void>
+  static int& toThrift(FullType&);
+
+  template <typename = void>
+  static void clear(FullType&);
+  template <typename = void>
+  static bool isEmpty(const FullType&);
+  template <typename = void>
+  static bool equal(const FullType&, const FullType&);
+  template <typename = void>
+  static bool less(const FullType&, const FullType&);
+  template <typename = void>
+  static folly::ordering compareThreeWay(const FullType&, const FullType&);
+  template <typename = void>
+  static size_t hash(const FullType&);
+  template <typename Struct, int16_t FieldId>
+  static void construct(FullType&, FieldContext<Struct, FieldId>);
+
+  template <bool, typename>
+  static uint32_t serializedSize(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static uint32_t encode(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static void decode(ConceptProtocol&, FullType&);
+};
+
+struct FieldIdSpecificAdapter {
+  template <typename = void>
+  static FullType fromThriftField(int, FieldContext<ConceptStruct, 1>);
+  template <typename = void>
+  static int toThrift(const FullType&);
+};
+
+struct FieldAdapterNoToThrift {
+  template <typename Struct, int16_t FieldId>
+  static FullType fromThriftField(int, FieldContext<Struct, FieldId>);
+};
+
+struct IncompleteField;
+struct IncompleteStruct;
+
+template <typename T, typename Struct, int16_t FieldId>
+struct CompleteOnlyField {
+  T value;
+};
+
+struct IncompleteTypeFieldAdapter {
+  template <typename T, typename Struct, int16_t FieldId>
+  static CompleteOnlyField<T, Struct, FieldId> fromThriftField(
+      T&&, FieldContext<Struct, FieldId>&&);
+
+  template <typename T>
+  static const T& toThrift(const T&);
+};
+
+struct TrueZeroCopyAdapter : ConceptAdapter {
+  template <bool ZeroCopy, typename>
+    requires(ZeroCopy)
+  static uint32_t serializedSize(ConceptProtocol&, const FullType&);
+};
+
+struct FromThriftOnlyAdapter {
+  static FullType fromThrift(int value) { return {nullptr, value}; }
+};
+
+struct MutableLessAdapter : ConceptAdapter {
+  template <typename = void>
+  static bool less(FullType&, const FullType&);
+};
+
+struct ByValueAdapter {
+  template <typename = void>
+  static FullType fromThrift(int);
+  template <typename = void>
+  static int toThrift(const FullType&);
+};
+
+struct CustomizationOnlyAdapter {
+  template <typename = void>
+  static int toThrift(const FullType&);
+  template <typename = void>
+  static int& toThrift(FullType&);
+
+  template <typename = void>
+  static void clear(FullType&);
+  template <typename = void>
+  static bool isEmpty(const FullType&);
+  template <typename = void>
+  static bool equal(const FullType&, const FullType&);
+  template <typename = void>
+  static bool less(const FullType&, const FullType&);
+  template <typename = void>
+  static folly::ordering compareThreeWay(const FullType&, const FullType&);
+  template <typename = void>
+  static size_t hash(const FullType&);
+  template <typename = void>
+  static void construct(FullType&, FieldContext<ConceptStruct, 1>);
+
+  template <bool, typename>
+  static uint32_t serializedSize(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static uint32_t encode(ConceptProtocol&, const FullType&);
+
+  template <typename>
+  static void decode(ConceptProtocol&, FullType&);
+};
+
+static_assert(ThriftTypeAdapter<ConceptAdapter, int>);
+static_assert(ThriftConstAdapter<ConceptAdapter, int>);
+static_assert(ThriftAdapter<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(!ThriftTypeAdapter<FromThriftOnlyAdapter, int>);
+static_assert(ThriftConstAdapter<FromThriftOnlyAdapter, int>);
+static_assert(!ThriftAdapter<FromThriftOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !adapt_detail::FieldAdapter<FromThriftOnlyAdapter, 1, int, ConceptStruct>);
+static_assert(std::is_same_v<
+              adapt_detail::
+                  adapted_field_t<FromThriftOnlyAdapter, 1, int, ConceptStruct>,
+              FullType>);
+static_assert(ThriftFieldAdapter<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(ThriftAdapter<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(
+    ThriftFieldAdapter<FieldIdSpecificAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !ThriftFieldAdapter<FieldIdSpecificAdapter, int, ConceptStruct, 2>);
+static_assert(ThriftAdapter<FieldIdSpecificAdapter, int, ConceptStruct, 1>);
+static_assert(!ThriftAdapter<FieldIdSpecificAdapter, int, ConceptStruct, 2>);
+static_assert(
+    adapt_detail::FieldAdapter<FieldAdapterNoToThrift, 1, int, ConceptStruct>);
+static_assert(
+    !ThriftFieldAdapter<FieldAdapterNoToThrift, int, ConceptStruct, 1>);
+static_assert(ThriftFieldAdapter<
+              IncompleteTypeFieldAdapter,
+              IncompleteField,
+              IncompleteStruct,
+              1>);
+static_assert(!ThriftTypeAdapter<ConceptFieldAdapter, int>);
+static_assert(AdapterWithConstruct<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithClear<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithIsEmpty<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithEqual<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithLess<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(!AdapterWithLess<MutableLessAdapter, int, ConceptStruct, 1>);
+static_assert(
+    AdapterWithCompareThreeWay<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithHash<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithSerializedSize<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              false,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithSerializedSize<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              false,
+              type::i32_t,
+              OtherConceptProtocol>);
+static_assert(AdapterWithSerializedSize<
+              TrueZeroCopyAdapter,
+              int,
+              ConceptStruct,
+              1,
+              true,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithSerializedSize<
+              TrueZeroCopyAdapter,
+              int,
+              ConceptStruct,
+              1,
+              false,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(AdapterWithEncode<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithEncode<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              OtherConceptProtocol>);
+static_assert(AdapterWithDecode<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithDecode<
+              ConceptAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              OtherConceptProtocol>);
+static_assert(InplaceThriftAdapter<ConceptAdapter, int, ConceptStruct, 1>);
+static_assert(ThriftTypeAdapter<ByValueAdapter, int>);
+static_assert(!InplaceThriftAdapter<ByValueAdapter, int, ConceptStruct, 1>);
+
+static_assert(AdapterWithConstruct<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithClear<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithIsEmpty<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithEqual<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithLess<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(
+    AdapterWithCompareThreeWay<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithHash<ConceptFieldAdapter, int, ConceptStruct, 1>);
+static_assert(AdapterWithSerializedSize<
+              ConceptFieldAdapter,
+              int,
+              ConceptStruct,
+              1,
+              false,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(AdapterWithEncode<
+              ConceptFieldAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(AdapterWithDecode<
+              ConceptFieldAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(InplaceThriftAdapter<ConceptFieldAdapter, int, ConceptStruct, 1>);
+
+static_assert(!ThriftTypeAdapter<CustomizationOnlyAdapter, int>);
+static_assert(!ThriftConstAdapter<CustomizationOnlyAdapter, int>);
+static_assert(!ThriftAdapter<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !AdapterWithConstruct<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !AdapterWithClear<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !AdapterWithIsEmpty<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !AdapterWithEqual<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(
+    !AdapterWithLess<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(!AdapterWithCompareThreeWay<
+              CustomizationOnlyAdapter,
+              int,
+              ConceptStruct,
+              1>);
+static_assert(
+    !AdapterWithHash<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(!AdapterWithSerializedSize<
+              CustomizationOnlyAdapter,
+              int,
+              ConceptStruct,
+              1,
+              false,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithEncode<
+              CustomizationOnlyAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(!AdapterWithDecode<
+              CustomizationOnlyAdapter,
+              int,
+              ConceptStruct,
+              1,
+              type::i32_t,
+              ConceptProtocol>);
+static_assert(
+    !InplaceThriftAdapter<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+
 class AdaptTest : public ::testing::Test {
  protected:
   testing::StrictMock<OpTracker> tracker_;
@@ -213,6 +545,14 @@ TEST_F(AdaptTest, Equal) {
   EXPECT_TRUE((equal<FullAdapter, FullType>(1, 1)));
   EXPECT_FALSE((equal<FullAdapter, FullType>(1, 2)));
   testing::Mock::VerifyAndClearExpectations(&tracker_);
+}
+
+TEST_F(AdaptTest, FromThriftFieldFallsBackToFromThrift) {
+  ConceptStruct object;
+  EXPECT_EQ(
+      (adapt_detail::fromThriftField<FromThriftOnlyAdapter, 1>(42, object)
+           .value),
+      42);
 }
 
 TEST_F(AdaptTest, NotEqual) {

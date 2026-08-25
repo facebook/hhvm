@@ -415,6 +415,13 @@ module Full = struct
     let (fuel, d) = ty ~fuel to_doc st penv fp_type in
     let (fuel, d) =
       match (fp_name, d) with
+      | (Some "...", _) ->
+        (* "..." is a synthetic name for a named-variadic parameter
+         * We do not render it.
+         * [fun_type] adds the ellipses when
+         * when [get_ft_named_variadic ft] is `true`.
+         *)
+        (fuel, d)
       | (None, _) -> ty ~fuel to_doc st penv fp_type
       | (Some param_name, Text ("_", 1)) ->
         (* Handle the case of missing a type by not printing it *)

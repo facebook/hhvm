@@ -847,11 +847,10 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos", "{root}foo_named.php:5:4"],
         )
 
-        # BUG: currently we print the named-variadic marker twice.
         self.test_driver.check_cmd_and_json_cmd(
-            ["(function(int, named bool ......): void)"],
+            ["(function(int, named bool...): void)"],
             [
-                '{{"type":"(function(int, named bool ......): void)",'
+                '{{"type":"(function(int, named bool...): void)",'
                 + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
                 + '"full_type":{{"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":3,"char_end":38}},"kind":"function","tparams":[],'
                 + '"params":[{{"callConvention":"normal","type":{{'

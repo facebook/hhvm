@@ -187,22 +187,22 @@ struct thrift_equal {
 };
 
 // Equal op based on the adapted types, with a fallback on thrift_equal.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapted_equal : thrift_equal<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires requires(const AdaptedT& lhs, const AdaptedT& rhs) { lhs == rhs; }
-struct adapted_equal<Adapter, AdaptedT, void> {
+struct adapted_equal<Adapter, AdaptedT> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return lhs == rhs;
   }
 };
 
 // Equal op based on the adapter, with a fallback on adapted_equal.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapter_equal : adapted_equal<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires EqualAdapter<Adapter, AdaptedT>
-struct adapter_equal<Adapter, AdaptedT, void> {
+struct adapter_equal<Adapter, AdaptedT> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::equal(lhs, rhs);
   }
@@ -217,22 +217,22 @@ struct thrift_less {
 };
 
 // Less op based on the adapted types, with a fallback on thrift_less.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapted_less : thrift_less<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires requires(const AdaptedT& lhs, const AdaptedT& rhs) { lhs < rhs; }
-struct adapted_less<Adapter, AdaptedT, void> {
+struct adapted_less<Adapter, AdaptedT> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return lhs < rhs;
   }
 };
 
 // Less op based on the adapter, with a fallback on adapted_less.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapter_less : adapted_less<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires LessAdapter<Adapter, AdaptedT>
-struct adapter_less<Adapter, AdaptedT, void> {
+struct adapter_less<Adapter, AdaptedT> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::less(lhs, rhs);
   }
@@ -254,12 +254,12 @@ struct thrift_compare_three_way {
 
 // CompareThreeWay op based on the adapted types, with a fallback on
 // thrift_compare_three_way.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapted_compare_three_way : thrift_compare_three_way<Adapter, AdaptedT> {
 };
 template <typename Adapter, typename AdaptedT>
   requires requires(const AdaptedT& lhs, const AdaptedT& rhs) { lhs < rhs; }
-struct adapted_compare_three_way<Adapter, AdaptedT, void> {
+struct adapted_compare_three_way<Adapter, AdaptedT> {
   constexpr folly::ordering operator()(
       const AdaptedT& lhs, const AdaptedT& rhs) const {
     if (lhs == rhs) {
@@ -273,12 +273,12 @@ struct adapted_compare_three_way<Adapter, AdaptedT, void> {
 
 // CompareThreeWay op based on the adapter, with a fallback on
 // adapted_compare_three_way.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapter_compare_three_way
     : adapted_compare_three_way<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires CompareThreeWayAdapter<Adapter, AdaptedT>
-struct adapter_compare_three_way<Adapter, AdaptedT, void> {
+struct adapter_compare_three_way<Adapter, AdaptedT> {
   constexpr folly::ordering operator()(
       const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::compareThreeWay(lhs, rhs);
@@ -295,19 +295,18 @@ struct thrift_hash {
 };
 
 // Hash based on the adapted types, with a fallback on thrift_hash.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapted_hash : thrift_hash<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires requires { std::hash<std::decay_t<AdaptedT>>{}(cr<AdaptedT>()); }
-struct adapted_hash<Adapter, AdaptedT, void>
-    : std::hash<std::decay_t<AdaptedT>> {};
+struct adapted_hash<Adapter, AdaptedT> : std::hash<std::decay_t<AdaptedT>> {};
 
 // Hash based on the adapter, with a fallback on adapted_hash.
-template <typename Adapter, typename AdaptedT, typename = void>
+template <typename Adapter, typename AdaptedT>
 struct adapter_hash : adapted_hash<Adapter, AdaptedT> {};
 template <typename Adapter, typename AdaptedT>
   requires HashAdapter<Adapter, AdaptedT>
-struct adapter_hash<Adapter, AdaptedT, void> {
+struct adapter_hash<Adapter, AdaptedT> {
   constexpr size_t operator()(const AdaptedT& value) const {
     return Adapter::hash(value);
   }
@@ -440,8 +439,7 @@ template <
     typename Adapter,
     typename AdaptedT,
     typename Protocol,
-    typename FallbackF,
-    typename = void>
+    typename FallbackF>
 struct adapter_serialized_size {
   uint32_t operator()(
       Protocol& /*unused*/, const AdaptedT& /*unused*/, FallbackF f) {
@@ -486,8 +484,7 @@ struct adapter_serialized_size<
     Adapter,
     AdaptedT,
     Protocol,
-    FallbackF,
-    void> {
+    FallbackF> {
   uint32_t operator()(
       Protocol& prot, const AdaptedT& val, FallbackF /*unused*/) {
     return Adapter::template serializedSize<ZeroCopy, Tag>(prot, val);

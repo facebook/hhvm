@@ -649,9 +649,7 @@ TEST_F(AdaptTest, UnorderedSet) {
 TEST_F(AdaptTest, AdaptSetKey_Ordered) {
   static_assert(
       std::is_same_v<
-          std::set<
-              int,
-              adapt_detail::adapted_less<test::TestAdapter, int, void>>,
+          std::set<int, adapt_detail::adapted_less<test::TestAdapter, int>>,
           adapt_detail::adapt_set_key_t<test::TestAdapter, std::set<int32_t>>>);
 }
 
@@ -660,9 +658,9 @@ TEST_F(AdaptTest, AdaptSetKey_Unordered) {
       std::is_same_v<
           std::unordered_set<
               int,
-              adapt_detail::adapted_hash<test::TestAdapter, int, void>,
+              adapt_detail::adapted_hash<test::TestAdapter, int>,
               adapt_detail::
-                  adapted_equal<apache::thrift::test::TestAdapter, int, void>>,
+                  adapted_equal<apache::thrift::test::TestAdapter, int>>,
           adapt_detail::
               adapt_set_key_t<test::TestAdapter, std::unordered_set<int32_t>>>);
 }
@@ -672,7 +670,7 @@ TEST_F(AdaptTest, AdpatMapKey_Ordered) {
                 std::map<
                     int,
                     std::string,
-                    adapt_detail::adapted_less<test::TestAdapter, int, void>>,
+                    adapt_detail::adapted_less<test::TestAdapter, int>>,
                 adapt_detail::adapt_map_key_t<
                     test::TestAdapter,
                     std::map<int32_t, std::string>>>);
@@ -683,8 +681,8 @@ TEST_F(AdaptTest, AdpatMapKey_Unordered) {
                 std::unordered_map<
                     int,
                     std::string,
-                    adapt_detail::adapted_hash<test::TestAdapter, int, void>,
-                    adapt_detail::adapted_equal<test::TestAdapter, int, void>>,
+                    adapt_detail::adapted_hash<test::TestAdapter, int>,
+                    adapt_detail::adapted_equal<test::TestAdapter, int>>,
                 adapt_detail::adapt_map_key_t<
                     test::TestAdapter,
                     std::unordered_map<int32_t, std::string>>>);

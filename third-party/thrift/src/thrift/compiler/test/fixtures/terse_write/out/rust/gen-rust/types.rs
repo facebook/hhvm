@@ -275,6 +275,12 @@ impl ::fbthrift::GetUri for self::MyEnum {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,

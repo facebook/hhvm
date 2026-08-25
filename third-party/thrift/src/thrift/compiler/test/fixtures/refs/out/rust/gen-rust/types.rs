@@ -363,6 +363,12 @@ impl ::fbthrift::GetTType for MyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -498,6 +504,12 @@ impl ::std::str::FromStr for TypedEnum {
 
 impl ::fbthrift::GetTType for TypedEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetTypeNameType for self::TypedEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for TypedEnum

@@ -278,6 +278,12 @@ impl ::fbthrift::GetUri for self::MyEnum {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -418,6 +424,12 @@ impl ::fbthrift::GetTType for HackEnum {
 impl ::fbthrift::GetUri for self::HackEnum {
     fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/HackEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::HackEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 

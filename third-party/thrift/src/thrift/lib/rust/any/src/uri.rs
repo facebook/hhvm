@@ -22,6 +22,7 @@ pub fn get_uri(any: &AnyStruct) -> Option<String> {
     match &any.r#type.name {
         TypeName::structType(TypeUri::uri(uri))
         | TypeName::unionType(TypeUri::uri(uri))
+        | TypeName::enumType(TypeUri::uri(uri))
         | TypeName::exceptionType(TypeUri::uri(uri)) => Some(uri.clone()),
         _ => None,
     }

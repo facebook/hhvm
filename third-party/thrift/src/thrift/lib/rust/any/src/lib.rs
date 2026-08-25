@@ -57,6 +57,7 @@ pub use serialize::SerializableToAny;
 pub use serialize::serialize;
 pub use serialize::serialize_json;
 pub use thrift_any_type::GetThriftAnyType;
+pub use thrift_any_type::make_thrift_any_type_enum;
 pub use thrift_any_type::make_thrift_any_type_struct;
 pub use thrift_any_type::make_thrift_any_type_union;
 pub use uri::get_uri;

@@ -184,6 +184,12 @@ impl ::fbthrift::GetTType for B {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::B {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for B
 where
     P: ::fbthrift::ProtocolWriter,

@@ -124,6 +124,12 @@ impl ::fbthrift::GetTType for HackEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::HackEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for HackEnum
 where
     P: ::fbthrift::ProtocolWriter,

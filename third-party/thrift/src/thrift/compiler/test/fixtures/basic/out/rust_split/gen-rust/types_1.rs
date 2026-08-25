@@ -130,6 +130,12 @@ impl ::fbthrift::GetUri for self::HackEnum {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::HackEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for HackEnum
 where
     P: ::fbthrift::ProtocolWriter,

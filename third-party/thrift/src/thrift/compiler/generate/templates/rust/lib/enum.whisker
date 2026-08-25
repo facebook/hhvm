@@ -149,6 +149,12 @@ impl ::fbthrift::GetUri for self::{{enum.rust_name}} {
 }
   {{/if (not (string.empty? enum.uri))}}
 
+impl ::fbthrift::GetTypeNameType for self::{{enum.rust_name}} {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for {{enum.rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,

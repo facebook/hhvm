@@ -162,6 +162,12 @@ impl ::fbthrift::GetUri for self::Metasyntactic {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Metasyntactic {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Metasyntactic
 where
     P: ::fbthrift::ProtocolWriter,
@@ -329,6 +335,12 @@ impl ::fbthrift::GetUri for self::MyEnum1 {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -475,6 +487,12 @@ impl ::fbthrift::GetTType for MyEnum2 {
 impl ::fbthrift::GetUri for self::MyEnum2 {
     fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyEnum2"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyEnum2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 
@@ -645,6 +663,12 @@ impl ::fbthrift::GetUri for self::MyEnum3 {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum3 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum3
 where
     P: ::fbthrift::ProtocolWriter,
@@ -800,6 +824,12 @@ impl ::fbthrift::GetUri for self::MyEnum4 {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyEnum4 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum4
 where
     P: ::fbthrift::ProtocolWriter,
@@ -949,6 +979,12 @@ impl ::fbthrift::GetUri for self::MyBitmaskEnum1 {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyBitmaskEnum1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyBitmaskEnum1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1095,6 +1131,12 @@ impl ::fbthrift::GetTType for MyBitmaskEnum2 {
 impl ::fbthrift::GetUri for self::MyBitmaskEnum2 {
     fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyBitmaskEnum2"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyBitmaskEnum2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 

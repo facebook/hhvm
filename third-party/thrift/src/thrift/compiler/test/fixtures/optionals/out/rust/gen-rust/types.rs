@@ -169,6 +169,12 @@ impl ::fbthrift::GetTType for Animal {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Animal {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Animal
 where
     P: ::fbthrift::ProtocolWriter,

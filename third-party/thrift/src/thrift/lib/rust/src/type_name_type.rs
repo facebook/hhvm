@@ -17,6 +17,7 @@
 pub enum TypeNameType {
     StructType,
     UnionType,
+    EnumType,
 }
 
 pub trait GetTypeNameType {

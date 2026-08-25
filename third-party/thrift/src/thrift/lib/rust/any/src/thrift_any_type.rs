@@ -33,6 +33,7 @@ impl<T: fbthrift::GetTypeNameType + fbthrift::GetUri> GetThriftAnyType for T {
         match <T as fbthrift::GetTypeNameType>::type_name_type() {
             fbthrift::TypeNameType::StructType => make_thrift_any_type_struct::<T>(),
             fbthrift::TypeNameType::UnionType => make_thrift_any_type_union::<T>(),
+            fbthrift::TypeNameType::EnumType => make_thrift_any_type_enum::<T>(),
         }
     }
 }
@@ -47,6 +48,14 @@ pub fn make_thrift_any_type_struct<T: fbthrift::GetUri>() -> ThriftAnyType {
 pub fn make_thrift_any_type_union<T: fbthrift::GetUri>() -> ThriftAnyType {
     ThriftAnyType {
         name: TypeName::unionType(TypeUri::uri(T::uri().to_string())),
+        ..Default::default()
+    }
+}
+
+/// Encodes a URI-bearing enum as the named enum type required by Thrift Any.
+pub fn make_thrift_any_type_enum<T: fbthrift::GetUri>() -> ThriftAnyType {
+    ThriftAnyType {
+        name: TypeName::enumType(TypeUri::uri(T::uri().to_string())),
         ..Default::default()
     }
 }
@@ -90,6 +99,15 @@ where
         },
         TypeName::unionType(uri) => match &t_type.name {
             TypeName::unionType(other) => check_uri_consistency(uri, other)?,
+            _ => bail!(AnyError::from(
+                AnyTypeExpectationViolated::TypeNamesInconsistent((
+                    any.r#type.name.clone(),
+                    t_type.name
+                ))
+            )),
+        },
+        TypeName::enumType(uri) => match &t_type.name {
+            TypeName::enumType(other) => check_uri_consistency(uri, other)?,
             _ => bail!(AnyError::from(
                 AnyTypeExpectationViolated::TypeNamesInconsistent((
                     any.r#type.name.clone(),

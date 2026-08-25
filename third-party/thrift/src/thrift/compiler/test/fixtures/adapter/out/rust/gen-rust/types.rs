@@ -613,6 +613,12 @@ impl ::fbthrift::GetUri for self::Color {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Color {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Color
 where
     P: ::fbthrift::ProtocolWriter,
@@ -753,6 +759,12 @@ impl ::fbthrift::GetTType for ThriftAdaptedEnum {
 impl ::fbthrift::GetUri for self::ThriftAdaptedEnum {
     fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/fixtures/adapter/ThriftAdaptedEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ThriftAdaptedEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 

@@ -211,6 +211,12 @@ impl ::fbthrift::GetTType for EmptyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::EmptyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for EmptyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -358,6 +364,12 @@ impl ::std::str::FromStr for City {
 
 impl ::fbthrift::GetTType for City {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetTypeNameType for self::City {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for City
@@ -513,6 +525,12 @@ impl ::std::str::FromStr for Company {
 
 impl ::fbthrift::GetTType for Company {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Company {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for Company

@@ -575,6 +575,12 @@ impl ::fbthrift::GetUri for self::has_bitwise_ops {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::has_bitwise_ops {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for has_bitwise_ops
 where
     P: ::fbthrift::ProtocolWriter,
@@ -718,6 +724,12 @@ impl ::fbthrift::GetUri for self::is_unscoped {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::is_unscoped {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for is_unscoped
 where
     P: ::fbthrift::ProtocolWriter,
@@ -858,6 +870,12 @@ impl ::fbthrift::GetTType for MyForwardRefEnum {
 impl ::fbthrift::GetUri for self::MyForwardRefEnum {
     fn uri() -> &'static ::std::primitive::str {
         "apache.org/thrift/fixtures/types/MyForwardRefEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyForwardRefEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 

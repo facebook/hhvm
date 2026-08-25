@@ -343,6 +343,12 @@ impl ::fbthrift::GetTType for E1 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetTypeNameType for self::E1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for E1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -466,6 +472,12 @@ impl ::std::str::FromStr for F2 {
 
 impl ::fbthrift::GetTType for F2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetTypeNameType for self::F2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for F2
@@ -603,6 +615,12 @@ impl ::std::str::FromStr for EnumWithDerives {
 
 impl ::fbthrift::GetTType for EnumWithDerives {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetTypeNameType for self::EnumWithDerives {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for EnumWithDerives

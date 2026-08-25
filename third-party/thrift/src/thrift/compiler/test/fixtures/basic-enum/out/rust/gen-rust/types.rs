@@ -122,6 +122,12 @@ impl ::fbthrift::GetUri for self::EmptyEnum {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::EmptyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for EmptyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -262,6 +268,12 @@ impl ::fbthrift::GetTType for MyEnum {
 impl ::fbthrift::GetUri for self::MyEnum {
     fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/fixtures/basic_enum/MyEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 
@@ -411,6 +423,12 @@ impl ::fbthrift::GetTType for MyUseIntrinsicDefaultEnum {
 impl ::fbthrift::GetUri for self::MyUseIntrinsicDefaultEnum {
     fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUseIntrinsicDefaultEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 
@@ -662,6 +680,12 @@ impl ::fbthrift::GetTType for MyBigEnum {
 impl ::fbthrift::GetUri for self::MyBigEnum {
     fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyBigEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::EnumType
     }
 }
 

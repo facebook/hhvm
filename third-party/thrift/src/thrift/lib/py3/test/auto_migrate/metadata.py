@@ -16,6 +16,7 @@
 
 import unittest
 
+# pyre-fixme[21]: Generated py3 metadata has no source-database entry.
 import test_thrift.metadata
 from apache.thrift.metadata.types import ThriftPrimitiveType
 from test_thrift.clients import TestingService, TestingServiceChild

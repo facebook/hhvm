@@ -826,6 +826,44 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos", "{root}foo_poly_function.php:9:4"],
         )
 
+    def test_type_at_pos_named(self) -> None:
+        """
+        Test hh_client --type-at-pos for function types with named parameters
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd_and_json_cmd(
+            ["(function(int, named string $tag): void)"],
+            [
+                '{{"type":"(function(int, named string $tag): void)",'
+                + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
+                + '"full_type":{{"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":20,"char_end":59}},"kind":"function","tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":30,"char_end":32}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal","named":true,"name":"$tag","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":41,"char_end":46}},"kind":"primitive","name":"string"}}}}],'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":55,"char_end":58}},"kind":"primitive","name":"void"}}}}}}'
+            ],
+            options=["--type-at-pos", "{root}foo_named.php:5:4"],
+        )
+
+        # BUG: currently we print the named-variadic marker twice.
+        self.test_driver.check_cmd_and_json_cmd(
+            ["(function(int, named bool ......): void)"],
+            [
+                '{{"type":"(function(int, named bool ......): void)",'
+                + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
+                + '"full_type":{{"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":3,"char_end":38}},"kind":"function","tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":13,"char_end":15}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal","named":true,"name":"...","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":24,"char_end":27}},"kind":"primitive","name":"bool"}}}}],'
+                + '"named_variadic":true,'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":34,"char_end":37}},"kind":"primitive","name":"void"}}}}}}'
+            ],
+            options=["--type-at-pos", "{root}foo_variadic.php:9:4"],
+        )
+
     def test_type_at_pos_batch(self) -> None:
         """
         Test hh_client --type-at-pos-batch

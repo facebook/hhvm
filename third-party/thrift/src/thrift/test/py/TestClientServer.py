@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
 
 # This starts up a bunch of servers, one for each of the server type
 # and socket typecombinations we have. It then runs through the tests

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
 
 """
 Common base for asyncio and Trollius (the Python 2 asyncio backport).

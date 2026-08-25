@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """
 Builder that constructs a SyntaxGraph from a deserialized type::Schema.

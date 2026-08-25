@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Tests that container typedefs gracefully degrade to the old factory-based
 behavior when thrift.python.container_typedefs is not available (simulating

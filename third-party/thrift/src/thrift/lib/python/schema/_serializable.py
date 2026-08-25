@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """
 The canonical ``SerializableTypeSystem`` wire boundary -- the export half of the

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """End-to-end test for thrift-python server-side interactions (request/response
 and server streaming).

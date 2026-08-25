@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """
 Canonical SHA-256 digest of the **runtime** TypeSystem model.

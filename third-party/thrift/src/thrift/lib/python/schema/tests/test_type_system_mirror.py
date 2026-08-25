@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Drift guards for the hand-rolled discriminant enums in ``type_system.py``.
 

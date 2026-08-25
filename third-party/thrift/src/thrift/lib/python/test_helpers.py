@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 from collections.abc import Iterable, Mapping, Sequence, Set as abcSet
 from dataclasses import asdict as dataclass_asdict, is_dataclass

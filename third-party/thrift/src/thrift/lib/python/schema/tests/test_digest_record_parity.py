@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Parity tests guaranteeing the **runtime** digest's native leaf hashers emit
 byte-identical bytes to the **serialized** digest's wire leaf hashers."""

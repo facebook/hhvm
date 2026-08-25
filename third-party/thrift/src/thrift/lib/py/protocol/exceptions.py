@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
-
 
 def create_ThriftUnicodeDecodeError_from_UnicodeDecodeError(error, field_name):
     if isinstance(error, ThriftUnicodeDecodeError):

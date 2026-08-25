@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 # Import from thrift.async_common directly in your files
 # This only exists for retrocompatibility and might be deleted in the future

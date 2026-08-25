@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 import test_thrift.constants_FBTHRIFT_ONLY_DO_NOT_USE as testing_constants
 import test_thrift.types as testing_types

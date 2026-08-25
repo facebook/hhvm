@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """
 Pure-Python runtime TypeSystem model for the thrift-python SchemaRegistry.

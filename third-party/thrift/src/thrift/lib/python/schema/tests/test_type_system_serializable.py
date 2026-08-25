@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Tests for the wire-form boundary (``_serializable.py`` + builder edits):
 ``to_type_id`` / ``resolve_type_id``, ``build_serializable_type_system``

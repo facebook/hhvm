@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 import thrift.python.reflection.services_reflection  # noqa: F401
 import thrift.python.reflection.types_reflection  # noqa: F401

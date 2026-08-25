@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Tests that reflection gracefully degrades when thrift.python.reflection
 and/or thrift.python.container_typedefs are unavailable, simulating an older

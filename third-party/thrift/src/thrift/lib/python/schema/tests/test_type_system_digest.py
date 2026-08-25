@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-strict
 
 """Tests for ``type_system_digest.py`` -- the cross-language-identical SHA-256
 digest over the canonical ``SerializableTypeSystem``.

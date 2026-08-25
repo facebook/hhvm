@@ -173,10 +173,7 @@ void ThriftTransportUtil::traceResponse(
   if (FOLLY_UNLIKELY(
           !request.traceContext().empty() && reply.hasValue() &&
           reply->response.hasValue() &&
-          reply->responseContext.headers.find(
-              facebook::contextprop::ContextpropConstants_constants::
-                  artillery_trace_ids_header_) !=
-              reply->responseContext.headers.end())) {
+          hasArtilleryHeaders(reply->responseContext.headers))) {
     folly::fibers::runInMainContext([&]() {
       traceResponseImpl(*reply->response, reply->responseContext.headers);
     });

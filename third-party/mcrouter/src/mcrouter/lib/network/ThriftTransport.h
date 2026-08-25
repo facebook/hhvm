@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
 #include "mcrouter/lib/Reply.h"
+#include "mcrouter/lib/carbon/ReplyCommon.h"
 #include "mcrouter/lib/mc/protocol.h"
 #include "mcrouter/lib/network/ConnectionOptions.h"
 #include "mcrouter/lib/network/RpcStatsContext.h"
@@ -178,12 +179,18 @@ class ThriftTransportUtil {
 
  private:
 #ifndef LIBMC_FBTRACE_DISABLE
+  // True if the reply carries either Artillery response header: the legacy
+  // trace-id echo or the server block report.
+  static bool hasArtilleryHeaders(
+      const apache::thrift::transport::THeader::StringToStringMap&
+          responseHeaders);
+
   void FOLLY_NOINLINE traceRequestImpl(
       const carbon::MessageCommon& request,
       apache::thrift::RpcOptions& opts);
 
   void FOLLY_NOINLINE traceResponseImpl(
-      carbon::MessageCommon& response,
+      carbon::ReplyCommon& response,
       const apache::thrift::transport::THeader::StringToStringMap&
           responseHeaders);
 #endif

@@ -12,6 +12,7 @@
 #include <folly/io/async/EventBase.h>
 
 #ifndef LIBMC_FBTRACE_DISABLE
+#include <artillery/if/gen-cpp2/artillery_server_block_constants.h>
 #include <contextprop/cpp/serde/SerDeHelper.h>
 #endif
 
@@ -270,6 +271,30 @@ void ThriftTransportBase::resetClient() {
 }
 
 #ifndef LIBMC_FBTRACE_DISABLE
+namespace {
+// A token from one map is usable in any map with the same key + hash type;
+// the temporary map here is just how F14 exposes prehashing.
+folly::F14HashToken prehashHeaderKey(const std::string& key) {
+  apache::thrift::transport::THeader::StringToStringMap tokenFactory;
+  return tokenFactory.prehash(key);
+}
+} // namespace
+
+bool ThriftTransportUtil::hasArtilleryHeaders(
+    const apache::thrift::transport::THeader::StringToStringMap&
+        responseHeaders) {
+  const auto& traceIdsHeader = facebook::contextprop::
+      ContextpropConstants_constants::artillery_trace_ids_header_;
+  const auto& serverBlockHeader = facebook::artillery2::
+      artillery_server_block_constants::artillery_server_block_header_;
+  static const folly::F14HashToken traceIdsToken =
+      prehashHeaderKey(traceIdsHeader);
+  static const folly::F14HashToken serverBlockToken =
+      prehashHeaderKey(serverBlockHeader);
+  return responseHeaders.contains(traceIdsToken, traceIdsHeader) ||
+      responseHeaders.contains(serverBlockToken, serverBlockHeader);
+}
+
 void ThriftTransportUtil::traceRequest(
     const carbon::MessageCommon& request,
     apache::thrift::RpcOptions& rpcOptions) {
@@ -293,7 +318,7 @@ void ThriftTransportUtil::traceRequestImpl(
 }
 
 void ThriftTransportUtil::traceResponseImpl(
-    carbon::MessageCommon& response,
+    carbon::ReplyCommon& response,
     const apache::thrift::transport::THeader::StringToStringMap&
         responseHeaders) {
   auto artilleryTraceIDs = contextprop::SerDeHelper::decodeAndDeserialize<
@@ -305,6 +330,17 @@ void ThriftTransportUtil::traceResponseImpl(
     response.setTraceContext(
         facebook::contextprop::SerDeHelper::convertToLegacyTraceContext(
             *artilleryTraceIDs));
+  }
+
+  const auto& serverBlockHeader = facebook::artillery2::
+      artillery_server_block_constants::artillery_server_block_header_;
+  static const folly::F14HashToken serverBlockToken =
+      prehashHeaderKey(serverBlockHeader);
+  if (auto it = responseHeaders.find(serverBlockToken, serverBlockHeader);
+      it != responseHeaders.end()) {
+    // Kept serialized here so carbon messages take no thrift dep; the cache
+    // client deserializes it.
+    response.setArtilleryServerBlockReport(it->second);
   }
 }
 #endif

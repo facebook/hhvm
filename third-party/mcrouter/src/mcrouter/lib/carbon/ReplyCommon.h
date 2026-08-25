@@ -35,9 +35,29 @@ class ReplyCommon : public MessageCommon {
   // Get region string if set
   const std::optional<std::string>& getRegion() const;
 
+  /**
+   * Gets the serialized ArtilleryServerBlockReport the server attached to this
+   * reply, describing the server block for the client to log on its behalf.
+   * Opaque here: the consumer deserializes it.
+   *
+   * Lives on the reply rather than on MessageCommon: only replies ever carry a
+   * report, and MessageCommon is also the base of RequestCommon, where the
+   * field would be dead weight on every request object.
+   *
+   * @return  The serialized report, or empty string if the reply carries none.
+   */
+  const std::string& artilleryServerBlockReport() const {
+    return artilleryServerBlockReport_;
+  }
+
+  void setArtilleryServerBlockReport(std::string report) {
+    artilleryServerBlockReport_ = std::move(report);
+  }
+
  private:
   std::shared_ptr<const facebook::memcache::AccessPoint> destination_;
   std::optional<std::string> region_;
+  std::string artilleryServerBlockReport_;
 };
 
 class ReplyCommonThrift : public ReplyCommon {

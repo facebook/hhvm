@@ -798,11 +798,11 @@ let check_consistent_enum_inclusion
   | Typing_visibility.Package_access_linter_error (pos, w) ->
     Lints_diagnostics.crosspackage_linter
       pos
-      w.current_package
-      w.target_package
-      w.target_package_before_override
-      w.classptr_reference_warning
-      w.caller_has_package_override
+      ~current_package:w.current_package
+      ~caller_has_package_override:w.caller_has_package_override
+      ~target_package:w.target_package
+      ~target_package_before_override:w.target_package_before_override
+      ~classptr_reference_warning:w.classptr_reference_warning
   | Typing_visibility.Package_access_ok -> ());
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->

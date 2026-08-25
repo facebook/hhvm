@@ -1331,11 +1331,11 @@ end = struct
     List.iter access_linter_errors ~f:(fun (pos, w) ->
         Lints_diagnostics.crosspackage_linter
           pos
-          w.current_package
-          w.target_package
-          w.target_package_before_override
-          w.classptr_reference_warning
-          w.caller_has_package_override);
+          ~current_package:w.current_package
+          ~caller_has_package_override:w.caller_has_package_override
+          ~target_package:w.target_package
+          ~target_package_before_override:w.target_package_before_override
+          ~classptr_reference_warning:w.classptr_reference_warning);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       (Typing_error.multiple_opt (other_errs @ access_errs));
@@ -3583,11 +3583,11 @@ end = struct
         | TVis.Package_access_linter_error (pos, w) ->
           Lints_diagnostics.crosspackage_linter
             pos
-            w.current_package
-            w.target_package
-            w.target_package_before_override
-            w.classptr_reference_warning
-            w.caller_has_package_override
+            ~current_package:w.current_package
+            ~caller_has_package_override:w.caller_has_package_override
+            ~target_package:w.target_package
+            ~target_package_before_override:w.target_package_before_override
+            ~classptr_reference_warning:w.classptr_reference_warning
         | TVis.Package_access_ok -> ());
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
@@ -5096,11 +5096,11 @@ end = struct
             | TVis.Package_access_linter_error (pos, w) ->
               Lints_diagnostics.crosspackage_linter
                 pos
-                w.current_package
-                w.target_package
-                w.target_package_before_override
-                w.classptr_reference_warning
-                w.caller_has_package_override
+                ~current_package:w.current_package
+                ~caller_has_package_override:w.caller_has_package_override
+                ~target_package:w.target_package
+                ~target_package_before_override:w.target_package_before_override
+                ~classptr_reference_warning:w.classptr_reference_warning
             | TVis.Package_access_ok -> ())
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
@@ -12041,11 +12041,11 @@ end = struct
           List.iter access_linter_errs ~f:(fun (pos, w) ->
               Lints_diagnostics.crosspackage_linter
                 pos
-                w.current_package
-                w.target_package
-                w.target_package_before_override
-                w.classptr_reference_warning
-                w.caller_has_package_override);
+                ~current_package:w.current_package
+                ~caller_has_package_override:w.caller_has_package_override
+                ~target_package:w.target_package
+                ~target_package_before_override:w.target_package_before_override
+                ~classptr_reference_warning:w.classptr_reference_warning);
           List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs);
 
         (* Don't add Exact superfluously to class type if it's final *)

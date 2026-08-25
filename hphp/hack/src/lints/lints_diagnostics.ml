@@ -294,7 +294,7 @@ let awaitable_awaitable pos =
     ^ " If this is intentional, please annotate the return type.")
 
 let package_into_override
-    pos current_package target_package target_package_before_override =
+    pos ~current_package ~target_package ~target_package_before_override =
   let current_package_name =
     Option.value_map current_package ~default:"<none>" ~f:snd
   in
@@ -326,9 +326,9 @@ let package_into_override
 
 let crosspackage_classptr_reference
     pos
-    current_package
-    target_package_before_override
-    caller_has_package_override =
+    ~current_package
+    ~target_package_before_override
+    ~caller_has_package_override =
   let current_package_name =
     Option.value_map current_package ~default:"<none>" ~f:snd
   in
@@ -364,20 +364,20 @@ let crosspackage_classptr_reference
 (* wrapper around crosspackage_classconst_reference and package_into_override *)
 let crosspackage_linter
     pos
-    current_package
-    target_package
-    target_package_before_override
-    classptr_reference_warning
-    caller_has_package_override =
+    ~current_package
+    ~caller_has_package_override
+    ~target_package
+    ~target_package_before_override
+    ~classptr_reference_warning =
   if classptr_reference_warning then
     crosspackage_classptr_reference
       pos
-      current_package
-      target_package_before_override
-      caller_has_package_override
+      ~current_package
+      ~target_package_before_override
+      ~caller_has_package_override
   else
     package_into_override
       pos
-      current_package
-      target_package
-      target_package_before_override
+      ~current_package
+      ~target_package
+      ~target_package_before_override

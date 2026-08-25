@@ -390,11 +390,11 @@ and check_type_integrity
        List.iter linter_errs ~f:(fun (pos, w) ->
            Lints_diagnostics.crosspackage_linter
              pos
-             w.current_package
-             w.target_package
-             w.target_package_before_override
-             w.classptr_reference_warning
-             w.caller_has_package_override);
+             ~current_package:w.current_package
+             ~caller_has_package_override:w.caller_has_package_override
+             ~target_package:w.target_package
+             ~target_package_before_override:w.target_package_before_override
+             ~classptr_reference_warning:w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       (* Note: class gating via __GatedByFeatureFlag is not yet supported
          because folded classes don't carry user attributes. If needed,
@@ -430,11 +430,11 @@ and check_type_integrity
        List.iter linter_errs ~f:(fun (pos, w) ->
            Lints_diagnostics.crosspackage_linter
              pos
-             w.current_package
-             w.target_package
-             w.target_package_before_override
-             w.classptr_reference_warning
-             w.caller_has_package_override);
+             ~current_package:w.current_package
+             ~caller_has_package_override:w.caller_has_package_override
+             ~target_package:w.target_package
+             ~target_package_before_override:w.target_package_before_override
+             ~classptr_reference_warning:w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       Typing_visibility.check_gated_by_feature_flag
         env

@@ -71,6 +71,55 @@ pub unsafe trait BorrowedMessageAdapter {
     unsafe fn borrow<'a>(message: Pin<&'a mut TypeErasedBox>) -> Self::View<'a>;
 }
 
+/// Adapter for temporarily moving owned state out of an inline C++ message.
+///
+/// The inline message object remains in the [`TypeErasedBox`] in a valid but
+/// empty state. The returned Rust value owns its state until it is restored to
+/// that same message object.
+///
+/// # Safety
+///
+/// `take` and `restore` must operate on the exact C++ type recognized by
+/// `holds`. A successful `take` must leave the inline object valid, and
+/// `restore` must transfer ownership back exactly once.
+pub unsafe trait OwnedMessageAdapter {
+    type Message;
+
+    fn holds(message: &TypeErasedBox) -> bool;
+
+    /// # Safety
+    ///
+    /// `message` must contain the exact C++ type recognized by [`Self::holds`].
+    unsafe fn take(message: Pin<&mut TypeErasedBox>) -> Self::Message;
+
+    /// # Safety
+    ///
+    /// `message` must contain the moved-from C++ object produced by
+    /// [`Self::take`].
+    unsafe fn restore(message: Pin<&mut TypeErasedBox>, value: Self::Message) -> bool;
+}
+
+/// An owned-message adapter whose view points into a stable allocation.
+///
+/// This permits a future to be created from the view before [`Self::take`]
+/// transfers the allocation's owner out of the inline message wrapper.
+///
+/// # Safety
+///
+/// `borrow_stable` must return a view into storage owned by `Message`, and
+/// [`OwnedMessageAdapter::take`] must not move or invalidate that storage. The
+/// view remains valid only while the value returned by `take` remains alive.
+pub unsafe trait StableOwnedMessageAdapter: OwnedMessageAdapter {
+    type View<'a>
+    where
+        Self: 'a;
+
+    /// # Safety
+    ///
+    /// `message` must contain the exact C++ type recognized by [`Self::holds`].
+    unsafe fn borrow_stable<'a>(message: Pin<&'a mut TypeErasedBox>) -> Self::View<'a>;
+}
+
 /// Provides the dev-mode type check used by [`RustTypeErasedBox::take`].
 /// Implemented once per message type via a tiny per-type C++ thunk that compares
 /// `typeid` — exactly like the per-type C++ `RustMessageAdapter<T>`. In release
@@ -162,6 +211,40 @@ impl<'a> RustTypeErasedBox<'a> {
         // this exclusive pinned borrow, so the value cannot be moved or
         // replaced while the view is live.
         unsafe { M::borrow(self.inner.as_mut()) }
+    }
+
+    /// Move an owned message handle out while leaving its inline C++ wrapper
+    /// available for a later [`Self::restore_owned`] call.
+    pub fn take_owned<A: OwnedMessageAdapter>(&mut self) -> A::Message {
+        assert!(
+            A::holds(self.inner.as_ref().get_ref()),
+            "RustTypeErasedBox::take_owned: box does not hold the requested type"
+        );
+        // SAFETY: the unconditional `A::holds` check establishes the exact
+        // inline C++ type required by the adapter.
+        unsafe { A::take(self.inner.as_mut()) }
+    }
+
+    /// Borrow the stable allocation owned by an inline message wrapper.
+    pub fn borrow_stable_owned<A: StableOwnedMessageAdapter>(&mut self) -> A::View<'_> {
+        assert!(
+            A::holds(self.inner.as_ref().get_ref()),
+            "RustTypeErasedBox::borrow_stable_owned: box does not hold the requested type"
+        );
+        // SAFETY: the type check establishes the adapter's inline C++ type.
+        // The adapter guarantees that its view points into stable allocation.
+        unsafe { A::borrow_stable(self.inner.as_mut()) }
+    }
+
+    /// Restore a message handle previously returned by [`Self::take_owned`].
+    pub fn restore_owned<A: OwnedMessageAdapter>(&mut self, value: A::Message) -> bool {
+        assert!(
+            A::holds(self.inner.as_ref().get_ref()),
+            "RustTypeErasedBox::restore_owned: box does not hold the requested type"
+        );
+        // SAFETY: the type check above establishes the adapter's inline C++
+        // type; the adapter validates that its moved-from state is restorable.
+        unsafe { A::restore(self.inner.as_mut(), value) }
     }
 
     /// True if the box currently holds no value.

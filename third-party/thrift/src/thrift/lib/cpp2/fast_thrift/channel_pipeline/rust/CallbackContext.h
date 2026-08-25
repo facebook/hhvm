@@ -97,6 +97,10 @@ class CallbackContext final {
   int32_t fireRead(std::unique_ptr<folly::IOBuf> message) noexcept;
   int32_t fireWrite(std::unique_ptr<folly::IOBuf> message) noexcept;
 
+  int32_t fireWriteBox(
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+          message) noexcept;
+
   // Forward the message downstream UNCHANGED, without recovering its type.
   // This is the "forward what you don't understand" (Netty pass-through)
   // primitive: the whole TypeErasedBox is moved on, so the handler need not
@@ -155,6 +159,11 @@ void destroyContextHandle(uint8_t* storage) noexcept;
 // suppressed when the pipeline has closed.
 void resumeDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept;
 void destroyDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept;
+
+void fireDeferredReadWriteBox(
+    uint8_t* FOLLY_NONNULL storage,
+    apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+        message) noexcept;
 
 // Returns the deferred box only on its originating EventBase, otherwise null.
 apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox*

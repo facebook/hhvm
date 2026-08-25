@@ -154,6 +154,7 @@
 //! | [`HandlerResult`] | FFI-stable return value (`Success`, `Backpressure`, `Error`) |
 //! | [`RustMessageAdapter`] | Trait describing how a message type crosses the FFI boundary |
 //! | [`BorrowedMessageAdapter`] | Callback-scoped view of an opaque inline C++ message without taking it from the box |
+//! | [`OwnedMessageAdapter`] | Move owned state out of an inline C++ message and restore it later |
 //! | [`CoroReadHandle`] / [`CoroWriteHandle`] / [`CoroExceptionHandle`] | Adapters from a pipeline callback to an `async` handler body |
 //! | [`ContextReadMessage`] / [`ContextWriteMessage`] | Message traits describing how to resume a captured continuation |
 //! | [`ErasedCheck`] | Dev-build type check for erased message recovery |
@@ -262,6 +263,7 @@ pub use adapter::RustMessageAdapter;
 pub use context::CallbackContext;
 pub use context::ContextHandle;
 pub use context::DeferredRead;
+pub use context::OutboundMessageAdapter;
 pub use context::PipelineError;
 pub use coro_handler::ContextReadMessage;
 pub use coro_handler::ContextWriteMessage;
@@ -270,7 +272,10 @@ pub use coro_handler::CoroReadHandle;
 pub use coro_handler::CoroWriteHandle;
 pub use erased::BorrowedMessageAdapter;
 pub use erased::ErasedCheck;
+pub use erased::OwnedMessageAdapter;
 pub use erased::RustTypeErasedBox;
+pub use erased::StableOwnedMessageAdapter;
+pub use ffi::FfiCallbackContext;
 pub use ffi::FfiTypeErasedBox;
 pub use ffi::RustHandlerOpaque;
 pub use ffi::box_handler;

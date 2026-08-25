@@ -198,7 +198,7 @@ void enqueueInEventBase(
     uintptr_t task,
     rust::Fn<void(uintptr_t)> call,
     rust::Fn<void(uintptr_t)> drop) noexcept {
-  CHECK(eventBase != nullptr);
+  auto& target = *CHECK_NOTNULL(eventBase);
   struct Task final {
     uintptr_t value;
     rust::Fn<void(uintptr_t)> call;
@@ -227,11 +227,16 @@ void enqueueInEventBase(
     }
   };
 
-  eventBase->runInEventBaseThreadAlwaysEnqueue(
+  auto continuation =
       [owned =
            Task(task, std::move(call), std::move(drop))]() mutable noexcept {
         owned();
-      });
+      };
+  if (target.isInEventBaseThread()) {
+    target.runInLoop(std::move(continuation), true);
+  } else {
+    target.runInEventBaseThreadAlwaysEnqueue(std::move(continuation));
+  }
 }
 
 void fireContextHandleRead(uint8_t* storage, BytesPtr message) noexcept {
@@ -321,6 +326,30 @@ void destroyDeferredRead(uint8_t* FOLLY_NONNULL storage) noexcept {
       [token = std::move(token)]() mutable noexcept {});
 }
 
+void fireDeferredReadWriteBox(
+    uint8_t* FOLLY_NONNULL storage,
+    apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+        message) noexcept {
+  auto token = consumeDeferredRead(storage);
+  auto& deferred = *CHECK_NOTNULL(token.get());
+  if (deferred.eventBase.isInEventBaseThread()) {
+    folly::RequestContextSaverScopeGuard requestContextGuard;
+    if (!deferred.pipeline.isClosed()) {
+      (void)deferred.context.fireWrite(std::move(message));
+    }
+    return;
+  }
+
+  deferred.eventBase.runInEventBaseThreadAlwaysEnqueue(
+      [token = std::move(token),
+       message = std::move(message)]() mutable noexcept {
+        auto& deferred = *CHECK_NOTNULL(token.get());
+        if (!deferred.pipeline.isClosed()) {
+          (void)deferred.context.fireWrite(std::move(message));
+        }
+      });
+}
+
 apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox* FOLLY_NULLABLE
 deferredReadMessage(uint8_t* FOLLY_NONNULL storage) noexcept {
   CHECK_EQ(
@@ -361,6 +390,16 @@ int32_t CallbackContext::fireWrite(
     return toInt(Result::Error);
   }
   return toInt(context_.fireWrite(std::move(*message_)));
+}
+
+int32_t CallbackContext::fireWriteBox(
+    apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+        message) noexcept {
+  if (!message_ || message.empty() || forwarded_) {
+    return toInt(Result::Error);
+  }
+  forwarded_ = true;
+  return toInt(context_.fireWrite(std::move(message)));
 }
 
 int32_t CallbackContext::forwardRead() noexcept {

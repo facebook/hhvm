@@ -52,6 +52,26 @@ use std::thread::Result as UnwindResult;
 
 use crate::ffi::ffi;
 
+/// A non-`Send` future confined to its originating EventBase.
+struct EventBaseLocalFuture<F>(F);
+
+// SAFETY: this wrapper is constructed only by `EventBaseTask::start_local`.
+// The task's first poll runs on the originating EventBase, and every later
+// poll or cancellation is delivered by `EventBaseScheduler` on that same
+// EventBase. Cross-thread wakers touch only the task cell's atomic state and
+// scheduler; they never access or destroy the wrapped future.
+unsafe impl<F> Send for EventBaseLocalFuture<F> {}
+
+impl<F: Future> Future for EventBaseLocalFuture<F> {
+    type Output = F::Output;
+
+    fn poll(self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
+        // SAFETY: pinning the wrapper also pins its `future` field, which is
+        // never moved before its destructor runs.
+        unsafe { self.map_unchecked_mut(|this| &mut this.0) }.poll(context)
+    }
+}
+
 /// A wake arrived and no poll has serviced it yet.
 const NOTIFIED: u8 = 1 << 0;
 /// The payload is installed: the task is schedulable and owns one reference.
@@ -613,6 +633,13 @@ impl EventBaseTask {
             FirstPoll::Ready(()) | FirstPoll::Panicked => {}
             FirstPoll::Pending(task) => task.install(()),
         }
+    }
+
+    pub(crate) fn start_local(
+        event_base: *mut ffi::EventBase,
+        future: impl Future<Output = ()> + 'static,
+    ) {
+        Self::start(event_base, EventBaseLocalFuture(future));
     }
 
     #[cfg(test)]

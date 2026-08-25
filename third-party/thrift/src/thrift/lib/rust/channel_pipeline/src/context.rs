@@ -26,6 +26,7 @@ use std::rc::Rc;
 use crate::adapter::BytesPtr;
 use crate::adapter::RustMessageAdapter;
 use crate::erased::BorrowedMessageAdapter;
+use crate::erased::OwnedMessageAdapter;
 use crate::event_base::EventBaseTask;
 use crate::event_base::FirstPoll;
 use crate::ffi::ffi::FfiCallbackContext;
@@ -149,6 +150,26 @@ pub struct DeferredRead {
     _not_sync: PhantomData<Cell<()>>,
 }
 
+/// Adapter for sending an owned message through the write side of a pipeline.
+///
+/// # Safety
+///
+/// Implementations must transfer `Message` into the exact native pipeline
+/// message type they represent. `fire_deferred_write` must consume the live
+/// deferred-read token at `storage` exactly once without retaining the pointer.
+pub unsafe trait OutboundMessageAdapter {
+    type Message;
+
+    fn fire_write(context: Pin<&mut crate::ffi::FfiCallbackContext>, message: Self::Message)
+    -> i32;
+
+    /// # Safety
+    ///
+    /// `storage` must contain one live token owned by a [`DeferredRead`]. The
+    /// implementation must consume that token exactly once.
+    unsafe fn fire_deferred_write(storage: *mut u8, message: Self::Message);
+}
+
 // SAFETY: the native token has unique ownership of both the message and its
 // pipeline guard. Cross-thread resume and destruction consume the token and
 // enqueue it onto the originating EventBase before touching or destroying the
@@ -182,6 +203,27 @@ impl DeferredRead {
         Some(unsafe { M::borrow(Pin::new_unchecked(message)) })
     }
 
+    /// Restore owned state into the deferred message on its originating
+    /// EventBase.
+    pub fn restore_owned<A: OwnedMessageAdapter>(&mut self, value: A::Message) -> bool {
+        // SAFETY: the native token owns this message exclusively and returns
+        // it only on the originating EventBase.
+        let message =
+            unsafe { crate::ffi::ffi::deferred_read_message(self.storage.as_mut_ptr().cast()) };
+        if message.is_null() {
+            return false;
+        }
+        // SAFETY: native code returned the live message owned by this token.
+        let mut message = unsafe { Pin::new_unchecked(&mut *message) };
+        assert!(
+            A::holds(message.as_ref().get_ref()),
+            "DeferredRead::restore_owned: box does not hold the requested type"
+        );
+        // SAFETY: the type check above establishes the adapter's inline C++
+        // type; the adapter validates that its moved-from state is restorable.
+        unsafe { A::restore(message.as_mut(), value) }
+    }
+
     /// Resume the original inbound message from its captured pipeline
     /// position. Delivery is suppressed if the pipeline has closed.
     pub fn resume(self) {
@@ -190,6 +232,17 @@ impl DeferredRead {
         // destructor from consuming that token a second time.
         unsafe {
             crate::ffi::ffi::resume_deferred_read(deferred.storage.as_mut_ptr().cast());
+        }
+    }
+
+    /// Stop the deferred read and send an owned response from its captured
+    /// pipeline position.
+    pub fn fire_write<A: OutboundMessageAdapter>(self, message: A::Message) {
+        let mut deferred = std::mem::ManuallyDrop::new(self);
+        // SAFETY: `deferred` uniquely owns one live token, and ManuallyDrop
+        // prevents its destructor from consuming that token a second time.
+        unsafe {
+            A::fire_deferred_write(deferred.storage.as_mut_ptr().cast(), message);
         }
     }
 }
@@ -375,7 +428,8 @@ impl<'callback> CallbackContext<'callback> {
     ///
     /// Completion receives the intact message token and may borrow, mutate,
     /// resume, or cancel it. The task owns the token throughout suspension, so
-    /// panic or task destruction safely cancels the read.
+    /// panic or task destruction safely cancels the read. The future is
+    /// confined to this pipeline's EventBase and does not need to be `Send`.
     ///
     /// If the current callback has no live message, the message is empty, or it
     /// was already forwarded, this returns HandlerResult::Error without
@@ -387,15 +441,15 @@ impl<'callback> CallbackContext<'callback> {
         complete: Complete,
     ) -> HandlerResult
     where
-        T: Send + 'static,
-        Fut: Future<Output = T> + Send + 'static,
-        Complete: FnOnce(DeferredRead, T) + Send + 'static,
+        T: 'static,
+        Fut: Future<Output = T> + 'static,
+        Complete: FnOnce(DeferredRead, T) + 'static,
     {
         let Some(deferred) = self.defer_read(message) else {
             return HandlerResult::Error;
         };
         let event_base = self.inner.as_ref().get_ref().event_base();
-        EventBaseTask::start(event_base, async move {
+        EventBaseTask::start_local(event_base, async move {
             complete(deferred, future.await);
         });
         HandlerResult::Success
@@ -418,6 +472,14 @@ impl<'callback> CallbackContext<'callback> {
     /// same one-shot and null-rejection guards.
     pub fn fire_write(&mut self, message: BytesPtr) -> HandlerResult {
         HandlerResult::from_ffi(self.inner.as_mut().fire_write(message.into_cpp()))
+    }
+
+    /// Send an adapter-defined owned message through the outbound pipeline.
+    pub fn fire_write_owned<A: OutboundMessageAdapter>(
+        &mut self,
+        message: A::Message,
+    ) -> HandlerResult {
+        HandlerResult::from_ffi(A::fire_write(self.inner.as_mut(), message))
     }
 
     /// Forward the inbound message downstream UNCHANGED, without recovering its

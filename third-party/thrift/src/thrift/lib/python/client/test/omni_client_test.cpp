@@ -24,6 +24,7 @@
 #include <folly/SocketAddress.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Task.h>
+#include <folly/init/Init.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
@@ -825,6 +826,7 @@ int main(int argc, char** argv) {
   apache::thrift::runtime::InitOptions thriftOptions;
   thriftOptions.clientInterceptors.push_back(gTracingInterceptor);
   apache::thrift::runtime::init(std::move(thriftOptions));
+  folly::Init follyInit(&argc, &argv);
 
   // Enable the client interceptor flag.
   THRIFT_FLAG_SET_MOCK(enable_python_client_interceptors, true);

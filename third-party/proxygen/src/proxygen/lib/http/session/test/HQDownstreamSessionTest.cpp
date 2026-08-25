@@ -3687,6 +3687,40 @@ TEST_P(HQDownstreamSessionTestWebTransport, WTRequestNegotiates) {
   flushRequestsAndLoop();
 }
 
+TEST_P(HQDownstreamSessionTestWebTransport, StopSendingBeforeWTStreamPreface) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 4;
+
+  sendSettings();
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  ASSERT_EQ(sendRequest(req, /*eom=*/false), sessionId);
+
+  auto wtHandler = proxygen::test::DummyWtHandler::make();
+  auto wtCtx = wtHandler->ctx;
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    HTTPMessage resp;
+    resp.setStatusCode(200);
+    handler->txn_->sendWtHeaders(resp, std::move(wtHandler));
+  });
+  handler->expectDetachTransaction();
+  flushRequestsAndLoopN(3);
+  ASSERT_NE(wtCtx->wtSession, nullptr);
+
+  socketDriver_->addStopSending(
+      wtStreamId, WebTransport::toHTTPErrorCode(WebTransport::kInternalError));
+  flushRequestsAndLoopN(1);
+
+  socketDriver_->addReadEOF(sessionId, std::chrono::milliseconds(0));
+  hqSession_->closeWhenIdle();
+  flushRequestsAndLoop();
+}
+
 namespace {
 // Build a WebTransport uni-stream preface (stream-type + session-id varint) and
 // queue it on the mock socket driver for the given stream id.

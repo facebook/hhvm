@@ -1849,6 +1849,9 @@ WebTransportImpl::StreamReadHandle* HTTPTransaction::onWebTransportUniStream(
 
 bool HTTPTransaction::onWebTransportStopSending(HTTPCodec::StreamID id,
                                                 uint32_t errorCode) {
+  if (!webTransportImpl_) {
+    return false;
+  }
   webTransportImpl_->onWebTransportStopSending(id, errorCode);
   return true;
 }

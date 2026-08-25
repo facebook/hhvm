@@ -32,6 +32,7 @@
 #include <folly/Utility.h>
 #include <folly/container/Reserve.h>
 #include <folly/container/View.h>
+#include <folly/lang/VectorTraits.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/TypeClass.h>
@@ -529,8 +530,16 @@ size_t writeList(
     size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
   const List& out = *static_cast<const List*>(object);
   size_t written = 0;
-  for (auto& elem : out) {
-    written += writer(context, &elem);
+  if constexpr (folly::is_vector_bool_reference_v<typename List::reference>) {
+    // std::vector<bool> has no addressable elements; bounce each value
+    // through an addressable temporary.
+    for (bool elem : out) {
+      written += writer(context, &elem);
+    }
+  } else {
+    for (auto& elem : out) {
+      written += writer(context, &elem);
+    }
   }
   return written;
 }
@@ -650,8 +659,14 @@ void consumeListElem(
     void* object,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
   List& out = *static_cast<List*>(object);
-  out.emplace_back();
-  reader(context, &out.back());
+  if constexpr (folly::is_vector_bool_reference_v<typename List::reference>) {
+    bool elem{};
+    reader(context, &elem);
+    out.push_back(elem);
+  } else {
+    out.emplace_back();
+    reader(context, &out.back());
+  }
 }
 
 template <typename Set>
@@ -695,8 +710,16 @@ void readList(
     }
   } else {
     out.resize(listSize);
-    for (auto& elem : out) {
-      reader(context, &elem);
+    if constexpr (folly::is_vector_bool_reference_v<typename List::reference>) {
+      for (std::size_t i = 0; i < out.size(); ++i) {
+        bool elem{};
+        reader(context, &elem);
+        out[i] = elem;
+      }
+    } else {
+      for (auto& elem : out) {
+        reader(context, &elem);
+      }
     }
   }
 }

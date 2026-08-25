@@ -31,7 +31,10 @@ from thrift.lib.python.client.test.compression_test_helper import (
 from thrift.lib.python.client.test.event_handler_helper import (
     client_handler_that_throws,
 )
-from thrift.lib.python.client.test.test_server import server_in_event_loop
+from thrift.lib.python.client.test.test_server import (
+    compression_server_in_event_loop,
+    server_in_event_loop,
+)
 from thrift.python.client import (
     ClientType,
     get_client,
@@ -48,7 +51,11 @@ from thrift.python.exceptions import (
 )
 from thrift.python.leaf.thrift_clients import LeafService
 from thrift.python.serializer import Protocol
-from thrift.python.test.thrift_clients import EchoService, TestService
+from thrift.python.test.thrift_clients import (
+    CompressionTestService,
+    EchoService,
+    TestService,
+)
 from thrift.python.test.thrift_types import (
     ArithmeticException,
     EmptyException,
@@ -375,6 +382,45 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(
                     result, [SimpleResponse(value=f"{i}") for i in (2, 3, 4)]
                 )
+
+    async def test_compression_offload_stream_value(self) -> None:
+        # GIVEN
+        expected = [SimpleResponse(value="a" * 8192)]
+        set_compression_offload_enabled(True)
+        self.addCleanup(reset_compression_offload_flag)
+
+        # WHEN
+        actual = []
+        async with compression_server_in_event_loop() as addr:
+            async with get_compression_test_client(
+                CompressionTestService, str(addr.ip), typing.cast(int, addr.port)
+            ) as client:
+                stream = await client.compressionStreamValue()
+                async for value in stream:
+                    actual.append(value)
+
+        # THEN
+        self.assertEqual(expected, actual)
+
+    async def test_compression_offload_stream_declared_error(self) -> None:
+        # GIVEN
+        expected = "E" * 8192
+        set_compression_offload_enabled(True)
+        self.addCleanup(reset_compression_offload_flag)
+
+        # WHEN
+        async with compression_server_in_event_loop() as addr:
+            async with get_compression_test_client(
+                CompressionTestService, str(addr.ip), typing.cast(int, addr.port)
+            ) as client:
+                stream = await client.compressionStreamDeclaredError()
+                with self.assertRaises(ArithmeticException) as context:
+                    async for _ in stream:
+                        pass
+                actual = context.exception.msg
+
+        # THEN
+        self.assertEqual(expected, actual)
 
     async def test_stream_nums_throws_inside(self) -> None:
         async with server_in_event_loop() as addr:

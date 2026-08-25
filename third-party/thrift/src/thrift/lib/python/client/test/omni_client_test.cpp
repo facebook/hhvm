@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/python/client/OmniClient.h> // @manual=//thrift/lib/python/client:omni_client__cython-lib
 #include <thrift/lib/python/client/test/event_handler_helper.h>
+#include <thrift/lib/python/client/test/gen-cpp2/CompressionTestService.h>
 #include <thrift/lib/python/client/test/gen-cpp2/TestService.h>
 #include <thrift/lib/python/client/test/gen-cpp2/test_types.h>
 
@@ -49,6 +50,11 @@ using namespace apache::thrift::python::test;
 
 const std::string kTestHeaderKey = "headerKey";
 const std::string kTestHeaderValue = "headerValue";
+constexpr size_t kLargePayloadSize = 8192;
+constexpr char kStreamValueCharacter = 'a';
+constexpr char kStreamExceptionCharacter = 'E';
+constexpr char kSinkFinalCharacter = 'S';
+constexpr char kBiDiValueCharacter = 'B';
 
 /**
  * A simple interceptor that tracks requests for testing global interceptor
@@ -114,11 +120,11 @@ std::shared_ptr<TracingClientInterceptor> gTracingInterceptor =
 /**
  * A simple Scaffold service that will be used to test the Thrift OmniClient.
  */
-class TestServiceHandler
-    : virtual public apache::thrift::ServiceHandler<TestService> {
+class CompressionTestServiceHandler
+    : virtual public apache::thrift::ServiceHandler<CompressionTestService> {
  public:
-  TestServiceHandler() {}
-  ~TestServiceHandler() override {}
+  CompressionTestServiceHandler() {}
+  ~CompressionTestServiceHandler() override {}
   int add(int num1, int num2) override { return num1 + num2; }
   void oneway() override {}
   void readHeader(
@@ -151,6 +157,30 @@ class TestServiceHandler
           ArithmeticException e;
           e.msg() = "throw_from_inside_stream";
           throw e;
+        });
+  }
+
+  ServerStream<SimpleResponse> compressionStreamValue() override {
+    return folly::coro::co_invoke(
+        []() -> folly::coro::AsyncGenerator<SimpleResponse&&> {
+          SimpleResponse response;
+          response.value() =
+              std::string(kLargePayloadSize, kStreamValueCharacter);
+          co_yield std::move(response);
+        });
+  }
+
+  ServerStream<SimpleResponse> compressionStreamDeclaredError() override {
+    return folly::coro::co_invoke(
+        []() -> folly::coro::AsyncGenerator<SimpleResponse&&> {
+          SimpleResponse response;
+          response.value() = "before error";
+          co_yield std::move(response);
+
+          ArithmeticException error;
+          error.msg() =
+              std::string(kLargePayloadSize, kStreamExceptionCharacter);
+          throw error;
         });
   }
 
@@ -190,25 +220,56 @@ class TestServiceHandler
     return {std::move(response), std::move(consumer)};
   }
 
+  folly::coro::Task<StreamTransformation<folly::IOBuf, folly::IOBuf>>
+  co_bidiBuffer() override {
+    co_return StreamTransformation<folly::IOBuf, folly::IOBuf>{
+        [](folly::coro::AsyncGenerator<folly::IOBuf&&> clientInput)
+            -> folly::coro::AsyncGenerator<folly::IOBuf&&> {
+          // This test covers inbound decode only; the client sends no outbound
+          // items. A read from clientInput before co_yield would block the
+          // response. Stream cancellation destroys the unused input when the
+          // test drops the response.
+          (void)clientInput;
+          co_yield std::move(*folly::IOBuf::copyBuffer(
+              std::string(kLargePayloadSize, kBiDiValueCharacter)));
+        }};
+  }
+
   SinkConsumer<folly::IOBuf, folly::IOBuf> countSinkPyBuf(
       int from, int to) override {
-    EXPECT_EQ(from, 'a');
-    EXPECT_EQ(to, 'd');
+    EXPECT_EQ('a', from);
+    EXPECT_EQ('d', to);
     SinkConsumer<folly::IOBuf, folly::IOBuf> consumer{
         [from, to](folly::coro::AsyncGenerator<folly::IOBuf&&> gen)
             -> folly::coro::Task<folly::IOBuf> {
           int expected = from;
           std::string uploads;
-          while (auto iobuf_chunk = co_await gen.next()) {
+          while (auto iobufChunk = co_await gen.next()) {
             StreamChunk chunk;
-            folly::IOBuf buf_copy = *iobuf_chunk;
-            CompactSerializer::deserialize<StreamChunk>(&buf_copy, chunk);
-            int c = *chunk.value();
-            EXPECT_EQ(c, expected++);
-            uploads += std::to_string(*chunk.value());
+            folly::IOBuf bufferCopy = *iobufChunk;
+            CompactSerializer::deserialize<StreamChunk>(&bufferCopy, chunk);
+            int value = *chunk.value();
+            EXPECT_EQ(expected++, value);
+            uploads += std::to_string(value);
           }
-          EXPECT_EQ(expected, to);
+          EXPECT_EQ(to, expected);
           co_return std::move(*IOBuf::fromString(uploads));
+        }};
+    return consumer;
+  }
+
+  SinkConsumer<folly::IOBuf, folly::IOBuf> compressionSinkFinalResponse()
+      override {
+    SinkConsumer<folly::IOBuf, folly::IOBuf> consumer{
+        [](folly::coro::AsyncGenerator<folly::IOBuf&&> gen)
+            -> folly::coro::Task<folly::IOBuf> {
+          size_t chunkCount = 0;
+          while (co_await gen.next()) {
+            ++chunkCount;
+          }
+          EXPECT_EQ(size_t{1}, chunkCount);
+          co_return std::move(*IOBuf::fromString(
+              std::string(kLargePayloadSize, kSinkFinalCharacter)));
         }};
     return consumer;
   }
@@ -406,7 +467,8 @@ class OmniClientTest : public ::testing::Test {
  protected:
   void SetUp() override {
     // Startup the test server.
-    server_ = createServer(std::make_shared<TestServiceHandler>(), serverPort_);
+    server_ = createServer(
+        std::make_shared<CompressionTestServiceHandler>(), serverPort_);
 
     // Verify interceptor is registered
     auto registeredInterceptors =
@@ -656,6 +718,20 @@ class OmniClientCompressionTest : public OmniClientTest,
   }
 };
 
+class OmniClientStreamPayloadCompressionTest : public OmniClientTest {
+ protected:
+  void SetUp() override {
+    OmniClientTest::SetUp();
+    compressResponses_ = true;
+    THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+  }
+
+  void TearDown() override {
+    THRIFT_FLAG_UNMOCK(thrift_client_compress_request_on_cpu);
+    OmniClientTest::TearDown();
+  }
+};
+
 TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
   AddRequest request;
   request.num1() = 1;
@@ -720,7 +796,7 @@ TEST_F(OmniClientTest, ReadHeaderTest) {
 TEST_P(OmniClientCompressionTest, CompressedResponse) {
   // GIVEN
   THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, GetParam());
-  const std::string expected(8192, 'a');
+  const std::string expected(kLargePayloadSize, kStreamValueCharacter);
   const auto expectedCompressionAlgorithm =
       GetParam() ? CompressionAlgorithm::ZSTD : CompressionAlgorithm::NONE;
   ReadHeaderRequest request;
@@ -756,6 +832,53 @@ TEST_F(OmniClientTest, SinkRequestTest) {
   SimpleResponse response;
   response.value() = "initial";
   testSend("TestService", "dumbSink", request, response, RpcKind::SINK);
+}
+
+TEST_F(OmniClientStreamPayloadCompressionTest, StreamValues) {
+  // GIVEN
+  CompressionStreamRequest request;
+  const std::string expected(kLargePayloadSize, kStreamValueCharacter);
+
+  // WHEN
+  // THEN
+  testSendStream(
+      "CompressionTestService",
+      "compressionStreamValue",
+      request,
+      [this, expected](
+          OmniClientResponseWithHeaders&& resp) -> folly::coro::Task<void> {
+        auto gen = std::move(*resp.stream).toAsyncGenerator();
+        auto actual = co_await gen.next();
+        if (!actual) {
+          ADD_FAILURE() << "Expected a stream value payload";
+          co_return;
+        }
+        testContains<CompactSerializer>(std::move(*actual), expected);
+      });
+}
+
+TEST_F(OmniClientStreamPayloadCompressionTest, StreamDeclaredException) {
+  // GIVEN
+  CompressionStreamRequest request;
+  const std::string expected(kLargePayloadSize, kStreamExceptionCharacter);
+
+  // WHEN
+  // THEN
+  testSendStream(
+      "CompressionTestService",
+      "compressionStreamDeclaredError",
+      request,
+      [this, expected](
+          OmniClientResponseWithHeaders&& resp) -> folly::coro::Task<void> {
+        auto gen = std::move(*resp.stream).toAsyncGenerator();
+        co_await gen.next();
+        auto actual = co_await gen.next();
+        if (!actual) {
+          ADD_FAILURE() << "Expected a declared stream exception payload";
+          co_return;
+        }
+        testContains<CompactSerializer>(std::move(*actual), expected);
+      });
 }
 
 TEST_F(OmniClientTest, StreamNumsTest) {
@@ -854,6 +977,59 @@ folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> chunkBufGenerator(
     S::serialize(*chunk, &queue);
     co_yield queue.move();
   }
+}
+
+TEST_F(OmniClientStreamPayloadCompressionTest, SinkFinalResponse) {
+  // GIVEN
+  CompressionSinkRequest request;
+  NumsRequest sinkInput;
+  sinkInput.f() = 0;
+  sinkInput.t() = 1;
+  const std::string expected(kLargePayloadSize, kSinkFinalCharacter);
+
+  // WHEN
+  // THEN
+  testSendSink<CompactSerializer, CompressionSinkRequest>(
+      "CompressionTestService",
+      "compressionSinkFinalResponse",
+      request,
+      expected,
+      [sinkInput](OmniClientResponseWithHeaders&& resp)
+          -> folly::coro::Task<std::unique_ptr<folly::IOBuf>> {
+        auto sink = std::move(*resp.sink);
+        co_return co_await sink.sink(chunkBufGenerator(sinkInput));
+      });
+}
+
+TEST_F(OmniClientStreamPayloadCompressionTest, BiDiInboundValue) {
+  // GIVEN
+  EmptyRequest request;
+  const std::string expected(kLargePayloadSize, kBiDiValueCharacter);
+
+  // WHEN
+  // THEN
+  connectToServer<CompactSerializer>(
+      [request, expected](OmniClient& client) -> folly::coro::Task<void> {
+        std::string args = CompactSerializer::serialize<std::string>(request);
+        auto data = apache::thrift::MethodMetadata::Data(
+            "bidiBuffer", apache::thrift::FunctionQualifier::Unspecified);
+        auto response = co_await client.semifuture_send(
+            "TestService",
+            "bidiBuffer",
+            args,
+            std::move(data),
+            {},
+            {},
+            co_await folly::coro::co_current_executor,
+            RpcKind::BIDIRECTIONAL_STREAM);
+        auto gen = std::move(*response.stream).toAsyncGenerator();
+        auto actual = co_await gen.next();
+        if (!actual) {
+          ADD_FAILURE() << "Expected a bidi inbound value payload";
+          co_return;
+        }
+        EXPECT_EQ(expected, (*actual)->to<std::string>());
+      });
 }
 
 TEST_F(OmniClientTest, CountSinkTest) {

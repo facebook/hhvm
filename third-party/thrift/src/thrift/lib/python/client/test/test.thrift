@@ -15,10 +15,8 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/thrift.thrift"
 
-@thrift.AllowLegacyMissingUris
-package;
+package "thrift.com/python/client/test"
 
 namespace cpp2 apache.thrift.python.test
 namespace py thrift.py.test
@@ -30,6 +28,9 @@ exception ArithmeticException {
   1: string msg;
 }
 
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary PyBuffer
+
 service TestService {
   i32 add(1: i32 num1, 2: i32 num2);
   double divide(1: double dividend, 2: double divisor) throws (
@@ -37,6 +38,7 @@ service TestService {
   );
   void noop();
   void oops() throws (1: EmptyException ee);
+  // @lint-ignore THRIFTCHECKS avoid-oneway-method (required to test oneway client behavior)
   oneway void oneway();
   void surprise();
   string readHeader(1: string key);
@@ -56,20 +58,29 @@ service TestService {
   sink<PyBuffer, PyBuffer> countSinkPyBuf(1: i32 from, 2: i32 to) throws (
     1: ArithmeticException e,
   );
+
+  sink<PyBuffer>, stream<PyBuffer> bidiBuffer();
+}
+
+service CompressionTestService extends TestService {
+  stream<SimpleResponse> compressionStreamValue();
+  stream<SimpleResponse throws (1: ArithmeticException e)> compressionStreamDeclaredError();
+  sink<PyBuffer, PyBuffer> compressionSinkFinalResponse();
 }
 
 service EchoService extends TestService {
   string echo(1: string input);
 }
 
-@cpp.Type{name = "folly::IOBuf"}
-typedef binary PyBuffer
-
 //
 // The following structures are defined to mimic the anonymous argument structs
 // for the related service functions. These request structures are used to test
 // the `OmniClient` so that we can easily construct the arguments.
 //
+struct CompressionStreamRequest {}
+
+struct CompressionSinkRequest {}
+
 struct AddRequest {
   1: i32 num1;
   2: i32 num2;

@@ -26,6 +26,7 @@ from thrift.py3.server import get_context, SocketAddress
 from thrift.python.leaf.thrift_services import LeafServiceInterface
 from thrift.python.server import ThriftServer
 from thrift.python.test.thrift_services import (
+    CompressionTestServiceInterface,
     EchoServiceInterface,
     TestServiceInterface,
 )
@@ -34,6 +35,9 @@ from thrift.python.test.thrift_types import (
     EmptyException,
     SimpleResponse,
 )
+
+
+_COMPRESSION_PAYLOAD_SIZE = 8192
 
 
 class TestServiceHandler(TestServiceInterface):
@@ -86,6 +90,29 @@ class TestServiceHandler(TestServiceInterface):
                 yield SimpleResponse(value=f"{i}")
 
         return (f + t) * (t - f + 1) // 2, gen()
+
+
+# The thrift-python server generator omits sink and bidi handlers. C++ tests
+# own those transport paths; this handler owns generated-Python stream cases.
+class CompressionTestServiceHandler(
+    TestServiceHandler, CompressionTestServiceInterface
+):
+    async def compressionStreamValue(
+        self,
+    ) -> typing.AsyncGenerator[SimpleResponse, None]:
+        async def gen() -> typing.AsyncGenerator[SimpleResponse, None]:
+            yield SimpleResponse(value="a" * _COMPRESSION_PAYLOAD_SIZE)
+
+        return gen()
+
+    async def compressionStreamDeclaredError(
+        self,
+    ) -> typing.AsyncGenerator[SimpleResponse, None]:
+        async def gen() -> typing.AsyncGenerator[SimpleResponse, None]:
+            yield SimpleResponse(value="before error")
+            raise ArithmeticException(msg="E" * _COMPRESSION_PAYLOAD_SIZE)
+
+        return gen()
 
 
 class EchoServiceHandler(TestServiceHandler, EchoServiceInterface):
@@ -142,9 +169,11 @@ def server_in_another_process() -> typing.Generator[str, None, None]:
 
 
 @contextlib.asynccontextmanager
-async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
+async def _server_in_event_loop(
+    handler: TestServiceInterface,
+) -> typing.AsyncGenerator[SocketAddress, None]:
     # pyrefly: ignore [bad-specialization]
-    server = ThriftServer(LeafServiceHandler(), ip="::1")
+    server = ThriftServer(handler, ip="::1")
     install_http2_routing_handler(server)
     serve_task = asyncio.get_running_loop().create_task(server.serve())
     addr = await server.get_address()
@@ -153,3 +182,17 @@ async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
     finally:
         server.stop()
         await serve_task
+
+
+@contextlib.asynccontextmanager
+async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
+    async with _server_in_event_loop(LeafServiceHandler()) as addr:
+        yield addr
+
+
+@contextlib.asynccontextmanager
+async def compression_server_in_event_loop() -> typing.AsyncGenerator[
+    SocketAddress, None
+]:
+    async with _server_in_event_loop(CompressionTestServiceHandler()) as addr:
+        yield addr

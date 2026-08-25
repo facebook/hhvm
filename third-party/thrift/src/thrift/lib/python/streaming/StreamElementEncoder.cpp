@@ -16,11 +16,14 @@
 
 #include <thrift/lib/python/streaming/StreamElementEncoder.h>
 
+#include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+
 namespace apache::thrift::python::detail {
 
 folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_element(
     folly::Try<apache::thrift::StreamPayload>&& payload) {
   if (payload.hasValue()) {
+    apache::thrift::detail::ap::decompressStreamPayload(*payload);
     return folly::Try<std::unique_ptr<folly::IOBuf>>(
         std::move(payload->payload));
   } else if (payload.hasException()) {
@@ -40,6 +43,7 @@ folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_exception(
       },
       [&ret](apache::thrift::detail::EncodedStreamError& err) {
         auto& payload = err.encoded;
+        apache::thrift::detail::ap::decompressStreamPayload(payload);
         DCHECK_EQ(payload.metadata.payloadMetadata().has_value(), true);
         DCHECK_EQ(
             folly::to_underlying(payload.metadata.payloadMetadata()->getType()),

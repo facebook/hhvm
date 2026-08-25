@@ -124,7 +124,9 @@ use rpc::rpc::ServerTestResult;
 use rpc::rpc::SinkBasicServerTestResult;
 use rpc::rpc::SinkChunkTimeoutServerTestResult;
 use rpc::rpc::SinkDeclaredExceptionServerTestResult;
+use rpc::rpc::SinkInitialDeclaredExceptionServerTestResult;
 use rpc::rpc::SinkInitialResponseServerTestResult;
+use rpc::rpc::SinkServerDeclaredExceptionServerTestResult;
 use rpc::rpc::SinkUndeclaredExceptionServerTestResult;
 use rpc::rpc::StreamBasicServerTestResult;
 use rpc::rpc::StreamDeclaredExceptionServerTestResult;
@@ -152,10 +154,16 @@ use rpc::rpc::services::r_p_c_conformance_service::SinkChunkTimeoutSinkResult;
 use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionSinkExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialDeclaredExceptionExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialDeclaredExceptionSinkResult;
 use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkFinalExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkServerDeclaredExceptionExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkServerDeclaredExceptionSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkServerDeclaredExceptionSinkFinalExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkServerDeclaredExceptionSinkResult;
 use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionSinkExn;
 use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionSinkResult;
@@ -819,6 +827,85 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
             },
         );
         Ok(SinkDeclaredExceptionSinkResult::new(handler).with_buffer_size(buffer_size))
+    }
+
+    async fn sinkInitialDeclaredException(
+        &self,
+        request: Request,
+    ) -> Result<SinkInitialDeclaredExceptionSinkResult, SinkInitialDeclaredExceptionExn> {
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::sinkInitialDeclaredException(
+            SinkInitialDeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::sinkInitialDeclaredException(instr) => {
+                if let Some(exception) = &instr.userException {
+                    Err(SinkInitialDeclaredExceptionExn::e(*exception.clone()))
+                } else {
+                    Err(SinkInitialDeclaredExceptionExn::ApplicationException(
+                        none_error(),
+                    ))
+                }
+            }
+            _ => Err(SinkInitialDeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
+    }
+
+    async fn sinkServerDeclaredException(
+        &self,
+        request: Request,
+    ) -> Result<SinkServerDeclaredExceptionSinkResult, SinkServerDeclaredExceptionExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let (buffer_size, user_exception) = match &r.serverInstruction {
+            ServerInstruction::sinkServerDeclaredException(instr) => match &instr.userException {
+                Some(exception) => (instr.bufferSize as u64, *exception.clone()),
+                None => {
+                    return Err(SinkServerDeclaredExceptionExn::ApplicationException(
+                        none_error(),
+                    ));
+                }
+            },
+            _ => {
+                return Err(SinkServerDeclaredExceptionExn::ApplicationException(
+                    instruction_match_error(),
+                ));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |stream: BoxStream<
+                'static,
+                Result<Request, SinkServerDeclaredExceptionSinkExn>,
+            >| {
+                (async move {
+                    let _sink_payloads = stream
+                        .try_collect::<Vec<Request>>()
+                        .await
+                        .unwrap_or_default();
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkServerDeclaredException(
+                        SinkServerDeclaredExceptionServerTestResult {
+                            request,
+                            ..Default::default()
+                        },
+                    );
+                    Err::<Response, SinkServerDeclaredExceptionSinkFinalExn>(
+                        SinkServerDeclaredExceptionSinkFinalExn::e(user_exception),
+                    )
+                })
+                .boxed()
+            },
+        );
+        Ok(SinkServerDeclaredExceptionSinkResult::new(handler).with_buffer_size(buffer_size))
     }
 }
 

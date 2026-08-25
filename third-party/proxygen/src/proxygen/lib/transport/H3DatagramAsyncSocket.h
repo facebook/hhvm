@@ -113,6 +113,12 @@ class H3DatagramAsyncSocket
     return -1;
   }
 
+  ssize_t writeWithCmsgs(const folly::SocketAddress& /*address*/,
+                         const std::unique_ptr<folly::IOBuf>& /*buf*/,
+                         const folly::SocketCmsgMap& /*cmsgs*/) override {
+    return -1;
+  }
+
   ssize_t writeGSO(const folly::SocketAddress& /*address*/,
                    const std::unique_ptr<folly::IOBuf>& /*buf*/,
                    folly::AsyncUDPSocket::WriteOptions /*options*/) override {

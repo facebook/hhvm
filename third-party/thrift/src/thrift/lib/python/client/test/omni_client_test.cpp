@@ -17,6 +17,7 @@
 #include <chrono>
 #include <optional>
 #include <stdexcept>
+#include <thread>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -28,6 +29,7 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
@@ -252,6 +254,154 @@ std::unique_ptr<ThriftServer> createServer(
   return server;
 }
 
+class DecompressionTrackingChannel final : public RequestChannel {
+ public:
+  static RequestChannel::Ptr newChannel(
+      RequestChannel::Ptr impl,
+      std::optional<std::thread::id>& decompressResponseThread,
+      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm) {
+    return {
+        new DecompressionTrackingChannel(
+            std::move(impl),
+            decompressResponseThread,
+            responseCompressionAlgorithm),
+        {}};
+  }
+
+  void sendRequestResponse(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      RequestClientCallback::Ptr callback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    impl_->sendRequestResponse(
+        std::move(rpcOptions),
+        std::move(methodMetadata),
+        std::move(request),
+        std::move(header),
+        std::move(callback),
+        std::move(frameworkMetadata));
+  }
+
+  void sendRequestNoResponse(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      RequestClientCallback::Ptr callback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    impl_->sendRequestNoResponse(
+        std::move(rpcOptions),
+        std::move(methodMetadata),
+        std::move(request),
+        std::move(header),
+        std::move(callback),
+        std::move(frameworkMetadata));
+  }
+
+  void sendRequestStream(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      StreamClientCallback* callback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    impl_->sendRequestStream(
+        std::move(rpcOptions),
+        std::move(methodMetadata),
+        std::move(request),
+        std::move(header),
+        callback,
+        std::move(frameworkMetadata));
+  }
+
+  void sendRequestSink(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      SinkClientCallback* callback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    impl_->sendRequestSink(
+        std::move(rpcOptions),
+        std::move(methodMetadata),
+        std::move(request),
+        std::move(header),
+        callback,
+        std::move(frameworkMetadata));
+  }
+
+  void sendRequestBiDi(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      BiDiClientCallback* callback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    impl_->sendRequestBiDi(
+        std::move(rpcOptions),
+        std::move(methodMetadata),
+        std::move(request),
+        std::move(header),
+        callback,
+        std::move(frameworkMetadata));
+  }
+
+  void compressRequest(
+      SerializedRequest& request,
+      const RpcOptions& rpcOptions,
+      transport::THeader& header) override {
+    impl_->compressRequest(request, rpcOptions, header);
+  }
+
+  void decompressResponse(ClientReceiveState& state) override {
+    decompressResponseThread_ = std::this_thread::get_id();
+    if (auto* header = state.header()) {
+      responseCompressionAlgorithm_ = header->getResponseCompressionAlgorithm();
+    } else {
+      responseCompressionAlgorithm_.reset();
+    }
+    impl_->decompressResponse(state);
+  }
+
+  void terminateInteraction(InteractionId id) override {
+    impl_->terminateInteraction(std::move(id));
+  }
+
+  InteractionId createInteraction(ManagedStringView&& name) override {
+    return impl_->createInteraction(std::move(name));
+  }
+
+  InteractionId registerInteraction(
+      ManagedStringView&& name, int64_t id) override {
+    return impl_->registerInteraction(std::move(name), id);
+  }
+
+  void setCloseCallback(CloseCallback* callback) override {
+    impl_->setCloseCallback(callback);
+  }
+
+  folly::EventBase* getEventBase() const override {
+    return impl_->getEventBase();
+  }
+
+  uint16_t getProtocolId() override { return impl_->getProtocolId(); }
+
+ private:
+  DecompressionTrackingChannel(
+      RequestChannel::Ptr impl,
+      std::optional<std::thread::id>& decompressResponseThread,
+      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm)
+      : impl_(std::move(impl)),
+        decompressResponseThread_(decompressResponseThread),
+        responseCompressionAlgorithm_(responseCompressionAlgorithm) {}
+
+  RequestChannel::Ptr impl_;
+  std::optional<std::thread::id>& decompressResponseThread_;
+  std::optional<CompressionAlgorithm>& responseCompressionAlgorithm_;
+};
+
 class OmniClientTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -289,19 +439,31 @@ class OmniClientTest : public ::testing::Test {
     folly::coro::blockingWait([this, &callMe]() -> folly::coro::Task<void> {
       CHECK_GT(serverPort_, 0) << "Check if the server has started already";
       folly::Executor* executor = co_await folly::coro::co_current_executor;
-      auto channel = PooledRequestChannel::newChannel(
+      auto pooledChannel = PooledRequestChannel::newChannel(
           executor,
           ioThread_,
           [this](folly::EventBase& evb) {
             auto chan = apache::thrift::RocketClientChannel::newChannel(
                 folly::AsyncSocket::UniquePtr(
                     new folly::AsyncSocket(&evb, "::1", serverPort_)));
+            if (compressResponses_) {
+              CompressionConfig compressionConfig;
+              compressionConfig.codecConfig().ensure().set_zstdConfig();
+              chan->setDesiredCompressionConfig(compressionConfig);
+            }
             chan->setProtocolId(prot);
             chan->setTimeout(500 /* ms */);
             return chan;
           },
           prot);
+      auto channel = DecompressionTrackingChannel::newChannel(
+          std::move(pooledChannel),
+          decompressResponseThread_,
+          responseCompressionAlgorithm_);
       OmniClient client(std::move(channel));
+      executorThread_ = std::this_thread::get_id();
+      decompressResponseThread_.reset();
+      responseCompressionAlgorithm_.reset();
       co_await callMe(client);
     }());
   }
@@ -426,6 +588,10 @@ class OmniClientTest : public ::testing::Test {
   }
 
  protected:
+  bool compressResponses_{false};
+  std::optional<std::thread::id> executorThread_;
+  std::optional<std::thread::id> decompressResponseThread_;
+  std::optional<CompressionAlgorithm> responseCompressionAlgorithm_;
   std::unique_ptr<ThriftServer> server_;
   folly::EventBase* eb_ = folly::EventBaseManager::get()->getEventBase();
   uint16_t serverPort_{0};
@@ -475,6 +641,20 @@ TEST_F(OmniClientTest, RequestsReportThePythonClientRuntime) {
 
   EXPECT_EQ(recorder->observed, ClientRuntime::Python);
 }
+
+class OmniClientCompressionTest : public OmniClientTest,
+                                  public ::testing::WithParamInterface<bool> {
+ protected:
+  void SetUp() override {
+    OmniClientTest::SetUp();
+    compressResponses_ = true;
+  }
+
+  void TearDown() override {
+    THRIFT_FLAG_UNMOCK(thrift_client_compress_request_on_cpu);
+    OmniClientTest::TearDown();
+  }
+};
 
 TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
   AddRequest request;
@@ -536,6 +716,39 @@ TEST_F(OmniClientTest, ReadHeaderTest) {
       {{kTestHeaderKey, kTestHeaderValue}},
       kTestHeaderValue);
 }
+
+TEST_P(OmniClientCompressionTest, CompressedResponse) {
+  // GIVEN
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, GetParam());
+  const std::string expected(8192, 'a');
+  const auto expectedCompressionAlgorithm =
+      GetParam() ? CompressionAlgorithm::ZSTD : CompressionAlgorithm::NONE;
+  ReadHeaderRequest request;
+  request.key() = kTestHeaderKey;
+
+  // WHEN
+  // THEN
+  testSendHeaders(
+      "TestService",
+      "readHeader",
+      request,
+      {{kTestHeaderKey, expected}},
+      expected);
+
+  EXPECT_EQ(
+      std::make_pair(
+          executorThread_,
+          std::optional<CompressionAlgorithm>{expectedCompressionAlgorithm}),
+      std::make_pair(decompressResponseThread_, responseCompressionAlgorithm_));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    DecompressionThread,
+    OmniClientCompressionTest,
+    ::testing::Bool(),
+    [](const ::testing::TestParamInfo<bool>& info) {
+      return info.param ? "DeferredHook" : "EagerUnpack";
+    });
 
 TEST_F(OmniClientTest, SinkRequestTest) {
   EmptyRequest request;

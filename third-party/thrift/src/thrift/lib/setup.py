@@ -504,6 +504,11 @@ else:
                 **common_options,
             ),
             Extension(
+                "thrift.lib.python.client.test.compression_test_helper",
+                sources=["thrift/lib/python/client/test/compression_test_helper.pyx"],
+                **common_options,
+            ),
+            Extension(
                 "thrift.lib.python.client.test.exceptions_helper",
                 sources=["thrift/lib/python/client/test/exceptions_helper.pyx"],
                 **common_options,
@@ -572,7 +577,7 @@ else:
 
     # Test-only package (directory created by test symlinks)
     if os.environ.get("THRIFT_BUILD_TESTS", "0") == "1":
-        packages.append("thrift.lib.python.client")
+        packages.extend(["thrift.lib.python.client", "thrift.lib.python.client.test"])
 
     setup(
         name="thrift",

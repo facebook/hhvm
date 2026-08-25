@@ -299,6 +299,10 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
 
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
+  // Match GeneratedAsyncClient's weak capture: a strong continuation capture
+  // can delay channel destruction and expose ServiceRouter teardown ordering
+  // issues. An expired channel means its decompression hook is no longer safe.
+  std::weak_ptr<RequestChannel> channelWeak = channel_;
   try {
     sendImpl(
         std::move(rpcOptions),
@@ -319,9 +323,16 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
   }
   return std::move(future)
       .deferValue([protocolTry = getChannelProtocolId(),
-                   rpcKind](ClientReceiveState&& state) {
+                   rpcKind,
+                   channelWeak =
+                       std::move(channelWeak)](ClientReceiveState&& state) {
         // Extract protocol, throws if exception (caught by deferError below)
         auto protocol = protocolTry.value();
+        if (!state.isException()) {
+          if (auto channel = channelWeak.lock()) {
+            channel->decompressResponse(state);
+          }
+        }
         if (state.isException()) {
           state.exception().throw_exception();
         }

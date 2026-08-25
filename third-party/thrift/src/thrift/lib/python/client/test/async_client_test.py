@@ -23,6 +23,11 @@ from unittest import IsolatedAsyncioTestCase, mock
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
+from thrift.lib.python.client.test.compression_test_helper import (
+    get_compression_test_client,
+    reset_compression_offload_flag,
+    set_compression_offload_enabled,
+)
 from thrift.lib.python.client.test.event_handler_helper import (
     client_handler_that_throws,
 )
@@ -130,6 +135,22 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:
                 sum_ = await client.add(1, 2)
                 self.assertEqual(3, sum_)
+
+    async def test_compression_offload_unary_response(self) -> None:
+        # GIVEN
+        expected = "a" * 8192
+        set_compression_offload_enabled(True)
+        self.addCleanup(reset_compression_offload_flag)
+
+        # WHEN
+        async with server_in_event_loop() as addr:
+            async with get_compression_test_client(
+                EchoService, str(addr.ip), typing.cast(int, addr.port)
+            ) as client:
+                actual = await client.echo(expected)
+
+        # THEN
+        self.assertEqual(expected, actual)
 
     async def test_basic_no_context_manager(self) -> None:
         # If immediately calling method from `get_client`, we used to segfault.

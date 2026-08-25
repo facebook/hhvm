@@ -315,17 +315,29 @@ std::unique_ptr<ThriftServer> createServer(
   return server;
 }
 
-class DecompressionTrackingChannel final : public RequestChannel {
+struct RequestCompressionObservation {
+  size_t callCount{0};
+  std::optional<std::thread::id> thread;
+  std::optional<size_t> requestSize;
+  std::optional<transport::THeader::StringToStringMap> rpcOptionsHeaders;
+  std::optional<transport::THeader::StringToStringMap> requestHeaders;
+  bool calledBeforeDispatch{false};
+  bool throwOnCompress{false};
+};
+
+class CompressionTrackingChannel final : public RequestChannel {
  public:
   static RequestChannel::Ptr newChannel(
       RequestChannel::Ptr impl,
       std::optional<std::thread::id>& decompressResponseThread,
-      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm) {
+      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm,
+      RequestCompressionObservation& requestCompressionObservation) {
     return {
-        new DecompressionTrackingChannel(
+        new CompressionTrackingChannel(
             std::move(impl),
             decompressResponseThread,
-            responseCompressionAlgorithm),
+            responseCompressionAlgorithm,
+            requestCompressionObservation),
         {}};
   }
 
@@ -336,6 +348,8 @@ class DecompressionTrackingChannel final : public RequestChannel {
       std::shared_ptr<transport::THeader> header,
       RequestClientCallback::Ptr callback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
+    requestCompressionObservation_.calledBeforeDispatch =
+        requestCompressionObservation_.callCount > 0;
     impl_->sendRequestResponse(
         std::move(rpcOptions),
         std::move(methodMetadata),
@@ -413,6 +427,20 @@ class DecompressionTrackingChannel final : public RequestChannel {
       SerializedRequest& request,
       const RpcOptions& rpcOptions,
       transport::THeader& header) override {
+    ++requestCompressionObservation_.callCount;
+    requestCompressionObservation_.thread = std::this_thread::get_id();
+    requestCompressionObservation_.requestSize = request.buffer
+        ? std::optional<size_t>{request.buffer->computeChainDataLength()}
+        : std::nullopt;
+    requestCompressionObservation_.rpcOptionsHeaders =
+        rpcOptions.getWriteHeaders();
+    requestCompressionObservation_.requestHeaders = header.getWriteHeaders();
+    if (requestCompressionObservation_.throwOnCompress) {
+      throw std::runtime_error("compression hook failure");
+    }
+    // This wrapper proves that OmniClient invokes the outer channel hook.
+    // The pooled delegate has no caller-thread compression policy;
+    // ServiceRouter integration tests own real compression behavior.
     impl_->compressRequest(request, rpcOptions, header);
   }
 
@@ -450,17 +478,34 @@ class DecompressionTrackingChannel final : public RequestChannel {
   uint16_t getProtocolId() override { return impl_->getProtocolId(); }
 
  private:
-  DecompressionTrackingChannel(
+  CompressionTrackingChannel(
       RequestChannel::Ptr impl,
       std::optional<std::thread::id>& decompressResponseThread,
-      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm)
+      std::optional<CompressionAlgorithm>& responseCompressionAlgorithm,
+      RequestCompressionObservation& requestCompressionObservation)
       : impl_(std::move(impl)),
         decompressResponseThread_(decompressResponseThread),
-        responseCompressionAlgorithm_(responseCompressionAlgorithm) {}
+        responseCompressionAlgorithm_(responseCompressionAlgorithm),
+        requestCompressionObservation_(requestCompressionObservation) {}
 
   RequestChannel::Ptr impl_;
   std::optional<std::thread::id>& decompressResponseThread_;
   std::optional<CompressionAlgorithm>& responseCompressionAlgorithm_;
+  RequestCompressionObservation& requestCompressionObservation_;
+};
+
+class InteractionTrackingClient final : public OmniClient {
+ public:
+  explicit InteractionTrackingClient(RequestChannelShared channel)
+      : OmniClient(std::move(channel)) {}
+
+  size_t setInteractionCallCount() const { return setInteractionCallCount_; }
+
+ protected:
+  void setInteraction(RpcOptions&) override { ++setInteractionCallCount_; }
+
+ private:
+  size_t setInteractionCallCount_{0};
 };
 
 class OmniClientTest : public ::testing::Test {
@@ -518,14 +563,16 @@ class OmniClientTest : public ::testing::Test {
             return chan;
           },
           prot);
-      auto channel = DecompressionTrackingChannel::newChannel(
+      auto channel = CompressionTrackingChannel::newChannel(
           std::move(pooledChannel),
           decompressResponseThread_,
-          responseCompressionAlgorithm_);
+          responseCompressionAlgorithm_,
+          requestCompressionObservation_);
       OmniClient client(std::move(channel));
       executorThread_ = std::this_thread::get_id();
       decompressResponseThread_.reset();
       responseCompressionAlgorithm_.reset();
+      requestCompressionObservation_ = {};
       co_await callMe(client);
     }());
   }
@@ -654,6 +701,7 @@ class OmniClientTest : public ::testing::Test {
   std::optional<std::thread::id> executorThread_;
   std::optional<std::thread::id> decompressResponseThread_;
   std::optional<CompressionAlgorithm> responseCompressionAlgorithm_;
+  RequestCompressionObservation requestCompressionObservation_;
   std::unique_ptr<ThriftServer> server_;
   folly::EventBase* eb_ = folly::EventBaseManager::get()->getEventBase();
   uint16_t serverPort_{0};
@@ -791,6 +839,90 @@ TEST_F(OmniClientTest, ReadHeaderTest) {
       request,
       {{kTestHeaderKey, kTestHeaderValue}},
       kTestHeaderValue);
+}
+
+TEST_F(OmniClientTest, RequestCompressionHookRunsBeforeDispatch) {
+  // GIVEN
+  ReadHeaderRequest request;
+  request.key() = kTestHeaderKey;
+  const std::unordered_map<std::string, std::string> requestHeaders{
+      {kTestHeaderKey, kTestHeaderValue}};
+  const transport::THeader::StringToStringMap expectedHookHeaders{
+      {kTestHeaderKey, kTestHeaderValue}};
+  const auto expectedRequestSize =
+      CompactSerializer::serialize<std::string>(request).size();
+
+  // WHEN
+  testSendHeaders(
+      "TestService", "readHeader", request, requestHeaders, kTestHeaderValue);
+
+  // THEN
+  EXPECT_EQ(
+      std::make_tuple(
+          size_t{1},
+          executorThread_,
+          std::optional<size_t>{expectedRequestSize},
+          std::optional{expectedHookHeaders},
+          std::optional{expectedHookHeaders},
+          true),
+      std::make_tuple(
+          requestCompressionObservation_.callCount,
+          requestCompressionObservation_.thread,
+          requestCompressionObservation_.requestSize,
+          requestCompressionObservation_.rpcOptionsHeaders,
+          requestCompressionObservation_.requestHeaders,
+          requestCompressionObservation_.calledBeforeDispatch));
+}
+
+TEST_F(OmniClientTest, RequestCompressionFailureClearsInteractionFactory) {
+  // GIVEN
+  ReadHeaderRequest request;
+  request.key() = kTestHeaderKey;
+  const std::unordered_map<std::string, std::string> requestHeaders{
+      {kTestHeaderKey, kTestHeaderValue}};
+  const auto expected = std::make_tuple(true, true, size_t{1});
+
+  // WHEN
+  // THEN
+  connectToServer<CompactSerializer>(
+      [this, request, requestHeaders, expected](
+          OmniClient& client) -> folly::coro::Task<void> {
+        InteractionTrackingClient factoryClient(client.getChannelShared());
+        client.set_interaction_factory(&factoryClient);
+        requestCompressionObservation_.throwOnCompress = true;
+
+        std::string firstArgs =
+            CompactSerializer::serialize<std::string>(request);
+        auto firstResponse = co_await client.semifuture_send(
+            "TestService",
+            "readHeader",
+            firstArgs,
+            apache::thrift::MethodMetadata::Data(
+                "readHeader", apache::thrift::FunctionQualifier::Unspecified),
+            requestHeaders,
+            {},
+            co_await folly::coro::co_current_executor);
+
+        requestCompressionObservation_.throwOnCompress = false;
+        std::string secondArgs =
+            CompactSerializer::serialize<std::string>(request);
+        auto secondResponse = co_await client.semifuture_send(
+            "TestService",
+            "readHeader",
+            secondArgs,
+            apache::thrift::MethodMetadata::Data(
+                "readHeader", apache::thrift::FunctionQualifier::Unspecified),
+            requestHeaders,
+            {},
+            co_await folly::coro::co_current_executor);
+
+        EXPECT_EQ(
+            expected,
+            std::make_tuple(
+                firstResponse.buf.hasError(),
+                secondResponse.buf.hasValue(),
+                factoryClient.setInteractionCallCount()));
+      });
 }
 
 TEST_P(OmniClientCompressionTest, CompressedResponse) {

@@ -499,10 +499,15 @@ void OmniClient::sendImpl(
                                          // serialize call
   }
 
-  SerializedRequest serializedRequest(std::move(args));
-
   setInteraction(rpcOptions);
   factoryClient_ = nullptr;
+
+  SerializedRequest serializedRequest(std::move(args));
+  // Async thrift-python reaches this caller-thread hook on the event loop
+  // with the GIL held. The opt-in flag keeps this cost explicit; broad
+  // rollout must measure loop latency. A Cython boundary change must prove
+  // argument lifetime safety before it releases the GIL.
+  channel_->compressRequest(serializedRequest, rpcOptions, *header);
 
   // Send the request!
   switch (rpcKind) {

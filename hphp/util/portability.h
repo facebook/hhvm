@@ -103,11 +103,13 @@
 #endif
 
 
-/*
- * AARCH64 needs to create a walkable stack frame for
- * getFrameRegs() when a FixupEntry isIndirect()
- */
 #ifdef __aarch64__
+#define HHVM_RECORD_JIT_CFA 1
+
+/*
+ * fixupWork() still needs a walkable native frame chain to reach the VM frame.
+ * Its indirect fixups use HHVM_RECORD_JIT_CFA for the precise caller CFA.
+ */
 #define AARCH64_WALKABLE_FRAME() asm("" ::: "memory");
 #else
 #define AARCH64_WALKABLE_FRAME()

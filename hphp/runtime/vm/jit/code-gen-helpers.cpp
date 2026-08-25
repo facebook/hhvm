@@ -88,6 +88,15 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   }
 }
 
+#ifdef HHVM_RECORD_JIT_CFA
+void emitStoreCFAForIndirectFixup(Vout& v) {
+  // BL does not adjust sp, so its value immediately before the call is the
+  // callee's CFA. AArch64 lowering uses rAsm to materialize sp, so this must
+  // remain after argument setup.
+  v << store{rsp(), rvmtl()[rds::kVmJitCfaOff]};
+}
+#endif
+
 template <>
 void emitDecodePtr<32>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};

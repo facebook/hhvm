@@ -117,6 +117,12 @@ inline jit::TCA& vmJitReturnAddr() {
   return vmRegsUnsafe().jitReturnAddr;
 }
 
+#ifdef HHVM_RECORD_JIT_CFA
+inline uintptr_t& vmJitCfa() {
+  return vmRegsUnsafe().jitCfa;
+}
+#endif
+
 inline void assert_native_stack_aligned() {
   assertx(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 }

@@ -35,6 +35,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
 
@@ -69,6 +70,9 @@ struct VMState {
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
+#ifdef HHVM_RECORD_JIT_CFA
+  uintptr_t jitCfa;
+#endif
   Either<ObjectData*, Exception*> exn;
 };
 

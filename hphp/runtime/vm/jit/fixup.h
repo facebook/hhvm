@@ -60,7 +60,8 @@ ActRec* findVMFrameForDebug(uintptr_t start = 0);
  *     that was called, but did not set up a full frame, as it is operating on
  *     behalf of the caller. This mode is used in prologues and some shared
  *     stubs on architectures, where the callee's frame is stored immediately
- *     under the caller's sp (currently true on x64, but not arm or ppc).
+ *     under the caller's sp. On AArch64 builds where the compiler does not
+ *     force that layout, the call site saves the native sp in RDS.
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
  *     a call to a shared stub or prologue, and then that code called C++. The
@@ -110,6 +111,10 @@ ActRec* findVMFrameForDebug(uintptr_t start = 0);
  *     dtor stub", relative to the value in the starred stack slot shown.  We
  *     then look that IP up in the fixup map again to find a normal
  *     (non-indirect) Fixup record.
+ *
+ *     On AArch64, native frame walking uses the CFA recorded immediately
+ *     before the indirect call instead of the walked saved frame pointer.
+ *     Exception unwinding obtains the CFA directly from the unwind context.
  *
  *   - an asio stub Fixup:
  *

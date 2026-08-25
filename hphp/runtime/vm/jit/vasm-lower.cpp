@@ -196,6 +196,12 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   doArgs(vargs.simdArgs, rarg_simd, nullptr);
 
   // Emit the appropriate call instruction sequence.
+#ifdef HHVM_RECORD_JIT_CFA
+  if (inst.fixup.isValid() && inst.fixup.isIndirect()) {
+    emitStoreCFAForIndirectFixup(v);
+  }
+  // Do not adjust rsp between saving the CFA above and emitting the call.
+#endif
   emitCall(v, inst.call, argRegs);
 
   // Handle fixup and unwind information.

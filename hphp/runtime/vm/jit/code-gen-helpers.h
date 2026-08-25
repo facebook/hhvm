@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/immed.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/ptr.h"
 #include "hphp/util/ringbuffer.h"
 
@@ -54,6 +55,11 @@ struct Vout;
  * take a 32-bit Immed, but we want to use it if possible instead of `store'.
  */
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
+
+#ifdef HHVM_RECORD_JIT_CFA
+/* Record the native CFA used by an indirect fixup. */
+void emitStoreCFAForIndirectFixup(Vout& v);
+#endif
 
 /**
  * Load a ptr from src to dst

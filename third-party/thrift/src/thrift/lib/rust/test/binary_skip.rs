@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use std::hint::black_box;
 use std::io::Cursor;
 
 use bytes::Bytes;
 use criterion::Criterion;
-use criterion::black_box;
 use criterion::criterion_group;
 use criterion::criterion_main;
 use fbthrift::BinaryProtocol;

@@ -34,10 +34,12 @@ let get_package_violation env current_pkg target_pkg =
 
 type package_warning_info = {
   current_package: Package.pos_id option;
+  current_package_before_override: string option;
+  caller_has_package_override: bool;
   target_package: Package.pos_id option;
   target_package_before_override: string option;
+  callee_has_package_override: bool;
   classptr_reference_warning: bool;
-  caller_has_package_override: bool;
 }
 
 type package_error_info = {
@@ -105,31 +107,38 @@ let package_includes current_pkg target_pkg =
       false)
   | _ -> false
 
-(* triggers a linter error if the edge introduces a new dependency from a file in a package
- * due to another file, ingoring package rules to a file with a packageoverride; used *)
+let has_package_override = function
+  | Some (Aast_defs.PackageOverride _) -> true
+  | Some (Aast_defs.PackageConfigAssignment _)
+  | None ->
+    false
+
+let package_before_override env file =
+  Option.map
+    (Package_provider.get_package_for_file
+       (Env.get_ctx env)
+       ~path:(Relative_path.suffix file))
+    ~f:Package.get_package_name
+
 let can_access_ignoring_package_override
     ~(env : Typing_env_types.env)
     ~(current_package : Package.pos_id option)
+    ~(current_package_before_override : string option)
+    ~(caller_has_package_override : bool)
     ~(target_package : Package.pos_id option)
+    ~(callee_has_package_override : bool)
     ~(target_file : Relative_path.t)
     ~(classptr_reference_warning : bool) =
   let target_package_before_override =
-    Option.map
-      (Package_provider.get_package_for_file
-         (Env.get_ctx env)
-         ~path:(Relative_path.suffix target_file))
-      ~f:Package.get_package_name
+    package_before_override env target_file
   in
   let is_target_package_before_override_included =
-    match (current_package, target_package_before_override) with
-    | (Some (_, current_package_name), Some target_package_before_override_name)
-      ->
-      let target_package_before_override =
-        Env.get_package_by_name env target_package_before_override_name
-      in
+    match (current_package_before_override, target_package_before_override) with
+    | ( Some current_package_before_override_name,
+        Some target_package_before_override_name ) ->
       package_includes
-        (Env.get_package_by_name env current_package_name)
-        target_package_before_override
+        (Env.get_package_by_name env current_package_before_override_name)
+        (Env.get_package_by_name env target_package_before_override_name)
     | _ -> true
   in
   let is_target_package_before_override_loaded =
@@ -146,10 +155,12 @@ let can_access_ignoring_package_override
     let warn_info =
       {
         current_package;
+        current_package_before_override;
+        caller_has_package_override;
         target_package;
         target_package_before_override;
+        callee_has_package_override;
         classptr_reference_warning;
-        caller_has_package_override = false;
       }
     in
     `YesWarning warn_info
@@ -209,21 +220,37 @@ let can_access_by_package_rules
       let standard_result =
         match get_package_violation env current_pkg target_pkg with
         | None ->
-          (* No package error, but warn if this edge is only legal because of a
-           * __PackageOverride on the callee: the caller could not reach the
-           * callee's original (pre-override) package on its own, so the override
-           * is what makes the edge legal and thus keeps the callee pinned into
-           * the (bloated) target package. *)
-          (match (current_package_membership, target_package_membership) with
-          | ( Some (Aast_defs.PackageConfigAssignment _),
-              Some (Aast_defs.PackageOverride _) ) ->
+          (* No package error, but the edge may be legal only because of a
+           * __PackageOverride on one of its endpoints, in which case it is what
+           * keeps that override -- and the package bloat it causes -- in
+           * place. *)
+          let caller_has_package_override =
+            has_package_override current_package_membership
+          in
+          let callee_has_package_override =
+            has_package_override target_package_membership
+          in
+          if not (caller_has_package_override || callee_has_package_override)
+          then
+            `Yes
+          else
+            (* Without an override the path-derived package is the one already
+               resolved, so skip the lookup. *)
+            let current_package_before_override =
+              if caller_has_package_override then
+                package_before_override env current_file
+              else
+                Option.map current_package ~f:snd
+            in
             can_access_ignoring_package_override
               ~env
               ~current_package
+              ~current_package_before_override
+              ~caller_has_package_override
               ~target_package
+              ~callee_has_package_override
               ~target_file
               ~classptr_reference_warning:false
-          | _ -> `Yes)
         | Some pkg_relationship ->
           (match pkg_relationship with
           | Package.Soft_includes -> `PackageSoftIncludes (mk_err_info ())

@@ -1332,9 +1332,11 @@ end = struct
         Lints_diagnostics.crosspackage_linter
           pos
           ~current_package:w.current_package
+          ~current_package_before_override:w.current_package_before_override
           ~caller_has_package_override:w.caller_has_package_override
           ~target_package:w.target_package
           ~target_package_before_override:w.target_package_before_override
+          ~callee_has_package_override:w.callee_has_package_override
           ~classptr_reference_warning:w.classptr_reference_warning);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
@@ -3584,9 +3586,11 @@ end = struct
           Lints_diagnostics.crosspackage_linter
             pos
             ~current_package:w.current_package
+            ~current_package_before_override:w.current_package_before_override
             ~caller_has_package_override:w.caller_has_package_override
             ~target_package:w.target_package
             ~target_package_before_override:w.target_package_before_override
+            ~callee_has_package_override:w.callee_has_package_override
             ~classptr_reference_warning:w.classptr_reference_warning
         | TVis.Package_access_ok -> ());
         let ((env, ty_err_opt), ty) =
@@ -5097,9 +5101,12 @@ end = struct
               Lints_diagnostics.crosspackage_linter
                 pos
                 ~current_package:w.current_package
+                ~current_package_before_override:
+                  w.current_package_before_override
                 ~caller_has_package_override:w.caller_has_package_override
                 ~target_package:w.target_package
                 ~target_package_before_override:w.target_package_before_override
+                ~callee_has_package_override:w.callee_has_package_override
                 ~classptr_reference_warning:w.classptr_reference_warning
             | TVis.Package_access_ok -> ())
           | Decl_entry.DoesNotExist
@@ -12042,9 +12049,12 @@ end = struct
               Lints_diagnostics.crosspackage_linter
                 pos
                 ~current_package:w.current_package
+                ~current_package_before_override:
+                  w.current_package_before_override
                 ~caller_has_package_override:w.caller_has_package_override
                 ~target_package:w.target_package
                 ~target_package_before_override:w.target_package_before_override
+                ~callee_has_package_override:w.callee_has_package_override
                 ~classptr_reference_warning:w.classptr_reference_warning);
           List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs);
 

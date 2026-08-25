@@ -293,31 +293,73 @@ let awaitable_awaitable pos =
     ^ " so stack traces include the lambda position."
     ^ " If this is intentional, please annotate the return type.")
 
+(* Shared by both endpoints, so the message phrases them alike and the reader
+   can compare them. *)
+let package_membership_clause ~package_name ~has_package_override =
+  if has_package_override then
+    "`__PackageOverride('" ^ package_name ^ "')`"
+  else
+    "its entry in the package config"
+
 let package_into_override
-    pos ~current_package ~target_package ~target_package_before_override =
+    pos
+    ~current_package
+    ~current_package_before_override
+    ~caller_has_package_override
+    ~target_package
+    ~target_package_before_override
+    ~callee_has_package_override =
   let current_package_name =
     Option.value_map current_package ~default:"<none>" ~f:snd
   in
   let target_package_name =
     Option.value_map target_package ~default:"<none>" ~f:snd
   in
+  let current_package_before_override_name =
+    Option.value current_package_before_override ~default:"<none>"
+  in
   let target_package_before_override_name =
     Option.value target_package_before_override ~default:"<none>"
+  in
+  let both_overridden =
+    caller_has_package_override && callee_has_package_override
   in
   Lints.add
     Codes.package_into_override
     Lint_error
     pos
-    ("This is a cross-boundary edge. Although the callee is accessible to the caller's package "
+    ("This is a cross-boundary edge. Although the caller is in package "
     ^ current_package_name
-    ^ " via `__PackageOverride('"
+    ^ " via "
+    ^ package_membership_clause
+        ~package_name:current_package_name
+        ~has_package_override:caller_has_package_override
+    ^ " and the callee is in package "
     ^ target_package_name
-    ^ "')`, that package override is load-bearing here: without it the callee stays in package "
+    ^ " via "
+    ^ package_membership_clause
+        ~package_name:target_package_name
+        ~has_package_override:callee_has_package_override
+    (* "together": only the pair is provably load-bearing, either override
+       alone may well be removable. *)
+    ^ (if both_overridden then
+        ", together those package overrides are load-bearing here: without them "
+      else
+        ", that package override is load-bearing here: without it ")
+    ^ "the caller stays in package "
+    ^ current_package_before_override_name
+    ^ " and the callee stays in package "
     ^ target_package_before_override_name
     ^ ", which "
-    ^ current_package_name
-    ^ " cannot reach, so this edge would be an error. This edge prevents removal of the `__PackageOverride` and SHOULD BE REMOVED. "
-    ^ "Either move the callee into the caller's package via hg mv, "
+    ^ current_package_before_override_name
+    ^ " cannot reach, so this edge would be an error. This edge prevents removal of the `__PackageOverride` "
+    ^ (if both_overridden then
+        "attributes"
+      else
+        "attribute")
+    ^ " and SHOULD BE REMOVED. Either move the callee into a package that "
+    ^ current_package_before_override_name
+    ^ " can reach via hg mv, "
     ^ "use `__RequirePackage` (if the whole function should only be invoked from "
     ^ target_package_before_override_name
     ^ ") or gate this reference via a `package` check "
@@ -365,9 +407,11 @@ let crosspackage_classptr_reference
 let crosspackage_linter
     pos
     ~current_package
+    ~current_package_before_override
     ~caller_has_package_override
     ~target_package
     ~target_package_before_override
+    ~callee_has_package_override
     ~classptr_reference_warning =
   if classptr_reference_warning then
     crosspackage_classptr_reference
@@ -379,5 +423,8 @@ let crosspackage_linter
     package_into_override
       pos
       ~current_package
+      ~current_package_before_override
+      ~caller_has_package_override
       ~target_package
       ~target_package_before_override
+      ~callee_has_package_override

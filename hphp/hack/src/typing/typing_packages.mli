@@ -8,10 +8,12 @@
 
 type package_warning_info = {
   current_package: Package.pos_id option;
+  current_package_before_override: string option;
+  caller_has_package_override: bool;
   target_package: Package.pos_id option;
   target_package_before_override: string option;
+  callee_has_package_override: bool;
   classptr_reference_warning: bool;
-  caller_has_package_override: bool;
 }
 
 type package_error_info = {
@@ -41,10 +43,15 @@ val get_package_profile :
 val is_strict_isolation_target :
   Typing_env_types.env -> Aast_defs.package_membership option -> bool
 
+val has_package_override : Aast_defs.package_membership option -> bool
+
 val can_access_ignoring_package_override :
   env:Typing_env_types.env ->
   current_package:Package.pos_id option ->
+  current_package_before_override:string option ->
+  caller_has_package_override:bool ->
   target_package:Package.pos_id option ->
+  callee_has_package_override:bool ->
   target_file:Relative_path.t ->
   classptr_reference_warning:bool ->
   [ `Yes | `YesWarning of package_warning_info ]

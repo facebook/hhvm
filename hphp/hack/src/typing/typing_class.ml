@@ -799,9 +799,11 @@ let check_consistent_enum_inclusion
     Lints_diagnostics.crosspackage_linter
       pos
       ~current_package:w.current_package
+      ~current_package_before_override:w.current_package_before_override
       ~caller_has_package_override:w.caller_has_package_override
       ~target_package:w.target_package
       ~target_package_before_override:w.target_package_before_override
+      ~callee_has_package_override:w.callee_has_package_override
       ~classptr_reference_warning:w.classptr_reference_warning
   | Typing_visibility.Package_access_ok -> ());
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with

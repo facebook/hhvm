@@ -290,7 +290,12 @@ let check_package_access
           Typing_packages.can_access_ignoring_package_override
             ~env
             ~current_package
+            ~current_package_before_override:(Option.map current_package ~f:snd)
+            ~caller_has_package_override:
+              (Typing_packages.has_package_override current_package_membership)
             ~target_package
+            ~callee_has_package_override:
+              (Typing_packages.has_package_override target_package_membership)
             ~target_file:(Pos_or_decl.filename def_pos)
             ~classptr_reference_warning:true
         with
@@ -311,11 +316,7 @@ let check_package_access
         | _ ->
           (* Target has no override, or overrides to a different package.
              Check if source's override package includes target's original package. *)
-          (match check_classptr_access () with
-          | Package_access_linter_error (pos, w) ->
-            Package_access_linter_error
-              (pos, { w with caller_has_package_override = true })
-          | other -> other))
+          check_classptr_access ())
       | None -> Package_access_ok)
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =

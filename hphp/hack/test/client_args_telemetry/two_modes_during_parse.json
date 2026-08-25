@@ -1,0 +1,1 @@
+{"args": ["--lint", "test.php", "--lint", "test.php"]}

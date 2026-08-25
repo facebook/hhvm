@@ -1,0 +1,14 @@
+=== hh_client result ===
+argv: hh_client ../no_config/missing
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+<empty>
+stderr:
+Uncaught exception:
+  
+  (Sys_error "../no_config/missing: No such file or directory")
+
+<stack trace omitted>
+=== telemetry ===
+[]

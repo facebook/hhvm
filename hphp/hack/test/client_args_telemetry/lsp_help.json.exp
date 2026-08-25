@@ -1,0 +1,11 @@
+=== hh_client result ===
+argv: hh_client lsp --help
+cwd: <test_tmp>/root
+exit_code: 0
+stdout:
+Usage: hh_client lsp [OPTION]...
+<usage omitted>
+stderr:
+<empty>
+=== telemetry ===
+[]

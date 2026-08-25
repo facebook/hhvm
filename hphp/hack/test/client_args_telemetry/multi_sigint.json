@@ -1,0 +1,1 @@
+{"args": ["--multi", "../sigint_fifo"], "sigint_after_opening_fifo": "../sigint_fifo"}

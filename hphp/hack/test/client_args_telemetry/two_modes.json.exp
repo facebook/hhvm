@@ -1,0 +1,14 @@
+=== hh_client result ===
+argv: hh_client --single test.php --lint test.php
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+<empty>
+stderr:
+Uncaught exception:
+  
+  (Arg.Bad "only a single mode should be specified")
+
+<stack trace omitted>
+=== telemetry ===
+[]

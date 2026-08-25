@@ -1,0 +1,13 @@
+=== hh_client result ===
+argv: hh_client --telemetry-test-unknown-option
+cwd: <test_tmp>/root
+exit_code: 2
+client exit bounded with wedged scribe: True
+stdout:
+<empty>
+stderr:
+hh_client: unknown option '--telemetry-test-unknown-option'.
+Usage: hh_client check [OPTION]... [WWW-ROOT]
+<usage omitted>
+=== telemetry ===
+[]

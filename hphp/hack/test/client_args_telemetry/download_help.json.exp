@@ -1,0 +1,11 @@
+=== hh_client result ===
+argv: hh_client download-saved-state --help
+cwd: <test_tmp>/root
+exit_code: 0
+stdout:
+Usage: hh_client download-saved-state [OPTION]... [WWW-ROOT]
+<usage omitted>
+stderr:
+<empty>
+=== telemetry ===
+[]

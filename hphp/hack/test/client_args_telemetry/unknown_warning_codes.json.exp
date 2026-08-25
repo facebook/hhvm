@@ -1,0 +1,10 @@
+=== hh_client result ===
+argv: hh_client -W 99999999
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+Unknown warning codes: 99999999
+stderr:
+<empty>
+=== telemetry ===
+[]

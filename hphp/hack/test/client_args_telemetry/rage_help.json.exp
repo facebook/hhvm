@@ -1,0 +1,11 @@
+=== hh_client result ===
+argv: hh_client rage --help
+cwd: <test_tmp>/root
+exit_code: 0
+stdout:
+Usage: hh_client rage [OPTION]... [WWW-ROOT]
+<usage omitted>
+stderr:
+<empty>
+=== telemetry ===
+[]

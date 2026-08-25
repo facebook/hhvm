@@ -1,0 +1,10 @@
+=== hh_client result ===
+argv: hh_client download-saved-state --type manifold .
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+The '--from' option is required.
+stderr:
+<empty>
+=== telemetry ===
+[]

@@ -1,0 +1,10 @@
+=== hh_client result ===
+argv: hh_client decompress-zhhdg
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+The '--path' option is required.
+stderr:
+<empty>
+=== telemetry ===
+[]

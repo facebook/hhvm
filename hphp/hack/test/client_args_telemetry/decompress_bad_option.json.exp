@@ -1,0 +1,12 @@
+=== hh_client result ===
+argv: hh_client decompress-zhhdg --telemetry-test-unknown-option
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+<empty>
+stderr:
+hh_client: unknown option '--telemetry-test-unknown-option'.
+Usage: hh_client decompress-zhhdg --path [PATH]
+<usage omitted>
+=== telemetry ===
+[]

@@ -1,0 +1,10 @@
+=== hh_client result ===
+argv: hh_client . ../no_config
+cwd: <test_tmp>/root
+exit_code: 1
+stdout:
+<empty>
+stderr:
+Error: please provide at most one www directory
+=== telemetry ===
+[]

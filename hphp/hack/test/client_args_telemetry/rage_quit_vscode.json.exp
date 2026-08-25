@@ -1,0 +1,22 @@
+=== hh_client result ===
+argv: hh_client rage .
+cwd: <test_tmp>/root
+exit_code: 0
+stdout:
+Sorry that hh isn't working. What's wrong?
+0. There's something wrong relating to VSCode or IDE
+1. hh_server takes ages to initialize
+2. hh is stuck in an infinite loop
+3. hh gives some error message about the monitor
+4. hack says it has an internal typecheck bug and asked me to report it
+5. hack is reporting errors that are clearly incorrect [please elaborate]
+6. I'm not sure how to write my code to avoid these hack errors
+7. hh says something about unsaved changes from an editor even after I've quit my editor
+8. something's wrong with hack VS Code or other editor
+[other] Please type either one of the above numbers, or a freeform description
+
+rage> Please use the VSCode bug nub (at the right of the status bar) instead of hh rage.
+stderr:
+<empty>
+=== telemetry ===
+[]

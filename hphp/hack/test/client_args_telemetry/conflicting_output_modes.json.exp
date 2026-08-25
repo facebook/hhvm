@@ -1,0 +1,10 @@
+=== hh_client result ===
+argv: hh_client --json --jsonl
+cwd: <test_tmp>/root
+exit_code: 2
+stdout:
+<empty>
+stderr:
+--json and --jsonl are mutually exclusive
+=== telemetry ===
+[]

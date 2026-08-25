@@ -21,7 +21,6 @@
 
 #include <boost/operators.hpp>
 
-#include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
@@ -60,9 +59,7 @@ class Buffer : boost::totally_ordered<Buffer> {
   bool operator<(const Buffer& that) const {
     return folly::IOBufLess{}(buf_, that.buf_);
   }
-  operator folly::ByteRange() const {
-    return folly::ByteRange(buf_.data(), buf_.length());
-  }
+  operator const folly::IOBuf&() const { return buf_; }
 
  private:
   folly::IOBuf buf_;

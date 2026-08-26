@@ -20,6 +20,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <variant>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -784,26 +785,26 @@ std::string get_resolved_name(const t_type* t) {
   return t->get_full_name();
 }
 
-template <typename T = t_type>
 struct rust_type_less {
-  bool operator()(const T* lhs, const T* rhs) const {
-    std::string lhs_annotation = get_type_annotation(lhs);
-    std::string rhs_annotation = get_type_annotation(rhs);
+  bool operator()(
+      std::variant<const t_type*, const t_field*> lhs,
+      std::variant<const t_type*, const t_field*> rhs) const {
+    std::string lhs_annotation = std::visit(get_type_annotation, lhs);
+    std::string rhs_annotation = std::visit(get_type_annotation, rhs);
     if (lhs_annotation != rhs_annotation) {
       return lhs_annotation < rhs_annotation;
     }
-    if constexpr (std::is_same_v<T, t_field>) {
-      return get_resolved_name(&lhs->type().deref()) <
-          get_resolved_name(&rhs->type().deref());
-    } else {
-      return get_resolved_name(lhs) < get_resolved_name(rhs);
-    }
+    auto type_type = [](const t_type* t) { return t; };
+    auto field_type = [](const t_field* f) { return &f->type().deref(); };
+    const t_type* lhs_type = detail::variant_match(lhs, type_type, field_type);
+    const t_type* rhs_type = detail::variant_match(rhs, type_type, field_type);
+    return get_resolved_name(lhs_type) < get_resolved_name(rhs_type);
   }
 };
 
-std::set<const t_type*, rust_type_less<>> nonstandard_types(
+std::set<const t_type*, rust_type_less> nonstandard_types(
     const t_program& program) {
-  std::set<const t_type*, rust_type_less<>> types;
+  std::set<const t_type*, rust_type_less> types;
   auto maybe_add_type = [&types](const t_type& ref) {
     if (has_nonstandard_type_annotation(&ref)) {
       types.insert(&ref);
@@ -1701,21 +1702,22 @@ class t_mstch_rust_generator : public t_whisker_generator {
       // Collect fields with nonstandard types not contained by
       // `nonstandard_types()` (avoid generating multiple definitions for the
       // same type).
-      std::unordered_set<std::string> names;
+      std::set<std::variant<const t_type*, const t_field*>, rust_type_less>
+          types;
       for (const t_type* type : nonstandard_types(self)) {
-        names.insert(get_resolved_name(type));
+        types.insert(type);
       }
       std::vector<const t_field*> fields;
       // Not using `ast_visitor` because exception fields are excluded
       for (const t_structured* strct : self.structs_and_unions()) {
         for (const t_field& field : strct->fields()) {
           if (has_nonstandard_type_annotation(&field) &&
-              !names.contains(get_resolved_name(&field.type().deref()))) {
+              types.insert(&field).second) {
             fields.emplace_back(&field);
           }
         }
       }
-      std::sort(fields.begin(), fields.end(), rust_type_less<t_field>{});
+      std::sort(fields.begin(), fields.end(), rust_type_less{});
       return to_array(fields, proto.of<t_field>());
     });
     def.property("direct_dependencies?", [this](const t_program&) {

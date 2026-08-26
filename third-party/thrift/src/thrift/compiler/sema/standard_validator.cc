@@ -1895,8 +1895,14 @@ void validate_cpp_type_annotation(sema_context& ctx, const Node& node) {
           "Exactly one of `name` and `template` must be specified for `@cpp.Type` on `{}`.",
           node.name());
     }
-    if (tmplate) {
-      if (!node.type()->get_true_type()->template is<t_container>()) {
+    const t_type* true_type = node.type()->get_true_type();
+    if (true_type->is<t_structured>()) {
+      ctx.error(
+          "`@cpp.Type` cannot be used on `{}` because its Thrift type resolves to structured type `{}`. Use `@cpp.Adapter` instead.",
+          node.name(),
+          true_type->name());
+    } else if (tmplate) {
+      if (!true_type->is<t_container>()) {
         ctx.error(
             "`@cpp.Type{{template=...}}` can only be used on containers, not on `{}`.",
             node.name());
@@ -2580,6 +2586,7 @@ ast_validator standard_validator() {
   validator.add_function_param_visitor(
       &detail::validate_annotation_scopes<
           detail::scope_check_type::function_parameter>);
+  validator.add_function_param_visitor(&validate_cpp_type_annotation<t_field>);
   validator.add_function_param_visitor(&validate_field_id_value);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);

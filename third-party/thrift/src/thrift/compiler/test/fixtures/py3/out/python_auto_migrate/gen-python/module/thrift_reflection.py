@@ -862,7 +862,6 @@ def get_reflection__CustomFields():
             qualifier=_Qualifier.UNQUALIFIED,
             default=_fbthrift__module__thrift_types.SimpleStruct(),
             structured_annotations={
-                "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "name": _ConstantSpec(value=  "::MyType", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )

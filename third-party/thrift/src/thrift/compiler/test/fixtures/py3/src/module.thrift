@@ -272,7 +272,6 @@ typedef list<i32> CustomList
 typedef set<i32> CustomSet
 @cpp.Type{name = "::MyType"}
 typedef map<i32, i32> CustomMap
-@cpp.Type{name = "::MyType"}
 typedef SimpleStruct CustomStruct
 
 @cpp.Adapter{name = "::MyAdapter"}
@@ -316,7 +315,6 @@ struct CustomFields {
   7: set<i32> set_field;
   @cpp.Type{name = "::MyType"}
   8: map<i32, i32> map_field;
-  @cpp.Type{name = "::MyType"}
   9: SimpleStruct struct_field;
 }
 

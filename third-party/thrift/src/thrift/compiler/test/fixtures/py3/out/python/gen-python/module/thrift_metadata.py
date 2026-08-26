@@ -404,7 +404,6 @@ def _fbthrift_gen_metadata_struct_CustomFields(metadata_struct: _fbthrift_metada
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::MyType"),  }),
         ]),
         _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.SimpleStruct")), name="struct_field", is_optional=False, structured_annotations=[
-            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::MyType"),  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

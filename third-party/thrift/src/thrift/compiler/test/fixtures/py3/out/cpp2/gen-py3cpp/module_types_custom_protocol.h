@@ -2471,7 +2471,7 @@ _readField_map_field:
 _readField_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::MyType, ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::read(*iprot, this->__fbthrift_field_struct_field);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::read(*iprot, this->__fbthrift_field_struct_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(8, true);
@@ -2622,7 +2622,7 @@ uint32_t CustomFields::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::TType::T_STRUCT, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::MyType, ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2666,7 +2666,7 @@ uint32_t CustomFields::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::TType::T_STRUCT, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::MyType, ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2745,7 +2745,7 @@ uint32_t CustomFields::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 8;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 9, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::MyType, ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::write(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::write(*prot_, this->__fbthrift_field_struct_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -2895,7 +2895,7 @@ _readField_map_field:
 _readField_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::cpp_type<::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::read(*iprot, this->__fbthrift_field_struct_field);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::read(*iprot, this->__fbthrift_field_struct_field);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(8, true);
@@ -3046,7 +3046,7 @@ uint32_t CustomTypedefFields::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::TType::T_STRUCT, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::cpp_type<::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3090,7 +3090,7 @@ uint32_t CustomTypedefFields::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::TType::T_STRUCT, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::cpp_type<::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3169,7 +3169,7 @@ uint32_t CustomTypedefFields::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 8;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 9, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::cpp_type<::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>::write(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>::write(*prot_, this->__fbthrift_field_struct_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

@@ -318,8 +318,6 @@ cdef extern from *:
     ctypedef string _MyType "::MyType"
 cdef extern from *:
     ctypedef bstring _MyType "::MyType"
-cdef extern from *:
-    ctypedef cSimpleStruct _MyType "::MyType"
 
 cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -469,7 +467,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         __field_ref[_MyType] list_field_ref "list_field_ref" ()
         __field_ref[_MyType] set_field_ref "set_field_ref" ()
         __field_ref[_MyType] map_field_ref "map_field_ref" ()
-        __field_ref[_MyType] struct_field_ref "struct_field_ref" ()
+        __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
 
 
     cdef cppclass cCustomTypedefFields "::py3::simple::CustomTypedefFields":
@@ -485,7 +483,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         __field_ref[_MyType] list_field_ref "list_field_ref" ()
         __field_ref[_MyType] set_field_ref "set_field_ref" ()
         __field_ref[_MyType] map_field_ref "map_field_ref" ()
-        __field_ref[_MyType] struct_field_ref "struct_field_ref" ()
+        __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
 
 
     cdef cppclass cAdaptedTypedefFields "::py3::simple::AdaptedTypedefFields":

@@ -20,13 +20,13 @@ namespace module_constants {
 
 
 
-::std::string_view _fbthrift_schema_97f1dc406b60e690() {
+::std::string_view _fbthrift_schema_780bc785e6026492() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_97f1dc406b60e690_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_780bc785e6026492_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_97f1dc406b60e690_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_780bc785e6026492_uris() {
   return {};
 }
 

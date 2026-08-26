@@ -440,6 +440,44 @@ TEST(StandardValidatorTest, CppTypeNonIntegerSkipped) {
   )");
 }
 
+TEST(StandardValidatorTest, CppTypeCannotReplaceStructuredTypes) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    struct Payload {}
+    union Choice {}
+    exception Error {}
+
+    @cpp.Type{name = "CustomPayload"}
+    typedef Payload PayloadAlias
+    # expected-error@-2: `@cpp.Type` cannot be used on `PayloadAlias` because its Thrift type resolves to structured type `Payload`. Use `@cpp.Adapter` instead.
+
+    struct Wrapper {
+      @cpp.Type{name = "CustomPayload"}
+      1: Payload payload;
+      # expected-error@-2: `@cpp.Type` cannot be used on `payload` because its Thrift type resolves to structured type `Payload`. Use `@cpp.Adapter` instead.
+
+      @cpp.Type{name = "CustomPayload"}
+      2: PayloadAlias alias;
+      # expected-error@-2: `@cpp.Type` cannot be used on `alias` because its Thrift type resolves to structured type `Payload`. Use `@cpp.Adapter` instead.
+
+      @cpp.Type{name = "CustomChoice"}
+      3: Choice choice;
+      # expected-error@-2: `@cpp.Type` cannot be used on `choice` because its Thrift type resolves to structured type `Choice`. Use `@cpp.Adapter` instead.
+
+      @cpp.Type{name = "CustomError"}
+      4: Error error;
+      # expected-error@-2: `@cpp.Type` cannot be used on `error` because its Thrift type resolves to structured type `Error`. Use `@cpp.Adapter` instead.
+    }
+
+    service Api {
+      void call(@cpp.Type{name = "CustomPayload"} 1: Payload payload)
+      # expected-error@-1: `@cpp.Type` cannot be used on `payload` because its Thrift type resolves to structured type `Payload`. Use `@cpp.Adapter` instead.
+    }
+  )");
+}
+
 TEST(StandardValidatorTest, FieldLevelAssignOnlyPatchOnlyEffectiveOnMap) {
   check_compile(R"(
     package "facebook.com/thrift/test"

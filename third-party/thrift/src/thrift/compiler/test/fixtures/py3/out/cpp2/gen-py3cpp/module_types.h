@@ -1419,7 +1419,7 @@ using CustomSet = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomMap", "kind": "typedef" } */
 using CustomMap = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomStruct", "kind": "typedef" } */
-using CustomStruct = ::MyType;
+using CustomStruct = ::py3::simple::SimpleStruct;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedBool", "kind": "typedef" } */
 using AdaptedBool = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, bool>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedInteger", "kind": "typedef" } */
@@ -3604,7 +3604,7 @@ class CustomFields final  {
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>
+    ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>
   >;
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -3621,7 +3621,7 @@ class CustomFields final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  CustomFields(apache::thrift::FragileConstructor, ::MyType bool_field__arg, ::MyType integer_field__arg, ::MyType double_field__arg, ::MyType string_field__arg, ::MyType binary_field__arg, ::MyType list_field__arg, ::MyType set_field__arg, ::MyType map_field__arg, ::MyType struct_field__arg);
+  CustomFields(apache::thrift::FragileConstructor, ::MyType bool_field__arg, ::MyType integer_field__arg, ::MyType double_field__arg, ::MyType string_field__arg, ::MyType binary_field__arg, ::MyType list_field__arg, ::MyType set_field__arg, ::MyType map_field__arg, ::py3::simple::SimpleStruct struct_field__arg);
 
   CustomFields(CustomFields&&) noexcept;
   CustomFields(const CustomFields& src);
@@ -3649,7 +3649,7 @@ class CustomFields final  {
  private:
   ::MyType __fbthrift_field_map_field;
  private:
-  ::MyType __fbthrift_field_struct_field;
+  ::py3::simple::SimpleStruct __fbthrift_field_struct_field;
  private:
   apache::thrift::detail::isset_bitset<9, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -3947,37 +3947,37 @@ class CustomFields final  {
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> struct_field_ref() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> struct_field_ref() & {
     return {this->__fbthrift_field_struct_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> struct_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field), __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> struct_field() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> struct_field() & {
     return {this->__fbthrift_field_struct_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::MyType>
+  template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> struct_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field), __isset.at(8), __isset.bit(8)};
   }
@@ -4096,16 +4096,16 @@ class CustomFields final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::MyType& get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
+  const ::py3::simple::SimpleStruct& get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  ::MyType get_struct_field() &&;
+  ::py3::simple::SimpleStruct get_struct_field() &&;
 
   /** Glean { "field": "struct_field" } */
-  template <typename T_CustomFields_struct_field_struct_setter = ::MyType>
+  template <typename T_CustomFields_struct_field_struct_setter = ::py3::simple::SimpleStruct>
   [[deprecated("Use `FOO.struct_field() = BAR` instead of `FOO.set_struct_field(BAR)`")]]
-  ::MyType& set_struct_field(T_CustomFields_struct_field_struct_setter&& struct_field_) {
+  ::py3::simple::SimpleStruct& set_struct_field(T_CustomFields_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_CustomFields_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
   }
@@ -4175,7 +4175,7 @@ class CustomTypedefFields final  {
     ::apache::thrift::type::cpp_type<::py3::simple::CustomList, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<::py3::simple::CustomSet, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<::py3::simple::CustomMap, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<::py3::simple::CustomStruct, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>
+    ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>
   >;
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -5201,87 +5201,87 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::py3::simple::SimpleException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x80\xf0\x21\xb8\xaa\x9c\xf3\x1b\x65\x67\x90\x96\x70\xde\x88\xd0", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x9e\x53\x95\xdb\x2b\xd1\xbe\xc2\x71\x0e\xd2\xeb\xdb\xfc\xf8\xdd", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::OptionalRefStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xb9\x65\x71\xcf\x23\x64\xf1\x90\x5d\x6f\x05\x84\x46\xcd\xc4\xa3", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x82\x1d\x33\x07\xc5\xc3\xe9\x50\x8b\x69\x6d\x06\x46\x67\xbb\xae", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::SimpleStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x52\x30\x5c\xf4\x57\x1a\x5c\x10\x86\x36\x3c\xc5\x24\x05\xc9\x57", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x57\x64\x60\x34\x62\xd2\x25\x00\x76\x03\x57\xbf\x64\x21\xc9\x33", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::Float32Struct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xea\x43\x9f\xe4\x02\xe7\xc9\x99\x9d\x7c\x37\x44\x27\x63\x8d\x4a", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x03\xb8\xbf\x7c\x14\x88\xfa\xc9\x95\xed\x33\x0f\xbf\x94\x59\xe0", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::IssetInspectionStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xca\xf6\x98\xb8\xe5\xc8\x07\x9c\xb3\x18\x69\xd1\x06\xae\x6f\x3d", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x49\x12\x50\x17\x8d\x60\xe0\x6a\x1f\x5d\x27\xa1\x4d\x5a\x04\xe4", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x90\x13\xc3\x7e\x77\x5a\x52\x2f\x5c\x4a\x79\xf5\x89\x82\xa2\x38", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x28\xbd\x24\x39\xc4\x74\xbf\x68\x5a\x7b\x0f\xaa\x96\x01\xf2\x88", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::detail::AdaptedUnion, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x64\xba\x79\xb3\xe2\x36\x4c\xe3\x42\x8f\xd6\xcb\x40\xa1\xf9\xc3", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x55\x60\xcb\x43\x89\x3d\x15\x3e\x27\x26\x93\x8d\x48\x08\x39\x33", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::HiddenException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xff\x3a\x79\x0d\x14\xae\x1b\x90\x17\xdf\xe3\x97\x01\x08\x0c\xf2", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x80\xde\xd8\x29\x1d\x0c\xfa\x80\x46\xf9\x73\x54\x4f\xb7\x04\x3a", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::ComplexStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x0f\xee\x08\x60\x48\x6b\x1e\xc2\x62\xf3\xd2\x14\x62\x45\xe8\xeb", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\xd8\x85\x80\xfa\xf2\x5b\xc1\x3e\xb4\x46\xad\xa0\x0f\x42\xd9\xbd", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::BinaryUnion, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x8e\x6f\xcb\xb0\x23\x73\x02\xbd\xaa\xa9\xd1\x0e\xcc\x9d\x9d\x7f", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x17\x19\x3d\xf0\x6a\x54\xaf\x7b\xc2\x36\x76\xe2\x13\xe5\xa3\x06", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::BinaryUnionStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x2c\xa2\xdd\x0c\x3a\xa4\x72\x22\x7c\xfd\xf0\x2a\x30\xd8\xb8\x8b", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x7c\x16\x09\x38\xd3\x1e\xc9\x81\x74\x6a\xf1\xc4\x68\xe3\xd6\x95", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::CustomFields, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x17\xa3\x1f\x44\x0f\x4c\x97\xe1\xf8\xee\xbb\x2d\x1c\x55\x0e\x4c", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x7f\x96\x7a\x55\x67\x5d\xdf\x05\x17\x99\x72\x20\x84\x5c\xc1\x5e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::CustomTypedefFields, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xe7\x00\xdc\x45\xc6\xc8\xb6\xa7\x21\xee\x4a\x9f\xbf\x68\x28\x2f", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\xad\xb4\x0f\x25\xe3\x3b\x70\x44\x51\x34\xb0\xbc\x88\xcf\x8c\x37", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AdaptedTypedefFields, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\x86\xd5\x53\xb9\x91\x80\x04\x08\xd1\xe7\x03\x41\xdc\x23\xde\xcc", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\xb4\xbe\xaa\xfd\xa9\xb1\x21\xa4\x86\x49\x2d\x4b\x8c\x59\xe4\x1f", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AnEnum, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xa4\x0e\x8d\x45\x3d\xc9\x59\xe6\x73\x2e\x78\xd1\xe3\xb4\x67\xd9", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\xde\x83\x1c\x2e\x5c\xf8\xe8\x6d\x42\x32\xce\x66\x73\x64\x1b\x5e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AnEnumRenamed, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xb6\xee\xd7\x42\xaf\x11\x72\x82\x63\x60\xa0\xb2\x1a\x2a\x26\xb8", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\x90\xe3\x43\x37\x3e\xb1\x89\x54\xc1\xf1\x1c\xe9\x3b\xcb\x8a\x4e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::Flags, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3805965505341622231;
-  static constexpr ::std::string_view definitionKey = {"\xe5\xfd\xf4\xc3\xc3\xd6\xfd\xf9\x5a\xd6\xb4\x20\x26\x4f\x9c\x14", 16};
+  static constexpr int64_t programId = 4305733995389591354;
+  static constexpr ::std::string_view definitionKey = {"\xd9\x80\x82\xb1\x80\x5c\x0e\x18\x46\xcf\x13\x85\xa1\x61\x78\x0f", 16};
 };
 } // namespace apache::thrift::detail

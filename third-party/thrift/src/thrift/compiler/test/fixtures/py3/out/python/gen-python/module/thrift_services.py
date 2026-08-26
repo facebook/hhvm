@@ -84,7 +84,7 @@ class SimpleServiceInterface(
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xcd\x41\xfe\x61\x06\xfa\xa8\xd5\xca\x4d\xd7\x93\x7d\x59\x50\xa0"
+        return b"\x62\x76\x3d\x13\x82\xe6\x0d\x2b\x80\x40\xa8\xb4\xb9\x7d\xcc\xb6"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -670,7 +670,7 @@ SimpleServiceInterface,
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x11\x9c\x5e\x1e\xdb\x32\x9d\xb5\xc7\xf5\xf2\xe6\x62\xc4\x35\xc8"
+        return b"\x84\x0d\x90\xe5\xb0\x22\xf1\xa0\x2e\x2b\x04\xb5\xe8\xca\xbe\x78"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -718,7 +718,7 @@ DerivedServiceInterface,
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x95\xd5\x49\x5e\xb9\x78\x45\xa1\xcd\x15\x09\xa9\x08\x73\x30\x21"
+        return b"\x60\x51\xb2\xbd\x12\x63\x17\x0c\xf8\x1b\xe6\x0a\xb8\x3e\x97\x10"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

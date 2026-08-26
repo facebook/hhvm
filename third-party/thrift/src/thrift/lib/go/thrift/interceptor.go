@@ -27,6 +27,8 @@ import (
 // The interceptor is responsible for calling pfunc.RunContext() and it can
 // return a result or an exception which are then sent back to the caller.
 // The interceptor is expected to be concurrency safe.
+//
+// Deprecated: Use ServiceInterceptor instead.
 type Interceptor func(
 	ctx context.Context,
 	methodName string,

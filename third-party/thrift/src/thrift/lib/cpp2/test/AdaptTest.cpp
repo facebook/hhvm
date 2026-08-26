@@ -212,6 +212,24 @@ struct FieldAdapterNoToThrift {
   static FullType fromThriftField(int, FieldContext<Struct, FieldId>);
 };
 
+struct NonComparableType {};
+struct NonComparableThriftType {};
+
+struct NonComparableAdapter {
+  static NonComparableType fromThrift(int);
+  static NonComparableThriftType toThrift(const NonComparableType&);
+};
+
+struct InvalidEqualAdapter : NonComparableAdapter {
+  static void equal(const NonComparableType&, const NonComparableType&);
+};
+
+struct NonComparableFieldAdapter {
+  template <typename Struct, int16_t FieldId>
+  static NonComparableType fromThriftField(int, FieldContext<Struct, FieldId>);
+  static NonComparableThriftType toThrift(const NonComparableType&);
+};
+
 struct IncompleteField;
 struct IncompleteStruct;
 
@@ -339,6 +357,20 @@ static_assert(
 static_assert(
     !ThriftFieldAdapter<FieldAdapterNoToThrift, int, ConceptStruct, 1>);
 static_assert(!ThriftTypeAdapter<ConceptFieldAdapter, int>);
+static_assert(
+    adapt_detail::EqualityComparableAdapter<ConceptAdapter, FullType>);
+static_assert(adapt_detail::EqualityComparableAdapter<MinAdapter, FullType>);
+static_assert(adapt_detail::EqualityComparableAdapter<MinAdapter, MinType>);
+static_assert(!adapt_detail::EqualityComparableAdapter<
+              NonComparableAdapter,
+              NonComparableType>);
+static_assert(!adapt_detail::EqualityComparableAdapter<
+              InvalidEqualAdapter,
+              NonComparableType>);
+static_assert(!ThriftTypeAdapter<NonComparableAdapter, int>);
+static_assert(!ThriftTypeAdapter<InvalidEqualAdapter, int>);
+static_assert(
+    !ThriftFieldAdapter<NonComparableFieldAdapter, int, ConceptStruct, 1>);
 static_assert(AdapterWithConstruct<ConceptAdapter, int, ConceptStruct, 1>);
 static_assert(AdapterWithClear<ConceptAdapter, int, ConceptStruct, 1>);
 static_assert(AdapterWithIsEmpty<ConceptAdapter, int, ConceptStruct, 1>);

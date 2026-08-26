@@ -71,6 +71,21 @@ concept EqualAdapter = requires {
   Adapter::equal(
       std::declval<const AdaptedT&>(), std::declval<const AdaptedT&>());
 };
+template <typename Adapter, typename AdaptedT>
+concept EqualityComparableAdapter =
+    requires(const AdaptedT& lhs, const AdaptedT& rhs) {
+      { Adapter::equal(lhs, rhs) } -> std::convertible_to<bool>;
+    } ||
+    (!EqualAdapter<Adapter, AdaptedT> &&
+     requires(const AdaptedT& lhs, const AdaptedT& rhs) {
+       { lhs == rhs } -> std::convertible_to<bool>;
+     }) ||
+    (!EqualAdapter<Adapter, AdaptedT> &&
+     !requires(const AdaptedT& lhs, const AdaptedT& rhs) { lhs == rhs; } &&
+     requires(const AdaptedT& lhs, const AdaptedT& rhs) {
+       { Adapter::toThrift(lhs) == Adapter::toThrift(rhs) } ->
+           std::convertible_to<bool>;
+     });
 // Used to detect if Adapter has a less override.
 template <typename Adapter, typename AdaptedT>
 concept LessAdapter = requires {
@@ -412,16 +427,6 @@ resolveMapForAdapated(const MapT<Key, Value, Hash, KeyEqual, Allocator>&);
 template <typename KeyAdapter, typename StandardMap>
 using adapt_map_key_t =
     decltype(resolveMapForAdapated<KeyAdapter>(std::declval<StandardMap>()));
-
-// Validates an adapter.
-// Checking decltype(equal<Adapter>(...)) is not sufficient for validation.
-template <typename Adapter, typename AdaptedT>
-void validate() {
-  const auto adapted = AdaptedT();
-  equal<Adapter>(adapted, adapted);
-  not_equal<Adapter>(adapted, adapted);
-  // less and hash are not validated because not all adapters provide it.
-}
 
 template <
     bool ZeroCopy,

@@ -33,7 +33,10 @@ concept ThriftConstAdapter =
 template <typename Adapter, typename ThriftT>
 concept ThriftTypeAdapter = adapt_detail::TypeAdapter<Adapter, ThriftT> &&
     (!std::semiregular<ThriftT> ||
-     std::semiregular<adapt_detail::adapted_t<Adapter, ThriftT>>);
+     std::semiregular<adapt_detail::adapted_t<Adapter, ThriftT>>) &&
+    (adapt_detail::EqualityComparableAdapter<
+        Adapter,
+        adapt_detail::adapted_t<Adapter, ThriftT>>);
 
 // Field adapters can omit fromThrift because fromThriftField determines their
 // adapted type from the containing struct and field id.
@@ -49,7 +52,10 @@ concept ThriftFieldAdapter =
     (!std::semiregular<ThriftT> ||
      std::semiregular<
          adapt_detail::
-             FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>>);
+             FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>>) &&
+    adapt_detail::EqualityComparableAdapter<
+        Adapter,
+        adapt_detail::FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>>;
 
 template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
 concept ThriftAdapter = ThriftTypeAdapter<Adapter, ThriftT> ||
@@ -62,9 +68,6 @@ void validateAdapter() {
   static_assert(
       ThriftTypeAdapter<Adapter, ThriftT>,
       "@cpp.Adapter on a type must satisfy ThriftTypeAdapter");
-  if constexpr (ThriftTypeAdapter<Adapter, ThriftT>) {
-    validate<Adapter, adapted_t<Adapter, ThriftT>>();
-  }
 }
 
 template <typename Adapter, int16_t FieldId, typename ThriftT, typename Struct>
@@ -72,9 +75,6 @@ void validateFieldAdapter() {
   static_assert(
       ThriftAdapter<Adapter, ThriftT, Struct, FieldId>,
       "@cpp.Adapter on a field must satisfy ThriftAdapter");
-  if constexpr (ThriftAdapter<Adapter, ThriftT, Struct, FieldId>) {
-    validate<Adapter, adapted_field_t<Adapter, FieldId, ThriftT, Struct>>();
-  }
 }
 
 } // namespace adapt_detail

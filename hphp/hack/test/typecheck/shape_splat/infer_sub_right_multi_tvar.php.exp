@@ -1,0 +1,24 @@
+ERROR: File "infer_sub_right_multi_tvar.php", line 19, characters 20-34:
+Invalid argument (Typing[4057])
+  File "infer_sub_right_multi_tvar.php", line 19, characters 20-34:
+  The field `y` is missing
+  File "infer_sub_right_multi_tvar.php", line 16, characters 33-35:
+  The field `y` is required here
+ERROR: File "infer_sub_right_multi_tvar.php", line 19, characters 37-54:
+Invalid argument (Typing[4057])
+  File "infer_sub_right_multi_tvar.php", line 19, characters 37-54:
+  The field `x` is missing
+  File "infer_sub_right_multi_tvar.php", line 16, characters 21-23:
+  The field `x` is required here
+ERROR: File "infer_sub_right_multi_tvar.php", line 35, characters 16-30:
+Invalid argument (Typing[4057])
+  File "infer_sub_right_multi_tvar.php", line 35, characters 16-30:
+  The field `y` is missing
+  File "infer_sub_right_multi_tvar.php", line 16, characters 33-35:
+  The field `y` is required here
+ERROR: File "infer_sub_right_multi_tvar.php", line 35, characters 33-50:
+Invalid argument (Typing[4057])
+  File "infer_sub_right_multi_tvar.php", line 35, characters 33-50:
+  The field `x` is missing
+  File "infer_sub_right_multi_tvar.php", line 16, characters 21-23:
+  The field `x` is required here

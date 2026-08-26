@@ -204,6 +204,142 @@ let refine_handle_errors
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
+(* Mark [field_name] absent in a single concrete shape. A closed shape simply
+   drops the field; an open shape gets an explicit [?field => nothing] entry so
+   its unknown tail cannot re-supply the field. Returns [None] when there is
+   nothing to do (a closed shape that doesn't have the field), leaving the
+   element untouched. *)
+let mark_field_absent pos field_name s =
+  if is_nothing s.s_unknown_value then
+    if TShapeMap.mem field_name s.s_fields then
+      Some
+        {
+          s with
+          s_origin = Missing_origin;
+          s_fields = TShapeMap.remove field_name s.s_fields;
+        }
+    else
+      None
+  else
+    Some
+      {
+        s with
+        s_origin = Missing_origin;
+        s_fields =
+          TShapeMap.add
+            field_name
+            (unset_field_shape_ty_entry pos field_name)
+            s.s_fields;
+      }
+
+let shape_type_proves_field_absent field_name = function
+  | Shape_simple { s_fields; s_unknown_value; _ } ->
+    (match TShapeMap.find_opt field_name s_fields with
+    | Some { sft_optional = true; sft_ty } -> is_nothing sft_ty
+    | Some _ -> false
+    | None -> is_nothing s_unknown_value)
+  | Shape_splat _ ->
+    (* A residual splat (unresolved elements) cannot prove absence. *)
+    false
+
+(* Whether localized upper bound [bound] proves that [field_name] is absent:
+   viewed as a shape, it either lists the field as [?f => nothing] or omits it
+   while being closed. Since an opaque type is a subtype of its bound, a bound
+   that cannot contain the field means the opaque type cannot either. Ah open shape
+   or one that lists the field as required or optional-and-inhabited, does not
+   prove absence. *)
+let bound_proves_field_absent env bound field_name =
+  let (env, bound) = Env.expand_type env bound in
+  match get_node bound with
+  | Tshape shape_ty ->
+    let (env, _err, view) =
+      Typing_shape_normalize.normalize_shape_type
+        ~on_error:None
+        (get_reason bound)
+        shape_ty
+        env
+    in
+    (match view with
+    | Typing_shape_normalize.Normalized_shape shape_ty ->
+      (env, shape_type_proves_field_absent field_name shape_ty)
+    (* An uninhabited bound has no values, so the field is vacuously absent. *)
+    | Typing_shape_normalize.Normalized_bottom -> (env, true))
+  | _ -> (env, false)
+
+let generic_bound_proves_field_absent env name field_name =
+  List.fold
+    (Typing_set.elements (Env.get_upper_bounds env name))
+    ~init:(env, false)
+    ~f:(fun (env, acc) b ->
+      if acc then
+        (env, true)
+      else
+        bound_proves_field_absent env b field_name)
+
+(* Remove [field_name] from the elements of a shape splat.
+
+   Merging is rightmost-wins, so marking the field absent on a single element can
+   be undone by another element that supplies it (an [?f => nothing] unions back
+   to required against any [f] on either side); we therefore edit every concrete
+   element. An opaque element (a type parameter, type variable or nested splat)
+   cannot be edited, and because [Shapes::removeKey] takes the shape [inout] its
+   type is invariant, so we may not change that element either. The removal is
+   therefore sound only when every opaque element provably lacks the field (a
+   bound that is a closed shape without it, or lists it as [?f => nothing]).
+   Otherwise the element might contain the field at runtime while the unchanged
+   type still claims it, so we report an error and leave the shape unchanged.
+   Concrete elements are edited as usual. *)
+let remove_field_from_splat env pos ss_elems field_name =
+  let (env, ss_elems) = List.map_env env ss_elems ~f:Env.expand_type in
+  let (env, blocked) =
+    List.fold ss_elems ~init:(env, false) ~f:(fun (env, blocked) ty ->
+        if blocked then
+          (env, true)
+        else
+          match get_node ty with
+          | Tshape (Shape_simple _) -> (env, false)
+          | Tgeneric name ->
+            let (env, absent) =
+              generic_bound_proves_field_absent env name field_name
+            in
+            (env, not absent)
+          | Tnewtype (_, _, bound) ->
+            let (env, absent) =
+              bound_proves_field_absent env bound field_name
+            in
+            (env, not absent)
+          | _ ->
+            (* A type variable, nested splat or other non-editable element may
+               contain the field; we cannot prove otherwise. *)
+            (env, true))
+  in
+  if blocked then
+    let err =
+      Typing_error.(
+        primary
+        @@ Primary.Generic_unify
+             {
+               pos;
+               msg =
+                 Printf.sprintf
+                   "Cannot remove field `%s`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?%s => nothing`"
+                   (TUtils.get_printable_shape_field_name field_name)
+                   (TUtils.get_printable_shape_field_name field_name);
+             })
+    in
+    (env, Some err, ss_elems)
+  else
+    let new_elems =
+      List.map ss_elems ~f:(fun ty ->
+          match deref ty with
+          | (r, Tshape (Shape_simple s)) ->
+            (match mark_field_absent pos field_name s with
+            | Some s -> mk (r, Tshape (Shape_simple s))
+            | None -> ty)
+          | _ -> ty)
+    in
+    (env, None, new_elems)
+
 let refine_handle_unions_dyn pos refine_f env ~shape_ty field_name :
     (Typing_env_types.env * Typing_error.t option) * locl_ty =
   let rec go ~supportdyn env shape_ty :
@@ -229,6 +365,26 @@ let refine_handle_unions_dyn pos refine_f env ~shape_ty field_name :
         if supportdyn then
           let r = get_reason result in
           MakeType.supportdyn r result
+        else
+          result )
+    | Tshape (Shape_splat { ss_elems }) ->
+      let (env, e2, new_elems) =
+        remove_field_from_splat env pos ss_elems field_name
+      in
+      (* Removing a field can empty the element it was on, leaving `...shape()`
+         (the merge identity) in the row, so rebuild through the canonical
+         constructor rather than reassembling the splat by hand. Safe to
+         ignore the error since removing a field can't introduce a malformed shape *)
+      let (env, _e3, result) =
+        Typing_shape_normalize.splat
+          ~on_error:None
+          ~reason:(Reason.witness pos)
+          new_elems
+          env
+      in
+      ( (env, Option.merge e1 e2 ~f:Typing_error.both),
+        if supportdyn then
+          MakeType.supportdyn (get_reason result) result
         else
           result )
     | Tunion tyl ->
@@ -423,7 +579,28 @@ let to_collection env pos shape_ty res return_type =
 
       method! on_tshape env r s =
         match s with
-        | Shape_splat _ -> failwith "Shape_splat unexpected"
+        | Shape_splat { ss_elems } ->
+          let (env, _err, result) =
+            Typing_shape_normalize.merge ~on_error:None ss_elems env
+          in
+          (match result with
+          | Typing_shape_normalize.Full (ty, _) -> self#on_type env ty
+          | Typing_shape_normalize.Empty_shape _ ->
+            self#on_tshape
+              env
+              r
+              (Shape_simple
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = MakeType.nothing r;
+                   s_fields = TShapeMap.empty;
+                 })
+          | Typing_shape_normalize.Partial _ ->
+            return_type
+              env
+              (get_reason res)
+              (MakeType.arraykey r)
+              (MakeType.mixed r))
         | Shape_simple
             { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
           (* The key type is the union of the types of the known fields,
@@ -531,6 +708,7 @@ let to_collection env pos shape_ty res return_type =
   mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
 let to_dict env pos shape_ty res =
+  let supports_dynamic = TUtils.is_supportdyn_use_tyvar_bounds env shape_ty in
   let ((env, e1), shape_ty) =
     Typing_solver.expand_type_and_solve
       ~description_of_expected:"a shape"
@@ -542,8 +720,14 @@ let to_dict env pos shape_ty res =
   let (env, shape_ty) =
     TUtils.get_base_type ~expand_supportdyn:true env shape_ty
   in
-  to_collection env pos shape_ty res (fun env r key value ->
-      (env, MakeType.dict r key value))
+  let (env, result) =
+    to_collection env pos shape_ty res (fun env r key value ->
+        (env, MakeType.dict r key value))
+  in
+  if supports_dynamic then
+    TUtils.make_supportdyn (get_reason result) env result
+  else
+    (env, result)
 
 let shape_field_pos = function
   | Ast_defs.SFlit_str (p, _)

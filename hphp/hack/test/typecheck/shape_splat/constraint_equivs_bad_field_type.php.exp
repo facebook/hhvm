@@ -1,0 +1,12 @@
+ERROR: File "constraint_equivs_bad_field_type.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_equivs_bad_field_type.php", line 8, characters 24-26:
+  Expected `int`
+  File "constraint_equivs_bad_field_type.php", line 6, characters 38-41:
+  But got `bool`
+ERROR: File "constraint_equivs_bad_field_type.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_equivs_bad_field_type.php", line 14, characters 24-26:
+  Expected `int`
+  File "constraint_equivs_bad_field_type.php", line 12, characters 76-79:
+  But got `bool`

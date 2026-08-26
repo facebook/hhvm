@@ -6261,6 +6261,38 @@ end = struct
     in
     create ~code:Error_code.ShapeFieldsUnknown ~reasons ()
 
+  let splat_may_require_fields pos decl_pos name =
+    let explanation =
+      match name with
+      | Some name ->
+        Markdown_lite.md_codify name ^ " may have required fields of its own"
+      | None -> "This may require fields beyond those written here"
+    in
+    let reasons =
+      lazy
+        [
+          (pos, "This shape is not guaranteed to have the fields required here");
+          (decl_pos, explanation);
+        ]
+    in
+    create ~code:Error_code.SplatMayRequireFields ~reasons ()
+
+  let splat_field_not_known pos decl_pos name field =
+    let name = Markdown_lite.md_codify name in
+    let field = Markdown_lite.md_codify field in
+    let reasons =
+      lazy
+        [
+          ( pos,
+            "The field "
+            ^ field
+            ^ " here is not compatible with every instantiation of "
+            ^ name );
+          (decl_pos, name ^ " may provide " ^ field ^ " with a type of its own");
+        ]
+    in
+    create ~code:Error_code.SplatFieldNotKnown ~reasons ()
+
   let abstract_tconst_not_allowed pos decl_pos tconst_name =
     let reasons =
       lazy
@@ -7011,6 +7043,10 @@ end = struct
         (missing_field pos name decl_pos reason_sub reason_super env)
     | Shape_fields_unknown { pos; decl_pos } ->
       Eval_result.single (shape_fields_unknown pos decl_pos)
+    | Splat_may_require_fields { pos; decl_pos; name } ->
+      Eval_result.single (splat_may_require_fields pos decl_pos name)
+    | Splat_field_not_known { pos; decl_pos; name; field } ->
+      Eval_result.single (splat_field_not_known pos decl_pos name field)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
       Eval_result.single (abstract_tconst_not_allowed pos decl_pos tconst_name)
     | Invalid_destructure { pos; decl_pos; ty_name } ->

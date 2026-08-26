@@ -1,0 +1,32 @@
+ERROR: File "spread_element_kinds.php", line 33, characters 12-13:
+Invalid return type (Typing[4110])
+  File "spread_element_kinds.php", line 32, characters 34-39:
+  Expected `string`
+  File "spread_element_kinds.php", line 13, characters 44-46:
+  But got `int`
+ERROR: File "spread_element_kinds.php", line 60, characters 10-11:
+Invalid return type (Typing[4110])
+  File "spread_element_kinds.php", line 59, characters 64-69:
+  Expected `string`
+  File "spread_element_kinds.php", line 10, characters 54-56:
+  But got `int`
+ERROR: File "spread_element_kinds.php", line 73, characters 34-34:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "spread_element_kinds.php", line 76, characters 10-11:
+Invalid return type (Typing[4523])
+  File "spread_element_kinds.php", line 74, characters 3-27:
+  The field `a` here is not compatible with every instantiation of `T`
+  File "spread_element_kinds.php", line 75, characters 13-13:
+  `T` may provide `a` with a type of its own
+ERROR: File "spread_element_kinds.php", line 76, characters 10-11:
+Invalid return type (Typing[4523])
+  File "spread_element_kinds.php", line 74, characters 3-27:
+  The field `extra` here is not compatible with every instantiation of `T`
+  File "spread_element_kinds.php", line 75, characters 13-13:
+  `T` may provide `extra` with a type of its own
+ERROR: File "spread_element_kinds.php", line 76, characters 10-11:
+Invalid return type (Typing[4522])
+  File "spread_element_kinds.php", line 74, characters 3-27:
+  This shape is not guaranteed to have the fields required here
+  File "spread_element_kinds.php", line 75, characters 13-13:
+  `T` may have required fields of its own

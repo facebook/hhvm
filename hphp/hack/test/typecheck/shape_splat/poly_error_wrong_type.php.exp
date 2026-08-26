@@ -1,0 +1,6 @@
+ERROR: File "poly_error_wrong_type.php", line 11, characters 15-16:
+Invalid argument (Typing[4110])
+  File "poly_error_wrong_type.php", line 6, characters 22-24:
+  Expected `int`
+  File "poly_error_wrong_type.php", line 10, characters 21-32:
+  But got `string`

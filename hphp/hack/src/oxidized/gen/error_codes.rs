@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e4f2726af84f2f8b5e71924505052188>>
+// @generated SignedSource<<156ab79adb3675370f6152f998d1437a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -590,6 +590,8 @@ pub enum Typing {
     EnumDuplicateValue = 4519,
     EnumUncheckableValue = 4520,
     InvalidUnsetTarget = 4521,
+    SplatMayRequireFields = 4522,
+    SplatFieldNotKnown = 4523,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

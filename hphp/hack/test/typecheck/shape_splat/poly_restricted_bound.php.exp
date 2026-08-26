@@ -1,0 +1,6 @@
+ERROR: File "poly_restricted_bound.php", line 23, characters 11-12:
+Invalid argument (Typing[4057])
+  File "poly_restricted_bound.php", line 22, characters 8-39:
+  The field `id` is missing
+  File "poly_restricted_bound.php", line 5, characters 29-32:
+  The field `id` is required here

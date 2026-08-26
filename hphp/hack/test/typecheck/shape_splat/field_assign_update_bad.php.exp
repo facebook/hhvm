@@ -1,0 +1,6 @@
+ERROR: File "field_assign_update_bad.php", line 9, characters 10-11:
+Invalid return type (Typing[4523])
+  File "field_assign_update_bad.php", line 5, characters 3-25:
+  The field `k` here is not compatible with every instantiation of `T`
+  File "field_assign_update_bad.php", line 7, characters 25-25:
+  `T` may provide `k` with a type of its own

@@ -1,0 +1,6 @@
+ERROR: File "poly_error_missing_field.php", line 13, characters 14-15:
+Invalid argument (Typing[4057])
+  File "poly_error_missing_field.php", line 12, characters 8-24:
+  The field `name` is missing
+  File "poly_error_missing_field.php", line 5, characters 15-20:
+  The field `name` is required here

@@ -1,3 +1,0 @@
-File "absent_syntax.php", line 24, characters 3-13:
-  shape(absent 'x', 'y' => int)
-No errors

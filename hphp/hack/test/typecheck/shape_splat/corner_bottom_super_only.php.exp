@@ -1,0 +1,12 @@
+ERROR: File "corner_bottom_super_only.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "corner_bottom_super_only.php", line 7, characters 13-13:
+  Expected `T`
+  File "corner_bottom_super_only.php", line 6, characters 3-19:
+  But got `shape('a' => int)`
+ERROR: File "corner_bottom_super_only.php", line 15, characters 10-11:
+Invalid return type (Typing[4522])
+  File "corner_bottom_super_only.php", line 13, characters 3-19:
+  This shape is not guaranteed to have the fields required here
+  File "corner_bottom_super_only.php", line 14, characters 13-13:
+  `T` may have required fields of its own

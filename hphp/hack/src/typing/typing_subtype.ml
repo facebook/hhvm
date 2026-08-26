@@ -2971,7 +2971,1175 @@ end = struct
     else
       res
 
-  (* == Shape subtyping ===================================================== *)
+  (* == Shape splat subtyping =============================================== *)
+
+  (* Entry point for shape-splat subtyping  Normalize both shapes then dispatch
+     on presence of type variables:
+     - no tyvar: ground corner procedure;
+     - sub/super only: single-side inference;
+     - one-each: couple via a fresh mid row;
+     - multiple on both sides: the decoupled fallback. *)
+  and simplify_subtype_shape_splat
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ((supportdyn_sub, r_sub, shape_type_sub) :
+        bool * Typing_reason.t * locl_phase shape_type)
+      ((supportdyn_super, r_super, shape_type_super) :
+        bool * Typing_reason.t * locl_phase shape_type) =
+    let (env, err_opt, norm_sub, norm_super) =
+      let on_error = subtype_env.Subtype_env.on_error in
+      let (env, err_sub, norm_sub) =
+        Typing_shape_normalize.Row.normalize ~on_error r_sub shape_type_sub env
+      in
+      let (env, err_super, norm_super) =
+        Typing_shape_normalize.Row.normalize
+          ~on_error
+          r_super
+          shape_type_super
+          env
+      in
+      let err_opt = Option.merge err_sub err_super ~f:Typing_error.both in
+      (env, err_opt, norm_sub, norm_super)
+    in
+    match err_opt with
+    | Some _ as fail -> invalid ~fail env
+    | None ->
+      let simple_sub = Typing_shape_normalize.Row.as_simple norm_sub
+      and simple_super = Typing_shape_normalize.Row.as_simple norm_super in
+      let super_is_top_shape =
+        match simple_super with
+        | Some { s_fields; s_unknown_value; s_origin = _ } ->
+          TShapeMap.is_empty s_fields && TUtils.is_mixed env s_unknown_value
+        | None -> false
+      in
+      if (not supportdyn_super) && super_is_top_shape then
+        (* [shape(...)] is the top row. Its [supportdyn] counterpart still
+           imposes dynamic-support obligations on every field. *)
+        valid env
+      else if Typing_shape_normalize.Row.is_bottom norm_sub then
+        valid env
+      else if Typing_shape_normalize.Row.is_bottom norm_super then
+        (* A non-bottom subrow may still be opaque and constrained to [nothing]. *)
+        let ty_sub = Typing_shape_normalize.Row.to_ty ~reason:r_sub norm_sub in
+        let ty_super =
+          Typing_shape_normalize.Row.to_ty ~reason:r_super norm_super
+        in
+        simplify_
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn = None; ty_sub }
+          ~rhs:{ super_supportdyn = false; super_like; ty_super }
+          env
+      else
+        let sv_sub = Typing_corners.spread_tyvar_ids norm_sub
+        and sv_super = Typing_corners.spread_tyvar_ids norm_super in
+        (match (sv_sub, sv_super) with
+        | ([], []) ->
+          (match (simple_sub, simple_super) with
+          | ( Some
+                {
+                  s_origin = origin_sub;
+                  s_unknown_value = kind_sub;
+                  s_fields = fdm_sub;
+                },
+              Some
+                {
+                  s_origin = origin_super;
+                  s_unknown_value = kind_super;
+                  s_fields = fdm_super;
+                } ) ->
+            if same_type_origin origin_super origin_sub then
+              (* Same origin fast path *)
+              valid env
+            else
+              (* Dispatch to simple shape subtyping *)
+              simplify_subtype_shape
+                ~subtype_env
+                ~env
+                ~this_ty
+                ~super_like
+                (supportdyn_sub, r_sub, kind_sub, fdm_sub)
+                (supportdyn_super, r_super, kind_super, fdm_super)
+          | _ ->
+            (* At least one type is a splat and neither have tyvars so use the
+               ground corners procedure *)
+            subrow_splat
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r:r_sub
+              ~sub:norm_sub
+              ~super:norm_super)
+        | ([], _ :: _) ->
+          (* At least one type variable in the supertype, none in the subtype *)
+          subrow_infer_super
+            ~subtype_env
+            ~env
+            ~this_ty
+            ~super_like
+            ~r:r_sub
+            ~sub:norm_sub
+            ~super:norm_super
+            sv_super
+        | (_ :: _, []) ->
+          (* At least one type variable in the subtype, none in the supertype *)
+          subrow_infer_sub
+            ~subtype_env
+            ~env
+            ~this_ty
+            ~super_like
+            ~r:r_sub
+            ~sub:norm_sub
+            ~super:norm_super
+            sv_sub
+        | ([sub_v], [super_v]) ->
+          (* Exactly on tyvar in each of the sub- and supertypes; solve using
+             a fresh coupled tyvar acting as upperbound for one and lowerbound
+             for the other *)
+          subrow_infer_couple
+            ~subtype_env
+            ~env
+            ~this_ty
+            ~super_like
+            ~r:r_sub
+            ~sub:norm_sub
+            ~sub_spread_var:sub_v
+            ~super:norm_super
+            ~super_spread_var:super_v
+        | (_ :: _, _ :: _) ->
+          (* Multiple spread vars on at least one side: decoupled fallback.
+             Resolve the other side's spread vars to their current solutions,
+             then run single-side inference each way. *)
+          let (env, super') =
+            Typing_corners.solve_spread_vars env r_sub norm_super
+          in
+          let (env, prop_sub) =
+            subrow_infer_sub
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r:r_sub
+              ~sub:norm_sub
+              ~super:super'
+              sv_sub
+          in
+          let (env, sub') =
+            Typing_corners.solve_spread_vars env r_sub norm_sub
+          in
+          let (env, prop_super) =
+            subrow_infer_super
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r:r_sub
+              ~sub:sub'
+              ~super:norm_super
+              sv_super
+          in
+          (env, TL.conj prop_sub prop_super))
+
+  (* -- Splat subtyping ----------------------------------------------------- *)
+
+  (* At least one type is a splat and neither type contains tyvars; apply
+     the ground corners procedure per label *)
+  and subrow_splat
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t) =
+    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    List.fold_left labels ~init:(valid env) ~f:(fun acc label ->
+        acc &&& fun env ->
+        subrow_splat_at
+          ~subtype_env
+          ~env
+          ~this_ty
+          ~super_like
+          ~r
+          ~sub
+          ~super
+          label)
+
+  and subrow_splat_at
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      label =
+    let live_super =
+      let open Typing_corners in
+      Splat_elem.Set.of_list (row_live_spread_at super label)
+    in
+    (* Attribute field failures to a named supertype spread elem live at this label. *)
+    let blame =
+      List.find_map
+        (Typing_corners.Splat_elem.Set.elements live_super)
+        ~f:(fun ty ->
+          match get_node ty with
+          | Tgeneric name
+          | Tnewtype (name, _, _) ->
+            Some (get_pos ty, name)
+          | _ -> None)
+    in
+    (* Attribute unknown-tail failures only when checking the tail projection. *)
+    let tail_blame =
+      match label with
+      | Some _ -> None
+      | None -> blame
+    in
+    let f env ~sub ~super =
+      subrow_subfield
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        ~r
+        ~tail_blame
+        ~blame
+        label
+        ~sub
+        ~super
+    in
+    (* Check subfields at all corner assignments *)
+    Typing_corners.check_subrow_corners
+      env
+      ~sub
+      ~super
+      label
+      r
+      ~init:valid
+      ~conj:( &&& )
+      ~f
+
+  and subrow_subfield
+      ~subtype_env
+      ~env
+      ~this_ty
+      ~super_like
+      ~r
+      ~(tail_blame : (Pos_or_decl.t * string) option)
+      ~(blame : (Pos_or_decl.t * string) option)
+      (label : TShapeField.t option)
+      ~(sub : locl_phase shape_field_type)
+      ~(super : locl_phase shape_field_type) =
+    match label with
+    | Some field_name ->
+      (* Map a field descriptor to a shape projection: an [Opt nothing] field
+         denotes an absent label *)
+      let to_proj (fd : locl_phase shape_field_type) =
+        if fd.sft_optional && Typing_defs.is_nothing fd.sft_ty then
+          `Absent
+        else if fd.sft_optional then
+          `Optional fd.sft_ty
+        else
+          `Required fd.sft_ty
+      in
+      let on_type_mismatch =
+        match blame with
+        | None -> None
+        | Some (decl_pos, name) ->
+          Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+              Typing_error.Reasons_callback.always
+                Typing_error.(
+                  apply_reasons ~on_error
+                  @@ Secondary.Splat_field_not_known
+                       {
+                         pos = Reason.to_pos r;
+                         decl_pos;
+                         name;
+                         field =
+                           TUtils.get_printable_shape_field_name field_name;
+                       }))
+      in
+      (match
+         simplify_subtype_shape_projection
+           ?on_type_mismatch
+           ~subtype_env
+           ~this_ty
+           ~super_like
+           ~env
+           (false, r, to_proj sub)
+           (false, r, to_proj super)
+           field_name
+       with
+      | Ok f -> f env
+      | Error fail -> invalid ~fail env)
+    | None ->
+      if Typing_corners.Field.requiredness_lte ~sub ~super then
+        simplify_
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn = None; ty_sub = sub.sft_ty }
+          ~rhs:{ super_supportdyn = false; super_like; ty_super = super.sft_ty }
+          env
+      else
+        let (decl_pos, name) =
+          match tail_blame with
+          | Some (pos, name) -> (pos, Some name)
+          | None -> (Reason.to_pos r, None)
+        in
+        let fail =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Splat_may_require_fields
+                       { pos = Reason.to_pos r; decl_pos; name })
+        in
+        invalid ~fail env
+
+  (* -- Splat inference ----------------------------------------------------- *)
+
+  (* Infer lower bounds for the super row's spread type variables. The sub row
+     has no unsolved spread variables, so its projected fields determine what
+     each super type variable must accept. *)
+  and subrow_infer_super
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      (super_spread_vars : Tvid.t list) =
+    List.fold_left super_spread_vars ~init:(valid env) ~f:(fun acc v ->
+        acc &&& fun env ->
+        match Typing_corners.partition_at_tyvar super v with
+        | None -> valid env
+        | Some (pre_elems, post_elems) ->
+          let (env, super_pre, super_post) =
+            let on_error = subtype_env.Subtype_env.on_error in
+            let (env, _e1, super_pre) =
+              let shape_ty = Shape_splat { ss_elems = pre_elems } in
+              Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+            in
+            let (env, _e2, super_post) =
+              let shape_ty = Shape_splat { ss_elems = post_elems } in
+              Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+            in
+            (env, super_pre, super_post)
+          in
+          if
+            (not (Typing_shape_normalize.Row.is_bottom super_pre))
+            && not (Typing_shape_normalize.Row.is_bottom super_post)
+          then
+            subrow_infer_super_part
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~spread_var_ty:(mk (r, Tvar v))
+              ~sub
+              ~super_pre
+              ~super_post
+              ~super
+          else
+            valid env)
+
+  (* Build a shape lower bound for the spread variable, using fresh type variables
+     for fields it may contribute. Generate per-field constraints relating the
+     subtype's fields to those variables and to fields contributed by the prefix
+     and suffix. Fields fully masked by the suffix are checked directly and do
+     not constrain the spread variable. *)
+  and subrow_infer_super_part
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(spread_var_ty : locl_ty)
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super_pre : Typing_shape_normalize.Row.t)
+      ~(super_post : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t) =
+    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    let (env, known, unknown, props) =
+      List.fold_left
+        labels
+        ~init:(env, TShapeMap.empty, MakeType.nothing r, [])
+        ~f:(fun (env, known, unknown, props) label ->
+          let (env, field, prop) =
+            subrow_infer_super_part_at
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~sub
+              ~super_pre
+              ~super_post
+              ~super
+              label
+          in
+          let (known, unknown) =
+            match label with
+            | Some lbl -> (TShapeMap.add lbl field known, unknown)
+            | None -> (known, field.sft_ty)
+          in
+          (env, known, unknown, prop :: props))
+    in
+    let bound =
+      Typing_shape_normalize.Row.of_simple
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = unknown;
+          s_fields = known;
+        }
+    in
+    let bound_ty = Typing_shape_normalize.Row.to_ty ~reason:r bound in
+    let (env, prop_resid) =
+      simplify_
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn = None; ty_sub = bound_ty }
+        ~rhs:{ super_supportdyn = false; super_like; ty_super = spread_var_ty }
+        env
+    in
+    (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
+
+  (* Infer [label]'s field in the spread variable's lower-bound shape and generate
+     the constraints needed at that label for every corner assignment. Where the
+     spread variable is live, use a fresh field type and constrain the subtype
+     field against the rightmost-wins merge of [super_pre], that fresh field, and
+     [super_post]. Where [super_post] masks the variable, check the subtype field
+     directly against [super_post]. If the variable need not contribute the field
+     in any case, represent that lack of a requirement as an absent field *)
+  and subrow_infer_super_part_at
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super_pre : Typing_shape_normalize.Row.t)
+      ~(super_post : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      label =
+    let live_names =
+      let open Typing_corners in
+      Splat_elem.Set.union
+        (Splat_elem.Set.of_list (row_live_spread_at sub label))
+        (Splat_elem.Set.of_list (row_live_spread_at super label))
+    in
+    let ty_params_topo = Typing_corners.topo env live_names r in
+    let (env, assignments) =
+      Typing_corners.corner_assignments env ty_params_topo label r
+    in
+    let (env, info) =
+      List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
+          let (env, fd_post) = Typing_corners.proj env super_post label a in
+          let (env, fd_sub) = Typing_corners.proj env sub label a in
+          (env, (Typing_corners.Field.is_required fd_post, fd_sub, a) :: acc))
+    in
+    let info = List.rev info in
+    let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
+    match live with
+    | [] ->
+      (* the spread tyvar is overwritten by [super_post] everywhere: it
+         contributes nothing to the lower bound at this label. The field is absent,
+         optional-[nothing], not required-[nothing], which would make the
+         inferred row uninhabited. *)
+      let (env, prop) =
+        List.fold_left info ~init:(valid env) ~f:(fun acc (_, fd_sub, a) ->
+            acc &&& fun env ->
+            let (env, fd_super) = Typing_corners.proj env super_post label a in
+            subrow_subfield
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~tail_blame:None
+              ~blame:None
+              label
+              ~sub:fd_sub
+              ~super:fd_super)
+      in
+      (env, { sft_optional = true; sft_ty = MakeType.nothing r }, prop)
+    | _ ->
+      let is_opt =
+        List.exists live ~f:(fun (_, fd_sub, _) ->
+            Typing_corners.Field.is_optional fd_sub)
+      in
+      (* A field which contributes `nothing` must not appear as required since
+         this means the shape is uninhabited *)
+      let (env, contributes_nothing) =
+        List.fold_left
+          live
+          ~init:(env, true)
+          ~f:(fun (env, discharged) (_, fd_sub, a) ->
+            if not discharged then
+              (env, false)
+            else if Typing_corners.Field.is_absent fd_sub env then
+              (* [nothing] fits under anything; no need to probe *)
+              (env, true)
+            else
+              let (env, fd_post) = Typing_corners.proj env super_post label a in
+              let (env, base) =
+                if is_opt then
+                  let (env, fd_pre) =
+                    Typing_corners.proj env super_pre label a
+                  in
+                  Typing_union.union env fd_pre.sft_ty fd_post.sft_ty
+                else
+                  (env, fd_post.sft_ty)
+              in
+              let (_env, p) =
+                simplify_
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
+                  ~rhs:{ super_supportdyn = false; super_like; ty_super = base }
+                  env
+              in
+              (env, TL.is_valid p))
+      in
+      let (env, flex) = Env.fresh_type env Pos.none in
+      let (env, prop) =
+        List.fold_left info ~init:(valid env) ~f:(fun acc (masked, fd_sub, a) ->
+            acc &&& fun env ->
+            if masked then
+              let (env, fd_super) =
+                Typing_corners.proj env super_post label a
+              in
+              subrow_subfield
+                ~subtype_env
+                ~env
+                ~this_ty
+                ~super_like
+                ~r
+                ~tail_blame:None
+                ~blame:None
+                label
+                ~sub:fd_sub
+                ~super:fd_super
+            else
+              let (env, fd_pre) = Typing_corners.proj env super_pre label a in
+              if
+                Typing_corners.Field.is_optional fd_sub
+                && Typing_corners.Field.is_required fd_pre
+              then
+                (* Opt </:_req Req *)
+                invalid ~fail:None env
+              else
+                let (env, fd_post) =
+                  Typing_corners.proj env super_post label a
+                in
+                let (env, ty) = Typing_union.union env flex fd_post.sft_ty in
+                let (env, super_base) =
+                  if is_opt then
+                    Typing_union.union env fd_pre.sft_ty ty
+                  else
+                    (env, ty)
+                in
+                simplify_
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
+                  ~rhs:
+                    {
+                      super_supportdyn = false;
+                      super_like;
+                      ty_super = super_base;
+                    }
+                  env)
+      in
+      let field =
+        if contributes_nothing then
+          { sft_optional = true; sft_ty = MakeType.nothing r }
+        else
+          { sft_optional = is_opt; sft_ty = flex }
+      in
+      (env, field, prop)
+
+  (* Infer upper bounds for the sub row's spread inference variables. The super
+     row has no unsolved spread variables, so its projected fields determine what
+     each sub variable may provide. *)
+  and subrow_infer_sub
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      (sub_spread_vars : Tvid.t list) =
+    List.fold_left sub_spread_vars ~init:(valid env) ~f:(fun acc v ->
+        acc &&& fun env ->
+        match Typing_corners.partition_at_tyvar sub v with
+        | None -> valid env
+        | Some (pre_elems, post_elems) ->
+          let (env, sub_pre, sub_post) =
+            let on_error = subtype_env.Subtype_env.on_error in
+            let (env, _e1, sub_pre) =
+              let shape_ty = Shape_splat { ss_elems = pre_elems } in
+              Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+            in
+            let (env, _e2, sub_post) =
+              let shape_ty = Shape_splat { ss_elems = post_elems } in
+              Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+            in
+            (env, sub_pre, sub_post)
+          in
+          if
+            (not (Typing_shape_normalize.Row.is_bottom sub_pre))
+            && not (Typing_shape_normalize.Row.is_bottom sub_post)
+          then
+            subrow_infer_sub_part
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~spread_var_ty:(mk (r, Tvar v))
+              ~sub_pre
+              ~sub_post
+              ~sub
+              ~super
+          else
+            valid env)
+
+  (* Construct an upper-bound shape for a sub-row spread type variable after
+     partitioning the sub row into [sub_pre] and [sub_post]. For each field, infer
+     what the variable may contribute and generate constraints checking that the
+     rightmost-wins merge of [sub_pre], the variable, and [sub_post] is a subtype
+     of [super]. Finally constrain the spread type variable below the constructed
+     bound. *)
+  and subrow_infer_sub_part
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(spread_var_ty : locl_ty)
+      ~(sub_pre : Typing_shape_normalize.Row.t)
+      ~(sub_post : Typing_shape_normalize.Row.t)
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t) =
+    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    let (env, known, unknown, props) =
+      List.fold_left
+        labels
+        ~init:(env, TShapeMap.empty, MakeType.mixed r, [])
+        ~f:(fun (env, known, unknown, props) label ->
+          let (env, field, prop) =
+            subrow_infer_sub_part_at
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~sub_pre
+              ~sub_post
+              ~sub
+              ~super
+              label
+          in
+          let (known, unknown) =
+            match label with
+            | Some lbl -> (TShapeMap.add lbl field known, unknown)
+            | None -> (known, field.sft_ty)
+          in
+          (env, known, unknown, prop :: props))
+    in
+    let bound =
+      Typing_shape_normalize.Row.of_simple
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = unknown;
+          s_fields = known;
+        }
+    in
+
+    let bound_ty = Typing_shape_normalize.Row.to_ty ~reason:r bound in
+    let (env, prop_resid) =
+      simplify_
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn = None; ty_sub = spread_var_ty }
+        ~rhs:{ super_supportdyn = false; super_like; ty_super = bound_ty }
+        env
+    in
+    (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
+
+  (* Infer [label]'s field in the spread variable's upper-bound shape and generate
+     constraints for every corner assignment. If [sub_post] masks the variable,
+     check [sub_post] directly against [super]. Otherwise, require the variable
+     to mask any optional or incompatible [sub_pre] field, bound its field type by
+     the live [super] field types, and check the remaining fixed contributions.
+     If the variable is always masked, give it the unconstrained top field. *)
+  and subrow_infer_sub_part_at
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub_pre : Typing_shape_normalize.Row.t)
+      ~(sub_post : Typing_shape_normalize.Row.t)
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      label =
+    let live_names =
+      let open Typing_corners in
+      Splat_elem.Set.union
+        (Splat_elem.Set.of_list (row_live_spread_at sub label))
+        (Splat_elem.Set.of_list (row_live_spread_at super label))
+    in
+    let ty_params_topo = Typing_corners.topo env live_names r in
+    let (env, assignments) =
+      Typing_corners.corner_assignments env ty_params_topo label r
+    in
+    let (env, info) =
+      List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
+          let (env, fd_post) = Typing_corners.proj env sub_post label a in
+          let (env, fd_super) = Typing_corners.proj env super label a in
+          (env, (Typing_corners.Field.is_required fd_post, fd_super, a) :: acc))
+    in
+    let info = List.rev info in
+    let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
+    match live with
+    | [] ->
+      (* the spread var is overwritten by [sub_post] everywhere: its upper bound
+         is the top field *)
+      let (env, prop) =
+        List.fold_left info ~init:(valid env) ~f:(fun acc (_, fd_super, a) ->
+            acc &&& fun env ->
+            let (env, fd_sub) = Typing_corners.proj env sub_post label a in
+            subrow_subfield
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ~r
+              ~tail_blame:None
+              ~blame:None
+              label
+              ~sub:fd_sub
+              ~super:fd_super)
+      in
+      (env, { sft_optional = true; sft_ty = MakeType.mixed r }, prop)
+    | _ ->
+      (* The spread var must be [Req] iff, at some live assignment, the field is [Req]
+         in super and [Opt] in [sub_pre], or [sub_pre]'s type does not fit super (so the
+         var must mask [sub_pre]). At the [None] unknown label the contribution is
+         opt-only. *)
+      let is_req =
+        match label with
+        | None -> false
+        | Some _ ->
+          List.exists live ~f:(fun (_, fd_super, a) ->
+              let (env_probe, fd_pre) =
+                Typing_corners.proj env sub_pre label a
+              in
+              Typing_corners.Field.is_required fd_super
+              && Typing_corners.Field.is_optional fd_pre
+              ||
+              let (_env, p) =
+                simplify_
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_pre.sft_ty }
+                  ~rhs:
+                    {
+                      super_supportdyn = false;
+                      super_like;
+                      ty_super = fd_super.sft_ty;
+                    }
+                  env_probe
+              in
+              TL.is_unsat p)
+      in
+      (* Decompose the field obligation instead of introducing a fresh tyvar:
+         [(fixed | tyvar) <: super] iff both [fixed <: super] and
+         [tyvar<: super]. *)
+      let upper_ty =
+        MakeType.intersection
+          r
+          (List.map live ~f:(fun (_, fd_super, _) ->
+               Sd.liken ~super_like env fd_super.sft_ty))
+      in
+      let (env, prop) =
+        List.fold_left
+          info
+          ~init:(valid env)
+          ~f:(fun acc (masked, fd_super, a) ->
+            acc &&& fun env ->
+            if masked then
+              let (env, fd_sub) = Typing_corners.proj env sub_post label a in
+              subrow_subfield
+                ~subtype_env
+                ~env
+                ~this_ty
+                ~super_like
+                ~r
+                ~tail_blame:None
+                ~blame:None
+                label
+                ~sub:fd_sub
+                ~super:fd_super
+            else
+              let (env, fd_post) = Typing_corners.proj env sub_post label a in
+              let (env, sub_base) =
+                if is_req then
+                  (env, fd_post.sft_ty)
+                else
+                  let (env, fd_pre) = Typing_corners.proj env sub_pre label a in
+                  (env, MakeType.union r [fd_pre.sft_ty; fd_post.sft_ty])
+              in
+              simplify_
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn = None; ty_sub = sub_base }
+                ~rhs:
+                  {
+                    super_supportdyn = false;
+                    super_like;
+                    ty_super = fd_super.sft_ty;
+                  }
+                env)
+      in
+      (env, { sft_optional = not is_req; sft_ty = upper_ty }, prop)
+
+  (* Both sub- and super rows have a single type variable. Dispatch on whether
+     it's the type variable in both positions *)
+  and subrow_infer_couple
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(sub_spread_var : Tvid.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      ~(super_spread_var : Tvid.t) =
+    if Tvid.equal sub_spread_var super_spread_var then
+      match
+        subrow_infer_same_var
+          ~subtype_env
+          ~env
+          ~this_ty
+          ~super_like
+          ~r
+          ~sub
+          ~super
+          sub_spread_var
+      with
+      | Some (env, prop) -> (env, prop)
+      | None ->
+        subrow_infer_couple_mid
+          ~subtype_env
+          ~env
+          ~this_ty
+          ~super_like
+          ~r
+          ~sub
+          ~sub_spread_var
+          ~super
+          ~super_spread_var
+    else
+      subrow_infer_couple_mid
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        ~r
+        ~sub
+        ~sub_spread_var
+        ~super
+        ~super_spread_var
+
+  (* For splat rows of the form [A, V, B] <: [V, D], derive per-label bounds
+     [lo <: V <: hi]. Since we don't have presence variables, the
+     [subrow_infer_couple_mid] fallback has to assume all fields are required
+     but here we can assume optional and improve completeness for just this case.
+     Return [None] when the rows don't have this layout . *)
+  and subrow_infer_same_var
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      (v : Tvid.t) : (env * TL.subtype_prop) option =
+    (* An empty element list is the empty CLOSED shape (the merge identity), NOT the
+       bottom row that [normalize_row] would collapse it to. *)
+    let to_shape env elems =
+      match elems with
+      | [] ->
+        let s_fields = TShapeMap.empty
+        and s_unknown_value = MakeType.nothing r in
+        Some
+          ( env,
+            Typing_shape_normalize.Row.of_simple
+              { s_origin = Missing_origin; s_unknown_value; s_fields } )
+      | _ ->
+        let (env, _e, row) =
+          let shape_ty = Shape_splat { ss_elems = elems } in
+          let on_error = subtype_env.Subtype_env.on_error in
+          Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+        in
+        if Typing_shape_normalize.Row.is_bottom row then
+          None
+        else
+          Some (env, row)
+    in
+    let bottom_field = { sft_optional = false; sft_ty = MakeType.nothing r } in
+    match
+      ( Typing_corners.partition_at_tyvar sub v,
+        Typing_corners.partition_at_tyvar super v )
+    with
+    | (Some (sub_pre_e, sub_post_e), Some (super_pre_e, super_post_e))
+      when List.is_empty super_pre_e ->
+      (* Normalize sequentially to thread [env] and stop at a bottom segment. *)
+      (match to_shape env sub_pre_e with
+      | None -> None
+      | Some (env, sub_pre) ->
+        (match to_shape env sub_post_e with
+        | None -> None
+        | Some (env, sub_post) ->
+          (match to_shape env super_post_e with
+          | None -> None
+          | Some (env, super_post) ->
+            let labels =
+              None
+              :: List.map
+                   (TShapeSet.elements
+                      (Typing_corners.subrow_label_set env ~sub ~super r))
+                   ~f:Option.some
+            in
+            let add_field known unknown label fd =
+              match label with
+              | Some lbl -> (TShapeMap.add lbl fd known, unknown)
+              | None -> (known, fd.sft_ty)
+            in
+            let (env, lo_known, lo_unknown, hi_known, hi_unknown, props) =
+              List.fold_left
+                labels
+                ~init:
+                  ( env,
+                    TShapeMap.empty,
+                    MakeType.nothing r,
+                    TShapeMap.empty,
+                    MakeType.mixed r,
+                    [] )
+                ~f:
+                  (fun (env, lo_known, lo_unknown, hi_known, hi_unknown, props)
+                       label ->
+                  let live_names =
+                    let open Typing_corners in
+                    Splat_elem.Set.union
+                      (Splat_elem.Set.of_list (row_live_spread_at sub label))
+                      (Splat_elem.Set.of_list (row_live_spread_at super label))
+                  in
+                  let ty_params_topo = Typing_corners.topo env live_names r in
+                  let (env, assignments) =
+                    Typing_corners.corner_assignments env ty_params_topo label r
+                  in
+                  let top_field =
+                    { sft_optional = true; sft_ty = MakeType.mixed r }
+                  in
+                  let (env, lower, upper, label_props) =
+                    List.fold_left
+                      assignments
+                      ~init:(env, bottom_field, top_field, [])
+                      ~f:(fun (env, lower, upper, label_props) assignment ->
+                        let (env, a) =
+                          Typing_corners.proj env sub_pre label assignment
+                        in
+                        let (env, b) =
+                          Typing_corners.proj env sub_post label assignment
+                        in
+                        let (env, d) =
+                          Typing_corners.proj env super_post label assignment
+                        in
+                        if Typing_corners.Field.is_required d then
+                          if Typing_corners.Field.is_required b then
+                            (* Both sides are masked: LHS=b and RHS=d. *)
+                            let (env, p) =
+                              subrow_subfield
+                                ~subtype_env
+                                ~env
+                                ~this_ty
+                                ~super_like
+                                ~r
+                                ~tail_blame:None
+                                ~blame:None
+                                label
+                                ~sub:b
+                                ~super:d
+                            in
+                            (env, lower, upper, p :: label_props)
+                          else
+                            (* The super masks the shared var. Its upper bound
+                               masks [sub_pre], while [sub_post]'s optional type
+                               must independently fit under [d]. *)
+                            let (env, upper) =
+                              Typing_corners.Field.meet env ~left:upper ~right:d
+                            in
+                            let (env, p) =
+                              simplify_
+                                ~subtype_env
+                                ~this_ty
+                                ~lhs:
+                                  { sub_supportdyn = None; ty_sub = b.sft_ty }
+                                ~rhs:
+                                  {
+                                    super_supportdyn = false;
+                                    super_like;
+                                    ty_super = d.sft_ty;
+                                  }
+                                env
+                            in
+                            (env, lower, upper, p :: label_props)
+                        else if Typing_corners.Field.is_required b then
+                          (* The sub masks the shared var, which must cover [b]. *)
+                          let (env, lower) =
+                            Typing_corners.Field.join env ~left:lower ~right:b
+                          in
+                          (env, lower, upper, label_props)
+                        else
+                          (* Neither side masks it, so it must absorb the
+                             sub-side fixed field. *)
+                          let (env, merged) =
+                            Typing_corners.Field.merge env ~left:a ~right:b
+                          in
+                          let (env, lower) =
+                            Typing_corners.Field.join
+                              env
+                              ~left:lower
+                              ~right:merged
+                          in
+                          (env, lower, upper, label_props))
+                  in
+                  let (lo_known, lo_unknown) =
+                    add_field lo_known lo_unknown label lower
+                  in
+                  let (hi_known, hi_unknown) =
+                    add_field hi_known hi_unknown label upper
+                  in
+                  ( env,
+                    lo_known,
+                    lo_unknown,
+                    hi_known,
+                    hi_unknown,
+                    List.rev_append label_props props ))
+            in
+            let lo =
+              Typing_shape_normalize.Row.of_simple
+                {
+                  s_fields = lo_known;
+                  s_unknown_value = lo_unknown;
+                  s_origin = Missing_origin;
+                }
+            in
+            let hi =
+              Typing_shape_normalize.Row.of_simple
+                {
+                  s_fields = hi_known;
+                  s_unknown_value = hi_unknown;
+                  s_origin = Missing_origin;
+                }
+            in
+
+            let v_ty = mk (r, Tvar v) in
+            let lo_ty = Typing_shape_normalize.Row.to_ty ~reason:r lo in
+            let (env, prop_lo) =
+              simplify_
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn = None; ty_sub = lo_ty }
+                ~rhs:{ super_supportdyn = false; super_like; ty_super = v_ty }
+                env
+            in
+
+            let hi_ty = Typing_shape_normalize.Row.to_ty ~reason:r hi in
+            let (env, prop_hi) =
+              simplify_
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn = None; ty_sub = v_ty }
+                ~rhs:{ super_supportdyn = false; super_like; ty_super = hi_ty }
+                env
+            in
+            Some
+              ( env,
+                List.fold_left
+                  (prop_lo :: prop_hi :: props)
+                  ~init:TL.valid
+                  ~f:TL.conj ))))
+    | _ -> None
+
+  (* Couple spread variables through a fresh simple row [mid], reducing the
+     original check to [sub <: mid <: super]. Its known fields are required
+     because it is not inferable (we have no 'presence' variables), so this can
+     reject solutions where the only valid intermediary has an optional field. *)
+  and subrow_infer_couple_mid
+      ~(subtype_env : Subtype_env.t)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ~super_like
+      ~r
+      ~(sub : Typing_shape_normalize.Row.t)
+      ~(sub_spread_var : Tvid.t)
+      ~(super : Typing_shape_normalize.Row.t)
+      ~(super_spread_var : Tvid.t) =
+    let (env, known) =
+      TShapeSet.fold
+        (fun lbl (env, known) ->
+          let (env, flex) = Env.fresh_type env Pos.none in
+          (env, TShapeMap.add lbl { sft_optional = false; sft_ty = flex } known))
+        (Typing_corners.subrow_label_set env ~sub ~super r)
+        (env, TShapeMap.empty)
+    in
+    let (env, unknown) = Env.fresh_type env Pos.none in
+    let mid =
+      Typing_shape_normalize.Row.of_simple
+        {
+          s_fields = known;
+          s_unknown_value = unknown;
+          s_origin = Missing_origin;
+        }
+    in
+    let (env, prop_sub) =
+      subrow_infer_sub
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        ~r
+        ~sub
+        ~super:mid
+        [sub_spread_var]
+    in
+    let (env, prop_super) =
+      subrow_infer_super
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        ~r
+        ~sub:mid
+        ~super
+        [super_spread_var]
+    in
+    (env, TL.conj prop_sub prop_super)
+
+  (* == Simple shape subtyping ============================================== *)
 
   and simplify_subtype_shape
       ~(subtype_env : Subtype_env.t)
@@ -3073,16 +4241,16 @@ end = struct
         r_super
         shape_kind_super
     in
-    let ty_super = Sd.liken ~super_like env ty_super in
-    let sub_supportdyn =
-      if supportdyn_sub then
-        Some r_sub
-      else
-        None
-    in
-    let lhs = { sub_supportdyn; ty_sub }
-    and rhs = { super_like = false; super_supportdyn = false; ty_super } in
-    simplify ~subtype_env ~this_ty ~lhs ~rhs env
+    (simplify_subtype_shape_type
+       ~subtype_env
+       ~this_ty
+       ~super_like
+       ~env
+       ~supportdyn_sub
+       ~r_sub
+       ~ty_sub
+       ~ty_super)
+      env
 
   (* Helper function to project out a field and then simplify subtype *)
   and shape_project_and_simplify_subtype
@@ -3128,6 +4296,7 @@ end = struct
       - `p1` = `Absent`, `p2` = `Absent`
      We therefore need to handle all other cases appropriately. *)
   and simplify_subtype_shape_projection
+      ?on_type_mismatch
       ~subtype_env
       ~this_ty
       ~super_like
@@ -3190,36 +4359,47 @@ end = struct
         in
         Error ty_err_opt
       | (`Optional ty_sub, `Absent) ->
-        let r_field_sub =
-          get_reason
-          @@ Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
-                 Typing_reason.(
-                   prj_shape
-                     ~sub:r_sub
-                     ~sub_prj:r_sub_prj
-                     ~super:r_super
-                     printable_name
-                     ~kind_sub:Optional
-                     ~kind_super:Absent))
-        and r_field_super = Typing_reason.missing_field in
-        let ty_err_opt =
-          Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Missing_field
-                       {
-                         pos = Reason.to_pos r_super;
-                         decl_pos = field_pos;
-                         name = printable_name;
-                         reason_sub = r_field_sub;
-                         reason_super = r_field_super;
-                       })
-        in
-
-        Error ty_err_opt
+        (* An optional field [?f => S] is compatible with an absent field only if
+           [S <: nothing]. If [S] is an unsolved type variable, as in shape-splat
+           inference, return the subtype obligation so inference can solve it to
+           [nothing]; otherwise report the more precise missing-field error. *)
+        let (_, ty_sub_expanded) = Env.expand_type env ty_sub in
+        (match get_node ty_sub_expanded with
+        | Tvar _ ->
+          Ok
+            (Some
+               ( (Typing_reason.Optional, ty_sub),
+                 (Typing_reason.Absent, MakeType.nothing r_super) ))
+        | _ ->
+          let r_field_sub =
+            get_reason
+            @@ Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
+                   Typing_reason.(
+                     prj_shape
+                       ~sub:r_sub
+                       ~sub_prj:r_sub_prj
+                       ~super:r_super
+                       printable_name
+                       ~kind_sub:Optional
+                       ~kind_super:Absent))
+          and r_field_super = Typing_reason.missing_field in
+          let ty_err_opt =
+            Option.map
+              subtype_env.Subtype_env.on_error
+              ~f:
+                Typing_error.(
+                  fun on_error ->
+                    apply_reasons ~on_error
+                    @@ Secondary.Missing_field
+                         {
+                           pos = Reason.to_pos r_super;
+                           decl_pos = field_pos;
+                           name = printable_name;
+                           reason_sub = r_field_sub;
+                           reason_super = r_field_super;
+                         })
+          in
+          Error ty_err_opt)
       | (`Optional ty_sub, `Required ty_super) ->
         let r_field_sub =
           get_reason
@@ -3316,26 +4496,48 @@ end = struct
               printable_name
               ~kind_sub
               ~kind_super)
-      and ty_super = Sd.liken ~super_like env ty_super in
-      let sub_supportdyn =
-        if supportdyn_sub then
-          Some r_sub
-        else
-          None
       in
-      let lhs = { sub_supportdyn; ty_sub }
-      and rhs = { super_like = false; super_supportdyn = false; ty_super } in
-      Ok (simplify ~subtype_env ~this_ty ~lhs ~rhs)
+      (* [on_type_mismatch] replaces the message for the type obligation only.
+         The requiredness errors above are already phrased in the user's terms
+         and must keep their own wording. *)
+      let subtype_env =
+        match on_type_mismatch with
+        | None -> subtype_env
+        | Some on_error ->
+          Subtype_env.map_on_error subtype_env ~f:(fun _ -> on_error)
+      in
+      Ok
+        (simplify_subtype_shape_type
+           ~subtype_env
+           ~this_ty
+           ~super_like
+           ~env
+           ~supportdyn_sub
+           ~r_sub
+           ~ty_sub
+           ~ty_super)
     | Error err -> Error err
 
-  (* Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
-     - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
-     - if `f` appears in `s` as `?f => ty` then `s |_ f` = `Optional ty`
-     - if `f` does not appear in `s` and `s` is closed, then `s |_ f` = `Absent`
-     - if `f` does not appear in `s` and `s` is open, then `s |_ f` = `Optional mixed`
-     EXCEPT
-     - `?f => nothing` should be ignored, and treated as `Absent`.
-     Such a field cannot be given a value, and so is effectively not present. *)
+  and simplify_subtype_shape_type
+      ~subtype_env
+      ~this_ty
+      ~super_like
+      ~env
+      ~supportdyn_sub
+      ~r_sub
+      ~ty_sub
+      ~ty_super =
+    let ty_super = Sd.liken ~super_like env ty_super in
+    let sub_supportdyn =
+      if supportdyn_sub then
+        Some r_sub
+      else
+        None
+    in
+    let lhs = { sub_supportdyn; ty_sub }
+    and rhs = { super_like = false; super_supportdyn = false; ty_super } in
+    simplify ~subtype_env ~this_ty ~lhs ~rhs
+
   and shape_projection_type ~supportdyn ~env r ty =
     if
       supportdyn
@@ -3349,6 +4551,14 @@ end = struct
     else
       ty
 
+  (* Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
+     - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
+     - if `f` appears in `s` as `?f => ty` then `s |_ f` = `Optional ty`
+     - if `f` does not appear in `s` and `s` is closed, then `s |_ f` = `Absent`
+     - if `f` does not appear in `s` and `s` is open, then `s |_ f` = `Optional mixed`
+     EXCEPT
+     - `?f => nothing` should be ignored, and treated as `Absent`.
+     Such a field cannot be given a value, and so is effectively not present. *)
   and shape_projection ~supportdyn ~env field_name shape_kind shape_map r =
     let make_supportdyn = shape_projection_type ~supportdyn ~env r in
     match TShapeMap.find_opt field_name shape_map with
@@ -4302,6 +5512,28 @@ end = struct
         env
         (LoclType ty_sub)
         (LoclType ty_super)
+    (* When we have a shape splat <: an opaque type we lift that type into a
+       singleton shape splat so that any assignment of a type parameter is
+       consistent on both sides of the subtype proposition *)
+    | ((r_sub, Tshape (Shape_splat _ as shape_sub)), (r_super, Tgeneric _)) ->
+      simplify_subtype_shape_splat
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        (Option.is_some sub_supportdyn, r_sub, shape_sub)
+        (false, r_super, Shape_splat { ss_elems = [ty_super] })
+    | ( (r_sub, Tshape (Shape_splat _ as shape_sub)),
+        (r_super, Tnewtype (n, _, _)) )
+      when (* [supportdyn] is itself a [Tnewtype] and has its own handling. *)
+           not (String.equal n SN.Classes.cSupportDyn) ->
+      simplify_subtype_shape_splat
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        (Option.is_some sub_supportdyn, r_sub, shape_sub)
+        (false, r_super, Shape_splat { ss_elems = [ty_super] })
     | ( ( _r_sub,
           ( Tany _ | Toption _ | Tnonnull | Tdynamic _ | Tprim _ | Tfun _
           | Ttuple _ | Tshape _ | Tintersection _ | Tvec_or_dict _ | Taccess _
@@ -4597,16 +5829,16 @@ end = struct
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn; ty_sub = unknown_fields_type }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-        | (_, Tshape (Shape_splat _)) ->
-          (* A residual shape splat survives localization only when it cannot be
-             flattened into a simple shape (splatting a type parameter), which
-             requires the still-experimental shape-splat subtyping not present on
-             this commit. We don't support deciding such propositions here, so
-             rather than crashing we declare the proposition invalid. The only
-             caller exercising this path is the [supportdyn] membership test in
-             [make_supportdyn], which uses the boolean result to decide whether to
-             wrap the type and reports no error of its own. *)
-          invalid ~fail env
+        | (_, Tshape (Shape_splat { ss_elems })) ->
+          (* Each element of the splat must be <: dynamic *)
+          List.fold_left ss_elems ~init:(valid env) ~f:(fun res elem_ty ->
+              res
+              &&& simplify
+                    ~subtype_env
+                    ~this_ty:None
+                    ~lhs:{ sub_supportdyn; ty_sub = elem_ty }
+                    ~rhs:
+                      { super_like = false; super_supportdyn = false; ty_super })
         (* class<T> <D: dynamic by exposure to string *)
         | (_, Tclass_ptr _) when subtype_env.Subtype_env.class_sub_classname ->
           valid env
@@ -5165,6 +6397,30 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
+    (* Keep this before the shape-splat case below: constraint decomposition must
+       retain [T <: shape(...)] so [T]'s declared upper bound is recorded. *)
+    | ((_, Tgeneric _), (_, Tshape (Shape_splat _)))
+      when subtype_env.Subtype_env.require_completeness ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
+        env
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    (* As above, wrap a opaque types in a singleton splat when subtyping
+       against a shape splat to ensure all assignments of type parameters
+       are consistent *)
+    | ( (r_sub, (Tgeneric _ | Tnewtype _)),
+        (r_super, Tshape (Shape_splat _ as shape_super)) ) ->
+      simplify_subtype_shape_splat
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        ( Option.is_some sub_supportdyn,
+          r_sub,
+          Shape_splat { ss_elems = [ty_sub] } )
+        (super_supportdyn, r_super, shape_super)
     (* -- C-Shape-R --------------------------------------------------------- *)
     | ((r_sub, Tnewtype (name_sub, tyl, _)), (_r_super, Tshape _)) ->
       let (env, ty_bound_sub) =
@@ -5206,9 +6462,15 @@ end = struct
           ~super_like
           (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
           (super_supportdyn, r_super, shape_kind_super, fdm_super)
-    | ((_, Tshape _), (_, Tshape (Shape_splat _)))
-    | ((_, Tshape (Shape_splat _)), (_, Tshape _)) ->
-      failwith "Shape_splat unexpected"
+    | ((r_sub, Tshape shape_sub), (r_super, Tshape shape_super)) ->
+      let sub_supportdyn = Option.is_some sub_supportdyn in
+      simplify_subtype_shape_splat
+        ~subtype_env
+        ~env
+        ~this_ty
+        ~super_like
+        (sub_supportdyn, r_sub, shape_sub)
+        (super_supportdyn, r_super, shape_super)
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _
@@ -7288,7 +8550,21 @@ end = struct
     | (_r_sub, Ttuple { t_required; t_optional; t_extra }) ->
       do_tuple_general t_required t_optional t_extra
     | (r_sub, Tshape (Shape_simple ts)) -> do_shape r_sub ts
-    | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
+    | (r_sub, Tshape (Shape_splat { ss_elems })) ->
+      (* For field access on Shape_splat, merge all elements using rightmost-wins
+         (expand tvars, recurse nested splats, resolve generics via bounds). A
+         distributed union operand yields a union type here: re-dispatch so the
+         [Tunion] arm above reads each member (a single shape). *)
+      let (env, read_ty) = Typing_corners.resolve_for_read env r_sub ss_elems in
+      (match get_node read_ty with
+      | Tshape (Shape_simple ts) -> do_shape r_sub ts
+      | _ ->
+        simplify_
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = read_ty }
+          ~rhs
+          env)
     | (r_sub, Tgeneric _generic_nm) ->
       let get_transitive_upper_bounds env ty =
         let rec iter seen env acc tyl =
@@ -7724,7 +9000,31 @@ end = struct
                    }) )
         in
         simplify_val ty env)
-    | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
+    | (r_sub, Tshape (Shape_splat { ss_elems })) ->
+      (* A field write is a runtime dict write: it adds a new field or overwrites
+         an existing one, and under rightmost-wins the written field must win over
+         every element. [set_rightmost_field] sets it on the rightmost concrete
+         element in place, or appends a new closed single-field element when the
+         rightmost element is opaque matching the direct write path in
+         [typing_array_access]. *)
+      (match
+         Typing_shapes.tshape_field_name_with_ty_err env cia.cia_index_expr
+       with
+      | Error ty_err -> invalid ~fail:(Some ty_err) env
+      | Ok field ->
+        let ss_elems =
+          List.map ss_elems ~f:(fun ty -> snd (Env.expand_type env ty))
+        in
+        let (env, _err, ty) =
+          Typing_shape_normalize.set_rightmost_field
+            ss_elems
+            field
+            { sft_optional = false; sft_ty = cia.cia_write }
+            ~pessimize_existing:(Option.is_some sub_supportdyn)
+            ~reason:r_sub
+            env
+        in
+        simplify_val ty env)
     | (_, Tclass ((_, n), _, _))
       when String.equal n SN.Collections.cAnyArray
            && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->

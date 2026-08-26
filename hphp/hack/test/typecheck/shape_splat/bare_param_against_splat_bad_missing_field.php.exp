@@ -1,0 +1,8 @@
+ERROR: File "bare_param_against_splat_bad_missing_field.php", line 6, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 35-35:
+  The field `a` is **optional**
+  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 35-35:
+  The field `a` is defined as **required**
+  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 61-63:
+  `a` is defined here

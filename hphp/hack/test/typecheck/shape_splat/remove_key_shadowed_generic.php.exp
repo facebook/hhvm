@@ -1,0 +1,2 @@
+ERROR: File "remove_key_shadowed_generic.php", line 10, characters 3-34:
+Cannot remove field `a`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?a => nothing` (Typing[4116])

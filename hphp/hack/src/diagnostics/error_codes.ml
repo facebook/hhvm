@@ -819,6 +819,8 @@ module Typing = struct
     | EnumDuplicateValue [@value 4519]
     | EnumUncheckableValue [@value 4520]
     | InvalidUnsetTarget [@value 4521]
+    | SplatMayRequireFields [@value 4522]
+    | SplatFieldNotKnown [@value 4523]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

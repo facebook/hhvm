@@ -1,0 +1,20 @@
+ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
+  The field `z` is **optional**
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
+  The field `z` is defined as **required**
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 8, characters 24-26:
+  `z` is defined here
+ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
+Invalid return type (Typing[4522])
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
+  This shape is not guaranteed to have the fields required here
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 8, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 3-12:
+  Expected `nothing`
+  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 6, characters 26-35:
+  But got `mixed`

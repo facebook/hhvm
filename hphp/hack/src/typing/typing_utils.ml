@@ -376,6 +376,23 @@ let wrap_union_inter_ty_in_var env r ty =
   else
     (env, ty)
 
+(* The lower bound of a newtype: what it is declared [super], if anything. The
+   dual of [get_newtype_super]; [None] when the typedef declares no [super]
+   constraint, so callers can pick their own default. *)
+let get_newtype_sub_opt env name tyargs =
+  match Env.get_typedef env name with
+  | Decl_entry.Found td ->
+    (match td.td_super_constraint with
+    | None -> (env, None)
+    | Some cstr ->
+      let substs = Decl_subst.make_locl td.td_tparams tyargs in
+      let ety_env = { empty_expand_env with substs } in
+      let ((env, _err), bound) = localize ~ety_env env cstr in
+      (env, Some bound))
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    (env, None)
+
 let get_newtype_super env r name tyargs =
   if Env.is_enum env name then
     match Env.get_enum_constraint env name with
@@ -489,6 +506,37 @@ let get_concrete_supertypes
             acc
             (TySet.elements (Env.get_upper_bounds env n) @ tyl)
       | Tintersection tyl' -> iter seen env acc (tyl' @ tyl)
+      | _ -> iter seen env (TySet.add ty acc) tyl)
+  in
+  let (env, resl) = iter SSet.empty env TySet.empty [ty] in
+  (env, TySet.elements resl)
+
+(** The dual of [get_concrete_supertypes] *)
+let get_concrete_subtypes env ty =
+  let rec iter seen env acc tyl =
+    match tyl with
+    | [] -> (env, acc)
+    | ty :: tyl ->
+      let (env, ty) = Env.expand_type env ty in
+      (match get_node ty with
+      | Tgeneric n ->
+        if SSet.mem n seen then
+          iter seen env acc tyl
+        else
+          iter
+            (SSet.add n seen)
+            env
+            acc
+            (TySet.elements (Env.get_lower_bounds env n) @ tyl)
+      | Tnewtype (cid, tyargs, _) ->
+        let (env, sub_ty) = get_newtype_sub_opt env cid tyargs in
+        (match sub_ty with
+        | Some sub_ty -> iter seen env acc (sub_ty :: tyl)
+        | None -> iter seen env (TySet.add ty acc) tyl)
+      (* Mirror of the [Tintersection] case in [get_concrete_supertypes]: every
+         member of a union is below it. An intersection is deliberately not
+         flattened here for the same reason that function leaves unions alone. *)
+      | Tunion tyl' -> iter seen env acc (tyl' @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
   let (env, resl) = iter SSet.empty env TySet.empty [ty] in
@@ -847,7 +895,7 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
          (fun _ { sft_ty; _ } d -> d && recurse sft_ty)
          s_fields
          true
-  | Tshape (Shape_splat _) -> false
+  | Tshape (Shape_splat { ss_elems }) -> List.for_all ss_elems ~f:recurse
   | Tvec_or_dict (ty1, ty2) -> recurse ty1 && recurse ty2
   | Tnewtype (n, [_], _) when String.equal n SN.Classes.cSupportDyn -> true
   | Tnewtype (n, tyl, _) ->

@@ -1,0 +1,30 @@
+ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
+  Expected `shape('a' => int, 'b' => bool, ...)`
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 12-13:
+  But got `T1 where T1 as shape('a' => int, ...), T1 as shape('b' => bool, ...), T1 as T2`
+ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
+  Expected `shape('a' => int, 'b' => bool, ...)`
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 12-13:
+  But got `T2 where T2 super T1, T2 as shape('a' => int, ...), T2 as shape('b' => bool, ...)`
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 6, characters 26-27:
+    by the definition of `T1`
+ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 9, characters 15-36:
+  The field `b` is **optional**
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
+  The field `b` is defined as **required**
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 29-32:
+  `b` is defined here
+ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 9, characters 45-67:
+  The field `a` is **optional**
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
+  The field `a` is defined as **required**
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 17-19:
+  `a` is defined here

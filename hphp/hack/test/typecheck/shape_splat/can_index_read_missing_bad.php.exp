@@ -1,0 +1,4 @@
+ERROR: File "can_index_read_missing_bad.php", line 7, characters 6-14:
+This shape doesn't have a field `missing` (Typing[4108])
+  File "can_index_read_missing_bad.php", line 5, characters 3-31:
+  The shape is defined here

@@ -1,0 +1,6 @@
+ERROR: File "sub_splat_contravariant_bound.php", line 19, characters 21-22:
+Invalid argument (Typing[4057])
+  File "sub_splat_contravariant_bound.php", line 18, characters 8-42:
+  The field `email` is missing
+  File "sub_splat_contravariant_bound.php", line 5, characters 52-58:
+  The field `email` is required here

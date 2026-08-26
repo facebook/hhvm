@@ -1,0 +1,4 @@
+ERROR: File "newtype_splat_opaque.php--file2.php", line 22, characters 25-32:
+This shape doesn't have a field `secret` (Typing[4108])
+  File "newtype_splat_opaque.php--file2.php", line 21, characters 22-50:
+  The shape is defined here

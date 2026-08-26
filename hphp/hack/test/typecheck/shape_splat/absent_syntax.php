@@ -2,7 +2,7 @@
 <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
 
 // `absent 'x'` is surface sugar for `?'x' => nothing`: the field is declared
-// definitely-not-present. This test pins that the two spellings are equivalent.
+// definitely-not-present. This test ensures the two are equivalent.
 
 type WithAbsent = shape('y' => int, absent 'x');
 type WithOptNothing = shape('y' => int, ?'x' => nothing);

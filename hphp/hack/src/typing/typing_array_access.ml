@@ -803,7 +803,30 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
            we applied an implicit upcast to dynamic
         *)
         (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-      | Tshape _
+      | Tshape (Shape_splat { ss_elems }) ->
+        (* If a type parameter may also provide this field, the write still
+           refines the local value: the new rightmost field shadows the parameter's
+           field. We do not require the written type to be compatible with every
+           instantiation of the parameter here. If the refined value is later used
+           where the original splat type is expected, shape-splat subtyping performs
+           that check and reports any incompatibility. *)
+        Typing_shapes.do_with_field_expr
+          env
+          key
+          ~with_error:
+            (let (env, ety1) = maybe_make_supportdyn r env ~supportdyn ety1 in
+             (env, (ety1, Ok ety1, Ok tkey, Ok ty2)))
+        @@ fun field ->
+        let (env, _err, ty) =
+          Typing_shape_normalize.set_rightmost_field
+            ss_elems
+            field
+            { sft_optional = false; sft_ty = ty2 }
+            ~pessimize_existing:supportdyn
+            ~reason:r
+            env
+        in
+        (env, (ty, Ok ty, Ok tkey, Ok ty2))
       | Toption _
       | Tnonnull
       | Tprim _

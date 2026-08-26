@@ -1,0 +1,6 @@
+ERROR: File "infer_suffix_masks_input_bad.php", line 9, characters 20-61:
+Invalid argument (Typing[4110])
+  File "infer_suffix_masks_input_bad.php", line 5, characters 27-29:
+  Expected `int`
+  File "infer_suffix_masks_input_bad.php", line 9, characters 38-44:
+  But got `string`

@@ -1,0 +1,24 @@
+ERROR: File "constraint_equivs_bad_converse.php", line 9, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_equivs_bad_converse.php", line 7, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_equivs_bad_converse.php", line 8, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_equivs_bad_converse.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_equivs_bad_converse.php", line 9, characters 3-12:
+  Expected `nothing`
+  File "constraint_equivs_bad_converse.php", line 6, characters 26-35:
+  But got `mixed`
+ERROR: File "constraint_equivs_bad_converse.php", line 15, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_equivs_bad_converse.php", line 13, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_equivs_bad_converse.php", line 14, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_equivs_bad_converse.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_equivs_bad_converse.php", line 15, characters 3-12:
+  Expected `nothing`
+  File "constraint_equivs_bad_converse.php", line 12, characters 56-65:
+  But got `mixed`

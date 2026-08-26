@@ -1,0 +1,12 @@
+ERROR: File "sub_splat_open_tail_closed_bad.php", line 7, characters 10-11:
+Invalid return type (Typing[4138])
+  File "sub_splat_open_tail_closed_bad.php", line 4, characters 35-44:
+  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
+  File "sub_splat_open_tail_closed_bad.php", line 6, characters 4-10:
+  It is incompatible with a shape that does not allow unknown fields.
+ERROR: File "sub_splat_open_tail_closed_bad.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+  File "sub_splat_open_tail_closed_bad.php", line 6, characters 4-10:
+  Expected `shape()`
+  File "sub_splat_open_tail_closed_bad.php", line 5, characters 12-12:
+  But got `T as shape(...)`

@@ -1,0 +1,6 @@
+ERROR: File "infer_tvar_leftmost_super.php", line 16, characters 9-10:
+Invalid argument (Typing[4110])
+  File "infer_tvar_leftmost_super.php", line 8, characters 22-24:
+  Expected `int`
+  File "infer_tvar_leftmost_super.php", line 15, characters 21-27:
+  But got `string`

@@ -1,0 +1,22 @@
+ERROR: File "bound_multi_combine_bad_singleton_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 4-38:
+  Expected `shape('a' => int, 'b' => bool, ...)`
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 7, characters 12-12:
+  But got `T where T as shape('a' => int, ...), T as shape('b' => bool, ...)`
+ERROR: File "bound_multi_combine_bad_singleton_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 9, characters 14-35:
+  The field `b` is **optional**
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 4-38:
+  The field `b` is defined as **required**
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 29-32:
+  `b` is defined here
+ERROR: File "bound_multi_combine_bad_singleton_upper_bounds.php", line 10, characters 10-11:
+Invalid return type (Typing[4163])
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 9, characters 43-65:
+  The field `a` is **optional**
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 4-38:
+  The field `a` is defined as **required**
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 17-19:
+  `a` is defined here

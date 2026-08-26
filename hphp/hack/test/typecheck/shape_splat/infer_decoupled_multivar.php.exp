@@ -1,0 +1,14 @@
+ERROR: File "infer_decoupled_multivar.php", line 20, characters 10-24:
+Invalid argument (Typing[4163])
+  File "infer_decoupled_multivar.php", line 11, characters 6-24:
+  The field `k` is **optional**
+  File "infer_decoupled_multivar.php", line 11, characters 6-24:
+  The field `k` is defined as **required**
+  File "infer_decoupled_multivar.php", line 16, characters 53-55:
+  `k` is defined here
+ERROR: File "infer_decoupled_multivar.php", line 20, characters 10-24:
+Invalid argument (Typing[4057])
+  File "infer_decoupled_multivar.php", line 11, characters 6-24:
+  The field `k` is missing
+  File "infer_decoupled_multivar.php", line 16, characters 46-48:
+  The field `k` is required here

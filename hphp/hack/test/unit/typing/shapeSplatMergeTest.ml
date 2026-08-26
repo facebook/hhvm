@@ -166,6 +166,99 @@ let residual_tyvar _ =
   | Norm.Empty_shape _ ->
     assert_failure "expected residual list for a free type variable"
 
+let normalized_row_is_aligned _ =
+  let parameter = mk (r, Tgeneric "T") in
+  let (env, type_variable) =
+    Env.fresh_type_reason dummy_env Pos.none (fun _ -> Reason.none)
+  in
+  let (_, err, singleton) =
+    Norm.Row.normalize
+      ~on_error:None
+      r
+      (Shape_splat { ss_elems = [parameter] })
+      env
+  in
+  assert_equal None err;
+  Norm.Row.fold
+    singleton
+    ~bottom:(fun () ->
+      assert_failure "a singleton parameter normalized to bottom")
+    ~simple:(fun _ ->
+      assert_failure "a singleton parameter normalized to a simple shape")
+    ~elements:(function
+      | [element] ->
+        (match Norm.Row.Element.view element with
+        | Norm.Row.Element.Opaque opaque ->
+          (match Norm.Row.Opaque.view opaque with
+          | Norm.Row.Opaque.Type_parameter ty ->
+            assert_bool
+              "a singleton parameter should be lifted out of the splat"
+              (Typing_defs.ty_equal ty parameter)
+          | Norm.Row.Opaque.Type_variable _
+          | Norm.Row.Opaque.Newtype _ ->
+            assert_failure
+              "a singleton parameter was not classified as a type parameter")
+        | Norm.Row.Element.Shape _ ->
+          assert_failure "a singleton parameter normalized to a shape")
+      | _ ->
+        assert_failure "a singleton parameter was not normalized to an atom");
+  let input =
+    Shape_splat
+      {
+        ss_elems =
+          [
+            shape_ty (simple [("a", field tint)]);
+            parameter;
+            shape_ty (simple [("b", field tbool)]);
+            shape_ty (simple [("c", field tfloat)]);
+            type_variable;
+            shape_ty (simple [("d", field tint)]);
+          ];
+      }
+  in
+  let (_, err, row) = Norm.Row.normalize ~on_error:None r input env in
+  assert_equal None err;
+  Norm.Row.fold
+    row
+    ~bottom:(fun () -> assert_failure "the normalized row is bottom")
+    ~simple:(fun _ ->
+      assert_failure "a row with opaque operands normalized to a simple shape")
+    ~elements:(fun elements ->
+      match List.map elements ~f:Norm.Row.Element.view with
+      | [
+       Norm.Row.Element.Shape (_, first);
+       Norm.Row.Element.Opaque parameter;
+       Norm.Row.Element.Shape (_, middle);
+       Norm.Row.Element.Opaque type_variable;
+       Norm.Row.Element.Shape (_, last);
+      ] ->
+        (match Norm.Row.Opaque.view parameter with
+        | Norm.Row.Opaque.Type_parameter _ -> ()
+        | Norm.Row.Opaque.Type_variable _
+        | Norm.Row.Opaque.Newtype _ ->
+          assert_failure
+            "generic operand was not classified as a type parameter");
+        (match Norm.Row.Opaque.view type_variable with
+        | Norm.Row.Opaque.Type_variable _ -> ()
+        | Norm.Row.Opaque.Type_parameter _
+        | Norm.Row.Opaque.Newtype _ ->
+          assert_failure
+            "inference operand was not classified as a type variable");
+        assert_bool
+          "first shape fragment should contain a"
+          (Option.is_some (get_field first "a"));
+        assert_bool
+          "contiguous shape fragments should merge b"
+          (Option.is_some (get_field middle "b"));
+        assert_bool
+          "contiguous shape fragments should merge c"
+          (Option.is_some (get_field middle "c"));
+        assert_bool
+          "last shape fragment should contain d"
+          (Option.is_some (get_field last "d"))
+      | _ ->
+        assert_failure "normalized splat elements are not shape/opaque aligned")
+
 (* -- Property tests -----------------------------------------------------------
    The examples above pin specific cases; the properties below check the
    algebraic laws over a small enumerated space of shapes. The space is every
@@ -175,6 +268,38 @@ let residual_tyvar _ =
    violation without a generator dependency. *)
 
 let splat elems = mk (r, Tshape (Shape_splat { ss_elems = elems }))
+
+let tgeneric name = mk (r, Tgeneric name)
+
+let repeated_generic_bottom_query_is_memoized _ =
+  let depth = 20 in
+  let name i = Printf.sprintf "T%d" i in
+  let generic i = tgeneric (name i) in
+  let env =
+    Env.add_upper_bound
+      dummy_env
+      (name depth)
+      (shape_ty (simple [("leaf", field tint)]))
+  in
+  let env =
+    List.fold_right (List.range 0 depth) ~init:env ~f:(fun i env ->
+        let left = generic (i + 1) in
+        let right = generic (i + 1) in
+        Env.add_upper_bound env (name i) (splat [left; right]))
+  in
+  let outer = generic 0 in
+  let (_, err, result) = Norm.merge ~on_error:None [outer] env in
+  assert_bool "merge should not report an error" (Option.is_none err);
+  match result with
+  | Norm.Partial ([ty], false) ->
+    (match get_node ty with
+    | Tgeneric name -> assert_equal "T0" name
+    | _ -> assert_failure "expected residual T0")
+  | Norm.Partial _ ->
+    assert_failure "expected exactly one non-supportdyn residual"
+  | Norm.Full _
+  | Norm.Empty_shape _ ->
+    assert_failure "expected T0 to remain residual"
 
 let empty_closed = simple []
 
@@ -396,6 +521,9 @@ let () =
          "open_right_absorbs" >:: open_right_absorbs;
          "bottom_absorbs" >:: bottom_absorbs;
          "residual_tyvar" >:: residual_tyvar;
+         "normalized_row_is_aligned" >:: normalized_row_is_aligned;
+         "repeated_generic_bottom_query_is_memoized"
+         >:: repeated_generic_bottom_query_is_memoized;
          "dynamic_on_right_unions" >:: dynamic_on_right_unions;
          "dynamic_on_left_field_wins" >:: dynamic_on_left_field_wins;
          "prop_rightmost_wins" >:: prop_rightmost_wins;

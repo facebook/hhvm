@@ -12,6 +12,6 @@ function ok(): shape(...C) {
   throw new Exception();
 }
 
-function bad<T as shape('a' => int)>(): shape(...T) {
+function bad<<<__Explicit>> T as shape('a' => int)>(): shape(...T) {
   throw new Exception();
 }

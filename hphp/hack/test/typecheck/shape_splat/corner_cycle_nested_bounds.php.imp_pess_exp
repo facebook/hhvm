@@ -1,0 +1,18 @@
+ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
+Invalid return type (Typing[4110])
+  File "corner_cycle_nested_bounds.php", line 11, characters 4-36:
+  Expected `nothing`
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  But got `mixed`
+ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
+Invalid return type (Typing[4110])
+  File "corner_cycle_nested_bounds.php", line 11, characters 18-23:
+  Expected `string`
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  But got `nonnull`
+ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
+Invalid return type (Typing[4110])
+  File "corner_cycle_nested_bounds.php", line 11, characters 18-23:
+  Expected `~string`
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  But got `mixed`

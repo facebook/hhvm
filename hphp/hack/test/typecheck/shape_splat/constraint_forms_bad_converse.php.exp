@@ -1,0 +1,48 @@
+ERROR: File "constraint_forms_bad_converse.php", line 9, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_forms_bad_converse.php", line 7, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_forms_bad_converse.php", line 8, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_forms_bad_converse.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_forms_bad_converse.php", line 9, characters 3-12:
+  Expected `nothing`
+  File "constraint_forms_bad_converse.php", line 6, characters 25-34:
+  But got `mixed`
+ERROR: File "constraint_forms_bad_converse.php", line 15, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_forms_bad_converse.php", line 13, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_forms_bad_converse.php", line 14, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_forms_bad_converse.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_forms_bad_converse.php", line 15, characters 3-12:
+  Expected `nothing`
+  File "constraint_forms_bad_converse.php", line 12, characters 55-64:
+  But got `mixed`
+ERROR: File "constraint_forms_bad_converse.php", line 21, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_forms_bad_converse.php", line 19, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_forms_bad_converse.php", line 20, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_forms_bad_converse.php", line 21, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_forms_bad_converse.php", line 21, characters 3-12:
+  Expected `nothing`
+  File "constraint_forms_bad_converse.php", line 18, characters 31-40:
+  But got `mixed`
+ERROR: File "constraint_forms_bad_converse.php", line 27, characters 10-11:
+Invalid return type (Typing[4522])
+  File "constraint_forms_bad_converse.php", line 25, characters 3-26:
+  This shape is not guaranteed to have the fields required here
+  File "constraint_forms_bad_converse.php", line 26, characters 13-14:
+  `T2` may have required fields of its own
+ERROR: File "constraint_forms_bad_converse.php", line 27, characters 10-11:
+Invalid return type (Typing[4110])
+  File "constraint_forms_bad_converse.php", line 27, characters 3-12:
+  Expected `nothing`
+  File "constraint_forms_bad_converse.php", line 24, characters 34-43:
+  But got `mixed`

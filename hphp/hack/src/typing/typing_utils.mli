@@ -336,6 +336,14 @@ val get_concrete_supertypes :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_set.elt list
 
+(** The concrete types known to be BELOW the given type: the dual of
+    [get_concrete_supertypes]. Use this, not that one, when reading a lower
+    bound -- supertypes can only bound from above. *)
+val get_concrete_subtypes :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_set.elt list
+
 val simplify_unions :
   Typing_env_types.env ->
   ?approx_cancel_neg:bool ->
@@ -509,6 +517,12 @@ val get_case_type_variants_as_type :
   Typing_defs.typedef_case_type_variant ->
   Typing_defs.typedef_case_type_variant list ->
   Typing_defs.decl_ty
+
+val get_newtype_sub_opt :
+  Typing_env_types.env ->
+  string ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * Typing_defs.locl_ty option
 
 val get_newtype_super :
   Typing_env_types.env ->

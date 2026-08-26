@@ -730,6 +730,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           }
         in
         (mk (r, Tshape (Shape_simple shape)), sd)
+      (* A splat of one element and nothing else IS that element, so lift it out
+         rather than leaving a singleton [Shape_splat] wrapper: `shape(...T)` is
+         `T`. Without this the wrapper hides the element behind the splat
+         machinery and reading a field off a `shape(...T)` parameter would go via
+         the corner's bound projection rather than the ordinary rules for `T`. *)
+      | Partial ([elem], sd) -> (elem, sd)
       | Partial (ss_elems, sd) -> (mk (r, Tshape (Shape_splat { ss_elems })), sd)
     in
     (* If any element was [supportdyn<...>] (e.g. an open shape under sound

@@ -1770,6 +1770,17 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
+    | Splat_may_require_fields of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        name: string option;
+      }
+    | Splat_field_not_known of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        name: string;
+        field: string;
+      }
     | Accept_disposable_invariant of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
@@ -2098,6 +2109,17 @@ end = struct
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+      }
+    | Splat_may_require_fields of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        name: string option;
+      }
+    | Splat_field_not_known of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        name: string;
+        field: string;
       }
     | Accept_disposable_invariant of {
         pos: Pos_or_decl.t;

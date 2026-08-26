@@ -1,0 +1,6 @@
+ERROR: File "bare_param_against_splat_bad_extra_field.php", line 6, characters 10-11:
+Invalid return type (Typing[4523])
+  File "bare_param_against_splat_bad_extra_field.php", line 5, characters 33-55:
+  The field `a` here is not compatible with every instantiation of `T`
+  File "bare_param_against_splat_bad_extra_field.php", line 5, characters 62-62:
+  `T` may provide `a` with a type of its own

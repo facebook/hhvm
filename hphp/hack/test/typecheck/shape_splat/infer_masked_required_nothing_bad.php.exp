@@ -1,0 +1,8 @@
+ERROR: File "infer_masked_required_nothing_bad.php", line 10, characters 3-34:
+Cannot remove field `x`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?x => nothing` (Typing[4116])
+ERROR: File "infer_masked_required_nothing_bad.php", line 11, characters 10-11:
+Invalid return type (Typing[4523])
+  File "infer_masked_required_nothing_bad.php", line 10, characters 3-34:
+  The field `x` here is not compatible with every instantiation of `T`
+  File "infer_masked_required_nothing_bad.php", line 9, characters 74-74:
+  `T` may provide `x` with a type of its own

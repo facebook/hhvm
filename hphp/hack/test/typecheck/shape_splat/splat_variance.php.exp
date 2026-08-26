@@ -1,0 +1,6 @@
+ERROR: File "splat_variance.php", line 7, characters 38-38:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "splat_variance.php", line 7, characters 24-24:
+  This is where the parameter was declared as contravariant `-`
+  File "splat_variance.php", line 7, characters 38-38:
+  Aliased types are covariant

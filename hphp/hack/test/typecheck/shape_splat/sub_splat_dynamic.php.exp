@@ -1,0 +1,6 @@
+ERROR: File "sub_splat_dynamic.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "sub_splat_dynamic.php", line 7, characters 4-10:
+  Expected `dynamic`
+  File "sub_splat_dynamic.php", line 6, characters 3-31:
+  Type `shape(...T, ...shape('name' => string))` is not a subtype of `dynamic` under dynamic-aware subtyping

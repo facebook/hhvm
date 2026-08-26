@@ -1,0 +1,24 @@
+ERROR: File "normalize_singleton_splat.php", line 22, characters 10-11:
+Invalid return type (Typing[4057])
+  File "normalize_singleton_splat.php", line 21, characters 45-45:
+  The field `b` is missing
+  File "normalize_singleton_splat.php", line 21, characters 65-67:
+  The field `b` is required here
+ERROR: File "normalize_singleton_splat.php", line 26, characters 10-11:
+Invalid return type (Typing[4057])
+  File "normalize_singleton_splat.php", line 25, characters 33-33:
+  The field `b` is missing
+  File "normalize_singleton_splat.php", line 25, characters 52-54:
+  The field `b` is required here
+ERROR: File "normalize_singleton_splat.php", line 34, characters 10-11:
+Invalid return type (Typing[4057])
+  File "normalize_singleton_splat.php", line 32, characters 12-12:
+  The field `b` is missing
+  File "normalize_singleton_splat.php", line 33, characters 16-18:
+  The field `b` is required here
+ERROR: File "normalize_singleton_splat.php", line 40, characters 10-11:
+Invalid return type (Typing[4057])
+  File "normalize_singleton_splat.php", line 38, characters 3-3:
+  The field `b` is missing
+  File "normalize_singleton_splat.php", line 39, characters 16-18:
+  The field `b` is required here

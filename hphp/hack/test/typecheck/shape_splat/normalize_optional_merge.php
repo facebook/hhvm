@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+<<file:__EnableUnstableFeatures('shape_splat_concrete', 'union_intersection_type_hints')>>
 
 // Test all field descriptor merge cases from HIP §4.1.3
 
@@ -28,21 +28,21 @@ type TOptOpt = shape(
 );
 
 function test_req_req(TReqReq $s): void {
-  hh_show($s);
+  hh_expect<shape('x' => bool)>($s);
   hh_expect<bool>($s['x']);
 }
 
 function test_req_opt(TReqOpt $s): void {
-  hh_show($s);
+  hh_expect<shape('x' => (int | bool))>($s);
   // Required because left has Req; type is (int | bool) because right is Opt
   hh_expect<(int | bool)>($s['x']);
 }
 
 function test_opt_req(TOptReq $s): void {
-  hh_show($s);
+  hh_expect<shape('x' => bool)>($s);
   hh_expect<bool>($s['x']);
 }
 
 function test_opt_opt(TOptOpt $s): void {
-  hh_show($s);
+  hh_expect<shape(?'x' => (int | bool))>($s);
 }

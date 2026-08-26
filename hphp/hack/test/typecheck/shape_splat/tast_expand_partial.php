@@ -7,5 +7,5 @@ function preserve_splat<T as shape(...)>(
   shape(...T, 'x' => int) $s,
 ): void {
   // Inside the body, T is still abstract — tast_expand cannot normalize
-  hh_show($s);
+  hh_expect<shape(...T, 'x' => int)>($s);
 }

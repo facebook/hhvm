@@ -1,0 +1,8 @@
+ERROR: File "sub_opt_not_req.php", line 5, characters 10-13:
+Invalid return type (Typing[4163])
+  File "sub_opt_not_req.php", line 4, characters 27-44:
+  The field `x` is **optional**
+  File "sub_opt_not_req.php", line 4, characters 53-69:
+  The field `x` is defined as **required**
+  File "sub_opt_not_req.php", line 4, characters 66-68:
+  `x` is defined here

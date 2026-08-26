@@ -12,8 +12,7 @@ type TOpen = shape('a' => int, ...);
 type TClosed = shape('a' => int);
 
 // (1) open base, explicit field, open tail: the open tail widens the base's
-// 'a' to mixed. direct decl does this; decl_hint (closed field-runs + a
-// leftmost open element) leaves 'a' as int.
+// 'a' to mixed. Both lowerings must agree on that widening.
 function open_base_field_tail(): shape(...TOpen, 'y' => string, ...) {
   throw new Exception();
 }

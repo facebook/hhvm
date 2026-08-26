@@ -111,6 +111,7 @@
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/shm-counter.h"
 #include "hphp/util/stack-trace.h"
@@ -1773,6 +1774,7 @@ static int execute_program_impl(int argc, char** argv) {
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")";
+    if (use_roar) cout << " (roar)";
     cout << " (packedptr)\n";
     cout << "Compiler: " << compilerId() << "\n";
     cout << "Repo schema: " << repoSchemaId() << "\n";

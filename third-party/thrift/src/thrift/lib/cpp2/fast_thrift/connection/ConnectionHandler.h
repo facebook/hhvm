@@ -38,10 +38,12 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/ConnectionStats.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/endpoint/ConnectionInstaller.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/endpoint/ConnectionListener.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionAcceptCallbackHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionBuilderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
@@ -76,6 +78,7 @@ HANDLER_TAG(connection_accept_callback_handler);
  *                                                    //   fizz, stoptls)
  *     → ConnectionBuilderHandler<F>
  *     → [ConnectionAcceptCallbackHandler<Conn>]      // only if onAccept is set
+ *     → [ConnectionMetricsHandler]                   // only if stats are set
  *     → ConnectionInstaller<Conn>  (tail)
  *
  * Shutdown is single-call: stop() tears the acceptance pipeline down,
@@ -92,6 +95,10 @@ class ConnectionHandler {
  public:
   using Ptr = std::unique_ptr<ConnectionHandler>;
 
+  // `stats` is borrowed and may be null, in which case no metrics handler is
+  // built into the acceptance pipeline and the handler costs nothing. Must be
+  // constructed on `evb`: the shard is resolved here, and it belongs to the
+  // constructing thread.
   ConnectionHandler(
       folly::EventBase& evb,
       folly::SocketAddress address,
@@ -99,7 +106,8 @@ class ConnectionHandler {
       folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
           tlsParamsObserver,
       SocketOptions socketOptions,
-      bool enableReusePortBpfSpread);
+      bool enableReusePortBpfSpread,
+      ConnectionStats* stats = nullptr);
 
   ~ConnectionHandler();
 
@@ -222,6 +230,10 @@ class ConnectionHandler {
   // every reader that goes through it.
   folly::SocketAddress boundAddress_;
 
+  // This EventBase's counter shard, resolved in the ctor, or null when the
+  // server was given no ConnectionStats. Written only from this EVB.
+  ConnectionStatsShard* statsShard_{nullptr};
+
   folly::F14NodeMap<uint64_t, AnyConnection> connections_;
   // Mirrors connections_.size(). Mutated on the EVB alongside the map so
   // observability calls can read it lock-free from any thread.
@@ -307,6 +319,13 @@ void ConnectionHandler::setConnectionFactory(
   if (onAccept) {
     builder.template addNextInbound<AcceptCallback>(
         connection_accept_callback_handler_tag, std::move(onAccept));
+  }
+
+  // Below the builder, so only connections that survived TLS and were built
+  // reach it — matching what the classic server's connAccepted() counts.
+  if (statsShard_ != nullptr) {
+    builder.template addNextInbound<handler::ConnectionMetricsHandler>(
+        handler::connection_metrics_handler_tag, statsShard_);
   }
 
   pipeline_ = builder.build();

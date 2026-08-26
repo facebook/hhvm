@@ -169,6 +169,24 @@ class FastThriftServer {
   }
 
   /**
+   * Attach connection counters. Wires the connection metrics handlers into
+   * the acceptance pipeline of every EventBase; leaving it unset omits them,
+   * so a server without them pays nothing. Must be called before
+   * start()/serve().
+   *
+   * Separate from setStats because the two describe different layers: these
+   * count connection lifecycle, those count thrift and rocket messages. See
+   * ConnectionStats for why the shards are not shared.
+   */
+  void setConnectionStats(std::shared_ptr<connection::ConnectionStats> stats);
+
+  /// The counters attached via setConnectionStats, or nullptr if none were.
+  const std::shared_ptr<connection::ConnectionStats>& getConnectionStats()
+      const noexcept {
+    return connectionStats_;
+  }
+
+  /**
    * Register raw ("native") embedder handlers to splice into the thrift
    * pipeline of every accepted connection. The handlers are inserted after all
    * built-in thrift handlers, immediately above the tail app adapter: the first
@@ -409,6 +427,9 @@ class FastThriftServer {
   // Per-EventBase server counters, or null when the embedder never called
   // setStats — in which case no metrics handler is built into any pipeline.
   std::shared_ptr<ServerStats> stats_;
+  // Per-EventBase connection-layer counters, or null when the embedder never
+  // called setConnectionStats. Handed to the ConnectionManager at start().
+  std::shared_ptr<connection::ConnectionStats> connectionStats_;
   // Cached ThriftServiceMetadataResponse for the user's service. Built once
   // at start() when config_.enableMetadataService is set; null otherwise.
   // Shared across every per-connection MetadataAppAdapter.

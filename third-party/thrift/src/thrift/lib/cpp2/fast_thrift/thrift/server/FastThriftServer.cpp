@@ -119,6 +119,19 @@ void FastThriftServer::setStats(std::shared_ptr<ServerStats> stats) {
   stats_ = std::move(stats);
 }
 
+void FastThriftServer::setConnectionStats(
+    std::shared_ptr<connection::ConnectionStats> stats) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setConnectionStats must be called before "
+         "start()/serve()";
+  CHECK(stats)
+      << "FastThriftServer::setConnectionStats requires non-null stats";
+  CHECK(!connectionStats_)
+      << "FastThriftServer::setConnectionStats called more than once";
+  connectionStats_ = std::move(stats);
+}
+
 void FastThriftServer::addNativeThriftPipelineHandlers(
     std::vector<server::ThriftPipelineHandlerFactory> factories) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
@@ -370,6 +383,7 @@ void FastThriftServer::start() {
       std::move(tlsParams),
       socketOptions_);
   connectionManager_->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
+  connectionManager_->setConnectionStats(connectionStats_.get());
 
   // Wire the per-connection factory. The factory carries all per-EVB-handler
   // config (user handler, aux interfaces, metadata, zero-copy threshold,

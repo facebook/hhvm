@@ -29,9 +29,11 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <thread>
 
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
@@ -40,6 +42,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/common/ServerStats.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/common/ConnectionStats.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServerAsyncClient.h>
@@ -55,6 +58,8 @@ namespace integration =
 using ::apache::thrift::FastServiceHandler;
 using ::apache::thrift::fast_thrift::ServerStats;
 using ::apache::thrift::fast_thrift::ServerStatsShard;
+using ::apache::thrift::fast_thrift::connection::ConnectionStats;
+using ::apache::thrift::fast_thrift::connection::ConnectionStatsShard;
 using ::apache::thrift::fast_thrift::thrift::test::integration::EchoResponse;
 
 namespace {
@@ -119,6 +124,8 @@ class FastThriftServerStatsE2ETest : public ::testing::Test {
     if (withStats) {
       stats_ = std::make_shared<ServerStats>();
       server_->setStats(stats_);
+      connectionStats_ = std::make_shared<ConnectionStats>();
+      server_->setConnectionStats(connectionStats_);
     }
     server_->start();
 
@@ -211,11 +218,99 @@ class FastThriftServerStatsE2ETest : public ::testing::Test {
     return total;
   }
 
+  // Sums every EventBase's connection shard, reading each from its owning
+  // thread as ConnectionStats requires.
+  ConnectionStatsShard connectionTotals() {
+    ConnectionStatsShard total;
+    for (auto& ka : server_->getIOThreadPool()->getAllEventBases()) {
+      auto* evb = ka.get();
+      evb->runInEventBaseThreadAndWait([&] {
+        const auto& shard = connectionStats_->currentThreadShard();
+        total.connectionsAccepted.incrementValue(
+            shard.connectionsAccepted.value());
+        total.connectionsActive.incrementValue(shard.connectionsActive.value());
+      });
+    }
+    return total;
+  }
+
+  // A connection tears down asynchronously after the client goes away, so the
+  // active gauge settles some time after the call that triggered it. Polls
+  // rather than sleeping a fixed interval, and fails loudly on timeout so a
+  // gauge that never comes down cannot pass as a slow one.
+  void waitForActiveConnections(int64_t expected) {
+    constexpr auto kTimeout = std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + kTimeout;
+    int64_t last = -1;
+    while (std::chrono::steady_clock::now() < deadline) {
+      last = connectionTotals().connectionsActive.value();
+      if (last == expected) {
+        return;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    ADD_FAILURE() << "active connections never reached " << expected
+                  << "; last read " << last;
+  }
+
   std::shared_ptr<TestHandler> handler_;
   std::shared_ptr<ServerStats> stats_;
+  std::shared_ptr<ConnectionStats> connectionStats_;
   std::unique_ptr<ftt::FastThriftServer> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
 };
+
+// A connection is counted once it is established — the tail of the acceptance
+// pipeline, past TLS — which is what the classic server's connAccepted() also
+// means, so a socket that dies mid-handshake is counted by neither.
+TEST_F(FastThriftServerStatsE2ETest, CountsAcceptedConnections) {
+  startServer(/*withStats=*/true);
+  auto client = createClient();
+  // The completed RPC is what guarantees the connection is established and
+  // its pipeline built; the socket alone would leave that racing.
+  syncCall([&] { return client->semifuture_ping(); });
+
+  const auto total = connectionTotals();
+  EXPECT_EQ(total.connectionsAccepted.value(), 1);
+  EXPECT_EQ(total.connectionsActive.value(), 1);
+
+  destroyClientOnEvb(client);
+}
+
+// The gauge is only useful if it comes back down. Its decrement lives beside
+// the connection map's own prune, so the two cannot disagree.
+TEST_F(FastThriftServerStatsE2ETest, ActiveConnectionsFallsOnDisconnect) {
+  startServer(/*withStats=*/true);
+  auto client = createClient();
+  syncCall([&] { return client->semifuture_ping(); });
+  ASSERT_EQ(connectionTotals().connectionsActive.value(), 1);
+
+  destroyClientOnEvb(client);
+  waitForActiveConnections(0);
+
+  // The connection is gone, but having existed is not undone.
+  EXPECT_EQ(connectionTotals().connectionsAccepted.value(), 1);
+}
+
+// Two clients means two connections — the gauge tracks concurrency, not a
+// single connection's presence.
+TEST_F(FastThriftServerStatsE2ETest, CountsConcurrentConnections) {
+  startServer(/*withStats=*/true);
+  auto first = createClient();
+  auto second = createClient();
+  syncCall([&] { return first->semifuture_ping(); });
+  syncCall([&] { return second->semifuture_ping(); });
+
+  const auto total = connectionTotals();
+  EXPECT_EQ(total.connectionsAccepted.value(), 2);
+  EXPECT_EQ(total.connectionsActive.value(), 2);
+
+  destroyClientOnEvb(first);
+  waitForActiveConnections(1);
+  EXPECT_EQ(connectionTotals().connectionsAccepted.value(), 2);
+
+  destroyClientOnEvb(second);
+}
 
 TEST_F(FastThriftServerStatsE2ETest, CountsRequestsAndResponses) {
   startServer(/*withStats=*/true);

@@ -28,7 +28,8 @@ ConnectionHandler::ConnectionHandler(
     folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
         tlsParamsObserver,
     SocketOptions socketOptions,
-    bool enableReusePortBpfSpread)
+    bool enableReusePortBpfSpread,
+    ConnectionStats* stats)
     : evb_(folly::getKeepAliveToken(&evb)),
       address_(std::move(address)),
       socketOptions_(socketOptions),
@@ -41,7 +42,16 @@ ConnectionHandler::ConnectionHandler(
               address_,
               socketOptions_,
               enableReusePortBpfSpread_))),
-      boundAddress_(address_) {}
+      boundAddress_(address_) {
+  // Resolved here rather than at pipeline-build time because this ctor runs
+  // on the EventBase that will own every connection this handler accepts —
+  // making it the thread whose shard these counts belong in, and the only
+  // thread that will ever write it.
+  if (stats != nullptr) {
+    DCHECK(evb_->isInEventBaseThread());
+    statsShard_ = &stats->currentThreadShard();
+  }
+}
 
 ConnectionHandler::~ConnectionHandler() {
   // Defensive: ensure shutdown runs at least once. From the EVB we can't
@@ -124,6 +134,13 @@ void ConnectionHandler::closeAllConnectionsOnEvb() {
   // erase is a no-op, so its `> 0` branch won't run; zero the counter
   // explicitly here to keep it in sync with the moved-out map.
   connectionCount_.store(0, std::memory_order_relaxed);
+  // Same reasoning for the gauge, which the no-op erase would likewise skip.
+  // Subtracted rather than zeroed: the shard is per-EventBase and shared with
+  // every other handler on this thread, so it is not this handler's to reset.
+  if (statsShard_ != nullptr) {
+    statsShard_->connectionsActive.incrementValue(
+        -static_cast<int64_t>(victims.size()));
+  }
   for (auto& [_, conn] : victims) {
     conn.close();
   }
@@ -132,6 +149,14 @@ void ConnectionHandler::closeAllConnectionsOnEvb() {
 void ConnectionHandler::onConnectionClosed(uint64_t connId) noexcept {
   if (connections_.erase(connId) > 0) {
     connectionCount_.fetch_sub(1, std::memory_order_relaxed);
+    // Paired with the increment in the acceptance pipeline's tail metrics
+    // handler. Decremented here, under the same erase that keeps
+    // connectionCount_ honest, so the gauge cannot drift from the map: every
+    // connection counted in was registered, and every registered connection
+    // is erased exactly once.
+    if (statsShard_ != nullptr) {
+      statsShard_->connectionsActive.incrementValue(-1);
+    }
   }
   if (draining_.load(std::memory_order_acquire) && connections_.empty()) {
     postDrainedOnce();

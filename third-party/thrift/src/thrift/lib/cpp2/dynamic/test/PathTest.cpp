@@ -215,6 +215,36 @@ TEST_F(PathTest, PathAllComponentTypes) {
   }
 }
 
+TEST_F(PathTest, PathFormatsSelectorTypes) {
+  auto stringKeyPath = [&] {
+    PathBuilder builder(getMyStructType());
+    auto field = builder.enterField("users");
+    auto value = builder.enterMapValue("42");
+    return builder.path();
+  }();
+  EXPECT_EQ(stringKeyPath.toString(), "MyStruct.users[\"42\"]");
+
+  auto integerKeyPath = [&] {
+    PathBuilder builder(getMyStructType());
+    auto field = builder.enterField("counts");
+    auto value = builder.enterMapValue(42);
+    return builder.path();
+  }();
+  EXPECT_EQ(integerKeyPath.toString(), "MyStruct.counts[42]");
+
+  auto anyTypePath = [&] {
+    PathBuilder builder(getMyStructType());
+    auto users = builder.enterField("users");
+    auto user = builder.enterMapValue("alice");
+    auto metadata = builder.enterField("metadata");
+    auto type = builder.enterAnyType(getUserProfileType());
+    return builder.path();
+  }();
+  EXPECT_EQ(
+      anyTypePath.toString(),
+      "MyStruct.users[\"alice\"].metadata[meta.com/thrift/test/UserProfile]");
+}
+
 // Tests for PathBuilder (typed builder with validation)
 
 TEST_F(PathTest, BuilderAllAccessTypes) {

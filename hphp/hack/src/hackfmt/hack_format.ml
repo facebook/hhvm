@@ -2506,7 +2506,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             if Syntax.is_missing shape_type_ellipsis_type then
               ellipsis
             else
-              make_list (Syntax.children shape_type_ellipsis_type @ [ellipsis])
+              let missing = make_missing () in
+              Syntax.make_tuple_or_union_or_intersection_element_type_specifier
+                missing
+                missing
+                shape_type_ellipsis_type
+                ellipsis
           in
           let ellipsis_list =
             [Syntax.make_list_item ellipsis_node missing_separator]

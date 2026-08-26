@@ -49,7 +49,9 @@ namespace apache::thrift::fast_thrift::frame::read::handler {
  * - Continuation fragments: PAYLOAD frames with hasFollows()=true
  * - Final fragment: PAYLOAD frame with hasFollows()=false
  * - Only first fragment contains metadata (if any)
- * - Reassembled frame preserves original frame type and flags
+ * - COMPLETE marks the end of the stream, so it rides the final fragment
+ * - Reassembled frame preserves the original frame type, the first fragment's
+ *   flags and the final fragment's
  *
  * Templated on a `ReassemblyTracker`-satisfying type (see ReassemblyTracker.h).
  * The default `NoOpReassemblyTracker` makes the single hook site a no-op and is
@@ -184,7 +186,8 @@ class FrameDefragmentationHandlerT {
     if (!frame.hasFollows()) {
       DCHECK(it->second.payload != nullptr);
       auto bytesToRelease = it->second.accumulatedBytes;
-      auto assembled = assembleFrame(std::move(it->second));
+      auto assembled =
+          assembleFrame(std::move(it->second), frame.metadata.flags_);
       pending_.erase(it);
       totalPendingBytes_ -= bytesToRelease;
       return ctx.fireRead(
@@ -276,15 +279,20 @@ class FrameDefragmentationHandlerT {
   /**
    * Assemble a complete ParsedFrame from accumulated fragments.
    * Consumes the FragmentState.
+   *
+   * `finalFlags` are the last fragment's flags. They are part of the result
+   * because COMPLETE rides the fragment that ends the frame, not the one that
+   * starts it -- a frame rebuilt from the first fragment alone looks
+   * non-terminal, and whoever tracks the stream never closes it.
    */
-  ParsedFrame assembleFrame(FragmentState&& state) {
+  ParsedFrame assembleFrame(FragmentState&& state, uint16_t finalFlags) {
     auto payloadSize = static_cast<uint32_t>(state.accumulatedBytes);
 
     ParsedFrame result;
     result.metadata.descriptor = &getDescriptor(state.originalType);
     result.metadata.streamId = state.streamId;
     // Clear follows bit since frame is now complete
-    result.metadata.flags_ = state.originalFlags &
+    result.metadata.flags_ = (state.originalFlags | finalFlags) &
         ~::apache::thrift::fast_thrift::frame::detail::kFollowsBit;
     result.metadata.payloadSize = payloadSize;
     result.metadata.payloadOffset = 0;

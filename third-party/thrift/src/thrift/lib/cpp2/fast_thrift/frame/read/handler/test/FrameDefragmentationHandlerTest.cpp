@@ -403,6 +403,46 @@ TEST(FrameDefragmentationHandlerTest, FollowsBitCleared) {
   EXPECT_FALSE(ctx.receivedFrames[0].hasFollows());
 }
 
+// COMPLETE marks the end of a stream, so a peer that fragments puts it on the
+// fragment that ends the frame -- never on the one that starts it. Rebuilding
+// from the first fragment's flags alone yields a frame nothing recognises as
+// terminal, and the stream it belongs to is never closed.
+TEST(FrameDefragmentationHandlerTest, CompleteFromFinalFragmentSurvives) {
+  FrameDefragmentationHandler handler;
+  MockContext ctx;
+
+  auto first = makeFrame(
+      FrameType::PAYLOAD,
+      /*streamId=*/11,
+      /*hasFollows=*/true,
+      /*data=*/"a");
+  first.metadata.flags_ |=
+      ::apache::thrift::fast_thrift::frame::detail::kNextBit;
+  (void)handler.onRead(
+      ctx,
+      apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+          std::move(first)));
+
+  auto last = makeFrame(
+      FrameType::PAYLOAD,
+      /*streamId=*/11,
+      /*hasFollows=*/false,
+      /*data=*/"b");
+  last.metadata.flags_ |=
+      ::apache::thrift::fast_thrift::frame::detail::kCompleteBit;
+  (void)handler.onRead(
+      ctx,
+      apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+          std::move(last)));
+
+  ASSERT_EQ(ctx.receivedFrames.size(), 1);
+  EXPECT_TRUE(ctx.receivedFrames[0].isComplete());
+  EXPECT_TRUE(ctx.receivedFrames[0].isTerminalFrame());
+  // The first fragment's own flags still have to survive alongside it.
+  EXPECT_TRUE(ctx.receivedFrames[0].hasNext());
+  EXPECT_FALSE(ctx.receivedFrames[0].hasFollows());
+}
+
 // ============================================================================
 // Cancellation Tests
 // ============================================================================

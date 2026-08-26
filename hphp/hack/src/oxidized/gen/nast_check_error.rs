@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<377ed18716b75cfc2540766fbbb5ff77>>
+// @generated SignedSource<<820db341c9b849db4c118b516c1933cc>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -70,6 +70,8 @@ pub enum StrictIsolationConstruct {
     PackageExpression,
     #[rust_to_ocaml(name = "Require_package_attribute")]
     RequirePackageAttribute(String),
+    #[rust_to_ocaml(name = "Package_override_attribute")]
+    PackageOverrideAttribute(String),
 }
 
 #[derive(

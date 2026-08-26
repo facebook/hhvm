@@ -18,6 +18,7 @@ type verb =
 type strict_isolation_construct =
   | Package_expression
   | Require_package_attribute of string
+  | Package_override_attribute of string
 
 type t =
   | Repeated_record_field_name of {
@@ -952,11 +953,20 @@ let package_strict_inclusion
     [(Pos_or_decl.of_raw_pos current_pos, location_msg); last_reason]
 
 let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
-  let construct =
+  let (construct, reason) =
     match construct with
     | Package_expression ->
-      "The " ^ Markdown_lite.md_codify "package" ^ " expression"
-    | Require_package_attribute name -> Markdown_lite.md_codify name
+      ( "The " ^ Markdown_lite.md_codify "package" ^ " expression",
+        "the presence of a strict-isolation package cannot be dynamically observed"
+      )
+    | Require_package_attribute name ->
+      ( Markdown_lite.md_codify name,
+        "the presence of a strict-isolation package cannot be dynamically observed"
+      )
+    | Package_override_attribute name ->
+      ( Markdown_lite.md_codify name,
+        "membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute"
+      )
   in
   User_diagnostic.make_err
     Error_code.(to_enum StrictIsolationPackageNotObservable)
@@ -967,9 +977,7 @@ let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
         pkg )
     [
       ( def_pos,
-        Printf.sprintf
-          "`%s` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed"
-          pkg );
+        Printf.sprintf "`%s` has strict isolation enabled; %s" pkg reason );
     ]
 
 let package_override_target_not_included

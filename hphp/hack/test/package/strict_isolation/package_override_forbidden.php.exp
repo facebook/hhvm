@@ -1,0 +1,58 @@
+error: NastCheck[3110] `__PackageOverride` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+
+package_override_forbidden.php--unpackaged/override_isolated.php:3:9
+ 1 | <?hh
+ 2 | // A file cannot join a strict-isolation package by attribute.
+ 3 | <<file: __PackageOverride('isolated')>>
+   |         ^^^^^^^^^^^^^^^^^ [1]
+ 4 | 
+ 5 | function test_override_isolated(): void {}
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__PackageOverride` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+
+package_override_forbidden.php--unpackaged/override_two_defs.php:3:9
+ 1 | <?hh
+ 2 | // One attribute, one error, however many definitions it covers.
+ 3 | <<file: __PackageOverride('isolated')>>
+   |         ^^^^^^^^^^^^^^^^^ [1]
+ 4 | 
+ 5 | function test_override_first(): void {}
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__PackageOverride` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+
+package_override_forbidden.php--unpackaged/override_typedef_only.php:3:9
+ 1 | <?hh
+ 2 | // A typedef carries no package membership of its own; still reported.
+ 3 | <<file: __PackageOverride('isolated')>>
+   |         ^^^^^^^^^^^^^^^^^ [1]
+ 4 | 
+ 5 | type TOverride = int;
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+3 errors found

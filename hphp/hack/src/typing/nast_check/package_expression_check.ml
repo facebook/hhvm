@@ -51,11 +51,9 @@ let check_package_strict_inclusion
     emit_error ~soft_included:true ~def_pos
   | _ -> ()
 
-(* A strict-isolation package must not be dynamically observable: the `package`
-   expression and the `__RequirePackage` / `__SoftRequirePackage` attributes are
-   not supported for it. If [required_pkg] has strict isolation enabled, emit an
-   error and return [true] so the caller skips the ordinary strict-inclusion
-   check. *)
+(* Emits an error and returns [true] if [required_pkg] has strict isolation
+   enabled, so the caller skips the ordinary strict-inclusion check.
+   [construct] selects the message. *)
 let error_if_strict_isolation ~pos ~pkg_name ~construct required_pkg =
   match required_pkg with
   | Some p when p.Package.enable_strict_isolation ->
@@ -245,9 +243,30 @@ let package_override_check env ua =
                    }))))
   | _ -> ()
 
+(* Refuses [__PackageOverride('p')] when [p] has strict isolation enabled. *)
+let package_override_strict_isolation env attr =
+  match attr with
+  | { ua_params = (_, _, String pkg_name) :: _; ua_name = (name_pos, name) }
+    when String.equal name SN.UserAttributes.uaPackageOverride ->
+    let (_ : bool) =
+      error_if_strict_isolation
+        ~pos:name_pos
+        ~pkg_name
+        ~construct:(Nast_check_error.Package_override_attribute name)
+        (lookup_package env pkg_name)
+    in
+    ()
+  | _ -> ()
+
 let handler =
   object
     inherit Nast_visitor.handler_base
+
+    (* A file attribute, so this hook rather than a per-definition one: the
+       latter reports once per definition, and misses files whose only
+       definitions are typedefs or constants. *)
+    method! at_user_attribute env attr =
+      package_override_strict_isolation env attr
 
     method! at_fun_def env f =
       require_package_strict_inclusion env f.fd_fun.f_user_attributes

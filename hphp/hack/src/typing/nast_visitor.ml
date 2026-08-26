@@ -119,6 +119,8 @@ class type handler =
     method at_gconst : env -> Nast.gconst -> unit
 
     method at_file_attribute : env -> Nast.file_attribute -> unit
+
+    method at_user_attribute : env -> Nast.user_attribute -> unit
   end
 
 class virtual handler_base : handler =
@@ -144,6 +146,8 @@ class virtual handler_base : handler =
     method at_gconst _ _ = ()
 
     method at_file_attribute _ _ = ()
+
+    method at_user_attribute _ _ = ()
   end
 
 let iter_with (handlers : handler list) : iter =
@@ -202,4 +206,8 @@ let iter_with (handlers : handler list) : iter =
     method! on_gconst env gconst =
       List.iter handlers ~f:(fun v -> v#at_gconst env gconst);
       super#on_gconst env gconst
+
+    method! on_user_attribute env ua =
+      List.iter handlers ~f:(fun v -> v#at_user_attribute env ua);
+      super#on_user_attribute env ua
   end

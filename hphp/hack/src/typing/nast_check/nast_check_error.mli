@@ -17,6 +17,7 @@ type verb =
 type strict_isolation_construct =
   | Package_expression
   | Require_package_attribute of string
+  | Package_override_attribute of string
 
 type t =
   | Repeated_record_field_name of {

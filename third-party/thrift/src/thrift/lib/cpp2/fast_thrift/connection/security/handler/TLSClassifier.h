@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/Util.h>
 #include <thrift/lib/cpp2/fast_thrift/security/HandshakeTimeout.h>
 #include <thrift/lib/cpp2/fast_thrift/security/TLSPrefixPeeker.h>
 
@@ -61,8 +62,9 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * msg.tlsParams (stamped upstream by TLSConfigHandler). No Observer
  * dependency lives here.
  *
- * Peek errors and timeouts are logged at DBG3 and the connection is
- * dropped — matches FizzHandshakeHandler error policy.
+ * Peek errors and timeouts drop the connection and report it by firing an
+ * exception onto the pipeline — matches FizzHandshakeHandler error policy.
+ * See Util.h.
  *
  * The connections parked here awaiting classification are capped: past the
  * cap a connection is refused rather than parked, so a peer that opens a
@@ -153,7 +155,12 @@ class TLSClassifier {
   }
 
   template <typename Context>
-  void onPipelineActive(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {
+    // Cleared, not just set on the way down: a pipeline may be deactivated
+    // and activated again, and a latched flag would silently suppress every
+    // future failure report for the life of the handler.
+    shuttingDown_ = false;
+  }
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
@@ -168,6 +175,12 @@ class TLSClassifier {
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
+    // cancel() below drives each helper's completion callback synchronously
+    // with a cancellation error. That is teardown, not a connection failing,
+    // so it must not be reported as one — and firing into a pipeline that is
+    // mid-deactivate would re-enter handlers that have already been told the
+    // pipeline is inactive.
+    shuttingDown_ = true;
     auto drained = std::move(inFlight_);
     for (auto& [_, peeker] : drained) {
       folly::DelayedDestruction::DestructorGuard guard(peeker.get());
@@ -189,6 +202,9 @@ class TLSClassifier {
     if (ex || !socket) {
       XLOG(DBG3) << "TLS peek failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
+      if (!shuttingDown_) {
+        fireConnectionFailure(ctx_, ex, "TLS peek failed", clientAddr);
+      }
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
@@ -256,6 +272,8 @@ class TLSClassifier {
       fast_security::TLSPrefixPeeker::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  // Set once teardown begins; see onPipelineInactive.
+  bool shuttingDown_{false};
   uint32_t maxPendingConnections_{0};
 };
 

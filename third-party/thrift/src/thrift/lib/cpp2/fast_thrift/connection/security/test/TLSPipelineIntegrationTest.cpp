@@ -20,6 +20,7 @@
 
 #include <sys/socket.h>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <memory>
 #include <string_view>
@@ -90,6 +91,7 @@ class NoopHead {
 class CapturingTail {
  public:
   using OnRead = folly::Function<void(conn::ConnectionMessage&&) noexcept>;
+  using OnException = folly::Function<void(folly::exception_wrapper&&)>;
 
   explicit CapturingTail(OnRead onRead) noexcept : onRead_(std::move(onRead)) {}
 
@@ -102,7 +104,15 @@ class CapturingTail {
     }
     return channel_pipeline::Result::Success;
   }
-  void onException(folly::exception_wrapper&&) noexcept {}
+  // A stage that gives up on a connection reports it by firing an exception,
+  // which arrives here after crossing out of the inner TLS pipeline.
+  void setOnException(OnException fn) { onException_ = std::move(fn); }
+
+  void onException(folly::exception_wrapper&& e) noexcept {
+    if (onException_) {
+      onException_(std::move(e));
+    }
+  }
   void onWriteReady() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
@@ -111,6 +121,7 @@ class CapturingTail {
 
  private:
   OnRead onRead_;
+  OnException onException_;
 };
 
 // === Client-side fizz driver ===
@@ -206,9 +217,14 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
   void buildPipeline(
       fts::SSLPolicy policy,
       CapturingTail::OnRead onRead,
-      uint32_t maxPending) {
+      uint32_t maxPending,
+      CapturingTail::OnException onException = nullptr) {
     head_ = std::make_unique<NoopHead>();
     tail_ = std::make_unique<CapturingTail>(std::move(onRead));
+    // Set before the pipeline is activated below: afterwards the EventBase
+    // thread owns this field, and writing it from here would race a handler
+    // reading it.
+    tail_->setOnException(std::move(onException));
 
     evb_->runInEventBaseThreadAndWait([&] {
       channel_pipeline::PipelineBuilder<
@@ -449,14 +465,19 @@ TEST_F(TLSPipelineIntegrationTest, PermittedTLSPathCompletesHandshake) {
   });
 }
 
-// REQUIRED + handshake garbage: no message reaches the tail; connection
-// is dropped at the FizzHandshakeHandler level.
-TEST_F(TLSPipelineIntegrationTest, RequiredGarbageInputDropsConnection) {
+// REQUIRED + handshake garbage: no message reaches the tail, because the
+// connection is dropped inside FizzHandshakeHandler. The drop must still be
+// *reported* — the work path ends at the stage, so an exception is the only
+// way anything downstream learns the connection existed at all.
+TEST_F(
+    TLSPipelineIntegrationTest, RequiredGarbageInputReportsDroppedConnection) {
   folly::Baton<> emitted;
+  folly::Baton<> failed;
   buildPipeline(
       fts::SSLPolicy::REQUIRED,
       [&](conn::ConnectionMessage&&) noexcept { emitted.post(); },
-      /*maxPending=*/0);
+      /*maxPending=*/0,
+      [&](folly::exception_wrapper&&) { failed.post(); });
 
   auto sp = makeSocketPair();
   ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
@@ -468,10 +489,101 @@ TEST_F(TLSPipelineIntegrationTest, RequiredGarbageInputDropsConnection) {
       ::write(sp.client.toFd(), garbage.data(), garbage.size()),
       ssize_t(garbage.size()));
 
-  // Tail should never fire — handshake fails inside FizzHandshakeHandler
-  // and the message is absorbed.
-  EXPECT_FALSE(emitted.try_wait_for(std::chrono::milliseconds{500}));
+  // The failure is reported. Asserted, not expected: everything below is only
+  // meaningful once the handshake has actually resolved.
+  ASSERT_TRUE(failed.try_wait_for(std::chrono::seconds{5}));
+  // ...and no transport is handed on, since there is nothing to hand on. Safe
+  // to sample rather than wait out a timeout: the connection is already gone
+  // by the time the failure is reported, so nothing can arrive after this.
+  EXPECT_FALSE(emitted.ready());
 
+  ::close(sp.client.toFd());
+}
+
+// Shutdown cancels whatever is still parked, and cancellation drives each
+// helper's completion callback with an error. That is teardown, not a
+// connection failing — reporting it would bill a graceful drain as a TLS
+// failure, once per connection still in flight.
+TEST_F(TLSPipelineIntegrationTest, ShutdownCancellationIsNotReported) {
+  std::atomic<int> failures{0};
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/0,
+      [&](folly::exception_wrapper&&) { ++failures; });
+
+  // A peer that connects and then says nothing stays parked in the handshake
+  // stage, so it is still in flight when the pipeline goes down.
+  auto sp = makeSocketPair();
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    pipeline_->deactivate();
+    // Reset here so TearDown does not deactivate a second time.
+    pipeline_.reset();
+  });
+  EXPECT_EQ(failures.load(), 0);
+
+  ::close(sp.client.toFd());
+}
+
+// A pipeline can be deactivated and activated again. The shutdown suppression
+// above must not latch: if it did, every failure after the first drain would
+// go unreported again, silently undoing what this reporting exists for.
+TEST_F(TLSPipelineIntegrationTest, ReportsAgainAfterReactivation) {
+  folly::Baton<> failed;
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/0,
+      [&](folly::exception_wrapper&&) { failed.post(); });
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    pipeline_->deactivate();
+    pipeline_->activate();
+  });
+
+  auto sp = makeSocketPair();
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
+  constexpr std::string_view garbage =
+      "definitely not a TLS ClientHello frame ........";
+  ASSERT_EQ(
+      ::write(sp.client.toFd(), garbage.data(), garbage.size()),
+      ssize_t(garbage.size()));
+
+  EXPECT_TRUE(failed.try_wait_for(std::chrono::seconds{5}));
+
+  ::close(sp.client.toFd());
+}
+
+// The report is fired from inside a helper's completion callback, so an
+// observer that reacts by tearing the pipeline down re-enters the stage and
+// cancels a helper whose callback frame is still live. The helpers'
+// DestructorGuards are what make that safe; this pins that, since nothing
+// else would catch a guard being dropped.
+TEST_F(TLSPipelineIntegrationTest, ObserverMayDeactivateFromExceptionHandler) {
+  folly::Baton<> failed;
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [](conn::ConnectionMessage&&) noexcept {},
+      /*maxPending=*/0,
+      [&](folly::exception_wrapper&&) {
+        // Re-entrant teardown, from underneath the helper that is reporting.
+        pipeline_->deactivate();
+        failed.post();
+      });
+
+  auto sp = makeSocketPair();
+  ASSERT_EQ(feedSocket(sp.server), channel_pipeline::Result::Success);
+  constexpr std::string_view garbage =
+      "definitely not a TLS ClientHello frame ........";
+  ASSERT_EQ(
+      ::write(sp.client.toFd(), garbage.data(), garbage.size()),
+      ssize_t(garbage.size()));
+
+  EXPECT_TRUE(failed.try_wait_for(std::chrono::seconds{5}));
+
+  evb_->runInEventBaseThreadAndWait([&] { pipeline_.reset(); });
   ::close(sp.client.toFd());
 }
 

@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/Util.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
 #include <thrift/lib/cpp2/fast_thrift/security/HandshakeTimeout.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
@@ -52,8 +53,10 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * handshake timeout off incoming msg.tlsParams (stamped upstream by
  * TLSConfigHandler). No Observer dependency lives here.
  *
- * Handshake failures are logged at DBG3 and the connection is dropped —
- * the message is absorbed (no downstream fire).
+ * Handshake failures drop the connection — the message is absorbed, so no
+ * transport travels on — and report it by firing an exception onto the
+ * pipeline, which is the only signal anything downstream ever gets that the
+ * connection existed. See Util.h.
  *
  * The handshakes parked here are capped: past the cap a connection is refused
  * rather than started, so a peer that never finishes its handshake cannot pin
@@ -159,7 +162,12 @@ class FizzHandshakeHandler {
   }
 
   template <typename Context>
-  void onPipelineActive(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {
+    // Cleared, not just set on the way down: a pipeline may be deactivated
+    // and activated again, and a latched flag would silently suppress every
+    // future failure report for the life of the handler.
+    shuttingDown_ = false;
+  }
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
@@ -174,6 +182,12 @@ class FizzHandshakeHandler {
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
+    // cancel() below drives each helper's completion callback synchronously
+    // with a cancellation error. That is teardown, not a connection failing,
+    // so it must not be reported as one — and firing into a pipeline that is
+    // mid-deactivate would re-enter handlers that have already been told the
+    // pipeline is inactive.
+    shuttingDown_ = true;
     auto drained = std::move(inFlight_);
     for (auto& [_, helper] : drained) {
       folly::DelayedDestruction::DestructorGuard guard(helper.get());
@@ -195,6 +209,9 @@ class FizzHandshakeHandler {
     if (ex || !fizzServer) {
       XLOG(DBG3) << "TLS handshake failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
+      if (!shuttingDown_) {
+        fireConnectionFailure(ctx_, ex, "TLS handshake failed", clientAddr);
+      }
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
@@ -252,6 +269,8 @@ class FizzHandshakeHandler {
       fast_security::FizzHandshakeHelper::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  // Set once teardown begins; see onPipelineInactive.
+  bool shuttingDown_{false};
   uint32_t maxPendingConnections_{0};
 };
 

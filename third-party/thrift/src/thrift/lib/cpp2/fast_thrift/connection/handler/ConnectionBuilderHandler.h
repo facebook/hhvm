@@ -62,7 +62,10 @@ class ConnectionBuilderHandler {
 
   template <typename Context>
   void onException(Context& ctx, folly::exception_wrapper&& e) noexcept {
-    XLOG(ERR) << "ConnectionBuilderHandler: " << e.what();
+    // Rate-limited: a TLS stage giving up on a connection reports it as an
+    // exception on this pipeline, so this is reachable once per failed
+    // connection attempt.
+    XLOG_EVERY_MS(ERR, 1000) << "ConnectionBuilderHandler: " << e.what();
     ctx.fireException(std::move(e));
   }
 

@@ -80,7 +80,10 @@ class ConnectionInstaller : public folly::DelayedDestruction {
   }
 
   void onException(folly::exception_wrapper&& e) noexcept {
-    XLOG(ERR) << "ConnectionInstaller: " << e.what();
+    // Rate-limited: this is where every TLS stage's per-connection failure
+    // converges, so a peer that can make handshakes fail can otherwise drive
+    // one log line per connection attempt.
+    XLOG_EVERY_MS(ERR, 1000) << "ConnectionInstaller: " << e.what();
   }
 
   void handlerAdded() noexcept {}

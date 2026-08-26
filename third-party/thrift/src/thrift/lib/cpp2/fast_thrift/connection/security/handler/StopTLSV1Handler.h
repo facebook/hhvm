@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/Util.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/util/StopTLSHelper.h>
 
 namespace apache::thrift::fast_thrift::connection::security::handler {
@@ -48,7 +49,8 @@ namespace apache::thrift::fast_thrift::connection::security::handler {
  *     downgraded plaintext transport (extension preserved so callers
  *     retain access to negotiated parameters).
  *
- * StopTLS failures are logged at DBG3 and the connection is dropped.
+ * StopTLS failures drop the connection and report it by firing an exception
+ * onto the pipeline. See Util.h.
  *
  * The downgrades parked here are capped: past the cap a connection is refused
  * rather than started. Each one is also bounded by the handshake-timeout
@@ -150,7 +152,12 @@ class StopTLSV1Handler {
   }
 
   template <typename Context>
-  void onPipelineActive(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {
+    // Cleared, not just set on the way down: a pipeline may be deactivated
+    // and activated again, and a latched flag would silently suppress every
+    // future failure report for the life of the handler.
+    shuttingDown_ = false;
+  }
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
@@ -165,6 +172,12 @@ class StopTLSV1Handler {
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
+    // cancel() below drives each helper's completion callback synchronously
+    // with a cancellation error. That is teardown, not a connection failing,
+    // so it must not be reported as one — and firing into a pipeline that is
+    // mid-deactivate would re-enter handlers that have already been told the
+    // pipeline is inactive.
+    shuttingDown_ = true;
     auto drained = std::move(inFlight_);
     for (auto& [_, helper] : drained) {
       folly::DelayedDestruction::DestructorGuard guard(helper.get());
@@ -186,6 +199,9 @@ class StopTLSV1Handler {
     if (ex || !plaintext) {
       XLOG(DBG3) << "StopTLS V1 failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
+      if (!shuttingDown_) {
+        fireConnectionFailure(ctx_, ex, "StopTLS V1 failed", clientAddr);
+      }
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
@@ -235,6 +251,8 @@ class StopTLSV1Handler {
   folly::F14FastMap<util::StopTLSHelper*, util::StopTLSHelper::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
+  // Set once teardown begins; see onPipelineInactive.
+  bool shuttingDown_{false};
   uint32_t maxPendingConnections_{0};
 };
 

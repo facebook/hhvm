@@ -27,6 +27,7 @@
 #include <glog/logging.h>
 #include <re2/re2.h>
 #include <chrono>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -160,6 +161,39 @@ class RowFields {
         mysql_field_flags_(std::move(mysql_field_flags)),
         mysql_field_types_(std::move(mysql_field_types)),
         mysql_field_charsetnrs_(std::move(mysql_field_charsetnrs)) {}
+
+  class Builder;
+  class BuilderWithoutCharsets;
+
+  // Builds a RowFields one column at a time. Every column contributes exactly
+  // one entry to every per-column vector and the name -> index map is derived
+  // rather than hand-maintained, so the misalignments the raw constructor
+  // permits cannot be expressed. Prefer this over the constructor.
+  //
+  //   auto fields = RowFields::builder()
+  //       .column("id", MYSQL_TYPE_LONG)
+  //       .column("name", MYSQL_TYPE_VARCHAR, "users")
+  //       .buildShared();
+  //
+  // Only `name` and `type` are required; `table`, `flags` and `charsetnr`
+  // default. Every column still contributes one entry to every vector, so a
+  // defaulted column is fully valid -- `tableName()` returns "" rather than
+  // reading out of bounds.
+  //
+  // There are two flavors because whether a charsetnr is reported is fixed by
+  // the protocol, not chosen per column: the MySQL protocol carries one for
+  // every column (63, `binary`, for non-text), while some protocols carry none
+  // at all. A per-column optional would reintroduce exactly the partial-vector/
+  // misalignment these builders exist to prevent, so the choice is made once,
+  // in the type.
+  static Builder builder();
+
+  // TRANSITIONAL -- for protocols that cannot supply charsetnrs at all. Once
+  // every supported protocol reports them, migrate the remaining callers to
+  // builder() and delete this overload along with hasFieldCharsetnrs() and the
+  // throwing branch of getFieldCharsetnr().
+  static BuilderWithoutCharsets builderWithoutCharsets();
+
   // Get the MySQL type of the field.
   enum_field_types getFieldType(size_t field_num) const {
     return mysql_field_types_[field_num];
@@ -181,7 +215,8 @@ class RowFields {
   }
 
   // Whether this result set carries `MYSQL_FIELD::charsetnr` per column. False
-  // on Thrift — see `ThriftRowMetadata::getFieldCharsetnr`.
+  // for protocols that do not report it — see
+  // `InternalRowMetadata::getFieldCharsetnr`.
   bool hasFieldCharsetnrs() const noexcept {
     return !mysql_field_charsetnrs_.empty();
   }
@@ -244,15 +279,139 @@ class RowFields {
 
  private:
   size_t num_fields_;
-  const folly::F14NodeMap<std::string, int> field_name_map_;
-  const std::vector<std::string> field_names_;
-  const std::vector<std::string> table_names_;
-  const std::vector<uint64_t> mysql_field_flags_;
-  const std::vector<enum_field_types> mysql_field_types_;
-  const std::vector<unsigned int> mysql_field_charsetnrs_;
+  folly::F14NodeMap<std::string, int> field_name_map_;
+  std::vector<std::string> field_names_;
+  std::vector<std::string> table_names_;
+  std::vector<uint64_t> mysql_field_flags_;
+  std::vector<enum_field_types> mysql_field_types_;
+  std::vector<unsigned int> mysql_field_charsetnrs_;
 
   friend class RowBlock;
 };
+
+// `MYSQL_FIELD::charsetnr` for the `binary` collation, which is what the MySQL
+// protocol reports for every non-text column. It is a real collation, not a
+// "missing" sentinel -- see RowFields::getFieldCharsetnr.
+inline constexpr unsigned int kBinaryCharsetnr = 63;
+
+// A charsetnr is deliberately not a bare integer, because `flags` and
+// `charsetnr` sit next to each other in Builder::column() and both would
+// otherwise accept any integer. The wrapper turns each confusion into a
+// compile error instead of a silently wrong column:
+//   - omitting `flags` and passing the charsetnr positionally, where it would
+//     become the flags value;
+//   - passing a plain integer where a charsetnr belongs;
+//   - passing a charsetnr to BuilderWithoutCharsets, which has no such
+//     parameter.
+struct Charsetnr {
+  explicit constexpr Charsetnr(unsigned int v) : value(v) {}
+  unsigned int value;
+};
+
+namespace detail {
+
+// Column accumulation shared by both RowFields builder flavors. Held by value
+// rather than inherited from so each builder exposes only its own `column()`.
+class RowFieldsColumns {
+ public:
+  // One column per call. Accumulating a vector of whole columns: if it throws,
+  // no column is half-added, so the builder cannot be left holding a misaligned
+  // set -- which is the invariant the builders exist to provide.
+  //
+  // Throws std::logic_error if `charsetnr` is present here but absent on the
+  // columns already added, or vice versa. Only presence has to agree -- the
+  // values differ per column -- and build() relies on that.
+  void add(
+      std::string name,
+      std::string table,
+      enum_field_types type,
+      uint64_t flags,
+      std::optional<unsigned int> charsetnr);
+
+  size_t size() const {
+    return columns_.size();
+  }
+
+  RowFields build();
+
+ private:
+  struct Column {
+    std::string name;
+    std::string table;
+    enum_field_types type;
+    uint64_t flags;
+    std::optional<unsigned int> charsetnr;
+  };
+
+  std::vector<Column> columns_;
+};
+
+} // namespace detail
+
+// Builds a RowFields whose columns all carry a charsetnr. See
+// RowFields::builder().
+class RowFields::Builder {
+ public:
+  // `table` and `flags` default because most callers -- mocks especially --
+  // have no meaningful value for them, and a defaulted-but-populated vector is
+  // still fully aligned. `charsetnr` defaults to binary, i.e. "these are just
+  // bytes", which is both true of mock data and the conservative shape for a
+  // decoder. A test exercising text decoding should pass one explicitly.
+  Builder& column(
+      std::string name,
+      enum_field_types type,
+      std::string table = "",
+      uint64_t flags = 0,
+      Charsetnr charsetnr = Charsetnr{kBinaryCharsetnr}) {
+    columns_.add(
+        std::move(name), std::move(table), type, flags, charsetnr.value);
+    return *this;
+  }
+
+  // Single use: both leave the builder empty.
+  RowFields build() {
+    return columns_.build();
+  }
+  std::shared_ptr<RowFields> buildShared() {
+    return std::make_shared<RowFields>(build());
+  }
+
+ private:
+  detail::RowFieldsColumns columns_;
+};
+
+// TRANSITIONAL -- builds a RowFields with no charsetnrs at all, for protocols
+// that cannot supply them. See RowFields::builderWithoutCharsets().
+class RowFields::BuilderWithoutCharsets {
+ public:
+  BuilderWithoutCharsets& column(
+      std::string name,
+      enum_field_types type,
+      std::string table = "",
+      uint64_t flags = 0) {
+    columns_.add(std::move(name), std::move(table), type, flags, std::nullopt);
+    return *this;
+  }
+
+  // Single use: both leave the builder empty.
+  RowFields build() {
+    return columns_.build();
+  }
+  std::shared_ptr<RowFields> buildShared() {
+    return std::make_shared<RowFields>(build());
+  }
+
+ private:
+  detail::RowFieldsColumns columns_;
+};
+
+inline RowFields::Builder RowFields::builder() {
+  return {};
+}
+
+inline RowFields::BuilderWithoutCharsets RowFields::builderWithoutCharsets() {
+  return {};
+}
 
 std::chrono::system_clock::time_point parseDateTime(
     folly::StringPiece datetime,

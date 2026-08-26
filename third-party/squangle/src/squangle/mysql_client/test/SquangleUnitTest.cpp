@@ -352,6 +352,132 @@ TEST(EndToEndTest, ComplexQueryWithMultipleTypes) {
 }
 
 // =============================================================================
+// RowFields Builder Tests
+//
+// The builder exists so that per-column data cannot be misaligned: every
+// column contributes one entry to every vector, and the name -> index map is
+// derived rather than hand-written.
+// =============================================================================
+
+// build() reads charset availability off the first column and then
+// dereferences every column's charsetnr, so a mix has to be rejected as the
+// columns go in rather than surfacing as bad_optional_access later.
+TEST(RowFieldsBuilderTest, MixedCharsetAvailabilityIsRejected) {
+  detail::RowFieldsColumns withCharset;
+  withCharset.add("a", "t", MYSQL_TYPE_LONG, 0, 63u);
+  EXPECT_THROW(
+      withCharset.add("b", "t", MYSQL_TYPE_LONG, 0, std::nullopt),
+      std::logic_error);
+  // The rejected column left nothing behind.
+  EXPECT_EQ(withCharset.size(), 1);
+
+  detail::RowFieldsColumns withoutCharset;
+  withoutCharset.add("a", "t", MYSQL_TYPE_LONG, 0, std::nullopt);
+  EXPECT_THROW(
+      withoutCharset.add("b", "t", MYSQL_TYPE_LONG, 0, 63u), std::logic_error);
+  EXPECT_EQ(withoutCharset.size(), 1);
+}
+
+TEST(RowFieldsBuilderTest, Builder_ColumnsWithCharsets_PopulatesEveryVector) {
+  auto fields =
+      RowFields::builder()
+          .column("id", MYSQL_TYPE_LONG, "tbl")
+          .column(
+              "name", MYSQL_TYPE_VARCHAR, "tbl2", /*flags=*/7, Charsetnr{45})
+          .build();
+
+  EXPECT_EQ(fields.numFields(), size_t{2});
+  EXPECT_EQ(fields.fieldName(0), "id");
+  EXPECT_EQ(fields.fieldName(1), "name");
+  EXPECT_EQ(fields.tableName(1), "tbl2");
+  EXPECT_EQ(fields.getFieldType(0), MYSQL_TYPE_LONG);
+  EXPECT_EQ(fields.getFieldType(1), MYSQL_TYPE_VARCHAR);
+  EXPECT_EQ(fields.getFieldFlags(0), uint64_t{0});
+  EXPECT_EQ(fields.getFieldFlags(1), uint64_t{7});
+  EXPECT_TRUE(fields.hasFieldCharsetnrs());
+  EXPECT_EQ(fields.getFieldCharsetnr(0), kBinaryCharsetnr);
+  EXPECT_EQ(fields.getFieldCharsetnr(1), 45u);
+}
+
+TEST(RowFieldsBuilderTest, Builder_DefaultedColumn_IsStillFullyPopulated) {
+  // The mock case: only name and type. Every per-column vector must still get
+  // an entry, so no accessor reads out of bounds.
+  auto fields = RowFields::builder()
+                    .column("id", MYSQL_TYPE_LONG)
+                    .column("name", MYSQL_TYPE_VARCHAR)
+                    .build();
+
+  EXPECT_EQ(fields.numFields(), size_t{2});
+  EXPECT_EQ(fields.tableName(0), "");
+  EXPECT_EQ(fields.tableName(1), "");
+  EXPECT_EQ(fields.getFieldFlags(0), uint64_t{0});
+  EXPECT_TRUE(fields.hasFieldCharsetnrs());
+  EXPECT_EQ(fields.getFieldCharsetnr(0), kBinaryCharsetnr);
+  EXPECT_EQ(fields.getFieldCharsetnr(1), kBinaryCharsetnr);
+}
+
+TEST(RowFieldsBuilderTest, Builder_DerivesNameToIndexMap) {
+  auto fields = RowFields::builder()
+                    .column("id", MYSQL_TYPE_LONG, "tbl")
+                    .column("name", MYSQL_TYPE_VARCHAR, "tbl", 0, Charsetnr{45})
+                    .build();
+
+  EXPECT_EQ(fields.fieldIndex("id"), size_t{0});
+  EXPECT_EQ(fields.fieldIndex("name"), size_t{1});
+  EXPECT_TRUE(fields.containsFieldName("name"));
+  EXPECT_FALSE(fields.containsFieldName("nope"));
+}
+
+TEST(RowFieldsBuilderTest, BuilderWithoutCharsets_LeavesCharsetsUnavailable) {
+  auto fields = RowFields::builderWithoutCharsets()
+                    .column("id", MYSQL_TYPE_LONG, "tbl")
+                    .column("name", MYSQL_TYPE_VARCHAR, "tbl")
+                    .build();
+
+  EXPECT_EQ(fields.numFields(), size_t{2});
+  EXPECT_FALSE(fields.hasFieldCharsetnrs());
+  // Absent charsets must stay an error rather than silently reporting binary.
+  EXPECT_THROW(fields.getFieldCharsetnr(0), std::runtime_error);
+}
+
+TEST(RowFieldsBuilderTest, Builder_DuplicateColumnNames_LastIndexWins) {
+  // Duplicate names are a real MySQL result shape; the map collapses them but
+  // numFields() and the positional accessors must still see both columns.
+  auto fields = RowFields::builderWithoutCharsets()
+                    .column("dup", MYSQL_TYPE_LONG, "tbl")
+                    .column("dup", MYSQL_TYPE_VARCHAR, "tbl")
+                    .build();
+
+  EXPECT_EQ(fields.numFields(), size_t{2});
+  EXPECT_EQ(fields.fieldIndex("dup"), size_t{1});
+  EXPECT_EQ(fields.getFieldType(0), MYSQL_TYPE_LONG);
+  EXPECT_EQ(fields.getFieldType(1), MYSQL_TYPE_VARCHAR);
+}
+
+TEST(RowFieldsBuilderTest, Builder_NoColumns_ProducesEmptyFields) {
+  auto fields = RowFields::builderWithoutCharsets().build();
+
+  EXPECT_EQ(fields.numFields(), size_t{0});
+  EXPECT_FALSE(fields.hasFieldCharsetnrs());
+}
+
+TEST(RowFieldsBuilderTest, BuildShared_ProducesUsableRowBlock) {
+  auto fields = RowFields::builderWithoutCharsets()
+                    .column("id", MYSQL_TYPE_VARCHAR, "tbl")
+                    .column("name", MYSQL_TYPE_VARCHAR, "tbl")
+                    .buildShared();
+
+  RowBlock block(fields);
+  block.startRow();
+  block.appendValue(folly::StringPiece("1"));
+  block.appendValue(folly::StringPiece("alice"));
+  block.finishRow();
+
+  EXPECT_EQ(block.numRows(), size_t{1});
+  EXPECT_EQ(block.getField<std::string>(0, "name"), "alice");
+}
+
+// =============================================================================
 // RowBlock Build-Path Tests
 //
 // Covers the RowBlock building API (startRow/appendValue/appendNull/finishRow)

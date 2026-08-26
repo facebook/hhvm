@@ -225,8 +225,8 @@ class FetchOperationImpl : virtual public OperationBase {
   ///         the operation before returning)
   [[nodiscard]] bool renderQuery();
 
-  /// Whether checksums are enabled for this operation.
-  /// Thrift overrides this to return false until checksum support is complete.
+  /// Whether checksums are enabled for this operation. Protocols that do not
+  /// yet support checksums override this to return false.
   virtual bool usingChecksums() const;
 
   /// Sets up query attributes and checksum on the connection.

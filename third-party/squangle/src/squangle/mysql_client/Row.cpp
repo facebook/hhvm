@@ -23,6 +23,86 @@ void throwIndexOutOfRange(std::string_view what, size_t value, size_t size) {
       fmt::format("{} {} out of range (size {})", what, value, size));
 }
 
+void RowFieldsColumns::add(
+    std::string name,
+    std::string table,
+    enum_field_types type,
+    uint64_t flags,
+    std::optional<unsigned int> charsetnr) {
+  // Whether a charsetnr is reported at all is a property of the protocol, so
+  // either every column carries one or none does. The values differ freely
+  // per column; only their presence has to agree. build() reads that presence
+  // off the first column and then dereferences every column's charsetnr, so a
+  // mix would be a bad_optional_access there -- reject it here instead, where
+  // the offending column is still identifiable. Checked before the push_back
+  // so a rejected column leaves nothing behind.
+  if (!columns_.empty() &&
+      columns_.front().charsetnr.has_value() != charsetnr.has_value()) {
+    throw std::logic_error(
+        fmt::format(
+            "RowFields: column '{}' {} a charsetnr while earlier columns {}. "
+            "Either every column reports one or none does; their values may "
+            "differ, their presence may not.",
+            name,
+            charsetnr.has_value() ? "has" : "has no",
+            columns_.front().charsetnr.has_value() ? "do" : "do not"));
+  }
+  columns_.push_back(
+      Column{std::move(name), std::move(table), type, flags, charsetnr});
+}
+
+RowFields RowFieldsColumns::build() {
+  const auto numFields = columns_.size();
+  const bool hasCharsets =
+      numFields > 0 && columns_.front().charsetnr.has_value();
+
+  // Derive the name -> index map rather than having the caller maintain it in
+  // parallel; a hand-written map is how a column ends up pointing at an index
+  // that does not exist. Duplicate column names are a legitimate MySQL result
+  // shape and collapse here, last one winning, matching
+  // EphemeralRowFields::makeBufferedFields.
+  folly::F14NodeMap<std::string, int> nameMap;
+  nameMap.reserve(numFields);
+  for (size_t i = 0; i < numFields; ++i) {
+    nameMap[columns_[i].name] = static_cast<int>(i);
+  }
+
+  std::vector<std::string> names;
+  std::vector<std::string> tables;
+  std::vector<uint64_t> flags;
+  std::vector<enum_field_types> types;
+  std::vector<unsigned int> charsetnrs;
+  names.reserve(numFields);
+  tables.reserve(numFields);
+  flags.reserve(numFields);
+  types.reserve(numFields);
+  if (hasCharsets) {
+    charsetnrs.reserve(numFields);
+  }
+
+  // Every allocation this needs has already happened, and moving a string is
+  // noexcept, so nothing below can throw partway and leave the per-column
+  // vectors at different lengths.
+  for (auto& column : columns_) {
+    names.push_back(std::move(column.name));
+    tables.push_back(std::move(column.table));
+    flags.push_back(column.flags);
+    types.push_back(column.type);
+    if (hasCharsets) {
+      charsetnrs.push_back(*column.charsetnr);
+    }
+  }
+  columns_.clear();
+
+  return RowFields(
+      std::move(nameMap),
+      std::move(names),
+      std::move(tables),
+      std::move(flags),
+      std::move(types),
+      std::move(charsetnrs));
+}
+
 } // namespace detail
 
 std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {

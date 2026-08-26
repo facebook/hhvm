@@ -749,8 +749,8 @@ class Connection {
     if (timeoutOverride) {
       op.setTimeout(*timeoutOverride);
       // If the connection had a query timeout set, it was put into the query
-      // attributes and would tell MyRouter to do a query timeout on that
-      // number. We need to override that here.
+      // attributes, where an intervening proxy may apply it as the query
+      // timeout. We need to override that here.
       op.setAttribute(
           "query_timeout",
           folly::to<std::string>(

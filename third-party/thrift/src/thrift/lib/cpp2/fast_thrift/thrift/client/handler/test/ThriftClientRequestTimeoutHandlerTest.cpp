@@ -214,6 +214,46 @@ TEST_F(ThriftClientRequestTimeoutHandlerTest, NoTimeoutIsNotArmed) {
 }
 
 TEST_F(
+    ThriftClientRequestTimeoutHandlerTest,
+    DefaultTimeoutBoundsARequestThatCarriesNone) {
+  CallerResult caller;
+  ThriftRequestContext* rc = nullptr;
+  auto request = makeRequest(/*timeoutMs=*/0, &caller, &rc);
+
+  ThriftClientRequestTimeoutHandler handler{std::chrono::milliseconds(5)};
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, erase_and_box(std::move(request))),
+      Result::Success);
+
+  evb_->loop();
+
+  EXPECT_EQ(caller.calls, 1);
+  EXPECT_TRUE(isTimedOut(caller.ew));
+}
+
+TEST_F(
+    ThriftClientRequestTimeoutHandlerTest,
+    PerRequestTimeoutWinsOverTheDefault) {
+  // A request that names its own deadline must not be stretched to the
+  // connection default. The margin between the two is what makes this
+  // assertable: firing on the request's 1ms rather than the default's 10s.
+  CallerResult caller;
+  ThriftRequestContext* rc = nullptr;
+  auto request = makeRequest(/*timeoutMs=*/1, &caller, &rc);
+
+  ThriftClientRequestTimeoutHandler handler{std::chrono::seconds(10)};
+  const auto start = std::chrono::steady_clock::now();
+  (void)handler.onWrite(*ctx_, erase_and_box(std::move(request)));
+
+  evb_->loop();
+  const auto elapsed = std::chrono::steady_clock::now() - start;
+
+  EXPECT_EQ(caller.calls, 1);
+  EXPECT_TRUE(isTimedOut(caller.ew));
+  EXPECT_LT(elapsed, std::chrono::seconds(5));
+}
+
+TEST_F(
     ThriftClientRequestTimeoutHandlerTest, ContextDestructionCancelsTimeout) {
   CallerResult caller;
   ThriftRequestContext* rc = nullptr;

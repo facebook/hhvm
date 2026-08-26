@@ -38,7 +38,13 @@ namespace apache::thrift::fast_thrift::thrift::client::handler {
 
 /**
  * ThriftClientRequestTimeoutHandler - Enforces the per-request client timeout
- * (the RpcOptions timeout, carried as RequestRpcMetadata.clientTimeoutMs).
+ * (the RpcOptions timeout, carried as RequestRpcMetadata.clientTimeoutMs),
+ * falling back to a connection-level default for requests that carry none.
+ *
+ * Without that default a request with no RpcOptions timeout is unbounded,
+ * where a classic RocketClientChannel would fall back to its channel timeout.
+ * The default is opt-in: leave it unset and such a request stays unbounded,
+ * exactly as before.
  *
  * On expiry the caller is failed in-process with a TIMED_OUT
  * TTransportException; nothing is sent on the wire and the connection stays
@@ -54,6 +60,12 @@ namespace apache::thrift::fast_thrift::thrift::client::handler {
 class ThriftClientRequestTimeoutHandler {
  public:
   ThriftClientRequestTimeoutHandler() = default;
+
+  // `defaultTimeout` bounds requests that carry no clientTimeoutMs of their
+  // own. Non-positive leaves them unbounded.
+  explicit ThriftClientRequestTimeoutHandler(
+      std::chrono::milliseconds defaultTimeout) noexcept
+      : defaultTimeout_(defaultTimeout) {}
 
   // === HandlerLifecycle ===
 
@@ -145,14 +157,21 @@ class ThriftClientRequestTimeoutHandler {
     ThriftRequestContext* rc_;
   };
 
-  static std::chrono::milliseconds clientTimeout(
-      const ThriftRequestMessage& request) noexcept {
+  // The per-request deadline wins wherever it is set; the connection default
+  // covers the rest. Unparseable metadata falls back too -- a request whose
+  // deadline cannot be read is the last one that should run unbounded.
+  std::chrono::milliseconds clientTimeout(
+      const ThriftRequestMessage& request) const noexcept {
     const auto* metadata = request.payload.getRequestRpcMetadata();
     if (metadata == nullptr) {
-      return std::chrono::milliseconds{0};
+      return defaultTimeout_;
     }
-    return std::chrono::milliseconds{metadata->clientTimeoutMs().value_or(0)};
+    const std::chrono::milliseconds perRequest{
+        metadata->clientTimeoutMs().value_or(0)};
+    return perRequest.count() > 0 ? perRequest : defaultTimeout_;
   }
+
+  std::chrono::milliseconds defaultTimeout_{0};
 };
 
 static_assert(

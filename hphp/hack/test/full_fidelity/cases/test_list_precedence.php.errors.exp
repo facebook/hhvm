@@ -1,2 +1,0 @@
-(3,14)-(3,26) Invalid use of 'list(...)'. A list expression may only be used as the left side of a simple assignment, the value clause of a foreach loop, or a list item nested inside another list expression.
-(4,14)-(4,40) Invalid use of 'list(...)'. A list expression may only be used as the left side of a simple assignment, the value clause of a foreach loop, or a list item nested inside another list expression.

@@ -1,2 +1,0 @@
-File "single_const_late_init.php", line 4, characters 3-39:
-__Const properties may not also be __LateInit (Parsing[1002])

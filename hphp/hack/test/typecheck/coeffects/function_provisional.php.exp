@@ -1,6 +1,0 @@
-File "function_provisional.php", line 11, characters 3-5:
-This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "function_provisional.php", line 10, characters 16-23:
-  From this declaration, the context of this function body provides the capability arraykey
-  File "function_provisional.php", line 5, characters 16-18:
-  But the function being called requires the capability int

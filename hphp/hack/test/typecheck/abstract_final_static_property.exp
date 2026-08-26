@@ -1,2 +1,0 @@
-File "abstract_final_noninstance_property.php", line 3, characters 14-20:
-Abstract final classes cannot have nonstatic methods or properties. (NastCheck[3074])

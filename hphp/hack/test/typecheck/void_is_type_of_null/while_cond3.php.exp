@@ -1,6 +1,0 @@
-File "while_cond3.php", line 18, characters 3-9:
-Typing error (Typing[4110])
-File "while_cond3.php", line 18, characters 3-4:
-This is a num (int/float) because this is used in an arithmetic operation
-File "while_cond3.php", line 12, characters 14-17:
-It is incompatible with void (null has type void)

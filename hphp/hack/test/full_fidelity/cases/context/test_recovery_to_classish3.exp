@@ -1,6 +1,0 @@
-(4,11)-(5,1) A right brace ('}') is expected here.
-(6,14)-(7,1) A right brace ('}') is expected here.
-(9,78)-(10,1) A right brace ('}') is expected here.
-(11,11)-(12,1) A right brace ('}') is expected here.
-(15,3)-(15,14) Method declarations require a visibility modifier such as public, private or protected.
-(17,5)-(17,9) Cannot define a class, interface, or trait inside a function. Currently class 'D' is inside function 'f'.

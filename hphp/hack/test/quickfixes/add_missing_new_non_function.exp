@@ -1,7 +1,0 @@
-<?hh
-
-class Person {}
-
-function foo(): void {
-  $p = Person;
-}

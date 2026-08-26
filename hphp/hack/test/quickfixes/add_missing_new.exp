@@ -1,9 +1,0 @@
-Add `new`
-
-<?hh
-
-class Person {}
-
-function foo(): void {
-  $p = new Person();
-}

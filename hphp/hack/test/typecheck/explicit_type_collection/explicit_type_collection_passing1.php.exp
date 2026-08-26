@@ -1,6 +1,0 @@
-File "explicit_type_collection_passing1.php", line 5, characters 7-19:
-Invalid argument (Typing[4110])
-File "explicit_type_collection_passing1.php", line 3, characters 18-20:
-This is an int
-File "explicit_type_collection_passing1.php", line 5, characters 11-16:
-It is incompatible with a string

@@ -482,6 +482,19 @@ class CellValue {
     requires std::unsigned_integral<T> && (!std::is_same_v<T, bool>)
   /* implicit */ CellValue(T v) : value_(static_cast<uint64_t>(v)) {}
 
+  // An empty optional is SQL NULL; a present one takes the contained value,
+  // dispatching to the matching constructor above. One template covers
+  // std::optional and folly::Optional (both expose has_value()/operator*).
+  // As with the other string-holding constructors, a present string value is
+  // referenced, not copied, so the source optional must outlive this CellValue.
+  template <typename Opt>
+    requires requires(const Opt& o) {
+      o.has_value();
+      *o;
+    }
+  /* implicit */ CellValue(const Opt& opt)
+      : value_(opt.has_value() ? CellValue(*opt).value_ : Value{Null{}}) {}
+
  private:
   struct Null {};
 

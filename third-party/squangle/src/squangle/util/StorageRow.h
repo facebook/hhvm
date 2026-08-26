@@ -65,12 +65,35 @@ class StorageRow {
 
   void appendValue(folly::StringPiece data);
   void appendValue(const char* str) {
-    appendValue(folly::StringPiece(str));
+    // A null pointer is SQL NULL; folly::StringPiece would strlen() it.
+    if (str == nullptr) {
+      appendNull();
+    } else {
+      appendValue(folly::StringPiece(str));
+    }
   }
   void appendValue(bool data);
   void appendValue(uint64_t data);
   void appendValue(int64_t data);
   void appendValue(double data);
+
+  // Appends the contained value, or a SQL NULL when the optional is empty.
+  // One template covers std::optional and folly::Optional, which both expose
+  // has_value() and operator*; the unwrapped value dispatches to the overloads
+  // above. folly::dynamic deliberately does not match -- its null test is
+  // isNull() and it has no operator*.
+  template <typename Opt>
+    requires requires(const Opt& o) {
+      o.has_value();
+      *o;
+    }
+  void appendValue(const Opt& opt) {
+    if (opt.has_value()) {
+      appendValue(*opt);
+    } else {
+      appendNull();
+    }
+  }
 
   void appendNull();
 

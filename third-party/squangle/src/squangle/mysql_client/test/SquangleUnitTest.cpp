@@ -14,6 +14,8 @@
 
 #include <gtest/gtest.h>
 
+#include <folly/Optional.h>
+#include <optional>
 #include "squangle/mysql_client/OperationHelpers.h"
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/Row.h"
@@ -525,6 +527,29 @@ TEST(RowBlockAddRowTest, AddRow_MixedCellTypes_RoundTrip) {
   EXPECT_EQ(block.getField<double>(0, 2), 1.5);
   EXPECT_EQ(block.getField<bool>(0, 3), true);
   EXPECT_EQ(block.getField<std::string>(0, 4), "hello");
+}
+
+TEST(RowBlockAddRowTest, AddRow_StdOptional_PresentAndEmpty) {
+  RowBlock block(makeRowFields({"name", "id"}));
+
+  // A present optional takes the contained value; an empty one is SQL NULL.
+  block.addRow({std::optional<std::string>("alice"), std::optional<int64_t>{}});
+
+  ASSERT_EQ(block.numRows(), size_t{1});
+  EXPECT_FALSE(block.isNull(0, 0));
+  EXPECT_EQ(block.getField<std::string>(0, 0), "alice");
+  EXPECT_TRUE(block.isNull(0, 1));
+}
+
+TEST(RowBlockAddRowTest, AddRow_FollyOptional_PresentAndEmpty) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  block.addRow({folly::Optional<int64_t>(7), folly::Optional<std::string>{}});
+
+  ASSERT_EQ(block.numRows(), size_t{1});
+  EXPECT_FALSE(block.isNull(0, 0));
+  EXPECT_EQ(block.getField<int64_t>(0, 0), 7);
+  EXPECT_TRUE(block.isNull(0, 1));
 }
 
 TEST(RowBlockAddRowTest, AddRow_RuntimeNullCharPointer_IsSqlNull) {

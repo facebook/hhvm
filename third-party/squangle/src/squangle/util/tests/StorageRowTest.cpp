@@ -10,7 +10,10 @@
 #include <folly/Random.h>
 #include <folly/Range.h>
 #include <gtest/gtest.h>
+#include <optional>
 #include <type_traits>
+
+#include <folly/Optional.h>
 
 #include "squangle/util/StorageRow.h"
 
@@ -288,6 +291,55 @@ void randomBytes(void* val, size_t length) {
     memcpy(((uint8_t*)val) + ii, &rnd, bytes_to_copy);
     ii += bytes_to_copy;
   }
+}
+
+namespace {
+auto expectStringPieceCol = [](const auto& arg) {
+  using T = std::decay_t<decltype(arg)>;
+  if constexpr (std::is_same_v<T, folly::StringPiece>) {
+    return arg;
+  }
+  throw std::runtime_error("not a folly::StringPiece");
+  return folly::StringPiece();
+};
+auto expectInt64Col = [](const auto& arg) {
+  using T = std::decay_t<decltype(arg)>;
+  if constexpr (std::is_same_v<T, int64_t>) {
+    return arg;
+  }
+  throw std::runtime_error("not an int64_t");
+  return (int64_t)0;
+};
+} // namespace
+
+TEST(StorageRowTest, NullCharPointerIsNull) {
+  StorageRow row(1);
+  const char* missing = nullptr;
+  row.appendValue(missing);
+  EXPECT_EQ(row.count(), 1);
+  EXPECT_TRUE(row.isNull(0));
+}
+
+TEST(StorageRowTest, StdOptionalPresentAndEmpty) {
+  StorageRow row(2);
+  row.appendValue(std::optional<std::string>("present"));
+  row.appendValue(std::optional<int64_t>{});
+
+  ASSERT_EQ(row.count(), 2);
+  EXPECT_FALSE(row.isNull(0));
+  EXPECT_EQ(row.as<folly::StringPiece>(0, expectStringPieceCol), "present");
+  EXPECT_TRUE(row.isNull(1));
+}
+
+TEST(StorageRowTest, FollyOptionalPresentAndEmpty) {
+  StorageRow row(2);
+  row.appendValue(folly::Optional<int64_t>(7));
+  row.appendValue(folly::Optional<std::string>{});
+
+  ASSERT_EQ(row.count(), 2);
+  EXPECT_FALSE(row.isNull(0));
+  EXPECT_EQ(row.as<int64_t>(0, expectInt64Col), 7);
+  EXPECT_TRUE(row.isNull(1));
 }
 
 TEST(StorageRowTest, RandomValues) {

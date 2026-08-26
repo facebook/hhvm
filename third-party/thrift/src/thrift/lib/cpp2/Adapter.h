@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <concepts>
+
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -26,19 +28,28 @@ template <typename Adapter, typename ThriftT>
 concept ThriftConstAdapter =
     requires { typename adapt_detail::adapted_t<Adapter, ThriftT>; };
 
+// The disjunctions below preserve support for non-semiregular Thrift types,
+// notably std::unique_ptr<folly::IOBuf>.
 template <typename Adapter, typename ThriftT>
-concept ThriftTypeAdapter = adapt_detail::TypeAdapter<Adapter, ThriftT>;
+concept ThriftTypeAdapter = adapt_detail::TypeAdapter<Adapter, ThriftT> &&
+    (!std::semiregular<ThriftT> ||
+     std::semiregular<adapt_detail::adapted_t<Adapter, ThriftT>>);
 
 // Field adapters can omit fromThrift because fromThriftField determines their
 // adapted type from the containing struct and field id.
 template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
 concept ThriftFieldAdapter =
-    adapt_detail::FieldAdapter<Adapter, FieldId, ThriftT, Struct> && requires {
+    adapt_detail::FieldAdapter<Adapter, FieldId, ThriftT, Struct> &&
+    requires {
       Adapter::toThrift(
           std::declval<
               const adapt_detail::
                   FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>&>());
-    };
+    } &&
+    (!std::semiregular<ThriftT> ||
+     std::semiregular<
+         adapt_detail::
+             FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>>);
 
 template <typename Adapter, typename ThriftT, typename Struct, int16_t FieldId>
 concept ThriftAdapter = ThriftTypeAdapter<Adapter, ThriftT> ||

@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/Adapter.h>
 
 #include <functional>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <type_traits>
@@ -24,6 +25,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <folly/CPortability.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 
 namespace apache::thrift::test {
@@ -121,6 +123,12 @@ struct FullAdapter : MinAdapter {
     return value.value + 2;
   }
 };
+
+// These declarations are intentionally undefined and used only in unevaluated
+// concept checks.
+FOLLY_PUSH_WARNING
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-member-function")
+FOLLY_CLANG_DISABLE_WARNING("-Wunneeded-member-function")
 
 struct ConceptStruct {};
 struct ConceptProtocol {};
@@ -231,6 +239,30 @@ struct FromThriftOnlyAdapter {
   static FullType fromThrift(int value) { return {nullptr, value}; }
 };
 
+struct NonSemiregularType {
+  NonSemiregularType() = default;
+  NonSemiregularType(const NonSemiregularType&) = delete;
+  NonSemiregularType(NonSemiregularType&&) = default;
+  NonSemiregularType& operator=(const NonSemiregularType&) = delete;
+  NonSemiregularType& operator=(NonSemiregularType&&) = default;
+};
+
+struct NonSemiregularTypeAdapter {
+  static NonSemiregularType fromThrift(int);
+  static int toThrift(const NonSemiregularType&);
+};
+
+struct MoveOnlyThriftAdapter {
+  static std::unique_ptr<int> fromThrift(std::unique_ptr<int>);
+  static std::unique_ptr<int> toThrift(const std::unique_ptr<int>&);
+};
+
+struct NonSemiregularFieldAdapter {
+  template <typename Struct, int16_t FieldId>
+  static NonSemiregularType fromThriftField(int, FieldContext<Struct, FieldId>);
+  static int toThrift(const NonSemiregularType&);
+};
+
 struct MutableLessAdapter : ConceptAdapter {
   template <typename = void>
   static bool less(FullType&, const FullType&);
@@ -280,6 +312,14 @@ static_assert(ThriftAdapter<ConceptAdapter, int, ConceptStruct, 1>);
 static_assert(!ThriftTypeAdapter<FromThriftOnlyAdapter, int>);
 static_assert(ThriftConstAdapter<FromThriftOnlyAdapter, int>);
 static_assert(!ThriftAdapter<FromThriftOnlyAdapter, int, ConceptStruct, 1>);
+static_assert(adapt_detail::TypeAdapter<NonSemiregularTypeAdapter, int>);
+static_assert(!ThriftTypeAdapter<NonSemiregularTypeAdapter, int>);
+static_assert(ThriftTypeAdapter<MoveOnlyThriftAdapter, std::unique_ptr<int>>);
+static_assert(
+    adapt_detail::
+        FieldAdapter<NonSemiregularFieldAdapter, 1, int, ConceptStruct>);
+static_assert(
+    !ThriftFieldAdapter<NonSemiregularFieldAdapter, int, ConceptStruct, 1>);
 static_assert(
     !adapt_detail::FieldAdapter<FromThriftOnlyAdapter, 1, int, ConceptStruct>);
 static_assert(std::is_same_v<
@@ -298,11 +338,6 @@ static_assert(
     adapt_detail::FieldAdapter<FieldAdapterNoToThrift, 1, int, ConceptStruct>);
 static_assert(
     !ThriftFieldAdapter<FieldAdapterNoToThrift, int, ConceptStruct, 1>);
-static_assert(ThriftFieldAdapter<
-              IncompleteTypeFieldAdapter,
-              IncompleteField,
-              IncompleteStruct,
-              1>);
 static_assert(!ThriftTypeAdapter<ConceptFieldAdapter, int>);
 static_assert(AdapterWithConstruct<ConceptAdapter, int, ConceptStruct, 1>);
 static_assert(AdapterWithClear<ConceptAdapter, int, ConceptStruct, 1>);
@@ -453,6 +488,8 @@ static_assert(!AdapterWithDecode<
               ConceptProtocol>);
 static_assert(
     !InplaceThriftAdapter<CustomizationOnlyAdapter, int, ConceptStruct, 1>);
+
+FOLLY_POP_WARNING
 
 class AdaptTest : public ::testing::Test {
  protected:

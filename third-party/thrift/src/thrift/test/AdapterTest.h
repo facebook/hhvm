@@ -500,13 +500,14 @@ struct EncodeTemplatedTestAdapter {
 
 template <typename T>
 struct VariableWrapper {
-  VariableWrapper(const VariableWrapper&) = delete;
+  VariableWrapper() = default;
+  VariableWrapper(const VariableWrapper&) = default;
 
   VariableWrapper(const T& v) : value{v} {}
   VariableWrapper(const T& v, std::string n, std::string u)
       : value{v}, name{n}, uri{u} {}
 
-  T value;
+  T value{};
   std::string name;
   std::string uri;
 };
@@ -568,6 +569,8 @@ struct I32ToStringAdapter {
 
 template <class T>
 struct WrappedMyStruct : type::detail::Wrap<T> {
+  WrappedMyStruct() = default;
+
   // Limit the type to MyStruct, which is defined as
   //
   //   class MyStruct { 1: i64 field1; }

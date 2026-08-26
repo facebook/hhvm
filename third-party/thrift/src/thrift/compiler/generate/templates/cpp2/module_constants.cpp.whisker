@@ -55,6 +55,9 @@ namespace {{program.name}}_constants {
   static folly::Indestructible<{{const.type.cpp_type}}> const instance{ {{!
     }}{{#partial const_value.iterate_const_values_adapted value=const.rendered_value root_const=const}} };
       {{#else}}
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<{{const.cpp_adapter}}, {{const.type.cpp_type}}>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<{{const.cpp_type}}> const instance{
       folly::factory_constructor, [](){ return {{const.cpp_adapter}}::fromThrift({{const.type.cpp_type}}({{!
         }}{{#partial const_value.iterate_const_values value=const.rendered_value root_const=const}}){{!

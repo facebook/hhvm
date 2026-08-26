@@ -14,6 +14,9 @@ namespace facebook::thrift::test::fixtures::adapter {
 namespace module_constants {
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var1() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::std::int32_t>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::std::int32_t(static_cast<::std::int32_t>(10)),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"))),
@@ -22,6 +25,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var2() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::std::string>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("20")),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar"))),
@@ -30,6 +36,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct> const& var3() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::fixtures::adapter::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(30)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{ 2 }>(std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("10"),
   apache::thrift::StringTraits<::std::string>::fromStringLiteral("20") }))),
@@ -39,6 +48,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var4() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::std::int32_t>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::std::int32_t(static_cast<::std::int32_t>(40)),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo2"))),
@@ -47,6 +59,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var5() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::std::string>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("50")),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar2"))),
@@ -55,6 +70,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct> const& var6() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::fixtures::adapter::MyStruct>> const instance{
       folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::fixtures::adapter::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(60)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{ 2 }>(std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("30"),
   apache::thrift::StringTraits<::std::string>::fromStringLiteral("40") }))),
@@ -64,6 +82,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::std::int32_t>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::std::int32_t(static_cast<::std::int32_t>(42)),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Person>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Foo"))),
@@ -72,6 +93,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::std::string>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("hello, world")),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Person>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Bar"))),
@@ -80,6 +104,9 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2> const& person() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::facebook::thrift::test::fixtures::adapter::Person2(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Person2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("DefaultName")))),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Person>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("NameFromAnnotation"))),
@@ -88,18 +115,27 @@ namespace module_constants {
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout_no_transitive() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::std::int32_t>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::std::int32_t(static_cast<::std::int32_t>(420))); }};
   return *instance;
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg_no_transitive() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::std::string>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("hello, world 2"))); }};
   return *instance;
 }
 
 ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2> const& person_no_transitive() {
+  static_assert(
+      ::apache::thrift::ThriftConstAdapter<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2>,
+      "@cpp.Adapter on a constant must satisfy ThriftConstAdapter");
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::fixtures::adapter::Person2>> const instance{
       folly::factory_constructor, [](){ return ::apache::thrift::test::VariableAdapter::fromThrift(::facebook::thrift::test::fixtures::adapter::Person2(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::adapter::Person2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("DefaultName 2"))))); }};
   return *instance;

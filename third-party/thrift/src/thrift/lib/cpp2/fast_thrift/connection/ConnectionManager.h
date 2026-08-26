@@ -137,6 +137,16 @@ class ConnectionManager : public folly::DelayedDestruction {
   void setConnectionStats(ConnectionStats* stats) noexcept { stats_ = stats; }
 
   /**
+   * Attach TLS counters. Wires the metrics handler into the TLS pipeline of
+   * every per-EventBase handler built after this point. Has no effect under
+   * SSLPolicy::DISABLED, which builds no TLS pipeline. Must be called before
+   * start().
+   *
+   * Borrowed — the caller keeps ownership and must outlive this manager.
+   */
+  void setTLSStats(security::TLSStats* stats) noexcept { tlsStats_ = stats; }
+
+  /**
    * Replace the TLS parameters used by future accepts. A single setValue
    * is observed by every accept on every EVB; no fan-out required.
    * In-flight handshakes keep the previous params alive via the shared_ptr
@@ -211,9 +221,10 @@ class ConnectionManager : public folly::DelayedDestruction {
       folly::F14FastMap<folly::EventBase*, ConnectionHandler::Ptr>>
       handlers_;
   bool enableReusePortBpfSpread_{false};
-  // Borrowed; null unless setConnectionStats was called. Each per-EVB handler
-  // resolves its own shard from this at construction.
+  // Borrowed; null unless the corresponding setter was called. Each per-EVB
+  // handler resolves its own shard from these at construction.
   ConnectionStats* stats_{nullptr};
+  security::TLSStats* tlsStats_{nullptr};
 };
 
 } // namespace apache::thrift::fast_thrift::connection

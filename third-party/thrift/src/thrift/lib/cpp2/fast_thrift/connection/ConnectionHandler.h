@@ -45,6 +45,7 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionBuilderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/TLSStats.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 
@@ -107,7 +108,8 @@ class ConnectionHandler {
           tlsParamsObserver,
       SocketOptions socketOptions,
       bool enableReusePortBpfSpread,
-      ConnectionStats* stats = nullptr);
+      ConnectionStats* stats = nullptr,
+      security::TLSStats* tlsStats = nullptr);
 
   ~ConnectionHandler();
 
@@ -230,9 +232,10 @@ class ConnectionHandler {
   // every reader that goes through it.
   folly::SocketAddress boundAddress_;
 
-  // This EventBase's counter shard, resolved in the ctor, or null when the
-  // server was given no ConnectionStats. Written only from this EVB.
+  // This EventBase's counter shards, resolved in the ctor, or null when the
+  // server was given no corresponding stats. Written only from this EVB.
   ConnectionStatsShard* statsShard_{nullptr};
+  security::TLSStatsShard* tlsShard_{nullptr};
 
   folly::F14NodeMap<uint64_t, AnyConnection> connections_;
   // Mirrors connections_.size(). Mutated on the EVB alongside the map so
@@ -310,7 +313,8 @@ void ConnectionHandler::setConnectionFactory(
         sslPolicy_,
         tlsParamsObserver_,
         &allocator_,
-        socketOptions_.maxPendingConnections);
+        socketOptions_.maxPendingConnections,
+        tlsShard_);
   }
 
   builder.template addNextInbound<Builder>(

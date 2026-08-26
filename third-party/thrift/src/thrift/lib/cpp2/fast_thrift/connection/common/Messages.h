@@ -36,6 +36,10 @@ namespace apache::thrift::fast_thrift::connection {
 struct PeerSecurityInfo {
   std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate;
   std::string securityProtocol;
+  // Whether the handshake resumed a session rather than running in full. Like
+  // the fields above it can only be read off the fizz session, so it is
+  // snapshotted here at the same moment rather than derived later.
+  bool sessionResumed{false};
 };
 
 // Single message type that flows through the acceptance pipeline. Each

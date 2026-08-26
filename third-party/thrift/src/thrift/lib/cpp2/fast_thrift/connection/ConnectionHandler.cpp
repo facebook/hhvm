@@ -29,7 +29,8 @@ ConnectionHandler::ConnectionHandler(
         tlsParamsObserver,
     SocketOptions socketOptions,
     bool enableReusePortBpfSpread,
-    ConnectionStats* stats)
+    ConnectionStats* stats,
+    security::TLSStats* tlsStats)
     : evb_(folly::getKeepAliveToken(&evb)),
       address_(std::move(address)),
       socketOptions_(socketOptions),
@@ -50,6 +51,10 @@ ConnectionHandler::ConnectionHandler(
   if (stats != nullptr) {
     DCHECK(evb_->isInEventBaseThread());
     statsShard_ = &stats->currentThreadShard();
+  }
+  if (tlsStats != nullptr) {
+    DCHECK(evb_->isInEventBaseThread());
+    tlsShard_ = &tlsStats->currentThreadShard();
   }
 }
 

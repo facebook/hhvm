@@ -51,6 +51,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/TLSStats.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
@@ -61,6 +62,7 @@ namespace apache::thrift::fast_thrift::connection::security::test {
 
 namespace fts = ::apache::thrift::fast_thrift::security;
 namespace conn = ::apache::thrift::fast_thrift::connection;
+namespace fts_sec = ::apache::thrift::fast_thrift::connection::security;
 
 // Bring nested test namespace into scope so we can call
 // `apache::thrift::fast_thrift::security::test::makeTestCert()` as
@@ -242,7 +244,8 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
               policy,
               tlsParamsObservable_->getObserver(),
               &allocator_,
-              maxPending);
+              maxPending,
+              &stats_);
       pipeline_ = builder.build();
       pipeline_->activate();
     });
@@ -312,6 +315,7 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
       folly::observer::SimpleObservable<std::shared_ptr<const fts::TLSParams>>>
       tlsParamsObservable_;
   channel_pipeline::SimpleBufferAllocator allocator_;
+  fts_sec::TLSStatsShard stats_;
   std::unique_ptr<NoopHead> head_;
   std::unique_ptr<CapturingTail> tail_;
   channel_pipeline::PipelineImpl::Ptr pipeline_;
@@ -459,6 +463,13 @@ TEST_F(TLSPipelineIntegrationTest, PermittedTLSPathCompletesHandshake) {
   EXPECT_NE(
       dynamic_cast<fizz::server::AsyncFizzServer*>(transport.get()), nullptr);
 
+  // A completed handshake is counted, and this one presented no client cert
+  // and resumed nothing, so only the completion is.
+  EXPECT_EQ(stats_.tlsComplete.value(), 1);
+  EXPECT_EQ(stats_.tlsWithClientCert.value(), 0);
+  EXPECT_EQ(stats_.tlsResumption.value(), 0);
+  EXPECT_EQ(stats_.tlsError.value(), 0);
+
   evb_->runInEventBaseThreadAndWait([&] {
     transport.reset();
     client.reset();
@@ -496,6 +507,10 @@ TEST_F(
   // to sample rather than wait out a timeout: the connection is already gone
   // by the time the failure is reported, so nothing can arrive after this.
   EXPECT_FALSE(emitted.ready());
+  // A handshake that never completed is not a completed handshake, and the
+  // stage giving up on it is what tlsError counts.
+  EXPECT_EQ(stats_.tlsComplete.value(), 0);
+  EXPECT_EQ(stats_.tlsError.value(), 1);
 
   ::close(sp.client.toFd());
 }

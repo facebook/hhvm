@@ -187,6 +187,23 @@ class FastThriftServer {
   }
 
   /**
+   * Attach TLS counters. Wires the metrics handler into every TLS pipeline;
+   * leaving it unset omits it, so a server without them pays nothing — as
+   * does any server under SSLPolicy::DISABLED, which builds no TLS pipeline
+   * for it to sit in. Must be called before start()/serve().
+   *
+   * Separate from setConnectionStats because a server may negotiate no
+   * security at all, in which case these counters have nothing to describe.
+   */
+  void setTLSStats(std::shared_ptr<connection::security::TLSStats> stats);
+
+  /// The counters attached via setTLSStats, or nullptr if none were.
+  const std::shared_ptr<connection::security::TLSStats>& getTLSStats()
+      const noexcept {
+    return tlsStats_;
+  }
+
+  /**
    * Register raw ("native") embedder handlers to splice into the thrift
    * pipeline of every accepted connection. The handlers are inserted after all
    * built-in thrift handlers, immediately above the tail app adapter: the first
@@ -430,6 +447,8 @@ class FastThriftServer {
   // Per-EventBase connection-layer counters, or null when the embedder never
   // called setConnectionStats. Handed to the ConnectionManager at start().
   std::shared_ptr<connection::ConnectionStats> connectionStats_;
+  // Per-EventBase TLS counters, same lifecycle as connectionStats_.
+  std::shared_ptr<connection::security::TLSStats> tlsStats_;
   // Cached ThriftServiceMetadataResponse for the user's service. Built once
   // at start() when config_.enableMetadataService is set; null otherwise.
   // Shared across every per-connection MetadataAppAdapter.

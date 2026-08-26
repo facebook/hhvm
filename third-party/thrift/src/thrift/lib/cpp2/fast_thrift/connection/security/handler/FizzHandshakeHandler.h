@@ -225,10 +225,13 @@ class FizzHandshakeHandler {
     }
     // Snapshot what the peer proved while the fizz session is still the
     // transport: a StopTLS downgrade downstream leaves nothing to read it from.
+    const auto pskType = fizzServer->getState().pskType();
     auto peerSecurity =
         std::make_shared<const PeerSecurityInfo>(PeerSecurityInfo{
             .peerCertificate = fizzServer->getState().clientCert(),
-            .securityProtocol = fizzServer->getSecurityProtocol()});
+            .securityProtocol = fizzServer->getSecurityProtocol(),
+            .sessionResumed =
+                pskType && *pskType == fizz::PskType::Resumption});
     TLSRequestMessage upgraded{
         .transport = folly::AsyncTransport::UniquePtr(fizzServer.release()),
         .clientAddr = clientAddr,

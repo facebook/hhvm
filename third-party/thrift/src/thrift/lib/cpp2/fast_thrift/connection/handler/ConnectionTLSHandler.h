@@ -37,6 +37,7 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSConfigHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSConnectionAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSFinalizer.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 
@@ -50,6 +51,7 @@ namespace tls_handler =
 // Inner-pipeline handler tags. Local to ConnectionTLSHandler; not exposed
 // to the outer pipeline.
 HANDLER_TAG(tls_inner_config);
+HANDLER_TAG(tls_inner_metrics);
 HANDLER_TAG(tls_inner_classifier);
 HANDLER_TAG(tls_inner_fizz_handshake);
 HANDLER_TAG(tls_inner_stoptls_v1);
@@ -110,7 +112,8 @@ class ConnectionTLSHandler {
       folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
           tlsParamsObserver,
       channel_pipeline::SimpleBufferAllocator* allocator,
-      uint32_t maxPendingConnections) {
+      uint32_t maxPendingConnections,
+      tls_pipeline::TLSStatsShard* stats = nullptr) {
     DCHECK(sslPolicy != fast_security::SSLPolicy::DISABLED)
         << "ConnectionTLSHandler should not be installed for DISABLED policy";
 
@@ -138,6 +141,15 @@ class ConnectionTLSHandler {
     // don't carry the Observer themselves.
     builder.template addNextDuplex<tls_handler::TLSConfigHandler>(
         tls_inner_config_tag, std::move(tlsParamsObserver));
+
+    // Metrics go last in build order, putting them at the tail end. Both
+    // things worth counting travel head→tail — the resolved connection on the
+    // read path TLSFinalizer turns it around onto, and any stage's failure as
+    // an exception — so this is the only position that sees both.
+    if (stats != nullptr) {
+      builder.template addNextDuplex<tls_handler::TLSMetricsHandler>(
+          tls_inner_metrics_tag, stats);
+    }
 
     innerPipeline_ = builder.build();
     head_.setPipeline(innerPipeline_.get());

@@ -113,7 +113,8 @@ void ConnectionManager::registerEventBase(folly::EventBase& evb) {
       tlsParamsObservable_.getObserver(),
       socketOptions_,
       enableReusePortBpfSpread_,
-      stats_);
+      stats_,
+      tlsStats_);
   configureHandler_(*handler);
 
   handlers_.withWLock([&](auto& map) {

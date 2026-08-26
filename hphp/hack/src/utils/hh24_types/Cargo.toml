@@ -12,7 +12,7 @@ path = "hh24_types.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-derive_more = { version = "1.0.0", features = ["full"] }
+derive_more = { version = "2.1.1", features = ["full"] }
 file_info = { path = "../../deps/rust/file_info" }
 hh_hash = { path = "../hh_hash" }
 relative_path = { path = "../rust/relative_path" }

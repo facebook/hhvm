@@ -66,7 +66,17 @@ void HTTPTransactionAdaptorSource::detachTransaction() noexcept {
   }
 
   txn_ = nullptr;
+  const bool ingressComplete = gate_.get(Event::IngressComplete);
   gate_.set(Event::EgressComplete);
+  /**
+   * error read from egressSource invokes HttpTxn::sendAbort, which does not
+   * invoke any HttpTxnHandler functions (HttpTxn::onError, etc.) -- so if
+   * ingress is not complete when ::detachTransaction is invoked we need to
+   * enqueue an ingress error
+   */
+  if (!ingressComplete) {
+    ingressSource_.abort(HTTPErrorCode::CANCEL);
+  }
 }
 
 void HTTPTransactionAdaptorSource::onHeadersComplete(

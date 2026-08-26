@@ -30,6 +30,15 @@ module Assignment : sig
   type t = locl_phase shape_field_type Splat_elem.Map.t
 end
 
+(** Memoized bound and dependency information for one splat operation. *)
+module Cache : sig
+  (** Bound resolutions shared within one shape-splat operation. *)
+  type t
+
+  (** Create an empty operation-local cache. *)
+  val create : unit -> t
+end
+
 (** Shape-field predicates and row-algebra operations. *)
 module Field : sig
   (** A required or optional localized shape field. *)
@@ -96,6 +105,7 @@ val row_live_spread_at :
 
 (** Concrete labels contributed by either row or by bounds of their spreads. *)
 val subrow_label_set :
+  Cache.t ->
   env ->
   sub:Typing_shape_normalize.Row.t ->
   super:Typing_shape_normalize.Row.t ->
@@ -104,6 +114,7 @@ val subrow_label_set :
 
 (** The unknown tail ([None]) followed by every concrete label to compare. *)
 val subrow_labels :
+  Cache.t ->
   env ->
   sub:Typing_shape_normalize.Row.t ->
   super:Typing_shape_normalize.Row.t ->
@@ -116,12 +127,13 @@ val subrow_labels :
     should be given values: each after those its bounds mention. Bounds can be
     cyclic, as [where T1 = T2] makes them, and then one dependency is dropped;
     the result is still total and does not vary between runs. *)
-val topo : env -> Splat_elem.Set.t -> Typing_reason.t -> locl_ty list
+val topo : Cache.t -> env -> Splat_elem.Set.t -> Typing_reason.t -> locl_ty list
 
 (* == Corners =============================================================== *)
 
 (** Check every corner assignment of the live spread elements. *)
 val check_subrow_corners :
+  Cache.t ->
   env ->
   sub:Typing_shape_normalize.Row.t ->
   super:Typing_shape_normalize.Row.t ->
@@ -138,6 +150,7 @@ val check_subrow_corners :
 
 (** Every corner co-assignment of the given spread elements. *)
 val corner_assignments :
+  Cache.t ->
   env ->
   locl_ty list ->
   TShapeField.t option ->
@@ -190,6 +203,7 @@ module For_test : sig
 
     (** Determine how [key] is masked in a row under the current assignment. *)
     val of_row :
+      Cache.t ->
       env ->
       Typing_shape_normalize.Row.t ->
       TShapeField.t option ->

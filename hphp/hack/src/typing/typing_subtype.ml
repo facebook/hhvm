@@ -3003,6 +3003,8 @@ end = struct
       let err_opt = Option.merge err_sub err_super ~f:Typing_error.both in
       (env, err_opt, norm_sub, norm_super)
     in
+    (* Create an empty cache for the corners procedure *)
+    let cache = Typing_corners.Cache.create () in
     match err_opt with
     | Some _ as fail -> invalid ~fail env
     | None ->
@@ -3068,6 +3070,7 @@ end = struct
             subrow_splat
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r:r_sub
@@ -3078,6 +3081,7 @@ end = struct
           subrow_infer_super
             ~subtype_env
             ~env
+            ~cache
             ~this_ty
             ~super_like
             ~r:r_sub
@@ -3089,6 +3093,7 @@ end = struct
           subrow_infer_sub
             ~subtype_env
             ~env
+            ~cache
             ~this_ty
             ~super_like
             ~r:r_sub
@@ -3102,6 +3107,7 @@ end = struct
           subrow_infer_couple
             ~subtype_env
             ~env
+            ~cache
             ~this_ty
             ~super_like
             ~r:r_sub
@@ -3120,6 +3126,7 @@ end = struct
             subrow_infer_sub
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r:r_sub
@@ -3134,6 +3141,7 @@ end = struct
             subrow_infer_super
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r:r_sub
@@ -3150,17 +3158,19 @@ end = struct
   and subrow_splat
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
       ~(sub : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t) =
-    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    let labels = Typing_corners.subrow_labels cache env ~sub ~super r in
     List.fold_left labels ~init:(valid env) ~f:(fun acc label ->
         acc &&& fun env ->
         subrow_splat_at
           ~subtype_env
           ~env
+          ~cache
           ~this_ty
           ~super_like
           ~r
@@ -3171,6 +3181,7 @@ end = struct
   and subrow_splat_at
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3213,6 +3224,7 @@ end = struct
     in
     (* Check subfields at all corner assignments *)
     Typing_corners.check_subrow_corners
+      cache
       env
       ~sub
       ~super
@@ -3309,6 +3321,7 @@ end = struct
   and subrow_infer_super
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3339,6 +3352,7 @@ end = struct
             subrow_infer_super_part
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r
@@ -3358,6 +3372,7 @@ end = struct
   and subrow_infer_super_part
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3366,7 +3381,7 @@ end = struct
       ~(super_pre : Typing_shape_normalize.Row.t)
       ~(super_post : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t) =
-    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    let labels = Typing_corners.subrow_labels cache env ~sub ~super r in
     let (env, known, unknown, props) =
       List.fold_left
         labels
@@ -3376,6 +3391,7 @@ end = struct
             subrow_infer_super_part_at
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r
@@ -3421,6 +3437,7 @@ end = struct
   and subrow_infer_super_part_at
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3435,9 +3452,9 @@ end = struct
         (Splat_elem.Set.of_list (row_live_spread_at sub label))
         (Splat_elem.Set.of_list (row_live_spread_at super label))
     in
-    let ty_params_topo = Typing_corners.topo env live_names r in
+    let ty_params_topo = Typing_corners.topo cache env live_names r in
     let (env, assignments) =
-      Typing_corners.corner_assignments env ty_params_topo label r
+      Typing_corners.corner_assignments cache env ty_params_topo label r
     in
     let (env, info) =
       List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
@@ -3572,6 +3589,7 @@ end = struct
   and subrow_infer_sub
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3602,6 +3620,7 @@ end = struct
             subrow_infer_sub_part
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r
@@ -3622,6 +3641,7 @@ end = struct
   and subrow_infer_sub_part
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3630,7 +3650,7 @@ end = struct
       ~(sub_post : Typing_shape_normalize.Row.t)
       ~(sub : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t) =
-    let labels = Typing_corners.subrow_labels env ~sub ~super r in
+    let labels = Typing_corners.subrow_labels cache env ~sub ~super r in
     let (env, known, unknown, props) =
       List.fold_left
         labels
@@ -3640,6 +3660,7 @@ end = struct
             subrow_infer_sub_part_at
               ~subtype_env
               ~env
+              ~cache
               ~this_ty
               ~super_like
               ~r
@@ -3685,6 +3706,7 @@ end = struct
   and subrow_infer_sub_part_at
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3699,9 +3721,9 @@ end = struct
         (Splat_elem.Set.of_list (row_live_spread_at sub label))
         (Splat_elem.Set.of_list (row_live_spread_at super label))
     in
-    let ty_params_topo = Typing_corners.topo env live_names r in
+    let ty_params_topo = Typing_corners.topo cache env live_names r in
     let (env, assignments) =
-      Typing_corners.corner_assignments env ty_params_topo label r
+      Typing_corners.corner_assignments cache env ty_params_topo label r
     in
     let (env, info) =
       List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
@@ -3819,6 +3841,7 @@ end = struct
   and subrow_infer_couple
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3831,6 +3854,7 @@ end = struct
         subrow_infer_same_var
           ~subtype_env
           ~env
+          ~cache
           ~this_ty
           ~super_like
           ~r
@@ -3843,6 +3867,7 @@ end = struct
         subrow_infer_couple_mid
           ~subtype_env
           ~env
+          ~cache
           ~this_ty
           ~super_like
           ~r
@@ -3854,6 +3879,7 @@ end = struct
       subrow_infer_couple_mid
         ~subtype_env
         ~env
+        ~cache
         ~this_ty
         ~super_like
         ~r
@@ -3870,6 +3896,7 @@ end = struct
   and subrow_infer_same_var
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -3919,7 +3946,7 @@ end = struct
               None
               :: List.map
                    (TShapeSet.elements
-                      (Typing_corners.subrow_label_set env ~sub ~super r))
+                      (Typing_corners.subrow_label_set cache env ~sub ~super r))
                    ~f:Option.some
             in
             let add_field known unknown label fd =
@@ -3946,9 +3973,16 @@ end = struct
                       (Splat_elem.Set.of_list (row_live_spread_at sub label))
                       (Splat_elem.Set.of_list (row_live_spread_at super label))
                   in
-                  let ty_params_topo = Typing_corners.topo env live_names r in
+                  let ty_params_topo =
+                    Typing_corners.topo cache env live_names r
+                  in
                   let (env, assignments) =
-                    Typing_corners.corner_assignments env ty_params_topo label r
+                    Typing_corners.corner_assignments
+                      cache
+                      env
+                      ty_params_topo
+                      label
+                      r
                   in
                   let top_field =
                     { sft_optional = true; sft_ty = MakeType.mixed r }
@@ -4091,6 +4125,7 @@ end = struct
   and subrow_infer_couple_mid
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
+      ~(cache : Typing_corners.Cache.t)
       ~(this_ty : locl_ty option)
       ~super_like
       ~r
@@ -4103,7 +4138,7 @@ end = struct
         (fun lbl (env, known) ->
           let (env, flex) = Env.fresh_type env Pos.none in
           (env, TShapeMap.add lbl { sft_optional = false; sft_ty = flex } known))
-        (Typing_corners.subrow_label_set env ~sub ~super r)
+        (Typing_corners.subrow_label_set cache env ~sub ~super r)
         (env, TShapeMap.empty)
     in
     let (env, unknown) = Env.fresh_type env Pos.none in
@@ -4119,6 +4154,7 @@ end = struct
       subrow_infer_sub
         ~subtype_env
         ~env
+        ~cache
         ~this_ty
         ~super_like
         ~r
@@ -4130,6 +4166,7 @@ end = struct
       subrow_infer_super
         ~subtype_env
         ~env
+        ~cache
         ~this_ty
         ~super_like
         ~r

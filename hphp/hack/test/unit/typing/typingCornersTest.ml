@@ -505,7 +505,10 @@ let the_order_gives_values_before_they_are_needed _ =
             Typing_corners.Splat_elem.Set.of_list [tgeneric "T1"; tgeneric "T2"]
           in
           let reached = Typing_corners.For_test.closure env start r in
-          let order = Typing_corners.topo env start r in
+          let order =
+            let cache = Typing_corners.Cache.create () in
+            Typing_corners.topo cache env start r
+          in
           let situation =
             Printf.sprintf
               "%s written as %s"
@@ -564,7 +567,10 @@ let independent_roots_keep_the_assignment_frontier_narrow _ =
   in
   let roots = Typing_corners.Splat_elem.Set.of_list (List.map chains ~f:snd) in
   let reached = Typing_corners.For_test.closure env roots r in
-  let run () = Typing_corners.topo env roots r in
+  let run () =
+    let cache = Typing_corners.Cache.create () in
+    Typing_corners.topo cache env roots r
+  in
   let order = run () in
   assert_bool
     "root-seeded ordering must include every reachable parameter exactly once"
@@ -647,10 +653,11 @@ let params prefix count =
 
 let assignment_frontier_for_rows env sub super params =
   let live = Typing_corners.Splat_elem.Set.of_list params in
-  let order = Typing_corners.topo env live r in
+  let cache = Typing_corners.Cache.create () in
+  let order = Typing_corners.topo cache env live r in
   let label = Some (TSFlit_str (Pos_or_decl.none, "x")) in
   let (_env, assignments) =
-    Typing_corners.corner_assignments env order label r
+    Typing_corners.corner_assignments cache env order label r
   in
   (sub, super, label, assignments)
 
@@ -922,8 +929,10 @@ let a_field_is_hidden_exactly_when_something_hides_it _ =
                       key
                       assignment
                   in
+                  let cache = Typing_corners.Cache.create () in
                   match
                     Typing_corners.Masking.of_row
+                      cache
                       env
                       normalized_row
                       label
@@ -1152,7 +1161,10 @@ let a_cycle_still_orders_every_parameter_the_same_way _ =
   let env = cyclic_env () in
   let start = Typing_corners.Splat_elem.Set.singleton (tgeneric "T1") in
   let reached = Typing_corners.For_test.closure env start r in
-  let run () = Typing_corners.topo env start r in
+  let run () =
+    let cache = Typing_corners.Cache.create () in
+    Typing_corners.topo cache env start r
+  in
   let first = run () in
   (* Total: nothing dropped. *)
   assert_bool
@@ -1244,7 +1256,13 @@ let every_label_that_matters_is_covered _ =
               let (env, sub_row) = normalize_row env sub_shape in
               let (env, super_row) = normalize_row env super_shape in
               let covered =
-                Typing_corners.subrow_labels env ~sub:sub_row ~super:super_row r
+                let cache = Typing_corners.Cache.create () in
+                Typing_corners.subrow_labels
+                  cache
+                  env
+                  ~sub:sub_row
+                  ~super:super_row
+                  r
               in
               (* Worked out here rather than by calling the functions being
                  checked. subrow_label_set IS the union of those, so using them
@@ -1377,11 +1395,13 @@ let cached_nested_bounds_cover_every_corner _ =
         add_bounds env (name i) (splat [left; right]))
   in
   let (env, row) = normalize_row env (Shape_splat { ss_elems = [generic 0] }) in
-  let labels = Typing_corners.subrow_labels env ~sub:row ~super:row r in
+  let cache = Typing_corners.Cache.create () in
+  let labels = Typing_corners.subrow_labels cache env ~sub:row ~super:row r in
   assert_equal 2 (List.length labels);
   List.iter labels ~f:(fun label ->
       let (_env, valid) =
         Typing_corners.check_subrow_corners
+          cache
           env
           ~sub:row
           ~super:row
@@ -1412,7 +1432,8 @@ let cache_does_not_reuse_results_from_another_env _ =
       (simple_shape [("first", MakeType.int r)] ~open_:false)
   in
   let (env, row) = normalize_row env (Shape_splat { ss_elems = [key] }) in
-  let first = Typing_corners.subrow_labels env ~sub:row ~super:row r in
+  let cache = Typing_corners.Cache.create () in
+  let first = Typing_corners.subrow_labels cache env ~sub:row ~super:row r in
   let env =
     Env.add_upper_bound
       (dummy_env ())
@@ -1420,7 +1441,7 @@ let cache_does_not_reuse_results_from_another_env _ =
       (simple_shape [("second", MakeType.int r)] ~open_:false)
   in
   let (env, row) = normalize_row env (Shape_splat { ss_elems = [key] }) in
-  let second = Typing_corners.subrow_labels env ~sub:row ~super:row r in
+  let second = Typing_corners.subrow_labels cache env ~sub:row ~super:row r in
   let contains labels name =
     List.exists labels ~f:(function
         | Some label -> String.equal name (TShapeField.name label)
@@ -1525,6 +1546,10 @@ let () =
          >:: every_label_that_matters_is_covered;
          "nominal_newtype_keys_ignore_stored_bounds"
          >:: nominal_newtype_keys_ignore_stored_bounds;
+         "cached_nested_bounds_cover_every_corner"
+         >:: cached_nested_bounds_cover_every_corner;
+         "cache_does_not_reuse_results_from_another_env"
+         >:: cache_does_not_reuse_results_from_another_env;
          "cyclic_bound_projection_with_no_assignment_is_absent"
          >:: cyclic_bound_projection_with_no_assignment_is_absent;
          "bottom_upper_view_beside_shape_is_discarded"

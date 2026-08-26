@@ -1,6 +1,3 @@
-fb_enable_code_coverage
-  INSERT fb_enable_code_coverage
-  function
 fb_fbid_in_oid_range
   INSERT fb_fbid_in_oid_range
   function
@@ -33,6 +30,9 @@ fb_get_allotment_shape_name
   function
 fb_get_cert_token
   INSERT fb_get_cert_token
+  function
+fb_get_client_authenticated_identities
+  INSERT fb_get_client_authenticated_identities
   function
 fb_get_client_identities
   INSERT fb_get_client_identities

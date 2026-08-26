@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <string_view>
 
@@ -89,9 +90,20 @@ class ServerTracker {
   FastThriftServer& getServer() const { return server_; }
   const std::string& getKey() const { return key_; }
 
+  /**
+   * Process-unique, monotonically increasing registration id.
+   *
+   * Distinguishes a fresh registration from a destroyed one that happened to
+   * be allocated at the same address — which a consumer keyed on the server
+   * pointer alone cannot do, and which would otherwise let per-server state
+   * outlive the server it describes.
+   */
+  uint64_t id() const { return id_; }
+
   ServerTrackerRef ref() const { return ServerTrackerRef{cb_.ref()}; }
 
  private:
+  uint64_t id_;
   std::string key_;
   FastThriftServer& server_;
   folly::PrimaryPtr<ServerTrackerRef::ControlBlock> cb_;
@@ -107,6 +119,15 @@ size_t getServerCount(std::string_view key);
  */
 void forEachServer(
     std::string_view key, folly::FunctionRef<void(FastThriftServer&)> f);
+
+/**
+ * As forEachServer, additionally passing each server's registration id. Same
+ * callback constraints apply — the registry read lock is held throughout, and
+ * a ServerTracker being destroyed blocks until the callback returns.
+ */
+void forEachServerWithId(
+    std::string_view key,
+    folly::FunctionRef<void(uint64_t, FastThriftServer&)> f);
 
 } // namespace instrumentation
 

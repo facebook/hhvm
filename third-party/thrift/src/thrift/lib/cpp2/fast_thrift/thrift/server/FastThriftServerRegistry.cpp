@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <set>
@@ -68,10 +69,15 @@ TrackerCollection& getTrackerCollection() {
   return trackerCollection.get();
 }
 
+// Never reused, so an id identifies a registration for the life of the
+// process rather than merely an address that is currently occupied.
+std::atomic<uint64_t> nextTrackerId{1};
+
 } // namespace
 
 ServerTracker::ServerTracker(std::string_view key, FastThriftServer& server)
-    : key_(key),
+    : id_(nextTrackerId.fetch_add(1, std::memory_order_relaxed)),
+      key_(key),
       server_(server),
       cb_(std::make_unique<ServerTrackerRef::ControlBlock>(key_, server_)) {
   getTrackerCollection().addTracker(key_, *this);
@@ -98,6 +104,17 @@ void forEachServer(
       key, [&](const std::set<ServerTracker*>& trackers) {
         for (auto* tracker : trackers) {
           f(tracker->getServer());
+        }
+      });
+}
+
+void forEachServerWithId(
+    std::string_view key,
+    folly::FunctionRef<void(uint64_t, FastThriftServer&)> f) {
+  getTrackerCollection().forTrackersWithKey(
+      key, [&](const std::set<ServerTracker*>& trackers) {
+        for (auto* tracker : trackers) {
+          f(tracker->id(), tracker->getServer());
         }
       });
 }

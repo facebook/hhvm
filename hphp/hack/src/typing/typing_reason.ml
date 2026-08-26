@@ -3718,18 +3718,18 @@ module Derivation = struct
       generated for an exist lower- or upper-bound.
 
       This function is used to recover this representation from the reason representation. *)
-  let of_reason ~sub ~super =
-    let rec aux (sub, super) ~deriv ~solutions =
+  let of_reason ~sub ~super ~is_derivation_suppressed =
+    let rec aux (sub, super) ~deriv ~solutions ~depth =
       match (sub, super) with
       (* -- Accumulate solutions -- *)
       | (Solved { solution; of_; in_ }, _) ->
         let solution = extract_first @@ resolve solution ~solutions ~depth:20 in
         let solutions = Tvid.Map.add of_ solution solutions in
-        aux (in_, super) ~deriv ~solutions
+        aux (in_, super) ~deriv ~solutions ~depth
       | (_, Solved { solution; of_; in_ }) ->
         let solution = extract_first @@ resolve solution ~solutions ~depth:20 in
         let solutions = Tvid.Map.add of_ solution solutions in
-        aux (sub, in_) ~deriv ~solutions
+        aux (sub, in_) ~deriv ~solutions ~depth
       (* -- Transitive constraints -- *)
       | ( Lower_bound
             {
@@ -3737,18 +3737,18 @@ module Derivation = struct
               of_ = ub_sub;
             },
           ub_super ) ->
-        let lower = aux (lb_sub, lb_super) ~deriv:[] ~solutions
-        and upper = aux (ub_sub, ub_super) ~deriv:[] ~solutions
-        and in_ = aux (lb_sub, ub_super) ~deriv ~solutions
+        let lower = nested (lb_sub, lb_super) ~solutions ~depth
+        and upper = nested (ub_sub, ub_super) ~solutions ~depth
+        and in_ = aux (lb_sub, ub_super) ~deriv ~solutions ~depth
         and on_ = extract_last lb_super in
         transitive ~lower ~upper ~on_ ~in_
       | (Lower_bound { bound; of_ }, super) ->
-        let bound = aux (bound, of_) ~deriv:[] ~solutions
-        and in_ = aux (bound, super) ~deriv ~solutions in
+        let bound = nested (bound, of_) ~solutions ~depth
+        and in_ = aux (bound, super) ~deriv ~solutions ~depth in
         lower_bound ~bound ~in_
       | (sub, Lower_bound { bound; of_ }) ->
-        let bound = aux (bound, of_) ~deriv:[] ~solutions
-        and in_ = aux (sub, bound) ~deriv ~solutions in
+        let bound = nested (bound, of_) ~solutions ~depth
+        and in_ = aux (sub, bound) ~deriv ~solutions ~depth in
         lower_bound ~bound ~in_
       (* -- One-sided projection on subtype -- *)
       | (Prj_one { part; whole; prj }, _) ->
@@ -3759,7 +3759,7 @@ module Derivation = struct
           Subtype_step.(step rule Subtype ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (whole, super) ~deriv ~solutions
+        aux (whole, super) ~deriv ~solutions ~depth
       | (Axiom { next; prev; axiom }, _) ->
         let step =
           let sub = push_solutions next ~solutions
@@ -3768,7 +3768,7 @@ module Derivation = struct
           Subtype_step.(step rule Subtype ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (prev, super) ~deriv ~solutions
+        aux (prev, super) ~deriv ~solutions ~depth
       (* -- One-sided projection on supertype -- *)
       | (_, Prj_one { part; whole; prj }) ->
         let step =
@@ -3778,7 +3778,7 @@ module Derivation = struct
           Subtype_step.(step rule Supertype ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (sub, whole) ~deriv ~solutions
+        aux (sub, whole) ~deriv ~solutions ~depth
       | (_, Axiom { next; prev; axiom }) ->
         let step =
           let sub = push_solutions sub ~solutions
@@ -3787,7 +3787,7 @@ module Derivation = struct
           Subtype_step.(step rule Supertype ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (sub, prev) ~deriv ~solutions
+        aux (sub, prev) ~deriv ~solutions ~depth
       (* -- Two-sided projections -- *)
       | (Prj_both { sub_prj; sub = parent_sub; super = parent_super; prj }, _)
         ->
@@ -3798,7 +3798,7 @@ module Derivation = struct
           Subtype_step.(step rule Both ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (parent_sub, parent_super) ~deriv ~solutions
+        aux (parent_sub, parent_super) ~deriv ~solutions ~depth
       | (_, Prj_both { sub_prj; sub = parent_sub; super = parent_super; prj })
         ->
         (* Does this happen? Should it?? *)
@@ -3809,7 +3809,7 @@ module Derivation = struct
           Subtype_step.(step rule Both ~sub ~super)
         in
         let deriv = step :: deriv in
-        aux (parent_sub, parent_super) ~deriv ~solutions
+        aux (parent_sub, parent_super) ~deriv ~solutions ~depth
       (* -- Reasons corresponding to a single step -- *)
       | ( ( No_reason | From_witness_decl _ | From_witness_locl _
           | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
@@ -3831,9 +3831,19 @@ module Derivation = struct
           Subtype_step.begin_ ~sub ~super
         in
         derivation (step :: deriv)
+    (* A supporting derivation starts a separate path one level below its
+       parent, so it must reset [deriv]. Check the renderer's depth policy
+       before descending: suppressed branches have no observable explanation
+       and need not be materialized. *)
+    and nested (sub, super) ~solutions ~depth =
+      let depth = depth + 1 in
+      if is_derivation_suppressed depth then
+        derivation []
+      else
+        aux (sub, super) ~deriv:[] ~solutions ~depth
     in
 
-    aux (sub, super) ~deriv:[] ~solutions:Tvid.Map.empty
+    aux (sub, super) ~deriv:[] ~solutions:Tvid.Map.empty ~depth:0
 
   (* ~~ Human-readable explanation of full derivation ~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -4439,17 +4449,22 @@ module Derivation = struct
       explain_reason r ~st ~cfg ~ctxt
   end
 
-  let explain t ~complexity =
+  let explain ~sub ~super ~complexity =
     let st = Explain.State.empty
     and cfg = Explain.Config.from_complexity complexity
     and ctxt = Explain.Context.empty in
-    let (expl, _) = Explain.explain t ~st ~cfg ~ctxt in
+    let deriv =
+      of_reason
+        ~sub
+        ~super
+        ~is_derivation_suppressed:(Explain.Config.suppress_derivation cfg)
+    in
+    let (expl, _) = Explain.explain deriv ~st ~cfg ~ctxt in
     expl
 end
 
 let explain ~sub ~super ~complexity =
-  let deriv = Derivation.of_reason ~sub ~super in
-  Explanation.derivation Derivation.(explain deriv ~complexity)
+  Explanation.derivation Derivation.(explain ~sub ~super ~complexity)
 
 let debug_reason ~sub ~super =
   let json =
@@ -4459,7 +4474,11 @@ let debug_reason ~sub ~super =
   Explanation.debug (Hh_json_helpers.Out.pretty_to_string json)
 
 let debug_derivation ~sub ~super =
-  let json = Derivation.(to_json @@ of_reason ~sub ~super) in
+  let json =
+    Derivation.(
+      to_json
+      @@ of_reason ~sub ~super ~is_derivation_suppressed:(fun _ -> false))
+  in
   Explanation.debug (Hh_json_helpers.Out.pretty_to_string json)
 
 let rec get_top_fun_param_prj_idx r =

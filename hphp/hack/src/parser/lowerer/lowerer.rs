@@ -196,6 +196,13 @@ pub struct State {
 const EXP_RECURSION_LIMIT: usize = 30_000;
 
 #[derive(Clone)]
+enum PackageMembershipCache {
+    Uncomputed,
+    NoPackage,
+    Package(PackageMembership),
+}
+
+#[derive(Clone)]
 pub struct Env<'a> {
     pub codegen: oxidized::namespace_env::Mode,
     quick_mode: bool,
@@ -233,7 +240,8 @@ pub struct Env<'a> {
 
     state: Rc<RefCell<State>>,
 
-    package: Option<PackageMembership>,
+    /// Memoized package membership for this file.
+    package: PackageMembershipCache,
 }
 
 impl<'a> Env<'a> {
@@ -268,7 +276,7 @@ impl<'a> Env<'a> {
             token_factory,
             arena,
             expression_tree_class: None,
-            package: None,
+            package: PackageMembershipCache::Uncomputed,
 
             state: Rc::new(RefCell::new(State {
                 cls_generics: HashMap::default(),
@@ -6248,8 +6256,10 @@ fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result
 }
 
 fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMembership> {
-    if env.package.is_some() {
-        return env.package.clone();
+    match &env.package {
+        PackageMembershipCache::NoPackage => return None,
+        PackageMembershipCache::Package(package) => return Some(package.clone()),
+        PackageMembershipCache::Uncomputed => {}
     }
     let span = p_pos(node, env);
     let filepath = span.filename().path_str();
@@ -6258,7 +6268,10 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMemb
         .package_info
         .get_package_for_file(parser_options.package_support_multifile_tests, filepath)
         .map(|p| PackageMembership::PackageConfigAssignment(p.name.1.clone()));
-    env.package = package.clone();
+    env.package = match &package {
+        Some(package) => PackageMembershipCache::Package(package.clone()),
+        None => PackageMembershipCache::NoPackage,
+    };
     package
 }
 
@@ -6984,7 +6997,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 if attr.name.1 == sn::user_attributes::PACKAGE_OVERRIDE {
                     if let [aast::Expr(_, pos, ast::Expr_::String(s))] = attr.params.as_slice() {
                         if let Ok(s) = String::from_utf8(s.to_vec()) {
-                            env.package = Some(PackageMembership::PackageOverride(pos.clone(), s))
+                            env.package = PackageMembershipCache::Package(
+                                PackageMembership::PackageOverride(pos.clone(), s),
+                            )
                         }
                     }
                 }

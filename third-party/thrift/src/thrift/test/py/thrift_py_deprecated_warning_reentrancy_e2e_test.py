@@ -15,6 +15,8 @@
 
 
 import importlib.resources
+import os
+import re
 import subprocess
 import textwrap
 import unittest
@@ -43,11 +45,18 @@ class TestThriftPyDeprecatedWarningReentrancyE2E(unittest.TestCase):
             stderr=subprocess.PIPE,
             text=True,
             check=False,
+            env={**os.environ, "THRIFT_PY_DEPRECATED_WARNING": "force"},
+        )
+        stderr = re.sub(
+            r"^__main__:\d+: ThriftPyDeprecatedWarning:",
+            "__main__:<LINE>: ThriftPyDeprecatedWarning:",
+            completed.stderr,
+            flags=re.MULTILINE,
         )
         return ProcessResult(
             returncode=completed.returncode,
             stdout=completed.stdout,
-            stderr=completed.stderr,
+            stderr=stderr,
         )
 
     def test_capturewarnings_filter_reentry_is_gated_in_subprocess(self) -> None:
@@ -57,7 +66,7 @@ class TestThriftPyDeprecatedWarningReentrancyE2E(unittest.TestCase):
             stdout="filter calls: 1\n",
             stderr=textwrap.dedent(
                 """\
-                __main__:43: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
+                __main__:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
 
                 """
             ),
@@ -78,7 +87,7 @@ class TestThriftPyDeprecatedWarningReentrancyE2E(unittest.TestCase):
             stdout="filter calls: 1\n",
             stderr=textwrap.dedent(
                 """\
-                __main__:43: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
+                __main__:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
 
                 """
             ),
@@ -97,7 +106,7 @@ class TestThriftPyDeprecatedWarningReentrancyE2E(unittest.TestCase):
             stdout="filter calls: 0\n",
             stderr=textwrap.dedent(
                 """\
-                __main__:43: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
+                __main__:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
                 """
             ),
         )

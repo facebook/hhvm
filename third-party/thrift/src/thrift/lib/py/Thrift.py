@@ -377,47 +377,61 @@ _PY_DEPRECATED_WARNING_MESSAGE = (
 )
 _py_deprecated_warning_filter_lock = threading.Lock()
 _py_deprecated_warning_reentrancy_state = threading.local()
-_py_deprecated_cli_summary_lock = threading.Lock()
-_py_deprecated_cli_summary_emitted = False
 
 _PY_DEPRECATED_WARNING_ENV_VAR = "THRIFT_PY_DEPRECATED_WARNING"
+_PY_DEPRECATED_HELPER_MODULE_PATTERN = r"(?#thrift-py-deprecated-helper).*"
 _PY_DEPRECATED_EXACT_USER_FILTER_ACTIONS = (
     "default",
     "ignore",
     "error",
     "always",
     "once",
+    "module",
 )
-_PY_DEPRECATED_MODULE_FILTER_ACTIONS = ("module",)
 
 
-def _has_filter_for_py_deprecated_warning(actions):
+def _is_helper_module_filter_for_py_deprecated_warning(warning_filter):
+    action, message, category, module, lineno = warning_filter
+    return (
+        action == "module"
+        and message is None
+        and category is ThriftPyDeprecatedWarning
+        and module is not None
+        and module.pattern == _PY_DEPRECATED_HELPER_MODULE_PATTERN
+        and lineno == 0
+    )
+
+
+def _has_user_filter_for_py_deprecated_warning():
+    """Return whether an exact-category user filter controls visibility.
+
+    The helper marks its own `module` filter with a private module pattern and
+    excludes that filter here. Exact user filters, such as `module`, opt in.
+    Generic superclass filters do not opt in, though filters that precede the
+    helper filter still control delivery through Python's first-match policy.
+    """
     import warnings
 
-    for action, _msg, category, _mod, _lineno in warnings.filters:
-        if action in actions and category is ThriftPyDeprecatedWarning:
+    for warning_filter in warnings.filters:
+        if _is_helper_module_filter_for_py_deprecated_warning(warning_filter):
+            continue
+        action, _msg, category, _mod, _lineno = warning_filter
+        if (
+            action in _PY_DEPRECATED_EXACT_USER_FILTER_ACTIONS
+            and category is ThriftPyDeprecatedWarning
+        ):
             return True
     return False
 
 
-def _has_user_filter_for_py_deprecated_warning():
-    """True if the user installed an exact-category `warnings` filter
-    that should override helper-managed visibility.
+def _has_helper_module_filter_for_py_deprecated_warning():
+    """Return whether the helper-managed dedup filter remains installed."""
+    import warnings
 
-    Superclass filters (e.g. CPython's startup `ignore::DeprecationWarning`)
-    are not exact user choices — they are interpreter defaults that would
-    silently suppress this warning. User-installed superclass filters added
-    after the helper's `module` filter still win through Python's
-    first-match-wins filter order."""
-    return _has_filter_for_py_deprecated_warning(
-        _PY_DEPRECATED_EXACT_USER_FILTER_ACTIONS
+    return any(
+        _is_helper_module_filter_for_py_deprecated_warning(warning_filter)
+        for warning_filter in warnings.filters
     )
-
-
-def _has_module_filter_for_py_deprecated_warning():
-    """True if a targeted `module` filter for
-    `ThriftPyDeprecatedWarning` is already present."""
-    return _has_filter_for_py_deprecated_warning(_PY_DEPRECATED_MODULE_FILTER_ACTIONS)
 
 
 def _ensure_module_filter_for_py_deprecated_warning():
@@ -428,46 +442,19 @@ def _ensure_module_filter_for_py_deprecated_warning():
 
     if _has_user_filter_for_py_deprecated_warning():
         return
-    if _has_module_filter_for_py_deprecated_warning():
+    if _has_helper_module_filter_for_py_deprecated_warning():
         return
 
     with _py_deprecated_warning_filter_lock:
         if _has_user_filter_for_py_deprecated_warning():
             return
-        if _has_module_filter_for_py_deprecated_warning():
+        if _has_helper_module_filter_for_py_deprecated_warning():
             return
-        warnings.filterwarnings("module", category=ThriftPyDeprecatedWarning)
-
-
-def _should_use_py_deprecated_cli_summary():
-    if os.environ.get(_PY_DEPRECATED_WARNING_ENV_VAR) == "force":
-        return False
-    if _has_user_filter_for_py_deprecated_warning():
-        return False
-
-    stderr = sys.stderr
-    if stderr is None:
-        return False
-
-    isatty = getattr(stderr, "isatty", None)
-    if not callable(isatty):
-        return False
-    return isatty()
-
-
-def _claim_py_deprecated_cli_summary_emission():
-    global _py_deprecated_cli_summary_emitted
-
-    with _py_deprecated_cli_summary_lock:
-        if _py_deprecated_cli_summary_emitted:
-            return False
-        _py_deprecated_cli_summary_emitted = True
-        return True
-
-
-def _emit_py_deprecated_cli_summary():
-    if _claim_py_deprecated_cli_summary_emission():
-        sys.stderr.write(_PY_DEPRECATED_WARNING_MESSAGE + "\n")
+        warnings.filterwarnings(
+            "module",
+            category=ThriftPyDeprecatedWarning,
+            module=_PY_DEPRECATED_HELPER_MODULE_PATTERN,
+        )
 
 
 def _py_deprecated_warning_action():
@@ -593,26 +580,30 @@ def _emit_py_deprecated_warning_from_frame(source_module_name, frame):
 
 
 def warn_thrift_py_deprecated(name):
-    """Emit a `ThriftPyDeprecatedWarning` to flag that a py-deprecated
-    thrift module has been imported. `name` is the importing module
-    (typically `__name__` from generated code).
+    """Keep py-deprecated imports quiet by default because runtime warning
+    noise now outweighs its migration value.
 
-    Walks the call stack to attribute the warning to the first
-    hand-written caller, skipping generated thrift module bodies (which
-    contain a literal `warn_thrift_py_deprecated` reference in their
-    `co_names`) and Python's import machinery (`importlib._bootstrap*`).
-    The displayed filename is the caller's dotted module name, not the
-    on-disk path."""
-    import sys
+    Set `THRIFT_PY_DEPRECATED_WARNING=force` to emit detailed warnings. An
+    exact-category `ThriftPyDeprecatedWarning` filter also opts in and controls
+    delivery. Generic warning filters do not opt in. `name` identifies the
+    source module (typically `__name__` from generated code).
+
+    When enabled, the helper walks the call stack to attribute the warning to
+    the first hand-written caller. It skips generated thrift module bodies,
+    which contain a literal `warn_thrift_py_deprecated` reference in their
+    `co_names`, and Python's import machinery (`importlib._bootstrap*`). The
+    displayed filename uses the caller's dotted module name, not the on-disk
+    path."""
+    if (
+        os.environ.get(_PY_DEPRECATED_WARNING_ENV_VAR) != "force"
+        and not _has_user_filter_for_py_deprecated_warning()
+    ):
+        return
 
     if getattr(_py_deprecated_warning_reentrancy_state, "emitting", False):
         return
 
     source_module_name = name
-
-    if _should_use_py_deprecated_cli_summary():
-        _emit_py_deprecated_cli_summary()
-        return
 
     # Install helper-managed source-module dedup policy unless the user
     # installed a filter that should control this warning category.

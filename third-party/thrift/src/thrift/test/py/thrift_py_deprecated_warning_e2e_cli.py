@@ -15,6 +15,7 @@
 
 
 import importlib
+import os
 import sys
 import warnings
 
@@ -39,6 +40,21 @@ def _configure_warning_mode(warning_mode: str) -> None:
             "always",
             category=thrift_module.ThriftPyDeprecatedWarning,
         )
+        return
+    if warning_mode == "module":
+        warnings.filterwarnings(
+            "module",
+            category=thrift_module.ThriftPyDeprecatedWarning,
+        )
+        return
+    if warning_mode == "once":
+        warnings.filterwarnings(
+            "once",
+            category=thrift_module.ThriftPyDeprecatedWarning,
+        )
+        return
+    if warning_mode == "generic-error":
+        warnings.filterwarnings("error", category=DeprecationWarning)
         return
     if warning_mode == "error":
         warnings.filterwarnings(
@@ -65,6 +81,21 @@ def _run_scenario(scenario: str) -> None:
     if scenario == "two-source-modules":
         importlib.import_module(_SOURCE_A_MODULE)
         importlib.import_module(_SOURCE_B_MODULE)
+        return
+    if scenario == "force-then-disable":
+        os.environ["THRIFT_PY_DEPRECATED_WARNING"] = "force"
+        importlib.import_module(_SOURCE_A_MODULE)
+        os.environ.pop("THRIFT_PY_DEPRECATED_WARNING")
+        importlib.import_module(_SOURCE_B_MODULE)
+        return
+    if scenario == "force-then-restore-warning-filters":
+        os.environ["THRIFT_PY_DEPRECATED_WARNING"] = "force"
+        thrift_module.warn_thrift_py_deprecated(__name__)
+        with warnings.catch_warnings():
+            warnings.resetwarnings()
+            thrift_module.warn_thrift_py_deprecated(__name__)
+        os.environ.pop("THRIFT_PY_DEPRECATED_WARNING")
+        thrift_module.warn_thrift_py_deprecated(__name__)
         return
     if scenario == "lazy-first-use":
         from thrift.test.py import thrift_py_deprecated_warning_e2e_lazy_source

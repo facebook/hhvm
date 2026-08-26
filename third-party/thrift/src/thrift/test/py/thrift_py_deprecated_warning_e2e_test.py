@@ -39,6 +39,12 @@ class ProcessResult:
     stderr: str
 
 
+@dataclass(frozen=True)
+class WarningPolicyResults:
+    force_enabled: ProcessResult
+    force_disabled: ProcessResult
+
+
 class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
     def __binary_path(self) -> str:
         return str(
@@ -61,7 +67,17 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
             chunks.append(chunk.decode())
         return "".join(chunks).replace("\r\n", "\n")
 
-    def __run_with_tty_stderr(self, warning_mode: str, scenario: str) -> ProcessResult:
+    def __subprocess_environment(self, warning_env_value: str | None) -> dict[str, str]:
+        environment = os.environ.copy()
+        if warning_env_value is None:
+            environment.pop("THRIFT_PY_DEPRECATED_WARNING", None)
+        else:
+            environment["THRIFT_PY_DEPRECATED_WARNING"] = warning_env_value
+        return environment
+
+    def __run_with_tty_stderr(
+        self, warning_mode: str, scenario: str, warning_env_value: str | None
+    ) -> ProcessResult:
         master_fd, slave_fd = pty.openpty()
         slave_fd_open = True
         try:
@@ -70,10 +86,11 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=slave_fd,
                 text=True,
+                env=self.__subprocess_environment(warning_env_value),
             )
             os.close(slave_fd)
             slave_fd_open = False
-            stderr = self.__read_pty_output(master_fd)
+            stderr = self.__normalize_stderr(self.__read_pty_output(master_fd))
             stdout, _stderr = process.communicate()
             returncode = process.returncode
             assert returncode is not None
@@ -98,6 +115,14 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
             'File "<python-runtime>/',
             stderr,
         )
+        stderr = re.sub(
+            r"^(thrift\.test\.py\.thrift_py_deprecated_warning_e2e_"
+            r"(?:cli|lazy_source|source_a|source_b)):\d+: "
+            r"ThriftPyDeprecatedWarning:",
+            r"\1:<LINE>: ThriftPyDeprecatedWarning:",
+            stderr,
+            flags=re.MULTILINE,
+        )
         return stderr
 
     def __abridge_error_stderr(self, stderr: str) -> str:
@@ -114,7 +139,7 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
         return f"Traceback (most recent call last):\n{exception_match.group(0)}\n"
 
     def __run_with_piped_stderr(
-        self, warning_mode: str, scenario: str
+        self, warning_mode: str, scenario: str, warning_env_value: str | None
     ) -> ProcessResult:
         completed = subprocess.run(
             [self.__binary_path(), warning_mode, scenario],
@@ -122,6 +147,7 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
             stderr=subprocess.PIPE,
             text=True,
             check=False,
+            env=self.__subprocess_environment(warning_env_value),
         )
         stderr = self.__normalize_stderr(completed.stderr)
         if completed.returncode != 0:
@@ -134,54 +160,110 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
             stderr=abridged_stderr,
         )
 
-    # pyre-ignore[56]: Pyre cannot infer parameterized tuple type.
-    @parameterized.expand(parameters.tty_cli_summary_cases())
-    def test_tty_cli_summary_output(
-        self,
-        _name: str,
-        warning_mode: str,
-        scenario: str,
-        _execution_surface: str,
-        expected_returncode: int,
-        expected_stdout: str,
-        expected_stderr: str,
-    ) -> None:
+    def test_non_force_warning_env_value_is_silent(self) -> None:
         # GIVEN
         expected = ProcessResult(
-            returncode=expected_returncode,
-            stdout=expected_stdout,
-            stderr=expected_stderr,
+            returncode=0,
+            stdout="",
+            stderr="",
         )
 
         # WHEN
-        actual = self.__run_with_tty_stderr(warning_mode, scenario)
+        actual = self.__run_with_piped_stderr(
+            "helper-default",
+            "source-a",
+            "1",
+        )
 
         # THEN
         self.assertEqual(expected, actual)
 
-    def test_force_env_keeps_detailed_warning_on_tty(self) -> None:
+    def test_force_can_be_disabled_after_helper_filter_install(self) -> None:
         # GIVEN
         expected = ProcessResult(
             returncode=0,
             stdout="",
             stderr=textwrap.dedent(
                 """\
-                thrift.test.py.thrift_py_deprecated_warning_e2e_source_a:18: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
-                Hello Thrift!!!
+                thrift.test.py.thrift_py_deprecated_warning_e2e_source_a:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
                 """
             ),
         )
-        original_warning_env = os.environ.get("THRIFT_PY_DEPRECATED_WARNING")
-        os.environ["THRIFT_PY_DEPRECATED_WARNING"] = "force"
 
-        try:
-            # WHEN
-            actual = self.__run_with_tty_stderr("helper-default", "source-a")
-        finally:
-            if original_warning_env is None:
-                os.environ.pop("THRIFT_PY_DEPRECATED_WARNING", None)
-            else:
-                os.environ["THRIFT_PY_DEPRECATED_WARNING"] = original_warning_env
+        # WHEN
+        actual = self.__run_with_piped_stderr(
+            "helper-default",
+            "force-then-disable",
+            None,
+        )
+
+        # THEN
+        self.assertEqual(expected, actual)
+
+    def test_restored_helper_filter_does_not_become_user_opt_in(self) -> None:
+        # GIVEN
+        expected = ProcessResult(
+            returncode=0,
+            stdout="",
+            stderr=textwrap.dedent(
+                """\
+                thrift.test.py.thrift_py_deprecated_warning_e2e_cli:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
+                thrift.test.py.thrift_py_deprecated_warning_e2e_cli:<LINE>: ThriftPyDeprecatedWarning: Uses thrift-py-deprecated. Migrate to thrift-python. See https://fburl.com/thrift-python and https://fburl.com/wiki/jihy02dr. Future automatic thrift-py-deprecated code generation may stop for non-migrated targets: https://fburl.com/workplace/wer48s4m.
+                """
+            ),
+        )
+
+        # WHEN
+        actual = self.__run_with_piped_stderr(
+            "helper-default",
+            "force-then-restore-warning-filters",
+            None,
+        )
+
+        # THEN
+        self.assertEqual(expected, actual)
+
+    # pyre-ignore[56]: Pyre cannot infer parameterized tuple type.
+    @parameterized.expand(parameters.tty_warning_cases())
+    def test_tty_warning_output(
+        self,
+        _name: str,
+        warning_mode: str,
+        scenario: str,
+        expected_returncode: int,
+        expected_stdout: str,
+        expected_stderr: str,
+        expected_silent_returncode: int,
+        expected_silent_stdout: str,
+        expected_silent_stderr: str,
+    ) -> None:
+        # GIVEN
+        expected = WarningPolicyResults(
+            force_enabled=ProcessResult(
+                returncode=expected_returncode,
+                stdout=expected_stdout,
+                stderr=expected_stderr,
+            ),
+            force_disabled=ProcessResult(
+                returncode=expected_silent_returncode,
+                stdout=expected_silent_stdout,
+                stderr=expected_silent_stderr,
+            ),
+        )
+
+        # WHEN
+        actual = WarningPolicyResults(
+            force_enabled=self.__run_with_tty_stderr(
+                warning_mode,
+                scenario,
+                "force",
+            ),
+            force_disabled=self.__run_with_tty_stderr(
+                warning_mode,
+                scenario,
+                None,
+            ),
+        )
 
         # THEN
         self.assertEqual(expected, actual)
@@ -197,16 +279,37 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
         expected_returncode: int,
         expected_stdout: str,
         expected_stderr: str,
+        expected_silent_returncode: int,
+        expected_silent_stdout: str,
+        expected_silent_stderr: str,
     ) -> None:
         # GIVEN
-        expected = ProcessResult(
-            returncode=expected_returncode,
-            stdout=expected_stdout,
-            stderr=expected_stderr,
+        expected = WarningPolicyResults(
+            force_enabled=ProcessResult(
+                returncode=expected_returncode,
+                stdout=expected_stdout,
+                stderr=expected_stderr,
+            ),
+            force_disabled=ProcessResult(
+                returncode=expected_silent_returncode,
+                stdout=expected_silent_stdout,
+                stderr=expected_silent_stderr,
+            ),
         )
 
         # WHEN
-        actual = self.__run_with_piped_stderr(warning_mode, scenario)
+        actual = WarningPolicyResults(
+            force_enabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                "force",
+            ),
+            force_disabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                None,
+            ),
+        )
 
         # THEN
         self.assertEqual(expected, actual)
@@ -222,16 +325,37 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
         expected_returncode: int,
         expected_stdout: str,
         expected_stderr: str,
+        expected_silent_returncode: int,
+        expected_silent_stdout: str,
+        expected_silent_stderr: str,
     ) -> None:
         # GIVEN
-        expected = ProcessResult(
-            returncode=expected_returncode,
-            stdout=expected_stdout,
-            stderr=expected_stderr,
+        expected = WarningPolicyResults(
+            force_enabled=ProcessResult(
+                returncode=expected_returncode,
+                stdout=expected_stdout,
+                stderr=expected_stderr,
+            ),
+            force_disabled=ProcessResult(
+                returncode=expected_silent_returncode,
+                stdout=expected_silent_stdout,
+                stderr=expected_silent_stderr,
+            ),
         )
 
         # WHEN
-        actual = self.__run_with_piped_stderr(warning_mode, scenario)
+        actual = WarningPolicyResults(
+            force_enabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                "force",
+            ),
+            force_disabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                None,
+            ),
+        )
 
         # THEN
         self.assertEqual(expected, actual)
@@ -247,16 +371,37 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
         expected_returncode: int,
         expected_stdout: str,
         expected_stderr: str,
+        expected_silent_returncode: int,
+        expected_silent_stdout: str,
+        expected_silent_stderr: str,
     ) -> None:
         # GIVEN
-        expected = ProcessResult(
-            returncode=expected_returncode,
-            stdout=expected_stdout,
-            stderr=expected_stderr,
+        expected = WarningPolicyResults(
+            force_enabled=ProcessResult(
+                returncode=expected_returncode,
+                stdout=expected_stdout,
+                stderr=expected_stderr,
+            ),
+            force_disabled=ProcessResult(
+                returncode=expected_silent_returncode,
+                stdout=expected_silent_stdout,
+                stderr=expected_silent_stderr,
+            ),
         )
 
         # WHEN
-        actual = self.__run_with_piped_stderr(warning_mode, scenario)
+        actual = WarningPolicyResults(
+            force_enabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                "force",
+            ),
+            force_disabled=self.__run_with_piped_stderr(
+                warning_mode,
+                scenario,
+                None,
+            ),
+        )
 
         # THEN
         self.assertEqual(expected, actual)

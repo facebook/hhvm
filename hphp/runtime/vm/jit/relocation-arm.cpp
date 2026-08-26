@@ -603,6 +603,22 @@ void recordFarCondBranchRewrite(Env& env,
   );
 }
 
+void recordRewrittenAddressImmediates(Env& env,
+                                      TCA srcAddr,
+                                      size_t srcCount,
+                                      TCA destAddr) {
+  auto const rewrittenEnd =
+    srcAddr + (srcCount << kInstructionSizeLog2);
+  auto const srcEnd = rewrittenEnd < env.end ? rewrittenEnd : env.end;
+  for (auto addr = srcAddr + kInstructionSize;
+       addr < srcEnd;
+       addr += kInstructionSize) {
+    if (env.meta.addressImmediates.contains(addr)) {
+      env.rel.recordAddress(addr, destAddr, 0);
+    }
+  }
+}
+
 /*
  * Shrink a metadata-marked single-bit TST followed by a conditional branch to
  * TBZ/TBNZ when the final target is in range. The branch may be either direct
@@ -671,6 +687,7 @@ bool optimizeTestBranch(Env& env, TCA srcAddr, TCA destAddr,
   } else {
     recordCondBranchRewrite(env, details, test, destAddr, srcCount);
   }
+  recordRewrittenAddressImmediates(env, srcAddr, srcCount, destAddr);
   return true;
 }
 
@@ -771,6 +788,9 @@ bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
 
   srcCount = kFarJccInstrs;
   recordFarCondBranchRewrite(env, far, src, destAddrToRewrite, srcCount);
+  recordRewrittenAddressImmediates(
+    env, srcAddr, srcCount, destAddrToRewrite
+  );
   FTRACE(3,
          "Relocated and optimized a far JCC at src {} with target {} to {}.\n",
          srcAddrActual,

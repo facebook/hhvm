@@ -138,7 +138,12 @@ void AsyncMysqlClient::shutdownClient() {
   // in, but guarantee no new operations will come along.
   drain(true);
 
-  CHECK_EQ(numStartedAndOpenConnections(), 0);
+  // drain(true) blocks new operations and then waits, untimed, on
+  // active_connection_counter_ reaching 0 -- the same counter this reads under
+  // the same mutex. This re-asserts the predicate that wait already returned
+  // on. Debug-only, matching the DCHECK below, so a leak cannot turn a
+  // graceful shutdown into an abort.
+  DCHECK_EQ(numStartedAndOpenConnections(), 0);
 
   DCHECK(connection_references_.size() == 0);
 

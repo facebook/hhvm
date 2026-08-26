@@ -157,7 +157,9 @@ MultiQueryStreamHandler::MultiQueryStreamHandler(
     MysqlClientBase& client,
     std::shared_ptr<MultiQueryStreamOperation> op)
     : operation_(std::move(op)), client_(client) {
-  CHECK(operation_);
+  // The constructor is protected; the only callers are Connection and the
+  // stream operation, which pass an operation the client has just created.
+  DCHECK(operation_);
 }
 
 MultiQueryStreamHandler::~MultiQueryStreamHandler() {

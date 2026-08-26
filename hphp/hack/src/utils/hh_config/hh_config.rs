@@ -31,6 +31,8 @@ use sha1::Sha1;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
+/// Must match `Config_keys.Hhconfig.enable_implicit_packages` on the OCaml side.
+const ENABLE_IMPLICIT_PACKAGES_KEY: &str = "enable_implicit_packages";
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
@@ -122,7 +124,7 @@ impl HhConfig {
         // Gate implicit packages on the same .hhconfig flag the OCaml typechecker
         // reads, so the Rust-side package info stays consistent with it.
         let enable_implicit_packages = hhconfig
-            .get_bool_or("enable_implicit_packages", false)
+            .get_bool_or(ENABLE_IMPLICIT_PACKAGES_KEY, false)
             .unwrap_or(false);
         PackageInfo::from_text_non_strict(
             enable_implicit_packages,

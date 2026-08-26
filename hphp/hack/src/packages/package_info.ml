@@ -40,7 +40,13 @@ let synthesize_member (family : Package.t) (member_dir : string) : Package.t =
   let member_path =
     match family.Package.include_paths with
     | (pos, path) :: _ -> (pos, path ^ member_dir ^ "/")
-    | [] -> (fpos, member_dir ^ "/")
+    (* Without the family path the member would get the root-relative
+     * include_path [D/], matching unrelated files anywhere in the repo. *)
+    | [] ->
+      failwith
+        (Printf.sprintf
+           "implicit package family %s carries no include_path"
+           fname)
   in
   {
     Package.name = (fpos, member_name);

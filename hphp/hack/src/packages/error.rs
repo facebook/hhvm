@@ -45,10 +45,14 @@ pub enum Error {
     },
     OverlappingImplicitPath {
         path: String,
+        /// The conflicting entry, already rendered (e.g. "include_path //a/ of
+        /// package foo"), so the message can name what the overlap is with.
+        other: String,
         span: (usize, usize),
     },
     PackageNamePrefixCollision {
         name: String,
+        package: String,
         span: (usize, usize),
     },
     ImplicitFamilyNameInvalid {
@@ -130,18 +134,23 @@ impl Error {
         }
     }
 
-    pub fn overlapping_implicit_path(path: String, span: Range<usize>) -> Self {
+    pub fn overlapping_implicit_path(path: String, other: String, span: Range<usize>) -> Self {
         let Range { start, end } = span;
         Self::OverlappingImplicitPath {
             path,
+            other,
             span: (start, end),
         }
     }
 
-    pub fn package_name_prefix_collision(family: &Spanned<String>) -> Self {
+    pub fn package_name_prefix_collision(
+        family: &Spanned<String>,
+        package: &Spanned<String>,
+    ) -> Self {
         let Range { start, end } = family.span();
         Self::PackageNamePrefixCollision {
             name: family.get_ref().into(),
+            package: package.get_ref().into(),
             span: (start, end),
         }
     }
@@ -257,18 +266,18 @@ impl Display for Error {
                     name
                 )?;
             }
-            Self::OverlappingImplicitPath { path, .. } => {
+            Self::OverlappingImplicitPath { path, other, .. } => {
                 write!(
                     f,
-                    "implicit_packages path //{} overlaps another package or implicit-family include path; they must be disjoint",
-                    path
+                    "implicit_packages path //{} overlaps {}; they must be disjoint",
+                    path, other
                 )?;
             }
-            Self::PackageNamePrefixCollision { name, .. } => {
+            Self::PackageNamePrefixCollision { name, package, .. } => {
                 write!(
                     f,
-                    "implicit_packages family {} collides with a package name (a family name may not equal or be a prefix of a package name)",
-                    name
+                    "implicit_packages family {} collides with package {} (a family name may not equal or be a prefix of a package name)",
+                    name, package
                 )?;
             }
             Self::ImplicitFamilyNameInvalid { name, .. } => {

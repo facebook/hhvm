@@ -1,12 +1,14 @@
 [packages]
 
+# Both include_paths overlap the family `path` below, but that is one problem to
+# fix, not two, so it must be reported once.
 [packages.www_pkg]
-include_paths = ["//www/prototypes/shared/"]
+include_paths = ["//www/prototypes/shared/", "//www/prototypes/other/"]
 
 # Triggers all three implicit-package validation errors:
 #  - the family name `www_pkg` collides with the package `www_pkg`
 #  - `include_paths` is not allowed on a family stanza
-#  - the family `path` overlaps the package's include_path
+#  - the family `path` overlaps the package's include_paths
 [implicit_packages.www_pkg]
 path = "//www/prototypes/"
 include_paths = ["//somewhere/"]

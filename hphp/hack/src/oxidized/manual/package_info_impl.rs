@@ -106,17 +106,21 @@ fn synthesize_member(family: &Package, member_dir: &str) -> Package {
     let family_name = &family.name;
     let member_name = format!("{}.{}", family_name.1, member_dir);
     // The family's include_path is its `path`; the member's is `path/D/`.
-    let (member_path_pos, member_path) = match family.include_paths.first() {
-        Some(PosId(pos, path)) => (pos.clone(), format!("{}{}/", path, member_dir)),
-        // A well-formed family always has exactly one include_path; fall back
-        // defensively to the family name's position.
-        None => (family_name.0.clone(), format!("{}/", member_dir)),
-    };
+    // Every family entry carries exactly one include_path. Without it the
+    // member would get the root-relative `D/`, matching unrelated files
+    // anywhere in the repo.
+    let PosId(family_path_pos, family_path) = family
+        .include_paths
+        .first()
+        .expect("should carry the family `path` as its sole include_path");
     Package {
         name: PosId(family_name.0.clone(), member_name),
         includes: family.includes.clone(),
         soft_includes: family.soft_includes.clone(),
-        include_paths: vec![PosId(member_path_pos, member_path)],
+        include_paths: vec![PosId(
+            family_path_pos.clone(),
+            format!("{}{}/", family_path, member_dir),
+        )],
         // Members inherit the family's strict-isolation setting.
         enable_strict_isolation: family.enable_strict_isolation,
         is_implicit: true,

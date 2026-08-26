@@ -431,28 +431,54 @@ mod test {
     fn test_implicit_packages_validation_errors() {
         let test_path = SRCDIR.as_path().join("tests/package-implicit-bad.toml");
         let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
-        let errors = info
-            .errors
-            .iter()
-            .map(|e| e.msg())
-            .collect::<std::collections::HashSet<_>>();
+        // Sorted rather than in emission order, so reordering the checks does
+        // not churn the test -- but a Vec, not a set, so a check that fires
+        // twice for one problem still shows up as a duplicate.
+        let mut errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        errors.sort();
         assert_eq!(
             errors,
-            [
+            vec![
+                String::from(
+                    "implicit_packages family www_pkg collides with package www_pkg (a family name may not equal or be a prefix of a package name)",
+                ),
+                String::from(
+                    "implicit_packages path //www/prototypes/ overlaps include_path //www/prototypes/shared/ of package www_pkg; they must be disjoint",
+                ),
                 String::from(
                     "implicit_packages.www_pkg must not specify include_paths: the include paths are derived from its path",
                 ),
-                String::from(
-                    "implicit_packages path //www/prototypes/ overlaps another package or implicit-family include path; they must be disjoint",
-                ),
-                String::from(
-                    "implicit_packages family www_pkg collides with a package name (a family name may not equal or be a prefix of a package name)",
-                ),
             ]
-            .iter()
-            .cloned()
-            .collect::<std::collections::HashSet<_>>()
         );
+    }
+
+    #[test]
+    fn test_implicit_family_malformed_path() {
+        // A family whose `path` is malformed is reported once and dropped, so it
+        // contributes nothing to the later checks: the first family's path is a
+        // prefix of `www_pkg`'s include_path, yet the disjointness check does not
+        // fire.
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-malformed.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        let malformed = |p: &str| {
+            format!(
+                "include_path {} is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
+                p
+            )
+        };
+        assert_eq!(
+            errors,
+            vec![
+                malformed("www/prototypes/"),
+                malformed("//www/prototypes"),
+                malformed("//www/./prototypes/"),
+            ]
+        );
+        // Every family was dropped, so nothing is carried downstream.
+        assert!(info.implicit_packages().is_empty());
     }
 
     #[test]
@@ -491,7 +517,7 @@ mod test {
         assert_eq!(
             errors,
             vec![String::from(
-                "implicit_packages path //www/prototypes/sub/ overlaps another package or implicit-family include path; they must be disjoint",
+                "implicit_packages path //www/prototypes/sub/ overlaps path //www/prototypes/ of implicit_packages family prototypes; they must be disjoint",
             )]
         );
     }

@@ -1,0 +1,21 @@
+[packages]
+
+[packages.www_pkg]
+include_paths = ["//www/prototypes/shared/"]
+
+# Every family below has a malformed `path`. Each is reported once and then
+# dropped before `check_config` runs, so none of them raises a secondary error --
+# in particular the first would otherwise trip the disjointness check against
+# `www_pkg`'s include_path.
+
+# Missing the leading `//`.
+[implicit_packages.no_leading_slashes]
+path = "www/prototypes/"
+
+# Directories must end with `/`.
+[implicit_packages.no_trailing_slash]
+path = "//www/prototypes"
+
+# `./` (and `../`) segments are not allowed.
+[implicit_packages.dot_segment]
+path = "//www/./prototypes/"

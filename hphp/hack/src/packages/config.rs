@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
 use std::collections::VecDeque;
 
-use hash::HashMap;
 use hash::HashSet;
 use serde::Deserialize;
 use toml::Spanned;
@@ -44,9 +44,9 @@ fn split_member_name(name: &str) -> Option<(&str, &str)> {
 
 impl Config {
     pub fn check_config(&self, errors: &mut Vec<Error>) {
-        // Set of declared implicit-package family names, plus a map from family
-        // name to its positioned (Spanned) name so we can normalize member
-        // references `F.D` back to the family `F` for transitive-closure checks.
+        // Set of declared implicit-package family names, used to recognize
+        // family and member references and normalize `F.D` back to `F` for
+        // transitive-closure checks.
         let family_key: HashSet<&str> = self
             .implicit_packages
             .keys()
@@ -98,33 +98,40 @@ impl Config {
         // family's includes/soft_includes. Every member of `F` shares those
         // includes by construction, so treating the family as a single node is
         // both correct and avoids enumerating members that do not exist at parse
-        // time.
-        let mut closure_map: PackageMap = self.packages.clone();
-        let mut family_name_spanned: HashMap<&str, &Spanned<String>> = HashMap::default();
-        for (fname, fam) in self.implicit_packages.iter() {
-            family_name_spanned.insert(fname.get_ref().as_str(), fname);
-            closure_map.insert(
-                fname.clone(),
-                Package {
-                    includes: fam.includes.clone(),
-                    soft_includes: fam.soft_includes.clone(),
-                    include_paths: None,
-                    // Synthetic node used only for include-closure checks; the
-                    // flag is irrelevant here.
-                    enable_strict_isolation: false,
-                },
-            );
-        }
+        // time. With no families declared -- the common case -- the package map
+        // is borrowed rather than copied.
+        let closure_map: Cow<'_, PackageMap> = if self.implicit_packages.is_empty() {
+            Cow::Borrowed(&self.packages)
+        } else {
+            let mut augmented = self.packages.clone();
+            augmented.extend(self.implicit_packages.iter().map(|(fname, fam)| {
+                (
+                    fname.clone(),
+                    Package {
+                        includes: fam.includes.clone(),
+                        soft_includes: fam.soft_includes.clone(),
+                        include_paths: None,
+                        // Synthetic node used only for include-closure checks;
+                        // the flag is irrelevant here.
+                        enable_strict_isolation: false,
+                    },
+                )
+            }));
+            Cow::Owned(augmented)
+        };
         // Normalize a name set so member references `F.D` collapse to the family
-        // `F` (which exists in `closure_map`); other names pass through.
+        // `F` (which exists in `closure_map`); other names pass through. The
+        // reference's own span is kept, so diagnostics point at the reference.
         let normalize_set = |set: &NameSet| -> NameSet {
             set.iter()
                 .map(|n| match split_member_name(n.get_ref()) {
-                    Some((f, _)) => match family_name_spanned.get(f) {
-                        Some(s) => (*s).clone(),
-                        None => n.clone(),
-                    },
-                    None => n.clone(),
+                    Some((f, _)) if family_key.contains(f) => {
+                        let family = f.to_owned();
+                        let mut normalized = n.clone();
+                        *normalized.get_mut() = family;
+                        normalized
+                    }
+                    _ => n.clone(),
                 })
                 .collect()
         };
@@ -225,17 +232,24 @@ impl Config {
             // membership order-dependent. Paths have already been normalized to
             // the leading-`//`-stripped form.
             let fpath = fam.path.get_ref().as_str();
-            for package in self.packages.values() {
-                if let Some(ips) = &package.include_paths {
-                    for ip in ips.iter() {
-                        let ipath = ip.get_ref().as_str();
-                        if fpath.starts_with(ipath) || ipath.starts_with(fpath) {
-                            errors.push(Error::overlapping_implicit_path(
-                                fpath.to_owned(),
-                                fam.path.span(),
-                            ));
-                        }
-                    }
+            let overlaps = |other: &str| fpath.starts_with(other) || other.starts_with(fpath);
+            for (pname, package) in self.packages.iter() {
+                // One error per conflicting package, not per include_path.
+                let overlapping = package
+                    .include_paths
+                    .iter()
+                    .flat_map(|ips| ips.iter())
+                    .find(|ip| overlaps(ip.get_ref()));
+                if let Some(ip) = overlapping {
+                    errors.push(Error::overlapping_implicit_path(
+                        fpath.to_owned(),
+                        format!(
+                            "include_path //{} of package {}",
+                            ip.get_ref(),
+                            pname.get_ref()
+                        ),
+                        fam.path.span(),
+                    ));
                 }
             }
             for (other_name, other_fam) in self.implicit_packages.iter() {
@@ -244,9 +258,14 @@ impl Config {
                     continue;
                 }
                 let opath = other_fam.path.get_ref().as_str();
-                if fpath.starts_with(opath) || opath.starts_with(fpath) {
+                if overlaps(opath) {
                     errors.push(Error::overlapping_implicit_path(
                         fpath.to_owned(),
+                        format!(
+                            "path //{} of implicit_packages family {}",
+                            opath,
+                            other_name.get_ref()
+                        ),
                         fam.path.span(),
                     ));
                 }
@@ -259,7 +278,7 @@ impl Config {
             for pname in self.packages.keys() {
                 let p = pname.get_ref().as_str();
                 if p == f || p.starts_with(&dotted) {
-                    errors.push(Error::package_name_prefix_collision(fname));
+                    errors.push(Error::package_name_prefix_collision(fname, pname));
                 }
             }
 

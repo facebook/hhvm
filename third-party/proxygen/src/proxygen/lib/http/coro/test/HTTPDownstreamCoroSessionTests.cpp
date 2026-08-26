@@ -3392,6 +3392,39 @@ TEST_P(H1DownstreamSessionTest, CodecHTTPError) {
   parseOutput();
 }
 
+// The message the codec recovered before rejecting the request has to reach
+// the handler, otherwise the rejection cannot be attributed to anything.
+TEST_P(H1DownstreamSessionTest, CodecHTTPErrorCarriesPartialMessage) {
+  auto handler =
+      addSimpleStrictHandler([](folly::EventBase * /*evb*/,
+                                HTTPSessionContextPtr /*ctx*/,
+                                HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        auto err = co_await expectHeaderError(requestSource);
+        EXPECT_NE(err.httpMessage, nullptr);
+        if (err.httpMessage) {
+          EXPECT_EQ(err.httpMessage->getMethodString(), "POST");
+          EXPECT_EQ(err.httpMessage->getURL(), "/upload?id=7");
+          EXPECT_EQ(
+              err.httpMessage->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST),
+              "www.facebook.com");
+        }
+        // Never read; the session generates its own 400.
+        co_return HTTPFixedSource::makeFixedResponse(408);
+      });
+
+  std::string badRequest(
+      "POST /upload?id=7 HTTP/1.1\r\n"
+      "Host: www.facebook.com\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "\r\n");
+  transport_->addReadEvent(1, folly::IOBuf::copyBuffer(badRequest), false);
+  evb_.loop();
+  expectResponse(1, 400, nullptr, false);
+  parseOutput();
+}
+
 TEST_P(H2DownstreamSessionTest, CodecHTTPError) {
   HTTPMessage req = getGetRequest();
   req.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "100");

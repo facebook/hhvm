@@ -374,6 +374,41 @@ TEST_F(HTTPStreamSourceTest, FinalHeaders) {
   EXPECT_EQ(error_->code, HTTPErrorCode::INVALID_STATE_TRANSITION);
 }
 
+// Headers received before an abort reach the reader on the error instead of
+// as an event.  This is what lets a caller attach a message it could not
+// finish parsing to the error it is about to raise.
+TEST_F(HTTPStreamSourceTest, AbortAttachesReceivedHeadersToError) {
+  ASSERT_TRUE(stream_.headersAllowed());
+  stream_.headers(makePostRequest(), false);
+  stream_.abort(HTTPErrorCode::HEADER_PARSE_ERROR);
+
+  co_withExecutor(&evb_, drainSource()).start();
+  run();
+
+  ASSERT_TRUE(error_.hasValue());
+  EXPECT_EQ(error_->code, HTTPErrorCode::HEADER_PARSE_ERROR);
+  ASSERT_NE(error_->httpMessage, nullptr);
+  EXPECT_EQ(error_->httpMessage->getMethodString(), "POST");
+  EXPECT_EQ(headerEvents_.size(), 0);
+}
+
+// A ::headers call the state machine rejects raises an error of its own, and
+// the first error wins, so the abort that follows is silently dropped.  This
+// is why callers attaching a message have to check ::headersAllowed first.
+TEST_F(HTTPStreamSourceTest, AbortDoesNotReplaceStateTransitionError) {
+  stream_.headers(makePostRequest(), false);
+  ASSERT_FALSE(stream_.headersAllowed());
+
+  stream_.headers(makePostRequest(), false);
+  stream_.abort(HTTPErrorCode::HEADER_PARSE_ERROR);
+
+  co_withExecutor(&evb_, drainSource()).start();
+  run();
+
+  ASSERT_TRUE(error_.hasValue());
+  EXPECT_EQ(error_->code, HTTPErrorCode::INVALID_STATE_TRANSITION);
+}
+
 TEST_F(HTTPStreamSourceTest, BodyBeforeFinalHeaders) {
   EXPECT_TRUE(stream_.headersAllowed());
   stream_.headers(makeResponse(100), false);

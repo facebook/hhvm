@@ -1234,6 +1234,15 @@ void HTTPCoroSession::onError(HTTPCodec::StreamID streamID,
   auto* stream = findStream(streamID);
   if (isDownstream() && stream && stream->canSendHeaders() &&
       error.hasHttpStatusCode()) {
+    // Deliver what the codec parsed before it gave up so the handler can
+    // attribute the rejected request.  ::abort below overwrites the state this
+    // advances, and the queued event is never read because the error is
+    // checked first.  ::headersAllowed is required: a transition the ingress
+    // state machine rejects sets an error that ::abort cannot replace.
+    if (const auto* partialMsg = error.getPartialMsg();
+        partialMsg && stream->streamSource.headersAllowed()) {
+      stream->streamSource.headers(std::make_unique<HTTPMessage>(*partialMsg));
+    }
     stream->abortIngress(ec, error.what());
     stream->setErrorStatusCode(error.getHttpStatusCode());
   } else {

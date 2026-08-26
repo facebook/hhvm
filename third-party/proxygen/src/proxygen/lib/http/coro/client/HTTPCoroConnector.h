@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/protocol/CertificateVerifier.h>
 #include <folly/SocketAddress.h>
@@ -52,6 +53,12 @@ class LifecycleObserver;
  */
 class HTTPCoroConnector {
  public:
+  enum class IdentityValidation : std::uint8_t {
+    Disabled_INSECURE,
+    Enforcing,
+    Logging,
+  };
+
   class SslSessionManagerIf {
    public:
     virtual ~SslSessionManagerIf() = default;
@@ -140,9 +147,7 @@ class HTTPCoroConnector {
     // Next protocol for plaintext (TCP) connections
     std::string plaintextProtocol;
 
-    // INSECURE: Disables identity verification on server presented end entity
-    // certificates
-    bool insecureSkipIdentityValidation{true};
+    IdentityValidation identityValidation{IdentityValidation::Logging};
 
     CertVerifyLogFn certVerifyLogFn;
   };

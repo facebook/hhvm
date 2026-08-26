@@ -228,7 +228,8 @@ CO_TEST_P_X(HTTPClientTests, IdentityVerificationE2E) {
     tlsParams.nextProtocols = {"h2", "http/1.1"};
     HTTPCoroConnector::ConnectionParams connParams;
     connParams.serverName = sni;
-    connParams.insecureSkipIdentityValidation = false;
+    connParams.identityValidation =
+        HTTPCoroConnector::IdentityValidation::Enforcing;
     connParams.fizzContextAndVerifier =
         HTTPCoroConnector::makeFizzClientContextAndVerifier(tlsParams);
     return HTTPCoroConnector_connect(

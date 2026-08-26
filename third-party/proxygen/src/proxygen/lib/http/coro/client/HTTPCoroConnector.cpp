@@ -57,6 +57,19 @@ using namespace proxygen::coro;
 constexpr size_t kDefaultConnFlowControl = 1u << 25;
 constexpr size_t kDefaultStreamFlowControl = 1u << 21;
 
+std::optional<ValidationPolicy> getValidationPolicy(
+    HTTPCoroConnector::IdentityValidation identityValidation) {
+  switch (identityValidation) {
+    case HTTPCoroConnector::IdentityValidation::Disabled_INSECURE:
+      return std::nullopt;
+    case HTTPCoroConnector::IdentityValidation::Enforcing:
+      return ValidationPolicy::Enforcing;
+    case HTTPCoroConnector::IdentityValidation::Logging:
+      return ValidationPolicy::Logging;
+  }
+  throw std::invalid_argument("unknown identity validation mode");
+}
+
 class ConnectCB
     : public folly::AsyncSocket::ConnectCallback
     , public AsyncFizzClient::HandshakeCallback {
@@ -252,18 +265,20 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
     expectedIdentity = ExpectedIdentity::expectDNS(connParams.serverName);
     sendSNI = connParams.serverName;
   }
-  auto policy = connParams.insecureSkipIdentityValidation
-                    ? ValidationPolicy::Logging
-                    : ValidationPolicy::Enforcing;
   if (!connParams.fizzContextAndVerifier.fizzCertVerifier) {
     throw std::invalid_argument(
         "HTTPCoroConnector::connectFizz requires a non-null fizzCertVerifier.");
   }
-  auto proxygenVerifier =
-      makeVerifier(connParams.fizzContextAndVerifier.fizzCertVerifier,
-                   std::move(expectedIdentity.value()),
-                   policy,
-                   connParams.certVerifyLogFn);
+  std::shared_ptr<const fizz::CertificateVerifier> proxygenVerifier;
+  if (const auto policy = getValidationPolicy(connParams.identityValidation)) {
+    proxygenVerifier =
+        makeVerifier(connParams.fizzContextAndVerifier.fizzCertVerifier,
+                     std::move(expectedIdentity.value()),
+                     *policy,
+                     connParams.certVerifyLogFn);
+  } else {
+    proxygenVerifier = connParams.fizzContextAndVerifier.fizzCertVerifier;
+  }
   if (connectStream) {
     folly::AsyncTransportWrapper::UniquePtr asyncTransport{
         new HTTPConnectAsyncTransport(std::move(connectStream))};

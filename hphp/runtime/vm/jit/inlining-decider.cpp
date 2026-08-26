@@ -824,9 +824,13 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
     entry = SrcKey{callee, param + 1, addedUninitNamed, SrcKey::FuncEntryTag {}};
   }
 
+  auto const maxBCInstrs = kind == TransKind::Live
+    ? Cfg::Jit::MaxLiveRegionInstrs
+    : Cfg::Jit::MaxRegionInstrs;
+
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
-                                  Cfg::Jit::MaxRegionInstrs, annotationsPtr);
+                                  maxBCInstrs, annotationsPtr);
     if (region) return {callerSk, region};
     // Special case: even if we don't have prof data for this func, if
     // it takes no arguments and returns a constant, it might be a
@@ -841,7 +845,7 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
   }
 
   auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
-                                     Cfg::Jit::MaxRegionInstrs);
+                                     maxBCInstrs);
   return {callerSk, region};
 }
 

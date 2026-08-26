@@ -192,6 +192,15 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
     evbThread_.reset();
   }
 
+  // Replace the params the pipeline will snapshot with ones carrying no fizz
+  // context — a server configured for TLS that has nothing to handshake with.
+  // Must be called before buildPipeline, which captures the observer.
+  void useTlsParamsWithoutFizzContext() {
+    tlsParams_ = std::make_shared<const fts::TLSParams>();
+    tlsParamsObservable_ = std::make_unique<folly::observer::SimpleObservable<
+        std::shared_ptr<const fts::TLSParams>>>(tlsParams_);
+  }
+
   // Build outer pipeline NoopHead → ConnectionTLSHandler → CapturingTail.
   // maxPending of zero leaves the pending-connection limit off.
   void buildPipeline(
@@ -291,6 +300,26 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
   std::unique_ptr<CapturingTail> tail_;
   channel_pipeline::PipelineImpl::Ptr pipeline_;
 };
+
+// A server configured for TLS with no fizz context cannot handshake, so the
+// connection is dropped on admission. It must be reported as such: returning
+// Success would tell the caller a connection it no longer holds is still on
+// its way through the pipeline, and nothing would ever arrive at the tail.
+TEST_F(TLSPipelineIntegrationTest, MissingFizzContextReportsError) {
+  useTlsParamsWithoutFizzContext();
+
+  bool reachedTail = false;
+  buildPipeline(
+      fts::SSLPolicy::REQUIRED,
+      [&](conn::ConnectionMessage&&) noexcept { reachedTail = true; },
+      /*maxPending=*/0);
+
+  auto sp = makeSocketPair();
+  EXPECT_EQ(feedSocket(sp.server), channel_pipeline::Result::Error);
+  EXPECT_FALSE(reachedTail);
+
+  ::close(sp.client.toFd());
+}
 
 // REQUIRED + TLS: pipeline = FizzHandshakeHandler → StopTLSV1Handler (no-op).
 // Handshake succeeds → tail receives AsyncFizzServer, and what the peer proved

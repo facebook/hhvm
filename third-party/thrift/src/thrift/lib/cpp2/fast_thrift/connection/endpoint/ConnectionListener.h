@@ -161,7 +161,11 @@ class ConnectionListener : public folly::DelayedDestruction,
   }
 
   void acceptError(folly::exception_wrapper ew) noexcept override {
-    XLOG(ERR) << "Accept error: " << ew.what();
+    // Rate-limited: the usual cause is FD exhaustion, which repeats on every
+    // accept attempt until the pressure lifts. folly backs off and retries on
+    // its own, so an unthrottled log here is the loudest thing in the process
+    // exactly when it is least useful.
+    XLOG_EVERY_MS(ERR, 1000) << "Accept error: " << ew.what();
   }
 
   void acceptStopped() noexcept override {

@@ -192,6 +192,12 @@ class TLSClassifier {
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
+      // Handler already removed from the pipeline: the peek landed after
+      // teardown began, so there is nowhere to forward it. The socket dies
+      // with this callback.
+      XLOG_EVERY_MS(WARNING, 1000)
+          << "Dropping classified connection from " << clientAddr.describe()
+          << ": TLS pipeline already torn down";
       return;
     }
 

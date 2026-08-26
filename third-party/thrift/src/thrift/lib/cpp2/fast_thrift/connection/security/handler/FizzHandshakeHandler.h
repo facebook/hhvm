@@ -111,9 +111,15 @@ class FizzHandshakeHandler {
 
     if (FOLLY_UNLIKELY(
             !incoming.tlsParams || !incoming.tlsParams->fizzContext)) {
-      XLOG(DBG3) << "Fizz handshake aborted — no fizz context configured for "
-                 << clientAddr.describe();
-      return channel_pipeline::Result::Success;
+      // `socket` dies with this scope, so the connection is gone either way —
+      // report that rather than Success, which would tell the caller a
+      // connection it no longer has is still on its way. A missing fizz
+      // context is a server misconfiguration, not peer behaviour, so this
+      // logs louder than the peer-driven failures below.
+      XLOG_EVERY_MS(ERR, 1000)
+          << "Fizz handshake aborted — no fizz context configured for "
+          << clientAddr.describe();
+      return channel_pipeline::Result::Error;
     }
 
     auto fizzContext = incoming.tlsParams->fizzContext;
@@ -192,6 +198,12 @@ class FizzHandshakeHandler {
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
+      // Handler already removed from the pipeline: the handshake landed after
+      // teardown began, so there is nowhere to forward it. The transport dies
+      // with this callback.
+      XLOG_EVERY_MS(WARNING, 1000)
+          << "Dropping completed handshake from " << clientAddr.describe()
+          << ": TLS pipeline already torn down";
       return;
     }
     // Snapshot what the peer proved while the fizz session is still the

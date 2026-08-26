@@ -160,7 +160,9 @@ class RowFields {
         table_names_(std::move(table_names)),
         mysql_field_flags_(std::move(mysql_field_flags)),
         mysql_field_types_(std::move(mysql_field_types)),
-        mysql_field_charsetnrs_(std::move(mysql_field_charsetnrs)) {}
+        mysql_field_charsetnrs_(std::move(mysql_field_charsetnrs)) {
+    validateFieldAlignment();
+  }
 
   class Builder;
   class BuilderWithoutCharsets;
@@ -278,6 +280,13 @@ class RowFields {
   }
 
  private:
+  // Every per-column vector is indexed by the same field number, so a short
+  // vector silently misaligns every column past the gap and makes the
+  // unchecked accessors above read out of bounds. `numFields()` is defined by
+  // `field_names_`; everything else must agree with it. Throws
+  // std::invalid_argument rather than aborting, per T283583376.
+  void validateFieldAlignment() const;
+
   size_t num_fields_;
   folly::F14NodeMap<std::string, int> field_name_map_;
   std::vector<std::string> field_names_;

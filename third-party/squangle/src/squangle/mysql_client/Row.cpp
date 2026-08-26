@@ -23,6 +23,18 @@ void throwIndexOutOfRange(std::string_view what, size_t value, size_t size) {
       fmt::format("{} {} out of range (size {})", what, value, size));
 }
 
+void checkPerFieldSize(std::string_view what, size_t actual, size_t numFields) {
+  if (actual != numFields) {
+    throw std::invalid_argument(
+        fmt::format(
+            "RowFields: {} has {} entries but there are {} fields; "
+            "every per-column vector must have one entry per field",
+            what,
+            actual,
+            numFields));
+  }
+}
+
 void RowFieldsColumns::add(
     std::string name,
     std::string table,
@@ -104,6 +116,44 @@ RowFields RowFieldsColumns::build() {
 }
 
 } // namespace detail
+
+void RowFields::validateFieldAlignment() const {
+  detail::checkPerFieldSize("table_names", table_names_.size(), num_fields_);
+  detail::checkPerFieldSize(
+      "mysql_field_flags", mysql_field_flags_.size(), num_fields_);
+  detail::checkPerFieldSize(
+      "mysql_field_types", mysql_field_types_.size(), num_fields_);
+
+  // Charsets are all-or-nothing: some protocols do not supply them at all, and
+  // a partial vector misaligns every column past the gap.
+  if (!mysql_field_charsetnrs_.empty()) {
+    detail::checkPerFieldSize(
+        "mysql_field_charsetnrs", mysql_field_charsetnrs_.size(), num_fields_);
+  }
+
+  // Duplicate column names are a legitimate MySQL result shape and collapse in
+  // the map, so it may be smaller than num_fields_ -- but never larger, and
+  // every index it yields must be addressable.
+  if (field_name_map_.size() > num_fields_) {
+    throw std::invalid_argument(
+        fmt::format(
+            "RowFields: field_name_map has {} entries but there are only {} "
+            "fields",
+            field_name_map_.size(),
+            num_fields_));
+  }
+  for (const auto& [name, index] : field_name_map_) {
+    if (index < 0 || static_cast<size_t>(index) >= num_fields_) {
+      throw std::invalid_argument(
+          fmt::format(
+              "RowFields: field_name_map entry '{}' maps to index {}, which is "
+              "out of range for {} fields",
+              name,
+              index,
+              num_fields_));
+    }
+  }
+}
 
 std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   auto num_fields = metadata_->numFields();

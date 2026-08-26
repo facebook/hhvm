@@ -15,6 +15,7 @@
  */
 
 #include <cassert>
+#include <compare>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -768,37 +769,124 @@ std::string compute_adapter_struct_qualified(
   return "<" + name + " as ::fbthrift::adapter::ThriftAdapter>";
 }
 
-std::string get_resolved_name(const t_type* t) {
-  t = t->get_true_type();
-  if (auto c = dynamic_cast<const t_list*>(t)) {
-    return fmt::format("list<{}>", get_resolved_name(&c->elem_type().deref()));
-  }
-  if (auto c = dynamic_cast<const t_set*>(t)) {
-    return fmt::format("set<{}>", get_resolved_name(&c->elem_type().deref()));
-  }
-  if (auto c = dynamic_cast<const t_map*>(t)) {
-    return fmt::format(
-        "map<{},{}>",
-        get_resolved_name(&c->key_type().deref()),
-        get_resolved_name(&c->val_type().deref()));
-  }
-  return t->get_full_name();
-}
-
 struct rust_type_less {
   bool operator()(
       std::variant<const t_type*, const t_field*> lhs,
       std::variant<const t_type*, const t_field*> rhs) const {
-    std::string lhs_annotation = std::visit(get_type_annotation, lhs);
-    std::string rhs_annotation = std::visit(get_type_annotation, rhs);
-    if (lhs_annotation != rhs_annotation) {
-      return lhs_annotation < rhs_annotation;
-    }
+    return cmp(lhs, rhs) == std::weak_ordering::less;
+  }
+
+ private:
+  static std::weak_ordering cmp(
+      std::variant<const t_type*, const t_field*> lhs,
+      std::variant<const t_type*, const t_field*> rhs) {
+    std::string lhs_rust_type = std::visit(get_type_annotation, lhs);
+    std::string rhs_rust_type = std::visit(get_type_annotation, rhs);
+    std::string lhs_adapter = std::visit(get_adapter_annotation, lhs);
+    std::string rhs_adapter = std::visit(get_adapter_annotation, rhs);
     auto type_type = [](const t_type* t) { return t; };
     auto field_type = [](const t_field* f) { return &f->type().deref(); };
     const t_type* lhs_type = detail::variant_match(lhs, type_type, field_type);
     const t_type* rhs_type = detail::variant_match(rhs, type_type, field_type);
-    return get_resolved_name(lhs_type) < get_resolved_name(rhs_type);
+
+    // Dereference until we arrive at one of:
+    //   - typedef with @rust.NewType
+    //   - typedef with @rust.Adapter
+    //   - typedef referring to unresolved type
+    //   - not a typedef
+    step_through_typedefs(lhs_type, lhs_rust_type, lhs_adapter);
+    step_through_typedefs(rhs_type, rhs_rust_type, rhs_adapter);
+
+    if (std::strong_ordering ord = lhs_rust_type <=> rhs_rust_type;
+        ord != std::strong_ordering::equal) {
+      return ord;
+    }
+
+    if (std::strong_ordering ord = lhs_adapter <=> rhs_adapter;
+        ord != std::strong_ordering::equal) {
+      return ord;
+    }
+
+    enum class type_category {
+      // Ordering is arbitrary but determines the ordering of LocalImpl blocks.
+      primitive,
+      named,
+      list,
+      set,
+      map,
+    };
+    auto type_category_of = [](const t_type* t) {
+      if (t->is<t_primitive_type>()) {
+        return type_category::primitive;
+      } else if (
+          t->is<t_structured>() || t->is<t_enum>() || t->is<t_typedef>()) {
+        return type_category::named;
+      } else if (t->is<t_list>()) {
+        return type_category::list;
+      } else if (t->is<t_set>()) {
+        return type_category::set;
+      } else if (t->is<t_map>()) {
+        return type_category::map;
+      } else {
+        throw std::runtime_error(
+            fmt::format(
+                "unexpected type in rust_type_less: {}", t->get_full_name()));
+      }
+    };
+    auto lhs_category = type_category_of(lhs_type);
+    auto rhs_category = type_category_of(rhs_type);
+    if (std::strong_ordering ord = lhs_category <=> rhs_category;
+        ord != std::strong_ordering::equal) {
+      return ord;
+    }
+
+    switch (lhs_category) {
+      case type_category::primitive:
+        return lhs_type->as<t_primitive_type>().primitive_type() <=>
+            rhs_type->as<t_primitive_type>().primitive_type();
+      case type_category::named:
+        return lhs_type->get_scoped_name() <=> rhs_type->get_scoped_name();
+      case type_category::list:
+        return cmp(
+            &lhs_type->as<t_list>().elem_type().deref(),
+            &rhs_type->as<t_list>().elem_type().deref());
+      case type_category::set:
+        return cmp(
+            &lhs_type->as<t_set>().elem_type().deref(),
+            &rhs_type->as<t_set>().elem_type().deref());
+      case type_category::map:
+        if (std::weak_ordering ord =
+                cmp(&lhs_type->as<t_map>().key_type().deref(),
+                    &rhs_type->as<t_map>().key_type().deref());
+            ord != std::weak_ordering::equivalent) {
+          return ord;
+        }
+        return cmp(
+            &lhs_type->as<t_map>().val_type().deref(),
+            &rhs_type->as<t_map>().val_type().deref());
+    }
+  }
+
+  static void step_through_typedefs(
+      const t_type*& type, std::string& rust_type, std::string& adapter) {
+    while (rust_type.empty() && adapter.empty()) {
+      const t_typedef* as_typedef = type->try_as<t_typedef>();
+      if (as_typedef == nullptr || !as_typedef->type().resolved() ||
+          has_newtype_annotation(as_typedef)) {
+        return;
+      }
+      type = &as_typedef->type().deref();
+      rust_type = get_type_annotation(type);
+      adapter = get_adapter_annotation(type);
+    }
+    type = type->get_true_type();
+  }
+
+  static std::string get_adapter_annotation(const t_named* type) {
+    if (const t_const* annot = find_structured_adapter_annotation(*type)) {
+      return get_annotation_property_string(annot, "name");
+    }
+    return "";
   }
 };
 

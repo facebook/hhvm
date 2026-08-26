@@ -501,6 +501,22 @@ void RowBlock::throwNoMoreCapacity() {
 }
 
 /* static */
+void RowBlock::throwAddRowWhileRowOpen() {
+  throw std::logic_error(
+      "Attempting to addRow() while a startRow() is still open.  "
+      "Finish the open row with finishRow(), or use addRow() exclusively");
+}
+
+void RowBlock::throwWrongColumnCount(size_t actual) const {
+  throw std::out_of_range(
+      fmt::format(
+          "row has {} values but there are {} columns; a row must supply "
+          "exactly one value per column",
+          actual,
+          row_fields_info_->numFields()));
+}
+
+/* static */
 void RowBlock::throwRowNotStarted() {
   throw std::logic_error(
       "Attempting to append a value to a row that hasn't been started.  "

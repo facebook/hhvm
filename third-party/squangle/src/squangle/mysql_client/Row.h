@@ -27,9 +27,14 @@
 #include <glog/logging.h>
 #include <re2/re2.h>
 #include <chrono>
+#include <concepts>
+#include <initializer_list>
+#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 #include "squangle/mysql_client/InternalConnection.h"
@@ -446,6 +451,60 @@ std::chrono::microseconds parseTimeOnly(
 // for (const auto& row : row_block) {
 //   ...
 // }
+
+// One cell handed to RowBlock::addRow().  Implicitly constructible from
+// everything a StorageRow can hold, plus nullptr for SQL NULL, so a row reads
+// as a plain braced list: `{1, "alice", nullptr}`.
+//
+// Strings are copied into the row's own storage by StorageRow::appendValue, so
+// passing a temporary (e.g. folly::to<std::string>(x)) is safe -- it outlives
+// the addRow() call it appears in.
+class CellValue {
+ public:
+  /* implicit */ CellValue(std::nullptr_t) : value_(Null{}) {}
+  /* implicit */ CellValue(folly::StringPiece v) : value_(v) {}
+  /* implicit */ CellValue(const char* v)
+      : value_(v == nullptr ? Value{Null{}} : Value{folly::StringPiece(v)}) {}
+  /* implicit */ CellValue(const std::string& v)
+      : value_(folly::StringPiece(v)) {}
+  /* implicit */ CellValue(bool v) : value_(v) {}
+  /* implicit */ CellValue(double v) : value_(v) {}
+
+  // Integer literals would be ambiguous across the alternatives below, so they
+  // are pinned to the signed/unsigned 64-bit forms StorageRow stores.
+  template <typename T>
+    requires std::signed_integral<T>
+  /* implicit */ CellValue(T v) : value_(static_cast<int64_t>(v)) {}
+
+  // bool satisfies std::unsigned_integral, so it has to be excluded explicitly
+  // or it would match here instead of the bool overload above.
+  template <typename T>
+    requires std::unsigned_integral<T> && (!std::is_same_v<T, bool>)
+  /* implicit */ CellValue(T v) : value_(static_cast<uint64_t>(v)) {}
+
+ private:
+  struct Null {};
+
+  void appendTo(StorageRow& row) const {
+    std::visit(
+        [&row](const auto& v) {
+          if constexpr (std::is_same_v<std::decay_t<decltype(v)>, Null>) {
+            row.appendNull();
+          } else {
+            row.appendValue(v);
+          }
+        },
+        value_);
+  }
+
+  using Value =
+      std::variant<Null, folly::StringPiece, bool, int64_t, uint64_t, double>;
+
+  Value value_;
+
+  friend class RowBlock;
+};
+
 class RowBlock {
  public:
   class Iterator;
@@ -573,7 +632,48 @@ class RowBlock {
     return Iterator(this, numRows());
   }
 
+  // Adds one complete row.  Preferred over the startRow()/appendValue()/
+  // finishRow() sequence below: a row is complete or it is not, so there is no
+  // partially built state to abandon and the column count is checked at a
+  // single, well-defined point.
+  //
+  //   block.addRow({1, "alice"});      // arity checked here
+  //   block.addRow({2, nullptr});      // nullptr is SQL NULL
+  //   block.addRow(values);            // any range of CellValue-convertibles
+  //
+  // Throws std::out_of_range if the row does not have exactly numFields()
+  // values, and std::logic_error if a startRow() is still open. out_of_range
+  // derives from logic_error, so catching logic_error covers both.
+  void addRow(StorageRow&& row) {
+    if (FOLLY_UNLIKELY(current_row_.has_value())) {
+      throwAddRowWhileRowOpen();
+    }
+    if (FOLLY_UNLIKELY(row.count() != row_fields_info_->numFields())) {
+      throwWrongColumnCount(row.count());
+    }
+    rows_.push_back(std::move(row));
+  }
+
+  void addRow(std::initializer_list<CellValue> values) {
+    addRowFromRange(values.begin(), values.end(), values.size());
+  }
+
+  template <typename Range>
+    requires(
+        !std::is_same_v<std::decay_t<Range>, StorageRow> &&
+        !std::is_same_v<std::decay_t<Range>, RowBlock>)
+  void addRow(const Range& values) {
+    addRowFromRange(
+        std::begin(values),
+        std::end(values),
+        static_cast<size_t>(
+            std::distance(std::begin(values), std::end(values))));
+  }
+
   // Functions called when building a RowBlock.  Not for general use.
+  //
+  // Prefer addRow() above; these remain for callers not yet migrated and will
+  // be deprecated once the in-tree callers have moved.
   //
   // Contract: each startRow() is paired with exactly one finishRow(), with
   // exactly numFields() values appended in between.  Violations throw rather
@@ -661,8 +761,27 @@ class RowBlock {
     }
   }
 
+  // Builds the row up front so the arity check happens before anything is
+  // published, and so a bad row leaves the block completely untouched.
+  template <typename Iter>
+  void addRowFromRange(Iter first, Iter last, size_t count) {
+    if (FOLLY_UNLIKELY(current_row_.has_value())) {
+      throwAddRowWhileRowOpen();
+    }
+    if (FOLLY_UNLIKELY(count != row_fields_info_->numFields())) {
+      throwWrongColumnCount(count);
+    }
+    StorageRow row(count);
+    for (; first != last; ++first) {
+      CellValue(*first).appendTo(row);
+    }
+    rows_.push_back(std::move(row));
+  }
+
   [[noreturn]] static void throwRowNotStarted();
   [[noreturn]] void throwNoMoreCapacity();
+  [[noreturn]] static void throwAddRowWhileRowOpen();
+  [[noreturn]] void throwWrongColumnCount(size_t actual) const;
 
   std::vector<StorageRow> rows_;
   std::optional<StorageRow> current_row_;

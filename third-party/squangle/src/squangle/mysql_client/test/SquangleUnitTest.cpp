@@ -477,15 +477,6 @@ TEST(RowFieldsBuilderTest, BuildShared_ProducesUsableRowBlock) {
   EXPECT_EQ(block.getField<std::string>(0, "name"), "alice");
 }
 
-// =============================================================================
-// RowBlock Build-Path Tests
-//
-// Covers the RowBlock building API (startRow/appendValue/appendNull/finishRow)
-// and the bounds checks on the read path. These run inside a noexcept libevent
-// callback, so they must throw a diagnosable exception rather than abort, and
-// must never leave a partially built row visible to readers.
-// =============================================================================
-
 namespace {
 
 std::shared_ptr<RowFields> makeRowFields(std::vector<std::string> fieldNames) {
@@ -503,6 +494,143 @@ std::shared_ptr<RowFields> makeRowFields(std::vector<std::string> fieldNames) {
 }
 
 } // namespace
+
+// =============================================================================
+// RowBlock::addRow Tests
+//
+// addRow() takes a complete row, so there is no partially built state to
+// abandon and the column count is checked at one point.
+// =============================================================================
+
+TEST(RowBlockAddRowTest, AddRow_BracedList_StoresRow) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  block.addRow({1, "alice"});
+  block.addRow({2, nullptr});
+
+  EXPECT_EQ(block.numRows(), size_t{2});
+  EXPECT_EQ(block.getField<int64_t>(0, 0), 1);
+  EXPECT_EQ(block.getField<std::string>(0, 1), "alice");
+  EXPECT_EQ(block.getField<int64_t>(1, 0), 2);
+  EXPECT_TRUE(block.isNull(1, 1));
+}
+
+TEST(RowBlockAddRowTest, AddRow_MixedCellTypes_RoundTrip) {
+  RowBlock block(makeRowFields({"i", "u", "d", "b", "s"}));
+
+  block.addRow({int64_t{-7}, uint64_t{7}, 1.5, true, std::string("hello")});
+
+  EXPECT_EQ(block.getField<int64_t>(0, 0), -7);
+  EXPECT_EQ(block.getField<uint64_t>(0, 1), uint64_t{7});
+  EXPECT_EQ(block.getField<double>(0, 2), 1.5);
+  EXPECT_EQ(block.getField<bool>(0, 3), true);
+  EXPECT_EQ(block.getField<std::string>(0, 4), "hello");
+}
+
+TEST(RowBlockAddRowTest, AddRow_RuntimeNullCharPointer_IsSqlNull) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  // A literal nullptr picks the std::nullptr_t overload; a const char* that is
+  // null only at run time reaches CellValue(const char*), where constructing a
+  // StringPiece from it would call strlen(nullptr).
+  const char* missing = nullptr;
+  const char* present = "alice";
+  block.addRow({missing, present});
+
+  EXPECT_EQ(block.numRows(), size_t{1});
+  EXPECT_TRUE(block.isNull(0, 0));
+  EXPECT_FALSE(block.isNull(0, 1));
+  EXPECT_EQ(block.getField<std::string>(0, 1), "alice");
+}
+
+TEST(RowBlockAddRowTest, AddRow_TemporaryString_IsCopied) {
+  RowBlock block(makeRowFields({"s"}));
+
+  // The StringPiece in the CellValue refers to a temporary that dies at the
+  // end of this full-expression; StorageRow must have copied the bytes.
+  block.addRow({folly::to<std::string>(12345)});
+
+  EXPECT_EQ(block.getField<std::string>(0, 0), "12345");
+}
+
+TEST(RowBlockAddRowTest, AddRow_TooFewValues_ThrowsOutOfRange) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  EXPECT_THROW(block.addRow({1}), std::out_of_range);
+  EXPECT_EQ(block.numRows(), size_t{0});
+}
+
+TEST(RowBlockAddRowTest, AddRow_TooManyValues_ThrowsAndAddsNothing) {
+  RowBlock block(makeRowFields({"id"}));
+
+  EXPECT_THROW(block.addRow({1, 2}), std::out_of_range);
+  EXPECT_EQ(block.numRows(), size_t{0});
+  EXPECT_TRUE(block.empty());
+}
+
+TEST(RowBlockAddRowTest, AddRow_Range_StoresRow) {
+  RowBlock block(makeRowFields({"a", "b", "c"}));
+  std::vector<std::string> values{"x", "y", "z"};
+
+  block.addRow(values);
+
+  EXPECT_EQ(block.numRows(), size_t{1});
+  EXPECT_EQ(block.getField<std::string>(0, 2), "z");
+}
+
+TEST(RowBlockAddRowTest, AddRow_StorageRow_StoresRow) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  StorageRow row(2);
+  row.appendValue(folly::StringPiece("1"));
+  row.appendValue(folly::StringPiece("alice"));
+  block.addRow(std::move(row));
+
+  EXPECT_EQ(block.numRows(), size_t{1});
+  EXPECT_EQ(block.getField<std::string>(0, "name"), "alice");
+}
+
+TEST(RowBlockAddRowTest, AddRow_StorageRowWrongArity_ThrowsOutOfRange) {
+  RowBlock block(makeRowFields({"id", "name"}));
+
+  StorageRow row(1);
+  row.appendValue(folly::StringPiece("1"));
+
+  EXPECT_THROW(block.addRow(std::move(row)), std::out_of_range);
+  EXPECT_EQ(block.numRows(), size_t{0});
+}
+
+TEST(RowBlockAddRowTest, AddRow_WhileStartRowOpen_ThrowsLogicError) {
+  // Mixing the two APIs mid-row would interleave; catch it rather than
+  // silently reordering the caller's rows.
+  RowBlock block(makeRowFields({"id"}));
+  block.startRow();
+
+  EXPECT_THROW(block.addRow({1}), std::logic_error);
+}
+
+TEST(RowBlockAddRowTest, AddRow_InterleavedWithStartRow_BothVisible) {
+  // Sequential use of both APIs is fine; only an *open* row is rejected.
+  RowBlock block(makeRowFields({"id"}));
+
+  block.addRow({1});
+  block.startRow();
+  block.appendValue(folly::StringPiece("2"));
+  block.finishRow();
+  block.addRow({3});
+
+  EXPECT_EQ(block.numRows(), size_t{3});
+  EXPECT_EQ(block.getField<int64_t>(2, 0), 3);
+}
+
+// =============================================================================
+// RowBlock Build-Path Tests
+//
+// Covers the RowBlock building API (startRow/appendValue/appendNull/finishRow)
+// and the bounds checks on the read path. These run inside a noexcept libevent
+// callback, so they must throw a diagnosable exception rather than abort, and
+// must never leave a partially built row visible to readers.
+// =============================================================================
 
 TEST(RowBlockTest, BuildRows_TwoCompletedRows_StoresExactlyTwoRows) {
   RowBlock block(makeRowFields({"id", "name"}));
@@ -530,8 +658,8 @@ TEST(RowBlockTest, AppendValue_PastFieldCount_ThrowsOutOfRange) {
   block.startRow();
   block.appendValue(folly::StringPiece("a"));
 
-  // Overrunning the declared column count is an out_of_range, not a
-  // runtime_error -- anything catching this must widen accordingly.
+  // Overrunning the declared column count is an out_of_range, which derives
+  // from logic_error like the rest of the build-API misuse errors.
   EXPECT_THROW(block.appendValue(folly::StringPiece("b")), std::out_of_range);
 }
 

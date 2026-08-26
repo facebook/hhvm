@@ -8,39 +8,44 @@
 
 #include "squangle/mysql_client/OperationHelpers.h"
 
+#include "squangle/util/StorageRow.h"
+
 namespace facebook::common::mysql_client {
 
 namespace {
 
 void copyRowToRowBlock(RowBlock* block, const EphemeralRow& eph_row) {
-  block->startRow();
+  // Build the row whole, then hand it over: a row that does not match the
+  // block's column count is rejected at a single point with the block left
+  // untouched, rather than partway through the loop.
+  StorageRow row(eph_row.numFields());
   for (int i = 0; i < eph_row.numFields(); ++i) {
     switch (eph_row.getType(i)) {
       case InternalRow::Type::Null:
-        block->appendNull();
+        row.appendNull();
         break;
       case InternalRow::Type::Bool:
-        block->appendValue(eph_row.getBool(i));
+        row.appendValue(eph_row.getBool(i));
         break;
 
       case InternalRow::Type::Int64:
-        block->appendValue(eph_row.getInt64(i));
+        row.appendValue(eph_row.getInt64(i));
         break;
 
       case InternalRow::Type::UInt64:
-        block->appendValue(eph_row.getUInt64(i));
+        row.appendValue(eph_row.getUInt64(i));
         break;
 
       case InternalRow::Type::Double:
-        block->appendValue(eph_row.getDouble(i));
+        row.appendValue(eph_row.getDouble(i));
         break;
 
       case InternalRow::Type::String:
-        block->appendValue(eph_row.getString(i));
+        row.appendValue(eph_row.getString(i));
         break;
     }
   }
-  block->finishRow();
+  block->addRow(std::move(row));
 }
 
 } // namespace

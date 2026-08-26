@@ -3340,7 +3340,10 @@ pub(crate) mod r#impl {
             }
 
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::string::String>() + P::min_size::<::std::primitive::i64>())?;
-            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or(0));
+            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64> as ::std::default::Default>::default();
+            if let ::std::option::Option::Some(len) = len {
+                map.reserve(len);
+            }
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));

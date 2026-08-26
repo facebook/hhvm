@@ -6670,7 +6670,10 @@ pub(crate) mod r#impl {
             }
 
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::primitive::i32>() + P::min_size::<::std::string::String>())?;
-            let mut map = <::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>>::with_capacity(len.unwrap_or(0));
+            let mut map = <::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String> as ::std::default::Default>::default();
+            if let ::std::option::Option::Some(len) = len {
+                map.reserve(len);
+            }
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));
@@ -6727,7 +6730,10 @@ pub(crate) mod r#impl {
             }
 
             let (_elem_ty, len) = p.read_set_begin(P::min_size::<::std::primitive::i32>())?;
-            let mut set = <::sorted_vector_map::SortedVectorSet<::std::primitive::i32>>::with_capacity(len.unwrap_or(0));
+            let mut set = <::sorted_vector_map::SortedVectorSet<::std::primitive::i32> as ::std::default::Default>::default();
+            if let ::std::option::Option::Some(len) = len {
+                set.reserve(len);
+            }
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(set));

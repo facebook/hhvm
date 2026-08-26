@@ -72,7 +72,10 @@ where
         }
 
         let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#partial types.type_name type=set_elem_type}}>())?;
-        let mut set = <{{#partial types.type_name type=type}}>::with_capacity(len.unwrap_or(0));
+        let mut set = <{{#partial types.type_name type=type}} as ::std::default::Default>::default();
+        if let ::std::option::Option::Some(len) = len {
+            set.reserve(len);
+        }
 
         if let ::std::option::Option::Some(0) = len {
             return ::std::result::Result::Ok(LocalImpl(set));
@@ -135,7 +138,10 @@ where
         }
 
         let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#partial types.type_name type=map_key_type}}>() + P::min_size::<{{#partial types.type_name type=map_val_type}}>())?;
-        let mut map = <{{#partial types.type_name type=type}}>::with_capacity(len.unwrap_or(0));
+        let mut map = <{{#partial types.type_name type=type}} as ::std::default::Default>::default();
+        if let ::std::option::Option::Some(len) = len {
+            map.reserve(len);
+        }
 
         if let ::std::option::Option::Some(0) = len {
             return ::std::result::Result::Ok(LocalImpl(map));
@@ -254,7 +260,10 @@ where
         }
 
         let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#partial types.type_name type=set_elem_type}}>())?;
-        let mut set = <{{#partial fields.annotated_type_name field=field}}>::with_capacity(len.unwrap_or(0));
+        let mut set = <{{#partial fields.annotated_type_name field=field}} as ::std::default::Default>::default();
+        if let ::std::option::Option::Some(len) = len {
+            set.reserve(len);
+        }
 
         if let ::std::option::Option::Some(0) = len {
             return ::std::result::Result::Ok(LocalImpl(set));
@@ -317,7 +326,10 @@ where
         }
 
         let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#partial types.type_name type=map_key_type}}>() + P::min_size::<{{#partial types.type_name type=map_val_type}}>())?;
-        let mut map = <{{#partial fields.annotated_type_name field=field}}>::with_capacity(len.unwrap_or(0));
+        let mut map = <{{#partial fields.annotated_type_name field=field}} as ::std::default::Default>::default();
+        if let ::std::option::Option::Some(len) = len {
+            map.reserve(len);
+        }
 
         if let ::std::option::Option::Some(0) = len {
             return ::std::result::Result::Ok(LocalImpl(map));

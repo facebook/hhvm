@@ -87,6 +87,22 @@ TEST(UnionFieldTest, operator_deref) {
   EXPECT_THROW(*a.int64(), bad_union_field_access);
 }
 
+TEST(UnionFieldTest, move_to_optional) {
+  Basic a;
+  std::optional<std::vector<int32_t>> opt = a.list_i32().move_to_optional();
+  EXPECT_FALSE(opt);
+
+  const std::vector<int32_t> expected = {1, 2, 3};
+  a.list_i32() = expected;
+  const auto* data = a.list_i32()->data();
+  opt = a.list_i32().move_to_optional();
+
+  ASSERT_TRUE(opt);
+  EXPECT_EQ(*opt, expected);
+  EXPECT_TRUE(a.list_i32().has_value());
+  EXPECT_EQ(opt->data(), data);
+}
+
 TEST(UnionFieldTest, operator_assign) {
   Basic a;
   a.int64() = 4;

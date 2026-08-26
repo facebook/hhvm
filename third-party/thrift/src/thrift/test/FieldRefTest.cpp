@@ -1007,6 +1007,50 @@ TYPED_TEST(optional_field_ref_typed_test, to_optional) {
   EXPECT_EQ(*opt, "foo");
 }
 
+template <typename Ref>
+concept HasMoveToOptional = requires(Ref ref) { ref.move_to_optional(); };
+
+static_assert(HasMoveToOptional<optional_field_ref<std::string&>>);
+static_assert(HasMoveToOptional<optional_field_ref<std::string&&>>);
+static_assert(!HasMoveToOptional<optional_field_ref<const std::string&&>>);
+
+using BoxedString = boxed_value_ptr<std::string>;
+static_assert(HasMoveToOptional<optional_boxed_field_ref<BoxedString&>>);
+static_assert(HasMoveToOptional<optional_boxed_field_ref<BoxedString&&>>);
+static_assert(
+    !HasMoveToOptional<optional_boxed_field_ref<const BoxedString&&>>);
+
+static_assert(HasMoveToOptional<apache::thrift::union_field_ref<std::string&>>);
+static_assert(
+    HasMoveToOptional<apache::thrift::union_field_ref<std::string&&>>);
+static_assert(
+    !HasMoveToOptional<apache::thrift::union_field_ref<const std::string&&>>);
+
+template <typename Struct>
+void test_move_to_optional() {
+  Struct s;
+  auto opt = s.opt_uptr().move_to_optional();
+  EXPECT_FALSE(opt);
+
+  s.opt_uptr() = std::make_unique<int>(42);
+  const auto* ptr = s.opt_uptr()->get();
+  opt = s.opt_uptr().move_to_optional();
+
+  ASSERT_TRUE(opt);
+  EXPECT_EQ(opt->get(), ptr);
+  EXPECT_EQ(**opt, 42);
+  EXPECT_TRUE(s.opt_uptr().has_value());
+  EXPECT_EQ(s.opt_uptr()->get(), nullptr);
+}
+
+TEST(OptionalFieldRefTest, move_to_optional) {
+  test_move_to_optional<TestStruct>();
+}
+
+TEST(OptionalBoxedFieldRefTest, move_to_optional) {
+  test_move_to_optional<TestStructBoxedValuePtr>();
+}
+
 TYPED_TEST(optional_field_ref_typed_test, rvalue_ref_method) {
   typename TestFixture::Struct s;
   auto ref = std::move(s).opt_uptr();

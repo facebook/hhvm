@@ -417,6 +417,16 @@ class optional_field_ref {
     return bitref_ ? type(value_) : type();
   }
 
+  // Moves the value into std::optional without changing whether the field is
+  // set.
+  FOLLY_ERASE std::optional<std::remove_const_t<value_type>> move_to_optional()
+      const
+    requires(!std::is_const_v<value_type>)
+  {
+    using type = std::optional<std::remove_const_t<value_type>>;
+    return bitref_ ? type(std::move(value_)) : type();
+  }
+
   FOLLY_ERASE bool has_value() const noexcept { return bool(bitref_); }
 
   FOLLY_ERASE explicit operator bool() const noexcept { return bool(bitref_); }
@@ -700,6 +710,16 @@ class optional_boxed_field_ref {
       const {
     using type = std::optional<std::remove_const_t<value_type>>;
     return has_value() ? type(*value_) : type();
+  }
+
+  // Moves the value into std::optional without changing whether the field is
+  // set.
+  FOLLY_ERASE std::optional<std::remove_const_t<value_type>> move_to_optional()
+      const
+    requires(!std::is_const_v<value_type>)
+  {
+    using type = std::optional<std::remove_const_t<value_type>>;
+    return has_value() ? type(std::move(*value_)) : type();
   }
 
   FOLLY_ERASE bool has_value() const noexcept {
@@ -1714,6 +1734,15 @@ class union_field_ref {
       const {
     using type = std::optional<std::remove_const_t<value_type>>;
     return has_value() ? type(get_value()) : type();
+  }
+
+  // Moves the value into std::optional without changing the active field.
+  FOLLY_ERASE std::optional<std::remove_const_t<value_type>> move_to_optional()
+      const
+    requires(!std::is_const_v<value_type>)
+  {
+    using type = std::optional<std::remove_const_t<value_type>>;
+    return has_value() ? type(std::move(get_value())) : type();
   }
 
   FOLLY_ERASE bool has_value() const { return type_ == field_type_; }

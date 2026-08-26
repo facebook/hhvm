@@ -86,7 +86,7 @@ name = "analysis"
 version = "0.0.0"
 dependencies = [
  "ir_core",
- "itertools",
+ "itertools 0.15.0",
  "newtype",
  "print",
 ]
@@ -277,7 +277,7 @@ dependencies = [
  "anyhow",
  "hash",
  "ir_core",
- "itertools",
+ "itertools 0.15.0",
  "log",
  "naming_special_names_rust",
  "parse_macro_ir",
@@ -288,7 +288,7 @@ name = "assemble_opcode_macro"
 version = "0.0.0"
 dependencies = [
  "hhbc-gen",
- "itertools",
+ "itertools 0.15.0",
  "proc-macro2",
  "quote",
  "syn 3.0.3",
@@ -333,7 +333,7 @@ dependencies = [
 name = "balanced_partition"
 version = "0.0.0"
 dependencies = [
- "itertools",
+ "itertools 0.15.0",
  "log",
  "rayon",
 ]
@@ -383,6 +383,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf95709a440f45e986983918d0e8a1f30a9b1df04918fc828670606804ac3c09"
 dependencies = [
  "virtue",
+]
+
+[[package]]
+name = "bindgen"
+version = "0.72.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "bitflags 2.13.1",
+ "cexpr",
+ "clang-sys",
+ "itertools 0.10.5",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "rustc-hash",
+ "shlex 1.3.0",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -528,7 +545,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "itertools",
+ "itertools 0.15.0",
  "print_opcode",
  "relative_path",
  "thiserror 2.0.20",
@@ -602,7 +619,16 @@ dependencies = [
  "find-msvc-tools",
  "jobserver",
  "libc",
- "shlex",
+ "shlex 2.0.1",
+]
+
+[[package]]
+name = "cexpr"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fac387a98bb7c37292057cffc56d62ecb629900026402633ae9160df93a8766"
+dependencies = [
+ "nom 7.1.3",
 ]
 
 [[package]]
@@ -663,6 +689,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "clang-sys"
+version = "1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "157a8ba7b480713b56f4c09fd13fc3e0a22a5dfab8097ba61cbc5feef950788a"
+dependencies = [
+ "glob",
+ "libc",
+ "libloading",
+]
+
+[[package]]
 name = "clap"
 version = "4.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -717,7 +754,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc_string_utils",
- "itertools",
+ "itertools 0.15.0",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -811,7 +848,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "intern",
- "itertools",
+ "itertools 0.15.0",
  "libc",
  "options",
  "oxidized",
@@ -866,7 +903,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "indexmap 2.14.0",
- "itertools",
+ "itertools 0.15.0",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -1270,7 +1307,7 @@ dependencies = [
  "dep_graph_delta",
  "depgraph_reader",
  "hash",
- "itertools",
+ "itertools 0.15.0",
  "ocamlrep",
  "ocamlrep_custom",
  "parking_lot",
@@ -1378,7 +1415,7 @@ dependencies = [
  "flatten_smart_constructors",
  "hash",
  "hh_autoimport_rust",
- "itertools",
+ "itertools 0.15.0",
  "namespaces_rust",
  "naming_special_names_rust",
  "ocaml_helper",
@@ -1431,7 +1468,7 @@ dependencies = [
  "hash",
  "hhbc_string_utils",
  "intern",
- "itertools",
+ "itertools 0.15.0",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
@@ -1517,7 +1554,7 @@ dependencies = [
  "hhvm_types_ffi",
  "indexmap 2.14.0",
  "instruction_sequence",
- "itertools",
+ "itertools 0.15.0",
  "label_rewriter",
  "naming_special_names_rust",
  "options",
@@ -1703,7 +1740,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "hhbc_string_utils",
- "itertools",
+ "itertools 0.15.0",
  "naming_special_names_rust",
  "oxidized",
  "serde",
@@ -1843,7 +1880,7 @@ dependencies = [
  "eq_modulo_pos",
  "hash",
  "indexmap 2.14.0",
- "itertools",
+ "itertools 0.15.0",
  "oxidized",
  "pos",
  "shallow_decl_provider",
@@ -1931,7 +1968,7 @@ dependencies = [
  "anyhow",
  "cc",
  "convert_case 0.4.0",
- "nom",
+ "nom 8.0.0",
 ]
 
 [[package]]
@@ -2087,7 +2124,7 @@ dependencies = [
  "hhvm_options",
  "ir",
  "ir_to_bc",
- "itertools",
+ "itertools 0.15.0",
  "jwalk",
  "log",
  "multifile_rust",
@@ -2234,7 +2271,7 @@ dependencies = [
  "byteorder",
  "crossbeam-channel",
  "flate2",
- "nom",
+ "nom 8.0.0",
  "num-traits",
 ]
 
@@ -2636,7 +2673,7 @@ dependencies = [
  "hhbc",
  "instruction_sequence",
  "ir",
- "itertools",
+ "itertools 0.15.0",
  "log",
  "smallvec",
  "stack_depth",
@@ -2658,6 +2695,15 @@ name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
+
+[[package]]
+name = "itertools"
+version = "0.10.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
+dependencies = [
+ "either",
+]
 
 [[package]]
 name = "itertools"
@@ -2777,11 +2823,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
+name = "libloading"
+version = "0.8.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
+dependencies = [
+ "cfg-if 1.0.4",
+ "windows-link",
+]
+
+[[package]]
 name = "libsqlite3-sys"
 version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "133c182a6a2c87864fe97778797e46c7e999672690dc9fa3ee8e241aa4a9c13f"
 dependencies = [
+ "bindgen",
  "cc",
  "pkg-config",
  "vcpkg",
@@ -2869,7 +2926,7 @@ dependencies = [
  "hash",
  "hhbc_string_utils",
  "html_entities",
- "itertools",
+ "itertools 0.15.0",
  "lint_rust",
  "naming_special_names_rust",
  "ocaml_helper",
@@ -3035,6 +3092,12 @@ checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
 ]
+
+[[package]]
+name = "minimal-lexical"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "miniz_oxide"
@@ -3231,6 +3294,16 @@ checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "nom"
+version = "7.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
+dependencies = [
+ "memchr",
+ "minimal-lexical",
+]
+
+[[package]]
+name = "nom"
 version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df9761775871bdef83bee530e60050f7e54b1105350d6884eb0fb4f46c2f9405"
@@ -3244,7 +3317,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2de2bc5b451bfedaef92c90b8939a8fff5770bdcc1fafd6239d086aab8fa6b29"
 dependencies = [
- "nom",
+ "nom 8.0.0",
 ]
 
 [[package]]
@@ -3398,7 +3471,7 @@ dependencies = [
  "cxx",
  "generate_configs_lib",
  "hhvm_options",
- "nom",
+ "nom 8.0.0",
  "nom-language",
  "oxidized",
  "serde",
@@ -3432,7 +3505,7 @@ dependencies = [
  "hh24_types",
  "hh_autoimport_rust",
  "hh_hash",
- "itertools",
+ "itertools 0.15.0",
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
@@ -3571,7 +3644,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.13.1",
  "bumpalo",
- "itertools",
+ "itertools 0.15.0",
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
@@ -3599,7 +3672,7 @@ dependencies = [
  "analysis",
  "hash",
  "ir_core",
- "itertools",
+ "itertools 0.15.0",
  "log",
  "newtype",
  "print",
@@ -4236,7 +4309,7 @@ dependencies = [
  "escaper",
  "hash",
  "hh_autoimport_rust",
- "itertools",
+ "itertools 0.15.0",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
@@ -4365,7 +4438,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc-gen",
- "itertools",
+ "itertools 0.15.0",
  "log",
  "newtype",
 ]
@@ -4465,7 +4538,7 @@ dependencies = [
  "anyhow",
  "datastore",
  "decl_parser",
- "itertools",
+ "itertools 0.15.0",
  "naming_provider",
  "oxidized",
  "pos",
@@ -4473,6 +4546,12 @@ dependencies = [
  "thiserror 2.0.20",
  "ty",
 ]
+
+[[package]]
+name = "shlex"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "shlex"
@@ -5005,7 +5084,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "ir",
- "itertools",
+ "itertools 0.15.0",
  "log",
  "naming_special_names_rust",
  "newtype",
@@ -5018,7 +5097,7 @@ dependencies = [
 name = "textual_macros"
 version = "0.0.0"
 dependencies = [
- "itertools",
+ "itertools 0.15.0",
  "proc-macro2",
  "quote",
  "syn 3.0.3",
@@ -5427,7 +5506,7 @@ version = "0.0.0"
 dependencies = [
  "analysis",
  "ir_core",
- "itertools",
+ "itertools 0.15.0",
  "print",
 ]
 

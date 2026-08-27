@@ -191,6 +191,7 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
     throw;
   } catch (transport::TTransportException& e) {
     LOG(ERROR) << e.what();
+    stats_.numFailure++;
     connectionGood_ = false;
     co_return;
   } catch (...) {

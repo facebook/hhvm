@@ -139,7 +139,9 @@ buffer->advance(kMetadataHeadroomBytes);
 
 If a minimum is necessary for allocator behavior, use a substantially smaller documented floor and validate it with allocation profiling.
 
-### 4. Moderate: Frame lengths are repeatedly recomputed by walking `IOBuf` chains
+### 4. Completed: Avoid repeated `IOBuf` chain-length calculations
+
+**Status:** Completed. Parsing now reuses a precomputed total size, inbound framing uses `IOBufQueue`'s cached chain length, frame serialization computes metadata length once, and data-presence checks use short-circuit `empty()`. Existing opt-LTO benchmarks improved by approximately 3% for single-frame parsing, 5-6% for multi-frame parsing, and 4-7% for frame writing.
 
 **Locations:**
 
@@ -293,7 +295,7 @@ Separately, server response serialization reserves 128 bytes of headroom on the 
 1. Reuse transport read buffers.
 2. ~~Skip non-participating handlers during pipeline wiring.~~ Completed; evaluated and reverted because no reliable benchmark improvement was observed.
 3. ~~Correct request and response metadata buffer sizing.~~ Completed; the 16-byte frame headroom remains reserved.
-4. Remove redundant `IOBuf` chain-length walks.
+4. ~~Remove redundant `IOBuf` chain-length walks.~~ Completed; existing frame benchmarks improved by approximately 3-7%.
 5. Add typed destruction for `TypeErasedBox::take<T>()`.
 6. Reduce `ComposedFrame` to one cache line.
 7. Remove unnecessary packed message layouts.

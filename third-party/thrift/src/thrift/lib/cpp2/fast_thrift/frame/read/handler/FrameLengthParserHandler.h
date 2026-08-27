@@ -65,7 +65,6 @@ class FrameLengthParserHandler {
   template <typename Context>
   void handlerRemoved(Context& /*ctx*/) noexcept {
     readBufQueue_.reset();
-    size_ = 0;
     frameLength_ = 0;
     frameLengthAndFieldSize_ = 0;
   }
@@ -86,7 +85,6 @@ class FrameLengthParserHandler {
     auto buf =
         msg.take<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>();
 
-    size_ += buf->computeChainDataLength();
     readBufQueue_.append(std::move(buf), true, true);
 
     return drainReadBufQueue(ctx);
@@ -105,13 +103,13 @@ class FrameLengthParserHandler {
     return frameLengthAndFieldSize_;
   }
 
-  size_t size() const noexcept { return size_; }
+  size_t size() const noexcept { return readBufQueue_.chainLength(); }
 
  private:
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result drainReadBufQueue(
       Context& ctx) noexcept {
-    while (size_ >= kMetadataLengthSize) {
+    while (readBufQueue_.chainLength() >= kMetadataLengthSize) {
       if (!frameLength_) {
         computeFrameLength();
 
@@ -124,7 +122,7 @@ class FrameLengthParserHandler {
         }
       }
 
-      if (size_ < frameLengthAndFieldSize_) {
+      if (readBufQueue_.chainLength() < frameLengthAndFieldSize_) {
         return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
       }
 
@@ -132,8 +130,7 @@ class FrameLengthParserHandler {
       readBufQueue_.trimStart(kMetadataLengthSize);
       auto frame = readBufQueue_.split(frameLength_);
 
-      // Update accounting before firing (in case of exception)
-      size_ -= frameLengthAndFieldSize_;
+      // Reset framing state before firing (in case of re-entrancy).
       frameLength_ = 0;
       frameLengthAndFieldSize_ = 0;
 
@@ -164,7 +161,6 @@ class FrameLengthParserHandler {
     frameLengthAndFieldSize_ = frameLength_ + kMetadataLengthSize;
   }
 
-  size_t size_{0};
   size_t frameLength_{0};
   size_t frameLengthAndFieldSize_{0};
   size_t maxFrameSize_;

@@ -113,7 +113,8 @@ inline std::pair<uint8_t, uint16_t> readFrameTypeAndFlags(
  *     // ...
  *   }
  */
-inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
+inline ParsedFrame parseFrame(
+    std::unique_ptr<folly::IOBuf> buffer, uint32_t totalSize) {
   folly::io::Cursor cursor(buffer.get());
 
   // Read common header fields (6 bytes minimum)
@@ -145,7 +146,6 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
     }
     payloadOffset = static_cast<uint32_t>(cursor.getCurrentPosition());
   }
-  auto totalSize = static_cast<uint32_t>(buffer->computeChainDataLength());
   uint32_t payloadSize = totalSize - payloadOffset;
 
   // For METADATA_PUSH frames, the entire payload is metadata (no data portion)
@@ -168,6 +168,12 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
   };
 }
 
+inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
+  const auto totalSize =
+      static_cast<uint32_t>(buffer->computeChainDataLength());
+  return parseFrame(std::move(buffer), totalSize);
+}
+
 /**
  * Try to parse a frame, returning an empty ParsedFrame on failure.
  *
@@ -179,10 +185,14 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
  * too small
  */
 inline ParsedFrame tryParseFrame(std::unique_ptr<folly::IOBuf> buffer) {
-  if (!buffer || buffer->computeChainDataLength() < 6) {
+  if (!buffer) {
     return ParsedFrame{};
   }
-  return parseFrame(std::move(buffer));
+  const auto totalSize = buffer->computeChainDataLength();
+  if (totalSize < 6) {
+    return ParsedFrame{};
+  }
+  return parseFrame(std::move(buffer), static_cast<uint32_t>(totalSize));
 }
 
 } // namespace apache::thrift::fast_thrift::frame::read

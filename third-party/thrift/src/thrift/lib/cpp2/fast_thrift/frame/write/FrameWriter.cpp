@@ -105,7 +105,7 @@ std::unique_ptr<folly::IOBuf> serializeFrameIntoHeadroom(
   metadata->prepend(headerSize);
 
   // Chain data after metadata
-  if (data != nullptr && data->computeChainDataLength() > 0) {
+  if (data != nullptr && !data->empty()) {
     metadata->appendChain(std::move(data));
   }
 
@@ -121,8 +121,9 @@ std::unique_ptr<folly::IOBuf> serializeFrame(
     size_t extraHeaderSize,
     std::unique_ptr<folly::IOBuf> metadata,
     std::unique_ptr<folly::IOBuf> data) {
-  bool hasMetadata =
-      metadata != nullptr && metadata->computeChainDataLength() > 0;
+  const size_t metadataLen =
+      metadata != nullptr ? metadata->computeChainDataLength() : 0;
+  const bool hasMetadata = metadataLen != 0;
 
   if (hasMetadata) {
     flags |= kMetadataBit;
@@ -138,7 +139,6 @@ std::unique_ptr<folly::IOBuf> serializeFrame(
   // and sufficient headroom for the entire frame header.
   if (hasMetadata && !metadata->isChained() && !metadata->isSharedOne() &&
       metadata->headroom() >= headerSize) {
-    size_t metadataLen = metadata->length();
     return serializeFrameIntoHeadroom(
         type,
         streamId,
@@ -169,8 +169,7 @@ std::unique_ptr<folly::IOBuf> serializeFrame(
 
   // Metadata length (3 bytes) if present
   if (hasMetadata) {
-    auto metaLen = metadata->computeChainDataLength();
-    writeMetadataLengthBE(appender, static_cast<uint32_t>(metaLen));
+    writeMetadataLengthBE(appender, static_cast<uint32_t>(metadataLen));
   }
 
   // Chain metadata (take ownership, no cloning)
@@ -179,7 +178,7 @@ std::unique_ptr<folly::IOBuf> serializeFrame(
   }
 
   // Chain data (take ownership, no cloning)
-  if (data != nullptr && data->computeChainDataLength() > 0) {
+  if (data != nullptr && !data->empty()) {
     queue.append(std::move(data));
   }
 

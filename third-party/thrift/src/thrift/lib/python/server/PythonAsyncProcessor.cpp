@@ -1052,7 +1052,10 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
               eb,
-              executor,
+              // The bidi transform invokes Cython after the handler returns.
+              // Keep that work on the Python asyncio executor: direct request
+              // channels use a native EventBase as the request executor.
+              executor_,
               ctx,
               nullptr,
               nullptr,

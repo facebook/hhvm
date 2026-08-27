@@ -70,7 +70,6 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
  *   auto rocketFrame = std::move(v).toRocketFrame();
  *     // → frame::ComposedFrame (discriminated by .frameType)
  */
-#pragma pack(push, 1)
 template <ThriftPayloadConcept... Ts>
 class ThriftPayloadVariant {
   static_assert(sizeof...(Ts) > 0);
@@ -320,6 +319,5 @@ class ThriftPayloadVariant {
     return getResponseRpcMetadataImpl(std::index_sequence_for<Ts...>{});
   }
 };
-#pragma pack(pop)
 
 } // namespace apache::thrift::fast_thrift::thrift

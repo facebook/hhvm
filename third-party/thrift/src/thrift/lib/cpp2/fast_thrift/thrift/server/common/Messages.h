@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
@@ -43,13 +44,14 @@ namespace apache::thrift::fast_thrift::thrift {
 // traverses the thrift pipeline, so every inbound request carries its own
 // per-request context (which itself holds a handle to the connection
 // context) without the tail adapter having to look it up.
-#pragma pack(push, 1)
 struct ThriftServerRequestMessage {
   std::unique_ptr<ThriftRequestContext> requestContext;
   ThriftServerInboundPayloadVariant payload;
   uint32_t streamId{0};
 };
-#pragma pack(pop)
+
+static_assert(
+    channel_pipeline::TypeErasedBox::fits_inline<ThriftServerRequestMessage>());
 
 /**
  * ThriftServerResponseMessage - Outbound message from handler to pipeline.
@@ -64,11 +66,12 @@ struct ThriftServerRequestMessage {
  * Null for framework-generated responses (parse errors, wrong RPC kind) that
  * have no per-request context.
  */
-#pragma pack(push, 1)
 struct ThriftServerResponseMessage {
   std::unique_ptr<ThriftRequestContext> requestContext{};
   ThriftServerOutboundPayloadVariant payload;
 };
-#pragma pack(pop)
+
+static_assert(channel_pipeline::TypeErasedBox::fits_inline<
+              ThriftServerResponseMessage>());
 
 } // namespace apache::thrift::fast_thrift::thrift

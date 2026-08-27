@@ -11,4 +11,17 @@ Uncaught exception:
 
 <stack trace omitted>
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client ../no_config/missing",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Sys_error(\"../no_config/missing: No such file or directory\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

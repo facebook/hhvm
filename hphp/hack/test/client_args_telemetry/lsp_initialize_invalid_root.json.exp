@@ -6,7 +6,6 @@ stdout:
 <empty>
 stderr:
 Error: could not find a .hhconfig file in <test_tmp>/no_config or any of its parent directories. Do you have a .hhconfig in your code's root directory?
-<stack trace omitted>
 === telemetry ===
 [
   {

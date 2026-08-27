@@ -4376,8 +4376,18 @@ let handle_client_message
       initialize_params_ref := Some initialize_params;
 
       let root_from_initialize_params =
-        Wwwroot.interpret_command_line_root_parameter
-          [Lsp_helpers.get_root initialize_params]
+        match
+          Wwwroot.interpret_command_line_root_parameter
+            [Lsp_helpers.get_root initialize_params]
+        with
+        | Ok root -> root
+        | Error message ->
+          (* Unlike in hh_client, we do *not* currently get telemetry in hh_server_events
+             * for invocations of `hh_client lsp` in directories with bad roots.
+             * Seems fine: invocations of `hh_client lsp` are usually done
+             * deterministic and not by agents nor humans. *)
+          Printf.eprintf "Error: %s\n%!" message;
+          Stdlib.exit 1
       in
       if not (Path.equal !env.args.root_from_cli root_from_initialize_params)
       then begin

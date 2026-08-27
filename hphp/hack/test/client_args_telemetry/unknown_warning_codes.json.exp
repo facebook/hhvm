@@ -3,8 +3,21 @@ argv: hh_client -W 99999999
 cwd: <test_tmp>/root
 exit_code: 2
 stdout:
-Unknown warning codes: 99999999
-stderr:
 <empty>
+stderr:
+Unknown warning codes: 99999999
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client -W 99999999",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"Unknown warning codes: 99999999\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

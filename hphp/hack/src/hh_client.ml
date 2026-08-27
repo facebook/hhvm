@@ -193,12 +193,15 @@ let () =
   set_up_signals ();
   let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
   let command =
-    ClientArgs.parse_args
-      ~from_default:
-        (if Proc.is_likely_from_interactive_shell init_proc_stack then
-          "[sh]"
-        else
-          "")
+    try
+      ClientArgs.parse_args
+        ~from_default:
+          (if Proc.is_likely_from_interactive_shell init_proc_stack then
+            "[sh]"
+          else
+            "")
+    with
+    | Exit_status.Exit_with exit_status -> Exit.exit exit_status
   in
   match command with
   | ClientCommand.Without_config command -> exec_command_without_config command

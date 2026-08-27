@@ -9,4 +9,17 @@ hh_client: --package-lint-full requires at least one candidate file.
 Usage: hh_client check [OPTION]... [WWW-ROOT]
 <usage omitted>
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client --package-lint-full test.php ,",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"hh_client: --package-lint-full requires at least one candidate file.\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

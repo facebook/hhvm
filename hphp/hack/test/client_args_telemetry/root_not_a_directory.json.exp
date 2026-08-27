@@ -7,4 +7,17 @@ stdout:
 stderr:
 Error: <test_tmp>/no_config/.hginclude is not a directory
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client ../no_config/.hginclude",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"Error: <test_tmp>/no_config/.hginclude is not a directory\")",
+    "exit_code": 1,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

@@ -124,23 +124,135 @@ let parse_command () =
     | "decompress-zhhdg" -> CKDecompressZhhdg
     | _ -> CKNone
 
+type arg_error = {
+  message: string;
+  usage: string option;
+}
+
+exception Parse_error of arg_error
+
+let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
+
+(**
+    On malformed command line args, ensure we record telemetry.
+    We preserve historical exit codes so we can establish a baseline.
+    *)
+module Die : sig
+  (** Report [message] and optional [usage] on stderr, log [message] in a
+      [CLIENT_BAD_ARGS] sample, and exit 2. An empty [message] prints nothing,
+      leaving [usage] to stand alone. *)
+  val bad_args : message:string -> usage:string option -> 'a
+
+  (** Specific return code for when there is a bad www root. Like [bad_args] but exit code 1 *)
+  val bad_www_root : message:string -> 'a
+
+  (** Log+re-raise. Should be unreachable:
+    * There is no reason to show a user a backtrace when they provide
+    * ill-formed command-line arguments to hh *)
+  val internal_exception : Exception.t -> 'a
+end = struct
+  let bad_args_exit_code = 2
+
+  let invalid_root_exit_code = 1
+
+  let log ~(exit_code : int) (e : Exception.t) : unit =
+    (* Avoid the user seeing stderr from failures to write to scuba *)
+    let stderr_level = Hh_logger.Level.min_level_stderr () in
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Off;
+    Utils.try_finally
+      ~finally:(fun () -> Hh_logger.Level.set_min_level_stderr stderr_level)
+      ~f:(fun () ->
+        try
+          (* Arg parsing failed, so there is no trustworthy root, --from or
+           * --custom-telemetry-data yet; initialize with placeholders so that
+           * the sample below has a base env to build on. *)
+          HackEventLogger.client_init
+          (* ~init_id is used for correlating things, specific value doesn't matter *)
+            ~init_id:(Random_id.short_string ())
+            ~from:""
+            ~is_interactive:false
+            ~custom_columns:[]
+            (Path.make ".");
+          HackEventLogger.client_bad_args
+            ~command_name:"Args"
+            ~exit_code
+            Exit_status.Input_error
+            e;
+          HackEventLogger.flush ()
+        with
+        (* hh_client's SIGINT handler raises this. Swallowing it would make Ctrl-C
+           look like it did nothing. *)
+        | Exit_status.Exit_with _ as interrupt -> raise interrupt
+        | _ -> ())
+
+  let die ~(exit_code : int) (e : Exception.t) : 'a =
+    log ~exit_code e;
+    Stdlib.exit exit_code
+
+  let report (message : string) : unit = Printf.eprintf "%s\n%!" message
+
+  let bad_args ~(message : string) ~(usage : string option) : 'a =
+    if not (String.is_empty message) then report message;
+    Option.iter usage ~f:report;
+    die
+      ~exit_code:bad_args_exit_code
+      (Exception.wrap_unraised (Arg.Bad message))
+
+  let bad_www_root ~(message : string) : 'a =
+    report message;
+    die
+      ~exit_code:invalid_root_exit_code
+      (Exception.wrap_unraised (Arg.Bad message))
+
+  let internal_exception (e : Exception.t) : 'a =
+    match Exception.unwrap e with
+    | Exit_status.Exit_with _ -> Exception.reraise e
+    | _ ->
+      log ~exit_code:bad_args_exit_code e;
+      Exception.reraise e
+end
+
 let parse_without_command options usage command =
   let args = ref [] in
-  Arg.parse (Arg.align options) (fun x -> args := x :: !args) usage;
+  (try
+     Arg.parse_argv
+       ~current:(ref 0)
+       Sys.argv
+       (Arg.align options)
+       (fun x -> args := x :: !args)
+       usage
+   with
+  (* [Arg] newline-terminates its messages and the rest of hh_client's are
+     unterminated; drop it here so everything downstream has one convention. *)
+  | Arg.Bad message ->
+    let message = String.chop_suffix_if_exists message ~suffix:"\n" in
+    let (message, usage) =
+      match String.lsplit2 message ~on:'\n' with
+      | None -> (message, None)
+      | Some (message, usage) -> (message, Some usage)
+    in
+    raise (Parse_error { message; usage })
+  | Arg.Help _ as help -> raise help
+  | e -> Die.internal_exception (Exception.wrap e));
   match List.rev !args with
   | x :: rest when String.(lowercase x = lowercase command) -> rest
   | args -> args
 
-let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
+let interpret_root ?config paths =
+  match Wwwroot.interpret_command_line_root_parameter ?config paths with
+  | exception e -> Die.internal_exception (Exception.wrap e)
+  | Ok root -> root
+  | Error message -> Die.bad_www_root ~message:("Error: " ^ message)
 
 let validate_check_args ~invalid_warning_codes =
-  if not (List.is_empty invalid_warning_codes) then (
-    Printf.printf
-      "Unknown warning codes: %s"
-      (String.concat ~sep:", "
-      @@ List.map invalid_warning_codes ~f:Int.to_string);
-    exit 2
-  )
+  if not (List.is_empty invalid_warning_codes) then
+    Die.bad_args
+      ~message:
+        (Printf.sprintf
+           "Unknown warning codes: %s"
+           (String.concat ~sep:", "
+           @@ List.map invalid_warning_codes ~f:Int.to_string))
+      ~usage:None
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
@@ -1033,10 +1145,10 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
 
   validate_check_args ~invalid_warning_codes:!invalid_warning_codes;
 
-  if !output_json && !output_jsonl then begin
-    Printf.eprintf "--json and --jsonl are mutually exclusive\n%!";
-    exit 2
-  end;
+  if !output_json && !output_jsonl then
+    Die.bad_args
+      ~message:"--json and --jsonl are mutually exclusive"
+      ~usage:None;
 
   if !version then (
     if !output_json then
@@ -1056,8 +1168,8 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     | (MODE_LINT, _)
     | (MODE_FILE_LEVEL_DEPENDENCIES, _)
     | (MODE_LOG_ERRORS _, _) ->
-      (Wwwroot.interpret_command_line_root_parameter [], args)
-    | (_, _) -> (Wwwroot.interpret_command_line_root_parameter args, [])
+      (interpret_root [], args)
+    | (_, _) -> (interpret_root args, [])
   in
 
   if !lock_file then (
@@ -1189,7 +1301,7 @@ let parse_start_env command ~from_default =
     ]
   in
   let args = parse_without_command options usage command in
-  let root = Wwwroot.interpret_command_line_root_parameter args in
+  let root = interpret_root args in
   {
     ClientStart.config = !config;
     custom_hhi_path = !custom_hhi_path;
@@ -1229,7 +1341,7 @@ let parse_stop_args ~from_default =
   let from = ref from_default in
   let options = [Common_argspecs.from from] in
   let args = parse_without_command options usage "stop" in
-  let root = Wwwroot.interpret_command_line_root_parameter args in
+  let root = interpret_root args in
   CStop { ClientStop.root; from = !from }
 
 let parse_lsp_args () =
@@ -1275,7 +1387,7 @@ let parse_lsp_args () =
     ]
   in
   let args = parse_without_command options usage "lsp" in
-  let root = Wwwroot.interpret_command_line_root_parameter args in
+  let root = interpret_root args in
   CLsp
     {
       ClientLsp.from = !from;
@@ -1310,7 +1422,7 @@ let parse_rage_args () =
     ]
   in
   let args = parse_without_command options usage "rage" in
-  let root = Wwwroot.interpret_command_line_root_parameter args in
+  let root = interpret_root args in
   (* hh_client normally handles Ctrl+C by printing an exception-stack.
      But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
   Sys_utils.set_signal Sys.sigint Sys.Signal_default;
@@ -1427,9 +1539,7 @@ Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg
   let _args = parse_without_command options usage "decompress-zhhdg" in
   let path =
     match !path with
-    | "" ->
-      print_endline "The '--path' option is required.";
-      exit 2
+    | "" -> Die.bad_args ~message:"The '--path' option is required." ~usage:None
     | p -> p
   in
   let from = !from in
@@ -1472,15 +1582,14 @@ invocations of `hh` faster.|}
   let root =
     match args with
     | [] ->
-      print_endline usage;
-      exit 2
-    | _ -> Wwwroot.interpret_command_line_root_parameter args
+      Die.bad_args
+        ~message:"--download-saved-state requires a WWW_ROOT argument"
+        ~usage:(Some usage)
+    | _ -> interpret_root args
   in
   let from =
     match !from with
-    | "" ->
-      print_endline "The '--from' option is required.";
-      exit 2
+    | "" -> Die.bad_args ~message:"The '--from' option is required." ~usage:None
     | from -> from
   in
   CDownloadSavedState
@@ -1493,19 +1602,29 @@ invocations of `hh` faster.|}
     }
 
 let parse_args ~(from_default : string) : command =
-  match parse_command () with
-  | CKNone
-  | CKCheck ->
-    With_config (CCheck (parse_check_args CKCheck ~from_default))
-  | CKStart -> With_config (parse_start_args ~from_default)
-  | CKStop -> With_config (parse_stop_args ~from_default)
-  | CKRestart -> With_config (parse_restart_args ~from_default)
-  | CKLsp -> With_config (parse_lsp_args ())
-  | CKRage -> With_config (parse_rage_args ())
-  | CKSavedStateProjectMetadata ->
-    With_config (parse_saved_state_project_metadata_args ~from_default)
-  | CKDownloadSavedState -> With_config (parse_download_saved_state_args ())
-  | CKDecompressZhhdg -> Without_config (parse_decompress_zhhdg_args ())
+  let command = parse_command () in
+  try
+    match command with
+    | CKNone
+    | CKCheck ->
+      With_config (CCheck (parse_check_args CKCheck ~from_default))
+    | CKStart -> With_config (parse_start_args ~from_default)
+    | CKStop -> With_config (parse_stop_args ~from_default)
+    | CKRestart -> With_config (parse_restart_args ~from_default)
+    | CKLsp -> With_config (parse_lsp_args ())
+    | CKRage -> With_config (parse_rage_args ())
+    | CKSavedStateProjectMetadata ->
+      With_config (parse_saved_state_project_metadata_args ~from_default)
+    | CKDownloadSavedState -> With_config (parse_download_saved_state_args ())
+    | CKDecompressZhhdg -> Without_config (parse_decompress_zhhdg_args ())
+  with
+  (* [Arg.parse_argv] raises rather than printing, so hh_client has to
+     reproduce what [Arg.parse] used to do here. *)
+  | Arg.Help message ->
+    Printf.printf "%s" message;
+    Stdlib.exit 0
+  | Parse_error { message; usage } -> Die.bad_args ~message ~usage
+  | Arg.Bad message -> Die.bad_args ~message ~usage:None
 
 let root = function
   | CCheck { ClientEnv.root; _ }

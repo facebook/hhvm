@@ -6,6 +6,18 @@ stdout:
 <empty>
 stderr:
 Error: could not find a .hhconfig file in <test_tmp>/no_config or any of its parent directories. Do you have a .hhconfig in your code's root directory?
-<stack trace omitted>
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client --lint ../root/test.php",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"Error: could not find a .hhconfig file in <test_tmp>/no_config or any of its parent directories. Do you have a .hhconfig in your code's root directory?\")",
+    "exit_code": 1,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

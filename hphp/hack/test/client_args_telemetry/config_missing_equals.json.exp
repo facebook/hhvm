@@ -11,4 +11,17 @@ Uncaught exception:
 
 <stack trace omitted>
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client --config no_equals_sign",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "String_utils.Incorrect_format",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

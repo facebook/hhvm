@@ -207,6 +207,8 @@ let server_hung_up
 
 let client_bad_exit ~command_name:_ _ _ = ()
 
+let client_bad_args ~command_name:_ ~exit_code:_ _ _ = ()
+
 let glean_init ~reponame:_ ~init_time:_ ~prev_init_time:_ = ()
 
 let glean_init_failure ~reponame:_ ~init_time:_ ~prev_init_time:_ ~e:_ = ()

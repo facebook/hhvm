@@ -3,9 +3,23 @@ argv: hh_client download-saved-state --from telemetry_test
 cwd: <test_tmp>/root
 exit_code: 2
 stdout:
+<empty>
+stderr:
+--download-saved-state requires a WWW_ROOT argument
 Usage: hh_client download-saved-state [OPTION]... [WWW-ROOT]
 <usage omitted>
-stderr:
-<empty>
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client download-saved-state --from telemetry_test",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"--download-saved-state requires a WWW_ROOT argument\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

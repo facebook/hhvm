@@ -5,10 +5,19 @@ exit_code: 2
 stdout:
 <empty>
 stderr:
-Uncaught exception:
-  
-  (Arg.Bad "only a single mode should be specified")
-
-<stack trace omitted>
+only a single mode should be specified
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client --single test.php --lint test.php",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"only a single mode should be specified\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

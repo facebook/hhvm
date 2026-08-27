@@ -3,8 +3,21 @@ argv: hh_client download-saved-state --type manifold .
 cwd: <test_tmp>/root
 exit_code: 2
 stdout:
-The '--from' option is required.
-stderr:
 <empty>
+stderr:
+The '--from' option is required.
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client download-saved-state --type manifold .",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"The '--from' option is required.\")",
+    "exit_code": 2,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

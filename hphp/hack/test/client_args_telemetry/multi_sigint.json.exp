@@ -1,14 +1,10 @@
 === hh_client result ===
 argv: hh_client --multi ../sigint_fifo
 cwd: <test_tmp>/root
-exit_code: 2
+exit_code: 130
 stdout:
 <empty>
 stderr:
-Uncaught exception:
-  
-  Exit_status.Exit_with(Exit_status.Interrupted)
-
-<stack trace omitted>
+<empty>
 === telemetry ===
 []

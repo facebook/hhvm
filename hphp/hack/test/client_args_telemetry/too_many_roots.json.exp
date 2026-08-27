@@ -7,4 +7,17 @@ stdout:
 stderr:
 Error: please provide at most one www directory
 === telemetry ===
-[]
+[
+  {
+    "argv": "hh_client . ../no_config",
+    "client_command": "Args",
+    "event": "CLIENT_BAD_ARGS",
+    "exception": "Stdlib.Arg.Bad(\"Error: please provide at most one www directory\")",
+    "exit_code": 1,
+    "exit_status": "Exit_status.Input_error",
+    "process": "client"
+  },
+  {
+    "event": "INIT_INFO"
+  }
+]

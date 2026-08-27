@@ -31,6 +31,34 @@ TEST(ResponseMetadataTest, FillSuccessResponseMetadataPopulatesResponseType) {
       apache::thrift::PayloadMetadata::Type::responseMetadata);
 }
 
+TEST(ResponseMetadataTest, AllocatesBinarySerializedSizeWithHeadroom) {
+  apache::thrift::ResponseRpcMetadata md;
+  fillSuccessResponseMetadata(md);
+  apache::thrift::BinaryProtocolWriter writer;
+  const auto serializedSize = md.serializedSizeZC(&writer);
+
+  auto buf =
+      serializeResponseMetadata(rocket::server::MetadataProtocol::BINARY, md);
+  ASSERT_NE(buf, nullptr);
+  EXPECT_GE(buf->headroom(), kMetadataHeadroomBytes);
+  EXPECT_GE(buf->capacity(), kMetadataHeadroomBytes + serializedSize);
+  EXPECT_LT(buf->capacity(), 1024);
+}
+
+TEST(ResponseMetadataTest, AllocatesCompactSerializedSizeWithHeadroom) {
+  apache::thrift::ResponseRpcMetadata md;
+  fillSuccessResponseMetadata(md);
+  apache::thrift::CompactProtocolWriter writer;
+  const auto serializedSize = md.serializedSizeZC(&writer);
+
+  auto buf =
+      serializeResponseMetadata(rocket::server::MetadataProtocol::COMPACT, md);
+  ASSERT_NE(buf, nullptr);
+  EXPECT_GE(buf->headroom(), kMetadataHeadroomBytes);
+  EXPECT_GE(buf->capacity(), kMetadataHeadroomBytes + serializedSize);
+  EXPECT_LT(buf->capacity(), 1024);
+}
+
 TEST(ResponseMetadataTest, FillAppErrorResponseMetadataHasBlame) {
   apache::thrift::ResponseRpcMetadata md;
   fillAppErrorResponseMetadata(

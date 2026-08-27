@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
 #include <memory>
 
@@ -43,9 +42,7 @@ inline std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
   apache::thrift::BinaryProtocolWriter writer;
   size_t serSize = metadata.serializedSizeZC(&writer);
 
-  constexpr size_t kMinAllocBytes = 1024;
-  auto buf = folly::IOBuf::create(
-      std::max(kMetadataHeadroomBytes + serSize, kMinAllocBytes));
+  auto buf = folly::IOBuf::create(kMetadataHeadroomBytes + serSize);
   buf->advance(kMetadataHeadroomBytes);
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   queue.append(std::move(buf));

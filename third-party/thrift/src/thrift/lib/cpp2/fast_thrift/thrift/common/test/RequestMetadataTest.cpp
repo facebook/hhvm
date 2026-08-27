@@ -58,11 +58,16 @@ TEST(SerializeRequestMetadataTest, RoundTripsPopulatedFields) {
   EXPECT_EQ(*decoded.queueTimeoutMs(), 100);
 }
 
-TEST(SerializeRequestMetadataTest, ReservesFrameHeaderHeadroom) {
+TEST(SerializeRequestMetadataTest, AllocatesSerializedSizeWithHeadroom) {
   auto md = makePopulatedMetadata();
+  apache::thrift::BinaryProtocolWriter writer;
+  const auto serializedSize = md.serializedSizeZC(&writer);
+
   auto buf = serializeRequestMetadata(md);
   ASSERT_NE(buf, nullptr);
   EXPECT_GE(buf->headroom(), kMetadataHeadroomBytes);
+  EXPECT_GE(buf->capacity(), kMetadataHeadroomBytes + serializedSize);
+  EXPECT_LT(buf->capacity(), 1024);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

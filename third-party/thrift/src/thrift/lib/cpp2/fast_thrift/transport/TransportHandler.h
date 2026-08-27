@@ -24,7 +24,6 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/Function.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocketException.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/AsyncTransport.h>
@@ -132,23 +131,28 @@ class TransportHandlerT : public folly::DelayedDestruction,
   // --- AsyncTransport::ReadCallback interface ---
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
-    if (readBufQueue_.tailroom() < minBufferSize_) {
-      // Grow through the pipeline's allocator rather than
-      // IOBufQueue::preallocate, which is hardwired to IOBuf::create. pack is
-      // off: the new buffer is empty, so there is nothing to pack and the
-      // append must chain it as the tail we hand to the socket.
+    if (!readBuf_ || readBuf_->tailroom() < minBufferSize_) {
       DCHECK(pipeline_);
-      readBufQueue_.append(pipeline_->allocate(maxBufferSize_), /*pack=*/false);
+      readBuf_ = pipeline_->allocate(maxBufferSize_);
     }
-    *bufReturn = readBufQueue_.writableTail();
-    *lenReturn = readBufQueue_.tailroom();
+    *bufReturn = readBuf_->writableTail();
+    *lenReturn = readBuf_->tailroom();
   }
 
   void readDataAvailable(size_t len) noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
-    readBufQueue_.postallocate(len);
+    DCHECK(readBuf_);
+    DCHECK_LE(len, readBuf_->tailroom());
     DCHECK(pipeline_);
-    handleReadResult(pipeline_->fireRead(TypeErasedBox(readBufQueue_.move())));
+
+    readBuf_->append(len);
+    auto bytes = std::move(readBuf_);
+    if (bytes->tailroom() >= minBufferSize_) {
+      // Preserve the unused tail for the next socket read without sharing the
+      // writable region with the bytes delivered to the pipeline.
+      readBuf_ = bytes->maybeSplitTail();
+    }
+    handleReadResult(pipeline_->fireRead(TypeErasedBox(std::move(bytes))));
   }
 
   void readBufferAvailable(
@@ -386,6 +390,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
     }
     state_ = State::Closing;
     pauseRead();
+    readBuf_.reset();
     if (pipeline_) {
       if (ex) {
         pipeline_->fireException(std::move(ex));
@@ -474,7 +479,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
   };
 
   folly::AsyncTransport::UniquePtr socket_;
-  folly::IOBufQueue readBufQueue_{folly::IOBufQueue::cacheChainLength()};
+  BytesPtr readBuf_;
   size_t minBufferSize_;
   size_t maxBufferSize_;
   std::chrono::milliseconds drainTimeoutDuration_;

@@ -582,13 +582,41 @@ TEST_F(TransportHandlerTest, ReadBufferComesFromPipelineAllocator) {
   EXPECT_EQ(allocator.allocationCount(), 1);
   EXPECT_EQ(second, buf);
 
-  // readDataAvailable moves the whole chain to the pipeline, so the next
-  // request starts over with a fresh buffer from the allocator.
+  // Delivering the completed prefix retains the unused tail for subsequent
+  // socket reads, so no second large allocation is needed.
   handler->readDataAvailable(16);
   EXPECT_EQ(appHandler_.readCount(), 1);
 
-  handler->getReadBuffer(&buf, &len);
-  EXPECT_EQ(allocator.allocationCount(), 2);
+  handler->getReadBuffer(&second, &len);
+  EXPECT_EQ(allocator.allocationCount(), 1);
+  EXPECT_EQ(second, static_cast<uint8_t*>(buf) + 16);
+  EXPECT_GE(len, kMaxBufferSize - 16);
+}
+
+TEST_F(TransportHandlerTest, ConsecutiveReadBuffersPreserveMessageBoundaries) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  std::vector<std::string> reads;
+  appHandler_.setOnReadCallback([&](TypeErasedBox&& msg) {
+    auto bytes = msg.take<BytesPtr>();
+    reads.push_back(bytes->to<std::string>());
+    return Result::Success;
+  });
+
+  void* first = nullptr;
+  size_t len = 0;
+  handler->getReadBuffer(&first, &len);
+  ASSERT_GE(len, 3);
+  std::memcpy(first, "one", 3);
+  handler->readDataAvailable(3);
+
+  void* second = nullptr;
+  handler->getReadBuffer(&second, &len);
+  ASSERT_GE(len, 3);
+  EXPECT_EQ(second, static_cast<uint8_t*>(first) + 3);
+  std::memcpy(second, "two", 3);
+  handler->readDataAvailable(3);
+
+  EXPECT_THAT(reads, ElementsAre("one", "two"));
 }
 
 // --- Lifecycle Tests ---

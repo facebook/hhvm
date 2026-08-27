@@ -503,6 +503,39 @@ McRouteHandleProvider<RouterInfo>::createDestinationRoute(
 
 template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf>
+McRouteHandleProvider<RouterInfo>::wrapWithWeightsRv(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
+    const folly::dynamic& json,
+    std::shared_ptr<typename RouterInfo::RouteHandleIf> route,
+    folly::StringPiece callerName) {
+  auto* jEnableTrafficRv = json.get_ptr("weights_rv");
+  if (!jEnableTrafficRv) {
+    return route;
+  }
+  folly::dynamic jHashRoute =
+      folly::dynamic::object("hash_func", WeightedCh3RvHashFunc::type())(
+          "weights_rv", jEnableTrafficRv->asString());
+  if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
+    if (parseBool(*jNeedBucketization, "bucketize")) {
+      jHashRoute["bucketize"] = true;
+    }
+  }
+  if (auto* jWeightsRvSalt = json.get_ptr("weights_rv_salt")) {
+    checkLogic(
+        jWeightsRvSalt->isString(),
+        "{}: 'weights_rv_salt' is not string",
+        callerName);
+    jHashRoute["salt"] = jWeightsRvSalt->getString();
+  }
+  return createHashRoute<RouterInfo>(
+      std::move(jHashRoute),
+      {std::move(route), makeNullRoute(factory, folly::dynamic::object())},
+      factory.getThreadId(),
+      proxy_);
+}
+
+template <class RouterInfo>
+std::shared_ptr<typename RouterInfo::RouteHandleIf>
 McRouteHandleProvider<RouterInfo>::createSRRoute(
     RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
     const folly::dynamic& json,
@@ -612,27 +645,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
     }
   }
 
-  if (auto* jEnableTrafficRv = json.get_ptr("weights_rv")) {
-    folly::dynamic jHashRoute =
-        folly::dynamic::object("hash_func", WeightedCh3RvHashFunc::type())(
-            "weights_rv", jEnableTrafficRv->asString());
-    if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
-      if (parseBool(*jNeedBucketization, "bucketize")) {
-        jHashRoute["bucketize"] = true;
-      }
-    }
-    if (auto* jWeightsRvSalt = json.get_ptr("weights_rv_salt")) {
-      checkLogic(
-          jWeightsRvSalt->isString(),
-          "SRRoute: 'weights_rv_salt' is not string");
-      jHashRoute["salt"] = jWeightsRvSalt->getString();
-    }
-    route = createHashRoute<RouterInfo>(
-        std::move(jHashRoute),
-        {route, makeNullRoute(factory, folly::dynamic::object())},
-        factory.getThreadId(),
-        proxy_);
-  }
+  route = wrapWithWeightsRv(factory, json, std::move(route), "SRRoute");
 
   route = bucketize(std::move(route), json);
 
@@ -793,6 +806,12 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
     if (json.isObject()) {
       // Wrap AxonLogRoute if configured
       route = wrapAxonLogRoute(std::move(route), proxy_, json, factory);
+      // Optional runtime traffic dial over the whole PoolRoute. The static
+      // per-destination "weights" handled above are unaffected; this wraps the
+      // assembled route in a {poolRoute, nullRoute} WeightedCh3Rv hash route.
+      // Applied before bucketize() (and before the asynclog registration below)
+      // so the resulting route tree matches createSRRoute.
+      route = wrapWithWeightsRv(factory, json, std::move(route), "PoolRoute");
       route = bucketize(std::move(route), json);
 
       if (auto jPoolId = json.get_ptr("pool_id")) {

@@ -202,6 +202,16 @@ class McRouteHandleProvider
 
   RouteHandlePtr bucketize(RouteHandlePtr route, const folly::dynamic& json);
 
+  // Wraps `route` in a {route, nullRoute} WeightedCh3Rv hash route for runtime
+  // traffic dialing when `json` contains a "weights_rv" key; returns `route`
+  // unchanged otherwise. Honors optional "weights_rv_salt" and "bucketize".
+  // `callerName` is used only for error-message context (e.g. "SRRoute").
+  RouteHandlePtr wrapWithWeightsRv(
+      RouteHandleFactory<RouteHandleIf>& factory,
+      const folly::dynamic& json,
+      RouteHandlePtr route,
+      folly::StringPiece callerName);
+
   RouteHandlePtr wrapAxonLogRoute(
       RouteHandlePtr route,
       ProxyBase& proxy,

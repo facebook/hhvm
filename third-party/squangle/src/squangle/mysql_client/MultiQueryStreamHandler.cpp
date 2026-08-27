@@ -534,11 +534,10 @@ void AsyncMultiQueryStreamHandler::streamCallback(
     case StreamState::Failure:
       finalizeFailure(op);
       break;
-
-    default:
-      CHECK(false)
-          << "Somehow got invalid StreamState value - check for memory corruption";
   }
+  // Deliberately no default label: every StreamState is handled above, so
+  // -Wswitch fails the build if the enum gains an enumerator. The default this
+  // replaced suppressed that warning and aborted at runtime instead.
   in_callback_baton_.post();
 }
 
@@ -668,11 +667,10 @@ void SyncMultiQueryStreamHandler::streamCallback(
       sync_state_.store(SyncState::Failure, std::memory_order_release);
       data_ready_baton_.post();
       break;
-
-    default:
-      CHECK(false)
-          << "Somehow got invalid StreamState value - check for memory corruption";
   }
+  // Deliberately no default label: every StreamState is handled above, so
+  // -Wswitch fails the build if the enum gains an enumerator. The default this
+  // replaced suppressed that warning and aborted at runtime instead.
   in_callback_baton_.post();
 }
 

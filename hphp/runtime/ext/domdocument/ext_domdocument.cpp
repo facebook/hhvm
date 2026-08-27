@@ -3304,7 +3304,7 @@ void HHVM_METHOD(DOMDocument, __construct,
   const OptString& str_encoding = encoding.isNull()
     ? null_string : encoding.toString();
   if (str_encoding.size() > 0) {
-    docp->encoding = (const xmlChar*)xmlStrdup((xmlChar*)str_encoding.data());
+    docp->encoding = xmlStrdup((const xmlChar*)str_encoding.data());
   }
   auto* data = Native::data<DOMNode>(this_);
   data->setNode((xmlNodePtr)docp);

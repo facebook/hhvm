@@ -79,11 +79,13 @@ endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # libXed
-if (HHVM_REQUIRE_XED)
+if (HHVM_ENABLE_XED)
   find_package(LibXed)
   if (LibXed_FOUND)
     include_directories(${LibXed_INCLUDE_DIR})
   endif()
+endif()
+if (HHVM_REQUIRE_XED)
   add_definitions(-DHAVE_XED=1)
 endif()
 
@@ -333,7 +335,7 @@ if (USE_JEMALLOC)
 
   if (JEMALLOC_VERSION_MINIMUM)
     message(STATUS "Found jemalloc: ${JEMALLOC_LIB} ${JEMALLOC_INCLUDE_DIR}")
-    include_directories(BEFORE "${JEMALLOC_INCLUDE_DIR}")
+    include_directories(BEFORE SYSTEM "${JEMALLOC_INCLUDE_DIR}")
   else()
     message(FATAL_ERROR "jemalloc >=5.3.0 is required")
   endif()
@@ -403,7 +405,10 @@ if (LZ4_INCLUDE_DIR)
   target_include_directories(lz4 INTERFACE ${LZ4_INCLUDE_DIR})
   target_link_libraries(lz4 INTERFACE ${LZ4_LIBRARY})
 endif()
-find_package(re2 CONFIG REQUIRED)
+find_package(re2 CONFIG QUIET)
+if(NOT TARGET re2::re2)
+  find_package(RE2 MODULE REQUIRED)
+endif()
 
 # Use the real xplat/usdt implementation for fbsource OSS builds so
 # verification doesn't silently compile away probes.

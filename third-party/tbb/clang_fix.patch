@@ -1,5 +1,4 @@
 diff --git a/third-party/tbb/src/build/linux.gcc.inc b/third-party/tbb/src/build/linux.gcc.inc
-index 214b38377bc..91345012017 100644
 --- a/third-party/tbb/src/build/linux.gcc.inc
 +++ b/third-party/tbb/src/build/linux.gcc.inc
 @@ -67,7 +67,7 @@ endif

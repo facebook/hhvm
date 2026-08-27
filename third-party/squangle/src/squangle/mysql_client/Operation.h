@@ -346,9 +346,7 @@ class OperationBase {
 
     virtual Connection* get() = 0;
     virtual const Connection* get() const = 0;
-    virtual std::unique_ptr<Connection> releaseConnection() {
-      return nullptr;
-    }
+    virtual std::unique_ptr<Connection> releaseConnection();
   };
 
  protected:

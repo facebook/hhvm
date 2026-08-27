@@ -105,6 +105,11 @@ if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
   mkdir "$TARGET_OPAM_DIR"
   tar xzf "$MINI_REPO_TARBALL" -C "$TARGET_OPAM_DIR"
   opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO_DIR" --no-setup --bare
+elif [[ -n "${HHVM_OSS_OPAM_REPOSITORY:-}" ]]; then
+  opam init --disable-sandboxing --reinit --no-setup --bare
+  opam repository set-url default \
+    "$HHVM_OSS_OPAM_REPOSITORY" --all-switches
+  opam update default
 else
   opam init --disable-sandboxing --reinit --no-setup --bare
 fi

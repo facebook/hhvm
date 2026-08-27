@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 # Do this until cmake has a define for ARMv8
 execute_process(COMMAND uname -m
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -168,16 +170,6 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
       if(AARCH64_TARGET_CPU)
         list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
         set(CMAKE_ASM_FLAGS_INIT  "${CMAKE_ASM_FLAGS_INIT} -mcpu=${AARCH64_TARGET_CPU}")
-
-        # Make sure GCC is not using the fix for errata 843419. This change
-        # interferes with the gold linker. Note that GCC applies this fix
-        # even if you specify an mcpu other than cortex-a53, which is why
-        # it's explicitly being disabled here for any cpu other than
-        # cortex-a53. If you're running a newer pass of the cortex-a53, then
-        # you can likely disable this fix with the following flag too. YMMV
-        if(NOT ${AARCH64_TARGET_CPU} STREQUAL "cortex-a53")
-          list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
-        endif()
       endif()
     endif()
 
@@ -198,6 +190,14 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   set(CMAKE_CXX_FLAGS_DEBUG_INIT          "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_DEBUGOPT_INIT         "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_CXX_FLAGS_DEBUGOPT_INIT       "-O2 -g${GDB_SUBOPTION}")
+  # CMake seeds flags from _INIT only for its builtin configurations, so the
+  # custom DebugOpt configuration needs explicit cache entries.
+  foreach(lang C CXX)
+    if(NOT DEFINED CMAKE_${lang}_FLAGS_DEBUGOPT)
+      set(CMAKE_${lang}_FLAGS_DEBUGOPT "${CMAKE_${lang}_FLAGS_DEBUGOPT_INIT}"
+          CACHE STRING "Flags used by the ${lang} compiler during DebugOpt builds.")
+    endif()
+  endforeach()
   set(CMAKE_C_FLAGS_MINSIZEREL_INIT       "-Os")
   set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "-Os")
   set(CMAKE_C_FLAGS_RELEASE_INIT          "-O3")
@@ -232,6 +232,26 @@ if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   foreach(opt ${RELEASE_CXX_OPTIONS})
     set(CMAKE_CXX_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT} -${opt}")
   endforeach()
+
+  # Some BFD versions overflow AArch64 branch relocations once a link gets into
+  # the multi-gigabyte range, which every non-trivial HHVM link does. Prefer
+  # lld for all link types rather than patching individual targets.
+  if(IS_AARCH64)
+    find_program(LLD_EXECUTABLE ld.lld)
+    mark_as_advanced(LLD_EXECUTABLE)
+    if(LLD_EXECUTABLE)
+      foreach(linker_flags
+              CMAKE_EXE_LINKER_FLAGS_INIT
+              CMAKE_SHARED_LINKER_FLAGS_INIT
+              CMAKE_MODULE_LINKER_FLAGS_INIT)
+        set(${linker_flags} "${${linker_flags}} -fuse-ld=lld")
+      endforeach()
+    else()
+      message(WARNING
+        "ld.lld not found; older BFD linkers may fail with AArch64 branch "
+        "relocation overflows.")
+    endif()
+  endif()
 else()
   message("Warning: unknown/unsupported compiler, things may go wrong")
 endif()

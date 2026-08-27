@@ -422,7 +422,6 @@ DbQueryResult Connection::queryWithGenerator(
       std::move(query_generator), std::move(cb), std::move(options));
 }
 
-template <>
 DbQueryResult Connection::queryWithGenerator(
     QueryGenerator& query_generator,
     QueryCallback&& cb,

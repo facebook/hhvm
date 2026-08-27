@@ -21,14 +21,24 @@ include(ExternalProject)
 
 set(TBB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(TBB_STATIC_LIB_PATH $<IF:$<CONFIG:Debug>,_debug,_release>/${CMAKE_STATIC_LIBRARY_PREFIX}tbb$<$<CONFIG:Debug>:_debug>${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(TBB_PATCH_COMMAND
+  patch -p4 < "${CMAKE_CURRENT_SOURCE_DIR}/pic_compile.patch"
+)
+set(TBB_COMPILER_ARG)
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  list(APPEND TBB_PATCH_COMMAND
+    COMMAND
+      patch -p4 < "${CMAKE_CURRENT_SOURCE_DIR}/clang_fix.patch"
+  )
+  set(TBB_COMPILER_ARG compiler=clang)
+endif()
 
 ExternalProject_Add(
   bundled_tbb
   EXCLUDE_FROM_ALL
   SOURCE_DIR "${TBB_ROOT}"
   CONFIGURE_COMMAND ""
-  PATCH_COMMAND
-    patch -p4 < "${CMAKE_CURRENT_SOURCE_DIR}/pic_compile.patch"
+  PATCH_COMMAND ${TBB_PATCH_COMMAND}
   BUILD_COMMAND
     cd <SOURCE_DIR> && make
       work_dir=<INSTALL_DIR>
@@ -36,14 +46,11 @@ ExternalProject_Add(
       CC=${CMAKE_C_COMPILER}
       CXX=${CMAKE_CXX_COMPILER}
       CXXFLAGS=${CMAKE_CXX_FLAGS}
+      ${TBB_COMPILER_ARG}
       tbb
   INSTALL_COMMAND ""
   BUILD_BYPRODUCTS "<INSTALL_DIR>${TBB_STATIC_LIB_PATH}"
 )
-
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
- execute_process(COMMAND "patch" "-p1" "-f" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/clang_fix.patch")
-endif()
 
 add_dependencies(tbb bundled_tbb)
 

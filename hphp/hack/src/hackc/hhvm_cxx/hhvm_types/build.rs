@@ -17,7 +17,6 @@ fn main() {
         PathBuf::from("hhvm_types_ffi.rs"),
         PathBuf::from("as-base-ffi.cpp"),
         PathBuf::from("as-base-ffi.h"),
-        hphp.join("runtime/vm/as-base.cpp"),
         hphp.join("runtime/vm/as-base.h"),
     ];
 

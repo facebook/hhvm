@@ -17,7 +17,6 @@ fn main() {
         PathBuf::from("ffi_bridge.rs"),
         PathBuf::from("ffi_bridge.cpp"),
         PathBuf::from("ffi_bridge.h"),
-        hphp.join("util/process-cpu.cpp"),
         hphp.join("util/process-cpu.h"),
     ];
 

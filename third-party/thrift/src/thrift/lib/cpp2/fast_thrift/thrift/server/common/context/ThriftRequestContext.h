@@ -24,8 +24,6 @@
 
 #include <folly/container/F14Map.h>
 
-#include <folly/CppAttributes.h>
-
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -44,7 +42,11 @@ class ThriftRequestContext {
   // string_view without building a std::string.
   using HeaderMap = folly::F14NodeMap<std::string, std::string>;
 
-  ThriftRequestContext() = default;
+  // The security layer's per-request fields are constructed by whoever
+  // creates the request context and moved in here; a server with no security
+  // layer leaves the slot empty.
+  explicit ThriftRequestContext(detail::InternalFieldsT internalFields = {})
+      : internalFields_(std::move(internalFields)) {}
 
   ThriftRequestContext(const ThriftRequestContext&) = delete;
   ThriftRequestContext& operator=(const ThriftRequestContext&) = delete;
@@ -85,39 +87,29 @@ class ThriftRequestContext {
     return checksumAlgorithm_;
   }
 
-  // Points this context at the per-request fields the security layer keeps for
-  // this request. Non-owning, as on the connection context; the fields live on
-  // the Cpp2RequestContext built for the request, which outlives it.
-  void setInternalFields(detail::InternalFieldsT* fields) noexcept {
-    internalFields_ = fields;
-  }
-
-  // The security layer's per-request fields, or null while nothing holds any.
-  // The connection's own fields are on getConnectionContext().
-  //
-  // Unchecked: only valid for the `T` the owner constructed.
+  // The security layer's per-request fields. The connection's own fields are
+  // on getConnectionContext(). Unchecked: only valid for the `T` the slot was
+  // constructed with, and only once something has filled it.
   template <class T>
-  T* FOLLY_NULLABLE getInternalFields() noexcept {
-    return hasInternalFields() ? &internalFields_->value_unchecked<T>()
-                               : nullptr;
+  T& getInternalFields() noexcept {
+    return internalFields_.value_unchecked<T>();
   }
 
   template <class T>
-  const T* FOLLY_NULLABLE getInternalFields() const noexcept {
-    return hasInternalFields() ? &internalFields_->value_unchecked<T>()
-                               : nullptr;
+  const T& getInternalFields() const noexcept {
+    return internalFields_.value_unchecked<T>();
+  }
+
+  bool hasInternalFields() const noexcept {
+    return internalFields_.has_value();
   }
 
  private:
-  bool hasInternalFields() const noexcept {
-    return internalFields_ != nullptr && internalFields_->has_value();
-  }
-
   boost::intrusive_ptr<ThriftConnContext> connContext_;
   HeaderMap headers_;
   apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
       apache::thrift::ChecksumAlgorithm::NONE};
-  detail::InternalFieldsT* internalFields_{nullptr};
+  detail::InternalFieldsT internalFields_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

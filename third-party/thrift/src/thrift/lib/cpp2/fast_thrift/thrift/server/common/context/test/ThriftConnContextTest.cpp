@@ -26,8 +26,7 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-// Stands in for the security layer's per-connection fields. Owned outside the
-// context, as the real ones are — they live on the Cpp2ConnContext.
+// Stands in for the security layer's per-connection fields.
 struct TestConnFields {
   int value{0};
 };
@@ -63,51 +62,36 @@ TEST(ThriftConnContextTest, IntrusivePtrSharesOwnership) {
   EXPECT_EQ(b->use_count(), 1);
 }
 
-// Nothing to read until something puts fields there: a server with no
-// security layer has none, and asking must not invent one. An installed but
-// empty slot reads the same way — there is no object to hand back.
-TEST(ThriftConnContextTest, InternalFieldsAreNullUntilFilled) {
-  detail::InternalFieldsT empty;
+// A server with no security layer never fills the slot, and the context must
+// not invent one.
+TEST(ThriftConnContextTest, InternalFieldsAreEmptyUntilFilled) {
   boost::intrusive_ptr<ThriftConnContext> ctx{new ThriftConnContext()};
-  EXPECT_EQ(ctx->getInternalFields<TestConnFields>(), nullptr);
-  EXPECT_EQ(std::as_const(*ctx).getInternalFields<TestConnFields>(), nullptr);
-
-  ctx->setInternalFields(&empty);
-  EXPECT_EQ(ctx->getInternalFields<TestConnFields>(), nullptr);
-  EXPECT_EQ(std::as_const(*ctx).getInternalFields<TestConnFields>(), nullptr);
+  EXPECT_FALSE(ctx->hasInternalFields());
 }
 
-// The point of the pointer: the context hands out the object its owner holds,
-// so a write through the owner is the write this context reads.
-TEST(ThriftConnContextTest, InternalFieldsAliasTheOwnersObject) {
-  detail::InternalFieldsT owned{std::in_place_type<TestConnFields>};
-  boost::intrusive_ptr<ThriftConnContext> ctx{new ThriftConnContext()};
-  ctx->setInternalFields(&owned);
+// The context owns the fields outright: the object the constructor was handed
+// is moved in, and what comes back out is that same object, not a copy.
+TEST(ThriftConnContextTest, InternalFieldsAreOwnedByTheContext) {
+  boost::intrusive_ptr<ThriftConnContext> ctx{new ThriftConnContext(
+      detail::InternalFieldsT{std::in_place_type<TestConnFields>})};
+  ASSERT_TRUE(ctx->hasInternalFields());
 
-  owned.value<TestConnFields>().value = 7;
-  ASSERT_NE(ctx->getInternalFields<TestConnFields>(), nullptr);
-  EXPECT_EQ(ctx->getInternalFields<TestConnFields>()->value, 7);
-  EXPECT_EQ(
-      ctx->getInternalFields<TestConnFields>(), &owned.value<TestConnFields>());
-
-  ctx->getInternalFields<TestConnFields>()->value = 9;
-  EXPECT_EQ(owned.value<TestConnFields>().value, 9);
+  ctx->getInternalFields<TestConnFields>().value = 9;
+  EXPECT_EQ(std::as_const(*ctx).getInternalFields<TestConnFields>().value, 9);
 }
 
-// Two connections point at their own owner's fields, never at each other's.
+// Each connection has its own fields, never a shared one.
 TEST(ThriftConnContextTest, InternalFieldsAreNotSharedBetweenConnections) {
-  detail::InternalFieldsT firstFields{std::in_place_type<TestConnFields>};
-  detail::InternalFieldsT secondFields{std::in_place_type<TestConnFields>};
-  boost::intrusive_ptr<ThriftConnContext> first{new ThriftConnContext()};
-  boost::intrusive_ptr<ThriftConnContext> second{new ThriftConnContext()};
-  first->setInternalFields(&firstFields);
-  second->setInternalFields(&secondFields);
+  boost::intrusive_ptr<ThriftConnContext> first{new ThriftConnContext(
+      detail::InternalFieldsT{std::in_place_type<TestConnFields>})};
+  boost::intrusive_ptr<ThriftConnContext> second{new ThriftConnContext(
+      detail::InternalFieldsT{std::in_place_type<TestConnFields>})};
 
-  first->getInternalFields<TestConnFields>()->value = 1;
-  second->getInternalFields<TestConnFields>()->value = 2;
+  first->getInternalFields<TestConnFields>().value = 1;
+  second->getInternalFields<TestConnFields>().value = 2;
 
-  EXPECT_EQ(first->getInternalFields<TestConnFields>()->value, 1);
-  EXPECT_EQ(second->getInternalFields<TestConnFields>()->value, 2);
+  EXPECT_EQ(first->getInternalFields<TestConnFields>().value, 1);
+  EXPECT_EQ(second->getInternalFields<TestConnFields>().value, 2);
 }
 
 TEST(ThriftConnContextTest, IntrusivePtrDeletesOnLastReference) {

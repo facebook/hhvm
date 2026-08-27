@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include <utility>
+
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -41,39 +43,31 @@ TEST(ThriftRequestContextTest, SetConnectionContextStoresIt) {
   EXPECT_EQ(rc.getConnectionContext()->getSecurityProtocol(), "TLS1.3");
 }
 
-// An installed but empty slot reads the same as no slot at all — there is no
-// object to hand back.
-TEST(ThriftRequestContextTest, InternalFieldsAreNullUntilFilled) {
-  detail::InternalFieldsT empty;
+// A server with no security layer never fills the slot, and the context must
+// not invent one.
+TEST(ThriftRequestContextTest, InternalFieldsAreEmptyUntilFilled) {
   ThriftRequestContext rc;
-  EXPECT_EQ(rc.getInternalFields<TestRequestFields>(), nullptr);
-
-  rc.setInternalFields(&empty);
-  EXPECT_EQ(rc.getInternalFields<TestRequestFields>(), nullptr);
+  EXPECT_FALSE(rc.hasInternalFields());
 }
 
-// Request fields belong to their request: two requests on one connection point
-// at their own, and neither at the connection's.
+// Request fields belong to their request: two requests on one connection own
+// their own, and the connection's slot stays untouched by either.
 TEST(ThriftRequestContextTest, InternalFieldsArePerRequest) {
-  detail::InternalFieldsT firstFields{std::in_place_type<TestRequestFields>};
-  detail::InternalFieldsT secondFields{std::in_place_type<TestRequestFields>};
   boost::intrusive_ptr<ThriftConnContext> conn{new ThriftConnContext()};
 
-  ThriftRequestContext first;
+  ThriftRequestContext first{
+      detail::InternalFieldsT{std::in_place_type<TestRequestFields>}};
   first.setConnectionContext(conn);
-  first.setInternalFields(&firstFields);
-  ThriftRequestContext second;
+  ThriftRequestContext second{
+      detail::InternalFieldsT{std::in_place_type<TestRequestFields>}};
   second.setConnectionContext(conn);
-  second.setInternalFields(&secondFields);
 
-  first.getInternalFields<TestRequestFields>()->value = 1;
-  second.getInternalFields<TestRequestFields>()->value = 2;
+  first.getInternalFields<TestRequestFields>().value = 1;
+  second.getInternalFields<TestRequestFields>().value = 2;
 
-  EXPECT_EQ(firstFields.value<TestRequestFields>().value, 1);
-  EXPECT_EQ(secondFields.value<TestRequestFields>().value, 2);
-  EXPECT_EQ(
-      first.getConnectionContext()->getInternalFields<TestRequestFields>(),
-      nullptr);
+  EXPECT_EQ(first.getInternalFields<TestRequestFields>().value, 1);
+  EXPECT_EQ(second.getInternalFields<TestRequestFields>().value, 2);
+  EXPECT_FALSE(first.getConnectionContext()->hasInternalFields());
 }
 
 TEST(ThriftRequestContextTest, KeepsConnContextAliveAfterLocalReset) {

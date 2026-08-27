@@ -62,9 +62,9 @@ class ThriftRequestContext {
     return connContext_.get();
   }
 
-  // Invoked method name (RequestRpcMetadata.name). Empty until something
-  // stamps it; nothing does yet. Moving the name out of the metadata avoids a
-  // copy, which is why the setter takes the string by value.
+  // Invoked method name (RequestRpcMetadata.name), stamped by
+  // ThriftServerRequestContextHandler. Empty when the request carried no
+  // method metadata.
   void setMethodName(std::string methodName) noexcept {
     methodName_ = std::move(methodName);
   }

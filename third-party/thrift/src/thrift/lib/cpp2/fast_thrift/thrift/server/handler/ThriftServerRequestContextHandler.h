@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -32,9 +33,10 @@ namespace apache::thrift::fast_thrift::thrift {
 
 /**
  * ThriftServerRequestContextHandler — duplex pipeline handler that creates a
- * fresh ThriftRequestContext for every inbound request and stamps it onto
- * the message. Subsequent handlers (ConnectionContextHandler, metadata
- * handler, etc.) populate individual fields on the per-request context.
+ * fresh ThriftRequestContext for every inbound request, stamps it onto the
+ * message, and fills in the invoked method name. Subsequent handlers
+ * (ConnectionContextHandler, headers handler, etc.) populate the remaining
+ * fields on the per-request context.
  *
  * Must sit upstream of any handler that wants to write into the request's
  * context (i.e. between ThriftServerTransportAdapter and any handler that
@@ -59,6 +61,13 @@ class ThriftServerRequestContextHandler {
       return ctx.fireRead(std::move(msg));
     }
     request.requestContext = std::make_unique<ThriftRequestContext>();
+    // Copied, not moved out of the metadata: the tail adapter still dispatches
+    // on RequestRpcMetadata.name, so emptying it here would break routing.
+    const auto* metadata = request.payload.getRequestRpcMetadata();
+    if (FOLLY_LIKELY(metadata != nullptr && metadata->name().has_value())) {
+      request.requestContext->setMethodName(
+          std::string(metadata->name()->view()));
+    }
     return ctx.fireRead(std::move(msg));
   }
 

@@ -16,17 +16,20 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
 
+#include <memory>
 #include <set>
 #include <vector>
 
 #include <gtest/gtest.h>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -60,6 +63,19 @@ class FakeContext {
 ThriftServerRequestMessage makeRequest(uint32_t streamId = 1) {
   ThriftServerRequestMessage req;
   req.streamId = streamId;
+  return req;
+}
+
+// Request-response message carrying real metadata, as the transport adapter
+// would hand it over.
+ThriftServerRequestMessage makeRequestWithMetadata(
+    uint32_t streamId,
+    std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata) {
+  ThriftServerRequestMessage req;
+  req.streamId = streamId;
+  req.payload = ThriftServerInboundPayloadVariant{ThriftRequestResponsePayload{
+      .data = folly::IOBuf::copyBuffer("body"),
+      .metadata = std::move(metadata)}};
   return req;
 }
 
@@ -100,6 +116,72 @@ TEST(ThriftServerRequestContextHandlerTest, EachRequestGetsItsOwnContext) {
     distinct.insert(m.requestContext.get());
   }
   EXPECT_EQ(distinct.size(), 3) << "each request must get its own context";
+}
+
+TEST(
+    ThriftServerRequestContextHandlerTest, StampsMethodNameOntoRequestContext) {
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = "Service.method";
+
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onRead(
+          ctx,
+          erase_and_box(
+              makeRequestWithMetadata(/*streamId=*/7, std::move(metadata)))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_EQ(forwarded.requestContext->getMethodName(), "Service.method");
+}
+
+// The name is copied, not moved out: the tail adapter dispatches on it, so
+// emptying the metadata here would break routing.
+TEST(ThriftServerRequestContextHandlerTest, LeavesMethodNameOnTheMetadata) {
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = "Service.method";
+
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onRead(
+          ctx,
+          erase_and_box(
+              makeRequestWithMetadata(/*streamId=*/7, std::move(metadata)))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  const auto* stamped = forwarded.payload.getRequestRpcMetadata();
+  ASSERT_NE(stamped, nullptr);
+  ASSERT_TRUE(stamped->name().has_value());
+  EXPECT_EQ(stamped->name()->view(), "Service.method");
+}
+
+// A request whose metadata carries no name still gets a context; the name is
+// simply empty.
+TEST(
+    ThriftServerRequestContextHandlerTest, MethodNameEmptyWhenMetadataHasNone) {
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onRead(
+          ctx,
+          erase_and_box(makeRequestWithMetadata(
+              /*streamId=*/7,
+              std::make_unique<apache::thrift::RequestRpcMetadata>()))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_TRUE(forwarded.requestContext->getMethodName().empty());
 }
 
 TEST(ThriftServerRequestContextHandlerTest, ForwardsExceptions) {

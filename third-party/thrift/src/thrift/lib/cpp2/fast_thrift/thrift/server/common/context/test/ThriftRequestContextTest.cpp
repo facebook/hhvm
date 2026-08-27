@@ -43,6 +43,14 @@ TEST(ThriftRequestContextTest, SetConnectionContextStoresIt) {
   EXPECT_EQ(rc.getConnectionContext()->getSecurityProtocol(), "TLS1.3");
 }
 
+TEST(ThriftRequestContextTest, MethodNameIsEmptyUntilSet) {
+  ThriftRequestContext rc;
+  EXPECT_TRUE(rc.getMethodName().empty());
+
+  rc.setMethodName("Service.method");
+  EXPECT_EQ(rc.getMethodName(), "Service.method");
+}
+
 // A server with no security layer never fills the slot, and the context must
 // not invent one.
 TEST(ThriftRequestContextTest, InternalFieldsAreEmptyUntilFilled) {

@@ -62,6 +62,15 @@ class ThriftRequestContext {
     return connContext_.get();
   }
 
+  // Invoked method name (RequestRpcMetadata.name). Empty until something
+  // stamps it; nothing does yet. Moving the name out of the metadata avoids a
+  // copy, which is why the setter takes the string by value.
+  void setMethodName(std::string methodName) noexcept {
+    methodName_ = std::move(methodName);
+  }
+
+  const std::string& getMethodName() const noexcept { return methodName_; }
+
   // Inbound custom request headers (RequestRpcMetadata.otherMetadata),
   // stamped by ThriftServerRequestHeadersHandler. Empty when the handler is
   // not wired or the request carried no custom headers.
@@ -106,6 +115,7 @@ class ThriftRequestContext {
 
  private:
   boost::intrusive_ptr<ThriftConnContext> connContext_;
+  std::string methodName_;
   HeaderMap headers_;
   apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
       apache::thrift::ChecksumAlgorithm::NONE};

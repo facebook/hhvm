@@ -281,9 +281,11 @@ class OperationBase {
   // there is one unique owner of the connection.
   std::unique_ptr<Connection> releaseConnection();
   const Connection* connection() const {
+    DCHECK(conn_proxy_) << "initializeConnection() was not called";
     return conn_proxy_->get();
   }
   Connection* connection() {
+    DCHECK(conn_proxy_) << "initializeConnection() was not called";
     return conn_proxy_->get();
   }
 
@@ -496,12 +498,16 @@ class OperationBase {
 
   Connection& conn() {
     auto* conn = connection();
-    CHECK(conn);
+    // conn can never be null because callers construct with
+    // ReferencedConnection where it is impossible for it to be null
+    DCHECK(conn);
     return *conn;
   }
   const Connection& conn() const {
     auto* conn = connection();
-    CHECK(conn);
+    // conn can never be null because callers construct with
+    // ReferencedConnection where it is impossible for it to be null
+    DCHECK(conn);
     return *conn;
   }
 

@@ -34,8 +34,14 @@ namespace {
 
 class ConnectPoolOperationHandoffTest : public ::testing::Test {
  protected:
-  std::shared_ptr<ConnectPoolOperation<SyncMysqlClient>> makeOperation() {
+  // One pool for the whole test: operations reference their client on
+  // destruction, so replacing the pool while any of them are still alive would
+  // leave them pointing at a freed one.
+  void SetUp() override {
     pool_ = SyncConnectionPool::makePool(std::make_shared<SyncMysqlClient>());
+  }
+
+  std::shared_ptr<ConnectPoolOperation<SyncMysqlClient>> makeOperation() {
     auto op =
         pool_->beginConnection(MockMysqlClient::createTestConnectionKey());
     return std::dynamic_pointer_cast<ConnectPoolOperation<SyncMysqlClient>>(op);
@@ -105,6 +111,66 @@ TEST_F(ConnectPoolOperationHandoffTest, RetryWithoutPrepWaitHasNoWaiter) {
   ASSERT_TRUE(op->abandonWait());
 
   EXPECT_FALSE(op->abandonWait());
+}
+
+// resumeRetry() only fires for a retry that attemptFailed() actually handed
+// back. Everything else -- no wait armed, a wait still in progress, a
+// connection handed over, an abandoned wait -- must leave it alone, because
+// running an attempt in any of those states would either duplicate work or
+// re-arm a wait nobody is holding.
+TEST_F(ConnectPoolOperationHandoffTest, ResumeRetryIgnoresEveryOtherState) {
+  auto unarmed = makeOperation();
+  ASSERT_NE(unarmed, nullptr);
+  EXPECT_FALSE(unarmed->resumeRetry());
+
+  auto waiting = makeOperation();
+  ASSERT_NE(waiting, nullptr);
+  waiting->prepWait();
+  EXPECT_FALSE(waiting->resumeRetry());
+
+  auto abandoned = makeOperation();
+  ASSERT_NE(abandoned, nullptr);
+  abandoned->prepWait();
+  ASSERT_TRUE(abandoned->abandonWait());
+  EXPECT_FALSE(abandoned->resumeRetry());
+}
+
+// A wait that was armed and then abandoned cannot later be claimed as a
+// retry, which is what stops a foreign thread from resuming an operation whose
+// owner has already walked away from it.
+TEST_F(ConnectPoolOperationHandoffTest, AbandonedWaitCannotBecomeARetry) {
+  auto op = makeOperation();
+  ASSERT_NE(op, nullptr);
+
+  op->prepWait();
+  ASSERT_TRUE(op->abandonWait());
+
+  EXPECT_FALSE(op->resumeRetry());
+  // ...and the abandonment still stands, so nothing else can claim it either.
+  EXPECT_FALSE(op->abandonWait());
+}
+
+// abandonRetry() only fires for a retry that attemptFailed() handed back in the
+// window before its baton post, where the owning thread times out on the
+// pre-retry deadline instead of waking to run it. Everything else -- no wait
+// armed, a wait still in progress, an already-abandoned wait -- must leave it
+// alone, so a timing-out owner never abandons an operation that was not handed
+// a retry, and never touches the baton in those states.
+TEST_F(ConnectPoolOperationHandoffTest, AbandonRetryIgnoresEveryOtherState) {
+  auto unarmed = makeOperation();
+  ASSERT_NE(unarmed, nullptr);
+  EXPECT_FALSE(unarmed->abandonRetry());
+
+  auto waiting = makeOperation();
+  ASSERT_NE(waiting, nullptr);
+  waiting->prepWait();
+  EXPECT_FALSE(waiting->abandonRetry());
+
+  auto abandoned = makeOperation();
+  ASSERT_NE(abandoned, nullptr);
+  abandoned->prepWait();
+  ASSERT_TRUE(abandoned->abandonWait());
+  EXPECT_FALSE(abandoned->abandonRetry());
 }
 
 } // namespace facebook::common::mysql_client::test

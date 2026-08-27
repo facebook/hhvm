@@ -42,12 +42,14 @@ void SyncConnectionPool::openNewConnectionFinish(
     SyncConnectPoolOperation& pool_op,
     const PoolKey& pool_key) {
   if (pool_op.syncWait()) {
-    // The connection was produced by whichever thread got there first, which
-    // is not necessarily this one. It left the completion to us so that this
-    // operation is only ever completed on the thread that owns it. See
-    // MysqlConnectPoolOperationImpl::connectionCallback.
+    // Whichever thread got here first left the work to us, so that this
+    // operation is only ever driven on the thread that owns it. That is either
+    // a connection to complete with, or another attempt to run. See
+    // MysqlConnectPoolOperationImpl::connectionCallback and ::attemptFailed.
     pool_op.completeDeferred();
-    pool_op.cleanupWait();
+    if (!pool_op.resumeRetry()) {
+      pool_op.cleanupWait();
+    }
     return;
   }
 
@@ -60,8 +62,17 @@ void SyncConnectionPool::openNewConnectionFinish(
     if (conn_storage_.dequeueOperation(pool_key, pool_op)) {
       pool_op.timeoutTriggered();
     }
+  } else if (pool_op.abandonRetry()) {
+    // attemptFailed() handed a retry back in the race window after its CAS but
+    // before it posted the baton, so syncWait() timed out on the pre-retry
+    // deadline rather than waking to run it. We have stopped waiting and cannot
+    // re-arm the baton to run the retry, so time the operation out instead.
+    // failOperations() already removed it from the queue, so complete it
+    // directly rather than via dequeueOperation().
+    pool_op.timeoutTriggered();
   } else {
-    // A handoff landed while we were timing out, so finishing it is ours.
+    // A connection handoff landed while we were timing out, so finishing it is
+    // ours.
     pool_op.completeDeferred();
   }
 

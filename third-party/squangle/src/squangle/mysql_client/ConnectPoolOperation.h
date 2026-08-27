@@ -44,6 +44,8 @@ class ConnectPoolOperationImpl : virtual public ConnectOperationImpl {
   virtual void cleanupWait() = 0;
   virtual void completeDeferred() = 0;
   virtual bool abandonWait() = 0;
+  virtual bool resumeRetry() = 0;
+  virtual bool abandonRetry() = 0;
 
   virtual void attemptFailed(OperationResult result) = 0;
   virtual void connectionCallback(
@@ -89,6 +91,14 @@ class ConnectPoolOperation : public ConnectOperation {
 
   bool abandonWait() {
     return impl()->abandonWait();
+  }
+
+  bool resumeRetry() {
+    return impl()->resumeRetry();
+  }
+
+  bool abandonRetry() {
+    return impl()->abandonRetry();
   }
 
   bool setPreOperation(std::shared_ptr<Operation> op) {

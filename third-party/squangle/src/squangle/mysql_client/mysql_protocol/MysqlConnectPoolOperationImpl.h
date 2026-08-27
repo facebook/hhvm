@@ -106,6 +106,17 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
     setTimeoutInternal(
         min(timeout_attempt_based, getConnectionOptions().getTotalTimeout()));
 
+    // A retry runs prepWait() again, which replaces the baton. If an owner is
+    // parked on the current one that would destroy it underneath them and
+    // leave them unwoken, so hand the retry back instead and let them run it
+    // on their own thread. Same rule as the completion: Waiting is the only
+    // state in which somebody is coming back for this operation.
+    auto expected = Handoff::Waiting;
+    if (handoff_.compare_exchange_strong(expected, Handoff::RetryPending)) {
+      signalWaiter();
+      return;
+    }
+
     specializedRun();
   }
 
@@ -257,12 +268,40 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
     }
   }
 
+  // Called by the owning thread to run a retry that attemptFailed() handed
+  // back to it. Returns whether there was one. Releases the baton it was parked
+  // on first, so that the retry's prepWait() arms a fresh one.
+  bool resumeRetry() override {
+    auto expected = Handoff::RetryPending;
+    if (!handoff_.compare_exchange_strong(expected, Handoff::Unarmed)) {
+      return false;
+    }
+
+    baton_.reset();
+    specializedRun();
+    return true;
+  }
+
   // Called by the owning thread when it stops waiting. Returns true if it got
   // there before any handoff, in which case connectionCallback() will complete
   // the operation itself if it arrives later. Returns false if a handoff had
   // already landed, leaving the completion to completeDeferred().
   bool abandonWait() override {
     auto expected = Handoff::Waiting;
+    return handoff_.compare_exchange_strong(expected, Handoff::Abandoned);
+  }
+
+  // Called by the owning thread when it stops waiting and finds that
+  // attemptFailed() handed a retry back in the race window after the CAS to
+  // RetryPending but before signalWaiter() posted the baton, so syncWait()
+  // timed out on the pre-retry deadline instead of waking. The owner has
+  // stopped waiting, so unlike resumeRetry() it must not touch the baton -- the
+  // handing-off thread may still be in signalWaiter() -- which is why it cannot
+  // run the retry (that re-arms the baton). It claims the retry so nobody else
+  // acts on it and leaves the operation for the caller to time out. Returns
+  // true if a handed-back retry was consumed. Abandoned still wins permanently.
+  bool abandonRetry() override {
+    auto expected = Handoff::RetryPending;
     return handoff_.compare_exchange_strong(expected, Handoff::Abandoned);
   }
 
@@ -279,11 +318,20 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
   // Which side owns completing this operation.
   //
   // Unarmed unless prepWait() has armed a wait for the current attempt, so
-  // "Waiting" is exactly the condition under which deferring is safe. From
-  // Waiting, either connectionCallback() takes HandedOff or the owning thread
-  // takes Abandoned; the CAS that moves it decides who completes. Completed
+  // "Waiting" is exactly the condition under which handing work back is safe.
+  // From Waiting exactly one CAS wins and decides who carries on:
+  // connectionCallback() takes HandedOff to give the owner a connection to
+  // complete, attemptFailed() takes RetryPending to give it another attempt to
+  // run, or the owner takes Abandoned to say it has stopped waiting. Completed
   // only exists to keep completeDeferred() idempotent.
-  enum class Handoff { Unarmed, Waiting, HandedOff, Abandoned, Completed };
+  enum class Handoff {
+    Unarmed,
+    Waiting,
+    HandedOff,
+    RetryPending,
+    Abandoned,
+    Completed,
+  };
   std::atomic<Handoff> handoff_{Handoff::Unarmed};
 
   friend class AsyncConnectionPool;

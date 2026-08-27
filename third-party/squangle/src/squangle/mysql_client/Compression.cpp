@@ -18,7 +18,11 @@ namespace facebook::common::mysql_client {
 bool setCompressionOption(MYSQL* mysql, CompressionAlgorithm algo) {
 #if MYSQL_VERSION_ID < 80018
   auto comp_lib = getCompressionValue(algo);
-  auto res = mysql_options(mysql, MYSQL_OPT_COMP_LIB, (void*)&comp_lib);
+  if (!comp_lib) {
+    return false; // unknown algorithm: leave compression disabled
+  }
+  auto lib = *comp_lib;
+  auto res = mysql_options(mysql, MYSQL_OPT_COMP_LIB, (void*)&lib);
 #else
   auto res = mysql_options(
       mysql, MYSQL_OPT_COMPRESSION_ALGORITHMS, getCompressionName(algo).data());
@@ -35,10 +39,18 @@ static const std::unordered_map<CompressionAlgorithm, mysql_compression_lib>
         {LZ4F_STREAM, MYSQL_COMPRESSION_LZ4F_STREAM},
 };
 
-mysql_compression_lib getCompressionValue(CompressionAlgorithm algo) {
+std::optional<mysql_compression_lib> getCompressionValue(
+    CompressionAlgorithm algo) {
   auto it = compressionAlgorithms.find(algo);
-  CHECK(it != compressionAlgorithms.end())
+  DCHECK(it != compressionAlgorithms.end())
       << "Invalid compression algorithm enum: " << (int)algo;
+
+  if (it == compressionAlgorithms.end()) {
+    // Unreachable in practice, same as getCompressionName below. Fail closed
+    // instead of dereferencing end(); setCompressionOption declines to enable
+    // compression rather than passing a garbage value to mysql_options.
+    return std::nullopt;
+  }
 
   return it->second;
 }
@@ -69,8 +81,17 @@ std::optional<CompressionAlgorithm> parseCompressionName(
 
 const std::string& getCompressionName(CompressionAlgorithm algo) {
   auto it = compressionAlgorithms.find(algo);
-  CHECK(it != compressionAlgorithms.end())
+  DCHECK(it != compressionAlgorithms.end())
       << "Invalid compression algorithm enum: " << (int)algo;
+
+  if (it == compressionAlgorithms.end()) {
+    // Unreachable in practice: CompressionAlgorithm only ever holds one of the
+    // four mapped enumerators, and parseCompressionName returns nullopt rather
+    // than a bogus value. Fail closed instead of dereferencing end() -- MySQL
+    // rejects the unknown name and setCompressionOption returns false.
+    static const std::string kInvalid = "invalid_compression_algorithm";
+    return kInvalid;
+  }
 
   return it->second;
 }

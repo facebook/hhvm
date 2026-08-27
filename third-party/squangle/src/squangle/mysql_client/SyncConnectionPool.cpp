@@ -41,21 +41,33 @@ void SyncConnectionPool::openNewConnectionPrep(
 void SyncConnectionPool::openNewConnectionFinish(
     SyncConnectPoolOperation& pool_op,
     const PoolKey& pool_key) {
-  if (!pool_op.syncWait()) {
-    if (!conn_storage_.dequeueOperation(pool_key, pool_op)) {
-      // The operation was not found in the queue, so someone must be fulfilling
-      // the operation.  Wait until that is finished.
-      while (pool_op.isActive()) {
-        /* sleep_override */ std::this_thread::sleep_for(1ms);
-      }
-
-      return;
-    }
-
-    pool_op.timeoutTriggered();
+  if (pool_op.syncWait()) {
+    // The connection was produced by whichever thread got there first, which
+    // is not necessarily this one. It left the completion to us so that this
+    // operation is only ever completed on the thread that owns it. See
+    // MysqlConnectPoolOperationImpl::connectionCallback.
+    pool_op.completeDeferred();
+    pool_op.cleanupWait();
+    return;
   }
 
-  pool_op.cleanupWait();
+  // We stopped waiting. Announce that, so that a handoff still in flight knows
+  // to complete the operation itself rather than leave it to us.
+  if (pool_op.abandonWait()) {
+    // We got there first, so no handoff has happened. Either the operation is
+    // still queued and we time it out, or it already left the queue another way
+    // (failOperations) and is already complete.
+    if (conn_storage_.dequeueOperation(pool_key, pool_op)) {
+      pool_op.timeoutTriggered();
+    }
+  } else {
+    // A handoff landed while we were timing out, so finishing it is ours.
+    pool_op.completeDeferred();
+  }
+
+  // Deliberately no cleanupWait() on either of these paths: the handing-off
+  // thread may not have reached signalWaiter() yet, and resetting the baton
+  // underneath it would race. It is released with the operation.
 }
 
 template <>

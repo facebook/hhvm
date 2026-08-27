@@ -42,6 +42,8 @@ class ConnectPoolOperationImpl : virtual public ConnectOperationImpl {
   virtual void prepWait() = 0;
   virtual bool syncWait() = 0;
   virtual void cleanupWait() = 0;
+  virtual void completeDeferred() = 0;
+  virtual bool abandonWait() = 0;
 
   virtual void attemptFailed(OperationResult result) = 0;
   virtual void connectionCallback(
@@ -79,6 +81,14 @@ class ConnectPoolOperation : public ConnectOperation {
 
   void cleanupWait() {
     impl()->cleanupWait();
+  }
+
+  void completeDeferred() {
+    impl()->completeDeferred();
+  }
+
+  bool abandonWait() {
+    return impl()->abandonWait();
   }
 
   bool setPreOperation(std::shared_ptr<Operation> op) {

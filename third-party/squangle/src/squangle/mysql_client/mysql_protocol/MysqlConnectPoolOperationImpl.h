@@ -9,6 +9,7 @@
 #pragma once
 
 #include <boost/polymorphic_cast.hpp>
+#include <atomic>
 
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
@@ -154,9 +155,13 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
       std::unique_ptr<MysqlPooledHolder<Client>> pooled_conn) override {
     // TODO: validate we are in the correct thread (for async)
 
+    // Every exit from here must signalWaiter(): a waiting owner thread that
+    // has already timed out relies on the post to know the handoff is over
+    // (see SyncConnectionPool::openNewConnectionFinish).
     if (!pooled_conn) {
       LOG(DFATAL) << "Unexpected error";
       completeOperation(OperationResult::Failed);
+      signalWaiter();
       return;
     }
 
@@ -165,6 +170,7 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
           << "Connection pool callback was called with mysql err: "
           << mysql_errno();
       completeOperation(OperationResult::Failed);
+      signalWaiter();
       return;
     }
 
@@ -182,7 +188,35 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
             shared_pool->recycleMysqlConnection(std::move(mysql_conn));
           }
         });
-    attemptSucceeded(OperationResult::Succeeded);
+    // Who finishes the operation depends on who is running this callback.
+    //
+    // The pool hands a finished connection to whichever operation is queued
+    // for it (ConnectionPool::addConnection), and for a client that does not
+    // confine its operations to one thread that queued operation may belong to
+    // a different thread than this one. Completing it here would touch its
+    // state -- notably the ConnectionContext it shares with the
+    // ConnectOperation that produced this connection -- from two threads at
+    // once.
+    //
+    // Deferring is gated on handoff_ being Waiting, which prepWait() sets and
+    // nothing else does. That is the only state in which some thread is
+    // guaranteed to come back for this operation, so it is the only state in
+    // which it is safe not to finish the job here. A pool hit, an operation
+    // whose previous attempt already resolved, and every client that confines
+    // its operations to one thread all leave it non-Waiting and complete
+    // inline, on the thread that owns the operation.
+    //
+    // When it is Waiting, the owner may still be about to stop waiting, so the
+    // two sides settle it with one CAS each: whoever moves the state out of
+    // Waiting owns the completion. Exactly one can win, so the operation is
+    // neither completed twice nor dropped.
+    auto expected = Handoff::Waiting;
+    if (!handoff_.compare_exchange_strong(expected, Handoff::HandedOff)) {
+      // The owner is not coming: either it never armed a wait, or it timed out
+      // and stopped touching this operation. Completing here is safe, and
+      // necessary, because nobody else is going to.
+      attemptSucceeded(OperationResult::Succeeded);
+    }
 
     signalWaiter();
   }
@@ -194,6 +228,13 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
 
   void prepWait() override {
     baton_ = std::make_unique<folly::Baton<>>();
+    // Arm the handoff for this attempt. Waiting means, and only means, that a
+    // waiter is coming: this runs from openNewConnectionPrep(), which is
+    // always followed by openNewConnectionFinish(). Re-arming here is what
+    // makes retries work -- a previous attempt may have left the state at
+    // Abandoned, and without this the retry's handoff would be completed on
+    // the fulfilling thread.
+    handoff_.store(Handoff::Waiting, std::memory_order_relaxed);
   }
 
   bool syncWait() override {
@@ -205,6 +246,25 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
     baton_.reset();
   }
 
+  // Called by the owning thread to take over a handoff. A no-op unless
+  // connectionCallback() actually handed off, so the inline-completion,
+  // failure and timeout paths are all unaffected.
+  void completeDeferred() override {
+    auto expected = Handoff::HandedOff;
+    if (handoff_.compare_exchange_strong(expected, Handoff::Completed)) {
+      attemptSucceeded(OperationResult::Succeeded);
+    }
+  }
+
+  // Called by the owning thread when it stops waiting. Returns true if it got
+  // there before any handoff, in which case connectionCallback() will complete
+  // the operation itself if it arrives later. Returns false if a handoff had
+  // already landed, leaving the completion to completeDeferred().
+  bool abandonWait() override {
+    auto expected = Handoff::Waiting;
+    return handoff_.compare_exchange_strong(expected, Handoff::Abandoned);
+  }
+
   void signalWaiter() {
     if (baton_) {
       baton_->post();
@@ -214,6 +274,16 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
   std::weak_ptr<ConnectionPool<Client>> pool_;
 
   std::unique_ptr<folly::Baton<>> baton_;
+
+  // Which side owns completing this operation.
+  //
+  // Unarmed unless prepWait() has armed a wait for the current attempt, so
+  // "Waiting" is exactly the condition under which deferring is safe. From
+  // Waiting, either connectionCallback() takes HandedOff or the owning thread
+  // takes Abandoned; the CAS that moves it decides who completes. Completed
+  // only exists to keep completeDeferred() idempotent.
+  enum class Handoff { Unarmed, Waiting, HandedOff, Abandoned, Completed };
+  std::atomic<Handoff> handoff_{Handoff::Unarmed};
 
   friend class AsyncConnectionPool;
   friend class ConnectPoolOperation<Client>;

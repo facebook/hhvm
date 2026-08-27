@@ -680,11 +680,14 @@ class ConnectionPool
     // Propagate the ConnectionContext from the incoming operation. These
     // contexts contain application specific logging that will be lost if not
     // passed to the new ConnectOperation that is spawned to fulfill the pool
-    // miss. Propagating the context pointer ensures that both operations are
-    // logged with the expected additional logging
+    // miss. Both operations then log with the expected additional logging.
+    //
+    // Each gets its own copy rather than a shared pointer: both run the same
+    // completion path, which writes connection details into the context, and
+    // they may complete on different threads.
     tryRequestNewConnection(
         poolKey,
-        pool_op->copyConnectionContextPtr(),
+        pool_op->cloneConnectionContext(),
         [&](uint32_t errnum, const std::string& error) {
           pool_op->setAsyncClientError(errnum, error);
           pool_op->attemptFailed(OperationResult::Failed);

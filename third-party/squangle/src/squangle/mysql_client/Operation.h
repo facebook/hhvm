@@ -263,10 +263,15 @@ class OperationBase {
   void setConnConnectionContext(
       std::shared_ptr<db::ConnectionContextBase> context);
 
-  // Access to connection context
-  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr() {
-    return connection_context_;
+  // Access to connection context.
+  //
+  // A context of its own, carrying the caller-supplied values. Operations fill
+  // in connection details (sslVersion, endpointVersion) as they complete, so
+  // two operations sharing one context would write it concurrently.
+  std::shared_ptr<db::ConnectionContextBase> cloneConnectionContext() const {
+    return connection_context_ ? connection_context_->copy() : nullptr;
   }
+
   db::ConnectionContextBase* getConnectionContext() const {
     return connection_context_.get();
   }
@@ -711,8 +716,8 @@ class Operation : public std::enable_shared_from_this<Operation>,
     impl()->setConnectionContext(std::move(context));
   }
 
-  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr() {
-    return impl()->copyConnectionContextPtr();
+  std::shared_ptr<db::ConnectionContextBase> cloneConnectionContext() const {
+    return impl()->cloneConnectionContext();
   }
 
   db::ConnectionContextBase* getConnectionContext() const {

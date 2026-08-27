@@ -788,23 +788,19 @@ std::optional<RefType> DynamicConstRef::traverseImpl(
         component,
         [&](const Path::FieldAccess& f) -> std::optional<RefType> {
           const auto& currentType = current->type();
-
           if (currentType.isStruct()) {
-            auto& structVal = current->asStruct();
-            return structVal.getField(f.handle);
-          } else if (currentType.isUnion()) {
-            auto& unionVal = current->asUnion();
-            // Check if this field is the active field
-            if (!unionVal.hasField(f.handle)) {
-              // Field is not active in union
+            return current->asStruct().getField(f.handle);
+          }
+          if (currentType.isUnion()) {
+            auto& unionValue = current->asUnion();
+            if (!unionValue.hasField(f.handle)) {
               return std::nullopt;
             }
-            return unionVal.getField(f.handle);
-          } else {
-            folly::throw_exception<InvalidPathAccessError>(fmt::format(
-                "cannot access field on non-structured type '{}'",
-                detail::typeDisplayName(currentType)));
+            return unionValue.getField(f.handle);
           }
+          folly::throw_exception<InvalidPathAccessError>(fmt::format(
+              "cannot access field on non-structured type '{}'",
+              detail::typeDisplayName(currentType)));
         },
         [&](const Path::ListElement& l) -> std::optional<RefType> {
           const auto& currentType = current->type();
@@ -813,11 +809,11 @@ std::optional<RefType> DynamicConstRef::traverseImpl(
                 "cannot access list element on non-list type '{}'",
                 detail::typeDisplayName(currentType)));
           }
-          auto& listVal = current->asList();
-          if (l.index >= listVal.size()) {
+          auto& listValue = current->asList();
+          if (l.index >= listValue.size()) {
             return std::nullopt;
           }
-          return listVal[l.index];
+          return listValue[l.index];
         },
         [&](const Path::SetElement& s) -> std::optional<RefType> {
           const auto& currentType = current->type();
@@ -888,12 +884,12 @@ std::optional<RefType> DynamicConstRef::traverseImpl(
           return mapVal.get(keyValue);
         },
         [&](const Path::AnyType&) -> std::optional<RefType> {
-          throw std::runtime_error("AnyType traversal is not supported");
+          folly::throw_exception<std::runtime_error>(
+              "AnyType traversal is not supported");
         });
 
     if (!next.has_value()) {
-      current.reset();
-      break;
+      return std::nullopt;
     }
     current.emplace(*next);
   }

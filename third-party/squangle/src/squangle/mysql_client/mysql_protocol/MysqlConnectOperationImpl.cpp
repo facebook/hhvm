@@ -366,7 +366,14 @@ int MysqlConnectOperationImpl::mysqlCertValidator(
     const char** errptr) {
   ConnectOperation* self =
       reinterpret_cast<ConnectOperation*>(const_cast<void*>(context));
-  CHECK_NOTNULL(self);
+  DCHECK(self);
+  if (self == nullptr) {
+    // Unreachable: the context is &getOp(), installed in connect() behind the
+    // getCertValidationCallback() gate. Fail closed rather than aborting
+    // inside a libmysql callback -- 1 means the certificate did not validate.
+    LOG(ERROR) << "Cert validator invoked with a null context";
+    return 1;
+  }
 
   // Hold a shared pointer to the Operation object while running the callback
   auto weak_self = self->weak_from_this();
@@ -379,7 +386,14 @@ int MysqlConnectOperationImpl::mysqlCertValidator(
 
   const CertValidatorCallback callback =
       self->getConnectionOptions().getCertValidationCallback();
-  CHECK(callback);
+  DCHECK(callback);
+  if (!callback) {
+    // Unreachable: connect() only installs this validator when the callback is
+    // set. Fail closed rather than aborting -- refusing the certificate is the
+    // safe answer if we somehow have no way to validate it.
+    LOG(ERROR) << "Cert validator invoked with no validation callback set";
+    return 1;
+  }
   folly::StringPiece errorMessage;
 
   // "libmysql" expects this callback to return "0" if the cert validation was

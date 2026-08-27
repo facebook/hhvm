@@ -92,6 +92,7 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
     ++attempts_made_;
     if (shouldCompleteOperation(result)) {
       completeOperation(result);
+      signalWaiter();
       return;
     }
 

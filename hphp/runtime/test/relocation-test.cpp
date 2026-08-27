@@ -58,6 +58,7 @@ void patchAdrpLiteralLoadTarget(Instruction* adrp,
 
 struct Veneer {
   TCA branch;
+  TCA veneer;
   TCA literal;
 };
 
@@ -99,12 +100,13 @@ Veneer emitDirectVeneer(MacroAssembler& a,
   auto const branch = main.frontier();
   emitBranch(veneerLabel);
   a.bind(&veneerLabel);
+  auto const veneer = main.frontier();
   a.Ldr(w17, &literalLabel);
   a.Br(x17);
   a.bind(&literalLabel);
   auto const literal = main.frontier();
   main.dword(makeTarget32(target));
-  return Veneer{branch, literal};
+  return Veneer{branch, veneer, literal};
 }
 
 template<class EmitBranch>
@@ -128,7 +130,7 @@ Veneer emitFarVeneer(MacroAssembler& a,
     Instruction::Cast(ldr),
     literal
   );
-  return Veneer{branch, literal};
+  return Veneer{branch, veneer, literal};
 }
 
 }
@@ -1730,6 +1732,63 @@ TEST(Relocation, SmashableTargetsOptimizeInRepoAuthoritativeMode) {
   EXPECT_EQ(jccInst->GetImmPCOffsetTarget(), Instruction::CastConst(jccTarget));
   EXPECT_FALSE(possiblySmashableJcc(jcc.branch));
   EXPECT_FALSE(optimizeSmashedJcc(jcc.branch));
+}
+
+TEST(Relocation, SmashableTargetsStayIndirectWhenTargetIsVeneer) {
+  if (!arch::any<arch::ARM>()) {
+    SUCCEED();
+    return;
+  }
+
+  auto const oldRepoAuth = Cfg::Repo::Authoritative;
+  Cfg::Repo::Authoritative = true;
+  SCOPE_EXIT { Cfg::Repo::Authoritative = oldRepoAuth; };
+
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(4096, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  MacroAssembler a { main };
+
+  auto const oldTarget = reinterpret_cast<TCA>(0x123400);
+  auto const target = emitDirectVeneer(
+    a,
+    main,
+    oldTarget,
+    [&] (vixl::Label& label) { a.b(&label); }
+  );
+  auto const call = emitFarVeneer(
+    a,
+    main,
+    oldTarget,
+    [&] (vixl::Label& label) { a.bl(&label); }
+  );
+  auto const jmp = emitFarVeneer(
+    a,
+    main,
+    oldTarget,
+    [&] (vixl::Label& label) { a.b(&label); }
+  );
+  auto const jcc = emitFarVeneer(
+    a,
+    main,
+    oldTarget,
+    [&] (vixl::Label& label) { a.b(&label, lt); }
+  );
+
+  if (reinterpret_cast<uintptr_t>(target.veneer) >> 32) {
+    SUCCEED();
+    return;
+  }
+
+  smashCall(call.branch, target.veneer);
+  smashJmp(jmp.branch, target.veneer);
+  smashJcc(jcc.branch, target.veneer);
+
+  EXPECT_EQ(smashableCallTarget(call.branch), target.veneer);
+  EXPECT_EQ(smashableJmpTarget(jmp.branch), target.veneer);
+  EXPECT_EQ(smashableJccTarget(jcc.branch), target.veneer);
 }
 
 TEST(Relocation, OptimizeSmashedJccRewritesFarVeneer) {

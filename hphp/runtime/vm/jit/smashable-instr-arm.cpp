@@ -198,6 +198,18 @@ bool isSmashableVeneer(const vixl::Instruction* start) {
   return bool(smashableVeneerLoad(start));
 }
 
+namespace {
+
+bool canOptimizeSmashedBranch(TCA target) {
+  // Direct branches cannot be resmashed or guarded. Stubs are temporary, and
+  // a smashable veneer may itself be retargeted concurrently.
+  return Cfg::Repo::Authoritative &&
+         !svcreq::isStub(target) &&
+         !isSmashableVeneer(vixl::Instruction::CastConst(target));
+}
+
+}
+
 bool possiblySmashableCall(TCA inst) {
   using namespace vixl;
 
@@ -257,17 +269,9 @@ void smashCall(TCA inst, TCA target) {
   auto const veneer = bl->ImmPCOffsetTarget();
   patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
-  // If the target can be reached through a direct call, then patch the original
-  // call.  Notice that this optimization prevents a debugger guard from being
-  // installed later, so we only perform it in repo authoritative mode.  Also,
-  // once this optimization is performed, the smashable call can't be smashed
-  // again, because possiblySmashableCall() can't detect the code pattern
-  // anymore.  For this reason, we don't perform this optimization when the
-  // target is a stub, since they're just a temporary target that we later want
-  // to replace with a permanent one.
+  // If the target can be reached through a direct call, patch the original.
   int64_t offset = target - inst;
-  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
-      is_int28(offset)) {
+  if (canOptimizeSmashedBranch(target) && is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashCall");
@@ -298,17 +302,9 @@ void smashJmp(TCA inst, TCA target) {
   auto const veneer = b->ImmPCOffsetTarget();
   patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
-  // If the target can be reached through a direct jump, then patch the original
-  // jump.  Notice that this optimization prevents a debugger guard from being
-  // installed later, so we only perform it in repo authoritative mode.  Also,
-  // once this optimization is performed, the smashable jump can't be smashed
-  // again, because possiblySmashableJmp() can't detect the code pattern
-  // anymore.  For this reason, we don't perform this optimization when the
-  // target is a stub, since they're just a temporary target that we later want
-  // to replace with a permanent one.
+  // If the target can be reached through a direct jump, patch the original.
   int64_t offset = target - inst;
-  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
-      is_int28(offset)) {
+  if (canOptimizeSmashedBranch(target) && is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashJmp");
@@ -337,17 +333,9 @@ void smashJcc(TCA inst, TCA target) {
   auto const veneer = b->ImmPCOffsetTarget();
   patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
-  // If the target can be reached through a direct branch, then patch the
-  // original branch.  Notice that this optimization prevents a debugger guard
-  // from being installed later, so we only perform it in repo authoritative
-  // mode.  Also, once this optimization is performed, the smashable Jcc can't
-  // be smashed again, because possiblySmashableJcc() can't detect the code
-  // pattern anymore.  For this reason, we don't perform this optimization when
-  // the target is a stub, since they're just a temporary target that we later
-  // want to replace with a permanent one.
+  // If the target can be reached through a direct branch, patch the original.
   int64_t offset = target - inst;
-  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
-      is_int21(offset)) {
+  if (canOptimizeSmashedBranch(target) && is_int21(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashJcc");

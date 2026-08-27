@@ -213,7 +213,7 @@ struct struct3 {
   8: union2 fieldH;
   9: list<i32> fieldI;
   10: list<string> fieldJ;
-  @cpp.Type{name = "std::deque<std::string>"}
+  @cpp.Type{template = "std::deque"}
   11: list<string> fieldK;
   12: list<structA> fieldL;
   13: set<i32> fieldM;

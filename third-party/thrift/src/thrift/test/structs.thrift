@@ -56,10 +56,10 @@ struct BasicRefsShared {
 }
 
 struct HasSmallSortedVector {
-  @cpp.Type{name = "folly::small_sorted_vector_set<int32_t>"}
+  @cpp.Type{template = "folly::small_sorted_vector_set"}
   1: set<i32> set_field;
 
-  @cpp.Type{name = "folly::small_sorted_vector_map<int32_t, int32_t>"}
+  @cpp.Type{template = "folly::small_sorted_vector_map"}
   2: i32_map map_field;
 }
 

@@ -10,5 +10,8 @@ $doc->loadXML(
 LIBXML_DTDLOAD | LIBXML_NOENT
 );
 
-var_dump($doc->textContent);
+$text = 'hello world';
+// libxml2 2.13+ includes entity declarations in document text content.
+$expected = LIBXML_VERSION >= 21300 ? $text.$text : $text;
+var_dump($doc->textContent === $expected);
 }

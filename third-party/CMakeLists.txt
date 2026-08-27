@@ -97,7 +97,7 @@ list(APPEND THIRD_PARTY_MODULES opam)
 
 # Add bundled XED library if XED is enabled and the specified XED library
 # is either not found or incompatible.
-if(HHVM_REQUIRE_XED AND NOT LibXed_FOUND)
+if(HHVM_ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND THIRD_PARTY_MODULES xed)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
@@ -114,10 +114,12 @@ endforeach()
 set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)
 
 if(NOT PCRE_LIBRARY)
-  target_include_directories(pcre PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre")
+  target_include_directories(pcre PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre"
+    "${CMAKE_CURRENT_BINARY_DIR}/forks/pcre"
+  )
   target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
 endif()
 
 ##### --- new style, but only depends on old style --- #####
 add_subdirectory(watchman)
-

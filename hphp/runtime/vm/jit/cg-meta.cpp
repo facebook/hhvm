@@ -161,6 +161,7 @@ Optional<TCA> getCatchTrace(CTCA ip) {
 }
 
 Reason* getTrapReason(CTCA addr) {
+  if (!tc::g_code || !tc::g_code->isValidCodeAddress(addr)) return nullptr;
   return s_trapReasonMap.find(tc::addrToOffset(addr));
 }
 

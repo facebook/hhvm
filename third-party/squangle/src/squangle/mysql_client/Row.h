@@ -740,7 +740,6 @@ class RowBlock {
   }
 
   // Special override for folly::StringPiece to match existing code
-  template <>
   void appendValue(folly::StringPiece value) {
     checkRowStartedAndCapacity();
     current_row_->appendValue(value);

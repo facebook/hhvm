@@ -1,6 +1,7 @@
 === All files in directory ===
-vec(7) {
+vec(8) {
   string(15) ".hhvmconfig.hdf"
+  string(12) "onlyfacebook"
   string(11) "readdir.php"
   string(18) "readdir.php.expect"
   string(21) "readdir.php.no_remote"

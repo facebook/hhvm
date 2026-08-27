@@ -76,7 +76,11 @@ struct SyncSignals {
   std::atomic<StoredInfoState> m_siState{StoredInfoState::Free};
   std::atomic<siginfo_t> m_storedInfo{};
 
-  using Handler = Either<sighandler_sync_t, sigaction_sync_t>;
+  using Handler = Either<
+    sighandler_sync_t,
+    sigaction_sync_t,
+    either_policy::high_bit
+  >;
 
   // "Synchronous" signal handlers.  This must be initialized before the handler
   // thread starts, and cannot change afterwards.

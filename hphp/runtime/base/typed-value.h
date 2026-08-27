@@ -396,8 +396,7 @@ typename std::enable_if<
   std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
 >::type make_tv() {
-  TypedValue ret;
-  ret.m_type = DType;
+  auto const ret = TypedValue { Value{}, DType, {0}, {0} };
   assertx(tvIsPlausible(ret));
   return ret;
 }

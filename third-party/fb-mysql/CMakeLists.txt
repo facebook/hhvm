@@ -2,6 +2,25 @@ add_library(fbmysqlclient INTERFACE)
 
 include(ExternalProject)
 
+set(
+  HHVM_OSS_FBMYSQL_SOURCE_DIR
+  "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  CACHE PATH
+  "Path to the fb-mysql source tree"
+)
+set(
+  HHVM_OSS_FBMYSQL_BOOST_ROOT
+  ""
+  CACHE PATH
+  "Path containing the fb-mysql Boost source or archive"
+)
+if(NOT EXISTS "${HHVM_OSS_FBMYSQL_SOURCE_DIR}/CMakeLists.txt")
+  message(FATAL_ERROR
+    "fb-mysql source not found at ${HHVM_OSS_FBMYSQL_SOURCE_DIR}. "
+    "Run build/oss_build.sh or set HHVM_OSS_FBMYSQL_SOURCE_DIR."
+  )
+endif()
+
 MYSQL_SOCKET_SEARCH()
 if (NOT MYSQL_UNIX_SOCK_ADDR)
   message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
@@ -30,12 +49,17 @@ set(FBMYSQL_CMAKE_ARGS
   -DWITH_ZSTD=system
   -DWITH_LIBEVENT=system
 )
+if (HHVM_OSS_FBMYSQL_BOOST_ROOT)
+  list(APPEND FBMYSQL_CMAKE_ARGS
+    -DWITH_BOOST=${HHVM_OSS_FBMYSQL_BOOST_ROOT}
+  )
+endif ()
 
 string(REPLACE ";" "|" FBMYSQL_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 
 ExternalProject_Add(
   bundled_fbmysqlclient
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  SOURCE_DIR "${HHVM_OSS_FBMYSQL_SOURCE_DIR}"
   BUILD_ALWAYS ON
   LIST_SEPARATOR |
   CMAKE_GENERATOR "Unix Makefiles"
@@ -55,7 +79,7 @@ target_link_libraries(fbmysqlclient_deps INTERFACE ${DEPS})
 
 ExternalProject_Get_Property(bundled_fbmysqlclient INSTALL_DIR)
 
-set(FBMYSQL_SOURCE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+set(FBMYSQL_SOURCE_INCLUDE_DIR "${HHVM_OSS_FBMYSQL_SOURCE_DIR}/include")
 set(FBMYSQL_COMPAT_ROOT "${CMAKE_CURRENT_BINARY_DIR}/mysql-compat")
 set(FBMYSQL_COMPAT_INCLUDE_DIR "${FBMYSQL_COMPAT_ROOT}/mysql/server/include")
 file(MAKE_DIRECTORY "${FBMYSQL_COMPAT_ROOT}/mysql/server")

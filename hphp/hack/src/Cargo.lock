@@ -911,12 +911,6 @@ dependencies = [
 
 [[package]]
 name = "convert_case"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
-
-[[package]]
-name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9"
@@ -1968,8 +1962,10 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cc",
- "convert_case 0.4.0",
+ "clap",
+ "convert_case 0.11.0",
  "nom 8.0.0",
+ "nom-language",
 ]
 
 [[package]]
@@ -2255,10 +2251,8 @@ dependencies = [
 name = "hdf"
 version = "0.0.0"
 dependencies = [
- "cc",
  "cxx",
  "cxx-build",
- "glob",
  "thiserror 2.0.20",
 ]
 

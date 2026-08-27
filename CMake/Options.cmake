@@ -36,10 +36,15 @@ IF (NOT DEFAULT_CONFIG_DIR)
 ENDIF()
 
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" HHVM_SYSTEM_PROCESSOR)
+option(ENABLE_XED "Enable Intel XED disassembler support" OFF)
 set(HHVM_REQUIRE_XED OFF)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
    HHVM_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
   set(HHVM_REQUIRE_XED ON)
+endif()
+set(HHVM_ENABLE_XED ${HHVM_REQUIRE_XED})
+if(ENABLE_XED)
+  set(HHVM_ENABLE_XED ON)
 endif()
 
 option(ENABLE_SYSTEM_LOCALE_ARCHIVE "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc." OFF)

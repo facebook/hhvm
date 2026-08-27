@@ -32,12 +32,6 @@ list(REMOVE_ITEM HEADER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.h
 )
 
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ptr-def.h
-  COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} bash ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-ptr-def.sh ignored
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-ptr-def.sh
-)
-
 if(USE_JEMALLOC)
   set(JEMALLOC_DEF_ARG "--jemalloc")
 else()
@@ -50,7 +44,6 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-jemalloc-def.sh
 )
 
-list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/ptr-def.h)
 list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/jemalloc-def.h)
 
 HHVM_PUBLIC_HEADERS(util ${HEADER_SOURCES})

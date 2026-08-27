@@ -321,7 +321,10 @@ add_custom_command(
   COMMAND
     . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
     cd "${HHVM_RUST_FFI_WORKSPACE_DIR}" &&
-    ${CMAKE_COMMAND} -E env CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${FFI_CXXFLAGS} "${CARGO_EXE}" build
+    ${CMAKE_COMMAND} -E env
+      CXX=${CMAKE_CXX_COMPILER}
+      CXXFLAGS=${FFI_CXXFLAGS}
+      "${CARGO_EXE}" build
       --quiet
       --package "${HHVM_RUST_FFI_STATICLIB_NAME}"
       --target-dir "${RUST_FFI_CARGO_TARGET_DIR}"
@@ -334,6 +337,9 @@ add_custom_command(
     "${HHVM_RUST_FFI_LIB_RS}"
 )
 add_custom_target(hack_rust_ffi_rust_build DEPENDS ${HHVM_RUST_FFI_STATICLIB})
+if (NOT SKIP_OPAM)
+  add_dependencies(hack_rust_ffi_rust_build opam_setup)
+endif()
 
 # Some consumers expect FFI headers to be in a different place, indulge them.
 set(FFI_PACKAGES_NEEDING_SYMLINKS compiler_ffi parser_ffi packages_ffi)

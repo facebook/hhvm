@@ -23,6 +23,11 @@ using namespace std::chrono_literals;
 
 namespace facebook::common::mysql_client {
 
+std::unique_ptr<Connection>
+OperationBase::ConnectionProxy::releaseConnection() {
+  return nullptr;
+}
+
 void OperationBase::run() {
   client().addOperation(op_->shared_from_this());
   stopwatch_ = std::make_unique<StopWatch>();

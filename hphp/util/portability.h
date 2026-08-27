@@ -151,12 +151,8 @@
 
 #elif defined(__AARCH64EL__)
 
-# if defined(__clang__)
 # define DECLARE_FRAME_POINTER(fp) ActRec* fp = (ActRec*) \
   __builtin_frame_address(0)
-#else
-# define DECLARE_FRAME_POINTER(fp) ActRec* fp asm("x29")
-#endif
 
 #else
 

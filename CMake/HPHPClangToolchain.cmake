@@ -2,8 +2,12 @@
 option(HPHP_ENABLE_HARDENING "Set hardening flags and definitions, e.g. stack-smashing protection" OFF)
 option(HPHP_FORCE_LIBCPP "Force using libc++ as the C++ standard library" OFF)
 
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
+if(NOT DEFINED CMAKE_C_COMPILER)
+  set(CMAKE_C_COMPILER clang)
+endif()
+if(NOT DEFINED CMAKE_CXX_COMPILER)
+  set(CMAKE_CXX_COMPILER clang++)
+endif()
 
 set(HPHP_COMPILER_CLANG ON)
 

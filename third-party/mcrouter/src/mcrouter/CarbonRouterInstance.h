@@ -15,6 +15,8 @@
 #include <thread>
 #include <vector>
 
+#include <folly/CppAttributes.h>
+#include <folly/Likely.h>
 #include <folly/Range.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 
@@ -241,8 +243,17 @@ class CarbonRouterInstance
     cpuStatsWorker_.reset();
   }
 
-  Proxy<RouterInfo>& getProxyFromHash(size_t hash) {
-    return *proxies_[hash % proxies_.size()];
+  /**
+   * Returns nullptr while the router is draining; route locally instead.
+   * Must be called from a proxy event base thread, and the result must not
+   * outlive the current turn of that thread's loop.
+   */
+  Proxy<RouterInfo>* FOLLY_NULLABLE getProxyFromHash(size_t hash) const {
+    if (FOLLY_UNLIKELY(proxiesDraining_.load(std::memory_order_relaxed))) {
+      return nullptr;
+    }
+    DCHECK(!proxies_.empty());
+    return proxies_[hash % proxies_.size()];
   }
 
   CarbonRouterInstance(const CarbonRouterInstance&) = delete;
@@ -266,6 +277,13 @@ class CarbonRouterInstance
   std::unique_ptr<McrouterLogger> mcrouterLogger_;
 
   std::atomic<bool> shutdownStarted_{false};
+
+  // Relaxed: the happens-before comes from fenceProxyEventBases(), not this.
+  std::atomic<bool> proxiesDraining_{false};
+
+  void setProxiesDraining() noexcept {
+    proxiesDraining_.store(true, std::memory_order_relaxed);
+  }
 
   FileObserverHandle runtimeVarsObserverHandle_;
 
@@ -304,6 +322,10 @@ class CarbonRouterInstance
 
   folly::Expected<folly::Unit, std::string> setupProxy(
       const std::vector<folly::EventBase*>& evbs);
+
+  // Waits for every proxy event base to cycle. Not callable from a proxy
+  // thread.
+  void fenceProxyEventBases() noexcept;
 
   void spawnAuxiliaryThreads();
   void joinAuxiliaryThreads() noexcept;

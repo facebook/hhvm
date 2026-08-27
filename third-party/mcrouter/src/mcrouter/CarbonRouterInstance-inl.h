@@ -404,6 +404,17 @@ CarbonRouterInstance<RouterInfo>::CarbonRouterInstance(
     : CarbonRouterInstanceBase(std::move(inputOptions)) {}
 
 template <class RouterInfo>
+void CarbonRouterInstance<RouterInfo>::fenceProxyEventBases() noexcept {
+  // Serial: proxyEvbs_.clear() pays the same N round-trips and dominates.
+  for (const auto& proxyEvb : proxyEvbs_) {
+    CHECK(!proxyEvb->getEventBase().inRunningEventBaseThread())
+        << "CarbonRouterInstance shutdown must not run on a proxy event base "
+           "thread";
+    proxyEvb->getEventBase().runInEventBaseThreadAndWait([] {});
+  }
+}
+
+template <class RouterInfo>
 void CarbonRouterInstance<RouterInfo>::shutdownImpl() noexcept {
   joinAuxiliaryThreads();
   for (size_t i = 0; i < proxies_.size(); ++i) {
@@ -412,6 +423,9 @@ void CarbonRouterInstance<RouterInfo>::shutdownImpl() noexcept {
           destinationMap->disableProbes();
         });
   }
+  // Both must precede clear(), which frees proxies other threads still use.
+  setProxiesDraining();
+  fenceProxyEventBases();
   proxyEvbs_.clear();
   resetMetadata();
   resetAxonProxyClientFactory();

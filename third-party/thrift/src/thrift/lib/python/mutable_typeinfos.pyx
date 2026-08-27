@@ -69,7 +69,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return &self.cpp_obj
 
-    cdef to_internal_data(self, object value):
+    cpdef to_internal_data(self, object value):
         """
         Validates and converts the given (mutable struct) `value` to a format
         that the serializer can understand.
@@ -95,7 +95,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         raise TypeError(f"MutableStructInfo cannot convert {self._mutable_struct_class} to internal data")
 
     # convert deserialized data to user format
-    cdef to_python_value(self, object struct_list):
+    cpdef to_python_value(self, object struct_list):
         return self._mutable_struct_class._fbthrift_from_internal_data(struct_list)
 
     def to_container_value(self, object value not None):
@@ -142,7 +142,7 @@ cdef class MutableListTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
-    cdef to_internal_data(self, object mutableList_or_thriftListWrapper):
+    cpdef to_internal_data(self, object mutableList_or_thriftListWrapper):
         """
         Validates the `mutableList_or_thriftListWrapper` and convert it into
         an internal data representation.
@@ -213,7 +213,7 @@ cdef class MutableListTypeInfo(TypeInfoBase):
 
         return lst
 
-    cdef to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         """
         Converts the given internal data (`value`) into a `MutableList` The resulting
         `MutableList` is capable of converting the internal data to Python values
@@ -291,7 +291,7 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
-    cdef to_internal_data(self, object mutableSet_or_thriftSetWrapper):
+    cpdef to_internal_data(self, object mutableSet_or_thriftSetWrapper):
         """
         Validates the `mutableSet_or_thriftSetWrapper` and converts it into
         an internal data representation.
@@ -350,7 +350,7 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
 
         return py_set
 
-    cdef to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         """
         Converts the given internal data (`value`) into a `MutableSet` The
         resulting `MutableSet` is capable of converting the internal data to
@@ -428,7 +428,7 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
-    cdef to_internal_data(self, object mutableMap_or_thriftMapWrapper):
+    cpdef to_internal_data(self, object mutableMap_or_thriftMapWrapper):
         """
         Validates the `mutableMap_or_thriftMapWrapper` and convert it into
         an internal data representation.
@@ -494,7 +494,7 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
             for k, v in values.items()
         }
 
-    cdef to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         """
         Converts the given internal data (`value`) into a `MutableMap` The
         resulting `MutableMap` is capable of converting the internal data to

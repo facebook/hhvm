@@ -24,7 +24,8 @@ import unittest
 from apache.thrift.type.standard.thrift_types import TypeName, Void
 from apache.thrift.type.type.thrift_types import Type
 from folly.iobuf import IOBuf
-from test_thrift.thrift_types import Color
+from test_thrift.thrift_mutable_types import SimpleStruct as MutableSimpleStruct
+from test_thrift.thrift_types import Color, SimpleStruct as ImmutableSimpleStruct
 from thrift.lib.python.any.typestub import PrimitiveType, SerializableType, TKey, TValue
 from thrift.python.any.serializer import (
     deserialize_list,
@@ -35,6 +36,23 @@ from thrift.python.any.serializer import (
     serialize_map,
     serialize_primitive,
     serialize_set,
+    serialize_with_type_info,
+)
+from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
+from thrift.python.mutable_typeinfos import (
+    MutableListTypeInfo,
+    MutableMapTypeInfo,
+    MutableSetTypeInfo,
+    MutableStructTypeInfo,
+)
+from thrift.python.serializer import Protocol
+from thrift.python.types import (
+    ListTypeInfo,
+    MapTypeInfo,
+    SetTypeInfo,
+    StructTypeInfo,
+    typeinfo_i32,
+    typeinfo_string,
 )
 
 # @manual=//thrift/test/testset:testset-python-types
@@ -71,6 +89,80 @@ class SerializerTests(unittest.TestCase):
 
     def test_iobuf_round_trip(self) -> None:
         self._test_round_trip(IOBuf(b"iobuf"))
+
+    def test_serialize_with_type_info_mutable_struct(self) -> None:
+        immutable_bytes = b"".join(
+            serialize_with_type_info(
+                ImmutableSimpleStruct(name="foo", value=42, city="bar"),
+                Protocol.BINARY,
+                StructTypeInfo(ImmutableSimpleStruct),
+            )
+        )
+        mutable_bytes = b"".join(
+            serialize_with_type_info(
+                MutableSimpleStruct(name="foo", value=42, city="bar"),
+                Protocol.BINARY,
+                MutableStructTypeInfo(MutableSimpleStruct),
+            )
+        )
+        self.assertEqual(immutable_bytes, mutable_bytes)
+
+    def test_serialize_with_type_info_mutable_list(self) -> None:
+        self.assertEqual(
+            b"".join(
+                serialize_with_type_info(
+                    [1, 2, 3], Protocol.BINARY, ListTypeInfo(typeinfo_i32)
+                )
+            ),
+            b"".join(
+                serialize_with_type_info(
+                    MutableList(typeinfo_i32, [1, 2, 3]),
+                    Protocol.BINARY,
+                    MutableListTypeInfo(typeinfo_i32),
+                )
+            ),
+        )
+
+    def test_serialize_with_type_info_mutable_set(self) -> None:
+        # Single element: the wire order of a set follows the iteration order
+        # of its internal container, which is a frozenset for the immutable
+        # typeinfo and a set for the mutable one.
+        mutable_set: MutableSet[int] = MutableSet(typeinfo_i32, {42})
+        self.assertEqual(
+            b"".join(
+                serialize_with_type_info(
+                    {42}, Protocol.BINARY, SetTypeInfo(typeinfo_i32)
+                )
+            ),
+            b"".join(
+                serialize_with_type_info(
+                    mutable_set,
+                    Protocol.BINARY,
+                    MutableSetTypeInfo(typeinfo_i32),
+                )
+            ),
+        )
+
+    def test_serialize_with_type_info_mutable_map(self) -> None:
+        mutable_map: MutableMap[str, int] = MutableMap(
+            typeinfo_string, typeinfo_i32, {"foo": 1, "bar": 2}
+        )
+        self.assertEqual(
+            b"".join(
+                serialize_with_type_info(
+                    {"foo": 1, "bar": 2},
+                    Protocol.BINARY,
+                    MapTypeInfo(typeinfo_string, typeinfo_i32),
+                )
+            ),
+            b"".join(
+                serialize_with_type_info(
+                    mutable_map,
+                    Protocol.BINARY,
+                    MutableMapTypeInfo(typeinfo_string, typeinfo_i32),
+                )
+            ),
+        )
 
     def test_enum_round_trip(self) -> None:
         self._test_round_trip(Color.green)

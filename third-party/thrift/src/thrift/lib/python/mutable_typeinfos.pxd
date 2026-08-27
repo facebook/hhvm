@@ -71,16 +71,16 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj
     cdef object _mutable_struct_class
     cdef const cTypeInfo* get_cTypeInfo(self)
-    cdef to_internal_data(self, object)
-    cdef to_python_value(self, object)
+    cpdef to_internal_data(self, object)
+    cpdef to_python_value(self, object)
 
 cdef class MutableListTypeInfo(TypeInfoBase):
     cdef object val_info
     cdef bint value_type_is_container
     cdef unique_ptr[cMutableListTypeInfo] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
-    cdef to_internal_data(self, object)
-    cdef to_python_value(self, object)
+    cpdef to_internal_data(self, object)
+    cpdef to_python_value(self, object)
     cdef from_python_values(self, object)
 
 cdef class MutableSetTypeInfo(TypeInfoBase):
@@ -88,8 +88,8 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
     cdef bint value_type_is_container
     cdef unique_ptr[cSetTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
-    cdef to_internal_data(self, object)
-    cdef to_python_value(self, object)
+    cpdef to_internal_data(self, object)
+    cpdef to_python_value(self, object)
     cdef from_python_values(self, object)
 
 cdef class MutableMapTypeInfo(TypeInfoBase):
@@ -99,6 +99,6 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
     cdef bint value_type_is_container
     cdef unique_ptr[cMapTypeInfoBase] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
-    cdef to_internal_data(self, object)
-    cdef to_python_value(self, object)
+    cpdef to_internal_data(self, object)
+    cpdef to_python_value(self, object)
     cdef from_python_values(self, object)

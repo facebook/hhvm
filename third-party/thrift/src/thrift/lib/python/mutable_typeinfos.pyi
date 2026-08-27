@@ -27,3 +27,10 @@ class MutableSetTypeInfo:
 
 class MutableMapTypeInfo:
     def __init__(self, key_info: object, val_info: object) -> None: ...
+
+AnyMutableTypeInfo = typing.Union[
+    MutableStructTypeInfo,
+    MutableListTypeInfo,
+    MutableSetTypeInfo,
+    MutableMapTypeInfo,
+]

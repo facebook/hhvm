@@ -29,6 +29,8 @@ from thrift.lib.python.any.typestub import (
     TValue,
 )
 from thrift.python.exceptions import GeneratedError
+from thrift.python.mutable_typeinfos import AnyMutableTypeInfo
+from thrift.python.mutable_types import MutableStructOrUnion
 from thrift.python.serializer import Protocol
 from thrift.python.types import AnyTypeInfo, Enum, StructOrUnion
 
@@ -72,7 +74,7 @@ def deserialize_map(
     protocol: Protocol = ...,
 ) -> typing.Mapping[TKey, TValue]: ...
 def serialize_with_type_info(
-    obj: SerializableTypeOrContainers,
+    obj: typing.Union[SerializableTypeOrContainers, MutableStructOrUnion],
     protocol: Protocol,
-    type_info: AnyTypeInfo,
+    type_info: typing.Union[AnyTypeInfo, AnyMutableTypeInfo],
 ) -> IOBuf: ...

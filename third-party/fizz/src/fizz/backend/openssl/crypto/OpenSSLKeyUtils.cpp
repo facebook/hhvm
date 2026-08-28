@@ -34,13 +34,18 @@ Status validateECKey(
   if (EC_KEY_check_key(ecKey.get()) != 1) {
     return err.error("Private key not valid");
   }
-  folly::ssl::EcGroupUniquePtr curve(EC_GROUP_new_by_curve_name(curveNid));
-  if (!curve) {
-    return err.error("Failed to create curve");
-  }
   auto keyGroup = EC_KEY_get0_group(ecKey.get());
-  if (EC_GROUP_cmp(keyGroup, curve.get(), nullptr) != 0) {
-    return err.error("Invalid group");
+  // Named-curve keys expose their curve NID directly, so a NID comparison
+  // avoids constructing a reference EC_GROUP. Explicit (unnamed) parameter
+  // keys report no NID here and fall back to a full group comparison.
+  if (EC_GROUP_get_curve_name(keyGroup) != curveNid) {
+    folly::ssl::EcGroupUniquePtr curve(EC_GROUP_new_by_curve_name(curveNid));
+    if (!curve) {
+      return err.error("Failed to create curve");
+    }
+    if (EC_GROUP_cmp(keyGroup, curve.get(), nullptr) != 0) {
+      return err.error("Invalid group");
+    }
   }
   return Status::Success;
 }

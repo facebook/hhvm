@@ -218,12 +218,11 @@ class RocketServerStreamStateHandler {
       apache::thrift::fast_thrift::frame::FrameType streamType,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    if (contexts.streams.find(streamId) != contexts.streams.end()) {
+    if (!contexts.streams
+             .emplace(streamId, RocketStreamContext{.streamType = streamType})
+             .second) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
-
-    contexts.streams.emplace(
-        streamId, RocketStreamContext{.streamType = streamType});
 
     auto& request = msg.get<RocketRequestMessage>();
     request.streamId = streamId;

@@ -7,10 +7,15 @@
  */
 
 #include "proxygen/lib/http/coro/transport/test/HTTPConnectTransportTest.h"
+#include "proxygen/lib/http/coro/transport/test/TestCoroTransport.h"
+#include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/session/test/MockHTTPSessionStats.h>
+#include <wangle/acceptor/TransportInfo.h>
 
+#include <folly/coro/Baton.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Collect.h>
+#include <folly/io/IOBuf.h>
 
 using namespace std::chrono_literals;
 using namespace folly;
@@ -120,6 +125,27 @@ class TransportTest : public testing::Test {
 
   EventBase evb;
   CancellationSource cancelSource;
+};
+
+class HTTPConnectStreamH1Test : public TransportTest {
+ protected:
+  class SessionObserver final : public LifecycleObserver {
+   public:
+    void onWrite(const HTTPCoroSession&, size_t bytesWritten) override {
+      if (bytesWritten > 0 && !requestWriteSeen) {
+        requestWriteSeen = true;
+        requestWritten.post();
+      }
+    }
+
+    void onDestroy(const HTTPCoroSession&) override {
+      sessionDestroyed.post();
+    }
+
+    bool requestWriteSeen{false};
+    folly::coro::Baton requestWritten;
+    folly::coro::Baton sessionDestroyed;
+  };
 };
 
 class HTTPConnectTransportTest : public TransportTest {
@@ -305,6 +331,94 @@ TEST_F(HTTPConnectTransportTest, ConnectCancelledBeforeIngressAssigned) {
                                          {{"Foo", "Bar"}},
                                          egressBufferSize)));
     EXPECT_TRUE(result.hasException());
+  });
+}
+
+TEST_F(HTTPConnectTransportTest, ConnectResponseWithEom) {
+  run([&]() -> Task<> {
+    auto session = co_await HTTPCoroConnector::connect(
+        &evb, *srv->address(), 0ms, getConnParams());
+    auto reservation = session->reserveRequest();
+    auto connectStream =
+        co_await HTTPConnectStream::connectUnique(session,
+                                                  std::move(*reservation),
+                                                  kAuthority,
+                                                  std::chrono::seconds(1),
+                                                  {{"EomOnConnect", "True"}},
+                                                  egressBufferSize);
+    EXPECT_FALSE(connectStream->canRead());
+    EXPECT_TRUE(connectStream->canWrite());
+
+    HTTPConnectTransport transport(std::move(connectStream));
+    std::array<uint8_t, 1> readBuf;
+    EXPECT_EQ(co_await transport.read(folly::MutableByteRange(readBuf)), 0);
+
+    std::array<uint8_t, 1> writeBuf{'a'};
+    folly::coro::TransportIf::WriteInfo info;
+    co_await transport.write(folly::ByteRange(writeBuf), 100ms, {}, &info);
+    EXPECT_EQ(info.bytesWritten, writeBuf.size());
+    transport.shutdownWrite();
+  });
+}
+
+TEST_F(HTTPConnectStreamH1Test, ConnectResponseWithEom) {
+  run([&]() -> Task<> {
+    test::TestCoroTransport::State transportState;
+    auto transport =
+        std::make_unique<test::TestCoroTransport>(&evb, &transportState);
+    auto transportPtr = transport.get();
+    auto codec = HTTPCodecFactory::getCodec(CodecProtocol::HTTP_1_1,
+                                            TransportDirection::UPSTREAM);
+    auto session = HTTPCoroSession::makeUpstreamCoroSession(
+        std::move(transport), std::move(codec), wangle::TransportInfo{});
+    session->setConnectionReadTimeout(std::chrono::seconds(1));
+    session->setStreamReadTimeout(std::chrono::seconds(1));
+    session->setWriteTimeout(std::chrono::seconds(1));
+
+    SessionObserver observer;
+    session->addLifecycleObserver(&observer);
+    session->run().startInlineUnsafe();
+
+    co_await folly::coro::collectAll(
+        [&]() -> Task<> {
+          auto reservation = session->reserveRequest();
+          EXPECT_TRUE(reservation.hasValue());
+          if (!reservation.hasValue()) {
+            co_return;
+          }
+          auto connectStream =
+              co_await HTTPConnectStream::connectUnique(session,
+                                                        std::move(*reservation),
+                                                        kAuthority,
+                                                        std::chrono::seconds(1),
+                                                        {},
+                                                        64 * 1024);
+          EXPECT_FALSE(connectStream->canRead());
+          EXPECT_TRUE(connectStream->canWrite());
+
+          HTTPConnectTransport transport(std::move(connectStream));
+          std::array<uint8_t, 1> readBuf;
+          EXPECT_EQ(co_await transport.read(folly::MutableByteRange(readBuf)),
+                    0);
+
+          std::array<uint8_t, 1> writeBuf{'a'};
+          folly::coro::TransportIf::WriteInfo info;
+          co_await transport.write(
+              folly::ByteRange(writeBuf), 100ms, {}, &info);
+          EXPECT_EQ(info.bytesWritten, writeBuf.size());
+          transport.shutdownWrite();
+        }(),
+        [&]() -> Task<> {
+          co_await observer.requestWritten;
+          transportPtr->addReadEvent(
+              folly::IOBuf::copyBuffer("HTTP/1.1 200 Connection Established\r\n"
+                                       "X-Connected-To: 1.2.3.4\r\n"
+                                       "\r\n"),
+              /*eof=*/true);
+        }());
+
+    session.reset();
+    co_await observer.sessionDestroyed;
   });
 }
 

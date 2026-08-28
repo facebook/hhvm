@@ -50,16 +50,21 @@ class ConnectHandler : public HTTPHandler {
     if (headerEvent.headers->getHeaders().exists("Slow")) {
       co_await folly::coro::sleep(std::chrono::milliseconds(500));
     }
+    const auto eomOnConnect =
+        headerEvent.headers->getHeaders().exists("EomOnConnect");
     if (headerEvent.headers->getHeaders().exists("Fail")) {
       respSource->headers(makeResponse(500), /*eom=*/true);
+    } else if (eomOnConnect) {
+      respSource->headers(std::move(resp), /*eom=*/true);
     } else {
       EXPECT_EQ(headerEvent.headers->getHeaders().getSingleOrEmpty("Foo"),
                 "Bar");
       respSource->headers(std::move(resp), false);
     }
     curRespSource = respSource;
-    co_withExecutor(eventBase,
-                    handleConnect(std::move(requestSource), respSourcePtr))
+    co_withExecutor(
+        eventBase,
+        handleConnect(std::move(requestSource), respSourcePtr, eomOnConnect))
         .start();
     respSourcePtr->start();
     co_return respSource;
@@ -67,7 +72,8 @@ class ConnectHandler : public HTTPHandler {
 
   folly::coro::Task<void> handleConnect(
       HTTPSourceHolder reqSource,
-      std::shared_ptr<HTTPStreamSourceHolder> respSourcePtr) {
+      std::shared_ptr<HTTPStreamSourceHolder> respSourcePtr,
+      bool responseComplete) {
     SCOPE_EXIT {
       curRespSource = nullptr;
     };
@@ -83,7 +89,7 @@ class ConnectHandler : public HTTPHandler {
         continue;
       }
       auto respSource = respSourcePtr->get();
-      if (!respSource) {
+      if (!respSource && !responseComplete) {
         break;
       }
       exceptionExpected.withLock([&bodyEvent](auto& exceptionExpected) {
@@ -98,7 +104,11 @@ class ConnectHandler : public HTTPHandler {
           bodyEvent->eom ||
           (bodyEvent->event.body.front()->toString().starts_with("write_fin"));
       if (bodyEvent->eventType == HTTPBodyEvent::BODY) {
-        respSource->body(bodyEvent->event.body.move(), 0, eom);
+        if (responseComplete) {
+          EXPECT_EQ(bodyEvent->event.body.front()->toString(), "a");
+        } else {
+          respSource->body(bodyEvent->event.body.move(), 0, eom);
+        }
       }
     } while (!eom);
     curRespSource = nullptr;

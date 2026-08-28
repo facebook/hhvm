@@ -91,6 +91,8 @@ folly::coro::Task<void> HTTPConnectStream::connectImpl(
   egressSource_->headers(std::move(connectRequest), false);
   ingressSource_ = std::make_unique<HTTPSourceHolder>(
       co_await session->sendRequest(egressSource_, std::move(reservation)));
+  const auto streamID = ingressSource_->getStreamID();
+  XCHECK(streamID);
   ingressSource_->setReadTimeout(timeout);
   while (true) {
     auto headerEvent = co_await ingressSource_->readHeaderEvent();
@@ -122,7 +124,7 @@ folly::coro::Task<void> HTTPConnectStream::connectImpl(
     break; // meh
   }
   // Successfully connected!
-  egressSource_->setStreamID(*ingressSource_->getStreamID());
+  egressSource_->setStreamID(*streamID);
   co_return;
 }
 

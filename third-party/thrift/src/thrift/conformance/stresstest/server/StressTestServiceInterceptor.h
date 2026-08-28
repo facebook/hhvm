@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <thrift/lib/cpp2/server/ServiceInterceptor.h>
 
 namespace apache::thrift::stress {
+
+class StressTestServerStats;
 
 class StressTestServiceInterceptor final
     : public ServiceInterceptor<folly::Unit, folly::Unit> {
@@ -26,6 +30,9 @@ class StressTestServiceInterceptor final
   using RequestState = folly::Unit;
 
  public:
+  explicit StressTestServiceInterceptor(
+      std::shared_ptr<StressTestServerStats> serverStats);
+
   std::string getName() const final;
 
   folly::coro::Task<std::optional<RequestState>> onRequest(
@@ -37,6 +44,9 @@ class StressTestServiceInterceptor final
   std::optional<ConnectionState> onConnectionEstablished(ConnectionInfo) final;
 
   void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept final;
+
+ private:
+  std::shared_ptr<StressTestServerStats> serverStats_;
 };
 
 } // namespace apache::thrift::stress

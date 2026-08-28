@@ -16,7 +16,32 @@
 
 #include <thrift/conformance/stresstest/server/StressTestServiceInterceptor.h>
 
+#include <utility>
+
+#include <thrift/conformance/stresstest/server/StressTestServerStats.h>
+#include <thrift/lib/cpp2/security/SSLUtil.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+
 namespace apache::thrift::stress {
+namespace {
+
+ConnectionMode classifyConnection(
+    const apache::thrift::Cpp2ConnContext& context) {
+  const auto& protocol = context.getSecurityProtocol();
+  if (protocol == apache::thrift::kSecurityProtocolStopTLSV2) {
+    return ConnectionMode::StopTlsV2;
+  }
+  if (context.isTransportEncrypted()) {
+    return ConnectionMode::Tls;
+  }
+  return protocol.empty() ? ConnectionMode::Plaintext : ConnectionMode::Unknown;
+}
+
+} // namespace
+
+StressTestServiceInterceptor::StressTestServiceInterceptor(
+    std::shared_ptr<StressTestServerStats> serverStats)
+    : serverStats_(std::move(serverStats)) {}
 
 std::string StressTestServiceInterceptor::getName() const {
   return "StressTestServiceInterceptor";
@@ -33,7 +58,10 @@ folly::coro::Task<void> StressTestServiceInterceptor::onResponse(
 }
 
 std::optional<StressTestServiceInterceptor::ConnectionState>
-StressTestServiceInterceptor::onConnectionEstablished(ConnectionInfo) {
+StressTestServiceInterceptor::onConnectionEstablished(ConnectionInfo info) {
+  if (serverStats_ && info.context) {
+    serverStats_->recordConnection(classifyConnection(*info.context));
+  }
   return std::nullopt;
 }
 

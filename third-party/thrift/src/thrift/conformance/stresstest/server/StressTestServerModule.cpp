@@ -15,9 +15,16 @@
  */
 
 #include <thrift/conformance/stresstest/server/StressTestServerModule.h>
+
+#include <utility>
+
 #include <thrift/conformance/stresstest/server/StressTestServiceInterceptor.h>
 
 namespace apache::thrift::stress {
+
+StressTestServerModule::StressTestServerModule(
+    std::shared_ptr<StressTestServerStats> serverStats)
+    : serverStats_(std::move(serverStats)) {}
 
 std::string StressTestServerModule::getName() const {
   return "StressTestServerModule";
@@ -25,13 +32,13 @@ std::string StressTestServerModule::getName() const {
 
 std::vector<std::shared_ptr<ServiceInterceptorBase>>
 StressTestServerModule::getServiceInterceptors() {
-  return {std::make_shared<StressTestServiceInterceptor>()};
+  return {std::make_shared<StressTestServiceInterceptor>(serverStats_)};
 }
 
 void StressTestServerModule::initIoUringStatsLogging(
     std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
     uint32_t dumpStatInterval) {
-  serverStats_.init(evbs, dumpStatInterval);
+  serverStats_->init(evbs, dumpStatInterval);
 }
 
 } // namespace apache::thrift::stress

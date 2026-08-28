@@ -21,10 +21,13 @@
 
 namespace apache::thrift::stress {
 
+class StressTestServerStats;
+
 std::shared_ptr<StressTestHandler> createStressTestHandler();
 
 std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler =
-        nullptr);
+        nullptr,
+    std::shared_ptr<StressTestServerStats> serverStats = nullptr);
 
 } // namespace apache::thrift::stress

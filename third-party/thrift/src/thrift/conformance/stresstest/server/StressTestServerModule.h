@@ -28,6 +28,8 @@ namespace apache::thrift::stress {
 
 class StressTestServerModule : public ServerModule {
  public:
+  StressTestServerModule(std::shared_ptr<StressTestServerStats> serverStats);
+
   std::string getName() const final;
   std::vector<std::shared_ptr<ServiceInterceptorBase>> getServiceInterceptors()
       final;
@@ -37,7 +39,7 @@ class StressTestServerModule : public ServerModule {
       uint32_t dumpStatInterval);
 
  private:
-  StressTestServerStats serverStats_;
+  std::shared_ptr<StressTestServerStats> serverStats_;
 };
 
 } // namespace apache::thrift::stress

@@ -198,7 +198,8 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
 }
 
 std::shared_ptr<ThriftServer> createStressTestServer(
-    std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler) {
+    std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler,
+    std::shared_ptr<StressTestServerStats> serverStats) {
   auto numCpuWorkerThreads = sanitizeNumThreads(FLAGS_cpu_threads);
 
   if (!handler) {
@@ -243,7 +244,11 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   }
   server->setIOThreadPool(ioThreadPool);
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
-  auto stressTestServerModule = std::make_unique<StressTestServerModule>();
+  if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0 && !serverStats) {
+    serverStats = std::make_shared<StressTestServerStats>();
+  }
+  auto stressTestServerModule =
+      std::make_unique<StressTestServerModule>(serverStats);
   if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0) {
     LOG(INFO) << "IO Uring statistics dump enabled every "
               << FLAGS_io_uring_dump_stat_interval << " seconds";

@@ -19,6 +19,7 @@
 #include <concepts>
 
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/StringTypeAdapter.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 

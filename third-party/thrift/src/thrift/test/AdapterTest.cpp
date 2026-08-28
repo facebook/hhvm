@@ -24,7 +24,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include <folly/Portability.h>
+#include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/Adapter.h>
+#include <thrift/lib/cpp2/StringTypeAdapter.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -68,6 +73,62 @@ TEST_F(AdapterTest, AdaptedT) {
   AssertSameType<
       adapt_detail::adapted_t<OverloadedAdapter, std::string>,
       String>();
+}
+
+TEST_F(AdapterTest, StringTypeAdapter) {
+  FOLLY_PUSH_WARNING
+  FOLLY_CLANG_DISABLE_WARNING("-Wshadow")
+  FOLLY_CLANG_DISABLE_WARNING("-Wunneeded-member-function")
+  FOLLY_CLANG_DISABLE_WARNING("-Wunused-member-function")
+  struct Protocol {
+    std::uint32_t writeString(std::string_view) { return 1; }
+    std::uint32_t writeBinary(std::string_view) { return 2; }
+    void readString(folly::fbstring& value) { value = "decoded string"; }
+    std::uint32_t serializedSizeString(std::string_view) { return 3; }
+    std::uint32_t serializedSizeBinary(std::string_view) { return 4; }
+    std::uint32_t serializedSizeZCBinary(std::string_view) { return 5; }
+  } protocol;
+  FOLLY_POP_WARNING
+
+  static_assert(!adapt_detail::StringTypeAdapterCompatible<std::u16string>);
+
+  auto adapted = StringTypeAdapter<folly::fbstring>::fromThrift("value");
+  EXPECT_FALSE(StringTypeAdapter<folly::fbstring>::isEmpty(adapted));
+  EXPECT_EQ(adapted, "value");
+  EXPECT_EQ(StringTypeAdapter<folly::fbstring>::toThrift(adapted), "value");
+  EXPECT_EQ(
+      StringTypeAdapter<folly::fbstring>::encode<type::string_t>(
+          protocol, adapted),
+      1);
+  EXPECT_EQ(
+      StringTypeAdapter<folly::fbstring>::encode<type::binary_t>(
+          protocol, adapted),
+      2);
+  EXPECT_EQ(
+      (StringTypeAdapter<folly::fbstring>::encode<
+          type::cpp_type<folly::fbstring, type::binary_t>>(protocol, adapted)),
+      2);
+  StringTypeAdapter<folly::fbstring>::decode<type::string_t>(protocol, adapted);
+  EXPECT_EQ(adapted, "decoded string");
+
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeString(folly::StringPiece{"compact string"});
+  auto encoded = queue.move();
+  CompactProtocolReader reader;
+  reader.setInput(encoded.get());
+  op::decode<type::adapted<StringTypeAdapter<folly::fbstring>, type::string_t>>(
+      reader, adapted);
+  EXPECT_EQ(adapted, "compact string");
+
+  const folly::fbstring empty;
+  EXPECT_TRUE(StringTypeAdapter<folly::fbstring>::isEmpty(empty));
+  EXPECT_TRUE(StringTypeAdapter<folly::fbstring>::toThrift(empty).empty());
+  EXPECT_EQ(
+      StringTypeAdapter<folly::fbstring>::encode<type::binary_t>(
+          protocol, empty),
+      2);
 }
 
 TEST_F(AdapterTest, IsMutableRef) {

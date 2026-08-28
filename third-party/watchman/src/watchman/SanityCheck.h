@@ -8,8 +8,10 @@
 #pragma once
 
 #ifdef __linux__
+#include <chrono>
 #include <cstdint>
 #include <optional>
+#include <thread>
 #endif
 
 namespace watchman {
@@ -42,6 +44,7 @@ std::optional<FileIdentity> getIdentityForPath(const char* path);
 ExecutableChange checkExecutableChange(
     const FileIdentity& running,
     const char* path);
+std::thread startBinaryChangeMonitorThread(std::chrono::seconds checkInterval);
 #endif
 void startSanityCheckThread();
 

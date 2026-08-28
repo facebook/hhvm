@@ -8,6 +8,11 @@
 #include <fmt/core.h>
 #include <folly/String.h>
 
+#ifdef __linux__
+#include <string>
+#include <string_view>
+#endif
+
 #include "watchman/Connect.h"
 #include "watchman/Logging.h"
 #include "watchman/PDU.h"
@@ -49,6 +54,64 @@ ExecutableChange checkExecutableChange(
 #endif
 
 namespace {
+
+#ifdef __linux__
+constexpr const char* kProcSelfExe = "/proc/self/exe";
+constexpr std::string_view kDeletedSuffix = " (deleted)";
+
+/**
+ * Filesystem location this process was executed from.
+ *
+ * A special case when RPM upgrade happens when watchman starts:
+ * The kernel marks the executable location `" (deleted)"` once the
+ * old file is unlinked so the marker is stripped.
+ */
+std::optional<std::string> getExecutablePathToWatch() {
+  try {
+    auto path = readSymbolicLink(kProcSelfExe).string();
+    if (path.ends_with(kDeletedSuffix)) {
+      path.resize(path.size() - kDeletedSuffix.size());
+    }
+    return path;
+  } catch (const std::exception& error) {
+    log(DBG, "unable to resolve /proc/self/exe: ", error.what(), "\n");
+    return std::nullopt;
+  }
+}
+
+bool waitForShutdown(std::chrono::seconds duration) {
+  const auto deadline = std::chrono::steady_clock::now() + duration;
+  while (!w_is_stopping() && std::chrono::steady_clock::now() < deadline) {
+    /* sleep override */
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  return w_is_stopping();
+}
+
+void binaryChangeMonitorThread(
+    FileIdentity running,
+    std::string path,
+    std::chrono::seconds checkInterval) noexcept {
+  w_set_thread_name("binarychange");
+
+  log(DBG, "starting binary change monitor for ", path, "\n");
+  while (!waitForShutdown(checkInterval)) {
+    const auto change = checkExecutableChange(running, path.c_str());
+    if (change == ExecutableChange::Unknown) {
+      log(DBG, "unable to inspect watchman binary at ", path, "\n");
+      continue;
+    }
+    if (change == ExecutableChange::Unchanged) {
+      continue;
+    }
+
+    log(ERR, "watchman binary changed at ", path, "; shutting down\n");
+    w_request_shutdown();
+    break;
+  }
+  log(DBG, "done with binary change monitor\n");
+}
+#endif
 
 // Work-around decodeNext which implictly resets to non-blocking
 std::optional<json_ref>
@@ -258,6 +321,23 @@ void sanityCheckThread() noexcept {
   log(ERR, "done with sanityCheckThread\n");
 }
 } // namespace
+
+#ifdef __linux__
+std::thread startBinaryChangeMonitorThread(std::chrono::seconds checkInterval) {
+  // Identify the running image through the magic link, not through the path it
+  // resolves to: it names the inode this process is executing even after that
+  // inode is unlinked.
+  auto running = getIdentityForPath(kProcSelfExe);
+  auto path = getExecutablePathToWatch();
+  if (!running || !path) {
+    log(ERR, "binary change monitor could not identify the executable\n");
+    return {};
+  }
+
+  return std::thread{
+      binaryChangeMonitorThread, *running, std::move(*path), checkInterval};
+}
+#endif
 
 void startSanityCheckThread() {
   // The blocking pipe reads we use on win32 can cause us to get blocked

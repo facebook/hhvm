@@ -332,6 +332,11 @@ ParseResult HTTPBinaryCodec::parseSingleContentHelper(folly::io::Cursor& cursor,
   if (!contentLength) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
+  // Check that we had enough bytes to parse contentLength, otherwise the
+  // "remaining - parsed" below underflows
+  if (remaining < contentLength->second) {
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
+  }
   // Increase parsed by the number of bytes read
   parsed += contentLength->second;
   if (contentLength->first == 0) {
@@ -371,12 +376,16 @@ ParseResult HTTPBinaryCodec::parseIndeterminateLengthContentHelper(
   ParseResult parseResult(ParseResultState::INITIALIZED);
   size_t parsed = 0;
   do {
-    // Parse the next body chunk
-    parseResult = parseSingleContentHelper(cursor, remaining);
-    if (parseResult.parseResultState_ == ParseResultState::ERROR ||
-        parseResult.parseResultState_ ==
-            ParseResultState::WAITING_FOR_MORE_DATA) {
+    // Parse the next body chunk out of what this call has not already consumed
+    parseResult = parseSingleContentHelper(cursor, remaining - parsed);
+    if (parseResult.parseResultState_ == ParseResultState::ERROR) {
       return parseResult;
+    }
+    // Report the bytes of the chunks already handed to the callback, otherwise
+    // they are not trimmed and are parsed and delivered a second time
+    if (parseResult.parseResultState_ ==
+        ParseResultState::WAITING_FOR_MORE_DATA) {
+      return ParseResult(parsed, ParseResultState::WAITING_FOR_MORE_DATA);
     }
     // After successfully processing a body chunk, we call onBody
     parsed += parseResult.bytesParsed_;

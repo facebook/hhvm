@@ -59,6 +59,34 @@ class HTTPBinaryCodecForTest : public HTTPBinaryCodec {
   }
 };
 
+namespace {
+
+void writeVarint(folly::io::QueueAppender& appender, uint64_t value) {
+  auto encoded = quic::encodeQuicInteger(value, [&](auto val) {
+    appender.writeBE(folly::tag<decltype(val)>, val);
+  });
+  CHECK(encoded.has_value());
+}
+
+void writeVarintString(folly::io::QueueAppender& appender,
+                       folly::StringPiece str) {
+  writeVarint(appender, str.size());
+  appender.pushAtMost(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+}
+
+// Framing indicator plus request control data for `GET
+// https://www.example.com/`
+void writeRequestPreamble(folly::io::QueueAppender& appender,
+                          uint64_t framingIndicator) {
+  writeVarint(appender, framingIndicator);
+  writeVarintString(appender, "GET");
+  writeVarintString(appender, "https");
+  writeVarintString(appender, "www.example.com");
+  writeVarintString(appender, "/");
+}
+
+} // namespace
+
 template <TransportDirection dir>
 class HTTPBinaryCodecTest : public ::testing::Test {
  protected:
@@ -1142,6 +1170,59 @@ TEST_F(HttpBinaryUpstreamCodecTest, IndeterminateLenReqKnownLengthResp) {
   EXPECT_EQ(downstreamCodecCb.msg->getHeaders().getSingleOrEmpty("host"),
             "test.com");
   EXPECT_FALSE(downstreamCodecCb.lastParseError);
+}
+
+// A chunk that is split across onIngress calls leaves the chunks before it
+// unparsed, so they must not be handed to the callback twice
+TEST_F(HttpBinaryDownstreamCodecTest, testSplitContentChunkIsDeliveredOnce) {
+  const std::string body(512, 'a');
+  folly::IOBufQueue message{folly::IOBufQueue::cacheChainLength()};
+  folly::io::QueueAppender appender(&message, 1024);
+  writeRequestPreamble(appender, 2 /* request, indeterminate length */);
+  writeVarint(appender, 0 /* empty field section */);
+  writeVarintString(appender, "first-");
+  writeVarintString(appender, body);
+
+  // Split partway through the second chunk, so the first chunk is complete and
+  // already delivered while the second one is still outstanding
+  auto head = message.split(message.chainLength() - 256);
+  auto tail = message.move();
+
+  FakeHTTPCodecCallback callback;
+  binaryCodecIndeterminateLength_->setCallback(&callback);
+  binaryCodecIndeterminateLength_->onIngress(*head);
+  binaryCodecIndeterminateLength_->onIngress(*tail);
+
+  EXPECT_EQ(callback.lastParseError, nullptr);
+  EXPECT_EQ(callback.bodyLength, body.size() + 6);
+  EXPECT_EQ(callback.data_.move()->to<std::string>(), "first-" + body);
+}
+
+// The bounds check for each chunk has to be made against what the call has not
+// already consumed, not against the whole buffer
+TEST_F(HttpBinaryDownstreamCodecTest, testPartialChunkIsNotOverCounted) {
+  const std::string first(200, 'a');
+  const std::string second(200, 'b');
+  folly::IOBufQueue message{folly::IOBufQueue::cacheChainLength()};
+  folly::io::QueueAppender appender(&message, 1024);
+  writeRequestPreamble(appender, 2 /* request, indeterminate length */);
+  writeVarint(appender, 0 /* empty field section */);
+  writeVarintString(appender, first);
+  writeVarintString(appender, second);
+
+  // Withhold the second half of the second chunk. Checking its declared length
+  // against the whole buffer rather than the unconsumed part would accept it.
+  auto head = message.split(message.chainLength() - 100);
+  auto tail = message.move();
+
+  FakeHTTPCodecCallback callback;
+  binaryCodecIndeterminateLength_->setCallback(&callback);
+  binaryCodecIndeterminateLength_->onIngress(*head);
+  binaryCodecIndeterminateLength_->onIngress(*tail);
+
+  EXPECT_EQ(callback.lastParseError, nullptr);
+  EXPECT_EQ(callback.bodyLength, first.size() + second.size());
+  EXPECT_EQ(callback.data_.move()->to<std::string>(), first + second);
 }
 
 } // namespace proxygen::test

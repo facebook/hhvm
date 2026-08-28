@@ -24,4 +24,6 @@ namespace apache::thrift::stress {
 
 void writeStressTestResult(const std::string& path, const ClientResult& result);
 
+void writeStressTestResult(const std::string& path, const ServerResult& result);
+
 } // namespace apache::thrift::stress

@@ -37,4 +37,9 @@ void writeStressTestResult(
   writeResult(path, result);
 }
 
+void writeStressTestResult(
+    const std::string& path, const ServerResult& result) {
+  writeResult(path, result);
+}
+
 } // namespace apache::thrift::stress

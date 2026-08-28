@@ -21,9 +21,39 @@
 
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestRegistry.h>
+#include <thrift/conformance/stresstest/common/StressTestResultFile.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
+DEFINE_string(
+    stress_test_result_path,
+    "",
+    "Write the final stress test result as Thrift SimpleJSON");
+DEFINE_string(
+    stress_test_result_run_id,
+    "",
+    "Run identifier stored in the stress test result");
+
 namespace apache::thrift::stress {
+
+namespace {
+
+void writeClientResult(
+    const std::string& testName, const StressTestStats& stats) {
+  if (FLAGS_stress_test_result_path.empty()) {
+    return;
+  }
+
+  ClientResult result;
+  result.metadata()->runId() = FLAGS_stress_test_result_run_id;
+  result.metadata()->workload() = testName;
+  result.requests()->succeeded() = stats.rpcStats.numSuccess;
+  result.requests()->failed() = stats.rpcStats.numFailure;
+  result.requests()->total() =
+      stats.rpcStats.numSuccess + stats.rpcStats.numFailure;
+  writeStressTestResult(FLAGS_stress_test_result_path, result);
+}
+
+} // namespace
 
 TestRunner::TestRunner(ClientConfig cfg)
     : cfg_(cfg), availableTests_(StressTestRegistry::getInstance().listAll()) {
@@ -35,6 +65,15 @@ TestRunner::TestRunner(ClientConfig cfg)
     selectedTests_.push_back(FLAGS_test_name);
   } else {
     selectedTests_ = availableTests_;
+  }
+  if (!FLAGS_stress_test_result_path.empty()) {
+    CHECK(!FLAGS_stress_test_result_run_id.empty())
+        << "--stress_test_result_run_id is required with "
+           "--stress_test_result_path";
+    CHECK_EQ(selectedTests_.size(), 1)
+        << "--stress_test_result_path requires exactly one selected test";
+    CHECK(!cfg_.continuous)
+        << "--stress_test_result_path is not supported with --continuous";
   }
 }
 
@@ -61,10 +100,11 @@ std::unique_ptr<StressTestBase> TestRunner::instantiate(
 }
 
 StressTestStats TestRunner::run(std::string testName) {
-  return run(instantiate(testName));
+  return runTest(testName, instantiate(testName));
 }
 
-StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
+StressTestStats TestRunner::runTest(
+    const std::string& testName, std::unique_ptr<StressTestBase> test) {
   resetMemoryStats();
 
   // initialize the client runner
@@ -72,11 +112,13 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
   // run the test
   runner.run(test.get());
   // collect and print statistics
-  return StressTestStats{
+  auto result = StressTestStats{
       .runtimeSeconds = FLAGS_runtime_s,
       .memoryStats = runner.getMemoryStats(),
       .rpcStats = runner.getRpcStats(),
   };
+  writeClientResult(testName, result);
+  return result;
 }
 
 void TestRunner::runTests() {

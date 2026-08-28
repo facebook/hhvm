@@ -38,7 +38,6 @@ class TestRunner {
   std::unique_ptr<StressTestBase> instantiate(std::string testName) const;
 
   StressTestStats run(std::string testName);
-  StressTestStats run(std::unique_ptr<StressTestBase> test);
 
   void runTests();
 
@@ -50,6 +49,8 @@ class TestRunner {
   std::vector<std::string> selectedTests_;
   folly::FunctionScheduler functionScheduler_;
 
+  StressTestStats runTest(
+      const std::string& testName, std::unique_ptr<StressTestBase> test);
   void runContinuously();
   void runContinuously(std::unique_ptr<StressTestBase> test);
   void runFixedTime();

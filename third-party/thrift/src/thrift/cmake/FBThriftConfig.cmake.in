@@ -29,7 +29,22 @@ else()
   set_and_check(FBTHRIFT_COMPILER "@PACKAGE_BIN_INSTALL_DIR@/thrift1")
 endif()
 
-find_dependency(Xxhash REQUIRED)
+# xxhash ships no CMake package config, so Xxhash resolves in MODULE mode via
+# the FindXxhash.cmake module installed alongside this config. Prepend this
+# config's own directory to CMAKE_MODULE_PATH only for that lookup, and restore
+# it before propagating any failure so the consumer's scope is never polluted
+# (find_dependency's REQUIRED failure path would return() before a later restore).
+set(_FBTHRIFT_SAVED_CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+find_package(Xxhash MODULE)
+set(CMAKE_MODULE_PATH "${_FBTHRIFT_SAVED_CMAKE_MODULE_PATH}")
+unset(_FBTHRIFT_SAVED_CMAKE_MODULE_PATH)
+if (NOT Xxhash_FOUND)
+  set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Could not find required dependency Xxhash")
+  set(${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)
+  return()
+endif()
+
 find_dependency(ZLIB REQUIRED)
 find_package(mvfst CONFIG)
 

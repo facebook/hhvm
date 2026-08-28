@@ -38,6 +38,13 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/FBThriftConfig.cmake
   DESTINATION ${CMAKE_INSTALL_DIR}
 )
+# xxhash ships no CMake package config, so FBThriftConfig.cmake resolves Xxhash
+# in MODULE mode. Install FindXxhash.cmake next to the config (which prepends its
+# own directory to CMAKE_MODULE_PATH) so downstream find_package(FBThrift) works.
+install(
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindXxhash.cmake
+  DESTINATION ${CMAKE_INSTALL_DIR}
+)
 install(
   EXPORT fbthrift-exports
   FILE FBThriftTargets.cmake

@@ -2498,35 +2498,20 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           (Syntax.is_missing ellipsis
           && Syntax.is_missing shape_type_ellipsis_type)
       in
-      let fields =
+      let trailing_item =
         if has_ellipsis then
-          let missing_separator = make_missing () in
-          (* Build a node combining the typed ellipsis type and the ... token *)
-          let ellipsis_node =
-            if Syntax.is_missing shape_type_ellipsis_type then
-              ellipsis
-            else
-              let missing = make_missing () in
-              Syntax.make_tuple_or_union_or_intersection_element_type_specifier
-                missing
-                missing
-                shape_type_ellipsis_type
-                ellipsis
-          in
-          let ellipsis_list =
-            [Syntax.make_list_item ellipsis_node missing_separator]
-          in
-          make_list (Syntax.children type_fields @ ellipsis_list)
+          Some (Concat [t env shape_type_ellipsis_type; t env ellipsis])
         else
-          type_fields
+          None
       in
       transform_container_literal
         env
         shape_kw
         left_p
-        fields
+        type_fields
         right_p
         ~allow_trailing:(not has_ellipsis)
+        ?trailing_item
     | Syntax.ShapeExpression
         {
           shape_expression_keyword = shape_kw;
@@ -3544,6 +3529,7 @@ and transform_container_literal
     ?(space = false)
     ?allow_trailing
     ?explicit_type
+    ?trailing_item
     kw
     left_p
     members
@@ -3551,8 +3537,8 @@ and transform_container_literal
   let force_newlines =
     node_has_trailing_newline left_p
     &&
-    match members.Syntax.syntax with
-    | Syntax.Missing -> false
+    match (members.Syntax.syntax, trailing_item) with
+    | (Syntax.Missing, None) -> false
     | _ -> true
   in
   let ty =
@@ -3568,13 +3554,30 @@ and transform_container_literal
         Space
       else
         Nothing);
-      transform_argish
-        env
-        ~force_newlines
-        ?allow_trailing
-        left_p
-        members
-        right_p;
+      (match trailing_item with
+      | None ->
+        transform_argish
+          env
+          ~force_newlines
+          ?allow_trailing
+          left_p
+          members
+          right_p
+      | Some trailing_item ->
+        delimited_nest
+          env
+          ~force_newlines
+          left_p
+          right_p
+          [
+            handle_possible_list
+              env
+              members
+              ~after_each:(fun _ -> space_split ())
+              ~handle_element:(transform_argish_item env)
+              ~handle_last:(transform_argish_item env);
+            trailing_item;
+          ]);
     ]
 
 and replace_leading_trivia node new_leading_trivia =

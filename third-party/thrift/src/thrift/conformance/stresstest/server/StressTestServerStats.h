@@ -34,19 +34,27 @@ class StressTestServerStats {
   void init(
       std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
       uint32_t intervalSeconds);
+  void collectFinal();
   void recordConnection(ConnectionMode mode);
   ServerResult publish(ResultMetadata metadata) const;
 
  private:
-  struct State {
+  class IoUringStatsTimer;
+  struct IoUringStatsTimerRegistration {
+    folly::EventBase* eventBase;
+    std::shared_ptr<IoUringStatsTimer> timer;
+  };
+
+  struct ConnectionState {
     int64_t unknownConnections{0};
     int64_t plaintextConnections{0};
     int64_t tlsConnections{0};
     int64_t stopTlsV2Connections{0};
   };
 
-  folly::Synchronized<State> state_;
-  std::vector<std::shared_ptr<folly::AsyncTimeout>> timers_;
+  folly::Synchronized<ConnectionState> connectionState_;
+  ZcrxCounters zcrxCounters_;
+  std::vector<IoUringStatsTimerRegistration> timers_;
 };
 
 } // namespace apache::thrift::stress

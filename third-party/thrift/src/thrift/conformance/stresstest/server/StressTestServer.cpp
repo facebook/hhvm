@@ -244,17 +244,21 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   }
   server->setIOThreadPool(ioThreadPool);
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
-  if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0 && !serverStats) {
+  const bool collectIoUringStats =
+      FLAGS_io_uring && (FLAGS_io_uring_dump_stat_interval > 0 || serverStats);
+  if (collectIoUringStats && !serverStats) {
     serverStats = std::make_shared<StressTestServerStats>();
   }
   auto stressTestServerModule =
       std::make_unique<StressTestServerModule>(serverStats);
-  if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0) {
-    LOG(INFO) << "IO Uring statistics dump enabled every "
-              << FLAGS_io_uring_dump_stat_interval << " seconds";
+  if (collectIoUringStats) {
     auto evbs = ioThreadPool->getAllEventBases();
     stressTestServerModule->initIoUringStatsLogging(
         evbs, static_cast<uint32_t>(FLAGS_io_uring_dump_stat_interval));
+  }
+  if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0) {
+    LOG(INFO) << "IO Uring statistics dump enabled every "
+              << FLAGS_io_uring_dump_stat_interval << " seconds";
   }
   server->addModule(std::move(stressTestServerModule));
   if (FLAGS_io_zctx) {

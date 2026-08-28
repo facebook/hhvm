@@ -32,6 +32,21 @@ from thrift.test.py import (
 )
 
 
+def pty_allocation_is_permitted() -> bool:
+    try:
+        master_fd, slave_fd = pty.openpty()
+    except OSError:
+        return False
+    os.close(master_fd)
+    os.close(slave_fd)
+    return True
+
+
+PTY_UNAVAILABLE_REASON = (
+    "pty allocation is not permitted here, so stderr cannot be made a tty"
+)
+
+
 @dataclass(frozen=True)
 class ProcessResult:
     returncode: int
@@ -225,6 +240,7 @@ class TestThriftPyDeprecatedWarningE2E(unittest.TestCase):
 
     # pyre-ignore[56]: Pyre cannot infer parameterized tuple type.
     @parameterized.expand(parameters.tty_warning_cases())
+    @unittest.skipUnless(pty_allocation_is_permitted(), PTY_UNAVAILABLE_REASON)
     def test_tty_warning_output(
         self,
         _name: str,

@@ -74,7 +74,9 @@ class PoolStorageData {
     list.push_back(std::move(weak_op));
   }
 
-  // Searches for an operation in the queue and removes it
+  // Searches for an operation in the queue and removes it. Returns whether it
+  // was still queued, which callers use to decide whether they may act on it:
+  // false means some other thread has already taken it out to fulfill it.
   bool dequeueOperation(
       const PoolKey& pool_key,
       const ConnectPoolOperation<Client>& pool_op) {
@@ -84,7 +86,12 @@ class PoolStorageData {
       return locked_op && locked_op.get() == &pool_op;
     });
 
-    return it != list.end();
+    if (it == list.end()) {
+      return false;
+    }
+
+    list.erase(it);
+    return true;
   }
 
   // Calls failureCallback with the error description and removed all

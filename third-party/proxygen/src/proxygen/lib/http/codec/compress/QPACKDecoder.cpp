@@ -92,6 +92,11 @@ uint32_t QPACKDecoder::decodePrefix(HPACKDecodeBuffer& dbuf) {
     }
   }
   VLOG(5) << "Decoded requiredInsertCount=" << requiredInsertCount;
+  if (requiredInsertCount > std::numeric_limits<uint32_t>::max()) {
+    LOG(ERROR) << "requiredInsertCount out of range=" << requiredInsertCount;
+    err_ = HPACK::DecodeError::INVALID_INDEX;
+    return 0;
+  }
   uint64_t delta = 0;
   if (dbuf.empty()) {
     LOG(ERROR) << "Invalid prefix, no delta-base";
@@ -112,10 +117,6 @@ uint32_t QPACKDecoder::decodePrefix(HPACKDecodeBuffer& dbuf) {
       err_ = HPACK::DecodeError::INVALID_INDEX;
       return 0;
     }
-    // The largest table we support is 2^32 - 1 / 32 entries, so
-    // requiredInsertCount (less any delta, etc) must be < 2^32.
-    CHECK_LE(requiredInsertCount - delta - 1,
-             std::numeric_limits<uint32_t>::max());
     baseIndex_ = requiredInsertCount - delta - 1;
   } else {
     // base must be < 2^32

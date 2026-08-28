@@ -1,0 +1,7 @@
+<?hh
+<<__EntryPoint>>
+function main(): void {
+  if (!class_exists("Memcache")) {
+    echo "skip: no memcache extension";
+  }
+}

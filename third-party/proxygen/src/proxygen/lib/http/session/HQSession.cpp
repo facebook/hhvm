@@ -2062,6 +2062,7 @@ size_t HQSession::handleWrite(WriteFunc writeFunc,
     hqStream->pendingEOM_ = false;
   }
   hqStream->bytesWritten_ += sent;
+  onBodyBytesWritten(sent);
   // hqStream's byteEventTracker cannot be changed, so no need to pass
   // shared_ptr or use in while loop
   hqStream->byteEventTracker_.processByteEvents(

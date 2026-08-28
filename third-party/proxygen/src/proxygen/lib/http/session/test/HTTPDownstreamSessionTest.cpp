@@ -1717,6 +1717,42 @@ TEST_F(HTTP2DownstreamSessionTest, TestPingWithPreSendSplit) {
   parseOutput(*clientCodec_);
 }
 
+TEST_F(HTTP2DownstreamSessionTest,
+       SlowConsumerPreSendSplitCountsOnlyWrittenBody) {
+  httpSession_->setSlowConsumerParams(
+      /*queueThresholdBytes=*/10,
+      /*minDequeueBytes=*/10,
+      /*window=*/milliseconds(1));
+
+  auto byteEventTracker = new NiceMock<MockByteEventTracker>(nullptr);
+  EXPECT_CALL(*byteEventTracker, drainByteEvents()).WillRepeatedly(Return(0));
+  EXPECT_CALL(*byteEventTracker, processByteEvents(_, _))
+      .WillRepeatedly(Invoke([](std::shared_ptr<ByteEventTracker> self,
+                                uint64_t bytesWritten) {
+        return self->ByteEventTracker::processByteEvents(self, bytesWritten);
+      }));
+  EXPECT_CALL(*byteEventTracker, preSend(_, _, _, _))
+      .WillOnce(Return(1))
+      .WillOnce(Invoke([this](bool*, bool*, bool*, uint64_t) {
+        transport_->pauseWrites();
+        return 0;
+      }))
+      .WillRepeatedly(Return(0));
+
+  auto handler = addSimpleStrictHandler();
+  sendRequest();
+  handler->expectHeaders();
+  handler->expectEOM([this, &handler, byteEventTracker] {
+    httpSession_->setByteEventTracker(
+        std::unique_ptr<ByteEventTracker>(byteEventTracker));
+    handler->sendReplyWithBody(200, 100);
+  });
+  handler->expectDetachTransaction();
+  expectDetachSession();
+
+  flushRequestsAndLoop();
+}
+
 TEST_F(HTTP2DownstreamSessionTest, SetByteEventTracker) {
   // Send two requests with writes paused, which will queue several byte events,
   // including last byte events which are holding a reference to the
@@ -1787,6 +1823,44 @@ TEST_F(HTTP2DownstreamSessionTest, SendNoErrorAfterEomFlush) {
                  /*expect100=*/false,
                  /*expectGoaway=*/false,
                  /*expectBody=*/false);
+  gracefulShutdown();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, SlowConsumerDropsSession) {
+  // A peer that never drains bytes should trip the slow-consumer detector.
+  httpSession_->setSlowConsumerParams(
+      /*queueThresholdBytes=*/1024,
+      /*minDequeueBytes=*/1024,
+      /*window=*/milliseconds(50));
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler, this] {
+    transport_->pauseWrites();
+    handler->sendReplyWithBody(200, 8192);
+  });
+  handler->expectDetachTransaction();
+  expectDetachSession();
+
+  sendRequest();
+  flushRequestsAndLoop();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, SlowConsumerKeepsSessionWhenDraining) {
+  // If writes complete promptly, the detector should not trip even under a
+  // response large enough to exceed queueThreshold_ briefly.
+  httpSession_->setSlowConsumerParams(
+      /*queueThresholdBytes=*/1024,
+      /*minDequeueBytes=*/1024,
+      /*window=*/milliseconds(50));
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler] { handler->sendReplyWithBody(200, 8192); });
+  handler->expectDetachTransaction();
+
+  sendRequest();
+  flushRequestsAndLoopN(2);
   gracefulShutdown();
 }
 

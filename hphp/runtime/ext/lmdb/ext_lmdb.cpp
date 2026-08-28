@@ -387,7 +387,7 @@ int64_t get(
     kv.mv_data = (void*)key_val->m_data.pstr->data();
     kv.mv_size = key_val->m_data.pstr->size();
   } else if (tvIsInt(key_val)) {
-    *((int64_t*)kv.mv_data) = key_val->m_data.num;
+    kv.mv_data = (void*)&key_val->m_data.num;
     kv.mv_size = sizeof(key_val->m_data.num);
   }
 
@@ -416,7 +416,7 @@ MDB_val keyToMdbVal(const Variant& key) {
     kv.mv_data = (void*)key_val->m_data.pstr->data();
     kv.mv_size = key_val->m_data.pstr->size();
   } else if (tvIsInt(key_val)) {
-    *((int64_t*)kv.mv_data) = key_val->m_data.num;
+    kv.mv_data = (void*)&key_val->m_data.num;
     kv.mv_size = sizeof(key_val->m_data.num);
   }
   return kv;

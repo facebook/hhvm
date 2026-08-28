@@ -483,11 +483,16 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             }
           }
           if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
-            _xml_add_to_info(parser, parser->ltags[parser->level-1] +
-                             parser->toffset);
+            // clamp toffset into the tag; this site does raw pointer math,
+            // unlike the substr-based sites which self-clamp.
+            char* ltag = parser->ltags[parser->level-1];
+            size_t tlen = ltag ? strlen(ltag) : 0;
+            size_t toff = (parser->toffset >= 0 &&
+                           (size_t)parser->toffset <= tlen)
+                          ? (size_t)parser->toffset : tlen;
+            _xml_add_to_info(parser, ltag + toff);
             Array tag = make_dict_array(
-              s_tag, OptString(parser->ltags[parser->level-1] +
-                                  parser->toffset, CopyString),
+              s_tag, OptString(ltag + toff, CopyString),
               s_value, decoded_value,
               s_type, s_cdata,
               s_level, parser->level

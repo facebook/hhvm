@@ -229,6 +229,8 @@ static xmlNodePtr serialize_zval(const Variant& val, sdlParamPtr param,
 static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
                                       int index, const char *name, int style,
                                       xmlNodePtr parent) {
+  // Function-scoped: `name` may still point here after the block below.
+  char paramNameBuf[10];
   if (!value.isNull() && value.isObject()) {
     Object obj_value = value.toObject();
     if (obj_value.instanceof(SoapParam::classof())) {
@@ -242,7 +244,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
     name = param->paramName.c_str();
   } else {
     if (name == nullptr) {
-      char paramNameBuf[10];
       snprintf(paramNameBuf, sizeof(paramNameBuf), "param%d", index);
       name = paramNameBuf;
     }

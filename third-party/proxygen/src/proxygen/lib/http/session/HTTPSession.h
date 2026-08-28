@@ -852,12 +852,22 @@ class HTTPSession
 
   size_t sendPing(uint64_t data) override;
 
+  uint64_t takeBodyBytesForWrite(uint64_t writeLen);
+
   // private members
 
   std::list<ReplaySafetyCallback*> waitingForReplaySafety_;
 
   folly::Optional<std::pair<uint64_t, HTTPSession::DestructorGuard>>
       pendingWrite_;
+
+  /**
+   * Body bytes contained in the currently in-flight write to the socket.
+   * Captured at scheduling time so writeSuccess can report body-only progress
+   * to the base session's slow-consumer detector.  Zero when no write is in
+   * flight.
+   */
+  uint64_t bodyBytesPendingWrite_{0};
 
   /**
    * Connection level flow control for HTTP/2
@@ -901,7 +911,9 @@ class HTTPSession
   uint64_t bytesScheduled_{0};
 
   /**
-   * Number of body un-encoded bytes in the write buffer per write iteration.
+   * Number of unencoded body bytes currently represented in writeBuf_.
+   * Preserved across pre-send splits so suffix body bytes are credited only
+   * when the suffix is written.
    */
   uint64_t bodyBytesPerWriteBuf_{0};
 

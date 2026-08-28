@@ -398,13 +398,16 @@ file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
        if (i == 0) {
          const char *str = nullptr;
          cdf_directory_t *d;
-         char name[__arraycount(d->d_name)];
+         // +1 and an explicit NUL: d_name need not be terminated, but
+         // cdf_app_to_mime runs strlen over it.
+         char name[__arraycount(d->d_name) + 1];
          size_t j, k;
 
          for (j = 0; str == nullptr && j < dir.dir_len; j++) {
            d = &dir.dir_tab[j];
-           for (k = 0; k < sizeof(name); k++)
+           for (k = 0; k < sizeof(name) - 1; k++)
              name[k] = (char)cdf_tole2(d->d_name[k]);
+           name[sizeof(name) - 1] = '\0';
            str = cdf_app_to_mime(name,
                NOTMIME(ms) ? name2desc : name2mime);
          }

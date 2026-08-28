@@ -365,8 +365,6 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
 #endif
 #endif
 
-#define Kmax 15
-
 namespace {
 
 struct Bigint {
@@ -377,18 +375,9 @@ struct Bigint {
 
 } // namespace
 
-void destroy_freelist(Bigint** freelist);
-
 struct BigintData {
-  BigintData() : p5s(nullptr) {
-    freelist = (Bigint **)calloc(Kmax + 1, sizeof(Bigint *));
-  }
-  ~BigintData() {
-    destroy_freelist(freelist);
-    free(freelist);
-  }
+  BigintData() : p5s(nullptr) {}
 
-  Bigint **freelist;
   Bigint *p5s;
 };
 static RDS_LOCAL_NO_CHECK(BigintData, s_bigint_data);
@@ -401,32 +390,18 @@ void zend_get_bigint_data() {
 
 static Bigint * Balloc(int k)
 {
-  int x;
-  Bigint *rv;
-
-  assertx(k <= Kmax);
-
-  Bigint **&freelist = s_bigint_data->freelist;
-  if ((rv = freelist[k])) {
-    freelist[k] = rv->next;
-  } else {
-    x = 1 << k;
-    rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
-    assertx(rv != nullptr);
-    rv->k = k;
-    rv->maxwds = x;
-  }
+  int x = 1 << k;
+  Bigint *rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
+  assertx(rv != nullptr);
+  rv->k = k;
+  rv->maxwds = x;
   rv->sign = rv->wds = 0;
   return rv;
 }
 
 static void Bfree(Bigint *v)
 {
-  if (v) {
-    Bigint **&freelist = s_bigint_data->freelist;
-    v->next = freelist[v->k];
-    freelist[v->k] = v;
-  }
+  free(v);            // free(nullptr) is a no-op
 }
 
 #define Bcopy(x,y) memcpy((char *)&x->sign, (char *)&y->sign, \
@@ -1270,23 +1245,6 @@ static int quorem(Bigint *b, Bigint *S)
   }
   return q;
 }
-
-void destroy_freelist(Bigint** freelist)
-{
-  int i;
-  Bigint *tmp;
-
-  for (i = 0; i <= Kmax; i++) {
-    Bigint **listp = &freelist[i];
-    while ((tmp = *listp) != nullptr) {
-      *listp = tmp->next;
-      free(tmp);
-    }
-    freelist[i] = nullptr;
-  }
-
-}
-
 
 void zend_freedtoa(char *s)
 {

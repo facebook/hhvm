@@ -35,6 +35,9 @@ std::unique_ptr<Connection> SyncConnectionPool::connect(
 
 void SyncConnectionPool::openNewConnectionPrep(
     SyncConnectPoolOperation& pool_op) {
+  // A pool with no connections can't satisfy a request from its free list, so
+  // every pool reaches this at least once before it has anything to clean up.
+  ensureCleanupScheduled();
   pool_op.prepWait();
 }
 

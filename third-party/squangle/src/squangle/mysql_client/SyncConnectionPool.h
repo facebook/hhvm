@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include <folly/executors/FunctionScheduler.h>
+#include <folly/executors/GlobalExecutor.h>
+#include <folly/futures/Future.h>
+#include <folly/synchronization/CallOnce.h>
 
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
@@ -42,16 +44,7 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
       PoolOptions pool_options)
       : ConnectionPool<SyncMysqlClient>(
             std::move(mysql_client),
-            std::move(pool_options)) {
-    scheduler_.addFunction(
-        [&]() {
-          conn_storage_.cleanupOperations();
-          conn_storage_.cleanupConnections();
-        },
-        PoolOptions::kCleanUpTimeout,
-        "pool_periodic_cleanup");
-    scheduler_.start();
-  }
+            std::move(pool_options)) {}
 
   ~SyncConnectionPool() override {
     VLOG(2) << "Connection pool dying";
@@ -70,12 +63,50 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
   void shutdown() override {
     bool expected = false;
     if (shutting_down_.compare_exchange_strong(expected, true)) {
-      scheduler_.shutdown();
       conn_storage_.clearAll();
     }
   }
 
  private:
+  // Arms the periodic cleanup. Deferred to the first connection request rather
+  // than done in the constructor because weak_from_this() is empty until a
+  // shared_ptr owns the pool, which would end the loop on its first iteration.
+  void ensureCleanupScheduled() {
+    folly::call_once(cleanup_started_, [this]() {
+      try {
+        scheduleCleanup();
+      } catch (const std::exception& e) {
+        // Only the global CPU executor going away at process shutdown, where
+        // nothing is left worth cleaning up. Swallowing it keeps an unexpected
+        // exception type out of the caller's connect.
+        LOG(WARNING) << "not scheduling pool cleanup: " << e.what();
+      }
+    });
+  }
+
+  // Re-arms itself after each pass, so the pool needs no thread of its own. The
+  // weak reference ends the loop once the pool is gone; while it is held the
+  // pool cannot be destroyed underneath us.
+  //
+  // Cleanup destroys pooled connections, and removeFromPool() takes a strong
+  // reference to do so -- when that is the last one the pool is destroyed on
+  // whichever thread ran the cleanup. Safe only because this pool joins no
+  // thread.
+  void scheduleCleanup() {
+    folly::futures::sleep(PoolOptions::kCleanUpTimeout)
+        .via(folly::getGlobalCPUExecutor())
+        .thenValue([weakSelf = weak_from_this()](auto&&) {
+          auto self =
+              std::static_pointer_cast<SyncConnectionPool>(weakSelf.lock());
+          if (!self || self->isShuttingDown()) {
+            return;
+          }
+          self->conn_storage_.cleanupOperations();
+          self->conn_storage_.cleanupConnections();
+          self->scheduleCleanup();
+        });
+  }
+
   bool isShuttingDown() const override {
     return shutting_down_;
   }
@@ -107,7 +138,7 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
 
   std::atomic<bool> shutting_down_{false};
 
-  folly::FunctionScheduler scheduler_;
+  folly::once_flag cleanup_started_;
 };
 
 } // namespace facebook::common::mysql_client

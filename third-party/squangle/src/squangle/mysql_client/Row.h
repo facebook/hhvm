@@ -749,7 +749,6 @@ class RowBlock {
   }
 
   // Special override for folly::StringPiece to match existing code
-  template <>
   [[deprecated(
       "ADVICE: prefer RowBlock::addRow(); this build API is "
       "deprecated")]]

@@ -8,6 +8,7 @@
 
 #include "proxygen/lib/http/coro/client/HTTPCoroConnector.h"
 #include "proxygen/lib/http/coro/client/TLS.h"
+#include "proxygen/lib/http/coro/client/ValidationPolicy.h"
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 
@@ -56,19 +57,6 @@ using namespace proxygen::coro;
 // default conn & stream fc are ~32MB & ~2MB respectively
 constexpr size_t kDefaultConnFlowControl = 1u << 25;
 constexpr size_t kDefaultStreamFlowControl = 1u << 21;
-
-std::optional<ValidationPolicy> getValidationPolicy(
-    HTTPCoroConnector::IdentityValidation identityValidation) {
-  switch (identityValidation) {
-    case HTTPCoroConnector::IdentityValidation::Disabled_INSECURE:
-      return std::nullopt;
-    case HTTPCoroConnector::IdentityValidation::Enforcing:
-      return ValidationPolicy::Enforcing;
-    case HTTPCoroConnector::IdentityValidation::Logging:
-      return ValidationPolicy::Logging;
-  }
-  throw std::invalid_argument("unknown identity validation mode");
-}
 
 class ConnectCB
     : public folly::AsyncSocket::ConnectCallback

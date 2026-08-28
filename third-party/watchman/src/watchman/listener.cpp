@@ -12,6 +12,7 @@
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <folly/net/NetworkSocket.h>
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <optional>
@@ -478,6 +479,9 @@ bool w_start_listener() {
 
   std::optional<AcceptLoop> tcp_loop;
   std::optional<AcceptLoop> unix_loop;
+#ifdef __linux__
+  std::thread binaryChangeMonitor;
+#endif
 
   // When we unwind, ensure that we stop the accept threads
   SCOPE_EXIT {
@@ -486,6 +490,11 @@ bool w_start_listener() {
     }
     unix_loop.reset();
     tcp_loop.reset();
+#ifdef __linux__
+    if (binaryChangeMonitor.joinable()) {
+      binaryChangeMonitor.join();
+    }
+#endif
   };
 
   if (listener_fd) {
@@ -506,6 +515,16 @@ bool w_start_listener() {
   if (Configuration().getBool("enable-sanity-check", true)) {
     startSanityCheckThread();
   }
+
+#ifdef __linux__
+  if (Configuration().getBool("exit_on_binary_change", false)) {
+    // A shorter interval than the 1s shutdown poll granularity would spin.
+    const auto checkInterval = std::chrono::seconds(
+        std::max<json_int_t>(
+            1, Configuration().getInt("binary_change_check_interval", 60)));
+    binaryChangeMonitor = startBinaryChangeMonitorThread(checkInterval);
+  }
+#endif
 
 #ifdef _WIN32
   // Start the named pipes and join them; this will

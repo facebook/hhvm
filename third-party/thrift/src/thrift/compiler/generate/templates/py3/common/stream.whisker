@@ -32,7 +32,7 @@ identification. Takes a function and produces
     folly::optional value type to a python type. }}
 {{#let export partial cython_cpp_value_to_python_value |type| captures |types|}}
 {{#pragma ignore-newlines}}
-{{#if type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(_value)
+{{#if type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(_value.clone())
 {{#else if type.iobufRef?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf(_value))
 {{#else if type.flexibleBinary?}}(<const char*>_value.data())[:_value.size()]
 {{#else if type.string?}}_value.data().decode('UTF-8')

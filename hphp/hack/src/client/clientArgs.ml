@@ -295,6 +295,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
   let preexisting_warnings = ref false in
+  let reason = ref None in
   let warning_switches = ref [] in
   let invalid_warning_codes = ref [] in
   let desc = ref (ClientCommand.command_name cmd) in
@@ -867,6 +868,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.Unit (fun () -> set_mode MODE_REMOVE_DEAD_UNSAFE_CASTS),
         " (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)",
         Arg_non_user_facing );
+      ( "--reason",
+        Arg.String (fun value -> reason := Some value),
+        " reason for invoking hh, logged to telemetry",
+        Arg_user_facing );
       ( "--retries",
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout",
@@ -1212,11 +1217,16 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
 
   let is_interactive = is_interactive !from in
+  let custom_telemetry_data =
+    match !reason with
+    | None -> !custom_telemetry_data
+    | Some reason -> !custom_telemetry_data @ [("reason", reason)]
+  in
   {
     ClientEnv.autostart = !autostart;
     config = !config;
     custom_hhi_path = !custom_hhi_path;
-    custom_telemetry_data = !custom_telemetry_data;
+    custom_telemetry_data;
     error_format = !error_format;
     force_dormant_start = !force_dormant_start;
     from = !from;

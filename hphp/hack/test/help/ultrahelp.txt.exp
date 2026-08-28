@@ -74,6 +74,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --remove-dead-fixme                      (mode) remove dead HH_FIXME for specified error code (first do hh_client restart --no-load)
   --remove-dead-fixmes                     (mode) remove dead HH_FIXME for any error code < 5000 (first do hh_client restart --no-load)
   --remove-dead-unsafe-casts               (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)
+  --reason                                 reason for invoking hh, logged to telemetry
   --retries                                (deprecated) same as --timeout
   --retry-if-init                          (deprecated and ignored)
   --rewrite-declarations Rewrite           Hack source code allowed in notebooks to valid Hack.

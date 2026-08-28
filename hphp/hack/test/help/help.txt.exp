@@ -30,6 +30,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --outline                                (mode) prints an outline of the text on stdin
   --outline-for-agents                     <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files
   --refactor                               (mode) rename a symbol, Usage: hh_client ["Class", "Function", "Method"] <Current Name> <New Name>
+  --reason                                 reason for invoking hh, logged to telemetry
   --single <path>                          Return errors in file with provided name (give '-' for stdin)
   --multi <path>                           Return errors for files read from the given file (one per line)
   --stats                                  display some server statistics

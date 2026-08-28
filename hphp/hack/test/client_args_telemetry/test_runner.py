@@ -91,7 +91,7 @@ def _project_sample(
     normal = sample.get("normal", {})
     projection = {
         key: normal[key]
-        for key in ("client_command", "event", "exit_status", "process")
+        for key in ("client_command", "event", "exit_status", "process", "reason")
         if key in normal
     }
     ints = sample.get("int", {})

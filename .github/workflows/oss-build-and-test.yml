@@ -1,0 +1,70 @@
+---
+name: OSS build and tests
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.architecture.name }} / ${{ matrix.compiler.name }}
+    runs-on: ${{ matrix.architecture.runner }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+          - name: x86_64
+            runner: ubuntu-26.04
+          - name: aarch64
+            runner: ubuntu-26.04-arm
+        compiler:
+          - name: clang-21
+            cc: clang-21
+            cxx: clang++-21
+            packages: clang-21 lld-21
+            lld: /usr/bin/ld.lld-21
+          - name: gcc-15
+            cc: gcc-15
+            cxx: g++-15
+            packages: gcc-15 g++-15
+            lld: ""
+    env:
+      HHVM_OSS_WORK_ROOT: ${{ runner.temp }}/hhvm-oss
+      HHVM_BIN: ${{ runner.temp }}/hhvm-oss/hhvm/hphp/hhvm/hhvm
+      HHVM_OSS_BUILD_TOOLS: true
+      HHVM_OSS_CMAKE_BUILD_TYPE: DebugOpt
+      HHVM_OSS_C_COMPILER: ${{ matrix.compiler.cc }}
+      HHVM_OSS_CXX_COMPILER: ${{ matrix.compiler.cxx }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify native architecture
+        run: test "$(uname -m)" = "${{ matrix.architecture.name }}"
+      - name: Install and verify compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.compiler.packages }}
+          actual_version="$("$HHVM_OSS_CXX_COMPILER" -dumpversion | cut -d. -f1)"
+          expected_version="${HHVM_OSS_CXX_COMPILER##*-}"
+          if [ "$actual_version" != "$expected_version" ]; then
+            echo "Expected compiler $expected_version, found $actual_version" >&2
+            exit 1
+          fi
+      - name: Select LLD
+        if: matrix.compiler.lld != ''
+        run: |
+          sudo update-alternatives \
+            --install /usr/bin/ld.lld ld.lld ${{ matrix.compiler.lld }} 1000
+      - name: Build DebugOpt OSS HHVM, HHBBC, and tc-print
+        run: ./build/oss_build.sh
+      - name: Run quick tests
+        run: ./hphp/test/run quick
+      - name: Run slow tests
+        continue-on-error: true
+        run: ./hphp/test/run slow -e ext_sbcc

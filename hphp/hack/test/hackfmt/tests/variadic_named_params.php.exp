@@ -20,4 +20,26 @@ function in_lambdas(): void {
   $_ = (int $x, named arraykey...) ==> $x;
   $_ = function(named int...): void {};
   $_ = async (named int...) ==> 1;
+  $_ = (
+    int $first,
+    string $second,
+    bool $third,
+    named float $flag,
+    named dict<string, vec<int>>...
+  ) ==> $first;
 }
+
+type TNamedVariadicFn = (function(named int...): void);
+
+function accepts(
+  (function(
+    int,
+    string,
+    bool,
+    float,
+    named arraykey $key,
+    named dict<string, vec<int>>...
+  ): void) $f,
+): void {}
+
+function returns(): (function(int, string..., named bool...): void) {}

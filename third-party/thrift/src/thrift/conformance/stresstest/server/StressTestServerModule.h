@@ -21,7 +21,7 @@
 
 #include <folly/Executor.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/conformance/stresstest/server/StressTestStatsLogger.h>
+#include <thrift/conformance/stresstest/server/StressTestServerStats.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 
 namespace apache::thrift::stress {
@@ -37,7 +37,7 @@ class StressTestServerModule : public ServerModule {
       uint32_t dumpStatInterval);
 
  private:
-  StressTestStatsLogger stressTestStatsLogger_;
+  StressTestServerStats serverStats_;
 };
 
 } // namespace apache::thrift::stress

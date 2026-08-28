@@ -22,18 +22,30 @@
 
 #include <folly/CPortability.h>
 #include <folly/Executor.h>
+#include <folly/Synchronized.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/conformance/stresstest/if/gen-cpp2/StressTestResult_types.h>
 
 namespace apache::thrift::stress {
 
-class StressTestStatsLogger {
+class StressTestServerStats {
  public:
   void init(
       std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
       uint32_t intervalSeconds);
+  void recordConnection(ConnectionMode mode);
+  ServerResult publish(ResultMetadata metadata) const;
 
  private:
+  struct State {
+    int64_t unknownConnections{0};
+    int64_t plaintextConnections{0};
+    int64_t tlsConnections{0};
+    int64_t stopTlsV2Connections{0};
+  };
+
+  folly::Synchronized<State> state_;
   std::vector<std::shared_ptr<folly::AsyncTimeout>> timers_;
 };
 

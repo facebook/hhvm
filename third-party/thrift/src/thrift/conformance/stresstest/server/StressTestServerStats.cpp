@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-#include <thrift/conformance/stresstest/server/StressTestStatsLogger.h>
+#include <thrift/conformance/stresstest/server/StressTestServerStats.h>
+
+#include <utility>
 
 #include <glog/logging.h>
 #include <folly/io/async/IoUringBackend.h>
@@ -71,7 +73,7 @@ class IoUringStatsTimer : public folly::AsyncTimeout {
   folly::IoUringBackend::IoUringStats stats_{};
 };
 
-void StressTestStatsLogger::init(
+void StressTestServerStats::init(
     std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
     uint32_t intervalSeconds) {
   if (intervalSeconds == 0) {
@@ -103,9 +105,44 @@ void StressTestStatsLogger::init(
   }
 }
 #else
-void StressTestStatsLogger::init(
+void StressTestServerStats::init(
     std::vector<folly::Executor::KeepAlive<folly::EventBase>>&,
     uint32_t /* intervalSeconds */) {}
 #endif
+
+void StressTestServerStats::recordConnection(ConnectionMode mode) {
+  auto state = state_.wlock();
+  switch (mode) {
+    case ConnectionMode::Plaintext:
+      ++state->plaintextConnections;
+      break;
+    case ConnectionMode::Tls:
+      ++state->tlsConnections;
+      break;
+    case ConnectionMode::StopTlsV2:
+      ++state->stopTlsV2Connections;
+      break;
+    case ConnectionMode::Unknown:
+      ++state->unknownConnections;
+      break;
+  }
+}
+
+ServerResult StressTestServerStats::publish(ResultMetadata metadata) const {
+  auto state = state_.rlock();
+  ServerResult result;
+  result.metadata() = std::move(metadata);
+  result.connections() = {
+      {ConnectionMode::Unknown, state->unknownConnections},
+      {ConnectionMode::Plaintext, state->plaintextConnections},
+      {ConnectionMode::Tls, state->tlsConnections},
+      {ConnectionMode::StopTlsV2, state->stopTlsV2Connections},
+  };
+  result.zcrx()->eventBaseCount() = 0;
+  result.zcrx()->copyFallbackCount() = 0;
+  result.zcrx()->copyFallbackBytes() = 0;
+  result.zcrx()->noBufferCount() = 0;
+  return result;
+}
 
 } // namespace apache::thrift::stress

@@ -31,7 +31,7 @@ StressTestServerModule::getServiceInterceptors() {
 void StressTestServerModule::initIoUringStatsLogging(
     std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
     uint32_t dumpStatInterval) {
-  stressTestStatsLogger_.init(evbs, dumpStatInterval);
+  serverStats_.init(evbs, dumpStatInterval);
 }
 
 } // namespace apache::thrift::stress

@@ -103,7 +103,13 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
 
   // for debugging, return number of pool keys in the pool
   [[nodiscard]] size_t getNumKey() const noexcept {
-    return conn_storage_.getNumKey();
+    // conn_storage_ is unsynchronized for this pool, which relies on every
+    // access happening on the mysql thread. Hop onto it so callers elsewhere
+    // don't race the pool mutating itself; runs inline if already there.
+    size_t numKey = 0;
+    mysql_client_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+        [&] { numKey = conn_storage_.getNumKey(); });
+    return numKey;
   }
 
  private:

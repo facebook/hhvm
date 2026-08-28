@@ -867,7 +867,11 @@ ALWAYS_INLINE
 static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
     req::ptr<WandResource<MagickWand>> wand, int64_t x, int64_t y,
     int64_t width, int64_t height, const OptString& map) {
-  size_t size = width * height * map.length();
+  size_t size;
+  if (__builtin_mul_overflow((size_t)width, (size_t)height, &size) ||
+      __builtin_mul_overflow(size, (size_t)map.length(), &size)) {
+    IMAGICK_THROW("Unable to export image pixels: region too large");
+  }
   vector<typename StorageTypeCPPType<T>::T> ret(size);
   auto status = MagickExportImagePixels(
     wand->getWand(), x, y, width, height, map.c_str(), T, (void*)ret.data());

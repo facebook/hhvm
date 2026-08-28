@@ -196,6 +196,7 @@ void HTTPUpstreamSession::maybeAttachSSLContext(
 void HTTPUpstreamSession::detachThreadLocals(bool detachSSLContext) {
   CHECK(transactions_.empty());
   cancelLoopCallbacks();
+  cancelSlowConsumerTimer();
   pauseReadsImpl();
   if (sock_) {
     if (detachSSLContext) {

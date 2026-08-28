@@ -1295,6 +1295,12 @@ size_t HTTPSession::sendBody(HTTPTransaction* txn,
   return encodedSize;
 }
 
+uint64_t HTTPSession::takeBodyBytesForWrite(uint64_t writeLen) {
+  auto bodyBytes = std::min(bodyBytesPerWriteBuf_, writeLen);
+  bodyBytesPerWriteBuf_ -= bodyBytes;
+  return bodyBytes;
+}
+
 size_t HTTPSession::sendChunkHeader(HTTPTransaction* txn,
                                     size_t length) noexcept {
   size_t encodedSize =
@@ -1834,7 +1840,6 @@ void HTTPSession::runSessionLoopCallback() noexcept {
 
   uint64_t bytesWritten = 0;
   for (uint32_t i = 0; i < kMaxWritesPerLoop; ++i) {
-    bodyBytesPerWriteBuf_ = 0;
     bool cork = true;
     bool timestampTx = false;
     bool timestampAck = false;
@@ -1860,6 +1865,7 @@ void HTTPSession::runSessionLoopCallback() noexcept {
     flags |= (timestampAck) ? folly::WriteFlags::EOR : folly::WriteFlags::NONE;
     CHECK(!pendingWrite_.hasValue());
     pendingWrite_.emplace(len, DestructorGuard(this));
+    bodyBytesPendingWrite_ = takeBodyBytesForWrite(len);
 
     if (!writeTimeout_.isScheduled()) {
       // Any performance concern here?
@@ -2375,6 +2381,8 @@ void HTTPSession::writeSuccess() noexcept {
   auto bytesWritten = pendingWrite_->first;
   bytesWritten_ += bytesWritten;
   transportInfo_.totalBytes += bytesWritten;
+  HTTPSessionBase::onBodyBytesWritten(bodyBytesPendingWrite_);
+  bodyBytesPendingWrite_ = 0;
   CHECK(writeTimeout_.isScheduled());
   VLOG(10) << "Cancel write timer on last successful write";
   writeTimeout_.cancelTimeout();
@@ -2432,6 +2440,7 @@ void HTTPSession::writeErr(size_t bytesWritten,
   DestructorGuard dg(this);
   DCHECK(pendingWrite_.hasValue());
   pendingWrite_.reset();
+  bodyBytesPendingWrite_ = 0;
   if (infoCallback_) {
     infoCallback_->onWrite(*this, bytesWritten);
   }

@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/HTTPSessionActivityTracker.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/utils/Time.h>
+#include <proxygen/lib/utils/WheelTimerInstance.h>
 #include <wangle/acceptor/ManagedConnection.h>
 #include <wangle/acceptor/TransportInfo.h>
 
@@ -311,6 +312,22 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   }
 
   /**
+   * Configure the slow-consumer detector. When more than
+   * `queueThresholdBytes` bytes are buffered for the peer and fewer than
+   * `minDequeueBytes` body bytes drain across a `window` interval, the
+   * session is dropped with kErrorWriteTimeout.
+   *
+   * A `queueThresholdBytes` of 0 disables the check (the default).
+   */
+  void setSlowConsumerParams(uint32_t queueThresholdBytes,
+                             uint32_t minDequeueBytes,
+                             std::chrono::milliseconds window) {
+    slowConsumerQueueThreshold_ = queueThresholdBytes;
+    slowConsumerMinDequeueBytes_ = minDequeueBytes;
+    slowConsumerWindow_ = window;
+  }
+
+  /**
    * Start reading from the transport and send any introductory messages
    * to the remote side. This function must be called once per session to
    * begin reads.
@@ -591,6 +608,15 @@ class HTTPSessionBase : public wangle::ManagedConnection {
 
   void updateWriteBufSize(int64_t delta);
 
+  /**
+   * Called by transports when body bytes have been handed to the underlying
+   * transport (i.e., accepted for delivery, not merely queued for
+   * serialization).  Used by the slow-consumer detector.
+   */
+  void onBodyBytesWritten(uint64_t bytes);
+
+  void cancelSlowConsumerTimer();
+
   void updatePendingWrites();
 
   bool hasPendingEgress() {
@@ -698,6 +724,49 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   getHTTPSessionObserverContainer() const {
     return nullptr;
   }
+
+  /**
+   * Timer used by the slow-consumer detector.  Scheduled while
+   * pendingWriteSize_ exceeds slowConsumerQueueThreshold_.  On fire,
+   * verifies enough body bytes drained since it was armed; drops the
+   * session if not.
+   */
+  class SlowConsumerTimer : public folly::HHWheelTimer::Callback {
+   public:
+    explicit SlowConsumerTimer(HTTPSessionBase& session) : session_(session) {
+    }
+    void timeoutExpired() noexcept override {
+      session_.slowConsumerTimerExpired(bodyBytesWrittenAtArm_);
+    }
+    void callbackCanceled() noexcept override {
+    }
+    void arm(std::chrono::milliseconds window,
+             uint64_t bodyBytesWrittenSnapshot);
+
+   private:
+    HTTPSessionBase& session_;
+    // Only valid while isScheduled().
+    uint64_t bodyBytesWrittenAtArm_{0};
+  };
+
+  void slowConsumerTimerExpired(uint64_t bodyBytesWrittenAtArm) noexcept;
+
+  SlowConsumerTimer slowConsumerTimer_{*this};
+
+  /**
+   * Total body bytes handed to the transport for this session.  Fed by
+   * onBodyBytesWritten() from HTTPSession::writeSuccess (for H1/H2) and
+   * from HQSession's per-stream write completion (for H3).  Monotonic.
+   */
+  uint64_t bodyBytesWritten_{0};
+
+  /**
+   * Slow-consumer detector configuration; a zero queue threshold disables
+   * the check entirely.
+   */
+  uint32_t slowConsumerQueueThreshold_{0};
+  uint32_t slowConsumerMinDequeueBytes_{0};
+  std::chrono::milliseconds slowConsumerWindow_{0};
 
   HTTPSessionStats* sessionStats_{nullptr};
 

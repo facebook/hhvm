@@ -372,9 +372,8 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
       struct curl_slist *slist;
       Array ret = Array::CreateVec();
       if (curl_easy_getinfo(cp, (CURLINFO)opt, &slist) == CURLE_OK) {
-        while (slist) {
-          ret.append(slist->data);
-          slist = slist->next;
+        for (auto node = slist; node; node = node->next) {
+          ret.append(node->data);
         }
         curl_slist_free_all(slist);
         return ret;

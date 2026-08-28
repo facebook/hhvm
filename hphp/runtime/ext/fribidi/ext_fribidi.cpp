@@ -101,9 +101,9 @@ static Variant HHVM_FUNCTION(
     return false;
   }
 
-  // Convert back from internal Unicode to original character set
+  // +1 for the trailing NUL fribidi_unicode_to_charset writes.
   visual_str_len = 4 * ustr_len;
-  visual_str = (char *) req::malloc_noptrs(sizeof(char) * visual_str_len);
+  visual_str = (char *) req::malloc_noptrs(sizeof(char) * (visual_str_len + 1));
   SCOPE_EXIT { req::free(visual_str); };
 
   visual_str_len = fribidi_unicode_to_charset(

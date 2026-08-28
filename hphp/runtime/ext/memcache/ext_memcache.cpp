@@ -132,8 +132,9 @@ static bool HHVM_METHOD(Memcache, connect, const OptString& host, int64_t port /
 
   if (!host.empty() &&
       !strncmp(host.c_str(), "unix://", sizeof("unix://") - 1)) {
-    const char *socket_path = host.substr(sizeof("unix://") - 1).c_str();
-    ret = memcached_server_add_unix_socket(&data->m_memcache, socket_path);
+    // Named local: .c_str() on the substr temporary would dangle.
+    auto socket_path = host.substr(sizeof("unix://") - 1);
+    ret = memcached_server_add_unix_socket(&data->m_memcache, socket_path.c_str());
   } else {
     if (!isServerReachable(host, port)) {
       return false;

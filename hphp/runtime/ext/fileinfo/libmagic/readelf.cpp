@@ -673,7 +673,9 @@ core:
 
   switch (os_style) {
   case OS_STYLE_NETBSD:
-    if (xnh_type == NT_NETBSD_CORE_PROCINFO) {
+    // descsz must cover the name read at 0x7c (32 bytes) and signal at 0x08.
+    if (xnh_type == NT_NETBSD_CORE_PROCINFO &&
+        descsz >= 0x7c + 32) {
       uint32_t signo;
       /*
        * Extract the program name.  It is at

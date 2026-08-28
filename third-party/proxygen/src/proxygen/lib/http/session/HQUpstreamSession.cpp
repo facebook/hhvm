@@ -145,6 +145,7 @@ void HQUpstreamSession::detachThreadLocals(bool) {
   // TODO: deal with control streams in h2q
   CHECK_EQ(getNumOutgoingStreams(), 0);
   cancelLoopCallback();
+  cancelSlowConsumerTimer();
 
   // TODO: Pause reads and invoke infocallback
   // pauseReadsImpl();

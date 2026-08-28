@@ -312,6 +312,27 @@ TEST_P(HQDownstreamSessionTest, SimpleGet) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQDownstreamSessionTest, SlowConsumerDropsSession) {
+  hqSession_->setSlowConsumerParams(
+      /*queueThresholdBytes=*/1024,
+      /*minDequeueBytes=*/1000000,
+      /*window=*/milliseconds(1));
+
+  auto id = sendRequest();
+  socketDriver_->setStreamFlowControlWindow(id, 0);
+  socketDriver_->setConnectionFlowControlWindow(0);
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler] { handler->sendReplyWithBody(200, 8192); });
+  handler->expectError([](const HTTPException& ex) {
+    EXPECT_EQ(ex.getProxygenError(), kErrorDropped);
+  });
+  handler->expectDetachTransaction();
+
+  flushRequestsAndLoop();
+}
+
 TEST_P(HQDownstreamSessionTest, PriorityUpdateIntoTransport) {
   auto request = getProgressiveGetRequest();
   auto id = sendRequest(request);

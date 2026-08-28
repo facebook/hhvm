@@ -1980,6 +1980,9 @@ const StaticString s_crypto_secretstream_xchacha20poly130_state_string_required(
 ),
 s_crypto_secretstream_xchacha20poly130_incorrect_key_size(
   "key size should be crypto_secretstream_xchacha20poly1305_KEYBYTES bytes"
+),
+s_crypto_secretstream_xchacha20poly130_incorrect_header_size(
+  "header size should be crypto_secretstream_xchacha20poly1305_HEADERBYTES bytes"
 );
 
 OptString HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_keygen) {
@@ -2053,6 +2056,10 @@ OptString HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_pull,
   // check key size
   if (key.size() != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
     throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  // check header size
+  if (header.size() != crypto_secretstream_xchacha20poly1305_HEADERBYTES) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_incorrect_header_size);
   }
   // secret stream init pull
   size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);

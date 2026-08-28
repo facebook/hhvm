@@ -823,7 +823,9 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
       DPRINTF(("Wrapped around %p < %p\n", q, p));
       goto out;
     }
-    if (q + sizeof(uint32_t) > e) {
+    // 12 bytes covers both layouts: pi_type(4)+nelements(4)+first u32 (vector),
+    // and pi_type(4)+8-byte scalar (non-vector).
+    if (q + 3 * sizeof(uint32_t) > e) {
       DPRINTF(("Ran of the end %p > %p\n", q, e));
       goto out;
     }
@@ -895,7 +897,10 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
       memcpy(&inp[i].pi_d, &u64, sizeof(inp[i].pi_d));
       break;
     case CDF_LENGTH32_STRING:
-    case CDF_LENGTH32_WSTRING:
+    case CDF_LENGTH32_WSTRING: {
+      // Later inp[i].pi_type entries aren't populated; capture the width here.
+      const size_t nelem_sz =
+          (inp[i].pi_type & CDF_TYPEMASK) == CDF_LENGTH32_WSTRING ? 2 : 1;
       if (nelements > 1) {
         size_t nelem = inp - *info;
         if (*maxcount > CDF_PROP_LIMIT
@@ -913,7 +918,13 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
           nelements));
       for (j = 0; j < nelements && i < sh.sh_properties;
           j++, i++) {
+        if (q + o4 + sizeof(uint32_t) > e)
+          goto out;
         uint32_t l = CDF_GETUINT32(q, o);
+        // cdf_file_property_info reads s_len elements of nelem_sz bytes
+        // from s_buf; reject lengths that would run past the section end.
+        if (l > (size_t)(e - &q[o4 + sizeof(l)]) / nelem_sz)
+          goto out;
         inp[i].pi_str.s_len = l;
         inp[i].pi_str.s_buf = (const char *)
             (const void *)(&q[o4 + sizeof(l)]);
@@ -930,6 +941,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
       }
       i--;
       break;
+    }
     case CDF_FILETIME:
       if (inp[i].pi_type & CDF_VECTOR)
         goto unknown;

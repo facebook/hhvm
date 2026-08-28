@@ -13,6 +13,8 @@
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 #include <proxygen/lib/http/webtransport/WebTransportSession.h>
 
+#include <folly/io/async/EventBase.h>
+
 using folly::SocketAddress;
 using wangle::TransportInfo;
 
@@ -28,7 +30,7 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
                                  const TransportInfo& tinfo,
                                  InfoCallback* infoCallback,
                                  std::unique_ptr<HTTPCodec> codec,
-                                 const WheelTimerInstance& wheelTimer,
+                                 const WheelTimerInstance&,
                                  HTTPCodec::StreamID rootNodeId)
     : infoCallback_(infoCallback),
       transportInfo_(tinfo),
@@ -44,12 +46,23 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
 }
 
 HTTPSessionBase::~HTTPSessionBase() {
+  slowConsumerTimer_.cancelTimeout();
   if (sessionStats_) {
     sessionStats_->recordPendingBufferedWriteBytes(-1 *
                                                    (int64_t)pendingWriteSize_);
     sessionStats_->recordPendingBufferedReadBytes(-1 *
                                                   (int64_t)pendingReadSize_);
   }
+}
+
+void HTTPSessionBase::SlowConsumerTimer::arm(
+    std::chrono::milliseconds window, uint64_t bodyBytesWrittenSnapshot) {
+  bodyBytesWrittenAtArm_ = bodyBytesWrittenSnapshot;
+  if (auto* evb = session_.getEventBase()) {
+    evb->timer().scheduleTimeout(this, window);
+    return;
+  }
+  VLOG(2) << "Ignoring slow-consumer timer arm with no EventBase";
 }
 
 void HTTPSessionBase::setSessionStats(HTTPSessionStats* stats) {
@@ -171,6 +184,43 @@ void HTTPSessionBase::updateWriteBufSize(int64_t delta) {
     sessionStats_->recordPendingBufferedWriteBytes(delta);
   }
   pendingWriteSize_ += delta;
+  if (slowConsumerQueueThreshold_ > 0) {
+    if (pendingWriteSize_ > slowConsumerQueueThreshold_) {
+      if (!slowConsumerTimer_.isScheduled()) {
+        slowConsumerTimer_.arm(slowConsumerWindow_, bodyBytesWritten_);
+      }
+    } else if (slowConsumerTimer_.isScheduled()) {
+      slowConsumerTimer_.cancelTimeout();
+    }
+  }
+}
+
+void HTTPSessionBase::onBodyBytesWritten(uint64_t bytes) {
+  bodyBytesWritten_ += bytes;
+}
+
+void HTTPSessionBase::cancelSlowConsumerTimer() {
+  slowConsumerTimer_.cancelTimeout();
+}
+
+void HTTPSessionBase::slowConsumerTimerExpired(
+    uint64_t bodyBytesWrittenAtArm) noexcept {
+  // Belt-and-suspenders: another codepath may have drained us below the
+  // threshold in the same event-loop iteration in which the timer fired.
+  if (pendingWriteSize_ <= slowConsumerQueueThreshold_) {
+    return;
+  }
+  const uint64_t drained = bodyBytesWritten_ - bodyBytesWrittenAtArm;
+  if (drained < slowConsumerMinDequeueBytes_) {
+    VLOG(2) << "Slow consumer detected; pending=" << pendingWriteSize_
+            << " drained=" << drained << " over " << slowConsumerWindow_.count()
+            << "ms; dropping session";
+    dropConnection("slow consumer");
+    return;
+  }
+  // Made forward progress this window; rearm from the current position so
+  // each window is an independent measurement.
+  slowConsumerTimer_.arm(slowConsumerWindow_, bodyBytesWritten_);
 }
 
 void HTTPSessionBase::updatePendingWrites() {

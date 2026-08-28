@@ -128,4 +128,3 @@ class RoutingDataPipelineFactory {
 } // namespace wangle
 
 #include <wangle/bootstrap/AcceptRoutingHandler-inl.h>
-#include <wangle/util/Logging.h>

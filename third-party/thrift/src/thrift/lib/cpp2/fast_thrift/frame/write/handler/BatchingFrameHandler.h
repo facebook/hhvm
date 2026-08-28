@@ -306,6 +306,9 @@ class BatchingFrameHandlerT : public Backpressure {
     pendingBytes_ = 0;
     pendingFrames_ = 0;
     tracker_.onFlush();
+    if (config_.coalesceOnFlush) {
+      batchToSend->coalesce();
+    }
 
     auto result = ctx.fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(

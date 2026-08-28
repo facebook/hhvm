@@ -63,6 +63,9 @@ struct BatchingHandlerConfig {
    *   - High-throughput: Increase to 64+
    */
   size_t maxPendingFrames{32};
+
+  /** Coalesce the batch into one contiguous buffer before writing. */
+  bool coalesceOnFlush{false};
 };
 
 } // namespace apache::thrift::fast_thrift::frame::write

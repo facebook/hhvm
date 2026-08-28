@@ -217,6 +217,25 @@ TEST_F(BatchingFrameHandlerTest, MultipleFramesBatched) {
   EXPECT_TRUE(batch->isChained());
 }
 
+TEST_F(BatchingFrameHandlerTest, CoalesceOnFlushProducesContiguousBatch) {
+  BatchingFrameHandler handler(
+      BatchingHandlerConfig{
+          .maxPendingBytes = 64 * 1024,
+          .maxPendingFrames = 32,
+          .coalesceOnFlush = true,
+      });
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100, 'A')));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(200, 'B')));
+  runEventBaseLoop();
+
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  const auto& batch = *CHECK_NOTNULL(ctx_->writtenBatches()[0].get());
+  EXPECT_FALSE(batch.isChained());
+  EXPECT_EQ(batch.computeChainDataLength(), 300);
+}
+
 TEST_F(BatchingFrameHandlerTest, FlushOnByteThreshold) {
   BatchingHandlerConfig config{
       .maxPendingBytes = 500, // Small threshold

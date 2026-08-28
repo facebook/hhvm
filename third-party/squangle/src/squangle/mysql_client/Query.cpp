@@ -7,6 +7,7 @@
  */
 
 #include <folly/String.h>
+#include <folly/Traits.h>
 #include <algorithm>
 #include <type_traits>
 #include <vector>
@@ -171,10 +172,18 @@ std::string_view QueryArgument::typeName() const {
           return "QualifiedColumn";
         } else if constexpr (std::is_same_v<T, AliasedQualifiedColumn>) {
           return "AliasedQualifiedColumn";
+        } else if constexpr (std::is_same_v<T, AggregateColumn>) {
+          return "AggregateColumn";
+        } else if constexpr (std::is_same_v<T, AliasedAggregateColumn>) {
+          return "AliasedAggregateColumn";
         } else {
-          // Should be unreachable since we have an entry for each type in the
-          // variant.
-          CHECK(false);
+          // Unreachable by construction: every alternative of the variant is
+          // handled above. A static_assert makes that a build error rather
+          // than a runtime abort if an alternative is ever added without a
+          // branch here.
+          static_assert(
+              folly::always_false<T>,
+              "Unhandled QueryArgument alternative in typeName()");
         }
       },
       value_);

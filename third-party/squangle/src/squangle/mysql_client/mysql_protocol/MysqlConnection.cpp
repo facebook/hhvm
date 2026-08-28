@@ -140,11 +140,17 @@ folly::EventHandler::EventFlags MysqlConnection::getReadWriteState() const {
     case NET_NONBLOCKING_WRITE:
     case NET_NONBLOCKING_CONNECT:
       return folly::EventHandler::WRITE;
-    default:
-      break;
   }
 
-  LOG(FATAL) << "Unknown nonblocking state " << async_blocking_state;
+  // No default label: every net_async_block_state is handled above, so builds
+  // with -Wswitch flag a state added by a future libmysqlclient. Correctness
+  // does not depend on that warning -- an unhandled value simply falls through
+  // to the throw below -- so open-source consumers building without -Wswitch
+  // still behave safely.
+  throw db::OperationStateException(
+      fmt::format(
+          "Unknown MySQL nonblocking state {}",
+          static_cast<int>(async_blocking_state)));
 }
 
 unsigned int MysqlConnection::getErrno() const {

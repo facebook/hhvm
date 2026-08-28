@@ -21,7 +21,7 @@
 namespace fizz {
 
 /**
- * This class is a wrapper around AsyncTransportWrapper to handle most app level
+ * This class is a wrapper around AsyncTransportWrapper to handle most app-level
  * interactions. The derived client and server classes utilize the protected
  * methods.
  */
@@ -85,7 +85,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
         std::unique_ptr<folly::IOBuf> endOfData) = 0;
   };
 
-  /* Interface used to get a reference to an folly::IOBufIovecBuilder
+  /* Interface used to get a reference to a folly::IOBufIovecBuilder
    */
   struct IOVecQueueOps {
     virtual ~IOVecQueueOps() = default;
@@ -104,7 +104,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
      *      Under this mode, Fizz will allocate contiguous chunks of memory to
      *      read incoming encrypted records. This might lead to higher mem usage
      *      due to the way the memory is allocated from an IOBufQueue and also
-     *      due to the inability to do in place decryption for shared buffers
+     *      due to the inability to do in-place decryption for shared buffers
      *
      *   ReadMode::ReadVec
      *      Under this mode, Fizz will use vectored IO (`readv`) to read
@@ -142,8 +142,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     /**
      * Under ReadMode::ReadBuffer, whenever the underlying transport becomes
      * available to read, Fizz will ensure that *at least*
-     * `readBuferMinReadSize` worth of contiguous data is read per read call. If
-     * the internal read buffer is smaller than `readBufferMinReadSize`, then
+     * `readBufferMinReadSize` worth of contiguous data is read per read call.
+     * If the internal read buffer is smaller than `readBufferMinReadSize`, then
      * Fizz will allocate `readBufferAllocationSize` worth of new buffer space
      * to satisfy this read.
      */
@@ -152,7 +152,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
      * When set, `zeroCopyMemStore` points to an instance of a
      * `ZeroCopyMemStore` that outlives all `AsyncFizzBase` instances.
      *
-     * When set, Fizz will attempt to perform TCP zero copy receives. This
+     * When set, Fizz will attempt to perform TCP zero-copy receives. This
      * requires appropriate kernel and hardware support. With appropriate
      * support, encrypted data received by the NIC will be handed directly to
      * Fizz for decryption (normally, Fizz will copy data from the kernel).
@@ -167,7 +167,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   ~AsyncFizzBase() override;
 
   /**
-   * App level information for reading/writing app data.
+   * App-level information for reading/writing app data.
    */
   ReadCallback* getReadCallback() const override;
 
@@ -239,7 +239,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
       uint16_t length) const override = 0;
 
   /**
-   * Clean up transport on destruction
+   * Clean up the transport on destruction.
    */
   void destroy() override;
 
@@ -305,15 +305,15 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   // Note we clearly do not own the callback, and thus it is the caller's
-  // responsibility to ensure the callback outlives the lifetime of
-  // the fizz base instance. There are a couple key behavior differences if
-  // this callback is set.
-  // 1. We do not close the transport on receivng a close notify. It is your
+  // responsibility to ensure the callback outlives the Fizz base instance.
+  // There are a couple of key behavioral differences if this callback is set.
+  // 1. We do not close the transport on receiving a close notify. It is your
   // responsibility to do whatever is appropriate.
   // 2. We do not call readEOF on any read callback set on the transport.
-  // 3. Depending on when the tls connection is closed, there may be pending
-  // data that exists past the close notify, this is passed along to the caller
-  // in the endOfTLS method and the caller must decide what to do with the data
+  // 3. Depending on when the TLS connection is closed, there may be pending
+  // data remaining after the close notify. This is passed along to the caller
+  // in the endOfTLS method, and the caller must decide what to do with the
+  // data.
   virtual void setEndOfTLSCallback(EndOfTLSCallback* cb) {
     endOfTLSCallback_ = cb;
   }
@@ -349,8 +349,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
    * in-progress TLS record. This reduces the number of allocations needed and
    * reduces the length of the final IOBuf chain for large records.
    *
-   * This is independent of setHandshakeRecordAlignedReads which is only used
-   * for handshakes and disabled after.
+   * This is independent of setHandshakeRecordAlignedReads, which is only used
+   * for handshakes and is disabled afterward.
    */
   void setPreallocFromRecordHint(bool flag) {
     preallocFromRecordHint_ = flag;
@@ -368,8 +368,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   /**
    * Always allocate a separate, aligned buffer to read a single TLS record
-   * into. This is always done even for small (e.g. 32 byte) TLS records, so
-   * only enable this for workloads where it's known to send large records >= 4
+   * into. This is always done even for small (e.g. 32-byte) TLS records, so
+   * only enable this for workloads that are known to send large records >= 4
    * KB.
    */
   void setAlignedRecordReads(bool enabled) {
@@ -378,26 +378,26 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   /**
    * If set, after AsyncFizzBase has been used to write `bytes` worth of data,
-   * AsyncFizzBase will automatically initiate a key_update
+   * AsyncFizzBase will automatically initiate a key update.
    */
   void setRekeyAfterWriting(size_t bytes) {
     keyUpdateThreshold_ = bytes;
   }
 
   /*
-   * Gets the threshold value set for automatic key update
+   * Gets the threshold value set for automatic key updates.
    */
   size_t getRekeyAfterWriting() const {
     return keyUpdateThreshold_;
   }
   /*
    * Gets the client random associated with this connection. The CR can be
-   * used as a transport agnostic identifier (for instance, for NSS keylogging)
+   * used as a transport-agnostic identifier (for instance, for NSS keylogging).
    */
   virtual folly::Optional<Random> getClientRandom() const = 0;
 
   /*
-   * Used to shut down the tls session, without shutting down the underlying
+   * Used to shut down the TLS session without shutting down the underlying
    * transport.
    */
   virtual void tlsShutdown() = 0;
@@ -450,8 +450,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   virtual void initiateKeyUpdate(KeyUpdateRequest keyUpdateRequest) = 0;
 
   /**
-   * Set pre-received app data, to be returned to read callback before any
-   * decrypted data from fizz.
+   * Set pre-received app data to be returned to the read callback before any
+   * decrypted data from Fizz.
    */
   void setPreReceivedAppData(std::unique_ptr<folly::IOBuf> data) {
     appBytesReceived_ += data->computeChainDataLength();
@@ -477,7 +477,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   virtual void cancelHandshakeTimeout();
 
   /**
-   * Interfaces for the derived class to interact with the app level read
+   * Interfaces for the derived class to interact with the app-level read
    * callback.
    */
   virtual void deliverAppData(std::unique_ptr<folly::IOBuf> buf);
@@ -495,7 +495,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
       folly::WriteFlags flags = folly::WriteFlags::NONE) = 0;
 
   /**
-   * Alert the derived class that a transport error occured.
+   * Alert the derived class that a transport error occurred.
    */
   virtual void transportError(const folly::AsyncSocketException& ex) = 0;
 
@@ -517,17 +517,17 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   virtual void secretAvailable(const DerivedSecret& secret) noexcept;
 
   /**
-   * Signal end of tls connection by a graceful shutdown.
+   * Signal the end of a TLS connection through a graceful shutdown.
    */
   virtual void endOfTLS(std::unique_ptr<folly::IOBuf> endOfData) noexcept;
 
   /**
    * Called by derived classes to control the size of the next read from the
    * underlying transport (if using the readDataAvailable() API) when
-   * the transport performs record aligned reads.
+   * the transport performs record-aligned reads.
    *
-   * Record aligned reads are not the default; it must be explicitly enabled
-   * through AsyncFizzBase::setHandshakeRecordAlignedReads()
+   * Record-aligned reads are not the default; they must be explicitly enabled
+   * through AsyncFizzBase::setHandshakeRecordAlignedReads().
    */
   void updateReadHint(size_t hint) {
     readSizeHint_ = hint;

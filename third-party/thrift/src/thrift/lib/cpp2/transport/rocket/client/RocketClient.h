@@ -123,6 +123,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       Payload&& request,
       std::chrono::milliseconds firstResponseTimeout,
       std::chrono::milliseconds chunkTimeout,
+      std::chrono::milliseconds firstChunkTimeout,
       int32_t initialRequestN,
       StreamClientCallback* clientCallback);
 

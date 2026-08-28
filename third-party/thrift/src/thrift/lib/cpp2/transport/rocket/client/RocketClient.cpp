@@ -1101,13 +1101,20 @@ void RocketClient::sendRequestStream(
     Payload&& request,
     std::chrono::milliseconds firstResponseTimeout,
     std::chrono::milliseconds chunkTimeout,
+    std::chrono::milliseconds firstChunkTimeout,
     int32_t initialRequestN,
     StreamClientCallback* clientCallback) {
   const auto streamId = makeStreamId();
-  if (chunkTimeout != std::chrono::milliseconds::zero()) {
+  if (chunkTimeout != std::chrono::milliseconds::zero() ||
+      firstChunkTimeout != std::chrono::milliseconds::zero()) {
     auto serverCallback =
         std::make_unique<RocketStreamServerCallbackWithChunkTimeout>(
-            streamId, *this, *clientCallback, chunkTimeout, initialRequestN);
+            streamId,
+            *this,
+            *clientCallback,
+            chunkTimeout,
+            firstChunkTimeout,
+            initialRequestN);
     sendRequestStreamChannel(
         streamId,
         std::move(request),

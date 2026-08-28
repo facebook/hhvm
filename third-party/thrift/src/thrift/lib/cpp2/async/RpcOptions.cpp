@@ -74,6 +74,16 @@ std::chrono::milliseconds RpcOptions::getChunkTimeout() const {
   return std::chrono::milliseconds(chunkTimeout_);
 }
 
+RpcOptions& RpcOptions::setFirstChunkTimeout(
+    std::chrono::milliseconds firstChunkTimeout) {
+  firstChunkTimeout_ = validateTimeout(firstChunkTimeout);
+  return *this;
+}
+
+std::chrono::milliseconds RpcOptions::getFirstChunkTimeout() const {
+  return std::chrono::milliseconds(firstChunkTimeout_);
+}
+
 RpcOptions& RpcOptions::setChunkBufferSize(int32_t chunkBufferSize) {
   CHECK_EQ(bufferOptions_.memSize, 0)
       << "Only one of setMemoryBufferSize and setChunkBufferSize should be called";

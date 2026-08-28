@@ -54,6 +54,8 @@ bool RocketStreamServerCallbackWithChunkTimeout::onInitialPayload(
 bool RocketStreamServerCallbackWithChunkTimeout::onStreamPayload(
     StreamPayload&& payload) {
   DCHECK(credits_ != 0);
+  // Set before rescheduling so the next deadline is the subsequent-chunk one.
+  firstChunkReceived_ = true;
   if (--credits_ != 0) {
     scheduleTimeout();
   } else {
@@ -63,20 +65,32 @@ bool RocketStreamServerCallbackWithChunkTimeout::onStreamPayload(
 }
 
 void RocketStreamServerCallbackWithChunkTimeout::timeoutExpired() noexcept {
+  // Only call out the first-chunk deadline when it is distinct from the chunk
+  // deadline, so callers that never configured one see the original wording.
+  const bool distinctFirstChunkDeadline =
+      !firstChunkReceived_ && firstChunkTimeout_ != chunkTimeout_;
   onStreamError(
       folly::make_exception_wrapper<transport::TTransportException>(
           transport::TTransportException::TTransportExceptionType::TIMED_OUT,
           folly::to<std::string>(
-              "stream chunk timeout after ", chunkTimeout_.count(), " ms.")));
+              distinctFirstChunkDeadline ? "stream first chunk timeout after "
+                                         : "stream chunk timeout after ",
+              activeTimeout().count(),
+              " ms.")));
   onStreamCancel();
 }
 
 void RocketStreamServerCallbackWithChunkTimeout::scheduleTimeout() {
+  const auto timeout = activeTimeout();
+  if (timeout == std::chrono::milliseconds::zero()) {
+    cancelTimeout();
+    return;
+  }
   if (!timeout_) {
     timeout_ = std::make_unique<
         TimeoutCallback<RocketStreamServerCallbackWithChunkTimeout>>(*this);
   }
-  client_.scheduleTimeout(timeout_.get(), chunkTimeout_);
+  client_.scheduleTimeout(timeout_.get(), timeout);
 }
 
 void RocketStreamServerCallbackWithChunkTimeout::cancelTimeout() {

@@ -94,6 +94,19 @@ class RpcOptions {
   RpcOptions& setChunkTimeout(std::chrono::milliseconds chunkTimeout);
   std::chrono::milliseconds getChunkTimeout() const;
 
+  /**
+   * Deadline for the first stream payload only, measured from the arrival of
+   * the first response (stream establishment). When unset, the first payload
+   * falls back to the chunk timeout.
+   *
+   * Useful when producing the first payload is far more expensive than the
+   * rest of the stream -- an LLM prefill, a cold cache fill -- and a chunk
+   * timeout loose enough to accommodate it would be too loose to detect a
+   * stall mid-stream.
+   */
+  RpcOptions& setFirstChunkTimeout(std::chrono::milliseconds firstChunkTimeout);
+  std::chrono::milliseconds getFirstChunkTimeout() const;
+
   // Only one of these may be set
   RpcOptions& setChunkBufferSize(int32_t chunkBufferSize);
   RpcOptions& setMemoryBufferSize(
@@ -228,6 +241,7 @@ class RpcOptions {
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
   timeout_ms_t chunkTimeout_{0};
+  timeout_ms_t firstChunkTimeout_{0};
   timeout_ms_t queueTimeout_{0};
   timeout_ms_t overallTimeout_{0};
   timeout_ms_t processingTimeout_{0};

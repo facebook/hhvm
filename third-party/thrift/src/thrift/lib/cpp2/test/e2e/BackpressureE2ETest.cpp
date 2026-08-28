@@ -235,6 +235,106 @@ CO_TEST_F(BackpressureE2ETest, StreamChunkTimeoutOnSlowServer) {
   EXPECT_THROW(co_await gen.next(), transport::TTransportException);
 }
 
+namespace {
+// Stalls before producing anything, then streams without further delay. The
+// stall lands after the stream is established, so it is the first payload that
+// is late, not the first response.
+struct SlowFirstItemHandler : public ServiceHandler_ {
+  explicit SlowFirstItemHandler(std::chrono::milliseconds delay)
+      : delay_(delay) {}
+
+  ServerStream<std::string> generateItems(int32_t count) override {
+    co_await folly::coro::sleep(delay_);
+    for (int32_t i = 0; i < count; ++i) {
+      co_yield std::to_string(i);
+    }
+  }
+
+  const std::chrono::milliseconds delay_;
+};
+} // namespace
+
+// The point of the separate deadline: a first payload far slower than the rest
+// no longer forces the chunk timeout to be loosened for the whole stream.
+CO_TEST_F(BackpressureE2ETest, FirstChunkTimeoutAllowsSlowFirstChunk) {
+  startServer(
+      std::make_shared<SlowFirstItemHandler>(std::chrono::milliseconds(400)));
+  auto client = makeClient();
+
+  RpcOptions opts;
+  opts.setFirstChunkTimeout(std::chrono::milliseconds(5000));
+  opts.setChunkTimeout(std::chrono::milliseconds(100));
+
+  auto gen = (co_await client->co_generateItems(opts, 3)).toAsyncGenerator();
+
+  int32_t received = 0;
+  while (co_await gen.next()) {
+    ++received;
+  }
+  EXPECT_EQ(received, 3)
+      << "the 100ms chunk timeout must not be applied to the first payload";
+}
+
+CO_TEST_F(BackpressureE2ETest, FirstChunkTimeoutFiresWhenFirstChunkTooSlow) {
+  startServer(
+      std::make_shared<SlowFirstItemHandler>(std::chrono::milliseconds(2000)));
+  auto client = makeClient();
+
+  RpcOptions opts;
+  opts.setFirstChunkTimeout(std::chrono::milliseconds(100));
+  opts.setChunkTimeout(std::chrono::milliseconds(10000));
+
+  auto gen = (co_await client->co_generateItems(opts, 3)).toAsyncGenerator();
+
+  EXPECT_THROW(co_await gen.next(), transport::TTransportException);
+}
+
+// Pins the behaviour that predates the split: with only a chunk timeout set,
+// that deadline still covers the first payload.
+CO_TEST_F(
+    BackpressureE2ETest, ChunkTimeoutCoversFirstChunkWhenFirstChunkUnset) {
+  startServer(
+      std::make_shared<SlowFirstItemHandler>(std::chrono::milliseconds(2000)));
+  auto client = makeClient();
+
+  RpcOptions opts;
+  opts.setChunkTimeout(std::chrono::milliseconds(100));
+
+  auto gen = (co_await client->co_generateItems(opts, 3)).toAsyncGenerator();
+
+  EXPECT_THROW(co_await gen.next(), transport::TTransportException);
+}
+
+// The two deadlines are independent: setting only the first-chunk one leaves
+// later payloads unbounded.
+CO_TEST_F(BackpressureE2ETest, FirstChunkTimeoutAloneLeavesLaterChunksFree) {
+  struct Handler : public ServiceHandler_ {
+    ServerStream<std::string> generateItems(int32_t /*count*/) override {
+      co_yield std::string("first");
+      co_await folly::coro::sleep(std::chrono::milliseconds(800));
+      co_yield std::string("second");
+    }
+  };
+
+  startServer(std::make_shared<Handler>());
+  auto client = makeClient();
+
+  // Deliberately shorter than the gap before "second": were this deadline to
+  // leak into later payloads, the second one would be cut off.
+  RpcOptions opts;
+  opts.setFirstChunkTimeout(std::chrono::milliseconds(300));
+
+  auto gen = (co_await client->co_generateItems(opts, 2)).toAsyncGenerator();
+
+  auto first = co_await gen.next();
+  EXPECT_TRUE(first.has_value());
+  EXPECT_EQ(*first, "first");
+
+  auto second = co_await gen.next();
+  EXPECT_TRUE(second.has_value());
+  EXPECT_EQ(*second, "second");
+}
+
 CO_TEST_F(BackpressureE2ETest, SinkChunkTimeoutOnSlowClient) {
   // Server sets a chunk timeout on the sink. Client pauses too long.
   struct Handler : public ServiceHandler_ {

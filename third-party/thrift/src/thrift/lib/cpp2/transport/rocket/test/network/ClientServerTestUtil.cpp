@@ -239,6 +239,7 @@ RocketTestClient::sendRequestStreamSync(Payload request) {
           std::move(request),
           kFirstResponseTimeout,
           kChunkTimeout,
+          std::chrono::milliseconds::zero() /* firstChunkTimeout */,
           0,
           ::apache::thrift::detail::ClientStreamBridge::create(clientCallback));
     });

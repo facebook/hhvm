@@ -211,7 +211,8 @@ TEST_F(
     clientRef.sendRequestStream(
         apache::thrift::rocket::Payload::makeFromData(folly::ByteRange()),
         std::chrono::seconds(60),
-        std::chrono::milliseconds::zero(),
+        std::chrono::milliseconds::zero() /* chunkTimeout */,
+        std::chrono::milliseconds::zero() /* firstChunkTimeout */,
         1,
         &callback);
 
@@ -250,7 +251,8 @@ TEST_F(
     clientRef.sendRequestStream(
         apache::thrift::rocket::Payload::makeFromData(folly::ByteRange()),
         std::chrono::milliseconds(1),
-        std::chrono::milliseconds::zero(),
+        std::chrono::milliseconds::zero() /* chunkTimeout */,
+        std::chrono::milliseconds::zero() /* firstChunkTimeout */,
         1,
         &callback);
 

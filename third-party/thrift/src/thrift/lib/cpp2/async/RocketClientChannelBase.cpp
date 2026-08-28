@@ -1298,6 +1298,7 @@ void RocketClientChannelBase::sendStreamRequest(
       std::move(requestPayload),
       firstResponseTimeout,
       rpcOptions.getChunkTimeout(),
+      rpcOptions.getFirstChunkTimeout(),
       rpcOptions.getChunkBufferSize(),
       new FirstRequestProcessorStream(
           protocolId,

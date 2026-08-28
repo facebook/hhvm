@@ -30,14 +30,23 @@ class RocketClient;
 class RocketStreamServerCallbackWithChunkTimeout
     : public RocketStreamServerCallback {
  public:
+  // A zero firstChunkTimeout means "unset": the first payload then shares the
+  // chunk timeout, which is how this class behaved before the two were
+  // separable. Either deadline being zero on its own disables just that
+  // deadline.
   RocketStreamServerCallbackWithChunkTimeout(
       StreamId streamId,
       RocketClient& client,
       StreamClientCallback& clientCallback,
       std::chrono::milliseconds chunkTimeout,
+      std::chrono::milliseconds firstChunkTimeout,
       uint64_t initialCredits)
       : RocketStreamServerCallback(streamId, client, clientCallback),
         chunkTimeout_(chunkTimeout),
+        firstChunkTimeout_(
+            firstChunkTimeout != std::chrono::milliseconds::zero()
+                ? firstChunkTimeout
+                : chunkTimeout),
         credits_(initialCredits) {}
 
   bool onStreamRequestN(int32_t tokens) override;
@@ -52,7 +61,13 @@ class RocketStreamServerCallbackWithChunkTimeout
   void scheduleTimeout();
   void cancelTimeout();
 
+  std::chrono::milliseconds activeTimeout() const {
+    return firstChunkReceived_ ? chunkTimeout_ : firstChunkTimeout_;
+  }
+
   const std::chrono::milliseconds chunkTimeout_;
+  const std::chrono::milliseconds firstChunkTimeout_;
+  bool firstChunkReceived_{false};
   uint64_t credits_{0};
   std::unique_ptr<folly::HHWheelTimer::Callback> timeout_;
 };

@@ -685,8 +685,8 @@ class RowBlock {
 
   // Functions called when building a RowBlock.  Not for general use.
   //
-  // Prefer addRow() above; these remain for callers not yet migrated and will
-  // be deprecated once the in-tree callers have moved.
+  // Prefer addRow() above.  These are deprecated in favor of it and remain
+  // only for callers not yet migrated.
   //
   // Contract: each startRow() is paired with exactly one finishRow(), with
   // exactly numFields() values appended in between.  Violations throw rather
@@ -705,6 +705,9 @@ class RowBlock {
   // row is silently dropped.  Omitting it on any earlier row is caught by the
   // next startRow().  An RAII-scoped builder that makes the pairing automatic
   // is planned to replace this API; prefer it once available.
+  [[deprecated(
+      "ADVICE: prefer RowBlock::addRow(); this build API is "
+      "deprecated")]]
   void startRow() {
     if (current_row_) {
       throw std::logic_error(
@@ -715,6 +718,9 @@ class RowBlock {
     current_row_ = StorageRow(row_fields_info_->numFields());
   }
 
+  [[deprecated(
+      "ADVICE: prefer RowBlock::addRow(); this build API is "
+      "deprecated")]]
   void finishRow() {
     if (!current_row_) {
       throw std::logic_error(
@@ -734,17 +740,27 @@ class RowBlock {
   }
 
   template <typename T>
+  [[deprecated(
+      "ADVICE: prefer RowBlock::addRow(); this build API is "
+      "deprecated")]]
   void appendValue(T value) {
     checkRowStartedAndCapacity();
     current_row_->appendValue(std::forward<T>(value));
   }
 
   // Special override for folly::StringPiece to match existing code
+  template <>
+  [[deprecated(
+      "ADVICE: prefer RowBlock::addRow(); this build API is "
+      "deprecated")]]
   void appendValue(folly::StringPiece value) {
     checkRowStartedAndCapacity();
     current_row_->appendValue(value);
   }
 
+  [[deprecated(
+      "ADVICE: prefer RowBlock::addRow(); this build API is "
+      "deprecated")]]
   void appendNull() {
     checkRowStartedAndCapacity();
     current_row_->appendNull();

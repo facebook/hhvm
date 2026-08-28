@@ -12,6 +12,11 @@
 // query rendering + mock execution without requiring a MySQL server.
 //
 
+// This file deliberately exercises the deprecated RowBlock build API
+// (startRow()/appendValue()/appendNull()/finishRow()), including negative
+// tests, so suppress the deprecation lint for the whole file.
+// @lint-ignore-every CLANGTIDY facebook-hte-Deprecated
+
 #include <gtest/gtest.h>
 
 #include <folly/Optional.h>

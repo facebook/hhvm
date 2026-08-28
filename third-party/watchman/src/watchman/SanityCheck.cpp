@@ -12,12 +12,42 @@
 #include "watchman/Logging.h"
 #include "watchman/PDU.h"
 #include "watchman/PerfSample.h"
+#include "watchman/SanityCheck.h"
 #include "watchman/Shutdown.h"
+#include "watchman/fs/FileSystem.h"
 #include "watchman/telemetry/LogEvent.h"
 #include "watchman/telemetry/WatchmanStructuredLogger.h"
 #include "watchman/watchman_stream.h"
 
 namespace watchman {
+
+#ifdef __linux__
+std::optional<FileIdentity> getIdentityForPath(const char* path) {
+  try {
+    auto options = OpenFileHandleOptions::queryFileInfo();
+    options.followSymlinks = true;
+    options.strictNameChecks = false;
+    const auto info = openFileHandle(path, options).getInfo();
+    return FileIdentity{
+        static_cast<uint64_t>(info.dev), static_cast<uint64_t>(info.ino)};
+  } catch (const std::exception& error) {
+    log(DBG, "unable to inspect ", path, ": ", error.what(), "\n");
+    return std::nullopt;
+  }
+}
+
+ExecutableChange checkExecutableChange(
+    const FileIdentity& running,
+    const char* path) {
+  auto installed = getIdentityForPath(path);
+  if (!installed) {
+    return ExecutableChange::Unknown;
+  }
+  return *installed == running ? ExecutableChange::Unchanged
+                               : ExecutableChange::Changed;
+}
+#endif
+
 namespace {
 
 // Work-around decodeNext which implictly resets to non-blocking

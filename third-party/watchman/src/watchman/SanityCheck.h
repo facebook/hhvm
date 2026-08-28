@@ -7,6 +7,42 @@
 
 #pragma once
 
+#ifdef __linux__
+#include <cstdint>
+#include <optional>
+#endif
+
 namespace watchman {
+
+#ifdef __linux__
+enum class ExecutableChange {
+  Unchanged,
+  Changed,
+  Unknown,
+};
+
+struct FileIdentity {
+  uint64_t device = 0;
+  uint64_t inode = 0;
+
+  bool operator==(const FileIdentity&) const = default;
+};
+
+/**
+ * Device and inode of whatever `path` resolves to, following symlinks and
+ * skipping name checks so magic links such as `/proc/self/exe` are accepted.
+ * Returns nullopt if the path cannot be inspected.
+ */
+std::optional<FileIdentity> getIdentityForPath(const char* path);
+
+/**
+ * Whether the file at `path` is still the one `running` identifies. `Unknown`
+ * means the path could not be inspected; it is not evidence of a change.
+ */
+ExecutableChange checkExecutableChange(
+    const FileIdentity& running,
+    const char* path);
+#endif
 void startSanityCheckThread();
-}
+
+} // namespace watchman

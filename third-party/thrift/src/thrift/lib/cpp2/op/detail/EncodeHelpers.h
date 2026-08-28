@@ -128,8 +128,13 @@ inline constexpr bool sorted_unique_constructible_ = false;
 template <typename T>
 inline constexpr bool sorted_unique_constructible_<
     folly::void_t<
-        decltype(T(folly::sorted_unique, typename T::container_type())),
-        decltype(T(typename T::container_type()))>,
+        decltype(T(
+            folly::sorted_unique,
+            typename T::container_type(),
+            std::declval<const typename T::key_compare&>())),
+        decltype(T(
+            typename T::container_type(),
+            std::declval<const typename T::key_compare&>()))>,
     T> = true;
 template <typename T>
 inline constexpr bool sorted_unique_constructible_v =
@@ -182,7 +187,9 @@ void deserialize_known_length_map(
   }
 
   using folly::sorted_unique;
-  map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
+  const auto compare = map.key_comp();
+  map = sorted ? Map(sorted_unique, std::move(tmp), compare)
+               : Map(std::move(tmp), compare);
 }
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
@@ -242,7 +249,9 @@ void deserialize_known_length_set(
   }
 
   using folly::sorted_unique;
-  set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
+  const auto compare = set.key_comp();
+  set = sorted ? Set(sorted_unique, std::move(tmp), compare)
+               : Set(std::move(tmp), compare);
 }
 
 template <typename Set, typename ValDeserializer>

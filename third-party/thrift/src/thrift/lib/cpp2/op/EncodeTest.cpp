@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <functional>
+#include <map>
+#include <memory>
+#include <set>
 #include <type_traits>
+#include <vector>
 #include <gtest/gtest.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
@@ -181,6 +186,45 @@ void testSerializedSizeContainers() {
 }
 
 enum class EmptyEnum : std::int16_t {};
+
+template <typename T>
+class PropagatingAllocator {
+ public:
+  using value_type = T;
+  using propagate_on_container_move_assignment = std::true_type;
+
+  explicit PropagatingAllocator(int state = 0) : state_(state) {}
+
+  template <typename U>
+  PropagatingAllocator(const PropagatingAllocator<U>& other)
+      : state_(other.state()) {}
+
+  [[nodiscard]] T* allocate(std::size_t count) {
+    return std::allocator<T>{}.allocate(count);
+  }
+
+  void deallocate(T* pointer, std::size_t count) {
+    std::allocator<T>{}.deallocate(pointer, count);
+  }
+
+  int state() const { return state_; }
+
+  template <typename U>
+  bool operator==(const PropagatingAllocator<U>& other) const {
+    return state_ == other.state();
+  }
+
+ private:
+  int state_;
+};
+
+struct StatefulCompare {
+  bool descending = false;
+
+  bool operator()(std::int32_t lhs, std::int32_t rhs) const {
+    return descending ? lhs > rhs : lhs < rhs;
+  }
+};
 
 template <conformance::StandardProtocol Protocol>
 void testSerializedSizeCppType() {
@@ -538,7 +582,7 @@ template <
     typename DecodeTag,
     typename DecodeT,
     typename EncodeT>
-DecodeT encodeAndDecode(EncodeT value) {
+void encodeAndDecodeInto(const EncodeT& value, DecodeT& result) {
   protocol_writer_t<Protocol> writer;
   folly::IOBufQueue queue;
   writer.setOutput(&queue);
@@ -547,8 +591,18 @@ DecodeT encodeAndDecode(EncodeT value) {
   protocol_reader_t<Protocol> reader;
   auto serialized = queue.move();
   reader.setInput(serialized.get());
-  DecodeT result;
   decode<DecodeTag>(reader, result);
+}
+
+template <
+    conformance::StandardProtocol Protocol,
+    typename EncodeTag,
+    typename DecodeTag,
+    typename DecodeT,
+    typename EncodeT>
+DecodeT encodeAndDecode(EncodeT value) {
+  DecodeT result;
+  encodeAndDecodeInto<Protocol, EncodeTag, DecodeTag>(value, result);
   return result;
 }
 
@@ -787,6 +841,75 @@ TEST(DecodeTest, DecodeUnsignedTypes) {
 TEST(DecodeTest, DecodeContainers) {
   testDecodeContainers<conformance::StandardProtocol::Binary>();
   testDecodeContainers<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, PreservesContainerState) {
+  using Protocol = conformance::StandardProtocol;
+
+  using ListAllocator = PropagatingAllocator<std::int32_t>;
+  std::vector<std::int32_t, ListAllocator> list({0}, ListAllocator{42});
+  encodeAndDecodeInto<
+      Protocol::Compact,
+      type::list<type::i32_t>,
+      type::list<type::i32_t>>(std::vector<std::int32_t>{1, 2, 3}, list);
+  EXPECT_EQ(list.get_allocator().state(), 42);
+  EXPECT_EQ(
+      std::vector<std::int32_t>(list.begin(), list.end()),
+      (std::vector<std::int32_t>{1, 2, 3}));
+
+  using SetAllocator = PropagatingAllocator<std::int32_t>;
+  std::set<std::int32_t, std::less<std::int32_t>, SetAllocator> set(
+      {0}, std::less<std::int32_t>{}, SetAllocator{42});
+  encodeAndDecodeInto<
+      Protocol::Compact,
+      type::set<type::i32_t>,
+      type::set<type::i32_t>>(std::set<std::int32_t>{1, 2, 3}, set);
+  EXPECT_EQ(set.get_allocator().state(), 42);
+  EXPECT_EQ(
+      std::set<std::int32_t>(set.begin(), set.end()),
+      (std::set<std::int32_t>{1, 2, 3}));
+
+  using MapValue = std::pair<const std::int32_t, std::int32_t>;
+  using MapAllocator = PropagatingAllocator<MapValue>;
+  std::map<std::int32_t, std::int32_t, std::less<std::int32_t>, MapAllocator>
+      map({{0, 0}}, std::less<std::int32_t>{}, MapAllocator{42});
+  encodeAndDecodeInto<
+      Protocol::Compact,
+      type::map<type::i32_t, type::i32_t>,
+      type::map<type::i32_t, type::i32_t>>(
+      std::map<std::int32_t, std::int32_t>{{1, 10}, {2, 20}}, map);
+  EXPECT_EQ(map.get_allocator().state(), 42);
+  EXPECT_EQ(
+      (std::map<std::int32_t, std::int32_t>(map.begin(), map.end())),
+      (std::map<std::int32_t, std::int32_t>{{1, 10}, {2, 20}}));
+
+  folly::sorted_vector_set<std::int32_t, StatefulCompare> sortedSet(
+      StatefulCompare{.descending = true});
+  encodeAndDecodeInto<
+      Protocol::Compact,
+      type::set<type::i32_t>,
+      type::set<type::i32_t>>(
+      std::set<std::int32_t, std::greater<std::int32_t>>{1, 2, 3}, sortedSet);
+  EXPECT_TRUE(sortedSet.key_comp().descending);
+  EXPECT_EQ(
+      std::vector<std::int32_t>(sortedSet.begin(), sortedSet.end()),
+      (std::vector<std::int32_t>{3, 2, 1}));
+
+  folly::sorted_vector_map<std::int32_t, std::int32_t, StatefulCompare>
+      sortedMap(StatefulCompare{.descending = true});
+  encodeAndDecodeInto<
+      Protocol::Compact,
+      type::map<type::i32_t, type::i32_t>,
+      type::map<type::i32_t, type::i32_t>>(
+      std::map<std::int32_t, std::int32_t, std::greater<std::int32_t>>{
+          {1, 10}, {2, 20}, {3, 30}},
+      sortedMap);
+  EXPECT_TRUE(sortedMap.key_comp().descending);
+  EXPECT_EQ(
+      (std::vector<std::pair<std::int32_t, std::int32_t>>(
+          sortedMap.begin(), sortedMap.end())),
+      (std::vector<std::pair<std::int32_t, std::int32_t>>{
+          {3, 30}, {2, 20}, {1, 10}}));
 }
 
 TEST(DecodeTest, DecodeStruct) {

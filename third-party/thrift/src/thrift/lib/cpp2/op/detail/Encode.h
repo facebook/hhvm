@@ -994,7 +994,7 @@ struct Decode<type::list<Tag>> {
     TType t;
     uint32_t s;
     prot.readListBegin(t, s);
-    list = ListType();
+    list.clear();
     if (prot.kOmitsContainerSizes()) {
       // list size unknown, SimpleJSON protocol won't know type, either
       // so let's just hope that it spits out something that makes sense
@@ -1071,7 +1071,7 @@ struct Decode<type::set<Tag>> {
     TType t;
     uint32_t s;
     prot.readSetBegin(t, s);
-    set = SetType();
+    set.clear();
     if (prot.kOmitsContainerSizes()) {
       while (prot.peekSet()) {
         typename SetType::value_type value;
@@ -1099,7 +1099,7 @@ struct Decode<type::map<Key, Value>> {
     TType keyType, valueType;
     uint32_t s;
     prot.readMapBegin(keyType, valueType, s);
-    map = MapType();
+    map.clear();
     if (prot.kOmitsContainerSizes()) {
       while (prot.peekMap()) {
         typename MapType::key_type key;

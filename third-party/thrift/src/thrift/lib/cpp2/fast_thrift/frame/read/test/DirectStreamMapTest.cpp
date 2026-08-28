@@ -209,6 +209,23 @@ TEST(DirectStreamMapTest, ReinsertAfterErase) {
   EXPECT_EQ(map.size(), 1);
 }
 
+TEST(DirectStreamMapTest, DoubleEraseDoesNotCorruptOtherProbeChain) {
+  DirectStreamMap<int> map(16);
+  map.emplace(2, 20);
+  auto stale = map.emplace(3, 30).first;
+  map.emplace(10, 100);
+  map.emplace(11, 110);
+
+  map.erase(stale);
+  EXPECT_DEATH(map.erase(stale), "stale iterator");
+  EXPECT_EQ(map.size(), 3);
+
+  map.erase(map.find(10));
+  EXPECT_EQ(map.size(), 2);
+  ASSERT_NE(map.find(11), map.end());
+  EXPECT_EQ(map.find(11)->second, 110);
+}
+
 TEST(DirectStreamMapTest, BackshiftChain) {
   // Insert 3 keys that collide: 2, 3, 4 all map to indices 1, 1, 2.
   // Erase the first — backshift should compact the chain.
@@ -225,6 +242,33 @@ TEST(DirectStreamMapTest, BackshiftChain) {
   EXPECT_EQ(map.find(3)->second, 30);
   ASSERT_NE(map.find(4), map.end());
   EXPECT_EQ(map.find(4)->second, 40);
+}
+
+TEST(DirectStreamMapTest, BackshiftWraparound) {
+  DirectStreamMap<int, uint32_t, SequentialIndex> map(16);
+  map.emplace(15, 150);
+  map.emplace(31, 310); // natural slot 15, probes across wraparound to 0
+
+  map.erase(map.find(15));
+  ASSERT_NE(map.find(31), map.end());
+  EXPECT_EQ(map.find(31)->second, 310);
+
+  map.emplace(0, 0);
+  map.erase(map.find(31));
+  EXPECT_EQ(map.find(31), map.end());
+  EXPECT_EQ(map.find(0)->second, 0);
+}
+
+TEST(DirectStreamMapTest, MovePreservesDisplacedEntries) {
+  DirectStreamMap<int> source(16);
+  source.emplace(2, 20);
+  source.emplace(3, 30);
+
+  DirectStreamMap<int> moved(std::move(source));
+  moved.erase(moved.find(2));
+
+  ASSERT_NE(moved.find(3), moved.end());
+  EXPECT_EQ(moved.find(3)->second, 30);
 }
 
 TEST(DirectStreamMapTest, ManyErasesDoNotCorrupt) {

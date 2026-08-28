@@ -27,7 +27,12 @@
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 
+#include <chrono>
+#include <condition_variable>
+#include <cstdlib>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 namespace apache::thrift::fast_thrift::frame::read {
 namespace {
@@ -46,6 +51,13 @@ struct FakeState {
       : streamId(id), payload(std::make_unique<char[]>(64)) {}
   FakeState(FakeState&&) = default;
   FakeState& operator=(FakeState&&) = default;
+};
+
+struct NonAllocatingState {
+  uint32_t streamId{0};
+
+  NonAllocatingState() = default;
+  explicit NonAllocatingState(uint32_t id) : streamId(id) {}
 };
 
 // ============================================================================
@@ -83,14 +95,14 @@ BENCHMARK(FindMiss_EmptyMap, iters) {
 BENCHMARK(Interleaved_10Streams, iters) {
   folly::BenchmarkSuspender susp;
   constexpr int kStreams = 10;
-  DirectStreamMap<FakeState> map;
+  DirectStreamMap<NonAllocatingState> map;
   susp.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
     uint32_t base = static_cast<uint32_t>((i * kStreams) % 100000) * 2 + 1;
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
-      map.emplace(id, FakeState(id));
+      map.emplace(id, NonAllocatingState(id));
     }
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
@@ -108,14 +120,14 @@ BENCHMARK(Interleaved_10Streams, iters) {
 BENCHMARK(Interleaved_100Streams, iters) {
   folly::BenchmarkSuspender susp;
   constexpr int kStreams = 100;
-  DirectStreamMap<FakeState> map;
+  DirectStreamMap<NonAllocatingState> map;
   susp.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
     uint32_t base = static_cast<uint32_t>((i * kStreams) % 100000) * 2 + 1;
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
-      map.emplace(id, FakeState(id));
+      map.emplace(id, NonAllocatingState(id));
     }
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
@@ -133,14 +145,14 @@ BENCHMARK(Interleaved_100Streams, iters) {
 BENCHMARK(Interleaved_1000Streams, iters) {
   folly::BenchmarkSuspender susp;
   constexpr int kStreams = 1000;
-  DirectStreamMap<FakeState> map;
+  DirectStreamMap<NonAllocatingState> map;
   susp.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
     uint32_t base = static_cast<uint32_t>((i * kStreams) % 1000000) * 2 + 1;
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
-      map.emplace(id, FakeState(id));
+      map.emplace(id, NonAllocatingState(id));
     }
     for (int s = 0; s < kStreams; ++s) {
       uint32_t id = base + static_cast<uint32_t>(s * 2);
@@ -181,7 +193,23 @@ BENCHMARK(SteadyState_10Pending, iters) {
 } // namespace apache::thrift::fast_thrift::frame::read
 
 int main(int argc, char** argv) {
+  std::mutex mutex;
+  std::condition_variable cv;
+  bool finished = false;
+  std::thread watchdog([&] {
+    std::unique_lock lock{mutex};
+    if (!cv.wait_for(lock, std::chrono::minutes(5), [&] { return finished; })) {
+      std::abort();
+    }
+  });
+
   folly::Init init(&argc, &argv);
   folly::runBenchmarks();
+  {
+    std::lock_guard lock{mutex};
+    finished = true;
+  }
+  cv.notify_one();
+  watchdog.join();
   return 0;
 }

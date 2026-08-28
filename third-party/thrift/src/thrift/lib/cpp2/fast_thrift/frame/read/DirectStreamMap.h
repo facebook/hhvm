@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <glog/logging.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <utility>
@@ -92,8 +94,20 @@ class DirectStreamMap {
 
   DirectStreamMap(const DirectStreamMap&) = delete;
   DirectStreamMap& operator=(const DirectStreamMap&) = delete;
-  DirectStreamMap(DirectStreamMap&&) = default;
-  DirectStreamMap& operator=(DirectStreamMap&&) = default;
+
+  DirectStreamMap(DirectStreamMap&& other) noexcept
+      : slots_(std::move(other.slots_)),
+        size_(std::exchange(other.size_, 0)),
+        displacedCount_(std::exchange(other.displacedCount_, 0)) {}
+
+  DirectStreamMap& operator=(DirectStreamMap&& other) noexcept {
+    if (this != &other) {
+      slots_ = std::move(other.slots_);
+      size_ = std::exchange(other.size_, 0);
+      displacedCount_ = std::exchange(other.displacedCount_, 0);
+    }
+    return *this;
+  }
 
   iterator find(Key key) noexcept {
     auto m = mask();
@@ -126,6 +140,8 @@ class DirectStreamMap {
     return insertInternal(key, std::forward<Args>(args)...);
   }
 
+  // All mutations invalidate iterators. Passing an invalidated iterator is
+  // undefined behavior, even if its address now refers to another live slot.
   void erase(iterator it) noexcept {
     if (!it) {
       return;
@@ -163,6 +179,7 @@ class DirectStreamMap {
       s.second = Value{};
     }
     size_ = 0;
+    displacedCount_ = 0;
   }
 
  private:
@@ -186,19 +203,36 @@ class DirectStreamMap {
   }
 
   void eraseSlot(size_t idx) noexcept {
-    auto m = mask();
+    CHECK_EQ(
+        static_cast<unsigned>(slots_[idx].tag),
+        static_cast<unsigned>(Tag::Live))
+        << "DirectStreamMap::erase called with a stale iterator";
+    const auto m = mask();
+    if (IndexPolicy::apply(slots_[idx].first, m) != idx) {
+      --displacedCount_;
+    }
     slots_[idx].tag = Tag::Empty;
     slots_[idx].second = Value{};
     --size_;
 
+    if (displacedCount_ == 0) {
+      return;
+    }
+
     // Backshift: walk forward, pull displaced entries back to fill the gap.
     auto next = (idx + 1) & m;
     while (slots_[next].tag == Tag::Live) {
-      auto nat = IndexPolicy::apply(slots_[next].first, m);
-      if (displaced(nat, idx, next)) {
+      const auto natural = IndexPolicy::apply(slots_[next].first, m);
+      if (displaced(natural, idx, next)) {
         slots_[idx] = std::move(slots_[next]);
         slots_[next].tag = Tag::Empty;
         slots_[next].second = Value{};
+        if (natural == idx) {
+          --displacedCount_;
+          if (displacedCount_ == 0) {
+            return;
+          }
+        }
         idx = next;
       }
       next = (next + 1) & m;
@@ -209,6 +243,7 @@ class DirectStreamMap {
     auto old = std::move(slots_);
     slots_ = std::vector<Slot>(old.size() * 2);
     size_ = 0;
+    displacedCount_ = 0;
     for (auto& s : old) {
       if (s.tag == Tag::Live) {
         insertInternal(s.first, std::move(s.second));
@@ -218,8 +253,9 @@ class DirectStreamMap {
 
   template <typename... Args>
   std::pair<iterator, bool> insertInternal(Key key, Args&&... args) {
-    auto m = mask();
-    auto idx = IndexPolicy::apply(key, m);
+    const auto m = mask();
+    const auto natural = IndexPolicy::apply(key, m);
+    auto idx = natural;
     for (size_t i = 0; i < slots_.size(); ++i) {
       auto& s = slots_[idx];
       if (s.tag == Tag::Empty) {
@@ -227,6 +263,7 @@ class DirectStreamMap {
         s.tag = Tag::Live;
         s.second = Value(std::forward<Args>(args)...);
         ++size_;
+        displacedCount_ += idx != natural;
         return {&s, true};
       }
       if (s.first == key) {
@@ -239,6 +276,7 @@ class DirectStreamMap {
 
   std::vector<Slot> slots_;
   size_t size_{0};
+  size_t displacedCount_{0};
 };
 
 // DirectStreamSet — a DirectStreamMap used purely for key membership.

@@ -17,6 +17,11 @@ type redo_type_decl_result = {
       (** The number of old decls we didn't have when calculating the redecl. *)
 }
 
+module For_test : sig
+  val reconcile_parallel_redecl_fanout :
+    during_init:bool -> deps_mode:Typing_deps_mode.t -> Fanout.t -> Fanout.t
+end
+
 (** Oldify any defs in [defs] which aren't already in
 [previously_oldified_defs], then determines which symbols need to be
 re-typechecked as a result of comparing the current versions of the symbols

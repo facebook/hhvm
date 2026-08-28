@@ -26,6 +26,27 @@ let lvl = Hh_logger.Level.Debug
 
 let compute_deps_neutral = (Fanout.empty, 0)
 
+let reconcile_parallel_redecl_fanout
+    ~(during_init : bool) ~(deps_mode : Typing_deps_mode.t) (fanout : Fanout.t)
+    : Fanout.t =
+  if during_init then
+    fanout
+  else
+    (* Dependency edges discovered during typechecking are registered in the
+       master process. Redecl workers can therefore compute fanout from a stale
+       process-local view of the dependency graph. *)
+    let master_dependents =
+      DepSet.diff
+        (Typing_deps.add_typing_deps deps_mode fanout.Fanout.changed)
+        fanout.Fanout.changed
+    in
+    let to_recheck = DepSet.union fanout.Fanout.to_recheck master_dependents in
+    { fanout with Fanout.to_recheck }
+
+module For_test = struct
+  let reconcile_parallel_redecl_fanout = reconcile_parallel_redecl_fanout
+end
+
 (** This is the place where we are going to put everything necessary for
   the redeclaration. We could "pass" the values directly to the workers,
   but it gives too much work to the master and slows things down,
@@ -598,7 +619,16 @@ let redo_type_decl
       in
       (fanout, old_decl_missing_count)
     else
-      parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
+      let (fanout, old_decl_missing_count) =
+        parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
+      in
+      let fanout =
+        reconcile_parallel_redecl_fanout
+          ~during_init
+          ~deps_mode:(Provider_context.get_deps_mode ctx)
+          fanout
+      in
+      (fanout, old_decl_missing_count)
   in
   Hh_logger.log
     "Decl_redecl_service.redo_type_decl: computing fanout of classes";

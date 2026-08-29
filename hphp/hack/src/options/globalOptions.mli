@@ -300,6 +300,8 @@ type t = {
       (** Error on $c::foo() when $c: classname<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
+  tco_class_pointer_array_literal_keys: bool;
+      (** Infer classname<T> for the key of dict[$c => 1] when $c: class<T>  *)
   tco_poly_function_pointers: bool;
   tco_permits_bypassing_visibility: string list;
   tco_tests_bypass_visibility_static_properties: bool;
@@ -413,6 +415,7 @@ val set :
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_classname_static_meth:int ->
   ?class_pointer_ban_class_array_key:bool ->
+  ?tco_class_pointer_array_literal_keys:bool ->
   ?tco_poly_function_pointers:bool ->
   ?tco_permits_bypassing_visibility:string list ->
   ?tco_tests_bypass_visibility_static_properties:bool ->

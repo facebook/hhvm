@@ -1,0 +1,2 @@
+--config 'class_pointer_ban_classname_static_meth=2'
+--config 'class_pointer_array_literal_keys=true'

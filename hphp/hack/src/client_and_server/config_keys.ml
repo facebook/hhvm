@@ -91,6 +91,8 @@ module Hhconfig = struct
 
   let class_class_type = key "class_class_type"
 
+  let class_pointer_array_literal_keys = key "class_pointer_array_literal_keys"
+
   let class_pointer_ban_class_array_key =
     key "class_pointer_ban_class_array_key"
 

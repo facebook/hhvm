@@ -152,6 +152,7 @@ impl Default for GlobalOptions {
             allow_class_string_cast: true,
             class_pointer_ban_classname_static_meth: 0,
             class_pointer_ban_class_array_key: false,
+            tco_class_pointer_array_literal_keys: false,
             tco_poly_function_pointers: true,
             tco_permits_bypassing_visibility: Default::default(),
             tco_tests_bypass_visibility_static_properties: false,

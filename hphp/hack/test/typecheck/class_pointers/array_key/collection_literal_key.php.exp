@@ -1,0 +1,16 @@
+ERROR: File "collection_literal_key.php", line 12, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "collection_literal_key.php", line 9, characters 19-26:
+  Definition is here
+ERROR: File "collection_literal_key.php", line 19, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "collection_literal_key.php", line 16, characters 18-25:
+  Definition is here
+ERROR: File "collection_literal_key.php", line 25, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "collection_literal_key.php", line 23, characters 25-32:
+  Definition is here
+ERROR: File "collection_literal_key.php", line 31, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "collection_literal_key.php", line 29, characters 22-29:
+  Definition is here

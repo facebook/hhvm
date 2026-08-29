@@ -27,8 +27,6 @@
 
 namespace apache::thrift::stress {
 
-StressTestHandler::StressTestHandler() {}
-
 void StressTestHandler::async_eb_ping(HandlerCallbackPtr<void> callback) {
   callback->done();
 }
@@ -363,6 +361,14 @@ void StressTestHandler::async_tm_storageWriteTm(
 void StressTestHandler::async_eb_storageWriteEb(
     HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
     std::unique_ptr<StorageWriteRequest> /*request*/) {
+  callback->result(std::make_unique<StorageWriteResponse>());
+}
+
+void StressTestHandler::async_eb_retainedStorageWriteEb(
+    HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+    std::unique_ptr<RetainedStorageWriteRequest> request) {
+  retainedStorageWriteIOBufs_.wlock()->push_back(
+      std::move(*request->payload()));
   callback->result(std::make_unique<StorageWriteResponse>());
 }
 

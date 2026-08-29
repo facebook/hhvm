@@ -103,6 +103,10 @@ struct StorageWriteRequest {
   1: IOBufPtr payload;
 }
 
+struct RetainedStorageWriteRequest {
+  1: IOBufPtr payload;
+}
+
 struct StorageWriteResponse {}
 
 service StressTest {
@@ -135,4 +139,8 @@ service StressTest {
   StorageWriteResponse storageWriteTm(1: StorageWriteRequest req);
   @cpp.ProcessInEbThreadUnsafe
   StorageWriteResponse storageWriteEb(1: StorageWriteRequest req);
+  @cpp.ProcessInEbThreadUnsafe
+  StorageWriteResponse retainedStorageWriteEb(
+    1: RetainedStorageWriteRequest req,
+  );
 }

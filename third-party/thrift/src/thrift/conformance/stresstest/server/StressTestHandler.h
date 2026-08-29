@@ -16,14 +16,16 @@
 
 #pragma once
 
+#include <vector>
+
+#include <folly/Synchronized.h>
+#include <folly/io/IOBuf.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
 namespace apache::thrift::stress {
 
 class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
  public:
-  StressTestHandler();
-
   void async_eb_ping(HandlerCallbackPtr<void> callback) override;
 
   void async_tm_echo(
@@ -83,6 +85,10 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
       HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
       std::unique_ptr<StorageWriteRequest> request) override;
 
+  void async_eb_retainedStorageWriteEb(
+      HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+      std::unique_ptr<RetainedStorageWriteRequest> request) override;
+
  private:
   void requestResponseImpl(
       HandlerCallbackPtr<std::unique_ptr<BasicResponse>> callback,
@@ -101,6 +107,9 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
 
   BasicResponse makeBasicResponse(
       int64_t payloadSize, bool stopTLSv2 = false) const;
+
+  folly::Synchronized<std::vector<std::unique_ptr<folly::IOBuf>>>
+      retainedStorageWriteIOBufs_;
 };
 
 } // namespace apache::thrift::stress

@@ -55,6 +55,8 @@ class StressTestClient {
       const StorageWriteRequest&) = 0;
   virtual folly::coro::Task<StorageWriteResponse> co_storageWriteEb(
       const StorageWriteRequest&) = 0;
+  virtual folly::coro::Task<StorageWriteResponse> co_retainedStorageWriteEb(
+      const RetainedStorageWriteRequest&) = 0;
 
   virtual folly::AsyncTransport* getTransport() = 0;
   virtual bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) = 0;
@@ -110,6 +112,8 @@ class ThriftStressTestClient : public StressTestClient {
       const StorageWriteRequest&) override;
   folly::coro::Task<StorageWriteResponse> co_storageWriteEb(
       const StorageWriteRequest&) override;
+  folly::coro::Task<StorageWriteResponse> co_retainedStorageWriteEb(
+      const RetainedStorageWriteRequest&) override;
 
   folly::AsyncTransport* getTransport() override;
   bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) override;

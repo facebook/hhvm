@@ -259,6 +259,16 @@ ThriftStressTestClient::co_storageWriteEb(const StorageWriteRequest& req) {
   co_return ret;
 }
 
+folly::coro::Task<StorageWriteResponse>
+ThriftStressTestClient::co_retainedStorageWriteEb(
+    const RetainedStorageWriteRequest& req) {
+  StorageWriteResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_retainedStorageWriteEb(req);
+  });
+  co_return ret;
+}
+
 folly::AsyncTransport* ThriftStressTestClient::getTransport() {
   auto channel =
       dynamic_cast<apache::thrift::RocketClientChannel*>(client_->getChannel());

@@ -13,10 +13,8 @@
 # limitations under the License.
 
 from cpython.ref cimport PyObject
-from libcpp cimport bool as cbool
 from libcpp.map cimport map as cmap
 from libcpp.memory cimport shared_ptr
-from libcpp.pair cimport pair
 from libcpp.vector cimport vector as cvector
 from libcpp.string cimport string
 

@@ -47,7 +47,7 @@ impl Drain for LockedFileDrain {
         };
 
         // Acquiring exclusive lock
-        while let Err(err) = fs2::FileExt::lock_exclusive(&file) {
+        while let Err(err) = file.lock() {
             match err.kind() {
                 // This shouldn't happen often, but if it's just an
                 // interruption, retry.
@@ -68,7 +68,7 @@ impl Drain for LockedFileDrain {
         }
 
         // Releasing lock
-        while let Err(err) = fs2::FileExt::unlock(&file) {
+        while let Err(err) = file.unlock() {
             match err.kind() {
                 std::io::ErrorKind::Interrupted => continue,
                 _ => {

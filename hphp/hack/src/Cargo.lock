@@ -1897,16 +1897,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
-name = "fs2"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
-dependencies = [
- "libc",
- "winapi",
-]
-
-[[package]]
 name = "full_fidelity_schema_version_number"
 version = "0.0.0"
 
@@ -2895,7 +2885,6 @@ dependencies = [
 name = "locked_file_drain"
 version = "0.0.0"
 dependencies = [
- "fs2",
  "serde_json",
  "slog",
  "slog-json",

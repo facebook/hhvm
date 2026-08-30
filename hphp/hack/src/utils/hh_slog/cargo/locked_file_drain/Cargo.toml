@@ -11,7 +11,6 @@ license = "MIT"
 path = "../../locked_file_drain.rs"
 
 [dependencies]
-fs2 = "0.4"
 slog = { version = "2.8.2", features = ["max_level_trace", "nested-values"] }
 slog-json = "2.6.1"
 

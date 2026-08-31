@@ -297,21 +297,60 @@ Query& Query::operator=(const Query&) = default;
 
 namespace {
 
-using FbRenderer = QueryRenderer<folly::fbstring>;
-using StdRenderer = QueryRenderer<std::string>;
-using FbEscapeMode = FbRenderer::EscapeMode;
-using StdEscapeMode = StdRenderer::EscapeMode;
+// Legacy (validated) renderers and the compile-time-checked (unvalidated)
+// renderers are the same template, differing only in the Validate flag.
+// EscapeMode is a value-identical enum in both instantiations, so these legacy
+// aliases name the escape modes for callers of renderWith below.
+using FbEscapeMode = QueryRenderer<folly::fbstring, true>::EscapeMode;
+using StdEscapeMode = QueryRenderer<std::string, true>::EscapeMode;
+
+// Dispatch a render call to either the checked (Validate=false) or legacy
+// (Validate=true) renderer for StringType. The two instantiations share an
+// identical EscapeMode enum, so the checked branch re-casts the value to its
+// own (distinct but value-identical) type. Passing escapeMode via the legacy
+// type keeps the callers' FbEscapeMode/StdEscapeMode aliases usable directly.
+template <typename StringType>
+StringType renderWith(
+    bool checked,
+    std::string_view queryText,
+    bool unsafeQuery,
+    const std::vector<QueryArgument>& params,
+    typename QueryRenderer<StringType, true>::EscapeMode escapeMode,
+    const InternalConnection* conn = nullptr,
+    size_t maxSize = SIZE_MAX,
+    std::string_view truncationIndicator = "...") {
+  using Checked = QueryRenderer<StringType, false>;
+  return checked ? Checked::render(
+                       queryText,
+                       unsafeQuery,
+                       params,
+                       static_cast<typename Checked::EscapeMode>(escapeMode),
+                       conn,
+                       maxSize,
+                       truncationIndicator)
+                 : QueryRenderer<StringType, true>::render(
+                       queryText,
+                       unsafeQuery,
+                       params,
+                       escapeMode,
+                       conn,
+                       maxSize,
+                       truncationIndicator);
+}
 
 } // namespace
 
-void Query::append(const Query& query2) {
-  query_text_ += query2.query_text_;
-  for (const auto& param2 : query2.params_) {
-    params_.push_back(param2);
-  }
-}
-
 void Query::append(Query&& query2) {
+  // The concatenation of two compile-time-checked queries is itself fully
+  // validated: each side's specifiers, argument counts, and argument types were
+  // checked at construction, and joining them (QueryText::operator+= inserts a
+  // separating space) introduces no new specifiers. So the result stays Checked
+  // and skips redundant render-time validation. If either side is a legacy
+  // (unchecked) query, the merged query still needs render-time validation, so
+  // it downgrades to Legacy.
+  if (mode_ != Mode::Checked || query2.mode_ != Mode::Checked) {
+    mode_ = Mode::Legacy;
+  }
   query_text_ += query2.query_text_;
   for (auto& param2 : query2.params_) {
     params_.push_back(std::move(param2));
@@ -382,26 +421,40 @@ folly::fbstring Query::renderFb(const InternalConnection* conn) const {
 folly::fbstring Query::renderFb(
     const InternalConnection* conn,
     const std::vector<QueryArgument>& params) const {
-  return FbRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params, FbEscapeMode::Full, conn);
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params,
+      FbEscapeMode::Full,
+      conn);
 }
 
 folly::fbstring Query::renderInsecureFb() const {
-  return FbRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params_, FbEscapeMode::None);
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params_,
+      FbEscapeMode::None);
 }
 
 folly::fbstring Query::renderInsecureFb(
     const std::vector<QueryArgument>& params) const {
-  return FbRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params, FbEscapeMode::None);
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params,
+      FbEscapeMode::None);
 }
 
 folly::fbstring Query::renderInsecureFb(
     size_t maxSize,
     std::string_view truncationIndicator) const {
-  return FbRenderer::render(
-      query_text_.getQuery(),
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
       unsafe_query_,
       params_,
       FbEscapeMode::None,
@@ -411,15 +464,20 @@ folly::fbstring Query::renderInsecureFb(
 }
 
 folly::fbstring Query::renderPartiallyEscapedFb() const {
-  return FbRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params_, FbEscapeMode::Simple);
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params_,
+      FbEscapeMode::Simple);
 }
 
 folly::fbstring Query::renderPartiallyEscapedFb(
     size_t maxSize,
     std::string_view truncationIndicator) const {
-  return FbRenderer::render(
-      query_text_.getQuery(),
+  return renderWith<folly::fbstring>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
       unsafe_query_,
       params_,
       FbEscapeMode::Simple,
@@ -437,26 +495,40 @@ std::string Query::renderStr(const InternalConnection* conn) const {
 std::string Query::renderStr(
     const InternalConnection* conn,
     const std::vector<QueryArgument>& params) const {
-  return StdRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params, StdEscapeMode::Full, conn);
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params,
+      StdEscapeMode::Full,
+      conn);
 }
 
 std::string Query::renderInsecureStr() const {
-  return StdRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params_, StdEscapeMode::None);
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params_,
+      StdEscapeMode::None);
 }
 
 std::string Query::renderInsecureStr(
     const std::vector<QueryArgument>& params) const {
-  return StdRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params, StdEscapeMode::None);
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params,
+      StdEscapeMode::None);
 }
 
 std::string Query::renderInsecureStr(
     size_t maxSize,
     std::string_view truncationIndicator) const {
-  return StdRenderer::render(
-      query_text_.getQuery(),
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
       unsafe_query_,
       params_,
       StdEscapeMode::None,
@@ -466,15 +538,20 @@ std::string Query::renderInsecureStr(
 }
 
 std::string Query::renderPartiallyEscapedStr() const {
-  return StdRenderer::render(
-      query_text_.getQuery(), unsafe_query_, params_, StdEscapeMode::Simple);
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
+      unsafe_query_,
+      params_,
+      StdEscapeMode::Simple);
 }
 
 std::string Query::renderPartiallyEscapedStr(
     size_t maxSize,
     std::string_view truncationIndicator) const {
-  return StdRenderer::render(
-      query_text_.getQuery(),
+  return renderWith<std::string>(
+      mode_ == Mode::Checked,
+      getQueryFormat(),
       unsafe_query_,
       params_,
       StdEscapeMode::Simple,

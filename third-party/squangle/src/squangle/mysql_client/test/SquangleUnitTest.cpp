@@ -17,11 +17,18 @@
 // tests, so suppress the deprecation lint for the whole file.
 // @lint-ignore-every CLANGTIDY facebook-hte-Deprecated
 
-#include <gtest/gtest.h>
-
 #include <folly/Optional.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
+#include <gtest/gtest.h>
+#include <forward_list>
+#include <limits>
+#include <map>
 #include <optional>
+#include <unordered_map>
+
 #include "squangle/mysql_client/OperationHelpers.h"
+
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/Row.h"
 #include "squangle/mysql_client/test/MockInternalConnection.h"
@@ -31,7 +38,451 @@
 
 namespace facebook::common::mysql_client::test {
 
-// =============================================================================
+// ============================================================================
+// Checked Query Compile-Time Validation Tests
+//
+// These static_asserts verify that the checked query compile-time parser
+// correctly accepts valid format strings and rejects invalid ones at
+// compile time, without needing to actually invoke Query::checked() which
+// would hard-fail compilation for invalid cases (making negative testing
+// cumbersome in same translation unit). By testing the underlying
+// detail:: traits directly, we prove the compile-time logic works.
+//
+// This serves as documentation of expected behavior and as regression
+// protection for future changes to Query.h checked API.
+// ============================================================================
+
+namespace checked_compile_tests {
+using namespace facebook::common::mysql_client;
+using namespace facebook::common::mysql_client::detail;
+
+// Valid format strings should parse ok
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM users"}>());
+static_assert(
+    parse_ok_fixed<fixed_string{"SELECT %s FROM %T WHERE %C = %d"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %C, %C FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %LC FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Ls FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Ld FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Lu FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Lf FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Lm FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"UPDATE %T SET %U WHERE %W"}>());
+static_assert(parse_ok_fixed<fixed_string{
+                  "SELECT %C FROM %T WHERE %W AND %C <= %d LIMIT %d"}>());
+static_assert(
+    parse_ok_fixed<fixed_string{
+        "SELECT COUNT(*) as oncall_cnt, SUM(CASE WHEN %W THEN 1 ELSE 0 END) as tenant_cnt FROM %T WHERE %W"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT %m FROM %T"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM %T WHERE %C %=d"}>());
+static_assert(parse_ok_fixed<fixed_string{"INSERT INTO %T VALUES %V"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM %T %K"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM %T WHERE %LO"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM %T WHERE %LA"}>());
+static_assert(parse_ok_fixed<fixed_string{"SELECT 50%% done FROM %T"}>());
+
+// Disallowed specifiers should fail parse at compile time
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE name = ''"}>()); // dangerous single quote in
+                                                    // literal
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users; DROP TABLE users"}>()); // dangerous semicolon
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE x = %Q"}>()); // %Q explicitly disallowed in
+                                                 // checked mode
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE x = %v"}>()); // simplified %v alias not
+                                                 // supported
+static_assert(!parse_ok_fixed<fixed_string{
+                  "SELECT * FROM %i WHERE id = 1"}>()); // simplified %i alias
+                                                        // not supported
+static_assert(!parse_ok_fixed<fixed_string{
+                  "SELECT * FROM users WHERE x = %q"}>()); // unknown specifier
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE x = %LT"}>()); // %LT historically not
+                                                  // working, explicitly
+                                                  // rejected
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE x = %Lv"}>()); // simplified list alias not
+                                                  // supported
+static_assert(
+    !parse_ok_fixed<fixed_string{
+        "SELECT * FROM users WHERE x = %Li"}>()); // simplified list alias not
+                                                  // supported
+static_assert(!parse_ok_fixed<fixed_string{
+                  "SELECT * FROM users WHERE x = %"}>()); // unfinished percent
+static_assert(!parse_ok_fixed<fixed_string{
+                  "SELECT * FROM \"users\""}>()); // dangerous double quote
+static_assert(
+    !parse_ok_fixed<fixed_string{"SELECT * FROM `users`"}>()); // dangerous
+                                                               // backtick
+static_assert(
+    !parse_ok_fixed<fixed_string{"SELECT * WHERE x %="}>()); // incomplete %=
+static_assert(!parse_ok_fixed<fixed_string{"SELECT x %L"}>()); // incomplete %L
+static_assert(!parse_ok_fixed<fixed_string{
+                  "SELECT %=x FROM t"}>()); // %= with bad sub-type
+
+// Parameter count validation
+static_assert(count_specs_fixed<fixed_string{"SELECT %s FROM %T"}>() == 2);
+static_assert(count_specs_fixed<fixed_string{"SELECT * FROM users"}>() == 0);
+static_assert(
+    count_specs_fixed<fixed_string{"SELECT %% FROM users"}>() ==
+    0); // %% does not consume argument
+static_assert(
+    count_specs_fixed<fixed_string{"UPDATE %T SET %U WHERE %W"}>() == 3);
+static_assert(
+    count_specs_fixed<fixed_string{"SELECT %=d FROM %T"}>() ==
+    2); // %=d consumes one argument
+static_assert(
+    count_specs_fixed<fixed_string{"SELECT %Ls, %LC FROM %T"}>() == 3);
+
+// ----------------------------------------------------------------------------
+// Per-specifier argument type validation. For each specifier we assert every
+// accepted argument category and that representative wrong categories are
+// rejected. Acceptance mirrors the legacy QueryRenderer (see
+// QueryRenderer.cpp).
+// ----------------------------------------------------------------------------
+
+// A scoped enum used to verify enums are accepted for integer/value specifiers
+// (QueryArgument collapses them to int64, matching legacy).
+enum class CheckedTestEnum : int { First = 1, Second = 7 };
+
+// %s — any string-like type, optional<string-like>, or null. Not numbers,
+// identifiers, or lists.
+static_assert(check_args_fixed<fixed_string{"%s"}, std::string>());
+static_assert(check_args_fixed<fixed_string{"%s"}, std::string_view>());
+static_assert(check_args_fixed<fixed_string{"%s"}, folly::fbstring>());
+static_assert(check_args_fixed<fixed_string{"%s"}, folly::StringPiece>());
+static_assert(check_args_fixed<fixed_string{"%s"}, const char*>());
+static_assert(
+    check_args_fixed<fixed_string{"%s"}, std::optional<std::string>>());
+static_assert(check_args_fixed<fixed_string{"%s"}, std::nullptr_t>());
+static_assert(check_args_fixed<fixed_string{"%s"}, std::nullopt_t>());
+static_assert(check_args_fixed<fixed_string{"%s"}, folly::None>());
+// Regression: an engaged optional must accept exactly what a bare value does.
+// The QueryArgument optional ctor delegates to the scalar ctors; a raw
+// `value_ = opt.value()` used to reject optional<string_view>/optional<
+// StringPiece> (fbstring's ctor from them is explicit), mis-store
+// optional<const char*> as bool, and reject optional<unsigned>.
+static_assert(
+    check_args_fixed<fixed_string{"%s"}, std::optional<std::string_view>>());
+static_assert(
+    check_args_fixed<fixed_string{"%s"}, std::optional<folly::StringPiece>>());
+static_assert(
+    check_args_fixed<fixed_string{"%s"}, std::optional<const char*>>());
+static_assert(
+    std::is_constructible_v<QueryArgument, std::optional<std::string_view>>);
+static_assert(
+    std::is_constructible_v<QueryArgument, std::optional<folly::StringPiece>>);
+static_assert(
+    std::is_constructible_v<QueryArgument, std::optional<const char*>>);
+static_assert(std::is_constructible_v<QueryArgument, std::optional<uint64_t>>);
+static_assert(
+    std::is_constructible_v<QueryArgument, folly::Optional<std::string_view>>);
+// %s (and %m) accept a sub-Query; the other value specifiers do not.
+static_assert(check_args_fixed<fixed_string{"%s"}, Query>());
+static_assert(check_args_fixed<fixed_string{"%m"}, Query>());
+static_assert(!check_args_fixed<fixed_string{"%d"}, Query>());
+static_assert(!check_args_fixed<fixed_string{"%f"}, Query>());
+// A pre-built (type-erased) QueryArgument is accepted for ANY specifier; its
+// value-vs-specifier check is deferred to the runtime renderer. This is how
+// existing call sites pass values (columnName(), QueryArgument::fromDynamic()).
+static_assert(check_args_fixed<fixed_string{"%s"}, QueryArgument>());
+static_assert(check_args_fixed<fixed_string{"%d"}, QueryArgument>());
+static_assert(check_args_fixed<fixed_string{"%C"}, QueryArgument>());
+static_assert(check_args_fixed<fixed_string{"%Ld"}, QueryArgument>());
+static_assert(check_args_fixed<fixed_string{"%W"}, QueryArgument>());
+static_assert(check_args_fixed<fixed_string{"%V"}, QueryArgument>());
+// A bare folly::dynamic is NOT accepted by checked, even though it is
+// type-erased. Runtime-shaped data must be passed as an explicit
+// QueryArgument::fromDynamic() (a QueryArgument, accepted above) or a concrete
+// typed argument. The legacy Query() constructor still accepts folly::dynamic.
+static_assert(!check_args_fixed<fixed_string{"%LC"}, folly::dynamic>());
+static_assert(!check_args_fixed<fixed_string{"%Lm"}, folly::dynamic>());
+static_assert(!check_args_fixed<fixed_string{"%s"}, folly::dynamic>());
+static_assert(!check_args_fixed<fixed_string{"%W"}, folly::dynamic>());
+static_assert(!check_args_fixed<fixed_string{"%s"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%s"}, double>());
+static_assert(!check_args_fixed<fixed_string{"%s"}, QualifiedColumn>());
+static_assert(
+    !check_args_fixed<fixed_string{"%s"}, std::vector<QueryArgument>>());
+
+// %d and %u — any integral (including bool), optional<integral>, or null;
+// matches legacy, which stores every integer as int64. Not strings or floats.
+static_assert(check_args_fixed<fixed_string{"%d"}, int>());
+static_assert(check_args_fixed<fixed_string{"%d"}, int64_t>());
+static_assert(check_args_fixed<fixed_string{"%d"}, unsigned int>());
+static_assert(check_args_fixed<fixed_string{"%d"}, std::size_t>());
+static_assert(check_args_fixed<fixed_string{"%d"}, bool>());
+static_assert(check_args_fixed<fixed_string{"%d"}, std::optional<int>>());
+static_assert(check_args_fixed<fixed_string{"%d"}, std::nullptr_t>());
+static_assert(check_args_fixed<fixed_string{"%u"}, int>());
+static_assert(check_args_fixed<fixed_string{"%u"}, unsigned int>());
+static_assert(!check_args_fixed<fixed_string{"%d"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%d"}, std::string>());
+static_assert(!check_args_fixed<fixed_string{"%d"}, double>());
+static_assert(!check_args_fixed<fixed_string{"%u"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%u"}, double>());
+
+// Enums are accepted wherever an integer is (QueryArgument stores them as
+// int64), so callers need not static_cast. Also valid for %m and as list/
+// optional element types; still rejected for string/identifier specifiers.
+static_assert(check_args_fixed<fixed_string{"%d"}, CheckedTestEnum>());
+static_assert(check_args_fixed<fixed_string{"%u"}, CheckedTestEnum>());
+static_assert(check_args_fixed<fixed_string{"%m"}, CheckedTestEnum>());
+static_assert(check_args_fixed<fixed_string{"%=d"}, CheckedTestEnum>());
+static_assert(
+    check_args_fixed<fixed_string{"%d"}, std::optional<CheckedTestEnum>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ld"}, std::vector<CheckedTestEnum>>());
+static_assert(!check_args_fixed<fixed_string{"%s"}, CheckedTestEnum>());
+static_assert(!check_args_fixed<fixed_string{"%T"}, CheckedTestEnum>());
+
+// %f — floating point, optional<float>, or null. Not ints or strings.
+static_assert(check_args_fixed<fixed_string{"%f"}, double>());
+static_assert(check_args_fixed<fixed_string{"%f"}, float>());
+static_assert(check_args_fixed<fixed_string{"%f"}, std::optional<double>>());
+static_assert(check_args_fixed<fixed_string{"%f"}, std::nullptr_t>());
+static_assert(!check_args_fixed<fixed_string{"%f"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%f"}, const char*>());
+
+// %m — any value (arithmetic, bool, string-like, Query, null, optional). Not an
+// identifier tuple, pair list, or value list.
+static_assert(check_args_fixed<fixed_string{"%m"}, int>());
+static_assert(check_args_fixed<fixed_string{"%m"}, double>());
+static_assert(check_args_fixed<fixed_string{"%m"}, bool>());
+static_assert(check_args_fixed<fixed_string{"%m"}, std::string>());
+static_assert(check_args_fixed<fixed_string{"%m"}, const char*>());
+static_assert(check_args_fixed<fixed_string{"%m"}, Query>());
+static_assert(check_args_fixed<fixed_string{"%m"}, std::nullptr_t>());
+static_assert(check_args_fixed<fixed_string{"%m"}, std::optional<int>>());
+static_assert(!check_args_fixed<fixed_string{"%m"}, QualifiedColumn>());
+static_assert(
+    !check_args_fixed<fixed_string{"%m"}, std::vector<QueryArgument>>());
+static_assert(!check_args_fixed<
+              fixed_string{"%m"},
+              std::vector<std::pair<folly::fbstring, QueryArgument>>>());
+
+// %T and %C — identifier: string-like or a (possibly aliased / aggregate)
+// qualified column tuple. Not numbers, lists, or pair lists.
+static_assert(check_args_fixed<fixed_string{"%T"}, const char*>());
+static_assert(check_args_fixed<fixed_string{"%T"}, std::string>());
+static_assert(check_args_fixed<fixed_string{"%T"}, QualifiedColumn>());
+static_assert(check_args_fixed<fixed_string{"%C"}, std::string_view>());
+static_assert(check_args_fixed<fixed_string{"%C"}, QualifiedColumn>());
+static_assert(check_args_fixed<fixed_string{"%C"}, AliasedQualifiedColumn>());
+static_assert(check_args_fixed<fixed_string{"%C"}, AggregateColumn>());
+static_assert(check_args_fixed<fixed_string{"%C"}, AliasedAggregateColumn>());
+static_assert(!check_args_fixed<fixed_string{"%C"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%T"}, int>());
+static_assert(
+    !check_args_fixed<fixed_string{"%C"}, std::vector<QueryArgument>>());
+
+// %=s / %=d / %=u / %=f / %=m — same categories as the scalar equivalents (and
+// null renders as IS NULL).
+static_assert(check_args_fixed<fixed_string{"%=s"}, const char*>());
+static_assert(check_args_fixed<fixed_string{"%=d"}, int>());
+static_assert(check_args_fixed<fixed_string{"%=d"}, std::nullptr_t>());
+static_assert(check_args_fixed<fixed_string{"%=f"}, double>());
+static_assert(check_args_fixed<fixed_string{"%=m"}, std::string>());
+static_assert(!check_args_fixed<fixed_string{"%=d"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%=s"}, int>());
+
+// %Ls / %Ld / %Lu / %Lf / %Lm / %LC — require a list (vector / initializer_list
+// of QueryArgument); a scalar of the element type is rejected (matches legacy).
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, std::vector<QueryArgument>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ld"}, std::vector<QueryArgument>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lu"}, std::vector<QueryArgument>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lf"}, std::vector<QueryArgument>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lm"}, std::vector<QueryArgument>>());
+static_assert(check_args_fixed<
+              fixed_string{"%LC"},
+              std::initializer_list<QueryArgument>>());
+static_assert(!check_args_fixed<fixed_string{"%Ls"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%Ld"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%LC"}, const char*>());
+
+// A homogeneous typed vector is also accepted for an element-list specifier,
+// with its element type checked at compile time (stronger than a type-erased
+// std::vector<QueryArgument>). The element type must match the specifier.
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, std::vector<std::string>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, std::vector<std::string_view>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, std::vector<folly::fbstring>>());
+static_assert(check_args_fixed<fixed_string{"%Ld"}, std::vector<int64_t>>());
+static_assert(check_args_fixed<fixed_string{"%Ld"}, std::vector<int>>());
+static_assert(check_args_fixed<fixed_string{"%Lu"}, std::vector<uint64_t>>());
+static_assert(check_args_fixed<fixed_string{"%Lf"}, std::vector<double>>());
+static_assert(check_args_fixed<fixed_string{"%Lm"}, std::vector<int>>());
+static_assert(
+    check_args_fixed<fixed_string{"%LC"}, std::vector<std::string>>());
+// Element type must match the specifier's subtype.
+static_assert(
+    !check_args_fixed<fixed_string{"%Ld"}, std::vector<std::string>>());
+static_assert(!check_args_fixed<fixed_string{"%Ls"}, std::vector<int>>());
+static_assert(!check_args_fixed<fixed_string{"%Lf"}, std::vector<int>>());
+
+// std::set / std::unordered_set are accepted the same way as std::vector, with
+// the same element-type checking.
+static_assert(check_args_fixed<fixed_string{"%Ls"}, std::set<std::string>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, std::unordered_set<std::string>>());
+static_assert(check_args_fixed<fixed_string{"%Ld"}, std::set<int64_t>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ld"}, std::unordered_set<uint64_t>>());
+static_assert(check_args_fixed<fixed_string{"%LC"}, std::set<std::string>>());
+static_assert(!check_args_fixed<fixed_string{"%Ld"}, std::set<std::string>>());
+static_assert(!check_args_fixed<fixed_string{"%Ls"}, std::set<int>>());
+
+// Any iterable collection works via the QueryArgumentCollection concept — e.g.
+// folly's F14 sets — without the renderer naming the container type.
+static_assert(
+    check_args_fixed<fixed_string{"%Ls"}, folly::F14FastSet<std::string>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Ld"}, folly::F14FastSet<int64_t>>());
+static_assert(
+    !check_args_fixed<fixed_string{"%Ld"}, folly::F14FastSet<std::string>>());
+// A non-sized range (no size()) is also accepted: toQueryArgumentList guards
+// its reserve() with sized_range, so e.g. std::forward_list works.
+static_assert(std::is_constructible_v<QueryArgument, std::forward_list<int>>);
+static_assert(check_args_fixed<fixed_string{"%Ld"}, std::forward_list<int>>());
+// A std::string is a range of char but must stay a scalar, not a list.
+static_assert(!check_args_fixed<fixed_string{"%Ls"}, std::string>());
+// A map is a range, but its pair element isn't a list element.
+static_assert(!check_args_fixed<
+              fixed_string{"%Ls"},
+              std::unordered_map<std::string, int>>());
+
+// %U / %W / %LO / %LA — pair list: a typed vector<pair<string-ish,
+// QueryArgument>>. Not a scalar, a plain value list, or an int. A bare
+// folly::dynamic (object) is NOT accepted by checked -- use a typed pair list
+// or QueryArgument::fromDynamic(); the legacy Query() ctor still accepts it.
+static_assert(check_args_fixed<
+              fixed_string{"%U"},
+              std::vector<std::pair<folly::fbstring, QueryArgument>>>());
+static_assert(check_args_fixed<
+              fixed_string{"%U"},
+              std::vector<std::pair<std::string, QueryArgument>>>());
+static_assert(!check_args_fixed<fixed_string{"%W"}, folly::dynamic>());
+// folly::dynamic::object(...) returns a (private) ObjectMaker; also rejected.
+static_assert(!check_args_fixed<
+              fixed_string{"%W"},
+              decltype(folly::dynamic::object("k", 1))>());
+static_assert(check_args_fixed<
+              fixed_string{"%LO"},
+              std::vector<std::pair<folly::fbstring, QueryArgument>>>());
+static_assert(!check_args_fixed<fixed_string{"%LA"}, folly::dynamic>());
+static_assert(!check_args_fixed<fixed_string{"%U"}, const char*>());
+static_assert(
+    !check_args_fixed<fixed_string{"%U"}, std::vector<QueryArgument>>());
+static_assert(!check_args_fixed<fixed_string{"%W"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%LO"}, int>());
+
+// Associative pair lists: any range of string-keyed pairs is accepted for
+// %U/%W/%LO/%LA (std::map / std::unordered_map / folly F14), enabling
+// lookup-and-replace by column before the query is built.
+static_assert(check_args_fixed<
+              fixed_string{"%U"},
+              std::map<std::string, QueryArgument>>());
+static_assert(check_args_fixed<
+              fixed_string{"%W"},
+              std::unordered_map<std::string, QueryArgument>>());
+static_assert(check_args_fixed<
+              fixed_string{"%LO"},
+              folly::F14FastMap<std::string, QueryArgument>>());
+static_assert(check_args_fixed<
+              fixed_string{"%LA"},
+              std::map<folly::fbstring, QueryArgument>>());
+// A non-QueryArgument value is fine as long as it is
+// QueryArgument-constructible.
+static_assert(
+    check_args_fixed<fixed_string{"%U"}, std::map<std::string, std::string>>());
+// A map whose key is not string-like is not a valid pair list.
+static_assert(
+    !check_args_fixed<fixed_string{"%U"}, std::map<int, QueryArgument>>());
+
+// %V — values matrix, supplied as a type-erased vector<QueryArgument> whose
+// elements are themselves lists, or as a vector<vector<QueryArgument>> (each
+// inner vector becomes a row). Not a scalar, and not a generic
+// vector<vector<T>> with a uniform cell type (rows are heterogeneous, so cells
+// are QueryArguments).
+static_assert(
+    check_args_fixed<fixed_string{"%V"}, std::vector<QueryArgument>>());
+static_assert(check_args_fixed<
+              fixed_string{"%V"},
+              std::vector<std::vector<QueryArgument>>>());
+static_assert(
+    !check_args_fixed<fixed_string{"%V"}, std::vector<std::vector<int>>>());
+static_assert(!check_args_fixed<fixed_string{"%V"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%V"}, int>());
+// A std::vector<ValueRow<Fmt>> is a values matrix: each row's arity/types are
+// checked at ValueRow construction, so %V just accepts the whole matrix.
+static_assert(
+    check_args_fixed<fixed_string{"%V"}, std::vector<ValueRow<"%d %s %f">>>());
+// ValueRow's constrained ctor enforces arity and per-column types at compile
+// time (so is_constructible reflects the schema).
+static_assert(std::is_constructible_v<ValueRow<"%d %s">, int, const char*>);
+static_assert(!std::is_constructible_v<ValueRow<"%d %s">, int>); // too few
+static_assert(
+    !std::is_constructible_v<ValueRow<"%d %s">, int, const char*, int>); // many
+static_assert(
+    !std::is_constructible_v<ValueRow<"%d %s">, const char*, const char*>);
+static_assert(
+    !std::is_constructible_v<ValueRow<"%d %s">, folly::dynamic, const char*>);
+// The schema accepts specifiers separated by no delimiter, whitespace, commas,
+// or vertical bars -- all equivalent (here: a 3-column %d %s %f row).
+static_assert(
+    std::is_constructible_v<ValueRow<"%d%s%f">, int, const char*, double>);
+static_assert(
+    std::is_constructible_v<ValueRow<"%d %s %f">, int, const char*, double>);
+static_assert(
+    std::is_constructible_v<ValueRow<"%d\t%s\t%f">, int, const char*, double>);
+static_assert(
+    std::is_constructible_v<ValueRow<"%d,%s,%f">, int, const char*, double>);
+static_assert(
+    std::is_constructible_v<ValueRow<"%s|%d|%f">, const char*, int, double>);
+// Arity is unaffected by delimiter style: the comma form still rejects 2 args.
+static_assert(!std::is_constructible_v<ValueRow<"%d,%s,%f">, int, const char*>);
+
+// %K — comment: string-like or optional<string-like>. Not numbers or lists.
+static_assert(check_args_fixed<fixed_string{"%K"}, const char*>());
+static_assert(check_args_fixed<fixed_string{"%K"}, std::string>());
+static_assert(
+    check_args_fixed<fixed_string{"%K"}, std::optional<std::string>>());
+static_assert(!check_args_fixed<fixed_string{"%K"}, int>());
+static_assert(
+    !check_args_fixed<fixed_string{"%K"}, std::vector<QueryArgument>>());
+
+// Multi-argument format strings and argument-count mismatches.
+static_assert(check_args_fixed<
+              fixed_string{"SELECT %C FROM %T WHERE %C = %s"},
+              const char*,
+              const char*,
+              const char*,
+              const char*>());
+static_assert(
+    !check_args_fixed<fixed_string{"SELECT %s"}>(),
+    "too few args should fail");
+static_assert(
+    !check_args_fixed<fixed_string{"SELECT a"}, int>(),
+    "too many args should fail");
+
+} // namespace checked_compile_tests
+
+// ============================================================================
 // Query Class Tests
 //
 // Tests query parsing, rendering, and parameter binding.
@@ -141,6 +592,758 @@ TEST_F(QueryTest, QueryWithDoubleParameter) {
   Query q("SELECT * FROM products WHERE price < %f", 19.99);
   auto rendered = q.renderInsecure();
   EXPECT_TRUE(rendered.find("19.99") != std::string::npos);
+}
+
+TEST_F(QueryTest, CheckedSimpleQueryRender) {
+  auto q = Query::checked("SELECT * FROM users");
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM users");
+  EXPECT_TRUE(q.isChecked());
+}
+
+TEST_F(QueryTest, CheckedAcceptsConstexprFormatConstants) {
+  // The format may be a string literal, a constexpr char array, or a constexpr
+  // std::string_view — all are compile-time constants, so validation still
+  // runs.
+  static constexpr std::string_view kSvQuery = "SELECT * FROM %T WHERE id = %d";
+  EXPECT_EQ(
+      Query::checked(kSvQuery, "users", 1).renderInsecure(),
+      "SELECT * FROM `users` WHERE id = 1");
+
+  static constexpr char kArrQuery[] = "SELECT %C FROM t";
+  EXPECT_EQ(
+      Query::checked(kArrQuery, "col").renderInsecure(), "SELECT `col` FROM t");
+}
+
+TEST_F(QueryTest, CheckedQueryWithValueParameter) {
+  // %d for int value parameter in checked mode (original spec set)
+  auto q = Query::checked("SELECT * FROM users WHERE id = %d", 42);
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM users WHERE id = 42");
+  EXPECT_TRUE(q.isChecked());
+  EXPECT_EQ(q.getQueryFormat(), "SELECT * FROM users WHERE id = %d");
+}
+
+TEST_F(QueryTest, CheckedQueryWithStringValue) {
+  auto q = Query::checked("SELECT * FROM users WHERE name = %s", "Alice");
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM users WHERE name = \"Alice\"");
+}
+
+TEST_F(QueryTest, CheckedQueryWithIdentifierParameter) {
+  // %T for table identifier, %C for column identifier in checked mode
+  auto q = Query::checked("SELECT * FROM %T WHERE id = 1", "users");
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM `users` WHERE id = 1");
+  EXPECT_TRUE(q.isChecked());
+}
+
+TEST_F(QueryTest, CheckedQueryWithQualifiedIdentifier) {
+  // QualifiedColumn tuple should render as backtick-quoted table.column
+  auto q =
+      Query::checked("SELECT %C FROM %T", QualifiedColumn{"db", "tbl"}, "mydb");
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT `db`.`tbl` FROM `mydb`");
+}
+
+TEST_F(QueryTest, CheckedQueryWithAliasedIdentifier) {
+  // AliasedQualifiedColumn tuple renders with AS
+  auto q = Query::checked(
+      "SELECT %C FROM users", AliasedQualifiedColumn{"db", "tbl", "alias"});
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT `db`.`tbl` AS `alias` FROM users");
+}
+
+TEST_F(QueryTest, CheckedQueryWithListValue) {
+  // %Ld with list replaces old list specs, now using original spec set
+  auto q = Query::checked(
+      "SELECT * FROM users WHERE id IN (%Ld)",
+      std::vector<QueryArgument>{1, 2, 3});
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM users WHERE id IN (1, 2, 3)");
+}
+
+TEST_F(QueryTest, CheckedQueryWithIdentifierList) {
+  // %LC for list of identifiers
+  auto q = Query::checked(
+      "SELECT %LC FROM users",
+      std::initializer_list<QueryArgument>{"a", "b", "c"});
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT `a`, `b`, `c` FROM users");
+}
+
+TEST_F(QueryTest, CheckedQueryWithEqValueNull) {
+  // %=d renders " IS NULL" for null and " = <value>" otherwise.
+  auto q1 =
+      Query::checked("SELECT * FROM users WHERE %C%=d", "deleted_at", nullptr);
+  EXPECT_EQ(
+      q1.renderInsecure(), "SELECT * FROM users WHERE `deleted_at` IS NULL");
+
+  auto q2 = Query::checked("SELECT * FROM users WHERE %C%=d", "deleted_at", 42);
+  EXPECT_EQ(q2.renderInsecure(), "SELECT * FROM users WHERE `deleted_at` = 42");
+}
+
+TEST_F(QueryTest, CheckedQueryWithUpdate) {
+  // %U renders comma-separated assignments. folly::dynamic objects iterate in
+  // hash (not insertion) order, so assert the checked output exactly matches
+  // the legacy renderer on the same object rather than a hardcoded key order.
+  folly::dynamic obj = folly::dynamic::object("name", "Bob")("age", 30);
+  // checked rejects a bare folly::dynamic; wrap runtime data via fromDynamic.
+  auto arg = QueryArgument::fromDynamic(obj);
+  auto checked =
+      Query::checked("UPDATE %T SET %U WHERE id = %d", "users", arg, 1);
+  auto legacy = Query("UPDATE %T SET %U WHERE id = %d", "users", arg, 1);
+  EXPECT_EQ(checked.renderInsecure(), legacy.renderInsecure());
+  EXPECT_NE(checked.renderInsecure().find(", "), folly::fbstring::npos);
+}
+
+TEST_F(QueryTest, CheckedQueryWithWhere) {
+  // %W renders AND-separated conditions; assert parity with legacy (see %U note
+  // re: folly::dynamic ordering).
+  folly::dynamic obj = folly::dynamic::object("active", 1)("name", "Alice");
+  auto arg = QueryArgument::fromDynamic(obj);
+  auto checked = Query::checked("SELECT * FROM %T WHERE %W", "users", arg);
+  auto legacy = Query("SELECT * FROM %T WHERE %W", "users", arg);
+  EXPECT_EQ(checked.renderInsecure(), legacy.renderInsecure());
+  EXPECT_NE(checked.renderInsecure().find(" AND "), folly::fbstring::npos);
+}
+
+TEST_F(QueryTest, CheckedQueryWithValuesMatrix) {
+  std::vector<QueryArgument> vals = {
+      std::vector<QueryArgument>{1, "a"}, std::vector<QueryArgument>{2, "b"}};
+  auto q = Query::checked("INSERT INTO %T VALUES %V", "t", vals);
+  EXPECT_EQ(
+      q.renderInsecure(), "INSERT INTO `t` VALUES (1, \"a\"), (2, \"b\")");
+}
+
+TEST_F(QueryTest, CheckedQueryWithValuesMatrixVectorOfVectors) {
+  // A std::vector<std::vector<QueryArgument>> may be passed directly for %V;
+  // each inner vector becomes a row and renders identically to the
+  // vector<QueryArgument>-of-lists form.
+  std::vector<std::vector<QueryArgument>> vals = {{1, "a"}, {2, "b"}};
+  auto q = Query::checked("INSERT INTO %T VALUES %V", "t", vals);
+  EXPECT_EQ(
+      q.renderInsecure(), "INSERT INTO `t` VALUES (1, \"a\"), (2, \"b\")");
+}
+
+TEST_F(QueryTest, CheckedQueryWithValueRowMatrix) {
+  // A std::vector<ValueRow<Fmt>> supplies a compile-time-schema'd matrix: each
+  // row is a bare braced list validated against the schema, and renders like
+  // any other %V matrix. Works with both checked and legacy.
+  std::vector<ValueRow<"%d %s %f">> rows = {{1, "a", 1.5}, {2, "b", 2.5}};
+  auto checked = Query::checked("INSERT INTO %T VALUES %V", "t", rows);
+  auto legacy = Query("INSERT INTO %T VALUES %V", "t", rows);
+  EXPECT_EQ(
+      checked.renderInsecure(),
+      "INSERT INTO `t` VALUES (1, \"a\", 1.5), (2, \"b\", 2.5)");
+  EXPECT_EQ(checked.renderInsecure(), legacy.renderInsecure());
+}
+
+TEST_F(QueryTest, CheckedQueryRendersIntegers) {
+  // Absolute (not parity) checks: pin %d/%u rendering. %u must render as an
+  // unsigned value — a high-bit-set value must not come out negative.
+  EXPECT_EQ(
+      Query::checked("WHERE id = %d", -5).renderInsecure(), "WHERE id = -5");
+  EXPECT_EQ(
+      Query::checked("WHERE id = %u", 42u).renderInsecure(), "WHERE id = 42");
+  EXPECT_EQ(
+      Query::checked("WHERE id = %u", std::numeric_limits<uint64_t>::max())
+          .renderInsecure(),
+      "WHERE id = 18446744073709551615");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsSubqueryForStringAndM) {
+  // %s and %m accept a sub-Query (rendered as a nested query), matching legacy.
+  auto sub = Query("SELECT %d", 1);
+  EXPECT_EQ(
+      Query::checked("WHERE id IN (%s)", sub).renderInsecure(),
+      "WHERE id IN (SELECT 1)");
+  EXPECT_EQ(
+      Query::checked("WHERE id IN (%m)", sub).renderInsecure(),
+      "WHERE id IN (SELECT 1)");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsPrebuiltQueryArgument) {
+  // Mirrors the common migration pattern where helpers return a pre-built,
+  // type-erased QueryArgument (e.g. columnName(), fromDynamic()). It's accepted
+  // for any specifier and validated/rendered at runtime.
+  // Use parentheses: brace-init would prefer the initializer_list ctor and wrap
+  // the value in a one-element list.
+  QueryArgument col("col");
+  QueryArgument val(42);
+  EXPECT_EQ(
+      Query::checked("SELECT %C WHERE %C = %d", col, col, val).renderInsecure(),
+      "SELECT `col` WHERE `col` = 42");
+
+  // A QueryArgument holding a list satisfies a list specifier.
+  QueryArgument ids(std::vector<QueryArgument>{1, 2, 3});
+  EXPECT_EQ(
+      Query::checked("id IN (%Ld)", ids).renderInsecure(), "id IN (1, 2, 3)");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsQueryArgumentFromDynamic) {
+  // A bare folly::dynamic is rejected by checked; runtime-shaped data is passed
+  // as an explicit QueryArgument::fromDynamic(). A dynamic array wrapped this
+  // way renders as a comma-separated identifier list.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT %LC FROM t",
+          QueryArgument::fromDynamic(folly::dynamic::array("a", "b")))
+          .renderInsecure(),
+      "SELECT `a`, `b` FROM t");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsTypedVectorForListSpec) {
+  // A homogeneous typed vector renders the same as a vector<QueryArgument>, but
+  // its element type is checked at compile time.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE name IN (%Ls)",
+          std::vector<std::string>{"a", "b", "c"})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE name IN (\"a\", \"b\", \"c\")");
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE id IN (%Ld)", std::vector<int64_t>{1, 2, 3})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE id IN (1, 2, 3)");
+  EXPECT_EQ(
+      Query::checked("SELECT %LC FROM t", std::vector<std::string>{"a", "b"})
+          .renderInsecure(),
+      "SELECT `a`, `b` FROM t");
+}
+
+TEST_F(QueryTest, LegacyQueryAcceptsAnyContainerForListSpec) {
+  // The container->list conversion lives in the QueryArgument constructor,
+  // which the legacy (non-checked) Query path shares, so any collection works
+  // there too — it just lacks the compile-time element-type check.
+  EXPECT_EQ(
+      Query("SELECT * FROM t WHERE id IN (%Ld)", std::set<int64_t>{3, 1, 2})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE id IN (1, 2, 3)");
+  EXPECT_EQ(
+      Query(
+          "SELECT * FROM t WHERE name IN (%Ls)",
+          folly::F14FastSet<std::string>{"only"})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE name IN (\"only\")");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsSetForListSpec) {
+  // std::set renders its elements in iteration (sorted) order; that determinism
+  // lets us assert exact output here.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE name IN (%Ls)",
+          std::set<std::string>{"c", "a", "b"})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE name IN (\"a\", \"b\", \"c\")");
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE id IN (%Ld)", std::set<int64_t>{3, 1, 2})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE id IN (1, 2, 3)");
+  // unordered_set order is unspecified, so just check a single-element set.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE id IN (%Ld)", std::unordered_set<int64_t>{7})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE id IN (7)");
+  // Any iterable collection works (e.g. an F14 set), via the generic concept.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE name IN (%Ls)",
+          folly::F14FastSet<std::string>{"only"})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE name IN (\"only\")");
+}
+
+TEST_F(QueryTest, CheckedQueryValidatesTypeErasedArgAtRuntime) {
+  // A type-erased argument's value type can't be proven at compile time, so a
+  // mismatch against its specifier must still be caught at render time, even
+  // though the query is "checked". (The format structure is what compile-time
+  // checking proves; the value type is not, for type-erased args.)
+  QueryArgument stringArg("not a number");
+  auto q = Query::checked("SELECT * FROM t WHERE id = %d", stringArg);
+  EXPECT_TRUE(q.isChecked());
+  EXPECT_THROW(q.renderInsecure(), std::invalid_argument);
+
+  // Same via QueryArgument::fromDynamic (the explicit type-erased escape
+  // hatch).
+  auto q2 = Query::checked(
+      "SELECT * FROM t WHERE id = %d",
+      QueryArgument::fromDynamic(folly::dynamic("str")));
+  EXPECT_TRUE(q2.isChecked());
+  EXPECT_THROW(q2.renderInsecure(), std::invalid_argument);
+
+  // A correctly-typed type-erased argument still renders fine.
+  QueryArgument intArg(42);
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM t WHERE id = %d", intArg).renderInsecure(),
+      "SELECT * FROM t WHERE id = 42");
+}
+
+TEST_F(QueryTest, CheckedQueryValidatesEmbeddedNonCheckedSubquery) {
+  // A non-checked sub-query embedded in a checked query must be validated by
+  // its OWN mode, not the outer query's: checked() proved nothing about the
+  // inner query's format. Here the legacy sub-query's format has a dangerous
+  // char, which the validating renderer must still reject even though the outer
+  // query is checked.
+  Query legacy("SELECT `x`");
+  EXPECT_FALSE(legacy.isChecked());
+  auto q = Query::checked("SELECT %s", legacy);
+  EXPECT_THROW(q.renderInsecure(), std::invalid_argument);
+
+  // A checked sub-query embedded in a checked query renders normally.
+  auto inner = Query::checked("SELECT %d", 7);
+  EXPECT_EQ(
+      Query::checked("SELECT %s", inner).renderInsecure(), "SELECT SELECT 7");
+}
+
+TEST_F(QueryTest, CheckedQueryRendersEnumAsInteger) {
+  // An enum passed to %d (or %Ld) renders as its underlying integer value, with
+  // no static_cast required at the call site.
+  using checked_compile_tests::CheckedTestEnum;
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE status = %d", CheckedTestEnum::Second)
+          .renderInsecure(),
+      "SELECT * FROM t WHERE status = 7");
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE status IN (%Ld)",
+          std::vector<CheckedTestEnum>{
+              CheckedTestEnum::First, CheckedTestEnum::Second})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE status IN (1, 7)");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsPairVectorForU) {
+  // %U now accepts a prebuilt pair vector (no cast / no folly::dynamic needed),
+  // both the fbstring-keyed (ArgumentPair) and std::string-keyed forms.
+  std::vector<ArgumentPair> fbPairs;
+  fbPairs.emplace_back("a", QueryArgument(1));
+  fbPairs.emplace_back("b", QueryArgument("x"));
+  EXPECT_EQ(
+      Query::checked("UPDATE %T SET %U", "t", std::move(fbPairs))
+          .renderInsecure(),
+      "UPDATE `t` SET `a` = 1, `b` = \"x\"");
+
+  std::vector<std::pair<std::string, QueryArgument>> strPairs{
+      {"a", 1}, {"b", "x"}};
+  EXPECT_EQ(
+      Query::checked("UPDATE %T SET %U", "t", strPairs).renderInsecure(),
+      "UPDATE `t` SET `a` = 1, `b` = \"x\"");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsMapForPairList) {
+  // An associative map is accepted for %U/%W. std::map iterates in sorted key
+  // order, so it renders identically to the equivalent sorted
+  // vector<ArgumentPair> -- proving the map path matches the established
+  // pair-vector path. Maps enable lookup-and-replace by column before building.
+  std::map<std::string, QueryArgument> m{{"b", "x"}, {"a", 1}};
+  m["a"] = QueryArgument(2); // replace an existing column by key
+  m["c"] = QueryArgument(3); // add another
+  std::vector<ArgumentPair> expected;
+  expected.emplace_back("a", QueryArgument(2));
+  expected.emplace_back("b", QueryArgument("x"));
+  expected.emplace_back("c", QueryArgument(3));
+  EXPECT_EQ(
+      Query::checked("UPDATE %T SET %U", "t", m).renderInsecure(),
+      Query::checked("UPDATE %T SET %U", "t", expected).renderInsecure());
+
+  std::map<std::string, QueryArgument> where{{"id", 5}, {"name", "y"}};
+  std::vector<ArgumentPair> expectedWhere;
+  expectedWhere.emplace_back("id", QueryArgument(5));
+  expectedWhere.emplace_back("name", QueryArgument("y"));
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM %T WHERE %W", "t", where).renderInsecure(),
+      Query::checked("SELECT * FROM %T WHERE %W", "t", expectedWhere)
+          .renderInsecure());
+
+  // An unordered_map renders the same assignments; use a single element so the
+  // result is independent of hash order.
+  std::unordered_map<std::string, QueryArgument> single{{"only", 9}};
+  std::vector<ArgumentPair> expectedSingle;
+  expectedSingle.emplace_back("only", QueryArgument(9));
+  EXPECT_EQ(
+      Query::checked("UPDATE %T SET %U", "t", single).renderInsecure(),
+      Query::checked("UPDATE %T SET %U", "t", expectedSingle).renderInsecure());
+}
+
+TEST_F(QueryTest, CheckedQueryPairListAcceptsOptionalValue) {
+  // The pair value is a QueryArgument, so an optional works: engaged -> value,
+  // empty -> NULL (and for %U, an empty value renders `col = NULL`).
+  std::vector<ArgumentPair> pairs;
+  pairs.emplace_back("a", std::optional<int>{5});
+  pairs.emplace_back("b", std::optional<int>{});
+  EXPECT_EQ(
+      Query::checked("UPDATE %T SET %U", "t", std::move(pairs))
+          .renderInsecure(),
+      "UPDATE `t` SET `a` = 5, `b` = NULL");
+}
+
+TEST_F(QueryTest, CheckedQueryOptionalStringLikeRendersAsString) {
+  // Regression: the optional ctor must route string-like values through the
+  // dedicated scalar ctors. optional<const char*> in particular must render as
+  // a string, not bool (1), which is what a raw variant assignment would do.
+  EXPECT_EQ(
+      Query::checked("SELECT %s", std::optional<const char*>{"x"})
+          .renderInsecure(),
+      "SELECT \"x\"");
+  EXPECT_EQ(
+      Query::checked("SELECT %s", std::optional<std::string_view>{"y"})
+          .renderInsecure(),
+      "SELECT \"y\"");
+  EXPECT_EQ(
+      Query::checked("SELECT %s", std::optional<folly::StringPiece>{"z"})
+          .renderInsecure(),
+      "SELECT \"z\"");
+  // nullopt still renders as NULL.
+  EXPECT_EQ(
+      Query::checked("SELECT %s", std::optional<const char*>{})
+          .renderInsecure(),
+      "SELECT NULL");
+}
+
+TEST_F(QueryTest, CheckedQueryUnsignedHighBitRoundTrip) {
+  // uint64_t is stored as int64_t (the variant has no uint64_t alternative), so
+  // a high-bit value is stored negative. %u casts back to uint64_t on render,
+  // so it round-trips correctly...
+  constexpr auto kMax = std::numeric_limits<uint64_t>::max();
+  EXPECT_EQ(
+      Query::checked("SELECT %u", kMax).renderInsecure(),
+      "SELECT 18446744073709551615");
+  EXPECT_EQ(
+      Query::checked("SELECT %u", std::optional<uint64_t>{kMax})
+          .renderInsecure(),
+      "SELECT 18446744073709551615");
+  // ...while %d is signed by design: the same bits render negative. Callers
+  // must use %u for unsigned values >= 2^63.
+  EXPECT_EQ(Query::checked("SELECT %d", kMax).renderInsecure(), "SELECT -1");
+}
+
+TEST_F(QueryTest, CheckedQueryAcceptsConstexprStringPiece) {
+  // A compile-time-constant folly::StringPiece works as the format string,
+  // validated at compile time like a literal / constexpr std::string_view.
+  constexpr folly::StringPiece kFmt = "SELECT * FROM %T WHERE id = %d";
+  EXPECT_EQ(
+      Query::checked(kFmt, "users", 5).renderInsecure(),
+      "SELECT * FROM `users` WHERE id = 5");
+}
+
+TEST_F(QueryTest, QueryAcceptsMutableCharArray) {
+  // Regression: a non-const char[] argument must be treated as a string, not a
+  // QueryArgumentCollection. decay_t<char[N]> is char* (not const char*), so
+  // before is_string_like_v covered char* it slipped into the collection
+  // constructor and called .size() on a C array -- a hard compile error for any
+  // legacy caller passing a mutable char buffer.
+  char buf[20] = "hello";
+  EXPECT_EQ(
+      Query("SELECT %s", buf).renderInsecure(),
+      Query("SELECT %s", std::string("hello")).renderInsecure());
+  EXPECT_EQ(
+      Query::checked("SELECT %s", buf).renderInsecure(),
+      Query::checked("SELECT %s", std::string("hello")).renderInsecure());
+}
+
+TEST_F(QueryTest, CheckedQueryRendersAggregateColumn) {
+  // Exercises resolveAggregateFunctionName via an aggregate column identifier.
+  auto q = Query::checked(
+      "SELECT %C FROM t",
+      AggregateColumn{AggregateFunction::COUNT, {"db", "tbl"}});
+  EXPECT_EQ(q.renderInsecure(), "SELECT COUNT(`db`.`tbl`) FROM t");
+}
+
+TEST_F(QueryTest, CheckedQueryValuesMatrixRejectsNonListRow) {
+  // A %V whose rows are not lists must produce a clean parse error, not an
+  // opaque std::bad_variant_access from getList().
+  auto q = Query::checked(
+      "INSERT INTO %T VALUES %V", "t", std::vector<QueryArgument>{1, 2});
+  EXPECT_THROW(q.renderInsecure(), std::invalid_argument);
+}
+
+TEST_F(QueryTest, CheckedQueryWithComment) {
+  auto q = Query::checked("SELECT * FROM users %K", "test comment");
+  auto rendered = q.renderInsecure();
+  EXPECT_EQ(rendered, "SELECT * FROM users /*test comment*/");
+}
+
+TEST_F(QueryTest, CheckedQueryGetFormatPreservesSimplifiedSpec) {
+  auto q = Query::checked("SELECT %C FROM %T WHERE %C = %d", "a", "b", "c", 1);
+  // getQueryFormat should return original spec set as provided
+  EXPECT_EQ(q.getQueryFormat(), "SELECT %C FROM %T WHERE %C = %d");
+  EXPECT_TRUE(q.isChecked());
+}
+
+TEST_F(QueryTest, CheckedQueryIsNotUnsafe) {
+  auto q = Query::checked("SELECT * FROM %T WHERE id = %d", "users", 1);
+  EXPECT_FALSE(q.isUnsafe());
+  EXPECT_TRUE(q.isChecked());
+}
+
+// =============================================================================
+// Checked-vs-legacy render parity
+//
+// The checked renderer (QueryRenderer<…, Validate=false>) shares its rendering
+// logic with the legacy renderer (Validate=true); only the runtime validation
+// differs. These tests pin that the two produce byte-identical output for the
+// same format string and arguments across every specifier, so the compile-time
+// checked path renders exactly like the original.
+// =============================================================================
+
+// Renders the same literal + args through legacy Query(...) and checked
+// Query::checked(...) and asserts identical output. The format must be a
+// literal (Query::checked requires it), so the literal is expanded into both
+// calls.
+#define EXPECT_RENDER_PARITY(fmt, ...)                        \
+  EXPECT_EQ(                                                  \
+      Query(fmt __VA_OPT__(, ) __VA_ARGS__).renderInsecure(), \
+      Query::checked(fmt __VA_OPT__(, ) __VA_ARGS__).renderInsecure())
+
+#define EXPECT_PARTIAL_PARITY(fmt, ...)                               \
+  EXPECT_EQ(                                                          \
+      Query(fmt __VA_OPT__(, ) __VA_ARGS__).renderPartiallyEscaped(), \
+      Query::checked(fmt __VA_OPT__(, ) __VA_ARGS__).renderPartiallyEscaped())
+
+TEST_F(QueryTest, CheckedRenderMatchesLegacy) {
+  // Values.
+  EXPECT_RENDER_PARITY("SELECT * FROM users");
+  EXPECT_RENDER_PARITY("WHERE id = %d", 42);
+  EXPECT_RENDER_PARITY("WHERE id = %d", -7);
+  EXPECT_RENDER_PARITY("WHERE b = %d", true);
+  EXPECT_RENDER_PARITY("WHERE x = %f", 19.99);
+  EXPECT_RENDER_PARITY("WHERE x = %m", 5);
+  EXPECT_RENDER_PARITY("WHERE x = %m", "str");
+  EXPECT_RENDER_PARITY("WHERE x = %s", nullptr);
+  // Note: checked and legacy share one renderer template (they differ only in
+  // elided runtime checks), so these parity assertions guard *dispatch*, not
+  // rendering — a shared rendering bug would cancel out on both sides.
+  // Rendering correctness is pinned by the absolute-value tests below (e.g.
+  // CheckedQueryRendersIntegers, CheckedQueryWith*).
+  EXPECT_RENDER_PARITY("WHERE id = %u", std::numeric_limits<uint64_t>::max());
+
+  // Identifiers, including qualified/aliased column tuples.
+  EXPECT_RENDER_PARITY("SELECT * FROM %T", "users");
+  EXPECT_RENDER_PARITY("SELECT %C FROM t", "col");
+  EXPECT_RENDER_PARITY("SELECT %C FROM t", QualifiedColumn{"db", "tbl"});
+  EXPECT_RENDER_PARITY(
+      "SELECT %C FROM t", AliasedQualifiedColumn{"db", "tbl", "a"});
+
+  // (List and values-matrix specifiers are covered separately in
+  // CheckedRenderMatchesLegacyForLists — a bare std::vector<QueryArgument>
+  // passed to the legacy Query(...) binds to its all-params constructor, so the
+  // two sides can't share one expression.)
+
+  // Pair lists (single key to keep folly::dynamic iteration order moot) plus
+  // %=/IS NULL via %W. checked rejects a bare folly::dynamic, so the runtime
+  // data is wrapped in QueryArgument::fromDynamic() (accepted by both checked
+  // and legacy, so parity still holds).
+  EXPECT_RENDER_PARITY(
+      "UPDATE %T SET %U WHERE id = %d",
+      "users",
+      QueryArgument::fromDynamic(folly::dynamic::object("name", "Bob")),
+      1);
+  EXPECT_RENDER_PARITY(
+      "WHERE %W", QueryArgument::fromDynamic(folly::dynamic::object("a", 1)));
+  EXPECT_RENDER_PARITY(
+      "WHERE %W",
+      QueryArgument::fromDynamic(folly::dynamic::object("a", nullptr)));
+  EXPECT_RENDER_PARITY(
+      "WHERE %LO", QueryArgument::fromDynamic(folly::dynamic::object("a", 1)));
+  EXPECT_RENDER_PARITY(
+      "WHERE %LA", QueryArgument::fromDynamic(folly::dynamic::object("a", 1)));
+
+  // Comment (terminator neutralization), literal percent, and %= both branches.
+  EXPECT_RENDER_PARITY("SELECT * FROM t %K", "hint */ DROP");
+  EXPECT_RENDER_PARITY("SELECT 50%% done");
+  EXPECT_RENDER_PARITY("WHERE %C %=d", "x", nullptr);
+  EXPECT_RENDER_PARITY("WHERE %C %=d", "x", 42);
+
+  // Subquery rendered as a value (exercises the recursive render path).
+  EXPECT_RENDER_PARITY("SELECT * FROM (%m) sub", Query("SELECT %d", 1));
+
+  // Escaping parity (renderInsecure does no escaping; use partial-escape mode).
+  EXPECT_PARTIAL_PARITY("WHERE name = %s", "O'Brien\n\"x\"");
+}
+
+TEST_F(QueryTest, CheckedRenderMatchesLegacyForLists) {
+  // For list/matrix specifiers the legacy side must wrap the single list
+  // argument inside the all-params vector (a bare std::vector<QueryArgument>
+  // would otherwise be taken as the entire parameter list); Query::checked
+  // takes it directly. Both feed the identical QueryArgument to the shared
+  // renderer.
+  auto legacyOneArg = [](const char* fmt, QueryArgument arg) {
+    return Query(fmt, std::vector<QueryArgument>{std::move(arg)})
+        .renderInsecure();
+  };
+
+  std::vector<QueryArgument> ids{1, 2, 3};
+  EXPECT_EQ(
+      legacyOneArg("WHERE id IN (%Ld)", ids),
+      Query::checked("WHERE id IN (%Ld)", ids).renderInsecure());
+
+  std::vector<QueryArgument> empty{};
+  EXPECT_EQ(
+      legacyOneArg("WHERE id IN (%Ld)", empty),
+      Query::checked("WHERE id IN (%Ld)", empty).renderInsecure());
+
+  std::vector<QueryArgument> cols{"a", "b"};
+  EXPECT_EQ(
+      legacyOneArg("SELECT %LC FROM t", cols),
+      Query::checked("SELECT %LC FROM t", cols).renderInsecure());
+
+  std::vector<QueryArgument> matrix{
+      std::vector<QueryArgument>{1, "a"}, std::vector<QueryArgument>{2, "b"}};
+  EXPECT_EQ(
+      Query(
+          "INSERT INTO %T VALUES %V",
+          std::vector<QueryArgument>{QueryArgument("t"), QueryArgument(matrix)})
+          .renderInsecure(),
+      Query::checked("INSERT INTO %T VALUES %V", "t", matrix).renderInsecure());
+}
+
+TEST_F(QueryTest, CheckedTruncationOverloadsDispatchToCheckedRenderer) {
+  // Exercises the truncating renderInsecureFb(maxSize) /
+  // renderPartiallyEscapedFb(maxSize) overloads on a checked query — previously
+  // these silently used the legacy renderer. Equality with the legacy query
+  // confirms correct dispatch (and the same for the std::string variants).
+  auto legacy = Query("SELECT * FROM %T WHERE id = %d", "users", 12345);
+  auto checked =
+      Query::checked("SELECT * FROM %T WHERE id = %d", "users", 12345);
+  EXPECT_EQ(legacy.renderInsecureFb(), checked.renderInsecureFb());
+  EXPECT_EQ(legacy.renderInsecureFb(10), checked.renderInsecureFb(10));
+  EXPECT_EQ(
+      legacy.renderPartiallyEscapedFb(10),
+      checked.renderPartiallyEscapedFb(10));
+  EXPECT_EQ(
+      legacy.renderPartiallyEscapedStr(10),
+      checked.renderPartiallyEscapedStr(10));
+}
+
+TEST_F(QueryTest, CheckedQueryCopyMovePreservesRendering) {
+  auto q = Query::checked("SELECT * FROM %T WHERE id = %d", "users", 1);
+  const auto expected = q.renderInsecure();
+
+  Query copy = q;
+  EXPECT_TRUE(copy.isChecked());
+  EXPECT_EQ(copy.renderInsecure(), expected);
+
+  Query moved = std::move(q);
+  EXPECT_TRUE(moved.isChecked());
+  EXPECT_EQ(moved.renderInsecure(), expected);
+}
+
+TEST_F(QueryTest, CheckedQueryAppendDowngradesToLegacyButRendersCorrectly) {
+  // Appending a legacy (unchecked) query downgrades the result: the legacy half
+  // was never validated at compile time, so it must be validated at render
+  // time.
+  auto q = Query::checked("SELECT * FROM %T", "users");
+  q.append(Query("WHERE active = %d", 1));
+  EXPECT_FALSE(q.isChecked());
+  EXPECT_EQ(q.renderInsecure(), "SELECT * FROM `users` WHERE active = 1");
+}
+
+TEST_F(QueryTest, CheckedQueryAppendStaysCheckedWhenBothChecked) {
+  // Concatenating two checked queries preserves checkedness: both sides were
+  // validated at compile time, so the merged query needs no render-time
+  // validation.
+  auto q = Query::checked("SELECT * FROM %T", "users");
+  q.append(Query::checked("WHERE active = %d", 1));
+  EXPECT_TRUE(q.isChecked());
+  EXPECT_EQ(q.renderInsecure(), "SELECT * FROM `users` WHERE active = 1");
+}
+
+TEST_F(QueryTest, CheckedQueryConcatOperatorStaysChecked) {
+  // operator+ copies the (checked) left side then appends the (checked) right
+  // side, so the result remains checked.
+  auto combined = Query::checked("SELECT %C FROM %T", "id", "users") +
+      Query::checked("WHERE id = %d", 5);
+  EXPECT_TRUE(combined.isChecked());
+  EXPECT_EQ(combined.renderInsecure(), "SELECT `id` FROM `users` WHERE id = 5");
+}
+
+TEST_F(QueryTest, CheckedRenderMatchesLegacyWithConnection) {
+  // Connection-based (Full) escaping is otherwise only exercised by legacy
+  // queries; confirm the checked path dispatches to the checked renderer there
+  // too and renders identically. (The mock's escapeString is identity, so the
+  // two sides match regardless of the escaping details.)
+  MockInternalConnection conn;
+  auto legacy = Query("SELECT * FROM %T WHERE name = %s", "users", "O'Brien");
+  auto checked =
+      Query::checked("SELECT * FROM %T WHERE name = %s", "users", "O'Brien");
+  EXPECT_EQ(legacy.renderFb(&conn), checked.renderFb(&conn));
+  EXPECT_EQ(legacy.renderStr(&conn), checked.renderStr(&conn));
+}
+
+TEST_F(QueryTest, MultiQueryRendersCheckedMember) {
+  // A checked query inside a multi-query must still render via the checked
+  // renderer (the per-query dispatch happens inside renderFb).
+  std::vector<Query> queries;
+  queries.emplace_back("SELECT * FROM %T", "a");
+  queries.push_back(Query::checked("SELECT * FROM %T WHERE id = %d", "b", 1));
+  EXPECT_EQ(
+      Query::renderMultiQuery(nullptr, queries),
+      "SELECT * FROM `a`;SELECT * FROM `b` WHERE id = 1");
+}
+
+namespace {
+// A mock connection whose escapeString actually escapes single quotes, so the
+// Full (connection-based) escape path can be pinned to an absolute value (the
+// base MockInternalConnection's escapeString is an identity copy).
+class EscapingMockConnection : public MockInternalConnection {
+ public:
+  using MockInternalConnection::MockInternalConnection;
+  size_t escapeString(char* out, const char* src, size_t length)
+      const override {
+    size_t n = 0;
+    for (size_t i = 0; i < length; ++i) {
+      if (src[i] == '\'') {
+        out[n++] = '\\';
+      }
+      out[n++] = src[i];
+    }
+    return n;
+  }
+};
+} // namespace
+
+TEST_F(QueryTest, CheckedQueryFullEscapesViaConnection) {
+  // Pin the checked path's Full (connection) escaping to an absolute value
+  // using a connection that really escapes, then confirm it matches legacy.
+  EscapingMockConnection conn;
+  auto checked =
+      Query::checked("SELECT * FROM %T WHERE name = %s", "users", "O'Brien");
+  EXPECT_EQ(
+      checked.renderFb(&conn),
+      "SELECT * FROM `users` WHERE name = \"O\\'Brien\"");
+  auto legacy = Query("SELECT * FROM %T WHERE name = %s", "users", "O'Brien");
+  EXPECT_EQ(checked.renderFb(&conn), legacy.renderFb(&conn));
+}
+
+TEST_F(QueryTest, MultiQueryStrAndPrefixRenderCheckedMember) {
+  std::vector<Query> queries;
+  queries.emplace_back("SELECT * FROM %T", "a");
+  queries.push_back(Query::checked("SELECT * FROM %T WHERE id = %d", "b", 1));
+  // std::string multi-query variant.
+  EXPECT_EQ(
+      Query::renderMultiQueryStr(nullptr, queries),
+      "SELECT * FROM `a`;SELECT * FROM `b` WHERE id = 1");
+  // With a per-query prefix.
+  EXPECT_EQ(
+      Query::renderMultiQueryFb(nullptr, queries, "/* p */ "),
+      "/* p */ SELECT * FROM `a`;/* p */ SELECT * FROM `b` WHERE id = 1");
+}
+
+TEST_F(QueryTest, MultiQueryWrapperRendersCheckedMember) {
+  std::vector<Query> queries;
+  queries.emplace_back("SELECT * FROM %T", "a");
+  queries.push_back(Query::checked("SELECT * FROM %T WHERE id = %d", "b", 1));
+  MultiQuery mq(std::move(queries));
+  MockInternalConnection conn;
+  auto rendered = mq.renderQuery(&conn);
+  ASSERT_NE(rendered, nullptr);
+  EXPECT_EQ(*rendered, "SELECT * FROM `a`;SELECT * FROM `b` WHERE id = 1");
 }
 
 // =============================================================================

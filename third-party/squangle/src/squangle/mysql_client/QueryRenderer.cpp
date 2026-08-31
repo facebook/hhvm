@@ -12,6 +12,7 @@
 #include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/container/Reserve.h>
+#include <glog/logging.h>
 
 #include "squangle/mysql_client/InternalConnection.h"
 #include "squangle/mysql_client/Query.h"
@@ -41,16 +42,6 @@ parseError(std::string_view s, size_t offset, std::string_view message) {
           "invalid value type {} for format string %{}",
           value_type,
           format_specifier));
-}
-
-// Consume the next x bytes from s, updating offset, and raising an
-// exception if there aren't sufficient bytes left.
-std::string_view advance(std::string_view s, size_t* offset, size_t num) {
-  if (s.size() <= *offset + num) {
-    parseError(s, *offset, "unexpected end of string");
-  }
-  *offset += num;
-  return std::string_view(s.data() + *offset - num + 1, num);
 }
 
 std::string_view resolveAggregateFunctionName(
@@ -109,8 +100,8 @@ std::string_view resolveAggregateFunctionName(
 
 // -- QueryRenderer<StringType> implementation --
 
-template <typename StringType>
-bool QueryRenderer<StringType>::checkTruncation(
+template <typename StringType, bool Validate>
+bool QueryRenderer<StringType, Validate>::checkTruncation(
     StringType& output,
     size_t maxSize,
     std::string_view truncationIndicator) {
@@ -126,8 +117,8 @@ bool QueryRenderer<StringType>::checkTruncation(
   return true;
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::escapeAndAppend(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::escapeAndAppend(
     StringType* dest,
     const folly::fbstring& value,
     EscapeMode mode,
@@ -190,8 +181,8 @@ void QueryRenderer<StringType>::escapeAndAppend(
   }
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::appendComment(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::appendComment(
     StringType* s,
     const QueryArgument& d) {
   auto str = d.asString();
@@ -200,8 +191,8 @@ void QueryRenderer<StringType>::appendComment(
   s->append(str.data(), str.size());
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::appendColumnTableName(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::appendColumnTableName(
     StringType* s,
     const QueryArgument& d) {
   if (d.isString()) {
@@ -257,8 +248,40 @@ void QueryRenderer<StringType>::appendColumnTableName(
   }
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::appendValue(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::renderSubQuery(
+    StringType& output,
+    const Query& subQuery,
+    EscapeMode escapeMode,
+    const InternalConnection* conn) {
+  // Dispatch on the sub-query's own mode, not the enclosing query's: a checked
+  // sub-query can skip the redundant format-structure checks, but a non-checked
+  // one must be validated.
+  // EscapeMode is a per-instantiation nested enum, so convert to the target
+  // instantiation's type (the enumerators are identical).
+  if (subQuery.isChecked()) {
+    using Target = QueryRenderer<StringType, false>;
+    Target::renderAppend(
+        output,
+        subQuery.getQueryFormat(),
+        subQuery.isUnsafe(),
+        subQuery.getParams(),
+        static_cast<typename Target::EscapeMode>(escapeMode),
+        conn);
+  } else {
+    using Target = QueryRenderer<StringType, true>;
+    Target::renderAppend(
+        output,
+        subQuery.getQueryFormat(),
+        subQuery.isUnsafe(),
+        subQuery.getParams(),
+        static_cast<typename Target::EscapeMode>(escapeMode),
+        conn);
+  }
+}
+
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::appendValue(
     StringType* s,
     std::string_view queryText,
     size_t offset,
@@ -266,6 +289,12 @@ void QueryRenderer<StringType>::appendValue(
     const QueryArgument& d,
     EscapeMode escapeMode,
     const InternalConnection* conn) {
+  // The argument's value type is validated here in BOTH modes. Compile-time
+  // checking cannot prove the type of a type-erased argument (a QueryArgument
+  // or folly::dynamic, which checked() accepts for any specifier), so the only
+  // place that mismatch can be caught is at render time. Unlike the
+  // format-structure checks (which checked() does prove and so elides), these
+  // must always run.
   if (d.isString()) {
     if (type != 's' && type != 'v' && type != 'm') {
       formatStringParseError(queryText, offset, type, "string");
@@ -295,14 +324,7 @@ void QueryRenderer<StringType>::appendValue(
     }
     folly::toAppend(d.getDouble(), s);
   } else if (d.isQuery()) {
-    const auto& subQuery = d.getQuery();
-    renderAppend(
-        *s,
-        subQuery.getQueryFormat(),
-        subQuery.isUnsafe(),
-        subQuery.getParams(),
-        escapeMode,
-        conn);
+    renderSubQuery(*s, d.getQuery(), escapeMode, conn);
   } else if (d.isNull()) {
     s->append("NULL");
   } else {
@@ -310,8 +332,8 @@ void QueryRenderer<StringType>::appendValue(
   }
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::appendValueClauses(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::appendValueClauses(
     StringType* ret,
     std::string_view queryText,
     size_t* idx,
@@ -343,8 +365,8 @@ void QueryRenderer<StringType>::appendValueClauses(
   }
 }
 
-template <typename StringType>
-void QueryRenderer<StringType>::renderAppend(
+template <typename StringType, bool Validate>
+void QueryRenderer<StringType, Validate>::renderAppend(
     StringType& output,
     std::string_view queryText,
     bool unsafeQuery,
@@ -356,9 +378,19 @@ void QueryRenderer<StringType>::renderAppend(
     return;
   }
 
-  auto offset = queryText.find_first_of(";'\"`");
-  if (offset != std::string_view::npos) {
-    parseError(queryText, offset, "Saw dangerous characters in SQL query");
+  // Validated (legacy) path scans for dangerous characters. The checked path
+  // skips this: Query::checked already rejected such characters at compile
+  // time.
+  if constexpr (Validate) {
+    auto offset = queryText.find_first_of(";'\"`");
+    if (offset != std::string_view::npos) {
+      parseError(queryText, offset, "Saw dangerous characters in SQL query");
+    }
+  } else {
+    DCHECK_EQ(queryText.find_first_of(";'\"`"), std::string_view::npos)
+        << "checked query contains dangerous characters; compile-time check "
+           "should have rejected this: "
+        << queryText;
   }
 
   auto current_param = params.begin();
@@ -375,9 +407,18 @@ void QueryRenderer<StringType>::renderAppend(
     }
     idx = pct;
 
-    // We're at a '%' character
+    // We're at a '%' character. The bounds guard prevents an out-of-range read;
+    // only the validated path reports it as an error (the checked path cannot
+    // reach a malformed format string).
     if (idx + 1 >= queryText.size()) {
-      parseError(queryText, idx, "string ended with unfinished % code");
+      if constexpr (Validate) {
+        parseError(queryText, idx, "string ended with unfinished % code");
+      } else {
+        DCHECK(false) << "checked query ended with an unfinished % code; "
+                         "compile-time check should have rejected this: "
+                      << queryText;
+        break;
+      }
     }
 
     idx++; // skip the '%'
@@ -390,13 +431,22 @@ void QueryRenderer<StringType>::renderAppend(
     }
 
     if (current_param == params.end()) {
-      parseError(queryText, idx - 1, "too few parameters for query");
+      if constexpr (Validate) {
+        parseError(queryText, idx - 1, "too few parameters for query");
+      } else {
+        DCHECK(false) << "checked query has more specifiers than arguments; "
+                         "compile-time check should have caught this: "
+                      << queryText;
+        break;
+      }
     }
 
     const auto& param = *current_param++;
     if (c == 'd' || c == 's' || c == 'f' || c == 'u') {
       appendValue(&output, queryText, idx - 1, c, param, escapeMode, conn);
     } else if (c == 'm') {
+      // Argument value-type check: always runs (see appendValue's note) because
+      // a type-erased %m argument cannot be verified at compile time.
       if (!(param.isString() || param.isInt() || param.isDouble() ||
             param.isBool() || param.isNull() || param.isQuery())) {
         parseError(queryText, idx - 1, "%m expects int/float/string/bool");
@@ -409,15 +459,32 @@ void QueryRenderer<StringType>::renderAppend(
     } else if (c == 'T' || c == 'C') {
       appendColumnTableName(&output, param);
     } else if (c == '=') {
-      // idx currently points past the '=', need to read the type character
-      // Adjust: advance expects idx to point at the character before the one
-      // we want to read. We need to back up by 1 since we already incremented.
-      size_t advIdx = idx - 1;
-      std::string_view type = advance(queryText, &advIdx, 1);
-      idx = advIdx + 1;
-      if (type != "d" && type != "s" && type != "f" && type != "u" &&
-          type != "m") {
-        parseError(queryText, idx - 1, "expected %=d, %=f, %=s, %=u, or %=m");
+      // Read the sub-type char following '='. The checked path can't reach a
+      // truncated specifier (it was validated at compile time), so it DCHECKs
+      // and bails rather than throwing.
+      if constexpr (Validate) {
+        if (idx >= queryText.size()) {
+          parseError(queryText, idx - 1, "incomplete %= specifier");
+        }
+      } else if (idx >= queryText.size()) {
+        DCHECK(false) << "checked query has an incomplete %= specifier: "
+                      << queryText;
+        break;
+      }
+      std::string_view type(queryText.data() + idx, 1);
+      idx++;
+      if constexpr (Validate) {
+        if (type != "d" && type != "s" && type != "f" && type != "u" &&
+            type != "m") {
+          parseError(queryText, idx - 1, "expected %=d, %=f, %=s, %=u, or %=m");
+        }
+      } else {
+        DCHECK(
+            type == "d" || type == "s" || type == "f" || type == "u" ||
+            type == "m")
+            << "checked query has an invalid %= sub-specifier; compile-time "
+               "check should have rejected this: "
+            << queryText;
       }
 
       if (param.isNull()) {
@@ -431,10 +498,18 @@ void QueryRenderer<StringType>::renderAppend(
       if (param.isQuery()) {
         parseError(queryText, idx - 1, "%V doesn't allow subquery");
       }
+      if (!param.isList()) {
+        parseError(
+            queryText, idx - 1, "expected array of rows for %V formatter");
+      }
       size_t col_idx;
       size_t row_len = 0;
       bool first_row = true;
       for (const auto& row : param.getList()) {
+        if (!row.isList()) {
+          parseError(
+              queryText, idx - 1, "each row for %V formatter must be a list");
+        }
         bool first_in_row = true;
         col_idx = 0;
         if (!first_row) {
@@ -463,10 +538,19 @@ void QueryRenderer<StringType>::renderAppend(
         }
       }
     } else if (c == 'L') {
-      // idx points past 'L', read the sub-type
-      size_t advIdx = idx - 1;
-      std::string_view type = advance(queryText, &advIdx, 1);
-      idx = advIdx + 1;
+      // Read the sub-type char following 'L' (see the %= note above regarding
+      // the checked path).
+      if constexpr (Validate) {
+        if (idx >= queryText.size()) {
+          parseError(queryText, idx - 1, "incomplete %L specifier");
+        }
+      } else if (idx >= queryText.size()) {
+        DCHECK(false) << "checked query has an incomplete %L specifier: "
+                      << queryText;
+        break;
+      }
+      std::string_view type(queryText.data() + idx, 1);
+      idx++;
       if (type == "O" || type == "A") {
         output.append("(");
         const char* sep = (type == "O") ? " OR " : " AND ";
@@ -504,30 +588,34 @@ void QueryRenderer<StringType>::renderAppend(
       }
     } else if (c == 'Q') {
       if (param.isQuery()) {
-        const auto& subQuery = param.getQuery();
-        renderAppend(
-            output,
-            subQuery.getQueryFormat(),
-            subQuery.isUnsafe(),
-            subQuery.getParams(),
-            escapeMode,
-            conn);
+        renderSubQuery(output, param.getQuery(), escapeMode, conn);
       } else {
         auto str = param.asString();
         output.append(str.data(), str.size());
       }
-    } else {
+    } else if constexpr (Validate) {
       parseError(queryText, idx - 1, "unknown % code");
+    } else {
+      DCHECK(false) << "checked query has an unknown % code '" << c
+                    << "'; compile-time check should have rejected this: "
+                    << queryText;
     }
   }
 
-  if (current_param != params.end()) {
-    parseError(queryText, 0, "too many parameters specified for query");
+  if constexpr (Validate) {
+    if (current_param != params.end()) {
+      parseError(queryText, 0, "too many parameters specified for query");
+    }
+  } else {
+    DCHECK(current_param == params.end())
+        << "checked query has more arguments than specifiers; compile-time "
+           "check should have caught this: "
+        << queryText;
   }
 }
 
-template <typename StringType>
-StringType QueryRenderer<StringType>::render(
+template <typename StringType, bool Validate>
+StringType QueryRenderer<StringType, Validate>::render(
     std::string_view queryText,
     bool unsafeQuery,
     const std::vector<QueryArgument>& params,
@@ -544,8 +632,11 @@ StringType QueryRenderer<StringType>::render(
   return ret;
 }
 
-// Explicit template instantiations
-template class QueryRenderer<folly::fbstring>;
-template class QueryRenderer<std::string>;
+// Explicit template instantiations: validated (legacy) and unvalidated
+// (compile-time-checked) variants for both output string types.
+template class QueryRenderer<folly::fbstring, true>;
+template class QueryRenderer<std::string, true>;
+template class QueryRenderer<folly::fbstring, false>;
+template class QueryRenderer<std::string, false>;
 
 } // namespace facebook::common::mysql_client

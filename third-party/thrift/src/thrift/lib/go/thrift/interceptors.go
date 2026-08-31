@@ -25,6 +25,8 @@ import (
 // ChainInterceptors returns a thrift interceptor that chains the execution of
 // the interceptors present in its arguments. Execution happens in order of
 // appearance.
+//
+// Deprecated: Use the modern ServiceInterceptor API instead.
 func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	return func(
 		ctx context.Context,

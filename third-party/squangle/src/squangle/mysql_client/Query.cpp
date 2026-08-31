@@ -70,10 +70,6 @@ bool QueryArgument::isPairList() const {
   return std::holds_alternative<std::vector<ArgPair>>(value_);
 }
 
-bool QueryArgument::isBool() const {
-  return std::holds_alternative<bool>(value_);
-}
-
 bool QueryArgument::isNull() const {
   return std::holds_alternative<std::monostate>(value_);
 }
@@ -134,14 +130,14 @@ folly::fbstring QueryArgument::asString() const {
       [](auto&& arg) -> folly::fbstring {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (
-            std::is_same_v<T, double> || std::is_same_v<T, bool> ||
-            std::is_same_v<T, int64_t> || std::is_same_v<T, folly::fbstring>) {
+            std::is_same_v<T, double> || std::is_same_v<T, int64_t> ||
+            std::is_same_v<T, folly::fbstring>) {
           return folly::to<folly::fbstring>(arg);
         }
 
         throw std::invalid_argument(
             fmt::format(
-                "Only allowed type conversions are Int, Double, Bool and String:"
+                "Only allowed type conversions are Int, Double and String:"
                 " type found: {}",
                 typeid(arg).name()));
       },
@@ -154,8 +150,6 @@ std::string_view QueryArgument::typeName() const {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, double>) {
           return "double";
-        } else if constexpr (std::is_same_v<T, bool>) {
-          return "bool";
         } else if constexpr (std::is_same_v<T, int64_t>) {
           return "int64_t";
         } else if constexpr (std::is_same_v<T, folly::fbstring>) {
@@ -195,10 +189,6 @@ double QueryArgument::getDouble() const {
 
 int64_t QueryArgument::getInt() const {
   return std::get<int64_t>(value_);
-}
-
-bool QueryArgument::getBool() const {
-  return std::get<bool>(value_);
 }
 
 const Query& QueryArgument::getQuery() const {
@@ -260,7 +250,9 @@ void QueryArgument::initFromDynamic(const folly::dynamic& param) {
   } else if (param.isString()) {
     value_ = folly::fbstring(param.getString());
   } else if (param.isBool()) {
-    value_ = param.asBool();
+    // MySQL has no boolean type (BOOL is an alias for tinyint(1)), so store as
+    // an int that renders 0/1. QueryArgument has no bool alternative.
+    value_ = static_cast<int64_t>(param.asBool());
   } else if (param.isDouble()) {
     value_ = param.asDouble();
   } else if (param.isInt()) {

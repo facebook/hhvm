@@ -304,11 +304,6 @@ void QueryRenderer<StringType, Validate>::appendValue(
     s->push_back('"');
     escapeAndAppend(s, value, escapeMode, conn);
     s->push_back('"');
-  } else if (d.isBool()) {
-    if (type != 'v' && type != 'm') {
-      formatStringParseError(queryText, offset, type, "bool");
-    }
-    folly::toAppend(d.getBool(), s);
   } else if (d.isInt()) {
     if (type != 'd' && type != 'v' && type != 'm' && type != 'u') {
       formatStringParseError(queryText, offset, type, "int");
@@ -448,8 +443,8 @@ void QueryRenderer<StringType, Validate>::renderAppend(
       // Argument value-type check: always runs (see appendValue's note) because
       // a type-erased %m argument cannot be verified at compile time.
       if (!(param.isString() || param.isInt() || param.isDouble() ||
-            param.isBool() || param.isNull() || param.isQuery())) {
-        parseError(queryText, idx - 1, "%m expects int/float/string/bool");
+            param.isNull() || param.isQuery())) {
+        parseError(queryText, idx - 1, "%m expects int/float/string");
       }
       appendValue(&output, queryText, idx - 1, c, param, escapeMode, conn);
     } else if (c == 'K') {

@@ -130,6 +130,11 @@ let mut read = CoroReadHandle::<BytesPtr, _>::new(|message: BytesPtr| async move
 original erased message after suspension; the completion gets a `DeferredRead`
 instead of a `ContextHandle`.
 
+For move-only native state, implement `OwnedMessageAdapter`: call `take_owned`, then restore before `forward_read`. On
+a deferred result, call `DeferredRead::restore_owned` followed by `resume`; to reply instead, consume it with
+`DeferredRead::fire_write` through `OutboundMessageAdapter`. Unlike `spawn`, `spawn_deferred_read` accepts
+EventBase-confined futures without a `Send` bound.
+
 ## Futures are polled where they live
 
 This is the invariant most likely to be "optimized" back into a bug, so it is

@@ -17,10 +17,6 @@
 
 namespace facebook::common::mysql_client {
 
-#define TYPE_CHECK(expected) \
-  if (type_ != expected)     \
-  throw std::invalid_argument("DataType doesn't match with the call")
-
 using ArgPair = std::pair<folly::fbstring, QueryArgument>;
 
 // fbstring constructors
@@ -115,15 +111,6 @@ QueryArgument&& QueryArgument::operator()(
   getPairs().emplace_back(std::move(q1), std::move(q2));
   return std::move(*this);
 }
-
-namespace { // anonymous namespace to prevent class shadowing
-
-template <class... Ts>
-struct overloads : Ts... {
-  using Ts::operator()...;
-};
-
-} // namespace
 
 folly::fbstring QueryArgument::asString() const {
   return std::visit(

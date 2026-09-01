@@ -87,6 +87,7 @@ ProxyConfigBuilder::buildGlobalParams(
       {"service-name", opts.service_name},
       {"service-router-capable", sr_linked},
       {"router-info-name", routerInfoName},
+      {"client-identity-attributes", getClientIdentityAttributes(opts)},
       {"num-proxies", opts.num_proxies},
   };
 

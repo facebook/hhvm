@@ -156,6 +156,8 @@ void scheduleSingletonCleanup();
 
 std::unordered_map<std::string, folly::dynamic> additionalConfigParams();
 
+folly::dynamic getClientIdentityAttributes(const McrouterOptions& options);
+
 inline bool isMetagetAvailable() {
   return false;
 }

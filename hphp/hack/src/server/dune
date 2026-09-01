@@ -56,6 +56,29 @@
   server_progress))
 
 (library
+ (name server_enforcement_at_pos)
+ (wrapped false)
+ (modules enforcementAtPosService serverEnforcementAtPos)
+ (libraries
+  annotated_ast
+  decl_provider
+  decl_provider_internals
+  file_content
+  naming_special_names
+  shallow_decl_defs
+  hh_json
+  pos
+  provider_context
+  tast_env
+  tast_provider
+  typing
+  typing_defs
+  utils_core
+  visitors_runtime)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name server)
  (wrapped false)
  (modules

@@ -640,7 +640,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     if (auto const sr = tc::findSrcRec(sk)) {
       if (auto const tca = sr->getTopTranslation()) {
         SKTRACE(2, sk, "handleResume: found %p\n", tca);
-        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
+        if (sk.anyFuncEntry()) return JitResumeAddr::transFuncEntry(tca);
         return JitResumeAddr::trans(tca);
       }
     }

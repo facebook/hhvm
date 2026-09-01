@@ -11,18 +11,25 @@ let on_hint on_error hint ~ctx =
   let err_list =
     match hint with
     | (pos, Aast.(Hfun { hf_param_info; _ })) ->
-      let (_, optional_precedes_non_optional) =
+      let (_, optional_positional_precedes_required_positional) =
         List.fold
           hf_param_info
           ~init:(false, false)
-          ~f:(fun (seen_optional, optional_precedes_non_optional) pi ->
+          ~f:(fun
+               (seen_optional_positional, optional_precedes_required_positional)
+               pi
+             ->
             match pi with
             | Some { Aast.hfparam_splat = Some Ast_defs.Splat; _ } ->
-              (seen_optional, optional_precedes_non_optional)
+              (seen_optional_positional, optional_precedes_required_positional)
+            | Some { Aast.hfparam_named = Some _; _ } ->
+              (seen_optional_positional, optional_precedes_required_positional)
             | Some { Aast.hfparam_optional = Some Ast_defs.Optional; _ } ->
-              (true, optional_precedes_non_optional)
+              (true, optional_precedes_required_positional)
             | _ ->
-              (seen_optional, optional_precedes_non_optional || seen_optional))
+              ( seen_optional_positional,
+                optional_precedes_required_positional
+                || seen_optional_positional ))
       in
       let optional_inouts =
         List.filter_map hf_param_info ~f:(fun pi ->
@@ -44,7 +51,7 @@ let on_hint on_error hint ~ctx =
                        }))
             | _ -> None)
       in
-      if optional_precedes_non_optional then
+      if optional_positional_precedes_required_positional then
         Naming_phase_error.parsing
           Parsing_error.(
             Parsing_error

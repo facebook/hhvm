@@ -1,4 +1,1 @@
-ERROR: File "function_type_optional_parameter_order.php", line 4, characters 3-61:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
-ERROR: File "function_type_optional_parameter_order.php", line 8, characters 3-46:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
+No errors

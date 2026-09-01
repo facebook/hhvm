@@ -524,6 +524,36 @@ let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
     ~show_query_text:any_hack_files;
   ()
 
+(**
+ * Sort for realistic behavior of an LSP client.
+ * See spec for `CompletionItem.sortText`
+ * https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItem
+ *
+ * > A string that should be used when comparing this item with other items. When omitted the label is used as the sort text for this item.
+ *)
+let sort_autocomplete_results results =
+  let autocomplete_sort_text (result : AutocompleteTypes.autocomplete_item) =
+    let label = result.res_label in
+    let should_downrank =
+      (String.length label > 2 && String.equal (Str.string_before label 2) "__")
+      || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
+    in
+    if should_downrank then
+      "~" ^ label
+    else
+      label
+  in
+  List.stable_sort results ~compare:(fun left right ->
+      let sort_text_comparison =
+        String.compare
+          (String.lowercase (autocomplete_sort_text left))
+          (String.lowercase (autocomplete_sort_text right))
+      in
+      if sort_text_comparison <> 0 then
+        sort_text_comparison
+      else
+        String.compare left.AutocompleteTypes.res_label right.res_label)
+
 (** This handles "--auto-complete" and "--auto-complete-manually-invoked".
 It parses the input file/multifiles for AUTO332, and runs them through
 ServerAutoComplete, and shows the results. These results will include
@@ -550,9 +580,12 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
           path
           contents
       in
+      let results =
+        sort_autocomplete_results result.Utils.With_complete_flag.value
+      in
       if show_file_titles then
         Printf.printf "//// %s\n" (Multifile.short_suffix path);
-      List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
+      List.iter results ~f:(fun r ->
           let open AutocompleteTypes in
           Printf.printf "%s\n" r.res_label;
           List.iter r.res_additional_edits ~f:(fun (s, _) ->

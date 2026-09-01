@@ -286,6 +286,9 @@ ftok
 ftruncate
   INSERT ftruncate
   function
+function
+  INSERT function
+  keyword
 function_exists
   INSERT function_exists
   function
@@ -298,6 +301,3 @@ furchash_hphp_ext_supported
 fwrite
   INSERT fwrite
   function
-function
-  INSERT function
-  keyword

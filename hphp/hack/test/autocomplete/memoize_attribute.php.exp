@@ -1,9 +1,9 @@
-NotKeyedByICAndLeakIC__DO_NOT_USE
-  INSERT NotKeyedByICAndLeakIC__DO_NOT_USE
+KeyedByIC
+  INSERT KeyedByIC
   ~string
 MakeICInaccessible
   INSERT MakeICInaccessible
   ~string
-KeyedByIC
-  INSERT KeyedByIC
+NotKeyedByICAndLeakIC__DO_NOT_USE
+  INSERT NotKeyedByICAndLeakIC__DO_NOT_USE
   ~string

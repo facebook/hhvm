@@ -50,6 +50,10 @@ Str\ends_with_ci
   INSERT Str\ends_with_ci(
   INSERT , ${1:\$suffix})
   (function(string $string, string $suffix)[]: bool)
+Str\example_for_testing_named_params_fake_arrow
+  INSERT Str\example_for_testing_named_params_fake_arrow(
+  INSERT , length=${1:\$length})
+  (function(string $_, named int $length): void)
 Str\is_empty
   INSERT Str\is_empty(
   INSERT )
@@ -162,7 +166,3 @@ Str\uppercase
   INSERT Str\uppercase(
   INSERT )
   (function(~string $string)[]: string)
-Str\example_for_testing_named_params_fake_arrow
-  INSERT Str\example_for_testing_named_params_fake_arrow(
-  INSERT , length=${1:\$length})
-  (function(string $_, named int $length): void)

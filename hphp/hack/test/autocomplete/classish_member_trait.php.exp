@@ -1,14 +1,8 @@
-use
-  INSERT use
+abstract
+  INSERT abstract
   keyword
-require class
-  INSERT require class
-  keyword
-require implements
-  INSERT require implements
-  keyword
-require extends
-  INSERT require extends
+const
+  INSERT const
   keyword
 final
   INSERT final
@@ -16,15 +10,21 @@ final
 private
   INSERT private
   keyword
-abstract
-  INSERT abstract
-  keyword
-const
-  INSERT const
-  keyword
 protected
   INSERT protected
   keyword
 public
   INSERT public
+  keyword
+require class
+  INSERT require class
+  keyword
+require extends
+  INSERT require extends
+  keyword
+require implements
+  INSERT require implements
+  keyword
+use
+  INSERT use
   keyword

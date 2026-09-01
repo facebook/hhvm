@@ -1,6 +1,6 @@
-number
-  INSERT number
-  ~?string
 nomenclature
   INSERT nomenclature
+  ~?string
+number
+  INSERT number
   ~?string

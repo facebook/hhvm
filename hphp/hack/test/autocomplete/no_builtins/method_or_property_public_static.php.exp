@@ -1,59 +1,17 @@
-noreturn
-  INSERT noreturn
-  builtin
-  A `noreturn` function always errors or loops forever.
+abstract
+  INSERT abstract
+  keyword
 arraykey
   INSERT arraykey
   builtin
   An `int` or a `string`. `arraykey` is a common key type for `dict`s.
-num
-  INSERT num
-  builtin
-  An `int` or a `float`.
-resource
-  INSERT resource
-  builtin
-  An external resource, such as a file handle or database connection.
-float
-  INSERT float
-  builtin
-  A 64-bit floating-point number.
+async
+  INSERT async
+  keyword
 bool
   INSERT bool
   builtin
   A boolean value, `true` or `false`.
-int
-  INSERT int
-  builtin
-  A 64-bit integer.
-void
-  INSERT void
-  builtin
-  A `void` return type indicates a function that never returns a value. `void` functions usually have side effects.
-null
-  INSERT null
-  builtin
-  The value `null`. The opposite of `nonnull`.
-string
-  INSERT string
-  builtin
-  A sequence of characters.
-shape
-  INSERT shape
-  builtin
-  A shape is a key-value data structure where the keys are known. Shapes are value types, just like `dict` and `vec`.
-  
-   A closed shape, such as `shape('x' => int)`, has a fixed number of keys.  An open shape, such as `shape('x' => int, ...)`, may have additional keys.
-nonnull
-  INSERT nonnull
-  builtin
-  Any value except `null`.
-nothing
-  INSERT nothing
-  builtin
-  The `nothing` type has no values, it's the empty type.
-  
-  A function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty.
 dynamic
   INSERT dynamic
   builtin
@@ -62,22 +20,64 @@ dynamic
   All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.
   
   To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the type checker will verify types after this point.
-mixed
-  INSERT mixed
+final
+  INSERT final
+  keyword
+float
+  INSERT float
   builtin
-  Any value at all. It's usually better to use a more specific type, or a generic.
+  A 64-bit floating-point number.
 Foo
   INSERT Foo
   class
 function
   INSERT function
   keyword
-async
-  INSERT async
-  keyword
-final
-  INSERT final
-  keyword
-abstract
-  INSERT abstract
-  keyword
+int
+  INSERT int
+  builtin
+  A 64-bit integer.
+mixed
+  INSERT mixed
+  builtin
+  Any value at all. It's usually better to use a more specific type, or a generic.
+nonnull
+  INSERT nonnull
+  builtin
+  Any value except `null`.
+noreturn
+  INSERT noreturn
+  builtin
+  A `noreturn` function always errors or loops forever.
+nothing
+  INSERT nothing
+  builtin
+  The `nothing` type has no values, it's the empty type.
+  
+  A function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty.
+null
+  INSERT null
+  builtin
+  The value `null`. The opposite of `nonnull`.
+num
+  INSERT num
+  builtin
+  An `int` or a `float`.
+resource
+  INSERT resource
+  builtin
+  An external resource, such as a file handle or database connection.
+shape
+  INSERT shape
+  builtin
+  A shape is a key-value data structure where the keys are known. Shapes are value types, just like `dict` and `vec`.
+  
+   A closed shape, such as `shape('x' => int)`, has a fixed number of keys.  An open shape, such as `shape('x' => int, ...)`, may have additional keys.
+string
+  INSERT string
+  builtin
+  A sequence of characters.
+void
+  INSERT void
+  builtin
+  A `void` return type indicates a function that never returns a value. `void` functions usually have side effects.

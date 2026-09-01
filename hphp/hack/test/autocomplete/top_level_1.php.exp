@@ -1,12 +1,12 @@
-FunctionCredential
-  INSERT FunctionCredential
-  class
+function
+  INSERT function
+  keyword
 function222
   INSERT function222
   function
 function_exists
   INSERT function_exists
   function
-function
-  INSERT function
-  keyword
+FunctionCredential
+  INSERT FunctionCredential
+  class

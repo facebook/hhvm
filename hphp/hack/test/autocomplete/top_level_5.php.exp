@@ -1,6 +1,6 @@
-FunctionCredential
-  INSERT FunctionCredential
-  class
 function_exists
   INSERT function_exists
   function
+FunctionCredential
+  INSERT FunctionCredential
+  class

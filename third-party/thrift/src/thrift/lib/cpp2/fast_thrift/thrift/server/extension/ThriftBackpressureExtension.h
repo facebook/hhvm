@@ -20,6 +20,8 @@
 #include <memory>
 #include <utility>
 
+#include <folly/io/async/EventBase.h>
+
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/extension/ThriftConnectionExtension.h>
 
@@ -91,15 +93,17 @@ struct ResumeControl {
  * callback runs synchronously from the socket's write-completion path, so
  * resuming there restarts reads underneath the write that triggered it and can
  * begin the next request inside the tail of the previous one's reply. Defer to
- * the next loop iteration unless the handler is known to tolerate it.
+ * the next loop iteration — eventBase()->runInLoop(...) — unless the handler is
+ * known to tolerate it.
  */
 class ReadResumer {
  public:
   ReadResumer() = default;
 
   explicit ReadResumer(
-      std::shared_ptr<backpressure_detail::ResumeControl> control) noexcept
-      : control_(std::move(control)) {}
+      std::shared_ptr<backpressure_detail::ResumeControl> control,
+      folly::EventBase* eventBase) noexcept
+      : control_(std::move(control)), eventBase_(eventBase) {}
 
   void resume() noexcept {
     if (control_ == nullptr) {
@@ -115,8 +119,23 @@ class ReadResumer {
     return control_ != nullptr && control_->owner != nullptr;
   }
 
+  /**
+   * The connection's EventBase — the one resume() may be called on, and the
+   * one a deferred resume must be scheduled against. Null only on a
+   * default-constructed resumer.
+   *
+   * Outlives the connection, so it stays usable for as long as the resumer
+   * itself does. The thread-local EventBase an extension could reach for
+   * instead is not necessarily this one: a server driven by an
+   * IOThreadPoolExecutor built over a private EventBaseManager registers its
+   * loops nowhere the global manager can see them, and asking that manager on
+   * such a thread hands back a fresh EventBase that nothing ever loops.
+   */
+  folly::EventBase* eventBase() const noexcept { return eventBase_; }
+
  private:
   std::shared_ptr<backpressure_detail::ResumeControl> control_;
+  folly::EventBase* eventBase_{nullptr};
 };
 
 // === Concepts ===

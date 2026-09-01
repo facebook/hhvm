@@ -1266,6 +1266,10 @@ struct BackpressureRecorder {
   // Whether that pause is ever lifted. A test that leaves it false pins what a
   // pause actually stops.
   std::atomic<bool> resumeAfterPause{true};
+  // Whether the EventBase the resumer named was the one looping the connection
+  // at the time the callback ran. An EventBase obtained any other way can be
+  // one nothing ever loops, which strands the deferred resume silently.
+  std::atomic<bool> resumerEvbLooping{false};
 
   std::mutex resumerMutex;
   ftt::ReadResumer resumer;
@@ -1305,7 +1309,11 @@ struct BackpressureExtension {
       std::lock_guard<std::mutex> lock(rec->resumerMutex);
       resumer = rec->resumer;
     }
-    folly::EventBaseManager::get()->getEventBase()->runInLoop(
+    rec->resumerEvbLooping.store(
+        resumer.eventBase() != nullptr &&
+            resumer.eventBase()->inRunningEventBaseThread(),
+        std::memory_order_relaxed);
+    resumer.eventBase()->runInLoop(
         [resumer]() mutable noexcept { resumer.resume(); });
   }
 
@@ -1890,6 +1898,9 @@ TEST(FastThriftServerBackpressureExtensionTest, PauseThenResumeKeepsServing) {
 
   EXPECT_TRUE(roundTripsOnOneConnection(server.getAddress(), 2));
   EXPECT_GE(rec.drained.load(), 1);
+  // The resumer named the EventBase the connection was running on, so a resume
+  // deferred onto it is guaranteed to run.
+  EXPECT_TRUE(rec.resumerEvbLooping.load(std::memory_order_relaxed));
 }
 
 // The extension outlives the connection, so a resume that arrives after

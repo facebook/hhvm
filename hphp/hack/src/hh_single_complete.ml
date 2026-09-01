@@ -524,35 +524,21 @@ let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
     ~show_query_text:any_hack_files;
   ()
 
-(**
- * Sort for realistic behavior of an LSP client.
- * See spec for `CompletionItem.sortText`
- * https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItem
- *
- * > A string that should be used when comparing this item with other items. When omitted the label is used as the sort text for this item.
- *)
+(** Sort for plausible behavior of a to-spec LSP client - doesn't include all
+VSCode behavior. *)
 let sort_autocomplete_results results =
-  let autocomplete_sort_text (result : AutocompleteTypes.autocomplete_item) =
-    let label = result.res_label in
-    let should_downrank =
-      (String.length label > 2 && String.equal (Str.string_before label 2) "__")
-      || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
-    in
-    if should_downrank then
-      "~" ^ label
-    else
-      label
-  in
   List.stable_sort results ~compare:(fun left right ->
       let sort_text_comparison =
         String.compare
-          (String.lowercase (autocomplete_sort_text left))
-          (String.lowercase (autocomplete_sort_text right))
+          (String.lowercase (AutocompleteTypes.sort_text left))
+          (String.lowercase (AutocompleteTypes.sort_text right))
       in
       if sort_text_comparison <> 0 then
         sort_text_comparison
       else
-        String.compare left.AutocompleteTypes.res_label right.res_label)
+        String.compare
+          left.AutocompleteTypes.res_label
+          right.AutocompleteTypes.res_label)
 
 (** This handles "--auto-complete" and "--auto-complete-manually-invoked".
 It parses the input file/multifiles for AUTO332, and runs them through

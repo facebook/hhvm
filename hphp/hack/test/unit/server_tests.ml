@@ -275,8 +275,48 @@ let test_quarantine () =
 
   true
 
+let test_autocomplete_sort_text () =
+  let make_item ~label ~explicit_sort_text =
+    let position = File_content.Position.beginning_of_file in
+    AutocompleteTypes.
+      {
+        res_decl_pos = Pos.to_absolute Pos.none;
+        res_replace_pos = Ide_api_types.{ st = position; ed = position };
+        res_base_class = None;
+        res_label = label;
+        res_insert_text = InsertLiterally label;
+        res_detail = "";
+        res_sort_text = explicit_sort_text;
+        res_filter_text = None;
+        res_additional_edits = [];
+        res_fullname = label;
+        res_kind = FileInfo.SI_Class;
+        res_documentation = None;
+      }
+  in
+  List.iter
+    [
+      ("regular", None, "regular");
+      ("__internal", None, "~__internal");
+      ("regular", Some "0001", "0001");
+      ("__internal", Some "0001", "~0001");
+      ("please_DO_NOT_USE_this", Some "0002", "~0002");
+      ("__internal", Some "", "~__internal");
+    ]
+    ~f:(fun (label, sort_text, expected) ->
+      let actual =
+        AutocompleteTypes.sort_text
+          (make_item ~label ~explicit_sort_text:sort_text)
+      in
+      Asserter.String_asserter.assert_equals
+        expected
+        actual
+        (Printf.sprintf "Unexpected sort text for %s" label));
+  true
+
 let tests =
   [
+    ("test_autocomplete_sort_text", test_autocomplete_sort_text);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);
     ( "test_compute_tast_counting_local_mem",

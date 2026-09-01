@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type snippet_with_fallback = {
   snippet: string;
   fallback: string;
@@ -23,6 +25,7 @@ type autocomplete_item = {
   res_label: string;
   res_insert_text: insert_text;
   res_detail: string;
+  res_sort_text: string option;
   res_filter_text: string option;
   res_additional_edits: (string * Ide_api_types.range) list;
   res_fullname: string;
@@ -38,6 +41,24 @@ type ide_result = {
 }
 
 type result = autocomplete_item list
+
+let sort_text result =
+  let raw_sort_text =
+    match result.res_sort_text with
+    | Some sort_text when not (String.is_empty sort_text) -> sort_text
+    | Some _
+    | None ->
+      result.res_label
+  in
+  let label = result.res_label in
+  let should_downrank =
+    (String.length label > 2 && String.equal (Str.string_before label 2) "__")
+    || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
+  in
+  if should_downrank then
+    "~" ^ raw_sort_text
+  else
+    raw_sort_text
 
 type legacy_autocomplete_context = {
   is_manually_invoked: bool;

@@ -32,4 +32,6 @@ THRIFT_FLAG_DEFINE_bool(enable_python_client_interceptors, false);
 
 THRIFT_FLAG_DEFINE_bool(enable_rust_client_interceptors, false);
 
+THRIFT_FLAG_DEFINE_bool(enable_interceptor_metrics, false);
+
 } // namespace apache::thrift

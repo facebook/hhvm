@@ -1249,7 +1249,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.ForceAllPersistent = false, paulbiss
 
   When enabled, all Func and PreClass objects will be marked as persistent
-  (AttrPersistent) during Unit construction from UnitEmitters.
+  (AttrPersistent) during Unit construction from UnitEmitters. This disables
+  Eval.ReuseUnitsByHash because persistent functions can execute without first
+  initializing the unit's request-local filepath.
 
 - bool Eval.TypeAliasPersistence = true, paulbiss
 
@@ -1606,7 +1608,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   More aggressively reuse already compiled units based on SHA1
 
-- bool Eval.ReuseUnitsByHash = false, UNKNOWN
+- bool Eval.ReuseUnitsByHash = false, UNKNOWN, postprocess
 
 - bool Eval.UseEdenFS = true, UNKNOWN
 

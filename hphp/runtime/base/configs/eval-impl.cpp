@@ -114,6 +114,10 @@ void EvalLoader::ReusableTCPaddingPostProcess(uint32_t& val) {
   if (!Cfg::Eval::EnableReusableTC) val = 0;
 }
 
+void EvalLoader::ReuseUnitsByHashPostProcess(bool& val) {
+  if (Cfg::Eval::ForceAllPersistent) val = false;
+}
+
 uint32_t EvalLoader::UnixServerWorkersDefault() {
   return Process::GetCPUCount();
 }

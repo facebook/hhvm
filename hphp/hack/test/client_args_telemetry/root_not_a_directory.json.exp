@@ -1,7 +1,7 @@
 === hh_client result ===
 argv: hh_client ../no_config/.hginclude
 cwd: <test_tmp>/root
-exit_code: 1
+exit_code: 64
 stdout:
 <empty>
 stderr:
@@ -13,8 +13,8 @@ Error: <test_tmp>/no_config/.hginclude is not a directory
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
     "exception": "Stdlib.Arg.Bad(\"Error: <test_tmp>/no_config/.hginclude is not a directory\")",
-    "exit_code": 1,
-    "exit_status": "Exit_status.Input_error",
+    "exit_code": 64,
+    "exit_status": "Exit_status.Client_bad_args",
     "process": "client"
   },
   {

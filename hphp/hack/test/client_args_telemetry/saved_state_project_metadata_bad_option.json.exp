@@ -1,7 +1,7 @@
 === hh_client result ===
 argv: hh_client saved-state-project-metadata --telemetry-test-unknown-option
 cwd: <test_tmp>/root
-exit_code: 2
+exit_code: 64
 stdout:
 <empty>
 stderr:
@@ -15,8 +15,8 @@ Usage: hh_client saved-state-project-metadata [OPTION]... [WWW-ROOT]
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
     "exception": "Stdlib.Arg.Bad(\"hh_client: unknown option '--telemetry-test-unknown-option'.\")",
-    "exit_code": 2,
-    "exit_status": "Exit_status.Input_error",
+    "exit_code": 64,
+    "exit_status": "Exit_status.Client_bad_args",
     "process": "client"
   },
   {

@@ -133,17 +133,14 @@ exception Parse_error of arg_error
 
 let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
 
-(**
-    On malformed command line args, ensure we record telemetry.
-    We preserve historical exit codes so we can establish a baseline.
-    *)
+(** On malformed command line args, ensure we record telemetry. *)
 module Die : sig
   (** Report [message] and optional [usage] on stderr, log [message] in a
-      [CLIENT_BAD_ARGS] sample, and exit 2. An empty [message] prints nothing,
-      leaving [usage] to stand alone. *)
+      [CLIENT_BAD_ARGS] sample, and exit with [Exit_status.Client_bad_args].
+      An empty [message] prints nothing, leaving [usage] to stand alone. *)
   val bad_args : message:string -> usage:string option -> 'a
 
-  (** Specific return code for when there is a bad www root. Like [bad_args] but exit code 1 *)
+  (** Like [bad_args], but prefixes [message] with "Error:". *)
   val bad_www_root : message:string -> 'a
 
   (** Log+re-raise. Should be unreachable:
@@ -151,11 +148,8 @@ module Die : sig
     * ill-formed command-line arguments to hh *)
   val internal_exception : Exception.t -> 'a
 end = struct
-  let bad_args_exit_code = 2
-
-  let invalid_root_exit_code = 1
-
-  let log ~(exit_code : int) (e : Exception.t) : unit =
+  let log ~(exit_code : int) ~(exit_status : Exit_status.t) (e : Exception.t) :
+      unit =
     (* Avoid the user seeing stderr from failures to write to scuba *)
     let stderr_level = Hh_logger.Level.min_level_stderr () in
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Off;
@@ -176,7 +170,7 @@ end = struct
           HackEventLogger.client_bad_args
             ~command_name:"Args"
             ~exit_code
-            Exit_status.Input_error
+            exit_status
             e;
           HackEventLogger.flush ()
         with
@@ -185,8 +179,9 @@ end = struct
         | Exit_status.Exit_with _ as interrupt -> raise interrupt
         | _ -> ())
 
-  let die ~(exit_code : int) (e : Exception.t) : 'a =
-    log ~exit_code e;
+  let die ~(exit_status : Exit_status.t) (e : Exception.t) : 'a =
+    let exit_code = Exit_status.exit_code exit_status in
+    log ~exit_code ~exit_status e;
     Stdlib.exit exit_code
 
   let report (message : string) : unit = Printf.eprintf "%s\n%!" message
@@ -195,20 +190,21 @@ end = struct
     if not (String.is_empty message) then report message;
     Option.iter usage ~f:report;
     die
-      ~exit_code:bad_args_exit_code
+      ~exit_status:Exit_status.Client_bad_args
       (Exception.wrap_unraised (Arg.Bad message))
 
   let bad_www_root ~(message : string) : 'a =
     report message;
     die
-      ~exit_code:invalid_root_exit_code
+      ~exit_status:Exit_status.Client_bad_args
       (Exception.wrap_unraised (Arg.Bad message))
 
   let internal_exception (e : Exception.t) : 'a =
     match Exception.unwrap e with
     | Exit_status.Exit_with _ -> Exception.reraise e
     | _ ->
-      log ~exit_code:bad_args_exit_code e;
+      (* Re-raising an uncaught OCaml exception exits with 2. *)
+      log ~exit_code:2 ~exit_status:Exit_status.Input_error e;
       Exception.reraise e
 end
 

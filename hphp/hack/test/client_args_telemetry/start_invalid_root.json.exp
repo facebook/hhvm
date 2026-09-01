@@ -1,7 +1,7 @@
 === hh_client result ===
 argv: hh_client start ../no_config
 cwd: <test_tmp>/root
-exit_code: 1
+exit_code: 64
 stdout:
 <empty>
 stderr:
@@ -13,8 +13,8 @@ Error: could not find a .hhconfig file in <test_tmp>/no_config or any of its par
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
     "exception": "Stdlib.Arg.Bad(\"Error: could not find a .hhconfig file in <test_tmp>/no_config or any of its parent directories. Do you have a .hhconfig in your code's root directory?\")",
-    "exit_code": 1,
-    "exit_status": "Exit_status.Input_error",
+    "exit_code": 64,
+    "exit_status": "Exit_status.Client_bad_args",
     "process": "client"
   },
   {

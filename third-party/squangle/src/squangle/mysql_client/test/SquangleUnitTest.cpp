@@ -1023,17 +1023,6 @@ TEST_F(QueryTest, CheckedQueryUnsignedHighBitRoundTrip) {
   EXPECT_EQ(Query::checked("SELECT %d", kMax).renderInsecure(), "SELECT -1");
 }
 
-TEST_F(QueryTest, DynamicBoolRendersAsInt) {
-  // MySQL has no boolean type, and QueryArgument has no bool alternative: a
-  // folly::dynamic bool is stored as int64_t, so it renders 0/1 and is accepted
-  // wherever an int is (e.g. %d), not just %m. (folly::dynamic goes through the
-  // legacy Query() ctor; checked() does not accept a bare dynamic.)
-  folly::dynamic dynTrue = true;
-  folly::dynamic dynFalse = false;
-  EXPECT_EQ(Query("SELECT %d", dynTrue).renderInsecure(), "SELECT 1");
-  EXPECT_EQ(Query("SELECT %m", dynFalse).renderInsecure(), "SELECT 0");
-}
-
 TEST_F(QueryTest, CheckedQueryAcceptsConstexprStringPiece) {
   // A compile-time-constant folly::StringPiece works as the format string,
   // validated at compile time like a literal / constexpr std::string_view.

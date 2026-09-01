@@ -1271,16 +1271,17 @@ class QueryArgument {
   // NEVER raw-assign a caller value to value_ (e.g. `value_ = someArg`). Route
   // through the scalar ctors below instead (directly, or by delegating like the
   // std::optional ctor). A raw variant converting-assignment silently
-  // mishandles several types -- e.g. it rejects string_view/StringPiece
-  // (fbstring's ctor from them is explicit). The scalar ctors exist precisely
-  // to avoid this. (There is deliberately no bool alternative: bool args are
-  // stored as int64_t so they render 0/1, matching MySQL, which has no boolean
-  // type.)
+  // mishandles several types: it rejects string_view/StringPiece (fbstring's
+  // ctor from them is explicit) and, because `bool` is an alternative,
+  // mis-selects bool for types with a standard conversion to bool (e.g. const
+  // char* -> bool beats the user-defined -> fbstring). The scalar ctors exist
+  // precisely to avoid this.
   std::variant<
       // monostate (implying NULL) needs to be the first entry
       std::monostate,
       int64_t,
       double,
+      bool,
       folly::fbstring,
       Query,
       std::vector<QueryArgument>,
@@ -1440,6 +1441,7 @@ class QueryArgument {
 
   double getDouble() const;
   int64_t getInt() const;
+  bool getBool() const;
   const Query& getQuery() const;
   const folly::fbstring& getString() const;
   const std::vector<std::pair<folly::fbstring, QueryArgument>>& getPairs()
@@ -1453,6 +1455,7 @@ class QueryArgument {
   bool isString() const;
   bool isQuery() const;
   bool isPairList() const;
+  bool isBool() const;
   bool isNull() const;
   bool isList() const;
   bool isDouble() const;

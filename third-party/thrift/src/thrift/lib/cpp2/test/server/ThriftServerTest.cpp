@@ -493,34 +493,67 @@ void doLoadHeaderTest(bool isRocket) {
         }
       };
 
-  auto checkGrLoadHeader = [](const auto& header,
-                              std::optional<std::string> grLoadMetric) {
+  // Shared by the three global-routing counter headers: each carries its value
+  // on its own typed metadata field, falling back to the string read header.
+  auto checkGrCounterHeader = [](const auto& header,
+                                 std::optional<std::string> metricName,
+                                 std::optional<int64_t> typedValue,
+                                 std::string_view headerKey,
+                                 folly::StringPiece metricPrefix) {
     auto& headers = header.getHeaders();
     auto metricVal = [&]() -> std::optional<int64_t> {
-      auto value = header.getGrLoadValue();
-      if (value) {
-        return value;
+      if (typedValue) {
+        return typedValue;
       }
-      if (auto* loadPtr = folly::get_ptr(
-              headers, THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER)) {
+      if (auto* loadPtr = folly::get_ptr(headers, headerKey)) {
         return folly::to<int64_t>(*loadPtr);
       }
       return {};
     }();
-    ASSERT_EQ(grLoadMetric.has_value(), metricVal.has_value());
+    ASSERT_EQ(metricName.has_value(), metricVal.has_value());
 
-    if (!grLoadMetric) {
+    if (!metricName) {
       return;
     }
 
-    folly::StringPiece metricSp(*grLoadMetric);
-    if (metricSp.removePrefix("custom_gr_load_metric_")) {
+    folly::StringPiece metricSp(*metricName);
+    if (metricSp.removePrefix(metricPrefix)) {
       EXPECT_EQ(metricSp, std::to_string(*metricVal));
     } else if (metricSp.empty()) {
       EXPECT_EQ(kEmptyMetricLoad, *metricVal);
     } else {
-      FAIL() << "Unexpected gr load metric";
+      FAIL() << "Unexpected " << headerKey << " metric";
     }
+  };
+
+  auto checkGrLoadHeader = [&](const auto& header,
+                               std::optional<std::string> grLoadMetric) {
+    checkGrCounterHeader(
+        header,
+        std::move(grLoadMetric),
+        header.getGrLoadValue(),
+        THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER,
+        "custom_gr_load_metric_");
+  };
+
+  auto checkGrSecondaryLoadHeader =
+      [&](const auto& header, std::optional<std::string> grSecondaryMetric) {
+        checkGrCounterHeader(
+            header,
+            std::move(grSecondaryMetric),
+            header.getGrSecondaryLoadValue(),
+            THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER,
+            "custom_gr_secondary_load_metric_");
+      };
+
+  auto checkGrHealthHeader = [&](const auto& header,
+                                 std::optional<std::string> grHealthMetric) {
+    checkGrCounterHeader(
+        header,
+        std::move(grHealthMetric),
+        header.getGrHealthValue(),
+        THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER,
+        "custom_gr_health_metric_");
   };
 
   class BlockInterface : public apache::thrift::ServiceHandler<TestService> {
@@ -540,7 +573,9 @@ void doLoadHeaderTest(bool isRocket) {
           folly::StringPiece metricPiece(metric);
           if (metricPiece.removePrefix("custom_load_metric_") ||
               metricPiece.removePrefix("custom_stopper_metric_") ||
-              metricPiece.removePrefix("custom_gr_load_metric_")) {
+              metricPiece.removePrefix("custom_gr_load_metric_") ||
+              metricPiece.removePrefix("custom_gr_secondary_load_metric_") ||
+              metricPiece.removePrefix("custom_gr_health_metric_")) {
             return folly::to<int32_t>(metricPiece.toString());
           } else if (metricPiece.empty()) {
             return kEmptyMetricLoad;
@@ -566,45 +601,66 @@ void doLoadHeaderTest(bool isRocket) {
     checkLoadHeader(*header, folly::none, true /*isSecondaryLoad*/);
     checkStopperMetricHeader(*header, folly::none);
     checkGrLoadHeader(*header, std::nullopt);
+    checkGrSecondaryLoadHeader(*header, std::nullopt);
+    checkGrHealthHeader(*header, std::nullopt);
   }
 
   {
-    // Empty load, secondary load, stopper metric and gr load header
+    // Empty load, secondary load, stopper metric and gr counter headers
     RpcOptions options;
     const std::string kEmptyLoadMetric;
     const std::string kEmptyStopperMetric;
     const std::string kEmptyGrLoadMetric;
+    const std::string kEmptyGrSecondaryLoadMetric;
+    const std::string kEmptyGrHealthMetric;
     options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kEmptyLoadMetric);
     options.setWriteHeader(
         THeader::QUERY_SECONDARY_LOAD_HEADER, kEmptyLoadMetric);
     options.setWriteHeader(THeader::QUERY_STOPPER_METRIC, kEmptyStopperMetric);
     options.setWriteHeader(
         THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER, kEmptyGrLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER,
+        kEmptyGrSecondaryLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER, kEmptyGrHealthMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kEmptyLoadMetric);
     checkLoadHeader(*header, kEmptyLoadMetric, true /*isSecondaryLoad*/);
     checkStopperMetricHeader(*header, kEmptyStopperMetric);
     checkGrLoadHeader(*header, kEmptyGrLoadMetric);
+    checkGrSecondaryLoadHeader(*header, kEmptyGrSecondaryLoadMetric);
+    checkGrHealthHeader(*header, kEmptyGrHealthMetric);
   }
 
   {
-    // Custom load, secondary load, stopper metric and gr load header
+    // Custom load, secondary load, stopper metric and gr counter headers
     RpcOptions options;
     const std::string kLoadMetric{"custom_load_metric_789"};
     const std::string kSecondaryLoadMetric{"custom_load_metric_99"};
     const std::string kStopperMetric{"custom_stopper_metric_11"};
     const std::string kGrLoadMetric{"custom_gr_load_metric_42"};
+    const std::string kGrSecondaryLoadMetric{
+        "custom_gr_secondary_load_metric_43"};
+    const std::string kGrHealthMetric{"custom_gr_health_metric_44"};
     options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setWriteHeader(
         THeader::QUERY_SECONDARY_LOAD_HEADER, kSecondaryLoadMetric);
     options.setWriteHeader(THeader::QUERY_STOPPER_METRIC, kStopperMetric);
     options.setWriteHeader(
         THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER, kGrLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER,
+        kGrSecondaryLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER, kGrHealthMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
     checkLoadHeader(*header, kSecondaryLoadMetric, true /*isSecondaryLoad*/);
     checkStopperMetricHeader(*header, kStopperMetric);
     checkGrLoadHeader(*header, kGrLoadMetric);
+    checkGrSecondaryLoadHeader(*header, kGrSecondaryLoadMetric);
+    checkGrHealthHeader(*header, kGrHealthMetric);
   }
 
   {

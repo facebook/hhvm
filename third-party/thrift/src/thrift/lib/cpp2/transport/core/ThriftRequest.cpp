@@ -78,6 +78,14 @@ ThriftRequestCore::ThriftRequestCore(
           metadata.grLoadMetric()
               ? std::optional{std::move(*metadata.grLoadMetric())}
               : std::nullopt),
+      grSecondaryLoadMetric_(
+          metadata.grSecondaryLoadMetric()
+              ? std::optional{std::move(*metadata.grSecondaryLoadMetric())}
+              : std::nullopt),
+      grHealthMetric_(
+          metadata.grHealthMetric()
+              ? std::optional{std::move(*metadata.grHealthMetric())}
+              : std::nullopt),
 
       reqContext_(
           &connContext,
@@ -434,6 +442,15 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
 
   if (grLoadMetric_) {
     metadata.grLoad() = serverConfigs_.getLoad(*grLoadMetric_);
+  }
+
+  if (grSecondaryLoadMetric_) {
+    metadata.grSecondaryLoad() =
+        serverConfigs_.getLoad(*grSecondaryLoadMetric_);
+  }
+
+  if (grHealthMetric_) {
+    metadata.grHealth() = serverConfigs_.getLoad(*grHealthMetric_);
   }
 
   if (!writeHeaders.empty()) {

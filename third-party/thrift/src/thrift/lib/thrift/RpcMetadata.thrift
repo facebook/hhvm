@@ -332,6 +332,11 @@ struct RequestRpcMetadata {
   29: optional string stopperMetric;
   // FB303 metric name to allow SR to fetch global routing load counter.
   30: optional string grLoadMetric;
+  // FB303 metric name to allow SR to fetch the second global routing load
+  // counter.
+  31: optional string grSecondaryLoadMetric;
+  // FB303 metric name to allow SR to fetch the global routing health counter.
+  32: optional string grHealthMetric;
 }
 
 struct ErrorClassification {
@@ -436,6 +441,10 @@ struct ResponseRpcMetadata {
   16: optional i64 stopperMetric;
   // Global routing load counter value returned by server in response
   17: optional i64 grLoad;
+  // Second global routing load counter value returned by server in response
+  18: optional i64 grSecondaryLoad;
+  // Global routing health counter value returned by server in response
+  19: optional i64 grHealth;
 }
 
 enum ResponseRpcErrorCategory {

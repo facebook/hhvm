@@ -298,6 +298,24 @@ void Cpp2Connection::setServerHeaders(
     writeHeaders[THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER] =
         folly::to<std::string>(load);
   }
+
+  // set global routing secondary load header
+  auto ptGrSl = folly::get_ptr(
+      readHeaders, THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER);
+  if (ptGrSl) {
+    auto load = getWorker()->getServer()->getLoad(*ptGrSl);
+    writeHeaders[THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER] =
+        folly::to<std::string>(load);
+  }
+
+  // set global routing health header
+  auto ptGrHealth =
+      folly::get_ptr(readHeaders, THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER);
+  if (ptGrHealth) {
+    auto health = getWorker()->getServer()->getLoad(*ptGrHealth);
+    writeHeaders[THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER] =
+        folly::to<std::string>(health);
+  }
 }
 
 void Cpp2Connection::requestTimeoutExpired() {

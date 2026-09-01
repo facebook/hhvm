@@ -1,1 +1,1 @@
-Fatal error: You cannot use this syntax in an `unset()` expression. in %s/unset_class_constant_dim0.php on line 10
+Fatal error: `unset` is only supported on container elements, e.g. `unset($x[$k]);` in %s/unset_class_constant_dim0.php on line 10

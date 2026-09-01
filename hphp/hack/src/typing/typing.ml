@@ -6190,11 +6190,9 @@ end = struct
                 @@ Primary.Unset_nonidx_in_strict { pos = p; reason = lazy [] })
             in
             (env, Some ty_err)
-          | ([Aast_defs.Anormal _], None) ->
-            let ty_err =
-              Typing_error.(primary @@ Primary.Invalid_unset_target p)
-            in
-            (env, Some ty_err)
+          (* A single argument that isn't an element access is already a parse
+             error, so don't pile on a second diagnostic. *)
+          | ([_], None) -> (env, None)
           | _ ->
             let ty_err =
               Typing_error.(
@@ -6205,19 +6203,7 @@ end = struct
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let should_forget_fakes = false in
-        let result =
-          match el with
-          | [arg] ->
-            (match Aast_utils.arg_to_expr arg with
-            | (_, p, Obj_get (_, _, Nullsafe, _)) ->
-              (Typing_error_utils.add_typing_error ~env
-              @@ Typing_error.(
-                   primary @@ Primary.Nullsafe_property_write_context p));
-              let (env, ty) = Env.fresh_type_error env p in
-              make_call_special_from_def env id tel (fun _ -> ty)
-            | _ -> make_call_special_from_def env id tel MakeType.void)
-          | _ -> make_call_special_from_def env id tel MakeType.void
-        in
+        let result = make_call_special_from_def env id tel MakeType.void in
         (result, should_forget_fakes)
       | type_structure
         when String.equal type_structure SN.StdlibFunctions.type_structure

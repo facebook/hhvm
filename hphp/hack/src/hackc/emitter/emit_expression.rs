@@ -737,22 +737,6 @@ fn text_of_expr(e: &ast::Expr) -> String {
     }
 }
 
-fn text_of_class_id(cid: &ast::ClassId) -> String {
-    match &cid.2 {
-        ast::ClassId_::CIparent => "parent".into(),
-        ast::ClassId_::CIself => "self".into(),
-        ast::ClassId_::CIstatic => "static".into(),
-        ast::ClassId_::CIexpr(e) => text_of_expr(e),
-        ast::ClassId_::CI(ast_defs::Id(_, id)) => id.into(),
-        ast::ClassId_::CIreified(ast_defs::Id(_, id)) => id.into(),
-    }
-}
-
-fn text_of_prop(prop: &(Pos, String)) -> String {
-    let (_, s) = prop;
-    s.into()
-}
-
 fn emit_import<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
@@ -2884,6 +2868,30 @@ fn emit_special_function<'a>(
                     _ => Err(Error::fatal_runtime(
                         pos,
                         "Local variable expected in __debugger_is_uninit()",
+                    )),
+                }
+            }
+        }
+        ("__SystemLib\\__debugger_make_uninit", _) => {
+            if nargs != 1 {
+                Err(Error::fatal_runtime(
+                    pos,
+                    format!(
+                        "__debugger_make_uninit() expects exactly 1 positional parameter {} given",
+                        nargs
+                    ),
+                ))
+            } else {
+                // Calling convention is dropped here, but given this is meant for the debugger
+                // I don't think it particularly matters.
+                match args[0].to_expr_ref() {
+                    Expr(_, _, Expr_::Lvar(id)) => Ok(Some(InstrSeq::gather(vec![
+                        instr::unset_l(get_local(e, env, pos, id.name())?),
+                        instr::null(),
+                    ]))),
+                    _ => Err(Error::fatal_runtime(
+                        pos,
+                        "Local variable expected in __debugger_make_uninit()",
                     )),
                 }
             }
@@ -6671,17 +6679,20 @@ pub fn emit_lval_op_nonlist<'a>(
     .map(|(lhs, rhs, setop)| InstrSeq::gather(vec![lhs, rhs, setop]))
 }
 
-pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: Local) -> InstrSeq {
+/// Mirrors the parser diagnostic; the emitter only ever sees these forms if
+/// something upstream let a rejected `unset` target through.
+const UNSET_TARGET_NOT_AN_ELEMENT: &str =
+    "`unset` is only supported on container elements, e.g. `unset($x[$k]);`";
+
+pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: Local) -> Result<InstrSeq> {
     use LValOp as L;
-    emit_pos_then(
-        pos,
-        match op {
-            L::Set => instr::set_l(lid),
-            L::SetOp(op) => instr::set_op_l(lid, op),
-            L::IncDec(op) => instr::inc_dec_l(lid, op),
-            L::Unset => instr::unset_l(lid),
-        },
-    )
+    let instr = match op {
+        L::Set => instr::set_l(lid),
+        L::SetOp(op) => instr::set_op_l(lid, op),
+        L::IncDec(op) => instr::inc_dec_l(lid, op),
+        L::Unset => return Err(Error::fatal_parse(pos, UNSET_TARGET_NOT_AN_ELEMENT)),
+    };
+    Ok(emit_pos_then(pos, instr))
 }
 
 fn emit_final_member_op(stack_size: StackIndex, op: LValOp, mk: MemberKey) -> InstrSeq {
@@ -6694,25 +6705,13 @@ fn emit_final_member_op(stack_size: StackIndex, op: LValOp, mk: MemberKey) -> In
     }
 }
 
-fn emit_final_static_op(cid: &ast::ClassId, prop: &(Pos, String), op: LValOp) -> Result<InstrSeq> {
+fn emit_final_static_op(prop: &(Pos, String), op: LValOp) -> Result<InstrSeq> {
     use LValOp as L;
     Ok(match op {
         L::Set => instr::set_s(ReadonlyOp::Any),
         L::SetOp(op) => instr::set_op_s(op),
         L::IncDec(op) => instr::inc_dec_s(op),
-        L::Unset => {
-            let (pos, _) = prop;
-            let cid = text_of_class_id(cid);
-            let id = text_of_prop(prop);
-            emit_fatal::emit_fatal_runtime(
-                pos,
-                format!(
-                    "Attempt to unset static property {}::{}",
-                    string_utils::strip_ns(&cid),
-                    id,
-                ),
-            )
-        }
+        L::Unset => return Err(Error::fatal_parse(&prop.0, UNSET_TARGET_NOT_AN_ELEMENT)),
     })
 }
 
@@ -6736,12 +6735,10 @@ pub fn emit_lval_op_nonlist_steps<'a>(
                 rhs_instrs,
                 instr::empty(),
             ),
-            Expr_::Lvar(v) if !is_local_this(env, &v.1) || op == LValOp::Unset => {
-                (instr::empty(), rhs_instrs, {
-                    let lid = get_local(e, env, &v.0, &(v.1).1)?;
-                    emit_final_local_op(outer_pos, op, lid)
-                })
-            }
+            Expr_::Lvar(v) if !is_local_this(env, &v.1) => (instr::empty(), rhs_instrs, {
+                let lid = get_local(e, env, &v.0, &(v.1).1)?;
+                emit_final_local_op(outer_pos, op, lid)?
+            }),
             Expr_::ArrayGet(x) => match x.1.as_ref() {
                 None if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
                     return Err(Error::fatal_runtime(pos, "Can't use [] for reading"));
@@ -6818,10 +6815,9 @@ pub fn emit_lval_op_nonlist_steps<'a>(
                         "?-> is not allowed in write context",
                     ));
                 }
-                let mode = match op {
-                    LValOp::Unset => MOpMode::Unset,
-                    _ => MOpMode::Define,
-                };
+                if op == LValOp::Unset {
+                    return Err(Error::fatal_parse(pos, UNSET_TARGET_NOT_AN_ELEMENT));
+                }
                 let readonly_op = if rhs_readonly {
                     ReadonlyOp::Readonly
                 } else {
@@ -6848,7 +6844,7 @@ pub fn emit_lval_op_nonlist_steps<'a>(
                     e,
                     env,
                     e1,
-                    mode,
+                    MOpMode::Define,
                     true,
                     BareThisOp::Notice,
                     null_coalesce_assignment,
@@ -6888,7 +6884,7 @@ pub fn emit_lval_op_nonlist_steps<'a>(
             Expr_::ClassGet(x) if x.as_ref().2 == ast::PropOrMethod::IsProp => {
                 let (cid, prop, _) = &**x;
                 let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
-                let final_instr_ = emit_final_static_op(cid, prop, op)?;
+                let final_instr_ = emit_final_static_op(prop, op)?;
                 let final_instr = emit_pos_then(pos, final_instr_);
                 let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
                 (

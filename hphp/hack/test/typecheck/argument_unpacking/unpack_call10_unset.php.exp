@@ -1,10 +1,8 @@
 ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
 ERROR: File "unpack_call10_unset.php", line 6, characters 12-12:
 An expression is expected here. (Parsing[1002])
 ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
 Unbound name: `...` (a global constant) (Naming[2049])
-ERROR: File "unpack_call10_unset.php", line 6, characters 3-18:
-The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
 Unbound global constant (Typing) (Typing[4106])

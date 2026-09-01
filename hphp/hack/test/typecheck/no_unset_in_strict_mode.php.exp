@@ -1,4 +1,6 @@
-ERROR: File "no_unset_in_strict_mode.php", line 5, characters 3-12:
-The argument to `unset` must be an array access. (Typing[4521])
-ERROR: File "no_unset_in_strict_mode.php", line 12, characters 5-20:
-The argument to `unset` must be an array access. (Typing[4521])
+ERROR: File "no_unset_in_strict_mode.php", line 5, characters 9-10:
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
+ERROR: File "no_unset_in_strict_mode.php", line 13, characters 11-18:
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
+ERROR: File "no_unset_in_strict_mode.php", line 14, characters 11-15:
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])

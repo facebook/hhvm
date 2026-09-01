@@ -512,15 +512,63 @@
             {
               "kind": "list_item",
               "list_item": {
-                "kind": "variable",
-                "variable_expression": {
+                "kind": "subscript_expression",
+                "subscript_receiver": {
+                  "kind": "variable",
+                  "variable_expression": {
+                    "kind": "token",
+                    "token": {
+                      "kind": "variable",
+                      "text": "$x",
+                      "offset": 66,
+                      "leading_width": 0,
+                      "width": 2,
+                      "trailing_width": 0,
+                      "leading": [],
+                      "trailing": [],
+                      "line_number": 6
+                    }
+                  }
+                },
+                "subscript_left_bracket": {
                   "kind": "token",
                   "token": {
-                    "kind": "variable",
-                    "text": "$x",
-                    "offset": 66,
+                    "kind": "[",
+                    "text": "[",
+                    "offset": 68,
                     "leading_width": 0,
-                    "width": 2,
+                    "width": 1,
+                    "trailing_width": 0,
+                    "leading": [],
+                    "trailing": [],
+                    "line_number": 6
+                  }
+                },
+                "subscript_index": {
+                  "kind": "literal",
+                  "literal_expression": {
+                    "kind": "token",
+                    "token": {
+                      "kind": "decimal_literal",
+                      "text": "0",
+                      "offset": 69,
+                      "leading_width": 0,
+                      "width": 1,
+                      "trailing_width": 0,
+                      "leading": [],
+                      "trailing": [],
+                      "line_number": 6
+                    }
+                  }
+                },
+                "subscript_right_bracket": {
+                  "kind": "token",
+                  "token": {
+                    "kind": "]",
+                    "text": "]",
+                    "offset": 70,
+                    "leading_width": 0,
+                    "width": 1,
                     "trailing_width": 0,
                     "leading": [],
                     "trailing": [],
@@ -536,7 +584,7 @@
           "token": {
             "kind": ")",
             "text": ")",
-            "offset": 68,
+            "offset": 71,
             "leading_width": 0,
             "width": 1,
             "trailing_width": 0,
@@ -550,23 +598,23 @@
           "token": {
             "kind": ";",
             "text": ";",
-            "offset": 69,
+            "offset": 72,
             "leading_width": 0,
             "width": 1,
             "trailing_width": 9,
             "leading": [],
             "trailing": [
-              { "kind": "whitespace", "text": " ", "offset": 70, "width": 1 },
+              { "kind": "whitespace", "text": " ", "offset": 73, "width": 1 },
               {
                 "kind": "single_line_comment",
                 "text": "// Good",
-                "offset": 71,
+                "offset": 74,
                 "width": 7
               },
               {
                 "kind": "end_of_line",
                 "text": "\n",
-                "offset": 78,
+                "offset": 81,
                 "width": 1
               }
             ],
@@ -581,7 +629,7 @@
           "token": {
             "kind": "end_of_file",
             "text": "",
-            "offset": 79,
+            "offset": 82,
             "leading_width": 0,
             "width": 0,
             "trailing_width": 0,

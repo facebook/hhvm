@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<156ab79adb3675370f6152f998d1437a>>
+// @generated SignedSource<<5c001ea83d4d63da970039d09c3af50c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -589,7 +589,6 @@ pub enum Typing {
     StrictIsolationExcludedPathAccess = 4518,
     EnumDuplicateValue = 4519,
     EnumUncheckableValue = 4520,
-    InvalidUnsetTarget = 4521,
     SplatMayRequireFields = 4522,
     SplatFieldNotKnown = 4523,
 }

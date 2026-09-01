@@ -669,6 +669,9 @@ pub fn not_allowed_in_write(what: &str) -> Error {
     Cow::Owned(format!("{} is not allowed in write context", what))
 }
 
+pub const invalid_unset_target: Error =
+    Cow::Borrowed("`unset` is only supported on container elements, e.g. `unset($x[$k]);`");
+
 pub fn invalid_lval(root: LvalRoot) -> Error {
     Cow::Owned(format!(
         "You cannot use this syntax {}",
@@ -946,7 +949,6 @@ pub fn superglobal_disallowed(name: &str) -> Error {
 }
 pub const invalid_this: Error =
     Cow::Borrowed("`$this` cannot be used in functions and static methods");
-pub const cannot_unset_this: Error = Cow::Borrowed("`$this` cannot be unset");
 pub const invalid_await_position_pipe: Error =
     Cow::Borrowed("`await` cannot be used as an expression right of a pipe operator.");
 pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {

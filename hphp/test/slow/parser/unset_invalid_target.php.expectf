@@ -1,0 +1,1 @@
+Fatal error: `unset` is only supported on container elements, e.g. `unset($x[$k]);` in %s/unset_invalid_target.php on line 11

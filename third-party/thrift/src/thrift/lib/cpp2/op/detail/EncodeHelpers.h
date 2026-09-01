@@ -18,6 +18,8 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory_resource>
+#include <scoped_allocator>
 #include <type_traits>
 #include <vector>
 
@@ -75,15 +77,35 @@ using detect_resize_without_initialization =
     decltype(folly::resizeWithoutInitialization(
         FOLLY_DECLVAL(C&), FOLLY_DECLVAL(A)...));
 
+// Whether allocator_traits<Alloc>::construct() passes an allocator to the
+// element it builds: a scoped allocator hands over its inner allocator
+// ([allocator.adaptor]), polymorphic_allocator hands over itself
+// ([mem.poly.allocator.mem]). An allocator absent from this list leaves the
+// element with a default-constructed one.
+template <typename Alloc>
+inline constexpr bool alloc_propagates_to_elements = false;
+template <typename Outer, typename... Inner>
+inline constexpr bool alloc_propagates_to_elements<
+    std::scoped_allocator_adaptor<Outer, Inner...>> = true;
+template <typename T>
+inline constexpr bool
+    alloc_propagates_to_elements<std::pmr::polymorphic_allocator<T>> = true;
+
 template <typename Container>
 typename Container::reference emplace_back_default(Container& c) {
-  constexpr auto passAlloc = apache::thrift::detail::
-      alloc_should_propagate<Container, typename Container::value_type>;
-  if constexpr (passAlloc) {
-    return c.emplace_back(typename Container::value_type(c.get_allocator()));
-  } else {
-    return c.emplace_back();
+  // Guarded, not folded into the static_assert: only a propagating container is
+  // guaranteed to have allocator_type.
+  if constexpr (apache::thrift::detail::alloc_should_propagate<
+                    Container,
+                    typename Container::value_type>) {
+    static_assert(
+        alloc_propagates_to_elements<typename Container::allocator_type>,
+        "This container's allocator does not pass itself to the elements it "
+        "constructs, so they would be built with a default-constructed "
+        "allocator. Wrap it in std::scoped_allocator_adaptor (or use "
+        "std::pmr::polymorphic_allocator) before naming it in cpp.allocator.");
   }
+  return c.emplace_back();
 }
 
 template <typename Container, typename Map>

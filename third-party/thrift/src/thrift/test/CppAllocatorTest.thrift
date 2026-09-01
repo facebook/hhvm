@@ -217,6 +217,17 @@ struct HasAllocatorAwareSetElement {
   1: set<string_8090> field;
 }
 
+// List whose element type is itself allocator-aware, used to test element
+// allocator propagation on deserialize through emplace_back_default.
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.allocator": "PmrByteAlloc"},
+}
+struct HasAllocatorAwareListElement {
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "std::pmr::vector"}
+  1: list<string_8090> field;
+}
+
 // Map whose key and value types are themselves allocator-aware, used to test
 // key/value allocator propagation on deserialize.
 @thrift.DeprecatedUnvalidatedAnnotations{

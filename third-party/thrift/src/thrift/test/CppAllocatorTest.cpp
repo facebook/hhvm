@@ -228,6 +228,10 @@ TYPED_TEST_SUITE(CppAllocatorDeserializeTest, DeserializeSerializers);
 
 TYPED_TEST(CppAllocatorDeserializeTest, ElementPropagatesAllocator) {
   // kTooLong disables SSO so the element/key read allocates.
+  HasAllocatorAwareListElement list;
+  list.field() = {kTooLong, kTooLong};
+  checkDeserializePropagatesAllocator<TypeParam>(list);
+
   HasAllocatorAwareSetElement set;
   set.field() = {kTooLong};
   checkDeserializePropagatesAllocator<TypeParam>(set);

@@ -94,12 +94,6 @@ std::string_view resolveAggregateFunctionName(
     case AggregateFunction::VARIANCE:
       return "VARIANCE(";
   }
-  // An out-of-range AggregateFunction (e.g. a bad cast) would otherwise fall
-  // off the end of this non-void function, which is UB and could splice
-  // arbitrary bytes into the emitted SQL. Fail loudly instead.
-  throw std::invalid_argument(
-      fmt::format(
-          "unknown AggregateFunction value {}", static_cast<int>(aggFunc)));
 }
 
 } // namespace

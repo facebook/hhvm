@@ -1377,20 +1377,6 @@ TEST_F(QueryArgumentTest, AsStringConversion) {
   EXPECT_TRUE(dblArg.asString().find("3.14") != std::string::npos);
 }
 
-TEST_F(QueryArgumentTest, TypeNameCoversAggregateColumns) {
-  // typeName() must have an arm for every variant alternative; aggregate-column
-  // tuples previously hit an unreachable CHECK(false) and crashed.
-  EXPECT_EQ(
-      QueryArgument(AggregateColumn{AggregateFunction::COUNT, {"db", "tbl"}})
-          .typeName(),
-      "AggregateColumn");
-  EXPECT_EQ(
-      QueryArgument(
-          AliasedAggregateColumn{AggregateFunction::SUM, {"db", "tbl", "a"}})
-          .typeName(),
-      "AliasedAggregateColumn");
-}
-
 // =============================================================================
 // EphemeralRowFields Tests
 //

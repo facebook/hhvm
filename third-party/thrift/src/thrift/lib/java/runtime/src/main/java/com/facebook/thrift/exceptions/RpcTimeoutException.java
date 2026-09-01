@@ -24,14 +24,14 @@ import java.util.concurrent.TimeoutException;
  * <p>Overrides fillInStackTrace() to avoid expensive stack trace capture. Stack traces from
  * timer/scheduler threads provide no useful debugging information, and capturing them during
  * timeout storms can worsen cascading failures.
+ *
+ * <p>Allocate a new instance per timeout; never cache one in a static field. Reactor's operator
+ * debug mode attaches an OnAssemblyException to a throwable and reuses it, appending one assembly
+ * trace for every operator chain the throwable travels through. A shared instance is never
+ * collected, so those traces accumulate for the life of the process and are printed in full by
+ * every logger that is handed the throwable.
  */
 public class RpcTimeoutException extends TimeoutException {
-
-  /**
-   * Cached singleton for the common case where no specific message is needed. Reusing this instance
-   * avoids allocation overhead entirely.
-   */
-  public static final RpcTimeoutException INSTANCE = new RpcTimeoutException("request timed out");
 
   public RpcTimeoutException(String message) {
     super(message);

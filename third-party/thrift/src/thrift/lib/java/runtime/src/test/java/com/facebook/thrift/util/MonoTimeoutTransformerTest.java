@@ -37,12 +37,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
+import reactor.util.retry.Retry;
 
 public class MonoTimeoutTransformerTest {
   @Test
@@ -1792,10 +1794,93 @@ public class MonoTimeoutTransformerTest {
     Assertions.assertEquals("first", receivedValues.get(0), "First value should be 'first'");
   }
 
+  @Test
+  public void testEachTimeoutEmitsItsOwnExceptionInstance() {
+    // A cached exception instance is never collected, so Reactor's operator debug mode keeps
+    // appending assembly traces to it for the life of the process.
+    Mono<Object> transform =
+        Mono.never()
+            .transform(
+                new MonoTimeoutTransformer<>(
+                    RpcResources.getClientOffLoopScheduler(), 10, TimeUnit.MILLISECONDS));
+
+    AtomicReference<Throwable> first = new AtomicReference<>();
+    AtomicReference<Throwable> second = new AtomicReference<>();
+
+    StepVerifier.create(transform).verifyErrorSatisfies(first::set);
+    StepVerifier.create(transform).verifyErrorSatisfies(second::set);
+
+    Assertions.assertTrue(first.get() instanceof TimeoutException);
+    Assertions.assertEquals("request timed out", first.get().getMessage());
+    Assertions.assertTrue(second.get() instanceof TimeoutException);
+    Assertions.assertNotSame(
+        first.get(), second.get(), "each timeout must emit its own exception instance");
+  }
+
+  @Test
+  public void testTimeoutErrorDoesNotAccumulateAssemblyTraces() {
+    // Reactor's operator debug mode attaches an OnAssemblyException to a throwable and then reuses
+    // it, appending a trace for every operator chain the throwable travels through. A cached
+    // exception instance is never collected, so those traces would pile up for the life of the
+    // process and be printed in full by every logger handed the throwable.
+    Hooks.onOperatorDebug();
+    try {
+      List<Integer> traceSizes = new ArrayList<>();
+      List<Throwable> errors = new ArrayList<>();
+
+      for (int i = 0; i < 10; i++) {
+        // A fresh chain per iteration, the way a server assembles one per request. New operator
+        // instances produce new nodes in the assembly trace rather than bumping the occurrence
+        // counter on existing ones, which is what makes the growth unbounded.
+        Mono<Object> pipeline =
+            Mono.never()
+                .transform(
+                    new MonoTimeoutTransformer<>(
+                        RpcResources.getClientOffLoopScheduler(), 10, TimeUnit.MILLISECONDS))
+                .retryWhen(
+                    Retry.max(2)
+                        .filter(t -> t instanceof TimeoutException)
+                        .onRetryExhaustedThrow((spec, signal) -> signal.failure()));
+
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        StepVerifier.create(pipeline).verifyErrorSatisfies(error::set);
+
+        errors.add(error.get());
+        traceSizes.add(assemblyTraceLineCount(error.get()));
+      }
+
+      Assertions.assertTrue(
+          traceSizes.get(0) > 0,
+          "operator debug mode attached no assembly trace, so this test proves nothing");
+      Assertions.assertEquals(
+          traceSizes.get(0),
+          traceSizes.get(9),
+          "assembly trace grew across pipelines, sizes were " + traceSizes);
+      Assertions.assertNotSame(
+          errors.get(0), errors.get(9), "each timeout must emit its own exception instance");
+    } finally {
+      Hooks.resetOnOperatorDebug();
+    }
+  }
+
   // ===================================================================================
   // Helper methods and classes are grouped together at the very end of the file.
   // They are declared private static.
   // ===================================================================================
+
+  /**
+   * Counts the lines of the assembly trace that Reactor's operator debug mode records on a
+   * throwable, or 0 when no trace is attached.
+   */
+  private static int assemblyTraceLineCount(Throwable t) {
+    for (Throwable suppressed : t.getSuppressed()) {
+      if ("OnAssemblyException".equals(suppressed.getClass().getSimpleName())) {
+        String message = suppressed.getMessage();
+        return message == null ? 0 : message.split("\n", -1).length;
+      }
+    }
+    return 0;
+  }
 
   /**
    * Creates a controllable scheduler that captures scheduled runnables for manual execution. Used

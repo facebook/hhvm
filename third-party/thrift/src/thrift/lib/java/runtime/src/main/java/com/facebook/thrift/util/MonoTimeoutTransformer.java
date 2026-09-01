@@ -541,8 +541,9 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
       }
 
       if (fallback == null) {
-        // No fallback - emit timeout error using stackless singleton for performance
-        actual.onError(RpcTimeoutException.INSTANCE);
+        // No fallback - emit timeout error. The exception is stackless, so a fresh instance per
+        // timeout is cheap; see RpcTimeoutException for why one must not be shared.
+        actual.onError(new RpcTimeoutException("request timed out"));
         return;
       }
 

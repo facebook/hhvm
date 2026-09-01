@@ -1573,20 +1573,6 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
   return Effects::Throws;
 }
 
-Effects miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
-  if (couldBeThisObj(env, env.collect.mInstrState.base)) {
-    if (auto const name = mStringKey(key)) {
-      unsetThisProp(env, name);
-    } else {
-      unsetUnknownThisProp(env);
-    }
-  }
-
-  endBase(env);
-  discard(env, nDiscard);
-  return Effects::Throws;
-}
-
 //////////////////////////////////////////////////////////////////////
 // Final elem ops
 
@@ -2392,17 +2378,11 @@ void in(ISS& env, const bc::SetOpM& op) {
 }
 
 void in(ISS& env, const bc::UnsetM& op) {
+  assertx(mcodeIsElem(op.mkey.mcode));
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
 
-  auto const effects = [&] {
-    if (mcodeIsProp(op.mkey.mcode)) {
-      return miFinalUnsetProp(env, op.arg1, key->first);
-    } else {
-      assertx(mcodeIsElem(op.mkey.mcode));
-      return miFinalUnsetElem(env, op.arg1, key->first);
-    }
-  }();
+  auto const effects = miFinalUnsetElem(env, op.arg1, key->first);
   handleEffects(env, effects, key->second);
 }
 

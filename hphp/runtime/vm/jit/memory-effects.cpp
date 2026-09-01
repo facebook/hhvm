@@ -1348,7 +1348,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetProp:
   case CGetPropQ:
   case SetProp:
-  case UnsetProp:
   case IssetProp:
   case IncDecProp:
   case SetOpProp:

@@ -2605,20 +2605,5 @@ inline TypedValue IncDecProp(
   unknownBaseType(type(base));
 }
 
-inline void UnsetPropObj(MemberLookupContext& ctx, ObjectData* instance, TypedValue key) {
-  // Prepare key.
-  auto keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  // Unset property.
-  instance->unsetProp(ctx, keySD);
-}
-
-inline void UnsetProp(MemberLookupContext& ctx, TypedValue base, TypedValue key) {
-  // Validate base.
-  if (LIKELY(type(base) == KindOfObject)) {
-    UnsetPropObj(ctx, val(base).pobj, key);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

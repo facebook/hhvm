@@ -224,18 +224,6 @@ SETPROP_OBJ_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-inline void unsetPropC(Func* f, TypedValue base, TypedValue key) {
-  auto ctx = HPHP::MemberLookupContext(f->cls(), f->moduleName());
-  HPHP::UnsetProp(ctx, base, key);
-}
-
-inline void unsetPropCO(Func* f, ObjectData* base, TypedValue key) {
-  auto ctx = HPHP::MemberLookupContext(f->cls(), f->moduleName());
-  HPHP::UnsetPropObj(ctx, base, key);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 inline TypedValue setOpPropC(Func* f, TypedValue base, TypedValue key,
                              TypedValue val, SetOpOp op) {
   TypedValue localTvRef;

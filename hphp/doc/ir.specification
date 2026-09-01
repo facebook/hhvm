@@ -3010,10 +3010,6 @@ fields of that struct for holding intermediate values.
 
   Set property with key S1 in S0 to S2.
 
-| UnsetProp, ND, S(Cell) S(Cell), NF
-
-  Unset an object property.
-
 | SetOpProp<op>, D(InitCell), S(Cell) S(Cell) S(Cell), PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.

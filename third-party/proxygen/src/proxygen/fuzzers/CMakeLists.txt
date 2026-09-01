@@ -55,11 +55,3 @@ function(proxygen_add_fuzzer)
     )
     target_compile_definitions(${PROXYGEN_FUZZ_TARGET} PRIVATE ${LIBGMOCK_DEFINES})
 endfunction()
-
-proxygen_add_fuzzer(TARGET ProxygenHTTP1xFuzzer
-  SOURCES
-    ProxygenHTTP1xFuzzer.cpp
-  DEPENDS
-    codectestutils
-    proxygen
-)

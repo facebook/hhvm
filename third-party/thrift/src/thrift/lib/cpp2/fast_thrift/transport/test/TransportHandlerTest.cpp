@@ -582,41 +582,29 @@ TEST_F(TransportHandlerTest, ReadBufferComesFromPipelineAllocator) {
   EXPECT_EQ(allocator.allocationCount(), 1);
   EXPECT_EQ(second, buf);
 
-  // Delivering the completed prefix retains the unused tail for subsequent
-  // socket reads, so no second large allocation is needed.
+  // readDataAvailable moves the whole chain to the pipeline, so the next
+  // request starts over with a fresh buffer from the allocator.
   handler->readDataAvailable(16);
   EXPECT_EQ(appHandler_.readCount(), 1);
 
-  handler->getReadBuffer(&second, &len);
-  EXPECT_EQ(allocator.allocationCount(), 1);
-  EXPECT_EQ(second, static_cast<uint8_t*>(buf) + 16);
-  EXPECT_GE(len, kMaxBufferSize - 16);
+  handler->getReadBuffer(&buf, &len);
+  EXPECT_EQ(allocator.allocationCount(), 2);
 }
 
-TEST_F(TransportHandlerTest, ConsecutiveReadBuffersPreserveMessageBoundaries) {
+// Test: closing frees the slab preallocated for the next socket read rather
+// than pinning it until the handler is destroyed.
+TEST_F(TransportHandlerTest, CloseFreesPreallocatedReadBuffer) {
   auto [handler, pipeline] = createHandlerAndPipeline();
-  std::vector<std::string> reads;
-  appHandler_.setOnReadCallback([&](TypeErasedBox&& msg) {
-    auto bytes = msg.take<BytesPtr>();
-    reads.push_back(bytes->to<std::string>());
-    return Result::Success;
-  });
+  handler->onConnect();
 
-  void* first = nullptr;
+  void* buf = nullptr;
   size_t len = 0;
-  handler->getReadBuffer(&first, &len);
-  ASSERT_GE(len, 3);
-  std::memcpy(first, "one", 3);
-  handler->readDataAvailable(3);
+  handler->getReadBuffer(&buf, &len);
+  ASSERT_GT(handler->readBufQueue_.tailroom(), 0);
 
-  void* second = nullptr;
-  handler->getReadBuffer(&second, &len);
-  ASSERT_GE(len, 3);
-  EXPECT_EQ(second, static_cast<uint8_t*>(first) + 3);
-  std::memcpy(second, "two", 3);
-  handler->readDataAvailable(3);
+  handler->close(folly::exception_wrapper{});
 
-  EXPECT_THAT(reads, ElementsAre("one", "two"));
+  EXPECT_EQ(handler->readBufQueue_.tailroom(), 0);
 }
 
 // --- Lifecycle Tests ---

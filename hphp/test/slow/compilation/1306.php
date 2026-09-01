@@ -5,7 +5,7 @@ function bar($a) :mixed{
 function foo($x) :mixed{
   $a = $x;
   echo $x;
-  unset($a);
+  $a = null;
   $a = bar(1);
   $t = $a; $a++; bar($t);
 }

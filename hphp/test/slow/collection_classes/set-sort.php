@@ -20,7 +20,7 @@ function main() :mixed{
         break;
     }
     var_dump($s);
-    unset($s);
+    $s = null;
     echo "----\n";
   }
 }

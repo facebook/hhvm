@@ -6,7 +6,7 @@ var_dump($a);
 
 $o = new stdClass;
 var_dump($o);
-unset($o);
+$o = null;
 
 $b = $x ==> $x + 3;
 var_dump($b);

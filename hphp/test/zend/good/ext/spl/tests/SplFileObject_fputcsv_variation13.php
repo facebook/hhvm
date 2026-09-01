@@ -10,7 +10,7 @@ $fo = new SplFileObject($file, 'w');
 
 var_dump($fo->fputcsv(vec['water', 'fruit'], ',,', '"'));
 
-unset($fo);
+$fo = null;
 
 echo "Done\n";
 

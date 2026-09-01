@@ -14,9 +14,9 @@ class late {
 <<__EntryPoint>> function main(): void {
 $t = new early();
 $t->__construct();
-unset($t);
+$t = null;
 $t = new late();
-//unset($t); delay to end of script
+//$t = null; delay to end of script
 
 echo "Done\n";
 }

@@ -11,7 +11,7 @@ class Test
 try
 {
     $o = new Test('Hello');
-    unset($o);
+    $o = null;
 }
 catch (Exception $e)
 {

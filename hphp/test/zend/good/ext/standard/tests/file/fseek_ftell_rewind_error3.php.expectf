@@ -5,9 +5,7 @@ Warning: rewind() expects exactly 1 positional parameter, 0 given in %s/test/zen
 -- Testing rewind() with more than expected number of arguments --
 
 Warning: rewind() expects exactly 1 positional parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error3.php on line 21
--- Testing rewind() with closed/unset file handle --
+-- Testing rewind() with closed file handle --
 Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error3.php on line 26
 bool(false)
-
-Warning: Undefined variable: file_handle in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error3.php on line 31
 Done

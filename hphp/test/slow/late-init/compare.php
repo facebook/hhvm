@@ -63,10 +63,6 @@ function test($name, $a, $b) :mixed{
 
   $b->y = 'test';
   test("set", $a, $b);
-
-  unset($a->y);
-  test("unset", $a, $b);
-
   $a->x = 456;
   test("short-circuit", $a, $b);
 }

@@ -10,5 +10,5 @@ class X {
  <<__EntryPoint>>
 function main_1503() :mixed{
 $x = new X;
- unset($x->a[foo()]->y);
+ unset($x->a[foo()]);
 }

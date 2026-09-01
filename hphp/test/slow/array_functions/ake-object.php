@@ -17,10 +17,6 @@ class D extends C {
   public $pub;
 }
 
-class E {
-  public $unsetme;
-}
-
 class F {
   <<__LateInit>> public $p;
   public $q;
@@ -66,12 +62,6 @@ var_dump(array_key_exists("\0*\0three", $o));
   echo "==== class B ====\n";
   var_dump(array_key_exists('p', $o));
   var_dump(array_key_exists("\0*\0p", $o));
-
-  $o = new E();
-  echo "==== class E ====\n";
-  var_dump(array_key_exists('unsetme', $o));
-  unset($o->unsetme);
-  var_dump(array_key_exists('unsetme', $o));
 
   $o = new F();
   echo "==== class F ====\n";

@@ -122,7 +122,7 @@ function main_ext_pdo() :mixed{
       var_dump($e->getMessage());
     }
 
-    unset($vstmt);
+    $vstmt = null;
 
     //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
     var_dump(
@@ -130,7 +130,7 @@ function main_ext_pdo() :mixed{
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
-    unset($vstmt);
+    $vstmt = null;
 
     //Then reset to PDOStatement. Zend allows the class name to be explicitly set
     //to PDOStatement.
@@ -140,7 +140,7 @@ function main_ext_pdo() :mixed{
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
 
-    unset($dbh);
+    $dbh = null;
 
   } catch (Exception $e) {
     VS($e, null);

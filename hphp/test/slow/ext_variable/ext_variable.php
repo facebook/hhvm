@@ -91,8 +91,8 @@ function main_ext_variable() :mixed{
   VS(gettype($invalid_res), "unknown type");
 
   imagedestroy($valid_res);
-  unset($valid_res);
-  unset($invalid_res);
+  $valid_res = null;
+  $invalid_res = null;
 
   VS(intval("12"), 12);
   VS(intval("12", 8), 10);

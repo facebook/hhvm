@@ -1,6 +1,0 @@
-Test begin
-object(stdClass) (1) {
-  ["doh"]=>
-  NULL
-}
-Test end

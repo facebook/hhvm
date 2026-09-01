@@ -15,7 +15,7 @@ $node = $dom->createElement('newfirst');
 $frag->appendChild($node);
 $root->replaceChild($frag, $root->firstChild);
 
-unset($frag);
+$frag = null;
 $frag = $dom->createDocumentFragment();
 
 $frag->appendChild(new DOMElement('newsecond'));

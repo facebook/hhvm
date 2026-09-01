@@ -7,6 +7,6 @@ $rm = new ReflectionMethod($closure, '__invoke');
 $rp = $rm->getParameters()[0];
 $rt = $rp->getType();
 $rrt = $rm->getReturnType();
-unset($rm, $rp);
+$rm = null; $rp = null;
 var_dump($rt->__toString(), $rrt->__toString());
 }

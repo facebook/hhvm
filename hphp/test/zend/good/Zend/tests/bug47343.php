@@ -23,8 +23,8 @@ for ($i = 0; $i < 2; $i++)
 {
     $Aobj = new A;
     $Bobj = $Aobj->getB();
-    unset($Bobj);
-    unset($Aobj);
+    $Bobj = null;
+    $Aobj = null;
 }
 
 echo "DONE\n";

@@ -18,7 +18,7 @@ function doStuff ($limit) :mixed{
     $b[$i] = clone $a;
   }
 
-  unset($a);
+  $a = null;
 
   gc_collect_cycles();
 }

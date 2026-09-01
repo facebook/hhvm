@@ -26,7 +26,7 @@ function test() :mixed{
   }
 
   $g2 = clone($g1);
-  unset($g1);
+  $g1 = null;
   gc_collect_cycles();
 
   foreach($g2 as $x) {

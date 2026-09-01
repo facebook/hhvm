@@ -276,7 +276,7 @@ function binary_trees($n = 12) :mixed{
   $stretchTree = bottomUpTree(0, $stretchDepth);
   printf("stretch tree of depth %d\t check: %d\n",
   $stretchDepth, itemCheck($stretchTree));
-  unset($stretchTree);
+  $stretchTree = null;
 
   $longLivedTree = bottomUpTree(0, $maxDepth);
 
@@ -288,10 +288,10 @@ function binary_trees($n = 12) :mixed{
      {
         $t = bottomUpTree($i, $minDepth);
         $check += itemCheck($t);
-        unset($t);
+        $t = null;
         $t = bottomUpTree(-$i, $minDepth);
         $check += itemCheck($t);
-        unset($t);
+        $t = null;
      }
 
      printf("%d\t trees of depth %d\t check: %d\n",

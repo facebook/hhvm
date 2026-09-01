@@ -32,11 +32,6 @@ function main() :mixed{
     function ($fv) {
       // __isset()
       return isset($fv->nonExistentProperty) ? "true" : "false";
-    },
-    function ($fv) {
-      // __unset()
-      unset($fv->nonExistentProperty); // should throw
-      return "SomethingWentWrong";
     }
   };
 

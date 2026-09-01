@@ -18,7 +18,7 @@ function f() :mixed{
   print ":".(string)(\HH\global_isset('y')).":\n";
   print ":".(string)(isset(quickIsset::$y)).":\n";
 
-  unset($x);
+  $x = null;
   \HH\global_unset('y');
   quickIsset::$y = null;
   print ":".(string)(isset($x)).":\n";

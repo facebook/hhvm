@@ -57,11 +57,6 @@ function f2()
                 // However, as $b goes away, remove its alias
 }
 
-class C
-{
-    public $prop1;
-    public $prop2;
-}
 <<__EntryPoint>>
 function main_entry(): void {
   error_reporting(-1);
@@ -91,9 +86,9 @@ function main_entry(): void {
 
   echo "After '\$a = new Point(2, 1)', \$d is " . $d->__toString() . ", \$b is " . $b->__toString() . ", and \$a is " . $a->__toString() . "\n";
 
-  unset($a);  // remove only alias from third point, so destructor runs
-  unset($b);  // remove only alias from first point, so destructor runs
-  unset($d);  // remove only alias from second point, so destructor runs
+  $a = null;  // remove only alias from third point, so destructor runs
+  $b = null;  // remove only alias from first point, so destructor runs
+  $d = null;  // remove only alias from second point, so destructor runs
   echo "Done\n";
   //*/
 
@@ -108,7 +103,7 @@ function main_entry(): void {
 
   echo "After 'f1(\$a)', \$a is " . $a->__toString() . "\n";
 
-  unset($a);  // remove only alias from first point, so destructor runs
+  $a = null;  // remove only alias from first point, so destructor runs
   echo "Done\n";
   //*/
 
@@ -118,23 +113,8 @@ function main_entry(): void {
   $a = f2();      // make a new alias in $a and remove the temporary alias
 
   echo "After '\$a = f2()', \$a is " . $a->__toString() . "\n";
-  unset($a);  // remove only alias from point, so destructor runs
+  $a = null;  // remove only alias from point, so destructor runs
   echo "Done\n";
   //*/
 
-  echo "----------------- unsetting properties ----------------------\n";
-
-  $c = new C;
-
-  echo "at start, \$c is "; var_dump($c);
-
-  unset($c->prop1);
-  echo "after unset(\$c->prop1), \$c is "; var_dump($c);
-
-  unset($c->prop2);
-  echo "after unset(\$c->prop2), \$c is "; var_dump($c);
-
-  unset($c);
-  echo "after unset(\$c), \$c is undefined\n";
-  echo "Done\n";
 }

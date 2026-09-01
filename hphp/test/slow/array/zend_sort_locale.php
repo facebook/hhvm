@@ -22,6 +22,6 @@ asort(inout $table, SORT_LOCALE_STRING);
 foreach($table as $key => $val) {
   $table[$key] = urlencode($val);
 }
-unset($val);
+$val = null;
 var_dump($table);
 }

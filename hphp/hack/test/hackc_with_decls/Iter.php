@@ -35,7 +35,7 @@ function test() {
 
   foreach ($s as $k => $v) {
     // CHECK: IterInit <BaseConst WithKeys> 0 {{_[0-9]+}} {{L[0-9]+}}
-    unset($s);
+    $s = vec[];
     // CHECK: IterNext <BaseConst WithKeys> 0 {{_[0-9]+}} {{L[0-9]+}}
   }
 

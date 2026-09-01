@@ -21,7 +21,7 @@ function main() :mixed{
       $obj->$key = 0;
     } else if($val == 3) {
       var_dump($key);
-      unset($obj->$key);
+      $obj->$key = null;
     } else {
       $obj->$key++;
     }

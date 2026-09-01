@@ -9,6 +9,6 @@ class blah {
 <<__EntryPoint>> function main(): void {
   $k = (new blah)->foo(); // only reference to obj is in the closure
   echo $k();
-  unset($k);
+  $k = null;
   echo "done\n";
 }

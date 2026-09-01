@@ -54,6 +54,6 @@ function main(): void {
     isset($zip->comment),
   );
 
-  unset($zip); //close the file before unlinking
+  $zip = null; //close the file before unlinking
   unlink($file);
 }

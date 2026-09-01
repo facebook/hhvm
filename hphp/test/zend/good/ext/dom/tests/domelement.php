@@ -41,7 +41,7 @@ function main_entry(): void {
   $lang = $dom->createAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:lang');
   $lang->nodeValue = 'en-GB';
   $node->setAttributeNodeNS($lang);
-  unset($lang);
+  $lang = null;
   echo "Language: ".$node->getAttributeNS('http://www.w3.org/XML/1998/namespace', 'lang')."\n";
   $lang = $node->getAttributeNodeNS('http://www.w3.org/XML/1998/namespace', 'lang');
   echo "Language: ".$lang->value."\n";

@@ -24,12 +24,4 @@ class A {
     echo $e->getMessage() . "\n";
   }
 
-  unset($a->y);
-  try {
-    echo "============== store #3 =================\n";
-    apc_store('a-key3', $a);
-  } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
-  }
-
 }

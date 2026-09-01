@@ -1,28 +1,28 @@
 <?hh
 
-unset($foo);
+unset($foo[0]);
 $baz = $qux;
 
 unset(
-  $foo,
-  $bar,
+  $foo[0],
+  $bar[0],
 );
 $baz = $qux;
 
 unset(
-  $foo,
-  $bar
+  $foo[0],
+  $bar[0]
 );
 $baz = $qux;
 
 unset(
-  $the_quick_brown_fox_jumped_over_the_lazy_dog,
-  $grump_wizards_make_toxic_brew_for_the_evil_queen_and_jack
+  $the_quick_brown_fox_jumped_over_the_lazy_dog[0],
+  $grump_wizards_make_toxic_brew_for_the_evil_queen[0]
 );
 $baz = $qux;
 
 unset(
-  $the_quick_brown_fox_jumped_over_the_lazy_dog,
-  $grump_wizards_make_toxic_brew_for_the_evil_queen_and_jack,
+  $the_quick_brown_fox_jumped_over_the_lazy_dog[0],
+  $grump_wizards_make_toxic_brew_for_the_evil_queen[0],
 );
 $baz = $qux;

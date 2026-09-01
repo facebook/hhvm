@@ -10,7 +10,7 @@ class derived extends base {
 <<__EntryPoint>> function main(): void {
 $obj = new derived;
 
-unset($obj);
+$obj = null;
 
 echo 'Done';
 }

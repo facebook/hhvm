@@ -13,7 +13,7 @@ var_dump(xmlwriter_start_attribute($xw, "\""));
 var_dump(xmlwriter_end_attribute($xw));
 var_dump(xmlwriter_end_element($xw));
 
-unset($xw);
+$xw = null;
 
 var_dump(file_get_contents($file));
 

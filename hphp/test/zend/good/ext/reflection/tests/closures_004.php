@@ -8,7 +8,7 @@ $closure2 = $method->getClosure ();
 $closure2 ();
 $closure2->__invoke ();
 
-unset ($closure);
+$closure = null;
 
 $closure2 ();
 $closure2->__invoke ();
@@ -21,7 +21,7 @@ $closure2 = $method->getClosure ($closure);
 $closure2 ();
 $closure2->__invoke ();
 
-unset ($closure);
+$closure = null;
 
 $closure2 ();
 $closure2->__invoke ();

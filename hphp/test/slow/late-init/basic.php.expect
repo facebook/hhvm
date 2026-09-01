@@ -111,63 +111,6 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-============= unsetting ==============
-=== get1 ===
-Accessing <<__LateInit>> property 'A::p1' before initialization
-=== isset1 ===
-bool(false)
-=== incdec1 ===
-Accessing <<__LateInit>> property 'A::p1' before initialization
-=== setop1 ===
-Accessing <<__LateInit>> property 'A::p1' before initialization
-=== get2 ===
-Accessing <<__LateInit>> property 'A::p2' before initialization
-=== isset2 ===
-bool(false)
-=== incdec2 ===
-Accessing <<__LateInit>> property 'A::p2' before initialization
-=== setop2 ===
-Accessing <<__LateInit>> property 'A::p2' before initialization
-=== get3 ===
-int(1124)
-=== isset3 ===
-bool(true)
-=== incdec3 ===
-int(1125)
-=== setop3 ===
-int(2125)
-=== get4 ===
-int(1124)
-=== isset4 ===
-bool(true)
-=== incdec4 ===
-int(1125)
-=== setop4 ===
-int(2125)
-=== get5 ===
-Accessing <<__LateInit>> property 'A::p9' before initialization
-=== get6 ===
-Accessing <<__LateInit>> property 'A::p9' before initialization
-=== get7 ===
-Accessing <<__LateInit>> property 'A::p10' before initialization
-=== get8 ===
-Accessing <<__LateInit>> property 'A::p10' before initialization
-=== get9 ===
-Accessing <<__LateInit>> property 'A::p11' before initialization
-=== get10 ===
-Accessing <<__LateInit>> property 'A::p12' before initialization
-=== get11 ===
-Accessing <<__LateInit>> static property 'A::p13' before initialization
-=== get12 ===
-Accessing <<__LateInit>> static property 'A::p14' before initialization
-=== isset5 ===
-bool(false)
-=== isset6 ===
-bool(false)
-=== isset7 ===
-bool(false)
-=== isset8 ===
-bool(false)
 === get1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === isset1 ===
@@ -265,63 +208,6 @@ Accessing <<__LateInit>> property 'B::p9' before initialization
 int(123)
 === get8 ===
 int(123)
-=== get9 ===
-Accessing <<__LateInit>> property 'B::p11' before initialization
-=== get10 ===
-Accessing <<__LateInit>> property 'B::p12' before initialization
-=== get11 ===
-Accessing <<__LateInit>> static property 'B::p13' before initialization
-=== get12 ===
-Accessing <<__LateInit>> static property 'B::p14' before initialization
-=== isset5 ===
-bool(false)
-=== isset6 ===
-bool(false)
-=== isset7 ===
-bool(false)
-=== isset8 ===
-bool(false)
-============= unsetting ==============
-=== get1 ===
-Accessing <<__LateInit>> property 'B::p1' before initialization
-=== isset1 ===
-bool(false)
-=== incdec1 ===
-Accessing <<__LateInit>> property 'B::p1' before initialization
-=== setop1 ===
-Accessing <<__LateInit>> property 'B::p1' before initialization
-=== get2 ===
-Accessing <<__LateInit>> property 'B::p2' before initialization
-=== isset2 ===
-bool(false)
-=== incdec2 ===
-Accessing <<__LateInit>> property 'B::p2' before initialization
-=== setop2 ===
-Accessing <<__LateInit>> property 'B::p2' before initialization
-=== get3 ===
-int(1124)
-=== isset3 ===
-bool(true)
-=== incdec3 ===
-int(1125)
-=== setop3 ===
-int(2125)
-=== get4 ===
-int(1124)
-=== isset4 ===
-bool(true)
-=== incdec4 ===
-int(1125)
-=== setop4 ===
-int(2125)
-=== get5 ===
-Accessing <<__LateInit>> property 'B::p9' before initialization
-=== get6 ===
-Accessing <<__LateInit>> property 'B::p9' before initialization
-=== get7 ===
-Accessing <<__LateInit>> property 'B::p10' before initialization
-=== get8 ===
-Accessing <<__LateInit>> property 'B::p10' before initialization
 === get9 ===
 Accessing <<__LateInit>> property 'B::p11' before initialization
 === get10 ===

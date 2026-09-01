@@ -23,7 +23,7 @@ function main() :mixed{
   } catch (Throwable $t) {
     echo "In catch\n";
     var_dump($t);
-    unset($t);
+    $t = null;
   }
   echo "Leaving main\n";
 }

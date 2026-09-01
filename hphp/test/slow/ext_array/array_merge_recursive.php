@@ -6,7 +6,7 @@ function main_array_merge_recursive() :mixed{
 $a1 = vec[];
 $a2 = dict["key1" => null];
 $a1 = array_merge_recursive($a1, $a2);
-unset($a1);unset($a2);
+$a1 = null;$a2 = null;
 
 $ar1 = dict[
   "color" => dict["favorite" => "red"],

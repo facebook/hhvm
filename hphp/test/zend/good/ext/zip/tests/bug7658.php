@@ -41,6 +41,6 @@ function main_entry(): void {
   $ar = array_diff($found, $expect);
 
   var_dump($ar);
-  unset($zip);
+  $zip = null;
   unlink($file);
 }

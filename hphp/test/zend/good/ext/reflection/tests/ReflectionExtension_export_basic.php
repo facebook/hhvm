@@ -3,7 +3,7 @@ ob_start();
 (new ReflectionExtension("reflection"))->__toString();
 $test = ob_get_clean();
 var_dump(!($test ?? false));
-unset($test);
+$test = null;
 ob_start();
 echo (new ReflectionExtension("reflection"))->__toString();
 $test = ob_get_clean();

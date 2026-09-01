@@ -114,12 +114,6 @@ function magic_methods() :mixed{
 
   echo "\n__isSet...\n";
   var_dump(isset((new ImmSet (Vector {1, 2, 3}))->notAProp));
-
-  echo "\n__unset...\n";
-  echo $cfail( function () {
-    $fs = new ImmSet(Vector {1, 2, 3});
-    unset($fs->inexistentProperty);
-  });
 }
 
 function static_methods() :mixed{

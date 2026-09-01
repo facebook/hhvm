@@ -66,8 +66,8 @@ function test_serialization($obj, $class_whitelist) :mixed{
   var_dump($str);
   $new_obj = unserialize($str, darray($class_whitelist));
   var_dump($new_obj);
-  unset($obj);
-  unset($new_obj);
+  $obj = null;
+  $new_obj = null;
   echo "========================\n";
 }
 

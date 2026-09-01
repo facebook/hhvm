@@ -3,7 +3,7 @@
 <<__EntryPoint>> function main(): void {
 $f = fopen(__FILE__, 'r');
 var_dump($f);
-unset($f);
+$f = null;
 
 $f = fopen(__FILE__, 'r');
 var_dump($f);

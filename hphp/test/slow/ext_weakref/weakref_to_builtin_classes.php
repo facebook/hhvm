@@ -10,7 +10,7 @@ function test($what) :mixed{
   $w = new WeakRef($foo);
   var_dump($w->valid());
   __hhvm_intrinsics\launder_value($foo);
-  unset($foo);
+  $foo = null;
   var_dump($w->valid());
 }
 

@@ -34,13 +34,13 @@ $incer();
 $a->printX();
 $printer();
 
-unset($a);
+$a = null;
 
 $incer();
 $printer();
 
-unset($incer);
+$incer = null;
 $printer();
 
-unset($printer);
+$printer = null;
 }

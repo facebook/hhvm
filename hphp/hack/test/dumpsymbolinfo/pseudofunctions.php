@@ -5,7 +5,7 @@ class C {
   public function instanceFoo(): void {}
 }
 
-function test(C $c): void {
+function test(C $c, dict<int, int> $d): void {
   echo('foo');
   print('foo');
 
@@ -13,7 +13,7 @@ function test(C $c): void {
   shape('x' => 5);
 
   isset($c);
-  unset($c);
+  unset($d[0]);
 
   invariant(true, 'foo');
   invariant_violation('foo');

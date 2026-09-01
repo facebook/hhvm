@@ -43,7 +43,7 @@ class derived extends base
 <<__EntryPoint>> function main(): void {
 $t = new derived;
 $t->test();
-unset($t);
+$t = null;
 
 echo "Done\n";
 }

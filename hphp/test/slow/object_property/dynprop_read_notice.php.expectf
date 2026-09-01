@@ -66,7 +66,6 @@ Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object
 ==== C never notice ====
 == dim for write ==
 == clone ==
-== unset ==
 ==== D may notice ====
 == read ==
 
@@ -139,7 +138,6 @@ Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object
 ==== D never notice ====
 == dim for write ==
 == clone ==
-== unset ==
 ==== GMP may notice ====
 == read ==
 
@@ -210,7 +208,6 @@ Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/obje
 ==== GMP never notice ====
 == dim for write ==
 == clone ==
-== unset ==
 ==== stdClass may notice ====
 == read ==
 == read (dynamic name) ==
@@ -241,7 +238,6 @@ object(stdClass) (1) refcount(%d){
 ==== stdClass never notice ====
 == dim for write ==
 == clone ==
-== unset ==
 ==== __PHP_Incomplete_Class may notice ====
 == read ==
 == read (dynamic name) ==
@@ -275,4 +271,3 @@ object(__PHP_Incomplete_Class) (2) refcount(%d){
 ==== __PHP_Incomplete_Class never notice ====
 == dim for write ==
 == clone ==
-== unset ==

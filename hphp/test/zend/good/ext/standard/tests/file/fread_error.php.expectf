@@ -12,12 +12,8 @@ bool(false)
 
 Warning: fread(): Length parameter must be greater than 0 in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 27
 bool(false)
--- Testing fwrite() with closed/unset file handle --
+-- Testing fwrite() with closed file handle --
 
 Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 32
 bool(false)
-
-Warning: Undefined variable: fp in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 37
-
-Warning: Undefined variable: fp in %s/test/zend/good/ext/standard/tests/file/fread_error.php on line 38
 Done

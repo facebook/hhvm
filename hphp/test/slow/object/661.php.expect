@@ -1,9 +1,11 @@
 string(1) "c"
-object(A) (3) {
+object(A) (4) {
   ["a"]=>
   int(2)
   ["b"]=>
   int(0)
+  ["c"]=>
+  NULL
   ["d"]=>
   int(5)
 }

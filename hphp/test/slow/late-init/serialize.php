@@ -61,13 +61,6 @@ function test($a, $func) :mixed{
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
-
-  unset($a->y);
-  try {
-    HH\dynamic_fun($func)($a);
-  } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
-  }
 }
 
 function run_serialize_tests($a) :mixed{

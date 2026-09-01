@@ -19,11 +19,11 @@ function main() :mixed{
     var_dump($e->getMessage());
   }
 
-  echo "unset in using\n";
+  echo "null in using\n";
   $x = new stdClass;
   try {
     using ($x) {
-      unset($x);
+      $x = null;
     }
   } catch (Exception $e) {
     var_dump($e->getMessage());

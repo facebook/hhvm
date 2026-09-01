@@ -10,7 +10,7 @@ function test($a) :mixed{
     }
     $s = $s ?? vec[];
     $ret[] = $s;
-    unset($s);
+    $s = null;
   }
   return $ret;
 }

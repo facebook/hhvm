@@ -78,9 +78,6 @@ function test($thing) :mixed{
 
   echo "== clone ==\n";
   $discard = clone $thing;
-
-  echo "== unset ==\n";
-  unset($thing->dynprop);
 }
 
 function by_ref(inout $ref) :mixed{}

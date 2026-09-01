@@ -55,7 +55,7 @@ foreach($t as $k => $v) {
     }
 }
 
-unset($t);
+$t = null;
 
 echo "===DONE===\n";
 }

@@ -17,6 +17,9 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
+
+#include <folly/observer/Observer.h>
 
 namespace apache::thrift::fast_thrift::connection {
 
@@ -51,6 +54,19 @@ struct SocketOptions {
   // three under PERMITTED. Has no effect under DISABLED, where a connection
   // is established on the accept itself and is never parked.
   uint32_t maxPendingConnections{0};
+
+  // Cap on the connections one IO thread will hold established at once. A
+  // connection past the cap is closed once its handshake completes, rather
+  // than being built — the same point the classic server enforces its own
+  // limit. Unset, or an observed zero, disables it.
+  //
+  // Per IO thread, not process-wide: an embedder holding a global budget
+  // divides it by the IO thread count before setting this.
+  //
+  // Loopback peers are exempt, so a local health probe still reaches a server
+  // sitting at its limit. Observed rather than snapshotted because a
+  // connection cap is worth changing on a running server.
+  std::optional<folly::observer::Observer<uint32_t>> maxConnectionsPerIOThread;
 };
 
 } // namespace apache::thrift::fast_thrift::connection

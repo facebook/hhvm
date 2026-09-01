@@ -25,27 +25,10 @@ class Query;
 // type, supporting both folly::fbstring and std::string without requiring
 // callers to do post-hoc conversion.
 //
-// It is also templated on a `Validate` flag that gates only the
-// format-string-structure checks — the dangerous-character scan, the
-// unknown/incomplete specifier checks, and the parameter-count checks. When
-// true (the default, used for legacy queries) those run and throw on violation;
-// when false (used for compile-time-checked queries, where Query::checked
-// already proved the format string is well-formed and has the right argument
-// count) they are elided via `if constexpr`, leaving a smaller, faster hot
-// path.
-//
-// Per-argument value-type checks (e.g. a string passed to %d) always run, in
-// BOTH modes. Compile-time checking cannot see through a type-erased argument
-// (a QueryArgument or folly::dynamic, which Query::checked accepts for any
-// specifier and validates at render time), so render time is the only place
-// such a mismatch can be caught. Both instantiations share the exact same
-// rendering logic and produce identical output; the only difference is whether
-// the redundant format-structure checks run.
-//
-// Template instantiations are provided for folly::fbstring and std::string
-// (both Validate values) in QueryRenderer.cpp. The extern template declarations
-// below prevent implicit instantiation in other translation units.
-template <typename StringType, bool Validate = true>
+// Template instantiations are provided for folly::fbstring and std::string in
+// QueryRenderer.cpp. The extern template declarations below prevent implicit
+// instantiation in other translation units.
+template <typename StringType>
 class QueryRenderer {
  public:
   enum class EscapeMode { None, Simple, Full };
@@ -65,22 +48,6 @@ class QueryRenderer {
       std::string_view truncationIndicator = "...");
 
  private:
-  // Lets the two Validate instantiations call each other's private
-  // renderAppend, so a sub-query can be rendered with the validator matching
-  // its own checked-ness (see renderSubQuery) regardless of the outer query's.
-  template <typename, bool>
-  friend class QueryRenderer;
-
-  // Render an embedded sub-query, dispatching on the SUB-query's own mode
-  // rather than the enclosing query's. A non-checked sub-query embedded in a
-  // checked query must still be validated: checked() proved nothing about the
-  // inner query's format.
-  static void renderSubQuery(
-      StringType& output,
-      const Query& subQuery,
-      EscapeMode escapeMode,
-      const InternalConnection* conn);
-
   static void escapeAndAppend(
       StringType* dest,
       const folly::fbstring& value,
@@ -123,9 +90,7 @@ class QueryRenderer {
       std::string_view truncationIndicator);
 };
 
-extern template class QueryRenderer<folly::fbstring, true>;
-extern template class QueryRenderer<std::string, true>;
-extern template class QueryRenderer<folly::fbstring, false>;
-extern template class QueryRenderer<std::string, false>;
+extern template class QueryRenderer<folly::fbstring>;
+extern template class QueryRenderer<std::string>;
 
 } // namespace facebook::common::mysql_client

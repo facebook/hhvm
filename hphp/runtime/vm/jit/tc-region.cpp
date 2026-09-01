@@ -796,7 +796,7 @@ void RegionTranslator::setCachedForProcessFail() {
   auto const numPosParams = func->numPositionalParams();
   if (sk == SrcKey{func, numPosParams, false, SrcKey::FuncEntryTag{}}) {
     const_cast<Func*>(func)->setFuncEntry(
-      tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
+      tc::ustubs().handleInterpMainFuncEntryNoTranslate);
   }
   auto const stub = svcreq::emit_interp_no_translate_stub(spOff, sk);
   TRACE(1, "setCachedForProcessFail: stub: %p  sk: %s\n",

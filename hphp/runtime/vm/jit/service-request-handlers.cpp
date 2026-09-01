@@ -299,6 +299,15 @@ TCA handleTranslateMainFuncEntry() noexcept {
     return resume(sk, getTranslation(sk));
 }
 
+TCA handleInterpMainFuncEntryNoTranslate() noexcept {
+    syncRegs(SBInvOffset{0});
+    FTRACE(1, "handleInterpMainFuncEntryNoTranslate {}\n",
+           vmfp()->func()->fullName()->data());
+    auto const numPosArgs = liveFunc()->numPositionalParams();
+    auto const sk = SrcKey { liveFunc(), numPosArgs, false, SrcKey::FuncEntryTag {} };
+    return resume(sk, TranslationResult::failForProcess());
+}
+
 TranslationResult::Scope shouldEnqueueForRetranslate(const SrcKey& sk) {
   return tc::shouldTranslate(sk, TransKind::Live);
 }

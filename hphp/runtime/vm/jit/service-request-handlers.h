@@ -51,6 +51,13 @@ TCA handleTranslateNamedParamsFuncEntry(uint32_t numArgs) noexcept;
  TCA handleTranslateMainFuncEntry() noexcept;
 
 /*
+ * Same as `handleTranslateMainFuncEntry', but for when we know no further
+ * translations can be created. Resumes in the interpreter without attempting
+ * to translate.
+ */
+ TCA handleInterpMainFuncEntryNoTranslate() noexcept;
+
+/*
  * Handle a request to retranslate the code at the given current location.
  * Reached from the last translation at the same SrcKey when no existing
  * translations support the incoming types.

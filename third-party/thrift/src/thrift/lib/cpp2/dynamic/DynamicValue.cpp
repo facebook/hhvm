@@ -831,16 +831,7 @@ std::optional<RefType> DynamicConstRef::traverseImpl(
             const auto& setVal = current->asSet();
             auto keyValue = deserializePrimitiveKeyFromSimpleJSON(
                 s.value, setVal.elementType());
-            if (!setVal.contains(keyValue)) {
-              return std::nullopt;
-            }
-            // For sets, find and return the element
-            for (auto elem : setVal) {
-              if (elem.copy() == keyValue) {
-                return elem;
-              }
-            }
-            return std::nullopt;
+            return setVal.find(keyValue);
           }
         },
         [&](const Path::MapKey& m) -> std::optional<RefType> {
@@ -859,16 +850,7 @@ std::optional<RefType> DynamicConstRef::traverseImpl(
             const auto& mapVal = current->asMap();
             auto keyValue =
                 deserializePrimitiveKeyFromSimpleJSON(m.key, mapVal.keyType());
-            if (!mapVal.contains(keyValue)) {
-              return std::nullopt;
-            }
-            // For map keys, find and return the key
-            for (auto [key, value] : mapVal) {
-              if (key.copy() == keyValue) {
-                return key;
-              }
-            }
-            return std::nullopt;
+            return mapVal.findKey(keyValue);
           }
         },
         [&](const Path::MapValue& m) -> std::optional<RefType> {

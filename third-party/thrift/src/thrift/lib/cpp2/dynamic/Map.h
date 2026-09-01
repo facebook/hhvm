@@ -58,6 +58,15 @@ class Map final {
   std::optional<DynamicConstRef> get(const DynamicConstRef& key) const;
 
   /**
+   * Find a key in the map.
+   *
+   * Intended for internal operations that need a reference to the stored key,
+   * such as path traversal. Use contains() for membership checks.
+   * Returns a reference that is invalidated by insertion or removal.
+   */
+  std::optional<DynamicConstRef> findKey(const DynamicConstRef& key) const;
+
+  /**
    * Insert or update a key-value pair.
    * Throws:
    *   - std::runtime_error if key/value types don't match

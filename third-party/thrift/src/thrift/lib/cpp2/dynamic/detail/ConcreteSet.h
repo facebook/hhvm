@@ -26,6 +26,7 @@
 #include <folly/container/F14Set.h>
 
 #include <memory_resource>
+#include <optional>
 
 namespace apache::thrift::dynamic::detail {
 
@@ -48,6 +49,8 @@ class ISet {
 
   virtual bool insert(DynamicValue value) = 0;
   virtual bool erase(const DynamicConstRef& value) = 0;
+  virtual std::optional<DynamicConstRef> find(
+      const DynamicConstRef& value) const = 0;
   virtual bool contains(const DynamicConstRef& value) const = 0;
   virtual size_t size() const = 0;
   virtual bool isEmpty() const = 0;
@@ -116,6 +119,15 @@ class ConcreteSet final : public ISet {
 
   bool erase(const DynamicConstRef& value) override {
     return elements_.erase(value.deref<T>()) > 0;
+  }
+
+  std::optional<DynamicConstRef> find(
+      const DynamicConstRef& value) const override {
+    auto it = elements_.find(value.deref<T>());
+    if (it == elements_.end()) {
+      return std::nullopt;
+    }
+    return DynamicConstRef(this->setType_.asSetUnchecked().elementType(), *it);
   }
 
   bool contains(const DynamicConstRef& value) const override {

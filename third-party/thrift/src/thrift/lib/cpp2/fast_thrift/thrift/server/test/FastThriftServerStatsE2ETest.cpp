@@ -15,7 +15,8 @@
  */
 
 /**
- * End-to-end test for FastThriftServer::setStats.
+ * End-to-end test for FastThriftServer's counters, reached either by
+ * setStats/setConnectionStats or by FastThriftServerConfig::enableStats.
  *
  * Boots a real FastThriftServer with a ServerStats attached, drives it with a
  * real RocketClientChannel, and asserts on the resulting counter values —
@@ -109,8 +110,18 @@ namespace integration =
 
 class FastThriftServerStatsE2ETest : public ::testing::Test {
  protected:
-  // Not in SetUp: one test needs the server started without stats.
-  void startServer(bool withStats) {
+  // Where the server under test gets its counters from.
+  enum class StatsMode {
+    // Neither route, so no metrics handler is built into any pipeline.
+    kNone,
+    // Embedder-supplied instances, via the setStats family.
+    kSetters,
+    // Server-materialized, via FastThriftServerConfig::enableStats.
+    kConfigFlag,
+  };
+
+  // Not in SetUp: the mode differs per test.
+  void startServer(StatsMode mode) {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
 
     handler_ = std::make_shared<TestHandler>();
@@ -118,16 +129,23 @@ class FastThriftServerStatsE2ETest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    config.enableStats = mode == StatsMode::kConfigFlag;
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
     server_->setInterface(handler_);
-    if (withStats) {
+    if (mode == StatsMode::kSetters) {
       stats_ = std::make_shared<ServerStats>();
       server_->setStats(stats_);
       connectionStats_ = std::make_shared<ConnectionStats>();
       server_->setConnectionStats(connectionStats_);
     }
     server_->start();
+    if (mode == StatsMode::kConfigFlag) {
+      // start() is what materializes them, so this is the earliest the
+      // fixture can hold them.
+      stats_ = server_->getStats();
+      connectionStats_ = server_->getConnectionStats();
+    }
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
   }
@@ -264,7 +282,7 @@ class FastThriftServerStatsE2ETest : public ::testing::Test {
 // pipeline, past TLS — which is what the classic server's connAccepted() also
 // means, so a socket that dies mid-handshake is counted by neither.
 TEST_F(FastThriftServerStatsE2ETest, CountsAcceptedConnections) {
-  startServer(/*withStats=*/true);
+  startServer(StatsMode::kSetters);
   auto client = createClient();
   // The completed RPC is what guarantees the connection is established and
   // its pipeline built; the socket alone would leave that racing.
@@ -280,7 +298,7 @@ TEST_F(FastThriftServerStatsE2ETest, CountsAcceptedConnections) {
 // The gauge is only useful if it comes back down. Its decrement lives beside
 // the connection map's own prune, so the two cannot disagree.
 TEST_F(FastThriftServerStatsE2ETest, ActiveConnectionsFallsOnDisconnect) {
-  startServer(/*withStats=*/true);
+  startServer(StatsMode::kSetters);
   auto client = createClient();
   syncCall([&] { return client->semifuture_ping(); });
   ASSERT_EQ(connectionTotals().connectionsActive.value(), 1);
@@ -295,7 +313,7 @@ TEST_F(FastThriftServerStatsE2ETest, ActiveConnectionsFallsOnDisconnect) {
 // Two clients means two connections — the gauge tracks concurrency, not a
 // single connection's presence.
 TEST_F(FastThriftServerStatsE2ETest, CountsConcurrentConnections) {
-  startServer(/*withStats=*/true);
+  startServer(StatsMode::kSetters);
   auto first = createClient();
   auto second = createClient();
   syncCall([&] { return first->semifuture_ping(); });
@@ -313,7 +331,7 @@ TEST_F(FastThriftServerStatsE2ETest, CountsConcurrentConnections) {
 }
 
 TEST_F(FastThriftServerStatsE2ETest, CountsRequestsAndResponses) {
-  startServer(/*withStats=*/true);
+  startServer(StatsMode::kSetters);
   auto client = createClient();
 
   EXPECT_EQ(syncCall([&] { return client->semifuture_add(10, 20); }), 30);
@@ -341,7 +359,7 @@ TEST_F(FastThriftServerStatsE2ETest, CountsRequestsAndResponses) {
 
 // Shards are created lazily per EventBase, on connection build.
 TEST_F(FastThriftServerStatsE2ETest, NoCountsBeforeFirstConnection) {
-  startServer(/*withStats=*/true);
+  startServer(StatsMode::kSetters);
 
   const auto total = totals();
   EXPECT_EQ(total.thriftInbound.value(), 0);
@@ -351,11 +369,58 @@ TEST_F(FastThriftServerStatsE2ETest, NoCountsBeforeFirstConnection) {
 // Leaving stats unset omits both metrics handlers; the server must be
 // unaffected.
 TEST_F(FastThriftServerStatsE2ETest, ServesNormallyWithoutStats) {
-  startServer(/*withStats=*/false);
+  startServer(StatsMode::kNone);
   auto client = createClient();
 
   EXPECT_EQ(syncCall([&] { return client->semifuture_add(1, 2); }), 3);
   EXPECT_EQ(server_->getStats(), nullptr);
 
   destroyClientOnEvb(client);
+}
+
+// The flag stands in for the whole setStats family, TLS included — an embedder
+// that sets it should not then have to discover which layers it missed.
+TEST_F(FastThriftServerStatsE2ETest, ConfigFlagMaterializesEveryLayer) {
+  startServer(StatsMode::kConfigFlag);
+
+  EXPECT_NE(server_->getStats(), nullptr);
+  EXPECT_NE(server_->getConnectionStats(), nullptr);
+  EXPECT_NE(server_->getTLSStats(), nullptr);
+}
+
+// Allocating the counters is only half the flag's job: it has to reach the
+// handler wiring too, which nothing but real traffic proves.
+TEST_F(FastThriftServerStatsE2ETest, ConfigFlagCountsRealTraffic) {
+  startServer(StatsMode::kConfigFlag);
+  auto client = createClient();
+
+  EXPECT_EQ(syncCall([&] { return client->semifuture_add(10, 20); }), 30);
+
+  EXPECT_EQ(totals().thriftInbound.value(), 1);
+  EXPECT_EQ(totals().thriftOutbound.value(), 1);
+  EXPECT_EQ(connectionTotals().connectionsAccepted.value(), 1);
+
+  destroyClientOnEvb(client);
+}
+
+// The flag fills empty slots rather than claiming them, so an embedder that
+// wants to hold its own instance — to publish it, say — still can.
+TEST_F(FastThriftServerStatsE2ETest, ExplicitStatsSurviveTheConfigFlag) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+  handler_ = std::make_shared<TestHandler>();
+
+  ftt::FastThriftServerConfig config;
+  config.address = folly::SocketAddress("::1", 0);
+  config.numIOThreads = 1;
+  config.enableStats = true;
+
+  server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
+  server_->setInterface(handler_);
+  auto mine = std::make_shared<ServerStats>();
+  server_->setStats(mine);
+  server_->start();
+
+  EXPECT_EQ(server_->getStats(), mine);
+  // The layers left empty are still filled.
+  EXPECT_NE(server_->getConnectionStats(), nullptr);
 }

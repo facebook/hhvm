@@ -33,6 +33,8 @@
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp2/fast_thrift/connection/common/ConnectionStats.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/TLSStats.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerConnectionFactory.h>
 
@@ -386,6 +388,22 @@ void FastThriftServer::start() {
         std::make_shared<folly::CPUThreadPoolExecutor>(config_.numCPUThreads);
     cpuExecutor_ = folly::getKeepAliveToken(ownedCPUThreadPool_.get());
   }
+  // Materialize the counters config_.enableStats asks for, leaving alone any
+  // layer the embedder already supplied via the setStats family. Done here
+  // rather than in the constructor so those setters, which reject a second
+  // instance, still have every pre-start call to themselves.
+  if (config_.enableStats) {
+    if (!stats_) {
+      stats_ = std::make_shared<ServerStats>();
+    }
+    if (!connectionStats_) {
+      connectionStats_ = std::make_shared<connection::ConnectionStats>();
+    }
+    if (!tlsStats_) {
+      tlsStats_ = std::make_shared<connection::security::TLSStats>();
+    }
+  }
+
   connectionManager_ = connection::ConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),

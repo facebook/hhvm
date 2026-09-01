@@ -157,6 +157,10 @@ class FastThriftServer {
    * omits both handlers, so a server without stats pays nothing. Must be
    * called before start()/serve().
    *
+   * Only needed to supply a specific instance — FastThriftServerConfig::
+   * enableStats materializes one (and the connection and TLS counters) at
+   * start() for embedders that just want the counters to exist.
+   *
    * Counters are sharded per EventBase and readable only from the owning
    * EventBase thread (see ServerStats). To publish them to fb303, hand the
    * same instance to a FastThriftStatsPublisher.

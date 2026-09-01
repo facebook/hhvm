@@ -100,6 +100,18 @@ struct FastThriftServerConfig {
   // there, or accept that a slow peer grows the socket write queue unbounded.
   bool enableBackpressure{true};
 
+  // When true, the server owns its counters: it materializes the message,
+  // connection and TLS stats at start() and wires the corresponding metrics
+  // handlers into every pipeline. Reach them afterwards via getStats() /
+  // getConnectionStats() / getTLSStats(), or let a
+  // FastThriftStatsRegistryPublisher discover them and publish to fb303.
+  //
+  // Per layer, an instance supplied via the setStats family wins — this flag
+  // only fills the slots the embedder left empty. Only takes effect on
+  // FastThriftServer; FastThriftChannelServer selects stats at compile time
+  // through its Stats template parameter.
+  bool enableStats{false};
+
   // Outbound write batching. Default zero-interval flushes via LoopCallback
   // at end of each event loop iteration. Set batchingInterval > 0 to use
   // an HHWheelTimer-driven flush instead.

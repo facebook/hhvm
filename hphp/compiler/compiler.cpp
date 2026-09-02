@@ -111,6 +111,7 @@ struct CompilerOptions {
   std::string matched_overrides;
   int logLevel;
   std::string filecache;
+  bool forceFileCacheSerial{true};
   bool coredump;
   std::string ondemandEdgesPath;
   std::string filesInBuildPath;
@@ -566,6 +567,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("file-cache",
      value<std::string>(&po.filecache),
      "if specified, generate a static file cache with this file name")
+    ("force-file-cache-serial",
+     value<bool>(&po.forceFileCacheSerial)->default_value(true)->implicit_value(true),
+     "build the file cache after emit instead of concurrently with it; set "
+     "to false to build it concurrently")
     ("coredump",
      value<bool>(&po.coredump)->default_value(false),
      "turn on coredump")
@@ -1686,11 +1691,29 @@ bool process(CompilerOptions &po) {
     po.coredump
   );
 
+  // The bulk of the file cache is the configured static inputs, which depend
+  // on nothing the compiler produces. Write them while emit runs so that only
+  // the files emit discovers are left on the critical path afterwards. This
+  // matters most for bytecode-only builds, where there is no HHBBC phase for
+  // the file cache write to hide under.
+  std::thread staticFileCache;
+  SCOPE_EXIT { if (staticFileCache.joinable()) staticFileCache.join(); };
+
   {
     // Emit phase: emit systemlib units, all input files, and the transitive
     // closure of files referenced by symbolRefs.
     Timer emitTimer(Timer::WallTime, "emit");
     if (!addInputsToPackage(*package, po)) return false;
+
+    if (!po.filecache.empty() && !po.forceFileCacheSerial) {
+      staticFileCache = std::thread{
+        [&] {
+          Timer _{Timer::WallTime, "saving static files to file cache..."};
+          HphpSessionAndThread session{Treadmill::SessionKind::CompilerEmit};
+          package->writeStaticFilesToVirtualFileSystem(po.filecache);
+        }
+      };
+    }
 
     if (!Cfg::Eval::UseHHBBC && Option::GenerateBinaryHHBC) {
       // Initialize autoload and repo for emitUnit() to populate
@@ -1711,6 +1734,10 @@ bool process(CompilerOptions &po) {
                   emitTimer.getMicroSeconds());
   }
 
+  // The writer isn't thread-safe, so hand it back to a single owner before
+  // appending the discovered files below.
+  if (staticFileCache.joinable()) staticFileCache.join();
+
   std::thread fileCache{
     [&, package = std::move(package), parsedFiles = std::move(parsedFiles),
       index = std::move(index)] () mutable {
@@ -1726,7 +1753,10 @@ bool process(CompilerOptions &po) {
       if (po.filecache.empty()) return;
       Timer _{Timer::WallTime, "saving file cache..."};
       HphpSessionAndThread session{Treadmill::SessionKind::CompilerEmit};
-      package->writeVirtualFileSystem(po.filecache.c_str());
+      if (po.forceFileCacheSerial) {
+        package->writeStaticFilesToVirtualFileSystem(po.filecache);
+      }
+      package->finishVirtualFileSystem();
       struct stat sb;
       stat(po.filecache.c_str(), &sb);
       Logger::Info("%" PRId64" MB %s saved",

@@ -109,6 +109,7 @@ struct Package {
           TicketExecutor& executor,
           extern_worker::Client& client,
           bool coredump);
+  ~Package();
 
   size_t getTotalFiles() const { return m_total.load(); }
 
@@ -129,7 +130,17 @@ struct Package {
   void addDirectory(const std::string& path);
   void addStaticDirectory(const std::string& path);
 
-  void writeVirtualFileSystem(const std::string& path);
+  // Write out the entries of the file cache which come purely from the
+  // configured inputs (static patterns, --dir sweeps, --cdir and --cfile).
+  // None of it depends on anything the compiler produces, so it may run
+  // concurrently with parse() and emit(). Only the files emit() discovers are
+  // left for finishVirtualFileSystem().
+  void writeStaticFilesToVirtualFileSystem(const std::string& path);
+
+  // Add the files discovered by emit() and finalize the file cache. Must run
+  // after emit() has completed and after writeStaticFilesToVirtualFileSystem()
+  // has been joined; the two share a writer which is not thread-safe.
+  void finishVirtualFileSystem();
 
   // Configuration for index & parse workers. This should contain any runtime
   // options which can affect HackC (or the interface to it).
@@ -434,6 +445,7 @@ private:
   folly_concurrent_hash_map_simd<
     std::string, std::string
   > m_discoveredStaticFiles;
+  std::unique_ptr<VirtualFileSystemWriter> m_vfsWriter;
 
   TicketExecutor& m_executor;
   extern_worker::Client& m_client;

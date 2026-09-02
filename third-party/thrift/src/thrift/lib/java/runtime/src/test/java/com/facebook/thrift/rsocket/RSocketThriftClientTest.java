@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
+import org.apache.thrift.transport.TTransportException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -81,6 +82,49 @@ public class RSocketThriftClientTest {
         () -> {
           client.pingException(new PingRequest.Builder().setRequest("ping").build());
         });
+  }
+
+  /**
+   * The handler sleeps for five seconds while the server's task timeout is a fraction of that. The
+   * client's own request timeout is left at a day so the server's error is what the caller sees.
+   */
+  @Test
+  public void testServerTaskTimeout() {
+    RpcServerHandler serverHandler =
+        new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
+
+    RSocketServerTransportFactory transportFactory =
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig()
+                .setSslEnabled(false)
+                .setEnableJdkSsl(false)
+                .setTaskExpirationTimeout(Duration.succinctDuration(200, TimeUnit.MILLISECONDS)));
+    RSocketServerTransport transport =
+        transportFactory.createServerTransport(serverHandler).block();
+
+    try {
+      InetSocketAddress address = (InetSocketAddress) transport.getAddress();
+      RpcClientFactory factory =
+          RpcClientFactory.builder()
+              .setDisableLoadBalancing(true)
+              .setDisableRSocket(false)
+              .setThriftClientConfig(
+                  new ThriftClientConfig()
+                      .setDisableSSL(true)
+                      .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+              .build();
+
+      PingService client =
+          PingService.clientBuilder().setProtocolId(ProtocolId.BINARY).build(factory, address);
+
+      TTransportException exception =
+          Assertions.assertThrows(
+              TTransportException.class,
+              () -> client.pingException(new PingRequest.Builder().setRequest("wait").build()));
+      assertEquals(TTransportException.TIMED_OUT, exception.getType());
+    } finally {
+      transport.dispose();
+    }
   }
 
   @Test

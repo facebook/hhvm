@@ -130,7 +130,7 @@ public class UnifiedServerTransport implements ServerTransport {
               // Add protocol-specific handlers
               if (protocol == RSOCKET) {
                 connection.addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder());
-                configureRsocket(connection, rpcServerHandler);
+                configureRsocket(connection, rpcServerHandler, config);
               } else {
                 int maxFrameLengthBytes =
                     (int) Math.min(config.getMaxFrameSize().toBytes(), Integer.MAX_VALUE);
@@ -187,10 +187,11 @@ public class UnifiedServerTransport implements ServerTransport {
         .subscribe(connection.disposeSubscriber());
   }
 
-  private static void configureRsocket(Connection connection, RpcServerHandler rpcServerHandler) {
+  private static void configureRsocket(
+      Connection connection, RpcServerHandler rpcServerHandler, ThriftServerConfig config) {
     RSocketServer.create(
             new ThriftSocketAcceptor(
-                rpcServerHandler, RpcServerUtils.getNiftyConnectionContext(connection)))
+                rpcServerHandler, RpcServerUtils.getNiftyConnectionContext(connection), config))
         .fragment(MAX_FRAME_SIZE)
         .payloadDecoder(PayloadDecoder.ZERO_COPY)
         .asConnectionAcceptor()

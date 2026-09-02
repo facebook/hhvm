@@ -16,8 +16,12 @@
 
 package com.facebook.thrift.rsocket.server;
 
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.facebook.thrift.payload.ServerRequestPayload;
+import com.facebook.thrift.payload.ServerResponsePayload;
+import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.rsocket.util.PayloadUtil;
 import com.facebook.thrift.server.RpcServerHandler;
@@ -30,10 +34,16 @@ import com.facebook.thrift.test.rocket.TestRequest;
 import com.facebook.thrift.test.rocket.TestRequest2;
 import com.facebook.thrift.test.rocket.TestResponse;
 import com.facebook.thrift.test.rocket.TestService;
+import com.facebook.thrift.util.RpcPayloadUtil;
 import com.facebook.thrift.util.resources.RpcResources;
+import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
+import io.rsocket.RSocketErrorException;
+import io.rsocket.frame.ErrorFrameCodec;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -42,6 +52,8 @@ import org.apache.thrift.PayloadExceptionMetadataBase;
 import org.apache.thrift.PayloadResponseMetadata;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.RequestRpcMetadata;
+import org.apache.thrift.ResponseRpcError;
+import org.apache.thrift.ResponseRpcErrorCode;
 import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.RpcKind;
 import org.apache.thrift.StreamPayloadMetadata;
@@ -49,9 +61,11 @@ import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TStruct;
 import org.apache.thrift.protocol.TType;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 public class ThriftServerRSocketTest {
@@ -777,5 +791,123 @@ public class ThriftServerRSocketTest {
         "streamInitialResponseInvalidFirstResponse",
         NullPointerException.class.getName(),
         "the first response must not be null");
+  }
+
+  private static final Duration SHORT_TASK_TIMEOUT = new Duration(50, TimeUnit.MILLISECONDS);
+  private static final Duration LONG_TASK_TIMEOUT = new Duration(1, TimeUnit.DAYS);
+  private static final String TIMEOUT_METHOD = "someMethod";
+
+  /** A handler that never answers, recording whether the transport cancelled it. */
+  private static RpcServerHandler stuckHandler(AtomicBoolean cancelled) {
+    return new RpcServerHandler() {
+      @Override
+      public Mono<ServerResponsePayload> singleRequestSingleResponse(ServerRequestPayload payload) {
+        return Mono.<ServerResponsePayload>never().doOnCancel(() -> cancelled.set(true));
+      }
+
+      @Override
+      public Mono<Void> singleRequestNoResponse(ServerRequestPayload payload) {
+        return Mono.<Void>never().doOnCancel(() -> cancelled.set(true));
+      }
+    };
+  }
+
+  private static RpcServerHandler immediateHandler() {
+    return new RpcServerHandler() {
+      @Override
+      public Mono<ServerResponsePayload> singleRequestSingleResponse(ServerRequestPayload payload) {
+        return Mono.just(RpcPayloadUtil.createServerResponsePayload(payload, protocol -> {}));
+      }
+    };
+  }
+
+  private ThriftServerRSocket rocketWithTaskTimeout(
+      RpcServerHandler handler, Duration taskExpirationTimeout) {
+    return new ThriftServerRSocket(handler, alloc, null, taskExpirationTimeout);
+  }
+
+  private Payload createTimeoutPayload(RpcKind kind, Integer clientTimeoutMs) {
+    RequestRpcMetadata.Builder builder =
+        new RequestRpcMetadata.Builder()
+            .setProtocol(ProtocolId.COMPACT)
+            .setName(TIMEOUT_METHOD)
+            .setKind(kind);
+    if (clientTimeoutMs != null) {
+      builder.setClientTimeoutMs(clientTimeoutMs);
+    }
+
+    ByteBuf metadata = alloc.buffer();
+    ProtocolUtil.writeCompact(builder.build()::write0, metadata);
+    return PayloadUtil.createPayload(alloc.buffer(), metadata);
+  }
+
+  @Test
+  public void testRequestResponseTimesOutWithTaskExpired() {
+    AtomicBoolean cancelled = new AtomicBoolean();
+
+    StepVerifier.create(
+            rocketWithTaskTimeout(stuckHandler(cancelled), SHORT_TASK_TIMEOUT)
+                .requestResponse(
+                    createTimeoutPayload(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, null)))
+        .expectErrorSatisfies(
+            t -> {
+              assertTrue(t instanceof RSocketErrorException, "expected an RSocket error, got " + t);
+              assertEquals(ErrorFrameCodec.CANCELED, ((RSocketErrorException) t).errorCode());
+
+              ResponseRpcError decoded = decodeRocketError(t);
+              assertEquals(ResponseRpcErrorCode.TASK_EXPIRED, decoded.getCode());
+              assertTrue(decoded.getWhatUtf8().contains(TIMEOUT_METHOD));
+            })
+        .verify();
+
+    assertTrue(cancelled.get(), "the handler subscription should be cancelled on timeout");
+  }
+
+  @Test
+  public void testClientDeadlineOverridesTheServerTaskTimeout() {
+    AtomicBoolean cancelled = new AtomicBoolean();
+
+    // The server would wait a day; the caller's 50ms deadline plus ten percent is what fires.
+    StepVerifier.create(
+            rocketWithTaskTimeout(stuckHandler(cancelled), LONG_TASK_TIMEOUT)
+                .requestResponse(createTimeoutPayload(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, 50)))
+        .expectError(RSocketErrorException.class)
+        .verify();
+
+    assertTrue(cancelled.get(), "the handler subscription should be cancelled on timeout");
+  }
+
+  @Test
+  public void testTaskTimeoutOfZeroLeavesTheRequestRunning() {
+    AtomicBoolean cancelled = new AtomicBoolean();
+
+    StepVerifier.create(
+            rocketWithTaskTimeout(stuckHandler(cancelled), new Duration(0, TimeUnit.MILLISECONDS))
+                .requestResponse(
+                    createTimeoutPayload(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, null)))
+        .expectTimeout(java.time.Duration.ofMillis(500))
+        .verify();
+  }
+
+  @Test
+  public void testFastRequestIsNotAffectedByTaskTimeout() {
+    StepVerifier.create(
+            rocketWithTaskTimeout(immediateHandler(), SHORT_TASK_TIMEOUT)
+                .requestResponse(
+                    createTimeoutPayload(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, null)))
+        .expectNextCount(1)
+        .verifyComplete();
+  }
+
+  @Test
+  public void testOnewayTaskTimeoutCompletesWithoutAResponse() {
+    AtomicBoolean cancelled = new AtomicBoolean();
+
+    StepVerifier.create(
+            rocketWithTaskTimeout(stuckHandler(cancelled), SHORT_TASK_TIMEOUT)
+                .fireAndForget(createTimeoutPayload(RpcKind.SINGLE_REQUEST_NO_RESPONSE, null)))
+        .verifyComplete();
+
+    assertTrue(cancelled.get(), "the handler subscription should be cancelled on timeout");
   }
 }

@@ -34,6 +34,7 @@ import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.legacy.server.ThriftOptionalSslHandler;
 import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.collect.ImmutableMap;
+import io.airlift.units.Duration;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
@@ -47,6 +48,7 @@ import io.netty.util.AttributeKey;
 import io.netty.util.internal.PlatformDependent;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import org.apache.thrift.RequestRpcMetadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -222,6 +224,56 @@ public class RpcServerUtilsTest {
 
     Flux<Object> objectFlux = RpcServerUtils.decorateWithRequestContext(mock, handle);
     StepVerifier.create(objectFlux.ignoreElements()).verifyComplete();
+  }
+
+  private static RequestRpcMetadata metadataWithClientTimeout(Integer clientTimeoutMs) {
+    RequestRpcMetadata.Builder builder = new RequestRpcMetadata.Builder().setName("someMethod");
+    if (clientTimeoutMs != null) {
+      builder.setClientTimeoutMs(clientTimeoutMs);
+    }
+    return builder.build();
+  }
+
+  @Test
+  public void testTaskTimeoutFallsBackToServerConfigWhenClientSendsNoDeadline() {
+    assertEquals(
+        5000L,
+        RpcServerUtils.resolveTaskTimeoutMillis(
+            metadataWithClientTimeout(null), Duration.valueOf("5s")));
+  }
+
+  @Test
+  public void testTaskTimeoutUsesClientDeadlinePlusHeadroom() {
+    assertEquals(
+        1100L,
+        RpcServerUtils.resolveTaskTimeoutMillis(
+            metadataWithClientTimeout(1000), Duration.valueOf("5s")));
+  }
+
+  @Test
+  public void testTaskTimeoutIgnoresZeroClientDeadline() {
+    assertEquals(
+        5000L,
+        RpcServerUtils.resolveTaskTimeoutMillis(
+            metadataWithClientTimeout(0), Duration.valueOf("5s")));
+  }
+
+  @Test
+  public void testTaskTimeoutOfZeroDisablesTheDeadline() {
+    assertEquals(
+        0L,
+        RpcServerUtils.resolveTaskTimeoutMillis(
+            metadataWithClientTimeout(1000), Duration.valueOf("0s")));
+    assertEquals(0L, RpcServerUtils.resolveTaskTimeoutMillis(null, null));
+  }
+
+  @Test
+  public void testTaskTimeoutUsesServerConfigDefault() {
+    ThriftServerConfig config = new ThriftServerConfig();
+    assertEquals(
+        5000L,
+        RpcServerUtils.resolveTaskTimeoutMillis(
+            metadataWithClientTimeout(null), config.getTaskExpirationTimeout()));
   }
 
   private static boolean isMacos() {

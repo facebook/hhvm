@@ -17,10 +17,12 @@
 package com.facebook.thrift.rsocket.server;
 
 import static com.facebook.thrift.rsocket.util.PayloadUtil.createPayload;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.taskExpired;
 
 import com.facebook.nifty.core.ConnectionContext;
 import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
+import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.compression.CompressionManager;
 import com.facebook.thrift.compression.ThriftCompressor;
 import com.facebook.thrift.payload.RequestData;
@@ -31,7 +33,11 @@ import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.server.RpcServerHandler;
+import com.facebook.thrift.util.MonoTimeoutTransformer;
 import com.facebook.thrift.util.NettyNiftyRequestContext;
+import com.facebook.thrift.util.RpcServerUtils;
+import com.facebook.thrift.util.resources.RpcResources;
+import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
@@ -39,6 +45,7 @@ import io.netty.util.ReferenceCounted;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
@@ -51,9 +58,12 @@ import reactor.core.publisher.Mono;
 public class ThriftServerRSocket implements RSocket {
   private static final Logger LOGGER = LoggerFactory.getLogger(ThriftServerRSocket.class);
 
+  private static final ThriftServerConfig DEFAULT_CONFIG = new ThriftServerConfig();
+
   private final RpcServerHandler rpcServerHandler;
   private final ByteBufAllocator alloc;
   private final ConnectionContext connectionContext;
+  private final Duration taskExpirationTimeout;
 
   public ThriftServerRSocket(RpcServerHandler rpcServerHandler, ByteBufAllocator alloc) {
     this(rpcServerHandler, alloc, null);
@@ -63,12 +73,28 @@ public class ThriftServerRSocket implements RSocket {
       RpcServerHandler rpcServerHandler,
       ByteBufAllocator alloc,
       ConnectionContext connectionContext) {
+    this(rpcServerHandler, alloc, connectionContext, DEFAULT_CONFIG.getTaskExpirationTimeout());
+  }
+
+  public ThriftServerRSocket(
+      RpcServerHandler rpcServerHandler,
+      ByteBufAllocator alloc,
+      ConnectionContext connectionContext,
+      Duration taskExpirationTimeout) {
     this.rpcServerHandler = rpcServerHandler;
     this.alloc = alloc;
     this.connectionContext =
         connectionContext != null ? connectionContext : new NiftyConnectionContext();
+    this.taskExpirationTimeout = taskExpirationTimeout;
   }
 
+  /**
+   * Note the one place this diverges from the C++ server. When the task timeout fires, {@link
+   * MonoTimeoutTransformer} cancels the handler subscription; C++ sends the error and lets the
+   * handler run to completion, then discards its result. Cancellation is best effort: a handler
+   * that blocks keeps its thread until it returns, so a blocking handler should be written to be
+   * cancellable if it must stop early.
+   */
   @Override
   public Mono<Payload> requestResponse(Payload payload) {
     ByteBuf data = null;
@@ -93,12 +119,24 @@ public class ThriftServerRSocket implements RSocket {
           == RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
       final ServerRequestPayload finalRequestPayload = requestPayload;
-      return rpcServerHandler
-          .singleRequestSingleResponse(requestPayload)
+      Mono<ServerResponsePayload> response =
+          rpcServerHandler.singleRequestSingleResponse(requestPayload);
+
+      long timeoutMillis = resolveTaskTimeoutMillis(requestRpcMetadata);
+      if (timeoutMillis > 0) {
+        final String methodName = requestRpcMetadata.getName();
+        response =
+            response.transform(
+                createTimeoutTransformer(
+                    timeoutMillis, Mono.error(() -> reportTaskExpired(methodName, timeoutMillis))));
+      }
+
+      return response
           .map(responsePayload -> handleResponse(alloc, finalRequestPayload, responsePayload))
           // The generated handler releases the request buffer right after it reads the args; this
-          // is the idempotent backstop for paths where no method body runs (unsupported RpcKind,
-          // unknown method, scheduler rejection, or cancellation before the read).
+          // is the backstop for paths where no method body runs (unsupported RpcKind, unknown
+          // method, scheduler rejection, task timeout, or cancellation before the read). It can
+          // run on a different thread from the read, so ServerRequestPayload serializes the two.
           .doFinally(__ -> finalRequestPayload.releaseRequestData());
     } catch (Throwable t) {
       releaseOnError(requestPayload, data, payload);
@@ -168,6 +206,21 @@ public class ThriftServerRSocket implements RSocket {
 
   private RequestContext createRequestContext(Map<String, String> requestHeaders) {
     return new NettyNiftyRequestContext(requestHeaders, connectionContext);
+  }
+
+  private long resolveTaskTimeoutMillis(RequestRpcMetadata requestRpcMetadata) {
+    return RpcServerUtils.resolveTaskTimeoutMillis(requestRpcMetadata, taskExpirationTimeout);
+  }
+
+  private static <T> MonoTimeoutTransformer<T> createTimeoutTransformer(
+      long timeoutMillis, Mono<T> fallback) {
+    return new MonoTimeoutTransformer<>(
+        RpcResources.getOffLoopScheduler(), timeoutMillis, TimeUnit.MILLISECONDS, fallback);
+  }
+
+  private static Throwable reportTaskExpired(String methodName, long timeoutMillis) {
+    LOGGER.warn("method {} timed out after {}ms", methodName, timeoutMillis);
+    return taskExpired(methodName, timeoutMillis);
   }
 
   /**
@@ -310,8 +363,27 @@ public class ThriftServerRSocket implements RSocket {
       assert requestPayload.getRequestRpcMetadata().getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 
       final ServerRequestPayload finalRequestPayload = requestPayload;
-      return rpcServerHandler
-          .singleRequestNoResponse(requestPayload)
+      Mono<Void> response = rpcServerHandler.singleRequestNoResponse(requestPayload);
+
+      long timeoutMillis = resolveTaskTimeoutMillis(requestRpcMetadata);
+      if (timeoutMillis > 0) {
+        final String methodName = requestRpcMetadata.getName();
+        // A oneway request has no response channel, so an expired task is dropped rather than
+        // reported. C++ arms the timer for fire-and-forget too and suppresses only the reply, so
+        // the dropped response matches; the cancellation above does not.
+        response =
+            response.transform(
+                createTimeoutTransformer(
+                    timeoutMillis,
+                    Mono.fromRunnable(
+                        () ->
+                            LOGGER.warn(
+                                "oneway method {} timed out after {}ms, dropping",
+                                methodName,
+                                timeoutMillis))));
+      }
+
+      return response
           // The generated handler releases the request buffer right after it reads the args; this
           // is the idempotent backstop for paths where no method body runs.
           .doFinally(__ -> finalRequestPayload.releaseRequestData());

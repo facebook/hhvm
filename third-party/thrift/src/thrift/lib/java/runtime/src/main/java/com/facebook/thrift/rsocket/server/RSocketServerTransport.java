@@ -78,7 +78,8 @@ public class RSocketServerTransport implements ServerTransport {
                         RSocketServer.create(
                                 new ThriftSocketAcceptor(
                                     rpcServerHandler,
-                                    RpcServerUtils.getNiftyConnectionContext(connection)))
+                                    RpcServerUtils.getNiftyConnectionContext(connection),
+                                    config))
                             .fragment(MAX_FRAME_SIZE)
                             .payloadDecoder(PayloadDecoder.ZERO_COPY)
                             .asConnectionAcceptor();

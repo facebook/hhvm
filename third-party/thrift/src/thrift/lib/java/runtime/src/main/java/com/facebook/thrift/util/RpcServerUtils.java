@@ -29,6 +29,7 @@ import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.server.ServerTransportFactory;
 import com.facebook.thrift.transport.unified.UnifiedServerTransportFactory;
+import io.airlift.units.Duration;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
@@ -55,6 +56,7 @@ import java.security.cert.X509Certificate;
 import java.util.Objects;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
+import org.apache.thrift.RequestRpcMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
@@ -66,7 +68,41 @@ public final class RpcServerUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(RpcServerUtils.class);
 
+  // Matches the C++ server: pad the caller's deadline so the caller times out first and sees its
+  // own timeout instead of a server error.
+  private static final double CLIENT_TIMEOUT_HEADROOM = 1.1;
+
   private RpcServerUtils() {}
+
+  /**
+   * Resolves how long the server will let a request run before it abandons it, in milliseconds.
+   * Zero means no deadline.
+   *
+   * <p>Follows {@code ThriftServer::getTaskExpireTimeForRequest} in the C++ runtime: the configured
+   * {@code taskExpirationTimeout} applies unless the caller advertised its own deadline in {@link
+   * RequestRpcMetadata#getClientTimeoutMs()}, in which case that deadline plus ten percent wins.
+   *
+   * <p>There is one deliberate difference. When the caller advertises no deadline, C++ computes a
+   * task timeout of zero and arms no timer at all. Java clients rarely set {@code clientTimeoutMs},
+   * so that behavior would leave the server unprotected in the common case; this keeps {@code
+   * taskExpirationTimeout} instead.
+   */
+  public static long resolveTaskTimeoutMillis(
+      RequestRpcMetadata metadata, Duration taskExpirationTimeout) {
+    long taskTimeoutMillis = taskExpirationTimeout == null ? 0L : taskExpirationTimeout.toMillis();
+    if (taskTimeoutMillis <= 0L) {
+      return 0L;
+    }
+    if (metadata == null) {
+      return taskTimeoutMillis;
+    }
+
+    Integer clientTimeoutMs = metadata.getClientTimeoutMs();
+    if (clientTimeoutMs == null || clientTimeoutMs <= 0) {
+      return taskTimeoutMillis;
+    }
+    return (long) (clientTimeoutMs * CLIENT_TIMEOUT_HEADROOM);
+  }
 
   /**
    * Returns ServerChannel Class from eventLoopGroup and socketAddress. Throws

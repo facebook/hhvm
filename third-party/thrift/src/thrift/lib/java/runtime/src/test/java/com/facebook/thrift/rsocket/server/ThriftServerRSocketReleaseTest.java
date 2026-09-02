@@ -335,4 +335,43 @@ public class ThriftServerRSocketReleaseTest {
     protocol.readStructEnd();
     return testResponse;
   }
+
+  /**
+   * The task timeout terminates the request from a different thread than the one that reads the
+   * args, so it is the ordering most likely to free a buffer under a reader. The handler here reads
+   * the args and then never answers, which leaves the read complete and the request alive until the
+   * deadline fires.
+   */
+  @Test
+  public void requestResponse_freesRequestBuffersWhenTheTaskTimeoutFires() {
+    RequestRpcMetadata metadata =
+        metadata(ProtocolId.COMPACT, "requestResponse", RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE);
+    ByteBuf data = createData(metadata, request(5, "foo"));
+    ByteBuf meta = createMetadata(metadata);
+    Payload payload = PayloadUtil.createPayload(data, meta);
+
+    RpcServerHandler handler =
+        TestService.Reactive.serverHandlerBuilder(
+                new TestServiceHandler() {
+                  @Override
+                  public reactor.core.publisher.Mono<TestResponse> requestResponse(
+                      TestRequest testRequest) {
+                    return reactor.core.publisher.Mono.never();
+                  }
+                })
+            .build();
+    ThriftServerRSocket timingOutRocket =
+        new ThriftServerRSocket(
+            handler,
+            ByteBufAllocator.DEFAULT,
+            null,
+            new io.airlift.units.Duration(50, java.util.concurrent.TimeUnit.MILLISECONDS));
+
+    StepVerifier.create(timingOutRocket.requestResponse(payload))
+        .expectError(io.rsocket.RSocketErrorException.class)
+        .verify();
+
+    assertEquals(0, data.refCnt(), "request data must be freed when the task timeout fires");
+    assertEquals(0, meta.refCnt(), "request metadata must be freed when the task timeout fires");
+  }
 }

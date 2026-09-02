@@ -117,8 +117,8 @@ typename Container::reference emplace_back_default_map(Container& c, Map& m) {
           alloc_should_propagate<Map, typename Map::mapped_type>;
   if constexpr (passAlloc) {
     return c.emplace_back(
-        typename Map::key_type(m.get_allocator()),
-        typename Map::mapped_type(m.get_allocator()));
+        apache::thrift::detail::default_map_key(m),
+        apache::thrift::detail::default_map_value(m));
   } else {
     return c.emplace_back();
   }

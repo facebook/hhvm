@@ -23,7 +23,7 @@ import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
 import com.facebook.thrift.compression.CompressionManager;
 import com.facebook.thrift.compression.ThriftCompressor;
-import com.facebook.thrift.payload.Reader;
+import com.facebook.thrift.payload.RequestData;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.payload.Writer;
@@ -38,15 +38,10 @@ import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ReferenceCounted;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
-import org.apache.thrift.protocol.TProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
@@ -201,20 +196,18 @@ public class ThriftServerRSocket implements RSocket {
     return compressor.decompress(alloc, data); // ownership of `data` transferred to the compressor
   }
 
-  @SuppressWarnings("rawtypes")
   private static ServerRequestPayload deserializeRequest(
       ByteBuf data,
       RequestRpcMetadata requestRpcMetadata,
       RequestContext requestContext,
       ReferenceCounted requestData) {
-    ByteBufTProtocol out =
+    ByteBufTProtocol protocol =
         TProtocolType.fromProtocolId(requestRpcMetadata.getProtocol()).apply(data);
-    Function<List<Reader>, List<Object>> readerTransformer = createReaderFunction(out);
-    // The payload owns the decoded request data buffer so the generated handler can release it (via
-    // releaseRequestData()) right after reading the request args, instead of holding it until the
-    // response completes.
+    // The payload owns the decoded request data buffer, bound to the reader positioned on it, so
+    // the generated handler reads and frees it as one claim rather than holding the buffer until
+    // the response completes.
     return ServerRequestPayload.create(
-        readerTransformer, requestRpcMetadata, requestContext, requestData);
+        requestRpcMetadata, requestContext, RequestData.of(requestData, protocol));
   }
 
   /**
@@ -326,25 +319,5 @@ public class ThriftServerRSocket implements RSocket {
       releaseOnError(requestPayload, data, payload);
       return Mono.error(t);
     }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static Function<List<Reader>, List<Object>> createReaderFunction(TProtocol out) {
-    return readers -> {
-      out.readStructBegin();
-      List<Object> requestArguments = Collections.emptyList();
-      if (readers != null && !readers.isEmpty()) {
-        requestArguments = new ArrayList<>();
-        for (Reader r : readers) {
-          out.readFieldBegin();
-          requestArguments.add(r.read(out));
-          out.readFieldEnd();
-        }
-      }
-
-      out.readStructEnd();
-      out.readMessageEnd();
-      return requestArguments;
-    };
   }
 }

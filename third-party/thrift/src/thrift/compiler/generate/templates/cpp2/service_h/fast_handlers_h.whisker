@@ -27,9 +27,15 @@ namespace apache::thrift {
  * Service-shared interface for the fast_thrift server.
  *
  * Users specialize this by inheriting from
- * apache::thrift::FastServiceHandler<{{service.qualified_name}}>
- * and overriding async_eb_* methods. One shared instance is wired into
- * every per-connection {{service.cpp_name}}AppAdapter.
+ * apache::thrift::FastServiceHandler<{{service.qualified_name}}> and
+ * overriding one generated method per function. One shared instance is wired
+ * into every per-connection {{service.cpp_name}}AppAdapter.
+ *
+ * The method name says where the body runs, matching the legacy stack:
+ * async_eb_<name> for a function annotated @cpp.ProcessInEbThreadUnsafe, which
+ * runs inline on the connection's EventBase; async_tm_<name> otherwise, which
+ * runs on the CPU executor when the server has one and inline on the EventBase
+ * when it does not.
  *
  * Each method takes a FastHandlerCallback that the user completes (with a
  * value, with done(), or with an exception). The default implementation
@@ -77,7 +83,7 @@ class FastServiceHandler<{{service.qualified_name}}>
 
   {{#each service.functions as |function|}}
   {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
-  virtual void async_eb_{{function.cpp_name}}(
+  virtual void async_{{#if function.event_based?}}eb{{#else}}tm{{/if}}_{{function.cpp_name}}(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<{{#partial server.return_type function=function service=service}}> callback{{#each function.params.fields as |field|}},
       {{#partial server.param_type type=field.type function=function}} /*p_{{field.cpp_name}}*/{{/each}}) {
     callback->exception(

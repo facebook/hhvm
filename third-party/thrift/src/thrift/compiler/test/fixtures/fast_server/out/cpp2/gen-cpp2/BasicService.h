@@ -411,9 +411,15 @@ namespace apache::thrift {
  * Service-shared interface for the fast_thrift server.
  *
  * Users specialize this by inheriting from
- * apache::thrift::FastServiceHandler<::cpp2::test::BasicService>
- * and overriding async_eb_* methods. One shared instance is wired into
- * every per-connection BasicServiceAppAdapter.
+ * apache::thrift::FastServiceHandler<::cpp2::test::BasicService> and
+ * overriding one generated method per function. One shared instance is wired
+ * into every per-connection BasicServiceAppAdapter.
+ *
+ * The method name says where the body runs, matching the legacy stack:
+ * async_eb_<name> for a function annotated @cpp.ProcessInEbThreadUnsafe, which
+ * runs inline on the connection's EventBase; async_tm_<name> otherwise, which
+ * runs on the CPU executor when the server has one and inline on the EventBase
+ * when it does not.
  *
  * Each method takes a FastHandlerCallback that the user completes (with a
  * value, with done(), or with an exception). The default implementation
@@ -448,14 +454,14 @@ class FastServiceHandler<::cpp2::test::BasicService>
   void getServiceMetadata(
       ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 
-  virtual void async_eb_ping(
+  virtual void async_tm_ping(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback) {
     callback->exception(
         folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: ping"));
   }
-  virtual void async_eb_add(
+  virtual void async_tm_add(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback,
       ::std::int32_t /*p_a*/,
       ::std::int32_t /*p_b*/) {
@@ -464,7 +470,7 @@ class FastServiceHandler<::cpp2::test::BasicService>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: add"));
   }
-  virtual void async_eb_buildItem(
+  virtual void async_tm_buildItem(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
       std::unique_ptr<::cpp2::test::DataItem> /*p_template_*/,
       ::std::int32_t /*p_id*/) {
@@ -473,7 +479,7 @@ class FastServiceHandler<::cpp2::test::BasicService>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: buildItem"));
   }
-  virtual void async_eb_lookup(
+  virtual void async_tm_lookup(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
       ::std::int32_t /*p_id*/) {
     callback->exception(
@@ -481,7 +487,7 @@ class FastServiceHandler<::cpp2::test::BasicService>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: lookup"));
   }
-  virtual void async_eb_secureLookup(
+  virtual void async_tm_secureLookup(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
       ::std::int32_t /*p_id*/,
       std::unique_ptr<::std::string> /*p_user*/) {

@@ -1403,10 +1403,10 @@ void BasicServiceAppAdapter::process_ping_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -1419,7 +1419,7 @@ void BasicServiceAppAdapter::process_ping_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_ping(
+    handler_->async_tm_ping(
         std::move(callback));
   } catch (...) {
   }
@@ -1533,10 +1533,10 @@ void BasicServiceAppAdapter::process_add_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -1549,7 +1549,7 @@ void BasicServiceAppAdapter::process_add_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_add(
+    handler_->async_tm_add(
         std::move(callback), args.uarg_a, args.uarg_b);
   } catch (...) {
   }
@@ -1664,10 +1664,10 @@ void BasicServiceAppAdapter::process_buildItem_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -1680,7 +1680,7 @@ void BasicServiceAppAdapter::process_buildItem_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_buildItem(
+    handler_->async_tm_buildItem(
         std::move(callback), std::move(args.uarg_template_), args.uarg_id);
   } catch (...) {
   }
@@ -1792,10 +1792,10 @@ void BasicServiceAppAdapter::process_lookup_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -1808,7 +1808,7 @@ void BasicServiceAppAdapter::process_lookup_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_lookup(
+    handler_->async_tm_lookup(
         std::move(callback), args.uarg_id);
   } catch (...) {
   }
@@ -1923,10 +1923,10 @@ void BasicServiceAppAdapter::process_secureLookup_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -1939,7 +1939,7 @@ void BasicServiceAppAdapter::process_secureLookup_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_secureLookup(
+    handler_->async_tm_secureLookup(
         std::move(callback), args.uarg_id, std::move(args.uarg_user));
   } catch (...) {
   }
@@ -2023,10 +2023,10 @@ void BasicServiceAppAdapter::process_ebLookup_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner

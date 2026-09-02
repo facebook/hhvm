@@ -149,10 +149,10 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_run(
   }
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
-  // The handler may complete synchronously or asynchronously; either way
-  // the callback owns any further write/close coordination.
+  // The handler may complete synchronously or asynchronously; either way the
+  // callback owns any further write/close coordination.
   //
-  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // A synchronous throw out of the handler would otherwise hit the noexcept
   // boundary on this function and terminate the process, so it is swallowed
   // here. The callback is deliberately not touched: ownership passed to the
   // handler at the call, and reaching back for it would mean a second owner
@@ -165,7 +165,7 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_run(
   // callback->exception(ew) is — so the lost exception detail is confined to
   // handler misuse.
   try {
-    handler_->async_eb_{{function.cpp_name}}(
+    handler_->async_{{#if function.event_based?}}eb{{#else}}tm{{/if}}_{{function.cpp_name}}(
         std::move(callback){{#partial server.get_args_ref function=function}});
   } catch (...) {
   }

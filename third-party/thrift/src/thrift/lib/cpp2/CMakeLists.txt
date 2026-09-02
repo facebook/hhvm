@@ -420,6 +420,7 @@ add_library(
   server/CPUConcurrencyController.cpp
   server/DecoratorData.cpp
   server/DecoratorDataRuntime.cpp
+  server/DiscriminantLoadSheddingOSS.cpp
   server/LazyDynamicArguments.cpp
   server/LegacyHeaderRoutingHandler.cpp
   server/LoggingEvent.cpp

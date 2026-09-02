@@ -40,7 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.TApplicationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -117,11 +117,15 @@ public class RSocketThriftClientTest {
       PingService client =
           PingService.clientBuilder().setProtocolId(ProtocolId.BINARY).build(factory, address);
 
-      TTransportException exception =
+      TApplicationException exception =
           Assertions.assertThrows(
-              TTransportException.class,
+              TApplicationException.class,
               () -> client.pingException(new PingRequest.Builder().setRequest("wait").build()));
-      assertEquals(TTransportException.TIMED_OUT, exception.getType());
+      assertEquals(TApplicationException.TIMEOUT, exception.getType());
+      // The caller must see what_utf8, not the compact-serialized error struct.
+      Assertions.assertTrue(
+          exception.getMessage().startsWith("Task expired for pingException after "),
+          "unexpected message: " + exception.getMessage());
     } finally {
       transport.dispose();
     }

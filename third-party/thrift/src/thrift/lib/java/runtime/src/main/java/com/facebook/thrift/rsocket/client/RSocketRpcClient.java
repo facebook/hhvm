@@ -21,7 +21,8 @@ import static com.facebook.thrift.rsocket.util.MetadataUtil.decodeStreamingPaylo
 import static com.facebook.thrift.rsocket.util.PayloadUtil.createPayload;
 import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
 import static com.facebook.thrift.rsocket.util.RocketErrorUtil.isRocketError;
-import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toTransportExceptionType;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toApplicationException;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toResponseMetadata;
 import static com.facebook.thrift.util.RpcClientUtils.getExceptionString;
 import static com.facebook.thrift.util.RpcClientUtils.getUndeclaredException;
 
@@ -52,7 +53,6 @@ import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TStruct;
-import org.apache.thrift.transport.TTransportException;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,17 +144,22 @@ public final class RSocketRpcClient implements RpcClient {
    * INVALID, CANCELLED and REJECTED rsocket error codes are defined as internal server error in
    * rocket protocol. Payload will be compact protocol serialized ResponseRpcError struct.
    *
+   * <p>The C++ client reports these as a {@code TApplicationException} carrying the error's own
+   * type and {@code what_utf8}, plus the {@code ex} header. This does the same.
+   *
    * @param t Throwable contains rsocket error code
    * @param <T>
    * @return ClientResponsePayload
    */
   private <T> ClientResponsePayload<T> getErrorFrame(Throwable t) {
     ResponseRpcError err = decodeRocketError(t);
+    if (err == null) {
+      // Unreadable frame: report the parse failure rather than letting it replace the server's
+      // error with an unrelated exception, as the C++ client does.
+      return ClientResponsePayload.createException(toApplicationException(t), null, null, false);
+    }
     return ClientResponsePayload.createException(
-        new TTransportException(toTransportExceptionType(err.getCode()), t.getMessage()),
-        null,
-        null,
-        false);
+        toApplicationException(err), toResponseMetadata(err), null, false);
   }
 
   @Override

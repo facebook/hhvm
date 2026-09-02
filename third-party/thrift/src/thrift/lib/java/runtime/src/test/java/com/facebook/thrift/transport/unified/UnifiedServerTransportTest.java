@@ -45,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.TApplicationException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -252,8 +251,9 @@ public class UnifiedServerTransportTest {
         .expectErrorSatisfies(
             t -> {
               assertTrue(
-                  t instanceof TTransportException, "expected a transport exception, got " + t);
-              assertEquals(TTransportException.TIMED_OUT, ((TTransportException) t).getType());
+                  t instanceof TApplicationException,
+                  "expected an application exception, got " + t);
+              assertEquals(TApplicationException.TIMEOUT, ((TApplicationException) t).getType());
             })
         .verify();
   }

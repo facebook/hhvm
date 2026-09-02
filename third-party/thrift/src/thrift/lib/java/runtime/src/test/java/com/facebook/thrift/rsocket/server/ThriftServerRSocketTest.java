@@ -17,6 +17,7 @@
 package com.facebook.thrift.rsocket.server;
 
 import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.isRocketError;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.payload.ServerRequestPayload;
@@ -851,7 +852,7 @@ public class ThriftServerRSocketTest {
                     createTimeoutPayload(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, null)))
         .expectErrorSatisfies(
             t -> {
-              assertTrue(t instanceof RSocketErrorException, "expected an RSocket error, got " + t);
+              assertTrue(isRocketError(t), "expected an RSocket error frame, got " + t);
               assertEquals(ErrorFrameCodec.CANCELED, ((RSocketErrorException) t).errorCode());
 
               ResponseRpcError decoded = decodeRocketError(t);

@@ -19,6 +19,9 @@ package com.facebook.thrift.rsocket.client;
 import static com.facebook.thrift.rsocket.util.MetadataUtil.decodePayloadMetadata;
 import static com.facebook.thrift.rsocket.util.MetadataUtil.decodeStreamingPayloadMetadata;
 import static com.facebook.thrift.rsocket.util.PayloadUtil.createPayload;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.isRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toTransportExceptionType;
 import static com.facebook.thrift.util.RpcClientUtils.getExceptionString;
 import static com.facebook.thrift.util.RpcClientUtils.getUndeclaredException;
 
@@ -36,8 +39,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketErrorException;
-import io.rsocket.frame.ErrorFrameCodec;
 import io.rsocket.util.ByteBufPayload;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,7 +48,6 @@ import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.ResponseRpcError;
-import org.apache.thrift.ResponseRpcErrorCode;
 import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TException;
@@ -128,7 +128,7 @@ public final class RSocketRpcClient implements RpcClient {
                         rsocketPayloadToClientResponsePayload(payload, response, protocolType))
                 .onErrorResume(
                     t -> {
-                      if (isInternalError(t)) {
+                      if (isRocketError(t)) {
                         return Mono.just(getErrorFrame(t));
                       }
                       return Mono.error(t);
@@ -140,27 +140,6 @@ public final class RSocketRpcClient implements RpcClient {
         });
   }
 
-  private boolean isInternalError(Throwable t) {
-    if (t instanceof RSocketErrorException) {
-      int code = ((RSocketErrorException) t).errorCode();
-
-      if (code >= ErrorFrameCodec.REJECTED && code <= ErrorFrameCodec.INVALID) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private int getType(ResponseRpcErrorCode code) {
-    switch (code) {
-      case TASK_EXPIRED:
-        return TTransportException.TIMED_OUT;
-      default:
-        return TTransportException.UNKNOWN;
-    }
-  }
-
   /**
    * INVALID, CANCELLED and REJECTED rsocket error codes are defined as internal server error in
    * rocket protocol. Payload will be compact protocol serialized ResponseRpcError struct.
@@ -170,12 +149,12 @@ public final class RSocketRpcClient implements RpcClient {
    * @return ClientResponsePayload
    */
   private <T> ClientResponsePayload<T> getErrorFrame(Throwable t) {
-    byte[] bytes = t.getMessage().getBytes();
-    ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
-    ByteBufTProtocol protocol = TProtocolType.TCompact.apply(byteBuf);
-    ResponseRpcError err = ResponseRpcError.read0(protocol);
+    ResponseRpcError err = decodeRocketError(t);
     return ClientResponsePayload.createException(
-        new TTransportException(getType(err.getCode()), t.getMessage()), null, null, false);
+        new TTransportException(toTransportExceptionType(err.getCode()), t.getMessage()),
+        null,
+        null,
+        false);
   }
 
   @Override
@@ -212,7 +191,7 @@ public final class RSocketRpcClient implements RpcClient {
                 .requestStream(rsocketPayload)
                 .onErrorResume(
                     t -> {
-                      if (isInternalError(t)) {
+                      if (isRocketError(t)) {
                         return Flux.just(
                             ByteBufPayload.create(
                                 getExceptionString(t, payload.getRequestRpcMetadata().getName())));
@@ -255,7 +234,7 @@ public final class RSocketRpcClient implements RpcClient {
                   .requestChannel(payloadFlux)
                   .onErrorResume(
                       t -> {
-                        if (isInternalError(t)) {
+                        if (isRocketError(t)) {
                           return Flux.just(
                               ByteBufPayload.create(
                                   getExceptionString(

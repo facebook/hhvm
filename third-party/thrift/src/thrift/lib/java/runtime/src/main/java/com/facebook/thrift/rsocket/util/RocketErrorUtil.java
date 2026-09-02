@@ -23,10 +23,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
 import io.rsocket.RSocketErrorException;
 import io.rsocket.exceptions.CanceledException;
+import io.rsocket.frame.ErrorFrameCodec;
 import java.nio.charset.StandardCharsets;
 import org.apache.thrift.ResponseRpcError;
 import org.apache.thrift.ResponseRpcErrorCategory;
 import org.apache.thrift.ResponseRpcErrorCode;
+import org.apache.thrift.transport.TTransportException;
 
 /**
  * Encodes and decodes the errors that Rocket carries out of band, in an RSocket ERROR frame, rather
@@ -68,12 +70,48 @@ public final class RocketErrorUtil {
   }
 
   /**
-   * Reads the {@link ResponseRpcError} back out of an ERROR frame. rsocket-java surfaces the frame
-   * data as the exception message.
+   * Returns whether the throwable is an ERROR frame carrying a {@link ResponseRpcError}. The Rocket
+   * protocol defines the INVALID, CANCELED and REJECTED codes as server errors that do so.
+   */
+  public static boolean isRocketError(Throwable t) {
+    if (!(t instanceof RSocketErrorException)) {
+      return false;
+    }
+    int code = ((RSocketErrorException) t).errorCode();
+    return code >= ErrorFrameCodec.REJECTED && code <= ErrorFrameCodec.INVALID;
+  }
+
+  /**
+   * Reads the {@link ResponseRpcError} out of an error for which {@link #isRocketError} holds.
+   * rsocket-java surfaces the frame data as the exception message.
    */
   public static ResponseRpcError decodeRocketError(Throwable t) {
     ByteBuf buffer = Unpooled.wrappedBuffer(t.getMessage().getBytes(StandardCharsets.UTF_8));
     return ProtocolUtil.readCompact(ResponseRpcError::read0, buffer);
+  }
+
+  /**
+   * Maps a decoded error code onto the {@link TTransportException} type a caller should see.
+   *
+   * <p>This is a verbatim move of the client's former private {@code getType}, so the map is the
+   * one that shipped before: only {@code TASK_EXPIRED} reaches TIMED_OUT, and every other code,
+   * including {@code QUEUE_TIMEOUT}, degrades to UNKNOWN.
+   *
+   * <p>It cannot be completed in place. The C++ client maps these codes onto {@link
+   * org.apache.thrift.TApplicationException}, which has a type for nearly every code: LOADSHEDDING
+   * for the overload, shutdown, quota and interaction-loadshed codes, plus UNKNOWN_METHOD,
+   * CHECKSUM_MISMATCH, INJECTED_FAILURE, INTERRUPTION, UNSUPPORTED_CLIENT_TYPE and INTERNAL_ERROR.
+   * {@link TTransportException} declares only UNKNOWN, NOT_OPEN, ALREADY_OPEN, TIMED_OUT and
+   * END_OF_FILE, so TIMED_OUT is the one type it shares with that set. The next diff in the stack
+   * moves the client to {@code TApplicationException} and ports the full table.
+   */
+  public static int toTransportExceptionType(ResponseRpcErrorCode code) {
+    switch (code) {
+      case TASK_EXPIRED:
+        return TTransportException.TIMED_OUT;
+      default:
+        return TTransportException.UNKNOWN;
+    }
   }
 
   /** Reduces a message to plain ASCII within {@link #MAX_MESSAGE_LENGTH} characters. */

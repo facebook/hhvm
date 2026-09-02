@@ -17,16 +17,21 @@
 package com.facebook.thrift.rsocket.util;
 
 import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.isRocketError;
 import static com.facebook.thrift.rsocket.util.RocketErrorUtil.taskExpired;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toTransportExceptionType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.rsocket.RSocketErrorException;
+import io.rsocket.exceptions.RejectedException;
 import io.rsocket.frame.ErrorFrameCodec;
 import java.nio.charset.StandardCharsets;
 import org.apache.thrift.ResponseRpcError;
 import org.apache.thrift.ResponseRpcErrorCategory;
 import org.apache.thrift.ResponseRpcErrorCode;
+import org.apache.thrift.transport.TTransportException;
 import org.junit.jupiter.api.Test;
 
 public class RocketErrorUtilTest {
@@ -35,6 +40,49 @@ public class RocketErrorUtilTest {
   public void testTaskExpiredUsesTheCanceledErrorCode() {
     RSocketErrorException exception = taskExpired("someMethod", 5000L);
     assertEquals(ErrorFrameCodec.CANCELED, exception.errorCode());
+    assertTrue(isRocketError(exception));
+  }
+
+  @Test
+  public void testIsRocketErrorRejectsOtherThrowables() {
+    assertFalse(isRocketError(new IllegalStateException("boom")));
+  }
+
+  @Test
+  public void testIsRocketErrorAcceptsTheOtherServerErrorCodes() {
+    assertTrue(isRocketError(new RejectedException("rejected")));
+  }
+
+  /** Pins the map that this diff moves, unchanged. The next diff in the stack corrects it. */
+  @Test
+  public void testTaskExpiredMapsToTimedOut() {
+    assertEquals(
+        TTransportException.TIMED_OUT, toTransportExceptionType(ResponseRpcErrorCode.TASK_EXPIRED));
+  }
+
+  @Test
+  public void testEveryOtherCodeMapsToUnknown() {
+    for (ResponseRpcErrorCode code :
+        new ResponseRpcErrorCode[] {
+          ResponseRpcErrorCode.QUEUE_TIMEOUT,
+          ResponseRpcErrorCode.OVERLOAD,
+          ResponseRpcErrorCode.QUEUE_OVERLOADED,
+          ResponseRpcErrorCode.SHUTDOWN,
+          ResponseRpcErrorCode.INJECTED_FAILURE,
+          ResponseRpcErrorCode.REQUEST_PARSING_FAILURE,
+          ResponseRpcErrorCode.RESPONSE_TOO_BIG,
+          ResponseRpcErrorCode.WRONG_RPC_KIND,
+          ResponseRpcErrorCode.UNKNOWN_METHOD,
+          ResponseRpcErrorCode.CHECKSUM_MISMATCH,
+          ResponseRpcErrorCode.INTERRUPTION,
+          ResponseRpcErrorCode.APP_OVERLOAD,
+          ResponseRpcErrorCode.UNIMPLEMENTED_METHOD,
+          ResponseRpcErrorCode.TENANT_QUOTA_EXCEEDED,
+          ResponseRpcErrorCode.INTERACTION_LOADSHEDDED,
+          ResponseRpcErrorCode.UNKNOWN,
+        }) {
+      assertEquals(TTransportException.UNKNOWN, toTransportExceptionType(code), code.toString());
+    }
   }
 
   @Test

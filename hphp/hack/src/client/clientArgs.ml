@@ -212,8 +212,8 @@ end = struct
     match Exception.unwrap e with
     | Exit_status.Exit_with _ -> Exception.reraise e
     | _ ->
-      (* Re-raising an uncaught OCaml exception exits with 2. *)
-      log ~exit_code:2 ~exit_status:Exit_status.Input_error e;
+      let exit_status = Exit_status.Uncaught_exception e in
+      log ~exit_code:(Exit_status.exit_code exit_status) ~exit_status e;
       Exception.reraise e
 end
 

@@ -185,7 +185,7 @@ let exec_command_with_config
   with
   | exn -> handle_exn_and_exit exn ~command_name
 
-let () =
+let main () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
   (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
@@ -207,3 +207,11 @@ let () =
   | ClientCommand.Without_config command -> exec_command_without_config command
   | ClientCommand.With_config command ->
     exec_command_with_config command ~init_proc_stack
+
+let () =
+  try main () with
+  | Exit_status.Exit_with exit_status -> Exit.exit exit_status
+  | exn ->
+    let exit_status = Exit_status.Uncaught_exception (Exception.wrap exn) in
+    Printf.eprintf "%s\n%!" (Exit_status.show_expanded exit_status);
+    Exit.exit exit_status

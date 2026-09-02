@@ -1,0 +1,9 @@
+(5,32)-(5,37) Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.
+(5,38)-(5,38) A right parenthesis `)` is expected here.
+(5,38)-(5,46) A type specifier is expected here.
+(5,47)-(5,47) A right parenthesis `)` is expected here.
+(5,51)-(5,51) Local variables cannot have type annotations in Hack.
+(5,57)-(5,57) A semicolon `;` is expected here.
+(5,58)-(5,58) An expression is expected here.
+(5,60)-(5,60) An expression is expected here.
+(5,64)-(5,65) Encountered unexpected token `)`.

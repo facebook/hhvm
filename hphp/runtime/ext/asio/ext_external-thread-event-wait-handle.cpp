@@ -140,8 +140,8 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
 }
 
 bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
-  if (getState() != STATE_WAITING) {
-    return false;               // already finished
+  if (getState() != STATE_WAITING || startedProcessing()) {
+    return false; // already finished or currently being processed.
   }
 
   if (!m_event->cancel()) {
@@ -178,10 +178,8 @@ bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
 
 void c_ExternalThreadEventWaitHandle::process() {
   assertx(getState() == STATE_WAITING);
-
-  if (isInContext()) {
-    unregisterFromContext();
-  }
+  assertx(!startedProcessing());
+  m_startedProcessing = true;
 
   // Store the finish time of the underlying IO operation
   // So we can pass it in the finish callbacks
@@ -191,6 +189,9 @@ void c_ExternalThreadEventWaitHandle::process() {
 
   TypedValue result;
   try {
+    auto unregisterGuard = folly::makeGuard([&] {
+      if (isInContext()) unregisterFromContext();
+    });
     try {
       m_event->unserialize(result);
     } catch (ExtendedException& exception) {

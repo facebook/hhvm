@@ -34,6 +34,16 @@ namespace HPHP::asio {
 
 namespace {
 
+void checkImportable(c_WaitableWaitHandle* node) {
+  if (node->getKind() == c_Awaitable::Kind::ExternalThreadEvent &&
+      node->asExternalThreadEvent()->startedProcessing()) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Detected cross-context dependency cycle. You are trying to depend "
+      "on something that is running you serially."
+    );
+  }
+}
+
 // Struct to hold metadate for tracking throughout discover phase.
 struct WHInfo {
   c_WaitableWaitHandle* waitHandle;
@@ -52,6 +62,8 @@ struct EnterContextState final {
     if (node->isFinished() || node->getContextStateIndex() >= newStateIdx) {
       return;
     }
+
+    checkImportable(node);
 
     auto it = m_importMap.find(node);
     if (it == m_importMap.end()) {
@@ -248,6 +260,7 @@ void enter_context_impl(c_WaitableWaitHandle *root,
                         ContextStateIndex newStateIdx) {
   assertx(!root->isFinished());
   assertx(root->getContextStateIndex() < newStateIdx);
+  checkImportable(root);
 
   EnterContextState ctx(root, newStateIdx);
   ctx.discover();

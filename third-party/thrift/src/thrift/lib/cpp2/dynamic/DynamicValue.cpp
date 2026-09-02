@@ -158,6 +158,10 @@ DynamicValue DynamicValue::makeDefault(
     case Kind::UNION:
       return DynamicValue(
           type, detail::Datum::make(makeUnion(type.asUnionUnchecked(), mr)));
+    case Kind::OPAQUE_ALIAS: {
+      auto target = makeDefault(type.asOpaqueAlias().targetType(), mr);
+      return DynamicValue(type, std::move(target).datum());
+    }
     default:
       throw std::runtime_error(
           fmt::format(

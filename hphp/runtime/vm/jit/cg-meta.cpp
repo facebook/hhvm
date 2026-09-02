@@ -25,12 +25,19 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/roar.h"
 
+typedef struct ROARFunctionCallSite_ {
+  void* call;
+  void* target;
+} ROARFunctionCallSite;
+
 namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg)
 
 extern "C" __attribute__((weak))
-int __roar_api_flag_safe_function_call_site(void*, void*);
+int __roar_api_flag_safe_function_call_sites(
+  const ROARFunctionCallSite*, size_t, bool
+);
 
 namespace {
 
@@ -233,6 +240,29 @@ void CGMeta::process_literals() {
   literalAddrs.clear();
 }
 
+void CGMeta::processNativeCalls() {
+  if (use_roar && !nativeCalls.empty()) {
+    std::vector<ROARFunctionCallSite> callSites;
+    callSites.reserve(nativeCalls.size());
+    for (auto const& nc : nativeCalls) {
+      callSites.push_back({nc.first, nc.second});
+    }
+
+    auto const retval = __roar_api_flag_safe_function_call_sites(
+      callSites.data(), callSites.size(), false
+    );
+    if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
+      Trace::ftraceRelease(
+        "ROAR: registering {} native calls, "
+        "__roar_api_flag_safe_function_call_sites returned = {}\n",
+        callSites.size(), retval
+      );
+    }
+  }
+
+  nativeCalls.clear();
+}
+
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -287,17 +317,7 @@ void CGMeta::process_only(
   }
   trapReasons.clear();
 
-  if (use_roar && __roar_api_flag_safe_function_call_site) {
-    for (auto const& nc : nativeCalls) {
-      const int retval = __roar_api_flag_safe_function_call_site(nc.first, nc.second);
-
-      if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
-        Trace::ftraceRelease("ROAR: registering native call @ {} to {}, "
-                             "__roar_api_flag_safe_function_call_site returned = {}\n",
-                             nc.first, nc.second, retval);
-      }
-    }
-  }
+  processNativeCalls();
 
   process_literals();
 

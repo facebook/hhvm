@@ -48,6 +48,7 @@
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
@@ -60,6 +61,8 @@ namespace {
 using PrologueTCAMap = jit::hash_map<PrologueID,TCA,PrologueID::Hasher>;
 using SrcKeyTransMap = jit::hash_map<SrcKey,jit::vector<TCA>,
                                      SrcKey::Hasher>;
+
+constexpr size_t kROARNativeCallBatchSize = 4096;
 
 bool checkLimit(TransKind kind, const size_t numTrans) {
   auto const limit = kind == TransKind::Profile
@@ -179,6 +182,27 @@ void publishOptFuncMeta(FuncMetaInfo& info) {
   for (auto const& translator : info.translators) {
     if (translator->translateSuccess()) translator->publishMetaInternal();
   }
+}
+
+void processSortedOptFuncsNativeCalls(std::vector<FuncMetaInfo>& infos) {
+  if (!use_roar) return;
+
+  CGMeta batch;
+  for (auto& finfo : infos) {
+    for (auto const& translator : finfo.translators) {
+      if (!translator->translateSuccess()) continue;
+
+      auto& nativeCalls = translator->meta().nativeCalls;
+      for (auto const& call : nativeCalls) {
+        if (batch.nativeCalls.size() == kROARNativeCallBatchSize) {
+          batch.processNativeCalls();
+        }
+        batch.nativeCalls.emplace(call.first, call.second);
+      }
+      nativeCalls.clear();
+    }
+  }
+  batch.processNativeCalls();
 }
 
 void publishOptFuncCode(FuncMetaInfo& info,
@@ -536,6 +560,8 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
       "retranslateAll: finished optimizing and relocating functions"
     );
   }
+
+  processSortedOptFuncsNativeCalls(infos);
 
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();

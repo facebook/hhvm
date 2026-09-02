@@ -47,6 +47,7 @@ struct CGMeta {
   void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
   void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
   void process_literals();
+  void processNativeCalls();
 
   bool empty() const;
   void clear();

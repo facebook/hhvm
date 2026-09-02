@@ -1,20 +1,20 @@
 === hh_client result ===
-argv: hh_client --multi ../no_config/missing
+argv: hh_client -Wignore-files '['
 cwd: <test_tmp>/root
 exit_code: 64
 stdout:
 <empty>
 stderr:
-hh_client: could not read --multi file: ../no_config/missing: No such file or directory.
+hh_client: option '-Wignore-files' expects a valid regular expression: [ class not closed by ].
 Usage: hh_client check [OPTION]... [WWW-ROOT]
 <usage omitted>
 === telemetry ===
 [
   {
-    "argv": "hh_client --multi ../no_config/missing",
+    "argv": "hh_client -Wignore-files [",
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
-    "exception": "Stdlib.Arg.Bad(\"hh_client: could not read --multi file: ../no_config/missing: No such file or directory.\")",
+    "exception": "Stdlib.Arg.Bad(\"hh_client: option '-Wignore-files' expects a valid regular expression: [ class not closed by ].\")",
     "exit_code": 64,
     "exit_status": "Exit_status.Client_bad_args",
     "process": "client"

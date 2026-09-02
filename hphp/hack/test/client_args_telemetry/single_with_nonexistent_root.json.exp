@@ -1,24 +1,20 @@
 === hh_client result ===
 argv: hh_client --single test.php ' test.php'
 cwd: <test_tmp>/root
-exit_code: 2
+exit_code: 64
 stdout:
 <empty>
 stderr:
-Uncaught exception:
-  
-  (Sys_error " test.php: No such file or directory")
-
-<stack trace omitted>
+Error:  test.php is not a directory
 === telemetry ===
 [
   {
     "argv": "hh_client --single test.php  test.php",
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
-    "exception": "Sys_error(\" test.php: No such file or directory\")",
-    "exit_code": 2,
-    "exit_status": "Exit_status.Input_error",
+    "exception": "Stdlib.Arg.Bad(\"Error:  test.php is not a directory\")",
+    "exit_code": 64,
+    "exit_status": "Exit_status.Client_bad_args",
     "process": "client"
   },
   {

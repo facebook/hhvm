@@ -27,10 +27,19 @@ type arg_kind =
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
+  let add_key_value ~option_name value_ref value =
+    match String_utils.split2 '=' value with
+    | Some key_value -> value_ref := key_value :: !value_ref
+    | None ->
+      raise
+        (Arg.Bad
+           (Printf.sprintf
+              "option '%s' expects an argument in the form <key>=<value>"
+              option_name))
+
   let config value_ref =
     ( "--config",
-      Arg.String
-        (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
+      Arg.String (add_key_value ~option_name:"--config" value_ref),
       " override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)"
     )
 
@@ -42,7 +51,7 @@ module Common_argspecs = struct
   let custom_telemetry_data value_ref =
     ( "--custom-telemetry-data",
       Arg.String
-        (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
+        (add_key_value ~option_name:"--custom-telemetry-data" value_ref),
       "Add a custom column to all logged telemetry samples (format: <column>=<value>)"
     )
 
@@ -316,7 +325,9 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let set_log_to_file x = log_to_file := Some x in
   let add_multi f =
     let files =
-      Sys_utils.read_file f
+      (try Sys_utils.read_file f with
+      | Sys_error message ->
+        raise (Arg.Bad ("could not read --multi file: " ^ message)))
       |> Bytes.to_string
       |> String.strip
       |> String.split ~on:'\n'
@@ -1049,8 +1060,15 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
       ( "-Wignore-files",
         Arg.String
           (fun regexp ->
-            add_warning_switch
-              (Filter_diagnostics.Ignored_files (Str.regexp regexp))),
+            let regexp =
+              try Str.regexp regexp with
+              | Failure message ->
+                raise
+                  (Arg.Bad
+                     ("option '-Wignore-files' expects a valid regular expression: "
+                     ^ message))
+            in
+            add_warning_switch (Filter_diagnostics.Ignored_files regexp)),
         " hide warnings in files matching a regexp",
         Arg_user_facing );
       ( "-Wgenerated",

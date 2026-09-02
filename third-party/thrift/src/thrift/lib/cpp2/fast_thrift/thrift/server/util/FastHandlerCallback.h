@@ -192,6 +192,7 @@ class FastHandlerCallback {
       ThriftServerAppAdapter* handler,
       uint32_t streamId,
       folly::EventBase* evb,
+      folly::Executor* executor,
       std::unique_ptr<ThriftRequestContext> requestContext)
       : resultFn_(resultFn),
         exceptionFn_(exceptionFn),
@@ -199,6 +200,7 @@ class FastHandlerCallback {
         adapterGuard_(handler),
         streamId_(streamId),
         evb_(folly::getKeepAliveToken(evb)),
+        executor_(executor),
         requestContext_(std::move(requestContext)) {}
 
   FastHandlerCallback(const FastHandlerCallback&) = delete;
@@ -259,6 +261,13 @@ class FastHandlerCallback {
   uint32_t streamId() const noexcept { return streamId_; }
 
   folly::EventBase* getEventBase() const { return evb_.get(); }
+
+  // Where a generated dispatcher should run a coroutine handler body. Null
+  // when the server has no CPU pool, in which case the caller falls back to
+  // the EventBase. Raw rather than a KeepAlive: the executor outlives the
+  // adapter, which this callback already keeps alive through adapterGuard_,
+  // so a per-request refcount would buy nothing.
+  folly::Executor* getHandlerExecutor() const noexcept { return executor_; }
 
   ThriftRequestContext* requestContext() const noexcept {
     return requestContext_.get();
@@ -349,6 +358,8 @@ class FastHandlerCallback {
   // Keepalive rather than a raw pointer: destroyOnEventBase may need to hop
   // onto this EventBase from a CPU thread, so it has to outlive us.
   folly::Executor::KeepAlive<folly::EventBase> evb_;
+  // Non-owning; see getHandlerExecutor().
+  folly::Executor* executor_{nullptr};
   std::unique_ptr<ThriftRequestContext> requestContext_;
   bool completed_{false};
 };
@@ -374,6 +385,7 @@ class FastHandlerCallback<void> {
       ThriftServerAppAdapter* handler,
       uint32_t streamId,
       folly::EventBase* evb,
+      folly::Executor* executor,
       std::unique_ptr<ThriftRequestContext> requestContext)
       : doneFn_(doneFn),
         exceptionFn_(exceptionFn),
@@ -381,6 +393,7 @@ class FastHandlerCallback<void> {
         adapterGuard_(handler),
         streamId_(streamId),
         evb_(folly::getKeepAliveToken(evb)),
+        executor_(executor),
         requestContext_(std::move(requestContext)) {}
 
   FastHandlerCallback(const FastHandlerCallback&) = delete;
@@ -420,6 +433,13 @@ class FastHandlerCallback<void> {
   uint32_t streamId() const noexcept { return streamId_; }
 
   folly::EventBase* getEventBase() const { return evb_.get(); }
+
+  // Where a generated dispatcher should run a coroutine handler body. Null
+  // when the server has no CPU pool, in which case the caller falls back to
+  // the EventBase. Raw rather than a KeepAlive: the executor outlives the
+  // adapter, which this callback already keeps alive through adapterGuard_,
+  // so a per-request refcount would buy nothing.
+  folly::Executor* getHandlerExecutor() const noexcept { return executor_; }
 
   ThriftRequestContext* requestContext() const noexcept {
     return requestContext_.get();
@@ -482,6 +502,8 @@ class FastHandlerCallback<void> {
   uint32_t streamId_;
   // See FastHandlerCallback<T>::evb_.
   folly::Executor::KeepAlive<folly::EventBase> evb_;
+  // Non-owning; see getHandlerExecutor().
+  folly::Executor* executor_{nullptr};
   std::unique_ptr<ThriftRequestContext> requestContext_;
   bool completed_{false};
 };

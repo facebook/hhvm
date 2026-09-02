@@ -24,6 +24,9 @@
 #include "{{service.program.include_prefix}}{{service.program.name}}_constants.h"
   {{/if service.program.has_schema_const?}}
 #include <thrift/lib/cpp2/gen/service_cpp.h>
+  {{#if service.is_fast_server?}}
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/FastHandlerCoro.h>
+  {{/if service.is_fast_server?}}
 
 {{> service_cpp/handlers_cpp}}
 {{#if service.is_fast_server?}}

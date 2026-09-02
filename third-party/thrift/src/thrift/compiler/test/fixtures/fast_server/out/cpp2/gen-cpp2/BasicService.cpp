@@ -9,6 +9,7 @@
 #include "thrift/compiler/test/fixtures/fast_server/gen-cpp2/BasicService.tcc"
 #include "thrift/compiler/test/fixtures/fast_server/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/FastHandlerCoro.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::getProcessor() {
   return std::make_unique<::cpp2::test::BasicServiceAsyncProcessor>(this);
@@ -1107,6 +1108,547 @@ FastServiceHandler<::cpp2::test::BasicService>::getAppAdapter(
 void FastServiceHandler<::cpp2::test::BasicService>::getServiceMetadata(
     ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::test::BasicService>>::gen(response);
+}
+//
+// Method 'ping'
+//
+
+void FastServiceHandler<::cpp2::test::BasicService>::sync_ping() {
+  folly::throw_exception<::apache::thrift::TApplicationException>(
+      ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+      "Unimplemented fast_thrift method: ping");
+}
+
+#if FOLLY_HAS_COROUTINES
+// Deliberately not a coroutine: it throws before any suspension, so the
+// exception surfaces synchronously at the call in async_tm_ rather than when
+// the Task is awaited. Compiling a real coroutine here for every method would
+// cost build time for a body that never runs once the ladder has settled.
+folly::coro::Task<void>
+FastServiceHandler<::cpp2::test::BasicService>::co_ping() {
+  auto expected{::apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  ::apache::thrift::detail::si::ignore();
+  folly::throw_exception(
+      ::apache::thrift::detail::si::UnimplementedCoroMethod::withoutCapturedArgs());
+}
+
+// Delegates rather than throwing: a handler that wants the request context
+// overrides this one, and a handler that does not falls through to the
+// no-params overload, whose default reports the method unimplemented.
+folly::coro::Task<void>
+FastServiceHandler<::cpp2::test::BasicService>::co_ping(
+    ::apache::thrift::fast_thrift::thrift::FastRequestParams /* params */) {
+  auto expected{::apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_ping();
+}
+#endif // FOLLY_HAS_COROUTINES
+
+// Resolves which surface the author implemented, by calling the most specific
+// one and letting its generated default report back. The result is memoized in
+// __fbthrift_invocation_ping, so the throw below happens at
+// most once per method for the process lifetime. An author who overrides this
+// function replaces the whole ladder and pays none of it.
+void FastServiceHandler<::cpp2::test::BasicService>::async_tm_ping(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback) {
+  // Read off the callback before it is moved anywhere below.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParams params(
+      callback->requestContext(),
+      callback->getEventBase(),
+      callback->getHandlerExecutor());
+  // Publishes `params` for the synchronous span of this function, which is
+  // exactly as long as a sync_ body can run. Cleared on return, before any
+  // coroutine started below could resume.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParamsGuard
+      requestParamsGuard(params);
+determineInvocationType:
+  auto invocationType =
+      __fbthrift_invocation_ping.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+#if FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_ping.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+      case ::apache::thrift::detail::si::InvocationType::CoroParam: {
+        // Two statements: argument evaluation order is unspecified, so the
+        // callback must not be moved before co_ has had its chance to throw.
+        auto task = co_ping(params);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case ::apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_ping();
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#else
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_ping.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::Sync,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::Sync:
+        sync_ping();
+        callback->done();
+        return;
+      default:
+        folly::assume_unreachable();
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (::apache::thrift::detail::si::UnimplementedCoroMethod&) {
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+//
+// Method 'add'
+//
+
+::std::int32_t FastServiceHandler<::cpp2::test::BasicService>::sync_add(::std::int32_t /*a*/, ::std::int32_t /*b*/) {
+  folly::throw_exception<::apache::thrift::TApplicationException>(
+      ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+      "Unimplemented fast_thrift method: add");
+}
+
+#if FOLLY_HAS_COROUTINES
+// Deliberately not a coroutine: it throws before any suspension, so the
+// exception surfaces synchronously at the call in async_tm_ rather than when
+// the Task is awaited. Compiling a real coroutine here for every method would
+// cost build time for a body that never runs once the ladder has settled.
+folly::coro::Task<::std::int32_t>
+FastServiceHandler<::cpp2::test::BasicService>::co_add(::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{::apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  folly::throw_exception(
+      ::apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*a*/, ::std::int32_t /*b*/>(p_a, p_b));
+}
+
+// Delegates rather than throwing: a handler that wants the request context
+// overrides this one, and a handler that does not falls through to the
+// no-params overload, whose default reports the method unimplemented.
+folly::coro::Task<::std::int32_t>
+FastServiceHandler<::cpp2::test::BasicService>::co_add(
+    ::apache::thrift::fast_thrift::thrift::FastRequestParams /* params */, ::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{::apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_add(p_a, p_b);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+// Resolves which surface the author implemented, by calling the most specific
+// one and letting its generated default report back. The result is memoized in
+// __fbthrift_invocation_add, so the throw below happens at
+// most once per method for the process lifetime. An author who overrides this
+// function replaces the whole ladder and pays none of it.
+void FastServiceHandler<::cpp2::test::BasicService>::async_tm_add(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback, ::std::int32_t p_a, ::std::int32_t p_b) {
+  // Read off the callback before it is moved anywhere below.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParams params(
+      callback->requestContext(),
+      callback->getEventBase(),
+      callback->getHandlerExecutor());
+  // Publishes `params` for the synchronous span of this function, which is
+  // exactly as long as a sync_ body can run. Cleared on return, before any
+  // coroutine started below could resume.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParamsGuard
+      requestParamsGuard(params);
+determineInvocationType:
+  auto invocationType =
+      __fbthrift_invocation_add.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+#if FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_add.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+      case ::apache::thrift::detail::si::InvocationType::CoroParam: {
+        // Two statements: argument evaluation order is unspecified, so the
+        // callback must not be moved before co_ has had its chance to throw.
+        auto task = co_add(params, p_a, p_b);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case ::apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_add(p_a, p_b);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#else
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_add.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::Sync,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::Sync:
+        callback->result(sync_add(p_a, p_b));
+        return;
+      default:
+        folly::assume_unreachable();
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (::apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_a, p_b) = std::move(ex).restoreArgs<::std::int32_t /*a*/, ::std::int32_t /*b*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+//
+// Method 'buildItem'
+//
+
+std::unique_ptr<::cpp2::test::DataItem> FastServiceHandler<::cpp2::test::BasicService>::sync_buildItem(std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/) {
+  folly::throw_exception<::apache::thrift::TApplicationException>(
+      ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+      "Unimplemented fast_thrift method: buildItem");
+}
+
+#if FOLLY_HAS_COROUTINES
+// Deliberately not a coroutine: it throws before any suspension, so the
+// exception surfaces synchronously at the call in async_tm_ rather than when
+// the Task is awaited. Compiling a real coroutine here for every method would
+// cost build time for a body that never runs once the ladder has settled.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{::apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  folly::throw_exception(
+      ::apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/>(std::move(p_template_), p_id));
+}
+
+// Delegates rather than throwing: a handler that wants the request context
+// overrides this one, and a handler that does not falls through to the
+// no-params overload, whose default reports the method unimplemented.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_buildItem(
+    ::apache::thrift::fast_thrift::thrift::FastRequestParams /* params */, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{::apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_buildItem(std::move(p_template_), p_id);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+// Resolves which surface the author implemented, by calling the most specific
+// one and letting its generated default report back. The result is memoized in
+// __fbthrift_invocation_buildItem, so the throw below happens at
+// most once per method for the process lifetime. An author who overrides this
+// function replaces the whole ladder and pays none of it.
+void FastServiceHandler<::cpp2::test::BasicService>::async_tm_buildItem(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  // Read off the callback before it is moved anywhere below.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParams params(
+      callback->requestContext(),
+      callback->getEventBase(),
+      callback->getHandlerExecutor());
+  // Publishes `params` for the synchronous span of this function, which is
+  // exactly as long as a sync_ body can run. Cleared on return, before any
+  // coroutine started below could resume.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParamsGuard
+      requestParamsGuard(params);
+determineInvocationType:
+  auto invocationType =
+      __fbthrift_invocation_buildItem.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+#if FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_buildItem.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+      case ::apache::thrift::detail::si::InvocationType::CoroParam: {
+        // Two statements: argument evaluation order is unspecified, so the
+        // callback must not be moved before co_ has had its chance to throw.
+        auto task = co_buildItem(params, std::move(p_template_), p_id);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case ::apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_buildItem(std::move(p_template_), p_id);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#else
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_buildItem.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::Sync,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::Sync:
+        callback->result(sync_buildItem(std::move(p_template_), p_id));
+        return;
+      default:
+        folly::assume_unreachable();
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (::apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_template_, p_id) = std::move(ex).restoreArgs<std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+//
+// Method 'lookup'
+//
+
+std::unique_ptr<::cpp2::test::DataItem> FastServiceHandler<::cpp2::test::BasicService>::sync_lookup(::std::int32_t /*id*/) {
+  folly::throw_exception<::apache::thrift::TApplicationException>(
+      ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+      "Unimplemented fast_thrift method: lookup");
+}
+
+#if FOLLY_HAS_COROUTINES
+// Deliberately not a coroutine: it throws before any suspension, so the
+// exception surfaces synchronously at the call in async_tm_ rather than when
+// the Task is awaited. Compiling a real coroutine here for every method would
+// cost build time for a body that never runs once the ladder has settled.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_lookup(::std::int32_t p_id) {
+  auto expected{::apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  folly::throw_exception(
+      ::apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*id*/>(p_id));
+}
+
+// Delegates rather than throwing: a handler that wants the request context
+// overrides this one, and a handler that does not falls through to the
+// no-params overload, whose default reports the method unimplemented.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_lookup(
+    ::apache::thrift::fast_thrift::thrift::FastRequestParams /* params */, ::std::int32_t p_id) {
+  auto expected{::apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_lookup(p_id);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+// Resolves which surface the author implemented, by calling the most specific
+// one and letting its generated default report back. The result is memoized in
+// __fbthrift_invocation_lookup, so the throw below happens at
+// most once per method for the process lifetime. An author who overrides this
+// function replaces the whole ladder and pays none of it.
+void FastServiceHandler<::cpp2::test::BasicService>::async_tm_lookup(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id) {
+  // Read off the callback before it is moved anywhere below.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParams params(
+      callback->requestContext(),
+      callback->getEventBase(),
+      callback->getHandlerExecutor());
+  // Publishes `params` for the synchronous span of this function, which is
+  // exactly as long as a sync_ body can run. Cleared on return, before any
+  // coroutine started below could resume.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParamsGuard
+      requestParamsGuard(params);
+determineInvocationType:
+  auto invocationType =
+      __fbthrift_invocation_lookup.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+#if FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_lookup.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+      case ::apache::thrift::detail::si::InvocationType::CoroParam: {
+        // Two statements: argument evaluation order is unspecified, so the
+        // callback must not be moved before co_ has had its chance to throw.
+        auto task = co_lookup(params, p_id);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case ::apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_lookup(p_id);
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#else
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_lookup.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::Sync,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::Sync:
+        callback->result(sync_lookup(p_id));
+        return;
+      default:
+        folly::assume_unreachable();
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (::apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_id) = std::move(ex).restoreArgs<::std::int32_t /*id*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
+}
+//
+// Method 'secureLookup'
+//
+
+std::unique_ptr<::cpp2::test::DataItem> FastServiceHandler<::cpp2::test::BasicService>::sync_secureLookup(::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/) {
+  folly::throw_exception<::apache::thrift::TApplicationException>(
+      ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+      "Unimplemented fast_thrift method: secureLookup");
+}
+
+#if FOLLY_HAS_COROUTINES
+// Deliberately not a coroutine: it throws before any suspension, so the
+// exception surfaces synchronously at the call in async_tm_ rather than when
+// the Task is awaited. Compiling a real coroutine here for every method would
+// cost build time for a body that never runs once the ladder has settled.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{::apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  folly::throw_exception(
+      ::apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/>(p_id, std::move(p_user)));
+}
+
+// Delegates rather than throwing: a handler that wants the request context
+// overrides this one, and a handler that does not falls through to the
+// no-params overload, whose default reports the method unimplemented.
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+FastServiceHandler<::cpp2::test::BasicService>::co_secureLookup(
+    ::apache::thrift::fast_thrift::thrift::FastRequestParams /* params */, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{::apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      ::apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_secureLookup(p_id, std::move(p_user));
+}
+#endif // FOLLY_HAS_COROUTINES
+
+// Resolves which surface the author implemented, by calling the most specific
+// one and letting its generated default report back. The result is memoized in
+// __fbthrift_invocation_secureLookup, so the throw below happens at
+// most once per method for the process lifetime. An author who overrides this
+// function replaces the whole ladder and pays none of it.
+void FastServiceHandler<::cpp2::test::BasicService>::async_tm_secureLookup(
+    ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  // Read off the callback before it is moved anywhere below.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParams params(
+      callback->requestContext(),
+      callback->getEventBase(),
+      callback->getHandlerExecutor());
+  // Publishes `params` for the synchronous span of this function, which is
+  // exactly as long as a sync_ body can run. Cleared on return, before any
+  // coroutine started below could resume.
+  const ::apache::thrift::fast_thrift::thrift::FastRequestParamsGuard
+      requestParamsGuard(params);
+determineInvocationType:
+  auto invocationType =
+      __fbthrift_invocation_secureLookup.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+#if FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_secureLookup.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+      case ::apache::thrift::detail::si::InvocationType::CoroParam: {
+        // Two statements: argument evaluation order is unspecified, so the
+        // callback must not be moved before co_ has had its chance to throw.
+        auto task = co_secureLookup(params, p_id, std::move(p_user));
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case ::apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_secureLookup(p_id, std::move(p_user));
+        ::apache::thrift::fast_thrift::thrift::detail::fastRunCoro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#else
+      case ::apache::thrift::detail::si::InvocationType::AsyncTm:
+        __fbthrift_invocation_secureLookup.compare_exchange_strong(
+            invocationType,
+            ::apache::thrift::detail::si::InvocationType::Sync,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      case ::apache::thrift::detail::si::InvocationType::Sync:
+        callback->result(sync_secureLookup(p_id, std::move(p_user)));
+        return;
+      default:
+        folly::assume_unreachable();
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (::apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_id, p_user) = std::move(ex).restoreArgs<::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(
+        ::folly::exception_wrapper(std::current_exception()));
+  }
 }
 
 } // namespace apache::thrift

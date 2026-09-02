@@ -1332,6 +1332,7 @@ void BasicServiceAppAdapter::process_ping_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   auto* executor = cpuExecutor();
@@ -1458,6 +1459,7 @@ void BasicServiceAppAdapter::process_add_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   auto* executor = cpuExecutor();
@@ -1588,6 +1590,7 @@ void BasicServiceAppAdapter::process_buildItem_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   auto* executor = cpuExecutor();
@@ -1719,6 +1722,7 @@ void BasicServiceAppAdapter::process_lookup_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   auto* executor = cpuExecutor();
@@ -1847,6 +1851,7 @@ void BasicServiceAppAdapter::process_secureLookup_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   auto* executor = cpuExecutor();
@@ -1978,6 +1983,7 @@ void BasicServiceAppAdapter::process_ebLookup_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   // @cpp.ProcessInEbThreadUnsafe: this method runs inline on the EventBase,

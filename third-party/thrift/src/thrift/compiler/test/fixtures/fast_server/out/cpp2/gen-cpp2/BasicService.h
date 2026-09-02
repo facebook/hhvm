@@ -454,48 +454,66 @@ class FastServiceHandler<::cpp2::test::BasicService>
   void getServiceMetadata(
       ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 
+  virtual void sync_ping();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_ping();
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<void> co_ping(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params);
+#endif // FOLLY_HAS_COROUTINES
   virtual void async_tm_ping(
-      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback) {
-    callback->exception(
-        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
-            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
-            "Unimplemented fast_thrift method: ping"));
-  }
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback);
+  virtual ::std::int32_t sync_add(::std::int32_t /*a*/, ::std::int32_t /*b*/);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_add(::std::int32_t p_a, ::std::int32_t p_b);
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<::std::int32_t> co_add(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params, ::std::int32_t p_a, ::std::int32_t p_b);
+#endif // FOLLY_HAS_COROUTINES
   virtual void async_tm_add(
-      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback,
-      ::std::int32_t /*p_a*/,
-      ::std::int32_t /*p_b*/) {
-    callback->exception(
-        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
-            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
-            "Unimplemented fast_thrift method: add"));
-  }
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<::std::int32_t> callback, ::std::int32_t p_a, ::std::int32_t p_b);
+  virtual std::unique_ptr<::cpp2::test::DataItem> sync_buildItem(std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_buildItem(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+#endif // FOLLY_HAS_COROUTINES
   virtual void async_tm_buildItem(
-      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
-      std::unique_ptr<::cpp2::test::DataItem> /*p_template_*/,
-      ::std::int32_t /*p_id*/) {
-    callback->exception(
-        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
-            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
-            "Unimplemented fast_thrift method: buildItem"));
-  }
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+  virtual std::unique_ptr<::cpp2::test::DataItem> sync_lookup(::std::int32_t /*id*/);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_lookup(::std::int32_t p_id);
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_lookup(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params, ::std::int32_t p_id);
+#endif // FOLLY_HAS_COROUTINES
   virtual void async_tm_lookup(
-      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
-      ::std::int32_t /*p_id*/) {
-    callback->exception(
-        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
-            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
-            "Unimplemented fast_thrift method: lookup"));
-  }
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id);
+  virtual std::unique_ptr<::cpp2::test::DataItem> sync_secureLookup(::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_secureLookup(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+#endif // FOLLY_HAS_COROUTINES
   virtual void async_tm_secureLookup(
-      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
-      ::std::int32_t /*p_id*/,
-      std::unique_ptr<::std::string> /*p_user*/) {
-    callback->exception(
-        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
-            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
-            "Unimplemented fast_thrift method: secureLookup"));
-  }
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
   virtual void async_eb_ebLookup(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback,
       ::std::int32_t /*p_id*/) {
@@ -504,6 +522,21 @@ class FastServiceHandler<::cpp2::test::BasicService>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: ebLookup"));
   }
+
+ private:
+  // Which of the three surfaces each function's author implemented. Resolved
+  // on that function's first request by async_tm_ walking the ladder, then
+  // read directly. EventBase-pinned functions have one surface and no state.
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_ping{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_add{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_buildItem{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_lookup{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_secureLookup{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 } // namespace apache::thrift

@@ -101,7 +101,7 @@ TEST(FastHandlerCallbackTest, ResultInvokesResultFnAndSuppressesDestructor) {
   folly::EventBase evb;
   {
     auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
     cb->result(123);
   }
   // Single success invocation, no synthetic destructor exception.
@@ -118,7 +118,7 @@ TEST(
   folly::EventBase evb;
   {
     auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
     cb->exception(
         folly::make_exception_wrapper<TApplicationException>(
             TApplicationException::UNKNOWN_METHOD, "boom"));
@@ -134,7 +134,7 @@ TEST(FastHandlerCallbackTest, DestructorFiresExceptionWhenNotCompleted) {
   folly::EventBase evb;
   {
     auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
     // Drop without completing — destructor must synthesize an error so the
     // peer never hangs.
   }
@@ -149,7 +149,7 @@ TEST(FastHandlerCallbackTest, VoidDoneInvokesDoneFnAndSuppressesDestructor) {
   folly::EventBase evb;
   {
     auto cb = makeFastHandlerCallback<FastHandlerCallback<void>>(
-        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
+        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
     cb->done();
   }
   EXPECT_EQ(rec->doneCount, 1);
@@ -162,7 +162,7 @@ TEST(FastHandlerCallbackTest, VoidDestructorFiresExceptionWhenNotCompleted) {
   folly::EventBase evb;
   {
     auto cb = makeFastHandlerCallback<FastHandlerCallback<void>>(
-        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
+        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
   }
   EXPECT_EQ(rec->doneCount, 0);
   EXPECT_EQ(rec->exceptionCount, 1);
@@ -173,7 +173,7 @@ TEST(FastHandlerCallbackTest, GetEventBaseReturnsConfiguredEventBase) {
   auto rec = makeRecorder();
   folly::EventBase evb;
   auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-      &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
+      &onResult, &onException, rec.get(), kStreamId, &evb, nullptr, nullptr);
   EXPECT_EQ(cb->getEventBase(), &evb);
   cb->result(0); // suppress destructor exception
 }
@@ -189,6 +189,7 @@ TEST(FastHandlerCallbackTest, RequestContextAccessorReturnsStoredPointer) {
       rec.get(),
       kStreamId,
       &evb,
+      nullptr,
       std::move(requestContext));
   EXPECT_EQ(cb->requestContext(), requestContextPtr);
   cb->result(0); // suppress destructor exception
@@ -207,7 +208,7 @@ TEST(FastHandlerCallbackTest, OutlivingFHCKeepsAdapterAlive) {
   RecordingAdapter* recPtr = rec.get();
 
   auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-      &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
+      &onResult, &onException, recPtr, kStreamId, &evb, nullptr, nullptr);
 
   // Owner drops its Ptr while the FHC is still alive — the FHC's
   // adapterGuard_ must hold the adapter live.
@@ -237,7 +238,7 @@ TEST(FastHandlerCallbackTest, UncompletedFHCDestructorIsSafeAfterOwnerDrop) {
   RecordingAdapter* recPtr = rec.get();
 
   auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
-      &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
+      &onResult, &onException, recPtr, kStreamId, &evb, nullptr, nullptr);
 
   // Test-only: keep the adapter alive past cb.reset() so we can
   // observe state. In production, dropping the owner Ptr leaves only

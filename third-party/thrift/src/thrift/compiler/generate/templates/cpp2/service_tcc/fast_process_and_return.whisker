@@ -50,6 +50,7 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
       this,
       streamId,
       getEventBase(),
+      cpuExecutor(),
       std::move(requestContext));
 
   {{#if function.event_based?}}

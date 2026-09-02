@@ -69,18 +69,18 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
   std::atomic<int> pingCount{0};
   std::atomic<int> addCount{0};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     pingCount.fetch_add(1, std::memory_order_relaxed);
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     addCount.fetch_add(1, std::memory_order_relaxed);
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -88,7 +88,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -96,7 +96,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> /*user*/) override {
@@ -122,7 +122,7 @@ class MonitoringHandler : public FastServiceHandler<Monitor>,
   std::atomic<bool> aliveSinceRanOnEventBase{false};
   std::atomic<bool> getCountersRanOnEventBase{false};
 
-  void async_eb_aliveSince(
+  void async_tm_aliveSince(
       ftt::FastHandlerCallbackPtr<std::int64_t> cb) override {
     aliveSinceCount.fetch_add(1, std::memory_order_relaxed);
     aliveSinceRanOnEventBase.store(

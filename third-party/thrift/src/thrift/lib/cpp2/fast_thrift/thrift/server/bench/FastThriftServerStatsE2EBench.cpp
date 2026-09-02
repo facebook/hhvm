@@ -117,7 +117,7 @@ class FastHandler
  public:
   bool noReply{false};
 
-  void async_eb_ping(
+  void async_tm_ping(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void>
           callback) override {
     if (noReply) {
@@ -126,7 +126,7 @@ class FastHandler
     callback->done();
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<
           std::unique_ptr<EchoResponse>> callback,
       std::unique_ptr<std::string> message) override {

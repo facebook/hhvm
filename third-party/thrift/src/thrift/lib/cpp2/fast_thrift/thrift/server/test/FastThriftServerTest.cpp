@@ -79,16 +79,16 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
   bool throwNotFound{false};
   bool throwPermissionDenied{false};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -96,7 +96,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t id) override {
     if (throwNotFound) {
@@ -112,7 +112,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> user) override {
@@ -138,7 +138,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
 class DeferredPingHandler
     : public FastServiceHandler<integration::FastThriftServer> {
  public:
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     evb_ = cb->getEventBase();
     callback_ = std::move(cb);
     pingStarted_.post();

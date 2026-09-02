@@ -134,19 +134,19 @@ class PrimaryHandler
   std::atomic<int> echoCount{0};
   std::atomic<int> addCount{0};
 
-  void async_eb_primaryPing(thrift::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_primaryPing(thrift::FastHandlerCallbackPtr<void> cb) override {
     pingCount++;
     cb->done();
   }
 
-  void async_eb_primaryEcho(
+  void async_tm_primaryEcho(
       thrift::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> message) override {
     echoCount++;
     cb->result(std::make_unique<std::string>(*message + "_primary"));
   }
 
-  void async_eb_primaryAdd(
+  void async_tm_primaryAdd(
       thrift::FastHandlerCallbackPtr<int64_t> cb,
       int64_t a,
       int64_t b) override {
@@ -162,20 +162,20 @@ class SecondaryHandler
   std::atomic<int> greetCount{0};
   std::atomic<int> multiplyCount{0};
 
-  void async_eb_secondaryPing(
+  void async_tm_secondaryPing(
       thrift::FastHandlerCallbackPtr<void> cb) override {
     pingCount++;
     cb->done();
   }
 
-  void async_eb_secondaryGreet(
+  void async_tm_secondaryGreet(
       thrift::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> name) override {
     greetCount++;
     cb->result(std::make_unique<std::string>("hello, " + *name));
   }
 
-  void async_eb_secondaryMultiply(
+  void async_tm_secondaryMultiply(
       thrift::FastHandlerCallbackPtr<int64_t> cb,
       int64_t a,
       int64_t b) override {

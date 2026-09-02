@@ -135,7 +135,7 @@ class TestFastServiceHandler
   // afterwards.
   void parkNextEcho() { parkEcho_ = true; }
 
-  // Blocks until async_eb_echo has parked a callback. Returns false on timeout.
+  // Blocks until async_tm_echo has parked a callback. Returns false on timeout.
   bool waitParkedEcho(std::chrono::milliseconds timeout) {
     return parkedBaton_.try_wait_for(timeout);
   }
@@ -154,7 +154,7 @@ class TestFastServiceHandler
     return true;
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> message) override {
     if (parkEcho_.exchange(false)) {
@@ -175,22 +175,22 @@ class TestFastServiceHandler
     cb->result(std::move(message));
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     cb->result(a + b);
   }
 
-  void async_eb_sendResponse(
+  void async_tm_sendResponse(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       int64_t size) override {
     cb->result(std::make_unique<std::string>(static_cast<size_t>(size), 'x'));
   }
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     cb->done();
   }
 
-  void async_eb_ranOnEventBase(ftt::FastHandlerCallbackPtr<bool> cb) override {
+  void async_tm_ranOnEventBase(ftt::FastHandlerCallbackPtr<bool> cb) override {
     const bool onEventBase = cb->getEventBase()->isInEventBaseThread();
     cb->result(onEventBase);
   }

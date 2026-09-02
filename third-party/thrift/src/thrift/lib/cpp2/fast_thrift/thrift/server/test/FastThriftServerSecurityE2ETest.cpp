@@ -69,17 +69,17 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
  public:
   std::atomic<int> pingCount{0};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     pingCount.fetch_add(1, std::memory_order_relaxed);
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -87,7 +87,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -95,7 +95,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> /*user*/) override {
@@ -116,11 +116,11 @@ class SecurityHandler : public FastServiceHandler<AuxInterfaceProbeService>,
   // whether the security child was handed the server's CPU executor.
   std::atomic<bool> greetRanOnEventBase{false};
 
-  void async_eb_probePing(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_probePing(ftt::FastHandlerCallbackPtr<void> cb) override {
     cb->done();
   }
 
-  void async_eb_probeGreet(
+  void async_tm_probeGreet(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> name) override {
     greetCount.fetch_add(1, std::memory_order_relaxed);
@@ -138,19 +138,19 @@ class ShadowingSecurityHandler
  public:
   std::atomic<int> pingCount{0};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     pingCount.fetch_add(1, std::memory_order_relaxed);
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb,
       int64_t /*a*/,
       int64_t /*b*/) override {
     cb->result(-1);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> /*message*/) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -158,7 +158,7 @@ class ShadowingSecurityHandler
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -166,7 +166,7 @@ class ShadowingSecurityHandler
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> /*user*/) override {

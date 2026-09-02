@@ -368,4 +368,15 @@ optimizations are run on the entire CFG. These are described in detail in
 
 ### Register Allocation
 
+Register allocation translates virtual registers in vasm into concrete hardware registers on the target architecture. HHVM uses an extended linear-scan register allocator configured per architecture:
+- Allocates registers based on live intervals computed across basic blocks.
+- Distinguishes between caller-saved (scratch) and callee-saved registers to minimize spilling across call instructions.
+- Spills infrequently used values to the execution frame stack when register pressure exceeds hardware register availability.
+
 ### Code Generation
+
+During the final lowering phase, vasm instructions are translated directly into binary machine instructions for the host architecture (e.g. x86_64, AArch64):
+- Emits native machine opcodes into the code cache (`TC`).
+- Assembles jump targets, branch displacements, and relocation entries.
+- Records debug metadata, unwind tables (`.eh_frame`), and perf / JIT symbol mappings for profiling and crash reporting.
+

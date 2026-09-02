@@ -686,6 +686,146 @@ TEST_P(HQUpstreamSessionTest, DropConnectionTwiceWithPendingStreams) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQUpstreamSessionTest, TimedPingWithZeroTimeoutIsFireAndForget) {
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(milliseconds::zero()))
+      .Times(2);
+  bool timeoutCalled = false;
+
+  hqSession_->sendPing(milliseconds::zero(), [&] { timeoutCalled = true; });
+  hqSession_->sendPing(milliseconds::zero(), [&] { timeoutCalled = true; });
+  hqSession_->pingTimeout();
+
+  EXPECT_FALSE(timeoutCalled);
+  EXPECT_FALSE(socketDriver_->isClosed());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest, ZeroTimeoutPingDoesNotFailOutstandingTimedPing) {
+  constexpr auto kPingTimeout = milliseconds(3000);
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(kPingTimeout));
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(milliseconds::zero()));
+  bool timedPingTimeoutCalled = false;
+  bool zeroTimeoutPingCallbackCalled = false;
+
+  hqSession_->sendPing(kPingTimeout, [&] { timedPingTimeoutCalled = true; });
+  hqSession_->sendPing(milliseconds::zero(),
+                       [&] { zeroTimeoutPingCallbackCalled = true; });
+
+  hqSession_->pingAcknowledged();
+  hqSession_->pingTimeout();
+
+  EXPECT_FALSE(timedPingTimeoutCalled);
+  EXPECT_FALSE(zeroTimeoutPingCallbackCalled);
+  EXPECT_FALSE(hqSession_->getSessionDropReason().has_value());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest,
+       TimedPingAcknowledgementAllowsTransactionToComplete) {
+  auto handler = openTransaction();
+  handler->txn_->sendHeadersWithEOM(getGetRequest());
+  constexpr auto kPingTimeout = milliseconds(3000);
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(kPingTimeout)).Times(2);
+  size_t timeoutCallbacks = 0;
+
+  hqSession_->sendPing(kPingTimeout, [&] { ++timeoutCallbacks; });
+  socketDriver_->addPingAcknowledgedReadEvent();
+
+  handler->expectHeaders();
+  handler->expectBody();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
+
+  hqSession_->sendPing(kPingTimeout, [&] { ++timeoutCallbacks; });
+  socketDriver_->addPingAcknowledgedReadEvent();
+  eventBase_.loopOnce();
+  hqSession_->pingTimeout();
+
+  EXPECT_EQ(timeoutCallbacks, 0);
+  EXPECT_FALSE(socketDriver_->isClosed());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest, ConcurrentTimedPingKeepsOriginalTimeoutCallback) {
+  constexpr auto kPingTimeout = milliseconds(3000);
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(kPingTimeout)).Times(1);
+  bool firstTimeoutCalled = false;
+  bool secondTimeoutCalled = false;
+
+  hqSession_->sendPing(kPingTimeout, [&] { firstTimeoutCalled = true; });
+  hqSession_->sendPing(kPingTimeout, [&] { secondTimeoutCalled = true; });
+
+  hqSession_->pingTimeout();
+  EXPECT_FALSE(firstTimeoutCalled);
+  EXPECT_FALSE(secondTimeoutCalled);
+
+  eventBase_.loopOnce();
+  EXPECT_TRUE(firstTimeoutCalled);
+  EXPECT_FALSE(secondTimeoutCalled);
+  EXPECT_FALSE(hqSession_->getSessionDropReason().has_value());
+  EXPECT_FALSE(socketDriver_->isClosed());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest, LegacyUint64PingTimeoutDoesNotDropConnection) {
+  constexpr uint64_t kPingTimeoutMs = 3000;
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              sendPing(milliseconds(kPingTimeoutMs)));
+
+  hqSession_->sendPing(kPingTimeoutMs);
+  hqSession_->pingTimeout();
+
+  EXPECT_FALSE(socketDriver_->isClosed());
+  EXPECT_FALSE(hqSession_->getSessionDropReason().has_value());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest, TimedPingTimeoutWithoutCallbackIsNoOp) {
+  constexpr auto kPingTimeout = milliseconds(3000);
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(kPingTimeout)).Times(1);
+
+  hqSession_->sendPing(kPingTimeout);
+  hqSession_->pingTimeout();
+  eventBase_.loopOnce();
+
+  EXPECT_FALSE(hqSession_->getSessionDropReason().has_value());
+  EXPECT_FALSE(socketDriver_->isClosed());
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTest, TimedPingTimeoutInvokesConfiguredCallback) {
+  auto handler = openTransaction();
+  handler->txn_->sendHeadersWithEOM(getGetRequest());
+  constexpr auto kPingTimeout = milliseconds(3000);
+  EXPECT_CALL(*socketDriver_->getSocket(), sendPing(kPingTimeout)).Times(1);
+  bool timeoutCalled = false;
+
+  hqSession_->sendPing(kPingTimeout, [&] { timeoutCalled = true; });
+  handler->expectHeaders();
+  handler->expectBody();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  hqSession_->pingTimeout();
+  EXPECT_FALSE(timeoutCalled);
+  flushAndLoop();
+
+  EXPECT_TRUE(timeoutCalled);
+  EXPECT_FALSE(hqSession_->getSessionDropReason().has_value());
+  EXPECT_FALSE(socketDriver_->isClosed());
+  hqSession_->closeWhenIdle();
+}
+
 TEST_P(HQUpstreamSessionTest, DropConnectionAfterCloseWhenIdle) {
   HQSession::DestructorGuard dg(hqSession_);
   hqSession_->closeWhenIdle();

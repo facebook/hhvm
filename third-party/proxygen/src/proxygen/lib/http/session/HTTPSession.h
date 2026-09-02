@@ -201,7 +201,9 @@ class HTTPSession
    * doesn't support pings, this will return 0. Otherwise, it will return
    * the number of bytes written on the transport to send the ping.
    */
-  size_t sendPing() override;
+  size_t sendPing(
+      std::chrono::milliseconds timeout = std::chrono::milliseconds::zero(),
+      PingTimeoutCallback onTimeout = nullptr) override;
 
   /**
    * Send a CERTIFICATE_REQUEST frame. If the underlying protocol doesn't

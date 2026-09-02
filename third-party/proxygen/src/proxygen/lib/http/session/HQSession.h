@@ -239,11 +239,8 @@ class HQSession
   void onDatagramsAvailable() noexcept override;
 
   // quic::QuicSocket::PingCallback
-  void pingAcknowledged() noexcept override {
-    resetTimeout();
-  }
-  void pingTimeout() noexcept override {
-  }
+  void pingAcknowledged() noexcept override;
+  void pingTimeout() noexcept override;
   void onPing() noexcept override {
     resetTimeout();
   }
@@ -392,11 +389,9 @@ class HQSession
    * doesn't support pings, this will return 0. Otherwise, it will return
    * the number of bytes written on the transport to send the ping.
    */
-  size_t sendPing() override {
-    sock_->sendPing(std::chrono::milliseconds(0));
-    return 0;
-  }
-
+  size_t sendPing(
+      std::chrono::milliseconds timeout = std::chrono::milliseconds::zero(),
+      PingTimeoutCallback onTimeout = nullptr) override;
   size_t sendPing(uint64_t data) override {
     sock_->sendPing(std::chrono::milliseconds(data));
     return 0;
@@ -2055,6 +2050,9 @@ class HQSession
   bool datagramEnabled_{false};
   bool writeCipherAvailableNotified_{false};
   bool writeCipherAvailableFailed_{false};
+  bool timedPingOutstanding_{false};
+  bool pingTimeoutPending_{false};
+  PingTimeoutCallback pingTimeoutCallback_;
 
   /** Reads in the current loop iteration */
   uint16_t readsPerLoop_{0};

@@ -973,6 +973,11 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       break;
   }
 
+  if (op == Op::UnsetM && !mcodeIsElem(mcode)) {
+    ferror("UnsetM only supports elem-flavored member keys.\n");
+    return false;
+  }
+
   if (op == Op::SetM || op == Op::UnsetM) {
     if (!cur->afterCheckCOW) {
       if (!mcodeIsProp(mcode) && cur->afterProp) {

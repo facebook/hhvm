@@ -683,7 +683,6 @@ module Primary = struct
         pos: Pos.t;
         reason: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Invalid_unset_target of Pos.t
     | Nullable_cast of {
         pos: Pos.t;
         ty_pos: Pos_or_decl.t;

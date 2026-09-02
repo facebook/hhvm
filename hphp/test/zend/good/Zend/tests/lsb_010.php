@@ -19,6 +19,6 @@ register_shutdown_function(vec['FooChild', 'bar']);
 
 $foo = new Foo();
 $fooChild = new FooChild();
-unset($foo);
-unset($fooChild);
+$foo = null;
+$fooChild = null;
 }

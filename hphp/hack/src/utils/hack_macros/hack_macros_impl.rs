@@ -990,7 +990,7 @@ mod tests {
     fn test_ex9() {
         assert_pat_eq(
             hack_stmt_impl.parse2(quote!(EX
-                "if (#{lvar(clone(name))} is __uninitSentinel) { unset(#{lvar(name)}); }"
+                "if (#{lvar(clone(name))} is __uninitSentinel) { \\__SystemLib\\__debugger_make_uninit(#{lvar(name)}); }"
             )),
             quote!({
                 use EX::ast::*;
@@ -1031,7 +1031,7 @@ mod tests {
                                         __hygienic_pos.clone(),
                                         Expr_::Id(Box::new(Id(
                                             __hygienic_pos.clone(),
-                                            "unset".to_owned(),
+                                            "\\__SystemLib\\__debugger_make_uninit".to_owned(),
                                         ))),
                                     ),
                                     targs: vec![],

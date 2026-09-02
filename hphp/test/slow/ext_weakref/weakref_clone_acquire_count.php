@@ -9,7 +9,7 @@ $wr1->acquire();
 $wr2 = clone $wr1;
 $wr2->release();
 __hhvm_intrinsics\launder_value($o);
-unset($o);
+$o = null;
 var_dump($wr1->valid());
 var_dump($wr2->valid());
 $wr1->release();

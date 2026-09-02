@@ -100,6 +100,19 @@ TEST(MapTest, Contains) {
   EXPECT_FALSE(map.contains(DynamicValue::makeI32(3)));
 }
 
+TEST(MapTest, FindKey) {
+  auto map = makeMap(makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::String()));
+  EXPECT_FALSE(map.findKey(DynamicValue::makeI32(1)).has_value());
+
+  map.insert(DynamicValue::makeI32(1), DynamicValue::makeString("one"));
+
+  auto key = map.findKey(DynamicValue::makeI32(1));
+  ASSERT_TRUE(key.has_value());
+  EXPECT_EQ(key->asI32(), 1);
+  EXPECT_FALSE(map.findKey(DynamicValue::makeI32(2)).has_value());
+}
+
 TEST(MapTest, Erase) {
   auto map = makeMap(makeMapType(
       type_system::TypeSystem::I32(), type_system::TypeSystem::String()));

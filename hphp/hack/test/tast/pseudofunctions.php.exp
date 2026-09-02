@@ -1,6 +1,5 @@
 Errors:
   [16:3-12] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode
-  [17:3-13] The argument to `unset` must be an array access.
 [(Class
     { c_span = [3:1-6:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -39,12 +38,17 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-14], "\\test");
        fd_fun =
        { f_span = [8:1-21:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([8:41-45], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
             param_pos = [8:17-19]; param_name = "$c"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_named = None; param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dict<int, int>);
+             param_type_hint = ((dict<int, int>), (Some ([8:21-35], (Happly (([8:21-25], "\\HH\\dict"), [([8:26-29], (Hprim Tint)); ([8:31-34], (Hprim Tint))]))))); 
+             param_pos = [8:36-38]; param_name = "$d"; param_info = Param_required; 
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -63,7 +67,7 @@ Errors:
                      { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [10:3-15], (Id ([10:3-15], "echo"))); 
                        targs = []; args = [(Anormal ((string), [10:9-14], (String "foo")))]; 
                        unpacked_arg = None }))));
-             ([12:3-10], (Expr ((HH\FunctionRef<(readonly function(C $c): void)>), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [], Code)))));
+             ([12:3-10], (Expr ((HH\FunctionRef<(readonly function(C $c, dict<int, int> $d): void)>), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [], Code)))));
              ([13:3-18],
               (Expr ((HH\FunctionRef<(readonly function(): void)>), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [], Code)))));
              ([14:3-40], (Expr ((HH\FunctionRef<(readonly function(C): void)>), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));
@@ -71,10 +75,13 @@ Errors:
               (Expr
                  ((bool), [16:3-12],
                   (Call { func = (((function(mixed $x)[]: bool)), [16:3-8], (Id ([16:3-8], "\\isset"))); targs = []; args = [(Anormal ((C), [16:9-11], (Lvar ([16:9-11], $c))))]; unpacked_arg = None }))));
-             ([17:3-13],
+             ([17:3-16],
               (Expr
-                 ((void), [17:3-13],
-                  (Call { func = (((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))); targs = []; args = [(Anormal ((C), [17:9-11], (Lvar ([17:9-11], $c))))]; unpacked_arg = None }))));
+                 ((void), [17:3-16],
+                  (Call
+                     { func = (((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))); 
+                       targs = []; args = [(Anormal ((int), [17:9-14], (Array_get (((dict<int, int>), [17:9-11], (Lvar ([17:9-11], $d))), (Some ((int), [17:12-13], (Int "0")))))))];
+                       unpacked_arg = None }))));
              ([19:3-26],
               (If (((bool), [19:13-17], (Unop (Unot, ((bool), [19:13-17], True)))),
                  [([19:3-25],
@@ -94,6 +101,83 @@ Errors:
                   (Call
                      { func = (((function<Targs as (mixed...)>(HH\TypedFormatString<PlainSprintf, ()> $fmt, ...() $fmt_args)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation")));
                        targs = [((()), ([20:3-22], Hwildcard))]; args = [(Anormal ((HH\TypedFormatString<~PlainSprintf, ()>), [20:23-28], (String "foo")))]; 
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-14], "\\test");
+       fd_fun =
+       { f_span = [8:1-21:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([8:41-45], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
+            param_pos = [8:17-19]; param_name = "$c"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([8:21-35], (Happly (([8:21-25], "\\HH\\dict"), [([8:26-29], (Hprim Tint)); ([8:31-34], (Hprim Tint))])))));
+             param_pos = [8:36-38]; param_name = "$d"; param_info = Param_required; 
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([9:3-15],
+             (Expr
+                ((void), [9:3-15],
+                 (Call
+                    { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [9:3-7], (Id ([9:3-7], "echo"))); 
+                      targs = []; args = [(Anormal ((string), [9:8-13], (String "foo")))]; 
+                      unpacked_arg = None }))));
+             ([10:3-16],
+              (Expr
+                 ((void), [10:3-15],
+                  (Call
+                     { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [10:3-15], (Id ([10:3-15], "echo"))); 
+                       targs = []; args = [(Anormal ((string), [10:9-14], (String "foo")))]; 
+                       unpacked_arg = None }))));
+             ([12:3-10], (Expr ((HH\FunctionRef<(readonly function(C $c, dict<int, int> $d): void)>), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [], Code)))));
+             ([13:3-18],
+              (Expr ((HH\FunctionRef<(readonly function(): void)>), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [], Code)))));
+             ([14:3-40], (Expr ((HH\FunctionRef<(readonly function(C): void)>), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));
+             ([16:3-13],
+              (Expr
+                 ((bool), [16:3-12],
+                  (Call { func = (((function(mixed $x)[]: bool)), [16:3-8], (Id ([16:3-8], "\\isset"))); targs = []; args = [(Anormal ((C), [16:9-11], (Lvar ([16:9-11], $c))))]; unpacked_arg = None }))));
+             ([17:3-16],
+              (Expr
+                 ((void), [17:3-16],
+                  (Call
+                     { func = (((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))); 
+                       targs = []; args = [(Anormal ((dynamic), [17:9-14], (Array_get (((dynamic), [17:9-11], (Lvar ([17:9-11], $d))), (Some ((int), [17:12-13], (Int "0")))))))]; 
+                       unpacked_arg = None }))));
+             ([19:3-26],
+              (If (((bool), [19:13-17], (Unop (Unot, ((bool), [19:13-17], True)))),
+                 [([19:3-25],
+                   (Expr
+                      ((noreturn), [19:3-25],
+                       (Call
+                          { func =
+                            (((function<Targs as (mixed...)>(HH\TypedFormatString<PlainSprintf, ()> $fmt, ...() $fmt_args)[]: noreturn)), [19:3-12], (Id ([19:3-12], "\\HH\\invariant_violation")));
+                            targs = [((()), ([19:3-12], Hwildcard))]; 
+                            args = [(Anormal ((string), [19:19-24], (String "foo")))]; 
+                            unpacked_arg = None }))))
+                   ],
+                 [([Pos.none], Noop)])));
+             ([20:3-30],
+              (Expr
+                 ((noreturn), [20:3-29],
+                  (Call
+                     { func = (((function<Targs as (mixed...)>(HH\TypedFormatString<PlainSprintf, ()> $fmt, ...() $fmt_args)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation")));
+                       targs = [((()), ([20:3-22], Hwildcard))]; args = [(Anormal ((string), [20:23-28], (String "foo")))]; 
                        unpacked_arg = None }))))
              ]
            };

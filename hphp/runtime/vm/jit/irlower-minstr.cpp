@@ -189,19 +189,6 @@ void cgSetProp(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
-void cgUnsetProp(IRLS& env, const IRInstruction* inst) {
-  auto const base = inst->src(0);
-
-  auto helper = base->isA(TObj)
-    ? CallSpec::direct(MInstrHelpers::unsetPropCO)
-    : CallSpec::direct(MInstrHelpers::unsetPropC);
-
-  auto const args = propArgs(env, inst).typedValue(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, helper, kVoidDest, SyncOptions::Sync, args);
-}
-
 void cgSetOpProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const extra = inst->extra<SetOpProp>();

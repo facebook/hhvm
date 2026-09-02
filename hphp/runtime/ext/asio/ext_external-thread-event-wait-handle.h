@@ -64,6 +64,7 @@ struct c_ExternalThreadEventWaitHandle final :
   void exitContext(ContextIndex contextIdx);
   void registerToContext();
   void unregisterFromContext();
+  bool startedProcessing() const { return m_startedProcessing; }
 
  private:
   void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
@@ -76,6 +77,8 @@ struct c_ExternalThreadEventWaitHandle final :
 
   // The i/o thread-owned event object, one per ETEWH
   AsioExternalThreadEvent* m_event;
+
+  bool m_startedProcessing{false};
 
   Object m_privData;
 

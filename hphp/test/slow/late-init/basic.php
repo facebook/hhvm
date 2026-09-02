@@ -36,13 +36,6 @@ class A {
     A::$p8->p9->p10 = 123;
   }
 
-  public function unset() :mixed{
-    unset($this->p1);
-    unset($this->p2);
-    unset(A::$p7->p9->p10);
-    unset(A::$p8->p9->p10);
-  }
-
   public function get1() :mixed{ return $this->p1; }
   public function isset1() :mixed{ return isset($this->p1); }
   public function incdec1() :mixed{
@@ -135,13 +128,6 @@ class B {
     B::$p8 = new B();
     B::$p8->{B::prop(9)} = new B();
     B::$p8->{B::prop(9)}->{B::prop(10)} = 123;
-  }
-
-  public function unset() :mixed{
-    unset($this->{B::prop(1)});
-    unset($this->{B::prop(2)});
-    unset(B::$p7->{B::prop(9)}->{B::prop(10)});
-    unset(B::$p8->{B::prop(9)}->{B::prop(10)});
   }
 
   public function get1() :mixed{ return $this->{B::prop(1)}; }
@@ -252,10 +238,6 @@ function test($tests, $a) :mixed{
   foreach ($tests as $test) run_test($a, $test);
   echo "============= setting ================\n";
   $a->set();
-  foreach ($tests as $test) run_test($a, $test);
-  echo "============= unsetting ==============\n";
-  $a->unset();
-  $a->unset();
   foreach ($tests as $test) run_test($a, $test);
 }
 <<__EntryPoint>>

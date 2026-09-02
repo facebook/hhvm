@@ -19,12 +19,50 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <optional>
+#include <type_traits>
 
 #include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
 #include <folly/Function.h>
 #include <folly/Portability.h>
 #include <folly/coro/Coroutine.h>
+#include <folly/lang/Exception.h>
+
+// `AsyncStackMetadataFrame` stores a reserved value as an `AsyncStackFrame`
+// return address. Its high bits do not match the sign-extension pattern
+// required for an x86-64 virtual address, and the value is not
+// instruction-aligned on AArch64.
+//
+// To add a 32-bit Linux target, reserve a permanent nonzero cookie below
+// `folly::kMinValidAddress`, verify marker construction and the C++ readers
+// under that ABI, and update out-of-process readers for its pointer width and
+// frame layout.
+#if UINTPTR_MAX == UINT64_MAX && \
+    (FOLLY_X64 || FOLLY_AARCH64 || defined(_M_ARM64) || defined(_M_ARM64EC))
+#define FOLLY_HAS_ASYNC_STACK_METADATA 1
+#else
+#define FOLLY_HAS_ASYNC_STACK_METADATA 0
+#endif
+
+#if FOLLY_HAS_ASYNC_STACK_METADATA
+// `AsyncStackMetadataFrame` stores this permanent value with
+// `AsyncStackFrame::setReturnAddress()`.
+// External stack walkers may read this symbol from a shared library or an
+// executable that retains symbol information. A fully stripped static
+// executable may omit the name. If readers ever need to discover it there,
+// export it into `.dynsym` at the final ELF link with
+// `--export-dynamic-symbol=folly_async_stack_metadata_frame_cookie` (or the
+// `-Wl,` form through a compiler driver); attributes and source references
+// alone cannot make the name survive stripping. In fbsource, restore
+// `xplat_linker_flags` forwarding in `fb_dirsync_cpp_library` so xplat can use
+// the compiler-driver form while fbcode uses the raw linker flag. A future
+// metadata-frame format must use another value.
+extern "C" {
+FOLLY_EXPORT extern const std::uintptr_t
+    folly_async_stack_metadata_frame_cookie;
+}
+#endif
 
 namespace folly {
 
@@ -256,6 +294,8 @@ AsyncStackFrame& getDetachedRootAsyncStackFrame() noexcept;
 // Given an initial AsyncStackFrame, this will write `addresses` with
 // the return addresses of the frames in this async stack trace, up to
 // `maxAddresses` written.
+// Metadata marker frames are omitted and do not count against `maxAddresses`.
+// The walk stops if two metadata marker frames are adjacent.
 // This assumes `addresses` has `maxAddresses` allocated space available.
 // Returns the number of frames written.
 size_t getAsyncStackTraceFromInitialFrame(
@@ -467,10 +507,9 @@ struct AsyncStackRoot {
   // loop or callback invocation. May be null if this event loop is
   // not currently executing any async operations.
   //
-  // This is atomic primarily to enforce visibility of writes to the
-  // AsyncStackFrame that occur before the topFrame in other processes,
-  // such as profilers/debuggers that may be running concurrently
-  // with the current thread.
+  // This is atomic to publish this pointer to profilers and debuggers. It does
+  // not make the non-owning frame chain safe for a concurrent reader; the
+  // owning thread must not mutate or destroy reachable frames during a walk.
   std::atomic<AsyncStackFrame*> topFrame{nullptr};
 
   // Pointer to the next event loop context lower on the current
@@ -494,7 +533,125 @@ struct AsyncStackRoot {
   void* returnAddress = nullptr;
 };
 
+/**
+ * The metadata attached to one frame of an async stack trace, if any.
+ *
+ * This optional-like type keeps the representation under Folly's control for
+ * profiler-facing arrays instead of depending on a library's std::optional
+ * layout. It is not a stable C++ ABI or wire format; an out-of-process payload
+ * decoder needs an explicit versioned contract. Presence is a separate flag
+ * rather than a reserved payload value because zero is valid metadata.
+ */
+class AsyncStackMetadata {
+ public:
+  using value_type = std::uintptr_t;
+
+  constexpr AsyncStackMetadata() noexcept : value_{0}, has_value_{false} {}
+
+  /* implicit */ constexpr AsyncStackMetadata(std::nullopt_t) noexcept
+      : value_{0}, has_value_{false} {}
+  /* implicit */ constexpr AsyncStackMetadata(value_type value) noexcept
+      : value_{value}, has_value_{true} {}
+
+  constexpr AsyncStackMetadata& operator=(std::nullopt_t) noexcept {
+    reset();
+    return *this;
+  }
+  constexpr AsyncStackMetadata& operator=(value_type value) noexcept {
+    emplace(value);
+    return *this;
+  }
+
+  constexpr const value_type& emplace(value_type value) noexcept {
+    value_ = value;
+    has_value_ = true;
+    return value_;
+  }
+
+  constexpr void reset() noexcept {
+    value_ = 0;
+    has_value_ = false;
+  }
+
+  constexpr void swap(AsyncStackMetadata& that) noexcept {
+    AsyncStackMetadata tmp = *this;
+    *this = that;
+    that = tmp;
+  }
+
+  constexpr bool has_value() const noexcept { return has_value_; }
+  constexpr explicit operator bool() const noexcept { return has_value(); }
+
+  constexpr const value_type& operator*() const noexcept {
+    assert(has_value());
+    return value_;
+  }
+  constexpr const value_type* operator->() const noexcept {
+    assert(has_value());
+    return &value_;
+  }
+
+  constexpr const value_type* get_pointer() const noexcept {
+    return has_value() ? &value_ : nullptr;
+  }
+
+  constexpr value_type value() const {
+    if (!has_value()) {
+      throw_exception<std::bad_optional_access>();
+    }
+    return value_;
+  }
+
+  constexpr value_type value_or(value_type fallback) const noexcept {
+    return has_value() ? value_ : fallback;
+  }
+
+  friend constexpr bool operator==(
+      const AsyncStackMetadata&, const AsyncStackMetadata&) noexcept = default;
+
+  friend constexpr void swap(
+      AsyncStackMetadata& a, AsyncStackMetadata& b) noexcept {
+    a.swap(b);
+  }
+
+ private:
+  value_type value_;
+  bool has_value_;
+};
+
+static_assert(std::is_trivially_copyable_v<AsyncStackMetadata>);
+static_assert(std::is_standard_layout_v<AsyncStackMetadata>);
+
 namespace detail {
+
+inline bool isAsyncStackMetadataFrame(const AsyncStackFrame& frame) noexcept {
+#if FOLLY_HAS_ASYNC_STACK_METADATA
+  return reinterpret_cast<std::uintptr_t>(frame.getReturnAddress()) ==
+      folly_async_stack_metadata_frame_cookie;
+#else
+  // This build cannot create metadata markers through the supported API.
+  (void)frame;
+  return false;
+#endif
+}
+
+struct MetadataFrameAdvanceResult {
+  AsyncStackFrame* frame;
+  bool foundAdjacentMetadataFrame;
+};
+
+// Two adjacent metadata frames mean the chain is invalid; normal metadata
+// construction never creates them. Skip one metadata frame, if present, and
+// report a second one so callers can stop before a marker cycle loops forever
+// without filling the output buffer.
+[[nodiscard]] inline MetadataFrameAdvanceResult advancePastMetadataFrame(
+    AsyncStackFrame* frame) noexcept {
+  if (frame == nullptr || !isAsyncStackMetadataFrame(*frame)) {
+    return {frame, false};
+  }
+  frame = frame->getParentFrame();
+  return {frame, frame != nullptr && isAsyncStackMetadataFrame(*frame)};
+}
 
 class ScopedAsyncStackRoot {
  public:
@@ -512,6 +669,31 @@ class ScopedAsyncStackRoot {
 };
 
 } // namespace detail
+
+inline size_t getAsyncStackTraceFromInitialFrame(
+    folly::AsyncStackFrame* initialFrame,
+    std::uintptr_t* addresses,
+    size_t maxAddresses) {
+  size_t numFrames = 0;
+  auto* frame = initialFrame;
+  while (frame != nullptr && numFrames < maxAddresses) {
+    const auto advanceResult = detail::advancePastMetadataFrame(frame);
+    frame = advanceResult.frame;
+    if (frame == nullptr || advanceResult.foundAdjacentMetadataFrame) {
+      break;
+    }
+
+    addresses[numFrames++] =
+        reinterpret_cast<std::uintptr_t>(frame->getReturnAddress());
+    // The output is full; reading the unused parent link may fault.
+    if (numFrames == maxAddresses) {
+      break;
+    }
+    frame = frame->getParentFrame();
+  }
+  return numFrames;
+}
+
 } // namespace folly
 
 #include <folly/tracing/AsyncStack-inl.h>

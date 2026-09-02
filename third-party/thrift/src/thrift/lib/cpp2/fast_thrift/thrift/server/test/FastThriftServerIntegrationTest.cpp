@@ -144,19 +144,19 @@ class TestHandler
   int32_t lastId{0};
   std::string lastUser;
 
-  void async_eb_ping(ft::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ft::FastHandlerCallbackPtr<void> cb) override {
     pingCalled = true;
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ft::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     lastA = a;
     lastB = b;
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ft::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     lastMessage = *message;
@@ -165,7 +165,7 @@ class TestHandler
     cb->result(std::move(response));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ft::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t id) override {
     lastId = id;
@@ -187,7 +187,7 @@ class TestHandler
     cb->result(std::move(response));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ft::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t id,
       std::unique_ptr<std::string> user) override {

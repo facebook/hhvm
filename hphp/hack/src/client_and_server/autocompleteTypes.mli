@@ -32,6 +32,7 @@ type autocomplete_item = {
   res_label: string;
   res_insert_text: insert_text;
   res_detail: string;
+  res_sort_text: string option;
   res_filter_text: string option;
   res_additional_edits: (string * Ide_api_types.range) list;
   (* res_fullname is res_label without trimming the namespace. *)
@@ -49,6 +50,9 @@ type ide_result = {
 }
 
 type result = autocomplete_item list
+
+(** The effective LSP sortText for a completion item. *)
+val sort_text : autocomplete_item -> string
 
 type legacy_autocomplete_context = {
   is_manually_invoked: bool;

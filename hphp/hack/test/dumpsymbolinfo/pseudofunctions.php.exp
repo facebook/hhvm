@@ -37,6 +37,16 @@
     {
       "pos": {
         "filename": "pseudofunctions.php",
+        "line": 8,
+        "char_start": 36,
+        "char_end": 37
+      },
+      "type": "dict<int, int>",
+      "ident": 0
+    },
+    {
+      "pos": {
+        "filename": "pseudofunctions.php",
         "line": 15,
         "char_start": 9,
         "char_end": 10
@@ -51,7 +61,7 @@
         "char_start": 9,
         "char_end": 10
       },
-      "type": "C",
+      "type": "dict<int, int>",
       "ident": 0
     }
   ]

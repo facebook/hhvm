@@ -1,5 +1,5 @@
-function
-  INSERT function
+abstract
+  INSERT abstract
   keyword
 async
   INSERT async
@@ -7,11 +7,8 @@ async
 final
   INSERT final
   keyword
-abstract
-  INSERT abstract
-  keyword
-static
-  INSERT static
+function
+  INSERT function
   keyword
 private
   INSERT private
@@ -21,4 +18,7 @@ protected
   keyword
 public
   INSERT public
+  keyword
+static
+  INSERT static
   keyword

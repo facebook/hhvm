@@ -1,18 +1,18 @@
 class
   INSERT class
   class<this>
-SECOND_NAME
-  INSERT SECOND_NAME
-  HH\MemberOf<SomeEnumClass, ~string>
 FIRST_NAME
   INSERT FIRST_NAME
   HH\MemberOf<SomeEnumClass, ~int>
-valueOf
-  INSERT valueOf(${1:#label})
-  function<TEnum super this, TType>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
-nameOf
-  INSERT nameOf(${1:\$label})
-  function<TType>(~HH\EnumClass\Label<this, TType> $label)[]: string
 getValues
   INSERT getValues()
   function()[HH\Contexts\write_props]: ~dict<string, HH\MemberOf<SomeEnumClass, mixed>>
+nameOf
+  INSERT nameOf(${1:\$label})
+  function<TType>(~HH\EnumClass\Label<this, TType> $label)[]: string
+SECOND_NAME
+  INSERT SECOND_NAME
+  HH\MemberOf<SomeEnumClass, ~string>
+valueOf
+  INSERT valueOf(${1:#label})
+  function<TEnum super this, TType>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>

@@ -112,6 +112,10 @@ std::unordered_map<std::string, folly::dynamic> additionalConfigParams() {
   return std::unordered_map<std::string, folly::dynamic>();
 }
 
+folly::dynamic getClientIdentityAttributes(const McrouterOptions&) {
+  return folly::dynamic::object;
+}
+
 void insertCustomStartupOpts(folly::dynamic& options) {}
 
 std::string getBinPath(folly::StringPiece name) {

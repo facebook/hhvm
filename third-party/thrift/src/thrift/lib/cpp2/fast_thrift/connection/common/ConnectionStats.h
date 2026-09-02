@@ -48,6 +48,10 @@ struct alignas(folly::hardware_destructive_interference_size)
   // Gauge. Incremented with connectionsAccepted, decremented when the
   // connection's close callback runs.
   PlainCounter connectionsActive;
+  // Refused because the IO thread was at its connection limit. Counted here
+  // and nowhere else: such a connection is closed before it is built, so it
+  // never reaches connectionsAccepted.
+  PlainCounter connectionsRejected;
 };
 
 // Scopes the per-thread storage below to connection stats, so its slots are

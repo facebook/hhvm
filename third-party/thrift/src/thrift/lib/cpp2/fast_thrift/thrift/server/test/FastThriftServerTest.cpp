@@ -79,16 +79,16 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
   bool throwNotFound{false};
   bool throwPermissionDenied{false};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -96,7 +96,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t id) override {
     if (throwNotFound) {
@@ -112,7 +112,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> user) override {
@@ -138,7 +138,7 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
 class DeferredPingHandler
     : public FastServiceHandler<integration::FastThriftServer> {
  public:
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     evb_ = cb->getEventBase();
     callback_ = std::move(cb);
     pingStarted_.post();
@@ -1266,6 +1266,10 @@ struct BackpressureRecorder {
   // Whether that pause is ever lifted. A test that leaves it false pins what a
   // pause actually stops.
   std::atomic<bool> resumeAfterPause{true};
+  // Whether the EventBase the resumer named was the one looping the connection
+  // at the time the callback ran. An EventBase obtained any other way can be
+  // one nothing ever loops, which strands the deferred resume silently.
+  std::atomic<bool> resumerEvbLooping{false};
 
   std::mutex resumerMutex;
   ftt::ReadResumer resumer;
@@ -1305,7 +1309,11 @@ struct BackpressureExtension {
       std::lock_guard<std::mutex> lock(rec->resumerMutex);
       resumer = rec->resumer;
     }
-    folly::EventBaseManager::get()->getEventBase()->runInLoop(
+    rec->resumerEvbLooping.store(
+        resumer.eventBase() != nullptr &&
+            resumer.eventBase()->inRunningEventBaseThread(),
+        std::memory_order_relaxed);
+    resumer.eventBase()->runInLoop(
         [resumer]() mutable noexcept { resumer.resume(); });
   }
 
@@ -1890,6 +1898,9 @@ TEST(FastThriftServerBackpressureExtensionTest, PauseThenResumeKeepsServing) {
 
   EXPECT_TRUE(roundTripsOnOneConnection(server.getAddress(), 2));
   EXPECT_GE(rec.drained.load(), 1);
+  // The resumer named the EventBase the connection was running on, so a resume
+  // deferred onto it is guaranteed to run.
+  EXPECT_TRUE(rec.resumerEvbLooping.load(std::memory_order_relaxed));
 }
 
 // The extension outlives the connection, so a resume that arrives after

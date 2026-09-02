@@ -102,6 +102,8 @@ type t =
   | Server_non_opt_build_mode
   | Not_restarting_server_with_precomputed_saved_state
   | Config_error
+  | Client_bad_args
+      (** hh_client command-line arguments could not be parsed or its root was invalid. *)
 [@@deriving show]
 
 and finale_data = {
@@ -209,6 +211,7 @@ let exit_code = function
     (* Zoncolan uses 226 and 227, skipping *)
     228
   | Distc_failed -> 229
+  | Client_bad_args -> 64 (* EX_USAGE from sysexits.h *)
 
 let exit_code_to_string (code : int) : string =
   (* We will return the string "See Exit_status.ml for meaning of this code".
@@ -240,6 +243,7 @@ let exit_code_to_string (code : int) : string =
       Watchman_failed;
       Server_non_opt_build_mode;
       Distc_failed;
+      Client_bad_args;
     ]
   in
   let matches =

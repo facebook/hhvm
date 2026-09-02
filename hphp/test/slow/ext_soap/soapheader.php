@@ -16,8 +16,4 @@ $soapHeader->data = dict["hello" => 'world'];
 $soapHeader->mustUnderstand = true;
 
 var_dump($soapHeader);
-
-unset($soapHeader->data);
-
-var_dump($soapHeader);
 }

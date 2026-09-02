@@ -491,7 +491,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowUndefPropException:
   case ThrowUninitLoc:
   case UnsetElem:
-  case UnsetProp:
   case VectorSet:
   case VerifyParam:
   case VerifyParamCallable:

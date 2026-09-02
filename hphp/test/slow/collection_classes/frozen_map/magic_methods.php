@@ -26,12 +26,6 @@ function main() :mixed{
 
   echo "\n__isSet...\n";
   var_dump(isset((new ImmMap (Vector {1, 2, 3}))->notAProp));
-
-  echo "\n__unset...\n";
-  echo $cfail( function () {
-    $fm = new ImmMap(Vector {1, 2, 3});
-    unset($fm->inexistentProperty);
-  });
 }
 
 

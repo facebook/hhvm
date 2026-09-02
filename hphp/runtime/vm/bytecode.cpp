@@ -2860,16 +2860,9 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
 }
 
 OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
-  auto const key = key_tv(mk);
-  maybeLogDynamicProp(mk, key);
-  auto ctx = MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
+  assertx(mcodeIsElem(mk.mcode));
   auto& mstate = vmMInstrState();
-  if (mcodeIsProp(mk.mcode)) {
-    UnsetProp(ctx, *mstate.base, key);
-  } else {
-    assertx(mcodeIsElem(mk.mcode));
-    UnsetElem(mstate.base, key);
-  }
+  UnsetElem(mstate.base, key_tv(mk));
 
   mFinal(mstate, nDiscard, std::nullopt);
 }

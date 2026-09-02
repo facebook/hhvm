@@ -524,6 +524,22 @@ let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
     ~show_query_text:any_hack_files;
   ()
 
+(** Sort for plausible behavior of a to-spec LSP client - doesn't include all
+VSCode behavior. *)
+let sort_autocomplete_results results =
+  List.stable_sort results ~compare:(fun left right ->
+      let sort_text_comparison =
+        String.compare
+          (String.lowercase (AutocompleteTypes.sort_text left))
+          (String.lowercase (AutocompleteTypes.sort_text right))
+      in
+      if sort_text_comparison <> 0 then
+        sort_text_comparison
+      else
+        String.compare
+          left.AutocompleteTypes.res_label
+          right.AutocompleteTypes.res_label)
+
 (** This handles "--auto-complete" and "--auto-complete-manually-invoked".
 It parses the input file/multifiles for AUTO332, and runs them through
 ServerAutoComplete, and shows the results. These results will include
@@ -550,9 +566,12 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
           path
           contents
       in
+      let results =
+        sort_autocomplete_results result.Utils.With_complete_flag.value
+      in
       if show_file_titles then
         Printf.printf "//// %s\n" (Multifile.short_suffix path);
-      List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
+      List.iter results ~f:(fun r ->
           let open AutocompleteTypes in
           Printf.printf "%s\n" r.res_label;
           List.iter r.res_additional_edits ~f:(fun (s, _) ->

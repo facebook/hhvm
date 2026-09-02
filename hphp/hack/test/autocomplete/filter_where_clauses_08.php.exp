@@ -1,6 +1,6 @@
-notToThrow
-  INSERT notToThrow()
-  function<TRet>(): void
 check
   INSERT check()
   function(): void
+notToThrow
+  INSERT notToThrow()
+  function<TRet>(): void

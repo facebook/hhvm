@@ -21,14 +21,9 @@ $fp = fopen(__FILE__, "r");
 try { var_dump( ftell($fp, 10) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // ftell on a file handle which is already closed
-echo "-- Testing ftell with closed/unset file handle --";
+echo "-- Testing ftell with closed file handle --";
 fclose($fp);
 var_dump(ftell($fp));
-
-// ftell on a file handle which is unset
-$file_handle = fopen(__FILE__, "r");
-unset($file_handle); //unset file handle
-try { var_dump( ftell($file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 }

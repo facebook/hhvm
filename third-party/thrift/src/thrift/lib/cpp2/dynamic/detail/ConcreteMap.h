@@ -53,6 +53,8 @@ class IMap {
   virtual std::optional<DynamicRef> get(const DynamicConstRef& key) = 0;
   virtual std::optional<DynamicConstRef> get(
       const DynamicConstRef& key) const = 0;
+  virtual std::optional<DynamicConstRef> findKey(
+      const DynamicConstRef& key) const = 0;
   virtual void insert(DynamicValue key, DynamicValue value) = 0;
   virtual bool erase(const DynamicConstRef& key) = 0;
   virtual bool contains(const DynamicConstRef& key) const = 0;
@@ -142,6 +144,16 @@ class ConcreteMap final : public IMap {
     }
     return DynamicConstRef(
         this->mapType_.asMapUnchecked().valueType(), it->second);
+  }
+
+  std::optional<DynamicConstRef> findKey(
+      const DynamicConstRef& key) const override {
+    auto it = elements_.find(key.deref<K>());
+    if (it == elements_.end()) {
+      return std::nullopt;
+    }
+    return DynamicConstRef(
+        this->mapType_.asMapUnchecked().keyType(), it->first);
   }
 
   void insert(DynamicValue key, DynamicValue value) override {

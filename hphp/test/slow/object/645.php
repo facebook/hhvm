@@ -24,5 +24,5 @@ $obj = new B(1);
  var_dump($obj->a);
 $obj = new C(1);
  var_dump($obj->a);
-unset($obj);
+$obj = null;
 }

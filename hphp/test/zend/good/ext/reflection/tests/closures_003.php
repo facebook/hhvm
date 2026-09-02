@@ -4,14 +4,14 @@ $closure = function($a, $b = 0) { };
 
 $method = new ReflectionMethod ($closure, '__invoke');
 $params = $method->getParameters ();
-unset ($method);
+$method = null;
 $method = $params[0]->getDeclaringFunction ();
-unset ($params);
+$params = null;
 echo $method->getName ()."\n";
 
 $parameter = new ReflectionParameter (vec[$closure, '__invoke'], 'b');
 $method = $parameter->getDeclaringFunction ();
-unset ($parameter);
+$parameter = null;
 echo $method->getName ()."\n";
 
 echo "===DONE===\n";

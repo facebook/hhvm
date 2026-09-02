@@ -105,13 +105,13 @@ function main_entry(): void {
   var_dump(!($abc->foo['bar'] ?? false));
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
-  unset($abc);
+  $abc = null;
 
   echo "**************************\n";
 
   $abc = new stdClass;
   tst2(inout $abc);  // make $abc a Var
-  unset($abc);
+  $abc = null;
 
   echo "**************************\n";
 
@@ -127,14 +127,14 @@ function main_entry(): void {
   var_dump(!($abc->foo['bar'] ?? false));
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
-  unset($abc);
+  $abc = null;
 
   echo "**************************\n";
 
   $abc = dict['foo' => new stdClass];
 
   tst3(inout $abc);  // make $abc a Var
-  unset($abc);
+  $abc = null;
 
   echo "**************************\n";
 }

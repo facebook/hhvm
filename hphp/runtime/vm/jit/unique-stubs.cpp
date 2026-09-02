@@ -845,8 +845,9 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler, co
   }, name);
 }
 
+template<class Handler>
 TCA emitHandleServiceRequestMainFE(CodeBlock& cb, DataBlock& data,
-                                   const char* name) {
+                                   Handler handler, const char* name) {
     alignCacheLine(cb);
     return vwrap(cb, data, [&] (Vout& v) {
       pushFrameFromFuncEntryRegs(v);
@@ -854,7 +855,7 @@ TCA emitHandleServiceRequestMainFE(CodeBlock& cb, DataBlock& data,
 
       auto const ret = v.makeReg();
       v << vcall{
-        CallSpec::direct(svcreq::handleTranslateMainFuncEntry),
+        CallSpec::direct(handler),
         v.makeVcallArgs({{}}),
         v.makeTuple({ret}),
         Fixup::none(),
@@ -925,7 +926,14 @@ TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data,
 }
 
 TCA emitHandleTranslateMainFE(CodeBlock& cb, DataBlock& data, const char* name) {
-  return emitHandleServiceRequestMainFE(cb, data, name);
+  return emitHandleServiceRequestMainFE(
+    cb, data, svcreq::handleTranslateMainFuncEntry, name);
+}
+
+TCA emitHandleInterpMainFENoTranslate(CodeBlock& cb, DataBlock& data,
+                                      const char* name) {
+  return emitHandleServiceRequestMainFE(
+    cb, data, svcreq::handleInterpMainFuncEntryNoTranslate, name);
 }
 
 TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data,
@@ -1562,6 +1570,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(handleTranslateFuncEntry, view, emitHandleTranslateFE, cold, data, false);
   ADD(handleTranslateNamedParamsFuncEntry, view, emitHandleTranslateFE, cold, data, true);
   ADD(handleTranslateMainFuncEntry, view, emitHandleTranslateMainFE, cold, data);
+  ADD(handleInterpMainFuncEntryNoTranslate, view,
+      emitHandleInterpMainFENoTranslate, cold, data);
   ADD(handleRetranslate, view, emitHandleRetranslate, cold, data);
   ADD(handleRetranslateFuncEntry, view, emitHandleRetranslateFE, cold, data, false);
   ADD(handleRetranslateNamedParamsFuncEntry, view, emitHandleRetranslateFE, cold,

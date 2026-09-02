@@ -27,9 +27,15 @@ namespace apache::thrift {
  * Service-shared interface for the fast_thrift server.
  *
  * Users specialize this by inheriting from
- * apache::thrift::FastServiceHandler<{{service.qualified_name}}>
- * and overriding async_eb_* methods. One shared instance is wired into
- * every per-connection {{service.cpp_name}}AppAdapter.
+ * apache::thrift::FastServiceHandler<{{service.qualified_name}}> and
+ * overriding one generated method per function. One shared instance is wired
+ * into every per-connection {{service.cpp_name}}AppAdapter.
+ *
+ * The method name says where the body runs, matching the legacy stack:
+ * async_eb_<name> for a function annotated @cpp.ProcessInEbThreadUnsafe, which
+ * runs inline on the connection's EventBase; async_tm_<name> otherwise, which
+ * runs on the CPU executor when the server has one and inline on the EventBase
+ * when it does not.
  *
  * Each method takes a FastHandlerCallback that the user completes (with a
  * value, with done(), or with an exception). The default implementation
@@ -77,6 +83,8 @@ class FastServiceHandler<{{service.qualified_name}}>
 
   {{#each service.functions as |function|}}
   {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+    {{#let function_comma = (if function.params.fields? ", " "")}}
+    {{#if function.event_based?}}
   virtual void async_eb_{{function.cpp_name}}(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<{{#partial server.return_type function=function service=service}}> callback{{#each function.params.fields as |field|}},
       {{#partial server.param_type type=field.type function=function}} /*p_{{field.cpp_name}}*/{{/each}}) {
@@ -85,7 +93,32 @@ class FastServiceHandler<{{service.qualified_name}}>
             ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
             "Unimplemented fast_thrift method: {{function.name}}"));
   }
+    {{#else}}
+  virtual {{#partial server.return_type function=function service=service}} sync_{{function.cpp_name}}({{#partial server.function_param_list_commented_out function=function}});
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<{{#partial server.return_type function=function service=service}}> co_{{function.cpp_name}}({{#partial server.function_param_list function=function}});
+  // Overload for a body that needs the request context. A coroutine resumes
+  // after the dispatcher has returned, so it cannot read the thread-local
+  // getRequestContext() a sync_ body uses; these are carried by value into
+  // the coroutine frame instead.
+  virtual folly::coro::Task<{{#partial server.return_type function=function service=service}}> co_{{function.cpp_name}}(
+      ::apache::thrift::fast_thrift::thrift::FastRequestParams params{{function_comma}}{{#partial server.function_param_list function=function}});
+#endif // FOLLY_HAS_COROUTINES
+  virtual void async_tm_{{function.cpp_name}}(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<{{#partial server.return_type function=function service=service}}> callback{{function_comma}}{{#partial server.function_param_list function=function}});
+    {{/if function.event_based?}}
   {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  {{/each}}
+
+ private:
+  // Which of the three surfaces each function's author implemented. Resolved
+  // on that function's first request by async_tm_ walking the ladder, then
+  // read directly. EventBase-pinned functions have one surface and no state.
+  {{#each service.functions as |function|}}
+  {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?) (not function.event_based?))}}
+  std::atomic<::apache::thrift::detail::si::InvocationType> __fbthrift_invocation_{{function.cpp_name}}{
+      ::apache::thrift::detail::si::InvocationType::AsyncTm};
+  {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?) (not function.event_based?))}}
   {{/each}}
 };
 

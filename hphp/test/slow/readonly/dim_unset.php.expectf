@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Property ro_f2 of class Foo1 must be mutable.' in %s/dim_unset.php:21
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Property ro_f2 of class Foo1 must be mutable.' in %s/dim_unset.php:22
 %A

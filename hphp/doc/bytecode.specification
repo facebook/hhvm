@@ -473,7 +473,7 @@ Magic property access methods
 -----------------------------
 
 Instructions that access properties may in some cases invoke a magic property
-access method (__get, __set, __isset, or __unset) if an object implements the
+access method (__get, __set, or __isset) if an object implements the
 method and the method is considered eligible for invocation. A magic property
 access method is considered "eligible" for a given object if there is not a
 frame on the call stack that corresponds to an invocation of the same method on
@@ -2479,33 +2479,6 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
     1011111 | b = y->__get(x); a = b; <op>a; y->__set(x, a);
             |   push a (Pre*) or b (Post*)
 
-UnsetPropC                        [C B]  ->  []
-UnsetPropL <local variable id>    [B]  ->  []
-
-  Unset property.
-
-  These instructions first load a value into x and a base into y, as given by
-  the following table:
-
-         operation     x    y
-       -------------+----+-----
-        UnsetPropC  | $2 | $1
-        UnsetPropL  | %1 | $1
-
-  Next, performs one of the following actions:
-
-    y is an object
-     y->x is visible
-      y->x is accessible
-       y has eligible __unset method
-    -----+----------------------------------------------------------------------
-    0XXX | do nothing
-    10X0 | do nothing
-    10X1 | y->__unset(x)
-    1100 | throw fatal error
-    1101 | y->__unset(x)
-    111X | unset(y->x)
-
 
 10. Member instructions
 -----------------------
@@ -2623,7 +2596,8 @@ SetOpM <stack count> <op> <member key>    [... C]  ->  [C]
 
 UnsetM <stack count> <member key>    [...]  ->  []
 
-  Unset{Prop,Elem} member operation.
+  UnsetElem member operation. The member key must be elem-flavored; unsetting a
+  property is not part of the language.
 
 11. Iterator instructions
 -------------------------

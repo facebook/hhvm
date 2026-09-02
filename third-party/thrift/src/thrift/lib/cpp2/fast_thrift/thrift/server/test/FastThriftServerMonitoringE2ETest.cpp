@@ -69,18 +69,18 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
   std::atomic<int> pingCount{0};
   std::atomic<int> addCount{0};
 
-  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+  void async_tm_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
     pingCount.fetch_add(1, std::memory_order_relaxed);
     cb->done();
   }
 
-  void async_eb_add(
+  void async_tm_add(
       ftt::FastHandlerCallbackPtr<int64_t> cb, int64_t a, int64_t b) override {
     addCount.fetch_add(1, std::memory_order_relaxed);
     cb->result(a + b);
   }
 
-  void async_eb_echo(
+  void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       std::unique_ptr<std::string> message) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -88,7 +88,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_lookup(
+  void async_tm_lookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/) override {
     auto resp = std::make_unique<EchoResponse>();
@@ -96,7 +96,7 @@ class UserHandler : public FastServiceHandler<integration::FastThriftServer> {
     cb->result(std::move(resp));
   }
 
-  void async_eb_secureLookup(
+  void async_tm_secureLookup(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<EchoResponse>> cb,
       int32_t /*id*/,
       std::unique_ptr<std::string> /*user*/) override {
@@ -122,7 +122,7 @@ class MonitoringHandler : public FastServiceHandler<Monitor>,
   std::atomic<bool> aliveSinceRanOnEventBase{false};
   std::atomic<bool> getCountersRanOnEventBase{false};
 
-  void async_eb_aliveSince(
+  void async_tm_aliveSince(
       ftt::FastHandlerCallbackPtr<std::int64_t> cb) override {
     aliveSinceCount.fetch_add(1, std::memory_order_relaxed);
     aliveSinceRanOnEventBase.store(
@@ -130,7 +130,7 @@ class MonitoringHandler : public FastServiceHandler<Monitor>,
     cb->result(kAliveSinceValue);
   }
 
-  void async_eb_getCounters(
+  void async_tm_getCounters(
       ftt::FastHandlerCallbackPtr<
           std::unique_ptr<std::map<std::string, std::int64_t>>> cb) override {
     getCountersRanOnEventBase.store(
@@ -262,18 +262,25 @@ TEST_P(FastThriftServerMonitoringE2ETest, BothHandlersHonorNegotiatedProtocol) {
   destroyClientOnEvb(monClient);
 }
 
-// Aux interfaces offload to the CPU pool like the user handler, except for
-// methods the IDL pins with @cpp.ProcessInEbThreadUnsafe. getCounters is
-// pinned (mirroring BaseService.getCounters in fb303_core.thrift) so counter
-// scrapes keep answering while the pool is saturated; aliveSince is not, so
-// it must move off the IO thread whenever a pool exists. Asserting both in
-// one test makes this an A/B rather than a claim that a pool is configured.
-TEST_P(FastThriftServerMonitoringE2ETest, PinnedMonitoringMethodsStayOnEvb) {
+// Aux interfaces offload to the CPU pool like the user handler. No monitoring
+// method is EventBase-pinned: building and serializing a six-figure counter
+// map on a connection's EventBase stalls every other connection on that
+// thread, so the counter scrapes offload like everything else. Both methods
+// must therefore leave the IO thread when a pool exists and stay on it when
+// none is configured — parameterizing on pool size makes this an A/B rather
+// than a claim that a pool is configured.
+//
+// Status.getStatus is the one aux method that is still pinned, so that a
+// container health check answers even when the pool is saturated. It is not
+// reachable from this fixture, which wires only a monitoring handler.
+TEST_P(FastThriftServerMonitoringE2ETest, MonitoringMethodsOffloadToCpuPool) {
   auto monClient = createClient<Monitor>();
 
   monClient->semifuture_getCounters().get();
-  EXPECT_TRUE(monitoringHandler_->getCountersRanOnEventBase.load())
-      << "getCounters is @cpp.ProcessInEbThreadUnsafe and must never offload";
+  EXPECT_EQ(
+      monitoringHandler_->getCountersRanOnEventBase.load(), !usingCPUPool())
+      << "getCounters is not EventBase-pinned and must offload when a pool "
+         "exists";
 
   monClient->semifuture_aliveSince().get();
   EXPECT_EQ(

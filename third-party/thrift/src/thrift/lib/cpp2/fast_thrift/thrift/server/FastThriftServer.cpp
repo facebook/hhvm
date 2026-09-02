@@ -33,6 +33,8 @@
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp2/fast_thrift/connection/common/ConnectionStats.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/TLSStats.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerConnectionFactory.h>
 
@@ -95,6 +97,19 @@ void FastThriftServer::setDebugInterface(
   CHECK(!auxInterfaces_.debugHandler)
       << "FastThriftServer::setDebugInterface called more than once";
   auxInterfaces_.debugHandler = std::move(handler);
+}
+
+void FastThriftServer::setControlInterface(
+    std::shared_ptr<fast_thrift::ControlServerInterface> handler) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setControlInterface must be called before "
+         "start()/serve()";
+  CHECK(handler)
+      << "FastThriftServer::setControlInterface requires a non-null handler";
+  CHECK(!auxInterfaces_.controlHandler)
+      << "FastThriftServer::setControlInterface called more than once";
+  auxInterfaces_.controlHandler = std::move(handler);
 }
 
 void FastThriftServer::setSecurityInterface(
@@ -341,6 +356,9 @@ void FastThriftServer::start() {
     if (auxInterfaces_.debugHandler) {
       auxInterfaces_.debugHandler->getServiceMetadata(*resp);
     }
+    if (auxInterfaces_.controlHandler) {
+      auxInterfaces_.controlHandler->getServiceMetadata(*resp);
+    }
     if (auxInterfaces_.securityHandler) {
       auxInterfaces_.securityHandler->getServiceMetadata(*resp);
     }
@@ -386,6 +404,22 @@ void FastThriftServer::start() {
         std::make_shared<folly::CPUThreadPoolExecutor>(config_.numCPUThreads);
     cpuExecutor_ = folly::getKeepAliveToken(ownedCPUThreadPool_.get());
   }
+  // Materialize the counters config_.enableStats asks for, leaving alone any
+  // layer the embedder already supplied via the setStats family. Done here
+  // rather than in the constructor so those setters, which reject a second
+  // instance, still have every pre-start call to themselves.
+  if (config_.enableStats) {
+    if (!stats_) {
+      stats_ = std::make_shared<ServerStats>();
+    }
+    if (!connectionStats_) {
+      connectionStats_ = std::make_shared<connection::ConnectionStats>();
+    }
+    if (!tlsStats_) {
+      tlsStats_ = std::make_shared<connection::security::TLSStats>();
+    }
+  }
+
   connectionManager_ = connection::ConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),
@@ -407,6 +441,7 @@ void FastThriftServer::start() {
       .monitoringHandler = auxInterfaces_.monitoringHandler,
       .statusHandler = auxInterfaces_.statusHandler,
       .debugHandler = auxInterfaces_.debugHandler,
+      .controlHandler = auxInterfaces_.controlHandler,
       .securityHandler = auxInterfaces_.securityHandler,
       .metadataResponse = metadataResponse_,
       .zeroCopyThreshold = config_.zeroCopyThreshold,

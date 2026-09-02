@@ -28,8 +28,8 @@ namespace {
    * var_dump($d); // prints an empty dict
    * ```
    *
-   * Also can be used to unset object properties and variables, but this behavior
-   * is disallowed by Hack.
+   * Removing a key is all `unset` does: unsetting a local, a property or a
+   * static property is not part of the language.
    */
   function unset(mixed $x)[]: void;
 

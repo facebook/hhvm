@@ -1,9 +1,7 @@
 ERROR: File "unset_function.php", line 8, characters 9-17:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
 ERROR: File "unset_function.php", line 9, characters 9-17:
 You cannot use this syntax in an `unset()` expression. (Parsing[1002])
-ERROR: File "unset_function.php", line 8, characters 3-19:
-The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "unset_function.php", line 9, characters 3-28:
 In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
   File "unset_function.php", line 3, characters 21-38:

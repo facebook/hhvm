@@ -26,7 +26,7 @@ echo "Object test: " . (isset($obj) ? "YES": "NO") . "\n";
 echo "Resource test: " . (isset($res) ? "YES": "NO") . "\n";
 
 echo "\n\nUnset the variables\n\n";
-unset($i, $f, $s, $a, $b, $n, $obj, $res);
+$i = null; $f = null; $s = null; $a = null; $b = null; $n = null; $obj = null; $res = null;
 
 echo "Integer test: " . (isset($i) ? "YES": "NO")  . "\n";
 echo "Float test: " . (isset($f) ? "YES": "NO") . "\n";

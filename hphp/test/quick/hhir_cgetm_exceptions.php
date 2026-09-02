@@ -18,11 +18,7 @@ class Something {
 }
 
 class Unsetter {
-  private $x;
-
-  public function __construct() {
-    unset($this->x);
-  }
+  <<__LateInit>> private $x;
 
   public function useX($k) :mixed{
     echo "sup\n";

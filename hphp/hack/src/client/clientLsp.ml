@@ -2384,19 +2384,6 @@ let make_ide_completion_response
              ]
             @ base_class))
     in
-    let hack_to_sort_text (completion : autocomplete_item) : string option =
-      let label = completion.res_label in
-      let should_downrank label =
-        String.length label > 2
-        && String.equal (Str.string_before label 2) "__"
-        || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
-      in
-      let downranked_result_prefix_character = "~" in
-      if should_downrank label then
-        Some (downranked_result_prefix_character ^ label)
-      else
-        Some label
-    in
     {
       label = completion.res_label;
       kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
@@ -2405,7 +2392,7 @@ let make_ide_completion_response
         Option.map completion.res_documentation ~f:(fun s ->
             MarkedStringsDocumentation [MarkedString s]);
       (* This will be filled in by completionItem/resolve. *)
-      sortText = hack_to_sort_text completion;
+      sortText = Some (AutocompleteTypes.sort_text completion);
       filterText = completion.res_filter_text;
       insertText = None;
       insertTextFormat = Some insertTextFormat;

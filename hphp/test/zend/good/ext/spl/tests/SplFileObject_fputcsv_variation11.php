@@ -49,7 +49,7 @@ foreach ($csv_lists as $csv_list) {
     var_dump( $fo->ftell() );
     var_dump( $fo->eof() );
     //close the file
-    unset($fo);
+    $fo = null;
     
     // print the file contents 
     var_dump( file_get_contents($file) );

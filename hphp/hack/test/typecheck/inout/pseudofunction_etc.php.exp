@@ -3,13 +3,13 @@ Property accessed on a value of type `dynamic` (Warn[12042])
   File "pseudofunction_etc.php", line 3, characters 36-42:
   This expression has type `dynamic`
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 6, characters 15-15:
 An expression is expected here. (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 14, characters 31-35:
 Parameters may not be marked `inout` on constructors (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
@@ -34,16 +34,10 @@ Invalid assignment to an `inout` parameter (Typing[4337])
   But got `dynamic`
   File "soundness.hhi", line 32, characters 3-5:
     via this generic `Tin`
-ERROR: File "pseudofunction_etc.php", line 6, characters 3-18:
-The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
-ERROR: File "pseudofunction_etc.php", line 8, characters 3-13:
-The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
-ERROR: File "pseudofunction_etc.php", line 9, characters 3-13:
-The argument to `unset` must be an array access. (Typing[4521])
 ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
 ERROR: File "pseudofunction_etc.php", line 10, characters 3-17:

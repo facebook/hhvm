@@ -24,6 +24,7 @@
 #include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/FastRequestParams.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
@@ -79,6 +80,21 @@ class ThriftServerAppAdapterFactory {
       folly::not_null<const ::apache::thrift::syntax_graph::ServiceNode*>>
   getServiceSchemaNodes() {
     return {};
+  }
+
+  // Per-request handles for the request currently being dispatched on this
+  // thread. Populated by the generated async_tm_ dispatcher for the duration
+  // of a sync_ body, and empty everywhere else.
+  //
+  // A co_ body must NOT use these: it resumes after the dispatcher has
+  // returned and the guard has cleared them, possibly on a different thread.
+  // Take the FastRequestParams overload of co_ instead, which carries the same
+  // handles by value into the coroutine frame.
+  static const FastRequestParams& getRequestParams() noexcept {
+    return detail::tlRequestParams();
+  }
+  static ThriftRequestContext* getRequestContext() noexcept {
+    return detail::tlRequestParams().getRequestContext();
   }
 };
 

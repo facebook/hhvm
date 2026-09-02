@@ -9,9 +9,6 @@ class Foo {
   function callUnknownClassMethod($method) :mixed{
     return HH\dynamic_class_meth(SomeUnknownClass::class, $method)();
   }
-  function unsetStaticProperty() :mixed{
-    unset(Foo::$baz);
-  }
 }
 
 <<__EntryPoint>>

@@ -54,6 +54,18 @@ TEST(SetTest, InsertAndContains) {
   EXPECT_FALSE(set.contains(DynamicValue::makeI32(40)));
 }
 
+TEST(SetTest, Find) {
+  auto set = makeSet(makeSetType(type_system::TypeSystem::I32()));
+  EXPECT_FALSE(set.find(DynamicValue::makeI32(10)).has_value());
+
+  set.insert(DynamicValue::makeI32(10));
+
+  auto element = set.find(DynamicValue::makeI32(10));
+  ASSERT_TRUE(element.has_value());
+  EXPECT_EQ(element->asI32(), 10);
+  EXPECT_FALSE(set.find(DynamicValue::makeI32(20)).has_value());
+}
+
 TEST(SetTest, InsertDuplicate) {
   auto set = makeSet(makeSetType(type_system::TypeSystem::I32()));
 

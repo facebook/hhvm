@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/common/ServerStats.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/control/ControlServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/security/SecurityServerInterface.h>
@@ -136,6 +137,24 @@ class FastThriftServer {
       std::shared_ptr<fast_thrift::DebugServerInterface> handler);
 
   /**
+   * Attach a Control handler. Methods on the control handler are dispatched
+   * on the same connection as the user handler; routing is by method name
+   * with the user handler winning on conflict (mirrors
+   * ThriftServer::setControlInterface). Must be called before
+   * start()/serve().
+   *
+   * Reads and mutates the environment the server runs in — options, gflags,
+   * settings. Nothing installs one by default on either stack, so a server
+   * that wants this surface wires it explicitly.
+   *
+   * The handler must derive from fast_thrift::ControlServerInterface — a
+   * marker base that exists purely as a type-system guardrail. No IDL ships
+   * with it; see that header.
+   */
+  void setControlInterface(
+      std::shared_ptr<fast_thrift::ControlServerInterface> handler);
+
+  /**
    * Attach a Security handler. Methods on the security handler are dispatched
    * on the same connection as the user handler; routing is by method name
    * with the user handler winning on conflict (mirrors
@@ -156,6 +175,10 @@ class FastThriftServer {
    * handlers into every connection built after this point; leaving it unset
    * omits both handlers, so a server without stats pays nothing. Must be
    * called before start()/serve().
+   *
+   * Only needed to supply a specific instance — FastThriftServerConfig::
+   * enableStats materializes one (and the connection and TLS counters) at
+   * start() for embedders that just want the counters to exist.
    *
    * Counters are sharded per EventBase and readable only from the owning
    * EventBase thread (see ServerStats). To publish them to fb303, hand the
@@ -404,6 +427,9 @@ class FastThriftServer {
   bool hasDebugHandler() const noexcept {
     return static_cast<bool>(auxInterfaces_.debugHandler);
   }
+  bool hasControlHandler() const noexcept {
+    return static_cast<bool>(auxInterfaces_.controlHandler);
+  }
   bool hasSecurityHandler() const noexcept {
     return static_cast<bool>(auxInterfaces_.securityHandler);
   }
@@ -428,6 +454,8 @@ class FastThriftServer {
         nullptr};
     std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler{nullptr};
     std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler{nullptr};
+    std::shared_ptr<fast_thrift::ControlServerInterface> controlHandler{
+        nullptr};
     std::shared_ptr<fast_thrift::SecurityServerInterface> securityHandler{
         nullptr};
   };

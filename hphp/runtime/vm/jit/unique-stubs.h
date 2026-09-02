@@ -446,6 +446,16 @@ struct UniqueStubs {
    * for creating a translation and setting the funcEntry appropriately.
    */
    TCA handleTranslateMainFuncEntry;
+  /*
+   * Same as `handleTranslateMainFuncEntry`, but does not attempt to create a
+   * translation. Installed as a Func's funcEntry once we know we can no longer
+   * translate it.
+   *
+   * Must not be confused with `interpHelperNoTranslateFuncEntryFromTC`, which
+   * looks equivalent but additionally requires vmpc() to have been synced by
+   * its caller. Callers reaching a funcEntry from the TC have not synced it.
+   */
+   TCA handleInterpMainFuncEntryNoTranslate;
 
   /*
    * Handle a request to retranslate the code at the given current location.

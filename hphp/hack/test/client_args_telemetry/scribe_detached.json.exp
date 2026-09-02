@@ -1,7 +1,7 @@
 === hh_client result ===
 argv: hh_client --telemetry-test-unknown-option
 cwd: <test_tmp>/root
-exit_code: 2
+exit_code: 64
 client exit bounded with wedged scribe: True
 stdout:
 <empty>

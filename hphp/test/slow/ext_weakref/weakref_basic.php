@@ -7,6 +7,6 @@ $o = new stdClass;
 $wr = new WeakRef($o);
 var_dump($wr->valid(), $wr->get());
 __hhvm_intrinsics\launder_value($o);
-unset($o);
+$o = null;
 var_dump($wr->valid(), $wr->get());
 }

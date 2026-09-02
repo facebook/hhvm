@@ -489,7 +489,8 @@ class ThriftExtensionPipelineHandler {
       bp_.resumeControl_->resumeFn = +[](void* owner) noexcept {
         static_cast<ThriftExtensionPipelineHandler*>(owner)->resumeReads();
       };
-      handler_.onBackpressureAttached(ReadResumer(bp_.resumeControl_));
+      handler_.onBackpressureAttached(
+          ReadResumer(bp_.resumeControl_, ctx.eventBase()));
     }
   }
 

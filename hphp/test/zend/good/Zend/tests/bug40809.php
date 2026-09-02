@@ -16,14 +16,14 @@ $b = dict[];
 for ($i=0; $i<$num; $i++) {
   $b[$i] = $a[$i][0];
 }
-unset($a);
+$a = null;
 
 for ($i=0;$i<$num_repeats;$i++) {
   $evil = "";
   for ($j=0;$j<$num_increments;$j++) {
     $evil .= str_repeat("a", $increment);
   }
-  unset($evil);
+  $evil = null;
 }
 echo "ok\n";
 }

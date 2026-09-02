@@ -32,11 +32,6 @@ function main() :mixed{
     function ($pp) {
       // __isset()
       return isset($pp->nonExistentProperty) ? "true" : "false";
-    },
-    function ($pp) {
-      // __unset()
-      unset($pp->nonExistentProperty); // should throw
-      return "SomethingWentWrong";
     }
   };
 

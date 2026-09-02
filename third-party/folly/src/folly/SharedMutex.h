@@ -468,22 +468,20 @@ class SharedMutexImpl
   void unlock() {
     annotateReleased(annotate_rwlock_level::wrlock);
     OwnershipTrackerBase::endThreadOwnership();
+    // Keep this as one result-returning RMW.  Replacing it with a
+    // result-discarding bit-clear (C++26 atomic::store_and) plus a separate
+    // load emits a single lock-and rather than a cmpxchg retry loop, but
+    // breaks two things: the reload may observe a later lock generation, so
+    // the waiter bits it reports no longer describe the waiters this release
+    // owes a wakeup to; and when the RMW result shows no waiters, unlock must
+    // not read state_ again at all, because the release may already have let
+    // another thread destroy this mutex (see the destructor contract above).
+    //
     // It is possible that we have a left-over kWaitingNotS if the last
     // unlock_shared() that let our matching lock() complete finished
     // releasing before lock()'s futexWait went to sleep.  Clean it up now
-    constexpr uint32_t kClearMask = kWaitingNotS | kPrevDefer | kHasE;
-    // In debug builds the assert consumes fetch_and's post-RMW result; in
-    // opt builds the assert compiles out, leaving that result unused so the
-    // compiler emits a single `lock and` rather than a cmpxchg loop.
-    uint32_t state =
-        state_.fetch_and(~kClearMask, std::memory_order_release) & ~kClearMask;
+    auto state = (state_ &= ~(kWaitingNotS | kPrevDefer | kHasE));
     assert((state & ~(kWaitingAny | kAnnotationCreated)) == 0);
-    // This reload cannot miss waiter bits registered before our fetch_and:
-    // kClearMask does not include kWaitingE/U/S, and C++ coherence requires
-    // this same-thread load to see our fetch_and or a later state_. A later
-    // clear of those bits is paired with a futexWake; later-set waiter bits
-    // may be woken here, but waiters recheck state_ before proceeding.
-    state = state_.load(std::memory_order_relaxed);
     wakeRegisteredWaiters(state, kWaitingE | kWaitingU | kWaitingS);
   }
 

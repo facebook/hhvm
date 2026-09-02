@@ -8,10 +8,6 @@ function test() :mixed{
   if (isset($x->$foo) || !($x->$foo ?? false) ||      isset($x->{
 'bar'}
 )) {
-    unset($x->$foo);
-    unset($x->{
-'bar'}
-);
     echo true;
   }
 }

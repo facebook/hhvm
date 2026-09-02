@@ -13,7 +13,7 @@ class Fub {
 <<__EntryPoint>> function main(): void {
 $f = new Fub;
 var_dump($f->dub);
-unset($f);
+$f = null;
 
 $f = new Fub;
 var_dump($f->dub);

@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/endpoint/ConnectionListener.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionAcceptCallbackHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionBuilderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionLimitHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/common/TLSStats.h>
@@ -77,6 +78,8 @@ HANDLER_TAG(connection_accept_callback_handler);
  *                                                    //   owns the inner TLS
  *                                                    //   pipeline (classifier,
  *                                                    //   fizz, stoptls)
+ *     → [ConnectionLimitHandler]                     // only if a per-IO-thread
+ *                                                    //   connection cap is set
  *     → ConnectionBuilderHandler<F>
  *     → [ConnectionAcceptCallbackHandler<Conn>]      // only if onAccept is set
  *     → [ConnectionMetricsHandler]                   // only if stats are set
@@ -315,6 +318,17 @@ void ConnectionHandler::setConnectionFactory(
         &allocator_,
         socketOptions_.maxPendingConnections,
         tlsShard_);
+  }
+
+  // Above the builder, so a refused connection is closed before a Connection
+  // is built for it, and below the TLS handler, so only connections that got
+  // through the handshake are counted against the cap.
+  if (socketOptions_.maxConnectionsPerIOThread.has_value()) {
+    builder.template addNextInbound<handler::ConnectionLimitHandler>(
+        handler::connection_limit_handler_tag,
+        *socketOptions_.maxConnectionsPerIOThread,
+        &connectionCount_,
+        statsShard_);
   }
 
   builder.template addNextInbound<Builder>(

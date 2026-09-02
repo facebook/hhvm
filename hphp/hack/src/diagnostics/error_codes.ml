@@ -818,7 +818,7 @@ module Typing = struct
     | StrictIsolationExcludedPathAccess [@value 4518]
     | EnumDuplicateValue [@value 4519]
     | EnumUncheckableValue [@value 4520]
-    | InvalidUnsetTarget [@value 4521]
+    (* | InvalidUnsetTargetDEPRECATED [@value 4521] *)
     | SplatMayRequireFields [@value 4522]
     | SplatFieldNotKnown [@value 4523]
   (* Add new Typing codes here! Comment out when deprecating. *)

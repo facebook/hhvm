@@ -37,9 +37,11 @@ class HTTPSessionAcceptor
   ~HTTPSessionAcceptor() override;
 
   /**
-   * Set the default error page generator.
+   * Set the default error page generator.  Generators are immutable and
+   * generate() is const, so a single generator may be shared by any number of
+   * acceptors, including acceptors running on different threads.
    */
-  void setDefaultErrorPage(std::unique_ptr<HTTPErrorPage> generator) {
+  void setDefaultErrorPage(std::shared_ptr<const HTTPErrorPage> generator) {
     defaultErrorPage_ = std::move(generator);
   }
 
@@ -136,7 +138,7 @@ class HTTPSessionAcceptor
   HTTPSessionAcceptor& operator=(const HTTPSessionAcceptor&) = delete;
 
   /** General-case error page generator */
-  std::unique_ptr<HTTPErrorPage> defaultErrorPage_;
+  std::shared_ptr<const HTTPErrorPage> defaultErrorPage_;
 
   std::shared_ptr<HTTPCodecFactory> codecFactory_{};
 

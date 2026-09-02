@@ -1,6 +1,6 @@
-AJ
-  INSERT AJ
-  ~C<AJ, string>
 AI
   INSERT AI
   ~C<AI, int>
+AJ
+  INSERT AJ
+  ~C<AJ, string>

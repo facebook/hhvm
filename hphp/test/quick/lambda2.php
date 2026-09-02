@@ -31,6 +31,6 @@ class bar {
   echo "holding this:\n";
   $k = (new bar)->grabThis();
   echo $k() . "\n";
-  unset($k);
+  $k = null;
   echo "Done\n";
 }

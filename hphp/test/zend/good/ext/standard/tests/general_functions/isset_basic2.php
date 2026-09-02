@@ -18,7 +18,7 @@ var_dump(isset($i, $f, $s, $b));
 var_dump(isset($i, $f, $s, $b, $n));
 
 echo "Unset a few\n";
-unset($i, $b);
+$i = null; $b = null;
 
 echo "Test again\n";
 var_dump(isset($i, $f, $s, $b));

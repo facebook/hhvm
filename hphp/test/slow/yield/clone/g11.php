@@ -14,7 +14,7 @@ function f($a) :AsyncGenerator<mixed,mixed,void>{
 function main_g11() :mixed{
 $a = new Ref(3);
 $x = f($a);
-unset($a);
+$a = null;
 $y1 = clone $x;
 $y2 = clone $x;
 foreach ($y1 as $v) {

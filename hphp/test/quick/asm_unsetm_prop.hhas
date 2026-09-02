@@ -1,0 +1,19 @@
+#
+# UnsetM only removes container elements; a prop-flavored member key is
+# rejected by the bytecode verifier.
+#
+
+.adata A_0 = """D:1:{s:1:"x";i:1;}""";
+
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
+  .declvars $o;
+  Dict @A_0
+  SetL $o
+  PopC
+
+  BaseL $o Unset Any
+  UnsetM 0 PT:"x" Any
+
+  Null
+  RetC None
+}

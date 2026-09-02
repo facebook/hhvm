@@ -9,7 +9,7 @@ $wr->acquire();
 $wr->acquire();
 var_dump($wr->valid(), $wr->get());
 __hhvm_intrinsics\launder_value($o);
-unset($o);
+$o = null;
 $wr->release();
 var_dump($wr->valid(), $wr->get());
 $wr->release();

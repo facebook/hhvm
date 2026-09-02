@@ -32,7 +32,7 @@ function foo($x) :mixed{
     $z = clone $y;
   }
   var_dump($z);
-  unset($z, $y);
+  $z = null; $y = null;
   var_dump($x);
 }
 
@@ -42,5 +42,5 @@ $y = new Y;
 foo($y);
 $z = new Z;
 foo($z);
-unset($z, $y);
+$z = null; $y = null;
 }

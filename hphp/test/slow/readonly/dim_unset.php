@@ -1,9 +1,9 @@
 <?hh
 
 class Foo2 {
-  public mixed $x;
+  public dict<string, num> $x;
   public function __construct(num $x = 0) {
-    $this->x = $x;
+    $this->x = dict['k' => $x];
   }
 }
 
@@ -17,7 +17,7 @@ function test(): void {
   $t = new Foo1();
   $t1 = new Foo1();
   $t->f2 = vec[new Foo2()];
-  unset($t->f2[0]->x);
+  unset($t->f2[0]->x['k']);
   $t1->ro_f2 = vec[new Foo2()];
-  unset($t1->ro_f2[0]->x);
+  unset($t1->ro_f2[0]->x['k']);
 }

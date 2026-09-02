@@ -102,6 +102,50 @@ class TestNumProxies(McrouterTestCase):
         self.assertEqual(res, "Right")
 
 
+class ClientIdentityAttributesTest(McrouterTestCase):
+    ROUTING_CONFIG = """
+{
+    "route": {
+        "type": "if",
+        "condition": "@empty(%client-identity-attributes%)",
+        "is_true": {
+            "type": "ErrorRoute",
+            "response": "Right",
+            "enable_logging": false
+        },
+        "is_false": {
+            "type": "ErrorRoute",
+            "response": "Wrong",
+            "enable_logging": false
+        }
+    }
+}
+"""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp_dir.cleanup)
+        self.config = f"{self.temp_dir.name}/config.json"
+        self.credentials = f"{self.temp_dir.name}/credentials.pem"
+        with open(self.config, "w") as config_file:
+            config_file.write(self.ROUTING_CONFIG)
+        open(self.credentials, "w").close()
+
+    def test_client_identity_attributes_param(self):
+        extra_args = [
+            "--pem-cert-path",
+            self.credentials,
+            "--pem-key-path",
+            self.credentials,
+        ]
+        mcrouter = self.add_mcrouter(self.config, extra_args=extra_args)
+
+        route = mcrouter.issue_command_and_read_all(
+            "get __mcrouter__.route_handles(get,abc)\r\n"
+        )
+        self.assertEqual(route.split()[-2].split("|")[-1], "Right")
+
+
 class TestConstShardHash(McrouterTestCase):
     config = "./mcrouter/test/test_config_params.json"
 

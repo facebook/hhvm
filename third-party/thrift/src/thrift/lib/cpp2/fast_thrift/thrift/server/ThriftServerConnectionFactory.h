@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/common/ServerStats.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/control/ControlServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/security/SecurityServerInterface.h>
@@ -73,6 +74,7 @@ struct ThriftServerConnectionFactoryConfig {
   std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler;
   std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler;
   std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler;
+  std::shared_ptr<fast_thrift::ControlServerInterface> controlHandler;
   std::shared_ptr<fast_thrift::SecurityServerInterface> securityHandler;
   std::shared_ptr<const apache::thrift::metadata::ThriftServiceMetadataResponse>
       metadataResponse;

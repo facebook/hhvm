@@ -15,7 +15,12 @@
  */
 
 #include <folly/tracing/AsyncStack.h>
+#include <folly/tracing/test/AsyncStackTestUtils.h>
 
+#include <array>
+#include <cstdint>
+#include <limits>
+#include <optional>
 #include <unordered_set>
 #include <glog/logging.h>
 
@@ -49,6 +54,158 @@ TEST(AsyncStack, ScopedAsyncStackRoot) {
   }
 
   CHECK(folly::tryGetCurrentAsyncStackRoot() == nullptr);
+}
+
+TEST(AsyncStack, MetadataValueSemantics) {
+  // This type replaces `std::optional` in profiler output buffers, so it keeps
+  // optional semantics, including zero as a present value.
+  using Metadata = folly::AsyncStackMetadata;
+  constexpr auto kZero = Metadata::value_type{0};
+  constexpr auto kMax = std::numeric_limits<Metadata::value_type>::max();
+  auto empty = Metadata{};
+  auto null = Metadata{std::nullopt};
+  auto zero = Metadata{kZero};
+  auto max = Metadata{kMax};
+
+  EXPECT_FALSE(empty.has_value());
+  EXPECT_FALSE(static_cast<bool>(empty));
+  EXPECT_EQ(empty, null);
+  EXPECT_EQ(empty.get_pointer(), nullptr);
+  EXPECT_EQ(empty.value_or(kMax), kMax);
+  EXPECT_THROW(empty.value(), std::bad_optional_access);
+
+  EXPECT_TRUE(static_cast<bool>(zero));
+  EXPECT_EQ(zero.value(), kZero);
+  EXPECT_EQ(*zero, kZero);
+  EXPECT_THAT(zero.get_pointer(), testing::Pointee(kZero));
+  EXPECT_EQ(zero.operator->(), zero.get_pointer());
+  EXPECT_EQ(zero.value_or(kMax), kZero);
+  EXPECT_EQ(max.value(), kMax);
+
+  EXPECT_NE(null, zero);
+
+  empty = kZero;
+  EXPECT_EQ(empty, zero);
+  empty = std::nullopt;
+  EXPECT_EQ(empty, null);
+  EXPECT_EQ(empty.emplace(kMax), kMax);
+  EXPECT_EQ(empty, max);
+  swap(empty, zero);
+  EXPECT_EQ(empty.value(), kZero);
+  EXPECT_EQ(zero.value(), kMax);
+  zero.reset();
+  EXPECT_FALSE(zero.has_value());
+}
+
+TEST(AsyncStack, MetadataFrameRecognition) {
+  folly::AsyncStackFrame frame;
+  EXPECT_FALSE(folly::detail::isAsyncStackMetadataFrame(frame));
+  frame.setReturnAddress(&frame);
+  EXPECT_FALSE(folly::detail::isAsyncStackMetadataFrame(frame));
+#if FOLLY_HAS_ASYNC_STACK_METADATA
+  folly::test::markAsMetadataFrame(frame);
+  EXPECT_TRUE(folly::detail::isAsyncStackMetadataFrame(frame));
+#endif
+}
+
+#if FOLLY_HAS_ASYNC_STACK_METADATA
+TEST(AsyncStack, InitialFrameWalkOmitsMarkerButKeepsWrapper) {
+  using namespace folly;
+  using test::linkInactiveFrames;
+  using test::markAsMetadataFrame;
+
+  // `wrapper -> [marker] -> parent`: the marker uses no output slot, so the
+  // full walk returns two addresses and leaves the spare slot untouched.
+  AsyncStackFrame parentFrame;
+  parentFrame.setReturnAddress(&parentFrame);
+
+  AsyncStackFrame metadataMarker;
+  markAsMetadataFrame(metadataMarker);
+
+  AsyncStackFrame wrapperFrame;
+  wrapperFrame.setReturnAddress(&wrapperFrame);
+  linkInactiveFrames(wrapperFrame, metadataMarker, parentFrame);
+
+  constexpr auto kCanary = std::numeric_limits<std::uintptr_t>::max();
+  const auto checkWalk =
+      [&](size_t maxAddresses,
+          size_t expectedNumFrames,
+          std::array<std::uintptr_t, 3> expected) {
+        std::array addresses{kCanary, kCanary, kCanary};
+        const auto numFrames = getAsyncStackTraceFromInitialFrame(
+            &wrapperFrame, addresses.data(), maxAddresses);
+
+        EXPECT_EQ(numFrames, expectedNumFrames);
+        EXPECT_LT(numFrames, addresses.size());
+        EXPECT_EQ(addresses, expected);
+      };
+
+  checkWalk(
+      3,
+      2,
+      {reinterpret_cast<std::uintptr_t>(&wrapperFrame),
+       reinterpret_cast<std::uintptr_t>(&parentFrame),
+       kCanary});
+  checkWalk(
+      1,
+      1,
+      {reinterpret_cast<std::uintptr_t>(&wrapperFrame), kCanary, kCanary});
+}
+
+TEST(AsyncStack, InitialFrameWalkHandlesInitialMarker) {
+  using namespace folly;
+  using test::linkInactiveFrames;
+  using test::markAsMetadataFrame;
+
+  // Metadata scopes never start with a marker. Exercise the defensive case:
+  // `[marker]` is empty; `[marker] -> parent` returns only `parent`.
+  AsyncStackFrame parentFrame;
+  parentFrame.setReturnAddress(&parentFrame);
+
+  AsyncStackFrame metadataMarker;
+  markAsMetadataFrame(metadataMarker);
+
+  std::uintptr_t address = 1;
+  EXPECT_EQ(
+      getAsyncStackTraceFromInitialFrame(&metadataMarker, &address, 1), 0);
+  EXPECT_EQ(address, 1);
+
+  linkInactiveFrames(metadataMarker, parentFrame);
+  EXPECT_EQ(
+      getAsyncStackTraceFromInitialFrame(&metadataMarker, &address, 1), 1);
+  EXPECT_EQ(address, reinterpret_cast<std::uintptr_t>(&parentFrame));
+}
+
+TEST(AsyncStack, InitialFrameWalkStopsOnAdjacentMetadataFrames) {
+  using namespace folly;
+  using test::linkInactiveFrames;
+  using test::markAsMetadataFrame;
+
+  // The API cannot create adjacent markers. The walker stops at any adjacent
+  // pair because a marker cycle would neither fill the output nor terminate.
+  AsyncStackFrame firstMarker;
+  markAsMetadataFrame(firstMarker);
+  AsyncStackFrame secondMarker;
+  markAsMetadataFrame(secondMarker);
+  AsyncStackFrame ordinaryFrame;
+  ordinaryFrame.setReturnAddress(&ordinaryFrame);
+  linkInactiveFrames(firstMarker, secondMarker, ordinaryFrame);
+
+  std::uintptr_t address = 0;
+  EXPECT_EQ(getAsyncStackTraceFromInitialFrame(&firstMarker, &address, 1), 0);
+  EXPECT_EQ(address, 0);
+}
+#endif
+
+TEST(AsyncStack, InitialFrameWalkHandlesEmptyAndZeroCapacity) {
+  std::uintptr_t address = 1;
+  EXPECT_EQ(folly::getAsyncStackTraceFromInitialFrame(nullptr, &address, 1), 0);
+  EXPECT_EQ(address, 1);
+
+  folly::AsyncStackFrame frame;
+  frame.setReturnAddress(&frame);
+  EXPECT_EQ(folly::getAsyncStackTraceFromInitialFrame(&frame, &address, 0), 0);
+  EXPECT_EQ(address, 1);
 }
 
 TEST(AsyncStack, PushPop) {

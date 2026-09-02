@@ -214,7 +214,12 @@ fn extract_debugger_main(
         .iter()
         .map(|name| {
             let name = local_id::make_unscoped(name);
-            hack_stmt!("if (#{lvar(clone(name))} is __uninitSentinel) { unset(#{lvar(name)}); }")
+            hack_stmt!(
+                r#"if (#{lvar(clone(name))} is __uninitSentinel) {
+                        \__SystemLib\__debugger_make_uninit(#{lvar(name)});
+                     }
+                "#
+            )
         })
         .collect();
     let sets: Vec<_> = vars

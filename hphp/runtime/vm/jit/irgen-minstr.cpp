@@ -2169,29 +2169,23 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
 }
 
 void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
-  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
+  assertx(mcodeIsElem(mk.mcode));
   auto const key = memberKey(env, mk);
   assertx(key->type().isKnownDataType());
 
   auto const base = extractBase(env);
 
-  if (mcodeIsProp(mk.mcode)) {
-    gen(env, UnsetProp, base, key);
-  } else {
-    assertx(mcodeIsElem(mk.mcode));
-
-    if (base->type().subtypeOfAny(TVec, TDict, TKeyset)) {
-      if (!key->type().subtypeOfAny(TInt, TStr)) {
-        gen(env, ThrowInvalidArrayKey, base, key);
-        return;
-      }
-
-      auto const newArr = gen(env, BespokeUnset, base, key);
-      gen(env, StMem, ldMBase(env), newArr);
-    } else {
-      // Slow path for handling collections and weird base types.
-      gen(env, UnsetElem, ldMBase(env), key);
+  if (base->type().subtypeOfAny(TVec, TDict, TKeyset)) {
+    if (!key->type().subtypeOfAny(TInt, TStr)) {
+      gen(env, ThrowInvalidArrayKey, base, key);
+      return;
     }
+
+    auto const newArr = gen(env, BespokeUnset, base, key);
+    gen(env, StMem, ldMBase(env), newArr);
+  } else {
+    // Slow path for handling collections and weird base types.
+    gen(env, UnsetElem, ldMBase(env), key);
   }
 
   mFinalImpl(env, nDiscard, nullptr);

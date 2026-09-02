@@ -1,8 +1,8 @@
-:name
-  INSERT :name
-  ~?string
 :color
   INSERT :color
+  ~?string
+:name
+  INSERT :name
   ~?string
 genRender
   INSERT genRender()

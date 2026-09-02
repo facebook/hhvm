@@ -1,9 +1,9 @@
-multiply
-  INSERT multiply
+add
+  INSERT add
   ~MyFunc<(int, int)>
 increment
   INSERT increment
   ~MyFunc<(int)>
-add
-  INSERT add
+multiply
+  INSERT multiply
   ~MyFunc<(int, int)>

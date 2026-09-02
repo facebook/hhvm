@@ -134,6 +134,7 @@ ThriftServerConnectionFactory::ThriftServerConnectionFactory(
           static_cast<bool>(config_.monitoringHandler) ||
           static_cast<bool>(config_.statusHandler) ||
           static_cast<bool>(config_.debugHandler) ||
+          static_cast<bool>(config_.controlHandler) ||
           static_cast<bool>(config_.securityHandler) ||
           static_cast<bool>(config_.metadataResponse)) {
   CHECK(config_.handler)
@@ -220,6 +221,11 @@ ThriftServerConnection ThriftServerConnectionFactory::buildCompositeConnection(
   if (config_.debugHandler) {
     tail.children.push_back(
         config_.debugHandler->getAppAdapter(config_.debugHandler));
+    attachCPUExecutor(*tail.children.back());
+  }
+  if (config_.controlHandler) {
+    tail.children.push_back(
+        config_.controlHandler->getAppAdapter(config_.controlHandler));
     attachCPUExecutor(*tail.children.back());
   }
   if (config_.securityHandler) {

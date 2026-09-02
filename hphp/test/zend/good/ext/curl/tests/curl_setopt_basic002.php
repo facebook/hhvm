@@ -18,7 +18,7 @@ curl_setopt($ch, CURLOPT_STDERR, $handle);
 $curl_content = curl_exec($ch);
 
 fclose($handle);
-unset($handle);
+$handle = null;
 var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 unlink($temp_file);
 
@@ -30,7 +30,7 @@ $data = curl_exec($ch);
 ob_end_clean();
 
 fclose($handle);
-unset($handle);
+$handle = null;
 var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 unlink($temp_file);
 

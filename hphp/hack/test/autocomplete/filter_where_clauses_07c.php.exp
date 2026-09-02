@@ -85,18 +85,57 @@ SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES
 SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES
   INSERT SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES
   constant
+sodium_crypto_core_ristretto255_add
+  INSERT sodium_crypto_core_ristretto255_add
+  function
 SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES
   INSERT SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES
   constant
+sodium_crypto_core_ristretto255_from_hash
+  INSERT sodium_crypto_core_ristretto255_from_hash
+  function
 SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES
   INSERT SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES
   constant
+sodium_crypto_core_ristretto255_is_valid_point
+  INSERT sodium_crypto_core_ristretto255_is_valid_point
+  function
 SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES
   INSERT SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES
   constant
+sodium_crypto_core_ristretto255_random
+  INSERT sodium_crypto_core_ristretto255_random
+  function
+sodium_crypto_core_ristretto255_scalar_add
+  INSERT sodium_crypto_core_ristretto255_scalar_add
+  function
+sodium_crypto_core_ristretto255_scalar_complement
+  INSERT sodium_crypto_core_ristretto255_scalar_complement
+  function
+sodium_crypto_core_ristretto255_scalar_invert
+  INSERT sodium_crypto_core_ristretto255_scalar_invert
+  function
+sodium_crypto_core_ristretto255_scalar_mul
+  INSERT sodium_crypto_core_ristretto255_scalar_mul
+  function
+sodium_crypto_core_ristretto255_scalar_negate
+  INSERT sodium_crypto_core_ristretto255_scalar_negate
+  function
+sodium_crypto_core_ristretto255_scalar_random
+  INSERT sodium_crypto_core_ristretto255_scalar_random
+  function
+sodium_crypto_core_ristretto255_scalar_reduce
+  INSERT sodium_crypto_core_ristretto255_scalar_reduce
+  function
+sodium_crypto_core_ristretto255_scalar_sub
+  INSERT sodium_crypto_core_ristretto255_scalar_sub
+  function
 SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES
   INSERT SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES
   constant
+sodium_crypto_core_ristretto255_sub
+  INSERT sodium_crypto_core_ristretto255_sub
+  function
 SODIUM_CRYPTO_GENERICHASH_KEYBYTES
   INSERT SODIUM_CRYPTO_GENERICHASH_KEYBYTES
   constant
@@ -175,6 +214,9 @@ SODIUM_CRYPTO_PWHASH_STRPREFIX
 SODIUM_CRYPTO_SCALARMULT_BYTES
   INSERT SODIUM_CRYPTO_SCALARMULT_BYTES
   constant
+sodium_crypto_scalarmult_ristretto255
+  INSERT sodium_crypto_scalarmult_ristretto255
+  function
 SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES
   INSERT SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES
   constant
@@ -205,6 +247,9 @@ SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES
 SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX
   INSERT SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX
   constant
+sodium_crypto_secretstream_xchacha20poly1305_rekey
+  INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey
+  function
 SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL
   INSERT SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL
   constant
@@ -253,48 +298,3 @@ SODIUM_LIBRARY_MINOR_VERSION
 SODIUM_LIBRARY_VERSION
   INSERT SODIUM_LIBRARY_VERSION
   constant
-sodium_crypto_core_ristretto255_add
-  INSERT sodium_crypto_core_ristretto255_add
-  function
-sodium_crypto_core_ristretto255_from_hash
-  INSERT sodium_crypto_core_ristretto255_from_hash
-  function
-sodium_crypto_core_ristretto255_is_valid_point
-  INSERT sodium_crypto_core_ristretto255_is_valid_point
-  function
-sodium_crypto_core_ristretto255_random
-  INSERT sodium_crypto_core_ristretto255_random
-  function
-sodium_crypto_core_ristretto255_scalar_add
-  INSERT sodium_crypto_core_ristretto255_scalar_add
-  function
-sodium_crypto_core_ristretto255_scalar_complement
-  INSERT sodium_crypto_core_ristretto255_scalar_complement
-  function
-sodium_crypto_core_ristretto255_scalar_invert
-  INSERT sodium_crypto_core_ristretto255_scalar_invert
-  function
-sodium_crypto_core_ristretto255_scalar_mul
-  INSERT sodium_crypto_core_ristretto255_scalar_mul
-  function
-sodium_crypto_core_ristretto255_scalar_negate
-  INSERT sodium_crypto_core_ristretto255_scalar_negate
-  function
-sodium_crypto_core_ristretto255_scalar_random
-  INSERT sodium_crypto_core_ristretto255_scalar_random
-  function
-sodium_crypto_core_ristretto255_scalar_reduce
-  INSERT sodium_crypto_core_ristretto255_scalar_reduce
-  function
-sodium_crypto_core_ristretto255_scalar_sub
-  INSERT sodium_crypto_core_ristretto255_scalar_sub
-  function
-sodium_crypto_core_ristretto255_sub
-  INSERT sodium_crypto_core_ristretto255_sub
-  function
-sodium_crypto_scalarmult_ristretto255
-  INSERT sodium_crypto_scalarmult_ristretto255
-  function
-sodium_crypto_secretstream_xchacha20poly1305_rekey
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey
-  function

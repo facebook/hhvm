@@ -1059,14 +1059,6 @@ void mergeEachThisPropRaw(ISS& env, MapFn fn) {
   }
 }
 
-void unsetThisProp(ISS& env, SString name) {
-  mergeThisProp(env, name, TUninit);
-}
-
-void unsetUnknownThisProp(ISS& env) {
-  env.collect.props.mergeInAllPrivateProps(env.index, TUninit);
-}
-
 //////////////////////////////////////////////////////////////////////
 // properties on self::
 

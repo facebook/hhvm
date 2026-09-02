@@ -111,6 +111,13 @@ bool Set::erase(const DynamicConstRef& value) {
   return impl_->erase(value);
 }
 
+std::optional<DynamicConstRef> Set::find(const DynamicConstRef& value) const {
+  if (!impl_) {
+    return std::nullopt;
+  }
+  return impl_->find(value);
+}
+
 bool Set::contains(const DynamicConstRef& value) const {
   if (!impl_) {
     return false;

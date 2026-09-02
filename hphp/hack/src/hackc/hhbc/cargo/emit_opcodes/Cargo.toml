@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../emit_opcodes.rs"
 
 [dependencies]
-convert_case = "0.11"
+convert_case = "0.12"
 hhbc-gen = { path = "../../../../../../tools/hhbc-gen" }
 proc-macro2 = { version = "1.0.107", features = ["span-locations"] }
 quote = "1.0.47"

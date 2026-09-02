@@ -1,0 +1,3 @@
+Verification Error (unit %s/asm_unsetm_prop.hhas func main): UnsetM only supports elem-flavored member keys.
+
+Verification failed for unit %s/asm_unsetm_prop.hhas. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

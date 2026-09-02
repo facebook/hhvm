@@ -5,8 +5,8 @@ class Ref {
 }
 function foo($a, $b, $y) :AsyncGenerator<mixed,mixed,void>{
   $x = $a;
-  unset($a);
-  unset($b);
+  $a = null;
+  $b = null;
   $x += 10;
   $y->value += 100;
   yield $x * 10000 + $y->value;

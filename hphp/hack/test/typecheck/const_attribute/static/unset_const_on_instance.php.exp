@@ -1,4 +1,2 @@
 ERROR: File "unset_const_on_instance.php", line 10, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
-ERROR: File "unset_const_on_instance.php", line 10, characters 3-15:
-The argument to `unset` must be an array access. (Typing[4521])
+`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])

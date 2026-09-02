@@ -1,1 +1,4 @@
-string(21) "Undefined variable: t"
+dict(1) {
+  ["x"]=>
+  int(1)
+}

@@ -31,11 +31,3 @@ object(SoapHeader) (4) {
   ["mustUnderstand"]=>
   bool(true)
 }
-object(SoapHeader) (3) {
-  ["namespace"]=>
-  string(9) "namespace"
-  ["name"]=>
-  string(4) "name"
-  ["mustUnderstand"]=>
-  bool(true)
-}

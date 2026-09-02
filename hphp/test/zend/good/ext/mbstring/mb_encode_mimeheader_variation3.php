@@ -27,10 +27,6 @@ $charset = 'utf-8';
 $linefeed = "\r\n";
 $indent = 2;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world

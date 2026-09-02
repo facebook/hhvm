@@ -132,6 +132,13 @@ std::optional<DynamicConstRef> Map::get(const DynamicConstRef& key) const {
   return impl_->get(key);
 }
 
+std::optional<DynamicConstRef> Map::findKey(const DynamicConstRef& key) const {
+  if (!impl_) {
+    return std::nullopt;
+  }
+  return impl_->findKey(key);
+}
+
 void Map::insert(DynamicValue key, DynamicValue value) {
   ensureInit().insert(std::move(key), std::move(value));
 }

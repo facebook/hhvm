@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <memory>
 #include <memory_resource>
+#include <optional>
 
 namespace apache::thrift::dynamic {
 
@@ -62,6 +63,15 @@ class Set final {
    * Returns true if the element was removed, false if it didn't exist.
    */
   bool erase(const DynamicConstRef& value);
+
+  /**
+   * Find an element in the set.
+   *
+   * Intended for internal operations that need a reference to the stored
+   * element, such as path traversal. Use contains() for membership checks.
+   * Returns a reference that is invalidated by insertion or removal.
+   */
+  std::optional<DynamicConstRef> find(const DynamicConstRef& value) const;
 
   /**
    * Check if an element exists in the set.

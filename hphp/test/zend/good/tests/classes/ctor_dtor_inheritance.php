@@ -31,10 +31,10 @@ class derived extends base {
 <<__EntryPoint>> function main(): void {
 echo "Testing class base\n";
 $t = new base();
-unset($t);
+$t = null;
 echo "Testing class derived\n";
 $t = new derived();
-unset($t);
+$t = null;
 
 echo "Done\n";
 }

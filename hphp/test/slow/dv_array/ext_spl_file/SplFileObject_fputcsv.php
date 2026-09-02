@@ -31,7 +31,7 @@ $list = dict [
 foreach ($list as $v) {
   $fo->fputcsv(varray(explode(',', $v)));
 }
-unset($fo);
+$fo = null;
 
 $res = file($file);
 foreach($res as $key => $val)

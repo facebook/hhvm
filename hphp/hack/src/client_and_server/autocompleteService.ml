@@ -389,6 +389,7 @@ let autocomplete_shape_key autocomplete_context fields id =
             res_fullname = code;
             res_kind = kind;
             res_documentation = None;
+            res_sort_text = None;
             res_filter_text = None;
             res_additional_edits = [];
           }
@@ -432,6 +433,7 @@ let autocomplete_member
           res_fullname = name;
           res_kind = kind;
           res_documentation = None;
+          res_sort_text = None;
           res_filter_text = None;
           res_additional_edits = [];
         }
@@ -608,6 +610,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_fullname = name;
               res_kind = kind;
               res_documentation = None;
+              res_sort_text = None;
               res_filter_text = None;
               res_additional_edits = [];
             }
@@ -642,6 +645,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           res_fullname = "true";
           res_kind = kind;
           res_documentation = None;
+          res_sort_text = None;
           res_filter_text = None;
           res_additional_edits = [];
         }
@@ -698,6 +702,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_fullname = name;
           res_kind = kind;
           res_documentation = None;
+          res_sort_text = None;
           res_filter_text = None;
           res_additional_edits = [];
         }
@@ -780,6 +785,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_fullname = name;
                       res_kind = kind;
                       res_documentation = None;
+                      res_sort_text = None;
                       res_filter_text = None;
                       res_additional_edits = [];
                     }
@@ -989,6 +995,7 @@ let autocomplete_hack_fake_arrow
             res_base_class = None;
             res_detail = Tast_env.print_decl_ty env fun_decl.fe_type;
             res_insert_text;
+            res_sort_text = None;
             (* VS Code uses filter text to decide which items match the current
                prefix. However, "C\contains" does not start with "->", so VS
                Code would normally ignore this completion item.
@@ -1103,6 +1110,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             res_fullname = name;
             res_kind = kind;
             res_documentation = None;
+            res_sort_text = None;
             res_filter_text = None;
             res_additional_edits = [];
           }
@@ -1227,6 +1235,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 res_fullname = name;
                 res_kind = FileInfo.SI_ClassConstant;
                 res_documentation = None;
+                res_sort_text = None;
                 res_filter_text = None;
                 res_additional_edits = [];
               }
@@ -1273,6 +1282,7 @@ let autocomplete_shape_literal_in_call
         res_fullname = key;
         res_kind = kind;
         res_documentation = None;
+        res_sort_text = None;
         res_filter_text = None;
         res_additional_edits = [];
       }
@@ -1328,6 +1338,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_fullname = name;
       res_kind = FileInfo.SI_Class;
       res_documentation = Some doc;
+      res_sort_text = None;
       res_filter_text = None;
       res_additional_edits = [];
     }
@@ -1385,6 +1396,7 @@ let autocomplete_overriding_method env m : unit =
               res_fullname = name;
               res_kind = FileInfo.SI_ClassMethod;
               res_documentation = None;
+              res_sort_text = None;
               res_filter_text = None;
               res_additional_edits = [];
             }
@@ -1456,6 +1468,7 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       res_fullname = key;
       res_kind = kind;
       res_documentation = None;
+      res_sort_text = None;
       res_filter_text = None;
       res_additional_edits = [];
     }
@@ -1705,6 +1718,7 @@ let find_global_results
             res_fullname;
             res_kind = r.si_kind;
             res_documentation = None;
+            res_sort_text = None;
             res_filter_text = None;
             res_additional_edits = [];
           }
@@ -1737,6 +1751,7 @@ let find_global_results
                  res_fullname = name;
                  res_kind = kind;
                  res_documentation = Some documentation;
+                 res_sort_text = None;
                  res_filter_text = None;
                  res_additional_edits = [];
                })
@@ -1793,6 +1808,7 @@ let complete_xhp_tag
           res_fullname;
           res_kind = r.si_kind;
           res_documentation = None;
+          res_sort_text = None;
           res_filter_text = None;
           res_additional_edits = [];
         }
@@ -1894,6 +1910,7 @@ let compute_complete_local env ctx tast =
             res_fullname = name;
             res_kind = kind;
             res_documentation = None;
+            res_sort_text = None;
             res_filter_text = None;
             res_additional_edits = [];
           }
@@ -2197,6 +2214,7 @@ let complete_keywords_at possible_keywords text pos : unit =
                res_fullname = keyword;
                res_kind = kind;
                res_documentation = None;
+               res_sort_text = None;
                res_filter_text = None;
                res_additional_edits = [];
              }

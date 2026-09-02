@@ -111,7 +111,7 @@ function main_entry(): void {
   $z = eval_point();
   echo "Point \$z is " . $z->__toString() . "\n";
 
-  unset($p, $v, $z);
+  $p = null; $v = null; $z = null;
 
   echo "---------------- test with inheritance -------------------\n";
 

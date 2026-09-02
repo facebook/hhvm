@@ -299,6 +299,15 @@ TCA handleTranslateMainFuncEntry() noexcept {
     return resume(sk, getTranslation(sk));
 }
 
+TCA handleInterpMainFuncEntryNoTranslate() noexcept {
+    syncRegs(SBInvOffset{0});
+    FTRACE(1, "handleInterpMainFuncEntryNoTranslate {}\n",
+           vmfp()->func()->fullName()->data());
+    auto const numPosArgs = liveFunc()->numPositionalParams();
+    auto const sk = SrcKey { liveFunc(), numPosArgs, false, SrcKey::FuncEntryTag {} };
+    return resume(sk, TranslationResult::failForProcess());
+}
+
 TranslationResult::Scope shouldEnqueueForRetranslate(const SrcKey& sk) {
   return tc::shouldTranslate(sk, TransKind::Live);
 }
@@ -631,7 +640,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     if (auto const sr = tc::findSrcRec(sk)) {
       if (auto const tca = sr->getTopTranslation()) {
         SKTRACE(2, sk, "handleResume: found %p\n", tca);
-        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
+        if (sk.anyFuncEntry()) return JitResumeAddr::transFuncEntry(tca);
         return JitResumeAddr::trans(tca);
       }
     }

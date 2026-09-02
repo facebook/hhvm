@@ -618,7 +618,6 @@ bool canDCE(const IRInstruction& inst) {
   case CGetProp:
   case CGetPropQ:
   case SetProp:
-  case UnsetProp:
   case SetOpProp:
   case IncDecProp:
   case IssetProp:

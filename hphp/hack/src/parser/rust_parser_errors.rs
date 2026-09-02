@@ -5462,6 +5462,22 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    /// `unset` only removes a container element. Unsetting a local, a property
+    /// or a static property is no longer part of the language.
+    fn check_unset_target(&mut self, target: S<'a>) {
+        match &target.children {
+            ParenthesizedExpression(x) => self.check_unset_target(&x.expression),
+            // `?->` is rejected for a more specific reason than "not an element
+            // access", and the general lvalue check always names it.
+            SubscriptExpression(_) | SafeMemberSelectionExpression(_) => {
+                self.check_lvalue_and_inout(target, LvalRoot::Unset, NestingContext::None)
+            }
+            _ => self
+                .errors
+                .push(make_error_from_node(target, errors::invalid_unset_target)),
+        }
+    }
+
     fn assignment_errors(&mut self, node: S<'a>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: S<'a>| {
             if does_unop_create_write(token_kind(op)) {
@@ -5841,7 +5857,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {
-                    self.check_lvalue_and_inout(expr, LvalRoot::Unset, NestingContext::None);
+                    self.check_unset_target(expr);
                 }
             }
             ClassPtrTypeSpecifier(_) => {

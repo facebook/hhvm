@@ -15,9 +15,9 @@ async function bar() :Awaitable<mixed>{
     $b = await foo();
   }
   echo "unset a\n";
-  unset($a);
+  $a = null;
   echo "unset b\n";
-  unset($b);
+  $b = null;
   echo "genva 2\n";
   concurrent {
     await foo();

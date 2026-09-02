@@ -4,7 +4,7 @@ function bar() :mixed{
 }
 function foo() :mixed{
   $foo = bar();
-  unset($foo);
+  $foo = null;
 }
 
 <<__EntryPoint>>

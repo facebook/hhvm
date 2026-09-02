@@ -5,7 +5,7 @@ function test($s) :mixed{
   $det->setText($s);
 
   $matches = $det->detectAll();
-  unset($det);
+  $det = null;
 
   foreach ($matches as $match) {
     $s .= "::" . $match->getEncoding();

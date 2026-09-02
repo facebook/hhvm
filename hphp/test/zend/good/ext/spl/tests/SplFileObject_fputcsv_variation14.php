@@ -9,7 +9,7 @@ $fo = new SplFileObject(sys_get_temp_dir().'/'.'SplFileObject_fputcsv_variation1
 
 var_dump($fo->fputcsv(vec['water', 'fruit'], ',,', '""'));
 
-unset($fo);
+$fo = null;
 
 echo "Done\n";
 

@@ -1594,12 +1594,14 @@ struct FactsStoreImpl final
   Optional<AutoloadMap::FileResult> getSymbolFileRelative(
       const OptString& symbol,
       T lambda) {
-    auto path =
-        getSymbolFileRelative<K>(std::string_view{symbol.slice()}, lambda);
-    if (UNLIKELY(!path)) {
+    const StringData* fileStr =
+        lambda(m_symbolMap, Symbol<K>{std::string_view{symbol.slice()}}).get();
+    if (UNLIKELY(!fileStr)) {
       return {};
     }
-    return AutoloadMap::FileResult(OptString{path->native()});
+    assertx(fileStr->isStatic());
+    assertx(fileStr->data()[0] != '/');
+    return AutoloadMap::FileResult(StrNR{fileStr});
   }
 
   template <SymKind K, class T>

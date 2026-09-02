@@ -177,6 +177,18 @@ void SingleRpcChannel::sendThriftResponse(
           folly::to<std::string>(*grLoad));
     }
 
+    if (auto grSecondaryLoad = metadata.grSecondaryLoad()) {
+      metadata.otherMetadata().ensure().emplace(
+          transport::THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER,
+          folly::to<std::string>(*grSecondaryLoad));
+    }
+
+    if (auto grHealth = metadata.grHealth()) {
+      metadata.otherMetadata().ensure().emplace(
+          transport::THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER,
+          folly::to<std::string>(*grHealth));
+    }
+
     if (auto otherMetadata = metadata.otherMetadata()) {
       encodeHeaders(std::move(*otherMetadata), msg);
     }
@@ -523,6 +535,18 @@ void SingleRpcChannel::extractHeaderInfo(
           headers.find(transport::THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER);
       grLoadIt != headers.end()) {
     metadata->grLoadMetric() = grLoadIt->second;
+  }
+
+  if (const auto& grSecondaryLoadIt = headers.find(
+          transport::THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER);
+      grSecondaryLoadIt != headers.end()) {
+    metadata->grSecondaryLoadMetric() = grSecondaryLoadIt->second;
+  }
+
+  if (const auto& grHealthIt =
+          headers.find(transport::THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER);
+      grHealthIt != headers.end()) {
+    metadata->grHealthMetric() = grHealthIt->second;
   }
 
   if (!headers.empty()) {

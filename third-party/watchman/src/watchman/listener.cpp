@@ -517,7 +517,7 @@ bool w_start_listener() {
   }
 
 #ifdef __linux__
-  if (Configuration().getBool("exit_on_binary_change", false)) {
+  if (Configuration().getBool("exit_on_binary_change", true)) {
     // A shorter interval than the 1s shutdown poll granularity would spin.
     const auto checkInterval = std::chrono::seconds(
         std::max<json_int_t>(

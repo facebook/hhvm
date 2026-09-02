@@ -26,9 +26,6 @@ bool(true)
 ==== class B ====
 bool(true)
 bool(false)
-==== class E ====
-bool(true)
-bool(false)
 ==== class F ====
 bool(false)
 bool(true)

@@ -135,9 +135,9 @@ function run($n, $tn, $tv) :mixed{
   }
  catch(Exception $e) {
     var_dump('Exception: ' . $e->getMessage());
-    unset($e);
+    $e = null;
   }
-  unset($b);
+  $b = null;
   var_dump('<<<main');
 }
 function test($n, $tn, $tv) :mixed{

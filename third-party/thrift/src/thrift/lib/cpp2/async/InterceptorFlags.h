@@ -63,4 +63,20 @@ THRIFT_FLAG_DECLARE_bool(enable_python_client_interceptors);
  */
 THRIFT_FLAG_DECLARE_bool(enable_rust_client_interceptors);
 
+/**
+ * Controls whether InterceptorMetricCallback implementations record interceptor
+ * timing metrics. Defaults to false because recording these metrics bumps
+ * quantile stats on the request hot path. When false, both the timing clock
+ * reads (via InterceptorTimer) and the stat recording are skipped.
+ */
+THRIFT_FLAG_DECLARE_bool(enable_interceptor_metrics);
+
+/**
+ * Accessor for enable_interceptor_metrics usable outside the apache::thrift
+ * namespace (the THRIFT_FLAG macro resolves an apache::thrift-scoped symbol).
+ */
+inline bool interceptorMetricsEnabled() {
+  return THRIFT_FLAG(enable_interceptor_metrics);
+}
+
 } // namespace apache::thrift

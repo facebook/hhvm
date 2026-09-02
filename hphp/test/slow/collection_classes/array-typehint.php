@@ -72,7 +72,7 @@ function main() :mixed{
       } catch (Exception $e) {
         echo $name . "() threw an exception\n";
       }
-      unset($x);
+      $x = null;
     }
   }
 }

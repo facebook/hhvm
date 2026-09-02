@@ -13,7 +13,7 @@ function foo($x) :mixed{
     $z = clone $y;
   }
   var_dump($z);
-  unset($z, $y);
+  $z = null; $y = null;
   var_dump($x);
 }
 <<__EntryPoint>>
@@ -32,5 +32,5 @@ function entrypoint_1489(): void {
   foo($y);
   $z = new z;
   foo($z);
-  unset($z, $y);
+  $z = null; $y = null;
 }

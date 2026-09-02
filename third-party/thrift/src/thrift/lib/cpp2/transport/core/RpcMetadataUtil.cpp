@@ -192,6 +192,20 @@ RequestRpcMetadata makeRequestRpcMetadata(
     writeHeaders.erase(grLoadIt);
   }
 
+  auto grSecondaryLoadIt = writeHeaders.find(
+      transport::THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER);
+  if (grSecondaryLoadIt != writeHeaders.end()) {
+    metadata.grSecondaryLoadMetric() = std::move(grSecondaryLoadIt->second);
+    writeHeaders.erase(grSecondaryLoadIt);
+  }
+
+  auto grHealthIt =
+      writeHeaders.find(transport::THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER);
+  if (grHealthIt != writeHeaders.end()) {
+    metadata.grHealthMetric() = std::move(grHealthIt->second);
+    writeHeaders.erase(grHealthIt);
+  }
+
   if (!writeHeaders.empty()) {
     metadata.otherMetadata() = std::move(writeHeaders);
   }
@@ -278,6 +292,20 @@ void fillTHeaderFromResponseRpcMetadata(
         folly::to<std::string>(*grLoad));
   }
 
+  if (auto grSecondaryLoad = responseMetadata.grSecondaryLoad()) {
+    header.setGrSecondaryLoadValue(*grSecondaryLoad);
+    header.setReadHeader(
+        transport::THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER,
+        folly::to<std::string>(*grSecondaryLoad));
+  }
+
+  if (auto grHealth = responseMetadata.grHealth()) {
+    header.setGrHealthValue(*grHealth);
+    header.setReadHeader(
+        transport::THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER,
+        folly::to<std::string>(*grHealth));
+  }
+
   if (auto crc32c = responseMetadata.crc32c()) {
     header.setCrc32c(*crc32c);
   }
@@ -347,6 +375,23 @@ void fillResponseRpcMetadataFromTHeader(
     if (grLoadIt != otherMetadata.end()) {
       responseMetadata.grLoad() = folly::to<int64_t>(grLoadIt->second);
       otherMetadata.erase(grLoadIt);
+    }
+  }
+  {
+    auto grSecondaryLoadIt = otherMetadata.find(
+        transport::THeader::QUERY_GLOBAL_ROUTING_SECONDARY_LOAD_HEADER);
+    if (grSecondaryLoadIt != otherMetadata.end()) {
+      responseMetadata.grSecondaryLoad() =
+          folly::to<int64_t>(grSecondaryLoadIt->second);
+      otherMetadata.erase(grSecondaryLoadIt);
+    }
+  }
+  {
+    auto grHealthIt = otherMetadata.find(
+        transport::THeader::QUERY_GLOBAL_ROUTING_HEALTH_HEADER);
+    if (grHealthIt != otherMetadata.end()) {
+      responseMetadata.grHealth() = folly::to<int64_t>(grHealthIt->second);
+      otherMetadata.erase(grHealthIt);
     }
   }
   if (auto crc32c = header.getCrc32c()) {

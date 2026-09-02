@@ -16,7 +16,7 @@ fb_rename_function('bungle', 'strtoupper');
 var_dump(strtoupper('tweet'));
 
 // release stringdata
-unset($stub_name);
+$stub_name = null;
 
 // try to allocate something in that memory
 $stub_name = prefix() . 'hagfish';

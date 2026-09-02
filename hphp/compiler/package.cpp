@@ -82,6 +82,11 @@ Package::Package(const std::string& root,
 {
 }
 
+// Out-of-line so that m_vfsWriter's deleter sees a complete
+// VirtualFileSystemWriter.
+Package::~Package() {
+}
+
 void Package::addInputList(const std::string& listFileName) {
   assert(!listFileName.empty());
   auto const f = fopen(listFileName.c_str(), "r");
@@ -130,8 +135,10 @@ void Package::addSourceFile(const std::string& fileName) {
   m_filesToParse.emplace(std::move(canonFileName), true);
 }
 
-void Package::writeVirtualFileSystem(const std::string& path) {
-  auto writer = VirtualFileSystemWriter(path);
+void Package::writeStaticFilesToVirtualFileSystem(const std::string& path) {
+  assertx(!m_vfsWriter);
+  m_vfsWriter = std::make_unique<VirtualFileSystemWriter>(path);
+  auto& writer = *m_vfsWriter;
 
   if (!m_staticPatterns.empty()) {
     auto root = std::filesystem::path(m_root);
@@ -175,6 +182,11 @@ void Package::writeVirtualFileSystem(const std::string& path) {
       }
     }
   }
+}
+
+void Package::finishVirtualFileSystem() {
+  assertx(m_vfsWriter);
+  auto& writer = *m_vfsWriter;
 
   for (auto const& pair : m_discoveredStaticFiles) {
     auto const file = pair.first.c_str();
@@ -190,6 +202,7 @@ void Package::writeVirtualFileSystem(const std::string& path) {
     }
   }
   writer.finish();
+  m_vfsWriter.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

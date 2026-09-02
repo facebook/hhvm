@@ -1199,7 +1199,13 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
       tmp[tmplen] = '\0';
       filearr[files++] = tmp;
     }
-    qsort(filearr, files, sizeof(*filearr), cmpstrp);
+    /*
+     * An empty directory leaves filearr null, which qsort() is not allowed to
+     * take
+     */
+    if (files > 1) {
+      qsort(filearr, files, sizeof(*filearr), cmpstrp);
+    }
     for (i = 0; i < files; i++) {
       load_1(ms, action, filearr[i], &errs, mentry,
           mentrycount);
@@ -1220,8 +1226,11 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
       }
       i = set_text_binary(ms, mentry[j], mentrycount[j], i);
     }
-    qsort(mentry[j], mentrycount[j], sizeof(*mentry[j]),
-        apprentice_sort);
+    /* An empty set has a null array, which qsort() is not allowed to take. */
+    if (mentrycount[j] > 1) {
+      qsort(mentry[j], mentrycount[j], sizeof(*mentry[j]),
+          apprentice_sort);
+    }
 
     /*
      * Make sure that any level 0 "default" line is last

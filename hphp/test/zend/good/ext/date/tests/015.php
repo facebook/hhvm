@@ -6,7 +6,7 @@ var_dump($tzold->getName());
 $dto->setTimezone(new DateTimeZone('US/Eastern'));
 var_dump($tzold->getName());
 var_dump($dto->getTimezone()->getName());
-unset($dto);
+$dto = null;
 var_dump($tzold->getName());
 echo "Done\n";
 }

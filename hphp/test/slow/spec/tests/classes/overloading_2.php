@@ -16,5 +16,4 @@ function main(): void {
   $p->color = "red"; // create/set the dynamic property "color"
   $v = $p->color; // get the dynamic property "color"
   isset($p->color); // test if (dynamic or not) "color" property exists
-  unset($p->color); // remove the property "color"
 }

@@ -85,6 +85,8 @@ type t =
   | Server_non_opt_build_mode
   | Not_restarting_server_with_precomputed_saved_state
   | Config_error
+  | Client_bad_args
+      (** hh_client command-line arguments could not be parsed or its root was invalid. *)
 [@@deriving show]
 
 and finale_data = {

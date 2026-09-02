@@ -99,6 +99,19 @@ void FastThriftServer::setDebugInterface(
   auxInterfaces_.debugHandler = std::move(handler);
 }
 
+void FastThriftServer::setControlInterface(
+    std::shared_ptr<fast_thrift::ControlServerInterface> handler) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setControlInterface must be called before "
+         "start()/serve()";
+  CHECK(handler)
+      << "FastThriftServer::setControlInterface requires a non-null handler";
+  CHECK(!auxInterfaces_.controlHandler)
+      << "FastThriftServer::setControlInterface called more than once";
+  auxInterfaces_.controlHandler = std::move(handler);
+}
+
 void FastThriftServer::setSecurityInterface(
     std::shared_ptr<fast_thrift::SecurityServerInterface> handler) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
@@ -343,6 +356,9 @@ void FastThriftServer::start() {
     if (auxInterfaces_.debugHandler) {
       auxInterfaces_.debugHandler->getServiceMetadata(*resp);
     }
+    if (auxInterfaces_.controlHandler) {
+      auxInterfaces_.controlHandler->getServiceMetadata(*resp);
+    }
     if (auxInterfaces_.securityHandler) {
       auxInterfaces_.securityHandler->getServiceMetadata(*resp);
     }
@@ -425,6 +441,7 @@ void FastThriftServer::start() {
       .monitoringHandler = auxInterfaces_.monitoringHandler,
       .statusHandler = auxInterfaces_.statusHandler,
       .debugHandler = auxInterfaces_.debugHandler,
+      .controlHandler = auxInterfaces_.controlHandler,
       .securityHandler = auxInterfaces_.securityHandler,
       .metadataResponse = metadataResponse_,
       .zeroCopyThreshold = config_.zeroCopyThreshold,

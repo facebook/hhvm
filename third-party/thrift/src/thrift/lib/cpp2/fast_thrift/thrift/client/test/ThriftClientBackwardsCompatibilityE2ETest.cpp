@@ -119,6 +119,21 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   bool& connected_;
 };
 
+class PingCounter {
+ public:
+  int64_t getPingCount() const {
+    return pingCount_.load(std::memory_order_relaxed);
+  }
+
+ protected:
+  ~PingCounter() = default;
+
+  void recordPing() { pingCount_.fetch_add(1, std::memory_order_relaxed); }
+
+ private:
+  std::atomic<int64_t> pingCount_{0};
+};
+
 /**
  * BackwardsCompatibilityTestHandler - Implementation of the generated
  * BackwardsCompatibilityTestServiceSvIf interface.
@@ -127,7 +142,8 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  * BackwardsCompatibilityTestService.thrift.
  */
 class BackwardsCompatibilityTestHandler
-    : public apache::thrift::ServiceHandler<BackwardsCompatibilityTestService> {
+    : public apache::thrift::ServiceHandler<BackwardsCompatibilityTestService>,
+      public PingCounter {
  public:
   void echo(
       std::string& response, std::unique_ptr<std::string> message) override {
@@ -140,7 +156,7 @@ class BackwardsCompatibilityTestHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -150,7 +166,8 @@ class BackwardsCompatibilityTestHandler
 
 class BackwardsCompatibilityTestFastHandler
     : public apache::thrift::ServiceHandler<
-          BackwardsCompatibilityTestFastService> {
+          BackwardsCompatibilityTestFastService>,
+      public PingCounter {
  public:
   void echo(
       std::string& response, std::unique_ptr<std::string> message) override {
@@ -163,7 +180,7 @@ class BackwardsCompatibilityTestFastHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -173,7 +190,8 @@ class BackwardsCompatibilityTestFastHandler
 
 class BackwardsCompatibilityTestFastChildHandler
     : public apache::thrift::ServiceHandler<
-          BackwardsCompatibilityTestFastChildService> {
+          BackwardsCompatibilityTestFastChildService>,
+      public PingCounter {
  public:
   // Inherited from parent.
   void echo(
@@ -187,7 +205,7 @@ class BackwardsCompatibilityTestFastChildHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -361,9 +379,15 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, Ping) {
       apache::thrift::Client<BackwardsCompatibilityTestService>>(
       std::move(channel_));
 
+  ASSERT_EQ(handler_->getPingCount(), 0);
+
   folly::coro::blockingWait(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_ping()));
+
+  // The RPC round-trip must actually invoke the server handler exactly once,
+  // not just complete without throwing on the client.
+  EXPECT_EQ(handler_->getPingCount(), 1);
 
   // Destroy the client in the EventBase thread
   destroyClientOnEvb(client);
@@ -808,9 +832,15 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 TEST_F(BackwardsCompatibilityFastClientE2ETest, Ping) {
   auto client = createFastClient();
 
+  ASSERT_EQ(handler_->getPingCount(), 0);
+
   folly::coro::blockingWait(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_ping()));
+
+  // The FastClient RPC must actually reach the server handler once, not just
+  // return without throwing on the client.
+  EXPECT_EQ(handler_->getPingCount(), 1);
 
   destroyClientOnEvb(client);
 }
@@ -1004,10 +1034,15 @@ TEST_F(
     BackwardsCompatibilityFastChildClientE2ETest, InheritedPingThroughChild) {
   auto client = createFastClient<BackwardsCompatibilityTestFastChildService>();
 
-  EXPECT_NO_THROW(
-      folly::coro::blockingWait(
-          folly::coro::co_withExecutor(
-              clientThread_->getEventBase(), client->co_ping())));
+  ASSERT_EQ(childHandler_->getPingCount(), 0);
+
+  folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_ping()));
+
+  // A FastClient<Child> calling an inherited (parent-defined) method must
+  // actually dispatch to the child handler's ping, not silently no-op.
+  EXPECT_EQ(childHandler_->getPingCount(), 1);
 
   destroyClientOnEvb(client);
 }

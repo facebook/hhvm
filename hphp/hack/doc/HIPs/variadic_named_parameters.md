@@ -91,6 +91,10 @@ Here,
 
 Another way of viewing subtyping is by elaboration to shapes: translate named parameters to a shape type, with required named parameters translated to required shape fields, optional named parameters translated to optional shape fields, and variadic named parameter translated to a typed open shape, e.g. `(function(named int $x, optional named string $y, named arraykey...):void)` becomes `(function(shape('x' => int, ?'y' => string, arraykey...)):void)`.
 
+## Restrictions
+
+Functions or methods with named variadic parameters cannot be marked `<<__Memoize>>`: this is a naming error. They also cannot be marked `readonly`: this is a parse error. This matches the behaviour for ordinary variadics.
+
 ## Runtime
 
 Prior to this change, if a function is called with a named argument whose name does not match any named parameter in the definition, an exception is raised. The new functionality is as follows: this exception is *not* raised if the function

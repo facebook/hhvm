@@ -53,6 +53,14 @@ function test5(): void {
   take5(f5<>);
 }
 
+// OK: an explicit optional parameter in sub shadows its variadic for that
+// name, but still accepts the type promised by super's variadic.
+function take6((function(named int...): void) $_): void {}
+function f6(named arraykey $x = 0, named arraykey...): void {}
+function test6(): void {
+  take6(f6<>);
+}
+
 // ERROR: sub is less permissive than super — sub requires `x` but
 // super may pass any named arg. Consumer might send `y` (unexpected) or
 // no args at all (missing `x`).
@@ -78,4 +86,12 @@ function take_err3((function(named int $x): void) $_): void {}
 function f_err3(named string...): void {}
 function test_err3(): void {
   take_err3(f_err3<>);
+}
+
+// ERROR: super's variadic allows x=int, but sub's explicit x parameter
+// shadows its arraykey variadic and accepts only strings.
+function take_err4((function(named int...): void) $_): void {}
+function f_err4(named string $x = "", named arraykey...): void {}
+function test_err4(): void {
+  take_err4(f_err4<>);
 }

@@ -2428,6 +2428,12 @@ end = struct
      2. If both sides have a named-variadic, their element types must
         subtype contravariantly (super's element <: sub's element).
 
+     3. If the expected function has a named-variadic and the actual function
+        has an optional named parameter not declared by the expected function,
+        the expected variadic's element type must be a subtype of that explicit
+        parameter's type. The explicit parameter shadows the actual function's
+        variadic for that name.
+
      The "missing named-variadic on sub" and "extra required name on sub"
      cases are handled in [simplify_subtype_funs_attributes] via
      [Typing_named_params.find_names_mismatch]. *)
@@ -2445,6 +2451,7 @@ end = struct
           | None -> acc)
     in
     let sub_named_names = names_of ft_sub in
+    let super_named_names = names_of ft_super in
     let contra ty_super ty_sub env =
       let ty_super =
         Typing_env.update_reason env ty_super ~f:(fun r_super_prj ->
@@ -2477,6 +2484,24 @@ end = struct
             | Some name when not (SSet.mem name sub_named_names) ->
               (env, prop) &&& contra super_fp.fp_type ty_sub_var
             | _ -> (env, prop))
+    in
+    (* An explicit optional parameter in the sub shadows its named variadic.
+       If the super only accepts that name through its variadic, check against
+       the explicit parameter's type instead of the sub's variadic type. *)
+    let (env, prop) =
+      match (sub_var, super_var) with
+      | (Some _, Some { fp_type = ty_super_var; _ }) ->
+        List.fold
+          (Typing_defs.ft_params_without_named_variadic ft_sub)
+          ~init:(env, prop)
+          ~f:(fun (env, prop) sub_fp ->
+            match Typing_defs.Named_params.name_of_named_param sub_fp with
+            | Some name
+              when Typing_defs_core.get_fp_is_optional sub_fp
+                   && not (SSet.mem name super_named_names) ->
+              (env, prop) &&& contra ty_super_var sub_fp.fp_type
+            | _ -> (env, prop))
+      | _ -> (env, prop)
     in
     (env, prop)
     &&&

@@ -33,6 +33,10 @@ DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
 DEFINE_bool(io_zcrx, false, "");
 DEFINE_bool(
+    io_zcrx_nodev,
+    false,
+    "Register the ZC Rx instance without a net device (ZCRX_REG_NODEV). All data is copied by the kernel, so this works over loopback and needs no ifname/queue/NAPI setup.");
+DEFINE_bool(
     io_zcrx_socket_bind,
     false,
     "Enable src port calculation and binding prior to connection. Default is false. (true, false)");
@@ -151,12 +155,33 @@ void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& options) {
   }
 }
 
+void validateZcrxFlags() {
+  if (FLAGS_io_zcrx_nodev && !FLAGS_io_zcrx) {
+    LOG(FATAL) << "--io_zcrx_nodev requires --io_zcrx";
+  }
+  if (FLAGS_io_zcrx_nodev && FLAGS_io_zcrx_hw_queues > 0) {
+    LOG(FATAL)
+        << "--io_zcrx_nodev has no hardware queues, --io_zcrx_hw_queues must be 0";
+  }
+  if (FLAGS_io_zcrx_nodev && FLAGS_io_zcrx_socket_bind) {
+    LOG(FATAL)
+        << "--io_zcrx_nodev has no queue to steer to, --io_zcrx_socket_bind must be false";
+  }
+}
+
 folly::IoUringBackend::Options getIoUringOptions() {
   folly::IoUringBackend::Options options;
   setIoUringCommonOptionsFromFlags(options);
 
+  validateZcrxFlags();
+
   static std::atomic<int32_t> currQueueId{FLAGS_io_zcrx_queue_id};
-  if (FLAGS_io_zcrx) {
+  if (FLAGS_io_zcrx_nodev) {
+    options.setZeroCopyRx(true)
+        .setZeroCopyRxNoDev(true)
+        .setZeroCopyRxNumBuffers(FLAGS_io_zcrx_num_pages)
+        .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries);
+  } else if (FLAGS_io_zcrx) {
     int32_t queueId = currQueueId.fetch_add(1);
     int32_t threadIdx = queueId - FLAGS_io_zcrx_queue_id;
     bool isOwner =

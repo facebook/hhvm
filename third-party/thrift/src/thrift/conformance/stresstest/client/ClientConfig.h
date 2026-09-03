@@ -64,6 +64,7 @@ struct ClientConnectionConfig {
   std::string trustedCertsPath;
   bool ioUring{false};
   bool ioUringZcrx{false};
+  bool ioUringZcrxNoDev{false};
   bool ioUringZcrxSocketBind{false};
   bool ioUringZctx{false};
   size_t ioUringZctxArenaSize{0};

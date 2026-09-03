@@ -348,13 +348,17 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     }
   }
 
-  if (config.connConfig.ioUringZcrx && FLAGS_io_zcrx_hw_queues > 0) {
+  if (config.connConfig.ioUringZcrx &&
+      (FLAGS_io_zcrx_hw_queues > 0 || config.connConfig.ioUringZcrxNoDev)) {
     std::vector<folly::EventBase*> evbs;
     evbs.reserve(clientThreads_.size());
     for (auto& ct : clientThreads_) {
       evbs.push_back(ct->getEventBase());
     }
-    if (!folly::setupIoUringBufferPoolSharing(evbs, FLAGS_io_zcrx_hw_queues)) {
+    size_t numQueues = config.connConfig.ioUringZcrxNoDev
+        ? clientThreads_.size()
+        : FLAGS_io_zcrx_hw_queues;
+    if (!folly::setupIoUringBufferPoolSharing(evbs, numQueues)) {
       LOG(FATAL) << "Failed to set up buffer pool sharing";
     }
   }
@@ -374,7 +378,7 @@ void ClientRunner::run(const StressTestBase* test) {
 
   latch_.wait();
 
-  if (config_.connConfig.ioUringZcrx &&
+  if (config_.connConfig.ioUringZcrx && !config_.connConfig.ioUringZcrxNoDev &&
       !config_.connConfig.ioUringZcrxSocketBind) {
     for (auto& thread : clientThreads_) {
       auto napiId = thread->getEventBase()->getBackend()->getNapiId();

@@ -169,6 +169,7 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
   connCfg.ioUring = FLAGS_io_uring;
   connCfg.ioUringZcrx = FLAGS_io_zcrx;
+  connCfg.ioUringZcrxNoDev = FLAGS_io_zcrx_nodev;
   connCfg.ioUringZctx = FLAGS_io_zctx;
   if (FLAGS_io_zctx_arena_mb > 0) {
     connCfg.ioUringZctxArenaSize = FLAGS_io_zctx_arena_mb * 1024 * 1024;

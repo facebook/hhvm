@@ -32,6 +32,7 @@ DECLARE_int32(io_registers);
 DECLARE_int32(io_prov_buffs_size);
 DECLARE_int32(io_prov_buffs);
 DECLARE_bool(io_zcrx);
+DECLARE_bool(io_zcrx_nodev);
 DECLARE_bool(io_zcrx_socket_bind);
 DECLARE_bool(io_zctx);
 DECLARE_int32(io_zctx_arena_mb);
@@ -45,6 +46,7 @@ DECLARE_int32(io_zcrx_hw_queues);
 
 namespace apache::thrift::stress {
 void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& opts);
+void validateZcrxFlags();
 folly::IoUringBackend::Options getIoUringOptions();
 } // namespace apache::thrift::stress
 

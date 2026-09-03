@@ -46,7 +46,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
@@ -78,7 +77,6 @@ using namespace apache::thrift::fast_thrift;
 using namespace apache::thrift::fast_thrift::thrift;
 using namespace apache::thrift::fast_thrift::thrift::client::handler;
 using namespace apache::thrift::fast_thrift::frame;
-using namespace apache::thrift::fast_thrift::frame::read::handler;
 using namespace apache::thrift::fast_thrift::frame::write::handler;
 using namespace apache::thrift::fast_thrift::frame::read;
 using namespace apache::thrift::fast_thrift::frame::write;
@@ -97,7 +95,6 @@ std::unique_ptr<folly::IOBuf> makePayloadData(size_t size) {
 }
 
 // Handler tags for pipeline construction
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -295,8 +292,7 @@ std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
           .setAllocator(&connection->allocator)
           .addState<apache::thrift::fast_thrift::rocket::client::
                         RocketClientStreamContexts>()
-          .addNextInbound<FrameLengthParserHandler>(
-              frame_length_parser_handler_tag)
+
           .addNextOutbound<FrameLengthEncoderHandler>(
               frame_length_encoder_handler_tag)
           .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
@@ -1376,7 +1372,7 @@ BENCHMARK_DRAW_LINE();
 // Advanced Benchmarks - Fragmented Response
 // =============================================================================
 
-// Fragmented response - tests FrameLengthParserHandler reassembly
+// Fragmented response - tests FrameLengthParser reassembly
 // Response arrives in multiple small chunks (simulating TCP fragmentation)
 BENCHMARK(Rocket_Response_Fragmented, iters) {
   folly::BenchmarkSuspender suspender;
@@ -1539,7 +1535,7 @@ BENCHMARK_RELATIVE(FastThriftWithChannel_Response_Fragmented, iters) {
 
   suspender.dismiss();
 
-  // Inject fragments - tests FrameLengthParserHandler reassembly
+  // Inject fragments - tests FrameLengthParser reassembly
   for (size_t i = 0; i < iters; ++i) {
     for (auto& fragment : fragmentedFrames[i]) {
       fixture.testTransport->injectReadData(std::move(fragment));

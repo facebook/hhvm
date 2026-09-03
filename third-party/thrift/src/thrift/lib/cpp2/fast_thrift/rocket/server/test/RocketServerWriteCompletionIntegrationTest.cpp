@@ -21,7 +21,8 @@
  * IntervalBatchingFrameHandler (the server's chosen batcher) under the default
  * config.
  *
- *   TransportHandlerT<RocketServerEventFactory>
+ *   TransportHandlerT<RocketServerEventFactory,
+ * apache::thrift::fast_thrift::transport::test::PassthroughParser>
  *     -> IntervalBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketServerEventFactory>>
  *     -> EventCapturingAppHandler  (subscribes to BatchWriteComplete via
@@ -58,6 +59,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/RocketServerEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::rocket::server {
 namespace {
@@ -68,8 +70,9 @@ namespace transport = apache::thrift::fast_thrift::transport;
 using transport::WriteCompletionStatus;
 using namespace testing;
 
-using TestTransportHandler =
-    transport::TransportHandlerT<RocketServerEventFactory>;
+using TestTransportHandler = transport::TransportHandlerT<
+    RocketServerEventFactory,
+    apache::thrift::fast_thrift::transport::test::PassthroughParser>;
 using TestBatcher = fw::IntervalBatchingFrameHandlerT<
     fw::WriteCompletionTrackerT<RocketServerEventFactory>>;
 

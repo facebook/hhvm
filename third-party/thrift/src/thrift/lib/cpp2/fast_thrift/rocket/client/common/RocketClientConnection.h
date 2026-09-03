@@ -19,6 +19,7 @@
 #include <folly/Function.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/RocketClientEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -55,7 +56,8 @@ template <
 struct RocketClientConnectionT {
   using OnConnectFn = folly::Function<void() noexcept>;
   using OnDisconnectFn = folly::Function<void() noexcept>;
-  using TransportHandler = transport::TransportHandlerT<Factory>;
+  using TransportHandler =
+      transport::TransportHandlerT<Factory, frame::read::FrameLengthParser>;
 
   RocketClientConnectionT() = default;
   RocketClientConnectionT(const RocketClientConnectionT&) = delete;

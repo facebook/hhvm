@@ -19,6 +19,7 @@
 #include <folly/Function.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/RocketServerEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -31,7 +32,8 @@ namespace apache::thrift::fast_thrift::rocket::server {
 // this alias, so the binding is stated once.
 using RocketServerTransportHandler =
     apache::thrift::fast_thrift::transport::TransportHandlerT<
-        RocketServerEventFactory>;
+        RocketServerEventFactory,
+        apache::thrift::fast_thrift::frame::read::FrameLengthParser>;
 
 /**
  * RocketServerConnection — owns the rocket pipeline and its

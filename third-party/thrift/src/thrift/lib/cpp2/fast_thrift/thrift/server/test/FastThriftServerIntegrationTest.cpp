@@ -47,6 +47,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.tcc>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -258,8 +259,8 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
 
     auto* sock = new ::testing::NiceMock<folly::test::MockAsyncTransport>();
     ON_CALL(*sock, getEventBase()).WillByDefault(::testing::Return(&evb_));
-    transportHandler_ =
-        ::apache::thrift::fast_thrift::transport::TransportHandler::create(
+    transportHandler_ = ::apache::thrift::fast_thrift::transport::test::
+        PassthroughTransportHandler::create(
             folly::AsyncTransport::UniquePtr(sock));
 
     auto handlerPtr = std::make_unique<MockHandler>();
@@ -273,7 +274,8 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
 
     pipeline_ =
         PipelineBuilder<
-            ::apache::thrift::fast_thrift::transport::TransportHandler,
+            ::apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler,
             FastThriftServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
@@ -309,8 +311,8 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
   std::shared_ptr<::apache::thrift::FastServiceHandler<FastThriftServer>>
       handler_;
   AdapterPtr adapter_;
-  ::apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
+  ::apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::
+      Ptr transportHandler_;
   PipelineImpl::Ptr pipeline_;
   MockHandler* mockHandler_{nullptr};
   ThriftServerResponseMessage captured_;

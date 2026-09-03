@@ -28,7 +28,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BackpressurePolicy.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
@@ -106,7 +105,6 @@ static_assert(
     "the fragmenter is the batcher's only BatchWriteComplete subscriber in "
     "both backpressure configurations; a NoOp tracker here would strand it");
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
@@ -428,8 +426,6 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
                      .setTail(appAdapter)
                      .setAllocator(&rocketAllocator_)
                      .addState<rocket::RocketStreamContexts>();
-  builder.addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-      frame_length_parser_handler_tag);
   // Batching and fragmentation are always present, but which specialization
   // is spliced depends on enableBackpressure. The no-backpressure variants
   // batch and fragment identically; they simply carry no write-ready hook, so

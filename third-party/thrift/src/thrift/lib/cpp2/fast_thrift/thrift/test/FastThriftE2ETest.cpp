@@ -35,7 +35,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
@@ -70,7 +69,6 @@ using apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator;
 using apache::thrift::fast_thrift::thrift::test::TestFastService;
 
 // Client handler tags
-HANDLER_TAG(client_frame_length_parser_handler);
 HANDLER_TAG(client_frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -327,8 +325,7 @@ class FastThriftE2ETest : public ::testing::TestWithParam<uint32_t> {
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addState<rocket::client::RocketClientStreamContexts>()
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  client_frame_length_parser_handler_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   client_frame_length_encoder_handler_tag)

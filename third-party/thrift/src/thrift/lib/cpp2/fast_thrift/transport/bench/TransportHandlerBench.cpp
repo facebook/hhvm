@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 using namespace folly;
 using namespace apache::thrift::fast_thrift::channel_pipeline;
@@ -150,11 +151,12 @@ auto createHandlerAndPipeline(
     BenchEndpointHandler& appHandler,
     BenchAllocator& allocator) {
   auto socket = folly::AsyncTransport::UniquePtr(new BenchSocket());
-  auto handler =
-      fast_transport::TransportHandler::create(std::move(socket), 256, 4096);
+  auto handler = apache::thrift::fast_thrift::transport::test::
+      PassthroughTransportHandler::create(std::move(socket), 256, 4096);
 
   auto pipeline = PipelineBuilder<
-                      fast_transport::TransportHandler,
+                      apache::thrift::fast_thrift::transport::test::
+                          PassthroughTransportHandler,
                       BenchEndpointHandler,
                       BenchAllocator>()
                       .setEventBase(&evb)

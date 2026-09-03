@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -184,8 +185,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
   }
 
   struct BuiltPipeline {
-    apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-        transportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::
+        Ptr transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
     // Raw ptr — owned by the test body's local adapter Ptr. Held here so
@@ -211,9 +212,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
       std::function<Result(
           apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&&)> writeHandler = nullptr) {
-    auto transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            createMockSocket());
+    auto transportHandler = apache::thrift::fast_thrift::transport::test::
+        PassthroughTransportHandler::create(createMockSocket());
 
     auto handlerPtr = std::make_unique<MockHandler>();
     auto* rawHandler = handlerPtr.get();
@@ -226,7 +226,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
     // Reads go from head → tail (transport → adapter)
     auto pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler,
             TestServerAppAdapter,
             TestAllocator>()
             .setEventBase(evb_)

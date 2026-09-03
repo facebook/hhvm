@@ -31,15 +31,16 @@
 #include <thrift/lib/cpp2/fast_thrift/test/TestClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/test/TestServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 #include <memory>
 
 namespace apache::thrift::fast_thrift::test {
 
 using ServerTransportHandler =
-    apache::thrift::fast_thrift::transport::TransportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler;
 using ClientTransportHandler =
-    apache::thrift::fast_thrift::transport::TransportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler;
 
 using TestConnectionManager =
     apache::thrift::fast_thrift::connection::ConnectionManager;

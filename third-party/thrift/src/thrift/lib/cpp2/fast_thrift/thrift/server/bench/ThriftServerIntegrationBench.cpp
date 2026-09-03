@@ -48,7 +48,6 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -97,7 +96,6 @@ std::unique_ptr<folly::IOBuf> makePayloadData(size_t size) {
   return folly::IOBuf::copyBuffer(std::string(size, 'x'));
 }
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -304,8 +302,7 @@ std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
           .setTail(rocketConn->appAdapter.get())
           .setAllocator(&rocketConn->allocator)
           .addState<apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-          .addNextInbound<FrameLengthParserHandler>(
-              frame_length_parser_handler_tag)
+
           .addNextOutbound<FrameLengthEncoderHandler>(
               frame_length_encoder_handler_tag)
           .addNextDuplex<frame::handler::FrameCodecHandler>(

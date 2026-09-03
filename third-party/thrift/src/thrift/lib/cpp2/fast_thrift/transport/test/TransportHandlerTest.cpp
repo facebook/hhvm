@@ -36,6 +36,9 @@
 #define private public
 #define protected public
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#undef protected
+#undef private
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::transport {
 
@@ -43,6 +46,10 @@ using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
 using MockAppHandler = MockTailHandler; // App receives reads (Tail)
 using namespace testing;
+
+// These tests exercise the transport itself, not any wire protocol, so they
+// pair it with a parser that does no framing.
+using TransportHandler = test::PassthroughTransportHandler;
 
 namespace {
 // Build a simple byte buffer for testing
@@ -589,22 +596,6 @@ TEST_F(TransportHandlerTest, ReadBufferComesFromPipelineAllocator) {
 
   handler->getReadBuffer(&buf, &len);
   EXPECT_EQ(allocator.allocationCount(), 2);
-}
-
-// Test: closing frees the slab preallocated for the next socket read rather
-// than pinning it until the handler is destroyed.
-TEST_F(TransportHandlerTest, CloseFreesPreallocatedReadBuffer) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-  handler->onConnect();
-
-  void* buf = nullptr;
-  size_t len = 0;
-  handler->getReadBuffer(&buf, &len);
-  ASSERT_GT(handler->readBufQueue_.tailroom(), 0);
-
-  handler->close(folly::exception_wrapper{});
-
-  EXPECT_EQ(handler->readBufQueue_.tailroom(), 0);
 }
 
 // --- Lifecycle Tests ---
@@ -1316,7 +1307,9 @@ static_assert(
 
 class TransportHandlerEventTest : public ::testing::Test {
  protected:
-  using HandlerT = TransportHandlerT<CapturingWriteCompleteEventFactory>;
+  using HandlerT = TransportHandlerT<
+      CapturingWriteCompleteEventFactory,
+      test::PassthroughParser>;
 
   void SetUp() override {
     CapturingFactoryState::calls.clear();

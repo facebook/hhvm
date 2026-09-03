@@ -103,8 +103,7 @@ struct FastThriftServerConfig {
  * Uses a two-pipeline architecture:
  *
  * Rocket pipeline (owned by RocketServerConnection):
- *   TransportHandler
- *     -> FrameLengthParserHandler
+ *   TransportHandler (frames inbound bytes via FrameLengthParser)
  *     -> BatchingFrameHandler
  *     -> FrameLengthEncoderHandler
  *     -> FrameCodecHandler
@@ -378,7 +377,6 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
@@ -399,7 +397,6 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 namespace apache::thrift::fast_thrift::thrift {
 
 // Handler tags for rocket pipeline construction
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
@@ -584,8 +581,6 @@ FastThriftServerT<Stats>::buildRocketPipeline(
                      .setTail(appAdapter)
                      .setAllocator(&rocketAllocator_)
                      .addState<rocket::RocketStreamContexts>();
-  builder.addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-      frame_length_parser_handler_tag);
   // Batching and fragmentation are always present, but which specialization
   // is spliced depends on enableBackpressure. The no-backpressure variants
   // batch and fragment identically; they simply carry no write-ready hook, so

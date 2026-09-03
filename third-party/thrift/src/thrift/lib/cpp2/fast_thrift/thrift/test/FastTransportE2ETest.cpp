@@ -38,7 +38,6 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
@@ -78,7 +77,6 @@ using apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator;
 using apache::thrift::fast_thrift::thrift::test::TestService;
 
 // Client handler tags
-HANDLER_TAG(client_frame_length_parser_handler);
 HANDLER_TAG(client_frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -87,7 +85,6 @@ HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
 // Server handler tags
-HANDLER_TAG(server_frame_length_parser_handler);
 HANDLER_TAG(server_frame_length_encoder_handler);
 HANDLER_TAG(server_frame_codec_handler);
 HANDLER_TAG(server_frame_defragmentation_handler);
@@ -246,9 +243,7 @@ class FastTransportE2ETest : public ::testing::Test {
             .setAllocator(&serverRocketAllocator_)
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
-                                FrameLengthParserHandler>(
-                server_frame_length_parser_handler_tag)
+
             .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                  handler::FrameLengthEncoderHandler>(
                 server_frame_length_encoder_handler_tag)
@@ -401,9 +396,7 @@ class FastTransportE2ETest : public ::testing::Test {
               .setAllocator(&connection->allocator)
               .addState<apache::thrift::fast_thrift::rocket::client::
                             RocketClientStreamContexts>()
-              .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                  handler::FrameLengthParserHandler>(
-                  client_frame_length_parser_handler_tag)
+
               .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                    handler::FrameLengthEncoderHandler>(
                   client_frame_length_encoder_handler_tag)

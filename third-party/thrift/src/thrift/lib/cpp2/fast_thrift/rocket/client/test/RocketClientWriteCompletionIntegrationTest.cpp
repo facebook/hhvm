@@ -20,7 +20,8 @@
  * Exercises the full client-side write-completion plumbing through a real
  * PipelineImpl:
  *
- *   TransportHandlerT<FrameEventFactory>
+ *   TransportHandlerT<FrameEventFactory,
+ * apache::thrift::fast_thrift::transport::test::PassthroughParser>
  *     -> LoopBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketClientEventFactory>>
  *     -> EventCapturingAppHandler  (subscribes to BatchWriteComplete via
@@ -59,6 +60,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/RocketClientEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::rocket::client {
 namespace {
@@ -72,8 +74,9 @@ using namespace testing;
 // Two events per pipeline: TransportHandler fires TransportWriteComplete and
 // the tracker re-fires BatchWriteComplete after enriching with the
 // rocket-frame count.
-using TestTransportHandler =
-    transport::TransportHandlerT<RocketClientEventFactory>;
+using TestTransportHandler = transport::TransportHandlerT<
+    RocketClientEventFactory,
+    apache::thrift::fast_thrift::transport::test::PassthroughParser>;
 using TestBatcher = fw::LoopBatchingFrameHandlerT<
     fw::WriteCompletionTrackerT<RocketClientEventFactory>>;
 

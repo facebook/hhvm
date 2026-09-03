@@ -32,7 +32,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
@@ -76,7 +75,6 @@ using apache::thrift::fast_thrift::thrift::test::
     BackwardsCompatibilityTestService;
 
 // Handler tags for pipeline construction
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -253,7 +251,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
    * Create a fast_thrift client channel connected to the test server.
    *
    * The channel is constructed with the full pipeline:
-   * - FrameLengthParserHandler: Parses frames from raw bytes
+   * - FrameLengthParser (in the transport): parses frames from raw bytes
    * - FrameLengthEncoderHandler: Encodes frames with length prefix
    * - RocketClientFrameCodecHandler: Bidirectional codec for Rocket frames
    * - RocketClientSetupFrameHandler: Handles initial SETUP frame
@@ -319,9 +317,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .setAllocator(&connection->allocator)
               .addState<apache::thrift::fast_thrift::rocket::client::
                             RocketClientStreamContexts>()
-              .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                  handler::FrameLengthParserHandler>(
-                  frame_length_parser_handler_tag)
+
               .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                    handler::FrameLengthEncoderHandler>(
                   frame_length_encoder_handler_tag)
@@ -758,8 +754,7 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addState<rocket::client::RocketClientStreamContexts>()
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  frame_length_parser_handler_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   frame_length_encoder_handler_tag)

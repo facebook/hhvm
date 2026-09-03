@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::bench {
 
@@ -91,7 +92,7 @@ namespace {
  * connection::Connection concept.
  */
 struct TcpConnection {
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::Ptr
       transportHandler;
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline;
   std::function<void()> closeCb;
@@ -171,13 +172,14 @@ TcpServer::TcpServer(
           [this](folly::AsyncTransport::UniquePtr socket) -> TcpConnection {
             auto* evb = socket->getEventBase();
             auto transportHandler = apache::thrift::fast_thrift::transport::
-                TransportHandler::create(std::move(socket));
+                test::PassthroughTransportHandler::create(std::move(socket));
 
             auto adapter = std::make_unique<ServerAppAdapter>();
 
             auto pipeline =
                 apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-                    apache::thrift::fast_thrift::transport::TransportHandler,
+                    apache::thrift::fast_thrift::transport::test::
+                        PassthroughTransportHandler,
                     ServerAppAdapter,
                     apache::thrift::fast_thrift::channel_pipeline::
                         SimpleBufferAllocator>()

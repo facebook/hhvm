@@ -40,8 +40,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
@@ -149,9 +149,17 @@ class RocketE2ETest : public ::testing::Test {
 
       // Create transport handlers
       clientTransport_ =
-          transport::TransportHandler::create(std::move(clientSocket));
+          apache::thrift::fast_thrift::transport::TransportHandlerT<
+              apache::thrift::fast_thrift::transport::
+                  NoOpWriteCompleteEventFactory,
+              apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+              create(std::move(clientSocket));
       serverTransport_ =
-          transport::TransportHandler::create(std::move(serverSocket));
+          apache::thrift::fast_thrift::transport::TransportHandlerT<
+              apache::thrift::fast_thrift::transport::
+                  NoOpWriteCompleteEventFactory,
+              apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+              create(std::move(serverSocket));
 
       // Wire client callbacks
       clientAppAdapter_->setResponseHandlers(
@@ -210,7 +218,10 @@ class RocketE2ETest : public ::testing::Test {
       // Build client pipeline
       clientPipeline_ =
           PipelineBuilder<
-              transport::TransportHandler,
+              apache::thrift::fast_thrift::transport::TransportHandlerT<
+                  apache::thrift::fast_thrift::transport::
+                      NoOpWriteCompleteEventFactory,
+                  apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
               client::RocketClientAppAdapter,
               TestAllocator>()
               .setEventBase(evb)
@@ -219,8 +230,7 @@ class RocketE2ETest : public ::testing::Test {
               .setAllocator(&clientAllocator_)
               .addState<apache::thrift::fast_thrift::rocket::client::
                             RocketClientStreamContexts>()
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  c_frame_length_parser_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   c_frame_length_encoder_tag)
@@ -249,7 +259,10 @@ class RocketE2ETest : public ::testing::Test {
       // Build server pipeline
       serverPipeline_ =
           PipelineBuilder<
-              transport::TransportHandler,
+              apache::thrift::fast_thrift::transport::TransportHandlerT<
+                  apache::thrift::fast_thrift::transport::
+                      NoOpWriteCompleteEventFactory,
+                  apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
               server::RocketServerAppAdapter,
               TestAllocator>()
               .setEventBase(evb)
@@ -260,8 +273,7 @@ class RocketE2ETest : public ::testing::Test {
                   apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
               .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                   s_batching_tag)
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  s_frame_length_parser_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   s_frame_length_encoder_tag)
@@ -314,8 +326,14 @@ class RocketE2ETest : public ::testing::Test {
       new client::RocketClientAppAdapter()};
   server::RocketServerAppAdapter::Ptr serverAppAdapter_{
       new server::RocketServerAppAdapter()};
-  transport::TransportHandler::Ptr clientTransport_;
-  transport::TransportHandler::Ptr serverTransport_;
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
+      clientTransport_;
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
+      serverTransport_;
   PipelineImpl::Ptr clientPipeline_;
   PipelineImpl::Ptr serverPipeline_;
   TestAllocator clientAllocator_;

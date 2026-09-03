@@ -385,7 +385,10 @@ DiscriminantLoadSheddingOSS::GetTenantFunctions::hashClientId() {
   return [](const ServerRequest& request) -> Tenant {
     const std::hash<std::string> hasher;
     const auto* clientId = request.requestContext()->clientId();
-    return hasher(clientId ? *clientId : "");
+    if (clientId != nullptr) {
+      return hasher(*clientId);
+    }
+    return hasher("");
   };
 }
 

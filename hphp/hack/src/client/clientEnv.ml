@@ -101,6 +101,7 @@ type client_check_env = {
   max_errors: int option;
   preexisting_warnings: bool;
       (** Whether to show preexisint warnings in typechecked files *)
+  reason: string option;
   mode: client_mode;
   no_load: bool;
   save_64bit: string option;

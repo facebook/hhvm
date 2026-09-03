@@ -1231,16 +1231,11 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
 
   let is_interactive = is_interactive !from in
-  let custom_telemetry_data =
-    match !reason with
-    | None -> !custom_telemetry_data
-    | Some reason -> !custom_telemetry_data @ [("reason", reason)]
-  in
   {
     ClientEnv.autostart = !autostart;
     config = !config;
     custom_hhi_path = !custom_hhi_path;
-    custom_telemetry_data;
+    custom_telemetry_data = !custom_telemetry_data;
     error_format = !error_format;
     force_dormant_start = !force_dormant_start;
     from = !from;
@@ -1250,6 +1245,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     paths;
     max_errors = !max_errors;
     preexisting_warnings = !preexisting_warnings;
+    reason = !reason;
     mode;
     no_load =
       (!no_load

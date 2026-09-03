@@ -113,6 +113,7 @@ let connect
     custom_hhi_path;
     custom_telemetry_data;
     preexisting_warnings;
+    reason = _;
     error_format = _;
     paths = _;
     max_errors = _;
@@ -1126,7 +1127,7 @@ let main
   HackEventLogger.client_set_mode
     (ClientEnv.Variants_of_client_mode.to_name args.mode);
 
-  HackEventLogger.client_check_start ();
+  HackEventLogger.client_check_start ~reason:args.reason;
   ClientSpinner.start_heartbeat_telemetry ();
   Lwt.dont_wait flush_event_logger (fun _exn -> ());
   let partial_telemetry_ref = ref None in

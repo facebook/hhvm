@@ -35,6 +35,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     paths = _;
     max_errors = _;
     preexisting_warnings = _;
+    reason = _;
     mode = _;
     no_load = _;
     save_64bit = _;

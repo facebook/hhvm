@@ -1048,6 +1048,8 @@ struct OtherStateExtension {
 // a rejecting verdict, which short-circuits the pipeline: the service handler
 // must never run and the client receives an application error.
 struct RejectingExtension {
+  static constexpr bool kUsesHeaders = true;
+
   std::atomic<int>* rejections{nullptr};
 
   ftt::RequestVerdict onRequest(ftt::ThriftRequestMutator& request) noexcept {
@@ -1141,6 +1143,15 @@ ftt::FastThriftServerConfig makeConnectionContextConfig() {
   // Connection extensions observe the per-connection context, so the server
   // must be building one.
   config.enableRequestContext = true;
+  return config;
+}
+
+ftt::FastThriftServerConfig makeHeadersConfig() {
+  auto config = makeConnectionContextConfig();
+  // Headers are readable only off the per-request context, which only this
+  // setting populates; an extension declaring kUsesHeaders is refused without
+  // it.
+  config.enableRequestHeaders = true;
   return config;
 }
 
@@ -1499,6 +1510,160 @@ TEST(FastThriftServerConnContextTest, PeerAddressReachesConnContext) {
   evb->runInEventBaseThreadAndWait([&] { socket.reset(); });
 }
 
+// Records what an extension could read back for a given inbound request header.
+struct HeaderReadingExtension {
+  static constexpr bool kUsesHeaders = true;
+
+  std::string* seen{nullptr};
+  std::atomic<bool>* ran{nullptr};
+
+  ftt::RequestVerdict onRequest(
+      const ftt::ThriftRequestView& request) noexcept {
+    if (const auto* value = request.header("x-client-header")) {
+      *seen = *value;
+    }
+    ran->store(true, std::memory_order_relaxed);
+    return ftt::RequestVerdict::proceed();
+  }
+};
+
+// Drives one `add(7, 35)` RPC carrying a custom request header.
+int64_t addRoundTripWithHeader(
+    const folly::SocketAddress& addr,
+    const std::string& key,
+    const std::string& value) {
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, addr);
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  int64_t sum = 0;
+  evb->runInEventBaseThread([&] {
+    apache::thrift::RpcOptions options;
+    options.setWriteHeader(key, value);
+    client->semifuture_add(options, 7, 35)
+        .via(evb)
+        .thenValue([&](int64_t v) {
+          sum = v;
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          ADD_FAILURE() << "RPC failed: " << folly::exceptionStr(ew);
+          done.post();
+        });
+  });
+  EXPECT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  return sum;
+}
+
+// enableRequestHeaders installs a handler that runs upstream of every
+// extension and moves the client's header map onto the per-request context,
+// which is where the extension reads it from.
+TEST(FastThriftServerExtensionTest, ExtensionReadsRequestHeaderWithHeadersOn) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  std::string seen;
+  std::atomic<bool> ran{false};
+
+  ftt::FastThriftServer server(makeHeadersConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("headers")
+          .addThriftExtension<HeaderReadingExtension>(&seen, &ran));
+  server.start();
+
+  EXPECT_EQ(
+      addRoundTripWithHeader(server.getAddress(), "x-client-header", "abc"),
+      42);
+  EXPECT_TRUE(ran.load());
+  EXPECT_EQ(seen, "abc");
+}
+
+// With the header handler off there is nowhere for the extension to read
+// headers from, so the server refuses the module outright rather than let it
+// run against headers it will never see.
+TEST(FastThriftServerExtensionTest, HeaderExtensionRejectedWithHeadersOff) {
+  auto handler = std::make_shared<TestHandler>();
+  std::string seen;
+  std::atomic<bool> ran{false};
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+
+  EXPECT_THROW(
+      server.addModule(
+          ftt::FastServerModule("headers")
+              .addThriftExtension<HeaderReadingExtension>(&seen, &ran)),
+      std::logic_error);
+}
+
+// Stamps a response header on the way out, then reads it straight back. The
+// read-back is what pins that the mutator and the view address the same place.
+struct ResponseHeaderExtension {
+  static constexpr bool kUsesHeaders = true;
+
+  std::string* readBack{nullptr};
+
+  void onResponse(ftt::ThriftResponseMutator& response) noexcept {
+    response.setHeader("x-server-header", "xyz");
+    if (const auto* value = response.header("x-server-header")) {
+      *readBack = *value;
+    }
+  }
+};
+
+// Drives one `add(7, 35)` RPC and reports the response header the client saw.
+//
+// Synchronous, on an EventBase nothing else is looping: the blocking form is
+// the one that projects response headers back into the caller's RpcOptions,
+// where semifuture_ drops them with the ClientReceiveState.
+std::string addRoundTripReadingHeader(
+    const folly::SocketAddress& addr, const std::string& key) {
+  folly::EventBase evb;
+  auto channel = apache::thrift::RocketClientChannel::newChannel(
+      folly::AsyncSocket::newSocket(&evb, addr));
+  apache::thrift::Client<integration::FastThriftServer> client(
+      std::move(channel));
+
+  apache::thrift::RpcOptions options;
+  EXPECT_EQ(client.sync_add(options, 7, 35), 42);
+
+  const auto& headers = options.getReadHeaders();
+  const auto it = headers.find(key);
+  return it == headers.end() ? std::string{} : it->second;
+}
+
+// A response header an extension sets on the per-request context still reaches
+// the wire: the context is drained onto the outgoing metadata by the request
+// context handler, which sits downstream of every extension on the write path.
+TEST(FastThriftServerExtensionTest, ExtensionResponseHeaderReachesClient) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  std::string readBack;
+
+  ftt::FastThriftServer server(makeHeadersConfig());
+  server.setInterface(handler);
+  server.addModule(
+      ftt::FastServerModule("response-headers")
+          .addThriftExtension<ResponseHeaderExtension>(&readBack));
+  server.start();
+
+  EXPECT_EQ(
+      addRoundTripReadingHeader(server.getAddress(), "x-server-header"), "xyz");
+  EXPECT_EQ(readBack, "xyz");
+}
+
 // An observer extension registered via addThriftExtension is spliced into every
 // per-connection thrift pipeline and sees the inbound request and the outbound
 // response of a real RPC without disturbing it.
@@ -1670,7 +1835,7 @@ TEST(FastThriftServerExtensionTest, ModifierRejectionShortCircuitsService) {
   auto handler = std::make_shared<TestHandler>();
   std::atomic<int> rejections{0};
 
-  ftt::FastThriftServer server(makeLoopbackConfig());
+  ftt::FastThriftServer server(makeHeadersConfig());
   server.setInterface(handler);
   server.addModule(
       ftt::FastServerModule("reject").addThriftExtension<RejectingExtension>(

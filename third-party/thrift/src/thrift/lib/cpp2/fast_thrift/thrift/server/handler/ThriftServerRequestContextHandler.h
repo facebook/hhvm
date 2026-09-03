@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -38,9 +39,15 @@ namespace apache::thrift::fast_thrift::thrift {
  * (ConnectionContextHandler, headers handler, etc.) populate the remaining
  * fields on the per-request context.
  *
+ * Outbound it does the closing half: hands the response headers accumulated on
+ * that context to the outgoing metadata. The handler that opens the context
+ * also drains it, and this is the last point on the write path that still can
+ * — everything nearer the wire is serializing.
+ *
  * Must sit upstream of any handler that wants to write into the request's
  * context (i.e. between ThriftServerTransportAdapter and any handler that
- * sets fields on ThriftRequestContext).
+ * sets fields on ThriftRequestContext). Symmetrically, every handler and
+ * extension that contributes a response header must sit downstream of it.
  */
 template <typename Context>
 class ThriftServerRequestContextHandler {
@@ -79,9 +86,10 @@ class ThriftServerRequestContextHandler {
 
   void onPipelineActive(Context& /*ctx*/) noexcept {}
 
-  // OutboundHandler — pure pass-through.
+  // OutboundHandler
   channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
+    attachResponseHeaders(msg.template get<ThriftServerResponseMessage>());
     return ctx.fireWrite(std::move(msg));
   }
 

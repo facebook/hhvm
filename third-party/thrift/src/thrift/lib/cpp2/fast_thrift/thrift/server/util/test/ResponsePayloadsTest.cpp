@@ -75,6 +75,25 @@ TEST(ResponsePayloadsTest, NoHandlerHeadersLeavesOtherMetadataUnset) {
   EXPECT_FALSE(metadataOf(message).otherMetadata().has_value());
 }
 
+// The context's headers join what a metadata producer already put there rather
+// than replacing the field wholesale, and win on a shared key.
+TEST(ResponsePayloadsTest, HandlerSetHeadersMergeWithExistingMetadata) {
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  requestContext->setResponseHeader("shard", "42");
+  requestContext->setResponseHeader("tier", "primary");
+  auto message = makeResponseWithContext(std::move(requestContext));
+  message.payload.get<ThriftInitialResponsePayload>()
+      .metadata->otherMetadata()
+      .ensure() = {{"tier", "stale"}, {"origin", "framework"}};
+
+  attachResponseHeaders(message);
+
+  const ThriftRequestContext::HeaderMap expected{
+      {"shard", "42"}, {"tier", "primary"}, {"origin", "framework"}};
+  ASSERT_TRUE(metadataOf(message).otherMetadata().has_value());
+  EXPECT_EQ(*metadataOf(message).otherMetadata(), expected);
+}
+
 // Headers are handed over, not copied — a second response built from the same
 // context (there is none in practice, but the contract should be explicit)
 // must not resend them.

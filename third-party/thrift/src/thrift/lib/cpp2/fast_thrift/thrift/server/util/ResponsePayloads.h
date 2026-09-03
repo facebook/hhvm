@@ -50,6 +50,10 @@ namespace apache::thrift::fast_thrift::thrift {
 // wire when the call ends up failing. Rocket ERROR frames have no
 // ResponseRpcMetadata to put them on and are skipped.
 //
+// The context's headers win over anything already on the metadata, but do not
+// erase it: a metadata producer and a handler can each contribute keys. The
+// overwhelmingly common empty-metadata case still moves the map wholesale.
+//
 // Handlers that set no header (the overwhelmingly common case) pay one
 // predictable branch and never touch the map.
 inline void attachResponseHeaders(

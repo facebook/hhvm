@@ -79,6 +79,27 @@ ThriftServerRequestMessage makeRequestWithMetadata(
   return req;
 }
 
+// Outbound message as the tail adapter emits it: typed metadata plus the
+// originating context, whose response headers are still on the context.
+ThriftServerResponseMessage makeResponseWithHeaders(
+    std::unique_ptr<ThriftRequestContext> requestContext) {
+  ThriftServerResponseMessage resp;
+  resp.requestContext = std::move(requestContext);
+  resp.payload =
+      ThriftServerOutboundPayloadVariant{ThriftInitialResponsePayload{
+          .data = folly::IOBuf::copyBuffer("body"),
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
+          .streamId = 7}};
+  return resp;
+}
+
+const apache::thrift::ResponseRpcMetadata& writtenMetadata(
+    const TypeErasedBox& box) {
+  return *box.get<ThriftServerResponseMessage>()
+              .payload.get<ThriftInitialResponsePayload>()
+              .metadata;
+}
+
 } // namespace
 
 TEST(
@@ -182,6 +203,44 @@ TEST(
   auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
   ASSERT_NE(forwarded.requestContext, nullptr);
   EXPECT_TRUE(forwarded.requestContext->getMethodName().empty());
+}
+
+// The closing half of the handler's job: response headers accumulated on the
+// context reach the outgoing metadata on the way out. Everything upstream of
+// here writes them to the context and nowhere else.
+TEST(ThriftServerRequestContextHandlerTest, DrainsResponseHeadersOnWrite) {
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  requestContext->setResponseHeader("shard", "42");
+
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onWrite(
+          ctx,
+          erase_and_box(makeResponseWithHeaders(std::move(requestContext)))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.written.size(), 1);
+  const ThriftRequestContext::HeaderMap expected{{"shard", "42"}};
+  const auto& metadata = writtenMetadata(ctx.written.front());
+  ASSERT_TRUE(metadata.otherMetadata().has_value());
+  EXPECT_EQ(*metadata.otherMetadata(), expected);
+}
+
+// A response with no per-request context behind it — a framework-generated
+// error, say — still goes out untouched.
+TEST(ThriftServerRequestContextHandlerTest, WriteWithoutContextIsPassThrough) {
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onWrite(ctx, erase_and_box(makeResponseWithHeaders(nullptr))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.written.size(), 1);
+  EXPECT_FALSE(
+      writtenMetadata(ctx.written.front()).otherMetadata().has_value());
 }
 
 TEST(ThriftServerRequestContextHandlerTest, ForwardsExceptions) {

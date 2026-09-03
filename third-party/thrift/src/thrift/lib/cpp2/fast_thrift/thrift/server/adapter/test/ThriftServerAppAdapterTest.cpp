@@ -525,22 +525,26 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
   EXPECT_EQ(capturedStreamId, 42u);
 }
 
-// The write funnel is where handler-set response headers are merged onto the
-// outgoing metadata, so every completion path inherits it. Without this, the
-// merge could be silently absent even though attachResponseHeaders itself
-// works.
-TEST_F(ThriftServerAppAdapterTest, WriteResponseMergesHandlerSetHeaders) {
+// Handler-set response headers are merged onto the outgoing metadata further
+// down the write path, by the handler that created the context — so what the
+// adapter owes is the context itself, still carrying its headers, on every
+// completion path. Dropping it here would strip the headers with no merge site
+// left to notice.
+TEST_F(ThriftServerAppAdapterTest, WriteResponseForwardsHeaderBearingContext) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
-  std::optional<ThriftRequestContext::HeaderMap> capturedHeaders;
+  std::optional<std::string> forwardedHeader;
   auto built = buildPipeline(
       adapter.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& box) {
         auto& resp = box.get<ThriftServerResponseMessage>();
-        const auto& metadata =
-            *resp.payload.get<ThriftInitialResponsePayload>().metadata;
-        capturedHeaders = metadata.otherMetadata().to_optional();
+        if (resp.requestContext != nullptr) {
+          if (const auto* value =
+                  resp.requestContext->getResponseHeader("shard")) {
+            forwardedHeader = *value;
+          }
+        }
         return Result::Success;
       });
 
@@ -556,9 +560,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseMergesHandlerSetHeaders) {
     adapter->writeResponse(std::move(message));
   });
 
-  const ThriftRequestContext::HeaderMap expected{{"shard", "42"}};
-  ASSERT_TRUE(capturedHeaders.has_value());
-  EXPECT_EQ(*capturedHeaders, expected);
+  EXPECT_EQ(forwardedHeader, "42");
 }
 
 // =============================================================================

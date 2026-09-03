@@ -76,6 +76,13 @@ class ThriftRequestContext {
   // not wired or the request carried no custom headers.
   void setHeaders(HeaderMap headers) noexcept { headers_ = std::move(headers); }
 
+  // Adds to (or overwrites) a single inbound header. Used by extensions
+  // injecting a header for the service to read; the bulk setter above is the
+  // one the headers handler uses to move the client's map in wholesale.
+  void setHeader(std::string key, std::string value) {
+    headers_[std::move(key)] = std::move(value);
+  }
+
   const HeaderMap& getHeaders() const noexcept { return headers_; }
 
   // Returns a pointer to the header value for `key`, or nullptr if absent.
@@ -96,6 +103,14 @@ class ThriftRequestContext {
   // the wire for them and drops them.
   void setResponseHeader(std::string key, std::string value) {
     writeHeaders_[std::move(key)] = std::move(value);
+  }
+
+  // Only reports what is still on the context. Once the response has been
+  // handed its headers this reads empty, so it answers "what will this
+  // response carry", not "what did it carry".
+  const std::string* getResponseHeader(std::string_view key) const noexcept {
+    auto it = writeHeaders_.find(key);
+    return it == writeHeaders_.end() ? nullptr : &it->second;
   }
 
   bool hasResponseHeaders() const noexcept { return !writeHeaders_.empty(); }

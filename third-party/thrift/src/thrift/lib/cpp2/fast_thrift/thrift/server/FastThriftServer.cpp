@@ -197,6 +197,16 @@ void FastThriftServer::addModule(FastServerModule module) {
             "extension, which requires enableRequestContext",
             module.name()));
   }
+  // Same posture for headers: they are reachable only through the per-request
+  // context, and only this setting puts them there. An extension that gates on
+  // a header it never receives would admit everything.
+  if (module.requiresHeaders() && !config_.enableRequestHeaders) {
+    throw std::logic_error(
+        fmt::format(
+            "FastThriftServer::addModule: module '{}' registers an extension "
+            "that uses headers, which requires enableRequestHeaders",
+            module.name()));
+  }
   // Two independent things pausing and resuming the same connection's reads,
   // with nothing arbitrating between them: WriteBufferBackpressureHandler
   // resumes as soon as its own buffer drains, which would lift a pause the

@@ -346,8 +346,12 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       << "enableRequestHeaders requires enableRequestContext; the request "
          "headers handler is skipped while enableRequestContext is off";
   if (config_.enableRequestContext) {
+    // Duplex: inbound it creates the per-request context, outbound it hands
+    // that context's response headers to the outgoing metadata. Sitting
+    // closest to the head on the write path makes it the last contributor
+    // downstream of every handler and extension that can add one.
     thriftPipelineBuilder
-        .template addNextInbound<ReqCtxHandler>(
+        .template addNextDuplex<ReqCtxHandler>(
             thrift_server_request_context_handler_tag)
         .template addNextInbound<ConnCtxHandler>(
             thrift_server_connection_context_handler_tag,

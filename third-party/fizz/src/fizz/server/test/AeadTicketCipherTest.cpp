@@ -349,7 +349,7 @@ TEST_F(AeadTicketCipherTest, TestUnsetTicketSecrets) {
 TEST_F(AeadTicketCipherTest, TestSetTicketSecretsTooShort) {
   folly::StringPiece tooShort{"short"};
   std::vector<folly::ByteRange> ticketSecrets{{tooShort}};
-  EXPECT_FALSE(cipher_.setTicketSecrets(std::move(ticketSecrets)));
+  EXPECT_FALSE(cipher_.setTicketSecrets(ticketSecrets));
   checkUnsetEncrypt();
 }
 } // namespace test

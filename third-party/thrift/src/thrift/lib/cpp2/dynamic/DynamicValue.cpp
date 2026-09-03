@@ -238,6 +238,13 @@ int32_t DynamicValue::asEnum() const& {
   return datum_.as<detail::Datum::Kind::I32>();
 }
 
+int32_t& DynamicValue::asEnum() & {
+  if (type_.kind() != type_system::TypeRef::Kind::ENUM) {
+    throw std::runtime_error("Value is not an enum");
+  }
+  return datum_.as<detail::Datum::Kind::I32>();
+}
+
 const String& DynamicValue::asString() const& {
   return datum_.as<detail::Datum::Kind::String>();
 }

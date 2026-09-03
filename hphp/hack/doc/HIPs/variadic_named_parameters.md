@@ -78,16 +78,13 @@ foo3(n=2, a=3); // illegal
 ```
 Subtyping on function types is as follows. Given two function types F1 and F2, for F1 to be a subtype of F2, it is necessary that for every name `n`,
 
-1. if F2 *requires* a named parameter `n` of type `t2` then F1 must also require a named parameter of type `t1` with `t2<:t1`, and
+1. if F1 *requires* `n` of type `t1` then F2 must also require `n` of type `t2` with `t2<:t1`, and
 
-2. if F2 *allows* a named parameter `n` of type `t2` then F1  must also allow a named parameter of type `t1` with `t2<:t1`, and
-
-3. if F2 *disallows* a named parameter `n` then F1 must also disallow a named parameter `n`.
+2. if F2 *accepts* `n` of type `t2` then F1  must also accept `n` of type `t1` with `t2<:t1`.
 
 Here,
-* F *requires* a named parameter `n` of type `t` if it declares `named t $n`.
-* F *allows* a named parameter `n` of type `t` if it declares `optional named t $n` or `named t $n` or `named t...`.
-* F *disallows* a named parameter `n` if it does not declare any named parameter.
+* F *requires* `n` of type `t` if it declares `named t $n`.
+* F *accepts* `n` of type `t` if it declares `optional named t $n` or `named t $n` or has no `named` parameter `$n` but does declare `named t...`.
 
 Another way of viewing subtyping is by elaboration to shapes: translate named parameters to a shape type, with required named parameters translated to required shape fields, optional named parameters translated to optional shape fields, and variadic named parameter translated to a typed open shape, e.g. `(function(named int $x, optional named string $y, named arraykey...):void)` becomes `(function(shape('x' => int, ?'y' => string, arraykey...)):void)`.
 

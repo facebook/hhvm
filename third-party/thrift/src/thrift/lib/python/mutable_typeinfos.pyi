@@ -16,17 +16,23 @@
 
 import typing
 
+from thrift.python.types import AnyTypeInfo
+
 class MutableStructTypeInfo:
     def __init__(self, klass: typing.Type[typing.Any]) -> None: ...
 
 class MutableListTypeInfo:
     def __init__(self, val_info: object) -> None: ...
+    def get_val_info(self) -> AnyOrMutableTypeInfo: ...
 
 class MutableSetTypeInfo:
     def __init__(self, val_info: object) -> None: ...
+    def get_val_info(self) -> AnyOrMutableTypeInfo: ...
 
 class MutableMapTypeInfo:
     def __init__(self, key_info: object, val_info: object) -> None: ...
+    def get_key_info(self) -> AnyOrMutableTypeInfo: ...
+    def get_val_info(self) -> AnyOrMutableTypeInfo: ...
 
 AnyMutableTypeInfo = typing.Union[
     MutableStructTypeInfo,
@@ -34,3 +40,5 @@ AnyMutableTypeInfo = typing.Union[
     MutableSetTypeInfo,
     MutableMapTypeInfo,
 ]
+
+AnyOrMutableTypeInfo = typing.Union[AnyTypeInfo, AnyMutableTypeInfo]

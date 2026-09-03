@@ -139,6 +139,7 @@ run_hh_oxidize \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
+  hphp/hack/src/deps/typing_deps_types.ml                                     \
   hphp/hack/src/diagnostics/explanation.ml                                         \
   hphp/hack/src/diagnostics/user_diagnostic.ml                                          \
   hphp/hack/src/diagnostics/diagnostics.ml                                              \

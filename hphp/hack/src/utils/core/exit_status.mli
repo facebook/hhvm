@@ -49,6 +49,7 @@ type t =
   | Edenfs_watcher_lost_changes
   | Distc_failed
   | File_provider_stale
+  | Depgraph_unavailable
   | Hhconfig_deleted
   | Hhconfig_changed
   | Package_config_changed

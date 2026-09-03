@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::VecDeque;
+use std::io::ErrorKind;
 use std::sync::OnceLock;
 
 use dep_graph_delta::DepGraphDelta;
@@ -21,18 +22,24 @@ use parking_lot::RwLockWriteGuard;
 use rpds::HashTrieSet;
 use typing_deps_hash::DepType;
 
+use crate::DepGraphLoadError;
 use crate::DepSet;
 use crate::RawTypingDepsMode;
 use crate::TypingDepsMode;
+
+enum BaseDepGraph<B> {
+    Uninitialized,
+    Loaded(Option<B>),
+}
 
 pub struct DepGraphWithDelta<B: BaseDepgraphTrait> {
     /// A structure wrapping the memory-mapped dependency graph.
     /// Each worker will itself lazily (or eagerly upon request)
     /// open a memory-mapping to the dependency graph.
     ///
-    /// It's an option, because custom mode might be enabled without
-    /// an existing saved-state.
-    base: Option<B>,
+    /// `Loaded(None)` means that custom mode is enabled without an existing
+    /// saved state, while `Uninitialized` means no load has been attempted.
+    base: BaseDepGraph<B>,
     /// The dependency graph delta.
     ///
     /// Even though this is only used in a single-threaded context (from OCaml)
@@ -42,13 +49,19 @@ pub struct DepGraphWithDelta<B: BaseDepgraphTrait> {
 
 impl<B: BaseDepgraphTrait> Default for DepGraphWithDelta<B> {
     fn default() -> Self {
-        Self::new(None, DepGraphDelta::default())
+        Self {
+            base: BaseDepGraph::Uninitialized,
+            delta: DepGraphDelta::default(),
+        }
     }
 }
 
 impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
     pub fn new(base: Option<B>, delta: DepGraphDelta) -> Self {
-        Self { base, delta }
+        Self {
+            base: BaseDepGraph::Loaded(base),
+            delta,
+        }
     }
 
     pub fn delta(&self) -> &DepGraphDelta {
@@ -60,7 +73,14 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
     }
 
     pub fn base(&self) -> Option<&B> {
-        self.base.as_ref()
+        match &self.base {
+            BaseDepGraph::Uninitialized => None,
+            BaseDepGraph::Loaded(base) => base.as_ref(),
+        }
+    }
+
+    fn is_base_loaded(&self) -> bool {
+        matches!(self.base, BaseDepGraph::Loaded(_))
     }
 
     /// Iterates over all dependents of a dependency, with possibly duplicate dependents.
@@ -68,7 +88,8 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
     where
         F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
     {
-        let Self { base, delta } = self;
+        let Self { delta, .. } = self;
+        let base = self.base();
         let HashSetDelta { added, removed } = delta.get(dep);
         let mut added_iter = added
             .map(|s| s.iter().copied())
@@ -84,7 +105,8 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
     }
 
     pub fn has_edge(&self, dependent: Dep, dependency: Dep) -> bool {
-        let Self { base, delta } = self;
+        let Self { delta, .. } = self;
+        let base = self.base();
         let HashSetDelta { added, removed } = delta.get(dependency);
         added.is_some_and(|added| added.contains(&dependent))
             || (base
@@ -249,39 +271,23 @@ impl DepGraphWithDelta<DepGraph> {
     ///
     /// The mode is only used on the first call, to establish some global state, and
     /// then ignored for future calls.
-    fn load_base(&mut self, mode: RawTypingDepsMode) -> Result<(), String> {
-        if self.base.is_none() {
-            self.base = Self::base_dep_graph_from_mode(mode)?;
+    fn load_base(&mut self, mode: TypingDepsMode) -> Result<(), DepGraphLoadError> {
+        if !self.is_base_loaded() {
+            self.base = BaseDepGraph::Loaded(Self::base_dep_graph_from_mode(mode)?);
         }
 
         Ok(())
     }
 
     /// Override the loaded dep graph.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the graph is not loaded, and custom mode was not enabled.
-    ///
-    /// Panics if the graph is not yet loaded, and opening
-    /// the graph results in an error.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    pub fn replace_dep_graph(&mut self, mode: RawTypingDepsMode) -> Result<(), String> {
-        self.base = Self::base_dep_graph_from_mode(mode)?;
+    pub fn replace_dep_graph(&mut self, mode: TypingDepsMode) -> Result<(), DepGraphLoadError> {
+        self.base = BaseDepGraph::Loaded(Self::base_dep_graph_from_mode(mode)?);
         Ok(())
     }
 
-    fn base_dep_graph_from_mode(mode: RawTypingDepsMode) -> Result<Option<DepGraph>, String> {
-        // # Safety
-        //
-        // The pointer to the dependency graph mode should still be pointing
-        // to a valid OCaml object.
-        let mode = unsafe { mode.to_rust().unwrap() };
-
+    fn base_dep_graph_from_mode(
+        mode: TypingDepsMode,
+    ) -> Result<Option<DepGraph>, DepGraphLoadError> {
         match mode {
             TypingDepsMode::InMemoryMode(None)
             | TypingDepsMode::SaveToDiskMode {
@@ -300,8 +306,15 @@ impl DepGraphWithDelta<DepGraph> {
             } => {
                 // We are opening and intializing the dep graph while holding onto the mutex...
                 // Which typically isn't great, but since ocaml is single threaded, it's ok.
-                let depgraph = DepGraph::from_path(depgraph_fn)
-                    .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
+                let depgraph = DepGraph::from_path(&depgraph_fn).map_err(|error| {
+                    if error.kind() == ErrorKind::NotFound {
+                        DepGraphLoadError::DepgraphNotFound(depgraph_fn.clone())
+                    } else {
+                        DepGraphLoadError::DepgraphOpenError(format!(
+                            "could not open dep graph file {depgraph_fn:?}: {error}"
+                        ))
+                    }
+                })?;
                 Ok(Some(depgraph))
             }
         }
@@ -324,6 +337,14 @@ impl LockedDepgraphWithDelta {
             c.get_or_init(DepGraphWithDelta::default);
             c.get_mut().unwrap()
         })
+    }
+
+    fn mode_from_raw(mode: RawTypingDepsMode) -> Result<TypingDepsMode, DepGraphLoadError> {
+        // SAFETY: Callers invoke this while the OCaml runtime is interrupted by
+        // the FFI call which supplied `mode`, so the pointed-to value cannot
+        // move or be modified during conversion.
+        unsafe { mode.to_rust() }
+            .map_err(|error| DepGraphLoadError::DepgraphInvalidMode(format!("{error:?}")))
     }
 
     /// Locks the depgraph delta for reading, which also maintains a lock on the depgraph
@@ -355,9 +376,9 @@ impl LockedDepgraphWithDelta {
     pub fn read(
         &self,
         mode: RawTypingDepsMode,
-    ) -> MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>> {
-        self.load_base(mode).unwrap();
-        self.read_init()
+    ) -> Result<MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>>, DepGraphLoadError> {
+        self.load(mode)?;
+        Ok(self.read_init())
     }
 
     /// Locks the depgraph for writing.
@@ -372,9 +393,17 @@ impl LockedDepgraphWithDelta {
     pub fn write(
         &self,
         mode: RawTypingDepsMode,
-    ) -> MappedRwLockWriteGuard<'_, DepGraphWithDelta<DepGraph>> {
-        self.load_base(mode).unwrap();
-        self.write_init()
+    ) -> Result<MappedRwLockWriteGuard<'_, DepGraphWithDelta<DepGraph>>, DepGraphLoadError> {
+        self.load(mode)?;
+        Ok(self.write_init())
+    }
+
+    /// Return the already-loaded graph without attempting any I/O.
+    pub fn read_loaded(&self) -> Option<MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>>> {
+        RwLockReadGuard::try_map(self.0.read(), |cell| {
+            cell.get().filter(|graph| graph.is_base_loaded())
+        })
+        .ok()
     }
 
     /// Load the graph using the given mode.
@@ -386,8 +415,22 @@ impl LockedDepgraphWithDelta {
     ///
     /// The pointer to the dependency graph mode should still be pointing
     /// to a valid OCaml object.
-    fn load_base(&self, mode: RawTypingDepsMode) -> Result<(), String> {
+    pub fn load(&self, mode: RawTypingDepsMode) -> Result<(), DepGraphLoadError> {
+        self.load_mode(Self::mode_from_raw(mode)?)
+    }
+
+    /// Replace the loaded graph using the given mode without first attempting
+    /// to load the previous graph.
+    pub fn replace(&self, mode: RawTypingDepsMode) -> Result<(), DepGraphLoadError> {
+        self.replace_mode(Self::mode_from_raw(mode)?)
+    }
+
+    fn load_mode(&self, mode: TypingDepsMode) -> Result<(), DepGraphLoadError> {
         self.write_init().load_base(mode)
+    }
+
+    fn replace_mode(&self, mode: TypingDepsMode) -> Result<(), DepGraphLoadError> {
+        self.write_init().replace_dep_graph(mode)
     }
 }
 
@@ -395,10 +438,67 @@ impl LockedDepgraphWithDelta {
 mod tests {
     use std::collections::HashMap;
     use std::collections::HashSet;
+    use std::path::Path;
+    use std::path::PathBuf;
+    use std::time::SystemTime;
+    use std::time::UNIX_EPOCH;
 
+    use depgraph_reader::compress::UncompressedHeader;
     use itertools::Itertools;
 
     use super::*;
+
+    fn fresh_depgraph_path() -> PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("current time should be after the Unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "hack_missing_lazy_depgraph_{}_{}",
+            std::process::id(),
+            unique
+        ))
+    }
+
+    fn write_empty_depgraph(path: &Path) {
+        let mut bytes = Vec::with_capacity(std::mem::size_of::<UncompressedHeader>());
+        bytes.extend_from_slice(&UncompressedHeader::MAGIC);
+        bytes.extend_from_slice(&UncompressedHeader::LATEST_VERSION.to_ne_bytes());
+        bytes.extend_from_slice(&0_u64.to_ne_bytes());
+        bytes.push(0);
+        bytes.extend_from_slice(&[0; 7]);
+        assert_eq!(bytes.len(), std::mem::size_of::<UncompressedHeader>());
+        std::fs::write(path, bytes).expect("should write an empty dependency graph");
+    }
+
+    #[test]
+    fn test_missing_lazy_depgraph_is_recoverable() {
+        let path = fresh_depgraph_path();
+        let path_string = path.to_string_lossy().into_owned();
+        write_empty_depgraph(&path);
+        std::fs::remove_file(&path).expect("should delete the dependency graph before loading");
+
+        let graph = LockedDepgraphWithDelta::new();
+        let error = graph
+            .load_mode(TypingDepsMode::InMemoryMode(Some(path_string.clone())))
+            .expect_err("loading a deleted dependency graph should fail");
+        assert_eq!(
+            error,
+            DepGraphLoadError::DepgraphNotFound(path_string.clone())
+        );
+        assert!(graph.read_loaded().is_none());
+
+        write_empty_depgraph(&path);
+        graph
+            .load_mode(TypingDepsMode::InMemoryMode(Some(path_string)))
+            .expect("retrying after recreating the dependency graph should succeed");
+        std::fs::remove_file(&path).expect("should delete the dependency graph after loading");
+
+        let loaded_graph = graph
+            .read_loaded()
+            .expect("the memory-mapped dependency graph should remain loaded after unlink");
+        assert!(!loaded_graph.has_edge(Dep::new(1), Dep::new(2)));
+    }
 
     pub struct SimpleDepGraph {
         graph: HashMap<Dep, HashSet<Dep>>,

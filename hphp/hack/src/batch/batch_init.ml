@@ -19,6 +19,10 @@ let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
     Exit.exit Exit_status.Decl_heap_elems_bug
   | File_provider.File_provider_stale ->
     Exit.exit Exit_status.File_provider_stale
+  | Typing_deps.Depgraph_unavailable error ->
+    let msg = Typing_deps.depgraph_load_error_to_string error in
+    Hh_logger.log "Dependency graph unavailable: %s" msg;
+    Exit.exit ~msg Exit_status.Depgraph_unavailable
   | Decl_defs.Decl_not_found x ->
     Hh_logger.log "Decl_not_found %s" x;
     Exit.exit Exit_status.Decl_not_found

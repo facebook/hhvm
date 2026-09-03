@@ -220,6 +220,16 @@ type dep_edge
 
 type dep_edges
 
+type depgraph_load_error = Typing_deps_types.depgraph_load_error =
+  | Depgraph_not_found of string
+  | Depgraph_open_error of string
+  | Depgraph_invalid_mode of string
+  | Depgraph_not_loaded
+
+exception Depgraph_unavailable of depgraph_load_error
+
+val depgraph_load_error_to_string : depgraph_load_error -> string
+
 val worker_id : int option ref
 
 val trace : bool ref

@@ -1304,6 +1304,7 @@ dependencies = [
  "itertools 0.15.0",
  "ocamlrep",
  "ocamlrep_custom",
+ "oxidized",
  "parking_lot",
  "rpds",
  "typing_deps_hash",

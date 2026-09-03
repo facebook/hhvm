@@ -34,6 +34,9 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
        can restart a full init cycle. *)
     let e = Exception.wrap exn in
     Exception.reraise e
+  | Typing_deps.Depgraph_unavailable _ as exn ->
+    let e = Exception.wrap exn in
+    Exception.reraise e
   | exn ->
     let e = Exception.wrap exn in
     Diagnostics.exception_occurred pos e;

@@ -479,6 +479,32 @@ type dep_edge = {
   idependency: Dep.t;  (** The node the dependent depends upon *)
 }
 
+type depgraph_load_error = Typing_deps_types.depgraph_load_error =
+  | Depgraph_not_found of string
+  | Depgraph_open_error of string
+  | Depgraph_invalid_mode of string
+  | Depgraph_not_loaded
+
+exception Depgraph_unavailable of depgraph_load_error
+
+let depgraph_load_error_to_string = function
+  | Depgraph_not_found path ->
+    Printf.sprintf "dependency graph not found: %s" path
+  | Depgraph_open_error message ->
+    Printf.sprintf "could not open dependency graph: %s" message
+  | Depgraph_invalid_mode message ->
+    Printf.sprintf "invalid dependency graph mode: %s" message
+  | Depgraph_not_loaded -> "dependency graph was not loaded"
+
+let () =
+  Exception.register_printer (function
+      | Depgraph_unavailable error ->
+        Some
+          (Printf.sprintf
+             "Typing_deps.Depgraph_unavailable(%s)"
+             (depgraph_load_error_to_string error))
+      | _ -> None)
+
 module DepEdgeSet = Stdlib.Set.Make (struct
   type t = dep_edge
 
@@ -504,33 +530,90 @@ module CustomGraph = struct
     allow_reads_ref := flag;
     prev
 
-  external hh_custom_dep_graph_replace : Mode.t -> unit
-    = "hh_custom_dep_graph_replace"
-    [@@noalloc]
+  let get_or_raise = function
+    | Ok value -> value
+    | Error error -> raise (Depgraph_unavailable error)
 
-  external depgraph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
+  external load_ffi : Mode.t -> (unit, depgraph_load_error) result
+    = "hh_custom_dep_graph_load"
+
+  external replace_ffi : Mode.t -> (unit, depgraph_load_error) result
+    = "hh_custom_dep_graph_replace"
+
+  type depgraph_has_edge_result =
+    | Edge_absent
+    | Edge_present
+    | Edge_not_loaded
+    | Edge_internal_error
+  [@@warning "-37"]
+
+  external depgraph_has_edge_ffi : Dep.t -> Dep.t -> depgraph_has_edge_result
     = "hh_depgraph_has_edge"
     [@@noalloc]
 
-  external get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
+  let ensure_loaded mode = load_ffi mode |> get_or_raise
+
+  let replace mode = replace_ffi mode |> get_or_raise
+
+  let depgraph_has_edge dependent dependency =
+    match depgraph_has_edge_ffi dependent dependency with
+    | Edge_absent -> false
+    | Edge_present -> true
+    | Edge_not_loaded -> raise (Depgraph_unavailable Depgraph_not_loaded)
+    | Edge_internal_error ->
+      raise
+        (Depgraph_unavailable
+           (Depgraph_open_error
+              "internal error while reading the loaded dependency graph"))
+
+  external get_ideps_from_hash_ffi :
+    Mode.t -> Dep.t -> (DepSet.t, depgraph_load_error) result
     = "hh_custom_dep_graph_get_ideps_from_hash"
 
-  external add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
+  let get_ideps_from_hash mode dep =
+    get_ideps_from_hash_ffi mode dep |> get_or_raise
+
+  external add_typing_deps_ffi :
+    Mode.t -> DepSet.t -> (DepSet.t, depgraph_load_error) result
     = "hh_custom_dep_graph_add_typing_deps"
 
-  external add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
+  let add_typing_deps mode deps = add_typing_deps_ffi mode deps |> get_or_raise
+
+  external add_extend_deps_ffi :
+    Mode.t -> DepSet.t -> (DepSet.t, depgraph_load_error) result
     = "hh_custom_dep_graph_add_extend_deps"
 
-  external get_extend_deps :
-    Mode.t -> VisitedSet.t -> Dep.t -> DepSet.t -> DepSet.t
+  let add_extend_deps mode deps = add_extend_deps_ffi mode deps |> get_or_raise
+
+  external get_extend_deps_ffi :
+    Mode.t ->
+    VisitedSet.t ->
+    Dep.t ->
+    DepSet.t ->
+    (DepSet.t, depgraph_load_error) result
     = "hh_custom_dep_graph_get_extend_deps"
 
-  external get_member_fanout :
-    Mode.t -> Dep.t -> Dep.dep_kind -> string -> DepSet.t -> DepSet.t
-    = "hh_get_member_fanout"
+  let get_extend_deps mode visited source_class acc =
+    get_extend_deps_ffi mode visited source_class acc |> get_or_raise
 
-  external get_not_subtype_fanout : Mode.t -> DepSet.t -> DepSet.t -> DepSet.t
+  external get_member_fanout_ffi :
+    Mode.t ->
+    Dep.t ->
+    Dep.dep_kind ->
+    string ->
+    DepSet.t ->
+    (DepSet.t, depgraph_load_error) result = "hh_get_member_fanout"
+
+  let get_member_fanout mode class_dep member_type member_name fanout_acc =
+    get_member_fanout_ffi mode class_dep member_type member_name fanout_acc
+    |> get_or_raise
+
+  external get_not_subtype_fanout_ffi :
+    Mode.t -> DepSet.t -> DepSet.t -> (DepSet.t, depgraph_load_error) result
     = "hh_get_not_subtype_fanout"
+
+  let get_not_subtype_fanout mode deps fanout_acc =
+    get_not_subtype_fanout_ffi mode deps fanout_acc |> get_or_raise
 
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
     = "hh_custom_dep_graph_register_discovered_dep_edge"
@@ -565,12 +648,13 @@ module CustomGraph = struct
   let filter_discovered_deps_batch mode =
     (* Empty discovered_deps_bach by checking for each edge whether it's already
      * in the dependency graph. If it is not, add it to the filtered deps batch. *)
+    if Hashtbl.length discovered_deps_batch > 0 then ensure_loaded mode;
     let s = !filtered_deps_batch in
     let s =
       Hashtbl.fold
         begin
           fun ({ idependent; idependency } as edge) () s ->
-            if not (depgraph_has_edge mode idependent idependency) then
+            if not (depgraph_has_edge idependent idependency) then
               DepEdgeSet.add edge s
             else
               s
@@ -755,11 +839,12 @@ end = struct
   (** Write to disk the dep edges which are not already in the depgraph. *)
   let filter_discovered_deps_batch ~flush mode =
     let handle = destination_file_handle mode in
+    if Hashtbl.length discovered_deps_batch > 0 then
+      CustomGraph.ensure_loaded mode;
     Hashtbl.iter
       begin
         fun { idependent; idependency } () ->
-          if not (CustomGraph.depgraph_has_edge mode idependent idependency)
-          then begin
+          if not (CustomGraph.depgraph_has_edge idependent idependency) then begin
             (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
 
             (* Write dependency. *)
@@ -887,7 +972,7 @@ let add_idep mode dependent dependency =
 
 let replace mode =
   match mode with
-  | InMemoryMode _ -> CustomGraph.hh_custom_dep_graph_replace mode
+  | InMemoryMode _ -> CustomGraph.replace mode
   | _ -> ()
 
 let dep_edges_make () : dep_edges = Some DepEdgeSet.empty

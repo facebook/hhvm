@@ -128,6 +128,7 @@ pub use r#gen::type_parameter_env;
 pub use r#gen::typechecker_options;
 pub use r#gen::typing_defs;
 pub use r#gen::typing_defs_core;
+pub use r#gen::typing_deps_types;
 pub use r#gen::typing_kinding_defs;
 pub use r#gen::typing_reason;
 pub use r#gen::typing_tyvar_occurrences;

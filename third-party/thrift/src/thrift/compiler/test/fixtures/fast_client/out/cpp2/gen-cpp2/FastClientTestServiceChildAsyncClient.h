@@ -116,7 +116,11 @@ class FastClient<::cpp2::test::FastClientTestServiceChild, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "greet",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     ::std::string _return{};

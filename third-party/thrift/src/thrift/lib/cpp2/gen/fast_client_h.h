@@ -26,6 +26,7 @@
 #include <folly/coro/Task.h>
 #include <folly/fibers/Baton.h>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
@@ -46,12 +47,18 @@ class FastClientBase {
   AppAdapter* getAppAdapter() const noexcept { return adapter_.get(); }
 
  protected:
+  // `readHeadersSink` receives the peer's custom response headers, or is null
+  // when the caller passed no RpcOptions of its own. It must never be the
+  // shared default RpcOptions: that object is process-wide, so writing to it
+  // would race across concurrent requests and leak one caller's headers into
+  // another's.
   folly::coro::Task<std::unique_ptr<folly::IOBuf>> co_sendRequestResponse(
       const apache::thrift::RpcOptions& rpcOptions,
       std::string_view methodName,
       apache::thrift::RpcKind rpcKind,
       folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
-          data) {
+          data,
+      apache::thrift::RpcOptions* readHeadersSink = nullptr) {
     if (data.hasError()) {
       co_yield folly::coro::co_error(std::move(data.error()));
     }
@@ -61,7 +68,9 @@ class FastClientBase {
     const bool cancellable = cancelToken.canBeCancelled();
 
     folly::fibers::Baton baton;
-    folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
+    folly::Expected<
+        apache::thrift::fast_thrift::thrift::client::FastResponse,
+        folly::exception_wrapper>
         response{folly::makeUnexpected(folly::exception_wrapper())};
 
     adapter_->sendRequestResponse(
@@ -71,7 +80,7 @@ class FastClientBase {
         std::move(data.value()),
         [&baton, &response](
             folly::Expected<
-                std::unique_ptr<folly::IOBuf>,
+                apache::thrift::fast_thrift::thrift::client::FastResponse,
                 folly::exception_wrapper>&& result,
             const apache::thrift::
                 RpcTransportStats& /*rpcTransportStats*/) mutable noexcept {
@@ -94,7 +103,11 @@ class FastClientBase {
       co_yield folly::coro::co_error(std::move(response.error()));
     }
 
-    co_return std::move(response.value());
+    if (readHeadersSink != nullptr && response.value().headers.has_value()) {
+      readHeadersSink->setReadHeaders(std::move(*response.value().headers));
+    }
+
+    co_return std::move(response.value().data);
   }
 
   void sendRequestResponse(
@@ -124,7 +137,7 @@ class FastClientBase {
         [clientCallback = std::move(clientCallback),
          protocolId = adapter_->getProtocolId()](
             folly::Expected<
-                std::unique_ptr<folly::IOBuf>,
+                apache::thrift::fast_thrift::thrift::client::FastResponse,
                 folly::exception_wrapper>&& result,
             const apache::thrift::RpcTransportStats&
                 rpcTransportStats) mutable noexcept {
@@ -142,8 +155,9 @@ class FastClientBase {
   static void handleCallbackResponse(
       apache::thrift::RequestClientCallback::Ptr callback,
       uint16_t protocolId,
-      folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>&&
-          result,
+      folly::Expected<
+          apache::thrift::fast_thrift::thrift::client::FastResponse,
+          folly::exception_wrapper>&& result,
       const apache::thrift::RpcTransportStats& rpcTransportStats) noexcept {
     auto* raw = callback.release();
     if (result.hasError()) {
@@ -151,12 +165,22 @@ class FastClientBase {
       return;
     }
 
+    auto& response = result.value();
+    // The callback API surfaces response headers through THeader, the only
+    // channel ClientReceiveState offers. Materialized only when the peer
+    // actually sent headers, so the common case stays allocation-free.
+    std::unique_ptr<apache::thrift::transport::THeader> header;
+    if (response.headers.has_value()) {
+      header = std::make_unique<apache::thrift::transport::THeader>();
+      header->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
+      header->setReadHeaders(std::move(*response.headers));
+    }
     raw->onResponse(
         apache::thrift::ClientReceiveState(
             protocolId,
             apache::thrift::MessageType::T_REPLY,
-            apache::thrift::SerializedResponse(std::move(result.value())),
-            nullptr,
+            apache::thrift::SerializedResponse(std::move(response.data)),
+            std::move(header),
             nullptr,
             rpcTransportStats));
   }

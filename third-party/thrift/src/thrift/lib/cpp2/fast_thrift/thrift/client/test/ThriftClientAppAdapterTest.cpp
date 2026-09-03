@@ -212,13 +212,13 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
     sendBasicRequest(
         client.adapter(),
         [&](folly::Expected<
-                std::unique_ptr<folly::IOBuf>,
+                apache::thrift::fast_thrift::thrift::client::FastResponse,
                 folly::exception_wrapper>&& result,
             const apache::thrift::RpcTransportStats&) noexcept {
           EXPECT_TRUE(result.hasValue());
           handlerCalled = true;
-          if (result.value()) {
-            capturedData = result.value()->moveToFbString().toStdString();
+          if (result.value().data) {
+            capturedData = result.value().data->moveToFbString().toStdString();
           }
         });
   });
@@ -394,7 +394,7 @@ TEST_F(
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       folly::IOBuf::copyBuffer("data"),
       [&](folly::Expected<
-              std::unique_ptr<folly::IOBuf>,
+              apache::thrift::fast_thrift::thrift::client::FastResponse,
               folly::exception_wrapper>&& result,
           const apache::thrift::RpcTransportStats&) noexcept {
         ASSERT_TRUE(result.hasError());

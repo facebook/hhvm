@@ -49,6 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerSetupHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestFastService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/TestFastServiceAsyncClient.h>
@@ -80,6 +81,10 @@ HANDLER_TAG(thrift_client_checksum_handler);
 
 // Server handler tags
 HANDLER_TAG(thrift_server_setup_handler);
+
+// Response header the test service stamps on every reply.
+constexpr std::string_view kResponseHeaderKey = "x-fast-thrift-test";
+constexpr std::string_view kResponseHeaderValue = "stamped";
 
 /**
  * ConnectCallback - Triggers transportHandler->onConnect() when the
@@ -152,9 +157,29 @@ class TestFastServiceHandler
     return true;
   }
 
+  // Every reply carries a known response header so tests can assert header
+  // propagation on both the success and the declared-exception shape. No-op
+  // when the server runs without enableRequestContext.
+  static void stampResponseHeader(ftt::ThriftRequestContext* requestContext) {
+    if (requestContext != nullptr) {
+      requestContext->setResponseHeader(
+          std::string(kResponseHeaderKey), std::string(kResponseHeaderValue));
+    }
+  }
+
+  void async_tm_throwDeclared(
+      ftt::FastHandlerCallbackPtr<void> cb,
+      std::unique_ptr<std::string> message) override {
+    stampResponseHeader(cb->requestContext());
+    TestFastException ex;
+    ex.message() = *message;
+    cb->exception(folly::make_exception_wrapper<TestFastException>(ex));
+  }
+
   void async_tm_echo(
       ftt::FastHandlerCallbackPtr<std::unique_ptr<std::string>> cb,
       std::unique_ptr<std::string> message) override {
+    stampResponseHeader(cb->requestContext());
     if (parkEcho_.exchange(false)) {
       {
         std::lock_guard<std::mutex> lock(parkedMutex_);
@@ -582,6 +607,68 @@ TEST_P(FastThriftE2ETest, ChecksumRoundTrip) {
   EXPECT_EQ(result, "checksummed");
 
   destroyFastClientOnEvb(client);
+}
+
+// The stamped header as the caller sees it, or empty when absent.
+std::string stampedReadHeader(const apache::thrift::RpcOptions& opts) {
+  const auto& headers = opts.getReadHeaders();
+  auto it = headers.find(std::string(kResponseHeaderKey));
+  return it == headers.end() ? std::string{} : it->second;
+}
+
+// A handler-set response header has to survive the move onto
+// ResponseRpcMetadata.otherMetadata, serialization, the wire, and the
+// FastClient's projection back into the caller's RpcOptions.
+TEST_P(FastThriftE2ETest, ResponseHeaderReachesClientOnSuccess) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  apache::thrift::RpcOptions opts;
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(evb, client->co_echo(opts, "hello")));
+  const auto header = stampedReadHeader(opts);
+  destroyFastClientOnEvb(client);
+
+  EXPECT_EQ(result, "hello");
+  EXPECT_EQ(header, kResponseHeaderValue);
+}
+
+// The same, on a failing call. A declared exception is still a PAYLOAD frame
+// with typed metadata, so the header belongs on it — this is the path that
+// dropped the request context entirely before it was threaded through the
+// exception cascade.
+TEST_P(FastThriftE2ETest, ResponseHeaderReachesClientOnDeclaredException) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  apache::thrift::RpcOptions opts;
+  bool threw = false;
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(
+            evb, client->co_throwDeclared(opts, "boom")));
+  } catch (const TestFastException&) {
+    threw = true;
+  }
+  const auto header = stampedReadHeader(opts);
+  destroyFastClientOnEvb(client);
+
+  EXPECT_TRUE(threw);
+  EXPECT_EQ(header, kResponseHeaderValue);
+}
+
+// A caller that passes no RpcOptions must still work: the generated code hands
+// down nullptr rather than the process-wide default options object, which
+// concurrent requests would otherwise race on.
+TEST_P(FastThriftE2ETest, ResponseHeaderWithoutRpcOptionsIsDropped) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(evb, client->co_echo("hello")));
+  destroyFastClientOnEvb(client);
+
+  EXPECT_EQ(result, "hello");
 }
 
 // Many requests in flight on a *single* connection. Every one of them

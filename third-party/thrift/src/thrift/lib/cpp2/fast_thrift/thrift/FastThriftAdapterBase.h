@@ -37,7 +37,8 @@ class FastThriftAdapterBase {
    * Handles a request-response frame: converts ERROR and unknown frame
    * types into folly::exception_wrapper. For PAYLOAD frames, deserializes
    * the response metadata, classifies declared/undeclared exceptions, and
-   * returns the response data IOBuf for the generated client to deserialize.
+   * returns the response data plus any custom response headers for the
+   * generated client to deserialize and surface.
    *
    * If the response carries a typed anyException variant (Rocket protocol
    * v10+), extracts the typed exception via the thrift Any registry using
@@ -47,9 +48,7 @@ class FastThriftAdapterBase {
    * App adapters should call this before invoking the response handler,
    * passing their negotiated protocol id.
    */
-  static folly::Expected<
-      std::unique_ptr<folly::IOBuf>,
-      folly::exception_wrapper>
+  static folly::Expected<client::FastResponse, folly::exception_wrapper>
   handleRequestResponse(ThriftResponseMessage&& response, uint16_t protocolId);
 };
 

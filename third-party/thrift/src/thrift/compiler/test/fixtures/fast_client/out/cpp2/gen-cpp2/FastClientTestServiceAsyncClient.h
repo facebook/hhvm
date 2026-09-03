@@ -159,7 +159,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "ping",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_ping(
@@ -236,7 +240,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "echo",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     ::std::string _return{};
@@ -317,7 +325,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "add",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     ::std::int32_t _return{};
@@ -396,7 +408,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "getData",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     ::cpp2::test::DataItem _return{};
@@ -477,7 +493,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
         "processData",
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        std::move(serialized));
+        std::move(serialized),
+        // Response headers go to the caller's own RpcOptions. Never to
+        // defaultRpcOptions: it is shared process-wide, so writing there
+        // would race and leak headers between unrelated requests.
+        hasRpcOptions ? rpcOptions : nullptr);
 
     auto data = std::move(response);
     bool _return{};

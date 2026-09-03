@@ -1199,14 +1199,14 @@ class IntegrationTestClient {
         std::move(data),
         [promise = std::move(promise)](
             folly::Expected<
-                std::unique_ptr<folly::IOBuf>,
+                apache::thrift::fast_thrift::thrift::client::FastResponse,
                 folly::exception_wrapper>&& result,
             const apache::thrift::
                 RpcTransportStats& /*rpcTransportStats*/) mutable noexcept {
           if (result.hasError()) {
             promise.setException(std::move(result.error()));
           } else {
-            promise.setValue(std::move(result.value()));
+            promise.setValue(std::move(result.value().data));
           }
         });
 
@@ -1492,7 +1492,7 @@ TEST_F(
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       folly::IOBuf::copyBuffer("request"),
       [&](folly::Expected<
-              std::unique_ptr<folly::IOBuf>,
+              apache::thrift::fast_thrift::thrift::client::FastResponse,
               folly::exception_wrapper>&& result,
           const apache::thrift::RpcTransportStats& stats) noexcept {
         handlerCalled = true;

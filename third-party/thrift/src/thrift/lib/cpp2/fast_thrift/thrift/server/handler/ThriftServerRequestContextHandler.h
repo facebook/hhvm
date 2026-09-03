@@ -68,12 +68,14 @@ class ThriftServerRequestContextHandler {
       return ctx.fireRead(std::move(msg));
     }
     request.requestContext = std::make_unique<ThriftRequestContext>();
-    // Copied, not moved out of the metadata: the tail adapter still dispatches
-    // on RequestRpcMetadata.name, so emptying it here would break routing.
-    const auto* metadata = request.payload.getRequestRpcMetadata();
-    if (FOLLY_LIKELY(metadata != nullptr && metadata->name().has_value())) {
+    // Copied, not moved: the context outlives the payload the name came from,
+    // and the tail adapter still dispatches on RequestRpcMetadata.name, so
+    // emptying it here would break routing.
+    if (const auto* metadata = request.payload.getRequestRpcMetadata();
+        metadata != nullptr && metadata->name().has_value()) {
+      const auto name = metadata->name()->view();
       request.requestContext->setMethodName(
-          std::string(metadata->name()->view()));
+          std::string(name.data(), name.size()));
     }
     return ctx.fireRead(std::move(msg));
   }

@@ -21,6 +21,8 @@
 #include <utility>
 
 #include <folly/SocketAddress.h>
+#include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/EventBase.h>
 
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
 
@@ -36,6 +38,8 @@ TEST(ThriftConnContextTest, DefaultsAreEmpty) {
   EXPECT_TRUE(ctx->getPeerAddress().empty());
   EXPECT_TRUE(ctx->getSecurityProtocol().empty());
   EXPECT_EQ(ctx->getPeerCertificate(), nullptr);
+  EXPECT_EQ(ctx->getTransport(), nullptr);
+  EXPECT_EQ(ctx->getClientMetadata(), nullptr);
   EXPECT_EQ(ctx->getUserData(), nullptr);
 }
 
@@ -43,11 +47,31 @@ TEST(ThriftConnContextTest, SettersAreReflectedInGetters) {
   boost::intrusive_ptr<ThriftConnContext> ctx{new ThriftConnContext()};
   folly::SocketAddress addr("127.0.0.1", 1234);
 
+  folly::EventBase evb;
+  auto socket = folly::AsyncSocket::newSocket(&evb);
+
   ctx->setPeerAddress(addr);
   ctx->setSecurityProtocol("TLS1.3");
+  ctx->setTransport(socket.get());
 
   EXPECT_EQ(ctx->getPeerAddress(), addr);
   EXPECT_EQ(ctx->getSecurityProtocol(), "TLS1.3");
+  EXPECT_EQ(ctx->getTransport(), socket.get());
+}
+
+// What the client sent about itself is kept whole, for triage to read back.
+TEST(ThriftConnContextTest, ClientMetadataIsLatchedWhole) {
+  boost::intrusive_ptr<ThriftConnContext> ctx{new ThriftConnContext()};
+
+  apache::thrift::ClientMetadata metadata;
+  metadata.hostname() = "client.host";
+  metadata.agent() = "test-agent";
+  ctx->setClientMetadata(std::move(metadata));
+
+  const auto* latched = ctx->getClientMetadata();
+  ASSERT_NE(latched, nullptr);
+  EXPECT_EQ(latched->hostname().value_or(""), "client.host");
+  EXPECT_EQ(latched->agent().value_or(""), "test-agent");
 }
 
 TEST(ThriftConnContextTest, IntrusivePtrSharesOwnership) {

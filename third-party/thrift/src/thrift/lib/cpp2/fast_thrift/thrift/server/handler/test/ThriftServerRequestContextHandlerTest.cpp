@@ -102,6 +102,48 @@ const apache::thrift::ResponseRpcMetadata& writtenMetadata(
 
 } // namespace
 
+// The context knows which method the request named, copied off the metadata
+// because the context outlives the payload that carried it.
+TEST(ThriftServerRequestContextHandlerTest, StampsTheMethodName) {
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = "Service.method";
+  ThriftServerRequestMessage req;
+  req.payload = ThriftRequestResponsePayload{
+      .data = folly::IOBuf::copyBuffer("body"),
+      .metadata = std::move(metadata)};
+
+  EXPECT_EQ(
+      handler.onRead(ctx, erase_and_box(std::move(req))), Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_EQ(forwarded.requestContext->getMethodName(), "Service.method");
+}
+
+// A request whose metadata names no method leaves the context without one,
+// rather than an empty name that reads as if it had been set.
+TEST(ThriftServerRequestContextHandlerTest, NoMethodNameLeavesItEmpty) {
+  ThriftServerRequestContextHandler<FakeContext> handler;
+  FakeContext ctx;
+
+  ThriftServerRequestMessage req;
+  req.payload = ThriftRequestResponsePayload{
+      .data = folly::IOBuf::copyBuffer("body"),
+      .metadata = std::make_unique<apache::thrift::RequestRpcMetadata>()};
+
+  EXPECT_EQ(
+      handler.onRead(ctx, erase_and_box(std::move(req))), Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_TRUE(forwarded.requestContext->getMethodName().empty());
+}
+
 TEST(
     ThriftServerRequestContextHandlerTest,
     StampsDefaultRequestContextOnInboundMessage) {

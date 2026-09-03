@@ -151,6 +151,12 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   if (config_.enableRequestContext) {
     connContext.reset(new ThriftConnContext());
     connContext->setPeerAddress(clientAddr);
+    // Non-owning. The transport is owned by the transport adapter, which
+    // ThriftServerConnection tears down after the pipeline that reads this —
+    // so it outlives every handler holding the context. Security is
+    // snapshotted separately because this is already the post-StopTLS
+    // transport when one was negotiated, and reports nothing about the peer.
+    connContext->setTransport(socket.get());
     if (peerSecurity != nullptr) {
       connContext->setPeerCertificate(peerSecurity->peerCertificate);
       connContext->setSecurityProtocol(peerSecurity->securityProtocol);

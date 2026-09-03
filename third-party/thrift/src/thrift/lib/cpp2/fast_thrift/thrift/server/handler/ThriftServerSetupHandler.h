@@ -91,6 +91,15 @@ class ThriftServerSetupHandler {
  private:
   channel_pipeline::Result answerSetup(
       Context& ctx, ConnectionSetupData& setup) noexcept {
+    // The setup is the only place the client describes itself, so latch that
+    // onto the connection before answering — whatever the answer turns out to
+    // be. Null when the server keeps no per-connection context.
+    if (setup.connContext != nullptr) {
+      if (auto metadata = setup.clientSetup.clientMetadata()) {
+        setup.connContext->setClientMetadata(*metadata);
+      }
+    }
+
     // A handler upstream already decided against this connection; its reason
     // is the answer.
     if (FOLLY_UNLIKELY(setup.reject.has_value())) {

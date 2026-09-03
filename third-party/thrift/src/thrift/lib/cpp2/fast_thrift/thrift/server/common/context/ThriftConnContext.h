@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -25,10 +26,14 @@
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
 
 #include <folly/SocketAddress.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/AsyncTransportCertificate.h>
+
+#include <folly/CppAttributes.h>
 
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -87,6 +92,32 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
     return peerCertificate_.get();
   }
 
+  // The connection's transport. Non-owning, and valid only while the
+  // connection is open — the transport outlives this context, but neither
+  // outlives the connection, so nothing may retain it.
+  //
+  // EventBase-affine: only touch it from the connection's own EventBase, which
+  // rules out a service that has been handed off to a CPU executor. Prefer the
+  // snapshotted peer certificate above, which is safe from anywhere and, after
+  // a StopTLS downgrade, is the only thing that still knows what the peer
+  // proved — by then this reports a plaintext socket.
+  const folly::AsyncTransport* getTransport() const noexcept {
+    return transport_;
+  }
+
+  // What the client said about itself in its setup: its hostname, its agent,
+  // and whatever else it chose to send. Client-supplied and unverified — good
+  // for triage, not evidence.
+  void setClientMetadata(apache::thrift::ClientMetadata metadata) noexcept {
+    clientMetadata_ = std::move(metadata);
+  }
+
+  // Null when the client sent none.
+  const apache::thrift::ClientMetadata* FOLLY_NULLABLE
+  getClientMetadata() const noexcept {
+    return clientMetadata_.has_value() ? &clientMetadata_.value() : nullptr;
+  }
+
   // Opaque per-connection slot. The deleter runs at connection close.
   //
   // There is one, so it has one owner. Anything shared between handlers, or
@@ -124,13 +155,18 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
       std::shared_ptr<const folly::AsyncTransportCertificate> cert) noexcept {
     peerCertificate_ = std::move(cert);
   }
+  void setTransport(const folly::AsyncTransport* transport) noexcept {
+    transport_ = transport;
+  }
 
  private:
   folly::SocketAddress peerAddress_{};
   std::string securityProtocol_;
   std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate_;
+  const folly::AsyncTransport* transport_{nullptr};
   rocket::TypeErasedPtr userData_{};
   detail::InternalFieldsT internalFields_;
+  std::optional<apache::thrift::ClientMetadata> clientMetadata_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

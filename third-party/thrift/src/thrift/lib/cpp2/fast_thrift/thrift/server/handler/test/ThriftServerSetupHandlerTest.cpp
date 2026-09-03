@@ -94,6 +94,20 @@ ThriftServerRequestMessage makeSetupMessage(
   return msg;
 }
 
+ThriftServerRequestMessage makeSetupMessageWithConnContext(
+    ThriftConnContext& connContext,
+    std::optional<apache::thrift::ClientMetadata> clientMetadata,
+    std::optional<SetupRejection> reject = std::nullopt) {
+  auto msg = makeSetupMessage(
+      kMinNegotiableVersion, kMaxNegotiableVersion, std::move(reject));
+  auto& setup = *msg.payload.get<ThriftConnectionSetupPayload>().setup;
+  setup.connContext = &connContext;
+  if (clientMetadata.has_value()) {
+    setup.clientSetup.clientMetadata() = std::move(*clientMetadata);
+  }
+  return msg;
+}
+
 apache::thrift::SetupResponse decodeSetupResponse(folly::IOBuf* buffer) {
   apache::thrift::CompactProtocolReader reader;
   reader.setInput(buffer);
@@ -105,6 +119,68 @@ apache::thrift::SetupResponse decodeSetupResponse(folly::IOBuf* buffer) {
 }
 
 } // namespace
+
+// The setup is where the client describes itself, so what it sends is latched
+// onto the connection for everything downstream to read.
+TEST(ThriftServerSetupHandlerTest, ClientMetadataIsLatchedOntoTheConnection) {
+  ThriftConnContext conn;
+  apache::thrift::ClientMetadata metadata;
+  metadata.hostname() = "client.host";
+  metadata.agent() = "test-agent";
+
+  ThriftServerSetupHandler<FakeContext> handler;
+  FakeContext ctx;
+  EXPECT_EQ(
+      handler.onRead(
+          ctx,
+          erase_and_box(
+              makeSetupMessageWithConnContext(conn, std::move(metadata)))),
+      Result::Success);
+
+  const auto* latched = conn.getClientMetadata();
+  ASSERT_NE(latched, nullptr);
+  EXPECT_EQ(latched->hostname().value_or(""), "client.host");
+  EXPECT_EQ(latched->agent().value_or(""), "test-agent");
+}
+
+// A refused connection still described itself, and whoever reports the refusal
+// is entitled to say who claimed to be calling.
+TEST(ThriftServerSetupHandlerTest, ClientMetadataIsLatchedEvenWhenRefused) {
+  ThriftConnContext conn;
+  apache::thrift::ClientMetadata metadata;
+  metadata.hostname() = "client.host";
+
+  ThriftServerSetupHandler<FakeContext> handler;
+  FakeContext ctx;
+  (void)handler.onRead(
+      ctx,
+      erase_and_box(makeSetupMessageWithConnContext(
+          conn,
+          std::move(metadata),
+          SetupRejection{
+              apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+              "refused"})));
+
+  ASSERT_NE(conn.getClientMetadata(), nullptr);
+  EXPECT_EQ(conn.getClientMetadata()->hostname().value_or(""), "client.host");
+}
+
+// A client that sends none leaves the connection with none, rather than an
+// empty description that reads as if it had.
+TEST(ThriftServerSetupHandlerTest, NoClientMetadataLeavesTheConnectionWithout) {
+  ThriftConnContext conn;
+
+  ThriftServerSetupHandler<FakeContext> handler;
+  FakeContext ctx;
+  EXPECT_EQ(
+      handler.onRead(
+          ctx,
+          erase_and_box(
+              makeSetupMessageWithConnContext(conn, /*clientMetadata=*/{}))),
+      Result::Success);
+
+  EXPECT_EQ(conn.getClientMetadata(), nullptr);
+}
 
 // A client whose advertised range overlaps the server's is answered with a
 // SETUP response carrying the negotiated version. It goes out structured, so

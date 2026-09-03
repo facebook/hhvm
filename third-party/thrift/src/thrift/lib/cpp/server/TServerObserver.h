@@ -130,6 +130,13 @@ class TServerObserver {
       }
       return {};
     }
+
+    folly::Optional<uint64_t> totalLatencyUsec() const {
+      if (readEnd != clock::time_point() && writeEnd != clock::time_point()) {
+        return to_microseconds(writeEnd - readEnd);
+      }
+      return {};
+    }
   };
 
   // This class is used to pass information regarding a connection to

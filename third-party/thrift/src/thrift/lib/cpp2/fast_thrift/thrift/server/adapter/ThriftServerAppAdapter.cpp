@@ -210,6 +210,9 @@ void ThriftServerAppAdapter::writeResponseOnEventBase(
     handleMissingPipeline();
     return;
   }
+  // Every response reaches the wire through here, so handler-set headers are
+  // merged once, at the funnel, rather than in each completion thunk.
+  attachResponseHeaders(message);
   auto result =
       pipeline_->fireWrite(channel_pipeline::erase_and_box(std::move(message)));
   // A failed write means the response can't reach the wire — pipeline

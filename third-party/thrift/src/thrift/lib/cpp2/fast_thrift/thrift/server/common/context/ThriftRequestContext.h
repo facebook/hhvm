@@ -84,6 +84,28 @@ class ThriftRequestContext {
     return it == headers_.end() ? nullptr : &it->second;
   }
 
+  // Custom headers to send back on this request's response, set by the service
+  // handler. Kept separate from the inbound headers above: the two directions
+  // are independent, and echoing what the client sent is never the intent.
+  //
+  // The map is the same type as ResponseRpcMetadata.otherMetadata, so it moves
+  // onto the outgoing metadata with no copy or rehash.
+  //
+  // Only an initial response carries metadata to put these on. A request
+  // answered by a rocket ERROR frame, or by a setup rejection, has nowhere on
+  // the wire for them and drops them.
+  void setResponseHeader(std::string key, std::string value) {
+    writeHeaders_[std::move(key)] = std::move(value);
+  }
+
+  bool hasResponseHeaders() const noexcept { return !writeHeaders_.empty(); }
+
+  // Hands the accumulated headers to the response being built, leaving the
+  // context with none. Called once per response, on the write path.
+  HeaderMap extractResponseHeaders() noexcept {
+    return std::exchange(writeHeaders_, {});
+  }
+
   // Checksum algorithm the response must echo, captured from the inbound
   // request's checksum by ThriftServerChecksumHandler. NONE when the request
   // carried no checksum, so the response is left unchecksummed.
@@ -117,6 +139,7 @@ class ThriftRequestContext {
   boost::intrusive_ptr<ThriftConnContext> connContext_;
   std::string methodName_;
   HeaderMap headers_;
+  HeaderMap writeHeaders_;
   apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
       apache::thrift::ChecksumAlgorithm::NONE};
   detail::InternalFieldsT internalFields_;

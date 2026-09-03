@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -522,6 +523,42 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
 
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(capturedStreamId, 42u);
+}
+
+// The write funnel is where handler-set response headers are merged onto the
+// outgoing metadata, so every completion path inherits it. Without this, the
+// merge could be silently absent even though attachResponseHeaders itself
+// works.
+TEST_F(ThriftServerAppAdapterTest, WriteResponseMergesHandlerSetHeaders) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  std::optional<ThriftRequestContext::HeaderMap> capturedHeaders;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        const auto& metadata =
+            *resp.payload.get<ThriftInitialResponsePayload>().metadata;
+        capturedHeaders = metadata.otherMetadata().to_optional();
+        return Result::Success;
+      });
+
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  requestContext->setResponseHeader("shard", "42");
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    auto message = makeResponseMessage(
+        /*streamId=*/42,
+        folly::IOBuf::copyBuffer("response"),
+        std::make_unique<apache::thrift::ResponseRpcMetadata>());
+    message.requestContext = std::move(requestContext);
+    adapter->writeResponse(std::move(message));
+  });
+
+  const ThriftRequestContext::HeaderMap expected{{"shard", "42"}};
+  ASSERT_TRUE(capturedHeaders.has_value());
+  EXPECT_EQ(*capturedHeaders, expected);
 }
 
 // =============================================================================

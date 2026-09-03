@@ -506,6 +506,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.variadic_named_parameters config)
     ?tco_silence_errors_under_dynamic:
       (bool_opt Config_keys.Hhconfig.silence_errors_under_dynamic config)
+    ?tco_reject_promoted_property_redeclaration:
+      (bool_opt
+         Config_keys.Hhconfig.reject_promoted_property_redeclaration
+         config)
     ?tco_ignore_unsafe_cast:
       (bool_opt Config_keys.Hhconfig.ignore_unsafe_cast config)
     ?tco_allowed_expression_tree_visitors:

@@ -190,6 +190,8 @@ module Hhconfig : sig
 
   val silence_errors_under_dynamic : string
 
+  val reject_promoted_property_redeclaration : string
+
   val skip_check_under_dynamic : string
 
   val typed_open_shapes : string

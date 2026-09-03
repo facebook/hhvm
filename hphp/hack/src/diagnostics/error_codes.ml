@@ -821,6 +821,7 @@ module Typing = struct
     (* | InvalidUnsetTargetDEPRECATED [@value 4521] *)
     | SplatMayRequireFields [@value 4522]
     | SplatFieldNotKnown [@value 4523]
+    | RedeclaringPromotedProperty [@value 4524]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

@@ -406,6 +406,10 @@ impl HhConfig {
                 "silence_errors_under_dynamic",
                 default.tco_silence_errors_under_dynamic,
             )?,
+            tco_reject_promoted_property_redeclaration: hhconfig.get_bool_or(
+                "reject_promoted_property_redeclaration",
+                default.tco_reject_promoted_property_redeclaration,
+            )?,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
             tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,

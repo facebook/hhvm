@@ -3126,6 +3126,25 @@ end = struct
     in
     create ~code:Error_code.CannotDeclareConstant ~claim ~reasons ()
 
+  let redeclaring_promoted_property pos prop_name parent_pos parent_name =
+    let claim =
+      lazy
+        ( pos,
+          "Cannot redeclare the promoted property "
+          ^ Markdown_lite.md_codify prop_name
+          ^ " here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter."
+        )
+    and reasons =
+      lazy
+        [
+          ( parent_pos,
+            Markdown_lite.md_codify prop_name
+            ^ " was previously declared in "
+            ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify) );
+        ]
+    in
+    create ~code:Error_code.RedeclaringPromotedProperty ~claim ~reasons ()
+
   let invalid_classname p =
     let claim = lazy (p, "Not a valid class name") in
     create ~code:Error_code.InvalidClassname ~claim ()
@@ -5229,6 +5248,9 @@ end = struct
       deprecated_use pos ~pos_def:decl_pos_opt msg
     | Cannot_declare_constant { pos; class_pos; class_name } ->
       cannot_declare_constant pos (class_pos, class_name)
+    | Redeclaring_promoted_property { pos; prop_name; parent_pos; parent_name }
+      ->
+      redeclaring_promoted_property pos prop_name parent_pos parent_name
     | Invalid_classname pos -> invalid_classname pos
     | Illegal_type_structure { pos; msg; fn } ->
       illegal_type_structure pos msg fn

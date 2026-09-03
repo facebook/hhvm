@@ -372,13 +372,7 @@ where
                 self.with_error(Errors::error1001, Vec::new());
                 None
             } else if !markup_section.is_missing() {
-                // Anything without a `.php` or `.hackpartial` extension
-                // should be treated like a `.hack` file (strict), which
-                // can include a shebang (hashbang).
-                //
-                // parse the shebang correctly and continue
-                //
-                // Executables do not require an extension.
+                // Parse the shebang and continue. Executables do not require an extension.
                 self.continue_from(parser1);
                 Some(markup_section)
             } else {
@@ -525,28 +519,8 @@ where
         //     { namespace-use-clauses }  ;
         // use namespace-name-as-a-prefix { namespace-use-kind-clauses  }  ;
         //
-        // TODO: Add the grammar for the namespace-use-clauses; ensure that it
-        // indicates that trailing commas are allowed in the list.
-        //
-        // ERROR RECOVERY
-        // In the "simple" format, the kind may only be specified up front.
-        //
-        // The grammar in the specification says that in the "group"
-        // format, if the kind is specified up front then it may not
-        // be specified in each clause. However, HHVM's parser disallows
-        // the kind in each clause regardless of whether it is specified up front.
-        // We will fix the specification to match HHVM.
-        //
-        // The grammar in the specification also says that in the "simple" format,
-        // the kind may only be specified up front.  But HHVM allows the kind to
-        // be specified in each clause.  Again, we will fix the specification to match
-        // HHVM.
-        //
-        // TODO: Update the grammar comment above when the specification is fixed.
-        // (This work is being tracked by spec work items 102, 103 and 104.)
-        //
-        // We do not enforce these rules here. Rather, we allow the kind to be anywhere,
-        // and detect the errors in a later pass.
+        // ERROR RECOVERY: Allow the kind in any position and report invalid
+        // combinations in a later pass.
         if self.is_group_use() {
             self.parse_group_use()
         } else {
@@ -868,7 +842,7 @@ where
     }
 
     fn parse_xhp_children_paren(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // ( xhp-children-expressions )
         //
         // xhp-children-expressions:
@@ -886,7 +860,7 @@ where
     }
 
     fn parse_xhp_children_term(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-children-term:
         // ( xhp-children-expressions ) trailing-opt
         // name trailing-opt
@@ -952,7 +926,7 @@ where
     }
 
     fn parse_xhp_children_expression(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-children-expression:
         //   xhp-children-term
         //   xhp-children-expression | xhp-children-term
@@ -964,7 +938,7 @@ where
     }
 
     fn parse_xhp_children_declaration(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-children-declaration:
         //   children empty ;
         //   children xhp-children-expression ;
@@ -1013,7 +987,7 @@ where
     }
 
     fn parse_xhp_type_specifier(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-type-specifier:
         //   (enum | ~enum) { xhp-attribute-enum-list  ,-opt  }
         //   type-specifier
@@ -1045,7 +1019,7 @@ where
     }
 
     fn parse_xhp_required_opt(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-required :
         //   @  (required | lateinit)
         //
@@ -1080,7 +1054,7 @@ where
     }
 
     fn parse_xhp_category_declaration(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-category-declaration:
         //   category xhp-category-list ,-opt  ;
         //
@@ -1099,7 +1073,7 @@ where
     }
 
     fn parse_xhp_class_attribute(&mut self) -> S::Output {
-        // SPEC (Draft)
+        // SPEC
         // xhp-attribute-declaration:
         //   xhp-class-name
         //   xhp-type-specifier xhp-name initializer-opt xhp-required-opt
@@ -1126,7 +1100,7 @@ where
     }
 
     fn parse_xhp_class_attribute_declaration(&mut self) -> S::Output {
-        // SPEC: (Draft)
+        // SPEC:
         // xhp-class-attribute-declaration :
         //   attribute xhp-attribute-declaration-list ;
         //
@@ -1176,14 +1150,7 @@ where
         //
         // This case returns a RequireClauseConstraint node
         //
-        // We must also parse "require extends :foo;"
-        // TODO: What about "require extends :foo<int>;" ?
-        // TODO: The spec is incomplete; we need to be able to parse
-        // require extends Foo<int>;
-        // (This work is being tracked by spec issue 105.)
-        // TODO: Check whether we also need to handle
-        // require extends foo::bar
-        // and so on.
+        // We must also parse generic and XHP class names.
         //
         // ERROR RECOVERY: Detect if the implements/extends/class, name and semi
         // are missing.
@@ -1307,8 +1274,6 @@ where
         //   property-declarator
         //   property-declarator-list  ,  property-declarator
         //
-        // The type specifier is optional in non-strict mode and required in
-        // strict mode. We give an error in a later pass.
         let prop_type = match self.peek_token_kind() {
             TokenKind::Variable => {
                 let pos = self.pos();
@@ -1595,10 +1560,6 @@ where
     //   attribute_value
     //   attribute_values , attribute_value
     // attribute_value := expression
-    //
-    // TODO: The list of attrs can have a trailing comma. Update the spec.
-    // TODO: The list of values can have a trailing comma. Update the spec.
-    // (Both these work items are tracked by spec issue 106.)
     pub fn parse_old_attribute_specification_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::LessThanLessThan {
             let (left, items, right) =
@@ -1670,12 +1631,6 @@ where
 
     pub fn parse_parameter_list_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         // SPEC
-        // TODO: The specification is wrong in several respects concerning
-        // variadic parameters. Variadic parameters are permitted to have a
-        // type and name but this is not mentioned in the spec. And variadic
-        // parameters are not mentioned at all in the grammar for constructor
-        // parameter lists.  (This is tracked by spec issue 107.)
-        //
         // parameter-list:
         //   variadic-parameter
         //   parameter-declaration-list
@@ -1703,13 +1658,6 @@ where
 
     fn parse_parameter_declaration(&mut self) -> S::Output {
         // SPEC
-        //
-        // TODO: Add call-convention-opt to the specification.
-        // (This work is tracked by task T22582676.)
-        //
-        // TODO: Update grammar for inout parameters.
-        // (This work is tracked by task T22582715.)
-        //
         // parameter-declaration:
         //   attribute-specification-opt \
         //   call-convention-opt \
@@ -1719,8 +1667,6 @@ where
         //   default-argument-specifier-opt
         //
         // ERROR RECOVERY
-        // In strict mode, we require a type specifier. This error is not caught
-        // at parse time but rather by a later pass.
         // Visibility modifiers are only legal in constructor parameter
         // lists; we give an error in a later pass.
         // Variadic params cannot be declared inout; we permit that here but
@@ -1807,10 +1753,6 @@ where
     }
 
     // SPEC
-    //
-    // TODO: Add this to the specification.
-    // (This work is tracked by task T22582676.)
-    //
     // call-convention:
     //   inout
     fn parse_call_convention_opt(&mut self) -> S::Output {
@@ -1828,10 +1770,6 @@ where
     }
 
     // SPEC
-    //
-    // TODO: Add this to the specification.
-    // (This work is tracked by task T22582676.)
-    //
     // readonly:
     //   readonly
     fn parse_readonly_opt(&mut self) -> S::Output {
@@ -1923,8 +1861,6 @@ where
     }
 
     fn parse_constraint_operator(&mut self) -> S::Output {
-        // TODO: Put this in the specification
-        // (This work is tracked by spec issue 100.)
         // constraint-operator:
         //   =
         //   as
@@ -1946,8 +1882,6 @@ where
     }
 
     fn parse_where_constraint(&mut self) -> S::Output {
-        // TODO: Put this in the specification
-        // (This work is tracked by spec issue 100.)
         // constraint:
         //   type-specifier  constraint-operator  type-specifier
         let left =
@@ -1971,8 +1905,6 @@ where
     }
 
     fn parse_where_clause(&mut self) -> S::Output {
-        // TODO: Add this to the specification
-        // (This work is tracked by spec issue 100.)
         // where-clause:
         //   where   constraint-list
         //
@@ -2004,11 +1936,6 @@ where
         //   attribute-specification-opt  async-opt  function  name  /
         //   generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
         //   return-type   where-clause-opt
-        // TODO: The spec does not specify "where" clauses. Add them.
-        // (This work is tracked by spec issue 100.)
-        //
-        // In strict mode, we require a type specifier. This error is not caught
-        // at parse time but rather by a later pass.
         let function_token = self.require_function();
         let label = self.parse_function_label_opt(is_methodish);
         let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
@@ -2319,10 +2246,7 @@ where
         //
         // // method-declaration
         // <<attr>> public/private/protected/abstract/final/static async function
-        // Note that a modifier is required, the attr and async are optional.
-        // TODO: Hack requires a visibility modifier, unless "static" is supplied,
-        // TODO: in which case the method is considered to be public.  Is this
-        // TODO: desired? Resolve this disagreement with the spec.
+        // A modifier is required; attributes and async are optional.
         //
         // // constructor-declaration
         // <<attr>> public/private/protected/abstract/final function __construct
@@ -2645,9 +2569,6 @@ where
         //
         // require-once-directive:
         //   require_once  include-filename  ;
-        //
-        // In non-strict mode we allow an inclusion directive (without semi) to be
-        // used as an expression. It is therefore easier to actually parse this as:
         //
         // inclusion-directive:
         //   inclusion-expression  ;

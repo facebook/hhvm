@@ -12,7 +12,7 @@ module Lint = Lints_core
 open Hh_prelude
 open Scoured_comments
 
-(* Context of the file being parsed, as (hopefully some day read-only) state. *)
+(* Context of the file being parsed. *)
 type env = {
   mode: Namespace_env.mode;
   php5_compat_mode: bool;
@@ -204,10 +204,6 @@ let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
   from_text env source_text
 
-(*****************************************************************************(
- * Backward compatibility matter (should be short-lived)
-)*****************************************************************************)
-
 let legacy (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode = Some x.fi_mode;
@@ -225,11 +221,6 @@ let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   from_source_text_with_legacy env source_text
 
 let from_file_with_legacy env = legacy (from_file env)
-
-(******************************************************************************(
- * For cut-over purposes only; this should be removed as soon as Parser_hack
- * is removed.
-)******************************************************************************)
 
 let defensive_program
     ?(quick = false)
@@ -255,8 +246,7 @@ let defensive_program
   | e ->
     Rust_pointer.free_leaked_pointer ();
 
-    (* If we fail to lower, try to just make a source text and get the file mode *)
-    (* If even THAT fails, we just have to give up and return an empty php file*)
+    (* If lowering fails, try to recover the file mode. *)
     let mode =
       try
         let source = Full_fidelity_source_text.make fn content in

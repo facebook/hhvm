@@ -30,7 +30,7 @@ DEFINE_int32(batch_size, 0, "");
 DEFINE_int32(timeout_us, 0, "");
 DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
-DEFINE_int32(io_prov_buffs, 2000, "");
+DEFINE_int32(io_prov_buffs, 2048, "");
 DEFINE_bool(io_zcrx, false, "");
 DEFINE_bool(
     io_zcrx_nodev,

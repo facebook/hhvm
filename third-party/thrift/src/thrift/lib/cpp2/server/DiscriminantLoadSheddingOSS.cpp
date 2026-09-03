@@ -173,7 +173,8 @@ RoundRobinRequestPile::Options makePileOptions(DLS::Setup& setup) {
   }
 
   for (uint32_t i = 0; i < setup.prioritiesCount; i++) {
-    options.setNumBucketsPerPriority(i, setup.bucketsCount);
+    options.setNumBucketsPerPriority(
+        i, static_cast<unsigned int>(setup.bucketsCount));
   }
 
   options.setPileSelectionFunction(makePileSelectionFunction(setup));

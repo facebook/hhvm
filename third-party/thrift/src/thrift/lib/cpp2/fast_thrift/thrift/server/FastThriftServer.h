@@ -270,6 +270,17 @@ class FastThriftServer {
    * start()/serve().
    */
   void addModule(FastServerModule module);
+
+  /**
+   * The configuration this server was constructed with, for an embedder whose
+   * handlers only work under particular settings and want to say so at
+   * registration time rather than fail at the first request.
+   *
+   * This is not a snapshot of effective runtime state. Later overrides such as
+   * setIOThreadPool() and setCPUExecutor() do not update it.
+   */
+  const FastThriftServerConfig& getConfig() const noexcept { return config_; }
+
   /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees

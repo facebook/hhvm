@@ -7,14 +7,13 @@ from typing import List
 
 
 # Any python_unittest target which directly or indirectly uses the hh_paths library
-# must set these four environment variables:
+# must set these three environment variables:
 # env = {
 #   "HACKFMT_TEST_PATH": "$(exe_target //hphp/hack/src:hackfmt)",
 #   "HH_CLIENT_PATH": "$(exe_target //hphp/hack/src:hh_client_precopy)",
-#   "HH_FANOUT_PATH": "$(exe_target //hphp/hack/src/hh_fanout:hh_fanout)",
 #   "HH_SERVER_PATH": "$(exe_target //hphp/hack/src:hh_server_precopy)",
 # },
-# Then, they can use hh_paths.{hackfmt,hh_client,hh_fanout,hh_server} confident in the
+# Then, they can use hh_paths.{hackfmt,hh_client,hh_server} confident in the
 # knowledge that these will be absolute paths which point to existing binaries,
 # and moreover that hh_server and hh_client are in the same directory.
 # It's an all-or-nothing deal for convenience -- even tests that only use some of these binaries

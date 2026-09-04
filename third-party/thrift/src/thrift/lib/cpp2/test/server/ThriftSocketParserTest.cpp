@@ -48,7 +48,10 @@ using folly::test::find_resource;
 static int isSocketTLS = 0;
 
 THRIFT_PLUGGABLE_FUNC_SET_TEST(
-    std::string, getSocketParser, folly::AsyncTransport& socket) {
+    std::string,
+    getSocketParser,
+    folly::AsyncTransport& socket,
+    const wangle::TransportInfo&) {
   if (socket.getUnderlyingTransport<folly::AsyncSSLSocket>()) {
     isSocketTLS = 1;
     return "aligned";

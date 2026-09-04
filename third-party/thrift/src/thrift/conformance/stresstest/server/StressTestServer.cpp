@@ -116,7 +116,10 @@ DEFINE_uint32(
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET(
-    std::string, getSocketParser, folly::AsyncTransport& socket) {
+    std::string,
+    getSocketParser,
+    folly::AsyncTransport& socket,
+    const wangle::TransportInfo&) {
   if (socket.getUnderlyingTransport<fizz::AsyncFizzBase>() ||
       socket.getUnderlyingTransport<folly::AsyncSSLSocket>()) {
     return THRIFT_FLAG(rocket_frame_parser);

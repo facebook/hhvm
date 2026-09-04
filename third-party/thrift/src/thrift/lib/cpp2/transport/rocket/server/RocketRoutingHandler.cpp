@@ -71,7 +71,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    std::string, getSocketParser, folly::AsyncTransport&) {
+    std::string,
+    getSocketParser,
+    folly::AsyncTransport&,
+    const wangle::TransportInfo&) {
   return THRIFT_FLAG(rocket_frame_parser);
 }
 } // namespace detail
@@ -170,7 +173,7 @@ void RocketRoutingHandler::handleConnection(
       server->getEgressBufferRecoveryFactor();
   cfg.socketOptions = &server->getPerConnectionSocketOptions();
   cfg.parserAllocator = server->getCustomAllocatorForParser();
-  cfg.parserStrategy = detail::getSocketParser(*sock);
+  cfg.parserStrategy = detail::getSocketParser(*sock, tinfo);
   const std::string& securotyProtocol = sock->getSecurityProtocol();
 
   auto* const sockPtr = sock.get();

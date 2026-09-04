@@ -311,8 +311,6 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckLoc,
                    CheckStk,
                    CheckMBase,
-                   CheckInit,
-                   CheckInitMem,
                    CheckRDSInitialized,
                    CheckVecBounds,
                    CheckDictKeys,
@@ -2563,18 +2561,6 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
   return roundImpl(env, inst, ceil);
 }
 
-SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
-  auto const srcType = inst->src(0)->type();
-  assertx(!srcType.maybe(TMem));
-  assertx(inst->taken());
-  if (!srcType.maybe(TUninit)) return gen(env, Nop);
-  return mergeBranchDests(env, inst);
-}
-
-SSATmp* simplifyCheckInitMem(State& env, const IRInstruction* inst) {
-  return mergeBranchDests(env, inst);
-}
-
 SSATmp* simplifyCheckRDSInitialized(State& env, const IRInstruction* inst) {
   auto const handle = inst->extra<CheckRDSInitialized>()->handle;
   if (!rds::isNormalHandle(handle)) return gen(env, Jmp, inst->next());
@@ -4211,8 +4197,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(PseudoRandomInt)
       X(CallBuiltin)
       X(Ceil)
-      X(CheckInit)
-      X(CheckInitMem)
       X(CheckRDSInitialized)
       X(MarkRDSInitialized)
       X(MarkRDSAccess)

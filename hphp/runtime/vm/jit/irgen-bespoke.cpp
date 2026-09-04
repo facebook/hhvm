@@ -240,7 +240,7 @@ SSATmp* emitElem(IRGS& env, SSATmp* arrLval, Type baseType, SSATmp* key,
       env, arr, key, arrLval,
       [] (SSATmp*, Block*) { return nullptr; },
       [&] (SSATmp*, SSATmp* elem, SSATmp*, SSATmp*, Block* fail) {
-        gen(env, CheckInitMem, fail, elem);
+        gen(env, CheckType, TInitCell, fail, gen(env, LdMem, TCell, elem));
         return elem;
       },
       [&] (SSATmp* arr) {

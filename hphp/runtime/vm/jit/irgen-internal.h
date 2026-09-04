@@ -841,10 +841,10 @@ inline SSATmp* ldLocWarn(IRGS& env,
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckInit, taken, locVal);
+      return gen(env, CheckType, TInitCell, taken, locVal);
     },
-    [&] { // Next: local is InitCell.
-      return gen(env, AssertType, TInitCell, locVal);
+    [&] (SSATmp* val) { // Next: local is InitCell.
+      return val;
     },
     [&] { // Taken: local is Uninit
       return warnUninit();

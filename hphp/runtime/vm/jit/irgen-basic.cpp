@@ -204,10 +204,10 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
         return cond(
           env,
           [&] (Block* taken) {
-            gen(env, CheckInit, taken, loc);
+            return gen(env, CheckType, TInitCell, taken, loc);
           },
-          [&] { // Next: local is InitCell.
-            return gen(env, AssertType, TInitCell, loc);
+          [&] (SSATmp* val) { // Next: local is InitCell.
+            return val;
           },
           [&] { // Taken: local is Uninit
             return cns(env, TInitNull);

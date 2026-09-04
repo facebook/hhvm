@@ -470,9 +470,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case CheckTypeMem:
     pointerRefine(inst->src(0), inst->typeParam());
     break;
-  case CheckInitMem:
-    pointerRefine(inst->src(0), TInitCell);
-    break;
 
   case AssertLoc:
   case CheckLoc: {

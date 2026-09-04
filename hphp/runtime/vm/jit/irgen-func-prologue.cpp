@@ -345,7 +345,7 @@ void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
           env,
           [&] (Block* taken) {
             auto const arg = top(env, offset);
-            gen(env, CheckInit, taken, arg);
+            gen(env, CheckType, TInitCell, taken, arg);
           },
           [&] {
             gen(env, AssertStk, TInitCell, irsproData, sp(env));

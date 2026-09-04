@@ -132,3 +132,22 @@ TEST(FSType, fstype_two_entries) {
       find_fstype_in_linux_proc_mounts(
           "/data/users/wez/fbsourcenoslash", mount_data_btrfs));
 }
+
+TEST(FSType, macosNfsEdenMountUsesMountSource) {
+  EXPECT_EQ(
+      w_string("edenfs:"),
+      w_fstype_detect_macos_nfs(w_string("nfs"), w_string("edenfs:")));
+}
+
+TEST(FSType, macosNfsNonEdenMountRemainsNfs) {
+  EXPECT_EQ(
+      w_string("nfs"),
+      w_fstype_detect_macos_nfs(
+          w_string("nfs"), w_string("server:/repository")));
+}
+
+TEST(FSType, macosNonNfsMountIgnoresEdenMountSource) {
+  EXPECT_EQ(
+      w_string("apfs"),
+      w_fstype_detect_macos_nfs(w_string("apfs"), w_string("edenfs:")));
+}

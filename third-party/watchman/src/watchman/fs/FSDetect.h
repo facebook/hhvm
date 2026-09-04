@@ -25,3 +25,4 @@ w_string w_fstype(const char* path);
 std::optional<w_string> find_fstype_in_linux_proc_mounts(
     std::string_view path,
     std::string_view procMountsData);
+w_string w_fstype_detect_macos_nfs(w_string fstype, w_string edenfs_indicator);

@@ -983,13 +983,23 @@ struct Decode<type::enum_t<T>> {
 };
 
 // TODO: add optimization used in protocol_methods.h
-template <typename Tag>
-struct Decode<type::list<Tag>> {
-  template <typename Protocol, typename ListType>
-  void operator()(Protocol& prot, ListType& list) const {
+template <TType ElemType>
+struct ListDecodeImpl {
+  template <typename Protocol, typename ListType, typename ElementRead>
+  void operator()(
+      Protocol& prot, ListType& list, ElementRead elementRead) const {
     auto consumeElem = [&] {
-      auto&& elem = emplace_back_default(list);
-      Decode<Tag>{}(prot, elem);
+      if constexpr (std::is_const_v<std::remove_reference_t<
+                        typename ListType::reference>>) {
+        list.emplace_back(folly::invocable_to([&] {
+          folly::remove_cvref_t<typename ListType::value_type> elem;
+          elementRead(elem);
+          return elem;
+        }));
+      } else {
+        auto&& elem = emplace_back_default(list);
+        elementRead(elem);
+      }
     };
     TType t;
     uint32_t s;
@@ -1001,7 +1011,7 @@ struct Decode<type::list<Tag>> {
       while (prot.peekList()) {
         consumeElem();
       }
-    } else if (typeTagToTType<Tag> == t) {
+    } else if (ElemType == t) {
       if (!canReadNElements(prot, s, {t})) {
         TProtocolException::throwTruncatedData();
       }
@@ -1027,7 +1037,7 @@ struct Decode<type::list<Tag>> {
         folly::resizeWithoutInitialization(list, s);
         if constexpr (should_process_as_arithmetic_vector_v<
                           Protocol,
-                          detail::TypeTagToTType<Tag>,
+                          std::integral_constant<TType, ElemType>,
                           ListType>) {
           prot.template readArithmeticVector<value_type>(
               list.data(), list.size());
@@ -1036,7 +1046,7 @@ struct Decode<type::list<Tag>> {
           const auto outEnd = list.end();
           try {
             for (; outIt != outEnd; ++outIt) {
-              Decode<Tag>{}(prot, *outIt);
+              elementRead(*outIt);
             }
           } catch (...) {
             // For behaviour parity, initialize the leftover elements when
@@ -1048,7 +1058,7 @@ struct Decode<type::list<Tag>> {
       } else if constexpr (should_resize) {
         list.resize(s);
         for (auto&& elem : list) {
-          Decode<Tag>{}(prot, elem);
+          elementRead(elem);
         }
       } else {
         folly::reserve_if_available(list, s);
@@ -1061,6 +1071,15 @@ struct Decode<type::list<Tag>> {
     }
 
     prot.readListEnd();
+  }
+};
+
+template <typename Tag>
+struct Decode<type::list<Tag>> {
+  template <typename Protocol, typename ListType>
+  void operator()(Protocol& prot, ListType& list) const {
+    ListDecodeImpl<typeTagToTType<Tag>>{}(
+        prot, list, [&](auto&& elem) { Decode<Tag>{}(prot, elem); });
   }
 };
 

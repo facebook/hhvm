@@ -21,7 +21,7 @@ ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 rc_pos = { path = "../../../utils/rust/pos" }
 relative_path = { path = "../../../utils/rust/relative_path" }
-rusqlite = { version = "0.39.0", features = ["backup", "blob", "bundled", "column_decltype", "fallible_uint", "functions", "limits", "modern_sqlite", "serde_json", "session", "vtab"] }
+rusqlite = { version = "0.40.0", features = ["backup", "blob", "bundled", "column_decltype", "fallible_uint", "functions", "limits", "modern_sqlite", "serde_json", "session", "vtab"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 thiserror = "2.0.20"
 typing_deps_hash = { path = "../../cargo/typing_deps_hash" }

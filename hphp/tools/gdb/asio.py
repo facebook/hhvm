@@ -78,6 +78,8 @@ class WaitHandle:
                 res = "SCHEDULED"
             else:
                 res = "BLOCKED"
+        elif state == 3 and kind == "ExternalThreadEvent":
+            res = "PROCESSING"
         elif state == 3 and kind == "Resumable":
             res = "SCHEDULED"
         elif state == 4 and kind == "Resumable":

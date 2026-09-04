@@ -64,7 +64,6 @@ struct c_ExternalThreadEventWaitHandle final :
   void exitContext(ContextIndex contextIdx);
   void registerToContext();
   void unregisterFromContext();
-  bool startedProcessing() const { return m_startedProcessing; }
 
  private:
   void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
@@ -78,8 +77,6 @@ struct c_ExternalThreadEventWaitHandle final :
   // The i/o thread-owned event object, one per ETEWH
   AsioExternalThreadEvent* m_event;
 
-  bool m_startedProcessing{false};
-
   Object m_privData;
 
   // Register for sweep, making this ETEWH also a root. AETE's could
@@ -88,6 +85,7 @@ struct c_ExternalThreadEventWaitHandle final :
   SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
  public:
   static const uint8_t STATE_WAITING = 2;
+  static const uint8_t STATE_PROCESSING = 3;
 
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };

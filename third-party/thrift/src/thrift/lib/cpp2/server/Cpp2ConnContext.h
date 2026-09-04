@@ -670,6 +670,14 @@ class Cpp2ConnContextInternalAPI {
     connContext_.transportInfo_.securityProtocol = std::move(protocol);
   }
 
+  /**
+   * What the client said about itself, for a transport that reads the setup
+   * itself rather than handing it to readSetupMetadata.
+   */
+  void setClientMetadata(const ClientMetadata& metadata) {
+    connContext_.setClientMetadata(metadata);
+  }
+
  private:
   Cpp2ConnContext& connContext_;
 };

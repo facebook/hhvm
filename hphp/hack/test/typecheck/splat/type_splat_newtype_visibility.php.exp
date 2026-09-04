@@ -1,11 +1,3 @@
-ERROR: File "type_splat_newtype_visibility.php--defining.php", line 5, characters 35-43:
-Some type arguments violate their constraints (Typing[4323])
-  File "type_splat_newtype_visibility.php--defining.php", line 5, characters 31-44:
-  Expected `(mixed...)`
-  File "type_splat_newtype_visibility.php--defining.php", line 5, characters 35-43:
-  But got `mixed`
-  File "type_splat_newtype_visibility.php--defining.php", line 3, characters 9-17:
-    by the definition of `TupleArgs` arising from an implicit `as ?nonnull` constraint on this type
 ERROR: File "type_splat_newtype_visibility.php--using.php", line 3, characters 36-44:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_newtype_visibility.php--using.php", line 3, characters 32-45:

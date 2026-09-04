@@ -39,6 +39,7 @@ class FrameLengthParserStrategy {
   void getReadBuffer(void** bufReturn, size_t* lenReturn);
   void readDataAvailable(size_t len);
   void readBufferAvailable(std::unique_ptr<folly::IOBuf> buf);
+  void setBuffersScarce(bool scarce) { copyFrames_ |= scarce; }
   bool isBufferMovable();
 
   // Functions for testing
@@ -61,6 +62,7 @@ class FrameLengthParserStrategy {
   size_t frameLengthAndFieldSize_{0};
   size_t minBufferSize_;
   size_t maxBufferSize_;
+  bool copyFrames_{false};
   folly::IOBufQueue readBufQueue_{folly::IOBufQueue::cacheChainLength()};
   folly::io::Cursor cursor_{readBufQueue_.front()};
 };
@@ -138,6 +140,13 @@ void FrameLengthParserStrategy<T>::drainReadBufQueue() {
       resetFrameLength();
     };
 
+    if (UNLIKELY(copyFrames_)) {
+      auto copy = folly::IOBuf::create(frameLength_);
+      folly::io::Cursor(frame.get()).pull(copy->writableTail(), frameLength_);
+      copy->append(frameLength_);
+      frame = std::move(copy);
+    }
+
     // hand frame off
     owner_.handleFrame(std::move(frame));
   }
@@ -155,6 +164,9 @@ template <class T>
 void FrameLengthParserStrategy<T>::resetFrameLength() {
   owner_.decMemoryUsage(frameLengthAndFieldSize_);
   size_ -= frameLengthAndFieldSize_;
+  if (size_ == 0) {
+    copyFrames_ = false;
+  }
   frameLength_ = 0;
   frameLengthAndFieldSize_ = 0;
 }

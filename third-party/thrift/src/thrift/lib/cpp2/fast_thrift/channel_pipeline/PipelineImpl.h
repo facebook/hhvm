@@ -271,6 +271,13 @@ class PipelineImpl : public folly::DelayedDestruction {
   }
 
   /**
+   * Check whether the head endpoint currently owns write backpressure.
+   */
+  bool isHeadWriteBackpressured() const noexcept {
+    return headWriteReadyHook_.hook.is_linked();
+  }
+
+  /**
    * Called by head when it can accept more reads.
    * Propagates onReadReady() to all handlers with pending read
    * backpressure.
@@ -289,8 +296,12 @@ class PipelineImpl : public folly::DelayedDestruction {
    * Returns nullptr if handler doesn't have a hook.
    */
   WriteReadyHook* handlerWriteReadyHook(size_t index) noexcept {
-    return index < handlers_.size() ? handlers_[index].writeReadyHook_
-                                    : nullptr;
+    if (index < handlers_.size()) {
+      return handlers_[index].writeReadyHook_;
+    }
+    return index == handlers_.size() && headOnWriteReadyFn_
+        ? &headWriteReadyHook_
+        : nullptr;
   }
 
   /**
@@ -407,6 +418,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Head handler callbacks
   Result (*headOnWriteFn_)(
       void*, detail::ContextImpl&, TypeErasedBox&&) noexcept {nullptr};
+  void (*headOnWriteReadyFn_)(void*, detail::ContextImpl&) noexcept {nullptr};
   void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
   // User-event subscription for the head endpoint (see
   // EndpointEventSubscriber).
@@ -441,8 +453,11 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Handlers self-register via ctx.awaitWriteReady()/ctx.awaitReadReady().
   WriteReadyList writeReadyList_;
   ReadReadyList readReadyList_;
+  WriteReadyHook headWriteReadyHook_;
   std::size_t writeReadyGeneration_{0};
   std::size_t readReadyGeneration_{0};
+  bool writeReadyDispatching_{false};
+  bool writeReadyDispatchPending_{false};
 
   // One intrusive list of subscribers per event type, indexed by event id.
   // Sized to the event enum's Count at construction; the array stays null and

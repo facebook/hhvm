@@ -76,6 +76,34 @@ class BackpressureTest : public ::testing::Test {
 
 // ==================== Explicit Backpressure API Tests ====================
 
+TEST_F(BackpressureTest, HeadEndpointCanAwaitWriteReady) {
+  app_.setOnWriteWithContextCallback(
+      [](detail::ContextImpl& ctx, TypeErasedBox&&) {
+        ctx.awaitWriteReady();
+        return Result::Backpressure;
+      });
+  app_.setOnWriteReadyCallback(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitWriteReady(); });
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&evb_)
+          .setHead(&app_)
+          .setTail(&transport_)
+          .setAllocator(&allocator_)
+          .build();
+
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+      Result::Backpressure);
+  EXPECT_TRUE(pipeline->hasPendingWriteReady());
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(app_.onWriteReadyCount(), 1);
+  EXPECT_FALSE(pipeline->hasPendingWriteReady());
+}
+
 TEST_F(BackpressureTest, AwaitWriteReadyRegistersHandler) {
   createHandlers();
 
@@ -208,6 +236,158 @@ TEST_F(BackpressureTest, OnlyRegisteredHandlerReceivesWriteReady) {
   EXPECT_EQ(head_ptr_->writeReadyCount(), 0);
   EXPECT_EQ(middle_ptr_->writeReadyCount(), 1);
   EXPECT_EQ(tail_ptr_->writeReadyCount(), 0);
+}
+
+TEST_F(BackpressureTest, HeadEndpointReceivesWriteReadyBeforeHandlers) {
+  createHandlers();
+  std::vector<std::string> readinessOrder;
+
+  middle_handler_->setOnWrite(
+      [](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+        ctx.awaitWriteReady();
+        return ctx.fireWrite(std::move(msg));
+      });
+  middle_handler_->setOnWriteReady([&](detail::ContextImpl& ctx) {
+    readinessOrder.push_back("handler");
+    ctx.cancelAwaitWriteReady();
+  });
+  app_.setOnWriteWithContextCallback(
+      [](detail::ContextImpl& ctx, TypeErasedBox&&) {
+        ctx.awaitWriteReady();
+        return Result::Backpressure;
+      });
+  app_.setOnWriteReadyCallback([&](detail::ContextImpl& ctx) {
+    readinessOrder.push_back("head");
+    ctx.cancelAwaitWriteReady();
+  });
+
+  auto pipeline = buildPipeline();
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+      Result::Backpressure);
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(readinessOrder, (std::vector<std::string>{"head", "handler"}));
+}
+
+TEST_F(BackpressureTest, HeadEndpointRearmDefersUpstreamWriteReady) {
+  createHandlers();
+  bool headStillBackpressured = true;
+
+  middle_handler_->setOnWrite(
+      [](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+        ctx.awaitWriteReady();
+        return ctx.fireWrite(std::move(msg));
+      });
+  middle_handler_->setOnWriteReady(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitWriteReady(); });
+  app_.setOnWriteWithContextCallback(
+      [](detail::ContextImpl& ctx, TypeErasedBox&&) {
+        ctx.awaitWriteReady();
+        return Result::Backpressure;
+      });
+  app_.setOnWriteReadyCallback([&](detail::ContextImpl& ctx) {
+    ctx.cancelAwaitWriteReady();
+    if (headStillBackpressured) {
+      ctx.awaitWriteReady();
+    }
+  });
+
+  auto pipeline = buildPipeline();
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+      Result::Backpressure);
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(app_.onWriteReadyCount(), 1);
+  EXPECT_EQ(middle_ptr_->writeReadyCount(), 0);
+  EXPECT_TRUE(pipeline->isHeadWriteBackpressured());
+
+  headStillBackpressured = false;
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(app_.onWriteReadyCount(), 2);
+  EXPECT_EQ(middle_ptr_->writeReadyCount(), 1);
+  EXPECT_FALSE(pipeline->hasPendingWriteReady());
+}
+
+TEST_F(BackpressureTest, HandlerHeadBackpressureDefersRemainingProducers) {
+  createHandlers();
+
+  middle_handler_->setOnWrite([](detail::ContextImpl& ctx, TypeErasedBox&&) {
+    ctx.awaitWriteReady();
+    return Result::Backpressure;
+  });
+  middle_handler_->setOnWriteReady([](detail::ContextImpl& ctx) {
+    ctx.cancelAwaitWriteReady();
+    EXPECT_EQ(
+        ctx.fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+        Result::Backpressure);
+  });
+  app_.setOnWriteWithContextCallback(
+      [](detail::ContextImpl& ctx, TypeErasedBox&&) {
+        ctx.awaitWriteReady();
+        return Result::Backpressure;
+      });
+  app_.setOnWriteReadyCallback(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitWriteReady(); });
+
+  auto pipeline = buildPipeline();
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+      Result::Backpressure);
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(middle_ptr_->writeReadyCount(), 1);
+  EXPECT_EQ(app_.writeCount(), 1);
+  EXPECT_EQ(transport_.onWriteReadyCount(), 0);
+  EXPECT_TRUE(pipeline->isHeadWriteBackpressured());
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(app_.onWriteReadyCount(), 1);
+  EXPECT_EQ(transport_.onWriteReadyCount(), 1);
+  EXPECT_FALSE(pipeline->hasPendingWriteReady());
+}
+
+TEST_F(BackpressureTest, ReentrantWriteReadyIsCoalesced) {
+  createHandlers();
+  bool requestedNestedDispatch = false;
+
+  head_handler_->setOnWrite([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitWriteReady();
+    return ctx.fireWrite(std::move(msg));
+  });
+  middle_handler_->setOnWrite(
+      [](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+        ctx.awaitWriteReady();
+        return ctx.fireWrite(std::move(msg));
+      });
+  head_handler_->setOnWriteReady([&](detail::ContextImpl& ctx) {
+    ctx.cancelAwaitWriteReady();
+    if (!requestedNestedDispatch) {
+      requestedNestedDispatch = true;
+      ctx.pipeline()->onWriteReady();
+    }
+  });
+  middle_handler_->setOnWriteReady(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitWriteReady(); });
+
+  auto pipeline = buildPipeline();
+  EXPECT_EQ(
+      pipeline->fireWrite(TypeErasedBox(folly::IOBuf::create(64))),
+      Result::Success);
+
+  pipeline->onWriteReady();
+
+  EXPECT_TRUE(requestedNestedDispatch);
+  EXPECT_EQ(head_ptr_->writeReadyCount(), 1);
+  EXPECT_EQ(middle_ptr_->writeReadyCount(), 1);
+  EXPECT_EQ(transport_.onWriteReadyCount(), 2);
+  EXPECT_FALSE(pipeline->hasPendingWriteReady());
 }
 
 TEST_F(BackpressureTest, MultipleHandlersCanRegisterForWriteReady) {

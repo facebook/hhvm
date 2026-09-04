@@ -43,6 +43,9 @@ class MockHeadHandler {
  public:
   using WriteCallback = std::function<Result(BytesPtr)>;
   using OnWriteCallback = std::function<Result(TypeErasedBox&&)>;
+  using OnWriteWithContextCallback =
+      std::function<Result(detail::ContextImpl&, TypeErasedBox&&)>;
+  using OnWriteReadyCallback = std::function<void(detail::ContextImpl&)>;
   using OnExceptionCallback = std::function<void(folly::exception_wrapper&&)>;
 
   MockHeadHandler() = default;
@@ -51,6 +54,9 @@ class MockHeadHandler {
   Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
     lastWriteContext_ = &ctx;
     writeCount_++;
+    if (onWriteWithContextCallback_) {
+      return onWriteWithContextCallback_(ctx, std::move(msg));
+    }
     if (onWriteCallback_) {
       return onWriteCallback_(std::move(msg));
     }
@@ -75,7 +81,13 @@ class MockHeadHandler {
   void onPipelineActive() noexcept { pipelineActiveCount_++; }
   void onPipelineInactive() noexcept { pipelineInactiveCount_++; }
 
-  // HeadEndpointHandler ready notification
+  // HeadEndpointHandler ready notifications
+  void onWriteReady(detail::ContextImpl& ctx) noexcept {
+    onWriteReadyCount_++;
+    if (onWriteReadyCallback_) {
+      onWriteReadyCallback_(ctx);
+    }
+  }
   void onReadReady() noexcept { onReadReadyCount_++; }
 
   // Configuration
@@ -83,6 +95,12 @@ class MockHeadHandler {
   void setWriteCallback(WriteCallback cb) { writeCallback_ = std::move(cb); }
   void setOnWriteCallback(OnWriteCallback cb) {
     onWriteCallback_ = std::move(cb);
+  }
+  void setOnWriteWithContextCallback(OnWriteWithContextCallback cb) {
+    onWriteWithContextCallback_ = std::move(cb);
+  }
+  void setOnWriteReadyCallback(OnWriteReadyCallback cb) {
+    onWriteReadyCallback_ = std::move(cb);
   }
 
   void setOnExceptionCallback(OnExceptionCallback cb) {
@@ -100,6 +118,7 @@ class MockHeadHandler {
   int handlerRemovedCount() const { return handlerRemovedCount_; }
   int pipelineActiveCount() const { return pipelineActiveCount_; }
   int pipelineInactiveCount() const { return pipelineInactiveCount_; }
+  int onWriteReadyCount() const { return onWriteReadyCount_; }
   int onReadReadyCount() const { return onReadReadyCount_; }
 
   void reset() {
@@ -110,11 +129,14 @@ class MockHeadHandler {
     writeResult_ = Result::Success;
     writeCallback_ = nullptr;
     onWriteCallback_ = nullptr;
+    onWriteWithContextCallback_ = nullptr;
+    onWriteReadyCallback_ = nullptr;
     onExceptionCallback_ = nullptr;
     handlerAddedCount_ = 0;
     handlerRemovedCount_ = 0;
     pipelineActiveCount_ = 0;
     pipelineInactiveCount_ = 0;
+    onWriteReadyCount_ = 0;
     onReadReadyCount_ = 0;
   }
 
@@ -126,11 +148,14 @@ class MockHeadHandler {
   Result writeResult_{Result::Success};
   WriteCallback writeCallback_;
   OnWriteCallback onWriteCallback_;
+  OnWriteWithContextCallback onWriteWithContextCallback_;
+  OnWriteReadyCallback onWriteReadyCallback_;
   OnExceptionCallback onExceptionCallback_;
   int handlerAddedCount_{0};
   int handlerRemovedCount_{0};
   int pipelineActiveCount_{0};
   int pipelineInactiveCount_{0};
+  int onWriteReadyCount_{0};
   int onReadReadyCount_{0};
 };
 

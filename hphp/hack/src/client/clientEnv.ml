@@ -79,6 +79,7 @@ type client_mode =
   | MODE_TAST_HOLES_BATCH of string
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
   | MODE_FILE_LEVEL_DEPENDENCIES
+  | MODE_FIND_ISOLATABLE_CLUSTERS
   | MODE_VERBOSE of bool
   | MODE_DEPS_OUT_AT_POS_BATCH of string list
   | MODE_DEPS_IN_AT_POS_BATCH of string list

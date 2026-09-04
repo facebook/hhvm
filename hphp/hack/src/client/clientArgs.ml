@@ -514,6 +514,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x)),
         " (mode) finds references of the provided class name",
         Arg_user_facing );
+      ( "--find-isolatable-clusters",
+        Arg.Unit (fun () -> set_mode MODE_FIND_ISOLATABLE_CLUSTERS),
+        " (mode) find clusters of files that can be isolated from the codebase",
+        Arg_non_user_facing );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
         " (mode) finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"

@@ -16,6 +16,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --enforcement-at-pos-batch               (mode) show enforcement at multiple positions [file:line:character list]
   --file-dependents                        (mode) Given a list of filepaths, shows list of (possibly) dependent files
   --find-class-refs                        (mode) finds references of the provided class name
+  --find-isolatable-clusters               (mode) find clusters of files that can be isolated from the codebase
   --find-refs                              (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent
   --find-my-tests                          (mode) return test files that reference the given symbols, using the version specified in the JSON config (default: staging)
   --find-my-tests-staging                  (deprecated, use --find-my-tests) alias for --find-my-tests

@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import re
 import time
 import unittest
 from typing import List, Optional, Tuple
@@ -77,6 +78,104 @@ class TestFreshInit(common_tests.CommonTests):
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
         return common_tests.CommonTestDriver()
+
+    def test_find_isolatable_clusters(self) -> None:
+        files = {
+            "isolation_seed.php": (
+                "<?hh\nfunction isolation_seed(): void {\n  isolation_seed();\n}\n"
+            ),
+            "isolation_function_target.php": (
+                "<?hh\nfunction isolation_function_target(): void {}\n"
+            ),
+            "isolation_function_caller.php": (
+                "<?hh\n"
+                "function isolation_function_caller(): void {\n"
+                "  isolation_function_target();\n"
+                "}\n"
+            ),
+            "isolation_static_target.php": (
+                "<?hh\n"
+                "class IsolationStaticTarget {\n"
+                "  public static function target(): void {}\n"
+                "}\n"
+            ),
+            "isolation_static_caller.php": (
+                "<?hh\n"
+                "function isolation_static_caller(): void {\n"
+                "  IsolationStaticTarget::target();\n"
+                "}\n"
+            ),
+            "isolation_base.php": (
+                "<?hh\n"
+                "class IsolationBase {\n"
+                "  public function inherited(): void {}\n"
+                "}\n"
+            ),
+            "isolation_child.php": (
+                "<?hh\nclass IsolationChild extends IsolationBase {}\n"
+            ),
+            "isolation_inherited_caller.php": (
+                "<?hh\n"
+                "function isolation_inherited_caller(\n"
+                "  IsolationChild $child,\n"
+                "): void {\n"
+                "  $child->inherited();\n"
+                "}\n"
+            ),
+        }
+        for filename, contents in files.items():
+            with open(os.path.join(self.test_driver.repo_dir, filename), "w") as f:
+                f.write(contents)
+
+        self.test_driver.start_hh_server(
+            changed_files=list(files.keys()), args=["--no-load"]
+        )
+        output, _ = self.test_driver.check_cmd(
+            expected_output=None, options=["--find-isolatable-clusters"]
+        )
+        lines = output.splitlines()
+
+        self.assertEqual(1, len(lines))
+        header_match = re.fullmatch(
+            r"Found (\d+) seed files \(zero inbound references\)\.", lines[0]
+        )
+        if header_match is None:
+            self.fail(f"Unexpected command header: {lines[0]}")
+
+        seed_count = int(header_match.group(1))
+        self.assertGreater(seed_count, 0)
+
+        # The count alone cannot tell a correct result from "every file is a
+        # seed", so check that the count *responds* to a dependency edge. Give
+        # isolation_seed.php an external referrer by editing a file that already
+        # exists: no file is added, so exactly one file changes classification
+        # and the seed count must drop by exactly one. If reverse dependencies
+        # were invisible, every file would be a seed both times and the count
+        # would not move.
+        with open(
+            os.path.join(self.test_driver.repo_dir, "isolation_function_caller.php"),
+            "w",
+        ) as f:
+            f.write(
+                "<?hh\n"
+                "function isolation_function_caller(): void {\n"
+                "  isolation_function_target();\n"
+                "  isolation_seed();\n"
+                "}\n"
+            )
+
+        output, _ = self.test_driver.check_cmd(
+            expected_output=None, options=["--find-isolatable-clusters"]
+        )
+        lines = output.splitlines()
+        self.assertEqual(1, len(lines))
+        header_match = re.fullmatch(
+            r"Found (\d+) seed files \(zero inbound references\)\.", lines[0]
+        )
+        if header_match is None:
+            self.fail(f"Unexpected command header: {lines[0]}")
+
+        self.assertEqual(seed_count - 1, int(header_match.group(1)))
 
     def test_remove_dead_fixmes(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:

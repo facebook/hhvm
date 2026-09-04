@@ -472,6 +472,11 @@ let handle :
   | ServerCommandTypes.FILE_DEPENDENTS filenames ->
     let files = ServerFileDependents.go genv env filenames in
     (env, files)
+  | ServerCommandTypes.FIND_ISOLATABLE_CLUSTERS ->
+    let seeds =
+      Server_isolation.go genv env |> List.map ~f:Relative_path.suffix
+    in
+    (env, seeds)
   | ServerCommandTypes.VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

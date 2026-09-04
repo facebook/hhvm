@@ -1020,6 +1020,14 @@ let main_internal
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_FIND_ISOLATABLE_CLUSTERS ->
+    let%lwt (seeds, telemetry) =
+      rpc args ServerCommandTypes.FIND_ISOLATABLE_CLUSTERS
+    in
+    Printf.printf
+      "Found %d seed files (zero inbound references).\n"
+      (List.length seeds);
+    Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)

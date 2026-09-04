@@ -33,18 +33,9 @@
 
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ExtensionSlots.h>
-#include <thrift/lib/cpp2/util/TypeErasedValue.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
-
-namespace detail {
-
-// The security layer's internal-fields slot, stored inline in the context
-// that owns it. Same type and size as the classic server's.
-using InternalFieldsT = apache::thrift::util::TypeErasedValue<128>;
-
-} // namespace detail
 
 // Per-connection context. Lives for the duration of one accepted connection.
 //
@@ -67,11 +58,7 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
                               ThriftConnContext,
                               boost::thread_unsafe_counter> {
  public:
-  // The security layer's per-connection fields are constructed by whoever
-  // accepts the connection and moved in here; a server with no security layer
-  // leaves the slot empty.
-  explicit ThriftConnContext(detail::InternalFieldsT internalFields = {})
-      : internalFields_(std::move(internalFields)) {}
+  ThriftConnContext() = default;
 
   ThriftConnContext(const ThriftConnContext&) = delete;
   ThriftConnContext& operator=(const ThriftConnContext&) = delete;
@@ -106,19 +93,6 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
     return transport_;
   }
 
-  // What the client said about itself in its setup: its hostname, its agent,
-  // and whatever else it chose to send. Client-supplied and unverified — good
-  // for triage, not evidence.
-  void setClientMetadata(apache::thrift::ClientMetadata metadata) noexcept {
-    clientMetadata_ = std::move(metadata);
-  }
-
-  // Null when the client sent none.
-  const apache::thrift::ClientMetadata* FOLLY_NULLABLE
-  getClientMetadata() const noexcept {
-    return clientMetadata_.has_value() ? &clientMetadata_.value() : nullptr;
-  }
-
   // Opaque per-connection slot. The deleter runs at connection close.
   //
   // There is one, so it has one owner. Anything shared between handlers, or
@@ -130,20 +104,30 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   }
   void* getUserData() const noexcept { return userData_.get(); }
 
-  // The security layer's per-connection fields. Unchecked: only valid for the
-  // `T` the slot was constructed with, and only once something has filled it.
-  template <class T>
-  T& getInternalFields() noexcept {
-    return internalFields_.value_unchecked<T>();
+  // Points this context at the peer's resolved identities, in the opaque form
+  // the security layer hands them out in. Non-owning: the identities live on
+  // the context that resolved them.
+  void setPeerIdentities(void* FOLLY_NULLABLE identities) noexcept {
+    peerIdentities_ = identities;
   }
 
-  template <class T>
-  const T& getInternalFields() const noexcept {
-    return internalFields_.value_unchecked<T>();
+  // The peer's identities, or null when nothing resolved any. Opaque: only the
+  // security layer knows the type behind it.
+  void* FOLLY_NULLABLE getPeerIdentities() const noexcept {
+    return peerIdentities_;
   }
 
-  bool hasInternalFields() const noexcept {
-    return internalFields_.has_value();
+  // What the client said about itself in its setup: its hostname, its agent,
+  // and whatever else it chose to send. Client-supplied and unverified — good
+  // for triage, not evidence.
+  void setClientMetadata(apache::thrift::ClientMetadata metadata) noexcept {
+    clientMetadata_ = std::move(metadata);
+  }
+
+  // Null when the client sent none.
+  const apache::thrift::ClientMetadata* FOLLY_NULLABLE
+  getClientMetadata() const noexcept {
+    return clientMetadata_.has_value() ? &clientMetadata_.value() : nullptr;
   }
 
   // Builds this connection's extension storage from the server's conn-scope
@@ -190,8 +174,8 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate_;
   const folly::AsyncTransport* transport_{nullptr};
   rocket::TypeErasedPtr userData_{};
-  detail::InternalFieldsT internalFields_;
   std::optional<apache::thrift::ClientMetadata> clientMetadata_;
+  void* peerIdentities_{nullptr};
   ExtensionSlots extensionSlots_;
 };
 

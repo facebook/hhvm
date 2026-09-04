@@ -24,6 +24,8 @@
 
 #include <folly/container/F14Map.h>
 
+#include <folly/CppAttributes.h>
+
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -42,11 +44,7 @@ class ThriftRequestContext {
   // string_view without building a std::string.
   using HeaderMap = folly::F14NodeMap<std::string, std::string>;
 
-  // The security layer's per-request fields are constructed by whoever
-  // creates the request context and moved in here; a server with no security
-  // layer leaves the slot empty.
-  explicit ThriftRequestContext(detail::InternalFieldsT internalFields = {})
-      : internalFields_(std::move(internalFields)) {}
+  ThriftRequestContext() = default;
 
   ThriftRequestContext(const ThriftRequestContext&) = delete;
   ThriftRequestContext& operator=(const ThriftRequestContext&) = delete;
@@ -135,23 +133,6 @@ class ThriftRequestContext {
     return checksumAlgorithm_;
   }
 
-  // The security layer's per-request fields. The connection's own fields are
-  // on getConnectionContext(). Unchecked: only valid for the `T` the slot was
-  // constructed with, and only once something has filled it.
-  template <class T>
-  T& getInternalFields() noexcept {
-    return internalFields_.value_unchecked<T>();
-  }
-
-  template <class T>
-  const T& getInternalFields() const noexcept {
-    return internalFields_.value_unchecked<T>();
-  }
-
-  bool hasInternalFields() const noexcept {
-    return internalFields_.has_value();
-  }
-
   // Builds this request's extension storage from the server's request-scope
   // layout, which must outlive the request. Called once, by whoever creates
   // the context, before any handler sees it.
@@ -183,7 +164,6 @@ class ThriftRequestContext {
   HeaderMap writeHeaders_;
   apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
       apache::thrift::ChecksumAlgorithm::NONE};
-  detail::InternalFieldsT internalFields_;
   ExtensionSlots extensionSlots_;
 };
 

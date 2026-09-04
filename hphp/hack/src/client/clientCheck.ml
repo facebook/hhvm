@@ -47,6 +47,20 @@ let print_find_my_tests_result result ~(json : bool) : unit =
     List.iter result.FMT.selected_test_files ~f:(fun file ->
         print_endline file.FMT.file_path)
 
+let output_isolation_result seeds ~output_json =
+  if output_json then
+    `Assoc
+      [
+        ("seed_files", `List (List.map seeds ~f:(fun path -> `String path)));
+        ("summary", `Assoc [("total_seed_files", `Int (List.length seeds))]);
+      ]
+    |> Hh_json_helpers.Out.to_string
+    |> print_endline
+  else
+    Printf.printf
+      "Found %d seed files (zero inbound references).\n"
+      (List.length seeds)
+
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
   let default_namespace str =
@@ -1024,9 +1038,7 @@ let main_internal
     let%lwt (seeds, telemetry) =
       rpc args ServerCommandTypes.FIND_ISOLATABLE_CLUSTERS
     in
-    Printf.printf
-      "Found %d seed files (zero inbound references).\n"
-      (List.length seeds);
+    output_isolation_result seeds ~output_json:args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.VERBOSE verbose in

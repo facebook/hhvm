@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 import os
 import re
 import time
@@ -145,8 +146,42 @@ class TestFreshInit(common_tests.CommonTests):
         seed_count = int(header_match.group(1))
         self.assertGreater(seed_count, 0)
 
-        # The count alone cannot tell a correct result from "every file is a
-        # seed", so check that the count *responds* to a dependency edge. Give
+        json_output, _ = self.test_driver.check_cmd(
+            expected_output=None,
+            options=["--find-isolatable-clusters", "--json"],
+        )
+        # This mode emits one JSON document and nothing else. Failing here with
+        # the actual output beats an opaque decode error if a stray line appears.
+        try:
+            json_result = json.loads(json_output)
+        except json.JSONDecodeError as exn:
+            self.fail(f"Expected a lone JSON document, got {json_output!r} ({exn})")
+        seed_paths = json_result["seed_files"]
+        # Within one payload: the summary must describe the list it summarises.
+        self.assertEqual(len(seed_paths), json_result["summary"]["total_seed_files"])
+        # Across the two invocations: nothing changed between them, so the
+        # count-only output must agree with the JSON.
+        self.assertEqual(seed_count, len(seed_paths))
+        # ServerIsolation.go returns paths sorted by Relative_path.compare and
+        # deduplicated (see serverIsolation.mli); assert that contract.
+        self.assertEqual(sorted(seed_paths), seed_paths)
+        self.assertEqual(len(seed_paths), len(set(seed_paths)))
+        seed_basenames = {os.path.basename(path) for path in seed_paths}
+        # All eight fixture files are accounted for: these four are seeds and
+        # the other four are not, so misclassifying any of them fails here. The
+        # comparison is restricted to fixture files because the template repo
+        # contributes seeds of its own that this test does not control.
+        self.assertEqual(
+            {
+                "isolation_seed.php",
+                "isolation_function_caller.php",
+                "isolation_static_caller.php",
+                "isolation_inherited_caller.php",
+            },
+            seed_basenames & set(files),
+        )
+
+        # Check that the count *responds* to a dependency edge. Give
         # isolation_seed.php an external referrer by editing a file that already
         # exists: no file is added, so exactly one file changes classification
         # and the seed count must drop by exactly one. If reverse dependencies

@@ -380,6 +380,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
     WireType reported_type = WireTypeInfo::defaultValue();
 
     protocol.readListBegin(reported_type, list_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       // list size unknown, SimpleJSON protocol won't know type, either
       // so let's just hope that it spits out something that makes sense
@@ -528,6 +529,7 @@ struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
     WireType reported_type = WireTypeInfo::defaultValue();
 
     protocol.readSetBegin(reported_type, set_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       while (protocol.peekSet()) {
         consume_elem(protocol, out);
@@ -632,6 +634,7 @@ struct protocol_methods<
              rpt_mapped_type = WireTypeInfo::defaultValue();
 
     protocol.readMapBegin(rpt_key_type, rpt_mapped_type, map_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       while (protocol.peekMap()) {
         consume_elem(protocol, out);

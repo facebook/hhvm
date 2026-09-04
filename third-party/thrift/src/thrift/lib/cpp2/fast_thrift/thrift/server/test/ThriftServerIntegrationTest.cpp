@@ -1329,7 +1329,8 @@ class ThriftRequestContextIntegrationTest
             .addNextDuplex<RocketThriftServerInterfaceHandler>(
                 rocket_thrift_interface_handler_tag)
             .addNextDuplex<ReqCtxHandler>(
-                thrift_server_request_context_handler_tag)
+                thrift_server_request_context_handler_tag,
+                /*requestExtensionLayout=*/nullptr)
             .addNextDuplex<ConnCtxHandler>(
                 thrift_server_connection_context_handler_tag, connContext_)
             .build();

@@ -445,6 +445,13 @@ void FastThriftServer::start() {
   // request-context wiring). The embedder onConnectionAccepted hook (if any)
   // runs from the connection-layer ConnectionAcceptCallbackHandler, reaching
   // the per-connection ThriftConnContext via ThriftServerConnection.
+  // Frozen here: every extension has registered by now, and both layouts are
+  // shared unchanged by every connection and request from this point on.
+  connExtensionLayout_ = std::make_shared<const ExtensionLayout>(
+      std::move(connExtensionBuilder_).build());
+  requestExtensionLayout_ = std::make_shared<const ExtensionLayout>(
+      std::move(requestExtensionBuilder_).build());
+
   server::ThriftServerConnectionFactoryConfig factoryConfig{
       .handler = handler_,
       .cpuExecutor = cpuExecutor_,
@@ -455,6 +462,8 @@ void FastThriftServer::start() {
       .securityHandler = auxInterfaces_.securityHandler,
       .metadataResponse = metadataResponse_,
       .zeroCopyThreshold = config_.zeroCopyThreshold,
+      .connExtensionLayout = connExtensionLayout_,
+      .requestExtensionLayout = requestExtensionLayout_,
       .enableRequestContext = config_.enableRequestContext,
       .enableRequestHeaders = config_.enableRequestHeaders,
       .enableChecksum = config_.enableChecksum,

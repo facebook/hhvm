@@ -32,6 +32,7 @@
 #include <folly/CppAttributes.h>
 
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ExtensionSlots.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -145,6 +146,30 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
     return internalFields_.has_value();
   }
 
+  // Builds this connection's extension storage from the server's conn-scope
+  // layout, which must outlive the connection. Called once, by whoever creates
+  // the context, before any handler sees it.
+  void installExtensions(const ExtensionLayout& layout) {
+    extensionSlots_.install(layout);
+  }
+
+  // `Ext`'s per-connection state, or null when `Ext` is not installed on this
+  // server. An extension that declares no `ConnState` does not compile here, so
+  // asking for a scope an extension does not have is caught at build time
+  // rather than read as absent.
+  template <class Ext>
+  typename Ext::ConnState* FOLLY_NULLABLE tryState() const noexcept {
+    return extensionSlots_.find<typename Ext::ConnState>(Ext::kId);
+  }
+
+  // Publishes `Ext`'s state on this context. Non-owning: the extension keeps
+  // it alive while the context can reach it, and clears the slot when it does
+  // not.
+  template <class Ext>
+  void setState(typename Ext::ConnState* FOLLY_NULLABLE state) noexcept {
+    extensionSlots_.set(Ext::kId, state);
+  }
+
   void setPeerAddress(folly::SocketAddress addr) noexcept {
     peerAddress_ = std::move(addr);
   }
@@ -167,6 +192,7 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   rocket::TypeErasedPtr userData_{};
   detail::InternalFieldsT internalFields_;
   std::optional<apache::thrift::ClientMetadata> clientMetadata_;
+  ExtensionSlots extensionSlots_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

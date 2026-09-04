@@ -408,7 +408,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
       serverBuilder
           .addNextInbound<thrift::ThriftServerRequestContextHandler<
               channel_pipeline::detail::ContextImpl>>(
-              thrift_server_request_context_handler_tag)
+              thrift_server_request_context_handler_tag,
+              /*requestExtensionLayout=*/nullptr)
           .addNextDuplex<thrift::ThriftServerChecksumHandler<
               channel_pipeline::detail::ContextImpl>>(
               thrift_server_checksum_handler_tag);

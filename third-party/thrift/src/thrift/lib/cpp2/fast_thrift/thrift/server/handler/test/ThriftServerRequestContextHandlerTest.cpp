@@ -105,7 +105,7 @@ const apache::thrift::ResponseRpcMetadata& writtenMetadata(
 // The context knows which method the request named, copied off the metadata
 // because the context outlives the payload that carried it.
 TEST(ThriftServerRequestContextHandlerTest, StampsTheMethodName) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
@@ -127,7 +127,7 @@ TEST(ThriftServerRequestContextHandlerTest, StampsTheMethodName) {
 // A request whose metadata names no method leaves the context without one,
 // rather than an empty name that reads as if it had been set.
 TEST(ThriftServerRequestContextHandlerTest, NoMethodNameLeavesItEmpty) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   ThriftServerRequestMessage req;
@@ -147,7 +147,7 @@ TEST(ThriftServerRequestContextHandlerTest, NoMethodNameLeavesItEmpty) {
 TEST(
     ThriftServerRequestContextHandlerTest,
     StampsDefaultRequestContextOnInboundMessage) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -164,7 +164,7 @@ TEST(
 }
 
 TEST(ThriftServerRequestContextHandlerTest, EachRequestGetsItsOwnContext) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   for (uint32_t sid = 1; sid <= 3; ++sid) {
@@ -186,7 +186,7 @@ TEST(
   auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
   metadata->name() = "Service.method";
 
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -208,7 +208,7 @@ TEST(ThriftServerRequestContextHandlerTest, LeavesMethodNameOnTheMetadata) {
   auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
   metadata->name() = "Service.method";
 
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -230,7 +230,7 @@ TEST(ThriftServerRequestContextHandlerTest, LeavesMethodNameOnTheMetadata) {
 // simply empty.
 TEST(
     ThriftServerRequestContextHandlerTest, MethodNameEmptyWhenMetadataHasNone) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -254,7 +254,7 @@ TEST(ThriftServerRequestContextHandlerTest, DrainsResponseHeadersOnWrite) {
   auto requestContext = std::make_unique<ThriftRequestContext>();
   requestContext->setResponseHeader("shard", "42");
 
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -273,7 +273,7 @@ TEST(ThriftServerRequestContextHandlerTest, DrainsResponseHeadersOnWrite) {
 // A response with no per-request context behind it — a framework-generated
 // error, say — still goes out untouched.
 TEST(ThriftServerRequestContextHandlerTest, WriteWithoutContextIsPassThrough) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -286,7 +286,7 @@ TEST(ThriftServerRequestContextHandlerTest, WriteWithoutContextIsPassThrough) {
 }
 
 TEST(ThriftServerRequestContextHandlerTest, ForwardsExceptions) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   handler.onException(

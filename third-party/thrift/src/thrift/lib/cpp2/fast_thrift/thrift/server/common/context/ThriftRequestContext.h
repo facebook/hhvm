@@ -50,8 +50,10 @@ class ThriftRequestContext {
 
   ThriftRequestContext(const ThriftRequestContext&) = delete;
   ThriftRequestContext& operator=(const ThriftRequestContext&) = delete;
-  ThriftRequestContext(ThriftRequestContext&&) = default;
-  ThriftRequestContext& operator=(ThriftRequestContext&&) = default;
+  // Extension storage hands out interior pointers, so a context stays where it
+  // was built.
+  ThriftRequestContext(ThriftRequestContext&&) = delete;
+  ThriftRequestContext& operator=(ThriftRequestContext&&) = delete;
 
   void setConnectionContext(
       boost::intrusive_ptr<ThriftConnContext> ctx) noexcept {
@@ -150,6 +152,30 @@ class ThriftRequestContext {
     return internalFields_.has_value();
   }
 
+  // Builds this request's extension storage from the server's request-scope
+  // layout, which must outlive the request. Called once, by whoever creates
+  // the context, before any handler sees it.
+  void installExtensions(const ExtensionLayout& layout) {
+    extensionSlots_.install(layout);
+  }
+
+  // `Ext`'s per-request state, or null when `Ext` is not installed on this
+  // server. An extension that declares no `RequestState` does not compile here,
+  // so asking for a scope an extension does not have is caught at build time
+  // rather than read as absent.
+  template <class Ext>
+  typename Ext::RequestState* FOLLY_NULLABLE tryState() const noexcept {
+    return extensionSlots_.find<typename Ext::RequestState>(Ext::kId);
+  }
+
+  // Publishes `Ext`'s state on this context. Non-owning: the extension keeps
+  // it alive while the context can reach it, and clears the slot when it does
+  // not.
+  template <class Ext>
+  void setState(typename Ext::RequestState* FOLLY_NULLABLE state) noexcept {
+    extensionSlots_.set(Ext::kId, state);
+  }
+
  private:
   boost::intrusive_ptr<ThriftConnContext> connContext_;
   std::string methodName_;
@@ -158,6 +184,7 @@ class ThriftRequestContext {
   apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
       apache::thrift::ChecksumAlgorithm::NONE};
   detail::InternalFieldsT internalFields_;
+  ExtensionSlots extensionSlots_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

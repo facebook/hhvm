@@ -52,6 +52,12 @@ namespace apache::thrift::fast_thrift::thrift {
 template <typename Context>
 class ThriftServerRequestContextHandler {
  public:
+  // `requestExtensionLayout` is the server's request-scope slot plan, or null
+  // on a server with no extensions. It outlives every connection.
+  explicit ThriftServerRequestContextHandler(
+      const ExtensionLayout* FOLLY_NULLABLE requestExtensionLayout) noexcept
+      : requestExtensionLayout_(requestExtensionLayout) {}
+
   // HandlerLifecycle
   void handlerAdded(Context& /*ctx*/) noexcept {}
   void handlerRemoved(Context& /*ctx*/) noexcept {}
@@ -68,6 +74,9 @@ class ThriftServerRequestContextHandler {
       return ctx.fireRead(std::move(msg));
     }
     request.requestContext = std::make_unique<ThriftRequestContext>();
+    if (requestExtensionLayout_ != nullptr) {
+      request.requestContext->installExtensions(*requestExtensionLayout_);
+    }
     // Copied, not moved: the context outlives the payload the name came from,
     // and the tail adapter still dispatches on RequestRpcMetadata.name, so
     // emptying it here would break routing.
@@ -98,6 +107,9 @@ class ThriftServerRequestContextHandler {
   void onWriteReady(Context& /*ctx*/) noexcept {}
 
   void onPipelineInactive(Context& /*ctx*/) noexcept {}
+
+ private:
+  const ExtensionLayout* FOLLY_NULLABLE requestExtensionLayout_{nullptr};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

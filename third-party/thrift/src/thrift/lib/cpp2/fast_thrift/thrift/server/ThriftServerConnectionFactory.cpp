@@ -150,6 +150,9 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   boost::intrusive_ptr<ThriftConnContext> connContext;
   if (config_.enableRequestContext) {
     connContext.reset(new ThriftConnContext());
+    if (config_.connExtensionLayout != nullptr) {
+      connContext->installExtensions(*config_.connExtensionLayout);
+    }
     connContext->setPeerAddress(clientAddr);
     // Non-owning. The transport is owned by the transport adapter, which
     // ThriftServerConnection tears down after the pipeline that reads this —
@@ -358,7 +361,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
     // downstream of every handler and extension that can add one.
     thriftPipelineBuilder
         .template addNextDuplex<ReqCtxHandler>(
-            thrift_server_request_context_handler_tag)
+            thrift_server_request_context_handler_tag,
+            config_.requestExtensionLayout.get())
         .template addNextInbound<ConnCtxHandler>(
             thrift_server_connection_context_handler_tag,
             std::move(connContext));

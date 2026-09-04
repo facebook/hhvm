@@ -31,6 +31,14 @@ let lambda_flags (f : Nast.fun_) =
       SN.UserAttributes.uaSupportDynamicType
       f.f_user_attributes
   in
+  let variadic =
+    List.exists f.f_params ~f:(fun param ->
+        Aast_utils.is_param_variadic param && Option.is_none param.param_named)
+  in
+  let named_variadic =
+    List.exists f.f_params ~f:(fun param ->
+        Aast_utils.is_param_variadic param && Option.is_some param.param_named)
+  in
   Typing_defs_flags.Fun.make
     f.f_fun_kind
     ~return_disposable
@@ -38,8 +46,8 @@ let lambda_flags (f : Nast.fun_) =
     ~readonly_this:ft_readonly_this
     ~support_dynamic_type:fe_support_dynamic_type
     ~is_memoized:ft_is_memoized
-    ~variadic:(List.exists f.f_params ~f:Aast_utils.is_param_variadic)
-    ~named_variadic:false
+    ~variadic
+    ~named_variadic
 
 let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =

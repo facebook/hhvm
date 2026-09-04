@@ -28,6 +28,13 @@ namespace apache::thrift::fast_thrift::thrift::server {
 template <typename H>
 class ThriftExtensionPipelineHandler;
 
+// Forward declaration of the framework's TProcessorEventHandler bridge
+// (defined in event_handler/TProcessorEventHandlerBridge.h). Declared here
+// rather than included for the same reason as the adapter above: framework/
+// takes no dependency on event_handler/, and there is no include cycle.
+template <typename Context>
+class TProcessorEventHandlerBridge;
+
 // A compile-time list of handler types. Membership is the allowlist.
 template <typename... Ts>
 struct NativeHandlerList {};
@@ -73,5 +80,16 @@ inline constexpr bool kIsAllowedNativeThriftHandler =
 template <typename H>
 inline constexpr bool
     kIsAllowedNativeThriftHandler<ThriftExtensionPipelineHandler<H>> = true;
+
+/**
+ * The framework's TProcessorEventHandler bridge is likewise always permitted.
+ * It needs the raw messages an extension is denied — the request context to
+ * build a Cpp2RequestContext from, the response metadata to write handler-set
+ * headers onto — and answers a refusal itself, so the extension API's fixed
+ * rejection shape does not fit it.
+ */
+template <typename Context>
+inline constexpr bool
+    kIsAllowedNativeThriftHandler<TProcessorEventHandlerBridge<Context>> = true;
 
 } // namespace apache::thrift::fast_thrift::thrift::server

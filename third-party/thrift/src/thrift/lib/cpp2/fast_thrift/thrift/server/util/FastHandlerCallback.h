@@ -126,6 +126,7 @@ template <typename Presult, typename ProtocolWriter, bool HasReturnType>
 inline void writeExceptionCascade(
     ThriftServerAppAdapter* a,
     uint32_t sid,
+    std::unique_ptr<ThriftRequestContext> requestContext,
     folly::DelayedDestruction::DestructorGuard&& adapterGuard,
     folly::exception_wrapper ew) noexcept {
   Presult presult;
@@ -134,17 +135,12 @@ inline void writeExceptionCascade(
       presult, ew, [&]<typename Ex>(Ex&) {
         classification = getDeclaredExceptionClassification<Ex>(ew);
       });
-  if (handled) {
-    a->writeResponse(
-        makeDeclaredExceptionMessage<ProtocolWriter>(
-            sid, presult, ew, classification),
-        std::move(adapterGuard));
-  } else {
-    a->writeResponse(
-        makeUnknownExceptionMessage(
-            sid, ew, apache::thrift::ErrorBlame::SERVER),
-        std::move(adapterGuard));
-  }
+  auto message = handled ? makeDeclaredExceptionMessage<ProtocolWriter>(
+                               sid, presult, ew, classification)
+                         : makeUnknownExceptionMessage(
+                               sid, ew, apache::thrift::ErrorBlame::SERVER);
+  message.requestContext = std::move(requestContext);
+  a->writeResponse(std::move(message), std::move(adapterGuard));
 }
 
 } // namespace detail
@@ -181,6 +177,7 @@ class FastHandlerCallback {
   using ExceptionFn = void (*)(
       ThriftServerAppAdapter*,
       uint32_t,
+      std::unique_ptr<ThriftRequestContext>,
       folly::DelayedDestruction::DestructorGuard&&,
       folly::exception_wrapper);
 
@@ -233,9 +230,17 @@ class FastHandlerCallback {
         std::move(value));
   }
 
+  // The context rides onto the error response too: an exception reply is a
+  // response like any other, and the write-side handlers owe it the same
+  // request-derived state a success reply gets.
   void exception(folly::exception_wrapper ew) {
     completed_ = true;
-    exceptionFn_(handler_, streamId_, std::move(adapterGuard_), std::move(ew));
+    exceptionFn_(
+        handler_,
+        streamId_,
+        std::move(requestContext_),
+        std::move(adapterGuard_),
+        std::move(ew));
   }
 
   // Writes a TApplicationException frame directly rather than through the
@@ -244,13 +249,13 @@ class FastHandlerCallback {
   // destructor does not add a second response.
   void sendAppError(const folly::exception_wrapper& ew) noexcept {
     completed_ = true;
-    handler_->writeResponse(
-        makeAppErrorMessage(
-            streamId_,
-            "TApplicationException",
-            detail::exceptionMessage(ew),
-            apache::thrift::ErrorBlame::SERVER),
-        std::move(adapterGuard_));
+    auto message = makeAppErrorMessage(
+        streamId_,
+        "TApplicationException",
+        detail::exceptionMessage(ew),
+        apache::thrift::ErrorBlame::SERVER);
+    message.requestContext = std::move(requestContext_);
+    handler_->writeResponse(std::move(message), std::move(adapterGuard_));
   }
 
   // True once result()/exception()/sendAppError() has been invoked. Used by
@@ -320,11 +325,16 @@ class FastHandlerCallback {
   static void writeException(
       ThriftServerAppAdapter* a,
       uint32_t sid,
+      std::unique_ptr<ThriftRequestContext> requestContext,
       folly::DelayedDestruction::DestructorGuard&& adapterGuard,
       folly::exception_wrapper ew) noexcept {
     detail::
         writeExceptionCascade<Presult, ProtocolWriter, /*HasReturnType=*/true>(
-            a, sid, std::move(adapterGuard), std::move(ew));
+            a,
+            sid,
+            std::move(requestContext),
+            std::move(adapterGuard),
+            std::move(ew));
   }
 
  private:
@@ -340,6 +350,7 @@ class FastHandlerCallback {
     exceptionFn_(
         handler_,
         streamId_,
+        std::move(requestContext_),
         std::move(adapterGuard_),
         folly::make_exception_wrapper<TApplicationException>(
             TApplicationException::INTERNAL_ERROR,
@@ -375,6 +386,7 @@ class FastHandlerCallback<void> {
   using ExceptionFn = void (*)(
       ThriftServerAppAdapter*,
       uint32_t,
+      std::unique_ptr<ThriftRequestContext>,
       folly::DelayedDestruction::DestructorGuard&&,
       folly::exception_wrapper);
 
@@ -411,21 +423,27 @@ class FastHandlerCallback<void> {
         std::move(adapterGuard_));
   }
 
+  // See FastHandlerCallback<T>::exception.
   void exception(folly::exception_wrapper ew) {
     completed_ = true;
-    exceptionFn_(handler_, streamId_, std::move(adapterGuard_), std::move(ew));
+    exceptionFn_(
+        handler_,
+        streamId_,
+        std::move(requestContext_),
+        std::move(adapterGuard_),
+        std::move(ew));
   }
 
   // See FastHandlerCallback<T>::sendAppError.
   void sendAppError(const folly::exception_wrapper& ew) noexcept {
     completed_ = true;
-    handler_->writeResponse(
-        makeAppErrorMessage(
-            streamId_,
-            "TApplicationException",
-            detail::exceptionMessage(ew),
-            apache::thrift::ErrorBlame::SERVER),
-        std::move(adapterGuard_));
+    auto message = makeAppErrorMessage(
+        streamId_,
+        "TApplicationException",
+        detail::exceptionMessage(ew),
+        apache::thrift::ErrorBlame::SERVER);
+    message.requestContext = std::move(requestContext_);
+    handler_->writeResponse(std::move(message), std::move(adapterGuard_));
   }
 
   bool isCompleted() const noexcept { return completed_; }
@@ -472,11 +490,16 @@ class FastHandlerCallback<void> {
   static void writeException(
       ThriftServerAppAdapter* a,
       uint32_t sid,
+      std::unique_ptr<ThriftRequestContext> requestContext,
       folly::DelayedDestruction::DestructorGuard&& adapterGuard,
       folly::exception_wrapper ew) noexcept {
     detail::
         writeExceptionCascade<Presult, ProtocolWriter, /*HasReturnType=*/false>(
-            a, sid, std::move(adapterGuard), std::move(ew));
+            a,
+            sid,
+            std::move(requestContext),
+            std::move(adapterGuard),
+            std::move(ew));
   }
 
  private:
@@ -488,6 +511,7 @@ class FastHandlerCallback<void> {
     exceptionFn_(
         handler_,
         streamId_,
+        std::move(requestContext_),
         std::move(adapterGuard_),
         folly::make_exception_wrapper<TApplicationException>(
             TApplicationException::INTERNAL_ERROR,

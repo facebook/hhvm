@@ -40,7 +40,9 @@ let assert_www_directory ?(config = ".hhconfig") (path : Path.t) : unit =
 
 (** Traverse parent directories until we find a directory containing .hhconfig *)
 let rec guess_root config start ~recursion_limit : Path.t option =
-  if Path.equal start (Path.parent start) then
+  if not (Path.file_exists start) then
+    None
+  else if Path.equal start (Path.dirname start) then
     (* Reached file system root *)
     None
   else if is_www_directory ~config start then
@@ -48,7 +50,7 @@ let rec guess_root config start ~recursion_limit : Path.t option =
   else if recursion_limit <= 0 then
     None
   else
-    guess_root config (Path.parent start) ~recursion_limit:(recursion_limit - 1)
+    guess_root config (Path.dirname start) ~recursion_limit:(recursion_limit - 1)
 
 let interpret_command_line_root_parameter
     ?(config = ".hhconfig") (paths : string list) : (Path.t, string) result =

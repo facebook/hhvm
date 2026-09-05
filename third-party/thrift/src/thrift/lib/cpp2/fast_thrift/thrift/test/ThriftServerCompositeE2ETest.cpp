@@ -49,7 +49,6 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
@@ -98,7 +97,6 @@ using channel_pipeline::SimpleBufferAllocator;
 
 // Server handler tags
 HANDLER_TAG(thrift_server_setup_handler);
-HANDLER_TAG(server_frame_length_parser_handler);
 HANDLER_TAG(server_frame_length_encoder_handler);
 HANDLER_TAG(server_frame_codec_handler);
 HANDLER_TAG(server_frame_defragmentation_handler);
@@ -111,7 +109,6 @@ HANDLER_TAG(thrift_server_request_context_handler);
 HANDLER_TAG(thrift_server_checksum_handler);
 
 // Client handler tags
-HANDLER_TAG(client_frame_length_parser_handler);
 HANDLER_TAG(client_frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -354,8 +351,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
             .setAllocator(ctx.rocketAllocator.get())
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                server_frame_length_parser_handler_tag)
+
             .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
                 server_frame_length_encoder_handler_tag)
             .addNextDuplex<frame::handler::FrameCodecHandler>(
@@ -412,7 +408,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
       serverBuilder
           .addNextInbound<thrift::ThriftServerRequestContextHandler<
               channel_pipeline::detail::ContextImpl>>(
-              thrift_server_request_context_handler_tag)
+              thrift_server_request_context_handler_tag,
+              /*requestExtensionLayout=*/nullptr)
           .addNextDuplex<thrift::ThriftServerChecksumHandler<
               channel_pipeline::detail::ContextImpl>>(
               thrift_server_checksum_handler_tag);
@@ -560,8 +557,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addState<rocket::client::RocketClientStreamContexts>()
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  client_frame_length_parser_handler_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   client_frame_length_encoder_handler_tag)

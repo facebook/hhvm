@@ -48,8 +48,8 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
  *   Parses raw bytes into a ParsedFrame, validates, and wraps it.
  *
  * Pipeline position:
- *   Transport -> FrameLengthParserHandler -> RocketClientFrameCodecHandler ->
- *   RocketClientSetupFrameHandler -> ...
+ *   Transport (frames via FrameLengthParser) -> RocketClientFrameCodecHandler
+ * -> RocketClientSetupFrameHandler -> ...
  */
 class RocketClientFrameCodecHandler {
  public:

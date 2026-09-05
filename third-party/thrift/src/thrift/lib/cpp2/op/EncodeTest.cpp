@@ -226,6 +226,21 @@ struct StatefulCompare {
   }
 };
 
+class ConstReferenceList {
+ public:
+  using value_type = std::int32_t;
+  using reference = const value_type&;
+  using size_type = std::vector<value_type>::size_type;
+
+  void emplace_back(value_type value) { values_.emplace_back(value); }
+  void clear() { values_.clear(); }
+
+  const std::vector<value_type>& values() const { return values_; }
+
+ private:
+  std::vector<value_type> values_;
+};
+
 template <conformance::StandardProtocol Protocol>
 void testSerializedSizeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
@@ -841,6 +856,19 @@ TEST(DecodeTest, DecodeUnsignedTypes) {
 TEST(DecodeTest, DecodeContainers) {
   testDecodeContainers<conformance::StandardProtocol::Binary>();
   testDecodeContainers<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeListWithConstReference) {
+  using Tag = type::list<type::i32_t>;
+  const std::vector<std::int32_t> values{1, 2, 3};
+  ConstReferenceList result;
+
+  encodeAndDecodeInto<
+      conformance::StandardProtocol::Compact,
+      Tag,
+      type::cpp_type<ConstReferenceList, Tag>>(values, result);
+
+  EXPECT_EQ(result.values(), values);
 }
 
 TEST(DecodeTest, PreservesContainerState) {

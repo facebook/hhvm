@@ -51,3 +51,23 @@ enum EnumManyUncheckable: int as int {
   R6 = 6 + 6; // uncheckable
   R7 = 7 + 7; // uncheckable
 }
+
+class Prefixes {
+  const string P = 'prefix_';
+}
+
+// 8. String concatenation of a class constant with a literal. Codegen reaches
+//    for this whenever members share a prefix, so it is the most common way
+//    real code becomes uncheckable, and it is not covered by the arithmetic
+//    case above.
+enum EnumConcatClassConst: string as string {
+  PREFIXED = Prefixes::P.'suffix'; // uncheckable
+  LITERAL = 'plain';
+}
+
+// 9. Concatenation onto another member of the same enum, deriving a value from
+//    a sibling rather than an outside constant.
+enum EnumConcatSelfConst: string as string {
+  BASE = 'base';
+  DERIVED = self::BASE.':extra'; // uncheckable
+}

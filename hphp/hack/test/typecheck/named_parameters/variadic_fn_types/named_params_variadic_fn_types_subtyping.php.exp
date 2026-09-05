@@ -1,24 +1,30 @@
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 62, characters 13-20:
+ERROR: File "named_params_variadic_fn_types_subtyping.php", line 70, characters 13-20:
 Invalid argument (Typing[4040])
-  File "named_params_variadic_fn_types_subtyping.php", line 60, characters 10-15:
+  File "named_params_variadic_fn_types_subtyping.php", line 68, characters 10-15:
   Missing required named parameter: ...
-  File "named_params_variadic_fn_types_subtyping.php", line 59, characters 20-49:
+  File "named_params_variadic_fn_types_subtyping.php", line 67, characters 20-49:
   Because of this definition
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 62, characters 13-20:
+ERROR: File "named_params_variadic_fn_types_subtyping.php", line 70, characters 13-20:
 Invalid argument (Typing[4041])
-  File "named_params_variadic_fn_types_subtyping.php", line 60, characters 10-15:
+  File "named_params_variadic_fn_types_subtyping.php", line 68, characters 10-15:
   Unexpected named parameter: x
-  File "named_params_variadic_fn_types_subtyping.php", line 59, characters 20-49:
+  File "named_params_variadic_fn_types_subtyping.php", line 67, characters 20-49:
   Because of this definition
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 71, characters 13-20:
+ERROR: File "named_params_variadic_fn_types_subtyping.php", line 79, characters 13-20:
 Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_subtyping.php", line 69, characters 29-31:
+  File "named_params_variadic_fn_types_subtyping.php", line 77, characters 29-31:
   Expected `string`
-  File "named_params_variadic_fn_types_subtyping.php", line 68, characters 36-38:
+  File "named_params_variadic_fn_types_subtyping.php", line 76, characters 36-38:
   But got `int`
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 80, characters 13-20:
+ERROR: File "named_params_variadic_fn_types_subtyping.php", line 88, characters 13-20:
 Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_subtyping.php", line 78, characters 29-31:
+  File "named_params_variadic_fn_types_subtyping.php", line 86, characters 29-31:
   Expected `string`
-  File "named_params_variadic_fn_types_subtyping.php", line 77, characters 36-38:
+  File "named_params_variadic_fn_types_subtyping.php", line 85, characters 36-38:
+  But got `int`
+ERROR: File "named_params_variadic_fn_types_subtyping.php", line 96, characters 13-20:
+Invalid argument (Typing[4110])
+  File "named_params_variadic_fn_types_subtyping.php", line 94, characters 23-28:
+  Expected `string`
+  File "named_params_variadic_fn_types_subtyping.php", line 93, characters 36-38:
   But got `int`

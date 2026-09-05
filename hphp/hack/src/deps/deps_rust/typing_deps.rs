@@ -18,6 +18,7 @@ use ocamlrep_custom::caml_serialize_default_impls;
 use rpds::HashTrieSet;
 
 mod dep_graph_with_delta;
+pub use oxidized::typing_deps_types::DepgraphLoadError as DepGraphLoadError;
 
 /// A structure wrapping the memory-mapped dependency graph.
 /// Each worker will itself lazily (or eagerly upon request)

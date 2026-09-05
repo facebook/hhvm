@@ -65,6 +65,7 @@ type t =
           The log data is prefixed with [spawn] or [runtime] to identify
           which phase of the distc run failed. *)
   | File_provider_stale
+  | Depgraph_unavailable
   | Hhconfig_deleted
   | Hhconfig_changed
   | Package_config_changed
@@ -212,6 +213,7 @@ let exit_code = function
     228
   | Distc_failed -> 229
   | Client_bad_args -> 64 (* EX_USAGE from sysexits.h *)
+  | Depgraph_unavailable -> 230
 
 let exit_code_to_string (code : int) : string =
   (* We will return the string "See Exit_status.ml for meaning of this code".
@@ -244,6 +246,7 @@ let exit_code_to_string (code : int) : string =
       Server_non_opt_build_mode;
       Distc_failed;
       Client_bad_args;
+      Depgraph_unavailable;
     ]
   in
   let matches =

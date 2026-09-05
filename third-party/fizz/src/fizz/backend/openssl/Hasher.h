@@ -16,7 +16,7 @@ namespace fizz::openssl {
 
 template <class T>
 Status makeHasher(std::unique_ptr<::fizz::Hasher>& ret, Error& /*err*/) {
-  ret = std::make_unique<::fizz::openssl::Sha>(Properties<T>::HashEngine());
+  ret = std::make_unique<::fizz::openssl::Sha<T>>();
   return Status::Success;
 }
 

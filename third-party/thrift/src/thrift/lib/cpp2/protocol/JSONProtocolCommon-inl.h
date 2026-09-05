@@ -587,6 +587,25 @@ inline uint32_t JSONProtocolReaderCommon::ensureChar(char expected) {
   return ret + ensureCharNoWhitespace(expected);
 }
 
+inline uint32_t JSONProtocolReaderCommon::ensureCharExpectNoWhitespace(
+    char expected) {
+  // `expected` is a non-whitespace delimiter that commonly has no leading
+  // whitespace in compact JSON. The extra peek only pays off for delimiters
+  // that rarely have leading whitespace (e.g. `,` and `:`); other delimiters
+  // should use ensureChar instead.
+  constexpr auto& ws = detail::json::json_ws_alphabet;
+  constexpr auto ws_sv = std::string_view(ws.data(), ws.size());
+  DCHECK_EQ(ws_sv.find(expected), std::string_view::npos);
+  if (skippedWhitespace_ == 0) {
+    auto const peek = folly::reinterpret_span_cast<char const>(in_.peek());
+    if (!peek.empty() && peek[0] == expected) {
+      in_.skip(1);
+      return 1;
+    }
+  }
+  return ensureChar(expected);
+}
+
 inline void JSONProtocolReaderCommon::ensureAndSkipContext() {
   if (skippedIsUnread_) {
     return;
@@ -599,19 +618,19 @@ inline void JSONProtocolReaderCommon::ensureAndSkipContext() {
       case ContextType::MAP:
         if (meta % 2 == 0) {
           if (meta != 0) {
-            skippedChars_ +=
-                ensureChar(apache::thrift::detail::json::kJSONElemSeparator);
+            skippedChars_ += ensureCharExpectNoWhitespace(
+                apache::thrift::detail::json::kJSONElemSeparator);
           }
           keyish_ = true;
         } else {
-          skippedChars_ +=
-              ensureChar(apache::thrift::detail::json::kJSONPairSeparator);
+          skippedChars_ += ensureCharExpectNoWhitespace(
+              apache::thrift::detail::json::kJSONPairSeparator);
         }
         break;
       case ContextType::ARRAY:
         if (meta != 0) {
-          skippedChars_ +=
-              ensureChar(apache::thrift::detail::json::kJSONElemSeparator);
+          skippedChars_ += ensureCharExpectNoWhitespace(
+              apache::thrift::detail::json::kJSONElemSeparator);
         }
         break;
       default:

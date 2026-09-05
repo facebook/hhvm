@@ -66,7 +66,6 @@ pub struct HhConfig {
     pub use_distc_crawl_dircache: bool,
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
-    pub distc_parallel_decl_decode: bool,
     pub distc_decl_buckets: i64,
     pub distc_enable_p2p: bool,
 }
@@ -92,7 +91,6 @@ impl Default for HhConfig {
             use_distc_crawl_dircache: false,
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
-            distc_parallel_decl_decode: false,
             distc_decl_buckets: 0,
             distc_enable_p2p: false,
         }
@@ -408,6 +406,10 @@ impl HhConfig {
                 "silence_errors_under_dynamic",
                 default.tco_silence_errors_under_dynamic,
             )?,
+            tco_reject_promoted_property_redeclaration: hhconfig.get_bool_or(
+                "reject_promoted_property_redeclaration",
+                default.tco_reject_promoted_property_redeclaration,
+            )?,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
             tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,
@@ -697,9 +699,6 @@ impl HhConfig {
                 "distc_enable_p2p" => {
                     c.distc_enable_p2p = parse_json(&value)?;
                 }
-                "distc_parallel_decl_decode" => {
-                    c.distc_parallel_decl_decode = parse_json(&value)?;
-                }
                 _ => {}
             }
         }
@@ -711,7 +710,6 @@ impl HhConfig {
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_enable_p2p": self.distc_enable_p2p,
-            "distc_parallel_decl_decode": self.distc_parallel_decl_decode,
         });
         experiments.to_string()
     }

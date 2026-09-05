@@ -28,7 +28,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BackpressurePolicy.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
@@ -106,7 +105,6 @@ static_assert(
     "the fragmenter is the batcher's only BatchWriteComplete subscriber in "
     "both backpressure configurations; a NoOp tracker here would strand it");
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
@@ -152,7 +150,16 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   boost::intrusive_ptr<ThriftConnContext> connContext;
   if (config_.enableRequestContext) {
     connContext.reset(new ThriftConnContext());
+    if (config_.connExtensionLayout != nullptr) {
+      connContext->installExtensions(*config_.connExtensionLayout);
+    }
     connContext->setPeerAddress(clientAddr);
+    // Non-owning. The transport is owned by the transport adapter, which
+    // ThriftServerConnection tears down after the pipeline that reads this —
+    // so it outlives every handler holding the context. Security is
+    // snapshotted separately because this is already the post-StopTLS
+    // transport when one was negotiated, and reports nothing about the peer.
+    connContext->setTransport(socket.get());
     if (peerSecurity != nullptr) {
       connContext->setPeerCertificate(peerSecurity->peerCertificate);
       connContext->setSecurityProtocol(peerSecurity->securityProtocol);
@@ -348,9 +355,14 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       << "enableRequestHeaders requires enableRequestContext; the request "
          "headers handler is skipped while enableRequestContext is off";
   if (config_.enableRequestContext) {
+    // Duplex: inbound it creates the per-request context, outbound it hands
+    // that context's response headers to the outgoing metadata. Sitting
+    // closest to the head on the write path makes it the last contributor
+    // downstream of every handler and extension that can add one.
     thriftPipelineBuilder
-        .template addNextInbound<ReqCtxHandler>(
-            thrift_server_request_context_handler_tag)
+        .template addNextDuplex<ReqCtxHandler>(
+            thrift_server_request_context_handler_tag,
+            config_.requestExtensionLayout.get())
         .template addNextInbound<ConnCtxHandler>(
             thrift_server_connection_context_handler_tag,
             std::move(connContext));
@@ -428,8 +440,6 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
                      .setTail(appAdapter)
                      .setAllocator(&rocketAllocator_)
                      .addState<rocket::RocketStreamContexts>();
-  builder.addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-      frame_length_parser_handler_tag);
   // Batching and fragmentation are always present, but which specialization
   // is spliced depends on enableBackpressure. The no-backpressure variants
   // batch and fragment identically; they simply carry no write-ready hook, so

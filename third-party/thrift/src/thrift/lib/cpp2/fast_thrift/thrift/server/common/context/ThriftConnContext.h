@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -25,20 +26,16 @@
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
 
 #include <folly/SocketAddress.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/AsyncTransportCertificate.h>
 
+#include <folly/CppAttributes.h>
+
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
-#include <thrift/lib/cpp2/util/TypeErasedValue.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ExtensionSlots.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
-
-namespace detail {
-
-// The security layer's internal-fields slot, stored inline in the context
-// that owns it. Same type and size as the classic server's.
-using InternalFieldsT = apache::thrift::util::TypeErasedValue<128>;
-
-} // namespace detail
 
 // Per-connection context. Lives for the duration of one accepted connection.
 //
@@ -61,11 +58,7 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
                               ThriftConnContext,
                               boost::thread_unsafe_counter> {
  public:
-  // The security layer's per-connection fields are constructed by whoever
-  // accepts the connection and moved in here; a server with no security layer
-  // leaves the slot empty.
-  explicit ThriftConnContext(detail::InternalFieldsT internalFields = {})
-      : internalFields_(std::move(internalFields)) {}
+  ThriftConnContext() = default;
 
   ThriftConnContext(const ThriftConnContext&) = delete;
   ThriftConnContext& operator=(const ThriftConnContext&) = delete;
@@ -87,6 +80,19 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
     return peerCertificate_.get();
   }
 
+  // The connection's transport. Non-owning, and valid only while the
+  // connection is open — the transport outlives this context, but neither
+  // outlives the connection, so nothing may retain it.
+  //
+  // EventBase-affine: only touch it from the connection's own EventBase, which
+  // rules out a service that has been handed off to a CPU executor. Prefer the
+  // snapshotted peer certificate above, which is safe from anywhere and, after
+  // a StopTLS downgrade, is the only thing that still knows what the peer
+  // proved — by then this reports a plaintext socket.
+  const folly::AsyncTransport* getTransport() const noexcept {
+    return transport_;
+  }
+
   // Opaque per-connection slot. The deleter runs at connection close.
   //
   // There is one, so it has one owner. Anything shared between handlers, or
@@ -98,20 +104,54 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
   }
   void* getUserData() const noexcept { return userData_.get(); }
 
-  // The security layer's per-connection fields. Unchecked: only valid for the
-  // `T` the slot was constructed with, and only once something has filled it.
-  template <class T>
-  T& getInternalFields() noexcept {
-    return internalFields_.value_unchecked<T>();
+  // Points this context at the peer's resolved identities, in the opaque form
+  // the security layer hands them out in. Non-owning: the identities live on
+  // the context that resolved them.
+  void setPeerIdentities(void* FOLLY_NULLABLE identities) noexcept {
+    peerIdentities_ = identities;
   }
 
-  template <class T>
-  const T& getInternalFields() const noexcept {
-    return internalFields_.value_unchecked<T>();
+  // The peer's identities, or null when nothing resolved any. Opaque: only the
+  // security layer knows the type behind it.
+  void* FOLLY_NULLABLE getPeerIdentities() const noexcept {
+    return peerIdentities_;
   }
 
-  bool hasInternalFields() const noexcept {
-    return internalFields_.has_value();
+  // What the client said about itself in its setup: its hostname, its agent,
+  // and whatever else it chose to send. Client-supplied and unverified — good
+  // for triage, not evidence.
+  void setClientMetadata(apache::thrift::ClientMetadata metadata) noexcept {
+    clientMetadata_ = std::move(metadata);
+  }
+
+  // Null when the client sent none.
+  const apache::thrift::ClientMetadata* FOLLY_NULLABLE
+  getClientMetadata() const noexcept {
+    return clientMetadata_.has_value() ? &clientMetadata_.value() : nullptr;
+  }
+
+  // Builds this connection's extension storage from the server's conn-scope
+  // layout, which must outlive the connection. Called once, by whoever creates
+  // the context, before any handler sees it.
+  void installExtensions(const ExtensionLayout& layout) {
+    extensionSlots_.install(layout);
+  }
+
+  // `Ext`'s per-connection state, or null when `Ext` is not installed on this
+  // server. An extension that declares no `ConnState` does not compile here, so
+  // asking for a scope an extension does not have is caught at build time
+  // rather than read as absent.
+  template <class Ext>
+  typename Ext::ConnState* FOLLY_NULLABLE tryState() const noexcept {
+    return extensionSlots_.find<typename Ext::ConnState>(Ext::kId);
+  }
+
+  // Publishes `Ext`'s state on this context. Non-owning: the extension keeps
+  // it alive while the context can reach it, and clears the slot when it does
+  // not.
+  template <class Ext>
+  void setState(typename Ext::ConnState* FOLLY_NULLABLE state) noexcept {
+    extensionSlots_.set(Ext::kId, state);
   }
 
   void setPeerAddress(folly::SocketAddress addr) noexcept {
@@ -124,13 +164,19 @@ class ThriftConnContext : public boost::intrusive_ref_counter<
       std::shared_ptr<const folly::AsyncTransportCertificate> cert) noexcept {
     peerCertificate_ = std::move(cert);
   }
+  void setTransport(const folly::AsyncTransport* transport) noexcept {
+    transport_ = transport;
+  }
 
  private:
   folly::SocketAddress peerAddress_{};
   std::string securityProtocol_;
   std::shared_ptr<const folly::AsyncTransportCertificate> peerCertificate_;
+  const folly::AsyncTransport* transport_{nullptr};
   rocket::TypeErasedPtr userData_{};
-  detail::InternalFieldsT internalFields_;
+  std::optional<apache::thrift::ClientMetadata> clientMetadata_;
+  void* peerIdentities_{nullptr};
+  ExtensionSlots extensionSlots_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

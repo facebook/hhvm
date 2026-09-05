@@ -240,6 +240,12 @@ TYPED_TEST(CppAllocatorDeserializeTest, ElementPropagatesAllocator) {
   map.field() = {{kTooLong, kTooLong}};
   checkDeserializePropagatesAllocator<TypeParam>(map);
 }
+
+TYPED_TEST(CppAllocatorDeserializeTest, SortedVectorMapPropagatesAllocator) {
+  HasAllocatorAwareSortedVectorMapValue value;
+  value.field() = {{1, kTooLong}};
+  checkDeserializePropagatesAllocator<TypeParam>(value);
+}
 } // namespace
 
 TEST(CppAllocatorTest, DeserializeNestedPmr) {

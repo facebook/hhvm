@@ -197,6 +197,16 @@ void FastThriftServer::addModule(FastServerModule module) {
             "extension, which requires enableRequestContext",
             module.name()));
   }
+  // Same posture for headers: they are reachable only through the per-request
+  // context, and only this setting puts them there. An extension that gates on
+  // a header it never receives would admit everything.
+  if (module.requiresHeaders() && !config_.enableRequestHeaders) {
+    throw std::logic_error(
+        fmt::format(
+            "FastThriftServer::addModule: module '{}' registers an extension "
+            "that uses headers, which requires enableRequestHeaders",
+            module.name()));
+  }
   // Two independent things pausing and resuming the same connection's reads,
   // with nothing arbitrating between them: WriteBufferBackpressureHandler
   // resumes as soon as its own buffer drains, which would lift a pause the
@@ -435,6 +445,13 @@ void FastThriftServer::start() {
   // request-context wiring). The embedder onConnectionAccepted hook (if any)
   // runs from the connection-layer ConnectionAcceptCallbackHandler, reaching
   // the per-connection ThriftConnContext via ThriftServerConnection.
+  // Frozen here: every extension has registered by now, and both layouts are
+  // shared unchanged by every connection and request from this point on.
+  connExtensionLayout_ = std::make_shared<const ExtensionLayout>(
+      std::move(connExtensionBuilder_).build());
+  requestExtensionLayout_ = std::make_shared<const ExtensionLayout>(
+      std::move(requestExtensionBuilder_).build());
+
   server::ThriftServerConnectionFactoryConfig factoryConfig{
       .handler = handler_,
       .cpuExecutor = cpuExecutor_,
@@ -445,6 +462,8 @@ void FastThriftServer::start() {
       .securityHandler = auxInterfaces_.securityHandler,
       .metadataResponse = metadataResponse_,
       .zeroCopyThreshold = config_.zeroCopyThreshold,
+      .connExtensionLayout = connExtensionLayout_,
+      .requestExtensionLayout = requestExtensionLayout_,
       .enableRequestContext = config_.enableRequestContext,
       .enableRequestHeaders = config_.enableRequestHeaders,
       .enableChecksum = config_.enableChecksum,

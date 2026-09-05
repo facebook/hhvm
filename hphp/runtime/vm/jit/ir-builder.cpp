@@ -535,24 +535,6 @@ SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeCheckInitMem(IRInstruction* inst) {
-  auto const ptr = inst->src(0);
-  assertx(ptr->isA(TMem));
-
-  auto const type = m_state.typeOfPointee(ptr);
-  if (!type.maybe(TUninit)) {
-    inst->convertToNop();
-    return nullptr;
-  }
-  if (type <= TUninit) {
-    gen(Jmp, inst->taken());
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeIsTypeMem(IRInstruction* inst) {
   assertx(inst->is(IsTypeMem, IsNTypeMem));
   auto const ptr = inst->src(0);
@@ -715,7 +697,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(StMem)
   X(StMemMeta)
   X(CheckTypeMem)
-  X(CheckInitMem)
   X(IsTypeMem)
   X(IsNTypeMem)
   X(StMROProp)

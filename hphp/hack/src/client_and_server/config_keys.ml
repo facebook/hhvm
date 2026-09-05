@@ -209,6 +209,9 @@ module Hhconfig = struct
 
   let silence_errors_under_dynamic = key "silence_errors_under_dynamic"
 
+  let reject_promoted_property_redeclaration =
+    key "reject_promoted_property_redeclaration"
+
   let skip_check_under_dynamic = key "skip_check_under_dynamic"
 
   let typed_open_shapes = key "typed_open_shapes"

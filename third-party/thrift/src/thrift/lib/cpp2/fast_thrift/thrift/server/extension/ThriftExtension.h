@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -172,16 +173,15 @@ class ThriftRequestView {
 
   // Value of custom request header `key`, or nullptr if absent.
   //
-  // Costs one std::string temporary per lookup: the metadata map's hasher and
-  // key-equal are not transparent, so it cannot be searched by string_view.
+  // The per-request context is the only place headers live. Declaring
+  // kUsesHeaders is what guarantees one is there: without it a server may be
+  // configured with no header support and this reads empty. The lookup is free
+  // of temporaries — the context's map is searchable by string_view.
   const std::string* header(std::string_view key) const noexcept {
-    const auto* md = request_.payload.getRequestRpcMetadata();
-    if (md == nullptr || !md->otherMetadata().has_value()) {
+    if (request_.requestContext == nullptr) {
       return nullptr;
     }
-    const auto& headers = *md->otherMetadata();
-    const auto it = headers.find(std::string(key));
-    return it == headers.end() ? nullptr : &it->second;
+    return request_.requestContext->getHeader(key);
   }
 
   // Rocket stream id correlating this request with its response.
@@ -202,20 +202,21 @@ class ThriftRequestMutator final : public ThriftRequestView {
   explicit ThriftRequestMutator(ThriftServerRequestMessage& request) noexcept
       : ThriftRequestView(request), request_(request) {}
 
-  // Set (or overwrite) a custom request header seen by downstream handlers and
-  // the service. No-op if the request carries no mutable metadata.
+  // Set (or overwrite) a custom request header seen by downstream extensions
+  // and the service.
+  //
+  // Writes to the per-request context, the one place headers are read from.
+  // Dropped on a server with no request context — see header() for why
+  // kUsesHeaders is what keeps that from happening.
   //
   // noexcept despite allocating: extension callbacks are themselves noexcept,
   // so an escaping bad_alloc terminates either way. OOM ⇒ terminate is the
   // pipeline-wide contract, not a hazard introduced here.
   void setHeader(std::string key, std::string value) noexcept {
-    if (!request_.payload.is<ThriftRequestResponsePayload>()) {
+    if (request_.requestContext == nullptr) {
       return;
     }
-    auto& rr = request_.payload.get<ThriftRequestResponsePayload>();
-    if (rr.metadata != nullptr) {
-      rr.metadata->otherMetadata().ensure()[std::move(key)] = std::move(value);
-    }
+    request_.requestContext->setHeader(std::move(key), std::move(value));
   }
 
  private:
@@ -224,8 +225,8 @@ class ThriftRequestMutator final : public ThriftRequestView {
 
 /**
  * Read-only view of an outbound response. Header access is only meaningful for
- * the normal (non-error) response; on an error response the accessors report
- * empty. Valid only for the duration of the callback.
+ * a response that has a per-request context behind it: framework-generated
+ * responses (parse errors, wrong RPC kind) have none and report empty.
  *
  * Base of ThriftResponseMutator; see ThriftRequestView for the non-virtual
  * destructor rationale.
@@ -248,18 +249,16 @@ class ThriftResponseView {
     return response_.payload.is<ThriftErrorPayload>();
   }
 
-  // See ThriftRequestView::header for the per-lookup allocation.
+  // Value of custom response header `key`, or nullptr if absent.
+  //
+  // Reads the headers the response is going to carry, off the per-request
+  // context — the extensions run while the response is still accumulating them
+  // and before they are handed to the outgoing metadata.
   const std::string* header(std::string_view key) const noexcept {
-    if (!response_.payload.is<ThriftInitialResponsePayload>()) {
+    if (response_.requestContext == nullptr) {
       return nullptr;
     }
-    const auto& ir = response_.payload.get<ThriftInitialResponsePayload>();
-    if (ir.metadata == nullptr || !ir.metadata->otherMetadata().has_value()) {
-      return nullptr;
-    }
-    const auto& headers = *ir.metadata->otherMetadata();
-    const auto it = headers.find(std::string(key));
-    return it == headers.end() ? nullptr : &it->second;
+    return response_.requestContext->getResponseHeader(key);
   }
 
  private:
@@ -276,16 +275,17 @@ class ThriftResponseMutator final : public ThriftResponseView {
   explicit ThriftResponseMutator(ThriftServerResponseMessage& response) noexcept
       : ThriftResponseView(response), response_(response) {}
 
-  // Set (or overwrite) a custom response header. No-op on an error response.
-  // See ThriftRequestMutator::setHeader for the noexcept rationale.
+  // Set (or overwrite) a custom response header, on the same context the
+  // service handler writes its own to. Dropped for a response with no
+  // per-request context, and for a Rocket ERROR frame, which has no metadata to
+  // carry headers on. See ThriftRequestMutator::setHeader for the noexcept
+  // rationale.
   void setHeader(std::string key, std::string value) noexcept {
-    if (!response_.payload.is<ThriftInitialResponsePayload>()) {
+    if (response_.requestContext == nullptr) {
       return;
     }
-    auto& ir = response_.payload.get<ThriftInitialResponsePayload>();
-    if (ir.metadata != nullptr) {
-      ir.metadata->otherMetadata().ensure()[std::move(key)] = std::move(value);
-    }
+    response_.requestContext->setResponseHeader(
+        std::move(key), std::move(value));
   }
 
  private:
@@ -331,6 +331,25 @@ concept HasResponseMutatorCallback = requires(H& h, ThriftResponseMutator& m) {
 template <typename H>
 concept HasResponseCallback =
     HasResponseViewCallback<H> || HasResponseMutatorCallback<H>;
+
+/**
+ * True iff H reads or writes request/response headers, by declaring
+ *
+ *   static constexpr bool kUsesHeaders = true;
+ *
+ * Headers live only on the per-request context, and a server populates that
+ * context only when configured to. FastThriftServer::addModule refuses a module
+ * carrying such an extension unless enableRequestHeaders is set, so a
+ * misconfigured server fails at startup rather than handing the extension
+ * silently empty headers.
+ *
+ * One declaration covers both directions: enableRequestHeaders implies
+ * enableRequestContext, which is all the response side needs.
+ */
+template <typename H>
+concept UsesHeaders = requires {
+  { H::kUsesHeaders } -> std::convertible_to<bool>;
+} && H::kUsesHeaders;
 
 /**
  * True iff H shares per-connection state with its peer extensions, by defining

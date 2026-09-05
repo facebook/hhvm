@@ -766,6 +766,11 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
       true
     | _ -> false
   in
+  let is_depgraph_unavailable =
+    match exit_status with
+    | Some c when c = Exit_status.(exit_code Depgraph_unavailable) -> true
+    | _ -> false
+  in
   let is_sql_assertion_failure =
     match exit_status with
     | Some c
@@ -848,6 +853,11 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
       else if is_heap_stale then
         let reason =
           "Several large rebases caused shared heap to be stale. Restarting"
+        in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_depgraph_unavailable then
+        let reason =
+          "hh_server dependency graph became unavailable. Restarting"
         in
         (Some reason, set_server (Ok env) Not_yet_started)
       else if is_big_rebase then

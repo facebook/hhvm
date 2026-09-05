@@ -177,14 +177,14 @@ struct TriviallyCopyableStruct {
   1: required i32 field;
 }
 
-@cpp.Type{name = "apache::thrift::frozen::FixedSizeString<2>"}
+@cpp.Adapter{name = "::apache::thrift::StringTypeAdapter<apache::thrift::frozen::FixedSizeString<2>>"}
 typedef string Fixed2
-@cpp.Type{name = "apache::thrift::frozen::FixedSizeString<8>"}
+@cpp.Adapter{name = "::apache::thrift::StringTypeAdapter<apache::thrift::frozen::FixedSizeString<8>>"}
 typedef string Fixed8
 
 struct TestFixedSizeString {
   1: Fixed8 bytes8;
-  @cpp.Type{name = "apache::thrift::frozen::FixedSizeString<4>"}
+  @cpp.Adapter{name = "::apache::thrift::StringTypeAdapter<apache::thrift::frozen::FixedSizeString<4>>"}
   2: optional string bytes4;
   @cpp.Type{template = "apache::thrift::frozen::VectorAsHashMap"}
   3: map<Fixed8, Fixed2> aMapToFreeze;

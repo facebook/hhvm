@@ -79,12 +79,75 @@ ThriftServerRequestMessage makeRequestWithMetadata(
   return req;
 }
 
+// Outbound message as the tail adapter emits it: typed metadata plus the
+// originating context, whose response headers are still on the context.
+ThriftServerResponseMessage makeResponseWithHeaders(
+    std::unique_ptr<ThriftRequestContext> requestContext) {
+  ThriftServerResponseMessage resp;
+  resp.requestContext = std::move(requestContext);
+  resp.payload =
+      ThriftServerOutboundPayloadVariant{ThriftInitialResponsePayload{
+          .data = folly::IOBuf::copyBuffer("body"),
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
+          .streamId = 7}};
+  return resp;
+}
+
+const apache::thrift::ResponseRpcMetadata& writtenMetadata(
+    const TypeErasedBox& box) {
+  return *box.get<ThriftServerResponseMessage>()
+              .payload.get<ThriftInitialResponsePayload>()
+              .metadata;
+}
+
 } // namespace
+
+// The context knows which method the request named, copied off the metadata
+// because the context outlives the payload that carried it.
+TEST(ThriftServerRequestContextHandlerTest, StampsTheMethodName) {
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
+  FakeContext ctx;
+
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = "Service.method";
+  ThriftServerRequestMessage req;
+  req.payload = ThriftRequestResponsePayload{
+      .data = folly::IOBuf::copyBuffer("body"),
+      .metadata = std::move(metadata)};
+
+  EXPECT_EQ(
+      handler.onRead(ctx, erase_and_box(std::move(req))), Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_EQ(forwarded.requestContext->getMethodName(), "Service.method");
+}
+
+// A request whose metadata names no method leaves the context without one,
+// rather than an empty name that reads as if it had been set.
+TEST(ThriftServerRequestContextHandlerTest, NoMethodNameLeavesItEmpty) {
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
+  FakeContext ctx;
+
+  ThriftServerRequestMessage req;
+  req.payload = ThriftRequestResponsePayload{
+      .data = folly::IOBuf::copyBuffer("body"),
+      .metadata = std::make_unique<apache::thrift::RequestRpcMetadata>()};
+
+  EXPECT_EQ(
+      handler.onRead(ctx, erase_and_box(std::move(req))), Result::Success);
+
+  ASSERT_EQ(ctx.forwarded.size(), 1);
+  auto& forwarded = ctx.forwarded.front().get<ThriftServerRequestMessage>();
+  ASSERT_NE(forwarded.requestContext, nullptr);
+  EXPECT_TRUE(forwarded.requestContext->getMethodName().empty());
+}
 
 TEST(
     ThriftServerRequestContextHandlerTest,
     StampsDefaultRequestContextOnInboundMessage) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -101,7 +164,7 @@ TEST(
 }
 
 TEST(ThriftServerRequestContextHandlerTest, EachRequestGetsItsOwnContext) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   for (uint32_t sid = 1; sid <= 3; ++sid) {
@@ -123,7 +186,7 @@ TEST(
   auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
   metadata->name() = "Service.method";
 
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -145,7 +208,7 @@ TEST(ThriftServerRequestContextHandlerTest, LeavesMethodNameOnTheMetadata) {
   auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
   metadata->name() = "Service.method";
 
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -167,7 +230,7 @@ TEST(ThriftServerRequestContextHandlerTest, LeavesMethodNameOnTheMetadata) {
 // simply empty.
 TEST(
     ThriftServerRequestContextHandlerTest, MethodNameEmptyWhenMetadataHasNone) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   EXPECT_EQ(
@@ -184,8 +247,46 @@ TEST(
   EXPECT_TRUE(forwarded.requestContext->getMethodName().empty());
 }
 
+// The closing half of the handler's job: response headers accumulated on the
+// context reach the outgoing metadata on the way out. Everything upstream of
+// here writes them to the context and nowhere else.
+TEST(ThriftServerRequestContextHandlerTest, DrainsResponseHeadersOnWrite) {
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  requestContext->setResponseHeader("shard", "42");
+
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onWrite(
+          ctx,
+          erase_and_box(makeResponseWithHeaders(std::move(requestContext)))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.written.size(), 1);
+  const ThriftRequestContext::HeaderMap expected{{"shard", "42"}};
+  const auto& metadata = writtenMetadata(ctx.written.front());
+  ASSERT_TRUE(metadata.otherMetadata().has_value());
+  EXPECT_EQ(*metadata.otherMetadata(), expected);
+}
+
+// A response with no per-request context behind it — a framework-generated
+// error, say — still goes out untouched.
+TEST(ThriftServerRequestContextHandlerTest, WriteWithoutContextIsPassThrough) {
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
+  FakeContext ctx;
+
+  EXPECT_EQ(
+      handler.onWrite(ctx, erase_and_box(makeResponseWithHeaders(nullptr))),
+      Result::Success);
+
+  ASSERT_EQ(ctx.written.size(), 1);
+  EXPECT_FALSE(
+      writtenMetadata(ctx.written.front()).otherMetadata().has_value());
+}
+
 TEST(ThriftServerRequestContextHandlerTest, ForwardsExceptions) {
-  ThriftServerRequestContextHandler<FakeContext> handler;
+  ThriftServerRequestContextHandler<FakeContext> handler{nullptr};
   FakeContext ctx;
 
   handler.onException(

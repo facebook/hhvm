@@ -40,9 +40,9 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -86,7 +86,6 @@ std::unique_ptr<folly::IOBuf> makePayloadData(size_t size) {
   return folly::IOBuf::copyBuffer(std::string(size, 'x'));
 }
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -164,7 +163,9 @@ struct BenchmarkFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
   AppAdapter::Ptr appAdapter{new AppAdapter()};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
       transportHandler;
   PipelineImpl::Ptr pipeline;
   TestAllocator allocator;
@@ -175,8 +176,11 @@ struct BenchmarkFixture {
     testTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
     transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+        apache::thrift::fast_thrift::transport::TransportHandlerT<
+            apache::thrift::fast_thrift::transport::
+                NoOpWriteCompleteEventFactory,
+            apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+            create(std::move(transport));
 
     appAdapter->setRequestHandlers(
         [](TypeErasedBox&& /*msg*/) noexcept -> Result {
@@ -186,7 +190,10 @@ struct BenchmarkFixture {
 
     pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::TransportHandlerT<
+                apache::thrift::fast_thrift::transport::
+                    NoOpWriteCompleteEventFactory,
+                apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
             AppAdapter,
             TestAllocator>()
             .setEventBase(&evb)
@@ -195,8 +202,7 @@ struct BenchmarkFixture {
             .setAllocator(&allocator)
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+
             .addNextOutbound<FrameLengthEncoderHandler>(
                 frame_length_encoder_handler_tag)
             .addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)

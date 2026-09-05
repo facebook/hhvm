@@ -36,8 +36,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
@@ -57,7 +57,6 @@ using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
 using namespace apache::thrift::fast_thrift;
 using namespace apache::thrift::fast_thrift::frame;
-using namespace apache::thrift::fast_thrift::frame::read::handler;
 using namespace apache::thrift::fast_thrift::frame::write::handler;
 using namespace apache::thrift::fast_thrift::frame::read;
 using namespace apache::thrift::fast_thrift::frame::write;
@@ -82,7 +81,6 @@ constexpr uint32_t kErrorCodeApplicationError = 0x00000201;
 constexpr uint32_t kErrorCodeConnectionClose = 0x00000102;
 
 // Handler tags for pipeline construction
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -164,7 +162,9 @@ struct BenchmarkFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
   AppAdapter::Ptr appAdapter{new AppAdapter()};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
       transportHandler;
   PipelineImpl::Ptr pipeline;
   TestAllocator allocator;
@@ -175,8 +175,11 @@ struct BenchmarkFixture {
     testTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
     transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+        apache::thrift::fast_thrift::transport::TransportHandlerT<
+            apache::thrift::fast_thrift::transport::
+                NoOpWriteCompleteEventFactory,
+            apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+            create(std::move(transport));
 
     appAdapter->setResponseHandlers(
         [](TypeErasedBox&& /*msg*/) noexcept -> Result {
@@ -184,36 +187,39 @@ struct BenchmarkFixture {
         },
         [](folly::exception_wrapper&& /*e*/) noexcept {});
 
-    pipeline = PipelineBuilder<
-                   apache::thrift::fast_thrift::transport::TransportHandler,
-                   AppAdapter,
-                   TestAllocator>()
-                   .setEventBase(&evb)
-                   .setHead(transportHandler.get())
-                   .setTail(appAdapter.get())
-                   .setAllocator(&allocator)
-                   .addState<apache::thrift::fast_thrift::rocket::client::
-                                 RocketClientStreamContexts>()
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextDuplex<RocketClientFrameCodecHandler>(
-                       rocket_client_frame_codec_handler_tag)
-                   .addNextInbound<RocketClientConnectionErrorHandler>(
-                       rocket_client_connection_error_handler_tag)
-                   .addNextDuplex<RocketClientSetupFrameHandler>(
-                       rocket_client_setup_handler_tag,
-                       []() {
-                         return std::make_pair(
-                             folly::IOBuf::copyBuffer("setup"),
-                             std::unique_ptr<folly::IOBuf>());
-                       })
-                   .addNextDuplex<RocketClientStreamStateHandler>(
-                       rocket_client_stream_state_handler_tag)
-                   .addNextInbound<RocketClientRequestResponseHandler>(
-                       rocket_client_request_response_handler_tag)
-                   .build();
+    pipeline =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandlerT<
+                apache::thrift::fast_thrift::transport::
+                    NoOpWriteCompleteEventFactory,
+                apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
+            AppAdapter,
+            TestAllocator>()
+            .setEventBase(&evb)
+            .setHead(transportHandler.get())
+            .setTail(appAdapter.get())
+            .setAllocator(&allocator)
+            .addState<apache::thrift::fast_thrift::rocket::client::
+                          RocketClientStreamContexts>()
+
+            .addNextOutbound<FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<RocketClientFrameCodecHandler>(
+                rocket_client_frame_codec_handler_tag)
+            .addNextInbound<RocketClientConnectionErrorHandler>(
+                rocket_client_connection_error_handler_tag)
+            .addNextDuplex<RocketClientSetupFrameHandler>(
+                rocket_client_setup_handler_tag,
+                []() {
+                  return std::make_pair(
+                      folly::IOBuf::copyBuffer("setup"),
+                      std::unique_ptr<folly::IOBuf>());
+                })
+            .addNextDuplex<RocketClientStreamStateHandler>(
+                rocket_client_stream_state_handler_tag)
+            .addNextInbound<RocketClientRequestResponseHandler>(
+                rocket_client_request_response_handler_tag)
+            .build();
 
     appAdapter->setPipeline(pipeline.get());
     transportHandler->setPipeline(pipeline.get());
@@ -345,8 +351,11 @@ BENCHMARK(Rocket_SetupFrame, iters) {
     fixture.testTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
     fixture.transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+        apache::thrift::fast_thrift::transport::TransportHandlerT<
+            apache::thrift::fast_thrift::transport::
+                NoOpWriteCompleteEventFactory,
+            apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+            create(std::move(transport));
     fixture.appAdapter->setResponseHandlers(
         [](TypeErasedBox&& /*msg*/) noexcept -> Result {
           return Result::Success;
@@ -355,7 +364,10 @@ BENCHMARK(Rocket_SetupFrame, iters) {
 
     fixture.pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::TransportHandlerT<
+                apache::thrift::fast_thrift::transport::
+                    NoOpWriteCompleteEventFactory,
+                apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
             AppAdapter,
             TestAllocator>()
             .setEventBase(&fixture.evb)
@@ -364,8 +376,7 @@ BENCHMARK(Rocket_SetupFrame, iters) {
             .setAllocator(&fixture.allocator)
             .addState<apache::thrift::fast_thrift::rocket::client::
                           RocketClientStreamContexts>()
-            .addNextInbound<FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+
             .addNextOutbound<FrameLengthEncoderHandler>(
                 frame_length_encoder_handler_tag)
             .addNextDuplex<RocketClientFrameCodecHandler>(

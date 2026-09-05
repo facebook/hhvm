@@ -47,6 +47,7 @@ class DetachedReadCallback : public IoUringRecvCallback {
       override {
     done();
   }
+  void recvBuffersScarce(bool /*scarce*/) noexcept override {}
 
   void done() {
     promise.setValue(std::move(data_));
@@ -79,7 +80,9 @@ class IoUringRecvHandle::RecvRequest
         fd_(fd),
         handle_(handle),
         handleGuard_(handle) {
-    if (backend->zcBufferPool() && !addr.isLoopbackAddress()) {
+    bool zcRxUsable = backend->zcBufferPool() &&
+        (!addr.isLoopbackAddress() || backend->options().zcRxNoDev);
+    if (zcRxUsable) {
       bufferPool_ = backend->zcBufferPool();
     } else {
       bufferRing_ = backend->bufferProvider();
@@ -131,7 +134,7 @@ class IoUringRecvHandle::RecvRequest
     auto res = cqe->res;
 
     if (res > 0) {
-      handle_->onRecvComplete(getData(cqe));
+      completeRecv(cqe);
       return;
     }
 
@@ -153,7 +156,7 @@ class IoUringRecvHandle::RecvRequest
     DestructorGuard dg(this);
 
     if (cqe->res > 0) {
-      handle_->onRecvComplete(getData(cqe));
+      completeRecv(cqe);
     }
 
     if (!(cqe->flags & IORING_CQE_F_MORE)) {
@@ -163,12 +166,18 @@ class IoUringRecvHandle::RecvRequest
   }
 
  private:
-  std::unique_ptr<IOBuf> getData(const struct io_uring_cqe* cqe) {
+  void completeRecv(const struct io_uring_cqe* cqe) {
     if (bufferPool_) {
       const auto* rcqe = (struct io_uring_zcrx_cqe*)(cqe + 1);
-      return bufferPool_->getIoBuf(cqe, rcqe);
+      auto result = bufferPool_->getIoBuf(cqe, rcqe);
+      handle_->onBuffersScarce(result.isScarce);
+      handle_->onRecvComplete(std::move(result.buffer));
+      return;
     }
+    handle_->onRecvComplete(getData(cqe));
+  }
 
+  std::unique_ptr<IOBuf> getData(const struct io_uring_cqe* cqe) {
     if (fallbackBuffer_) {
       fallbackBuffer_->append(cqe->res);
       return std::move(fallbackBuffer_);
@@ -387,6 +396,13 @@ void IoUringRecvHandle::ensureRecvArmed() {
   backend_->submitSoon(*request_);
 }
 
+void IoUringRecvHandle::onBuffersScarce(bool scarce) noexcept {
+  DestructorGuard dg(this);
+  if (backend_ && recvCallback_) {
+    recvCallback_->recvBuffersScarce(scarce);
+  }
+}
+
 void IoUringRecvHandle::onRecvComplete(std::unique_ptr<IOBuf> data) {
   DestructorGuard dg(this);
   if (backend_ == nullptr) {
@@ -505,6 +521,10 @@ void IoUringRecvHandle::appendQueuedData(std::unique_ptr<IOBuf> /*data*/) {
 }
 
 void IoUringRecvHandle::ensureRecvArmed() {
+  folly::terminate_with<std::runtime_error>("io_uring not supported");
+}
+
+void IoUringRecvHandle::onBuffersScarce(bool /*scarce*/) noexcept {
   folly::terminate_with<std::runtime_error>("io_uring not supported");
 }
 

@@ -93,9 +93,10 @@ TEST(FastThriftAdapterBaseTest, PayloadFrameYieldsResultWithData) {
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result.value(), nullptr);
+  ASSERT_NE(result.value().data, nullptr);
   EXPECT_EQ(
-      result.value()->moveToFbString().toStdString(), std::string{"hello"});
+      result.value().data->moveToFbString().toStdString(),
+      std::string{"hello"});
 }
 
 TEST(FastThriftAdapterBaseTest, ErrorFrameReturnsDecodedException) {
@@ -193,7 +194,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithDeclaredExceptionPassesThrough) {
   // Declared exceptions pass through — generated code reads the presult
   // struct from the data IOBuf to surface the typed exception.
   ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result.value(), nullptr);
+  ASSERT_NE(result.value().data, nullptr);
 }
 
 TEST(FastThriftAdapterBaseTest, PayloadWithNoMetadataPassesThrough) {

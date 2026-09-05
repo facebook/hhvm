@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ThriftServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -209,8 +210,8 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
   }
 
   struct BuiltPipeline {
-    apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-        transportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::
+        Ptr transportHandler;
     PipelineImpl::Ptr pipeline;
     // Raw ptr — owned by the test body's local composite Ptr. Held here so
     // ~BuiltPipeline can release the composite's pipelineGuard_ before its
@@ -237,9 +238,8 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
       std::function<Result(
           apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&&)> writeHandler = nullptr) {
-    auto transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            createMockSocket());
+    auto transportHandler = apache::thrift::fast_thrift::transport::test::
+        PassthroughTransportHandler::create(createMockSocket());
 
     auto handlerPtr = std::make_unique<MockHandler>();
     if (writeHandler) {
@@ -248,7 +248,8 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
 
     auto pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler,
             ThriftServerCompositeAppAdapter,
             TestAllocator>()
             .setEventBase(evb_)

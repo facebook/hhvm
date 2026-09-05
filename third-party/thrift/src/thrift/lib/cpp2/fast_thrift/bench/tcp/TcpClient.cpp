@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::bench {
 
@@ -45,8 +46,8 @@ class TcpClient::AppAdapter {
   explicit AppAdapter(folly::AsyncTransport::UniquePtr socket)
       : evb_(socket->getEventBase()),
         transportHandler_(
-            apache::thrift::fast_thrift::transport::TransportHandler::create(
-                std::move(socket))) {}
+            apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler::create(std::move(socket))) {}
 
   ~AppAdapter() {
     if (transportHandler_) {
@@ -68,8 +69,8 @@ class TcpClient::AppAdapter {
     transportHandler_->resumeRead();
   }
 
-  apache::thrift::fast_thrift::transport::TransportHandler* transportHandler()
-      const {
+  apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler*
+  transportHandler() const {
     return transportHandler_.get();
   }
 
@@ -145,7 +146,7 @@ class TcpClient::AppAdapter {
 
  private:
   folly::EventBase* evb_;
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::Ptr
       transportHandler_;
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline_;
   apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator
@@ -184,7 +185,8 @@ void TcpClient::connect(
 
   auto pipeline =
       apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-          apache::thrift::fast_thrift::transport::TransportHandler,
+          apache::thrift::fast_thrift::transport::test::
+              PassthroughTransportHandler,
           AppAdapter,
           apache::thrift::fast_thrift::channel_pipeline::
               SimpleBufferAllocator>()

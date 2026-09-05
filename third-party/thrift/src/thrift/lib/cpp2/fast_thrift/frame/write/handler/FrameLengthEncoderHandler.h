@@ -43,8 +43,8 @@ inline void writeFrameLength(uint8_t* buf, size_t length) noexcept {
  * FrameLengthEncoderHandler - Pipeline handler that prepends the 3-byte
  * frame length prefix to outbound frames.
  *
- * This is the outbound counterpart to FrameLengthParserHandler. While
- * FrameLengthParserHandler strips the length prefix from inbound frames,
+ * This is the outbound counterpart to FrameLengthParser. While the parser
+ * strips the length prefix from inbound frames inside the transport,
  * this handler adds the length prefix to outbound frames before they
  * are written to the transport.
  *

@@ -438,16 +438,16 @@ module Full = struct
             text "<<__AcceptDisposable>>" ^^ Space
           else
             Nothing);
-          (if named then
-            text "named" ^^ Space
-          else
-            Nothing);
           (if is_optional then
             text "optional" ^^ Space
           else
             Nothing);
           (if inout then
             text "inout" ^^ Space
+          else
+            Nothing);
+          (if named then
+            text "named" ^^ Space
           else
             Nothing);
           (if readonly then

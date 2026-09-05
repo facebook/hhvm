@@ -557,9 +557,7 @@ where
         // TODO: What about newlines embedded?
         // SPEC:
         // single-quoted-string-literal::
-        //   b-opt  ' sq-char-sequence-opt  '
-        //
-        // TODO: What is this b-opt?  We don't lex an optional 'b' before a literal.
+        //   ' sq-char-sequence-opt  '
         //
         // sq-char-sequence::
         //   sq-char
@@ -1457,34 +1455,29 @@ where
                     TokenKind::Percent
                 }
             }
-            '<' => {
-                match (self.peek_char(1), self.peek_char(2)) {
-                    ('<', '<') => self.scan_docstring_literal(),
-                    ('<', '=') => {
-                        self.advance(3);
-                        TokenKind::LessThanLessThanEqual
-                    }
-                    // TODO: We lex and parse the spaceship operator.
-                    // TODO: This is not in the spec at present.  We should either make it an
-                    // TODO: error, or add it to the specification.
-                    ('=', '>') => {
-                        self.advance(3);
-                        TokenKind::LessThanEqualGreaterThan
-                    }
-                    ('=', _) => {
-                        self.advance(2);
-                        TokenKind::LessThanEqual
-                    }
-                    ('<', _) => {
-                        self.advance(2);
-                        TokenKind::LessThanLessThan
-                    }
-                    _ => {
-                        self.advance(1);
-                        TokenKind::LessThan
-                    }
+            '<' => match (self.peek_char(1), self.peek_char(2)) {
+                ('<', '<') => self.scan_docstring_literal(),
+                ('<', '=') => {
+                    self.advance(3);
+                    TokenKind::LessThanLessThanEqual
                 }
-            }
+                ('=', '>') => {
+                    self.advance(3);
+                    TokenKind::LessThanEqualGreaterThan
+                }
+                ('=', _) => {
+                    self.advance(2);
+                    TokenKind::LessThanEqual
+                }
+                ('<', _) => {
+                    self.advance(2);
+                    TokenKind::LessThanLessThan
+                }
+                _ => {
+                    self.advance(1);
+                    TokenKind::LessThan
+                }
+            },
             '>' => {
                 match (self.peek_char(1), self.peek_char(2)) {
                     // If we are parsing a generic type argument list then we might be at the >>

@@ -240,6 +240,15 @@ struct HasAllocatorAwareMapElement {
 }
 
 @thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.allocator": "PmrByteAlloc"},
+}
+struct HasAllocatorAwareSortedVectorMapValue {
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "::PmrSortedVectorMap"}
+  1: map<i32, string_8090> field;
+}
+
+@thrift.DeprecatedUnvalidatedAnnotations{
   items = {"cpp.allocator": "::ScopedStatefulAlloc<>"},
 }
 struct HasSortedUniqueConstructibleFields {

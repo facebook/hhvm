@@ -171,6 +171,150 @@ class TestLsp(LspTestBase):
         )
         self.run_spec(spec, variables)
 
+    def test_named_argument_completion_sort_text(self) -> None:
+        """How to read this test: a compliant LSP client sorts by `sortText`
+        NOT the order of responses from the server.
+
+        Here is the expected order of parameters, with sortText in parentheses
+          zz_named_req_z  (000000001)
+          zz_named_req_a  (000000003)
+          zz_named_opt_z  (100000000)
+          zz_named_opt_a  (100000002)
+
+        The ordering imposed by our sortText is:
+        - required comes before optional
+        - within a required/optional set: declaration order (modulo downranking, not tested here)
+        """
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("named_argument_completion.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("named_argument_completion_sort_text"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 16, "character": 0},
+                                "end": {"line": 16, "character": 0},
+                            },
+                            "text": "$example->example(zz_named_used='', zz_named_);",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 45},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "zz_named_req_a",
+                            "kind": 6,
+                            "detail": "float (required named parameter)",
+                            "sortText": "000000003",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 16, "character": 36},
+                                    "end": {"line": 16, "character": 45},
+                                },
+                                "newText": "zz_named_req_a=${1:\\$zz_named_req_a}",
+                            },
+                            "data": {
+                                "fullname": "zz_named_req_a",
+                                "filename": "${root_path}/named_argument_completion.php",
+                                "line": 9,
+                                "char": 11,
+                            },
+                        },
+                        {
+                            "label": "zz_named_opt_a",
+                            "kind": 6,
+                            "detail": "bool (optional named parameter)",
+                            "sortText": "100000002",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 16, "character": 36},
+                                    "end": {"line": 16, "character": 45},
+                                },
+                                "newText": "zz_named_opt_a=${1:\\$zz_named_opt_a}",
+                            },
+                            "data": {
+                                "fullname": "zz_named_opt_a",
+                                "filename": "${root_path}/named_argument_completion.php",
+                                "line": 8,
+                                "char": 11,
+                            },
+                        },
+                        {
+                            "label": "zz_named_req_z",
+                            "kind": 6,
+                            "detail": "int (required named parameter)",
+                            "sortText": "000000001",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 16, "character": 36},
+                                    "end": {"line": 16, "character": 45},
+                                },
+                                "newText": "zz_named_req_z=${1:\\$zz_named_req_z}",
+                            },
+                            "data": {
+                                "fullname": "zz_named_req_z",
+                                "filename": "${root_path}/named_argument_completion.php",
+                                "line": 7,
+                                "char": 11,
+                            },
+                        },
+                        {
+                            "label": "zz_named_opt_z",
+                            "kind": 6,
+                            "detail": "string (optional named parameter)",
+                            "sortText": "100000000",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 16, "character": 36},
+                                    "end": {"line": 16, "character": 45},
+                                },
+                                "newText": "zz_named_opt_z=${1:\\$zz_named_opt_z}",
+                            },
+                            "data": {
+                                "fullname": "zz_named_opt_z",
+                                "filename": "${root_path}/named_argument_completion.php",
+                                "line": 6,
+                                "char": 11,
+                            },
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
     def test_serverless_ide_completion(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("completion.php"))

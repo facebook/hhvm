@@ -1971,6 +1971,66 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
   check_no_generic_static_property env tc;
   (env, user_attributes, file_attrs)
 
+(** Reject re-promoting (via a constructor parameter visibility modifier) a
+  property that is already declared by an ancestor. Such re-declaration is
+  error-prone and can make HHVM fatal at runtime when the inherited type-hint
+  bound ends up violated (e.g. with generics). The un-promoted forms remain
+  legal: declaring the property separately, or forwarding the value to
+  `parent::__construct` without a visibility modifier. Private (non-LSB)
+  ancestor properties are excluded since those are shadowed per-subclass rather
+  than inherited. *)
+let check_no_redeclared_promoted_props env c (parents : class_parents) =
+  let (constructor, _, _) = split_methods c.c_methods in
+  match constructor with
+  | _
+    when not
+           (TypecheckerOptions.reject_promoted_property_redeclaration
+              (Env.get_tcopt env)) ->
+    (* Rollout flag, off by default: re-promoting an inherited property is a
+       widespread pattern in existing code, so this is gated behind
+       [reject_promoted_property_redeclaration] until callers are migrated. *)
+    ()
+  | None -> ()
+  | Some m ->
+    let ancestor_prop prop_name =
+      List.find_map parents.extends ~f:(fun (_, parent_ty) ->
+          match get_node parent_ty with
+          | Tapply ((_, parent_class_name), _) ->
+            (match Env.get_class env parent_class_name with
+            | Decl_entry.Found parent_cls ->
+              (* Private (non-LSB) properties are effectively cloned into each
+                 subclass, so re-declaring one is legal shadowing rather than a
+                 conflicting redeclaration. *)
+              Env.get_prop env parent_cls prop_name
+              |> Option.filter ~f:(fun ce ->
+                     not (class_elt_is_private_not_lsb ce))
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
+              None)
+          | _ -> None)
+    in
+    List.iter m.m_params ~f:(fun param ->
+        match param.param_visibility with
+        | None -> ()
+        | Some _ ->
+          let prop_name =
+            String.chop_prefix_if_exists ~prefix:"$" param.param_name
+          in
+          (match ancestor_prop prop_name with
+          | None -> ()
+          | Some parent_ce ->
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary
+                @@ Primary.Redeclaring_promoted_property
+                     {
+                       pos = param.param_pos;
+                       prop_name;
+                       parent_pos = Lazy.force parent_ce.ce_pos;
+                       parent_name = parent_ce.ce_origin;
+                     })))
+
 (** Perform all hierarchy checks,
   i.e. checking that making this class a child of its parents is legal:
   - requirements from `require` statements
@@ -2016,6 +2076,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
         (c.c_implements @ c.c_extends @ c.c_uses)
     in
     check_parent env c tc;
+    check_no_redeclared_promoted_props env c parents;
     check_consistent_construct_not_abstract_final env c tc;
     check_parents_sealed env c tc;
     check_sealed env c;

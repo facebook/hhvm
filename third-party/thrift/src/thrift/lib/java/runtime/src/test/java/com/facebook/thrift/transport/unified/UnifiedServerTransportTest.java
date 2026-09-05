@@ -211,6 +211,71 @@ public class UnifiedServerTransportTest {
         .verifyComplete();
   }
 
+  private RpcServerHandler neverRespondingHandler() {
+    return TestService.Reactive.serverHandlerBuilder(
+            new TestServiceHandler() {
+              @Override
+              public Mono<TestResponse> requestResponse(TestRequest testRequest) {
+                return Mono.never();
+              }
+            })
+        .build();
+  }
+
+  private void startTransportWithShortTaskTimeout() {
+    serverConfig.setTaskExpirationTimeout(Duration.valueOf("200ms"));
+    transport =
+        UnifiedServerTransport.createNewInstance(
+                serverAddress, neverRespondingHandler(), serverConfig, new SPINiftyMetrics())
+            .block();
+    assertNotNull(transport);
+  }
+
+  /**
+   * The task timeout has to reach the RSocket branch of the ALPN split, which is where it used to
+   * be dropped. The Rocket protocol reports it as an ERROR frame, which the client surfaces as a
+   * timed-out transport exception.
+   */
+  @Test
+  public void testRSocketTaskTimeout() throws Exception {
+    startTransportWithShortTaskTimeout();
+
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(createRSocketClientFactory(), serverAddress);
+
+    TestRequest request = new TestRequest.Builder().setIntField(1).setStrField("slow").build();
+
+    StepVerifier.create(client.requestResponse(request))
+        .expectErrorSatisfies(
+            t -> {
+              assertTrue(
+                  t instanceof TApplicationException,
+                  "expected an application exception, got " + t);
+              assertEquals(TApplicationException.TIMEOUT, ((TApplicationException) t).getType());
+            })
+        .verify();
+  }
+
+  /** The header branch already had a task timeout; this pins that it still fires. */
+  @Test
+  public void testHeaderTaskTimeout() throws Exception {
+    startTransportWithShortTaskTimeout();
+
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(createHeaderClientFactory(), serverAddress);
+
+    TestRequest request = new TestRequest.Builder().setIntField(1).setStrField("slow").build();
+
+    StepVerifier.create(client.requestResponse(request))
+        .expectErrorSatisfies(
+            t -> assertTrue(t.getMessage().contains("timed out after"), "unexpected error: " + t))
+        .verify();
+  }
+
   /**
    * Test RSocket streaming capability. This validates that streaming operations work correctly over
    * the RSocket path.

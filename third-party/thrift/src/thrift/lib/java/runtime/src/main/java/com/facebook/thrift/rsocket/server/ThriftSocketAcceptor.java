@@ -17,10 +17,12 @@
 package com.facebook.thrift.rsocket.server;
 
 import com.facebook.nifty.core.ConnectionContext;
+import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.payload.Constants;
 import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.resources.RpcResources;
+import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.rsocket.ConnectionSetupPayload;
@@ -35,16 +37,27 @@ import reactor.core.publisher.Mono;
 
 public class ThriftSocketAcceptor implements SocketAcceptor {
 
+  private static final ThriftServerConfig DEFAULT_CONFIG = new ThriftServerConfig();
+
   private final RpcServerHandler serverHandler;
   private final ConnectionContext connectionContext;
+  private final Duration taskExpirationTimeout;
 
   public ThriftSocketAcceptor(RpcServerHandler serverHandler) {
     this(serverHandler, null);
   }
 
   public ThriftSocketAcceptor(RpcServerHandler serverHandler, ConnectionContext connectionContext) {
+    this(serverHandler, connectionContext, DEFAULT_CONFIG);
+  }
+
+  public ThriftSocketAcceptor(
+      RpcServerHandler serverHandler,
+      ConnectionContext connectionContext,
+      ThriftServerConfig config) {
     this.serverHandler = serverHandler;
     this.connectionContext = connectionContext;
+    this.taskExpirationTimeout = config.getTaskExpirationTimeout();
   }
 
   @Override
@@ -56,7 +69,10 @@ public class ThriftSocketAcceptor implements SocketAcceptor {
 
     ThriftServerRSocket rSocket =
         new ThriftServerRSocket(
-            serverHandler, RpcResources.getByteBufAllocator(), connectionContext);
+            serverHandler,
+            RpcResources.getByteBufAllocator(),
+            connectionContext,
+            taskExpirationTimeout);
 
     return sendSetupResponse(sendingSocket).thenReturn(rSocket);
   }

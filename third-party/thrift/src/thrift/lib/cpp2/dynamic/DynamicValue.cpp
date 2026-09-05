@@ -158,6 +158,10 @@ DynamicValue DynamicValue::makeDefault(
     case Kind::UNION:
       return DynamicValue(
           type, detail::Datum::make(makeUnion(type.asUnionUnchecked(), mr)));
+    case Kind::OPAQUE_ALIAS: {
+      auto target = makeDefault(type.asOpaqueAlias().targetType(), mr);
+      return DynamicValue(type, std::move(target).datum());
+    }
     default:
       throw std::runtime_error(
           fmt::format(
@@ -228,6 +232,13 @@ double& DynamicValue::asDouble() & {
 }
 
 int32_t DynamicValue::asEnum() const& {
+  if (type_.kind() != type_system::TypeRef::Kind::ENUM) {
+    throw std::runtime_error("Value is not an enum");
+  }
+  return datum_.as<detail::Datum::Kind::I32>();
+}
+
+int32_t& DynamicValue::asEnum() & {
   if (type_.kind() != type_system::TypeRef::Kind::ENUM) {
     throw std::runtime_error("Value is not an enum");
   }

@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -108,8 +109,8 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
   }
 
   struct BuiltPipeline {
-    apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-        transportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::
+        Ptr transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
     ThriftClientAppAdapter* adapter{nullptr};
@@ -134,9 +135,8 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
       std::function<Result(
           apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&&)> writeHandler = nullptr) {
-    auto transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            createMockSocket());
+    auto transportHandler = apache::thrift::fast_thrift::transport::test::
+        PassthroughTransportHandler::create(createMockSocket());
 
     auto handlerPtr = std::make_unique<MockHandler>();
     auto* rawHandler = handlerPtr.get();
@@ -147,7 +147,8 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
 
     auto pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler,
             ThriftClientAppAdapter,
             TestAllocator>()
             .setEventBase(evb_)
@@ -211,13 +212,13 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
     sendBasicRequest(
         client.adapter(),
         [&](folly::Expected<
-                std::unique_ptr<folly::IOBuf>,
+                apache::thrift::fast_thrift::thrift::client::FastResponse,
                 folly::exception_wrapper>&& result,
             const apache::thrift::RpcTransportStats&) noexcept {
           EXPECT_TRUE(result.hasValue());
           handlerCalled = true;
-          if (result.value()) {
-            capturedData = result.value()->moveToFbString().toStdString();
+          if (result.value().data) {
+            capturedData = result.value().data->moveToFbString().toStdString();
           }
         });
   });
@@ -393,7 +394,7 @@ TEST_F(
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       folly::IOBuf::copyBuffer("data"),
       [&](folly::Expected<
-              std::unique_ptr<folly::IOBuf>,
+              apache::thrift::fast_thrift::thrift::client::FastResponse,
               folly::exception_wrapper>&& result,
           const apache::thrift::RpcTransportStats&) noexcept {
         ASSERT_TRUE(result.hasError());

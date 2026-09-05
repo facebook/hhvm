@@ -230,6 +230,9 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   uint32_t readWhitespace();
   uint32_t ensureCharNoWhitespace(char expected);
   uint32_t ensureChar(char expected);
+  // like ensureChar, but with a fast path for delimiters that commonly have no
+  // leading whitespace in compact JSON (e.g. `,` and `:`)
+  uint32_t ensureCharExpectNoWhitespace(char expected);
   // this is similar to skipWhitespace and readWhitespace.  The skip-version
   // skips over context so that we can peek, and stores the number of bytes
   // skipped.  The read-version calls the skip-version, and returns the number

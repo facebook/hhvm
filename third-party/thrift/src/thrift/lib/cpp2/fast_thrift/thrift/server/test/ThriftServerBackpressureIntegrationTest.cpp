@@ -103,7 +103,8 @@ class ThriftServerBackpressureIntegrationTest : public ::testing::Test {
     tail_.reset();
     allocator_.reset();
 
-    auto reqCtx = std::make_unique<ReqCtxHandler>();
+    auto reqCtx =
+        std::make_unique<ReqCtxHandler>(/*requestExtensionLayout=*/nullptr);
     auto connCtx = std::make_unique<ConnCtxHandler>(
         boost::intrusive_ptr<ft::ThriftConnContext>(
             new ft::ThriftConnContext{}));

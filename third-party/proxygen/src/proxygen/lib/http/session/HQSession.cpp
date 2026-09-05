@@ -882,6 +882,37 @@ size_t HQSession::sendSettings() {
   return generated;
 }
 
+size_t HQSession::sendPing(std::chrono::milliseconds timeout,
+                           PingTimeoutCallback onTimeout) {
+  if (timeout <= std::chrono::milliseconds::zero()) {
+    sock_->sendPing(std::chrono::milliseconds::zero());
+    return 0;
+  }
+  if (timedPingOutstanding_ || pingTimeoutPending_) {
+    return 0;
+  }
+  timedPingOutstanding_ = true;
+  pingTimeoutCallback_ = std::move(onTimeout);
+  sock_->sendPing(timeout);
+  return 0;
+}
+
+void HQSession::pingAcknowledged() noexcept {
+  timedPingOutstanding_ = false;
+  pingTimeoutPending_ = false;
+  pingTimeoutCallback_ = nullptr;
+  resetTimeout();
+}
+
+void HQSession::pingTimeout() noexcept {
+  if (!timedPingOutstanding_) {
+    return;
+  }
+  timedPingOutstanding_ = false;
+  pingTimeoutPending_ = true;
+  scheduleLoopCallback(true);
+}
+
 void HQSession::notifyPendingShutdown() {
   VLOG(4) << __func__ << " sess=" << *this;
   drainImpl();
@@ -1153,6 +1184,18 @@ void HQSession::runSessionLoopCallback() noexcept {
     dropConnectionSync(sessionDropReason_->quicError,
                        sessionDropReason_->proxygenError);
     return;
+  }
+
+  if (pingTimeoutPending_) {
+    pingTimeoutPending_ = false;
+    auto onTimeout = std::move(pingTimeoutCallback_);
+    pingTimeoutCallback_ = nullptr;
+    if (onTimeout) {
+      onTimeout();
+      if (!sock_ || sessionDropReason_.has_value()) {
+        return;
+      }
+    }
   }
 
   readsPerLoop_ = 0;

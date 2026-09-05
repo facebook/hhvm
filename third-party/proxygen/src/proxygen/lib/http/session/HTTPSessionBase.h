@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/record/Types.h>
+#include <folly/Function.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncUDPSocket.h>
 #include <folly/io/async/SSLContext.h>
@@ -34,6 +35,8 @@ constexpr uint32_t kDefaultMaxConcurrentOutgoingStreams = 100;
 
 class HTTPSessionBase : public wangle::ManagedConnection {
  public:
+  using PingTimeoutCallback = folly::Function<void()>;
+
   /**
    * Optional callback interface that the HTTPSessionBase
    * notifies of connection lifecycle events.
@@ -344,7 +347,9 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    * doesn't support pings, this will return 0. Otherwise, it will return
    * the number of bytes written on the transport to send the ping.
    */
-  virtual size_t sendPing() = 0;
+  virtual size_t sendPing(
+      std::chrono::milliseconds timeout = std::chrono::milliseconds::zero(),
+      PingTimeoutCallback onTimeout = nullptr) = 0;
 
   virtual size_t sendPing(uint64_t data) = 0;
 

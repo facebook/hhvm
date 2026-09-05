@@ -21,6 +21,27 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>
 
 namespace apache::thrift::rocket {
+namespace {
+
+std::unique_ptr<folly::IOBuf> makeBorrowedBuffer(
+    void* data, size_t size, size_t& releaseCount) {
+  return folly::IOBuf::takeOwnership(
+      data,
+      size,
+      [](void*, void* userData) { ++*static_cast<size_t*>(userData); },
+      &releaseCount);
+}
+
+std::string serializeFrame(const std::string& payload) {
+  std::string frame(Serializer::kBytesForFrameOrMetadataLength, '\0');
+  HeaderSerializer serializer(
+      reinterpret_cast<uint8_t*>(frame.data()), frame.size());
+  serializer.writeFrameOrMetadataSize(payload.size());
+  frame.append(payload);
+  return frame;
+}
+
+} // namespace
 
 TEST(FrameLengthParserTest, testAppendFrame) {
   FakeOwner owner;
@@ -197,6 +218,66 @@ TEST(FrameLengthParserTest, testAppendUsingIOBuf) {
   EXPECT_EQ(parser.getFrameLengthAndFieldSize(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
   EXPECT_EQ(owner.frames_.size(), 1);
+}
+
+TEST(FrameLengthParserTest, testCopiesFrameIfAnyBufferIsScarce) {
+  const std::string payload = "frame split across receive buffers";
+  auto frame = serializeFrame(payload);
+  const auto firstBufferSize = Serializer::kBytesForFrameOrMetadataLength + 8;
+  const auto secondBufferSize = 8;
+  size_t releaseCount = 0;
+  FakeOwner owner;
+  FrameLengthParserStrategy<FakeOwner> parser(owner);
+
+  parser.setBuffersScarce(false);
+  parser.readBufferAvailable(
+      makeBorrowedBuffer(frame.data(), firstBufferSize, releaseCount));
+  parser.setBuffersScarce(true);
+  parser.readBufferAvailable(makeBorrowedBuffer(
+      frame.data() + firstBufferSize, secondBufferSize, releaseCount));
+  EXPECT_TRUE(owner.frames_.empty());
+
+  parser.setBuffersScarce(false);
+  parser.readBufferAvailable(makeBorrowedBuffer(
+      frame.data() + firstBufferSize + secondBufferSize,
+      frame.size() - firstBufferSize - secondBufferSize,
+      releaseCount));
+
+  ASSERT_EQ(owner.frames_.size(), 1);
+  EXPECT_EQ(releaseCount, 3);
+  EXPECT_EQ(owner.frames_[0]->to<std::string>(), payload);
+}
+
+TEST(FrameLengthParserTest, testCopiesEveryFrameInScarceBufferAndResets) {
+  const std::string firstPayload = "first frame";
+  const std::string secondPayload = "second frame";
+  const std::string thirdPayload = "third frame";
+  auto scarceData =
+      serializeFrame(firstPayload) + serializeFrame(secondPayload);
+  auto unscarceData = serializeFrame(thirdPayload);
+  size_t releaseCount = 0;
+  FakeOwner owner;
+  FrameLengthParserStrategy<FakeOwner> parser(owner);
+  parser.setBuffersScarce(true);
+
+  parser.readBufferAvailable(
+      makeBorrowedBuffer(scarceData.data(), scarceData.size(), releaseCount));
+
+  ASSERT_EQ(owner.frames_.size(), 2);
+  EXPECT_EQ(releaseCount, 1);
+  EXPECT_EQ(owner.frames_[0]->to<std::string>(), firstPayload);
+  EXPECT_EQ(owner.frames_[1]->to<std::string>(), secondPayload);
+
+  parser.setBuffersScarce(false);
+  parser.readBufferAvailable(makeBorrowedBuffer(
+      unscarceData.data(), unscarceData.size(), releaseCount));
+
+  ASSERT_EQ(owner.frames_.size(), 3);
+  EXPECT_EQ(releaseCount, 1);
+  EXPECT_EQ(owner.frames_[2]->to<std::string>(), thirdPayload);
+
+  owner.frames_.clear();
+  EXPECT_EQ(releaseCount, 2);
 }
 
 } // namespace apache::thrift::rocket

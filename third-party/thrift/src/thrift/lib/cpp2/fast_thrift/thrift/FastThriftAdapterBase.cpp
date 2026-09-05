@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/FastThriftAdapterBase.h>
 
+#include <optional>
+
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
@@ -23,7 +25,7 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
+folly::Expected<client::FastResponse, folly::exception_wrapper>
 FastThriftAdapterBase::handleRequestResponse(
     ThriftResponseMessage&& response, uint16_t protocolId) {
   auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
@@ -42,7 +44,14 @@ FastThriftAdapterBase::handleRequestResponse(
       return folly::makeUnexpected(
           extractAnyException(std::move(payload.data), protocolId));
     }
-    return std::move(payload.data);
+    client::FastResponse result{
+        .data = std::move(payload.data), .headers = std::nullopt};
+    // Moved, not copied: otherMetadata is the same map type the caller
+    // projects into RpcOptions read headers. to_optional() would deep-copy it.
+    if (metadata.otherMetadata().has_value()) {
+      result.headers = std::move(*metadata.otherMetadata());
+    }
+    return result;
   }
 
   if (inbound.is<ThriftErrorPayload>()) {

@@ -79,6 +79,7 @@ type client_mode =
   | MODE_TAST_HOLES_BATCH of string
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
   | MODE_FILE_LEVEL_DEPENDENCIES
+  | MODE_FIND_ISOLATABLE_CLUSTERS
   | MODE_VERBOSE of bool
   | MODE_DEPS_OUT_AT_POS_BATCH of string list
   | MODE_DEPS_IN_AT_POS_BATCH of string list
@@ -101,6 +102,7 @@ type client_check_env = {
   max_errors: int option;
   preexisting_warnings: bool;
       (** Whether to show preexisint warnings in typechecked files *)
+  reason: string option;
   mode: client_mode;
   no_load: bool;
   save_64bit: string option;

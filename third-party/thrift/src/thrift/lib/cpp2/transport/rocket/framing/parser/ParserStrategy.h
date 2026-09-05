@@ -51,6 +51,10 @@ class ParserStrategy : private Strategy<T, Args...> {
     Strategy<T, Args...>::readBufferAvailable(std::move(buf));
   }
 
+  void setBuffersScarce(bool scarce) {
+    Strategy<T, Args...>::setBuffersScarce(scarce);
+  }
+
   bool isBufferMovable() { return Strategy<T, Args...>::isBufferMovable(); }
 };
 

@@ -17,8 +17,11 @@
 #include <gtest/gtest.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/test/gen-cpp2/UseOpEncodeProgram_types.h>
 #include <thrift/test/gen-cpp2/UseOpEncode_types.h>
 
@@ -147,5 +150,40 @@ TEST(UseOpEncodeTest, ProgramScopeAnnotation) {
   auto b = apache::thrift::CompactSerializer::deserialize<FooList>(
       apache::thrift::CompactSerializer::serialize<std::string>(a));
   EXPECT_EQ(b.adapted_list_field()->value.at(0).value.field(), 42);
+}
+
+template <typename T, typename Decode>
+void testListDefaultIsReplaced(Decode decode) {
+  CompactProtocolWriter writer;
+  folly::IOBufQueue queue;
+  writer.setOutput(&queue);
+  writer.writeListBegin(protocol::TType::T_STRING, 1);
+  writer.writeString("wire");
+  writer.writeListEnd();
+
+  CompactProtocolReader reader;
+  auto serialized = queue.move();
+  reader.setInput(serialized.get());
+  T result;
+  EXPECT_EQ(*result.values(), std::vector<std::string>{"default"});
+  decode(reader, *result.values());
+
+  EXPECT_EQ(*result.values(), std::vector<std::string>{"wire"});
+}
+
+TEST(UseOpEncodeTest, GeneratedListDefaultIsReplaced) {
+  using ListMethods = detail::pm::protocol_methods<
+      type_class::list<type_class::string>,
+      std::vector<std::string>,
+      type::list<type::string_t>>;
+  testListDefaultIsReplaced<GeneratedDefaultList>(
+      [](auto& reader, auto& value) { ListMethods::read(reader, value); });
+}
+
+TEST(UseOpEncodeTest, OpEncodedListDefaultIsReplaced) {
+  testListDefaultIsReplaced<OpEncodedDefaultList>(
+      [](auto& reader, auto& value) {
+        op::decode<type::list<type::string_t>>(reader, value);
+      });
 }
 } // namespace apache::thrift::test

@@ -110,3 +110,12 @@ struct BazWithUseOpEncode {
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional list<AdaptedFoo> list_shared_ptr_field;
 }
+
+struct GeneratedDefaultList {
+  1: list<string> values = ["default"];
+}
+
+@cpp.UseOpEncode
+struct OpEncodedDefaultList {
+  1: list<string> values = ["default"];
+}

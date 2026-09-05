@@ -355,8 +355,6 @@ bool canDCE(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case CheckInit:
-  case CheckInitMem:
   case CheckCold:
   case CheckNonNull:
   case DivDbl:

@@ -17,12 +17,14 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
 #include <folly/Function.h>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
@@ -31,21 +33,38 @@
 namespace apache::thrift::fast_thrift::thrift::client {
 
 /**
+ * A completed request-response reply: the serialized response plus whatever
+ * the adapter salvaged from the response metadata for the caller.
+ *
+ * A struct rather than extra handler parameters so future per-response
+ * signals (load metrics, queue timings) can join without breaking every
+ * adapter's signature again.
+ */
+struct FastResponse {
+  std::unique_ptr<folly::IOBuf> data;
+
+  // Custom response headers, moved straight out of
+  // ResponseRpcMetadata.otherMetadata — same map type, so no copy or rehash.
+  // Empty optional when the peer sent none, which costs no allocation.
+  std::optional<apache::thrift::transport::THeader::StringToStringMap> headers;
+};
+
+/**
  * Handler invoked by an adapter when a request-response RPC completes.
  *
- * On success, receives the response data IOBuf; on failure (transport
- * error, undeclared exception, pipeline error, etc.) receives an
- * exception_wrapper. Always called on the adapter's EventBase thread.
+ * On success, receives the FastResponse; on failure (transport error,
+ * undeclared exception, pipeline error, etc.) receives an exception_wrapper.
+ * Always called on the adapter's EventBase thread.
  *
  * The second argument carries the transport-level per-request stats. It is
  * populated on the success path; on early-failure paths (no pipeline, write
  * error, etc.) it is default-constructed (all fields zero).
  *
- * Response metadata is consumed and discarded by the adapter — generated
- * code only ever sees the data IOBuf (or an exception_wrapper) and the stats.
+ * Response metadata beyond what FastResponse names is consumed and discarded
+ * by the adapter.
  */
 using RequestResponseHandler = folly::Function<void(
-    folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>&&,
+    folly::Expected<FastResponse, folly::exception_wrapper>&&,
     const apache::thrift::RpcTransportStats&) noexcept>;
 
 /**

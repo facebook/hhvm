@@ -40,7 +40,8 @@ let check_tparams_constraints env use_pos tparams targs =
   else
     (env, None)
 
-let loclty_of_hint unchecked_tparams env h =
+let loclty_of_hint
+    ?(visibility_behavior = Never_expand_newtype) unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -58,7 +59,7 @@ let loclty_of_hint unchecked_tparams env h =
     empty_expand_env_with_on_error
       (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
   in
-  let ety_env = { ety_env with visibility_behavior = Never_expand_newtype } in
+  let ety_env = { ety_env with visibility_behavior } in
   let ((env, ty_err_opt), locl_ty) = Phase.localize env ~ety_env decl_ty in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, hint_pos, locl_ty)
@@ -142,7 +143,11 @@ let check_splat_hint env p h =
   (* It's important that we pass tenv down to subtyping
    * because tpenv might have been updated during localization *)
   let (tenv, hint_pos, locl_ty) =
-    loclty_of_hint env.typedef_tparams env.tenv h
+    loclty_of_hint
+      ~visibility_behavior:Expand_visible_newtype_only
+      env.typedef_tparams
+      env.tenv
+      h
   in
   (* The top tuple (mixed...) *)
   let cstr_ty =

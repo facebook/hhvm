@@ -566,6 +566,7 @@ let env =
       saved_state_ignore_hhconfig = true;
       paths = [];
       max_errors = None;
+      reason = None;
       mode = ClientEnv.MODE_STATUS;
       no_load = true;
       save_64bit = None;

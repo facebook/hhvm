@@ -78,6 +78,9 @@ let skip_hierarchy_checks t = t.GlobalOptions.tco_skip_hierarchy_checks
 let silence_errors_under_dynamic t =
   t.GlobalOptions.tco_silence_errors_under_dynamic
 
+let reject_promoted_property_redeclaration t =
+  t.GlobalOptions.tco_reject_promoted_property_redeclaration
+
 let set_skip_hierarchy_checks t =
   GlobalOptions.{ t with tco_skip_hierarchy_checks = true }
 

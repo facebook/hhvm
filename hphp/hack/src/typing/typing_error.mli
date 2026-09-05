@@ -871,6 +871,12 @@ module Primary : sig
         class_pos: Pos.t;
         class_name: string;
       }
+    | Redeclaring_promoted_property of {
+        pos: Pos.t;
+        prop_name: string;
+        parent_pos: Pos_or_decl.t;
+        parent_name: string;
+      }
     | Invalid_classname of Pos.t
     | Illegal_type_structure of {
         pos: Pos.t;

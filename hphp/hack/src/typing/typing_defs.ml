@@ -532,26 +532,12 @@ module Named_params = struct
     | Anamed ((_, name), _) -> Some name
 end
 
-(* A function type has a named-variadic parameter in either of two cases:
- *   1. The [named_variadic] flag on [ft.ft_flags] is set. This is how
- *      function TYPES (e.g., `(function(named int...): void)`) are lowered
- *      by decl_hint.ml — the named-variadic is added as an extra trailing
- *      param beyond any positional variadic.
- *   2. The [variadic] flag is set and the trailing variadic parameter is
- *      itself marked as named (fp_is_named). This is how function
- *      DEFINITIONS with `named T ...$name` syntax reach the type checker,
- *      since the direct-decl parser and lambda decl only track a single
- *      [variadic] flag.
- * In both cases the named-variadic parameter is the last entry of
- * [ft.ft_params]. It represents "accepts any number of named args of this
- * element type", NOT a required named parameter. *)
+(* A named-variadic parameter is the last entry of [ft.ft_params]. It
+ * represents "accepts any number of named args of this element type", NOT a
+ * required named parameter. *)
 let ft_named_variadic_param (ft : _ fun_type) : _ fun_param option =
   if get_ft_named_variadic ft then
     List.last ft.ft_params
-  else if get_ft_variadic ft then
-    match List.last ft.ft_params with
-    | Some fp when Typing_defs_core.get_fp_is_named fp -> Some fp
-    | _ -> None
   else
     None
 
@@ -561,15 +547,7 @@ let ft_params_without_named_variadic (ft : _ fun_type) : _ fun_param list =
   | Some _ -> List.drop_last_exn ft.ft_params
   | None -> ft.ft_params
 
-(* True iff [ft] has a positional (unnamed) variadic parameter. This is
- * distinct from [get_ft_variadic ft] because the [variadic] flag can be set
- * for a definition-syntax named-variadic (see [ft_named_variadic_param]). *)
-let ft_has_positional_variadic (ft : _ fun_type) : bool =
-  get_ft_variadic ft
-  &&
-  match List.last (ft_params_without_named_variadic ft) with
-  | Some fp -> not (Typing_defs_core.get_fp_is_named fp)
-  | None -> false
+let ft_has_positional_variadic (ft : _ fun_type) : bool = get_ft_variadic ft
 
 (* The identifier for this *)
 let this = Local_id.make_scoped "$this"

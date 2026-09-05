@@ -141,6 +141,7 @@ TEST(HTTP1xCodecTest, Test09Req) {
   codec.onIngress(*buffer);
   EXPECT_EQ(callbacks.headersComplete, 1);
   EXPECT_EQ(callbacks.messageComplete, 1);
+  ASSERT_NE(callbacks.msg_, nullptr);
   EXPECT_EQ(callbacks.msg_->getHTTPVersion(), HTTPMessage::kHTTPVersion09);
 }
 
@@ -222,6 +223,7 @@ TEST(HTTP1xCodecTest, TestKeepalive09_10) {
   codec1.onIngress(*buffer);
   EXPECT_EQ(callbacks1.headersComplete, 1);
   EXPECT_EQ(callbacks1.messageComplete, 1);
+  ASSERT_NE(callbacks1.msg_, nullptr);
   EXPECT_EQ(callbacks1.msg_->getHTTPVersion(), HTTPMessage::kHTTPVersion09);
   HTTPCodec::StreamID id = 1;
   HTTPMessage resp;
@@ -242,6 +244,7 @@ TEST(HTTP1xCodecTest, TestKeepalive09_10) {
   codec2.onIngress(*buffer);
   EXPECT_EQ(callbacks2.headersComplete, 1);
   EXPECT_EQ(callbacks2.messageComplete, 1);
+  ASSERT_NE(callbacks2.msg_, nullptr);
   EXPECT_EQ(callbacks2.msg_->getHTTPVersion(), HTTPMessage::kHTTPVersion10);
   resp.setHTTPVersion(1, 0);
   codec2.generateHeader(buf, id, resp, true);
@@ -264,6 +267,7 @@ TEST(HTTP1xCodecTest, TestKeepalive09_10) {
   codec3.onIngress(*buffer);
   EXPECT_EQ(callbacks3.headersComplete, 1);
   EXPECT_EQ(callbacks3.messageComplete, 1);
+  ASSERT_NE(callbacks3.msg_, nullptr);
   EXPECT_EQ(callbacks3.msg_->getHTTPVersion(), HTTPMessage::kHTTPVersion10);
   codec3.generateHeader(buf, id, resp, true);
   EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -282,6 +286,7 @@ TEST(HTTP1xCodecTest, TestKeepalive09_10) {
   codec4.onIngress(*buffer);
   EXPECT_EQ(callbacks4.headersComplete, 1);
   EXPECT_EQ(callbacks4.messageComplete, 1);
+  ASSERT_NE(callbacks4.msg_, nullptr);
   EXPECT_EQ(callbacks4.msg_->getHTTPVersion(), HTTPMessage::kHTTPVersion10);
   resp.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
   resp.getHeaders().remove(HTTP_HEADER_CONTENT_LENGTH);

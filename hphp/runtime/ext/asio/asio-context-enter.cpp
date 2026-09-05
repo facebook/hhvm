@@ -34,14 +34,10 @@ namespace HPHP::asio {
 
 namespace {
 
-void checkImportable(c_WaitableWaitHandle* node) {
-  if (node->getKind() == c_Awaitable::Kind::ExternalThreadEvent &&
-      node->asExternalThreadEvent()->startedProcessing()) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Detected cross-context dependency cycle. You are trying to depend "
-      "on something that is running you serially."
-    );
-  }
+[[noreturn]] void throwDependencyCycle() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Detected cross-context dependency cycle. You are trying to depend "
+    "on something that is running you serially.");
 }
 
 // Struct to hold metadate for tracking throughout discover phase.
@@ -63,8 +59,6 @@ struct EnterContextState final {
       return;
     }
 
-    checkImportable(node);
-
     auto it = m_importMap.find(node);
     if (it == m_importMap.end()) {
       m_importMap.insert({node, newStateIdx});
@@ -82,9 +76,7 @@ struct EnterContextState final {
 
   bool discoverResumable(c_ResumableWaitHandle* node) {
     if (node->getState() == c_ResumableWaitHandle::STATE_RUNNING) {
-      SystemLib::throwInvalidOperationExceptionObject(
-        "Detected cross-context dependency cycle. You are trying to depend "
-        "on something that is running you serially.");
+      throwDependencyCycle();
     }
 
     return node->getState() == c_ResumableWaitHandle::STATE_BLOCKED;
@@ -134,6 +126,15 @@ struct EnterContextState final {
     enqueue(child, newStateIdx);
   }
 
+  // No children to discover, but a node being processed might be running us
+  // serially inside AsioExternalThreadEvent::unserialize().
+  void discover(c_ExternalThreadEventWaitHandle* node, ContextStateIndex) {
+    if (node->getState() == c_ExternalThreadEventWaitHandle::STATE_PROCESSING) {
+      throwDependencyCycle();
+    }
+    assertx(node->getState() == c_ExternalThreadEventWaitHandle::STATE_WAITING);
+  }
+
   void discover() {
     while (!m_pending.empty()) {
       auto whInfo = m_pending.back();
@@ -158,10 +159,13 @@ struct EnterContextState final {
         case Kind::PriorityBridge:
           discover(whInfo.waitHandle->asPriorityBridge(), whInfo.newStateIdx);
           break;
+        case Kind::ExternalThreadEvent:
+          discover(whInfo.waitHandle->asExternalThreadEvent(),
+                   whInfo.newStateIdx);
+          break;
         case Kind::Static:
         case Kind::Reschedule:
         case Kind::Sleep:
-        case Kind::ExternalThreadEvent:
           break;
       }
     }
@@ -260,7 +264,6 @@ void enter_context_impl(c_WaitableWaitHandle *root,
                         ContextStateIndex newStateIdx) {
   assertx(!root->isFinished());
   assertx(root->getContextStateIndex() < newStateIdx);
-  checkImportable(root);
 
   EnterContextState ctx(root, newStateIdx);
   ctx.discover();

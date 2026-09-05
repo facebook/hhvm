@@ -127,6 +127,13 @@ template <class K, class V>
 using StatefulAllocSortedVectorMap = folly::
     sorted_vector_map<K, V, std::less<K>, ScopedStatefulAlloc<std::pair<K, V>>>;
 
+template <class K, class V>
+using PmrSortedVectorMap = folly::sorted_vector_map<
+    K,
+    V,
+    std::less<K>,
+    std::pmr::polymorphic_allocator<std::pair<K, V>>>;
+
 template <class T>
 struct CountingAlloc : private std::allocator<T> {
   using value_type = T;

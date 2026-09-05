@@ -29,7 +29,8 @@
  *             -> BenchSerializer  (ComposedFrame -> IOBuf)
  *             -> tail                                   (events disabled)
  *
- *   handler:  TransportHandlerT<RocketClientEventFactory>
+ *   handler:  TransportHandlerT<RocketClientEventFactory,
+ * apache::thrift::fast_thrift::transport::test::PassthroughParser>
  *             -> LoopBatchingFrameHandlerT<WriteCompletionTrackerT<...>>
  *             -> BenchSerializer
  *             -> BenchWriteCompleteSubscriber (subscribes FrameWriteComplete)
@@ -68,6 +69,7 @@
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/bench/BenchAsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 using namespace folly;
 using namespace apache::thrift::fast_thrift::channel_pipeline;
@@ -181,7 +183,9 @@ struct FixtureT {
   static constexpr bool kWithHandler = WithHandler;
 
   using TransportHandler =
-      apache::thrift::fast_thrift::transport::TransportHandlerT<Factory>;
+      apache::thrift::fast_thrift::transport::TransportHandlerT<
+          Factory,
+          apache::thrift::fast_thrift::transport::test::PassthroughParser>;
   using Batcher = LoopBatchingFrameHandlerT<Tracker>;
 
   folly::EventBase evb;

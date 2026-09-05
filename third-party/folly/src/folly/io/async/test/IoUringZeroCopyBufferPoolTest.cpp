@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <folly/io/async/IoUringZeroCopyBufferPool.h>
@@ -71,7 +74,7 @@ TEST(IoUringZeroCopyBufferPoolTest, GetBuf) {
   cqe.res = 2048;
   io_uring_zcrx_cqe zcqe{};
   zcqe.off = 0;
-  auto buf = pool->getIoBuf(&cqe, &zcqe);
+  auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
   ASSERT_EQ(buf->length(), 2048);
   EXPECT_EQ(buf->capacity() >= buf->length(), true);
 }
@@ -90,13 +93,75 @@ TEST(IoUringZeroCopyBufferPoolTest, DelayedDestruction) {
   cqe.res = 2048;
   io_uring_zcrx_cqe zcqe{};
   zcqe.off = 0;
-  auto buf1 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
   cqe.res = 2048;
   zcqe.off = 4096;
-  auto buf2 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
   buf1.reset();
   pool.reset();
   buf2.reset();
+}
+
+TEST(IoUringZeroCopyBufferPoolTest, BuffersScarce) {
+  IoUringZeroCopyBufferPool::Params params = {
+      .ring = nullptr,
+      .numBuffers = 20,
+      .bufferSizeHint = 4096,
+      .rqEntries = 20,
+      .ifindex = 0,
+      .queueId = 0,
+  };
+  auto pool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+  io_uring_cqe cqe{};
+  cqe.res = 2048;
+  io_uring_zcrx_cqe zcqe{};
+  vector<unique_ptr<IOBuf>> buffers;
+
+  for (uint32_t i = 0; i < 16; ++i) {
+    zcqe.off = i * 4096;
+    auto result = pool->getIoBuf(&cqe, &zcqe);
+    EXPECT_FALSE(result.isScarce);
+    buffers.push_back(std::move(result.buffer));
+  }
+
+  zcqe.off = 16 * 4096;
+  auto scarceResult = pool->getIoBuf(&cqe, &zcqe);
+  EXPECT_TRUE(scarceResult.isScarce);
+  buffers.push_back(std::move(scarceResult.buffer));
+
+  buffers.pop_back();
+  buffers.pop_back();
+  zcqe.off = 17 * 4096;
+  auto recoveredResult = pool->getIoBuf(&cqe, &zcqe);
+  EXPECT_FALSE(recoveredResult.isScarce);
+}
+
+TEST(IoUringZeroCopyBufferPoolTest, SmallPoolReservesOneBuffer) {
+  IoUringZeroCopyBufferPool::Params params = {
+      .ring = nullptr,
+      .numBuffers = 8,
+      .bufferSizeHint = 4096,
+      .rqEntries = 8,
+      .ifindex = 0,
+      .queueId = 0,
+  };
+  auto pool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+  io_uring_cqe cqe{};
+  cqe.res = 2048;
+  io_uring_zcrx_cqe zcqe{};
+  vector<unique_ptr<IOBuf>> buffers;
+
+  for (uint32_t i = 0; i < 6; ++i) {
+    zcqe.off = i * 4096;
+    auto result = pool->getIoBuf(&cqe, &zcqe);
+    EXPECT_FALSE(result.isScarce);
+    buffers.push_back(std::move(result.buffer));
+  }
+
+  zcqe.off = 6 * 4096;
+  auto result = pool->getIoBuf(&cqe, &zcqe);
+  EXPECT_TRUE(result.isScarce);
+  buffers.push_back(std::move(result.buffer));
 }
 
 TEST(IoUringZeroCopyBufferPoolTest, RefillTest) {
@@ -118,13 +183,13 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillTest) {
 
   cqe.res = 2048;
   zcqe.off = 0;
-  auto buf1 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   zcqe.off += 4096;
-  auto buf2 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   zcqe.off += 4096;
-  auto buf3 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf3 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   buf1.reset();
   buf2.reset();
@@ -139,7 +204,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillTest) {
   EXPECT_EQ(helper.getPendingBuffersSize(), 1);
 
   zcqe.off += 4096;
-  auto buf4 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf4 = pool->getIoBuf(&cqe, &zcqe).buffer;
   buf4.reset();
   EXPECT_EQ(helper.getRingUsedCount(), 2);
   EXPECT_EQ(helper.getRingFreeCount(), 0);
@@ -168,7 +233,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillWithLargePendingQueue) {
   zcqe.off = 0;
 
   for (int i = 0; i < 150; i++) {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
   }
 
@@ -183,7 +248,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillWithLargePendingQueue) {
   EXPECT_EQ(helper.getPendingBuffersSize(), 142);
 
   {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
   }
 
@@ -193,7 +258,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillWithLargePendingQueue) {
   helper.consumeRefillRingEntries(8);
 
   for (int i = 0; i < 10; i++) {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
   }
 
@@ -203,7 +268,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillWithLargePendingQueue) {
   helper.consumeRefillRingEntries(8);
 
   while (helper.getPendingBuffersSize() > 0) {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
     if (helper.getRingUsedCount() == 8) {
       helper.consumeRefillRingEntries(8);
@@ -232,11 +297,11 @@ TEST(IoUringZeroCopyBufferPoolTest, SharedBufferGetIoBuf) {
   // Dispense 3 IOBufs: two sharing buffers_[0], one on buffers_[1].
   cqe.res = 1500;
   zcqe.off = 0;
-  auto buf1 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   cqe.res = 800;
   zcqe.off = 1600;
-  auto buf2 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   EXPECT_EQ(buf1->length(), 1500);
   EXPECT_EQ(buf2->length(), 800);
@@ -244,7 +309,7 @@ TEST(IoUringZeroCopyBufferPoolTest, SharedBufferGetIoBuf) {
 
   cqe.res = 2048;
   zcqe.off = 4096;
-  auto buf3 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf3 = pool->getIoBuf(&cqe, &zcqe).buffer;
   EXPECT_EQ(buf3->length(), 2048);
 
   EXPECT_EQ(helper.getRingUsedCount(), 0);
@@ -283,13 +348,13 @@ TEST(IoUringZeroCopyBufferPoolTest, SharedBufferRefillWithPending) {
   // This results in 3 returnBuffer() calls when freed.
   cqe.res = 1500;
   zcqe.off = 0;
-  auto buf1 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
   cqe.res = 2048;
   zcqe.off = 4096;
-  auto buf2 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
   cqe.res = 800;
   zcqe.off = 1600;
-  auto buf3 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf3 = pool->getIoBuf(&cqe, &zcqe).buffer;
 
   buf1.reset();
   buf2.reset();
@@ -302,7 +367,7 @@ TEST(IoUringZeroCopyBufferPoolTest, SharedBufferRefillWithPending) {
   EXPECT_EQ(helper.getRingFreeCount(), 2);
 
   zcqe.off = 2 * 4096;
-  auto buf4 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf4 = pool->getIoBuf(&cqe, &zcqe).buffer;
   buf4.reset();
 
   EXPECT_EQ(helper.getRingUsedCount(), 2);
@@ -404,13 +469,13 @@ TEST(IoUringZeroCopyBufferPoolTest, NoBufferCount) {
   cqe.res = 2048;
   zcqe.off = 0;
 
-  auto buf1 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
   helper.incNoBufferCount();
   EXPECT_EQ(pool->getAndResetNoBufferCount(), 1);
 
   buf1.reset();
   zcqe.off = 4096;
-  auto buf2 = pool->getIoBuf(&cqe, &zcqe);
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
   helper.incNoBufferCount();
   helper.incNoBufferCount();
   EXPECT_EQ(pool->getAndResetNoBufferCount(), 2);
@@ -471,7 +536,7 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillMoreThanCapacity) {
   cqe.res = 2048;
   zcqe.off = 0;
   for (int i = 0; i < 8; i++) {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
   }
 
@@ -482,11 +547,110 @@ TEST(IoUringZeroCopyBufferPoolTest, RefillMoreThanCapacity) {
   helper.consumeRefillRingEntries(2);
   zcqe.off = 0;
   for (int i = 0; i < 2; i++) {
-    auto buf = pool->getIoBuf(&cqe, &zcqe);
+    auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
     zcqe.off += 4096;
   }
   EXPECT_EQ(helper.getRingUsedCount(), 2);
   EXPECT_EQ(helper.getRingFreeCount(), 0);
   EXPECT_EQ(helper.getPendingBuffersSize(), 6);
   pool.reset();
+}
+
+// A noDev pool has no netdev driving the page pool, but from the pool's own
+// point of view buffers must still be dispensed and recycled exactly as they
+// are for a device-backed pool.
+TEST(IoUringZeroCopyBufferPoolTest, NoDevRefillRecyclesBuffers) {
+  IoUringZeroCopyBufferPool::Params params = {
+      .ring = nullptr,
+      .numBuffers = 8,
+      .bufferSizeHint = 4096,
+      .rqEntries = 2,
+      .ifindex = 0,
+      .queueId = 0,
+      .noDev = true,
+  };
+  auto pool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+  IoUringZeroCopyBufferPoolTestHelper helper(*pool);
+
+  io_uring_cqe cqe{};
+  io_uring_zcrx_cqe zcqe{};
+  cqe.res = 2048;
+  zcqe.off = 0;
+
+  auto buf1 = pool->getIoBuf(&cqe, &zcqe).buffer;
+  zcqe.off += 4096;
+  auto buf2 = pool->getIoBuf(&cqe, &zcqe).buffer;
+  zcqe.off += 4096;
+  auto buf3 = pool->getIoBuf(&cqe, &zcqe).buffer;
+
+  buf1.reset();
+  buf2.reset();
+  buf3.reset();
+
+  // Two entries fit the refill ring, the third overflows to the pending queue.
+  EXPECT_EQ(helper.getRingUsedCount(), 2);
+  EXPECT_EQ(helper.getRingFreeCount(), 0);
+  EXPECT_EQ(helper.getPendingBuffersSize(), 1);
+
+  helper.consumeRefillRingEntries(2);
+  zcqe.off += 4096;
+  auto buf4 = pool->getIoBuf(&cqe, &zcqe).buffer;
+  buf4.reset();
+
+  EXPECT_EQ(helper.getRingUsedCount(), 2);
+  EXPECT_EQ(helper.getPendingBuffersSize(), 0);
+}
+
+// The kernel rejects a noDev registration whose rx_buf_len is not exactly one
+// page (io_uring/zcrx.c: !ifq->dev && buf_size_shift != PAGE_SHIFT), so an
+// oversized hint has to be clamped even when the kernel reports that it
+// supports configurable rx page sizes.
+TEST(IoUringZeroCopyBufferPoolTest, NoDevClampsBufferSizeToPageSize) {
+  size_t pageSize = sysconf(_SC_PAGESIZE);
+  uint32_t largeHint = static_cast<uint32_t>(pageSize * 4);
+
+  IoUringZeroCopyBufferPool::Params params = {
+      .ring = nullptr,
+      .numBuffers = 8,
+      .bufferSizeHint = largeHint,
+      .rqEntries = 4,
+      .ifindex = 0,
+      .queueId = 0,
+      .noDev = false,
+  };
+
+  // With a device the oversized hint is honoured.
+  auto devPool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+  IoUringZeroCopyBufferPoolTestHelper devHelper(*devPool);
+  EXPECT_EQ(devHelper.getBufferSize(), largeHint);
+
+  // Without one it is clamped down to a single page.
+  params.noDev = true;
+  auto noDevPool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+  IoUringZeroCopyBufferPoolTestHelper noDevHelper(*noDevPool);
+  EXPECT_EQ(noDevHelper.getBufferSize(), pageSize);
+}
+
+// noDev must not change how a dispensed buffer maps onto the underlying area.
+TEST(IoUringZeroCopyBufferPoolTest, NoDevGetBuf) {
+  size_t pageSize = sysconf(_SC_PAGESIZE);
+  IoUringZeroCopyBufferPool::Params params = {
+      .ring = nullptr,
+      .numBuffers = 32,
+      .bufferSizeHint = static_cast<uint32_t>(pageSize),
+      .rqEntries = 8,
+      .ifindex = 0,
+      .queueId = 0,
+      .noDev = true,
+  };
+  auto pool = IoUringZeroCopyBufferPoolTestHelper::create(params);
+
+  io_uring_cqe cqe{};
+  cqe.res = 2048;
+  io_uring_zcrx_cqe zcqe{};
+  zcqe.off = static_cast<uint64_t>(pageSize);
+
+  auto buf = pool->getIoBuf(&cqe, &zcqe).buffer;
+  EXPECT_EQ(buf->length(), 2048);
+  EXPECT_TRUE(buf->isSharedOne());
 }

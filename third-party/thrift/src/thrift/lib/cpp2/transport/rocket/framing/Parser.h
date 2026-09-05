@@ -118,6 +118,12 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
   FOLLY_NOINLINE void readBufferAvailable(
       std::unique_ptr<folly::IOBuf> /*readBuf*/) noexcept override;
 
+  void readBuffersScarce(bool scarce) noexcept override {
+    if (auto* parser = std::get_if<FrameLengthParser>(&parser_)) {
+      parser->setBuffersScarce(scarce);
+    }
+  }
+
   bool isBufferMovable() noexcept override {
     return visit([](auto& parser) { return parser.isBufferMovable(); });
   }

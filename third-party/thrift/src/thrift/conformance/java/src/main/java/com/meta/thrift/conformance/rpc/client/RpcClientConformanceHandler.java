@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.stream.Collectors;
 import org.apache.thrift.ProtocolId;
+import org.apache.thrift.TApplicationException;
 import org.apache.thrift.conformance.ClientInstruction;
 import org.apache.thrift.conformance.ClientTestResult;
 import org.apache.thrift.conformance.InteractionConstructorClientInstruction;
@@ -176,9 +177,20 @@ public class RpcClientConformanceHandler {
                             .build())));
   }
 
-  private boolean isTTransportException(Throwable t) {
-    return (t instanceof TTransportException
-        && ((TTransportException) t).getType() == TTransportException.TIMED_OUT);
+  /**
+   * The conformance contract asks only whether a timeout was observed, and the two transports
+   * report one differently. A deadline the client enforces locally is a transport failure. A
+   * deadline the server enforces arrives as a Rocket ERROR frame carrying {@code TASK_EXPIRED},
+   * which is application level and becomes a {@link TApplicationException}, exactly as the C++
+   * client's {@code decodeResponseError} reports it. This client installs no local timer, so on
+   * Rocket it always observes the second form.
+   */
+  private boolean isTimeoutException(Throwable t) {
+    if (t instanceof TTransportException) {
+      return ((TTransportException) t).getType() == TTransportException.TIMED_OUT;
+    }
+    return t instanceof TApplicationException
+        && ((TApplicationException) t).getType() == TApplicationException.TIMEOUT;
   }
 
   public Mono<ClientTestResult> testRequestResponseTimeout(
@@ -194,7 +206,7 @@ public class RpcClientConformanceHandler {
                 Mono.just(
                     ClientTestResult.fromRequestResponseTimeout(
                         new RequestResponseTimeoutClientTestResult.Builder()
-                            .setTimeoutException(isTTransportException(t))
+                            .setTimeoutException(isTimeoutException(t))
                             .build())));
   }
 

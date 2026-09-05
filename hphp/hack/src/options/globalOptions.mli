@@ -128,6 +128,9 @@ type t = {
         Set to true only for debugging purposes! *)
   tco_silence_errors_under_dynamic: bool;
       (** Do not report errors under the dynamic pass of the typechecker *)
+  tco_reject_promoted_property_redeclaration: bool;
+      (** Reject a subclass constructor re-promoting (via a visibility modifier) a
+        property already declared by an ancestor. Rollout flag; off by default. *)
   tco_skip_tast_checks: bool;
       (** Skip checks implemented with TAST visitors.
         Set to true only for debugging purposes! *)
@@ -334,6 +337,7 @@ val set :
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?tco_silence_errors_under_dynamic:bool ->
+  ?tco_reject_promoted_property_redeclaration:bool ->
   ?tco_skip_tast_checks:bool ->
   ?tco_coeffects:bool ->
   ?tco_coeffects_local:bool ->

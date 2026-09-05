@@ -60,7 +60,6 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -99,7 +98,6 @@ namespace {
 
 constexpr size_t kPayloadSize = 4'096;
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -238,7 +236,7 @@ std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
               apache::thrift::fast_thrift::rocket::RocketStreamContexts>();
 
   builder
-      .addNextInbound<FrameLengthParserHandler>(frame_length_parser_handler_tag)
+
       .addNextOutbound<FrameLengthEncoderHandler>(
           frame_length_encoder_handler_tag)
       .addNextDuplex<frame::handler::FrameCodecHandler>(frame_codec_handler_tag)

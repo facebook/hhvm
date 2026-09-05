@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseSerializer.h>
@@ -39,6 +40,46 @@ namespace apache::thrift::fast_thrift::thrift {
 // each wire shape the server emits. Callers hand the result to a single
 // writeResponse() entry point on the adapter — payload construction and
 // pipeline write are deliberately separate concerns.
+
+// Moves any handler-set response headers off the request context and onto the
+// outgoing metadata, mirroring what classic Thrift's makeResponseRpcMetadata
+// does with THeader's write headers.
+//
+// Applies to every response shape carrying typed metadata — success, declared
+// exception, app error — so a handler that sets a header still gets it on the
+// wire when the call ends up failing. Rocket ERROR frames have no
+// ResponseRpcMetadata to put them on and are skipped.
+//
+// The context's headers win over anything already on the metadata, but do not
+// erase it: a metadata producer and a handler can each contribute keys. The
+// overwhelmingly common empty-metadata case still moves the map wholesale.
+//
+// Handlers that set no header (the overwhelmingly common case) pay one
+// predictable branch and never touch the map.
+inline void attachResponseHeaders(
+    ThriftServerResponseMessage& message) noexcept {
+  if (message.requestContext == nullptr ||
+      !message.requestContext->hasResponseHeaders() ||
+      !message.payload.is<ThriftInitialResponsePayload>()) {
+    return;
+  }
+  auto& initialResponse = message.payload.get<ThriftInitialResponsePayload>();
+  if (initialResponse.metadata == nullptr) {
+    return;
+  }
+  // Merged, not assigned: a pipeline handler downstream of the adapter writes
+  // this same field, and whichever ran second would otherwise drop the other's
+  // headers with no error. The empty case still moves, which is the common one.
+  auto headers = message.requestContext->extractResponseHeaders();
+  auto otherMetadata = initialResponse.metadata->otherMetadata();
+  if (!otherMetadata.has_value() || otherMetadata->empty()) {
+    otherMetadata = std::move(headers);
+    return;
+  }
+  for (auto& [key, value] : headers) {
+    (*otherMetadata)[key] = std::move(value);
+  }
+}
 
 // PAYLOAD frame, application-built data + metadata.
 inline ThriftServerResponseMessage makeResponseMessage(

@@ -32,7 +32,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
@@ -76,7 +75,6 @@ using apache::thrift::fast_thrift::thrift::test::
     BackwardsCompatibilityTestService;
 
 // Handler tags for pipeline construction
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
@@ -119,6 +117,21 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   bool& connected_;
 };
 
+class PingCounter {
+ public:
+  int64_t getPingCount() const {
+    return pingCount_.load(std::memory_order_relaxed);
+  }
+
+ protected:
+  ~PingCounter() = default;
+
+  void recordPing() { pingCount_.fetch_add(1, std::memory_order_relaxed); }
+
+ private:
+  std::atomic<int64_t> pingCount_{0};
+};
+
 /**
  * BackwardsCompatibilityTestHandler - Implementation of the generated
  * BackwardsCompatibilityTestServiceSvIf interface.
@@ -127,7 +140,8 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  * BackwardsCompatibilityTestService.thrift.
  */
 class BackwardsCompatibilityTestHandler
-    : public apache::thrift::ServiceHandler<BackwardsCompatibilityTestService> {
+    : public apache::thrift::ServiceHandler<BackwardsCompatibilityTestService>,
+      public PingCounter {
  public:
   void echo(
       std::string& response, std::unique_ptr<std::string> message) override {
@@ -140,7 +154,7 @@ class BackwardsCompatibilityTestHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -150,7 +164,8 @@ class BackwardsCompatibilityTestHandler
 
 class BackwardsCompatibilityTestFastHandler
     : public apache::thrift::ServiceHandler<
-          BackwardsCompatibilityTestFastService> {
+          BackwardsCompatibilityTestFastService>,
+      public PingCounter {
  public:
   void echo(
       std::string& response, std::unique_ptr<std::string> message) override {
@@ -163,7 +178,7 @@ class BackwardsCompatibilityTestFastHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -173,7 +188,8 @@ class BackwardsCompatibilityTestFastHandler
 
 class BackwardsCompatibilityTestFastChildHandler
     : public apache::thrift::ServiceHandler<
-          BackwardsCompatibilityTestFastChildService> {
+          BackwardsCompatibilityTestFastChildService>,
+      public PingCounter {
  public:
   // Inherited from parent.
   void echo(
@@ -187,7 +203,7 @@ class BackwardsCompatibilityTestFastChildHandler
     response = std::string(static_cast<size_t>(size), 'x');
   }
 
-  void ping() override {}
+  void ping() override { recordPing(); }
 
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
@@ -235,7 +251,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
    * Create a fast_thrift client channel connected to the test server.
    *
    * The channel is constructed with the full pipeline:
-   * - FrameLengthParserHandler: Parses frames from raw bytes
+   * - FrameLengthParser (in the transport): parses frames from raw bytes
    * - FrameLengthEncoderHandler: Encodes frames with length prefix
    * - RocketClientFrameCodecHandler: Bidirectional codec for Rocket frames
    * - RocketClientSetupFrameHandler: Handles initial SETUP frame
@@ -301,9 +317,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .setAllocator(&connection->allocator)
               .addState<apache::thrift::fast_thrift::rocket::client::
                             RocketClientStreamContexts>()
-              .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                  handler::FrameLengthParserHandler>(
-                  frame_length_parser_handler_tag)
+
               .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                    handler::FrameLengthEncoderHandler>(
                   frame_length_encoder_handler_tag)
@@ -361,9 +375,15 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, Ping) {
       apache::thrift::Client<BackwardsCompatibilityTestService>>(
       std::move(channel_));
 
+  ASSERT_EQ(handler_->getPingCount(), 0);
+
   folly::coro::blockingWait(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_ping()));
+
+  // The RPC round-trip must actually invoke the server handler exactly once,
+  // not just complete without throwing on the client.
+  EXPECT_EQ(handler_->getPingCount(), 1);
 
   // Destroy the client in the EventBase thread
   destroyClientOnEvb(client);
@@ -734,8 +754,7 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addState<rocket::client::RocketClientStreamContexts>()
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  frame_length_parser_handler_tag)
+
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   frame_length_encoder_handler_tag)
@@ -808,9 +827,15 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 TEST_F(BackwardsCompatibilityFastClientE2ETest, Ping) {
   auto client = createFastClient();
 
+  ASSERT_EQ(handler_->getPingCount(), 0);
+
   folly::coro::blockingWait(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_ping()));
+
+  // The FastClient RPC must actually reach the server handler once, not just
+  // return without throwing on the client.
+  EXPECT_EQ(handler_->getPingCount(), 1);
 
   destroyClientOnEvb(client);
 }
@@ -1004,10 +1029,15 @@ TEST_F(
     BackwardsCompatibilityFastChildClientE2ETest, InheritedPingThroughChild) {
   auto client = createFastClient<BackwardsCompatibilityTestFastChildService>();
 
-  EXPECT_NO_THROW(
-      folly::coro::blockingWait(
-          folly::coro::co_withExecutor(
-              clientThread_->getEventBase(), client->co_ping())));
+  ASSERT_EQ(childHandler_->getPingCount(), 0);
+
+  folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_ping()));
+
+  // A FastClient<Child> calling an inherited (parent-defined) method must
+  // actually dispatch to the child handler's ping, not silently no-op.
+  EXPECT_EQ(childHandler_->getPingCount(), 1);
 
   destroyClientOnEvb(client);
 }

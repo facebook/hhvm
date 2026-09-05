@@ -116,7 +116,10 @@ DEFINE_uint32(
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET(
-    std::string, getSocketParser, folly::AsyncTransport& socket) {
+    std::string,
+    getSocketParser,
+    folly::AsyncTransport& socket,
+    const wangle::TransportInfo&) {
   if (socket.getUnderlyingTransport<fizz::AsyncFizzBase>() ||
       socket.getUnderlyingTransport<folly::AsyncSSLSocket>()) {
     return THRIFT_FLAG(rocket_frame_parser);
@@ -216,9 +219,13 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool;
   folly::AsyncServerSocket::CallbackAssignFunction assignFunc = nullptr;
   if (FLAGS_io_zcrx) {
+    validateZcrxFlags();
     int numThreads = sanitizeNumThreads(FLAGS_io_threads);
     int numQueues =
         FLAGS_io_zcrx_hw_queues > 0 ? FLAGS_io_zcrx_hw_queues : numThreads;
+    if (FLAGS_io_zcrx_nodev) {
+      numQueues = 0;
+    }
     apache::thrift::facebook::ZcrxIOThreadPoolExecutor::Config zcrxConfig{
         .ifname = FLAGS_io_zcrx_ifname,
         .numQueues = numQueues,
@@ -227,9 +234,11 @@ std::shared_ptr<ThriftServer> createStressTestServer(
         .zcrxNumPages = FLAGS_io_zcrx_num_pages,
         .zcrxRefillEntries = FLAGS_io_zcrx_refill_entries,
         .zcrxBufferSizeHint = FLAGS_io_zcrx_buffer_size_hint,
+        .noDev = FLAGS_io_zcrx_nodev,
     };
     gflags::CommandLineFlagInfo info;
-    if (gflags::GetCommandLineFlagInfo("io_zcrx_queue_id", &info) &&
+    if (!FLAGS_io_zcrx_nodev &&
+        gflags::GetCommandLineFlagInfo("io_zcrx_queue_id", &info) &&
         !info.is_default) {
       zcrxConfig.startQueueId = FLAGS_io_zcrx_queue_id;
     }
@@ -237,7 +246,9 @@ std::shared_ptr<ThriftServer> createStressTestServer(
         std::move(zcrxConfig),
         "thrift_eventbase",
         setIoUringCommonOptionsFromFlags);
-    assignFunc = executor->getCallbackAssignFunc();
+    if (!FLAGS_io_zcrx_nodev) {
+      assignFunc = executor->getCallbackAssignFunc();
+    }
     ioThreadPool = std::move(executor);
   } else {
     ioThreadPool = getIOThreadPool("thrift_eventbase", FLAGS_io_threads);
@@ -317,7 +328,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     }
   }
 
-  if (FLAGS_io_zcrx) {
+  if (FLAGS_io_zcrx && !FLAGS_io_zcrx_nodev) {
     server->setCallbackAssignFunc(assignFunc);
   }
 

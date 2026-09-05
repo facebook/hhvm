@@ -51,7 +51,10 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     apache::thrift::ThriftServer&);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    std::string, getSocketParser, folly::AsyncTransport&);
+    std::string,
+    getSocketParser,
+    folly::AsyncTransport&,
+    const wangle::TransportInfo&);
 } // namespace detail
 
 class RocketRoutingHandler : public TransportRoutingHandler {

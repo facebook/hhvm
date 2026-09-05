@@ -96,6 +96,7 @@ class FastServerModule {
     requiresConnectionContext_ |= ThriftConnectionExtensionHandler<H> ||
         ThriftBackpressureExtensionHandler<H>;
     controlsReads_ |= ThriftBackpressureExtensionHandler<H>;
+    requiresHeaders_ |= UsesHeaders<H>;
     return addFactory([&](channel_pipeline::HandlerId id) {
       return server::makeThriftExtensionHandlerFactory<H>(
           id, std::move(args)...);
@@ -119,6 +120,14 @@ class FastServerModule {
    * drain would silently lift an extension's pause.
    */
   bool controlsReads() const { return controlsReads_; }
+
+  /**
+   * Whether any extension in this module declares kUsesHeaders. Checked by
+   * FastThriftServer::addModule against enableRequestHeaders: headers are
+   * reachable only through the per-request context, which the server populates
+   * only under that setting, so without it the extension would read empty.
+   */
+  bool requiresHeaders() const { return requiresHeaders_; }
 
   /**
    * The module's handler factories, in call order. FastThriftServer::addModule
@@ -151,6 +160,7 @@ class FastServerModule {
   std::vector<server::ThriftPipelineHandlerFactory> factories_;
   bool requiresConnectionContext_{false};
   bool controlsReads_{false};
+  bool requiresHeaders_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

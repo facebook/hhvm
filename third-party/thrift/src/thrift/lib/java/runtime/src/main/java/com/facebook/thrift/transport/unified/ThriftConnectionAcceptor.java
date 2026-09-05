@@ -23,7 +23,7 @@ import static org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
 import com.facebook.thrift.legacy.codec.ThriftFrame;
-import com.facebook.thrift.payload.Reader;
+import com.facebook.thrift.payload.RequestData;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.protocol.TProtocolType;
@@ -35,9 +35,7 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -448,10 +446,10 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       RpcKind kind =
           message.seqid == -1 ? SINGLE_REQUEST_NO_RESPONSE : SINGLE_REQUEST_SINGLE_RESPONSE;
 
-      // Hand the frame to the payload so the generated handler can release it (via
-      // releaseRequestData()) right after reading the request args.
+      // The frame is the reference to free; byteBufTProtocol reads frame.getMessage() from just
+      // past the envelope that was consumed above. Bind the two so the generated handler claims
+      // and frees them together, and no reader can outlive the release.
       return ServerRequestPayload.create(
-          createReaderFunction(byteBufTProtocol),
           new RequestRpcMetadata.Builder()
               .setKind(kind)
               .setProtocol(protocol.getProtocolId())
@@ -459,36 +457,10 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
               .build(),
           requestContext,
           message.seqid,
-          frame);
+          RequestData.of(frame, byteBufTProtocol));
     } catch (Throwable t) {
       throw new RuntimeException("Failed to decode message", t);
     }
-  }
-
-  /**
-   * Create reader function for parsing request arguments.
-   *
-   * @param protocol the protocol
-   * @return function that reads request arguments
-   */
-  @SuppressWarnings("rawtypes")
-  private static Function<List<Reader>, List<Object>> createReaderFunction(TProtocol protocol) {
-    return readers -> {
-      protocol.readStructBegin();
-      List<Object> requestArguments = Collections.emptyList();
-      if (readers != null && !readers.isEmpty()) {
-        requestArguments = new ArrayList<>();
-        for (Reader r : readers) {
-          protocol.readFieldBegin();
-          requestArguments.add(r.read(protocol));
-          protocol.readFieldEnd();
-        }
-      }
-
-      protocol.readStructEnd();
-      protocol.readMessageEnd();
-      return requestArguments;
-    };
   }
 
   /**

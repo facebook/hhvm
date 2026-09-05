@@ -497,8 +497,6 @@ where
     // using-statement:
     //   await-opt   using   expression   ;
     //   await-opt   using   (   expression-list   )   compound-statement
-    //
-    // TODO: Update the specification of the grammar
     fn parse_using_statement(&mut self, await_kw: S::Output) -> S::Output {
         let using_kw = self.assert_token(TokenKind::Using);
         // Decision point - Are we at a function scope or a body scope
@@ -547,14 +545,6 @@ where
     }
 
     fn parse_unset_statement(&mut self) -> S::Output {
-        // TODO: This is listed as unsupported in Hack in the spec; is that true?
-        // TODO: If it is formally supported in Hack then update the spec; if not
-        // TODO: then should we make it illegal in strict mode?
-        // TODO: Can the list be comma-terminated?
-        // TODO: Can the list be empty?
-        // TODO: The list has to be expressions which evaluate as variables;
-        // add an error checking pass.
-        // TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
         let keyword = self.assert_token(TokenKind::Unset);
         let (left_paren, variables, right_paren) =
             self.parse_parenthesized_comma_list_opt_allow_trailing(|x| x.parse_expression());
@@ -736,8 +726,6 @@ where
         //
         // The parsing of course has to be greedy; we never want to say that there
         // are zero statements *between* two sections.
-        //
-        // TODO: Update the specification with these rules.
 
         let switch_keyword_token = self.assert_token(TokenKind::Switch);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
@@ -1044,13 +1032,7 @@ where
     }
 
     fn parse_default_label(&mut self) -> S::Output {
-        //
         // See comments under parse_switch_statement for the grammar.
-        // TODO: Update the spec.
-        // TODO: The spec is wrong; it implies that a statement must always follow
-        //       the default:, but in fact
-        //       switch($x) { default: }
-        //       is legal. Fix the spec.
         // TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
         // here; add an error in a later pass.
         let default_token = self.assert_token(TokenKind::Default);
@@ -1067,10 +1049,6 @@ where
     fn parse_case_label(&mut self) -> S::Output {
         // SPEC:
         // See comments under parse_switch_statement for the grammar.
-        // TODO: The spec is wrong; it implies that a statement must always follow
-        //       the case, but in fact
-        //       switch($x) { case 10: }
-        //       is legal. Fix the spec.
         // TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
         // here; add an error in a later pass.
 
@@ -1094,7 +1072,6 @@ where
     }
 
     // SPEC:
-    // TODO: update the spec to reflect that echo and print must be a statement
     // echo-intrinsic:
     //   echo  expression
     //   echo  (  expression  )

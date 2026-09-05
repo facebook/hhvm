@@ -42,8 +42,6 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
                CheckLoc,
                CheckStk,
                CheckMBase,
-               CheckInit,
-               CheckInitMem,
                CheckRDSInitialized)) {
     return false;
   }
@@ -62,15 +60,6 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
         takenBlk = block->next();
       }
       isUnconditional = true;
-    } else if (term.is(CheckInit)) {
-      if (!src->type().maybe(TUninit)) {
-        // Never taken.
-        takenBlk = block->next();
-        isUnconditional = true;
-      } else if (src->isA(TUninit)) {
-        // Always taken.
-        isUnconditional = true;
-      }
     }
   }
 
@@ -132,7 +121,7 @@ bool foldJmp(IRUnit& unit, Block* block) {
     // If we reach here, takenBlk cannot be merged into block as it has other
     // predecessors. We could duplicate whatever code in takenBlk in block, but
     // we only do it if takenBlk contains only a cheap instruction.
-    if (takenBlk->begin()->is(Jmp, JmpZero, JmpNZero, CheckInit)) {
+    if (takenBlk->begin()->is(Jmp, JmpZero, JmpNZero)) {
       block->back().become(unit, &*takenBlk->begin());
       FTRACE(1, "Duplicated B{} into B{}\n", takenBlk->id(), block->id());
       // takenBlk is probably still reachable from other blocks.

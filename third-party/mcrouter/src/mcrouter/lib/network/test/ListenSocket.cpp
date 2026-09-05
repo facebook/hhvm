@@ -27,7 +27,8 @@ namespace memcache {
 
 std::pair<int, uint16_t> createAndBind(
     uint16_t port,
-    bool zeroCopyEnable = false) {
+    bool zeroCopyEnable = false,
+    bool reuseAddr = false) {
   struct addrinfo hints;
   struct addrinfo* res;
 
@@ -53,6 +54,14 @@ std::pair<int, uint16_t> createAndBind(
         port,
         folly::errnoStr(errno));
   }
+  int reuse = 1;
+  if (reuseAddr &&
+      ::setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse))) {
+    auto errStr = folly::errnoStr(errno);
+    ::close(socketFd);
+    throwRuntime("Failed to set SO_REUSEADDR for port {}: {}", port, errStr);
+  }
+
   if (::bind(socketFd, res->ai_addr, res->ai_addrlen) != 0) {
     auto errStr = folly::errnoStr(errno);
     ::close(socketFd);
@@ -78,18 +87,33 @@ std::pair<int, uint16_t> createAndBind(
   return std::make_pair(socketFd, ntohs(addr.sin_port));
 }
 
-ListenSocket::ListenSocket(bool zeroCopyEnabled) {
-  auto sockPort = createAndBind(0, zeroCopyEnabled);
-  socketFd_ = sockPort.first;
-  port_ = sockPort.second;
-  if (::listen(socketFd_, SOMAXCONN) != 0) {
+namespace {
+std::pair<int, uint16_t>
+bindAndListen(uint16_t port, bool zeroCopyEnabled, bool reuseAddr) {
+  auto sockPort = createAndBind(port, zeroCopyEnabled, reuseAddr);
+  if (::listen(sockPort.first, SOMAXCONN) != 0) {
+    auto errStr = folly::errnoStr(errno);
+    ::close(sockPort.first);
     throwRuntime(
         "Failed to listen on a socket for port {}: {}",
-        port_,
-        folly::errnoStr(errno));
+        sockPort.second,
+        errStr);
   }
 
-  VLOG(1) << "Listening on " << socketFd_ << ", port " << port_;
+  VLOG(1) << "Listening on " << sockPort.first << ", port " << sockPort.second;
+  return sockPort;
+}
+} // namespace
+
+ListenSocket::ListenSocket(bool zeroCopyEnabled) {
+  auto sockPort = bindAndListen(0, zeroCopyEnabled, /* reuseAddr */ false);
+  socketFd_ = sockPort.first;
+  port_ = sockPort.second;
+}
+
+ListenSocket ListenSocket::createOnPort(uint16_t port, bool zeroCopyEnabled) {
+  auto sockPort = bindAndListen(port, zeroCopyEnabled, /* reuseAddr */ true);
+  return ListenSocket(sockPort.first, sockPort.second);
 }
 
 void ListenSocket::setCloseOnExec(bool value) {

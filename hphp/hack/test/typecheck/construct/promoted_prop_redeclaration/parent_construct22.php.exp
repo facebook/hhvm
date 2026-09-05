@@ -1,0 +1,8 @@
+ERROR: File "parent_construct22.php", line 15, characters 55-61:
+Cannot redeclare the promoted property `config` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. (Typing[4524])
+  File "parent_construct22.php", line 8, characters 41-47:
+  `config` was previously declared in `EntFooBase`
+ERROR: File "parent_construct22.php", line 34, characters 45-46:
+Cannot redeclare the promoted property `x` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. (Typing[4524])
+  File "parent_construct22.php", line 30, characters 41-43:
+  `x` was previously declared in `Base`

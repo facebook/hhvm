@@ -26,3 +26,11 @@ ERROR: File "enum_uncheckable_values.php", line 45, characters 6-24:
   `R5` cannot be checked
   File "enum_uncheckable_values.php", line 45, characters 6-24:
   (and 2 more)
+ERROR: File "enum_uncheckable_values.php", line 63, characters 6-25:
+`EnumConcatClassConst` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_uncheckable_values.php", line 64, characters 3-10:
+  `PREFIXED` cannot be checked
+ERROR: File "enum_uncheckable_values.php", line 70, characters 6-24:
+`EnumConcatSelfConst` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
+  File "enum_uncheckable_values.php", line 72, characters 3-9:
+  `DERIVED` cannot be checked

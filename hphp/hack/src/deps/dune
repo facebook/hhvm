@@ -21,6 +21,7 @@
  (name typing_deps)
  (wrapped false)
  (modules
+  typing_deps_types
   typing_deps
   typing_deps_mode)
  (libraries

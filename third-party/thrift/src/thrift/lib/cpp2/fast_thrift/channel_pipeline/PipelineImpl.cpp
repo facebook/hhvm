@@ -93,6 +93,7 @@ PipelineImpl::PipelineImpl(
 
 void PipelineImpl::initializeContexts() noexcept {
   const auto N = handlers_.size();
+  headWriteReadyHook_.handlerIndex = N;
   contexts_.reserve(N);
   handlerMap_.reserve(N);
 
@@ -499,31 +500,70 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
   if (state_ == State::Closed) {
     return;
   }
+  if (writeReadyDispatching_) {
+    writeReadyDispatchPending_ = true;
+    return;
+  }
+  writeReadyDispatching_ = true;
 
-  // A callback may unlink and re-arm its hook. Mark each hook before dispatch
-  // and skip hooks already delivered in this generation, preventing same-pass
-  // reentrant delivery without allocating or changing native linked semantics.
-  const auto generation = ++writeReadyGeneration_;
-  auto it = writeReadyList_.begin();
-  while (it != writeReadyList_.end()) {
-    auto& hook = *it;
-    ++it;
-    if (hook.lastNotifiedGeneration == generation) {
-      continue;
+  bool propagationBlocked = false;
+  do {
+    writeReadyDispatchPending_ = false;
+    // A callback may unlink and re-arm its hook. Mark each hook before
+    // dispatch and restart list inspection after every callback so no iterator
+    // survives arbitrary hook mutation.
+    const auto generation = ++writeReadyGeneration_;
+
+    // Write capacity originates at the head endpoint. Let it consume the edge
+    // before upstream handlers retry so they observe the updated transport
+    // state.
+    if (headWriteReadyHook_.hook.is_linked()) {
+      headWriteReadyHook_.lastNotifiedGeneration = generation;
+      DCHECK(headOnWriteReadyFn_);
+      headOnWriteReadyFn_(headHandler_, headCtx_);
+      if (state_ == State::Closed || headWriteReadyHook_.hook.is_linked()) {
+        propagationBlocked = true;
+        break;
+      }
     }
-    hook.lastNotifiedGeneration = generation;
-    size_t i = hook.handlerIndex;
-    DCHECK(handlers_[i].onWriteReadyFn);
-    DCHECK_LT(i, contexts_.size());
-    handlers_[i].onWriteReadyFn(handlers_[i].handlerPtr, contexts_[i]);
-    if (state_ == State::Closed) {
+
+    while (true) {
+      WriteReadyHook* next = nullptr;
+      for (auto& hook : writeReadyList_) {
+        if (hook.lastNotifiedGeneration != generation) {
+          next = &hook;
+          break;
+        }
+      }
+      if (next == nullptr) {
+        break;
+      }
+      next->lastNotifiedGeneration = generation;
+      const size_t i = next->handlerIndex;
+      if (i == handlers_.size()) {
+        DCHECK(headOnWriteReadyFn_);
+        headOnWriteReadyFn_(headHandler_, headCtx_);
+      } else {
+        DCHECK(handlers_[i].onWriteReadyFn);
+        DCHECK_LT(i, contexts_.size());
+        handlers_[i].onWriteReadyFn(handlers_[i].handlerPtr, contexts_[i]);
+      }
+      if (state_ == State::Closed || headWriteReadyHook_.hook.is_linked()) {
+        propagationBlocked = true;
+        break;
+      }
+    }
+
+    if (propagationBlocked) {
       break;
     }
-  }
 
-  // Notify the tail endpoint that writes can resume.
-  DCHECK(tailOnWriteReadyFn_);
-  tailOnWriteReadyFn_(tailHandler_);
+    // Notify the tail endpoint that writes can resume.
+    DCHECK(tailOnWriteReadyFn_);
+    tailOnWriteReadyFn_(tailHandler_);
+  } while (writeReadyDispatchPending_ && state_ != State::Closed);
+
+  writeReadyDispatching_ = false;
 }
 
 void PipelineImpl::onReadReady() noexcept {

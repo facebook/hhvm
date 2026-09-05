@@ -134,6 +134,10 @@ let exit_on_exception (e : Exception.t) =
     Exit.exit Exit_status.Worker_failed_to_send_job
   | File_provider.File_provider_stale ->
     Exit.exit Exit_status.File_provider_stale
+  | Typing_deps.Depgraph_unavailable error ->
+    let msg = Typing_deps.depgraph_load_error_to_string error in
+    Hh_logger.log "Dependency graph unavailable: %s" msg;
+    Exit.exit ~msg Exit_status.Depgraph_unavailable
   | Decl_class.Decl_heap_elems_bug _ ->
     Exit.exit Exit_status.Decl_heap_elems_bug
   | Decl_defs.Decl_not_found _ -> Exit.exit Exit_status.Decl_not_found

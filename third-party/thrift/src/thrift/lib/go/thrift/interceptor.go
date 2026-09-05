@@ -54,6 +54,9 @@ type interceptorProcessor struct {
 // RunSinkContext / RunBiDiContext methods (interceptorProcessorFunction embeds
 // the ProcessorFunction interface, which does not declare them), so the server
 // would reject the call as "not a streaming function".
+//
+// Deprecated: Implement ServiceInterceptor and register it with
+// WithServiceInterceptor instead.
 func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 	if interceptor == nil {
 		return p

@@ -42,8 +42,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
@@ -76,7 +76,6 @@ using namespace apache::thrift::fast_thrift::thrift::bench;
 
 // Handler tags for the fast_thrift server pipeline
 HANDLER_TAG(batching_frame_handler);
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -129,7 +128,10 @@ std::shared_ptr<apache::thrift::ThriftServer> createThriftServer(
 // Per-accepted-client connection state for the benchmark server. Satisfies
 // the connection::Connection concept.
 struct BenchmarkConnection {
-  transport::TransportHandler::Ptr transportHandler;
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
+      transportHandler;
   channel_pipeline::PipelineImpl::Ptr pipeline;
   std::function<void()> closeCb;
   bool closed{false};
@@ -186,7 +188,11 @@ class FastThriftBenchmarkServer {
   BenchmarkConnection buildConnection(folly::AsyncTransport::UniquePtr socket) {
     auto* evb = socket->getEventBase();
     auto transportHandler =
-        transport::TransportHandler::create(std::move(socket));
+        apache::thrift::fast_thrift::transport::TransportHandlerT<
+            apache::thrift::fast_thrift::transport::
+                NoOpWriteCompleteEventFactory,
+            apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+            create(std::move(socket));
 
     auto serverChannel =
         std::make_shared<thrift::ThriftServerChannel>(handler_);
@@ -197,7 +203,10 @@ class FastThriftBenchmarkServer {
     // measure both configurations of the same pipeline.
     auto builder =
         channel_pipeline::PipelineBuilder<
-            transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::TransportHandlerT<
+                apache::thrift::fast_thrift::transport::
+                    NoOpWriteCompleteEventFactory,
+                apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
             thrift::ThriftServerChannel,
             channel_pipeline::SimpleBufferAllocator>()
             .setEventBase(evb)
@@ -215,8 +224,7 @@ class FastThriftBenchmarkServer {
           batching_frame_handler_tag);
     }
     builder
-        .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-            frame_length_parser_handler_tag)
+
         .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
             frame_length_encoder_handler_tag)
         .addNextDuplex<frame::handler::FrameCodecHandler>(

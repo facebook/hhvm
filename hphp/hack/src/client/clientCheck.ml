@@ -47,6 +47,20 @@ let print_find_my_tests_result result ~(json : bool) : unit =
     List.iter result.FMT.selected_test_files ~f:(fun file ->
         print_endline file.FMT.file_path)
 
+let output_isolation_result seeds ~output_json =
+  if output_json then
+    `Assoc
+      [
+        ("seed_files", `List (List.map seeds ~f:(fun path -> `String path)));
+        ("summary", `Assoc [("total_seed_files", `Int (List.length seeds))]);
+      ]
+    |> Hh_json_helpers.Out.to_string
+    |> print_endline
+  else
+    Printf.printf
+      "Found %d seed files (zero inbound references).\n"
+      (List.length seeds)
+
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
   let default_namespace str =
@@ -113,6 +127,7 @@ let connect
     custom_hhi_path;
     custom_telemetry_data;
     preexisting_warnings;
+    reason = _;
     error_format = _;
     paths = _;
     max_errors = _;
@@ -1019,6 +1034,12 @@ let main_internal
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_FIND_ISOLATABLE_CLUSTERS ->
+    let%lwt (seeds, telemetry) =
+      rpc args ServerCommandTypes.FIND_ISOLATABLE_CLUSTERS
+    in
+    output_isolation_result seeds ~output_json:args.output_json;
+    Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)
@@ -1126,7 +1147,7 @@ let main
   HackEventLogger.client_set_mode
     (ClientEnv.Variants_of_client_mode.to_name args.mode);
 
-  HackEventLogger.client_check_start ();
+  HackEventLogger.client_check_start ~reason:args.reason;
   ClientSpinner.start_heartbeat_telemetry ();
   Lwt.dont_wait flush_event_logger (fun _exn -> ());
   let partial_telemetry_ref = ref None in

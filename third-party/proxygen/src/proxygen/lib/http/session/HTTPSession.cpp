@@ -2178,7 +2178,8 @@ bool HTTPSession::shouldShutdown() const {
           !codec_->isReusable());
 }
 
-size_t HTTPSession::sendPing() {
+size_t HTTPSession::sendPing(std::chrono::milliseconds /*timeout*/,
+                             PingTimeoutCallback /*onTimeout*/) {
   return sendPing(folly::Random::rand64());
 }
 

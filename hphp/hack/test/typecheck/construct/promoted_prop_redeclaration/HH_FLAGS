@@ -1,0 +1,1 @@
+--config reject_promoted_property_redeclaration=true

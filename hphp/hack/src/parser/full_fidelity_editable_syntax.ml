@@ -102,9 +102,7 @@ let is_in_body node position =
   aux parents
 
 (* This function takes a parse tree and renders it in the GraphViz DOT
-   language; this is a small domain-specific language for visualizing graphs.
-   You can use www.webgraphviz.com to render it in a browser, or the "dot"
-   command line tool to turn DOT text into image files.
+   language; use the "dot" command line tool to turn DOT text into image files.
 
    Edge labels can make the graph hard to read, so they can be enabled or
    disabled as you like.

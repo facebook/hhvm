@@ -54,7 +54,6 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -89,7 +88,6 @@ using apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter;
 using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
 HANDLER_TAG(thrift_server_setup_handler);
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -281,9 +279,7 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
             .setAllocator(&rocketAllocator_)
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
-                                FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+
             .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                  handler::FrameLengthEncoderHandler>(
                 frame_length_encoder_handler_tag)

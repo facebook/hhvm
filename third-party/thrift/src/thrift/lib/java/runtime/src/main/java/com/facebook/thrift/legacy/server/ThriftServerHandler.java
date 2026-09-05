@@ -28,7 +28,7 @@ import com.facebook.thrift.legacy.codec.FrameInfo;
 import com.facebook.thrift.legacy.codec.LegacyTransportType;
 import com.facebook.thrift.legacy.codec.ThriftFrame;
 import com.facebook.thrift.legacy.exceptions.FrameTooLargeException;
-import com.facebook.thrift.payload.Reader;
+import com.facebook.thrift.payload.RequestData;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.protocol.TProtocolType;
@@ -44,13 +44,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
@@ -345,8 +342,10 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
 
       // Hand the frame to the payload so the generated handler can release it (via
       // releaseRequestData()) right after reading the request args.
+      // The frame is the reference to free; byteBufTProtocol reads frame.getMessage() from just
+      // past the envelope that was consumed above. Bind the two so the generated handler claims
+      // and frees them together, and no reader can outlive the release.
       return ServerRequestPayload.create(
-          createReaderFunction(byteBufTProtocol),
           new RequestRpcMetadata.Builder()
               .setKind(kind)
               .setProtocol(protocol.getProtocolId())
@@ -354,32 +353,12 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
               .build(),
           requestContext,
           message.seqid,
-          frame);
+          RequestData.of(frame, byteBufTProtocol));
     } catch (Throwable t) {
       // Decode failed before the payload took ownership; release the frame here.
       ReferenceCountUtil.safeRelease(frame);
       throw Exceptions.propagate(t);
     }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static Function<List<Reader>, List<Object>> createReaderFunction(TProtocol out) {
-    return readers -> {
-      out.readStructBegin();
-      List<Object> requestArguments = Collections.emptyList();
-      if (readers != null && !readers.isEmpty()) {
-        requestArguments = new ArrayList<>();
-        for (Reader r : readers) {
-          out.readFieldBegin();
-          requestArguments.add(r.read(out));
-          out.readFieldEnd();
-        }
-      }
-
-      out.readStructEnd();
-      out.readMessageEnd();
-      return requestArguments;
-    };
   }
 
   private static ThriftFrame encodeApplicationResponse(

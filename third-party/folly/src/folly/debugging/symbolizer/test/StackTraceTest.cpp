@@ -191,7 +191,7 @@ TEST(StackTraceTest, AsyncStackTraceOmitsMetadataMarkers) {
   AsyncStackFrame initialMarker;
   markAsMetadataFrame(initialMarker);
   linkInactiveFrames(initialMarker, wrapper);
-  wrapper.setParentFrame(parentMarker);
+  wrapper.setParentFrameUnsafe(parentMarker);
   CapturedAsyncStack marked;
   {
     ScopedAsyncStackRootWithFrame activeRoot{initialMarker};

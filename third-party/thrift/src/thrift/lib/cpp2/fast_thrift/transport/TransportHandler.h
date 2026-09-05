@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/Parser.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::transport {
@@ -46,6 +47,17 @@ namespace apache::thrift::fast_thrift::transport {
  * elided via `if constexpr` (detected via `std::is_same_v`). Pipelines that
  * want per-write notifications instantiate with a real factory.
  *
+ * Also templated on a `Parser`-satisfying type (see Parser.h), which owns the
+ * inbound buffer and cuts the byte stream into whole messages. Composing the
+ * parser in rather than dispatching to it keeps the calls direct and the drain
+ * loop inlined into readDataAvailable. A pipeline that wants to choose framing
+ * per connection at runtime supplies a parser that dispatches internally; the
+ * transport stays a direct call either way.
+ *
+ * There is deliberately no default parser: framing is a property of the
+ * protocol on the wire, and a transport that guesses it is the bug this
+ * parameter exists to prevent.
+ *
  * State machine (one-directional; per-connection, not reused):
  *   Created   --setPipeline-->   Ready
  *   Ready     --onConnect-->     Open
@@ -58,7 +70,7 @@ namespace apache::thrift::fast_thrift::transport {
  * AsyncSocket. Closing -> Closed when writePending_ hits 0 (natural drain)
  * or the drain timeout fires (force closeNow cascades writeErrs).
  */
-template <WriteCompleteEventFactory Factory = NoOpWriteCompleteEventFactory>
+template <WriteCompleteEventFactory Factory, Parser ParserT>
 class TransportHandlerT : public folly::DelayedDestruction,
                           public folly::AsyncTransport::ReadCallback,
                           public folly::AsyncTransport::WriteCallback {
@@ -86,13 +98,25 @@ class TransportHandlerT : public folly::DelayedDestruction,
   using Ptr =
       std::unique_ptr<TransportHandlerT, folly::DelayedDestruction::Destructor>;
 
+  // Buffer sizing defaults come from the parser: each protocol knows what its
+  // messages cost, and the transport no longer has an opinion.
   static Ptr create(
       folly::AsyncTransport::UniquePtr socket,
-      size_t minBufferSize = 4096,
-      size_t maxBufferSize = 65536,
+      size_t minBufferSize = ParserT::kDefaultMinBufferSize,
+      size_t maxBufferSize = ParserT::kDefaultMaxBufferSize,
       std::chrono::milliseconds drainTimeout = kDefaultDrainTimeout) {
     return Ptr(new TransportHandlerT(
-        std::move(socket), minBufferSize, maxBufferSize, drainTimeout));
+        std::move(socket),
+        ParserT(minBufferSize, maxBufferSize),
+        drainTimeout));
+  }
+
+  static Ptr createWithParser(
+      folly::AsyncTransport::UniquePtr socket,
+      ParserT parser,
+      std::chrono::milliseconds drainTimeout = kDefaultDrainTimeout) {
+    return Ptr(new TransportHandlerT(
+        std::move(socket), std::move(parser), drainTimeout));
   }
 
   State state() const noexcept { return state_; }
@@ -110,6 +134,13 @@ class TransportHandlerT : public folly::DelayedDestruction,
     pipeline_ = pipeline;
     pipelineGuard_ =
         std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
+    // Read buffers come from the pipeline's allocator, same as every other
+    // buffer the pipeline hands around. Wired here rather than at
+    // construction because the pipeline is not known until now.
+    bufFactory_ = [pipeline](size_t capacity) noexcept {
+      return pipeline->allocate(capacity);
+    };
+    parser_.setIOBufFactory(&bufFactory_);
     state_ = State::Ready;
   }
 
@@ -132,30 +163,20 @@ class TransportHandlerT : public folly::DelayedDestruction,
   // --- AsyncTransport::ReadCallback interface ---
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
-    if (readBufQueue_.tailroom() < minBufferSize_) {
-      // Grow through the pipeline's allocator rather than
-      // IOBufQueue::preallocate, which is hardwired to IOBuf::create. pack is
-      // off: the new buffer is empty, so there is nothing to pack and the
-      // append must chain it as the tail we hand to the socket.
-      DCHECK(pipeline_);
-      readBufQueue_.append(pipeline_->allocate(maxBufferSize_), /*pack=*/false);
-    }
-    *bufReturn = readBufQueue_.writableTail();
-    *lenReturn = readBufQueue_.tailroom();
+    parser_.getReadBuffer(bufReturn, lenReturn);
   }
 
   void readDataAvailable(size_t len) noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
-    readBufQueue_.postallocate(len);
     DCHECK(pipeline_);
-    handleReadResult(pipeline_->fireRead(TypeErasedBox(readBufQueue_.move())));
+    handleReadResult(parser_.consume(len, messageSink()));
   }
 
   void readBufferAvailable(
       std::unique_ptr<folly::IOBuf> buf) noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
     DCHECK(pipeline_);
-    handleReadResult(pipeline_->fireRead(TypeErasedBox(std::move(buf))));
+    handleReadResult(parser_.consumeBuffer(std::move(buf), messageSink()));
   }
 
   void readEOF() noexcept override {
@@ -304,12 +325,10 @@ class TransportHandlerT : public folly::DelayedDestruction,
  protected:
   TransportHandlerT(
       folly::AsyncTransport::UniquePtr socket,
-      size_t minBufferSize,
-      size_t maxBufferSize,
+      ParserT parser,
       std::chrono::milliseconds drainTimeout)
       : socket_(std::move(socket)),
-        minBufferSize_(minBufferSize),
-        maxBufferSize_(maxBufferSize),
+        parser_(std::move(parser)),
         drainTimeoutDuration_(drainTimeout),
         socketDrainer_(this) {}
 
@@ -350,6 +369,20 @@ class TransportHandlerT : public folly::DelayedDestruction,
     }
   }
 
+  // Sink the parser hands each complete message to. A parser may emit several
+  // messages per read, and firing one can close the connection re-entrantly,
+  // so the Open check gates every message rather than just the read: the
+  // Error return unwinds the parser's drain loop, leaving unconsumed bytes
+  // queued for a connection that will never read them again.
+  auto messageSink() noexcept {
+    return [this](BytesPtr&& bytes) noexcept {
+      if (FOLLY_UNLIKELY(state_ == State::Closing || state_ == State::Closed)) {
+        return Result::Error;
+      }
+      return pipeline_->fireRead(TypeErasedBox(std::move(bytes)));
+    };
+  }
+
   // Dispatch a pipeline read result: Success falls through, Backpressure
   // pauses reads, Error closes gracefully. Shared by readDataAvailable +
   // readBufferAvailable.
@@ -386,9 +419,10 @@ class TransportHandlerT : public folly::DelayedDestruction,
     }
     state_ = State::Closing;
     pauseRead();
-    // Free the preallocated read slab now; a drain can outlive the close by
-    // the drain timeout. reset() frees, clear() would only zero the lengths.
-    readBufQueue_.reset();
+    // Reads are done for good, so drop the inbound buffer now rather than at
+    // destruction — a graceful close can sit in Closing for the whole drain
+    // timeout while pending writes land.
+    parser_.reset();
     if (pipeline_) {
       if (ex) {
         pipeline_->fireException(std::move(ex));
@@ -477,9 +511,10 @@ class TransportHandlerT : public folly::DelayedDestruction,
   };
 
   folly::AsyncTransport::UniquePtr socket_;
-  folly::IOBufQueue readBufQueue_{folly::IOBufQueue::cacheChainLength()};
-  size_t minBufferSize_;
-  size_t maxBufferSize_;
+  // Borrowed by parser_ via setIOBufFactory, so it must outlive it: members
+  // are destroyed in reverse declaration order, hence declared before it.
+  folly::IOBufFactory bufFactory_;
+  ParserT parser_;
   std::chrono::milliseconds drainTimeoutDuration_;
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
@@ -490,11 +525,5 @@ class TransportHandlerT : public folly::DelayedDestruction,
   uint32_t writePending_{0};
   SocketDrainer socketDrainer_;
 };
-
-// Default specialization — preserves the existing TransportHandler name for
-// callers that don't need write-completion events. New consumers
-// (rocket-client/server pipelines) instantiate TransportHandlerT<RealFactory>
-// directly.
-using TransportHandler = TransportHandlerT<NoOpWriteCompleteEventFactory>;
 
 } // namespace apache::thrift::fast_thrift::transport

@@ -264,35 +264,6 @@ void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
   v << copy{src, dst};
 }
 
-void cgCheckInit(IRLS& env, const IRInstruction* inst) {
-  assertx(inst->taken());
-
-  auto const src = inst->src(0);
-  if (!src->type().maybe(TUninit)) return;
-
-  auto const type = srcLoc(env, inst, 0).reg(1);
-  assertx(type != InvalidReg);
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << cmpbi{static_cast<data_type_t>(KindOfUninit), type, sf};
-  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
-  assertx(inst->taken());
-
-  auto const src = inst->src(0);
-
-  auto const ptrLoc = srcLoc(env, inst, 0);
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, memTVTypePtr(src, ptrLoc));
-
-  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {

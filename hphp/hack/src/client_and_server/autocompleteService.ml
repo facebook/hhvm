@@ -1259,6 +1259,72 @@ let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
     e
   | _ -> e
 
+let autocomplete_named_argument_in_call
+    env (ft : Typing_defs.locl_fun_type) (args : Tast.argument list) : unit =
+  let used_names =
+    args
+    |> List.filter_map ~f:Typing_defs.Named_params.name_of_arg
+    |> SSet.of_list
+  in
+  let add_named_argument_results pos id =
+    let prefix = strip_suffix id |> Utils.strip_ns in
+    let matching_params =
+      Typing_defs.ft_params_without_named_variadic ft
+      |> List.filter_map ~f:(fun fp ->
+             Option.map
+               (Typing_defs.Named_params.name_of_named_param fp)
+               ~f:(fun name -> (name, fp)))
+      |> List.filter ~f:(fun (name, _) ->
+             String.is_prefix name ~prefix && not (SSet.mem name used_names))
+    in
+    List.iteri matching_params ~f:(fun declaration_index (name, fp) ->
+        let is_optional = Typing_defs_core.get_fp_is_optional fp in
+        let sort_text =
+          Printf.sprintf
+            "%d%08d"
+            (if is_optional then
+              1
+            else
+              0)
+            declaration_index
+        in
+        let complete =
+          {
+            res_decl_pos = get_pos_for env (Phase.locl fp.fp_type);
+            res_replace_pos = replace_pos_of_id (pos, id);
+            res_base_class = None;
+            res_detail =
+              Printf.sprintf
+                "%s (%s named parameter)"
+                (Tast_env.print_ty env fp.fp_type)
+                (if is_optional then
+                  "optional"
+                else
+                  "required");
+            res_label = name;
+            res_insert_text =
+              InsertAsSnippet
+                { snippet = snippet_for_params [fp]; fallback = name ^ "=" };
+            res_fullname = name;
+            res_kind = FileInfo.SI_LocalVariable;
+            res_documentation = None;
+            res_sort_text = Some sort_text;
+            res_filter_text = None;
+            res_additional_edits = [];
+          }
+        in
+        add_res complete)
+  in
+  List.iter args ~f:(function
+      | Aast.Anormal arg ->
+        (match unwrap_holes arg with
+        | (_, _, Aast.Id (pos, id)) when is_auto_complete id ->
+          add_named_argument_results pos id
+        | _ -> ())
+      | Aast.Ainout _
+      | Aast.Anamed _ ->
+        ())
+
 (* If we see a call to a function that takes a shape argument, offer
    completions for field names in shape literals.
 
@@ -2048,6 +2114,7 @@ let visitor
       | (_, _, Aast.(Call { func = (recv_ty, _, _); args; _ })) -> begin
         match expand_fun env recv_ty with
         | Some ft ->
+          autocomplete_named_argument_in_call env ft args;
           autocomplete_shape_literal_in_call env ft args;
           autocomplete_enum_value_in_call env ft args
         | _ -> ()

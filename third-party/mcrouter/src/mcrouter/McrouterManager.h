@@ -36,16 +36,17 @@ class McrouterManager {
       const McrouterOptions& options,
       std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool = nullptr) {
     std::shared_ptr<CarbonRouterInstanceBase> mcrouterBase;
+    auto persistenceIdStr = persistenceId.str();
 
     {
       std::lock_guard<std::mutex> lg(mutex_);
-      mcrouterBase = folly::get_default(mcrouters_, persistenceId.str());
+      mcrouterBase = folly::get_default(mcrouters_, persistenceIdStr);
     }
     if (!mcrouterBase) {
       std::lock_guard<std::mutex> ilg(initMutex_);
       {
         std::lock_guard<std::mutex> lg(mutex_);
-        mcrouterBase = folly::get_default(mcrouters_, persistenceId.str());
+        mcrouterBase = folly::get_default(mcrouters_, persistenceIdStr);
       }
       if (!mcrouterBase) {
         std::shared_ptr<CarbonRouterInstance<RouterInfo>> mcrouter =
@@ -53,7 +54,7 @@ class McrouterManager {
                 options.clone(), std::move(ioThreadPool));
         if (mcrouter) {
           std::lock_guard<std::mutex> lg(mutex_);
-          mcrouters_[persistenceId.str()] = mcrouter;
+          mcrouters_[std::move(persistenceIdStr)] = mcrouter;
           return mcrouter.get();
         }
       }

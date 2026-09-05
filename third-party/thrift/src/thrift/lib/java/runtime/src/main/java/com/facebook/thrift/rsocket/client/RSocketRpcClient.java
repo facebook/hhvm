@@ -19,6 +19,10 @@ package com.facebook.thrift.rsocket.client;
 import static com.facebook.thrift.rsocket.util.MetadataUtil.decodePayloadMetadata;
 import static com.facebook.thrift.rsocket.util.MetadataUtil.decodeStreamingPayloadMetadata;
 import static com.facebook.thrift.rsocket.util.PayloadUtil.createPayload;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.decodeRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.isRocketError;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toApplicationException;
+import static com.facebook.thrift.rsocket.util.RocketErrorUtil.toResponseMetadata;
 import static com.facebook.thrift.util.RpcClientUtils.getExceptionString;
 import static com.facebook.thrift.util.RpcClientUtils.getUndeclaredException;
 
@@ -36,8 +40,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketErrorException;
-import io.rsocket.frame.ErrorFrameCodec;
 import io.rsocket.util.ByteBufPayload;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,12 +49,10 @@ import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.ResponseRpcError;
-import org.apache.thrift.ResponseRpcErrorCode;
 import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TStruct;
-import org.apache.thrift.transport.TTransportException;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +128,7 @@ public final class RSocketRpcClient implements RpcClient {
                         rsocketPayloadToClientResponsePayload(payload, response, protocolType))
                 .onErrorResume(
                     t -> {
-                      if (isInternalError(t)) {
+                      if (isRocketError(t)) {
                         return Mono.just(getErrorFrame(t));
                       }
                       return Mono.error(t);
@@ -140,42 +140,26 @@ public final class RSocketRpcClient implements RpcClient {
         });
   }
 
-  private boolean isInternalError(Throwable t) {
-    if (t instanceof RSocketErrorException) {
-      int code = ((RSocketErrorException) t).errorCode();
-
-      if (code >= ErrorFrameCodec.REJECTED && code <= ErrorFrameCodec.INVALID) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private int getType(ResponseRpcErrorCode code) {
-    switch (code) {
-      case TASK_EXPIRED:
-        return TTransportException.TIMED_OUT;
-      default:
-        return TTransportException.UNKNOWN;
-    }
-  }
-
   /**
    * INVALID, CANCELLED and REJECTED rsocket error codes are defined as internal server error in
    * rocket protocol. Payload will be compact protocol serialized ResponseRpcError struct.
+   *
+   * <p>The C++ client reports these as a {@code TApplicationException} carrying the error's own
+   * type and {@code what_utf8}, plus the {@code ex} header. This does the same.
    *
    * @param t Throwable contains rsocket error code
    * @param <T>
    * @return ClientResponsePayload
    */
   private <T> ClientResponsePayload<T> getErrorFrame(Throwable t) {
-    byte[] bytes = t.getMessage().getBytes();
-    ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
-    ByteBufTProtocol protocol = TProtocolType.TCompact.apply(byteBuf);
-    ResponseRpcError err = ResponseRpcError.read0(protocol);
+    ResponseRpcError err = decodeRocketError(t);
+    if (err == null) {
+      // Unreadable frame: report the parse failure rather than letting it replace the server's
+      // error with an unrelated exception, as the C++ client does.
+      return ClientResponsePayload.createException(toApplicationException(t), null, null, false);
+    }
     return ClientResponsePayload.createException(
-        new TTransportException(getType(err.getCode()), t.getMessage()), null, null, false);
+        toApplicationException(err), toResponseMetadata(err), null, false);
   }
 
   @Override
@@ -212,7 +196,7 @@ public final class RSocketRpcClient implements RpcClient {
                 .requestStream(rsocketPayload)
                 .onErrorResume(
                     t -> {
-                      if (isInternalError(t)) {
+                      if (isRocketError(t)) {
                         return Flux.just(
                             ByteBufPayload.create(
                                 getExceptionString(t, payload.getRequestRpcMetadata().getName())));
@@ -255,7 +239,7 @@ public final class RSocketRpcClient implements RpcClient {
                   .requestChannel(payloadFlux)
                   .onErrorResume(
                       t -> {
-                        if (isInternalError(t)) {
+                        if (isRocketError(t)) {
                           return Flux.just(
                               ByteBufPayload.create(
                                   getExceptionString(

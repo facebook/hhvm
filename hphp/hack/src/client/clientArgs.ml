@@ -27,10 +27,19 @@ type arg_kind =
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
+  let add_key_value ~option_name value_ref value =
+    match String_utils.split2 '=' value with
+    | Some key_value -> value_ref := key_value :: !value_ref
+    | None ->
+      raise
+        (Arg.Bad
+           (Printf.sprintf
+              "option '%s' expects an argument in the form <key>=<value>"
+              option_name))
+
   let config value_ref =
     ( "--config",
-      Arg.String
-        (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
+      Arg.String (add_key_value ~option_name:"--config" value_ref),
       " override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)"
     )
 
@@ -42,7 +51,7 @@ module Common_argspecs = struct
   let custom_telemetry_data value_ref =
     ( "--custom-telemetry-data",
       Arg.String
-        (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
+        (add_key_value ~option_name:"--custom-telemetry-data" value_ref),
       "Add a custom column to all logged telemetry samples (format: <column>=<value>)"
     )
 
@@ -203,8 +212,8 @@ end = struct
     match Exception.unwrap e with
     | Exit_status.Exit_with _ -> Exception.reraise e
     | _ ->
-      (* Re-raising an uncaught OCaml exception exits with 2. *)
-      log ~exit_code:2 ~exit_status:Exit_status.Input_error e;
+      let exit_status = Exit_status.Uncaught_exception e in
+      log ~exit_code:(Exit_status.exit_code exit_status) ~exit_status e;
       Exception.reraise e
 end
 
@@ -316,7 +325,9 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let set_log_to_file x = log_to_file := Some x in
   let add_multi f =
     let files =
-      Sys_utils.read_file f
+      (try Sys_utils.read_file f with
+      | Sys_error message ->
+        raise (Arg.Bad ("could not read --multi file: " ^ message)))
       |> Bytes.to_string
       |> String.strip
       |> String.split ~on:'\n'
@@ -503,6 +514,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x)),
         " (mode) finds references of the provided class name",
         Arg_user_facing );
+      ( "--find-isolatable-clusters",
+        Arg.Unit (fun () -> set_mode MODE_FIND_ISOLATABLE_CLUSTERS),
+        " (mode) find clusters of files that can be isolated from the codebase",
+        Arg_non_user_facing );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
         " (mode) finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"
@@ -1049,8 +1064,15 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
       ( "-Wignore-files",
         Arg.String
           (fun regexp ->
-            add_warning_switch
-              (Filter_diagnostics.Ignored_files (Str.regexp regexp))),
+            let regexp =
+              try Str.regexp regexp with
+              | Failure message ->
+                raise
+                  (Arg.Bad
+                     ("option '-Wignore-files' expects a valid regular expression: "
+                     ^ message))
+            in
+            add_warning_switch (Filter_diagnostics.Ignored_files regexp)),
         " hide warnings in files matching a regexp",
         Arg_user_facing );
       ( "-Wgenerated",
@@ -1213,16 +1235,11 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
 
   let is_interactive = is_interactive !from in
-  let custom_telemetry_data =
-    match !reason with
-    | None -> !custom_telemetry_data
-    | Some reason -> !custom_telemetry_data @ [("reason", reason)]
-  in
   {
     ClientEnv.autostart = !autostart;
     config = !config;
     custom_hhi_path = !custom_hhi_path;
-    custom_telemetry_data;
+    custom_telemetry_data = !custom_telemetry_data;
     error_format = !error_format;
     force_dormant_start = !force_dormant_start;
     from = !from;
@@ -1232,6 +1249,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     paths;
     max_errors = !max_errors;
     preexisting_warnings = !preexisting_warnings;
+    reason = !reason;
     mode;
     no_load =
       (!no_load

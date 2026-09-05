@@ -37,6 +37,9 @@ class RecordingAdapter : public ThriftServerAppAdapter {
   uint32_t lastStreamId{0};
   int lastValue{0};
   std::string lastExceptionMessage;
+  // Recorded rather than kept alive: the thunks own the context and drop it,
+  // so only its identity survives the call.
+  const ThriftRequestContext* lastRequestContext{nullptr};
 
  protected:
   ~RecordingAdapter() override = default;
@@ -47,25 +50,26 @@ RecordingAdapter& asRecorder(ThriftServerAppAdapter* p) {
 }
 
 // Impersonates the codegen result thunk: records the invocation instead of
-// building/writing a response. The extra requestContext param matches the
-// ResultFn signature (the real thunk rides it onto the message); the fake
-// ignores it.
+// building/writing a response. The real thunk rides the requestContext onto
+// the message; the fake just records which one it was handed.
 void onResult(
     ThriftServerAppAdapter* a,
     uint32_t streamId,
-    std::unique_ptr<ThriftRequestContext> /*requestContext*/,
+    std::unique_ptr<ThriftRequestContext> requestContext,
     folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/,
     int value) {
   auto& r = asRecorder(a);
   r.resultCount++;
   r.lastStreamId = streamId;
   r.lastValue = value;
+  r.lastRequestContext = requestContext.get();
 }
 
 // The by-value exception_wrapper matches the ExceptionFn signature.
 void onException(
     ThriftServerAppAdapter* a,
     uint32_t streamId,
+    std::unique_ptr<ThriftRequestContext> requestContext,
     folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/,
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     folly::exception_wrapper ew) {
@@ -73,16 +77,18 @@ void onException(
   r.exceptionCount++;
   r.lastStreamId = streamId;
   r.lastExceptionMessage = ew.what().toStdString();
+  r.lastRequestContext = requestContext.get();
 }
 
 void onDone(
     ThriftServerAppAdapter* a,
     uint32_t streamId,
-    std::unique_ptr<ThriftRequestContext> /*requestContext*/,
+    std::unique_ptr<ThriftRequestContext> requestContext,
     folly::DelayedDestruction::DestructorGuard&& /*adapterGuard*/) {
   auto& r = asRecorder(a);
   r.doneCount++;
   r.lastStreamId = streamId;
+  r.lastRequestContext = requestContext.get();
 }
 
 using RecordingAdapterPtr =
@@ -193,6 +199,52 @@ TEST(FastHandlerCallbackTest, RequestContextAccessorReturnsStoredPointer) {
       std::move(requestContext));
   EXPECT_EQ(cb->requestContext(), requestContextPtr);
   cb->result(0); // suppress destructor exception
+}
+
+// An exception reply is a response like any other: it must carry the same
+// per-request context a success reply does, or write-side handlers (checksum
+// today, response headers next) silently skip every error response.
+TEST(FastHandlerCallbackTest, ExceptionForwardsRequestContextToThunk) {
+  auto rec = makeRecorder();
+  folly::EventBase evb;
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  auto* requestContextPtr = requestContext.get();
+  {
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<int>>(
+        &onResult,
+        &onException,
+        rec.get(),
+        kStreamId,
+        &evb,
+        nullptr,
+        std::move(requestContext));
+    cb->exception(
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::UNKNOWN_METHOD, "boom"));
+  }
+  EXPECT_EQ(rec->exceptionCount, 1);
+  EXPECT_EQ(rec->lastRequestContext, requestContextPtr);
+}
+
+// The dropped-callback path synthesizes its own error, so it has to hand the
+// context over too.
+TEST(FastHandlerCallbackTest, UncompletedDestructorForwardsRequestContext) {
+  auto rec = makeRecorder();
+  folly::EventBase evb;
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  auto* requestContextPtr = requestContext.get();
+  {
+    auto cb = makeFastHandlerCallback<FastHandlerCallback<void>>(
+        &onDone,
+        &onException,
+        rec.get(),
+        kStreamId,
+        &evb,
+        nullptr,
+        std::move(requestContext));
+  }
+  EXPECT_EQ(rec->exceptionCount, 1);
+  EXPECT_EQ(rec->lastRequestContext, requestContextPtr);
 }
 
 // =============================================================================

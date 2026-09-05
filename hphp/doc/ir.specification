@@ -227,14 +227,6 @@ Instruction set
   This is similar to a CheckMBase except that it does not imply a runtime check
   and cannot cause control flow.
 
-| CheckInit, ND, S(Cell), B
-
-  If S0's type is Uninit, branch to block B.
-
-| CheckInitMem, ND, S(Mem), B
-
-  If the value pointed to by S0 has type Uninit, branch to block B.
-
 | CheckCold<TransID>, ND, NA, B
 
   Check if the counter associated with translation TransID is cold (i.e. within

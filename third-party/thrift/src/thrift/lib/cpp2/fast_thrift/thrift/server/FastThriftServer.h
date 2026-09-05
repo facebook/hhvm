@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ExtensionSlots.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/FastServerModule.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/framework/ThriftPipelineHandler.h>
@@ -243,6 +244,24 @@ class FastThriftServer {
       std::vector<server::ThriftPipelineHandlerFactory> factories);
 
   /**
+   * Reserves per-connection and per-request storage for `Ext`, so that its
+   * handlers reach it through `tryState<Ext>()` on either context.
+   *
+   * A slot is reserved for each scope the extension declares state for; an
+   * extension declaring neither reserves nothing. Registering the same
+   * extension twice aborts. Must be called before start()/serve().
+   */
+  template <class Ext>
+  void registerExtension() {
+    if constexpr (requires { typename Ext::ConnState; }) {
+      connExtensionBuilder_.add(Ext::kId);
+    }
+    if constexpr (requires { typename Ext::RequestState; }) {
+      requestExtensionBuilder_.add(Ext::kId);
+    }
+  }
+
+  /**
    * Register a module — a named, ordered bundle of thrift pipeline handlers.
    * The module's handlers are appended to the pipeline in call order relative
    * to other addModule / addNativeThriftPipelineHandlers calls, preserving
@@ -251,6 +270,17 @@ class FastThriftServer {
    * start()/serve().
    */
   void addModule(FastServerModule module);
+
+  /**
+   * The configuration this server was constructed with, for an embedder whose
+   * handlers only work under particular settings and want to say so at
+   * registration time rather than fail at the first request.
+   *
+   * This is not a snapshot of effective runtime state. Later overrides such as
+   * setIOThreadPool() and setCPUExecutor() do not update it.
+   */
+  const FastThriftServerConfig& getConfig() const noexcept { return config_; }
+
   /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees
@@ -467,6 +497,11 @@ class FastThriftServer {
   // order. Copied into the per-connection factory config at start().
   std::vector<server::ThriftPipelineHandlerFactory>
       thriftPipelineHandlerFactories_;
+  // Consumed into the layouts below at start(); untouched after.
+  ExtensionLayoutBuilder connExtensionBuilder_;
+  ExtensionLayoutBuilder requestExtensionBuilder_;
+  std::shared_ptr<const ExtensionLayout> connExtensionLayout_;
+  std::shared_ptr<const ExtensionLayout> requestExtensionLayout_;
   // Names of registered modules, for duplicate detection in addModule.
   folly::F14FastSet<std::string> moduleNames_;
   // Per-EventBase server counters, or null when the embedder never called

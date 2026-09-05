@@ -1933,7 +1933,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         };
         let id = id_opt.unwrap_or_else(|| Id(self.get_pos(&header.name), "".into()));
         let attributes = self.to_attributes(attributes);
-        let (params, properties, variadic) =
+        let (params, properties, variadic, named_variadic) =
             self.as_fun_params(attributes.no_auto_likes, header.param_list)?;
         let f_pos = self.get_pos(&header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos.clone());
@@ -2004,6 +2004,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         if variadic {
             flags |= FunTypeFlags::VARIADIC
         }
+        if named_variadic {
+            flags |= FunTypeFlags::NAMED_VARIADIC
+        }
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
@@ -2041,12 +2044,13 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         &self,
         no_auto_likes: bool,
         list: Node,
-    ) -> Option<(FunParams, Vec<ShallowProp>, bool)> {
+    ) -> Option<(FunParams, Vec<ShallowProp>, bool, bool)> {
         match list {
             Node::List(nodes) => {
                 let mut params = Vec::with_capacity(nodes.len());
                 let mut properties = Vec::new();
                 let mut ft_variadic = false;
+                let mut ft_named_variadic = false;
                 for node in nodes.into_iter() {
                     match node {
                         Node::FunParam(box FunParamDecl {
@@ -2163,7 +2167,11 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                                 flags |= FunParamFlags::IS_OPTIONAL;
                             }
                             if variadic {
-                                ft_variadic = true;
+                                if named {
+                                    ft_named_variadic = true;
+                                } else {
+                                    ft_variadic = true;
+                                }
                             }
                             let variadic = initializer.is_ignored() && variadic;
                             let type_ = if variadic {
@@ -2217,9 +2225,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                         _ => {}
                     }
                 }
-                Some((params, properties, ft_variadic))
+                Some((params, properties, ft_variadic, ft_named_variadic))
             }
-            n if n.is_ignored() => Some((vec![], vec![], false)),
+            n if n.is_ignored() => Some((vec![], vec![], false, false)),
             _ => None,
         }
     }
@@ -6233,6 +6241,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         outer_right_paren: Self::Output,
     ) -> Self::Output {
         let mut ft_variadic = false;
+        let mut ft_named_variadic = false;
         let mut make_param = |fp: FunParamDecl| -> FunParam {
             let mut flags = FunParamFlags::empty();
 
@@ -6258,7 +6267,11 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 flags |= FunParamFlags::READONLY;
             }
             if fp.variadic {
-                ft_variadic = true;
+                if fp.named {
+                    ft_named_variadic = true;
+                } else {
+                    ft_variadic = true;
+                }
             }
             if fp.splat {
                 flags |= FunParamFlags::SPLAT;
@@ -6341,6 +6354,9 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         }
         if ft_variadic {
             flags |= FunTypeFlags::VARIADIC
+        }
+        if ft_named_variadic {
+            flags |= FunTypeFlags::NAMED_VARIADIC
         }
 
         let pess_return_type = if self.implicit_sdt() && !self.no_auto_likes() {

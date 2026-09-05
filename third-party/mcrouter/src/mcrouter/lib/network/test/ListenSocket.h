@@ -23,6 +23,18 @@ class ListenSocket {
   explicit ListenSocket(bool zeroCopyEnabled = false);
   ~ListenSocket();
 
+  /**
+   * Listen on `port` instead of on an OS-assigned ephemeral one.
+   *
+   * SO_REUSEADDR is set, so a port that a previous process left with
+   * connections in TIME_WAIT can be rebound immediately. That does not permit
+   * a second live listener, so a port another process is listening on still
+   * fails.
+   *
+   * @throws std::runtime_error  if the port cannot be bound
+   */
+  static ListenSocket createOnPort(uint16_t port, bool zeroCopyEnabled = false);
+
   uint16_t getPort() const {
     return port_;
   }
@@ -61,6 +73,9 @@ class ListenSocket {
   ListenSocket& operator=(const ListenSocket&) = delete;
 
  private:
+  ListenSocket(int socketFd, uint16_t port)
+      : socketFd_(socketFd), port_(port) {}
+
   int socketFd_{-1};
   uint16_t port_{0};
 };

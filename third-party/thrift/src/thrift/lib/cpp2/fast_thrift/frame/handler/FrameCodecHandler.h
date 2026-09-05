@@ -44,7 +44,7 @@ namespace apache::thrift::fast_thrift::frame::handler {
  *   and writes the matching wire format via `write::serialize`.
  *
  * Pipeline position:
- *   Transport → FrameLengthParserHandler → FrameCodecHandler →
+ *   Transport (frames via FrameLengthParser) → FrameCodecHandler →
  *     [defrag] → ... rocket marshal → ...
  *   ... → [frag] → FrameCodecHandler → FrameLengthEncoderHandler →
  *     batching → Transport

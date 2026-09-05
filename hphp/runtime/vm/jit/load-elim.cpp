@@ -537,9 +537,6 @@ Flags handle_general_effects(Local& env,
       case CheckMBase:
         return handleCheck(inst.typeParam());
 
-      case CheckInitMem:
-        return handleCheck(TInitCell);
-
       case CheckMROProp:
         return handleCheck(Type::cns(true));
 
@@ -1156,10 +1153,6 @@ bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags,
     reduce_to(CheckType, inst.typeParam());
     break;
 
-  case CheckInitMem:
-    reduce_to(CheckInit, std::nullopt);
-    break;
-
   case AssertLoc:
   case AssertStk:
     reduce_to(AssertType, flags.knownType);
@@ -1379,9 +1372,6 @@ void optimize_edges(Global& env, Block* blk) {
       case CheckMBase:
         return handleCheck(inst.typeParam());
 
-      case CheckInitMem:
-        return handleCheck(TInitCell);
-
       case CheckMROProp:
         return handleCheck(Type::cns(true));
 
@@ -1554,11 +1544,6 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     case CheckMBase:
       // Subtract inst.typeParam() on the taken branch.
       handleCheck(TCell, inst.typeParam());
-      break;
-
-    case CheckInitMem:
-      // The pointee is TUninit on the taken branch.
-      handleCheck(TUninit, TBottom);
       break;
 
     case CheckMROProp:

@@ -85,7 +85,7 @@ RequestResponseHandler makeCaptureHandler(CallerResult* out) {
   return RequestResponseHandler{
       [out](
           folly::Expected<
-              std::unique_ptr<folly::IOBuf>,
+              apache::thrift::fast_thrift::thrift::client::FastResponse,
               folly::exception_wrapper>&& result,
           const apache::thrift::RpcTransportStats&) noexcept {
         out->calls++;

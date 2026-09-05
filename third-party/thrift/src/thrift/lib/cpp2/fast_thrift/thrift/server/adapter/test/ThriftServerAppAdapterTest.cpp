@@ -32,9 +32,11 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -184,8 +186,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
   }
 
   struct BuiltPipeline {
-    apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-        transportHandler;
+    apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler::
+        Ptr transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
     // Raw ptr — owned by the test body's local adapter Ptr. Held here so
@@ -211,9 +213,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
       std::function<Result(
           apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&&)> writeHandler = nullptr) {
-    auto transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            createMockSocket());
+    auto transportHandler = apache::thrift::fast_thrift::transport::test::
+        PassthroughTransportHandler::create(createMockSocket());
 
     auto handlerPtr = std::make_unique<MockHandler>();
     auto* rawHandler = handlerPtr.get();
@@ -226,7 +227,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
     // Reads go from head → tail (transport → adapter)
     auto pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::test::
+                PassthroughTransportHandler,
             TestServerAppAdapter,
             TestAllocator>()
             .setEventBase(evb_)
@@ -521,6 +523,44 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
 
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(capturedStreamId, 42u);
+}
+
+// Handler-set response headers are merged onto the outgoing metadata further
+// down the write path, by the handler that created the context — so what the
+// adapter owes is the context itself, still carrying its headers, on every
+// completion path. Dropping it here would strip the headers with no merge site
+// left to notice.
+TEST_F(ThriftServerAppAdapterTest, WriteResponseForwardsHeaderBearingContext) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  std::optional<std::string> forwardedHeader;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        if (resp.requestContext != nullptr) {
+          if (const auto* value =
+                  resp.requestContext->getResponseHeader("shard")) {
+            forwardedHeader = *value;
+          }
+        }
+        return Result::Success;
+      });
+
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  requestContext->setResponseHeader("shard", "42");
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    auto message = makeResponseMessage(
+        /*streamId=*/42,
+        folly::IOBuf::copyBuffer("response"),
+        std::make_unique<apache::thrift::ResponseRpcMetadata>());
+    message.requestContext = std::move(requestContext);
+    adapter->writeResponse(std::move(message));
+  });
+
+  EXPECT_EQ(forwardedHeader, "42");
 }
 
 // =============================================================================

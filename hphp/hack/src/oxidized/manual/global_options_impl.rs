@@ -68,6 +68,7 @@ impl Default for GlobalOptions {
             tco_populate_member_heaps: true,
             tco_skip_hierarchy_checks: false,
             tco_silence_errors_under_dynamic: false,
+            tco_reject_promoted_property_redeclaration: false,
             tco_skip_tast_checks: false,
             tco_coeffects: true,
             tco_coeffects_local: true,

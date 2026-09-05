@@ -27,6 +27,7 @@
 #include <folly/Executor.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ExtensionSlots.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -80,6 +81,12 @@ struct ThriftServerConnectionFactoryConfig {
       metadataResponse;
   // Per-connection MSG_ZEROCOPY threshold; 0 disables zero-copy.
   std::size_t zeroCopyThreshold{0};
+
+  // Slot plans for the extensions installed on this server, built once before
+  // it accepts anything and shared by every context. Null when nothing
+  // registered, in which case contexts carry no slots and allocate nothing.
+  std::shared_ptr<const ExtensionLayout> connExtensionLayout;
+  std::shared_ptr<const ExtensionLayout> requestExtensionLayout;
   // When true, build a per-connection ThriftConnContext on accept and wire
   // the ThriftServerRequestContextHandler +
   // ThriftServerConnectionContextHandler into the thrift pipeline so each

@@ -18,6 +18,7 @@
 
 #include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 namespace apache::thrift::fast_thrift::test {
 
@@ -26,7 +27,8 @@ namespace {
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  public:
   explicit ConnectCallback(
-      apache::thrift::fast_thrift::transport::TransportHandler* handler)
+      apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler*
+          handler)
       : handler_(handler) {}
 
   void connectSuccess() noexcept override { handler_->onConnect(); }
@@ -36,7 +38,8 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   }
 
  private:
-  apache::thrift::fast_thrift::transport::TransportHandler* handler_;
+  apache::thrift::fast_thrift::transport::test::PassthroughTransportHandler*
+      handler_;
 };
 
 } // namespace
@@ -48,9 +51,8 @@ TestServerConnection TestServerConnectionFactory::getConnection(
         const apache::thrift::fast_thrift::connection::PeerSecurityInfo>&
     /*peerSecurity*/) {
   auto* evb = socket->getEventBase();
-  auto transportHandler =
-      apache::thrift::fast_thrift::transport::TransportHandler::create(
-          std::move(socket));
+  auto transportHandler = apache::thrift::fast_thrift::transport::test::
+      PassthroughTransportHandler::create(std::move(socket));
 
   auto pipeline =
       apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<

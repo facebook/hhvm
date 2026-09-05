@@ -61,7 +61,10 @@ struct ConnectionSetupData {
   // Non-owning. The connection-context handler owns the context for the
   // pipeline's lifetime, which outlives the setup exchange. Null when the
   // server runs without a per-connection context.
-  const ThriftConnContext* connContext{nullptr};
+  //
+  // Mutable: a handler that resolves something once per connection stamps it
+  // here for everything downstream to read.
+  ThriftConnContext* connContext{nullptr};
   apache::thrift::RequestSetupMetadata clientSetup;
 
   // Set to refuse the connection. The terminus answers with this instead of a

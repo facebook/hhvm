@@ -1,1 +1,1 @@
-{"args": ["--config", "no_equals_sign"]}
+{"args": ["--config", "malformed-on-purpose"]}

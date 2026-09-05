@@ -68,8 +68,10 @@ struct FastThriftServerConfig {
 
   // When true, populate each request's ThriftRequestContext with the inbound
   // custom headers (RequestRpcMetadata.otherMetadata) so handlers can read
-  // them via getHeaders()/getHeader(). Requires enableRequestContext; ignored
-  // when that flag is off. Only takes effect on FastThriftServer.
+  // them via getHeaders()/getHeader(). The context is the only place headers
+  // are readable, so an extension declaring kUsesHeaders is refused at
+  // addModule while this is off. Requires enableRequestContext; ignored when
+  // that flag is off. Only takes effect on FastThriftServer.
   bool enableRequestHeaders{false};
 
   // When true, insert ThriftServerChecksumHandler to validate the inbound

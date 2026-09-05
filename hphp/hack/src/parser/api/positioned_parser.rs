@@ -6,21 +6,6 @@
 //! `positioned_parser` produces concrete syntax tree parametrized with
 //! `PositionedToken` / `PositionedTrivia`. This is probably what you want
 //! to use for most applications.
-//!
-//! As opposed to [minimal_parser](../minimal_parser/), nodes contain more
-//! information (like their offset within the file) making it easier to
-//! consume (at the cost of taking more memory and more time to produce due
-//! to cost of all additional allocations).
-//!
-//! The structure should be identical to one produced by `minimal_parser`
-//! and it *should* be possible to transform minimal tree to positioned one
-//! without reparsing the file, but due to bugs in implementations there
-//! are multiple small incompatibilities.
-//!
-//! [coroutine_parser_leak_tree](../coroutine_parser_leak_tree/) and
-//! [positioned_coroutine_parser](../positioned_coroutine_parser/) are the
-//! versions of the same parser with some small tweaks necessary for
-//! particular applications in `hackc` / `hh_server`.
 
 use parser::NoState;
 use parser::lexer::Lexer;

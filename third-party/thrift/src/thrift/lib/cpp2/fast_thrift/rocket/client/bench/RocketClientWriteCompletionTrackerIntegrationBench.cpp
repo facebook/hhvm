@@ -24,9 +24,10 @@
  *             → LoopBatchingFrameHandler (NoOp tracker)
  *             → tail                              (events disabled)
  *
- *   tracking: TransportHandlerT<RocketClientEventFactory>
- *             → LoopBatchingFrameHandlerT<WriteCompletionTrackerT<...>>
- *             → tail (subscribes to RocketClientEventId)
+ *   tracking: TransportHandlerT<RocketClientEventFactory,
+ * apache::thrift::fast_thrift::transport::test::PassthroughParser> →
+ * LoopBatchingFrameHandlerT<WriteCompletionTrackerT<...>> → tail (subscribes to
+ * RocketClientEventId)
  *
  * The baseline is the BENCHMARK reference and the tracking variant is its
  * BENCHMARK_RELATIVE, so the relative number is the tracking overhead: the
@@ -57,6 +58,7 @@
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/bench/BenchAsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/PassthroughParser.h>
 
 using namespace folly;
 using namespace apache::thrift::fast_thrift::channel_pipeline;
@@ -89,7 +91,9 @@ HANDLER_TAG(batching);
 template <typename Factory, typename Tracker, typename EventEnumT>
 struct FixtureT {
   using TransportHandler =
-      apache::thrift::fast_thrift::transport::TransportHandlerT<Factory>;
+      apache::thrift::fast_thrift::transport::TransportHandlerT<
+          Factory,
+          apache::thrift::fast_thrift::transport::test::PassthroughParser>;
   using Batcher = LoopBatchingFrameHandlerT<Tracker>;
 
   folly::EventBase evb;

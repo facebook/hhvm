@@ -463,6 +463,14 @@ class PipelineBuilder {
                                   TypeErasedBox&& msg) noexcept -> Result {
       return static_cast<HeadHandler*>(h)->onWrite(ctx, std::move(msg));
     };
+    if constexpr (requires(HeadHandler& h, detail::ContextImpl& ctx) {
+                    { h.onWriteReady(ctx) } noexcept -> std::same_as<void>;
+                  }) {
+      pipeline->headOnWriteReadyFn_ = [](void* h,
+                                         detail::ContextImpl& ctx) noexcept {
+        static_cast<HeadHandler*>(h)->onWriteReady(ctx);
+      };
+    }
     pipeline->headOnReadReadyFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onReadReady();
     };

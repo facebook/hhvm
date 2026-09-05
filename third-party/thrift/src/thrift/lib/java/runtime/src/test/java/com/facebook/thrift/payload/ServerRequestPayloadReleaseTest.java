@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
@@ -267,5 +269,96 @@ public class ServerRequestPayloadReleaseTest {
     assertThat(probe.readInvoked).isFalse();
     assertThat(probe.frame.refCnt()).isEqualTo(1); // untouched by codegen; backstop would release
     probe.frame.release();
+  }
+
+  /**
+   * A backstop release can run on a different thread from the read: the generated handler reads on
+   * the off-loop scheduler, while a cancelled or expired request terminates the sequence elsewhere.
+   * The read claims the request bytes, so a release that arrives during it finds nothing to free
+   * and the reader frees them on its way out.
+   *
+   * <p>Without the claim the release frees the buffer part way through the read, and the reader
+   * sees a dead refCnt.
+   */
+  @Test
+  public void readClaimsTheBufferSoAConcurrentReleaseCannotFreeIt() throws Exception {
+    ByteBuf frame = Unpooled.buffer().writeByte(1);
+    CountDownLatch readStarted = new CountDownLatch(1);
+    CountDownLatch releaseReturned = new CountDownLatch(1);
+    AtomicInteger refCntSeenAtEndOfRead = new AtomicInteger(-1);
+
+    ServerRequestPayload payload =
+        ServerRequestPayload.create(
+            readers -> {
+              readStarted.countDown();
+              try {
+                // Do not finish the read until the racing release has run to completion.
+                releaseReturned.await(10, TimeUnit.SECONDS);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              }
+              refCntSeenAtEndOfRead.set(frame.refCnt());
+              return Collections.emptyList();
+            },
+            new RequestRpcMetadata.Builder()
+                .setName("someMethod")
+                .setKind(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
+                .build(),
+            new NettyNiftyRequestContext(Collections.emptyMap(), null),
+            frame);
+
+    CompletableFuture<List<Object>> reader =
+        CompletableFuture.supplyAsync(() -> payload.getData(Collections.emptyList()));
+    assertThat(readStarted.await(10, TimeUnit.SECONDS)).isTrue();
+
+    payload.releaseRequestData();
+    releaseReturned.countDown();
+
+    reader.get(10, TimeUnit.SECONDS);
+
+    assertThat(refCntSeenAtEndOfRead.get())
+        .as("the buffer must still be alive for the whole read")
+        .isGreaterThan(0);
+    assertThat(frame.refCnt()).as("the reader frees the buffer once it is done").isEqualTo(0);
+  }
+
+  /** The other order: the release wins, so the read reports that the bytes are gone. */
+  @Test
+  public void readAfterAReleaseReportsThatTheBytesAreGone() {
+    ByteBuf frame = Unpooled.buffer().writeByte(1);
+    ServerRequestPayload payload =
+        ServerRequestPayload.create(
+            readers -> Collections.emptyList(),
+            new RequestRpcMetadata.Builder()
+                .setName("someMethod")
+                .setKind(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
+                .build(),
+            new NettyNiftyRequestContext(Collections.emptyMap(), null),
+            frame);
+
+    payload.releaseRequestData();
+    assertThat(frame.refCnt()).isEqualTo(0);
+
+    assertThatThrownBy(() -> payload.getData(Collections.emptyList()))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("already released");
+  }
+
+  @Test
+  public void releaseRemainsIdempotent() {
+    ByteBuf frame = Unpooled.buffer().writeByte(1);
+    ServerRequestPayload payload =
+        ServerRequestPayload.create(
+            readers -> Collections.emptyList(),
+            new RequestRpcMetadata.Builder()
+                .setName("someMethod")
+                .setKind(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
+                .build(),
+            new NettyNiftyRequestContext(Collections.emptyMap(), null),
+            frame);
+
+    payload.releaseRequestData();
+    payload.releaseRequestData();
+    assertThat(frame.refCnt()).isEqualTo(0);
   }
 }

@@ -51,9 +51,9 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameLengthParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -95,7 +95,6 @@ using rocket::server::handler::RocketServerRequestResponseHandler;
 using rocket::server::handler::RocketServerSetupFrameHandler;
 using rocket::server::handler::RocketServerStreamStateHandler;
 
-HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(frame_codec_handler);
 HANDLER_TAG(frame_defragmentation_handler);
@@ -135,8 +134,11 @@ class RocketServerIntegrationTest : public ::testing::Test {
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
     transportHandler_ =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+        apache::thrift::fast_thrift::transport::TransportHandlerT<
+            apache::thrift::fast_thrift::transport::
+                NoOpWriteCompleteEventFactory,
+            apache::thrift::fast_thrift::frame::read::FrameLengthParser>::
+            create(std::move(transport));
 
     appAdapter_->setRequestHandlers(
         [this](TypeErasedBox&& msg) noexcept -> Result {
@@ -158,7 +160,10 @@ class RocketServerIntegrationTest : public ::testing::Test {
 
     pipeline_ =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::transport::TransportHandlerT<
+                apache::thrift::fast_thrift::transport::
+                    NoOpWriteCompleteEventFactory,
+                apache::thrift::fast_thrift::frame::read::FrameLengthParser>,
             rocket::server::RocketServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
@@ -167,9 +172,7 @@ class RocketServerIntegrationTest : public ::testing::Test {
             .setAllocator(&allocator_)
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
-                                FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+
             .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                  handler::FrameLengthEncoderHandler>(
                 frame_length_encoder_handler_tag)
@@ -265,7 +268,9 @@ class RocketServerIntegrationTest : public ::testing::Test {
   TestAsyncTransport* testTransport_{nullptr};
   rocket::server::RocketServerAppAdapter::Ptr appAdapter_{
       new rocket::server::RocketServerAppAdapter()};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+  apache::thrift::fast_thrift::transport::TransportHandlerT<
+      apache::thrift::fast_thrift::transport::NoOpWriteCompleteEventFactory,
+      apache::thrift::fast_thrift::frame::read::FrameLengthParser>::Ptr
       transportHandler_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;
@@ -606,7 +611,8 @@ TEST_F(RocketServerIntegrationTest, EmptyPayloadResponse) {
 
 using RejectionTransportHandler =
     apache::thrift::fast_thrift::transport::TransportHandlerT<
-        RocketServerEventFactory>;
+        RocketServerEventFactory,
+        apache::thrift::fast_thrift::frame::read::FrameLengthParser>;
 // Both batcher specializations a production rocket pipeline can be built with.
 // The refusal has to survive either: the batcher hears FlushWrites through the
 // pipeline's event enum, which is independent of whether it tracks write
@@ -646,9 +652,7 @@ class RocketServerSetupRejectionTest : public ::testing::Test {
             .setAllocator(&allocator_)
             .addState<
                 apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
-            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
-                                FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+
             .addNextOutbound<RejectionBatcher>(batching_frame_handler_tag)
             // The batcher is the fixture's type parameter, so everything
             // chained after it is a dependent call.

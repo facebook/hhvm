@@ -166,7 +166,8 @@
     serverInitTypes
     serverLazyInit
     serverMain
-    serverRpc)
+    serverRpc
+    server_isolation)
   (libraries
     ast
     ci_util

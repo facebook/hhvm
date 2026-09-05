@@ -28,6 +28,7 @@
 #if FOLLY_HAS_LIBURING
 
 // TODO: T264228475: remove this once liburing/uapi headers are updated.
+#define ZCRX_REG_NODEV 2
 #define ZCRX_NOTIF_NO_BUFFER 0
 #define ZCRX_NOTIF_NO_BUFFER_MASK (1 << ZCRX_NOTIF_NO_BUFFER)
 #define ZCRX_FEATURE_NOTIFICATION (1 << 1)
@@ -75,6 +76,12 @@ struct io_uring_zcrx_notif_stats {
 
 namespace folly {
 
+namespace {
+
+constexpr size_t kScarcityReserveDivisor = 8;
+
+} // namespace
+
 class IoUringZeroCopyBufferPoolImpl {
  public:
   friend class IoUringZeroCopyBufferPool;
@@ -90,6 +97,7 @@ class IoUringZeroCopyBufferPoolImpl {
     bool exportRing{false};
     bool pageSize{false};
     bool flushRq{false};
+    bool noDev{false};
     bool notification{false};
     uint32_t notifFlags{0};
     uint32_t notifStatsSize{0};
@@ -110,7 +118,7 @@ class IoUringZeroCopyBufferPoolImpl {
 
   void destroy() noexcept;
 
-  std::unique_ptr<IOBuf> getIoBuf(
+  IoUringZeroCopyBufferPool::Result getIoBuf(
       const struct io_uring_cqe* cqe,
       const struct io_uring_zcrx_cqe* rcqe) noexcept;
   void returnBuffer(Buffer* buf) noexcept;
@@ -166,6 +174,7 @@ class IoUringZeroCopyBufferPoolImpl {
   struct io_uring* ring_{nullptr};
   uint32_t bufferSize_{0};
   uint32_t rqEntries_{0};
+  bool noDev_{false};
 
   void* bufArea_{nullptr};
   size_t bufAreaSize_{0};
@@ -241,6 +250,7 @@ void IoUringZeroCopyBufferPoolImpl::checkZcRxFeatures() {
   }
 
   supportedFeatures_.importRing = zcrxQuery.register_flags & ZCRX_REG_IMPORT;
+  supportedFeatures_.noDev = zcrxQuery.register_flags & ZCRX_REG_NODEV;
   supportedFeatures_.exportRing = zcrxQuery.nr_ctrl_opcodes > ZCRX_CTRL_EXPORT;
   supportedFeatures_.flushRq = zcrxQuery.nr_ctrl_opcodes > ZCRX_CTRL_FLUSH_RQ;
   supportedFeatures_.pageSize = zcrxQuery.features & ZCRX_FEATURE_RX_PAGE_SIZE;
@@ -269,9 +279,10 @@ IoUringZeroCopyBufferPoolImpl::IoUringZeroCopyBufferPoolImpl(
     : ring_(params.ring),
       bufferSize_(params.bufferSizeHint),
       rqEntries_(params.rqEntries),
+      noDev_(params.noDev),
       buffers_(params.numBuffers) {
   uint32_t pageSize = static_cast<uint32_t>(sysconf(_SC_PAGESIZE));
-  if (!bufferSize_) {
+  if (noDev_ || !bufferSize_) {
     bufferSize_ = pageSize;
   }
 
@@ -283,10 +294,17 @@ IoUringZeroCopyBufferPoolImpl::IoUringZeroCopyBufferPoolImpl(
   }
   if (!test) {
     checkZcRxFeatures();
-  }
-
-  if (test) {
+    if (noDev_ && !supportedFeatures_.noDev) {
+      throw std::runtime_error(
+          "IoUringZeroCopyBufferPool: kernel does not support ZCRX_REG_NODEV");
+    }
+    if (noDev_ && !supportedFeatures_.flushRq) {
+      throw std::runtime_error(
+          "IoUringZeroCopyBufferPool: noDev zcrx requires ZCRX_CTRL_FLUSH_RQ support");
+    }
+  } else {
     supportedFeatures_.notification = true;
+    supportedFeatures_.pageSize = true;
     supportedFeatures_.notifStatsSize =
         sizeof(struct io_uring_zcrx_notif_stats);
     supportedFeatures_.notifStatsOffAlignment =
@@ -355,7 +373,7 @@ void IoUringZeroCopyBufferPoolImpl::destroy() noexcept {
   delayedDestroy(remaining);
 }
 
-std::unique_ptr<IOBuf> IoUringZeroCopyBufferPoolImpl::getIoBuf(
+IoUringZeroCopyBufferPool::Result IoUringZeroCopyBufferPoolImpl::getIoBuf(
     const struct io_uring_cqe* cqe,
     const struct io_uring_zcrx_cqe* rcqe) noexcept {
   // By the time the pool is being destroyed, IoUringBackend has already drained
@@ -382,8 +400,16 @@ std::unique_ptr<IOBuf> IoUringZeroCopyBufferPoolImpl::getIoBuf(
   // only 'wrap' the data and is read-only. Mark as shared such that downstream
   // users of this IOBuf do not try to destructively modify the data.
   ret->markExternallySharedOne();
-  bufDispensed_.fetch_add(1, std::memory_order_relaxed);
-  return ret;
+  const auto returned = io_uring_smp_load_acquire(rqRing_.ktail);
+  const auto dispensed =
+      bufDispensed_.fetch_add(1, std::memory_order_relaxed) + 1;
+  const auto numBuffers = buffers_.size();
+  const auto reserveBuffers =
+      (numBuffers + kScarcityReserveDivisor - 1) / kScarcityReserveDivisor;
+  return {
+      .buffer = std::move(ret),
+      .isScarce = dispensed - returned >= numBuffers - reserveBuffers,
+  };
 }
 
 void IoUringZeroCopyBufferPoolImpl::mapMemory() {
@@ -427,11 +453,18 @@ void IoUringZeroCopyBufferPoolImpl::initialRegister(
   areaReg.len = bufAreaSize_;
 
   struct io_uring_zcrx_ifq_reg ifqReg{};
-  ifqReg.if_idx = params.ifindex;
-  ifqReg.if_rxq = params.queueId;
   ifqReg.rq_entries = rqEntries_;
   ifqReg.area_ptr = reinterpret_cast<uint64_t>(&areaReg);
   ifqReg.region_ptr = reinterpret_cast<uint64_t>(&regionReg);
+
+  if (noDev_) {
+    ifqReg.if_idx = 0;
+    ifqReg.if_rxq = 0;
+    ifqReg.flags = ZCRX_REG_NODEV;
+  } else {
+    ifqReg.if_idx = params.ifindex;
+    ifqReg.if_rxq = params.queueId;
+  }
 
   struct zcrx_notification_desc notifDesc{};
   if (supportedFeatures_.notification) {
@@ -440,7 +473,7 @@ void IoUringZeroCopyBufferPoolImpl::initialRegister(
       notifDesc.type_mask = ZCRX_NOTIF_NO_BUFFER_MASK;
     }
 
-    if (supportedFeatures_.notifStatsSize) {
+    if (supportedFeatures_.notifStatsSize && !noDev_) {
       notifDesc.flags = ZCRX_NOTIF_DESC_FLAG_STATS;
       notifDesc.stats_offset = getRefillRingSize(params.rqEntries);
     }
@@ -538,6 +571,10 @@ void IoUringZeroCopyBufferPoolImpl::returnBuffer(Buffer* buffer) noexcept {
 
   if (rqTail_ != startTail) {
     io_uring_smp_store_release(rqRing_.ktail, rqTail_);
+    if (FOLLY_UNLIKELY(noDev_)) {
+      lock.unlock();
+      flushRefillQueue();
+    }
   }
 }
 
@@ -642,7 +679,7 @@ IoUringZeroCopyBufferPool::exportHandle() const {
   return ExportHandle(zcrxFd, impl_);
 }
 
-std::unique_ptr<IOBuf> IoUringZeroCopyBufferPool::getIoBuf(
+IoUringZeroCopyBufferPool::Result IoUringZeroCopyBufferPool::getIoBuf(
     const struct io_uring_cqe* cqe,
     const struct io_uring_zcrx_cqe* rcqe) noexcept {
   return impl_->getIoBuf(cqe, rcqe);

@@ -1,24 +1,22 @@
 === hh_client result ===
-argv: hh_client --config no_equals_sign
+argv: hh_client --config malformed-on-purpose
 cwd: <test_tmp>/root
-exit_code: 2
+exit_code: 64
 stdout:
 <empty>
 stderr:
-Uncaught exception:
-  
-  String_utils.Incorrect_format
-
-<stack trace omitted>
+hh_client: option '--config' expects an argument in the form <key>=<value>.
+Usage: hh_client check [OPTION]... [WWW-ROOT]
+<usage omitted>
 === telemetry ===
 [
   {
-    "argv": "hh_client --config no_equals_sign",
+    "argv": "hh_client --config malformed-on-purpose",
     "client_command": "Args",
     "event": "CLIENT_BAD_ARGS",
-    "exception": "String_utils.Incorrect_format",
-    "exit_code": 2,
-    "exit_status": "Exit_status.Input_error",
+    "exception": "Stdlib.Arg.Bad(\"hh_client: option '--config' expects an argument in the form <key>=<value>.\")",
+    "exit_code": 64,
+    "exit_status": "Exit_status.Client_bad_args",
     "process": "client"
   },
   {

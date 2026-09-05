@@ -1,0 +1,1194 @@
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_inout.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_inout.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php", line 6, characters 36-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php", line 6, characters 36-43:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 6, characters 36-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 6, characters 36-43:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly.php", line 6, characters 49-50:
+Inout readonly parameters are not currently supported (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php", line 6, characters 45-52:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php", line 6, characters 45-52:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 45-59:
+Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 58-59:
+Interfaces cannot have member variables (NastCheck[3009])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly.php", line 6, characters 43-44:
+Inout readonly parameters are not currently supported (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php", line 6, characters 39-43:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 6, characters 39-43:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php", line 6, characters 39-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php", line 6, characters 39-46:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 6, characters 39-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 6, characters 39-46:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 45-59:
+Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 58-59:
+Interfaces cannot have member variables (NastCheck[3009])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 6, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_named.php", line 6, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_named.php", line 6, characters 30-34:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 45-59:
+Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 58-59:
+Interfaces cannot have member variables (NastCheck[3009])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 6, characters 30-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 6, characters 30-37:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php", line 6, characters 39-43:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 6, characters 39-43:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional.php", line 6, characters 39-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional.php", line 6, characters 39-46:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 6, characters 39-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 6, characters 39-46:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout.php", line 6, characters 24-44:
+Cannot use `optional` on `inout` parameters (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named.php", line 6, characters 24-50:
+Cannot use `optional` on `inout` parameters (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php", line 6, characters 24-59:
+Cannot use `optional` on `inout` parameters (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php", line 6, characters 58-59:
+Inout readonly parameters are not currently supported (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php", line 6, characters 24-53:
+Cannot use `optional` on `inout` parameters (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php", line 6, characters 52-53:
+Inout readonly parameters are not currently supported (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php", line 6, characters 48-52:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php", line 6, characters 48-52:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php", line 6, characters 39-43:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 6, characters 39-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 6, characters 39-43:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php", line 6, characters 48-52:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php", line 6, characters 48-52:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_optional.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_optional.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php", line 6, characters 42-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php", line 6, characters 42-46:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 6, characters 42-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 6, characters 42-46:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named.php", line 6, characters 42-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named.php", line 6, characters 42-46:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 6, characters 42-46:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 6, characters 42-46:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout.php", line 6, characters 33-37:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 6, characters 33-37:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 6, characters 33-37:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 6, characters 33-37:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 6, characters 33-37:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named.php", line 6, characters 33-37:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 6, characters 33-37:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 6, characters 33-37:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 6, characters 33-37:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 6, characters 33-37:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 6, characters 33-37:
+Encountered unexpected text `named`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 6, characters 33-40:
+Encountered unexpected text `optional`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 6, characters 19-22:
+This method is declared as abstract, but has a body (NastCheck[3002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 6, characters 19-22:
+This method shouldn't have a body (NastCheck[3001])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 6, characters 19-22:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_readonly.php", line 6, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_readonly.php", line 6, characters 33-40:
+Encountered unexpected text `readonly`, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php", line 5, characters 47-47:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php", line 5, characters 47-47:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php", line 5, characters 57-57:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php", line 5, characters 59-64:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 55-59:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 61-61:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 63-67:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 69-69:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 78-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 63-67:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 78-78:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php", line 5, characters 50-50:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php", line 5, characters 50-50:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php", line 5, characters 63-63:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php", line 5, characters 65-70:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 55-55:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 55-55:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 64-68:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 63-63:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 72-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 78-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 58-58:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 58-58:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 67-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 79-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 80-80:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 5, characters 82-87:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 63-63:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 72-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 64-64:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 64-64:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 72-72:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 72-72:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 78-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php", line 5, characters 67-67:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php", line 5, characters 67-67:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php", line 5, characters 80-80:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php", line 5, characters 82-87:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 72-72:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 72-72:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 41-45:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 47-47:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 53-55:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 57-58:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 59-59:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 60-60:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 5, characters 62-67:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 49-53:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 55-55:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 61-68:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 69-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 78-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 49-53:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 55-55:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 61-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 69-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 41-45:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 47-47:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 53-55:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 57-58:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 59-59:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 60-60:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 5, characters 62-67:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 44-48:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 50-50:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 59-61:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 63-64:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 65-65:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 66-66:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 5, characters 68-73:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 49-53:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 55-55:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 64-68:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 72-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 78-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 52-56:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 58-58:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 67-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 80-81:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 82-82:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 83-83:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 5, characters 85-90:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 63-63:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 72-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 49-53:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 64-64:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 72-72:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 78-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 52-56:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 67-67:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 80-81:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 82-82:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 83-83:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 5, characters 85-90:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 57-61:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 72-72:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout.php", line 5, characters 53-57:
+Optional parameter cannot be inout (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named.php", line 5, characters 58-62:
+Optional parameter cannot be inout (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named_readonly.php", line 5, characters 66-70:
+Optional parameter cannot be inout (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly.php", line 5, characters 61-65:
+Optional parameter cannot be inout (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 81-81:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 81-81:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 58-62:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 64-64:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 66-70:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 72-72:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 78-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 66-70:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 81-81:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php", line 5, characters 56-56:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php", line 5, characters 56-56:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php", line 5, characters 69-69:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php", line 5, characters 71-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php", line 5, characters 70-70:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php", line 5, characters 70-70:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php", line 5, characters 80-80:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php", line 5, characters 82-87:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 75-75:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 75-75:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 70-70:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 70-70:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 80-81:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 82-82:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 83-83:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 5, characters 85-90:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 75-75:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 75-75:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php", line 5, characters 53-53:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php", line 5, characters 53-53:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php", line 5, characters 63-63:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php", line 5, characters 65-70:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 58-58:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 58-58:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 64-68:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 72-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 78-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 61-61:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 61-61:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 67-74:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 79-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 80-80:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 5, characters 82-87:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 72-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 53-53:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 53-53:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 59-61:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 63-64:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 65-65:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 66-66:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 5, characters 68-73:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 58-58:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 58-58:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 64-68:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 70-72:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 74-75:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 76-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 77-77:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 5, characters 79-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 72-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 78-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 61-61:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 61-61:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 67-74:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 80-81:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 82-82:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 83-83:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 5, characters 85-90:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 72-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php", line 5, characters 56-56:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php", line 5, characters 56-56:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php", line 5, characters 69-69:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php", line 5, characters 71-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 61-61:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 61-61:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 70-74:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 79-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 80-80:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 5, characters 82-87:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 75-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 61-61:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 61-61:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 70-74:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 76-78:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 80-81:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 82-82:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 83-83:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 5, characters 85-90:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 66-66:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 66-66:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 75-79:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 81-85:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 87-89:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 91-92:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 93-93:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 94-94:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 5, characters 96-101:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php", line 5, characters 56-56:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php", line 5, characters 56-56:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php", line 5, characters 69-69:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php", line 5, characters 71-76:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

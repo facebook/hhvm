@@ -17,6 +17,6 @@ hh24_types = { path = "../../utils/hh24_types" }
 oxidized = { path = "../../oxidized" }
 rand = "0.10.2"
 relative_path = { path = "../../utils/rust/relative_path" }
-rusqlite = { version = "0.37.0", features = ["backup", "blob", "bundled", "column_decltype", "functions", "limits", "modern_sqlite", "serde_json", "session", "vtab"] }
+rusqlite = { version = "0.40.0", features = ["backup", "blob", "bundled", "column_decltype", "fallible_uint", "functions", "limits", "modern_sqlite", "serde_json", "session", "vtab"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

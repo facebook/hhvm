@@ -26,7 +26,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <folly/Conv.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/container/Reserve.h>
@@ -380,6 +379,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
     WireType reported_type = WireTypeInfo::defaultValue();
 
     protocol.readListBegin(reported_type, list_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       // list size unknown, SimpleJSON protocol won't know type, either
       // so let's just hope that it spits out something that makes sense
@@ -478,7 +478,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
     std::size_t xfer = 0;
 
     xfer += protocol.serializedSizeListBegin(
-        elem_ttype::value, folly::to_narrow(folly::to_unsigned(out.size())));
+        elem_ttype::value, checked_container_size(out.size()));
     for (const auto& elem : out) {
       xfer += elem_methods::template serializedSize<ZeroCopy>(protocol, elem);
     }
@@ -528,6 +528,7 @@ struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
     WireType reported_type = WireTypeInfo::defaultValue();
 
     protocol.readSetBegin(reported_type, set_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       while (protocol.peekSet()) {
         consume_elem(protocol, out);
@@ -568,7 +569,7 @@ struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
     std::size_t xfer = 0;
 
     xfer += protocol.serializedSizeSetBegin(
-        elem_ttype::value, folly::to_narrow(folly::to_unsigned(out.size())));
+        elem_ttype::value, checked_container_size(out.size()));
     for (const auto& elem : out) {
       xfer += elem_methods::template serializedSize<ZeroCopy>(protocol, elem);
     }
@@ -632,6 +633,7 @@ struct protocol_methods<
              rpt_mapped_type = WireTypeInfo::defaultValue();
 
     protocol.readMapBegin(rpt_key_type, rpt_mapped_type, map_size);
+    out.clear();
     if (protocol.kOmitsContainerSizes()) {
       while (protocol.peekMap()) {
         consume_elem(protocol, out);
@@ -689,7 +691,7 @@ struct protocol_methods<
     std::size_t xfer = protocol.serializedSizeMapBegin(
         key_ttype::value,
         mapped_ttype::value,
-        folly::to_narrow(folly::to_unsigned(out.size())));
+        checked_container_size(out.size()));
     for (const auto& elem_pair : out) {
       xfer += key_methods::template serializedSize<ZeroCopy>(
           protocol, elem_pair.first);

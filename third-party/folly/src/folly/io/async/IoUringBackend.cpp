@@ -283,6 +283,10 @@ class SQGroupInfoRegistry {
 static folly::Indestructible<SQGroupInfoRegistry> sSQGroupInfoRegistry;
 
 bool validateZeroCopyRxOptions(IoUringOptions& options) {
+  if (options.zeroCopyRx && options.zcRxNoDev) {
+    return options.zcRxNumBuffers > 0 && options.zcRxRefillEntries > 0;
+  }
+
   if (options.zeroCopyRx &&
       (options.zcRxIfname.empty() || options.zcRxIfindex <= 0 ||
        options.zcRxQueueId == -1 || !options.resolveNapiId ||
@@ -497,7 +501,7 @@ IoUringBackend::IoUringBackend(Options options)
     params_.flags |= IORING_SETUP_COOP_TASKRUN;
     params_.flags |= IORING_SETUP_SUBMIT_ALL;
   }
-  if (options_.zeroCopyRx) {
+  if (options_.zeroCopyRx && !options_.zcRxNoDev) {
     napiId_ =
         options_.resolveNapiId(options_.zcRxIfindex, options_.zcRxQueueId);
   }
@@ -1073,6 +1077,7 @@ bool IoUringBackend::createZcBufferPool() {
       .rqEntries = static_cast<uint32_t>(options_.zcRxRefillEntries),
       .ifindex = static_cast<uint32_t>(options_.zcRxIfindex),
       .queueId = static_cast<uint16_t>(options_.zcRxQueueId),
+      .noDev = options_.zcRxNoDev,
   };
   zcBufferPool_ = IoUringZeroCopyBufferPool::create(params);
   return zcBufferPool_ != nullptr;
@@ -1941,11 +1946,11 @@ void IoUringBackend::processRecvZc(
     return;
   }
 
-  auto buf = zcBufferPool_->getIoBuf(cqe, rcqe);
+  auto result = zcBufferPool_->getIoBuf(cqe, rcqe);
   ::memcpy(
       reinterpret_cast<char*>(iov->iov_base) + ioSqe->offset_,
-      buf->data(),
-      buf->length());
+      result.buffer->data(),
+      result.buffer->length());
   ioSqe->offset_ += cqe->res;
 }
 

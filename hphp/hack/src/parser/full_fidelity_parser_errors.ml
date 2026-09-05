@@ -28,7 +28,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | NoCompat
       | HHVMCompat
 
-    (* TODO(sao): FIX *)
     type env = {
       syntax_tree: SyntaxTree.t;
       level: error_level;

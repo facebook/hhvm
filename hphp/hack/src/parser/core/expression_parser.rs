@@ -578,16 +578,6 @@ where
     }
 
     fn parse_eval_expression(&mut self) -> S::Output {
-        // TODO: This is a PHP-ism. Open questions:
-        // * Should we allow a trailing comma? it is not a function call and
-        //   never has more than one argument. See D4273242 for discussion.
-        // * Is there any restriction on the kind of expression this can be?
-        // * Should this be an error in strict mode?
-        // * Should this be in the specification?
-        // * Eval is case-insensitive. Should use of non-lowercase be an error?
-        //
-        // TODO: The original Hack and HHVM parsers accept "eval" as an
-        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Eval);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -603,17 +593,6 @@ where
     }
 
     fn parse_isset_expression(&mut self) -> S::Output {
-        // TODO: This is a PHP-ism. Open questions:
-        // * Should we allow a trailing comma? See D4273242 for discussion.
-        // * Is there any restriction on the kind of expression the arguments can be?
-        // * Should this be an error in strict mode?
-        // * Should this be in the specification?
-        // * PHP requires that there be at least one argument; should we require
-        //   that? if so, should we give the error in the parser or a later pass?
-        // * Isset is case-insensitive. Should use of non-lowercase be an error?
-        //
-        // TODO: The original Hack and HHVM parsers accept "isset" as an
-        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Isset);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -717,8 +696,8 @@ where
                 //    arbitrary expressions are allowed in the curly braces. (This amounts
                 //    to a variable-variable.)
                 //
-                // This is very similar to the grammar detailed in the specification
-                // discussed in `parse_string_literal` below, except that `${x=>y}` is not
+                // This is similar to the interpolation grammar discussed in
+                // `parse_string_literal` below, except that `${x=>y}` is not
                 // valid; it appears to be treated the same as performing member access on
                 // the constant `x` rather than the variable `$x`, which is not valid
                 // syntax.
@@ -843,11 +822,6 @@ where
         //
         // TODO: What about ?->
         //
-        // The actual situation is considerably more complex than indicated
-        // in the specification.
-        //
-        // TODO: Consider updating the specification.
-        //
         // The tokens in the grammar above have no leading or trailing trivia.
         //
         // An embedded variable expression may also be enclosed in curly braces;
@@ -866,9 +840,6 @@ where
         //
         // Note that the braced expressions can include double-quoted strings.
         // {$c["abc"]} is good, for instance.
-        //
-        // ${ is illegal in strict mode. In non-strict mode, ${varname is treated
-        // the same as {$varname, and may be an arbitrary expression.
         //
         // TODO: We need to produce errors if there are unbalanced brackets,
         // example: "$x[0" is illegal.
@@ -1053,8 +1024,7 @@ where
 
         let handle_dollar =
             |parser: &mut Self, dollar, head: Option<Token<S>>, acc: &mut Vec<S::Output>| {
-                // We need to parse ${x} as though it was {$x}
-                // TODO: This should be an error in strict mode.
+                // Parse ${x} as though it were {$x}; a later pass reports the error.
                 // We must not have trivia between the $ and the {, but we can have
                 // trivia after the {. That's why we use next_token_in_string here.
                 let mut parser1 = parser.clone();
@@ -1139,22 +1109,14 @@ where
         // require-once-directive:
         //   require_once  include-filename  ;
         //
-        // In non-strict mode we allow an inclusion directive (without semi) to be
-        // used as an expression. It is therefore easier to actually parse this as:
-        //
         // inclusion-directive:
         //   inclusion-expression  ;
         //
         // inclusion-expression:
         //   require include-filename
         //   require_once include-filename
-        //
-        // TODO: We allow "include" and "include_once" as well, which are PHP-isms
-        // specified as not supported in Hack. Do we need to produce an error in
-        // strict mode?
-        //
-        // TODO: Produce an error if this is used in an expression context
-        // in strict mode.
+        //   include include-filename
+        //   include_once include-filename
         let require = self.next_token();
         let operator = Operator::prefix_unary_from_token(require.kind());
         let require = self.sc_mut().make_token(require);
@@ -1497,12 +1459,12 @@ where
         // member-selection-expression:
         //   postfix-expression  =>  name
         //   postfix-expression  =>  variable-name
-        //   postfix-expression  =>  xhp-class-name (DRAFT XHP SPEC)
+        //   postfix-expression  =>  xhp-class-name
         //
         // null-safe-member-selection-expression:
         //   postfix-expression  ?=>  name
         //   postfix-expression  ?=>  variable-name
-        //   postfix-expression  ?=>  xhp-class-name (DRAFT XHP SPEC)
+        //   postfix-expression  ?=>  xhp-class-name
         //
         // PHP allows $a=>{$b}; to be more compatible with PHP, and give
         // good errors, we allow that here as well.
@@ -1585,15 +1547,6 @@ where
 
     fn parse_expression_list_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         // SPEC
-        //
-        // TODO: This business of allowing ... does not appear in the spec. Add it.
-        //
-        // TODO: Add call-convention-opt to the specification.
-        // (This work is tracked by task T22582676.)
-        //
-        // TODO: Update grammar for inout parameters.
-        // (This work is tracked by task T22582715.)
-        //
         // ERROR RECOVERY: A ... expression can only appear at the end of a
         // formal parameter list. However, we parse it everywhere without error,
         // and detect the error in a later pass.
@@ -1676,7 +1629,6 @@ where
         //   subscript-expression
         //   variable-name
         //
-        // TODO: Update the spec to allow qualified-name < type arguments >
         // TODO: This will need to be fixed to allow situations where the qualified name
         // is also a non-reserved token.
         let default =
@@ -1746,11 +1698,8 @@ where
         // constructor-call:
         //   class-type-designator  (  argument-expression-list-opt  )
         //
-        // PHP allows the entire expression list to be omitted.
-        // TODO: SPEC ERROR: PHP allows the entire expression list to be omitted,
-        // but Hack disallows this behavior. (See SyntaxError.error2038) However,
-        // the Hack spec still states that the argument expression list is optional.
-        // Update the spec to say that the argument expression list is required.
+        // PHP allows the entire expression list to be omitted, but Hack reports
+        // SyntaxError.error2038 for this form in a later pass.
         let designator = self.parse_designator();
         let (left, args, right) = if self.peek_token_kind() == TokenKind::LeftParen {
             self.parse_expression_list_opt()
@@ -2268,13 +2217,10 @@ where
     }
 
     fn parse_conditional_expression(&mut self, test: S::Output, question: S::Output) -> S::Output {
-        // POSSIBLE SPEC PROBLEM
         // We allow any expression, including assignment expressions, to be in
         // the consequence and alternative of a conditional expression, even
         // though assignment is lower precedence than ?:.  This is legal:
         // $a ? $b = $c : $d = $e
-        // Interestingly, this is illegal in C and Java, which require parens,
-        // but legal in C
         let kind = self.peek_token_kind();
         // ERROR RECOVERY
         // e1 ?: e2 is legal and we parse it as a binary expression. However,
@@ -2294,8 +2240,6 @@ where
         //
         // The first example also resolves cleanly to [2]. To reduce confusion,
         // we report an error for the e1 ? : e2 construction in a later pass.
-        //
-        // TODO: Add this to the XHP draft specification.
         let missing_consequence = kind == TokenKind::Colon && !(self.is_next_xhp_class_name());
         let consequence = if missing_consequence {
             let pos = self.pos();
@@ -2386,8 +2330,6 @@ where
         //  * for pairs, a comma-separated list of exactly two expressions
         //
         // In all three cases, the lists may be comma-terminated.
-        // TODO: This fact is not represented in the specification; it should be.
-        // This work item is tracked by spec issue #109.
 
         let (left_brace, initialization_list, right_brace) =
             self.parse_braced_comma_list_opt_allow_trailing(|p| p.parse_init_expression());
@@ -2431,8 +2373,6 @@ where
         // expression-list:
         //   expression-opt
         //   expression-list , expression-opt
-        //
-        // See https://github.com/hhvm/hack-langspec/issues/82
         //
         // list-intrinsic must be used as the left-hand operand in a
         // simple-assignment-expression of which the right-hand operand
@@ -2498,7 +2438,6 @@ where
     }
 
     fn parse_darray_intrinsic_expression(&mut self) -> S::Output {
-        // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Darray,
             |p| p.parse_keyed_element_initializer(),
@@ -2507,8 +2446,6 @@ where
     }
 
     fn parse_dictionary_intrinsic_expression(&mut self) -> S::Output {
-        // TODO: Create the grammar and add it to the spec.
-        // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Dict,
             |p| p.parse_keyed_element_initializer(),
@@ -2528,7 +2465,6 @@ where
     }
 
     fn parse_varray_intrinsic_expression(&mut self) -> S::Output {
-        // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Varray,
             |p| p.parse_expression_with_reset_precedence(),
@@ -2537,8 +2473,6 @@ where
     }
 
     fn parse_vector_intrinsic_expression(&mut self) -> S::Output {
-        // TODO: Create the grammar and add it to the spec.
-        // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Vec,
             |p| p.parse_expression_with_reset_precedence(),
@@ -2570,11 +2504,6 @@ where
         //   qualified-name  =>  expression
         //   scope-resolution-expression  =>  expression
         //
-
-        // Specification is wrong, and fixing it is being tracked by
-        // https://github.com/hhvm/hack-langspec/issues/108
-        //
-
         // ERROR RECOVERY: We allow any expression on the left-hand side,
         // even though only some expressions are legal;
         // we will give an error in a later pass

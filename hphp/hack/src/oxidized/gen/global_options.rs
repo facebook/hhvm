@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8405c0c2c1f979a4aa9fcf60c873db50>>
+// @generated SignedSource<<8bdc69e66434c21c5c294cf98f3f2576>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -225,6 +225,9 @@ pub struct GlobalOptions {
     pub tco_skip_hierarchy_checks: bool,
     /// Do not report errors under the dynamic pass of the typechecker
     pub tco_silence_errors_under_dynamic: bool,
+    /// Reject a subclass constructor re-promoting (via a visibility modifier) a
+    /// property already declared by an ancestor. Rollout flag; off by default.
+    pub tco_reject_promoted_property_redeclaration: bool,
     /// Skip checks implemented with TAST visitors.
     /// Set to true only for debugging purposes!
     pub tco_skip_tast_checks: bool,

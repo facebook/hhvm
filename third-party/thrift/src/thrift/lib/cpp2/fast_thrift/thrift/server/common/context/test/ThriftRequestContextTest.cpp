@@ -24,10 +24,6 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-struct TestRequestFields {
-  int value{0};
-};
-
 TEST(ThriftRequestContextTest, DefaultConstructedHasNoConnContext) {
   ThriftRequestContext rc;
   EXPECT_EQ(rc.getConnectionContext(), nullptr);
@@ -49,33 +45,6 @@ TEST(ThriftRequestContextTest, MethodNameIsEmptyUntilSet) {
 
   rc.setMethodName("Service.method");
   EXPECT_EQ(rc.getMethodName(), "Service.method");
-}
-
-// A server with no security layer never fills the slot, and the context must
-// not invent one.
-TEST(ThriftRequestContextTest, InternalFieldsAreEmptyUntilFilled) {
-  ThriftRequestContext rc;
-  EXPECT_FALSE(rc.hasInternalFields());
-}
-
-// Request fields belong to their request: two requests on one connection own
-// their own, and the connection's slot stays untouched by either.
-TEST(ThriftRequestContextTest, InternalFieldsArePerRequest) {
-  boost::intrusive_ptr<ThriftConnContext> conn{new ThriftConnContext()};
-
-  ThriftRequestContext first{
-      detail::InternalFieldsT{std::in_place_type<TestRequestFields>}};
-  first.setConnectionContext(conn);
-  ThriftRequestContext second{
-      detail::InternalFieldsT{std::in_place_type<TestRequestFields>}};
-  second.setConnectionContext(conn);
-
-  first.getInternalFields<TestRequestFields>().value = 1;
-  second.getInternalFields<TestRequestFields>().value = 2;
-
-  EXPECT_EQ(first.getInternalFields<TestRequestFields>().value, 1);
-  EXPECT_EQ(second.getInternalFields<TestRequestFields>().value, 2);
-  EXPECT_FALSE(first.getConnectionContext()->hasInternalFields());
 }
 
 TEST(ThriftRequestContextTest, KeepsConnContextAliveAfterLocalReset) {

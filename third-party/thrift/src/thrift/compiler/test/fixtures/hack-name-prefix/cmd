@@ -1,2 +1,0 @@
-hack: hack:server src/module.thrift
-hack_omit_from_name_string: hack:server src/omit_from_name_string.thrift

@@ -1,5 +1,0 @@
-InheritParentConfig: true
-Checks: >
-  -clang-diagnostic-unused-member-function,
-  -facebook-hte-LocalUncheckedArrayBounds,
-  -facebook-avoid-non-const-global-variables,

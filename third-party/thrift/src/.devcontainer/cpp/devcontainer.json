@@ -1,7 +1,0 @@
-{
-    "name": "FBThrift C++ Build",
-    "build": {
-        "context": "../..",
-        "dockerfile": "../Containerfile-cpp"
-    }
-}

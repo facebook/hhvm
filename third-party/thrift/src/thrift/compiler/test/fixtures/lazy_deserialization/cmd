@@ -1,1 +1,0 @@
-cpp2_simple: mstch_cpp2 src/simple.thrift

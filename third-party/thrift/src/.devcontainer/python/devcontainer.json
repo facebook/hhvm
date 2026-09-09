@@ -1,7 +1,0 @@
-{
-    "name": "FBThrift Python Build",
-    "build": {
-        "context": "../..",
-        "dockerfile": "../Containerfile-python"
-    }
-}

@@ -1,8 +1,0 @@
-{
-  "pools": {
-    "foo": {
-      "servers": [ "localhost:12345" ]
-    }
-  },
-  "route": "PoolRoute|foo"
-}

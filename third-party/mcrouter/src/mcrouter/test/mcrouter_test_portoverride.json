@@ -1,9 +1,0 @@
-{
-  "pools": {
-    "foo": {
-      "servers": [ "localhost" ],
-      "port_override": "@int(%PORT%)"
-    }
-  },
-  "route": "PoolRoute|foo"
-}

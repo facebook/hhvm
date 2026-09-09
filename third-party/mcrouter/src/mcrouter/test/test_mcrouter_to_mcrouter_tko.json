@@ -1,9 +1,0 @@
-{
-  "pools": {
-    "foo": {
-      "protocol": "caret",
-      "servers": [ "localhost:12345" ]
-    }
-  },
-  "route": "AllSyncRoute|Pool|foo"
-}

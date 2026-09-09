@@ -1,2 +1,0 @@
-hack: hack src/module.thrift
-java: mstch_java src/module.thrift

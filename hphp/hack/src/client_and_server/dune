@@ -88,7 +88,7 @@
   save_state_service
   server_deps_out_batch
   server_deps_util
-  serverError
+  server_error
   server_file_dependents
   server_fun_deps_batch
   server_global_state

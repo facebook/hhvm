@@ -51,7 +51,7 @@ module Program = struct
         ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
         env.ServerEnv.last_recheck_loop_stats_for_actual_work
     in
-    ServerError.print_error_list
+    Server_error.print_error_list
       stdout
       ~stale_msg:None
       ~output_json:(ServerArgs.json_mode genv.options)

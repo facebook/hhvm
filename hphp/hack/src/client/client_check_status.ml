@@ -79,7 +79,7 @@ let go
         || (Option.is_none error_format && not is_interactive)
         || List.is_empty error_list
       then (
-        ServerError.print_error_list
+        Server_error.print_error_list
           stdout
           ~stale_msg
           ~output_json

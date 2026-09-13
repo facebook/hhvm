@@ -157,7 +157,7 @@
  (wrapped false)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
- (modules serverLoadFlag))
+ (modules server_load_flag))
 
 (library
  (name promise)

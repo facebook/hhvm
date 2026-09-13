@@ -29,7 +29,7 @@ let save ~logging_init =
     allowed_fixme_codes_strict = !Diagnostics.allowed_fixme_codes_strict;
     code_agnostic_fixme = !Diagnostics.code_agnostic_fixme;
     paths_to_ignore = Files_to_ignore.get_paths_to_ignore ();
-    no_load = ServerLoadFlag.get_no_load ();
+    no_load = Server_load_flag.get_no_load ();
     logging_init;
     cgroup_initial_reading = CgroupProfiler.get_initial_reading ();
   }
@@ -63,7 +63,7 @@ let restore
   Diagnostics.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
   Diagnostics.code_agnostic_fixme := code_agnostic_fixme;
   Files_to_ignore.set_paths_to_ignore paths_to_ignore;
-  ServerLoadFlag.set_no_load no_load;
+  Server_load_flag.set_no_load no_load;
   Diagnostics.set_allow_errors_in_default_path false;
   CgroupProfiler.use_initial_reading cgroup_initial_reading;
   logging_init ()

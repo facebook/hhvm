@@ -69,7 +69,7 @@ let monitor_daemon_main
   end;
 
   Relative_path.set_path_prefix Relative_path.Root www_root;
-  let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
+  let () = Server_load_flag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
   ServerConfig.warn_on_invalid_config_keys (ServerArgs.config options);

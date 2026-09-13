@@ -26,7 +26,7 @@ val parse_files_and_update_forward_naming_table :
   trace:bool ->
   decl_mode:Direct_decl_service.direct_decl_mode ->
   telemetry_label:string ->
-  cgroup_steps:CgroupProfiler.step_group ->
+  cgroup_steps:Cgroup_profiler.step_group ->
   worker_call:MultiWorker.call_wrapper ->
   ServerEnv.env * float
 
@@ -39,7 +39,7 @@ val update_reverse_naming_table_from_env_and_get_duplicate_name_errors :
   ServerEnv.env ->
   float ->
   telemetry_label:string ->
-  cgroup_steps:CgroupProfiler.step_group ->
+  cgroup_steps:Cgroup_profiler.step_group ->
   ServerEnv.env * float
 
 (** Just a quick validation that there are no errors *)
@@ -63,5 +63,5 @@ val defer_or_do_type_check :
   ServerEnv.Init_telemetry.t ->
   float ->
   telemetry_label:string ->
-  cgroup_steps:CgroupProfiler.step_group ->
+  cgroup_steps:Cgroup_profiler.step_group ->
   ServerEnv.env * float

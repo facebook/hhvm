@@ -339,7 +339,7 @@ let use_precomputed_state_exn
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
-    (cgroup_steps : CgroupProfiler.step_group) : loaded_info =
+    (cgroup_steps : Cgroup_profiler.step_group) : loaded_info =
   let {
     ServerArgs.naming_table_path;
     corresponding_base_revision;
@@ -352,7 +352,7 @@ let use_precomputed_state_exn
     info
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
-  CgroupProfiler.step_start_end cgroup_steps "load deptable"
+  Cgroup_profiler.step_start_end cgroup_steps "load deptable"
   @@ fun _cgroup_step ->
   let deptable_fn =
     let deptable = deptable_with_filename deptable_fn in
@@ -379,7 +379,7 @@ let use_precomputed_state_exn
   let warning_hashes_path = ServerArgs.warnings_path_for_target_info info in
   let (old_naming_table, { Save_state_service_types.old_errors; old_warnings })
       =
-    CgroupProfiler.step_start_end cgroup_steps "load saved state"
+    Cgroup_profiler.step_start_end cgroup_steps "load saved state"
     @@ fun _cgroup_step ->
     Save_state_service.load_saved_state_exn
       ctx
@@ -424,8 +424,8 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
     (parsing_files : Relative_path.Set.t)
     (naming_table_fallback_fn : string option)
     (t : float)
-    ~(cgroup_steps : CgroupProfiler.step_group) : float =
-  CgroupProfiler.step_start_end cgroup_steps "naming from saved state"
+    ~(cgroup_steps : Cgroup_profiler.step_group) : float =
+  Cgroup_profiler.step_start_end cgroup_steps "naming from saved state"
   @@ fun _cgroup_step ->
   begin
     match naming_table_fallback_fn with
@@ -629,7 +629,7 @@ let calculate_fanout_and_defer_or_do_type_check
     ~(dirty_local_files_unchanged_decls : Relative_path.Set.t)
     ~(dirty_local_files_changed_decls : Relative_path.Set.t)
     (t : float)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   let start_t : seconds = Unix.gettimeofday () in
   let dirty_files_unchanged_decls =
     Relative_path.Set.union
@@ -869,7 +869,7 @@ let initialize_naming_table
     ~(cache_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   Server_progress.with_message progress_message @@ fun () ->
   let (get_next, count, t) =
     match fnl with
@@ -916,7 +916,7 @@ let initialize_naming_table
 let write_symbol_info
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group)
+    (cgroup_steps : Cgroup_profiler.step_group)
     (t : float) : ServerEnv.env * float =
   let open Write_symbol_info in
   let (env, t) =
@@ -965,7 +965,7 @@ let write_symbol_info
 let write_symbol_info_full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   let (env, t) =
     initialize_naming_table
       ~cache_decls:true
@@ -980,7 +980,7 @@ let write_symbol_info_full_init
 let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   let init_telemetry =
     ServerEnv.Init_telemetry.make
       ServerEnv.Init_telemetry.Init_lazy_full
@@ -1023,7 +1023,7 @@ let full_init
 let parse_only_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   initialize_naming_table
     ~cache_decls:false
     "parse-only initialization"
@@ -1062,7 +1062,7 @@ let update_naming_table
     ~(do_indexing : bool)
     ~(state_result :
        loaded_info * Relative_path.Set.t * Server_notifier.clock option)
-    (cgroup_steps : CgroupProfiler.step_group) =
+    (cgroup_steps : Cgroup_profiler.step_group) =
   let ( (loaded_info : Server_init_types.loaded_info),
         changed_while_parsing,
         clock ) =
@@ -1102,7 +1102,7 @@ let update_naming_table
   Hh_logger.log
     "Among the changed files, %d are hack/php files (that are not ignored according to ignore_paths flag)."
     file_count;
-  ( CgroupProfiler.step_start_end cgroup_steps "remove fixmes"
+  ( Cgroup_profiler.step_start_end cgroup_steps "remove fixmes"
   @@ fun _cgroup_step -> Fixme_provider.remove_batch naming_files );
   (* Parse dirty files only *)
   let (env, t) =
@@ -1264,7 +1264,7 @@ let post_saved_state_initialization
     ~(env : ServerEnv.env)
     ~(state_result :
        loaded_info * Relative_path.Set.t * Server_notifier.clock option)
-    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   let ( (loaded_info : Server_init_types.loaded_info),
         _changed_while_parsing,
         _clock ) =
@@ -1416,7 +1416,7 @@ let check_credentials genv =
       t
 
 let load_saved_state_exn env genv load_state_approach root cgroup_steps =
-  CgroupProfiler.step_start_end cgroup_steps "load saved state"
+  Cgroup_profiler.step_start_end cgroup_steps "load saved state"
   @@ fun _cgroup_step ->
   let ctx = Provider_utils.ctx_from_server_env env in
   match load_state_approach with
@@ -1430,7 +1430,7 @@ let saved_state_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (root : Path.t)
-    (cgroup_steps : CgroupProfiler.step_group) :
+    (cgroup_steps : Cgroup_profiler.step_group) :
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =

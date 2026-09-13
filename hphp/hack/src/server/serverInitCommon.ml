@@ -37,9 +37,9 @@ let parse_files_and_update_forward_naming_table
     ~(trace : bool)
     ~(decl_mode : Direct_decl_service.direct_decl_mode)
     ~(telemetry_label : string)
-    ~(cgroup_steps : CgroupProfiler.step_group)
+    ~(cgroup_steps : Cgroup_profiler.step_group)
     ~(worker_call : MultiWorker.call_wrapper) : ServerEnv.env * float =
-  CgroupProfiler.step_start_end cgroup_steps telemetry_label
+  Cgroup_profiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   begin
     match count with
@@ -76,8 +76,8 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     (env : ServerEnv.env)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  CgroupProfiler.step_start_end cgroup_steps telemetry_label
+    ~(cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+  Cgroup_profiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   Server_progress.with_message "resolving symbol references" @@ fun () ->
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -160,7 +160,7 @@ let defer_or_do_type_check
     (init_telemetry : Init_telemetry.t)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    ~(cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
   if ServerArgs.check_mode genv.options then (
     (* Prechecked files are not supported in check mode, we
      * should always recheck everything necessary up-front. *)
@@ -230,7 +230,7 @@ let defer_or_do_type_check
       in
       let root = ServerArgs.root genv.ServerEnv.options in
       let ctx = Provider_utils.ctx_from_server_env env in
-      CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
+      Cgroup_profiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
         ctx
         genv.workers

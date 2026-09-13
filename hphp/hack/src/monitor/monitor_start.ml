@@ -176,7 +176,8 @@ let start () =
     (* This call might not return: *)
     Daemon.check_entry_point ();
     (* This allows us to measure cgroups relative to what it was at startup: *)
-    CgroupProfiler.get_initial_reading () |> CgroupProfiler.use_initial_reading;
+    Cgroup_profiler.get_initial_reading ()
+    |> Cgroup_profiler.use_initial_reading;
     (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
     Startup_initializer.init ();
     let proc_stack = Proc.get_proc_stack (Unix.getpid ()) in

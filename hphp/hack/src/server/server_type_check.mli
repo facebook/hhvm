@@ -21,7 +21,7 @@ val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
   float ->
-  CgroupProfiler.step_group ->
+  Cgroup_profiler.step_group ->
   ServerEnv.env * CheckStats.t * Telemetry.t
 
 (****************************************************************************)

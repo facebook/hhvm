@@ -60,7 +60,7 @@ let saved_state_init_error env genv ~do_indexing err =
     let fall_back_to_full_init profiling =
       Server_lazy_init.full_init genv env profiling |> post_init genv
     in
-    ( CgroupProfiler.step_group "full_init" ~log:true @@ fall_back_to_full_init,
+    ( Cgroup_profiler.step_group "full_init" ~log:true @@ fall_back_to_full_init,
       Load_state_failed (user_message, telemetry) )
   | _ -> Exit.exit ~msg:user_message ~telemetry next_step
 
@@ -135,4 +135,4 @@ let init
       ( write_symbol_info_init genv env root (Some load_state_approach),
         "write_symbol_info_with_state" )
   in
-  CgroupProfiler.step_group init_method_name ~log:true init_method
+  Cgroup_profiler.step_group init_method_name ~log:true init_method

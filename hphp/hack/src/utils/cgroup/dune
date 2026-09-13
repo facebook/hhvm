@@ -1,7 +1,7 @@
 (library
  (name cgroupprofiler)
  (wrapped false)
- (modules CgroupProfiler)
+ (modules Cgroup_profiler)
  (libraries cgroup core_kernel heap_shared_mem logging utils_core)
  (foreign_stubs
   (language c)

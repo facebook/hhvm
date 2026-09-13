@@ -1356,7 +1356,7 @@ let go_with_interrupt
       ~init_id:check_info.init_id
       ~check_reason:check_info.check_reason
       ~recheck_id:check_info.recheck_id
-      ~start_hh_stats:(CgroupProfiler.get_initial_stats ())
+      ~start_hh_stats:(Cgroup_profiler.get_initial_stats ())
       ~start_typecheck_stats:
         (Hack_event_logger.ProfileTypeCheck.get_stats
            ~include_current_process:false

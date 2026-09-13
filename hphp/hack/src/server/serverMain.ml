@@ -447,7 +447,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, check_stats, type_check_telemetry) =
-      CgroupProfiler.step_group check_kind_str ~log:true
+      Cgroup_profiler.step_group check_kind_str ~log:true
       @@ Server_type_check.type_check genv env start_time
     in
     let telemetry =

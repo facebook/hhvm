@@ -12,19 +12,19 @@ open Server_init_types
 val full_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.step_group ->
+  Cgroup_profiler.step_group ->
   ServerEnv.env * float
 
 val parse_only_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.step_group ->
+  Cgroup_profiler.step_group ->
   ServerEnv.env * float
 
 val write_symbol_info_full_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.step_group ->
+  Cgroup_profiler.step_group ->
   ServerEnv.env * float
 
 (** if [index] is true, call Glean indexer after init, otherwise typechecks *)
@@ -34,7 +34,7 @@ val saved_state_init :
   ServerEnv.genv ->
   ServerEnv.env ->
   Path.t ->
-  CgroupProfiler.step_group ->
+  Cgroup_profiler.step_group ->
   ( (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing),
     load_state_error )
   result

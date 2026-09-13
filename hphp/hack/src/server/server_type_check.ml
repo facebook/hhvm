@@ -124,7 +124,7 @@ let indexing genv env to_check cgroup_steps :
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let defs_per_file =
-    CgroupProfiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
+    Cgroup_profiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
     Direct_decl_service.(
       go
         ctx
@@ -195,11 +195,11 @@ let do_naming
     (env : env)
     (ctx : Provider_context.t)
     ~(defs_per_file_parsed : FileInfo.t Relative_path.Map.t)
-    ~(cgroup_steps : CgroupProfiler.step_group) : naming_result =
+    ~(cgroup_steps : Cgroup_profiler.step_group) : naming_result =
   let telemetry = Telemetry.create () in
   let start_t = Unix.gettimeofday () in
   let count = Relative_path.Map.cardinal defs_per_file_parsed in
-  CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
+  Cgroup_profiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
   Server_incremental.remove_defs_from_reverse_naming_table
     env.naming_table
     defs_per_file_parsed;
@@ -253,7 +253,7 @@ let do_redecl
     ~(reparsed : Relative_path.Set.t)
     ~(defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     ~(naming_table : Naming_table.t)
-    ~(cgroup_steps : CgroupProfiler.step_group) : redecl_result =
+    ~(cgroup_steps : Cgroup_profiler.step_group) : redecl_result =
   let get_classes =
     get_classes_from_old_and_new
       ~new_naming_table:naming_table
@@ -262,7 +262,7 @@ let do_redecl
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
   let { Decl_redecl_service.old_decl_missing_count; fanout } =
-    CgroupProfiler.step_start_end cgroup_steps "redecl" @@ fun _cgroup_step ->
+    Cgroup_profiler.step_start_end cgroup_steps "redecl" @@ fun _cgroup_step ->
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx
@@ -306,7 +306,7 @@ let do_type_checking
     ~(files_to_check : Relative_path.Set.t)
     ~(lazy_check_later : Relative_path.Set.t)
     ~(check_reason : string)
-    ~(cgroup_steps : CgroupProfiler.step_group)
+    ~(cgroup_steps : Cgroup_profiler.step_group)
     ~(files_with_naming_errors : Relative_path.Set.t) : type_checking_result =
   let telemetry = Telemetry.create () in
   if Relative_path.(Set.mem files_to_check default) then
@@ -342,7 +342,7 @@ let do_type_checking
   let (errorl', telemetry, env, unfinished_and_reason, time_first_typing_error)
       =
     let ctx = Provider_utils.ctx_from_server_env env in
-    CgroupProfiler.step_start_end
+    Cgroup_profiler.step_start_end
       cgroup_steps
       ~telemetry_ref:cgroup_typecheck_telemetry
       "type check"
@@ -1076,7 +1076,7 @@ let type_check :
     genv ->
     env ->
     seconds ->
-    CgroupProfiler.step_group ->
+    Cgroup_profiler.step_group ->
     env * CheckStats.t * Telemetry.t =
  fun genv env start_time cgroup_steps ->
   ServerUtils.with_exit_on_exception @@ fun () ->

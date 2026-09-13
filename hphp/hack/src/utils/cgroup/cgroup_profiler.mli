@@ -6,7 +6,7 @@
  *
  *)
 
-(* The CgroupProfiler module is to help us keep track of how cgroup
+(* The Cgroup_profiler module is to help us keep track of how cgroup
    memory usage evolves during the various steps of work done by hh_server.
 
    It helps to group steps into groups. An example step-group is "init",

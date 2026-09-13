@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-include WrappedMap.Make (IntKey)
+include WrappedMap.Make (Int_key)
 
 let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =
  (fun pp_data -> make_pp Format.pp_print_int pp_data)
@@ -14,4 +14,4 @@ let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =
 let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 
 let yojson_of_t yojson_of_value t =
-  make_yojson_of_t IntKey.to_string yojson_of_value t
+  make_yojson_of_t Int_key.to_string yojson_of_value t

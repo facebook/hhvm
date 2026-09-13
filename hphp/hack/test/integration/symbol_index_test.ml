@@ -114,7 +114,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~quiet:true
   in
   let paths_with_addenda =
-    Find.find ~file_only:true ~filter:FindUtils.file_filter [harness.repo_dir]
+    Find.find ~file_only:true ~filter:Find_utils.file_filter [harness.repo_dir]
     |> List.filter_map ~f:(fun path ->
            let path = Relative_path.create_detect_prefix path in
            let decls = Direct_decl_utils.direct_decl_parse ctx path in

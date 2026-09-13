@@ -14,7 +14,7 @@ let file_inputs_to_cacheable_paths file_inputs =
     | [] -> Some (List.rev acc)
     | FileName file_name :: rest ->
       let path = Relative_path.create_detect_prefix file_name in
-      if FindUtils.path_filter path then
+      if Find_utils.path_filter path then
         aux (path :: acc) rest
       else
         None

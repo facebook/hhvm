@@ -166,7 +166,7 @@ let with_exit_on_exception f =
     exit_on_exception e
 
 let make_next
-    ?(hhi_filter = FindUtils.is_hack)
+    ?(hhi_filter = Find_utils.is_hack)
     ~(indexer : unit -> string list)
     ~(extra_roots : Path.t list) : Relative_path.t list Bucket.next =
   let next_files_root =
@@ -192,7 +192,7 @@ let make_next
       ~f:(fun root ->
         Utils.compose
           (List.map ~f:Relative_path.create_detect_prefix)
-          (Find.make_next_files ~filter:FindUtils.file_filter root))
+          (Find.make_next_files ~filter:Find_utils.file_filter root))
       extra_roots
     |> concat_next_files
   in

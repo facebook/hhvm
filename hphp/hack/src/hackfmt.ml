@@ -17,7 +17,7 @@ open Printf
 open Boundaries
 open Hackfmt_error
 open Ocaml_overrides
-open FindUtils
+open Find_utils
 
 type filename = string
 

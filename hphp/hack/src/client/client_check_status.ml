@@ -895,7 +895,7 @@ let rec keep_trying_to_open
               SSet.of_list raw_updates
           in
           let updates =
-            FindUtils.post_file_watcher_filter_from_fully_qualified_raw_updates
+            Find_utils.post_file_watcher_filter_from_fully_qualified_raw_updates
               ~root
               ~raw_updates
           in
@@ -931,7 +931,7 @@ let rec keep_trying_to_open
                CARE! This only works if hh_server's test for "are there new files" is at least
                as strict as our own.
                They're identical, in fact, because they both use the same watch_spec filter
-               [FilesToIgnore.server_watch_spec] and the same [FindUtils.post_file_watcher_filter]. *)
+               [FilesToIgnore.server_watch_spec] and the same [Find_utils.post_file_watcher_filter]. *)
             Hh_logger.log
               "Errors-file: %s is present, was started at clock %s, but file watcher reports updates since then, so trying again. %d updates, for example %s"
               (Sys_utils.show_inode fd)

@@ -845,7 +845,7 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
     | Server_notifier.AsyncChanges updates ->
       let root = Path.to_string root in
       let filter p =
-        String.is_prefix p ~prefix:root && FindUtils.file_filter p
+        String.is_prefix p ~prefix:root && Find_utils.file_filter p
       in
       SSet.filter updates ~f:filter
       |> Relative_path.relativize_set Relative_path.Root
@@ -1096,7 +1096,7 @@ let update_naming_table
         dirty_local_files;
         changed_while_parsing;
       ]
-    |> Relative_path.Set.filter ~f:FindUtils.path_filter
+    |> Relative_path.Set.filter ~f:Find_utils.path_filter
   in
   let file_count = Relative_path.Set.cardinal naming_files in
   Hh_logger.log

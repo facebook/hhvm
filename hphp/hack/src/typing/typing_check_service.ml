@@ -1375,7 +1375,7 @@ let go_with_interrupt
       fnl
     else
       let result =
-        Big_list.filter ~f:(FindUtils.sample_filter ~sample_rate) fnl
+        Big_list.filter ~f:(Find_utils.sample_filter ~sample_rate) fnl
       in
       Hh_logger.log
         "Sampling %f percent of files: %d out of %d"

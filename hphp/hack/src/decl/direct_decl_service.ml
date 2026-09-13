@@ -19,7 +19,7 @@ let parse
     ~(decl_mode : direct_decl_mode)
     (acc : FileInfo.t Relative_path.Map.t)
     (fn : Relative_path.t) : FileInfo.t Relative_path.Map.t =
-  if not (FindUtils.path_filter fn) then
+  if not (Find_utils.path_filter fn) then
     acc
   else
     let start_parse_time = Unix.gettimeofday () in

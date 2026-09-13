@@ -74,7 +74,7 @@ let get_from_local_cache ~full ctx file_name =
     let popt = Provider_context.get_popt ctx in
     let parse contents =
       let contents =
-        if FindUtils.file_filter fn then
+        if Find_utils.file_filter fn then
           contents
         else
           ""
@@ -190,7 +190,7 @@ let get_ast_with_error ~(full : bool) ctx path =
   Counters.count Counters.Category.Ast_provider_get @@ fun () ->
   let parse_from_disk_no_caching ~apply_file_filter =
     let absolute_path = Relative_path.to_absolute path in
-    if (not apply_file_filter) || FindUtils.file_filter absolute_path then
+    if (not apply_file_filter) || Find_utils.file_filter absolute_path then
       let contents = Sys_utils.cat absolute_path in
       let source_text = Full_fidelity_source_text.make path contents in
       let (err, { Parser_return.ast; _ }) =

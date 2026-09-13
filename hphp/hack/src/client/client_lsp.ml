@@ -3930,10 +3930,10 @@ let do_initialize ~initialize_params : Initialize.result =
 
 let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   (* We want a glob-pattern like "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}".
-     I'm constructing it from FindUtils.extensions so our glob-pattern doesn't get out
-     of sync with FindUtils.file_filter. *)
+     I'm constructing it from Find_utils.extensions so our glob-pattern doesn't get out
+     of sync with Find_utils.file_filter. *)
   let extensions =
-    List.map FindUtils.extensions ~f:(fun s -> String_utils.lstrip s ".")
+    List.map Find_utils.extensions ~f:(fun s -> String_utils.lstrip s ".")
   in
   let globPattern =
     Printf.sprintf "**/*.{%s}" (extensions |> String.concat ~sep:",")
@@ -4477,10 +4477,10 @@ let handle_client_message
                but experimentally the uris seem to be canonical paths. That's lucky
                because if we had to turn a symlink of a deleted file file:///home/ljw/www/foo.php
                into the actual canonical path /data/users/ljw/www-hg/foo.php then it'd be hard!
-               Anyway, because they refer to canonical paths, we can safely use [FindUtils.file_filter]
+               Anyway, because they refer to canonical paths, we can safely use [Find_utils.file_filter]
                and [Relative_path.create_detect_prefix], both of which match string prefix on the
                canonical root. *)
-            if FindUtils.file_filter path then
+            if Find_utils.file_filter path then
               Some (Relative_path.create_detect_prefix path)
             else
               None)

@@ -104,7 +104,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   let paths_with_addenda =
     Find.find
       ~file_only:true
-      ~filter:FindUtils.file_filter
+      ~filter:Find_utils.file_filter
       [Path.make repo_path]
     |> List.filter_map ~f:(fun path ->
            let path = Relative_path.create_detect_prefix path in

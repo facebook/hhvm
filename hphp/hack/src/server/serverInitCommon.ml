@@ -19,7 +19,7 @@ let directory_walk
   let get_next =
     ServerUtils.make_next
       ?hhi_filter
-      ~indexer:(genv.indexer FindUtils.file_filter)
+      ~indexer:(genv.indexer Find_utils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)
   in
   Hack_event_logger.indexing_end ~desc:telemetry_label t;

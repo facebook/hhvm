@@ -163,7 +163,7 @@ val try_delete : unit -> unit
   1. When hh_server is launched, it either eventually exits or eventually writes
   an errors.bin file with some clock value that came at or after its launch.
   2. When files on disk are changed that pass FilesToIgnore.watch_spec
-  and FindUtils.post_file_watcher_filter, then eventually either a new errors.bin will
+  and Find_utils.post_file_watcher_filter, then eventually either a new errors.bin will
   be written which reflects the clock after those files, or eventually it will terminate.
 
   These invariants imply how the client should connect:

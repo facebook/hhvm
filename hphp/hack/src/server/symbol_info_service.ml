@@ -24,7 +24,7 @@ let parallel_helper workers filename_l tcopt =
 let go workers file_list env =
   let filename_l =
     file_list
-    |> List.filter ~f:FindUtils.file_filter
+    |> List.filter ~f:Find_utils.file_filter
     |> List.map ~f:(Relative_path.create Relative_path.Root)
   in
   let ctx = Provider_utils.ctx_from_server_env env in

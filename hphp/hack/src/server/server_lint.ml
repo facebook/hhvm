@@ -58,9 +58,9 @@ let lint_all genv ctx code =
         |> List.map ~f:(fun fn ->
                { filename = RP.create RP.Root fn; contents = None })
         |> List.filter ~f:(fun { filename; _ } ->
-               FindUtils.sample_filter ~sample_rate filename)
+               Find_utils.sample_filter ~sample_rate filename)
         |> Hack_bucket.of_list)
-      (genv.indexer FindUtils.is_hack)
+      (genv.indexer Find_utils.is_hack)
   in
   let errs =
     MultiWorker.call

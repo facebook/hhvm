@@ -8,18 +8,18 @@
  *
  *)
 
-let test_empty_path () = not (FindUtils.has_ancestor "" "hello")
+let test_empty_path () = not (Find_utils.has_ancestor "" "hello")
 
-let test_no_parent () = not (FindUtils.has_ancestor "foo.php" "hello")
+let test_no_parent () = not (Find_utils.has_ancestor "foo.php" "hello")
 
 let test_parent_matches () =
-  FindUtils.has_ancestor "experimental/foo.php" "experimental"
+  Find_utils.has_ancestor "experimental/foo.php" "experimental"
 
 let test_grandparent_matches () =
-  FindUtils.has_ancestor "experimental/dict/foo.php" "experimental"
+  Find_utils.has_ancestor "experimental/dict/foo.php" "experimental"
 
 let test_no_match () =
-  not (FindUtils.has_ancestor "abc/def/g/hhi/foo.php" "experimental")
+  not (Find_utils.has_ancestor "abc/def/g/hhi/foo.php" "experimental")
 
 let tests =
   [

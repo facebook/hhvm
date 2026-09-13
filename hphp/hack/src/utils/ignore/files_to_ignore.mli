@@ -11,7 +11,7 @@
 directive. *)
 val ignore_path : Str.regexp -> unit
 
-(** FindUtils.file_filter calls [should_ignore], which consults the list of ignore_path regexps,
+(** Find_utils.file_filter calls [should_ignore], which consults the list of ignore_path regexps,
 to determine whether hh_server recognizes a given file as part of the project. *)
 val should_ignore : string -> bool
 

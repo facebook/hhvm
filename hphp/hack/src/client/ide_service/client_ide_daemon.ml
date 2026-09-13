@@ -428,7 +428,7 @@ let initialize2
       Relative_path.Set.union
         dstate.changed_files_to_process
         (Relative_path.Set.of_list changed_files)
-      |> Relative_path.Set.filter ~f:FindUtils.path_filter
+      |> Relative_path.Set.filter ~f:Find_utils.path_filter
     in
     let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches

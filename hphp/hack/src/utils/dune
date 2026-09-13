@@ -11,7 +11,7 @@
 (library
  (name utils_find)
  (wrapped false)
- (modules findUtils)
+ (modules find_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
  (libraries ignore relative_path))

@@ -13,7 +13,7 @@ let log s = Hh_logger.log ("[ide-incremental] " ^^ s)
 
 let should_update_changed_file (path : Relative_path.t) : bool =
   Relative_path.is_root (Relative_path.prefix path)
-  && FindUtils.path_filter path
+  && Find_utils.path_filter path
 
 external batch_index_root_relative_paths_only :
   Decl_parser_options.t ->

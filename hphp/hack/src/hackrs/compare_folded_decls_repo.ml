@@ -93,7 +93,7 @@ let parse_repo
     ServerUtils.make_next
       ~hhi_filter:(fun _ -> true)
       ~indexer:
-        (Find.make_next_files ~name:"root" ~filter:FindUtils.is_hack root)
+        (Find.make_next_files ~name:"root" ~filter:Find_utils.is_hack root)
       ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
   in
   measure_time "parsing repo" @@ fun () ->

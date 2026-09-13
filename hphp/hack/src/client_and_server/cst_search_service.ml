@@ -611,7 +611,7 @@ let go
       in
       MultiWorker.next genv.ServerEnv.workers files_to_search ~progress_fn
     | None ->
-      let indexer = genv.ServerEnv.indexer FindUtils.is_hack in
+      let indexer = genv.ServerEnv.indexer Find_utils.is_hack in
       fun () ->
         let files = indexer () |> List.filter_map ~f:get_job_info in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);

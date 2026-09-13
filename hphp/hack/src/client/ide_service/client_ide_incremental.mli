@@ -22,7 +22,7 @@ type update_result = {
   which caches will have to be deleted by the caller.
 
   Note: this function ignores non-root files,
-  and those that fail FindUtils.path_filter.
+  and those that fail Find_utils.path_filter.
 
   IO: this function uses File_provider to read the file. *)
 val update_naming_tables_and_si :

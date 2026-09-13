@@ -241,7 +241,7 @@ let query_notifier
   in
   Program.exit_if_critical_update genv ~raw_updates;
   let updates =
-    FindUtils.post_file_watcher_filter_from_fully_qualified_raw_updates
+    Find_utils.post_file_watcher_filter_from_fully_qualified_raw_updates
       ~root:(ServerArgs.root genv.options)
       ~raw_updates
   in

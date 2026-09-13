@@ -12,7 +12,7 @@ path = "names.rs"
 
 [dependencies]
 anyhow = "1.0.104"
-crossbeam = "0.8"
+crossbeam = "0.8.5"
 hh24_types = { path = "../../utils/hh24_types" }
 oxidized = { path = "../../oxidized" }
 rand = "0.10.2"

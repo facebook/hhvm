@@ -14,7 +14,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-crossbeam = "0.8"
+crossbeam = "0.8.5"
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 hh_hash = { path = "../../../utils/hh_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

@@ -117,7 +117,7 @@ end
 let finalize_init init_env typecheck_telemetry init_telemetry =
   (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
-  let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let hash_telemetry = Server_utils.log_and_get_sharedmem_load_telemetry () in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~start_time:init_env.init_start_t
@@ -483,8 +483,8 @@ let new_serve_iteration_id () = Random_id.short_string ()
  * anything. *)
 let main_loop_command_handler client result =
   match result with
-  | ServerUtils.Done env -> env
-  | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
+  | Server_utils.Done env -> env
+  | Server_utils.Needs_full_recheck { env; finish_command_handling; reason } ->
     (* We should not accept any new clients until this is cleared *)
     assert (
       Option.is_none env.nonpersistent_client_pending_command_needs_full_check);
@@ -864,11 +864,11 @@ let priority_client_interrupt_handler genv client_provider :
              env
              client
          with
-        | ServerUtils.Needs_full_recheck { reason; _ } ->
+        | Server_utils.Needs_full_recheck { reason; _ } ->
           failwith
             ("unexpected command needing full recheck in priority channel: "
             ^ reason)
-        | ServerUtils.Done env -> env)
+        | Server_utils.Done env -> env)
     in
 
     (env, MultiThreadedCall.Continue)
@@ -914,7 +914,7 @@ let serve genv env in_fds =
     Typing_deps.allow_dependency_table_reads env.deps_mode false
   in
   let () = Diagnostics.set_allow_errors_in_default_path false in
-  MultiThreadedCall.on_exception (fun e -> ServerUtils.exit_on_exception e);
+  MultiThreadedCall.on_exception (fun e -> Server_utils.exit_on_exception e);
   let client_provider = Client_provider.provider_from_file_descriptors in_fds in
 
   (* This is needed when typecheck_after_init option is disabled.
@@ -1048,7 +1048,7 @@ let program_init genv env =
   Server_notifier.wait_until_ready genv.notifier;
   EventLogger.set_init_type init_type;
   let telemetry =
-    ServerUtils.log_and_get_sharedmem_load_telemetry ()
+    Server_utils.log_and_get_sharedmem_load_telemetry ()
     |> Telemetry.object_opt ~key:"init_error" ~value:init_error_telemetry
     |> Telemetry.json
          ~key:"deps_mode"
@@ -1482,7 +1482,7 @@ let daemon_main
 
   setup_hhi_root options;
 
-  ServerUtils.with_exit_on_exception @@ fun () ->
+  Server_utils.with_exit_on_exception @@ fun () ->
   daemon_main_exn
     ~informant_managed
     options

@@ -836,7 +836,7 @@ let type_check_core
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_
          ~key:"hash"
-         ~value:(ServerUtils.log_and_get_sharedmem_load_telemetry ())
+         ~value:(Server_utils.log_and_get_sharedmem_load_telemetry ())
     |> Telemetry.int_opt
          ~key:"depgraph_delta_num_edges"
          ~value:
@@ -1079,7 +1079,7 @@ let type_check :
     Cgroup_profiler.step_group ->
     env * CheckStats.t * Telemetry.t =
  fun genv env start_time cgroup_steps ->
-  ServerUtils.with_exit_on_exception @@ fun () ->
+  Server_utils.with_exit_on_exception @@ fun () ->
   (*
   (1) THE ENV MODEL FOR DIAGNOSTICS...
   env.{diagnostics, needs_recheck, disk_needs_parsing} are all persistent values that

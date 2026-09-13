@@ -418,7 +418,7 @@ let stmt_is_invariant_package_intern env (_, stmt_) =
   match stmt_ with
   | Aast.If (cond, then_block, _) ->
     Option.exists
-      (ServerUtils.resugar_invariant_call env cond then_block)
+      (Server_utils.resugar_invariant_call env cond then_block)
       ~f:is_invariant_package_intern_call
   | _ -> false
 
@@ -613,7 +613,7 @@ let visitor =
         typed_class_id env ty id_pos
 
     method! on_If env cond then_block else_block : Result_set.t =
-      match ServerUtils.resugar_invariant_call env cond then_block with
+      match Server_utils.resugar_invariant_call env cond then_block with
       | Some e -> self#on_expr env e
       | None when is_package_intern_expr cond ->
         self#plus

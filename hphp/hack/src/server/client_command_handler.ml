@@ -15,7 +15,7 @@ module NonPersistent : sig
     ServerEnv.genv ->
     ServerEnv.env ->
     Client_provider.client ->
-    ServerEnv.env ServerUtils.handle_command_result
+    ServerEnv.env Server_utils.handle_command_result
 end = struct
   let handle_client_command_exception
       ~(env : ServerEnv.env)
@@ -69,7 +69,7 @@ end = struct
     Client_provider.track
       client
       ~key:Connection_tracker.Server_start_handle_connection;
-    handle_client_command_try (fun x -> ServerUtils.Done x) client env
+    handle_client_command_try (fun x -> Server_utils.Done x) client env
     @@ fun () ->
     match Client_provider.read_connection_type client with
     | Server_command_types.Non_persistent ->
@@ -79,11 +79,11 @@ end = struct
   let handle_client_command_or_persistent_connection genv env client =
     handle_client_command_or_persistent_connection_ genv env client
     (* Similarly to persistent client commands, we wrap in handle_client_command_try a second time here. *)
-    |> ServerUtils.wrap ~try_:(handle_client_command_try (fun x -> x) client)
+    |> Server_utils.wrap ~try_:(handle_client_command_try (fun x -> x) client)
 end
 
 let handle_client_command_or_persistent_connection genv env client :
-    ServerEnv.env ServerUtils.handle_command_result =
+    ServerEnv.env Server_utils.handle_command_result =
   Server_idle.stamp_connection ();
   Hh_logger.log
     ~category:"clients"

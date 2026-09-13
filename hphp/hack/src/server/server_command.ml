@@ -101,7 +101,7 @@ let handle
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (client : Client_provider.client) :
-    ServerEnv.env ServerUtils.handle_command_result =
+    ServerEnv.env Server_utils.handle_command_result =
   (* In the case if LSP, it's normal that this [Server_waiting_for_cmd]
      track happens on a per-message basis, much later than the previous
      [Server_got_connection_type] track that happened when the persistent
@@ -156,7 +156,7 @@ let handle
 
   if full_recheck_needed then begin
     send_progress " typechecking";
-    ServerUtils.Needs_full_recheck
+    Server_utils.Needs_full_recheck
       { env; finish_command_handling = handle_command; reason = reason msg }
   end else
-    ServerUtils.Done (handle_command env)
+    Server_utils.Done (handle_command env)

@@ -90,7 +90,7 @@ let parse_repo
     (workers : MultiWorker.worker list option) : FileInfo.t Relative_path.Map.t
     =
   let get_next =
-    ServerUtils.make_next
+    Server_utils.make_next
       ~hhi_filter:(fun _ -> true)
       ~indexer:
         (Find.make_next_files ~name:"root" ~filter:Find_utils.is_hack root)

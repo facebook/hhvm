@@ -17,7 +17,7 @@
 (library
  (name server_utils)
  (wrapped false)
- (modules serverUtils)
+ (modules server_utils)
  (libraries
   core_kernel
   find

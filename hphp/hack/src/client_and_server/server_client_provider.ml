@@ -265,7 +265,7 @@ let priority_to_string (client : client) : string =
   | Priority_default -> "default"
   | Priority_dormant -> "dormant"
 
-let shutdown_client client = ServerUtils.shutdown_client (client.ic, client.oc)
+let shutdown_client client = Server_utils.shutdown_client (client.ic, client.oc)
 
 let ping client =
   let (_ : int) =

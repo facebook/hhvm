@@ -11,4 +11,4 @@ val handle_client_command_or_persistent_connection :
   ServerEnv.genv ->
   ServerEnv.env ->
   Client_provider.client ->
-  ServerEnv.env ServerUtils.handle_command_result
+  ServerEnv.env Server_utils.handle_command_result

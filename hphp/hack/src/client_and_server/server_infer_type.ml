@@ -313,7 +313,7 @@ let base_visitor
       | _ -> acc
 
     method! on_If env cond then_block else_block =
-      match ServerUtils.resugar_invariant_call env cond then_block with
+      match Server_utils.resugar_invariant_call env cond then_block with
       | Some e -> self#on_expr env e
       | None -> super#on_If env cond then_block else_block
 

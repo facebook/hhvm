@@ -17,7 +17,7 @@ let directory_walk
   Server_progress.write "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
-    ServerUtils.make_next
+    Server_utils.make_next
       ?hhi_filter
       ~indexer:(genv.indexer Find_utils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)
@@ -128,7 +128,7 @@ let log_type_check_end
     ~desc
     ~init_telemetry
     ~typecheck_telemetry : unit =
-  let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let hash_telemetry = Server_utils.log_and_get_sharedmem_load_telemetry () in
 
   let telemetry =
     Telemetry.create ()

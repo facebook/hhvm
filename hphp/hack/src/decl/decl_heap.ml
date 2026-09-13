@@ -58,27 +58,27 @@ end
 
 module Funs =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (Fun)
     (Capacity)
 module Classes =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (Class)
     (Capacity)
 module Typedefs =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (Typedef)
     (Capacity)
 module GConsts =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (GConst)
     (Capacity)
 module Modules =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (Module)
     (Capacity)
 
@@ -147,6 +147,6 @@ module StaticMethods =
     (Capacity)
 module Constructors =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
     (Constructor)
     (Capacity)

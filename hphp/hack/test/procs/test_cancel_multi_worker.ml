@@ -15,7 +15,7 @@ end
 
 module TestHeap =
   SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
     (IntVal)
 
 let sum acc x = acc + x

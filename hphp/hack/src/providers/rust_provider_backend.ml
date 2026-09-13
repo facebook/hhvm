@@ -176,7 +176,7 @@ module Decl = struct
 
   module Funs =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Shallow_decl_defs.fun_decl
 
@@ -189,7 +189,7 @@ module Decl = struct
 
   module ShallowClasses =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Shallow_decl_defs.class_decl
 
@@ -202,7 +202,7 @@ module Decl = struct
 
   module Typedefs =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Shallow_decl_defs.typedef_decl
 
@@ -215,7 +215,7 @@ module Decl = struct
 
   module GConsts =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Shallow_decl_defs.const_decl
 
@@ -228,7 +228,7 @@ module Decl = struct
 
   module Modules =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Shallow_decl_defs.module_decl
 
@@ -241,7 +241,7 @@ module Decl = struct
 
   module FoldedClasses =
     StoreWithLocalCache
-      (StringKey)
+      (String_key)
       (struct
         type t = Decl_defs.decl_class_type
 

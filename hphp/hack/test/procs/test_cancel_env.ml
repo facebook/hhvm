@@ -29,7 +29,7 @@ end
 
 module TestHeap =
   SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
     (UnitVal)
 
 (* The tasks will be numbers 1...num_workers_and_jobs,

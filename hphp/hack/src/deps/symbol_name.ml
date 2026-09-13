@@ -95,7 +95,7 @@ end
 
 (** [Set_Impl] implements an opaque set, via a SSet *)
 module Set_Impl = struct
-  include Stdlib.Set.Make (StringKey)
+  include Stdlib.Set.Make (String_key)
 
   let pp (fmt : Format.formatter) (t : t) =
     Format.fprintf fmt "@[<2>{";

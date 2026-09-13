@@ -39,35 +39,35 @@ module ClassEltKey : SharedMem.Key with type t = string * string
 module Funs :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (Fun)
         (Capacity)
 
 module Classes :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (Class)
         (Capacity)
 
 module Typedefs :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (Typedef)
         (Capacity)
 
 module GConsts :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (GConst)
         (Capacity)
 
 module Modules :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (Module)
         (Capacity)
 
@@ -102,6 +102,6 @@ module StaticMethods :
 module Constructors :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
         (Constructor)
         (Capacity)

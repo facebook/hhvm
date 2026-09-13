@@ -31,7 +31,7 @@ type module_decl = Typing_defs.module_def_type
       (the class merged with all its inherited members.)  *)
 module Cache =
   SharedMem.FreqCache
-    (StringKey)
+    (String_key)
     (struct
       type t = Typing_class_types.class_t
 

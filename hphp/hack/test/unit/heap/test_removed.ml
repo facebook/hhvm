@@ -29,7 +29,7 @@ let test_add_remove
 
 module TestNoCache =
   SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
     (IntVal)
 
 let tests () =

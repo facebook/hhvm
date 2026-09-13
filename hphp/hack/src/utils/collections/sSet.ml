@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-include Set.Make (StringKey)
+include Set.Make (String_key)
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 let pp_limit ?(max_elts = None) fmt sset =
@@ -56,5 +56,5 @@ let show_large ?(max_elts = 5) sset =
 
 let yojson_of_t t =
   elements t
-  |> List.sort StringKey.compare
-  |> yojson_of_list StringKey.yojson_of_t
+  |> List.sort String_key.compare
+  |> yojson_of_list String_key.yojson_of_t

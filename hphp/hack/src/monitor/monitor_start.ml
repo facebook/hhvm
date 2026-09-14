@@ -117,7 +117,7 @@ let monitor_daemon_main
 
   if ServerArgs.check_mode options then (
     Hh_logger.log "%s" "Will run once in check mode then exit.";
-    ServerMain.run_once options config local_config
+    Server_main.run_once options config local_config
   ) else
     let current_version = ServerConfig.version config in
     let waiting_client = ServerArgs.waiting_client options in

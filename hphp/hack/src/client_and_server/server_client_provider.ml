@@ -36,7 +36,7 @@ require a full typecheck (e.g. hh status) will use default. The monitor,
 when it performs handshake, looks at the request and dispatches to one of
 the three FDs.
 
-In [ServerMain.serve_one_iteration], it decides which of the three FDs to poll
+In [Server_main.serve_one_iteration], it decides which of the three FDs to poll
 for incoming requests. For instance if it's in the middle of a typecheck then
 it's willing to listen for priority requests (so it can interrupt the current
 typecheck to handle thenm) but not for default requests. And if we're "dormant"

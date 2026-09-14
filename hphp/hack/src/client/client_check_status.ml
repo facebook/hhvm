@@ -101,7 +101,7 @@ let go
              ~dropped_count:(Some dropped_count)
              ~max_errors)
           ~f:(fun msg -> Printf.printf "%s" msg);
-        (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
+        (* [stale_msg] ultimately comes from [Server_main.query_notifier], and says whether the check
            reflects data from a sync file watcher query, or just whatever has arrived asynchronously
            so far. *)
         Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);

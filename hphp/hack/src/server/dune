@@ -165,7 +165,7 @@
     server_init_messages
     server_init_types
     server_lazy_init
-    serverMain
+    server_main
     server_rpc
     server_isolation)
   (libraries

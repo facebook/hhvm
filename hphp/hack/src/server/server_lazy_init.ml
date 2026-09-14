@@ -1046,7 +1046,7 @@ let parse_only_init
     1. [old_naming_table], which we got from the saved-state, is a [NamingTable.t]
        that's "backed" i.e. it reflects just the sqlite file plus a delta, initially empty.
     2. [env.naming_table] starts out as [Naming_table.empty] as it was created in
-       [ServerMain.setup_server]. We will add to it the forward-naming-table FileInfo.t
+       [Server_main.setup_server]. We will add to it the forward-naming-table FileInfo.t
        for all files discussed above, [parsing_files]
     3. The reverse naming-table is made up of global mutable shmem delta with
        eventual fallback to sqlite. We will write into that delta the reverse-names

@@ -11,7 +11,7 @@ exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 or store it as a continuation to be completed later
 (when full recheck is completed, when workers are available,
 when current recheck is cancelled...).
-Invariant (checked in [ServerMain.priority_client_interrupt_handler]):
+Invariant (checked in [Server_main.priority_client_interrupt_handler]):
 if this returns anything other than [Done], then [use_priority_pipe]
 must have returned false for the command we fetch from the client to handle. *)
 val handle :

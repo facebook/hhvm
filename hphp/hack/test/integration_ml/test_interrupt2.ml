@@ -59,7 +59,7 @@ let test () =
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
       ()
   in
-  ServerMain.force_break_recheck_loop_for_test false;
+  Server_main.force_break_recheck_loop_for_test false;
 
   (* There are initially no errors *)
   let env =

@@ -13,7 +13,7 @@ let start_server_daemon
     ~informant_managed
     options
     log_link
-    (daemon_entry : (ServerMain.params, _, _) Daemon.entry) =
+    (daemon_entry : (Server_main.params, _, _) Daemon.entry) =
   let log_fds =
     let in_fd = Daemon.null_fd () in
     if ServerArgs.should_detach options then (
@@ -61,7 +61,7 @@ let start_server_daemon
       log_fds
       daemon_entry
       {
-        ServerMain.informant_managed;
+        Server_main.informant_managed;
         state;
         options;
         monitor_pid;
@@ -107,7 +107,7 @@ let start_server_daemon
 
 let start_hh_server ~informant_managed options =
   let log_link = Server_files.log_link (ServerArgs.root options) in
-  start_server_daemon ~informant_managed options log_link ServerMain.entry
+  start_server_daemon ~informant_managed options log_link Server_main.entry
 
 type server_start_options = ServerArgs.options
 

@@ -75,7 +75,7 @@ let test_init_common ?(hhi_files = []) () =
   let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);
 
-  ServerMain.force_break_recheck_loop_for_test true;
+  Server_main.force_break_recheck_loop_for_test true;
 
   List.iter hhi_files ~f:(fun (fn, contents) ->
       Test_disk.set (Filename.concat hhi fn) contents);
@@ -155,7 +155,7 @@ let run_loop_once :
   in
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.{ env with last_notifier_check_time = 0.0 } in
-  let env = ServerMain.serve_one_iteration genv env client_provider in
+  let env = Server_main.serve_one_iteration genv env client_provider in
   let {
     ServerEnv.RecheckLoopStats.total_changed_files_count;
     total_rechecked_count;

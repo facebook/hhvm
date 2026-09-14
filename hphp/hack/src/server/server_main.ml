@@ -626,7 +626,7 @@ let serve_one_iteration genv env client_provider =
     match selected_client with
     | Client_provider.(Select_nothing | Select_exception _) ->
       (* There's some subtle IDE behavior, described in [ServerCommand.handle]
-         and [ServerMain.recheck_until_no_changes_left]... If an EDIT was received
+         and [Server_main.recheck_until_no_changes_left]... If an EDIT was received
          over the persistent connection, then we won't resume typechecking
          until either a file-save comes in or 5.0s has elapsed. *)
       let (disposition, msg) =
@@ -1359,7 +1359,7 @@ let possibly_save_naming_table env genv =
 
 let run_once options config local_config =
   assert (ServerArgs.check_mode options);
-  Hh_logger.log "ServerMain.run_once starting";
+  Hh_logger.log "Server_main.run_once starting";
 
   let (workers, env) =
     setup_server
@@ -1407,7 +1407,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Startup_initializer.init ();
   Printexc.record_backtrace true;
 
-  Hh_logger.log "ServerMain daemon starting.";
+  Hh_logger.log "Server_main daemon starting.";
 
   let (config, local_config) =
     ServerConfig.load
@@ -1489,4 +1489,4 @@ let daemon_main
     monitor_pid
     (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd)
 
-let entry = Daemon.register_entry_point "ServerMain.daemon_main" daemon_main
+let entry = Daemon.register_entry_point "Server_main.daemon_main" daemon_main

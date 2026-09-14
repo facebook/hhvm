@@ -66,7 +66,7 @@ type ('param, 'input, 'output) entry
 (** Alternate entry points must be registered at toplevel, i.e.
      every call to `Daemon.register_entry_point` must have been
      evaluated when `Daemon.check_entry_point` is called at the
-     beginning of `ServerMain.start`. *)
+     beginning of `Server_main.start`. *)
 val register_entry_point :
   string ->
   ('param -> ('input, 'output) channel_pair -> unit) ->

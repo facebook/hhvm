@@ -36,7 +36,7 @@ type cancel_reason = {
 }
 
 (** An interrupt is set up as a pair [Unix.file_descr * 'env interrupt_handler].
-Our interrupts are set up in serverMain.ml...
+Our interrupts are set up in server_main.ml...
 * The file-descr for our file watcher and a handler which processes the file change event;
 * The file-descr for our persistent connection and a handler which processes the RPC;
 * The file-descr for our "priority channel" i.e. new hh_client connections and a handler for them.

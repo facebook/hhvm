@@ -1084,7 +1084,7 @@ let type_check :
   (1) THE ENV MODEL FOR DIAGNOSTICS...
   env.{diagnostics, needs_recheck, disk_needs_parsing} are all persistent values that
   might be adjusted as we go:
-  * disk_needs_parsing gets initialized in serverLazyInit, augmented in serverMain both
+  * disk_needs_parsing gets initialized in serverLazyInit, augmented in server_main both
     at the start of the loop and during file watcher interrupts, and in serverTypeCheck it
     gets reset to empty once we have computed files-to-parse and decls-to-refresh from it.
     (files-to-recheck is computed from these two).
@@ -1116,7 +1116,7 @@ let type_check :
     this fact right away in the errors-file so that the client "hh check" can finish "No errors!".
     But if it was not complete (e.g. it got interrupted by watchman) then there is no need to finish
     for the sake of the client: there will be an immediate next round of
-    ServerMain.recheck_until_no_changes_left, and it will call us again, and the errors-file
+    Server_main.recheck_until_no_changes_left, and it will call us again, and the errors-file
     will be restarted on that next round, and the act of restarting will close the current errors-file.
 
   How do we guarantee that hh_server produces an errors-file upon startup?
@@ -1126,12 +1126,12 @@ let type_check :
   to happen after its (synchronous, non-interruptible) init has finished. It does
   this so that clients will be able to connect as soon as init has finished, and
   observe/interrupt the deferred typecheck. It does this by setting
-  [env.full_check_status=Full_check_started], so that when ServerMain first enters
+  [env.full_check_status=Full_check_started], so that when Server_main first enters
   its main loop and calls [serve_one_iteration] for the first time, it will believe
   that a full check is needed and hence call [ServerTypeCheck.type_check]. No matter
   if we did a perfect saved-state-load so that [env.disk_needs_parsing] is empty,
   no matter if we did a full init and [env.needs_recheck] contains every file in the
-  project, no matter what init path, the start of ServerMain main loop will always
+  project, no matter what init path, the start of Server_main main loop will always
   start by calling [ServerTypeCheck.type_check]. And it's at this moment, right here,
   that we'll lay down the first errors file.
   *)
@@ -1156,7 +1156,7 @@ let type_check :
       Because we mark the errors-file as complete, anyone tailing it will
       know that they can finish their tailing.
 
-      For incomplete typechecks, we don't do anything here. Necessarily ServerMain
+      For incomplete typechecks, we don't do anything here. Necessarily Server_main
       will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
       and then next round will call [Server_progress.ErrorsWrite.new_empty_file]
       which will put a "restarted" sentinel at the end of the current file as

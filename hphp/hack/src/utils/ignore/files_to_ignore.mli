@@ -7,7 +7,7 @@
  *
  *)
 
-(** This is invoked in serverMain and other entry points, upon reading .hhconfig ignore_paths=
+(** This is invoked in server_main and other entry points, upon reading .hhconfig ignore_paths=
 directive. *)
 val ignore_path : Str.regexp -> unit
 

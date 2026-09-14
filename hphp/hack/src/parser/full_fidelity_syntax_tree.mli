@@ -60,7 +60,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
   end
 
   include module type of
-      WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
+      WithSmartConstructors (Syntax_smart_constructors.WithSyntax (Syntax))
 
   val create :
     Full_fidelity_source_text.t ->

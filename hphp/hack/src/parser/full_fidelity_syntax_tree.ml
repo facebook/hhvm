@@ -148,7 +148,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         ]
   end
 
-  include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
+  include WithSmartConstructors (Syntax_smart_constructors.WithSyntax (Syntax))
 
   let create text root errors mode = create text root None errors mode ()
 

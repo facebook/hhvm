@@ -119,5 +119,5 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         [make_error_from_node (SyntaxTree.root env.syntax_tree) error_msg]
   end
 
-  include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
+  include WithSmartConstructors (Syntax_smart_constructors.WithSyntax (Syntax))
 end

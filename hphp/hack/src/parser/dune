@@ -126,7 +126,7 @@
   ; from smart_constructors
   smartConstructors
   smartConstructorsWrappers
-  syntaxSmartConstructors)
+  syntax_smart_constructors)
  (libraries
   common
   file_info

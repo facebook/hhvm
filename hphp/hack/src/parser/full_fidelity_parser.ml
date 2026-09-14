@@ -62,7 +62,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     let parse_script parser = rust_parse_script parser
   end
 
-  module SC = SyntaxSmartConstructors.WithSyntax (Syntax)
+  module SC = Syntax_smart_constructors.WithSyntax (Syntax)
   include WithSmartConstructors (SC)
 end
 

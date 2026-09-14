@@ -1286,7 +1286,7 @@ end
       ~transformations:[]
       ~filename:
         (full_fidelity_path_prefix
-        ^ "smart_constructors/syntaxSmartConstructors.ml")
+        ^ "smart_constructors/syntax_smart_constructors.ml")
       ~template:full_fidelity_syntax_smart_constructors_template
       ()
 end

@@ -18,3 +18,10 @@ function test_override_family(): void {}
 <<file: __PackageOverride('standalone')>>
 
 function test_override_plain(): void {}
+
+//// prototypes/foo/override_from_member.php
+<?hh
+// Directory placement fixes this file's implicit package membership.
+<<file: __PackageOverride('standalone')>>
+
+type OverrideFromImplicitMember = int;

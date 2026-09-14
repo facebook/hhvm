@@ -70,6 +70,20 @@ let error_if_strict_isolation ~pos ~pkg_name ~construct required_pkg =
     true
   | _ -> false
 
+let error_if_implicit_package_override attr = function
+  | Some package when package.Package.is_implicit ->
+    error_if_strict_isolation
+      ~pos:(fst attr.ua_name)
+      ~pkg_name:(Package.get_package_name package)
+      ~construct:
+        (Nast_check_error.Package_override_attribute (snd attr.ua_name))
+      (Some package)
+  | _ -> false
+
+let get_path_package env pos =
+  let path = Relative_path.suffix (Pos.filename pos) in
+  Package_provider.get_package_for_file env.Nast_check_env.ctx ~path
+
 let require_package_strict_inclusion env attr =
   match
     Naming_attributes.find2
@@ -202,13 +216,12 @@ let package_override_check env ua =
     (* An unbound override target is reported by the naming pass. *)
     | None -> ()
     | Some target_package ->
-      let path = Relative_path.suffix (Pos.filename (fst ua.ua_name)) in
-      (match
-         Package_provider.get_package_for_file env.Nast_check_env.ctx ~path
-       with
+      (match get_path_package env (fst ua.ua_name) with
       (* A file with no path-derived package uses the override to opt into one,
          so there is no inclusion relationship to enforce. *)
       | None -> ()
+      (* The file-level isolation check reports this once. *)
+      | Some path_package when path_package.Package.is_implicit -> ()
       | Some path_package ->
         (match Package.relationship path_package target_package with
         (* [path_package] includes (or soft-includes) [target]: a valid demote
@@ -243,19 +256,24 @@ let package_override_check env ua =
                    }))))
   | _ -> ()
 
-(* Refuses [__PackageOverride('p')] when [p] has strict isolation enabled. *)
+(* Refuses [__PackageOverride] when its target has strict isolation or when the
+   file already belongs to an implicit package. *)
 let package_override_strict_isolation env attr =
   match attr with
   | { ua_params = (_, _, String pkg_name) :: _; ua_name = (name_pos, name) }
     when String.equal name SN.UserAttributes.uaPackageOverride ->
-    let (_ : bool) =
-      error_if_strict_isolation
-        ~pos:name_pos
-        ~pkg_name
-        ~construct:(Nast_check_error.Package_override_attribute name)
-        (lookup_package env pkg_name)
-    in
-    ()
+    if error_if_implicit_package_override attr (get_path_package env name_pos)
+    then
+      ()
+    else
+      let (_ : bool) =
+        error_if_strict_isolation
+          ~pos:name_pos
+          ~pkg_name
+          ~construct:(Nast_check_error.Package_override_attribute name)
+          (lookup_package env pkg_name)
+      in
+      ()
   | _ -> ()
 
 let handler =

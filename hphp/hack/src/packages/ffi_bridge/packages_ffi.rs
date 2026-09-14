@@ -26,6 +26,7 @@ mod ffi {
         includes: Vec<String>,
         soft_includes: Vec<String>,
         include_paths: Vec<String>,
+        enable_strict_isolation: bool,
     }
     struct DeploymentMapEntry {
         name: String,
@@ -72,6 +73,7 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                         includes: convert(package.includes.as_ref()),
                         soft_includes: convert(package.soft_includes.as_ref()),
                         include_paths: convert(package.include_paths.as_ref()),
+                        enable_strict_isolation: package.enable_strict_isolation,
                     };
                     ffi::PackageMapEntry {
                         name: name.get_ref().to_string(),

@@ -703,7 +703,8 @@ void validateIncrementalPackageInfo(
                               const PackageInfo::Package& right) {
     return left.m_includes == right.m_includes &&
       left.m_soft_includes == right.m_soft_includes &&
-      left.m_include_paths == right.m_include_paths;
+      left.m_include_paths == right.m_include_paths &&
+      left.m_enable_strict_isolation == right.m_enable_strict_isolation;
   };
   auto const sameDeployment = [](const PackageInfo::Deployment& left,
                                  const PackageInfo::Deployment& right) {

@@ -25,7 +25,7 @@
 namespace HPHP {
 namespace {
 
-// Checks that PackageInfo exposes implicit families only when enabled.
+// Checks that config loading gates implicit families and reports strict status.
 TEST(PackageInfoTest, LoadsImplicitPackageFamiliesOnlyWhenEnabled) {
   folly::test::TemporaryDirectory temp{"package-info"};
   auto const config = temp.path() / "PACKAGES.toml";
@@ -34,6 +34,9 @@ TEST(PackageInfoTest, LoadsImplicitPackageFamiliesOnlyWhenEnabled) {
 [packages]
 [packages.intern]
 [packages.soft]
+
+[packages.strict]
+enable_strict_isolation = true
 
 [implicit_packages.prototypes]
 path = "//www/prototypes/"
@@ -55,6 +58,22 @@ soft_includes = ["soft"]
   EXPECT_TRUE(disabled.implicitPackageFamilies().empty());
   EXPECT_TRUE(disabled.packages().contains("intern"));
   EXPECT_TRUE(disabled.packages().contains("soft"));
+  EXPECT_TRUE(enabled.isStrictIsolationPackage("strict"));
+  EXPECT_FALSE(enabled.isStrictIsolationPackage("intern"));
+  EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes"));
+  EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes.example"));
+  EXPECT_FALSE(enabled.isStrictIsolationPackage("unknown"));
+}
+
+// Checks that strict-isolation metadata contributes to the package cache key.
+TEST(PackageInfoTest, StrictIsolationChangesCacheMangle) {
+  PackageInfo base;
+  base.m_packages.emplace("example", PackageInfo::Package{});
+
+  auto strict = base;
+  strict.m_packages.at("example").m_enable_strict_isolation = true;
+
+  EXPECT_NE(base.mangleForCacheKey(), strict.mangleForCacheKey());
 }
 
 // Checks that the cache key includes an empty implicit package family map.
@@ -64,7 +83,7 @@ TEST(PackageInfoTest, MangleIncludesEmptyImplicitFamilies) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"example":{"include_paths":[],"includes":[],"soft_includes":[]}},{}])"
+    R"([{"example":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"soft_includes":[]}},{}])"
   );
 }
 
@@ -79,7 +98,7 @@ TEST(PackageInfoTest, SeparatesImplicitFamiliesInCacheMangle) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"implicit_families":{"include_paths":[],"includes":[],"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","soft_includes":[]}}])"
+    R"([{"implicit_families":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","soft_includes":[]}}])"
   );
 }
 

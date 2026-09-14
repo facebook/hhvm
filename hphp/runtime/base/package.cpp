@@ -87,7 +87,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
                        Package {
                          convert(p.package.includes),
                          convert(p.package.soft_includes),
-                         convert(p.package.include_paths)
+                         convert(p.package.include_paths),
+                         p.package.enable_strict_isolation
                        });
     }
 
@@ -134,6 +135,17 @@ PackageInfo PackageInfo::defaults() {
   return {};
 }
 
+bool PackageInfo::isStrictIsolationPackage(const std::string& package) const {
+  auto const explicitPackage = packages().find(package);
+  if (explicitPackage != packages().end()) {
+    return explicitPackage->second.m_enable_strict_isolation;
+  }
+
+  auto const separator = package.find('.');
+  auto const family = package.substr(0, separator);
+  return implicitPackageFamilies().contains(family);
+}
+
 namespace {
 folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
   folly::dynamic result = folly::dynamic::array();
@@ -158,6 +170,7 @@ std::string PackageInfo::mangleForCacheKey() const {
     entry["include_paths"] = mangleVecForCacheKey(package.m_include_paths);
     entry["includes"] = mangleVecForCacheKey(package.m_includes);
     entry["soft_includes"] = mangleVecForCacheKey(package.m_soft_includes);
+    entry["enable_strict_isolation"] = package.m_enable_strict_isolation;
     packagesAndDeployments[name] = entry;
   }
 

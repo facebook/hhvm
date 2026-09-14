@@ -42,11 +42,13 @@ struct PackageInfo {
     hphp_vector_string_set m_includes;
     hphp_vector_string_set m_soft_includes;
     hphp_vector_string_set m_include_paths;
+    bool m_enable_strict_isolation{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_includes, stdltstr{})
         (m_soft_includes, stdltstr{})
         (m_include_paths, stdltstr{})
+        (m_enable_strict_isolation)
         ;
     }
   };
@@ -97,6 +99,7 @@ struct PackageInfo {
   const ImplicitPackageFamilyMap& implicitPackageFamilies() const {
     return m_implicitPackageFamilies;
   }
+  bool isStrictIsolationPackage(const std::string& package) const;
 
   PackageInfo(const PackageMap& packages,
               const DeploymentMap& deployments,

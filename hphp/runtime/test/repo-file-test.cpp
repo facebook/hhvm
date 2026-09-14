@@ -856,6 +856,39 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedPackageInfo) {
   );
 }
 
+// Checks that incremental builds reject changed strict-isolation metadata.
+TEST(RepoFileTest, IncrementalBuildRejectsChangedStrictIsolation) {
+  folly::test::TemporaryDirectory temp{"repo-file-incremental-package-info"};
+  auto const oldUseHHBBC = std::exchange(Cfg::Eval::UseHHBBC, false);
+  auto const oldEnableDecl = std::exchange(Cfg::Eval::EnableDecl, false);
+  SCOPE_EXIT {
+    Cfg::Eval::UseHHBBC = oldUseHHBBC;
+    Cfg::Eval::EnableDecl = oldEnableDecl;
+  };
+  auto const basePath = temp.path() / "base.hhbc";
+
+  PackageInfo basePackageInfo;
+  basePackageInfo.m_packages.emplace("example", PackageInfo::Package{});
+  {
+    RepoFileBuilder builder{basePath.string(), true};
+    finishRepo(builder, {}, 1, &basePackageInfo);
+  }
+
+  auto changedPackageInfo = basePackageInfo;
+  changedPackageInfo.m_packages.at("example").m_enable_strict_isolation = true;
+  EXPECT_THAT(
+    ([&] {
+      RepoFileData base{basePath.string()};
+      RepoFileBuilder builder{
+        (temp.path() / "incremental.hhbc").string(), true
+      };
+      finishRepo(builder, {}, 2, &changedPackageInfo, &base);
+    }),
+    ThrowsMessage<std::runtime_error>(
+      HasSubstr("base PackageInfo does not match the current build"))
+  );
+}
+
 // Checks that incremental builds reject changes to implicit family metadata.
 TEST(RepoFileTest, IncrementalBuildRejectsChangedImplicitPackageFamily) {
   folly::test::TemporaryDirectory temp{"repo-file-incremental-package-info"};
@@ -954,6 +987,7 @@ TEST(RepoFileTest, IncrementalBuildAcceptsEquivalentPackageInfo) {
   package.m_soft_includes.emplace("soft-alpha");
   package.m_include_paths.emplace("zeta/path");
   package.m_include_paths.emplace("alpha/path");
+  package.m_enable_strict_isolation = true;
   packageInfo.m_packages.emplace("example", std::move(package));
 
   PackageInfo::Deployment deployment;

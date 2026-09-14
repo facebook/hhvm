@@ -128,9 +128,11 @@ void test_vasm(size_t blockSize,
 }
 
 template<typename Lcodegen, typename Ltest>
-void test_cross_area_emission(Lcodegen lcodegen, Ltest ltest) {
+void test_cross_area_emission(Lcodegen lcodegen,
+                              Ltest ltest,
+                              size_t mainSize = kDefaultBlockSize) {
   test_vasm_areas(
-    kDefaultBlockSize,
+    mainSize,
     kDefaultBlockSize,
     lcodegen,
     [&] (uint8_t*, CodeBlock& main, CGMeta& meta) {
@@ -355,6 +357,72 @@ TEST(Vasm, ArmCrossAreaTestBranchRelocatesToVeneer) {
       vixl::Instruction::CastConst(main.toDestAddress(relocatedVeneer))
     );
   });
+}
+
+TEST(Vasm, ArmFarCrossAreaConditionalVeneersPreserveSourceBranches) {
+  constexpr size_t kMainSize = 2 * 1024 * 1024;
+  constexpr size_t kFillerNops =
+    1024 * 1024 / vixl::kInstructionSize + 1024;
+
+  test_cross_area_emission([] (Vunit& unit, Vout& v) {
+    auto compareBranch = v.makeBlock();
+    auto filler = compareBranch.makeBlock();
+    auto const takenLabel = unit.makeBlock(AreaIndex::Cold, 1);
+    Vout taken{unit, takenLabel};
+
+    v << jcc{
+      CC_E,
+      VregSF{RegSF{0}},
+      {compareBranch, takenLabel},
+      StringTag{}
+    };
+    compareBranch << cbzq{
+      Vreg64{Reg64{0}},
+      {filler, takenLabel}
+    };
+    for (size_t i = 0; i < kFillerNops; ++i) filler << nop{};
+    filler << ret{};
+    taken << ret{};
+  }, [] (CodeBlock& main, CGMeta& meta) {
+    ASSERT_EQ(meta.veneerAddrs.size(), 2);
+
+    auto source = vixl::Instruction::Cast(
+      main.toDestAddress(main.base())
+    );
+    auto veneerIt = meta.veneerAddrs.begin();
+    auto const checkAppendix = [&] (bool compareBranch) {
+      ASSERT_EQ(source->Mask(vixl::UnconditionalBranchMask), vixl::B);
+
+      auto veneer = vixl::Instruction::Cast(
+        main.toDestAddress(*veneerIt++)
+      );
+      auto appendix = veneer;
+      for (size_t i = 0; i < 3; ++i) {
+        appendix = appendix->GetNextInstruction();
+      }
+      EXPECT_EQ(source->ImmPCOffsetTarget(), appendix);
+
+      if (compareBranch) {
+        ASSERT_TRUE(appendix->IsCompareBranch());
+        auto const details = arm::getCompareAndBranchDetails(appendix);
+        EXPECT_FALSE(details.isCbnz);
+        EXPECT_EQ(details.reg.code(), vixl::x0.code());
+        EXPECT_EQ(details.reg.size(), vixl::x0.size());
+      } else {
+        ASSERT_TRUE(appendix->IsCondBranchImm());
+        EXPECT_EQ(appendix->ConditionBranch(), vixl::eq);
+      }
+      EXPECT_EQ(appendix->ImmPCOffsetTarget(), veneer);
+
+      auto const next = appendix->GetNextInstruction();
+      ASSERT_EQ(next->Mask(vixl::UnconditionalBranchMask), vixl::B);
+      EXPECT_EQ(next->ImmPCOffsetTarget(), source->GetNextInstruction());
+      source = source->GetNextInstruction();
+    };
+
+    checkAppendix(false);
+    checkAppendix(true);
+  }, kMainSize);
 }
 
 #endif

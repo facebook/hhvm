@@ -80,6 +80,7 @@ struct RelocationInfo {
     // the newly relocated range.
     decltype(addressImmediates) updatedAI;
     for (auto addrImm : ai) {
+      if (m_addressImmediatesInvalidToMap.contains(addrImm)) continue;
       if (TCA adjusted = adjustedAddressAfter(addrImm)) {
         updatedAI.insert(adjusted);
       } else if (TCA odd = adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
@@ -91,6 +92,16 @@ struct RelocationInfo {
   }
   bool isAddressImmediate(TCA ip) {
     return addressImmediates.count(ip);
+  }
+  /*
+   * Keep the marker for the original instruction, but do not transfer it to
+   * the instruction's mapped address in markAddressImmediates().
+   */
+  void markAddressImmediateInvalidToMap(TCA ip) {
+    m_addressImmediatesInvalidToMap.insert(ip);
+  }
+  bool isAddressImmediateInvalidToMap(TCA ip) const {
+    return m_addressImmediatesInvalidToMap.contains(ip);
   }
   void markSmashableRelocation(TCA ip) {
     m_smashableRelocations.insert(ip);
@@ -113,6 +124,7 @@ struct RelocationInfo {
    */
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
   std::set<TCA> addressImmediates;
+  std::set<TCA> m_addressImmediatesInvalidToMap;
   std::set<TCA> m_smashableRelocations;
 };
 

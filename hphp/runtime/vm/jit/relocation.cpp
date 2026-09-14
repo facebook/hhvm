@@ -246,6 +246,7 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
 
   decltype(meta.addressImmediates) updatedAI;
   for (auto addrImm : meta.addressImmediates) {
+    if (rel.isAddressImmediateInvalidToMap(addrImm)) continue;
     if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
       updatedAI.insert(adjusted);
     } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {

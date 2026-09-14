@@ -274,6 +274,30 @@ uint32_t invertedCompareBranchEncoding(bool is64, bool isCbnz) {
   return compareBranchEncoding(is64, !isCbnz);
 }
 
+void expectFarCondBranchMappings(RelocationInfo& rel,
+                                 TCA srcHead,
+                                 TCA srcFarJump,
+                                 TCA srcAfter,
+                                 TCA destHead,
+                                 TCA destFarJump,
+                                 TCA destAfter) {
+  EXPECT_EQ(rel.adjustedAddressAfter(srcHead), destHead);
+  EXPECT_EQ(rel.adjustedAddressAfter(srcFarJump), destFarJump);
+  EXPECT_EQ(rel.adjustedAddressAfter(srcAfter), destAfter);
+}
+
+void expectRemovedFarJumpAddressImmediate(
+  RelocationInfo& rel,
+  TCA srcFarJump,
+  TCA destTarget,
+  bool targetHasIndependentMarker = false) {
+  EXPECT_TRUE(rel.isAddressImmediate(srcFarJump));
+  EXPECT_EQ(
+    rel.isAddressImmediate(destTarget),
+    targetHasIndependentMarker
+  );
+}
+
 template<class EmitBranch>
 TCA emitFarConditionalBranchSequence(MacroAssembler& a,
                                      CodeBlock& main,
@@ -338,6 +362,12 @@ void emitNonNopPaddingPastCompareBranchRange(MacroAssembler& a) {
   for (auto i = 0; i < kPaddingInstrs; ++i) {
     a.brk(0);
   }
+}
+
+void emitUnrelatedFallthroughBranch(MacroAssembler& a) {
+  // Keep a B adjacent to one-instruction rewrites so it cannot be mistaken for
+  // the unconditional branch produced by a two-instruction rewrite.
+  a.b(1);
 }
 
 /*
@@ -409,22 +439,11 @@ TEST(Relocation, RelocateFarCbnzqToCbzqVeneer) {
   checkFarCompareBranchVeneer(x0, true, true);    // 64-bit cbnzq
 }
 
-/*
- * Relocate an emitted far compare-branch sequence whose target becomes near in
- * the relocated block, and verify optimizeFarCondBranch shrinks it back to the
- * original direct compare-branch.
- *
- *     cb!op $rt, fallthrough
- *     adrp/ldr/br target
- *   fallthrough:
- *
- * to
- *
- *     cbop $rt, target
- */
-void checkOptimizeFarCompareBranchToDirect(const Register& rt,
-                                           bool is64,
-                                           bool isCbnz) {
+template<class EmitBranch, class CheckBranch>
+void checkOptimizeFarConditionalBranchToDirect(EmitBranch emitBranch,
+                                               CheckBranch checkBranch,
+                                               bool addressImmediateTarget =
+                                                 false) {
   CodeBlock main;
   DataBlock data;
   auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
@@ -436,10 +455,12 @@ void checkOptimizeFarCompareBranchToDirect(const Register& rt,
   auto const start = main.frontier();
   MacroAssembler a { main };
 
-  auto const farJump = emitFarCompareBranchSequence(a, main, meta, rt, isCbnz);
-  a.brk(0);
+  auto const farJump = emitBranch(a, main, meta);
+  auto const fallthrough = main.frontier();
+  emitUnrelatedFallthroughBranch(a);
   auto const target = main.frontier();
-  a.brk(1);
+  if (addressImmediateTarget) meta.addressImmediates.insert(target);
+  a.b(1);
 
   for (auto i = 0; i < (1024 * 1024) / kInstructionSize + 1024; ++i) {
     a.nop();
@@ -455,16 +476,79 @@ void checkOptimizeFarCompareBranchToDirect(const Register& rt,
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
   relocate(rel, main, start, end, main, meta, ai);
 
-  expectAddressImmediatesAfterRelocation(rel, meta, {end});
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedTarget, nullptr);
+  expectRemovedFarJumpAddressImmediate(
+    rel, farJump, relocatedTarget, addressImmediateTarget
+  );
+  if (addressImmediateTarget) {
+    expectAddressImmediatesAfterRelocation(
+      rel, meta, {end, relocatedTarget}
+    );
+  } else {
+    expectAddressImmediatesAfterRelocation(rel, meta, {end});
+  }
 
-  ASSERT_TRUE(relocated->IsCompareBranch());
-  EXPECT_EQ(relocated->Mask(CompareBranchMask),
-            compareBranchEncoding(is64, isCbnz));
-  EXPECT_EQ(relocated->GetSixtyFourBits(), is64 ? 1 : 0);
-  EXPECT_EQ(relocated->Rt(), rt.code());
+  ASSERT_TRUE(checkBranch(relocated));
+  ASSERT_TRUE(relocated->GetNextInstruction()->IsUncondBranchImm());
   EXPECT_EQ(
     relocated->ImmPCOffsetTarget(),
-    Instruction::CastConst(main.toDestAddress(rel.adjustedAddressAfter(target)))
+    Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+  expectFarCondBranchMappings(
+    rel,
+    start,
+    farJump,
+    fallthrough,
+    end,
+    relocatedTarget,
+    end + kInstructionSize
+  );
+}
+
+/*
+ * Covers a far compare-branch whose target becomes near. The conditional head
+ * shrinks to the original direct compare-branch. The old far-jump entry maps
+ * to the relocated semantic target rather than the conditional instruction.
+ */
+void checkOptimizeFarCompareBranchToDirect(const Register& rt,
+                                           bool is64,
+                                           bool isCbnz) {
+  checkOptimizeFarConditionalBranchToDirect(
+    [&] (MacroAssembler& a, CodeBlock& main, CGMeta& meta) {
+      return emitFarCompareBranchSequence(a, main, meta, rt, isCbnz);
+    },
+    [&] (const Instruction* relocated) {
+      if (!relocated->IsCompareBranch()) return false;
+      EXPECT_EQ(relocated->Mask(CompareBranchMask),
+                compareBranchEncoding(is64, isCbnz));
+      EXPECT_EQ(relocated->GetSixtyFourBits(), is64 ? 1 : 0);
+      EXPECT_EQ(relocated->Rt(), rt.code());
+      return true;
+    }
+  );
+}
+
+/*
+ * Covers the crash shape: after a far B.cond becomes a direct B.cond, the old
+ * far-jump entry maps to the shortened branch's semantic target. A veneer
+ * entering there therefore does not depend on NZCV.
+ */
+void checkOptimizeFarBccToDirect(Condition farCond,
+                                 bool addressImmediateTarget = false) {
+  checkOptimizeFarConditionalBranchToDirect(
+    [&] (MacroAssembler& a, CodeBlock& main, CGMeta& meta) {
+      return emitFarBccSequence(a, main, meta, farCond);
+    },
+    [&] (const Instruction* relocated) {
+      if (!relocated->IsCondBranchImm()) return false;
+      EXPECT_EQ(
+        static_cast<Condition>(relocated->ConditionBranch()),
+        InvertCondition(farCond)
+      );
+      return true;
+    },
+    addressImmediateTarget
   );
 }
 
@@ -502,6 +586,7 @@ void checkOptimizeFarCompareBranchToCompareBranchAndB(
   MacroAssembler a { main };
 
   auto const farJump = emitFarCompareBranchSequence(a, main, meta, rt, isCbnz);
+  auto const fallthrough = main.frontier();
   emitNonNopPaddingPastCompareBranchRange(a);
   auto const target = main.frontier();
   a.brk(1);
@@ -516,10 +601,6 @@ void checkOptimizeFarCompareBranchToCompareBranchAndB(
   AreaIndex ai = AreaIndex::Main;
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
   relocate(rel, main, start, end, main, meta, ai);
-
-  expectAddressImmediatesAfterRelocation(
-    rel, meta, {end, end + kInstructionSize}
-  );
 
   ASSERT_TRUE(relocated->IsCompareBranch());
   EXPECT_EQ(
@@ -536,9 +617,20 @@ void checkOptimizeFarCompareBranchToCompareBranchAndB(
   EXPECT_EQ(branch->Mask(UnconditionalBranchMask), B);
   auto const relocatedTarget = rel.adjustedAddressAfter(target);
   ASSERT_NE(relocatedTarget, nullptr);
+  expectRemovedFarJumpAddressImmediate(rel, farJump, relocatedTarget);
+  expectAddressImmediatesAfterRelocation(rel, meta, {end});
   EXPECT_EQ(
     branch->GetImmPCOffsetTarget(),
     Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+  expectFarCondBranchMappings(
+    rel,
+    start,
+    farJump,
+    fallthrough,
+    end,
+    relocatedTarget,
+    end + 2 * kInstructionSize
   );
 }
 
@@ -562,6 +654,7 @@ void checkOptimizeFarBccToBccAndB(Condition cond) {
   MacroAssembler a { main };
 
   auto const farJump = emitFarBccSequence(a, main, meta, cond);
+  auto const fallthrough = main.frontier();
   emitNonNopPaddingPastCompareBranchRange(a);
   auto const target = main.frontier();
   a.brk(1);
@@ -577,10 +670,6 @@ void checkOptimizeFarBccToBccAndB(Condition cond) {
   auto const relocated = Instruction::Cast(main.toDestAddress(end));
   relocate(rel, main, start, end, main, meta, ai);
 
-  expectAddressImmediatesAfterRelocation(
-    rel, meta, {end, end + kInstructionSize}
-  );
-
   ASSERT_TRUE(relocated->IsCondBranchImm());
   EXPECT_EQ(static_cast<Condition>(relocated->ConditionBranch()), cond);
 
@@ -591,9 +680,77 @@ void checkOptimizeFarBccToBccAndB(Condition cond) {
   EXPECT_EQ(branch->Mask(UnconditionalBranchMask), B);
   auto const relocatedTarget = rel.adjustedAddressAfter(target);
   ASSERT_NE(relocatedTarget, nullptr);
+  expectRemovedFarJumpAddressImmediate(rel, farJump, relocatedTarget);
+  expectAddressImmediatesAfterRelocation(rel, meta, {end});
   EXPECT_EQ(
     branch->GetImmPCOffsetTarget(),
     Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+  expectFarCondBranchMappings(
+    rel,
+    start,
+    farJump,
+    fallthrough,
+    end,
+    relocatedTarget,
+    end + 2 * kInstructionSize
+  );
+}
+
+template<class EmitBranch, class CheckBranch>
+void checkPreserveFarConditionalBranch(EmitBranch emitBranch,
+                                       CheckBranch checkBranch) {
+  auto const old = Cfg::Jit::ArmDisableAdrpLdrShortening;
+  Cfg::Jit::ArmDisableAdrpLdrShortening = true;
+  SCOPE_EXIT { Cfg::Jit::ArmDisableAdrpLdrShortening = old; };
+
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4096, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+  auto const start = main.frontier();
+  meta.smashableLocations.insert(start);
+
+  MacroAssembler a { main };
+  auto const farJump = emitBranch(a, main, meta);
+  meta.veneerAddrs.insert(farJump);
+  auto const fallthrough = main.frontier();
+  emitUnrelatedFallthroughBranch(a);
+  auto const target = main.frontier();
+  a.brk(1);
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, ai);
+
+  auto const relocatedFarJump = end + kInstructionSize;
+  auto const relocatedFallthrough =
+    relocatedFarJump + (fallthrough - farJump);
+  expectAddressImmediatesAfterRelocation(
+    rel, meta, {end, relocatedFarJump}
+  );
+  EXPECT_TRUE(checkBranch(relocated));
+  EXPECT_TRUE(
+    LoadLiteral::at(
+      Instruction::Cast(main.toDestAddress(relocatedFarJump))
+    ).isFar()
+  );
+  expectFarCondBranchMappings(
+    rel,
+    start,
+    farJump,
+    fallthrough,
+    end,
+    relocatedFarJump,
+    relocatedFallthrough
   );
 }
 
@@ -611,6 +768,77 @@ TEST(Relocation, OptimizeFarCbnzlToDirectCbnzl) {
 
 TEST(Relocation, OptimizeFarCbnzqToDirectCbnzq) {
   checkOptimizeFarCompareBranchToDirect(x0, true, true);
+}
+
+TEST(Relocation, OptimizeFarBccDirectMapsFarJumpEntryToSemanticTarget) {
+  checkOptimizeFarBccToDirect(ne);
+}
+
+TEST(Relocation, PreserveIndependentTargetAddressImmediate) {
+  checkOptimizeFarBccToDirect(ne, true);
+}
+
+/*
+ * A far Bcc whose semantic target is itself a literal load. Relocation removes
+ * the far jump and maps its source address to that target. The internal-ref
+ * pass walks every source address in the range, so it reaches the removed
+ * ADRP; it must not then adjust the unrelated load at the target using the far
+ * jump's address-immediate marker. The target's own metadata says its literal
+ * is not an address, so the literal must survive relocation untouched.
+ */
+TEST(Relocation, RemovedFarJumpDoesNotPatchLiteralLoadAtTarget) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+
+  auto const start = main.frontier();
+  MacroAssembler a { main };
+
+  auto const farJump = emitFarBccSequence(a, main, meta, ne);
+  emitUnrelatedFallthroughBranch(a);
+
+  // The branch's semantic target is a 32-bit literal load whose constant only
+  // looks like a relocatable address. It is deliberately absent from
+  // meta.addressImmediates. Relocation requires the far ADRP/LDR form.
+  auto const target = main.frontier();
+  a.adrp(x0, int64_t{0});
+  a.ldr(w0, MemOperand(x0, 0));
+  auto const decoy = main.frontier();
+  main.dword(makeTarget32(start));
+  patchFarJumpLiteral(main, target, decoy);
+
+  for (auto i = 0; i < (1024 * 1024) / kInstructionSize + 1024; ++i) {
+    a.nop();
+  }
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+
+  patchFarJumpLiteral(main, farJump, literal);
+
+  auto const decoyValueBefore =
+    *reinterpret_cast<uint32_t*>(main.toDestAddress(decoy));
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  relocate(rel, main, start, end, main, meta, ai);
+
+  // Read the relocated literal back through the relocated load, the same way
+  // adjustLiteralLoadImmediate() would reach it.
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedTarget, nullptr);
+  auto const relocatedLoad = LoadLiteral::at(
+    Instruction::Cast(main.toDestAddress(relocatedTarget))
+  );
+  ASSERT_TRUE(relocatedLoad);
+  EXPECT_EQ(
+    *reinterpret_cast<uint32_t*>(relocatedLoad.literalAddress()),
+    decoyValueBefore
+  );
 }
 
 TEST(Relocation, OptimizeFarCbzlToCbzlBWithForwardTarget) {
@@ -633,10 +861,33 @@ TEST(Relocation, OptimizeFarBccToBccBWithForwardTarget) {
   checkOptimizeFarBccToBccAndB(lt);
 }
 
+TEST(Relocation, PreserveFarBccMapsFarJumpToRelocatedFarJump) {
+  checkPreserveFarConditionalBranch(
+    [&] (MacroAssembler& a, CodeBlock& main, CGMeta& meta) {
+      return emitFarBccSequence(a, main, meta, ne);
+    },
+    [] (const Instruction* relocated) {
+      return relocated->IsCondBranchImm();
+    }
+  );
+}
+
+TEST(Relocation, PreserveFarCbzMapsFarJumpToRelocatedFarJump) {
+  checkPreserveFarConditionalBranch(
+    [&] (MacroAssembler& a, CodeBlock& main, CGMeta& meta) {
+      return emitFarCompareBranchSequence(a, main, meta, x0, false);
+    },
+    [] (const Instruction* relocated) {
+      return relocated->IsCompareBranch();
+    }
+  );
+}
+
 void checkRelocateSingleBitTestFarJcc(vixl::Register reg,
                                       uint8_t bit,
                                       bool isTbnz,
-                                      bool smashable = false) {
+                                      bool smashable = false,
+                                      bool testBranchAndB = false) {
   CodeBlock main;
   DataBlock data;
   auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
@@ -657,7 +908,10 @@ void checkRelocateSingleBitTestFarJcc(vixl::Register reg,
     meta,
     isTbnz ? eq : ne
   );
-  a.brk(0);
+  if (smashable) meta.veneerAddrs.insert(farJump);
+  auto const fallthrough = main.frontier();
+  emitUnrelatedFallthroughBranch(a);
+  if (testBranchAndB) emitNonNopPaddingPastCompareBranchRange(a);
   auto const target = main.frontier();
   a.brk(1);
 
@@ -675,40 +929,89 @@ void checkRelocateSingleBitTestFarJcc(vixl::Register reg,
   relocate(rel, main, start, end, main, meta, ai);
 
   if (smashable) {
+    auto const relocatedFarJump = end + 2 * kInstructionSize;
+    auto const relocatedFallthrough =
+      relocatedFarJump + (fallthrough - farJump);
     expectAddressImmediatesAfterRelocation(
       rel,
       meta,
-      {end + kInstructionSize, end + 2 * kInstructionSize}
+      {end + kInstructionSize, relocatedFarJump}
     );
 
     ASSERT_TRUE(relocated->IsLogicalImmediate());
     EXPECT_EQ(relocated->ImmLogical(), uint64_t{1} << bit);
 
-    auto const branch = relocated->GetNextInstruction();
-    ASSERT_TRUE(branch->IsCondBranchImm());
+    auto const relocatedBranch = relocated->GetNextInstruction();
+    ASSERT_TRUE(relocatedBranch->IsCondBranchImm());
     EXPECT_EQ(
-      static_cast<Condition>(branch->ConditionBranch()),
+      static_cast<Condition>(relocatedBranch->ConditionBranch()),
       isTbnz ? eq : ne
+    );
+    EXPECT_TRUE(
+      LoadLiteral::at(
+        Instruction::Cast(main.toDestAddress(relocatedFarJump))
+      ).isFar()
+    );
+    EXPECT_EQ(rel.adjustedAddressAfter(start), end);
+    EXPECT_EQ(
+      rel.adjustedAddressAfter(branch),
+      end + kInstructionSize
+    );
+    EXPECT_EQ(rel.adjustedAddressAfter(farJump), relocatedFarJump);
+    EXPECT_EQ(
+      rel.adjustedAddressAfter(fallthrough),
+      relocatedFallthrough
     );
     return;
   }
 
-  EXPECT_TRUE(rel.isAddressImmediate(end));
-  expectAddressImmediatesAfterRelocation(rel, meta, {end});
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedTarget, nullptr);
+
+  EXPECT_EQ(rel.adjustedAddressAfter(start), end);
+  EXPECT_EQ(rel.adjustedAddressAfter(branch), nullptr);
 
   ASSERT_TRUE(relocated->IsTestBranch());
+  ASSERT_TRUE(relocated->GetNextInstruction()->IsUncondBranchImm());
   auto const details = getTestAndBranchDetails(relocated);
   EXPECT_EQ(details.bit, bit);
-  EXPECT_EQ(details.isTbnz, isTbnz);
   EXPECT_EQ(details.reg.code(), reg.code());
   EXPECT_EQ(details.reg.size(), bit < 32 ? kWRegSize : kXRegSize);
-  EXPECT_EQ(
-    relocated->ImmPCOffsetTarget(),
-    Instruction::CastConst(main.toDestAddress(rel.adjustedAddressAfter(target)))
-  );
+  expectRemovedFarJumpAddressImmediate(rel, farJump, relocatedTarget);
+  expectAddressImmediatesAfterRelocation(rel, meta, {branch});
+
+  if (testBranchAndB) {
+    auto const relocatedFallthrough = end + 2 * kInstructionSize;
+    EXPECT_EQ(details.isTbnz, !isTbnz);
+    EXPECT_EQ(
+      relocated->ImmPCOffsetTarget(),
+      Instruction::CastConst(main.toDestAddress(relocatedFallthrough))
+    );
+    auto const directBranch = relocated->GetNextInstruction();
+    EXPECT_EQ(
+      directBranch->ImmPCOffsetTarget(),
+      Instruction::CastConst(main.toDestAddress(relocatedTarget))
+    );
+    EXPECT_EQ(rel.adjustedAddressAfter(farJump), relocatedTarget);
+    EXPECT_EQ(
+      rel.adjustedAddressAfter(fallthrough),
+      relocatedFallthrough
+    );
+  } else {
+    EXPECT_EQ(details.isTbnz, isTbnz);
+    EXPECT_EQ(
+      relocated->ImmPCOffsetTarget(),
+      Instruction::CastConst(main.toDestAddress(relocatedTarget))
+    );
+    EXPECT_EQ(rel.adjustedAddressAfter(farJump), relocatedTarget);
+    EXPECT_EQ(
+      rel.adjustedAddressAfter(fallthrough),
+      end + kInstructionSize
+    );
+  }
 }
 
-TEST(Relocation, OptimizeSingleBitTestFarJccMapsAddressImmediatesToTbzq) {
+TEST(Relocation, OptimizeSingleBitTestFarJccPreservesFarJumpEntry) {
   checkRelocateSingleBitTestFarJcc(x0, 63, false);
 }
 
@@ -724,7 +1027,18 @@ TEST(Relocation, OptimizeSingleBitTestFarJccToTbnzl) {
   checkRelocateSingleBitTestFarJcc(w0, 7, true);
 }
 
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbnzB) {
+  checkRelocateSingleBitTestFarJcc(x0, 63, false, false, true);
+}
+
+TEST(Relocation, OptimizeSingleBitTestFarJccToTbzB) {
+  checkRelocateSingleBitTestFarJcc(w0, 31, true, false, true);
+}
+
 TEST(Relocation, PreserveSmashableSingleBitTestFarJcc) {
+  auto const old = Cfg::Jit::ArmDisableAdrpLdrShortening;
+  Cfg::Jit::ArmDisableAdrpLdrShortening = true;
+  SCOPE_EXIT { Cfg::Jit::ArmDisableAdrpLdrShortening = old; };
   checkRelocateSingleBitTestFarJcc(x0, 63, false, true);
 }
 
@@ -758,12 +1072,20 @@ void checkRelocateSingleBitTestNearJcc(size_t padding, Check check) {
 
   auto const adjustedTarget = rel.adjustedAddressAfter(target);
   ASSERT_NE(adjustedTarget, nullptr);
+  if (relocated->IsTestBranch()) {
+    EXPECT_EQ(rel.adjustedAddressAfter(branch), nullptr);
+  } else {
+    EXPECT_EQ(
+      rel.adjustedAddressAfter(branch),
+      end + kInstructionSize
+    );
+  }
   check(
     relocated,
     Instruction::CastConst(main.toDestAddress(adjustedTarget))
   );
   auto const expectedBranch = relocated->IsTestBranch()
-    ? end
+    ? branch
     : end + kInstructionSize;
   expectAddressImmediatesAfterRelocation(rel, meta, {expectedBranch});
   EXPECT_TRUE(meta.testBranches.empty());
@@ -887,7 +1209,11 @@ TEST(Relocation, RelocateMarkedTestFarJccRetriesGrowingInternalTarget) {
   );
   auto const relocatedBranchAddr = rel.adjustedAddressAfter(branch);
   ASSERT_NE(relocatedBranchAddr, nullptr);
-  expectAddressImmediatesAfterRelocation(rel, meta, {relocatedBranchAddr});
+  EXPECT_EQ(rel.adjustedAddressAfter(farJump), relocatedTarget);
+  expectRemovedFarJumpAddressImmediate(rel, farJump, relocatedTarget);
+  expectAddressImmediatesAfterRelocation(
+    rel, meta, {relocatedBranchAddr}
+  );
 }
 
 /*

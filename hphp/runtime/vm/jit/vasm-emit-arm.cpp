@@ -787,9 +787,6 @@ void Vgen::emitVeneers(Venv& env) {
         //      B APPENDIX
         //   NEXT:
 
-        // Turn the original conditional branch into an unconditional one.
-        at.b(offset >> kInstructionSizeLog2);
-
         // Emit appendix.
         auto const appendix = cb->frontier();
         int imm19 = -veneerInstrCount;
@@ -808,6 +805,9 @@ void Vgen::emitVeneers(Venv& env) {
           (vaddr + veneerSize + kInstructionSize); // addr of "B NEXT"
         always_assert(is_int28(nextOffset));
         av.b(nextOffset >> kInstructionSizeLog2);
+
+        // Turn the original conditional branch into an unconditional one.
+        at.b(offset >> kInstructionSizeLog2);
 
         // Replace veneer.source with appendix in the relevant metadata.
         meta.smashableLocations.erase(veneer.source);

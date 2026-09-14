@@ -73,6 +73,10 @@ struct Patch {
   Instruction* src;
 };
 using PatchList = std::vector<Patch>;
+struct FarCondBranchRewrite {
+  TCA srcFarJump;
+  TCA destAddrToRewrite;
+};
 using InstrSet = jit::hash_set<const Instruction*>;
 struct JmpOutOfRange : std::exception {};
 
@@ -128,6 +132,8 @@ struct Env {
    * relocated after they were rewritten.
    */
   PatchList rewriteAdjust;
+
+  std::vector<FarCondBranchRewrite> farCondBranchRewrites;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -594,35 +600,42 @@ void recordCondBranchRewrite(Env& env,
 
 void recordFarCondBranchRewrite(Env& env,
                                 const FarCondBranchDetails& branch,
+                                TCA srcFarJump,
                                 Instruction* src,
                                 TCA destAddrToRewrite,
                                 size_t srcCount) {
   env.literalsToRemove.insert(Instruction::Cast(branch.literal));
+  env.farCondBranchRewrites.push_back({srcFarJump, destAddrToRewrite});
   recordCondBranchRewrite(
     env, branch.branch, src, destAddrToRewrite, srcCount
   );
 }
 
-void recordRewrittenAddressImmediates(Env& env,
-                                      TCA srcAddr,
-                                      size_t srcCount,
-                                      TCA destAddr) {
-  auto const rewrittenEnd =
-    srcAddr + (srcCount << kInstructionSizeLog2);
-  auto const srcEnd = rewrittenEnd < env.end ? rewrittenEnd : env.end;
-  for (auto addr = srcAddr + kInstructionSize;
-       addr < srcEnd;
-       addr += kInstructionSize) {
-    if (env.meta.addressImmediates.contains(addr)) {
-      env.rel.recordAddress(addr, destAddr, 0);
-    }
+/*
+ * destAddrToRewrite identifies the instruction carrying the far jump's target.
+ * Once forward branches have been patched, decode that instruction's final
+ * target and map the removed far jump directly to it. This preserves the far
+ * jump's unconditional semantics for both one- and two-instruction rewrites.
+ */
+void recordRewrittenFarCondBranchAddress(Env& env) {
+  for (auto const& rewrite : env.farCondBranchRewrites) {
+    auto const dest = Instruction::Cast(
+      env.destBlock.toDestAddress(rewrite.destAddrToRewrite)
+    );
+    auto const destFarJump = reinterpret_cast<TCA>(
+      dest->GetImmPCOffsetTarget(
+        Instruction::Cast(rewrite.destAddrToRewrite)
+      )
+    );
+    env.rel.recordAddress(rewrite.srcFarJump, destFarJump, 0);
   }
 }
 
 /*
  * Shrink a metadata-marked single-bit TST followed by a conditional branch to
- * TBZ/TBNZ when the final target is in range. The branch may be either direct
- * or the head of the standard far-JCC sequence.
+ * TBZ/TBNZ when the final target is in range. If a far-JCC target only fits an
+ * unconditional branch, use an inverted TBZ/TBNZ to skip a following B. The
+ * branch may be either direct or the head of the standard far-JCC sequence.
  */
 bool optimizeTestBranch(Env& env, TCA srcAddr, TCA destAddr,
                         size_t& srcCount, size_t& destCount) {
@@ -670,24 +683,45 @@ bool optimizeTestBranch(Env& env, TCA srcAddr, TCA destAddr,
   }
 
   if (cond != eq && cond != ne) return false;
-  if (!is_int14(details.imm)) return false;
+  auto const direct = is_int14(details.imm);
+  if (!direct && (!far || !is_int26(details.imm - 1))) return false;
 
   vixl::Assembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
-  if (cond == eq) {
-    a.tbz(testDetails.reg, testDetails.bit, details.imm);
+  auto destAddrToRewrite = destAddr;
+  if (direct) {
+    if (cond == eq) {
+      a.tbz(testDetails.reg, testDetails.bit, details.imm);
+    } else {
+      a.tbnz(testDetails.reg, testDetails.bit, details.imm);
+    }
   } else {
-    a.tbnz(testDetails.reg, testDetails.bit, details.imm);
+    constexpr auto nextImm = 2;
+    if (cond == eq) {
+      a.tbnz(testDetails.reg, testDetails.bit, nextImm);
+    } else {
+      a.tbz(testDetails.reg, testDetails.bit, nextImm);
+    }
+    a.b(details.imm - 1);
+    destAddrToRewrite += kInstructionSize;
+    destCount++;
   }
 
   srcCount = far ? kFarJccInstrs + 1 : 2;
-  destCount = 1;
   if (far) {
-    recordFarCondBranchRewrite(env, farDetails, test, destAddr, srcCount);
+    recordFarCondBranchRewrite(
+      env,
+      farDetails,
+      branchAddr + kInstructionSize,
+      test,
+      destAddrToRewrite,
+      srcCount
+    );
   } else {
-    recordCondBranchRewrite(env, details, test, destAddr, srcCount);
+    recordCondBranchRewrite(
+      env, details, test, destAddrToRewrite, srcCount
+    );
   }
-  recordRewrittenAddressImmediates(env, srcAddr, srcCount, destAddr);
   return true;
 }
 
@@ -787,9 +821,13 @@ bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
   }
 
   srcCount = kFarJccInstrs;
-  recordFarCondBranchRewrite(env, far, src, destAddrToRewrite, srcCount);
-  recordRewrittenAddressImmediates(
-    env, srcAddr, srcCount, destAddrToRewrite
+  recordFarCondBranchRewrite(
+    env,
+    far,
+    srcAddr + kInstructionSize,
+    src,
+    destAddrToRewrite,
+    srcCount
   );
   FTRACE(3,
          "Relocated and optimized a far JCC at src {} with target {} to {}.\n",
@@ -1710,6 +1748,20 @@ size_t relocateImpl(Env& env) {
     }
     if (!ok) {
       throw JmpOutOfRange();
+    }
+    /*
+     * Must run after the internal-ref pass: that pass resolves every source
+     * address and would follow this mapping into a literal load at the target.
+     */
+    recordRewrittenFarCondBranchAddress(env);
+
+    /*
+     * Retain each removed far jump's address-immediate marker for adjusting
+     * the original thread-local code, but do not keep it in relocated metadata
+     * or let its semantic mapping mark the taken target.
+     */
+    for (auto const& rewrite : env.farCondBranchRewrites) {
+      env.rel.markAddressImmediateInvalidToMap(rewrite.srcFarJump);
     }
     env.rel.markAddressImmediates(env.meta.addressImmediates);
   } catch (...) {

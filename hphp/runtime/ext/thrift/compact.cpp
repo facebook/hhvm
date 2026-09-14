@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/tv-variant.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -373,13 +374,20 @@ struct CompactWriter {
 
         auto const& property = prop[slot];
         auto const index = cls.propSlotToIndex(slot);
-        Variant fieldVal;
+        Variant fieldOwner;
+        TypedValue fieldTv;
+        auto const setOwnedValue = [&](Variant value) {
+          fieldOwner = std::move(value);
+          fieldTv = *fieldOwner.asTypedValue();
+        };
         if (field.isWrapped) {
-          fieldVal = getThriftType(obj, StrNR(field.name));
+          setOwnedValue(getThriftType(obj, StrNR(field.name)));
         } else {
-          fieldVal = VarNR{objProps->at(index).tv()};
+          // Deliberately borrow the property without changing its refcount.
+          fieldTv = objProps->at(index).tv();
         }
 
+        auto const& fieldVal = tvAsCVarRef(fieldTv);
         if (fieldVal.isNull()) {
           if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
               (property.attrs & AttrLateInit)) {
@@ -390,10 +398,10 @@ struct CompactWriter {
 
         auto const fieldType = field.type;
         if (field.isTypeWrapped && fieldVal.isObject()) {
-          fieldVal = getThriftField(fieldVal.toObject());
+          setOwnedValue(getThriftField(fieldVal.toObject()));
         }
         if (field.adapter) {
-          fieldVal = transformToThriftType(fieldVal, *field.adapter);
+          setOwnedValue(transformToThriftType(fieldVal, *field.adapter));
         }
         if (field.isTerse && is_value_type_default(fieldType, fieldVal)) {
           continue;

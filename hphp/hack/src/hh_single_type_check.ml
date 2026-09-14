@@ -2115,11 +2115,11 @@ let handle_mode
   | Find_refs pos ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in
-    let genv = ServerEnvBuild.default_genv in
+    let genv = Server_env_build.default_genv in
     let init_id = Random_id.short_string () in
     let env =
       {
-        (ServerEnvBuild.make_env
+        (Server_env_build.make_env
            ~init_id
            ~deps_mode:(Typing_deps_mode.InMemoryMode None)
            genv.config)
@@ -2159,11 +2159,11 @@ let handle_mode
   | Go_to_impl pos ->
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
-    let genv = ServerEnvBuild.default_genv in
+    let genv = Server_env_build.default_genv in
     let init_id = Random_id.short_string () in
     let env =
       {
-        (ServerEnvBuild.make_env
+        (Server_env_build.make_env
            ~init_id
            ~deps_mode:(Typing_deps_mode.InMemoryMode None)
            genv.ServerEnv.config)

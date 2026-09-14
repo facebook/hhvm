@@ -15,7 +15,7 @@
 (library
  (name server_env_build)
  (wrapped false)
- (modules serverEnvBuild)
+ (modules server_env_build)
  (libraries server_env server_revision_tracker dfind)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

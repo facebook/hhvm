@@ -196,7 +196,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
   let _ = harness in
   let init_id = Random_id.short_string () in
   let env =
-    ServerEnvBuild.make_env
+    Server_env_build.make_env
       ~init_id
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
       ServerConfig.default_config

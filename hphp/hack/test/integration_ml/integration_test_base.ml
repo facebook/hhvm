@@ -27,7 +27,7 @@ let tmp = "/tmp"
 
 let () = Folly.ensure_folly_init ()
 
-let server_config = ServerEnvBuild.default_genv.ServerEnv.config
+let server_config = Server_env_build.default_genv.ServerEnv.config
 
 let po =
   Parser_options.
@@ -50,7 +50,7 @@ let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options server_config po
 
 let genv =
-  ref { ServerEnvBuild.default_genv with ServerEnv.config = server_config }
+  ref { Server_env_build.default_genv with ServerEnv.config = server_config }
 
 let did_init = ref false
 
@@ -104,8 +104,9 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
   in
   let env =
     match custom_config with
-    | Some config -> ServerEnvBuild.make_env ~init_id ~deps_mode config
-    | None -> ServerEnvBuild.make_env ~init_id ~deps_mode !genv.ServerEnv.config
+    | Some config -> Server_env_build.make_env ~init_id ~deps_mode config
+    | None ->
+      Server_env_build.make_env ~init_id ~deps_mode !genv.ServerEnv.config
   in
   let hhi_file_list =
     List.map hhi_files ~f:(fun (fn, _) ->

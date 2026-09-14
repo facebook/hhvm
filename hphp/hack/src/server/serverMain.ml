@@ -1338,7 +1338,7 @@ let setup_server
       local_config
   in
   let env =
-    ServerEnvBuild.make_env config ~init_id ~deps_mode:(get_deps_mode options)
+    Server_env_build.make_env config ~init_id ~deps_mode:(get_deps_mode options)
   in
 
   (workers, env)
@@ -1369,7 +1369,7 @@ let run_once options config local_config =
       ~informant_managed:false
       ~monitor_pid:None
   in
-  let genv = ServerEnvBuild.make_genv options config local_config workers in
+  let genv = Server_env_build.make_genv options config local_config workers in
 
   (* The type-checking happens here *)
   let env = program_init genv env in
@@ -1425,7 +1425,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       ~informant_managed
       ~monitor_pid:(Some monitor_pid)
   in
-  let genv = ServerEnvBuild.make_genv options config local_config workers in
+  let genv = Server_env_build.make_genv options config local_config workers in
 
   Hack_event_logger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   log_pid_cgroup ();

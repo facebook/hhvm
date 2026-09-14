@@ -38,27 +38,15 @@ let text_source_to_filename = function
 
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
-let rec guess_root config start recursion_limit =
-  if Path.equal start (Path.parent start) then
-    None
-  (* Reach fs root, nothing to do. *)
-  else if Wwwroot.is_www_directory ~config start then
-    Some start
-  else if recursion_limit <= 0 then
-    None
-  else
-    guess_root config (Path.parent start) (recursion_limit - 1)
-
 let get_www_root_for_diff () =
   eprintf "No root specified, trying to guess one\n";
-  let config = ".hhconfig" in
   let start_path = Path.make "." in
   let root =
-    match guess_root config start_path 50 with
+    match Wwwroot.guess_root start_path with
     | None -> start_path
     | Some r -> r
   in
-  Wwwroot.assert_www_directory ~config root;
+  Wwwroot.assert_www_directory root;
   eprintf "Guessed root: %a\n%!" Path.output root;
   root
 
@@ -71,7 +59,7 @@ let get_www_root_for_format files =
      * error during validation *)
     | hd :: _ -> Path.make hd |> Path.dirname
   in
-  match guess_root ".hhconfig" start_path 50 with
+  match Wwwroot.guess_root start_path with
   | Some p -> p
   | None -> cur
 

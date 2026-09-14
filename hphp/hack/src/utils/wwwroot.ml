@@ -38,8 +38,7 @@ let assert_www_directory ?(config = ".hhconfig") (path : Path.t) : unit =
     Printf.eprintf "Error: %s\n%!" message;
     exit 1
 
-(** Traverse parent directories until we find a directory containing .hhconfig *)
-let rec guess_root config start ~recursion_limit : Path.t option =
+let rec guess_root_with_limit config start ~recursion_limit : Path.t option =
   if not (Path.file_exists start) then
     None
   else if Path.equal start (Path.dirname start) then
@@ -50,7 +49,13 @@ let rec guess_root config start ~recursion_limit : Path.t option =
   else if recursion_limit <= 0 then
     None
   else
-    guess_root config (Path.dirname start) ~recursion_limit:(recursion_limit - 1)
+    guess_root_with_limit
+      config
+      (Path.dirname start)
+      ~recursion_limit:(recursion_limit - 1)
+
+let guess_root (start : Path.t) : Path.t option =
+  guess_root_with_limit ".hhconfig" start ~recursion_limit:50
 
 let interpret_command_line_root_parameter
     ?(config = ".hhconfig") (paths : string list) : (Path.t, string) result =
@@ -63,7 +68,7 @@ let interpret_command_line_root_parameter
   in
   let start_path = Path.make path in
   let root =
-    match guess_root config start_path ~recursion_limit:50 with
+    match guess_root_with_limit config start_path ~recursion_limit:50 with
     | None -> start_path
     | Some root -> root
   in

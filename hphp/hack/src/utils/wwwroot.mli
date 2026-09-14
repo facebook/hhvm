@@ -12,6 +12,9 @@ val is_www_directory : ?config:string -> Path.t -> bool
 (** Print a diagnostic to stderr and exit 1 if [path] is not a www directory. *)
 val assert_www_directory : ?config:string -> Path.t -> unit
 
+(** Traverse parent directories until a directory containing [.hhconfig] is found. *)
+val guess_root : Path.t -> Path.t option
+
 (** Our command-line tools generally take a "root" parameter, and if none is
 supplied then they fall back to a search based on the current directory.
 This code implements that -- it ensures that either 0 or 1 root parameters

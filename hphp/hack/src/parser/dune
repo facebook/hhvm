@@ -125,7 +125,7 @@
   syntax_transforms
   ; from smart_constructors
   smart_constructors
-  smartConstructorsWrappers
+  smart_constructors_wrappers
   syntax_smart_constructors)
  (libraries
   common

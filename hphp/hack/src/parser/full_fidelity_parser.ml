@@ -11,7 +11,7 @@ module Env = Full_fidelity_parser_env
 
 module type SC_S = Smart_constructors.SmartConstructors_S
 
-module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
+module type SCWithToken_S = Smart_constructors_wrappers.SyntaxKind_S
 
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
 
@@ -29,7 +29,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     val parse_script : t -> t * SCI.r * Rust_pointer.t option
   end = struct
-    module SCWithToken = SmartConstructorsWrappers.SyntaxKind (SCI)
+    module SCWithToken = Smart_constructors_wrappers.SyntaxKind (SCI)
     module SourceText = Full_fidelity_source_text
     module SyntaxError = Full_fidelity_syntax_error
 

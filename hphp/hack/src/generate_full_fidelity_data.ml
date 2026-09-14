@@ -1765,7 +1765,7 @@ end
       ~transformations:[]
       ~filename:
         (full_fidelity_path_prefix
-        ^ "smart_constructors/smartConstructorsWrappers.ml")
+        ^ "smart_constructors/smart_constructors_wrappers.ml")
       ~template:full_fidelity_smart_constructors_wrappers_template
       ()
 end

@@ -111,4 +111,27 @@ async function main(): Awaitable<void> {
     ],
     async () ==> $print_fn(),
   );
+
+  // Default-coeffect callbacks would mask an overly restrictive batch helper.
+  $prepared = vec[
+    StringMemoContext1::prepare_('a'),
+    StringAgnosticContext::prepare_('c'),
+  ];
+  var_dump(HH\ImplicitContext\PreparedContext::runBatch(
+    $prepared,
+    ()[] ==> 42,
+  ));
+  var_dump(HH\ImplicitContext\PreparedContext::runBatch(
+    $prepared,
+    ()[zoned_shallow] ==> 43,
+  ));
+  var_dump(await HH\ImplicitContext\PreparedContext::runBatchAsync(
+    $prepared,
+    async ()[] ==> 44,
+  ));
+  var_dump(await HH\ImplicitContext\PreparedContext::runBatchAsync(
+    $prepared,
+    async ()[zoned_shallow] ==> 45,
+  ));
+  $print_fn();
 }

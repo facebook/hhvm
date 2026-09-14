@@ -94,7 +94,7 @@ abstract class PreparedContext {
   private static function processPrepared(
     \HH\ImplicitContext\_Private\ImplicitContextData $ic,
     vec<\HH\ImplicitContext\PreparedContext> $prepared,
-  ): \HH\ImplicitContext\_Private\ImplicitContextData {
+  )[leak_safe]: \HH\ImplicitContext\_Private\ImplicitContextData {
     invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
     foreach ($prepared as $prepared_context) {
       $ic_class = $prepared_context->icClass;

@@ -1,0 +1,26 @@
+[packages]
+
+[packages.intern]
+
+[packages.bridge]
+includes = ["intern", "prototypes.checkout"]
+
+[packages.consumer_missing_member]
+includes = ["bridge", "intern"]
+
+[packages.consumer_complete]
+includes = ["bridge", "intern", "prototypes.checkout"]
+
+[implicit_packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["intern"]
+
+[deployments]
+
+[deployments.missing_member]
+packages = ["bridge", "intern"]
+
+[deployments.complete]
+packages = ["bridge", "intern", "prototypes.checkout"]

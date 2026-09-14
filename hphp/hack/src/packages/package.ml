@@ -56,14 +56,26 @@ let get_package_pos pkg = fst pkg.name
 
 let get_package_name pkg = snd pkg.name
 
+let matches_package_reference (_, referenced_name) target =
+  let target_name = get_package_name target in
+  String.equal referenced_name target_name
+  || target.is_implicit
+     &&
+     match String.lsplit2 target_name ~on:'.' with
+     | Some (family_name, member_name) ->
+       (not (String.is_empty family_name))
+       && (not (String.is_empty member_name))
+       && String.equal referenced_name family_name
+     | None -> false
+
 let includes pkg1 pkg2 =
   List.exists
-    ~f:(fun (_, name) -> String.equal name @@ get_package_name pkg2)
+    ~f:(fun package -> matches_package_reference package pkg2)
     pkg1.includes
 
 let soft_includes pkg1 pkg2 =
   List.exists
-    ~f:(fun (_, name) -> String.equal name @@ get_package_name pkg2)
+    ~f:(fun package -> matches_package_reference package pkg2)
     pkg1.soft_includes
 
 let relationship pkg1 pkg2 =

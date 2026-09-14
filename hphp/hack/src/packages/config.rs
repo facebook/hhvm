@@ -102,12 +102,9 @@ impl Config {
                 }
             };
         // Augmented map used for transitive-closure checks: the hand-written
-        // packages plus one synthetic node per implicit family `F`, carrying the
-        // family's includes/soft_includes. Every member of `F` shares those
-        // includes by construction, so treating the family as a single node is
-        // both correct and avoids enumerating members that do not exist at parse
-        // time. With no families declared -- the common case -- the package map
-        // is borrowed rather than copied.
+        // packages plus synthetic nodes for implicit families and referenced
+        // members. A member node keeps its exact `F.D` name while carrying the
+        // relationships declared by `F`.
         let closure_map: Cow<'_, PackageMap> = if self.implicit_packages.is_empty() {
             Cow::Borrowed(&self.packages)
         } else {
@@ -125,31 +122,59 @@ impl Config {
                     },
                 )
             }));
+
+            let mut add_member = |name: &Spanned<String>| {
+                let Some((family_name, _)) = split_member_name(name.get_ref()) else {
+                    return;
+                };
+                let Some(family) = self.implicit_packages.get(family_name) else {
+                    return;
+                };
+                if augmented.contains_key(name.get_ref().as_str()) {
+                    return;
+                }
+                augmented.insert(
+                    name.clone(),
+                    Package {
+                        includes: family.includes.clone(),
+                        soft_includes: family.soft_includes.clone(),
+                        include_paths: None,
+                        enable_strict_isolation: false,
+                    },
+                );
+            };
+            for package in self.packages.values() {
+                for name in package.includes.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+                for name in package.soft_includes.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+            }
+            for deployment in self.deployments.iter().flat_map(|d| d.values()) {
+                for name in deployment.packages.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+                for name in deployment.soft_packages.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+            }
+            for family in self.implicit_packages.values() {
+                for name in family.includes.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+                for name in family.soft_includes.as_ref().unwrap_or_default().iter() {
+                    add_member(name);
+                }
+            }
             Cow::Owned(augmented)
-        };
-        // Normalize a name set so member references `F.D` collapse to the family
-        // `F` (which exists in `closure_map`); other names pass through. The
-        // reference's own span is kept, so diagnostics point at the reference.
-        let normalize_set = |set: &NameSet| -> NameSet {
-            set.iter()
-                .map(|n| match split_member_name(n.get_ref()) {
-                    Some((f, _)) if family_key.contains(f) => {
-                        let family = f.to_owned();
-                        let mut normalized = n.clone();
-                        *normalized.get_mut() = family;
-                        normalized
-                    }
-                    _ => n.clone(),
-                })
-                .collect()
         };
 
         let check_package_includes_are_transitively_closed =
             |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
-                let mut includes = normalize_set(package.includes.as_ref().unwrap_or_default());
+                let mut includes = package.includes.clone().unwrap_or_default();
                 includes.insert(package_name.clone());
-                let soft_includes =
-                    normalize_set(package.soft_includes.as_ref().unwrap_or_default());
+                let soft_includes = package.soft_includes.clone().unwrap_or_default();
                 let (missing_pkgs, missing_soft_pkgs) =
                     find_missing_packages_from_transitive_closure(
                         &closure_map,
@@ -176,8 +201,8 @@ impl Config {
              deployment: &Spanned<String>,
              pkgs: &Option<NameSet>,
              soft_pkgs: &Option<NameSet>| {
-                let deployed = normalize_set(pkgs.as_ref().unwrap_or_default());
-                let soft_deployed = normalize_set(soft_pkgs.as_ref().unwrap_or_default());
+                let deployed = pkgs.clone().unwrap_or_default();
+                let soft_deployed = soft_pkgs.clone().unwrap_or_default();
                 let (missing_pkgs, missing_soft_pkgs) =
                     find_missing_packages_from_transitive_closure(
                         &closure_map,
@@ -214,6 +239,36 @@ impl Config {
                 check_member_names(errors, &deployment.packages);
                 check_member_names(errors, &deployment.soft_packages);
                 check_packages_are_defined(errors, &deployment.packages, &deployment.soft_packages);
+                let deployed = deployment
+                    .packages
+                    .iter()
+                    .flat_map(|packages| packages.iter())
+                    .chain(
+                        deployment
+                            .soft_packages
+                            .iter()
+                            .flat_map(|packages| packages.iter()),
+                    )
+                    .collect::<Vec<_>>();
+                for family in self
+                    .implicit_packages
+                    .keys()
+                    .map(|name| name.get_ref().as_str())
+                {
+                    if !deployed.iter().any(|name| name.get_ref() == family) {
+                        continue;
+                    }
+                    for member in deployed.iter().filter(|name| {
+                        split_member_name(name.get_ref())
+                            .is_some_and(|(member_family, _)| member_family == family)
+                    }) {
+                        errors.push(Error::implicit_deployment_family_member_conflict(
+                            positioned_name,
+                            family,
+                            member,
+                        ));
+                    }
+                }
                 check_deployed_packages_are_transitively_closed(
                     errors,
                     positioned_name,

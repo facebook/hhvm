@@ -543,6 +543,95 @@ mod test {
     }
 
     #[test]
+    fn test_implicit_member_references() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-member-reference.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert!(
+            info.errors().is_empty(),
+            "unexpected errors: {:?}",
+            info.errors()
+                .iter()
+                .map(|error| error.msg())
+                .collect::<Vec<_>>()
+        );
+        let consumer = &info.packages()["consumer"];
+        assert_eq!(
+            consumer.includes.as_ref().unwrap()[0].get_ref(),
+            "prototypes.package_hard"
+        );
+        assert_eq!(
+            consumer.soft_includes.as_ref().unwrap()[0].get_ref(),
+            "prototypes.package_soft"
+        );
+        let deployment = &info.deployments().unwrap()["prod"];
+        assert!(
+            deployment
+                .packages
+                .as_ref()
+                .unwrap()
+                .contains("prototypes.deploy_hard")
+        );
+        assert!(
+            deployment
+                .soft_packages
+                .as_ref()
+                .unwrap()
+                .contains("prototypes.deploy_soft")
+        );
+    }
+
+    #[test]
+    fn test_implicit_member_transitive_closure() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-member-transitive-closure.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert_eq!(
+            info.errors()
+                .iter()
+                .map(|error| error.msg())
+                .collect::<Vec<_>>(),
+            vec![
+                "consumer_missing_member must include all nested included packages. Missing prototypes.checkout",
+                "missing_member must deploy all nested included packages. Missing prototypes.checkout",
+            ]
+        );
+    }
+
+    #[test]
+    fn test_implicit_member_name_must_be_identifier() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-invalid-member-reference.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert_eq!(
+            info.errors()
+                .iter()
+                .map(|error| error.msg())
+                .collect::<Vec<_>>(),
+            vec![
+                "Implicit package member segment bad-name in prototypes.bad-name must be a valid Hack identifier"
+            ]
+        );
+    }
+
+    #[test]
+    fn test_implicit_family_and_member_deployment_conflict() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-deployment-conflict.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert_eq!(
+            info.errors().iter().map(|e| e.msg()).collect::<Vec<_>>(),
+            vec![String::from(
+                "Deployment prod cannot contain both implicit package family prototypes and member prototypes.checkout",
+            )]
+        );
+    }
+
+    #[test]
     fn test_package_names_must_be_identifiers() {
         let test_path = SRCDIR.as_path().join("tests/package-invalid-names.toml");
         let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();

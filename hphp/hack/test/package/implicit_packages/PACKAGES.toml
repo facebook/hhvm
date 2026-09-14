@@ -19,3 +19,23 @@ include_paths = ["//standalone/"]
 path = "//prototypes/"
 includes = ["intern", "shared"]
 soft_includes = ["standalone"]
+
+[packages.family_hard_consumer]
+include_paths = ["//family_hard_consumer/"]
+includes = ["prototypes", "intern", "shared"]
+soft_includes = ["standalone"]
+
+[packages.family_soft_consumer]
+include_paths = ["//family_soft_consumer/"]
+includes = ["intern", "shared"]
+soft_includes = ["prototypes", "standalone"]
+
+[packages.member_consumer]
+include_paths = ["//member_consumer/"]
+includes = ["prototypes.alpha", "intern", "shared"]
+soft_includes = ["standalone"]
+
+[implicit_packages.family_consumers]
+path = "//family_consumers/"
+includes = ["prototypes", "intern", "shared"]
+soft_includes = ["standalone"]

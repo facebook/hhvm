@@ -1,0 +1,12 @@
+[packages]
+
+[implicit_packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+
+[deployments]
+
+[deployments.prod]
+packages = ["prototypes"]
+soft_packages = ["prototypes.checkout"]

@@ -1,0 +1,9 @@
+[packages]
+
+[packages.intern]
+
+[packages.consumer]
+includes = ["prototypes.bad-name"]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"

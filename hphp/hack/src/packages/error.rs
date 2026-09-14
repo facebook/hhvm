@@ -68,6 +68,12 @@ pub enum Error {
         member: String,
         span: (usize, usize),
     },
+    ImplicitDeploymentFamilyMemberConflict {
+        deployment: String,
+        family: String,
+        member: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -185,6 +191,19 @@ impl Error {
         }
     }
 
+    pub fn implicit_deployment_family_member_conflict(
+        deployment: &Spanned<String>,
+        family: &str,
+        member: &Spanned<String>,
+    ) -> Self {
+        let Range { start, end } = member.span();
+        Self::ImplicitDeploymentFamilyMemberConflict {
+            deployment: deployment.get_ref().into(),
+            family: family.into(),
+            member: member.get_ref().into(),
+            span: (start, end),
+        }
+    }
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateIncludePath { span, .. }
@@ -198,7 +217,8 @@ impl Error {
             | Self::PackageNamePrefixCollision { span, .. }
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
-            | Self::ImplicitMemberNameInvalid { span, .. } => *span,
+            | Self::ImplicitMemberNameInvalid { span, .. }
+            | Self::ImplicitDeploymentFamilyMemberConflict { span, .. } => *span,
         }
     }
 
@@ -310,6 +330,18 @@ impl Display for Error {
                     f,
                     "Implicit package member segment {} in {} must be a valid Hack identifier",
                     member, name
+                )?;
+            }
+            Self::ImplicitDeploymentFamilyMemberConflict {
+                deployment,
+                family,
+                member,
+                ..
+            } => {
+                write!(
+                    f,
+                    "Deployment {} cannot contain both implicit package family {} and member {}",
+                    deployment, family, member
                 )?;
             }
         };

@@ -1,0 +1,41 @@
+error: Typing[4472] Cannot access class `ExcludedMemberClass` defined in package `prototypes.beta` which may not be available [1]
+-> `ExcludedMemberClass` is defined in include_specific_member.php--prototypes/beta/b.php [2]
+-> `ExcludedMemberClass` belongs to package `prototypes.beta` by this entry in the package config [3]
+-> package `member_consumer` is available because the current file belongs to it by this entry in the package config [4]
+-> `member_consumer` includes `prototypes.alpha` via its definition [5]
+-> `member_consumer` includes `intern` via its definition [6]
+-> `member_consumer` includes `shared` via its definition [7]
+
+include_specific_member.php--member_consumer/use.php:7:7
+ 5 | 
+ 6 | function use_excluded_member(): void {
+ 7 |   new ExcludedMemberClass();
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+ 8 | }
+
+include_specific_member.php--prototypes/beta/b.php:2:7
+ 1 | <?hh
+ 2 | class ExcludedMemberClass {}
+   |       ^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [3]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+   :
+31 | soft_includes = ["prototypes", "standalone"]
+32 | 
+33 | [packages.member_consumer]
+   |           ^^^^^^^^^^^^^^^ [4]
+34 | include_paths = ["//member_consumer/"]
+35 | includes = ["prototypes.alpha", "intern", "shared"]
+   |             ^^^^^^^^^^^^^^^^^^ [5]
+   |                                 ^^^^^^^^ [6]
+   |                                           ^^^^^^^^ [7]
+36 | soft_includes = ["standalone"]
+37 | 
+
+1 error found

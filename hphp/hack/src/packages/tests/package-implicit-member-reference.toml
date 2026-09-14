@@ -1,0 +1,19 @@
+[packages]
+
+[packages.intern]
+
+[packages.consumer]
+includes = ["prototypes.package_hard", "intern"]
+soft_includes = ["prototypes.package_soft"]
+
+[implicit_packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["intern"]
+
+[deployments]
+
+[deployments.prod]
+packages = ["intern", "prototypes.deploy_hard"]
+soft_packages = ["prototypes.deploy_soft"]

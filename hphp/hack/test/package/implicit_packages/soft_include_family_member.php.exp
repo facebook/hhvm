@@ -1,0 +1,39 @@
+error: Typing[4473] Cannot access class `SoftFamilyMemberClass` defined in package `prototypes.alpha` which may not be available [1]
+-> `SoftFamilyMemberClass` is defined in soft_include_family_member.php--prototypes/alpha/a.php [2]
+-> `SoftFamilyMemberClass` belongs to package `prototypes.alpha` by this entry in the package config [3]
+-> package `family_soft_consumer` is available because the current file belongs to it by this entry in the package config [4]
+-> `family_soft_consumer` includes `intern` via its definition [5]
+-> `family_soft_consumer` includes `shared` via its definition [6]
+
+soft_include_family_member.php--family_soft_consumer/use.php:3:7
+ 1 | <?hh
+ 2 | function use_soft_family_member(): void {
+ 3 |   new SoftFamilyMemberClass();
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+ 4 | }
+
+soft_include_family_member.php--prototypes/alpha/a.php:2:7
+ 1 | <?hh
+ 2 | class SoftFamilyMemberClass {}
+   |       ^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:18:20
+16 | # (prototypes.<dir>). Members are isolated from each other but all hard-include
+17 | # intern (and transitively shared) and soft-include standalone.
+18 | [implicit_packages.prototypes]
+   |                    ^^^^^^^^^^ [3]
+19 | path = "//prototypes/"
+20 | includes = ["intern", "shared"]
+   :
+26 | soft_includes = ["standalone"]
+27 | 
+28 | [packages.family_soft_consumer]
+   |           ^^^^^^^^^^^^^^^^^^^^ [4]
+29 | include_paths = ["//family_soft_consumer/"]
+30 | includes = ["intern", "shared"]
+   |             ^^^^^^^^ [5]
+   |                       ^^^^^^^^ [6]
+31 | soft_includes = ["prototypes", "standalone"]
+32 | 
+
+1 error found

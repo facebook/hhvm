@@ -10,7 +10,7 @@ module Syn = Full_fidelity_editable_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module Trivia = Full_fidelity_positioned_trivia
 module TriviaKind = Full_fidelity_trivia_kind
-module RT = ServerRenameTypes
+module RT = Server_rename_types
 
 let find_width_hh_fixme token =
   let rec find_width_hh_fixme_rec acc last sd =

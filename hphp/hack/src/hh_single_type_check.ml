@@ -1550,8 +1550,8 @@ let codemod
     ~files_contents
     ctx
     (get_patches :
-      files_info:FileInfo.t Relative_path.Map.t -> ServerRenameTypes.patch list)
-    =
+      files_info:FileInfo.t Relative_path.Map.t ->
+      Server_rename_types.patch list) =
   let decl_parse_typecheck_and_then = decl_parse_typecheck_and_then ctx in
   let backend = Provider_context.get_backend ctx in
   (* Because we repeatedly apply the codemod, positions change. So we need to
@@ -1609,7 +1609,7 @@ let codemod
     decl_parse_typecheck_and_then files_contents @@ fun files_info ->
     let patches = get_patches ~files_info in
     let files_contents =
-      ServerRenameTypes.apply_patches_to_file_contents files_contents patches
+      Server_rename_types.apply_patches_to_file_contents files_contents patches
     in
     if List.is_empty patches then begin
       final_files_info := files_info;

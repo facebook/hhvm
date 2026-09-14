@@ -367,11 +367,11 @@ let handle :
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let definition_for_wrapper =
           match rename_action with
-          | ServerRenameTypes.ClassRename _
-          | ServerRenameTypes.ClassConstRename _
-          | ServerRenameTypes.LocalVarRename _ ->
+          | Server_rename_types.ClassRename _
+          | Server_rename_types.ClassConstRename _
+          | Server_rename_types.LocalVarRename _ ->
             None
-          | ServerRenameTypes.MethodRename { class_name; old_name; _ } ->
+          | Server_rename_types.MethodRename { class_name; old_name; _ } ->
             Server_symbol_definition.go
               ctx
               None
@@ -385,7 +385,7 @@ let handle :
                 pos = Pos.none;
                 affects_prod_build = true;
               }
-          | ServerRenameTypes.FunctionRename { old_name; _ } ->
+          | Server_rename_types.FunctionRename { old_name; _ } ->
             Server_symbol_definition.go
               ctx
               None

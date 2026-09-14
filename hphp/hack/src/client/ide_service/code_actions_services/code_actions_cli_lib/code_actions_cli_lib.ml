@@ -8,13 +8,13 @@
 open Hh_prelude
 module CodeAction = Lsp.CodeAction
 
-let apply_patches_to_string old_content (patches : ServerRenameTypes.patch list)
-    : string =
+let apply_patches_to_string
+    old_content (patches : Server_rename_types.patch list) : string =
   let buf = Buffer.create (String.length old_content) in
   let patch_list =
-    List.sort ~compare:ServerRenameTypes.compare_result patches
+    List.sort ~compare:Server_rename_types.compare_result patches
   in
-  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
+  Server_rename_types.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 let lsp_range_to_pos ~source_text path range =
@@ -57,7 +57,7 @@ let patched_text_of_command_or_action ~source_text path code_action :
     let open Result.Let_syntax in
     let to_patch Lsp.TextEdit.{ range; newText = text } =
       let pos = lsp_range_to_pos ~source_text path range in
-      ServerRenameTypes.Replace ServerRenameTypes.{ pos; text }
+      Server_rename_types.Replace Server_rename_types.{ pos; text }
     in
     let patches =
       Lsp.DocumentUri.Map.values changes |> List.concat |> List.map ~f:to_patch
@@ -78,7 +78,7 @@ let patched_text_of_command_or_action ~source_text path code_action :
       | None -> rewritten_contents
       | Some selection ->
         let patches =
-          ServerRenameTypes.
+          Server_rename_types.
             [
               Replace { pos = Pos.shrink_to_start selection; text = ">|" };
               Replace { pos = Pos.shrink_to_end selection; text = "|<" };

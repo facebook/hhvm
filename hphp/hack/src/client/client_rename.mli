@@ -6,11 +6,11 @@
  *
  *)
 
-val apply_patches : ServerRenameTypes.patch list -> unit
+val apply_patches : Server_rename_types.patch list -> unit
 
-val patches_to_json_string : ServerRenameTypes.patch list -> string
+val patches_to_json_string : Server_rename_types.patch list -> string
 
-val print_patches_json : ServerRenameTypes.patch list -> unit
+val print_patches_json : Server_rename_types.patch list -> unit
 
 val go :
   (unit -> Client_connect.conn Lwt.t) ->
@@ -21,4 +21,4 @@ val go :
   after:string ->
   unit Lwt.t
 
-val go_ide_from_patches : ServerRenameTypes.patch list -> bool -> unit
+val go_ide_from_patches : Server_rename_types.patch list -> bool -> unit

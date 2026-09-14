@@ -316,9 +316,9 @@ module Find_my_tests = struct
 end
 
 module Rename = struct
-  type ide_result = (ServerRenameTypes.patch list, string) result
+  type ide_result = (Server_rename_types.patch list, string) result
 
-  type result = ServerRenameTypes.patch list
+  type result = Server_rename_types.patch list
 
   type ide_result_or_retry = ide_result Done_or_retry.t
 
@@ -557,17 +557,17 @@ type _ t =
   | IDE_GO_TO_IMPL_BY_SYMBOL :
       Find_refs_wire_format.CliArgs.t
       -> Find_refs.result_or_retry t
-  | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
+  | RENAME : Server_rename_types.action -> Rename.result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
       Find_refs.action * string * Relative_path.t Symbol_definition.t
       -> Rename.ide_result_or_retry t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
       int list
-      -> [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
+      -> [ `Ok of Server_rename_types.patch list | `Error of string ] t
   | REMOVE_DEAD_UNSAFE_CASTS
-      : [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
-  | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRenameTypes.patch list t
+      : [ `Ok of Server_rename_types.patch list | `Error of string ] t
+  | REWRITE_LAMBDA_PARAMETERS : string list -> Server_rename_types.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Stdlib.result t
   | SAVE_NAMING :
       string

@@ -64,7 +64,7 @@ type rename_result =
         (Relative_path.t Symbol_definition.t
         * Server_command_types.Find_refs.action)
         option;
-      local: ServerRenameTypes.patch list;
+      local: Server_rename_types.patch list;
     }
 
 type go_to_impl_result =
@@ -166,7 +166,7 @@ type _ t =
        - Rename_success, where we return a record containing two fields:
            - [shellout], an optional tuple of (SymbolDefinition.full_name * Find_refs.action)
              to indicate that ClientIdeDaemon could not satisfy all of the rename (the non-localvar case)
-           - [local], a [ServerRenameTypes.patch list], a list of rename patches for each open file supplied
+           - [local], a [Server_rename_types.patch list], a list of rename patches for each open file supplied
             in the input document list
           *)
   | Type_definition :

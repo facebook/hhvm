@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open ServerEnv
-open ServerRenameTypes
+open Server_rename_types
 
 (* Not incremental, so it's safe to skip dependency tracking *)
 [@@@alert "-dependencies"]
@@ -635,7 +635,7 @@ let go_for_single_file
 
 (**
   Like go_ide, but rather than looking up a symbolDefinition manually from a file and
-  converting a ServerRenameTypes.action to a Find_refs.action, we supply a Find_refs.action
+  converting a Server_rename_types.action to a Find_refs.action, we supply a Find_refs.action
   directly.
 *)
 let go_ide_with_find_refs_action

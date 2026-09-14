@@ -8,18 +8,18 @@
 
 open Hh_prelude
 
-let apply_patches_to_string old_content (patches : ServerRenameTypes.patch list)
-    : string =
+let apply_patches_to_string
+    old_content (patches : Server_rename_types.patch list) : string =
   let buf = Buffer.create (String.length old_content) in
   let patch_list =
-    List.sort ~compare:ServerRenameTypes.compare_result patches
+    List.sort ~compare:Server_rename_types.compare_result patches
   in
-  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
+  Server_rename_types.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
-let pos_to_patches (pos : Pos.t) : ServerRenameTypes.patch list =
+let pos_to_patches (pos : Pos.t) : Server_rename_types.patch list =
   let pos = Pos.to_absolute pos in
-  ServerRenameTypes.
+  Server_rename_types.
     [
       Replace { pos = Pos.shrink_to_start pos; text = ">" };
       Replace { pos = Pos.shrink_to_end pos; text = "<" };
@@ -27,7 +27,7 @@ let pos_to_patches (pos : Pos.t) : ServerRenameTypes.patch list =
 
 let classish_positions_for_class_to_patches
     (cp : Pos.t Classish_positions_types.classish_positions) :
-    ServerRenameTypes.patch list SMap.t =
+    Server_rename_types.patch list SMap.t =
   let Classish_positions_types.
         {
           classish_start_of_body;
@@ -48,7 +48,7 @@ let classish_positions_for_class_to_patches
 
 let classish_positions_to_patches
     (cps : Pos.t Classish_positions_types.classish_positions SMap.t) :
-    ServerRenameTypes.patch list SMap.t =
+    Server_rename_types.patch list SMap.t =
   let merge_map_entry _key xs ys =
     match (xs, ys) with
     | (None, None) -> None

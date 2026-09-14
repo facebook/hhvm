@@ -10,23 +10,23 @@
 open Hh_prelude
 open Client_env
 
-let get_pos = ServerRenameTypes.get_pos
+let get_pos = Server_rename_types.get_pos
 
-let compare_result = ServerRenameTypes.compare_result
+let compare_result = Server_rename_types.compare_result
 
 let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
   let patch_list = List.sort ~compare:compare_result patch_list in
-  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
+  Server_rename_types.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 let apply_patches_to_file fn patch_list =
   let old_content = Sys_utils.cat fn in
   let new_file_contents = apply_patches_to_string old_content patch_list in
-  ServerRenameTypes.write_string_to_file fn new_file_contents
+  Server_rename_types.write_string_to_file fn new_file_contents
 
 let list_to_file_map =
-  List.fold_left ~f:ServerRenameTypes.map_patches_to_filename ~init:SMap.empty
+  List.fold_left ~f:Server_rename_types.map_patches_to_filename ~init:SMap.empty
 
 let plural count one many =
   let obj =
@@ -46,10 +46,11 @@ let apply_patches patches =
 let patch_to_json res =
   let (type_, replacement) =
     match res with
-    | ServerRenameTypes.Insert patch -> ("insert", patch.ServerRenameTypes.text)
-    | ServerRenameTypes.Replace patch ->
-      ("replace", patch.ServerRenameTypes.text)
-    | ServerRenameTypes.Remove _ -> ("remove", "")
+    | Server_rename_types.Insert patch ->
+      ("insert", patch.Server_rename_types.text)
+    | Server_rename_types.Replace patch ->
+      ("replace", patch.Server_rename_types.text)
+    | Server_rename_types.Remove _ -> ("remove", "")
   in
   let pos = get_pos res in
   let (char_start, char_end) = Pos.info_raw pos in
@@ -100,9 +101,9 @@ let go
     ~(after : string) : unit Lwt.t =
   let command =
     match mode with
-    | Class -> ServerRenameTypes.ClassRename (before, after)
+    | Class -> Server_rename_types.ClassRename (before, after)
     | Function ->
-      ServerRenameTypes.FunctionRename { old_name = before; new_name = after }
+      Server_rename_types.FunctionRename { old_name = before; new_name = after }
     | Method ->
       let befores = Str.split (Str.regexp "::") before in
       if List.length befores <> 2 then
@@ -118,7 +119,7 @@ let go
         Printf.printf "%s %s\n" before_class after_class;
         failwith "Before and After classname must match"
       ) else
-        ServerRenameTypes.MethodRename
+        Server_rename_types.MethodRename
           {
             class_name = before_class;
             old_name = before_method;

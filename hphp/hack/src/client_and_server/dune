@@ -268,7 +268,7 @@
   server_format_types
   server_lint_types
   server_rage_types
-  serverRenameTypes
+  Server_rename_types
   tast_holes_service)
  (libraries
   base64

@@ -199,7 +199,7 @@ module Run_env = struct
         symbol_definition: Relative_path.t Symbol_definition.t; [@opaque]
         find_refs_action: Server_command_types.Find_refs.action; [@opaque]
         new_name: string;
-        ide_calculated_patches: ServerRenameTypes.patch list; [@opaque]
+        ide_calculated_patches: Server_rename_types.patch list; [@opaque]
       }
   [@@deriving show]
 
@@ -3224,9 +3224,9 @@ let do_topLevelDefNameAtPos
   in
   Lwt.return result
 
-let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
+let patch_to_workspace_edit_change (patch : Server_rename_types.patch) :
     Lsp.DocumentUri.t * TextEdit.t =
-  let open ServerRenameTypes in
+  let open Server_rename_types in
   let open Pos in
   let text_edit =
     match patch with
@@ -3253,7 +3253,7 @@ let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
   in
   (Lsp.DocumentUri.Uri uri_string, text_edit)
 
-let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
+let patches_to_workspace_edit (patches : Server_rename_types.patch list) :
     WorkspaceEdit.t =
   let changes = List.map patches ~f:patch_to_workspace_edit_change in
   let changes =

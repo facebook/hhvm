@@ -9,13 +9,13 @@ open Hh_prelude
 module Syn = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (Syn)
 
-let apply_patches_to_string old_content (patches : ServerRenameTypes.patch list)
-    : string =
+let apply_patches_to_string
+    old_content (patches : Server_rename_types.patch list) : string =
   let buf = Buffer.create (String.length old_content) in
   let patch_list =
-    List.sort ~compare:ServerRenameTypes.compare_result patches
+    List.sort ~compare:Server_rename_types.compare_result patches
   in
-  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
+  Server_rename_types.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 (** given the source text of a block, apply `f` to source text wrapped such that it's
@@ -87,8 +87,8 @@ let rewrite_block r path block_source_text ~return_var_raw_name :
             | Some pos ->
               let (r, var) = Inline_method_rename.rename r var in
               let patch =
-                ServerRenameTypes.Replace
-                  ServerRenameTypes.{ pos = Pos.to_absolute pos; text = var }
+                Server_rename_types.Replace
+                  Server_rename_types.{ pos = Pos.to_absolute pos; text = var }
               in
               (r, patch :: patches)
             | None -> acc)
@@ -100,8 +100,8 @@ let rewrite_block r path block_source_text ~return_var_raw_name :
               in
               let text = Printf.sprintf "%s = " return_var in
               let patch =
-                ServerRenameTypes.Replace
-                  ServerRenameTypes.{ pos = Pos.to_absolute pos; text }
+                Server_rename_types.Replace
+                  Server_rename_types.{ pos = Pos.to_absolute pos; text }
               in
               (r, patch :: patches)
             | None -> acc)

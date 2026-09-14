@@ -8,13 +8,13 @@
 
 open Hh_prelude
 
-let apply_patches_to_string old_content (patches : ServerRenameTypes.patch list)
-    : string =
+let apply_patches_to_string
+    old_content (patches : Server_rename_types.patch list) : string =
   let buf = Buffer.create (String.length old_content) in
   let patch_list =
-    List.sort ~compare:ServerRenameTypes.compare_result patches
+    List.sort ~compare:Server_rename_types.compare_result patches
   in
-  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
+  Server_rename_types.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 (**
@@ -123,7 +123,7 @@ let underlines_for_line_to_patches (uls : underline list) : string =
 
 let underlines_to_patches
     filename source_text (underlines_per_line : underline list IMap.t) :
-    ServerRenameTypes.patch list =
+    Server_rename_types.patch list =
   let text_per_line =
     IMap.map underlines_for_line_to_patches underlines_per_line
   in
@@ -143,7 +143,7 @@ let underlines_to_patches
             insert_offset
         in
         let pos = Pos.to_absolute insert_pos in
-        ServerRenameTypes.(Replace { pos; text }))
+        Server_rename_types.(Replace { pos; text }))
       text_per_line
   in
   IMap.values patch_per_line

@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-type patches = ServerRenameTypes.patch list
+type patches = Server_rename_types.patch list
 
 type can_be_captured = bool
 
@@ -62,8 +62,8 @@ let generate_patch content (can_be_captured, hole_pos, expr_pos) =
     else
       text
   in
-  ServerRenameTypes.Replace
-    ServerRenameTypes.{ pos = Pos.to_absolute hole_pos; text }
+  Server_rename_types.Replace
+    Server_rename_types.{ pos = Pos.to_absolute hole_pos; text }
 
 let get_patches ?(is_test = false) ~files_info ~fold =
   let get_patches_from_file path _ patches =

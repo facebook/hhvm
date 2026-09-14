@@ -147,7 +147,13 @@ class MysqlConnectOperationImpl : public MysqlOperationImpl,
     ConnectTcpTimeoutHandler& operator=(ConnectTcpTimeoutHandler&&) = delete;
 
     void timeoutExpired() noexcept override {
-      op_->tcpConnectTimeoutTriggered();
+      // timeoutExpired is `noexcept` so we can't throw from it, and swallowing
+      // must not leave the caller waiting on an operation that never
+      // completes.  runCallbackGuarded handles both.
+      op_->runCallbackGuarded(
+          "TCP connect timeoutExpired", OperationResult::TimedOut, [this] {
+            op_->tcpConnectTimeoutTriggered();
+          });
     }
 
    private:

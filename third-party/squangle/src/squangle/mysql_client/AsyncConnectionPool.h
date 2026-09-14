@@ -124,9 +124,53 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
         : folly::AsyncTimeout(base), pool_(pool) {}
 
     void timeoutExpired() noexcept override {
-      scheduleTimeout(PoolOptions::kCleanUpTimeout);
-      pool_.cleanupOperations();
-      pool_.cleanupConnections();
+      // timeoutExpired is `noexcept` so we can't throw from it.  The two
+      // sweeps are guarded separately so that neither is skipped because the
+      // other failed.
+      //
+      // Rate limited because this timer fires every kCleanUpTimeout (300ms)
+      // and keeps rescheduling, so a persistently throwing sweep would
+      // otherwise log a few lines a second for the life of the process, in a
+      // library with a very large number of dependents.
+      // SQUANGLE_LOG_EVERY_N_ATOMIC rather than LOG_EVERY_N: the latter is not
+      // thread safe, which is why ConnectionPool.h defines the former.
+      // `guarded` is a generic lambda, so each step instantiates it separately
+      // and carries its own counters -- the throttle is per step, and per catch
+      // arm within a step, rather than one budget shared across all of them.
+      auto guarded = [](const char* step, auto&& fn) noexcept {
+        try {
+          fn();
+        } catch (const std::exception& ex) {
+          SQUANGLE_LOG_EVERY_N_ATOMIC(ERROR, 1024)
+              << "Exception in pool cleanup " << step << ": " << ex.what();
+        } catch (...) {
+          SQUANGLE_LOG_EVERY_N_ATOMIC(ERROR, 1024)
+              << "Unknown exception in pool cleanup " << step;
+        }
+      };
+
+      // Not guarded: scheduleTimeout reports failure by returning false, not by
+      // throwing.  Ignoring it is the reachable fault -- folly leaves the
+      // timeout unscheduled after an error even when it was only rescheduling,
+      // so cleanup would stop for the life of the pool with nothing in
+      // squangle saying so.
+      //
+      // Not throttled either, unlike the sweeps above: after this failure the
+      // timer is never armed again, so there is at most one such line per pool
+      // and no volume to suppress.
+      //
+      // DFATAL rather than ERROR, matching the initial arming in the
+      // constructor.  It is fatal in dev and CI, where a broken event base
+      // should stop a test rather than scroll past, and an error in release,
+      // where squangle has a very large number of dependents.
+      if (!scheduleTimeout(PoolOptions::kCleanUpTimeout)) {
+        LOG(DFATAL) << "Failed to reschedule pool cleanup; idle and aged-out "
+                       "connections will no longer be retired and the wait "
+                       "list will no longer be swept";
+      }
+
+      guarded("cleanupOperations", [&] { pool_.cleanupOperations(); });
+      guarded("cleanupConnections", [&] { pool_.cleanupConnections(); });
     }
 
    private:

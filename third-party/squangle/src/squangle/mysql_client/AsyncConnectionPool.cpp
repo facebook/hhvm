@@ -34,7 +34,9 @@ AsyncConnectionPool::AsyncConnectionPool(
           std::move(pool_options)),
       cleanup_timer_(mysql_client_->getEventBase(), conn_storage_) {
   if (!mysql_client_->runInThread([this]() {
-        cleanup_timer_.scheduleTimeout(PoolOptions::kCleanUpTimeout);
+        if (!cleanup_timer_.scheduleTimeout(PoolOptions::kCleanUpTimeout)) {
+          LOG(DFATAL) << "Unable to arm pool cleanup; it will never run";
+        }
       })) {
     LOG(DFATAL) << "Unable to schedule timeout due to event base issue";
   }

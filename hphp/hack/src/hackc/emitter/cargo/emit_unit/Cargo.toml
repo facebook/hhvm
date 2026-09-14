@@ -14,7 +14,7 @@ path = "../../emit_unit.rs"
 ast_scope = { path = "../ast_scope" }
 bit-set = "0.11.1"
 bit-vec = "0.10.1"
-bitflags = { version = "2.13.1", features = ["serde", "std"], default-features = false }
+bitflags = { version = "2.13.2", features = ["serde", "std"], default-features = false }
 bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 constant_folder = { path = "../constant_folder" }
 core_utils_rust = { path = "../../../../utils/core" }

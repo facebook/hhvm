@@ -1057,7 +1057,7 @@ end
     Full_fidelity_schema.make_template_file
       ~transformations:[]
       ~filename:
-        (full_fidelity_path_prefix ^ "smart_constructors/smartConstructors.ml")
+        (full_fidelity_path_prefix ^ "smart_constructors/smart_constructors.ml")
       ~template:full_fidelity_smart_constructors_template
       ()
 end
@@ -1219,7 +1219,7 @@ module GenerateFFSyntaxSmartConstructors = struct
     ^ "
 open Sexplib.Std
 
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SC_S = Smart_constructors.SmartConstructors_S
 
 module ParserEnv = Full_fidelity_parser_env
 
@@ -1725,7 +1725,7 @@ module GenerateFFSmartConstructorsWrappers = struct
  "
     ^ "
 
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SC_S = Smart_constructors.SmartConstructors_S
 
 module SK = Full_fidelity_syntax_kind
 

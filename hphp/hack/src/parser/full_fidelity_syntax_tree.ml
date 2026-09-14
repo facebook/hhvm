@@ -23,7 +23,7 @@ module SyntaxError = Full_fidelity_syntax_error
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module WithSmartConstructors
-      (SCI : SmartConstructors.SmartConstructors_S
+      (SCI : Smart_constructors.SmartConstructors_S
                with type r = Syntax.t
                with module Token = Syntax.Token) =
   struct

@@ -20,7 +20,7 @@
  
  *)
 
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SC_S = Smart_constructors.SmartConstructors_S
 
 module SK = Full_fidelity_syntax_kind
 

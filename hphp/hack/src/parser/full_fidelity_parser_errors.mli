@@ -9,7 +9,7 @@
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
   module WithSmartConstructors
-      (SmartConstructors : SmartConstructors.SmartConstructors_S
+      (SmartConstructors : Smart_constructors.SmartConstructors_S
                              with type r = Syntax.t
                              with module Token = Syntax.Token) : sig
     type error_level =

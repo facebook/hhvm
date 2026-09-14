@@ -9,7 +9,7 @@
 open Sexplib.Std
 module Env = Full_fidelity_parser_env
 
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SC_S = Smart_constructors.SmartConstructors_S
 
 module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 

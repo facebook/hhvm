@@ -21,7 +21,7 @@
  *)
 open Sexplib.Std
 
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SC_S = Smart_constructors.SmartConstructors_S
 
 module ParserEnv = Full_fidelity_parser_env
 

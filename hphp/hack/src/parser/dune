@@ -124,7 +124,7 @@
   rust_lazy_trivia_ffi
   syntax_transforms
   ; from smart_constructors
-  smartConstructors
+  smart_constructors
   smartConstructorsWrappers
   syntax_smart_constructors)
  (libraries

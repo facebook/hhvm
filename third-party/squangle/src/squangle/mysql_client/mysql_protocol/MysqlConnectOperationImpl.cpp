@@ -6,10 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
+#include <folly/ScopeGuard.h>
+
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/Flags.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 
 using namespace std::chrono_literals;
@@ -300,6 +302,15 @@ void MysqlConnectOperationImpl::maybeStoreSSLSession() {
   });
 }
 
+void MysqlConnectOperationImpl::wakeCallerOnce() {
+  if (callerWoken_) {
+    return;
+  }
+  callerWoken_ = true;
+  conn().notify();
+  op().callConnectCallback();
+}
+
 void MysqlConnectOperationImpl::specializedCompleteOperation() {
   // Pass the callbacks to the Connection now that we are done with them
   conn().setCallbacks(std::move(callbacks_));
@@ -342,9 +353,7 @@ void MysqlConnectOperationImpl::specializedCompleteOperation() {
   conn().setKillOnQueryTimeout(getKillOnQueryTimeout());
   setConnConnectionContext(connection_context_);
 
-  conn().notify();
-
-  op().callConnectCallback();
+  wakeCallerOnce();
 
   // In case this operation didn't even get the chance to run, we still need
   // to remove the reference it added to the async client

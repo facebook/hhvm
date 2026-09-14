@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <folly/Function.h>
+#include <string_view>
+
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook::common::mysql_client::mysql_protocol {
@@ -68,6 +71,25 @@ class MysqlOperationImpl : virtual public OperationBase,
   // Overridden in child classes and invoked when the status is actionable. This
   // function should either completeOperation or waitForActionable.
   virtual void actionable() = 0;
+
+  // Runs `fn` on behalf of a noexcept libevent callback named `what`.  Logs
+  // anything it throws, records it as the operation's error if the operation
+  // does not already carry one, and completes the operation with
+  // `failureResult`, so that swallowing the exception cannot leave the caller
+  // waiting on an operation that will never complete.
+  void runCallbackGuarded(
+      std::string_view what,
+      OperationResult failureResult,
+      folly::FunctionRef<void()> fn) noexcept;
+
+  // Takes the operation off the event base.  Virtual because a subclass may own
+  // timers beyond the one AsyncTimeout this base knows about.
+  virtual void detachFromEventBase();
+
+  // How runCallbackGuarded finishes a failed callback.  Subclasses whose
+  // normal exits pair completion with waking a parked owner have to override
+  // this, so the recovery path honours the same contract as the rest of them.
+  virtual void completeOperationFromCallbackFailure(OperationResult result);
 
   // EventHandler override
   void handlerReady(uint16_t /*events*/) noexcept override;

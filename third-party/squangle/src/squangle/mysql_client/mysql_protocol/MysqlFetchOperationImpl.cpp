@@ -9,6 +9,8 @@
 #include <linux/sockios.h>
 #include <sys/ioctl.h>
 
+#include <folly/ScopeGuard.h>
+
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/Flags.h"

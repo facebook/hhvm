@@ -20,10 +20,39 @@ void MysqlSpecialOperationImpl::actionable() {
     auto result = (status == DONE) ? OperationResult::Succeeded
                                    : OperationResult::Failed; // ERROR
     completeOperation(result);
-    if (callback_) {
-      callback_(getOp(), result);
-    }
+    invokeCallbackOnce(result);
   }
+}
+
+void MysqlSpecialOperationImpl::completeOperationFromCallbackFailure(
+    OperationResult result) {
+  // completeOperation() runs consumer callbacks of its own and can throw, and
+  // the callback is owed either way: for a reset operation the pool's whole
+  // continuation lives in it, so skipping it leaves the pooled connect behind
+  // the reset waiting out its timeout.  Rethrowing hands the completion failure
+  // to runCallbackGuarded.
+  //
+  // The callback gets result(), not the result passed in.  Once the operation
+  // has completed, completeOperation() is a no-op and the recorded result is
+  // the real one -- reporting the recovery's failureResult instead would tell
+  // the callback a succeeded operation had failed.  On the path that does
+  // complete here the two are the same, because completeOperationInner() sets
+  // the result on its second line, before anything that can throw.
+  try {
+    completeOperation(result);
+  } catch (...) {
+    invokeCallbackOnce(this->result());
+    throw;
+  }
+  invokeCallbackOnce(this->result());
+}
+
+void MysqlSpecialOperationImpl::invokeCallbackOnce(OperationResult result) {
+  if (callbackInvoked_ || !callback_) {
+    return;
+  }
+  callbackInvoked_ = true;
+  callback_(getOp(), result);
 }
 
 void MysqlSpecialOperationImpl::specializedCompleteOperation() {
@@ -32,6 +61,11 @@ void MysqlSpecialOperationImpl::specializedCompleteOperation() {
 
 void MysqlSpecialOperationImpl::specializedTimeoutTriggered() {
   completeOperation(OperationResult::TimedOut);
+  // Same reason as the recovery path: completing without firing callback_
+  // strands whoever is waiting on it.  A timing-out reset operation would
+  // otherwise leave the pool operation behind it with neither a connection nor
+  // a failure.
+  invokeCallbackOnce(OperationResult::TimedOut);
 }
 
 void MysqlSpecialOperationImpl::specializedRun() {

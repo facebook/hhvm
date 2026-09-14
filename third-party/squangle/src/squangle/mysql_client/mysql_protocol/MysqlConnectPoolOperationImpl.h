@@ -88,6 +88,67 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
     MysqlConnectOperationImpl::timeoutHandler(false, true);
   }
 
+  // Completion in this class must always pair with signalWaiter(), and the
+  // recovery path is no different: completeOperation() can throw from consumer
+  // callbacks, and skipping the post leaves the owner asleep.  syncWait() is a
+  // timed wait, so the cost is the rest of the connect timeout and a spurious
+  // failure rather than a permanent hang -- still the failure this override
+  // exists to prevent.
+  //
+  // handoff_ is left as it is.  A connectionCallback() arriving after this
+  // finds handoff_ already out of Waiting, so its CAS fails and it completes
+  // inline through attemptSucceeded(), which is a no-op on an already-Completed
+  // operation.  Nothing is left undone either way.
+  void completeOperationFromCallbackFailure(OperationResult result) override {
+    // The connect wake-up is owed on both branches.  It does not touch baton_,
+    // so the race that gates signalWaiter() below does not apply to it, and the
+    // state this override returns early on is exactly the one the base class's
+    // wake-up exists for -- a throw out of specializedCompleteOperation after
+    // Completed was already set.
+    //
+    // signalWaiter() only when this call is the one completing the operation.
+    // Once it is already Completed the owner may have woken and run
+    // cleanupWait(), which resets baton_ on its own thread, so posting from
+    // here would race that reset.
+    //
+    // Skipping the post cannot strand an owner, but not for the reason it
+    // first looks like.  "Already Completed" does not imply "already
+    // signalled": everywhere else in this class the two are separate
+    // statements, and completeOperation() reaches a consumer-supplied logger
+    // that can throw between them.  It is safe because no baton is armed on
+    // any path that reaches here -- prepWait() is called only by
+    // SyncConnectionPool, and SyncMysqlClient has no event base, so it never
+    // attaches the handler or the timeout that drive runCallbackGuarded.
+    if (state() == OperationState::Completed) {
+      // Skipping the post is only safe while that invariant holds.  DFATAL
+      // rather than DCHECK: this is a reachability claim spanning several
+      // classes rather than a local invariant, so a change elsewhere could
+      // break it, and release builds are where the signal would be needed.
+      if (baton_) {
+        LOG(DFATAL) << "pool connect already completed with a waiter armed; "
+                       "the owner will wait out its timeout";
+      }
+      wakeCallerOnce();
+      return;
+    }
+
+    // Wake before posting, matching every path in this class that completes
+    // inline.  Were an owner ever parked here, the post would release it to run
+    // completeDeferred(), so the wake has to come first.  Only the wake, note:
+    // runCallbackGuarded still detaches and retires this operation after this
+    // returns, so the post is not the last thing to touch it.
+    //
+    // Not SCOPE_EXIT, for the same reason as the base class: its body is
+    // `noexcept` and wakeCallerOnce() runs a consumer callback.
+    try {
+      completeOperation(result);
+    } catch (...) {
+      dischargeWaiters();
+      throw;
+    }
+    dischargeWaiters();
+  }
+
   void attemptFailed(OperationResult result) override {
     ++attempts_made_;
     if (shouldCompleteOperation(result)) {
@@ -303,6 +364,21 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
   bool abandonRetry() override {
     auto expected = Handoff::RetryPending;
     return handoff_.compare_exchange_strong(expected, Handoff::Abandoned);
+  }
+
+  // Both the connect wake-up and the baton post are owed once this operation
+  // is finished.  wakeCallerOnce() runs the consumer's connect callback and can
+  // throw; signalWaiter() only posts a baton and cannot, and is still owed if
+  // the wake fails -- so the post goes in the wake's catch rather than after
+  // it.
+  void dischargeWaiters() {
+    try {
+      wakeCallerOnce();
+    } catch (...) {
+      signalWaiter();
+      throw;
+    }
+    signalWaiter();
   }
 
   void signalWaiter() {

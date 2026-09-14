@@ -95,9 +95,90 @@ void MysqlOperationImpl::waitForActionable() {
   registerHandler(event_mask);
 }
 
+void MysqlOperationImpl::completeOperationFromCallbackFailure(
+    OperationResult result) {
+  completeOperation(result);
+}
+
+void MysqlOperationImpl::detachFromEventBase() {
+  unregisterHandler();
+  cancelTimeout();
+}
+
+void MysqlOperationImpl::runCallbackGuarded(
+    std::string_view what,
+    OperationResult failureResult,
+    folly::FunctionRef<void()> fn) noexcept {
+  std::string error;
+  try {
+    fn();
+    return;
+  } catch (const std::exception& ex) {
+    error = ex.what();
+  } catch (...) {
+    error = "unknown exception";
+  }
+  LOG(ERROR) << "Exception in " << what << ": " << error;
+
+  // Recovery.  Each step is independent and separately guarded: this is a
+  // noexcept frame, so a second failure must not escape, and one step failing
+  // must not cost the others.
+  auto step = [&](std::string_view stage, auto&& body) noexcept {
+    try {
+      body();
+    } catch (const std::exception& ex) {
+      LOG(ERROR) << "Could not " << stage << " after " << what
+                 << " failed: " << ex.what();
+    } catch (...) {
+      LOG(ERROR) << "Could not " << stage << " after " << what << " failed";
+    }
+  };
+
+  // Swallowing the exception must not leave the caller waiting forever.  The
+  // retry path in a connect attempt unregisters the event handler and cancels
+  // both timeouts before re-arming them, so a throw in that window strands the
+  // operation with nothing left to drive it and no terminal state.
+  //
+  // The error is recorded only when there is nothing to lose by recording it.
+  // setAsyncClientError overwrites mysql_errno_/mysql_error_ unconditionally,
+  // and both halves of the condition matter: a completed operation may have
+  // succeeded, and a *pending* one may already carry a real server error --
+  // MysqlConnectOperationImpl::actionable() snapshots the MySQL errno before
+  // calling attemptFailed(), which is the very window this recovery exists
+  // for, so state alone would let SQ_INTERNAL_ERROR bury an "Access denied".
+  step("complete operation", [&] {
+    if (state() != OperationState::Completed && mysql_errno() == 0) {
+      setAsyncClientError(
+          static_cast<unsigned int>(SquangleErrno::SQ_INTERNAL_ERROR),
+          fmt::format("{} failed: {}", what, error));
+    }
+    completeOperationFromCallbackFailure(failureResult);
+  });
+
+  // Detach from the event base, which the completion above cannot be relied on
+  // to have done.  completeOperationInner sets Completed on its first line but
+  // only unregisters and cancels several statements later, so a throw in that
+  // window leaves the handler registered and the timeout armed while
+  // completeOperation has already become a no-op.  Retiring the operation
+  // below without this would leave a readiness event or timer able to re-enter
+  // these callbacks on an operation that is finished and gone.  Both calls are
+  // idempotent, so repeating them on the paths that did run costs nothing.
+  step("detach from the event base", [&] { detachFromEventBase(); });
+
+  // Retire the operation.  Skipping this leaves the client holding its
+  // shared_ptr in pending_.operations, so the operation is never retired and a
+  // drain or shutdown still counts it as in flight.  Repeating it is safe, but
+  // not because the operation has already left pending_.operations -- it has
+  // not, since removal happens later in cleanupCompletedOperations, so the
+  // contains() guard passes and the body runs again.  It is safe because
+  // to_remove is no longer empty, which suppresses a second runInThread, and
+  // because re-inserting into the set is a no-op.
+  step("retire operation", [&] { deferRemoveOperation(op_); });
+}
+
 void MysqlOperationImpl::handlerReady(uint16_t /*events*/) noexcept {
   // handlerReady is `noexcept` so we can't throw from it.
-  try {
+  runCallbackGuarded("handlerReady", OperationResult::Failed, [&] {
     DCHECK(conn().isInEventBaseThread());
 
     auto st = state();
@@ -109,22 +190,13 @@ void MysqlOperationImpl::handlerReady(uint16_t /*events*/) noexcept {
     } else {
       LOG(WARNING) << "handlerReady() called in unexpected state: " << st;
     }
-  } catch (const std::exception& ex) {
-    LOG(ERROR) << "Exception in handlerReady: " << ex.what();
-  } catch (...) {
-    LOG(ERROR) << "Unknown exception in handlerReady";
-  }
+  });
 }
 
 void MysqlOperationImpl::timeoutExpired() noexcept {
   // timeoutExpired is `noexcept` so we can't throw from it.
-  try {
-    timeoutTriggered();
-  } catch (const std::exception& ex) {
-    LOG(ERROR) << "Exception in timeoutExpired: " << ex.what();
-  } catch (...) {
-    LOG(ERROR) << "Unknown exception in timeoutExpired";
-  }
+  runCallbackGuarded(
+      "timeoutExpired", OperationResult::TimedOut, [&] { timeoutTriggered(); });
 }
 
 void MysqlOperationImpl::timeoutTriggered() {

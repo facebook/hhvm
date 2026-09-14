@@ -856,6 +856,85 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedPackageInfo) {
   );
 }
 
+// Checks that incremental builds reject changes to implicit family metadata.
+TEST(RepoFileTest, IncrementalBuildRejectsChangedImplicitPackageFamily) {
+  folly::test::TemporaryDirectory temp{"repo-file-incremental-package-info"};
+  auto const oldUseHHBBC = std::exchange(Cfg::Eval::UseHHBBC, false);
+  auto const oldEnableDecl = std::exchange(Cfg::Eval::EnableDecl, false);
+  SCOPE_EXIT {
+    Cfg::Eval::UseHHBBC = oldUseHHBBC;
+    Cfg::Eval::EnableDecl = oldEnableDecl;
+  };
+  auto const basePath = temp.path() / "base.hhbc";
+
+  PackageInfo basePackageInfo;
+  basePackageInfo.m_implicitPackageFamilies.emplace(
+    "prototypes",
+    PackageInfo::ImplicitPackageFamily{"www/prototypes/", {}, {}}
+  );
+  {
+    RepoFileBuilder builder{basePath.string(), true};
+    finishRepo(builder, {}, 1, &basePackageInfo);
+  }
+
+  auto const expectRejected = [&](const std::string& suffix, auto mutate) {
+    auto changedPackageInfo = basePackageInfo;
+    mutate(changedPackageInfo.m_implicitPackageFamilies.at("prototypes"));
+    auto const outputPath = temp.path() /
+      (std::string{"incremental-"} + suffix + ".hhbc");
+    EXPECT_THAT(
+      [&] {
+        RepoFileData base{basePath.string()};
+        RepoFileBuilder builder(outputPath.string(), true);
+        finishRepo(builder, {}, 2, &changedPackageInfo, &base);
+      },
+      ThrowsMessage<std::runtime_error>(
+        HasSubstr("base PackageInfo does not match the current build"))
+    );
+  };
+
+  expectRejected("path", [](auto& family) {
+    family.m_path = "www/other/";
+  });
+  expectRejected("includes", [](auto& family) {
+    family.m_includes.emplace("other");
+  });
+  expectRejected("soft-includes", [](auto& family) {
+    family.m_soft_includes.emplace("other-soft");
+  });
+}
+
+// Checks that repo serialization round-trips every implicit family field.
+TEST(RepoFileTest, RoundTripsImplicitPackageFamilies) {
+  folly::test::TemporaryDirectory temp{"repo-file-package-info"};
+  auto const repoPath = temp.path() / "repo.hhbc";
+
+  PackageInfo packageInfo;
+  PackageInfo::ImplicitPackageFamily family;
+  family.m_path = "www/prototypes/";
+  family.m_includes.emplace("intern");
+  family.m_soft_includes.emplace("soft");
+  packageInfo.m_implicitPackageFamilies.emplace(
+    "prototypes",
+    std::move(family)
+  );
+  {
+    RepoFileBuilder builder{repoPath.string()};
+    finishRepo(builder, {}, 1, &packageInfo);
+  }
+
+  RepoFile::init(repoPath.string());
+  SCOPE_EXIT { RepoFile::destroy(); };
+  auto const& roundTripped = RepoFile::packageInfo();
+  ASSERT_EQ(roundTripped.implicitPackageFamilies().size(), 1);
+  auto const& roundTrippedFamily =
+    roundTripped.implicitPackageFamilies().at("prototypes");
+  EXPECT_EQ(roundTrippedFamily.m_path, "www/prototypes/");
+  EXPECT_TRUE(roundTrippedFamily.m_includes.contains("intern"));
+  EXPECT_TRUE(roundTrippedFamily.m_soft_includes.contains("soft"));
+}
+
+// Checks that incremental builds accept equivalent package metadata.
 TEST(RepoFileTest, IncrementalBuildAcceptsEquivalentPackageInfo) {
   folly::test::TemporaryDirectory temp{"repo-file-incremental-package-info"};
   auto const oldUseHHBBC = std::exchange(Cfg::Eval::UseHHBBC, false);
@@ -883,6 +962,17 @@ TEST(RepoFileTest, IncrementalBuildAcceptsEquivalentPackageInfo) {
   deployment.m_soft_packages.emplace("soft-zeta");
   deployment.m_soft_packages.emplace("soft-alpha");
   packageInfo.m_deployments.emplace("intern", std::move(deployment));
+
+  PackageInfo::ImplicitPackageFamily family;
+  family.m_path = "www/prototypes/";
+  family.m_includes.emplace("zeta");
+  family.m_includes.emplace("alpha");
+  family.m_soft_includes.emplace("soft-zeta");
+  family.m_soft_includes.emplace("soft-alpha");
+  packageInfo.m_implicitPackageFamilies.emplace(
+    "prototypes",
+    std::move(family)
+  );
 
   {
     RepoFileBuilder builder{basePath.string(), true};

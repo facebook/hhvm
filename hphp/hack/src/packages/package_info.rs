@@ -90,15 +90,8 @@ impl PackageInfo {
         }
 
         if !enable_implicit_packages {
-            // The feature is gated off (the default). An `[implicit_packages]`
-            // stanza is a hard error, and we do not process families any
-            // further -- so a config that declares one behaves as if the
-            // section were absent (besides the error). This keeps the feature
-            // fully inert until it is explicitly enabled in .hhconfig.
-            let disabled: Vec<_> = config.implicit_packages.keys().cloned().collect();
-            for name in &disabled {
-                errors.push(Error::implicit_packages_disabled(name));
-            }
+            // Keep the feature inert when gated off: ignore family declarations
+            // before validating or transporting package configuration.
             config.implicit_packages.clear();
         } else {
             // Normalize implicit-package family paths to the same leading-`//`-
@@ -484,19 +477,13 @@ mod test {
     #[test]
     fn test_implicit_packages_disabled() {
         // With the feature gated off (the default), an [implicit_packages]
-        // stanza is a hard error and the family is not processed.
+        // stanza is ignored and the family is not processed.
         let test_path = SRCDIR.as_path().join("tests/package-implicit.toml");
         let info = PackageInfo::from_text(false, false, test_path.to_str().unwrap()).unwrap();
-        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
-        assert_eq!(
-            errors,
-            vec![String::from(
-                "[implicit_packages.prototypes] is not permitted: set enable_implicit_packages = true in .hhconfig to use implicit packages",
-            )]
-        );
+        assert!(info.errors().is_empty());
         // The family is dropped, so nothing is carried downstream.
         assert!(info.implicit_packages().is_empty());
-        // Rejecting the stanza is otherwise inert: the declared package still
+        // Ignoring the stanza is otherwise inert: the declared package still
         // parses, and the family does not leak in as a regular package.
         assert_eq!(
             info.packages()
@@ -526,14 +513,32 @@ mod test {
     fn test_implicit_deployment_closure() {
         // A deployment may name a family (expands to all members) or an
         // individual member `F.D`; both normalize to the family `F` for the
-        // transitive-closure check, so deploying the family together with its
-        // hard include `intern` is complete.
+        // transitive-closure check, so deploying it together with its hard
+        // include `intern` is complete.
         let test_path = SRCDIR.as_path().join("tests/package-implicit-deploy.toml");
         let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
         assert!(
             info.errors().is_empty(),
             "unexpected errors: {:?}",
             info.errors().iter().map(|e| e.msg()).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn test_implicit_family_references_must_be_defined() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-undefined-include.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert_eq!(
+            info.errors()
+                .iter()
+                .map(|error| error.msg())
+                .collect::<Vec<_>>(),
+            vec![
+                "Undefined package: missing_hard",
+                "Undefined package: missing_soft",
+            ]
         );
     }
 

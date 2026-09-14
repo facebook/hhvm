@@ -15,6 +15,7 @@ mod ffi {
     struct PackageInfo {
         packages: Vec<PackageMapEntry>,
         deployments: Vec<DeploymentMapEntry>,
+        implicit_package_families: Vec<ImplicitPackageFamilyMapEntry>,
         errors: Vec<String>,
     }
     struct PackageMapEntry {
@@ -34,17 +35,29 @@ mod ffi {
         packages: Vec<String>,
         soft_packages: Vec<String>,
     }
+    struct ImplicitPackageFamilyMapEntry {
+        name: String,
+        family: ImplicitPackageFamily,
+    }
+    struct ImplicitPackageFamily {
+        path: String,
+        includes: Vec<String>,
+        soft_includes: Vec<String>,
+    }
     extern "Rust" {
-        pub fn package_info(packages_toml: &CxxString) -> PackageInfo;
+        pub fn package_info(
+            packages_toml: &CxxString,
+            enable_implicit_packages: bool,
+        ) -> PackageInfo;
     }
 }
 
-pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
+pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -> ffi::PackageInfo {
     // HHVM should not perform validation of include_paths, so invoking from_text_non_strict.
-    // `implicit_packages` is passed through permissively (true): the HHVM runtime does not yet
-    // consume implicit-package families (they are dropped by the conversion below), so this
-    // preserves the runtime's existing behavior of ignoring the section rather than erroring on it.
-    let s = packages::PackageInfo::from_text_non_strict(true, &packages_toml.to_string());
+    let s = packages::PackageInfo::from_text_non_strict(
+        enable_implicit_packages,
+        &packages_toml.to_string(),
+    );
     match s {
         Ok(info) => {
             let convert = |v: Option<&packages::NameSet>| {
@@ -84,10 +97,23 @@ pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
                         .collect()
                 })
                 .unwrap_or_default();
+            let implicit_package_families = info
+                .implicit_packages()
+                .iter()
+                .map(|(name, family)| ffi::ImplicitPackageFamilyMapEntry {
+                    name: name.get_ref().into(),
+                    family: ffi::ImplicitPackageFamily {
+                        path: family.path.get_ref().into(),
+                        includes: convert(family.includes.as_ref()),
+                        soft_includes: convert(family.soft_includes.as_ref()),
+                    },
+                })
+                .collect();
             let errors = info.errors().iter().map(|e| e.msg()).collect();
             ffi::PackageInfo {
                 packages,
                 deployments,
+                implicit_package_families,
                 errors,
             }
         }

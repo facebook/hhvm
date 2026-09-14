@@ -46,14 +46,18 @@ folly::SharedMutex s_patternCacheLock;
 
 }
 
-PackageInfo::PackageInfo(PackageMap& packages,
-                         DeploymentMap& deployments)
+PackageInfo::PackageInfo(const PackageMap& packages,
+                         const DeploymentMap& deployments,
+                         const ImplicitPackageFamilyMap& implicitPackageFamilies)
   : m_packages(packages)
-  , m_deployments(deployments) {}
+  , m_deployments(deployments)
+  , m_implicitPackageFamilies(implicitPackageFamilies) {}
 
-PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
+PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
+                                  bool enableImplicitPackages) {
   PackageMap packages;
   DeploymentMap deployments;
+  ImplicitPackageFamilyMap implicitPackageFamilies;
 
   try {
     if (!std::filesystem::exists(path)) {
@@ -65,7 +69,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
       return defaults();
     }
 
-    auto info = package::package_info(path.string());
+    auto info = package::package_info(path.string(), enableImplicitPackages);
 
     auto const convert = [&] (auto const& v) {
       hphp_vector_string_set result;
@@ -94,6 +98,16 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
                             convert(d.deployment.soft_packages),
                           });
     }
+    for (auto& f : info.implicit_package_families) {
+      implicitPackageFamilies.emplace(
+        std::string(f.name),
+        ImplicitPackageFamily {
+          std::string(f.family.path),
+          convert(f.family.includes),
+          convert(f.family.soft_includes),
+        }
+      );
+    }
     if (info.errors.size() > 0) {
       std::vector<folly::StringPiece> packageConfigErrors;
       for (auto& error : info.errors) {
@@ -102,7 +116,11 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
       Logger::FError("Error parsing {}: {}", path.c_str(), folly::join("\n", packageConfigErrors));
     }
 
-    return PackageInfo(packages, deployments);
+    return PackageInfo(
+      packages,
+      deployments,
+      implicitPackageFamilies
+    );
   } catch (const std::exception& e) {
     Logger::Warning(
       "Exception %s when reading: %s. Continuing with the empty package specification.",
@@ -133,22 +151,35 @@ folly::dynamic mangleVecForCacheKey(
 } // namespace
 
 std::string PackageInfo::mangleForCacheKey() const {
-  folly::dynamic result = folly::dynamic::object();
+  folly::dynamic packagesAndDeployments = folly::dynamic::object();
 
   for (auto& [name, package] : packages()) {
     folly::dynamic entry = folly::dynamic::object();
     entry["include_paths"] = mangleVecForCacheKey(package.m_include_paths);
     entry["includes"] = mangleVecForCacheKey(package.m_includes);
     entry["soft_includes"] = mangleVecForCacheKey(package.m_soft_includes);
-    result[name] = entry;
+    packagesAndDeployments[name] = entry;
   }
 
   for (auto& [name, deployment] : deployments()) {
     folly::dynamic entry = folly::dynamic::object();
     entry["packages"] = mangleVecForCacheKey(deployment.m_packages);
     entry["soft_packages"] = mangleVecForCacheKey(deployment.m_soft_packages);
-    result[name] = entry;
+    packagesAndDeployments[name] = entry;
   }
+
+  folly::dynamic families = folly::dynamic::object();
+  for (auto& [name, family] : implicitPackageFamilies()) {
+    folly::dynamic entry = folly::dynamic::object();
+    entry["path"] = family.m_path;
+    entry["includes"] = mangleVecForCacheKey(family.m_includes);
+    entry["soft_includes"] = mangleVecForCacheKey(family.m_soft_includes);
+    families[name] = entry;
+  }
+  auto result = folly::dynamic::array(
+    std::move(packagesAndDeployments),
+    std::move(families)
+  );
 
   // By default the ordering of keys in dynamic objects is unspecified, and
   // in dbg builds we randomize the order to ensure no one is depending on it.

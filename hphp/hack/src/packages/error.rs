@@ -68,10 +68,6 @@ pub enum Error {
         member: String,
         span: (usize, usize),
     },
-    ImplicitPackagesDisabled {
-        name: String,
-        span: (usize, usize),
-    },
 }
 
 impl Error {
@@ -164,14 +160,6 @@ impl Error {
         }
     }
 
-    pub fn implicit_packages_disabled(family: &Spanned<String>) -> Self {
-        let Range { start, end } = family.span();
-        Self::ImplicitPackagesDisabled {
-            name: family.get_ref().into(),
-            span: (start, end),
-        }
-    }
-
     pub fn package_name_invalid(package: &Spanned<String>) -> Self {
         let Range { start, end } = package.span();
         Self::PackageNameInvalid {
@@ -210,8 +198,7 @@ impl Error {
             | Self::PackageNamePrefixCollision { span, .. }
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
-            | Self::ImplicitMemberNameInvalid { span, .. }
-            | Self::ImplicitPackagesDisabled { span, .. } => *span,
+            | Self::ImplicitMemberNameInvalid { span, .. } => *span,
         }
     }
 
@@ -323,13 +310,6 @@ impl Display for Error {
                     f,
                     "Implicit package member segment {} in {} must be a valid Hack identifier",
                     member, name
-                )?;
-            }
-            Self::ImplicitPackagesDisabled { name, .. } => {
-                write!(
-                    f,
-                    "[implicit_packages.{}] is not permitted: set enable_implicit_packages = true in .hhconfig to use implicit packages",
-                    name
                 )?;
             }
         };

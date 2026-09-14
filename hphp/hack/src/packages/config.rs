@@ -296,6 +296,7 @@ impl Config {
             // as for a hand-written package. Every member shares these includes,
             // so checking the family once suffices for all (current and future)
             // members.
+            check_packages_are_defined(errors, &fam.includes, &fam.soft_includes);
             check_package_includes_are_transitively_closed(
                 errors,
                 fname,

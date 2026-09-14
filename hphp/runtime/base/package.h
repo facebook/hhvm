@@ -74,13 +74,33 @@ struct PackageInfo {
     }
   };
 
+  struct ImplicitPackageFamily {
+    std::string m_path;
+    PackageSet m_includes;
+    PackageSet m_soft_includes;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_path)
+        (m_includes, stdltstr{})
+        (m_soft_includes, stdltstr{})
+        ;
+    }
+  };
+
   using PackageMap = hphp_vector_map<std::string, Package>;
   using DeploymentMap = hphp_vector_map<std::string, Deployment>;
+  using ImplicitPackageFamilyMap =
+    hphp_vector_map<std::string, ImplicitPackageFamily>;
 
   const PackageMap& packages() const { return m_packages; }
   const DeploymentMap& deployments() const { return m_deployments; }
+  const ImplicitPackageFamilyMap& implicitPackageFamilies() const {
+    return m_implicitPackageFamilies;
+  }
 
-  PackageInfo(PackageMap& packages, DeploymentMap& deployments);
+  PackageInfo(const PackageMap& packages,
+              const DeploymentMap& deployments,
+              const ImplicitPackageFamilyMap& implicitPackageFamilies);
   PackageInfo() = default;
 
   const Deployment* getActiveDeployment() const;
@@ -91,15 +111,18 @@ struct PackageInfo {
   template <typename SerDe> void serde(SerDe& sd) {
     sd(m_packages, stdltstr{})
       (m_deployments, stdltstr{})
+      (m_implicitPackageFamilies, stdltstr{})
       ;
   }
 
-  static PackageInfo fromFile(const std::filesystem::path&);
+  static PackageInfo fromFile(const std::filesystem::path&,
+                              bool enableImplicitPackages);
   static PackageInfo defaults();
 
 public:
   PackageMap m_packages;
   DeploymentMap m_deployments;
+  ImplicitPackageFamilyMap m_implicitPackageFamilies;
 
 };
 

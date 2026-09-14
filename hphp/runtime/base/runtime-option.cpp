@@ -550,7 +550,10 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file), m_in
   if (!m_path.empty()) {
       m_repo = std::filesystem::canonical(m_path.parent_path());
   }
-  m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / Cfg::Eval::PackagesTomlFileName);
+  m_flags.m_packageInfo = PackageInfo::fromFile(
+    m_repo / Cfg::Eval::PackagesTomlFileName,
+    m_flags.EnableImplicitPackages
+  );
   calcCacheKey();
   calcAutoloadDB();
   m_flags.calcCachedQuery();

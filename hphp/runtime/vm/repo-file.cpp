@@ -710,6 +710,13 @@ void validateIncrementalPackageInfo(
     return left.m_packages == right.m_packages &&
       left.m_soft_packages == right.m_soft_packages;
   };
+  auto const sameImplicitPackageFamily = [](
+      const PackageInfo::ImplicitPackageFamily& left,
+      const PackageInfo::ImplicitPackageFamily& right) {
+    return left.m_path == right.m_path &&
+      left.m_includes == right.m_includes &&
+      left.m_soft_includes == right.m_soft_includes;
+  };
 
   if (!sameMap(
         basePackageInfo.packages(),
@@ -720,6 +727,11 @@ void validateIncrementalPackageInfo(
         basePackageInfo.deployments(),
         packageInfo.deployments(),
         sameDeployment
+      ) ||
+      !sameMap(
+        basePackageInfo.implicitPackageFamilies(),
+        packageInfo.implicitPackageFamilies(),
+        sameImplicitPackageFamily
       )) {
     throw std::runtime_error(
       "Incremental RepoFile base PackageInfo does not match the current build"

@@ -1777,6 +1777,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Killswitch for the class<T> type. When false, lowerer and direct decl parser
   erase it to classname<T>.
 
+- bool Hack.Lang.EnableImplicitPackages = false, UNKNOWN, repooptionsflag(Parser)
+
 - bool Hack.Lang.DisallowNonAnnotatedMemoize = false, maxt, repooptionsflag(Parser)|hackc(parser)
 
   Disallow non annotated <<__Memoize>>. Will throw for such.

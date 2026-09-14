@@ -1,0 +1,6 @@
+[packages]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["missing_hard"]
+soft_includes = ["missing_soft"]

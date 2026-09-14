@@ -11,7 +11,7 @@ license = "MIT"
 path = "../direct_decl_smart_constructors.rs"
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 escaper = { path = "../../utils/escaper" }
 flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
 hash = { path = "../../utils/hash" }

@@ -14,7 +14,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 deps_rust = { path = "../../../deps/cargo/deps_rust" }
 file_info = { path = "../../../deps/rust/file_info" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

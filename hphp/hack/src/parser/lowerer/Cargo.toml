@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.20.3", features = ["allocator_api", "collections"] }
 escaper = { path = "../../utils/escaper" }
 hash = { path = "../../utils/hash" }

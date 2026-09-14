@@ -11,5 +11,5 @@ license = "MIT"
 path = "../lib.rs"
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 write_bytes-macro = { path = "../write_bytes-macro" }

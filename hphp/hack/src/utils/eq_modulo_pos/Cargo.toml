@@ -12,7 +12,7 @@ path = "eq_modulo_pos.rs"
 
 [dependencies]
 arena_collections = { path = "../../arena_collections" }
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 eq_modulo_pos_derive = { path = "../eq_modulo_pos_derive" }
 hcons = { path = "../../hcons" }
 indexmap = { version = "2.14.2", features = ["arbitrary", "rayon", "serde"] }

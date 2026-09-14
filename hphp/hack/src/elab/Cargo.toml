@@ -12,7 +12,7 @@ path = "elab.rs"
 
 [dependencies]
 bitflags = { version = "2.13.1", features = ["serde", "std"], default-features = false }
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 elaborate_namespaces_visitor = { path = "../naming/cargo/elaborate_namespaces" }
 hack_macros = { path = "../utils/hack_macros/cargo/hack_macros" }
 hash = { path = "../utils/hash" }

@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../string_utils.rs"
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 escaper = { path = "../../../../utils/escaper" }
 libc = "0.2.186"
 naming_special_names_rust = { path = "../../../../naming" }

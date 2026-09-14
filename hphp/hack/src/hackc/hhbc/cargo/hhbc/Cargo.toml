@@ -12,7 +12,7 @@ path = "../../lib.rs"
 
 [dependencies]
 bitflags = { version = "2.13.1", features = ["serde"], default-features = false }
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 emit_opcodes_macro = { path = "../emit_opcodes_macro" }
 ffi = { path = "../../../ffi/ffi" }
 hash = { path = "../../../../utils/hash" }

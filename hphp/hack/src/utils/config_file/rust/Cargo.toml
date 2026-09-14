@@ -11,7 +11,7 @@ license = "MIT"
 path = "config_file.rs"
 
 [dependencies]
-bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
 oxidized = { path = "../../../oxidized" }
 regex = "1.13.1"
 serde_json = { version = "1.0.151", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

@@ -166,7 +166,7 @@ let test_concurrent_parser () =
   ()
 
 let () =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   test_decl_provider ();
   test_concurrent_parser ();
   ()

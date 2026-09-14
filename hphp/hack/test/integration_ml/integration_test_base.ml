@@ -66,7 +66,7 @@ let test_init_common ?(hhi_files = []) () =
 
   Unix.putenv "HH_TEST_MODE" "1";
   Printexc.record_backtrace true;
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
@@ -375,7 +375,7 @@ module Client = struct
   let with_env ~(custom_config : ServerConfig.t option) (f : env -> unit) : unit
       =
     Printexc.record_backtrace true;
-    EventLogger.init_fake ();
+    Event_logger.init_fake ();
     Tempfile.with_real_tempdir @@ fun root ->
     Tempfile.with_real_tempdir @@ fun hhi_root ->
     Tempfile.with_real_tempdir @@ fun tmp ->

@@ -963,7 +963,7 @@ let main_hack
     : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
 
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config

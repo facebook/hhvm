@@ -187,7 +187,7 @@ let test_ten_changed_files () : bool Lwt.t =
 
 let () =
   Printexc.record_backtrace true;
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   let tests =
     [
       ( "test_files_to_recheck_uses_latest_section",

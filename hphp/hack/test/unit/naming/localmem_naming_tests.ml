@@ -410,7 +410,7 @@ let tests =
   ]
 
 let () =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Typing_deps.trace := false;
   (* trace=false so compute_tast doesn't write to sharedmem *)
   tests |> Unit_test.run_all

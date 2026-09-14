@@ -162,7 +162,7 @@ let rec shm_dir_init config ~num_workers = function
         hh_shared_init ~config ~shm_dir:(Some shm_dir) ~num_workers
       with
       | Less_than_minimum_available avail ->
-        EventLogger.(
+        Event_logger.(
           log_if_initialized (fun () ->
               sharedmem_less_than_minimum_available
                 ~shm_dir
@@ -184,13 +184,13 @@ let rec shm_dir_init config ~num_workers = function
         let reason =
           Utils.spf "Unix error%s: %s" fn_string (Unix.error_message e)
         in
-        EventLogger.(
+        Event_logger.(
           log_if_initialized (fun () ->
               sharedmem_failed_to_use_shm_dir ~shm_dir ~reason));
         Hh_logger.log "Failed to use shm dir `%s`: %s" shm_dir reason;
         shm_dir_init config ~num_workers shm_dirs
       | Failed_to_use_shm_dir reason ->
-        EventLogger.(
+        Event_logger.(
           log_if_initialized (fun () ->
               sharedmem_failed_to_use_shm_dir ~shm_dir ~reason));
         Hh_logger.log "Failed to use shm dir `%s`: %s" shm_dir reason;
@@ -202,7 +202,7 @@ let init config ~num_workers =
   let fst =
     try anonymous_init config ~num_workers with
     | Failed_anonymous_memfd_init ->
-      EventLogger.(
+      Event_logger.(
         log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
       Hh_logger.log "Failed to use anonymous memfd init";
       shm_dir_init config ~num_workers config.shm_dirs
@@ -324,7 +324,7 @@ module SMTelemetry = struct
     let w = Obj.reachable_words r in
     w * (Sys.word_size / 8)
 
-  let init_done () = EventLogger.sharedmem_init_done (heap_size ())
+  let init_done () = Event_logger.sharedmem_init_done (heap_size ())
 end
 
 module GC = struct
@@ -355,7 +355,7 @@ module GC = struct
         old_size
         new_size
         time_taken;
-      EventLogger.sharedmem_gc_ran effort old_size new_size time_taken
+      Event_logger.sharedmem_gc_ran effort old_size new_size time_taken
     )
 end
 

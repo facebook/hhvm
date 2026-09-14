@@ -942,7 +942,7 @@ let check_and_run_loop_
   let env = update_status env monitor_config in
   if not has_client then
     (* Note: this call merely reads from disk; it doesn't go via the slow HackEventLogger. *)
-    let () = EventLogger.recheck_disk_files () in
+    let () = Event_logger.recheck_disk_files () in
     env
   else
     let (fd, _) =

@@ -365,7 +365,7 @@ let make_dep_to_symbol_map ctx options (files : Relative_path.Set.t) :
 (** Initialize a number of backend structures and global states necessary
   for the typechecker to function. *)
 let init (hhi_root : Path.t) config : Provider_context.t =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   let (_ : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in

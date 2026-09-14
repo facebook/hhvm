@@ -62,7 +62,7 @@ let run_daemon (scuba_table, roots) (ic, oc) =
   let roots = List.map roots ~f:Path.to_string in
   let env = Dfind_env.make roots in
   List.iter roots ~f:(Dfind_add_file.path env);
-  EventLogger.dfind_ready scuba_table t;
+  Event_logger.dfind_ready scuba_table t;
   Marshal_tools.to_fd_with_preamble outfd Ready |> ignore;
   ignore @@ Hh_logger.log_duration "Initialization" t;
   let acc = ref SSet.empty in

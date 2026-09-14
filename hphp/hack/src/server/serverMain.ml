@@ -1046,7 +1046,7 @@ let program_init genv env =
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   Server_progress.write "wrapping up init...";
   Server_notifier.wait_until_ready genv.notifier;
-  EventLogger.set_init_type init_type;
+  Event_logger.set_init_type init_type;
   let telemetry =
     Server_utils.log_and_get_sharedmem_load_telemetry ()
     |> Telemetry.object_opt ~key:"init_error" ~value:init_error_telemetry

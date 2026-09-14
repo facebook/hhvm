@@ -167,5 +167,5 @@ let main args files =
 
 let () =
   let args = Full_fidelity_parse_args.parse_args () in
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   main args args.Full_fidelity_parse_args.files

@@ -226,7 +226,7 @@ let read_and_process_job ic oc : job_outcome =
         (Exception.wrap e |> Exception.to_string |> Exception.clean_stack)
     in
     Hh_logger.log "%s" msg;
-    EventLogger.log_if_initialized (fun () ->
+    Event_logger.log_if_initialized (fun () ->
         Hack_event_logger.invariant_violation_bug msg);
     `Error Exit_status.Type_error
   | exn ->
@@ -234,7 +234,7 @@ let read_and_process_job ic oc : job_outcome =
     Hh_logger.log
       "WORKER_EXCEPTION %s"
       (Exception.to_string e |> Exception.clean_stack);
-    EventLogger.log_if_initialized (fun () ->
+    Event_logger.log_if_initialized (fun () ->
         Hack_event_logger.worker_exception e);
     (* What exit code should we emit for an uncaught exception?
        The ocaml runtime emits exit code 2 for uncaught exceptions.
@@ -359,7 +359,7 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
  * does not clone a process for each incoming job. *)
 let unix_worker_main_no_clone restore (state, controller_fd) (ic, oc) =
   (* T83401330: Long-lived workers are not production ready because
-     they will not flush their logs often enough (c.f. EventLogger.flush).
+     they will not flush their logs often enough (c.f. Event_logger.flush).
      This can be addressed in this file, or in the user code that needs
      to log. *)
   restore state;

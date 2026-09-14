@@ -854,7 +854,7 @@ let () =
       }
   in
   let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Warn;
   Unit_test.run_all
     [

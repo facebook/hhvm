@@ -10,10 +10,10 @@
 (* The full type ClientCommand.command refers to environment types in
  * other client modules like ClientStart.env, ClientBuild.env, etc. If
  * we want to do logging from, e.g. inside ClientBuild, then the fact
- * that EventLogger's logging functions take the current client
+ * that Event_logger's logging functions take the current client
  * command as an argument, this creates a circular dependency
  *
- * ClientBuild -> EventLogger -> ClientCommand
+ * ClientBuild -> Event_logger -> ClientCommand
  *      ^-------------------------------v
  *
  * To avoid this, we have here a stripped-down version of

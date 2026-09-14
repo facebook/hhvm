@@ -251,5 +251,5 @@ let tests args =
 let () =
   Daemon.check_entry_point ();
   let args = Args.parse () in
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Unit_test.run_all (tests args)

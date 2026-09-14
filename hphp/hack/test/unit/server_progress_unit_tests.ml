@@ -1305,7 +1305,7 @@ let test_filter_warnings_generated () : bool =
 
 let () =
   Printexc.record_backtrace true;
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Unit_test.run_all
     [
       ("test_completed", (fun () -> Lwt_main.run (test_completed ())));

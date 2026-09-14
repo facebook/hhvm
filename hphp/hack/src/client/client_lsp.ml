@@ -4916,7 +4916,7 @@ let handle_deferred_check
 (** Called once a second but only when there are no pending messages from client
 or clientIdeDaemon *)
 let handle_tick ~(state : state ref) : result_telemetry option Lwt.t =
-  EventLogger.recheck_disk_files ();
+  Event_logger.recheck_disk_files ();
   Hack_event_logger.Memory.profile_if_needed ();
   let%lwt () = try_open_errors_file ~state in
   let (promise : unit Lwt.t) = Event_logger_lwt.flush () in

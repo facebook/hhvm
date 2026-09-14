@@ -551,7 +551,7 @@ let () =
       exit 0
     end
   in
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   let file = Path.make file in
   let auto_namespace_map = !auto_namespace_map in
   let enable_xhp_class_modifier = !enable_xhp_class_modifier in

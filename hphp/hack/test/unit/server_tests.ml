@@ -328,7 +328,7 @@ let tests =
   ]
 
 let () =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   (* The parsing service needs shared memory to be set up *)
   let config =
     SharedMem.

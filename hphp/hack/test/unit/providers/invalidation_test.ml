@@ -33,7 +33,7 @@ let change_class path name =
     }
 
 let f =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   let repo =
     [
       ( "a.php",

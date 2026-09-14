@@ -1356,7 +1356,7 @@ let serve
     dbg_set_activity ~key:"flush" "flush";
     Lwt.async Event_logger_lwt.flush;
     dbg_set_activity ~key:"flush" "recheck";
-    EventLogger.recheck_disk_files ();
+    Event_logger.recheck_disk_files ();
     flush_event_logger ()
   in
   let rec pump_stdin (message_queue : message_queue) : unit Lwt.t =

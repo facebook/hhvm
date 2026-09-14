@@ -124,7 +124,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.one_second,
         fun ~env ->
-          EventLogger.recheck_disk_files ();
+          Event_logger.recheck_disk_files ();
           env );
       ( Periodical.one_minute *. 5.,
         fun ~env ->
@@ -143,7 +143,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.one_hour *. 3.,
         fun ~env ->
-          EventLogger.log_gc_stats ();
+          Event_logger.log_gc_stats ();
           env );
       ( Periodical.always,
         fun ~env ->
@@ -151,7 +151,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           env );
       ( Periodical.always,
         fun ~env ->
-          EventLogger.flush ();
+          Event_logger.flush ();
           env );
       ( Periodical.one_day,
         fun ~env ->

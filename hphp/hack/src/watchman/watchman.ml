@@ -50,20 +50,20 @@ end = struct
   let assert_no_error obj =
     (try
        let warning = J.get_string_val "warning" obj in
-       EventLogger.watchman_warning warning;
+       Event_logger.watchman_warning warning;
        Hh_logger.log "Watchman warning: %s\n" warning
      with
     | J.Not_found -> ());
     (try
        let error = J.get_string_val "error" obj in
-       EventLogger.watchman_error error;
+       Event_logger.watchman_error error;
        raise @@ T.Watchman_error error
      with
     | J.Not_found -> ());
     try
       let canceled = J.get_bool_val "canceled" obj in
       if canceled then (
-        EventLogger.watchman_error "Subscription canceled by watchman";
+        Event_logger.watchman_error "Subscription canceled by watchman";
         raise @@ T.Subscription_canceled_by_watchman
       ) else
         ()
@@ -214,7 +214,7 @@ end = struct
           ~do_:(fun _ -> Buffered_line_reader.get_next_line reader)
           ~timeout
           ~on_timeout:(fun (_ : Timeout.timings) ->
-            let () = EventLogger.watchman_timeout () in
+            let () = Event_logger.watchman_timeout () in
             raise Read_payload_too_long)
 
   (** Asks watchman for the path to the socket file *)
@@ -810,12 +810,12 @@ module Watchman_actual : Watchman_sig.S = struct
         with
         | None ->
           Hh_logger.log "Reestablishing watchman subscription failed.";
-          EventLogger.watchman_connection_reestablishment_failed ();
+          Event_logger.watchman_connection_reestablishment_failed ();
           Watchman_dead
             { dead_env with reinit_attempts = dead_env.reinit_attempts + 1 }
         | Some env ->
           Hh_logger.log "Watchman connection reestablished.";
-          EventLogger.watchman_connection_reestablished ();
+          Event_logger.watchman_connection_reestablished ();
           Watchman_alive env
       ) else
         instance
@@ -824,7 +824,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
   let close_channel_on_instance env =
     close env;
-    EventLogger.watchman_died_caught ();
+    Event_logger.watchman_died_caught ();
     (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
 
   let with_instance instance ~try_to_restart ~on_alive ~on_dead =
@@ -868,7 +868,7 @@ module Watchman_actual : Watchman_sig.S = struct
          * channel when that happens since we never had a useable channel
          * to start with. *)
         Hh_logger.log "Watchman bad file descriptor.";
-        EventLogger.watchman_died_caught ();
+        Event_logger.watchman_died_caught ();
 
         (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
       | End_of_file ->
@@ -885,7 +885,7 @@ module Watchman_actual : Watchman_sig.S = struct
         close_channel_on_instance env
       | exn ->
         let msg = Exception.to_string (Exception.wrap exn) in
-        EventLogger.watchman_uncaught_failure msg;
+        Event_logger.watchman_uncaught_failure msg;
         raise Exit_status.(Exit_with Watchman_failed)
     in
     fun instance source f ->

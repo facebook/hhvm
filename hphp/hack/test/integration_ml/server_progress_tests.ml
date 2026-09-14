@@ -1150,7 +1150,7 @@ let test_server_invalid_config_key () : bool Lwt.t =
 
 let () =
   Printexc.record_backtrace true;
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   let tests =
     [
       ("test_start_stop", test_start_stop);

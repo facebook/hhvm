@@ -435,7 +435,7 @@ let test_eden_preprocess_early_decision temp_dir =
   true
 
 let () =
-  EventLogger.init_fake ();
+  Event_logger.init_fake ();
   Relative_path.(set_path_prefix Root (Path.make "/tmp"));
   Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
   let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in

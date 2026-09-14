@@ -40,7 +40,7 @@ let default_config =
     heap_size = 20 * gig;
     hash_table_pow = 18;
     (* 1 << 18 *)
-    shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
+    shm_dirs = [Global_config.shm_dir; Global_config.tmp_dir];
     shm_use_sharded_hashtbl = false;
     shm_cache_size = -1 (* eviction disabled *);
     shm_min_avail = gig / 2;

@@ -94,7 +94,7 @@ module Program = struct
         Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
           (Relative_path.suffix ServerConfig.repo_config_path)
-          GlobalConfig.program_name;
+          Global_config.program_name;
 
         (* TODO: Notify the server monitor directly about this. *)
         Exit.exit Exit_status.Hhconfig_changed
@@ -109,7 +109,7 @@ module Program = struct
       Hh_logger.log
         "%s changed; please restart %s.\n"
         (Relative_path.suffix Package_config.repo_config_path)
-        GlobalConfig.program_name;
+        Global_config.program_name;
       Exit.exit Exit_status.Package_config_changed
     end
 end

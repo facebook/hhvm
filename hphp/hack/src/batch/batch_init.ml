@@ -31,7 +31,7 @@ let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
     Exit.exit Exit_status.Worker_not_found_exception
 
 let make_tmp_dir () =
-  let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "files") in
+  let tmpdir = Path.make (Tmp.temp_dir Global_config.tmp_dir "files") in
   Relative_path.set_path_prefix Relative_path.Tmp tmpdir
 
 let make_hhi_dir () =

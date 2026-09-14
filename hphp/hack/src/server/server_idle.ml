@@ -171,7 +171,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
             ~f:
               begin
                 fun fn ->
-                  let fn = Filename.concat GlobalConfig.tmp_dir fn in
+                  let fn = Filename.concat Global_config.tmp_dir fn in
                   if
                     (try Sys.is_directory fn with
                     | _ -> false)
@@ -185,7 +185,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
                       (Sys_utils.Touch_existing { follow_symlinks = false })
                       fn
               end
-            (Sys.readdir GlobalConfig.tmp_dir);
+            (Sys.readdir Global_config.tmp_dir);
           env );
     ]
   in

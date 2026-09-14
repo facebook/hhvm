@@ -21,7 +21,7 @@
 let () = Random.self_init ()
 
 let make_tmp_dir () =
-  let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "files") in
+  let tmpdir = Path.make (Tmp.temp_dir Global_config.tmp_dir "files") in
   Relative_path.set_path_prefix Relative_path.Tmp tmpdir
 
 let log_monitor_exit (finale_data : Exit_status.finale_data) =

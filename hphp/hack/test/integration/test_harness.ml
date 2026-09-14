@@ -118,7 +118,7 @@ let run_test ?(stop_server_in_teardown = true) config test_case =
      * for HH_TMPDIR instead of using a custom one for testing.
      *
      * The problem is that we look for a server's socket file in
-     * GlobalConfig.tmp_dir, which is a static constant. So, when we
+     * Global_config.tmp_dir, which is a static constant. So, when we
      * start a server by forking hh_client (with a custom HH_TMPDIR env
      * variable), it puts the socket file in that custom directory. But
      * when we try to open a connection inside this existing process,

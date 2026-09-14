@@ -60,7 +60,7 @@ let is_compatible c1 c2 =
 
 let make_gc_control config =
   let { Gc.Control.minor_heap_size; space_overhead; _ } =
-    GlobalConfig.gc_control
+    Global_config.gc_control
   in
   let minor_heap_size =
     int_ Config_keys.Hhconfig.gc_minor_heap_size ~default:minor_heap_size config
@@ -68,7 +68,7 @@ let make_gc_control config =
   let space_overhead =
     int_ Config_keys.Hhconfig.gc_space_overhead ~default:space_overhead config
   in
-  { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
+  { Global_config.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
 let make_sharedmem_config config local_config =
   let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
@@ -887,7 +887,7 @@ let default_config =
   {
     version = Config_file.Opaque_version None;
     load_script_timeout = 0;
-    gc_control = GlobalConfig.gc_control;
+    gc_control = Global_config.gc_control;
     sharedmem_config = SharedMem.default_config;
     tc_options = Typechecker_options.default;
     glean_options = Glean_options.default;

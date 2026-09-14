@@ -12,7 +12,7 @@ open Utils
 
 let tmp : Path.t option ref = ref None
 
-(** Normally, the ServerFiles.* functions use GlobalConfig.tmp_dir
+(** Normally, the ServerFiles.* functions use Global_config.tmp_dir
 which is initialized at startup to be either HH_TMPDIR if defined
 or /tmp/hh_server otherwise.
 
@@ -27,7 +27,7 @@ You have been warned. *)
 let set_tmp_FOR_TESTING_ONLY (t : Path.t) : unit = tmp := Some t
 
 let get_tmp () : string =
-  Option.value_map !tmp ~f:Path.to_string ~default:GlobalConfig.tmp_dir
+  Option.value_map !tmp ~f:Path.to_string ~default:Global_config.tmp_dir
 
 (** Slash-escaped path in the system temp directory corresponding
     with this root directory for this extension. *)

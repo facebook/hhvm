@@ -117,7 +117,7 @@ let init
     let dfind =
       Dfind_lib.init
         (in_fd, log_fd, log_fd)
-        (GlobalConfig.scuba_table_name, [root])
+        (Global_config.scuba_table_name, [root])
     in
     Hack_event_logger.set_file_watcher_dfind ();
     Dfind { root; ready = ref false; dfind }

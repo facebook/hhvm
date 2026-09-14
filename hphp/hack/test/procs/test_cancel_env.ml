@@ -16,7 +16,7 @@ let make_workers n =
       ~saved_state:!pipe_path
       ~entry
       n
-      ~gc_control:GlobalConfig.gc_control
+      ~gc_control:Global_config.gc_control
       ~heap_handle:handle
   in
   workers

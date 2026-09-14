@@ -1,5 +1,5 @@
 (library
  (name global_config)
  (wrapped false)
- (modules globalConfig)
+ (modules global_config)
  (libraries core_kernel find sys_utils))

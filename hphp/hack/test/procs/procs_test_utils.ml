@@ -25,7 +25,7 @@ let make_workers n =
       ~saved_state:handle
       ~entry
       n
-      ~gc_control:GlobalConfig.gc_control
+      ~gc_control:Global_config.gc_control
       ~heap_handle:handle
   in
   workers

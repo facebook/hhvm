@@ -43,7 +43,7 @@ let default =
     search_chunk_size = 0;
     io_priority = 7;
     cpu_priority = 10;
-    shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
+    shm_dirs = [Global_config.shm_dir; Global_config.tmp_dir];
     shm_use_sharded_hashtbl = false;
     shm_cache_size = -1;
     max_workers = None;
@@ -242,11 +242,11 @@ let apply_overrides
         config
     in
     if experiments_enabled then begin
-      Disk.mkdir_p GlobalConfig.tmp_dir;
+      Disk.mkdir_p Global_config.tmp_dir;
       let dir =
         string_
           Config_keys.Hhconf.experiments_config_path
-          ~default:GlobalConfig.tmp_dir
+          ~default:Global_config.tmp_dir
           config
       in
       let owner = Sys_utils.get_primary_owner () in

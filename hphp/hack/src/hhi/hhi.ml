@@ -46,7 +46,7 @@ let get_hhi_root ?(force_write = false) () =
   | (Some r, false) -> r
   | (_, true)
   | (None, _) ->
-    let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "hhi") in
+    let tmpdir = Path.make (Tmp.temp_dir Global_config.tmp_dir "hhi") in
     extract_hhis tmpdir;
     root := Some tmpdir;
     Relative_path.set_path_prefix Relative_path.Hhi tmpdir;

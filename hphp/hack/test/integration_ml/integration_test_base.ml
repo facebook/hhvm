@@ -27,7 +27,7 @@ let tmp = "/tmp"
 
 let () = Folly.ensure_folly_init ()
 
-let server_config = Server_env_build.default_genv.ServerEnv.config
+let server_config = Server_env_build.default_genv.Server_env.config
 
 let po =
   Parser_options.
@@ -50,7 +50,7 @@ let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options server_config po
 
 let genv =
-  ref { Server_env_build.default_genv with ServerEnv.config = server_config }
+  ref { Server_env_build.default_genv with Server_env.config = server_config }
 
 let did_init = ref false
 
@@ -86,7 +86,7 @@ let test_init_common ?(hhi_files = []) () =
    This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
    files, but to test incremental mode behavior with Hhi files present.
 *)
-let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
+let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : Server_env.env
     =
   test_init_common () ~hhi_files;
 
@@ -106,7 +106,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
     match custom_config with
     | Some config -> Server_env_build.make_env ~init_id ~deps_mode config
     | None ->
-      Server_env_build.make_env ~init_id ~deps_mode !genv.ServerEnv.config
+      Server_env_build.make_env ~init_id ~deps_mode !genv.Server_env.config
   in
   let hhi_file_list =
     List.map hhi_files ~f:(fun (fn, _) ->
@@ -116,12 +116,12 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
 
   Server_progress.disable ();
   (* Return environment *)
-  { env with ServerEnv.disk_needs_parsing = hhi_set }
+  { env with Server_env.disk_needs_parsing = hhi_set }
 
 let default_loop_input = { disk_changes = []; new_client = None }
 
 let run_loop_once :
-    type a. ServerEnv.env -> a loop_inputs -> ServerEnv.env * a loop_outputs =
+    type a. Server_env.env -> a loop_inputs -> Server_env.env * a loop_outputs =
  fun env inputs ->
   Test_client_provider.clear ();
   Option.iter inputs.new_client ~f:(function RequestResponse x ->
@@ -149,19 +149,19 @@ let run_loop_once :
   let genv =
     {
       !genv with
-      ServerEnv.notifier =
+      Server_env.notifier =
         Server_notifier.init_mock ~get_changes_sync ~get_changes_async;
     }
   in
   (* Always pick up disk changes in tests immediately *)
-  let env = ServerEnv.{ env with last_notifier_check_time = 0.0 } in
+  let env = Server_env.{ env with last_notifier_check_time = 0.0 } in
   let env = Server_main.serve_one_iteration genv env client_provider in
   let {
-    ServerEnv.RecheckLoopStats.total_changed_files_count;
+    Server_env.RecheckLoopStats.total_changed_files_count;
     total_rechecked_count;
     _;
   } =
-    env.ServerEnv.last_recheck_loop_stats
+    env.Server_env.last_recheck_loop_stats
   in
   ( env,
     {
@@ -169,10 +169,10 @@ let run_loop_once :
       total_changed_files_count;
       total_rechecked_count;
       last_actual_total_rechecked_count =
-        (match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
+        (match env.Server_env.last_recheck_loop_stats_for_actual_work with
         | None -> None
         | Some stats ->
-          Some stats.ServerEnv.RecheckLoopStats.total_rechecked_count);
+          Some stats.Server_env.RecheckLoopStats.total_rechecked_count);
       new_client_response =
         Test_client_provider.get_client_response Non_persistent;
     } )
@@ -256,13 +256,13 @@ let full_check_status env =
     }
 
 let start_initial_full_check env =
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Initial_typechecking _ -> ()
+  (match env.Server_env.prechecked_files with
+  | Server_env.Initial_typechecking _ -> ()
   | _ -> assert false);
 
   let (env, loop_output) = full_check_status env in
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Prechecked_files_ready _ -> ()
+  (match env.Server_env.prechecked_files with
+  | Server_env.Prechecked_files_ready _ -> ()
   | _ -> assert false);
 
   let { total_rechecked_count; _ } = loop_output in
@@ -283,7 +283,7 @@ let assert_diagnostics diagnostics expected =
   assertEqual expected (Buffer.contents buf)
 
 let assert_env_diagnostics env expected =
-  assert_diagnostics env.ServerEnv.diagnostics expected
+  assert_diagnostics env.Server_env.diagnostics expected
 
 let assert_no_diagnostics env = assert_env_diagnostics env ""
 
@@ -348,7 +348,7 @@ let assert_needs_recheck env x =
   if
     not
       Relative_path.(
-        Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x)))
+        Set.mem env.Server_env.needs_recheck (create_detect_prefix (root ^ x)))
   then
     let () = Printf.eprintf "Expected %s to need recheck\n" x in
     assert false
@@ -356,7 +356,7 @@ let assert_needs_recheck env x =
 let assert_needs_no_recheck env x =
   if
     Relative_path.(
-      Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x)))
+      Set.mem env.Server_env.needs_recheck (create_detect_prefix (root ^ x)))
   then
     let () = Printf.eprintf "Expected %s not to need recheck\n" x in
     assert false

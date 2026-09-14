@@ -65,7 +65,7 @@ let test () =
   let ctx = Provider_utils.ctx_from_server_env env in
   let workers = None in
   let defs_per_file =
-    Naming_table.to_defs_per_file env.ServerEnv.naming_table
+    Naming_table.to_defs_per_file env.Server_env.naming_table
   in
   (* Pretend that this rechecking will be cancelled before we get to bar1 *)
   let bar1_path =

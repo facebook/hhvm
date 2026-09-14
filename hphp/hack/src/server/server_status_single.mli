@@ -16,7 +16,7 @@ val go :
   Diagnostics.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t
 
 val go_from_cached_diagnostics :
-  ServerEnv.env ->
+  Server_env.env ->
   Server_command_types.file_input list ->
   return_expanded_tast:bool ->
   preexisting_warnings:bool ->

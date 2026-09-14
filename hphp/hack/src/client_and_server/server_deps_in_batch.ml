@@ -4,8 +4,8 @@ open Server_deps_util
 let references
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
+    ~(genv : Server_env.genv)
+    ~(env : Server_env.env)
     (occ : Relative_path.t Symbol_occurrence.t) :
     Server_command_types.Find_refs.result_or_retry =
   let (line, column, _) = Pos.info_pos occ.Symbol_occurrence.pos in
@@ -25,8 +25,8 @@ let references
 let body_references
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
+    ~(genv : Server_env.genv)
+    ~(env : Server_env.env)
     ~(declarations : Relative_path.t Symbol_occurrence.t list)
     ~(get_def :
        Relative_path.t Symbol_occurrence.t ->
@@ -43,8 +43,8 @@ let body_references
 
 let go
     ~(ctx : Provider_context.t)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
+    ~(genv : Server_env.genv)
+    ~(env : Server_env.env)
     (pos_list : (string * int * int) list) :
     Server_command_types.Find_refs.result_or_retry list =
   let deps_in_of_location acc_ctx_in (file, line, column) :

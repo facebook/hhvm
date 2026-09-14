@@ -11,18 +11,18 @@ module CheckStats : sig
   type t = {
     reparse_count: int;
     total_rechecked_count: int;
-    time_first_result: ServerEnv.seconds_since_epoch option;
+    time_first_result: Server_env.seconds_since_epoch option;
         (** This is either the duration to get the first error if any
             or until we get "typecheck done" status message. *)
   }
 end
 
 val type_check :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   float ->
   Cgroup_profiler.step_group ->
-  ServerEnv.env * CheckStats.t * Telemetry.t
+  Server_env.env * CheckStats.t * Telemetry.t
 
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)

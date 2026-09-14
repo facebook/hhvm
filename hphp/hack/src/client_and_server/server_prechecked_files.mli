@@ -9,24 +9,24 @@
 
 val should_use : ServerArgs.options -> Server_local_config.t -> bool
 
-val expand_all : ServerEnv.env -> ServerEnv.env
+val expand_all : Server_env.env -> Server_env.env
 
 val init :
-  ServerEnv.env ->
+  Server_env.env ->
   dirty_local_deps:Typing_deps.DepSet.t ->
   dirty_master_deps:Typing_deps.DepSet.t ->
-  ServerEnv.env
+  Server_env.env
 
 val update_after_recheck :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Relative_path.Set.t ->
   start_time:float ->
-  ServerEnv.env * Telemetry.t
+  Server_env.env * Telemetry.t
 
 val update_after_local_changes :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Typing_deps.DepSet.t ->
   start_time:float ->
-  ServerEnv.env * Telemetry.t
+  Server_env.env * Telemetry.t

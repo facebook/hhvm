@@ -29,10 +29,10 @@ let has_external_dependents deps_mode file_info =
   let dependents = Typing_deps.add_typing_deps deps_mode own in
   not (Typing_deps.DepSet.is_empty (Typing_deps.DepSet.diff dependents own))
 
-let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : Relative_path.t list =
+let go (_genv : Server_env.genv) (env : Server_env.env) : Relative_path.t list =
   let ctx = Provider_utils.ctx_from_server_env env in
   let deps_mode = Provider_context.get_deps_mode ctx in
-  let naming_table = env.ServerEnv.naming_table in
+  let naming_table = env.Server_env.naming_table in
   (* One whole-repo naming table scan, unavoidable for a whole-repo query. The
      [file_info] it yields is used in place; re-deriving it per file would cost
      a SQLite SELECT each. *)

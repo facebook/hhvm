@@ -566,8 +566,8 @@ let search
   result
 
 let go
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     ~(sort_results : bool)
     ~(files_to_search : string list option)
     (input : Yojson.Safe.t) : (Yojson.Safe.t, string) Result.t =
@@ -596,7 +596,7 @@ let go
   let next_files : (Relative_path.t * pattern) list Hh_bucket.next =
     let get_job_info path =
       let path = Relative_path.create_detect_prefix path in
-      if Naming_table.has_file env.ServerEnv.naming_table path then
+      if Naming_table.has_file env.Server_env.naming_table path then
         Some (path, pattern)
       else
         (* We may not have the file information for a file such as one that we
@@ -609,9 +609,9 @@ let go
         Sys_utils.parse_path_list files_to_search
         |> List.filter_map ~f:get_job_info
       in
-      MultiWorker.next genv.ServerEnv.workers files_to_search ~progress_fn
+      MultiWorker.next genv.Server_env.workers files_to_search ~progress_fn
     | None ->
-      let indexer = genv.ServerEnv.indexer Find_utils.is_hack in
+      let indexer = genv.Server_env.indexer Find_utils.is_hack in
       fun () ->
         let files = indexer () |> List.filter_map ~f:get_job_info in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
@@ -641,7 +641,7 @@ let go
   in
   let results =
     MultiWorker.call
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       ~job
       ~neutral:[]
       ~merge:List.rev_append

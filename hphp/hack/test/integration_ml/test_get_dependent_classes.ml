@@ -36,7 +36,7 @@ let test () =
   let ctx = Provider_utils.ctx_from_server_env env in
 
   let get_classes path =
-    match Naming_table.get_file_info env.ServerEnv.naming_table path with
+    match Naming_table.get_file_info env.Server_env.naming_table path with
     | None -> SSet.empty
     | Some info ->
       SSet.of_list

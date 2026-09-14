@@ -26,14 +26,14 @@ val run_once :
   ServerArgs.options -> ServerConfig.t -> Server_local_config.t -> 'a
 
 val serve_one_iteration :
-  ServerEnv.genv -> ServerEnv.env -> Client_provider.t -> ServerEnv.env
+  Server_env.genv -> Server_env.env -> Client_provider.t -> Server_env.env
 
 (* Main loop can choose to batch several rechecks together. Setting this will
  * disable this behavior, forcing only one recheck per serve_one_iteration
  * call. This is useful in tests to observe intermediate state. *)
 val force_break_recheck_loop_for_test : bool -> unit
 
-val program_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
+val program_init : Server_env.genv -> Server_env.env -> Server_env.env
 
 (** Does a bunch of operations to get the server up and running, among other things:
   - Initialize shared memory
@@ -48,4 +48,4 @@ val setup_server :
   ServerArgs.options ->
   ServerConfig.t ->
   Server_local_config.t ->
-  MultiWorker.worker list * ServerEnv.env
+  MultiWorker.worker list * Server_env.env

@@ -17,26 +17,26 @@ val in_daemon : (unit -> unit) -> unit
 
 val default_loop_input : 'a loop_inputs
 
-val setup_disk : ServerEnv.env -> disk_changes_type -> ServerEnv.env
+val setup_disk : Server_env.env -> disk_changes_type -> Server_env.env
 
 val change_files :
-  ServerEnv.env -> disk_changes_type -> ServerEnv.env * 'a loop_outputs
+  Server_env.env -> disk_changes_type -> Server_env.env * 'a loop_outputs
 
 val setup_server :
   ?custom_config:ServerConfig.t ->
   ?hhi_files:(string * string) list ->
   ?edges_dir:string ->
   unit ->
-  ServerEnv.env
+  Server_env.env
 
 val run_loop_once :
-  ServerEnv.env -> 'a loop_inputs -> ServerEnv.env * 'a loop_outputs
+  Server_env.env -> 'a loop_inputs -> Server_env.env * 'a loop_outputs
 
 (* wrappers around run_loop_once for most common operations *)
 
-val full_check_status : ServerEnv.env -> ServerEnv.env * 'a loop_outputs
+val full_check_status : Server_env.env -> Server_env.env * 'a loop_outputs
 
-val start_initial_full_check : ServerEnv.env -> ServerEnv.env * int
+val start_initial_full_check : Server_env.env -> Server_env.env * int
 
 val prepend_root : string -> string
 
@@ -81,11 +81,11 @@ val fail : string -> 'noreturn
 
 val assertEqual : string -> string -> unit
 
-val assert_no_diagnostics : ServerEnv.env -> unit
+val assert_no_diagnostics : Server_env.env -> unit
 
 val assert_diagnostics : Diagnostics.t -> string -> unit
 
-val assert_env_diagnostics : ServerEnv.env -> string -> unit
+val assert_env_diagnostics : Server_env.env -> string -> unit
 
 val assertSingleDiagnostic : string -> Diagnostics.diagnostic list -> unit
 
@@ -105,6 +105,6 @@ val assert_find_refs :
 val assert_rename :
   Server_command_types.Rename.result_or_retry loop_outputs -> string -> unit
 
-val assert_needs_recheck : ServerEnv.env -> string -> unit
+val assert_needs_recheck : Server_env.env -> string -> unit
 
-val assert_needs_no_recheck : ServerEnv.env -> string -> unit
+val assert_needs_no_recheck : Server_env.env -> string -> unit

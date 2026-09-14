@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 open Server_local_config
 
 let get_naming_table_fallback_path genv : string option =

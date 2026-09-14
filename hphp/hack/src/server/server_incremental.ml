@@ -109,7 +109,7 @@ let resolve_files ctx ~reparsed env (fanout : Fanout.t) : Relative_path.Set.t =
   let files_to_recheck = Naming_provider.get_files ctx to_recheck in
   let files_with_errors_to_recheck =
     let files_with_errors =
-      Diagnostics.get_failed_files env.ServerEnv.diagnostics
+      Diagnostics.get_failed_files env.Server_env.diagnostics
     in
     let files_to_recheck_if_errors =
       Naming_provider.get_files ctx to_recheck_if_errors

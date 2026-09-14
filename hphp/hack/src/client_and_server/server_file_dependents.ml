@@ -38,10 +38,11 @@ let deps_of_paths ctx workers naming_table relative_paths =
   in
   all_deps |> Naming_provider.get_files ctx |> Relative_path.Set.elements
 
-let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list) =
+let go (genv : Server_env.genv) (env : Server_env.env) (filenames : string list)
+    =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let workers = genv.ServerEnv.workers in
-  let naming_table = env.ServerEnv.naming_table in
+  let workers = genv.Server_env.workers in
+  let naming_table = env.Server_env.naming_table in
   let paths = List.map ~f:Relative_path.create_detect_prefix filenames in
   let all_deps = deps_of_paths ctx workers naming_table paths in
   List.map ~f:Relative_path.to_absolute all_deps

@@ -8,7 +8,7 @@
 
 (** Handle client command messages and connections from persistent clients. *)
 val handle_client_command_or_persistent_connection :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Client_provider.client ->
-  ServerEnv.env Server_utils.handle_command_result
+  Server_env.env Server_utils.handle_command_result

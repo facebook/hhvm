@@ -130,5 +130,5 @@ val invalidate_upon_file_changes :
   Telemetry.t
 
 (** Construct a [Provider_context.t] from the configuration information
-contained within a [ServerEnv.env]. *)
-val ctx_from_server_env : ServerEnv.env -> Provider_context.t
+contained within a [Server_env.env]. *)
+val ctx_from_server_env : Server_env.env -> Provider_context.t

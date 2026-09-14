@@ -14,8 +14,8 @@ open Hh_prelude
 (*****************************************************************************)
 
 type callback =
-  | Periodic of (float ref * float * (env:ServerEnv.env -> ServerEnv.env))
-  | Once of (float ref * (env:ServerEnv.env -> ServerEnv.env))
+  | Periodic of (float ref * float * (env:Server_env.env -> Server_env.env))
+  | Once of (float ref * (env:Server_env.env -> Server_env.env))
 
 module Periodical : sig
   val always : float
@@ -31,7 +31,7 @@ module Periodical : sig
   val one_week : float
 
   (** Check if any callback is due and run those. *)
-  val check : ServerEnv.env -> ServerEnv.env
+  val check : Server_env.env -> Server_env.env
 
   (* register_callback X Y
    * Registers a new callback Y called every X seconds.
@@ -57,7 +57,7 @@ end = struct
 
   let last_call = ref (Unix.time ())
 
-  let check (env : ServerEnv.env) : ServerEnv.env =
+  let check (env : Server_env.env) : Server_env.env =
     let current = Unix.time () in
     let delta = current -. !last_call in
     let env = ref env in
@@ -112,7 +112,7 @@ let exit_if_unused () =
 (*****************************************************************************)
 (* The registered jobs *)
 (*****************************************************************************)
-let init (genv : ServerEnv.genv) (root : Path.t) : unit =
+let init (genv : Server_env.genv) (root : Path.t) : unit =
   ignore genv;
   let jobs =
     [

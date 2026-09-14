@@ -26,7 +26,7 @@ open Hh_prelude
 open GlobalOptions
 open Result.Export
 open Reordered_argument_collections
-open ServerEnv
+open Server_env
 open Server_init_types
 module SLC = Server_local_config
 
@@ -112,7 +112,7 @@ let run_saved_state_future
       additional_info
     in
     let ignore_hh_version =
-      ServerArgs.ignore_hh_version genv.ServerEnv.options
+      ServerArgs.ignore_hh_version genv.Server_env.options
     in
     let deptable_fn =
       let deptable = deptable_with_filename (Path.to_string dep_table_path) in
@@ -206,7 +206,7 @@ let report
   ()
 
 let download_and_load_state_exn
-    ~(genv : ServerEnv.genv) ~(ctx : Provider_context.t) ~(root : Path.t) :
+    ~(genv : Server_env.genv) ~(ctx : Provider_context.t) ~(root : Path.t) :
     (loaded_info, load_state_error) result =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let (progress_naming_table_load, progress_dep_table_load) =
@@ -259,7 +259,7 @@ let download_and_load_state_exn
   run_saved_state_future genv ctx dependency_table_saved_state_future
 
 let mergebase_info (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
-    ServerEnv.saved_state_revs_info =
+    Server_env.saved_state_revs_info =
   let root_path = Path.to_string root_path in
   let future =
     Future.continue_with_future (Hg.current_mergebase_hg_rev root_path)
@@ -287,11 +287,11 @@ let mergebase_info (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
     Hh_logger.log
       "[serverLazyInit]: mergebase_info failed: %s"
       (Future.error_to_string e);
-    ServerEnv.SavedStateRevsInfo.default ~saved_state_rev
+    Server_env.SavedStateRevsInfo.default ~saved_state_rev
 
 let calculate_state_distance_and_age_from_hg
     (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
-    ServerEnv.saved_state_revs_info =
+    Server_env.saved_state_revs_info =
   let root_path = Path.to_string root_path in
   let future =
     Future.continue_with_future (Hg.current_mergebase_hg_rev root_path)
@@ -332,11 +332,11 @@ let calculate_state_distance_and_age_from_hg
     Hh_logger.log
       "[serverLazyInit]: calculate_state_distance_and_age_from_hg failed: %s"
       (Future.error_to_string e);
-    ServerEnv.SavedStateRevsInfo.default ~saved_state_rev
+    Server_env.SavedStateRevsInfo.default ~saved_state_rev
 
 let use_precomputed_state_exn
     ~(root : Path.t)
-    (genv : ServerEnv.genv)
+    (genv : Server_env.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
     (cgroup_steps : Cgroup_profiler.step_group) : loaded_info =
@@ -351,7 +351,9 @@ let use_precomputed_state_exn
   } =
     info
   in
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+  let ignore_hh_version =
+    ServerArgs.ignore_hh_version genv.Server_env.options
+  in
   Cgroup_profiler.step_start_end cgroup_steps "load deptable"
   @@ fun _cgroup_step ->
   let deptable_fn =
@@ -478,7 +480,7 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t
 
 (* Prechecked files are gated with a flag and not supported in AI/check modes. *)
-let use_prechecked_files (genv : ServerEnv.genv) : bool =
+let use_prechecked_files (genv : Server_env.genv) : bool =
   Server_prechecked_files.should_use genv.options genv.local_config
   && not (ServerArgs.check_mode genv.options)
 
@@ -532,8 +534,8 @@ let log_fanout_information to_recheck_deps files_to_recheck =
 
 (** Compute fanout for saved state init *)
 let get_files_to_recheck
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (old_naming_table : Naming_table.t)
     (new_naming_table : Naming_table.t)
     (defs_per_dirty_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
@@ -620,8 +622,8 @@ let get_files_to_recheck
        not their dependencies since their decl are unchanged
     *)
 let calculate_fanout_and_defer_or_do_type_check
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     ~(old_naming_table : Naming_table.t)
     ~(new_naming_table : Naming_table.t)
     ~(dirty_master_files_unchanged_decls : Relative_path.Set.t)
@@ -629,7 +631,7 @@ let calculate_fanout_and_defer_or_do_type_check
     ~(dirty_local_files_unchanged_decls : Relative_path.Set.t)
     ~(dirty_local_files_changed_decls : Relative_path.Set.t)
     (t : float)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   let start_t : seconds = Unix.gettimeofday () in
   let dirty_files_unchanged_decls =
     Relative_path.Set.union
@@ -761,7 +763,7 @@ let calculate_fanout_and_defer_or_do_type_check
     let to_recheck =
       if
         not
-          genv.ServerEnv.local_config
+          genv.Server_env.local_config
             .Server_local_config.enable_type_check_filter_files
       then
         to_recheck
@@ -774,8 +776,8 @@ let calculate_fanout_and_defer_or_do_type_check
                dirty_files_changed_decls)
     in
     let init_telemetry =
-      ServerEnv.Init_telemetry.make
-        ServerEnv.Init_telemetry.Init_lazy_dirty
+      Server_env.Init_telemetry.make
+        Server_env.Init_telemetry.Init_lazy_dirty
         (Telemetry.create ()
         |> Telemetry.float_ ~key:"start_time" ~value:start_t
         |> Telemetry.int_
@@ -806,7 +808,7 @@ let calculate_fanout_and_defer_or_do_type_check
              ~key:"saved_state_revs_info"
              ~value:
                (Option.map
-                  ~f:ServerEnv.SavedStateRevsInfo.to_telemetry
+                  ~f:Server_env.SavedStateRevsInfo.to_telemetry
                   env.init_env.saved_state_revs_info))
     in
     let result =
@@ -829,7 +831,7 @@ let calculate_fanout_and_defer_or_do_type_check
       (Relative_path.Set.cardinal to_recheck);
     result
 
-let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
+let get_updates_exn ~(genv : Server_env.genv) ~(root : Path.t) :
     Relative_path.Set.t * Server_notifier.clock option =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Getting files changed while parsing...";
@@ -858,7 +860,7 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
        "Finished getting files changed while parsing"
        start_t
       : float);
-  Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
+  Hh_logger.log "Watchclock: %s" (Server_env.show_clock clock);
   Hack_event_logger.changed_while_parsing_end start_t;
   (files_changed_while_parsing, clock)
 
@@ -867,9 +869,9 @@ let initialize_naming_table
     ?(fnl : Relative_path.t list option = None)
     ?(do_naming : bool = false)
     ~(cache_decls : bool)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (genv : Server_env.genv)
+    (env : Server_env.env)
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   Server_progress.with_message progress_message @@ fun () ->
   let (get_next, count, t) =
     match fnl with
@@ -914,10 +916,10 @@ let initialize_naming_table
     (env, t)
 
 let write_symbol_info
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (cgroup_steps : Cgroup_profiler.step_group)
-    (t : float) : ServerEnv.env * float =
+    (t : float) : Server_env.env * float =
   let open Write_symbol_info in
   let (env, t) =
     ServerInitCommon
@@ -963,9 +965,9 @@ let write_symbol_info
     (env, t)
 
 let write_symbol_info_full_init
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (genv : Server_env.genv)
+    (env : Server_env.env)
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   let (env, t) =
     initialize_naming_table
       ~cache_decls:true
@@ -978,12 +980,12 @@ let write_symbol_info_full_init
 
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (genv : Server_env.genv)
+    (env : Server_env.env)
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   let init_telemetry =
-    ServerEnv.Init_telemetry.make
-      ServerEnv.Init_telemetry.Init_lazy_full
+    Server_env.Init_telemetry.make
+      Server_env.Init_telemetry.Init_lazy_full
       (Telemetry.create ()
       |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
@@ -1021,9 +1023,9 @@ let full_init
     ~cgroup_steps
 
 let parse_only_init
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (genv : Server_env.genv)
+    (env : Server_env.env)
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   initialize_naming_table
     ~cache_decls:false
     "parse-only initialization"
@@ -1260,11 +1262,11 @@ let compute_fanout
 (** Among other things, updates the naming table and compute fanout. *)
 let post_saved_state_initialization
     ~(do_indexing : bool)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
+    ~(genv : Server_env.genv)
+    ~(env : Server_env.env)
     ~(state_result :
        loaded_info * Relative_path.Set.t * Server_notifier.clock option)
-    (cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    (cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   let ( (loaded_info : Server_init_types.loaded_info),
         _changed_while_parsing,
         _clock ) =
@@ -1292,17 +1294,17 @@ let post_saved_state_initialization
         ();
       Option.iter
         ~f:Hack_event_logger.set_mergebase_globalrev
-        saved_state_revs_info.ServerEnv.mergebase_globalrev;
+        saved_state_revs_info.Server_env.mergebase_globalrev;
       Hh_logger.log
         "Warning: disabling restart on rebase (server was started with precomputed saved-state)"
     end else
       Option.iter
-        saved_state_revs_info.ServerEnv.mergebase_globalrev
+        saved_state_revs_info.Server_env.mergebase_globalrev
         ~f:Server_revision_tracker.initialize
   else
     Option.iter
       ~f:Hack_event_logger.set_mergebase_globalrev
-      saved_state_revs_info.ServerEnv.mergebase_globalrev;
+      saved_state_revs_info.Server_env.mergebase_globalrev;
   let env =
     {
       env with
@@ -1311,7 +1313,7 @@ let post_saved_state_initialization
           env.init_env with
           mergebase_warning_hashes =
             Option.some_if
-              (not (ServerArgs.preexisting_warnings genv.ServerEnv.options))
+              (not (ServerArgs.preexisting_warnings genv.Server_env.options))
               old_warnings;
           naming_table_manifold_path;
           saved_state_revs_info = Some saved_state_revs_info;
@@ -1427,11 +1429,11 @@ let load_saved_state_exn env genv load_state_approach root cgroup_steps =
 let saved_state_init
     ~(do_indexing : bool)
     ~(load_state_approach : load_state_approach)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (root : Path.t)
     (cgroup_steps : Cgroup_profiler.step_group) :
-    ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
+    ( (Server_env.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
   check_credentials genv;
@@ -1459,7 +1461,7 @@ let saved_state_init
     t;
   state_result >>| fun (loaded_info, changed_while_parsing, clock) ->
   Server_progress.write "loading saved state succeeded";
-  Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
+  Hh_logger.log "Watchclock: %s" (Server_env.show_clock clock);
   let (env, t) =
     post_saved_state_initialization
       ~do_indexing

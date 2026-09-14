@@ -23,8 +23,8 @@ val result_to_json : sort_results:bool -> result option -> Yojson.Safe.t
 
 (** Search for the given pattern across the given set of files. *)
 val go :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   sort_results:bool ->
   files_to_search:string list option ->
   Yojson.Safe.t ->

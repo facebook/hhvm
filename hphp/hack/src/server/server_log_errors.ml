@@ -11,7 +11,7 @@ open Option.Monad_infix
 
 let go
     (workers : MultiWorker.worker list option)
-    (env : ServerEnv.env)
+    (env : Server_env.env)
     (files : string list)
     (error_filter : Filter_diagnostics.Filter.t)
     (preexisting_warnings : bool) : Telemetry.t =
@@ -25,7 +25,7 @@ let go
     {
       Tast_provider.ErrorFilter.error_filter;
       warnings_saved_state =
-        ServerEnv.(env.init_env.mergebase_warning_hashes)
+        Server_env.(env.init_env.mergebase_warning_hashes)
         >>= Option.some_if (not preexisting_warnings);
     }
   in

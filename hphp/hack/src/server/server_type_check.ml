@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 open Reordered_argument_collections
 module SLC = Server_local_config
 
@@ -288,7 +288,7 @@ let do_redecl
   }
 
 type type_checking_result = {
-  env: ServerEnv.env;
+  env: Server_env.env;
   diagnostics: Diagnostics.t;
   telemetry: Telemetry.t;
   files_checked: Relative_path.Set.t;
@@ -300,8 +300,8 @@ type type_checking_result = {
 }
 
 let do_type_checking
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     ~(diagnostics : Diagnostics.t)
     ~(files_to_check : Relative_path.Set.t)
     ~(lazy_check_later : Relative_path.Set.t)
@@ -321,20 +321,20 @@ let do_type_checking
          duplicate name errors. Eventually we'll want to make duplicate
          name errors a typing error and this check can go away. *)
       Relative_path.Set.cardinal files_with_naming_errors = 0
-      && genv.ServerEnv.local_config.Server_local_config.use_distc
+      && genv.Server_env.local_config.Server_local_config.use_distc
     in
     Option.some_if
       use_distc
       Typing_check_service.
         {
           enable_fanout_aware_distc =
-            genv.ServerEnv.local_config
+            genv.Server_env.local_config
               .Server_local_config.enable_fanout_aware_distc;
           fanout_threshold =
-            genv.ServerEnv.local_config
+            genv.Server_env.local_config
               .Server_local_config.hh_distc_fanout_threshold;
           fanout_full_init_threshold =
-            genv.ServerEnv.local_config
+            genv.Server_env.local_config
               .Server_local_config.hh_distc_fanout_full_init_threshold;
         }
   in
@@ -355,7 +355,7 @@ let do_type_checking
               time_first_error;
             } ),
           cancelled ) =
-      let root = ServerArgs.root genv.ServerEnv.options in
+      let root = ServerArgs.root genv.Server_env.options in
       Typing_check_service.go_with_interrupt
         ctx
         genv.workers
@@ -373,10 +373,10 @@ let do_type_checking
                (let during_init =
                   Option.is_some env.init_env.why_needed_full_check
                 in
-                during_init && ServerEnv.discard_warnings env)
+                during_init && Server_env.discard_warnings env)
              genv
              env)
-        ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
+        ~warnings_saved_state:Server_env.(env.init_env.mergebase_warning_hashes)
     in
     let env =
       { env with init_env = { env.init_env with mergebase_warning_hashes } }
@@ -490,8 +490,8 @@ let type_check_core
          ~key:"init"
          ~value:
            (Option.map
-              env.ServerEnv.init_env.ServerEnv.why_needed_full_check
-              ~f:ServerEnv.Init_telemetry.get)
+              env.Server_env.init_env.Server_env.why_needed_full_check
+              ~f:Server_env.Init_telemetry.get)
   in
   let time_first_error = None in
   let do_errors_file =
@@ -726,7 +726,7 @@ let type_check_core
      open in the IDE, leaving other affected files to be lazily checked later.
      In either case, don't attempt to typecheck files with parse errors. *)
   let enable_type_check_filter_files =
-    genv.ServerEnv.local_config
+    genv.Server_env.local_config
       .Server_local_config.enable_type_check_filter_files
   in
   let lazy_check_later = Relative_path.Set.empty in
@@ -975,7 +975,7 @@ let type_check_core
   (* We might have completed a full check, which might mean that a rebase was
    * successfully processed. *)
   Server_revision_tracker.check_non_blocking
-    ~is_full_check_done:ServerEnv.(is_full_check_done env.full_check_status);
+    ~is_full_check_done:Server_env.(is_full_check_done env.full_check_status);
   let telemetry =
     Telemetry.duration
       telemetry
@@ -1039,8 +1039,8 @@ let type_check_core
 let type_check_unsafe genv env start_time profiling =
   let check_kind = "Full_check" in
   let check_reason =
-    match env.ServerEnv.init_env.ServerEnv.why_needed_full_check with
-    | Some init_telemetry -> ServerEnv.Init_telemetry.get_reason init_telemetry
+    match env.Server_env.init_env.Server_env.why_needed_full_check with
+    | Some init_telemetry -> Server_env.Init_telemetry.get_reason init_telemetry
     | None -> "incremental"
   in
   let telemetry =
@@ -1135,7 +1135,9 @@ let type_check :
   start by calling [ServerTypeCheck.type_check]. And it's at this moment, right here,
   that we'll lay down the first errors file.
   *)
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+  let ignore_hh_version =
+    ServerArgs.ignore_hh_version genv.Server_env.options
+  in
   (* Restart the errors-file at the start of type_check. *)
   Server_progress.ErrorsWrite.new_empty_file
     ~ignore_hh_version
@@ -1179,7 +1181,7 @@ let type_check :
     | Some { MultiThreadedCall.user_message; log_message; timestamp = _ } ->
       {
         env with
-        ServerEnv.why_needs_server_type_check = (user_message, log_message);
+        Server_env.why_needs_server_type_check = (user_message, log_message);
       }
     | None when not is_complete ->
       (* The typecheck wasn't interrupted, but there are still items to check.
@@ -1195,7 +1197,7 @@ let type_check :
     | None ->
       {
         env with
-        ServerEnv.why_needs_server_type_check = ("Type check is complete", "");
+        Server_env.why_needs_server_type_check = ("Type check is complete", "");
       }
   in
 

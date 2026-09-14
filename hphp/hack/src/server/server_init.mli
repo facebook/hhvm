@@ -22,7 +22,7 @@ type init_approach =
 type init_result =
   (* Loaded a saved saved state of this distance. Note: for older load scripts
    * distance is unknown, thus None. *)
-  | Load_state_succeeded of ServerEnv.saved_state_revs_info
+  | Load_state_succeeded of Server_env.saved_state_revs_info
   (* Loading error *)
   | Load_state_failed of string * Telemetry.t
   (* This option means we didn't even try to load a saved state *)
@@ -32,6 +32,6 @@ type init_result =
     refresh the environment and update the many shared heaps *)
 val init :
   init_approach:init_approach ->
-  ServerEnv.genv ->
-  ServerEnv.env ->
-  ServerEnv.env * (* If the script failed, the error message *) init_result
+  Server_env.genv ->
+  Server_env.env ->
+  Server_env.env * (* If the script failed, the error message *) init_result

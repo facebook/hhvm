@@ -12,13 +12,13 @@ val make_genv :
   ServerConfig.t ->
   Server_local_config.t ->
   MultiWorker.worker list ->
-  ServerEnv.genv
+  Server_env.genv
 
-val default_genv : ServerEnv.genv
+val default_genv : Server_env.genv
 
 val make_env :
   init_id:string ->
   deps_mode:Typing_deps_mode.t ->
   ?diagnostics:Diagnostics.t ->
   ServerConfig.t ->
-  ServerEnv.env
+  Server_env.env

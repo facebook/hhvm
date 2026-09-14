@@ -55,7 +55,7 @@ let test () =
   in
   Test.assertSingleDiagnostic
     f_errors
-    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics);
+    (Diagnostics.get_diagnostic_list env.Server_env.diagnostics);
 
   let (env, _) =
     Test.(

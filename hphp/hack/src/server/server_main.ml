@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 open Reordered_argument_collections
 
 (*****************************************************************************)
@@ -48,8 +48,8 @@ module Program = struct
   let run_once_and_exit genv env =
     let recheck_stats =
       Option.map
-        ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
-        env.ServerEnv.last_recheck_loop_stats_for_actual_work
+        ~f:Server_env.RecheckLoopStats.to_user_telemetry
+        env.Server_env.last_recheck_loop_stats_for_actual_work
     in
     Server_error.print_error_list
       stdout
@@ -123,7 +123,7 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
     |> Telemetry.duration ~start_time:init_env.init_start_t
     |> Telemetry.object_
          ~key:"init"
-         ~value:(ServerEnv.Init_telemetry.get init_telemetry)
+         ~value:(Server_env.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.int_
@@ -160,11 +160,11 @@ query kind (which deliberately waits for the sync), but it might be true or fals
 Personally, I've never actually seen it be true. It's surfaced to the user in clientCheckStatus.ml
 with the message "this may be stale, probably due to file watcher being unresponsive". *)
 let query_notifier
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (query_kind : [> `Async | `Skip | `Sync ])
     (start_time : float) :
-    ServerEnv.env
+    Server_env.env
     * Relative_path.Set.t
     * Server_notifier.clock option
     * bool
@@ -363,7 +363,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       Option.is_some clock
       && not (Option.equal Server_notifier.equal_clock clock env.clock)
     then begin
-      Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
+      Hh_logger.log "Recheck at watchclock %s" (Server_env.show_clock clock);
       { env with clock }
     end else
       env
@@ -419,7 +419,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     Telemetry.duration telemetry ~key:"sorted_out_client" ~start_time
   in
   (* We have some new, or previously un-processed updates *)
-  let full_check = ServerEnv.is_full_check_started env.full_check_status in
+  let full_check = Server_env.is_full_check_started env.full_check_status in
   let telemetry =
     telemetry
     |> Telemetry.bool_ ~key:"full_check" ~value:full_check
@@ -499,8 +499,8 @@ let generate_and_update_recheck_id env =
   let env =
     {
       env with
-      ServerEnv.init_env =
-        { env.ServerEnv.init_env with ServerEnv.recheck_id = Some recheck_id };
+      Server_env.init_env =
+        { env.Server_env.init_env with Server_env.recheck_id = Some recheck_id };
     }
   in
   (env, recheck_id)
@@ -536,9 +536,9 @@ let idle_if_no_client env waiting_client =
       env
   | Client_provider.Select_new _ -> env
 
-let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~diagnostics =
+let log_recheck_end (stats : Server_env.RecheckLoopStats.t) ~diagnostics =
   let telemetry =
-    ServerEnv.RecheckLoopStats.to_user_telemetry stats
+    Server_env.RecheckLoopStats.to_user_telemetry stats
     |> Telemetry.object_
          ~key:"errors"
          ~value:(Diagnostics.as_telemetry_summary diagnostics)
@@ -663,7 +663,7 @@ let serve_one_iteration genv env client_provider =
   let t_done_recheck = Unix.gettimeofday () in
   let t_sent_diagnostics = Unix.gettimeofday () in
   let stats =
-    ServerEnv.RecheckLoopStats.record_result_sent_ts
+    Server_env.RecheckLoopStats.record_result_sent_ts
       stats
       (Some t_sent_diagnostics)
   in
@@ -770,7 +770,7 @@ let cancel_due_to_file_changes
       log_message =
         Printf.sprintf
           "file change interrupt handler at clock %s. %d files changed. [%s]"
-          (ServerEnv.show_clock clock)
+          (Server_env.show_clock clock)
           (Relative_path.Set.cardinal updates)
           (String.concat examples ~sep:",");
       timestamp;
@@ -790,7 +790,7 @@ let file_changes_interrupt_handler genv :
     Hh_logger.log
       "Interrupted by file watcher message: %d files changed at watchclock %s"
       size
-      (ServerEnv.show_clock clock);
+      (Server_env.show_clock clock);
     ( {
         env with
         disk_needs_parsing =
@@ -821,7 +821,7 @@ let priority_client_interrupt_handler genv client_provider :
     Hh_logger.log
       "Interrupted by file watcher sync query: %d files changed at watchclock %s"
       n_updates
-      (ServerEnv.show_clock clock);
+      (Server_env.show_clock clock);
     ( {
         env with
         disk_needs_parsing =
@@ -921,8 +921,8 @@ let serve genv env in_fds =
    * We're just filling it with placeholder telemetry values since
    * we don't much care about this scenario. *)
   let init_telemetry =
-    ServerEnv.Init_telemetry.make
-      ServerEnv.Init_telemetry.Init_typecheck_disabled_after_init
+    Server_env.Init_telemetry.make
+      Server_env.Init_telemetry.Init_typecheck_disabled_after_init
       (Telemetry.create ()
       |> Telemetry.string_
            ~key:"mode"

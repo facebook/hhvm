@@ -9,5 +9,5 @@
 val check :
   MultiWorker.worker list option ->
   string ->
-  ServerEnv.env ->
+  Server_env.env ->
   (string, string) result

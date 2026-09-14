@@ -1,6 +1,6 @@
 (* Duplicate the same file twice *)
 open Integration_test_base_types
-open ServerEnv
+open Server_env
 module Test = Integration_test_base
 
 let foo_contents =

@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 open Server_rename_types
 
 (* Not incremental, so it's safe to skip dependency tracking *)

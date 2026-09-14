@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Result.Export
-open ServerEnv
+open Server_env
 module SLC = Server_local_config
 include Server_init_types
 
@@ -115,8 +115,8 @@ let possibly_set_rust_provider_backend env genv : unit =
 
 let init
     ~(init_approach : init_approach)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * init_result =
+    (genv : Server_env.genv)
+    (env : Server_env.env) : Server_env.env * init_result =
   possibly_set_rust_provider_backend env genv;
   Hh_logger.log
     "ServerInit: init_approach=%s"

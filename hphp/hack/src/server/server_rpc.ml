@@ -34,22 +34,22 @@ let single_ctx env path file_input =
 
 let log_check_response env =
   Hack_event_logger.check_response
-    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics
+    (Diagnostics.get_diagnostic_list env.Server_env.diagnostics
     |> List.map ~f:(fun { User_diagnostic.code; _ } -> code))
 
 let handle :
     type a.
-    ServerEnv.genv ->
-    ServerEnv.env ->
+    Server_env.genv ->
+    Server_env.env ->
     is_stale:bool ->
     Server_command_types.cmd_metadata ->
     a Server_command_types.t ->
-    ServerEnv.env * a =
+    Server_env.env * a =
  fun genv env ~is_stale metadata -> function
   | Server_command_types.STATUS { max_errors; error_filter } ->
     log_check_response env;
     let (error_list, dropped_count) =
-      env.ServerEnv.diagnostics
+      env.Server_env.diagnostics
       |> Diagnostics.sort_and_finalize
       |> Filter_diagnostics.filter error_filter
       |> take_max_errors max_errors
@@ -61,14 +61,14 @@ let handle :
         Server_command_types.Live_status
     in
     let last_recheck_stats =
-      match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
+      match env.Server_env.last_recheck_loop_stats_for_actual_work with
       | None -> None
       | Some recheck_stats ->
         Some
-          (ServerEnv.RecheckLoopStats.to_user_telemetry recheck_stats
+          (Server_env.RecheckLoopStats.to_user_telemetry recheck_stats
           |> Telemetry.string_
                ~key:"init_id"
-               ~value:ServerEnv.(env.init_env.init_id))
+               ~value:Server_env.(env.init_env.init_id))
     in
     ( env,
       {
@@ -76,7 +76,7 @@ let handle :
         error_list;
         dropped_count;
         last_recheck_stats;
-        file_watcher_clock = env.ServerEnv.clock;
+        file_watcher_clock = env.Server_env.clock;
       } )
   | Server_command_types.STATUS_SINGLE
       {
@@ -90,21 +90,21 @@ let handle :
       {
         Tast_provider.ErrorFilter.error_filter;
         warnings_saved_state =
-          ServerEnv.(env.init_env.mergebase_warning_hashes)
+          Server_env.(env.init_env.mergebase_warning_hashes)
           >>= Option.some_if (not preexisting_warnings);
       }
     in
     let ctx = lazy (Provider_utils.ctx_from_server_env env) in
     let (errors, tasts) =
       let use_cached_diagnostics =
-        genv.ServerEnv.local_config
+        genv.Server_env.local_config
           .Server_local_config.status_single_use_cached_diagnostics
       in
       let uses_partial_typecheck =
-        genv.ServerEnv.local_config
+        genv.Server_env.local_config
           .Server_local_config.enable_type_check_filter_files
         || Option.is_some
-             genv.ServerEnv.local_config.Server_local_config.workload_quantile
+             genv.Server_env.local_config.Server_local_config.workload_quantile
       in
       let cached_result =
         if use_cached_diagnostics then
@@ -123,7 +123,7 @@ let handle :
       | Some result -> result
       | None ->
         Server_status_single.go
-          genv.ServerEnv.workers
+          genv.Server_env.workers
           file_names
           (Lazy.force ctx)
           ~return_expanded_tast
@@ -151,7 +151,7 @@ let handle :
       { files; log_file; error_filter; preexisting_warnings } ->
     let telemetry =
       Server_log_errors.go
-        genv.ServerEnv.workers
+        genv.Server_env.workers
         env
         files
         error_filter
@@ -210,9 +210,9 @@ let handle :
     in
     (env, results)
   | Server_command_types.INFER_TYPE_BATCH positions ->
-    (env, Server_infer_type_batch.go genv.ServerEnv.workers positions env)
+    (env, Server_infer_type_batch.go genv.Server_env.workers positions env)
   | Server_command_types.IS_SUBTYPE stdin ->
-    (env, Server_is_subtype.check genv.ServerEnv.workers stdin env)
+    (env, Server_is_subtype.check genv.Server_env.workers stdin env)
   | Server_command_types.TAST_HOLES (file_input, hole_filter) ->
     let path =
       match file_input with
@@ -228,7 +228,7 @@ let handle :
     in
     (env, result)
   | Server_command_types.TAST_HOLES_BATCH files ->
-    (env, Server_tast_holes_batch.go genv.ServerEnv.workers files env)
+    (env, Server_tast_holes_batch.go genv.Server_env.workers files env)
   | Server_command_types.INFER_TYPE_ERROR (file_input, line, column) ->
     let path =
       match file_input with
@@ -306,11 +306,12 @@ let handle :
         class_
         ~filter
         ~find_children
-        env.ServerEnv.naming_table
-        genv.ServerEnv.workers )
+        env.Server_env.naming_table
+        genv.Server_env.workers )
   | Server_command_types.METHOD_JUMP_BATCH (classes, filter) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, Server_method_jumps_batch.go ctx genv.ServerEnv.workers classes filter)
+    ( env,
+      Server_method_jumps_batch.go ctx genv.Server_env.workers classes filter )
   | Server_command_types.FIND_REFS find_refs_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -424,12 +425,12 @@ let handle :
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, Server_rename.get_lambda_parameter_rewrite_patches ctx files)
   | Server_command_types.DUMP_SYMBOL_INFO file_list ->
-    (env, Symbol_info_service.go genv.ServerEnv.workers file_list env)
+    (env, Symbol_info_service.go genv.Server_env.workers file_list env)
   | Server_command_types.IN_MEMORY_DEP_TABLE_SIZE ->
     (* TODO(hverr): Clean up 32-bit/migrate *)
     (env, Ok 0)
   | Server_command_types.SAVE_NAMING filename ->
-    (env, Save_state_service.go_naming env.ServerEnv.naming_table filename)
+    (env, Save_state_service.go_naming env.Server_env.naming_table filename)
   | Server_command_types.CHECK_LIVENESS ->
     (* This is for the client to know "is the server available to process requests?" *)
     (env, ())
@@ -470,9 +471,9 @@ let handle :
   | Server_command_types.NO_PRECHECKED_FILES ->
     (Server_prechecked_files.expand_all env, ())
   | Server_command_types.FUN_DEPS_BATCH positions ->
-    (env, Server_fun_deps_batch.go genv.ServerEnv.workers positions env)
+    (env, Server_fun_deps_batch.go genv.Server_env.workers positions env)
   | Server_command_types.LIST_FILES_WITH_ERRORS ->
-    (env, ServerEnv.list_files_with_errors env)
+    (env, Server_env.list_files_with_errors env)
   | Server_command_types.FILE_DEPENDENTS filenames ->
     let files = Server_file_dependents.go genv env filenames in
     (env, files)
@@ -486,7 +487,7 @@ let handle :
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug
     else
       Hh_logger.Level.set_min_level
-        genv.ServerEnv.local_config.Server_local_config.min_log_level;
+        genv.Server_env.local_config.Server_local_config.min_log_level;
     (env, ())
   | Server_command_types.DEPS_OUT_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in

@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 
 let should_use options local_config =
   Option.value
@@ -171,8 +171,8 @@ let update_after_recheck genv env rechecked ~start_time =
       else
         let full_check_status = Full_check_started in
         let why_needed_full_check =
-          ServerEnv.Init_telemetry.make
-            ServerEnv.Init_telemetry.Init_prechecked_fanout
+          Server_env.Init_telemetry.make
+            Server_env.Init_telemetry.Init_prechecked_fanout
             (Telemetry.create ()
             |> Telemetry.float_ ~key:"time" ~value:(Unix.gettimeofday ())
             |> Telemetry.string_ ~key:"reason" ~value:"prechecked_fanout"
@@ -181,7 +181,7 @@ let update_after_recheck genv env rechecked ~start_time =
                  ~value:
                    (Option.map
                       env.init_env.why_needed_full_check
-                      ~f:ServerEnv.Init_telemetry.get))
+                      ~f:Server_env.Init_telemetry.get))
           |> Option.some
         in
         let init_env = { env.init_env with why_needed_full_check } in
@@ -315,7 +315,7 @@ let update_after_local_changes genv env changes ~start_time =
                ~value:(Relative_path.Set.cardinal env.needs_recheck)
           |> Telemetry.string_
                ~key:"full_check_status"
-               ~value:(ServerEnv.show_full_check_status env.full_check_status)
+               ~value:(Server_env.show_full_check_status env.full_check_status)
           |> Telemetry.object_ ~key:"intersect" ~value:intersect_telemetry
         in
         Hack_event_logger.prechecked_evaluate_incremental t size;

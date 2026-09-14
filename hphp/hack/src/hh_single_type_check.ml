@@ -2124,8 +2124,8 @@ let handle_mode
            ~deps_mode:(Typing_deps_mode.InMemoryMode None)
            genv.config)
         with
-        ServerEnv.naming_table;
-        ServerEnv.tcopt = Provider_context.get_tcopt ctx;
+        Server_env.naming_table;
+        Server_env.tcopt = Provider_context.get_tcopt ctx;
       }
     in
     let include_defs = true in
@@ -2166,9 +2166,9 @@ let handle_mode
         (Server_env_build.make_env
            ~init_id
            ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-           genv.ServerEnv.config)
+           genv.Server_env.config)
         with
-        ServerEnv.naming_table;
+        Server_env.naming_table;
         tcopt = Provider_context.get_tcopt ctx;
       }
     in

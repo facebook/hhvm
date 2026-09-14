@@ -13,11 +13,11 @@ open Server_command_types.Find_refs
 val add_ns : String.t -> String.t
 
 val handle_prechecked_files :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Typing_deps.DepSet.elt ->
   (unit -> 'a) ->
-  ServerEnv.env * 'a Server_command_types.Done_or_retry.t
+  Server_env.env * 'a Server_command_types.Done_or_retry.t
 
 val is_local : action -> bool
 
@@ -32,9 +32,9 @@ val go :
   bool ->
   stream_file:Path.t option ->
   hints:Relative_path.t list ->
-  ServerEnv.genv ->
-  ServerEnv.env ->
-  ServerEnv.env * server_result_or_retry
+  Server_env.genv ->
+  Server_env.env ->
+  Server_env.env * server_result_or_retry
 
 (**
  Like `go`, but only looks for references in the cached TAST from the supplied filename.

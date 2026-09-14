@@ -12,15 +12,15 @@
 
 module NonPersistent : sig
   val handle_client_command_or_persistent_connection :
-    ServerEnv.genv ->
-    ServerEnv.env ->
+    Server_env.genv ->
+    Server_env.env ->
     Client_provider.client ->
-    ServerEnv.env Server_utils.handle_command_result
+    Server_env.env Server_utils.handle_command_result
 end = struct
   let handle_client_command_exception
-      ~(env : ServerEnv.env)
+      ~(env : Server_env.env)
       ~(client : Client_provider.client)
-      (e : Exception.t) : ServerEnv.env =
+      (e : Exception.t) : Server_env.env =
     match Exception.to_exn e with
     | Client_provider.Client_went_away
     | Server_command_types.Read_command_timeout ->
@@ -83,7 +83,7 @@ end = struct
 end
 
 let handle_client_command_or_persistent_connection genv env client :
-    ServerEnv.env Server_utils.handle_command_result =
+    Server_env.env Server_utils.handle_command_result =
   Server_idle.stamp_connection ();
   Hh_logger.log
     ~category:"clients"

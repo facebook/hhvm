@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
+exception Nonfatal_rpc_exception of Exception.t * Server_env.env
 
 (** Handle a client command. This can either execute the command immediately,
 or store it as a continuation to be completed later
@@ -15,7 +15,7 @@ Invariant (checked in [Server_main.priority_client_interrupt_handler]):
 if this returns anything other than [Done], then [use_priority_pipe]
 must have returned false for the command we fetch from the client to handle. *)
 val handle :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Client_provider.client ->
-  ServerEnv.env Server_utils.handle_command_result
+  Server_env.env Server_utils.handle_command_result

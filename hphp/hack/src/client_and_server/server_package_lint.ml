@@ -142,11 +142,11 @@ let go genv env file candidate_files =
   in
   let ref_files =
     MultiWorker.call
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       ~job
       ~merge:Relative_path.Set.union
       ~neutral:Relative_path.Set.empty
-      ~next:(MultiWorker.next genv.ServerEnv.workers candidate_paths)
+      ~next:(MultiWorker.next genv.Server_env.workers candidate_paths)
   in
   (* Target uses its natural (path-based) package because the question is
      "what if the override on the target were removed?". Dependents use

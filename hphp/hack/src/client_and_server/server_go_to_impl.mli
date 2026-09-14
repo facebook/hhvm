@@ -10,9 +10,9 @@ open Server_command_types.Find_refs
 
 val go :
   action:action ->
-  genv:ServerEnv.genv ->
-  env:ServerEnv.env ->
-  ServerEnv.env * server_result_or_retry
+  genv:Server_env.genv ->
+  env:Server_env.env ->
+  Server_env.env * server_result_or_retry
 
 val go_for_single_file :
   ctx:Provider_context.t ->

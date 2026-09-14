@@ -10,7 +10,7 @@
 
 open Hh_prelude
 open Option.Monad_infix
-open ServerEnv
+open Server_env
 open Reordered_argument_collections
 open Server_command_types.Find_refs
 open Server_command_types.Done_or_retry
@@ -88,7 +88,7 @@ let search_function ctx function_name include_defs ~stream_file ~hints genv env
   let files =
     Find_refs_service.get_dependent_files_function
       ctx
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       function_name
     |> Relative_path.Set.elements
   in
@@ -180,7 +180,7 @@ let search_gconst ctx cst_name include_defs ~stream_file ~hints genv env =
   let files =
     Find_refs_service.get_dependent_files_gconst
       ctx
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       cst_name
     |> Relative_path.Set.elements
   in
@@ -218,7 +218,7 @@ let search_class
   let files =
     Find_refs_service.get_dependent_files
       ctx
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       (SSet.singleton class_name)
     |> Relative_path.Set.elements
   in

@@ -7,7 +7,7 @@
  *
  *)
 
-open ServerEnv
+open Server_env
 open Utils
 module Hack_bucket = Bucket
 open Hh_prelude

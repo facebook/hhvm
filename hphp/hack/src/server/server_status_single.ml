@@ -46,7 +46,7 @@ let go_from_cached_diagnostics
     return_expanded_tast
     || preexisting_warnings
     || is_stale
-    || not (ServerEnv.are_diagnostics_complete env ~uses_partial_typecheck)
+    || not (Server_env.are_diagnostics_complete env ~uses_partial_typecheck)
   then
     None
   else
@@ -58,7 +58,7 @@ let go_from_cached_diagnostics
         error_filter
       in
       let diagnostics =
-        diagnostics_for_paths env.ServerEnv.diagnostics paths
+        diagnostics_for_paths env.Server_env.diagnostics paths
         |> Diagnostics.filter_out_mergebase_warnings warnings_saved_state
         |> Filter_diagnostics.filter_rel error_filter
       in

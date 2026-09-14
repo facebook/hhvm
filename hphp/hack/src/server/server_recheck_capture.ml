@@ -11,8 +11,8 @@ type snapshot = unit
 let update_env env changed_files =
   {
     env with
-    ServerEnv.changed_files =
-      Relative_path.Set.union env.ServerEnv.changed_files changed_files;
+    Server_env.changed_files =
+      Relative_path.Set.union env.Server_env.changed_files changed_files;
   }
 
 let update_before_recheck
@@ -20,7 +20,7 @@ let update_before_recheck
     env
     ~(changed_files : Relative_path.Set.t)
     ~(to_recheck_count : int)
-    ~(parse_t : float) : ServerEnv.env * snapshot =
+    ~(parse_t : float) : Server_env.env * snapshot =
   ignore (genv, to_recheck_count, parse_t);
   (update_env env changed_files, ())
 
@@ -32,7 +32,7 @@ let update_after_recheck
     ~(rechecked_files : Relative_path.Set.t)
     ~(changed_files : Relative_path.Set.t)
     ~(recheck_errors : Diagnostics.t)
-    ~(all_errors : Diagnostics.t) : ServerEnv.env * string Future.t option =
+    ~(all_errors : Diagnostics.t) : Server_env.env * string Future.t option =
   ignore
     ( genv,
       snapshot,

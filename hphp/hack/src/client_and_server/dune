@@ -392,7 +392,7 @@
 (library
  (name server_env)
  (wrapped false)
- (modules serverEnv )
+ (modules server_env )
  (libraries
   ci_util
   client_provider

@@ -9,9 +9,9 @@
 (** Might raise {!Naming_table.File_info_not_found} *)
 val handle :
   'res.
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   is_stale:bool ->
   Server_command_types.cmd_metadata ->
   'res Server_command_types.t ->
-  ServerEnv.env * 'res
+  Server_env.env * 'res

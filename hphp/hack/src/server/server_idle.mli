@@ -13,14 +13,14 @@
 
 (** Initialize with a set of default periodic callbacks, for example
     garbage collection, log flushing, etc. *)
-val init : ServerEnv.genv -> Path.t -> unit
+val init : Server_env.genv -> Path.t -> unit
 
 (** Register the provided function as a callback to be run next time the server
     is idle. *)
-val async : (env:ServerEnv.env -> ServerEnv.env) -> unit
+val async : (env:Server_env.env -> Server_env.env) -> unit
 
 (** Called whenever the server is idle. Will run any due callbacks. *)
-val go : ServerEnv.env -> ServerEnv.env
+val go : Server_env.env -> Server_env.env
 
 (** Record timestamp of client connections *)
 val stamp_connection : unit -> unit

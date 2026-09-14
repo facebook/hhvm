@@ -8,4 +8,4 @@
 
 (** Seed files: files under the project root that no other file references.
     Returns unique paths sorted by {!Relative_path.compare}. *)
-val go : ServerEnv.genv -> ServerEnv.env -> Relative_path.t list
+val go : Server_env.genv -> Server_env.env -> Relative_path.t list

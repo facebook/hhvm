@@ -9,10 +9,10 @@
 module Hack_bucket = Bucket
 open Hh_prelude
 module Bucket = Hack_bucket
-open ServerEnv
+open Server_env
 
 let directory_walk
-    ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
+    ?hhi_filter ~(telemetry_label : string) (genv : Server_env.genv) :
     Relative_path.t list Bucket.next * float =
   Server_progress.write "indexing";
   let t = Unix.gettimeofday () in
@@ -29,8 +29,8 @@ let directory_walk
 (** This parses files with the direct decl parser and uses the result to update
   the naming table in the provided env. *)
 let parse_files_and_update_forward_naming_table
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     ~(get_next : Relative_path.t list Bucket.next)
     ?(count : int option)
     (t : float)
@@ -38,7 +38,7 @@ let parse_files_and_update_forward_naming_table
     ~(decl_mode : Direct_decl_service.direct_decl_mode)
     ~(telemetry_label : string)
     ~(cgroup_steps : Cgroup_profiler.step_group)
-    ~(worker_call : MultiWorker.call_wrapper) : ServerEnv.env * float =
+    ~(worker_call : MultiWorker.call_wrapper) : Server_env.env * float =
   Cgroup_profiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   begin
@@ -73,10 +73,10 @@ let parse_files_and_update_forward_naming_table
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
 let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
-    (env : ServerEnv.env)
+    (env : Server_env.env)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    ~(cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   Cgroup_profiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   Server_progress.with_message "resolving symbol references" @@ fun () ->
@@ -134,7 +134,7 @@ let log_type_check_end
     Telemetry.create ()
     |> Telemetry.object_
          ~key:"init"
-         ~value:(ServerEnv.Init_telemetry.get init_telemetry)
+         ~value:(Server_env.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.object_
@@ -154,13 +154,13 @@ let log_type_check_end
     ~start_t
 
 let defer_or_do_type_check
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (files_to_check : Relative_path.t list)
     (init_telemetry : Init_telemetry.t)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_steps : Cgroup_profiler.step_group) : ServerEnv.env * float =
+    ~(cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
   if ServerArgs.check_mode genv.options then (
     (* Prechecked files are not supported in check mode, we
      * should always recheck everything necessary up-front. *)
@@ -184,7 +184,7 @@ let defer_or_do_type_check
     let files_to_check =
       if
         not
-          genv.ServerEnv.local_config
+          genv.Server_env.local_config
             .Server_local_config.enable_type_check_filter_files
       then
         files_to_check
@@ -218,17 +218,17 @@ let defer_or_do_type_check
           Typing_check_service.
             {
               enable_fanout_aware_distc =
-                genv.ServerEnv.local_config
+                genv.Server_env.local_config
                   .Server_local_config.enable_fanout_aware_distc;
               fanout_threshold =
-                genv.ServerEnv.local_config
+                genv.Server_env.local_config
                   .Server_local_config.hh_distc_fanout_threshold;
               fanout_full_init_threshold =
-                genv.ServerEnv.local_config
+                genv.Server_env.local_config
                   .Server_local_config.hh_distc_fanout_full_init_threshold;
             }
       in
-      let root = ServerArgs.root genv.ServerEnv.options in
+      let root = ServerArgs.root genv.Server_env.options in
       let ctx = Provider_utils.ctx_from_server_env env in
       Cgroup_profiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
@@ -241,12 +241,12 @@ let defer_or_do_type_check
         ~hh_distc_config
         ~check_info:
           (Server_check_utils.get_check_info
-             ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
+             ~check_reason:(Server_env.Init_telemetry.get_reason init_telemetry)
              ~log_errors:true
-             ~discard_warnings:(ServerEnv.discard_warnings env)
+             ~discard_warnings:(Server_env.discard_warnings env)
              genv
              env)
-        ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
+        ~warnings_saved_state:Server_env.(env.init_env.mergebase_warning_hashes)
     in
     let env =
       { env with diagnostics = Diagnostics.merge errorl env.diagnostics }

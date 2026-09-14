@@ -39,7 +39,7 @@ type init_approach =
 
 (** Docs are in .mli *)
 type init_result =
-  | Load_state_succeeded of ServerEnv.saved_state_revs_info
+  | Load_state_succeeded of Server_env.saved_state_revs_info
   | Load_state_failed of string * Telemetry.t
   | Load_state_declined of string
 
@@ -125,7 +125,7 @@ type loaded_info = {
   old_errors: (Save_state_service_types.saved_state_errors[@yojson.opaque]);
       [@show.opaque]
   old_warnings: (Warnings_saved_state.t[@yojson.opaque]); [@show.opaque]
-  saved_state_revs_info: ServerEnv.saved_state_revs_info;
+  saved_state_revs_info: Server_env.saved_state_revs_info;
   (* The manifold path for naming table saved state, to be used by remote type checker
      for downloading the naming table in the case of a saved-state init *)
   naming_table_manifold_path: string option;

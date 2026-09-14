@@ -17,5 +17,5 @@ val get_tast_map :
 val go :
   MultiWorker.worker list option ->
   (string * File_content.Position.t * File_content.Position.t option) list ->
-  ServerEnv.env ->
+  Server_env.env ->
   string list

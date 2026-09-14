@@ -9,15 +9,15 @@
 
 open Hh_prelude
 
-let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : Server_rage_types.result
-    =
+let go (_genv : Server_env.genv) (env : Server_env.env) :
+    Server_rage_types.result =
   let open Server_rage_types in
   let data =
     Printf.sprintf
       "hh_server pid=%d ppid=%d\ndisk_needs_parsing: %s\n"
       (Unix.getpid ())
       (Unix.getppid ())
-      (Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
+      (Relative_path.Set.elements env.Server_env.disk_needs_parsing
       |> List.map ~f:Relative_path.to_absolute
       |> String.concat ~sep:" ")
   in

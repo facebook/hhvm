@@ -100,4 +100,4 @@ let test () =
   in
   Test.assertSingleDiagnostic
     bar_errors
-    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics)
+    (Diagnostics.get_diagnostic_list env.Server_env.diagnostics)

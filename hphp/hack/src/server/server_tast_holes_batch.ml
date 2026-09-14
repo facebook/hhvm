@@ -24,7 +24,7 @@ let helper ctx acc path_list =
 let go :
     MultiWorker.worker list option ->
     string list ->
-    ServerEnv.env ->
+    Server_env.env ->
     Tast_holes_service.result =
  fun workers file_list env ->
   let file_list =

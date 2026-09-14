@@ -172,13 +172,13 @@ let invalidate_upon_file_changes
   |> Telemetry.duration ~key:"invalidate_upon_file_changes_ms" ~start_time
   |> Telemetry.string_ ~key:"kind" ~value:kind
 
-let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
+let ctx_from_server_env (env : Server_env.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
   Provider_context.empty_for_tool
-    ~popt:env.ServerEnv.popt
-    ~tcopt:env.ServerEnv.tcopt
+    ~popt:env.Server_env.popt
+    ~tcopt:env.Server_env.tcopt
     ~backend:(Provider_backend.get ())
-    ~deps_mode:env.ServerEnv.deps_mode
+    ~deps_mode:env.Server_env.deps_mode
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =

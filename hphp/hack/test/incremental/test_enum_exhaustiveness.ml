@@ -1,5 +1,5 @@
 open Integration_test_base_types
-open ServerEnv
+open Server_env
 module Test = Integration_test_base
 
 let init_base_content =

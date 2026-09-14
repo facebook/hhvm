@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-open ServerEnv
+open Server_env
 open Reordered_argument_collections
 open Server_command_types.Find_refs
 open Server_command_types.Done_or_retry
@@ -126,12 +126,12 @@ let parallel_find_positions_of_methods
 let find_child_classes
     (ctx : Provider_context.t)
     (class_name : string)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : string list =
+    (genv : Server_env.genv)
+    (env : Server_env.env) : string list =
   let files =
     Find_refs_service.get_dependent_files
       ctx
-      genv.ServerEnv.workers
+      genv.Server_env.workers
       (SSet.singleton class_name)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -158,8 +158,8 @@ let find_child_classes_in_file
 let search_class
     (ctx : Provider_context.t)
     (class_name : string)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * server_result_or_retry =
+    (genv : Server_env.genv)
+    (env : Server_env.env) : Server_env.env * server_result_or_retry =
   let class_name = Server_find_refs.add_ns class_name in
   Server_find_refs.handle_prechecked_files
     genv
@@ -187,8 +187,8 @@ let search_member
     (ctx : Provider_context.t)
     (class_name : string)
     (member : member)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * server_result_or_retry =
+    (genv : Server_env.genv)
+    (env : Server_env.env) : Server_env.env * server_result_or_retry =
   match member with
   | Method method_name ->
     let class_name = Server_find_refs.add_ns class_name in
@@ -274,8 +274,8 @@ let go_for_single_file
   | LocalVar _ ->
     []
 
-let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
-    ServerEnv.env * server_result_or_retry =
+let go ~(action : action) ~(genv : Server_env.genv) ~(env : Server_env.env) :
+    Server_env.env * server_result_or_retry =
   let ctx = Provider_utils.ctx_from_server_env env in
   match action with
   | Class class_name

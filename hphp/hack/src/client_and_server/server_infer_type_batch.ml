@@ -181,7 +181,7 @@ let parallel_helper
 let go :
     MultiWorker.worker list option ->
     (string * File_content.Position.t * File_content.Position.t option) list ->
-    ServerEnv.env ->
+    Server_env.env ->
     string list =
  fun workers pos_list env ->
   let pos_list =

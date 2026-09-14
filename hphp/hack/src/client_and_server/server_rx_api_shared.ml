@@ -118,7 +118,7 @@ let parallel_helper h workers tcopt pos_list =
 let go :
     MultiWorker.worker list option ->
     (string * int * int) list ->
-    ServerEnv.env ->
+    Server_env.env ->
     _ handlers ->
     _ =
  fun workers pos_list env h ->

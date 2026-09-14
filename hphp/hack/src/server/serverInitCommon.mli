@@ -12,14 +12,14 @@ It actually returns a [Bucket.next], i.e. a lazy list, rather than doing it eage
 val directory_walk :
   ?hhi_filter:(string -> bool) ->
   telemetry_label:string ->
-  ServerEnv.genv ->
+  Server_env.genv ->
   Relative_path.t list Bucket.next * float
 
 (** This parses all the lazy list of files provided by [get_next] to get [FileInfo.t]
   information for all of them, then updates the forward naming table [env.naming_table]. *)
 val parse_files_and_update_forward_naming_table :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   get_next:Relative_path.t list Bucket.next ->
   ?count:int ->
   float ->
@@ -28,7 +28,7 @@ val parse_files_and_update_forward_naming_table :
   telemetry_label:string ->
   cgroup_steps:Cgroup_profiler.step_group ->
   worker_call:MultiWorker.call_wrapper ->
-  ServerEnv.env * float
+  Server_env.env * float
 
 (** This walks [env.naming_table], the forward-naming-table, and uses it to
 update the (global mutable) reverse naming table. It also adds
@@ -36,11 +36,11 @@ duplicate-name-errors into [env.errors], and also puts them also
 into [env.failed_naming] since that's how we currently accomplish
 incremental updates that fix duplicate names. *)
 val update_reverse_naming_table_from_env_and_get_duplicate_name_errors :
-  ServerEnv.env ->
+  Server_env.env ->
   float ->
   telemetry_label:string ->
   cgroup_steps:Cgroup_profiler.step_group ->
-  ServerEnv.env * float
+  Server_env.env * float
 
 (** Just a quick validation that there are no errors *)
 val validate_no_errors : Diagnostics.t -> unit
@@ -57,11 +57,11 @@ val validate_no_errors : Diagnostics.t -> unit
   and "hh_server --save-state" (i.e. full-init which saves a state and then quits),
   it typechecks all the files provided in the list. *)
 val defer_or_do_type_check :
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  Server_env.genv ->
+  Server_env.env ->
   Relative_path.t list ->
-  ServerEnv.Init_telemetry.t ->
+  Server_env.Init_telemetry.t ->
   float ->
   telemetry_label:string ->
   cgroup_steps:Cgroup_profiler.step_group ->
-  ServerEnv.env * float
+  Server_env.env * float

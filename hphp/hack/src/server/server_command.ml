@@ -11,7 +11,7 @@ open Hh_prelude
 open Utils
 open Server_command_types
 
-exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
+exception Nonfatal_rpc_exception of Exception.t * Server_env.env
 
 let reason = Server_command_types_utils.debug_describe_cmd
 
@@ -41,12 +41,12 @@ let with_dependency_table_reads mode full_recheck_needed f =
     available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
   Hh_logger.debug "SeverCommand.actually_handle preamble";
-  with_dependency_table_reads env.ServerEnv.deps_mode full_recheck_needed
+  with_dependency_table_reads env.Server_env.deps_mode full_recheck_needed
   @@ fun () ->
   Diagnostics.ignore_ @@ fun () ->
   assert (
     (not full_recheck_needed)
-    || ServerEnv.(is_full_check_done env.full_check_status));
+    || Server_env.(is_full_check_done env.full_check_status));
 
   Client_provider.track
     client
@@ -98,10 +98,10 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     new_env
 
 let handle
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
+    (genv : Server_env.genv)
+    (env : Server_env.env)
     (client : Client_provider.client) :
-    ServerEnv.env Server_utils.handle_command_result =
+    Server_env.env Server_utils.handle_command_result =
   (* In the case if LSP, it's normal that this [Server_waiting_for_cmd]
      track happens on a per-message basis, much later than the previous
      [Server_got_connection_type] track that happened when the persistent
@@ -144,7 +144,7 @@ let handle
     ~long_delay_okay:false;
   let full_recheck_needed = rpc_command_needs_full_check (snd msg) in
   let is_stale =
-    ServerEnv.(env.last_recheck_loop_stats.RecheckLoopStats.updates_stale)
+    Server_env.(env.last_recheck_loop_stats.RecheckLoopStats.updates_stale)
   in
 
   let handle_command =

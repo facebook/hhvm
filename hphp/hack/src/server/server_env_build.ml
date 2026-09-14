@@ -11,7 +11,7 @@
 (* Building the environment *)
 (*****************************************************************************)
 open Hh_prelude
-open ServerEnv
+open Server_env
 
 let make_genv options config local_config workers =
   Typing_deps.trace := not (ServerArgs.check_mode options);
@@ -40,7 +40,7 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id ~deps_mode ?diagnostics config : ServerEnv.env =
+let make_env ~init_id ~deps_mode ?diagnostics config : Server_env.env =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;

@@ -365,39 +365,48 @@ struct CompactWriter {
       const size_t numFields = fields.size();
       // Write each member
       for (int slot = 0; slot < numFields; ++slot) {
-        if (slot < numProps && fields[slot].name == prop[slot].name) {
-          auto index = cls.propSlotToIndex(slot);
-          Variant fieldVal;
-          if (fields[slot].isWrapped) {
-            fieldVal = getThriftType(obj, StrNR(fields[slot].name));
-          } else {
-            fieldVal = VarNR{objProps->at(index).tv()};
-          }
-          if (!fieldVal.isNull()) {
-            TType fieldType = fields[slot].type;
-            if (fields[slot].isTypeWrapped && fieldVal.isObject()) {
-              fieldVal = getThriftField(fieldVal.toObject());
-            }
-            if (fields[slot].adapter) {
-              fieldVal = transformToThriftType(fieldVal, *fields[slot].adapter);
-            }
-            if(fields[slot].isTerse && is_value_type_default(fieldType, fieldVal)) {
-              continue;
-            }
-            writeFieldBegin(fields[slot].fieldNum, fieldType);
-            auto fieldInfo = FieldInfo();
-            fieldInfo.cls = &cls;
-            fieldInfo.prop = &prop[slot];
-            fieldInfo.fieldNum = fields[slot].fieldNum;
-            writeFieldInternal(fieldVal, fields[slot], fieldType, fieldInfo);
-            writeFieldEnd();
-          } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
-                     (prop[slot].attrs & AttrLateInit)) {
-            throw_late_init_prop(prop[slot].cls, prop[slot].name, false);
-          }
-        } else {
-          writeSlow(fields[slot], obj);
+        auto const& field = fields[slot];
+        if (slot >= numProps || field.name != prop[slot].name) {
+          writeSlow(field, obj);
+          continue;
         }
+
+        auto const& property = prop[slot];
+        auto const index = cls.propSlotToIndex(slot);
+        Variant fieldVal;
+        if (field.isWrapped) {
+          fieldVal = getThriftType(obj, StrNR(field.name));
+        } else {
+          fieldVal = VarNR{objProps->at(index).tv()};
+        }
+
+        if (fieldVal.isNull()) {
+          if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
+              (property.attrs & AttrLateInit)) {
+            throw_late_init_prop(property.cls, property.name, false);
+          }
+          continue;
+        }
+
+        auto const fieldType = field.type;
+        if (field.isTypeWrapped && fieldVal.isObject()) {
+          fieldVal = getThriftField(fieldVal.toObject());
+        }
+        if (field.adapter) {
+          fieldVal = transformToThriftType(fieldVal, *field.adapter);
+        }
+        if (field.isTerse && is_value_type_default(fieldType, fieldVal)) {
+          continue;
+        }
+
+        writeFieldBegin(field.fieldNum, fieldType);
+        const FieldInfo fieldInfo = {
+          .cls = &cls,
+          .prop = &property,
+          .fieldNum = field.fieldNum,
+        };
+        writeFieldInternal(fieldVal, field, fieldType, fieldInfo);
+        writeFieldEnd();
       }
 
       // Write stop

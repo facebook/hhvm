@@ -14,7 +14,7 @@ let max_hierarchy_depth = 2
 
 let max_branching_factor = 2
 
-let min_tuple_arity = 1
+let min_tuple_arity = 0
 
 let max_tuple_arity = 3
 
@@ -970,10 +970,8 @@ end = struct
        hierarchy so that it is easy to enumerate subtypes. This is fine because
        it can only make disjointness more conservative.
 
-       The reason we output multiple types is that not every type has a unique
-       weakening to establish disjointness. For example, 2-tuples are not
-       disjoint from 3-tuples. So we weaken all tuples to (mixed),
-       (mixed,mixed), and (mixed,mixed,mixed) (because we only generate 1/2/3 tuples).
+       Tuples and vecs share a runtime representation, so their weakenings
+       must overlap even when the tuple arities differ.
 
        Although we don't have to keep the non-weakened types for disjointness
        checking, it makes termination of `weaken_for_disjointness` trivial, so
@@ -1200,22 +1198,16 @@ end = struct
     match kind with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
-    | Kind.Option ->
-      let rec candidate () =
-        match
-          mk
-            ~complexity:(complexity - 1)
-            REnv.{ renv with for_option_ty = true }
-            env
-        with
-        | (_, Mixed) -> candidate ()
-        | (_, Option _) as res ->
-          res
-          (* Due to some misguided checks the parser and the typechecker has. We
-             need to eliminate these cases. *)
-        | (env, ty) -> (env, Option ty)
-      in
-      candidate ()
+    | Kind.Option -> begin
+      match
+        mk
+          ~complexity:(complexity - 1)
+          REnv.{ renv with for_option_ty = true }
+          env
+      with
+      | (_, Option _) as res -> res
+      | (env, ty) -> (env, Option ty)
+    end
     | Kind.Awaitable ->
       let (env, ty) =
         mk
@@ -1362,8 +1354,6 @@ end = struct
         (env, Keyset ty)
     end
     | Kind.Tuple ->
-      (* Sadly, although nullary tuples can be generated with an expression,
-         there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
       let renv = REnv.{ renv with for_option_ty = false } in
       let (env, conjuncts) =

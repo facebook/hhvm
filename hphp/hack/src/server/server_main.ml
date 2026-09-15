@@ -54,7 +54,7 @@ module Program = struct
     Server_error.print_error_list
       stdout
       ~stale_msg:None
-      ~output_json:(ServerArgs.json_mode genv.options)
+      ~output_json:(Server_args.json_mode genv.options)
       ~error_format:(Some Diagnostics.Raw)
       ~error_list:
         (List.map
@@ -67,7 +67,7 @@ module Program = struct
     let has_errors = Diagnostics.has_errors env.diagnostics in
     let error_code =
       if has_errors then
-        if Option.is_some (ServerArgs.write_symbol_info genv.options) then
+        if Option.is_some (Server_args.write_symbol_info genv.options) then
           32
         else
           1
@@ -87,8 +87,8 @@ module Program = struct
       let (new_config, _) =
         ServerConfig.load
           ~silent:false
-          ~from:(ServerArgs.from genv.options)
-          ~cli_config_overrides:(ServerArgs.config genv.options)
+          ~from:(Server_args.from genv.options)
+          ~cli_config_overrides:(Server_args.config genv.options)
       in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
@@ -242,7 +242,7 @@ let query_notifier
   Program.exit_if_critical_update genv ~raw_updates;
   let updates =
     Find_utils.post_file_watcher_filter_from_fully_qualified_raw_updates
-      ~root:(ServerArgs.root genv.options)
+      ~root:(Server_args.root genv.options)
       ~raw_updates
   in
   (* CARE! For streaming-errors to work in clientCheckStatus.ml, the test
@@ -948,34 +948,34 @@ let serve genv env in_fds =
  * 6. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : Server_init.init_approach * string =
-  if Option.is_some (ServerArgs.save_naming_filename genv.options) then
+  if Option.is_some (Server_args.save_naming_filename genv.options) then
     (Server_init.Parse_only_init, "Server_args_saving_naming")
-  else if ServerArgs.no_load genv.options then
+  else if Server_args.no_load genv.options then
     (Server_init.Full_init, "Server_args_no_load")
   else if
     (not genv.local_config.Server_local_config.use_saved_state)
-    && Option.is_none (ServerArgs.write_symbol_info genv.options)
+    && Option.is_none (Server_args.write_symbol_info genv.options)
   then
     (Server_init.Full_init, "Local_config_saved_state_disabled")
-  else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
+  else if Option.is_some (Server_args.write_symbol_info genv.options) then
     match
       ( genv.local_config.Server_local_config.use_saved_state_when_indexing,
-        ServerArgs.with_saved_state genv.options )
+        Server_args.with_saved_state genv.options )
     with
     | (false, None) ->
       (Server_init.Write_symbol_info, "Server_args_writing_symbol_info")
     | (true, None) ->
       ( Server_init.Write_symbol_info_with_state Server_init.Load_state_natively,
         "Server_args_writing_symbol_info_load_native" )
-    | (_, Some (ServerArgs.Saved_state_target_info target)) ->
+    | (_, Some (Server_args.Saved_state_target_info target)) ->
       ( Server_init.Write_symbol_info_with_state (Server_init.Precomputed target),
         "Server_args_writing_symbol_info_precomputed" )
   else
     match
       ( genv.local_config.Server_local_config.load_state_natively,
-        ServerArgs.with_saved_state genv.options )
+        Server_args.with_saved_state genv.options )
     with
-    | (_, Some (ServerArgs.Saved_state_target_info target)) ->
+    | (_, Some (Server_args.Saved_state_target_info target)) ->
       ( Server_init.Saved_state_init (Server_init.Precomputed target),
         "Precomputed" )
     | (false, None) ->
@@ -1077,7 +1077,7 @@ let num_workers options local_config =
             ^^ "for max workers are given. Choosing minimum of the two.");
           min a b
         ))
-      (ServerArgs.max_procs options)
+      (Server_args.max_procs options)
       local_config.Server_local_config.max_workers
   in
   let nbr_procs = Sys_utils.nbr_procs in
@@ -1168,7 +1168,7 @@ let initialize_logging
       ~root
       ~hhconfig_version
       ~init_id
-      ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~custom_columns:(Server_args.custom_telemetry_data options)
       ~rollout_flags:(Server_local_config_load.to_rollout_flags local_config)
       ~rollout_group:local_config.Server_local_config.rollout_group
       ~time:(Unix.gettimeofday ())
@@ -1178,7 +1178,7 @@ let initialize_logging
       ~root
       ~hhconfig_version
       ~init_id
-      ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~custom_columns:(Server_args.custom_telemetry_data options)
       ~informant_managed
       ~rollout_flags:(Server_local_config_load.to_rollout_flags local_config)
       ~rollout_group:local_config.Server_local_config.rollout_group
@@ -1188,7 +1188,7 @@ let initialize_logging
 
 let check_nfs ~root options local_config =
   let root_s = Path.to_string root in
-  let check_mode = ServerArgs.check_mode options in
+  let check_mode = Server_args.check_mode options in
   if
     (not check_mode)
     && Sys_utils.is_nfs root_s
@@ -1211,7 +1211,7 @@ let warn_on_non_opt_build options config =
       ^ "and this repository's .hhconfig specifies warn_on_non_opt_build option. "
       ^ "Parsing with non-opt build will take significantly longer"
     in
-    if ServerArgs.allow_non_opt_build options then
+    if Server_args.allow_non_opt_build options then
       Hh_logger.log
         "Warning: %s. Initializing anyway due to --allow-non-opt-build option."
         msg
@@ -1226,10 +1226,10 @@ let warn_on_non_opt_build options config =
   end
 
 let get_deps_mode options =
-  match ServerArgs.save_64bit options with
+  match Server_args.save_64bit options with
   | Some new_edges_dir ->
     let human_readable_dep_map_dir =
-      ServerArgs.save_human_readable_64bit_dep_map options
+      Server_args.save_human_readable_64bit_dep_map options
     in
     Typing_deps_mode.SaveToDiskMode
       { graph = None; new_edges_dir; human_readable_dep_map_dir }
@@ -1281,7 +1281,7 @@ let log_pids root ~monitor_pid =
 let setup_server
     ~(informant_managed : bool)
     ~(monitor_pid : int option)
-    (options : ServerArgs.options)
+    (options : Server_args.options)
     (config : ServerConfig.t)
     (local_config : Server_local_config.t) : MultiWorker.worker list * env =
   let num_workers = num_workers options local_config in
@@ -1289,7 +1289,7 @@ let setup_server
     SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
   in
   let init_id = Random_id.short_string () in
-  let root = ServerArgs.root options in
+  let root = Server_args.root options in
 
   setup_ipc root;
 
@@ -1344,7 +1344,7 @@ let setup_server
   (workers, env)
 
 let possibly_save_naming_table env genv =
-  match ServerArgs.save_naming_filename genv.options with
+  match Server_args.save_naming_filename genv.options with
   | None -> ()
   | Some filename ->
     Disk.mkdir_p (Filename.dirname filename);
@@ -1358,7 +1358,7 @@ let possibly_save_naming_table env genv =
     )
 
 let run_once options config local_config =
-  assert (ServerArgs.check_mode options);
+  assert (Server_args.check_mode options);
   Hh_logger.log "Server_main.run_once starting";
 
   let (workers, env) =
@@ -1402,7 +1402,7 @@ let time f =
  * via ic.
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
-  assert (not (ServerArgs.check_mode options));
+  assert (not (Server_args.check_mode options));
   (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
   Startup_initializer.init ();
   Printexc.record_backtrace true;
@@ -1412,8 +1412,8 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   let (config, local_config) =
     ServerConfig.load
       ~silent:false
-      ~from:(ServerArgs.from options)
-      ~cli_config_overrides:(ServerArgs.config options)
+      ~from:(Server_args.from options)
+      ~cli_config_overrides:(Server_args.config options)
   in
   Option.iter local_config.Server_local_config.memtrace_dir ~f:(fun dir ->
       Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));
@@ -1433,7 +1433,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
 
   let env = time @@ fun () -> program_init genv env in
 
-  Server_idle.init genv (ServerArgs.root options);
+  Server_idle.init genv (Server_args.root options);
   log_server_ready ();
 
   serve genv env in_fds
@@ -1441,14 +1441,14 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
 type params = {
   informant_managed: bool;
   state: Server_global_state.t;
-  options: ServerArgs.options;
+  options: Server_args.options;
   monitor_pid: int;
   priority_in_fd: Unix.file_descr;
   force_dormant_start_only_in_fd: Unix.file_descr;
 }
 
 let setup_hhi_root options =
-  match ServerArgs.custom_hhi_path options with
+  match Server_args.custom_hhi_path options with
   | None ->
     (* Restore hhi files every time the server restarts
        in case the tmp folder changes *)

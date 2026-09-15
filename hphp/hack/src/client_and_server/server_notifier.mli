@@ -28,7 +28,7 @@ type t
 type indexer = (string -> bool) -> unit -> string list
 
 val init :
-  ServerArgs.options -> Server_local_config.t -> num_workers:int -> t * indexer
+  Server_args.options -> Server_local_config.t -> num_workers:int -> t * indexer
 
 val init_null : unit -> t
 

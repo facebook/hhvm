@@ -14,7 +14,7 @@ open Hh_prelude
 open Server_env
 
 let make_genv options config local_config workers =
-  Typing_deps.trace := not (ServerArgs.check_mode options);
+  Typing_deps.trace := not (Server_args.check_mode options);
   let (notifier, indexer) =
     Server_notifier.init options local_config ~num_workers:(List.length workers)
   in
@@ -31,7 +31,7 @@ let make_genv options config local_config workers =
 (* useful in testing code *)
 let default_genv =
   {
-    options = ServerArgs.default_options ~root:"";
+    options = Server_args.default_options ~root:"";
     config = ServerConfig.default_config;
     local_config = Server_local_config_load.default;
     workers = None;

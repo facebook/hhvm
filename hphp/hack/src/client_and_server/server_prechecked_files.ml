@@ -12,7 +12,7 @@ open Server_env
 
 let should_use options local_config =
   Option.value
-    (ServerArgs.prechecked options)
+    (Server_args.prechecked options)
     ~default:local_config.Server_local_config.prechecked_files
 
 let set env prechecked_files = { env with prechecked_files }

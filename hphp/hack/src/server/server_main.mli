@@ -10,7 +10,7 @@
 type params = {
   informant_managed: bool;
   state: Server_global_state.t;
-  options: ServerArgs.options;
+  options: Server_args.options;
   monitor_pid: int;
   priority_in_fd: Unix.file_descr;
   force_dormant_start_only_in_fd: Unix.file_descr;
@@ -23,7 +23,7 @@ type params = {
 val entry : (params, unit, unit) Daemon.entry
 
 val run_once :
-  ServerArgs.options -> ServerConfig.t -> Server_local_config.t -> 'a
+  Server_args.options -> ServerConfig.t -> Server_local_config.t -> 'a
 
 val serve_one_iteration :
   Server_env.genv -> Server_env.env -> Client_provider.t -> Server_env.env
@@ -45,7 +45,7 @@ val program_init : Server_env.genv -> Server_env.env -> Server_env.env
 val setup_server :
   informant_managed:bool ->
   monitor_pid:int option ->
-  ServerArgs.options ->
+  Server_args.options ->
   ServerConfig.t ->
   Server_local_config.t ->
   MultiWorker.worker list * Server_env.env

@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-type server_start_options = ServerArgs.options
+type server_start_options = Server_args.options
 
 (** Start the server. Optionally takes in the exit code of the previously
       running server that exited. *)

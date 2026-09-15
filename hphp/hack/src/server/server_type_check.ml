@@ -355,7 +355,7 @@ let do_type_checking
               time_first_error;
             } ),
           cancelled ) =
-      let root = ServerArgs.root genv.Server_env.options in
+      let root = Server_args.root genv.Server_env.options in
       Typing_check_service.go_with_interrupt
         ctx
         genv.workers
@@ -1136,7 +1136,7 @@ let type_check :
   that we'll lay down the first errors file.
   *)
   let ignore_hh_version =
-    ServerArgs.ignore_hh_version genv.Server_env.options
+    Server_args.ignore_hh_version genv.Server_env.options
   in
   (* Restart the errors-file at the start of type_check. *)
   Server_progress.ErrorsWrite.new_empty_file

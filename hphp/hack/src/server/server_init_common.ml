@@ -161,7 +161,7 @@ let defer_or_do_type_check
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : Cgroup_profiler.step_group) : Server_env.env * float =
-  if ServerArgs.check_mode genv.options then (
+  if Server_args.check_mode genv.options then (
     (* Prechecked files are not supported in check mode, we
      * should always recheck everything necessary up-front. *)
     assert (
@@ -228,7 +228,7 @@ let defer_or_do_type_check
                   .Server_local_config.hh_distc_fanout_full_init_threshold;
             }
       in
-      let root = ServerArgs.root genv.Server_env.options in
+      let root = Server_args.root genv.Server_env.options in
       let ctx = Provider_utils.ctx_from_server_env env in
       Cgroup_profiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go

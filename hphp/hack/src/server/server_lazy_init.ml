@@ -112,7 +112,7 @@ let run_saved_state_future
       additional_info
     in
     let ignore_hh_version =
-      ServerArgs.ignore_hh_version genv.Server_env.options
+      Server_args.ignore_hh_version genv.Server_env.options
     in
     let deptable_fn =
       let deptable = deptable_with_filename (Path.to_string dep_table_path) in
@@ -208,7 +208,7 @@ let report
 let download_and_load_state_exn
     ~(genv : Server_env.genv) ~(ctx : Provider_context.t) ~(root : Path.t) :
     (loaded_info, load_state_error) result =
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+  let ignore_hh_version = Server_args.ignore_hh_version genv.options in
   let (progress_naming_table_load, progress_dep_table_load) =
     (ref None, ref None)
   in
@@ -338,10 +338,10 @@ let use_precomputed_state_exn
     ~(root : Path.t)
     (genv : Server_env.genv)
     (ctx : Provider_context.t)
-    (info : ServerArgs.saved_state_target_info)
+    (info : Server_args.saved_state_target_info)
     (cgroup_steps : Cgroup_profiler.step_group) : loaded_info =
   let {
-    ServerArgs.naming_table_path;
+    Server_args.naming_table_path;
     corresponding_base_revision;
     deptable_fn;
     compressed_deptable_fn = _;
@@ -352,7 +352,7 @@ let use_precomputed_state_exn
     info
   in
   let ignore_hh_version =
-    ServerArgs.ignore_hh_version genv.Server_env.options
+    Server_args.ignore_hh_version genv.Server_env.options
   in
   Cgroup_profiler.step_start_end cgroup_steps "load deptable"
   @@ fun _cgroup_step ->
@@ -368,7 +368,7 @@ let use_precomputed_state_exn
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let naming_sqlite_table_path =
-    ServerArgs.naming_sqlite_path_for_target_info info
+    Server_args.naming_sqlite_path_for_target_info info
   in
   let naming_table_fallback_path =
     if Sys.file_exists naming_sqlite_table_path then (
@@ -377,8 +377,8 @@ let use_precomputed_state_exn
     ) else
       Server_check_utils.get_naming_table_fallback_path genv
   in
-  let errors_path = ServerArgs.errors_path_for_target_info info in
-  let warning_hashes_path = ServerArgs.warnings_path_for_target_info info in
+  let errors_path = Server_args.errors_path_for_target_info info in
+  let warning_hashes_path = Server_args.warnings_path_for_target_info info in
   let (old_naming_table, { Save_state_service_types.old_errors; old_warnings })
       =
     Cgroup_profiler.step_start_end cgroup_steps "load saved state"
@@ -482,7 +482,7 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
 (* Prechecked files are gated with a flag and not supported in AI/check modes. *)
 let use_prechecked_files (genv : Server_env.genv) : bool =
   Server_prechecked_files.should_use genv.options genv.local_config
-  && not (ServerArgs.check_mode genv.options)
+  && not (Server_args.check_mode genv.options)
 
 let file_names_to_deps names deps =
   let open Typing_deps in
@@ -745,7 +745,7 @@ let calculate_fanout_and_defer_or_do_type_check
      `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
      we no longer worry about `hh_fanout` regressing vs. `hh_server`. Deletion
      is tracked at T65464119. *)
-  if ServerArgs.dump_fanout genv.options then (
+  if Server_args.dump_fanout genv.options then (
     Hh_json_helpers.Out.pretty_to_channel
       stdout
       (`Assoc
@@ -954,7 +954,7 @@ let write_symbol_info
     (env, t)
   | None ->
     let out_dir =
-      match ServerArgs.write_symbol_info genv.options with
+      match Server_args.write_symbol_info genv.options with
       | None -> failwith "No write directory specified for --write-symbol-info"
       | Some s -> s
     in
@@ -1290,7 +1290,7 @@ let post_saved_state_initialization
     loaded_info
   in
   if genv.local_config.SLC.hg_aware then
-    if ServerArgs.is_using_precomputed_saved_state genv.options then begin
+    if Server_args.is_using_precomputed_saved_state genv.options then begin
       Hack_event_logger
       .tried_to_be_hg_aware_with_precomputed_saved_state_warning
         ();
@@ -1315,16 +1315,16 @@ let post_saved_state_initialization
           env.init_env with
           mergebase_warning_hashes =
             Option.some_if
-              (not (ServerArgs.preexisting_warnings genv.Server_env.options))
+              (not (Server_args.preexisting_warnings genv.Server_env.options))
               old_warnings;
           naming_table_manifold_path;
           saved_state_revs_info = Some saved_state_revs_info;
         };
       deps_mode =
-        (match ServerArgs.save_64bit genv.options with
+        (match Server_args.save_64bit genv.options with
         | Some new_edges_dir ->
           let human_readable_dep_map_dir =
-            ServerArgs.save_human_readable_64bit_dep_map genv.options
+            Server_args.save_human_readable_64bit_dep_map genv.options
           in
           Typing_deps_mode.SaveToDiskMode
             {

@@ -35,11 +35,11 @@ let log_monitor_exit (finale_data : Exit_status.finale_data) =
     listening to socket requests from hh_client, checking Build ID, and relaying
     requests to the typechecker process. *)
 let monitor_daemon_main
-    (options : ServerArgs.options) ~(proc_stack : string list) =
+    (options : Server_args.options) ~(proc_stack : string list) =
   (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
   Startup_initializer.init ();
 
-  let www_root = ServerArgs.root options in
+  let www_root = Server_args.root options in
   Server_progress.set_root www_root;
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck
@@ -47,7 +47,7 @@ let monitor_daemon_main
      then we will exit immediately, and avoid side-effects like cycling the logfile;
      (2) otherwise we'll start up the server and it will continue to run
      and handle requests. *)
-  (if not (ServerArgs.check_mode options) then
+  (if not (Server_args.check_mode options) then
     let lock_file = Server_files.lock_file www_root in
     if not (Lock.grab lock_file) then (
       Printf.eprintf "Monitor lock file already exists: %s\n%!" lock_file;
@@ -58,7 +58,7 @@ let monitor_daemon_main
      us in a new process, and it's now our responsibility to establish a logfile
      and redirect stdout/err to it; in the absence of that flag, we'll just continue
      to write to stdout/err as normal. *)
-  if ServerArgs.should_detach options then begin
+  if Server_args.should_detach options then begin
     let log_link = Server_files.monitor_log_link www_root in
     (try Sys.rename log_link (log_link ^ ".old") with
     | _ -> ());
@@ -69,25 +69,25 @@ let monitor_daemon_main
   end;
 
   Relative_path.set_path_prefix Relative_path.Root www_root;
-  let () = Server_load_flag.set_no_load (ServerArgs.no_load options) in
+  let () = Server_load_flag.set_no_load (Server_args.no_load options) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
-  ServerConfig.warn_on_invalid_config_keys (ServerArgs.config options);
+  ServerConfig.warn_on_invalid_config_keys (Server_args.config options);
   let (config, local_config) =
     ServerConfig.load
       ~silent:false
-      ~from:(ServerArgs.from options)
-      ~cli_config_overrides:(ServerArgs.config options)
+      ~from:(Server_args.from options)
+      ~cli_config_overrides:(Server_args.config options)
   in
   Hack_event_logger.init_monitor
-    ~from:(ServerArgs.from options)
-    ~custom_columns:(ServerArgs.custom_telemetry_data options)
+    ~from:(Server_args.from options)
+    ~custom_columns:(Server_args.custom_telemetry_data options)
     ~hhconfig_version:
       (ServerConfig.version config |> Config_file.version_to_string_opt)
     ~rollout_flags:(Server_local_config_load.to_rollout_flags local_config)
     ~rollout_group:local_config.Server_local_config.rollout_group
     ~proc_stack
-    (ServerArgs.root options)
+    (Server_args.root options)
     init_id
     (Unix.gettimeofday ());
   Exit.add_hook_upon_clean_exit log_monitor_exit;
@@ -99,7 +99,7 @@ let monitor_daemon_main
   | Unix.Unix_error _ -> ());
   ignore (make_tmp_dir ());
 
-  (match ServerArgs.custom_hhi_path options with
+  (match Server_args.custom_hhi_path options with
   | None -> ignore (Hhi.get_hhi_root ())
   | Some path ->
     if Disk.file_exists path && Disk.is_directory path then (
@@ -115,30 +115,30 @@ let monitor_daemon_main
   Exit.add_hook_upon_clean_exit (fun _finale_data ->
       Server_progress.try_delete ());
 
-  if ServerArgs.check_mode options then (
+  if Server_args.check_mode options then (
     Hh_logger.log "%s" "Will run once in check mode then exit.";
     Server_main.run_once options config local_config
   ) else
     let current_version = ServerConfig.version config in
-    let waiting_client = ServerArgs.waiting_client options in
+    let waiting_client = Server_args.waiting_client options in
     let Server_local_config.Watchman.
           { debug_logging; subscribe = allow_subscriptions; _ } =
       local_config.Server_local_config.watchman
     in
     let informant_options =
       {
-        Informant.root = ServerArgs.root options;
+        Informant.root = Server_args.root options;
         allow_subscriptions;
         use_dummy = local_config.Server_local_config.use_dummy_informant;
         watchman_debug_logging =
-          ServerArgs.watchman_debug_logging options || debug_logging;
+          Server_args.watchman_debug_logging options || debug_logging;
         use_eden = local_config.Server_local_config.edenfs_informant_enabled;
         min_distance_restart =
           local_config.Server_local_config.informant_min_distance_restart;
-        ignore_hh_version = ServerArgs.ignore_hh_version options;
+        ignore_hh_version = Server_args.ignore_hh_version options;
         is_saved_state_precomputed =
-          (match ServerArgs.with_saved_state options with
-          | Some (ServerArgs.Saved_state_target_info _) -> true
+          (match Server_args.with_saved_state options with
+          | Some (Server_args.Saved_state_target_info _) -> true
           | _ -> false);
       }
     in
@@ -163,7 +163,7 @@ let monitor_daemon_main
 let daemon_entry =
   Daemon.register_entry_point
     "monitor_daemon_main"
-    (fun ((options, proc_stack) : ServerArgs.options * string list) (_ic, _oc)
+    (fun ((options, proc_stack) : Server_args.options * string list) (_ic, _oc)
     -> monitor_daemon_main options ~proc_stack)
 
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
@@ -181,8 +181,8 @@ let start () =
     (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
     Startup_initializer.init ();
     let proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
-    let options = ServerArgs.parse_options () in
-    if ServerArgs.should_detach options then begin
+    let options = Server_args.parse_options () in
+    if Server_args.should_detach options then begin
       let (_ : (unit, unit) Daemon.handle) =
         Daemon.spawn
           (Daemon.null_fd (), Unix.stdout, Unix.stderr)

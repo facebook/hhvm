@@ -295,7 +295,7 @@
 (library
  (name server_args)
  (wrapped false)
- (modules serverArgs)
+ (modules server_args)
  (libraries
    ai_options
    cli_args

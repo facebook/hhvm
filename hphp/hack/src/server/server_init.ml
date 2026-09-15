@@ -122,7 +122,7 @@ let init
     "ServerInit: init_approach=%s"
     (show_init_approach init_approach);
   let (init_method, init_method_name) =
-    let root = ServerArgs.root genv.options in
+    let root = Server_args.root genv.options in
     match init_approach with
     | Full_init -> (full_init genv env, "full_init")
     | Saved_state_init load_state_approach ->

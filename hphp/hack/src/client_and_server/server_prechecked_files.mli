@@ -7,7 +7,7 @@
  *
  *)
 
-val should_use : ServerArgs.options -> Server_local_config.t -> bool
+val should_use : Server_args.options -> Server_local_config.t -> bool
 
 val expand_all : Server_env.env -> Server_env.env
 

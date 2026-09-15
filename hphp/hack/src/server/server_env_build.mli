@@ -8,7 +8,7 @@
  *)
 
 val make_genv :
-  ServerArgs.options ->
+  Server_args.options ->
   ServerConfig.t ->
   Server_local_config.t ->
   MultiWorker.worker list ->

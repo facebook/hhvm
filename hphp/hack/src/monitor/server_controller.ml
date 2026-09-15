@@ -16,7 +16,7 @@ let start_server_daemon
     (daemon_entry : (Server_main.params, _, _) Daemon.entry) =
   let log_fds =
     let in_fd = Daemon.null_fd () in
-    if ServerArgs.should_detach options then (
+    if Server_args.should_detach options then (
       (try
          let old_log_name i = Printf.sprintf "%s.%d.old" log_link i in
          let max_n_log_files = 20 in
@@ -106,10 +106,10 @@ let start_server_daemon
   server
 
 let start_hh_server ~informant_managed options =
-  let log_link = Server_files.log_link (ServerArgs.root options) in
+  let log_link = Server_files.log_link (Server_args.root options) in
   start_server_daemon ~informant_managed options log_link Server_main.entry
 
-type server_start_options = ServerArgs.options
+type server_start_options = Server_args.options
 
 let start_server ~informant_managed ~prior_exit_status options =
   match prior_exit_status with
@@ -118,7 +118,7 @@ let start_server ~informant_managed ~prior_exit_status options =
          || (c = Exit_status.(exit_code Sql_cantopen))
          || (c = Exit_status.(exit_code Sql_corrupt))
          || c = Exit_status.(exit_code Sql_misuse) ->
-    start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
+    start_hh_server ~informant_managed (Server_args.set_no_load options true)
   | _ -> start_hh_server ~informant_managed options
 
 let kill_server ~violently process =
@@ -157,4 +157,4 @@ let wait_for_server_exit ~(timeout_t : float) process =
 let wait_pid process =
   Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.Server_process.pid
 
-let is_saved_state_precomputed = ServerArgs.is_using_precomputed_saved_state
+let is_saved_state_precomputed = Server_args.is_using_precomputed_saved_state

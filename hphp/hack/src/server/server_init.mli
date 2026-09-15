@@ -8,7 +8,7 @@
  *)
 
 type load_state_approach =
-  | Precomputed of ServerArgs.saved_state_target_info
+  | Precomputed of Server_args.saved_state_target_info
   (* Load a saved state using Ocaml implementation of saved state loader. *)
   | Load_state_natively
 

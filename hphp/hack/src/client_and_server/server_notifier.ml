@@ -95,10 +95,10 @@ let indexer (t : t) (filter : string -> bool) : unit -> string list =
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
 
 let init
-    (options : ServerArgs.options)
+    (options : Server_args.options)
     (local_config : Server_local_config.t)
     ~(num_workers : int) : t * indexer =
-  let root = ServerArgs.root options in
+  let root = Server_args.root options in
   let watchman_config = local_config.Server_local_config.watchman in
   let watchman_enabled = watchman_config.Server_local_config.Watchman.enabled in
   let edenfs_watcher_config =
@@ -142,7 +142,7 @@ let init
               None);
           expression_terms = Files_to_ignore.watchman_server_expression_terms;
           debug_logging =
-            ServerArgs.watchman_debug_logging options || debug_logging;
+            Server_args.watchman_debug_logging options || debug_logging;
           sockname;
           subscription_prefix = "hh_type_check_watcher";
           roots = [root];
@@ -242,7 +242,7 @@ let init
   let lazy_watchman = lazy (try_init_watchman ()) in
 
   let notifier =
-    if ServerArgs.check_mode options then (
+    if Server_args.check_mode options then (
       (* check_mode *)
       Hh_logger.log "Not using any file watching mechanism";
       IndexOnly { root }

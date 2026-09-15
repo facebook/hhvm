@@ -493,7 +493,7 @@ let to_string
     |> Printf.sprintf "[%s]"
   in
   [
-    "ServerArgs.options({";
+    "Server_args.options({";
     "ai_mode: ";
     ai_mode_str;
     ", ";

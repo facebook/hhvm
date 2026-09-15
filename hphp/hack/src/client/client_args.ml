@@ -1175,7 +1175,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
 
   if !version then (
     if !output_json then
-      ServerArgs.print_json_version ()
+      Server_args.print_json_version ()
     else
       print_endline Hh_version.version;
     exit 0

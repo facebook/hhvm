@@ -40,7 +40,7 @@ let tcopt config =
       po = popt;
       tco_allow_all_files_for_module_declarations = true;
     }
-  |> ServerConfig.load_config config
+  |> Server_config.load_config config
 
 let log_section ~name ~content =
   Printf.printf "%s:\n" (String.uppercase name);

@@ -57,7 +57,7 @@ type common_state = {
   hhi_root: Path.t;
       (** hhi_root files are written during initialize, deleted at shutdown, and
       refreshed periodically in case the tmp-cleaner has deleted them. *)
-  config: ServerConfig.t; [@opaque]
+  config: Server_config.t; [@opaque]
   local_config: Server_local_config.t; [@opaque]
   local_memory: Provider_backend.local_memory; [@opaque]
       (** Local_memory backend; includes decl caches *)
@@ -313,8 +313,8 @@ let batch_update_naming_table_and_invalidate_caches
 (** An empty ctx with no entries *)
 let make_empty_ctx (common : common_state) : Provider_context.t =
   Provider_context.empty_for_tool
-    ~popt:(ServerConfig.parser_options common.config)
-    ~tcopt:(ServerConfig.typechecker_options common.config)
+    ~popt:(Server_config.parser_options common.config)
+    ~tcopt:(Server_config.typechecker_options common.config)
     ~backend:(Provider_backend.Local_memory common.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
 
@@ -352,10 +352,10 @@ let initialize1
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let (config, local_config) =
-    ServerConfig.load ~silent:true ~cli_config_overrides:config ~from:""
+    Server_config.load ~silent:true ~cli_config_overrides:config ~from:""
   in
   Hack_event_logger.set_hhconfig_version
-    (ServerConfig.version config |> Config_file.version_to_string_opt);
+    (Server_config.version config |> Config_file.version_to_string_opt);
   Hack_event_logger.set_rollout_flags
     (Server_local_config_load.to_rollout_flags local_config);
   Hack_event_logger.set_rollout_group
@@ -804,7 +804,7 @@ let handle_request
     let (dopen_files, entry, _) = update_file dstate.dopen_files document in
     let result =
       File_outline.outline_entry_no_comments
-        ~popt:(ServerConfig.parser_options dstate.dcommon.config)
+        ~popt:(Server_config.parser_options dstate.dcommon.config)
         ~entry
     in
     (During_init { dstate with dopen_files }, Ok result)
@@ -812,7 +812,7 @@ let handle_request
     let (iopen_files, entry, _) = update_file istate.iopen_files document in
     let result =
       File_outline.outline_entry_no_comments
-        ~popt:(ServerConfig.parser_options istate.icommon.config)
+        ~popt:(Server_config.parser_options istate.icommon.config)
         ~entry
     in
     (Initialized { istate with iopen_files }, Ok result)
@@ -1514,11 +1514,11 @@ module Test = struct
 
   let init ~custom_config ~naming_sqlite : env =
     let config =
-      Option.value custom_config ~default:ServerConfig.default_config
+      Option.value custom_config ~default:Server_config.default_config
     in
     let local_config = Server_local_config_load.default in
-    let tcopt = ServerConfig.typechecker_options config in
-    let popt = ServerConfig.parser_options config in
+    let tcopt = Server_config.typechecker_options config in
+    let popt = Server_config.parser_options config in
     Provider_backend.set_local_memory_backend_with_defaults_for_test ();
     let local_memory =
       match Provider_backend.get () with
@@ -1527,7 +1527,7 @@ module Test = struct
     in
     let sienv =
       Symbol_index.initialize
-        ~gleanopt:(ServerConfig.glean_options config)
+        ~gleanopt:(Server_config.glean_options config)
         ~namespace_map:tcopt.GlobalOptions.po.Parser_options.auto_namespace_map
         ~provider_name:
           local_config.Server_local_config.ide_symbolindex_search_provider

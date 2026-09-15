@@ -28,8 +28,8 @@ let read_file path =
    using ServerLocalConfigLoad.load_from_config for consistent parsing. *)
 let build_ocaml_hh_config contents =
   let config = Config_file_common.parse_contents contents in
-  (* Load GlobalOptions via ServerConfig.load_config *)
-  let opts = ServerConfig.load_config config GlobalOptions.default in
+  (* Load GlobalOptions via Server_config.load_config *)
+  let opts = Server_config.load_config config GlobalOptions.default in
   (* Load ServerLocalConfig from parsed config *)
   let version = Config_file_version.parse_version None in
   let local_config =

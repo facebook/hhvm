@@ -256,7 +256,7 @@ let filter_real_paths ~allow_directories paths =
 
 let main_internal
     (args : Client_env.client_check_env)
-    (config : ServerConfig.t)
+    (config : Server_config.t)
     (local_config : Server_local_config.t)
     (partial_telemetry_ref : Telemetry.t option ref) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -275,7 +275,7 @@ let main_internal
         ~generated_files:
           (List.map
              ~f:Str.regexp
-             (ServerConfig.warnings_generated_files config))
+             (Server_config.warnings_generated_files config))
         args.warning_switches
     in
     (* We don't do streaming errors under [output_json]: our contract
@@ -339,7 +339,7 @@ let main_internal
         ~generated_files:
           (List.map
              ~f:Str.regexp
-             (ServerConfig.warnings_generated_files config))
+             (Server_config.warnings_generated_files config))
         args.warning_switches
     in
     let%lwt (((error_list, dropped_count), tasts), telemetry) =
@@ -395,7 +395,7 @@ let main_internal
         ~generated_files:
           (List.map
              ~f:Str.regexp
-             (ServerConfig.warnings_generated_files config))
+             (Server_config.warnings_generated_files config))
         args.warning_switches
     in
     let%lwt ((), telemetry) =
@@ -943,7 +943,7 @@ let main_internal
         ~generated_files:
           (List.map
              ~f:Str.regexp
-             (ServerConfig.warnings_generated_files config))
+             (Server_config.warnings_generated_files config))
         args.warning_switches
     in
     let status_cmd =
@@ -1150,7 +1150,7 @@ let rec flush_event_logger () : unit Lwt.t =
 
 let main
     (args : Client_env.client_check_env)
-    (config : ServerConfig.t)
+    (config : Server_config.t)
     (local_config : Server_local_config.t)
     ~(init_proc_stack : string list option) : _ =
   Hack_event_logger.client_set_mode

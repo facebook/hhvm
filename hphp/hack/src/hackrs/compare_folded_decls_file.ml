@@ -182,7 +182,7 @@ let () =
       ( "--auto-namespace-map",
         Arg.String
           (fun m ->
-            auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+            auto_namespace_map := Server_config.convert_auto_namespace_to_map m),
         "Namespace aliases" );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,
@@ -284,7 +284,7 @@ let () =
               ~overrides:c
               ~log_reason:None)
       in
-      ServerConfig.load_config config tcopt
+      Server_config.load_config config tcopt
     in
     (* Temporarily set the root to the location of the test file so that
        Multifile will strip the dirname prefix. *)
@@ -337,7 +337,7 @@ let () =
             (Decl_fold_options.from_global_options tcopt)
             (* Fold rupro with the same fully-resolved parser options OCaml uses.
                `popt` is built from CLI flags only (pre-`--config`); the `--config`
-               overrides are applied to `tcopt` by `ServerConfig.load_config`
+               overrides are applied to `tcopt` by `Server_config.load_config`
                above. Passing `popt` here made rupro silently ignore every parser
                option set via `--config`, yielding spurious OCaml-vs-rupro
                mismatches (e.g. a test passing `--config everything_sdt=true`).

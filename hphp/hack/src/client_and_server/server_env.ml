@@ -96,7 +96,7 @@ end
 (** The "static" environment, initialized first and then doesn't change *)
 type genv = {
   options: Server_args.options;
-  config: ServerConfig.t;
+  config: Server_config.t;
   local_config: Server_local_config.t;
   workers: MultiWorker.worker list option;
   notifier: Server_notifier.t;

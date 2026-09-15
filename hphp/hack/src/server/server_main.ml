@@ -81,19 +81,19 @@ module Program = struct
     let hhconfig_in_updates =
       SSet.mem
         raw_updates
-        (Relative_path.to_absolute ServerConfig.repo_config_path)
+        (Relative_path.to_absolute Server_config.repo_config_path)
     in
     if hhconfig_in_updates then begin
       let (new_config, _) =
-        ServerConfig.load
+        Server_config.load
           ~silent:false
           ~from:(Server_args.from genv.options)
           ~cli_config_overrides:(Server_args.config genv.options)
       in
-      if not (ServerConfig.is_compatible genv.config new_config) then (
+      if not (Server_config.is_compatible genv.config new_config) then (
         Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
-          (Relative_path.suffix ServerConfig.repo_config_path)
+          (Relative_path.suffix Server_config.repo_config_path)
           Global_config.program_name;
 
         (* TODO: Notify the server monitor directly about this. *)
@@ -1161,7 +1161,7 @@ let initialize_logging
   Hh_logger.Level.set_categories local_config.Server_local_config.log_categories;
 
   let hhconfig_version =
-    config |> ServerConfig.version |> Config_file.version_to_string_opt
+    config |> Server_config.version |> Config_file.version_to_string_opt
   in
   if is_worker then
     Hack_event_logger.init_worker
@@ -1201,7 +1201,8 @@ let check_nfs ~root options local_config =
 
 let warn_on_non_opt_build options config =
   if
-    ServerConfig.warn_on_non_opt_build config && not Build_id.is_build_optimized
+    Server_config.warn_on_non_opt_build config
+    && not Build_id.is_build_optimized
   then begin
     let msg =
       Printf.sprintf
@@ -1257,7 +1258,7 @@ let make_workers
       config
       local_config
   in
-  let gc_control = ServerConfig.gc_control config in
+  let gc_control = Server_config.gc_control config in
   Server_worker.make
     ~longlived_workers:local_config.Server_local_config.longlived_workers
     ~nbr_procs:num_workers
@@ -1282,11 +1283,11 @@ let setup_server
     ~(informant_managed : bool)
     ~(monitor_pid : int option)
     (options : Server_args.options)
-    (config : ServerConfig.t)
+    (config : Server_config.t)
     (local_config : Server_local_config.t) : MultiWorker.worker list * env =
   let num_workers = num_workers options local_config in
   let shmem_handle =
-    SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
+    SharedMem.init ~num_workers (Server_config.sharedmem_config config)
   in
   let init_id = Random_id.short_string () in
   let root = Server_args.root options in
@@ -1299,7 +1300,7 @@ let setup_server
 
   configure_gc ();
 
-  List.iter (ServerConfig.ignored_paths config) ~f:Files_to_ignore.ignore_path;
+  List.iter (Server_config.ignored_paths config) ~f:Files_to_ignore.ignore_path;
 
   initialize_logging
     ~is_worker:false
@@ -1410,7 +1411,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Hh_logger.log "Server_main daemon starting.";
 
   let (config, local_config) =
-    ServerConfig.load
+    Server_config.load
       ~silent:false
       ~from:(Server_args.from options)
       ~cli_config_overrides:(Server_args.config options)

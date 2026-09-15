@@ -72,9 +72,9 @@ let monitor_daemon_main
   let () = Server_load_flag.set_no_load (Server_args.no_load options) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
-  ServerConfig.warn_on_invalid_config_keys (Server_args.config options);
+  Server_config.warn_on_invalid_config_keys (Server_args.config options);
   let (config, local_config) =
-    ServerConfig.load
+    Server_config.load
       ~silent:false
       ~from:(Server_args.from options)
       ~cli_config_overrides:(Server_args.config options)
@@ -83,7 +83,7 @@ let monitor_daemon_main
     ~from:(Server_args.from options)
     ~custom_columns:(Server_args.custom_telemetry_data options)
     ~hhconfig_version:
-      (ServerConfig.version config |> Config_file.version_to_string_opt)
+      (Server_config.version config |> Config_file.version_to_string_opt)
     ~rollout_flags:(Server_local_config_load.to_rollout_flags local_config)
     ~rollout_group:local_config.Server_local_config.rollout_group
     ~proc_stack
@@ -119,7 +119,7 @@ let monitor_daemon_main
     Hh_logger.log "%s" "Will run once in check mode then exit.";
     Server_main.run_once options config local_config
   ) else
-    let current_version = ServerConfig.version config in
+    let current_version = Server_config.version config in
     let waiting_client = Server_args.waiting_client options in
     let Server_local_config.Watchman.
           { debug_logging; subscribe = allow_subscriptions; _ } =

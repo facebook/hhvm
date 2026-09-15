@@ -23,7 +23,7 @@ type params = {
 val entry : (params, unit, unit) Daemon.entry
 
 val run_once :
-  Server_args.options -> ServerConfig.t -> Server_local_config.t -> 'a
+  Server_args.options -> Server_config.t -> Server_local_config.t -> 'a
 
 val serve_one_iteration :
   Server_env.genv -> Server_env.env -> Client_provider.t -> Server_env.env
@@ -46,6 +46,6 @@ val setup_server :
   informant_managed:bool ->
   monitor_pid:int option ->
   Server_args.options ->
-  ServerConfig.t ->
+  Server_config.t ->
   Server_local_config.t ->
   MultiWorker.worker list * Server_env.env

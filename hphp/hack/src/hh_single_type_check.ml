@@ -359,7 +359,7 @@ let parse_options () =
         Arg.String
           (fun m ->
             auto_namespace_map :=
-              Some (ServerConfig.convert_auto_namespace_to_map m)),
+              Some (Server_config.convert_auto_namespace_to_map m)),
         " Alias namespaces" );
       ( "--no-call-coeffects",
         Arg.Unit (fun () -> call_coeffects := false),
@@ -810,14 +810,14 @@ let parse_options () =
         config
         |> Config_file.Getters.string_opt
              Config_keys.Hhconfig.auto_namespace_map
-        |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
+        |> Option.map ~f:Server_config.convert_auto_namespace_to_map;
       allowed_fixme_codes_strict :=
         config
         |> Config_file.Getters.string_opt
              Config_keys.Hhconfig.allowed_fixme_codes_strict
         |> Option.map ~f:comma_string_to_iset;
       sharedmem_config :=
-        ServerConfig.make_sharedmem_config
+        Server_config.make_sharedmem_config
           config
           Server_local_config_load.default;
       no_builtins := true;
@@ -917,7 +917,7 @@ let parse_options () =
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       GlobalOptions.default
   in
-  let tcopt = ServerConfig.load_config config tcopt in
+  let tcopt = Server_config.load_config config tcopt in
 
   Diagnostics.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;

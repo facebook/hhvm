@@ -79,10 +79,10 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let repo_path = Path.to_string harness.repo_dir in
   let (hhconfig, _) =
-    ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
+    Server_config.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
-  let popt = ServerConfig.parser_options hhconfig in
-  let tcopt = ServerConfig.typechecker_options hhconfig in
+  let popt = Server_config.parser_options hhconfig in
+  let tcopt = Server_config.typechecker_options hhconfig in
   let ctx =
     Provider_context.empty_for_test
       ~popt

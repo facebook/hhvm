@@ -45,9 +45,9 @@ let global_opts =
     ~tco_fetch_remote_old_decls:false
     GlobalOptions.default
 
-let server_config = ServerConfig.set_tc_options server_config global_opts
+let server_config = Server_config.set_tc_options server_config global_opts
 
-let server_config = ServerConfig.set_parser_options server_config po
+let server_config = Server_config.set_parser_options server_config po
 
 let genv =
   ref { Server_env_build.default_genv with Server_env.config = server_config }
@@ -372,8 +372,8 @@ let doc (suffix : string) (file_contents : string) : Client_ide_message.document
 module Client = struct
   type env = Client_ide_daemon.Test.env
 
-  let with_env ~(custom_config : ServerConfig.t option) (f : env -> unit) : unit
-      =
+  let with_env ~(custom_config : Server_config.t option) (f : env -> unit) :
+      unit =
     Printexc.record_backtrace true;
     Event_logger.init_fake ();
     Tempfile.with_real_tempdir @@ fun root ->

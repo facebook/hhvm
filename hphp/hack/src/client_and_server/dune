@@ -364,7 +364,7 @@
   (wrapped false)
   (modules
    config_keys
-   serverConfig
+   server_config
    server_local_config
    server_local_config_load)
   (libraries

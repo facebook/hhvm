@@ -116,7 +116,7 @@ let init_via_fetch
 and then loading it. Also returns [si_addenda] from what we gathered
 during the full index. *)
 let init_via_build
-    ~(config : ServerConfig.t) ~(root : Path.t) ~(hhi_root : Path.t) :
+    ~(config : Server_config.t) ~(root : Path.t) ~(hhi_root : Path.t) :
     (Path.t * Symbol_index_core.paths_with_addenda) outcome Lwt.t =
   let path = Path.make (Server_files.client_ide_naming_table root) in
   let rec poll_build_until_complete_exn progress =
@@ -127,7 +127,7 @@ let init_via_build
       poll_build_until_complete_exn progress
   in
 
-  if not (ServerConfig.ide_fall_back_to_full_index config) then begin
+  if not (Server_config.ide_fall_back_to_full_index config) then begin
     Lwt.return (Skip "ide_fallback_to_full_index=false")
   end else begin
     let progress =
@@ -297,7 +297,7 @@ let map_attempt
     Lwt.return_error (telemetry, reason)
 
 let init
-    ~(config : ServerConfig.t)
+    ~(config : Server_config.t)
     ~(local_config : Server_local_config.t)
     ~(param : Client_ide_message.Initialize_from_saved_state.t)
     ~(hhi_root : Path.t)
@@ -314,9 +314,9 @@ let init
   } =
     param
   in
-  let popt = ServerConfig.parser_options config in
-  let tcopt = ServerConfig.typechecker_options config in
-  let gleanopt = ServerConfig.glean_options config in
+  let popt = Server_config.parser_options config in
+  let tcopt = Server_config.typechecker_options config in
+  let gleanopt = Server_config.glean_options config in
 
   let ctx =
     Provider_context.empty_for_tool

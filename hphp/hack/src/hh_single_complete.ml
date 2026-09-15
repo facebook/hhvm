@@ -123,7 +123,7 @@ let parse_options () =
         Arg.String
           (fun m ->
             auto_namespace_map :=
-              Some (ServerConfig.convert_auto_namespace_to_map m)),
+              Some (Server_config.convert_auto_namespace_to_map m)),
         " Alias namespaces" );
       ( "--auto-complete",
         Arg.Unit (set_mode (Autocomplete { is_manually_invoked = false })),
@@ -231,14 +231,14 @@ let parse_options () =
       auto_namespace_map :=
         config
         |> Config_file.Getters.string_opt "auto_namespace_map"
-        |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
+        |> Option.map ~f:Server_config.convert_auto_namespace_to_map;
       let allowed_fixme_codes_strict =
         config
         |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
         |> Option.map ~f:comma_string_to_iset
       in
       let sharedmem_config =
-        ServerConfig.make_sharedmem_config
+        Server_config.make_sharedmem_config
           config
           Server_local_config_load.default
       in

@@ -91,10 +91,10 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let (hhconfig, _) =
-    ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
+    Server_config.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
-  let popt = ServerConfig.parser_options hhconfig in
-  let tcopt = ServerConfig.typechecker_options hhconfig in
+  let popt = Server_config.parser_options hhconfig in
+  let tcopt = Server_config.typechecker_options hhconfig in
   let ctx =
     Provider_context.empty_for_test
       ~popt
@@ -199,7 +199,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
     Server_env_build.make_env
       ~init_id
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ServerConfig.default_config
+      Server_config.default_config
   in
   let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);

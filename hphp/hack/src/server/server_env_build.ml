@@ -32,7 +32,7 @@ let make_genv options config local_config workers =
 let default_genv =
   {
     options = Server_args.default_options ~root:"";
-    config = ServerConfig.default_config;
+    config = Server_config.default_config;
     local_config = Server_local_config_load.default;
     workers = None;
     notifier = Server_notifier.init_null ();
@@ -42,10 +42,10 @@ let default_genv =
 
 let make_env ~init_id ~deps_mode ?diagnostics config : Server_env.env =
   {
-    tcopt = ServerConfig.typechecker_options config;
-    popt = ServerConfig.parser_options config;
-    gleanopt = ServerConfig.glean_options config;
-    swriteopt = ServerConfig.symbol_write_options config;
+    tcopt = Server_config.typechecker_options config;
+    popt = Server_config.parser_options config;
+    gleanopt = Server_config.glean_options config;
+    swriteopt = Server_config.symbol_write_options config;
     naming_table = Naming_table.empty;
     deps_mode;
     diagnostics = Option.value diagnostics ~default:Diagnostics.empty;

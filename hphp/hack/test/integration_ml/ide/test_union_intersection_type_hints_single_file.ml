@@ -63,9 +63,9 @@ let test () =
   let global_opts : GlobalOptions.t =
     GlobalOptions.set ~po GlobalOptions.default
   in
-  let custom_config = ServerConfig.default_config in
-  let custom_config = ServerConfig.set_tc_options custom_config global_opts in
-  let custom_config = ServerConfig.set_parser_options custom_config po in
+  let custom_config = Server_config.default_config in
+  let custom_config = Server_config.set_tc_options custom_config global_opts in
+  let custom_config = Server_config.set_parser_options custom_config po in
   Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
   let env =
     Test.Client.setup_disk

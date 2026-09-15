@@ -4952,7 +4952,7 @@ let setup_logging ~root ~verbose =
 let main
     (args : args)
     ~(init_id : string)
-    ~(config : ServerConfig.t)
+    ~(config : Server_config.t)
     ~(local_config : Server_local_config.t)
     ~(init_proc_stack : string list option) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
@@ -4984,7 +4984,7 @@ let main
     Filter_diagnostics.Filter.make
       ~default_all:local_config.Server_local_config.warnings_default_all
       ~generated_files:
-        (List.map ~f:Str.regexp (ServerConfig.warnings_generated_files config))
+        (List.map ~f:Str.regexp (Server_config.warnings_generated_files config))
       []
   in
   let ide_service =

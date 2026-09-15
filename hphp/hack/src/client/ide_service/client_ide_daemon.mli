@@ -13,7 +13,7 @@ val daemon_entry_point :
 module Test : sig
   type env
 
-  val init : custom_config:ServerConfig.t option -> naming_sqlite:Path.t -> env
+  val init : custom_config:Server_config.t option -> naming_sqlite:Path.t -> env
 
   val index : env -> Relative_path.Set.t -> env
 

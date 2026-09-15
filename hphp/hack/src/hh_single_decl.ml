@@ -470,7 +470,7 @@ let () =
       ( "--auto-namespace-map",
         Arg.String
           (fun m ->
-            auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+            auto_namespace_map := Server_config.convert_auto_namespace_to_map m),
         "Namespace aliases" );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,

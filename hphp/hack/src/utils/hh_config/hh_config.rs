@@ -37,7 +37,7 @@ const ENABLE_IMPLICIT_PACKAGES_KEY: &str = "enable_implicit_packages";
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
 ///
-/// Fields correspond to ServerConfig.t
+/// Fields correspond to Server_config.t
 /// IMPORTANT: Field order must match the OCaml Hh_config.t type exactly for FFI.
 #[derive(Debug, Clone, FromOcamlRep, ToOcamlRep)]
 #[repr(C)]
@@ -469,7 +469,7 @@ impl HhConfig {
                 .map_or(default.tco_allowed_expression_tree_visitors, |s| {
                     let mut allowed_expression_tree_visitors = parse_svec(s);
                     // Fix up type names so they will match with elaborated names.
-                    // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
+                    // Keep this in sync with the Utils.add_ns loop in server/server_config.ml
                     for ty in &mut allowed_expression_tree_visitors {
                         if !ty.starts_with('\\') {
                             *ty = format!("\\{}", ty)

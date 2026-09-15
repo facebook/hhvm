@@ -9,7 +9,7 @@
 
 val make_genv :
   Server_args.options ->
-  ServerConfig.t ->
+  Server_config.t ->
   Server_local_config.t ->
   MultiWorker.worker list ->
   Server_env.genv
@@ -20,5 +20,5 @@ val make_env :
   init_id:string ->
   deps_mode:Typing_deps_mode.t ->
   ?diagnostics:Diagnostics.t ->
-  ServerConfig.t ->
+  Server_config.t ->
   Server_env.env

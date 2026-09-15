@@ -15,14 +15,14 @@ let usage =
 
 let make_workers
     (root : Path.t)
-    (server_config : ServerConfig.t)
+    (server_config : Server_config.t)
     (server_local_config : Server_local_config.t) : MultiWorker.worker list =
   let num_workers = Sys_utils.nbr_procs in
   let gc_control = Gc.get () in
   let hhconfig_version =
-    server_config |> ServerConfig.version |> Config_file.version_to_string_opt
+    server_config |> Server_config.version |> Config_file.version_to_string_opt
   in
-  let shmem_config = ServerConfig.sharedmem_config server_config in
+  let shmem_config = Server_config.sharedmem_config server_config in
   let heap_handle = SharedMem.init ~num_workers shmem_config in
   Server_worker.make
     ~longlived_workers:true
@@ -59,10 +59,10 @@ let init (root : Path.t) (naming_table_path : string option) :
   Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
 
   let (server_config, server_local_config) =
-    ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
+    Server_config.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
-  let popt = ServerConfig.parser_options server_config in
-  let tcopt = ServerConfig.typechecker_options server_config in
+  let popt = Server_config.parser_options server_config in
+  let tcopt = Server_config.typechecker_options server_config in
   let ctx =
     Provider_context.empty_for_tool
       ~popt
@@ -94,7 +94,7 @@ let parse_repo
       ~hhi_filter:(fun _ -> true)
       ~indexer:
         (Find.make_next_files ~name:"root" ~filter:Find_utils.is_hack root)
-      ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
+      ~extra_roots:(Server_config.extra_paths Server_config.default_config)
   in
   measure_time "parsing repo" @@ fun () ->
   Direct_decl_service.go ctx workers ~get_next ~trace:false ~cache_decls:true
@@ -277,9 +277,9 @@ let () =
       (Path.make "tmpdir_NOT_USED");
     Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
     let (server_config, _server_local_config) =
-      ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
+      Server_config.load ~silent:true ~from:"" ~cli_config_overrides:[]
     in
-    let tcopt = ServerConfig.typechecker_options server_config in
+    let tcopt = Server_config.typechecker_options server_config in
     tcopt
   in
   let tcopt = rust_tcopt_init () in

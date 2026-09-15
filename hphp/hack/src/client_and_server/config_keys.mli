@@ -19,7 +19,7 @@
  * 1. Add a new key in the appropriate submodule
  *    using [key] (for .hhconfig) or [hhconf_key] (for hh.conf)
  * 2. Use the key constant (e.g. [Config_keys.Hhconfig.timeout]) in
- *    serverConfig.ml or serverLocalConfigLoad.ml instead of a raw string
+ *    server_config.ml or serverLocalConfigLoad.ml instead of a raw string
  *)
 
 (** Keys valid in .hhconfig files. *)

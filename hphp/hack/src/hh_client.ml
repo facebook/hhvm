@@ -30,7 +30,7 @@ let init_event_logger
     (command : Client_command.heavy_command)
     ~init_id
     ~from
-    (config : ServerConfig.t)
+    (config : Server_config.t)
     (local_config : Server_local_config.t) : unit =
   Hack_event_logger.client_init
     ~init_id
@@ -39,7 +39,7 @@ let init_event_logger
     ~custom_columns:(Client_command.get_custom_telemetry_data command)
     root;
   Hack_event_logger.set_hhconfig_version
-    (ServerConfig.version config |> Config_file.version_to_string_opt);
+    (Server_config.version config |> Config_file.version_to_string_opt);
   Hack_event_logger.set_rollout_group
     local_config.Server_local_config.rollout_group;
   Hack_event_logger.set_rollout_flags
@@ -146,7 +146,7 @@ let exec_command_with_config
   let cli_config_overrides =
     Client_args.config command |> Option.value ~default:[]
   in
-  ServerConfig.warn_on_invalid_config_keys cli_config_overrides;
+  Server_config.warn_on_invalid_config_keys cli_config_overrides;
 
   let qe_fetches = ref [] in
   let apply_qe_overrides ~silent config =
@@ -157,7 +157,7 @@ let exec_command_with_config
     config
   in
   let (config, local_config) =
-    ServerConfig.load_with_dynamic_overrides
+    Server_config.load_with_dynamic_overrides
       ~apply_dynamic_overrides:apply_qe_overrides
       ~silent:(not @@ Client_args.dump_config command)
       ~from

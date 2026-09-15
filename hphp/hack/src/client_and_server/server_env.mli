@@ -15,7 +15,7 @@ type seconds_since_epoch = float
 (** The "static" environment, initialized first and then doesn't change *)
 type genv = {
   options: Server_args.options;
-  config: ServerConfig.t;
+  config: Server_config.t;
   local_config: Server_local_config.t;
   workers: MultiWorker.worker list option;
       (** Early-initialized workers to be used in MultiWorker jobs

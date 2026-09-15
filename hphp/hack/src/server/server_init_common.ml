@@ -20,7 +20,7 @@ let directory_walk
     Server_utils.make_next
       ?hhi_filter
       ~indexer:(genv.indexer Find_utils.file_filter)
-      ~extra_roots:(ServerConfig.extra_paths genv.config)
+      ~extra_roots:(Server_config.extra_paths genv.config)
   in
   Hack_event_logger.indexing_end ~desc:telemetry_label t;
   let t = Hh_logger.log_duration ("indexing " ^ telemetry_label) t in

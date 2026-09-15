@@ -23,7 +23,7 @@ val change_files :
   Server_env.env -> disk_changes_type -> Server_env.env * 'a loop_outputs
 
 val setup_server :
-  ?custom_config:ServerConfig.t ->
+  ?custom_config:Server_config.t ->
   ?hhi_files:(string * string) list ->
   ?edges_dir:string ->
   unit ->
@@ -45,7 +45,7 @@ They use the following module instead of [setup_server] and [setup_disk]. *)
 module Client : sig
   type env = Client_ide_daemon.Test.env
 
-  val with_env : custom_config:ServerConfig.t option -> (env -> unit) -> unit
+  val with_env : custom_config:Server_config.t option -> (env -> unit) -> unit
 
   val setup_disk : env -> (string * string) list -> env
 

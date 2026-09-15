@@ -18,6 +18,7 @@ import uuid
 
 from pywatchman import (
     bser,
+    BserCodec,
     client,
     pybser,
     SocketConnectError,
@@ -441,6 +442,35 @@ class TestBSERDump(unittest.TestCase):
         t(b"\x03\x00")
         t(b"\x02")
         t(b"\x07")
+
+
+# Not run against pybser: only the C decoder recurses on the interpreter stack.
+class TestBSERNesting(unittest.TestCase):
+    def nested_document(self, depth):
+        # A single-element array, re-nested `depth` times around an int8 zero.
+        nested = b"\x00\x03\x01" * depth + b"\x03\x00"
+        return b"\x00\x01\x05" + struct.pack("@i", len(nested)) + nested
+
+    def test_decoder_raises_rather_than_overflowing(self):
+        self.assertRaises(
+            RecursionError, bser.loads, self.nested_document(depth=100000)
+        )
+
+    def test_codec_reports_a_watchman_error(self):
+        class ChunkedTransport(Transport):
+            def __init__(self, data):
+                self.data = data
+                self.pos = 0
+
+            def readBytes(self, size):
+                chunk = self.data[self.pos : self.pos + size]
+                self.pos += len(chunk)
+                return chunk
+
+        codec = BserCodec(
+            ChunkedTransport(self.nested_document(depth=100000)), None, None
+        )
+        self.assertRaises(WatchmanError, codec.receive)
 
 
 if __name__ == "__main__":

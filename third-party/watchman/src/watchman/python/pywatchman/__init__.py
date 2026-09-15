@@ -717,7 +717,7 @@ class BserCodec(Codec):
         try:
             res = self._loads(response)
             return res
-        except ValueError as e:
+        except (ValueError, RecursionError) as e:
             raise WatchmanError("watchman response decode error: %s" % e)
 
     def send(self, *args):
@@ -785,7 +785,7 @@ class Bser2WithFallbackCodec(BserCodec):
         try:
             res = self._loads(response)
             return res
-        except ValueError as e:
+        except (ValueError, RecursionError) as e:
             raise WatchmanError("watchman response decode error: %s" % e)
 
     def send(self, *args):

@@ -159,7 +159,7 @@ class AsyncBserCodec(AsyncCodec):
         try:
             res = self._loads(response)
             return res
-        except ValueError as e:
+        except (ValueError, RecursionError) as e:
             raise WatchmanError("watchman response decode error: %s" % e)
 
     async def send(self, *args):

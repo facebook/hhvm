@@ -617,13 +617,31 @@ PyObject* bser_loads_recursive(
     }
 
     case BSER_ARRAY:
-      return bunser_array(ptr, end, ctx);
-
     case BSER_OBJECT:
-      return bunser_object(ptr, end, ctx);
+    case BSER_TEMPLATE: {
+      // The interpreter's recursion limit is what keeps nested containers from
+      // overflowing the C stack. It surfaces as RecursionError, not the
+      // ValueError the other paths raise: no stack headroom left to build one.
+      if (Py_EnterRecursiveCall(" while decoding BSER")) {
+        return NULL;
+      }
 
-    case BSER_TEMPLATE:
-      return bunser_template(ptr, end, ctx);
+      PyObject* val;
+      switch (buf[0]) {
+        case BSER_ARRAY:
+          val = bunser_array(ptr, end, ctx);
+          break;
+        case BSER_OBJECT:
+          val = bunser_object(ptr, end, ctx);
+          break;
+        default:
+          val = bunser_template(ptr, end, ctx);
+          break;
+      }
+
+      Py_LeaveRecursiveCall();
+      return val;
+    }
 
     default:
       PyErr_Format(PyExc_ValueError, "unhandled bser opcode 0x%02x", buf[0]);

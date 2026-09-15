@@ -184,21 +184,21 @@ namespace HH {
     extends WaitableWaitHandle<T> {
     public static function setOnCreateCallback(
       ?(function(
-        AsyncFunctionWaitHandle<mixed>,
+        ResumableWaitHandle<mixed>,
         ?WaitableWaitHandle<mixed>,
       ): void) $callback,
     ): void {}
     public static function setOnAwaitCallback(
       ?(function(
-        AsyncFunctionWaitHandle<mixed>,
+        ResumableWaitHandle<mixed>,
         WaitableWaitHandle<mixed>,
       ): void) $callback,
     ): void {}
     public static function setOnSuccessCallback(
-      ?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback,
+      ?(function(ResumableWaitHandle<mixed>, mixed): void) $callback,
     ): void {}
     public static function setOnFailCallback(
-      ?(function(AsyncFunctionWaitHandle<mixed>, \Exception): void) $callback,
+      ?(function(ResumableWaitHandle<mixed>, \Exception): void) $callback,
     ): void {}
   }
 

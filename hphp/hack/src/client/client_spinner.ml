@@ -67,7 +67,7 @@ let start_time : float = Unix.gettimeofday ()
 
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
-    let%lwt _ = Lwt_unix.sleep 1.0 in
+    let%lwt (_ : unit) = Lwt_unix.sleep 1.0 in
     Hack_event_logger.spinner_heartbeat n ~spinner:(get_latest_report ());
     loop (n + 1)
   in

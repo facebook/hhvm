@@ -17,8 +17,8 @@ type genv = {
   options: Server_args.options;
   config: Server_config.t;
   local_config: Server_local_config.t;
-  workers: MultiWorker.worker list option;
-      (** Early-initialized workers to be used in MultiWorker jobs
+  workers: Multi_worker.worker list option;
+      (** Early-initialized workers to be used in Multi_worker jobs
           They are initialized early to keep their heaps as empty as possible. *)
   notifier: Server_notifier.t;
       (** Common abstraction for watchman/Edenfs_watcher/dfind *)

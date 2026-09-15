@@ -8,7 +8,7 @@
  *)
 
 val go :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   Server_command_types.file_input list ->
   Provider_context.t ->
   return_expanded_tast:bool ->

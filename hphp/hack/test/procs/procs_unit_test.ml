@@ -6,7 +6,7 @@ let multi_worker_list workers () =
   let work = [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13] in
   let expected = List.length work * (List.length work + 1) / 2 in
   let result =
-    MultiWorker.call
+    Multi_worker.call
       (Some workers)
       ~job:sum
       ~merge:( + )
@@ -30,7 +30,7 @@ let multi_worker_bucket workers () =
   in
   let expected = buckets * (buckets + 1) / 2 in
   let result =
-    MultiWorker.call (Some workers) ~job:( + ) ~merge:( + ) ~neutral:0 ~next
+    Multi_worker.call (Some workers) ~job:( + ) ~merge:( + ) ~neutral:0 ~next
   in
   Printf.printf "Got %d\n" result;
   result = expected
@@ -45,7 +45,7 @@ let multi_worker_of_n_buckets workers () =
       bucket.work
     in
     let result =
-      MultiWorker.call
+      Multi_worker.call
         (Some workers)
         ~job:do_work
         ~merge:( + )
@@ -56,7 +56,7 @@ let multi_worker_of_n_buckets workers () =
     result = expected)
 
 let multi_worker_one_worker_throws _workers () =
-  (* When a worker fails, the rest in the same MultiWorker call can't
+  (* When a worker fails, the rest in the same Multi_worker call can't
    * be reused right now. So let's use fresh workers for this unit test
    * instead of corrupted the shared workers. *)
   let workers = make_workers 10 in
@@ -72,7 +72,7 @@ let multi_worker_one_worker_throws _workers () =
     MultiThreadedCall.(
       try
         let _result =
-          MultiWorker.call
+          Multi_worker.call
             (Some workers)
             ~job:do_work
             ~merge:( + )
@@ -89,7 +89,7 @@ let multi_worker_with_failure_handler _workers () =
   let workers = make_workers 10 in
   let split ~bucket =
     (*
-     * We want the first 5 buckets to all have exited when the MultiWorker result
+     * We want the first 5 buckets to all have exited when the Multi_worker result
      * is merged. Yes, they fail quickly, but it's still racy. We don't want to
      * see "just 3" failures or something when merging.
      *
@@ -120,14 +120,14 @@ let multi_worker_with_failure_handler _workers () =
     MultiThreadedCall.(
       try
         let _ =
-          MultiWorker.call
+          Multi_worker.call
             (Some workers)
             ~job:do_work
             ~merge:( + )
             ~neutral:0
             ~next:(make_n_buckets ~buckets:10 ~split)
         in
-        Printf.eprintf "Expected MultiWorker.call to throw, but it didn't!\n";
+        Printf.eprintf "Expected Multi_worker.call to throw, but it didn't!\n";
         false
       with
       | Coalesced_failures failures ->

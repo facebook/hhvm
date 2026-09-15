@@ -45,7 +45,7 @@ let () =
       }
   in
   let workers =
-    MultiWorker.make
+    Multi_worker.make
       ?call_wrapper:None
       ~longlived_workers:false
       ~saved_state:()
@@ -82,7 +82,7 @@ let () =
       Hh_bucket.Done
   in
   let merge () () = () in
-  MultiWorker.call (Some workers) ~neutral:() ~job ~merge ~next;
+  Multi_worker.call (Some workers) ~neutral:() ~job ~merge ~next;
 
   (* Ensure ids are globally unique. *)
   let all_ids_len = num_jobs * ids_per_job in

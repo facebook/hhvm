@@ -15,7 +15,7 @@ val init :
   deps_mode:Typing_deps_mode.t ->
   ?gc_control:Gc.control ->
   float ->
-  Provider_context.t * MultiWorker.worker list * float
+  Provider_context.t * Multi_worker.worker list * float
 
 val init_with_defaults :
-  float -> Provider_context.t * MultiWorker.worker list * float
+  float -> Provider_context.t * Multi_worker.worker list * float

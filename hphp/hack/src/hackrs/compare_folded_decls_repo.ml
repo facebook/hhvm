@@ -16,7 +16,7 @@ let usage =
 let make_workers
     (root : Path.t)
     (server_config : Server_config.t)
-    (server_local_config : Server_local_config.t) : MultiWorker.worker list =
+    (server_local_config : Server_local_config.t) : Multi_worker.worker list =
   let num_workers = Sys_utils.nbr_procs in
   let gc_control = Gc.get () in
   let hhconfig_version =
@@ -52,7 +52,7 @@ let measure_time (action : string) (f : unit -> 'a) : 'a =
   result
 
 let init (root : Path.t) (naming_table_path : string option) :
-    Provider_context.t * Naming_table.t option * MultiWorker.worker list option
+    Provider_context.t * Naming_table.t option * Multi_worker.worker list option
     =
   Relative_path.set_path_prefix Relative_path.Root root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmpdir_NOT_USED");
@@ -87,7 +87,7 @@ let init (root : Path.t) (naming_table_path : string option) :
 let parse_repo
     (ctx : Provider_context.t)
     (root : Path.t)
-    (workers : MultiWorker.worker list option) : FileInfo.t Relative_path.Map.t
+    (workers : Multi_worker.worker list option) : FileInfo.t Relative_path.Map.t
     =
   let get_next =
     Server_utils.make_next
@@ -198,14 +198,14 @@ let fold_and_compare_single_decl
 
 let fold_repo
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     rust_decl_map
     output_dir
     print_limit =
   let rust_decls = SMap.bindings rust_decl_map in
   measure_time "folding repo" @@ fun () ->
   let (num_correct, _num_checked) =
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:(fun _ batch ->
         List.fold
@@ -227,7 +227,7 @@ let fold_repo
       ~merge:(fun (i_correct, i_total) (j_correct, j_total) ->
         (i_correct + j_correct, i_total + j_total))
       ~neutral:(0, 0)
-      ~next:(MultiWorker.next workers rust_decls)
+      ~next:(Multi_worker.next workers rust_decls)
   in
   (num_correct, List.length rust_decls)
 

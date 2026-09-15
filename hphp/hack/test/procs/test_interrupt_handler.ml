@@ -40,7 +40,7 @@ let test_interrupt_handler () =
     }
   in
   let ((), (x, y), unfinished_and_reason) =
-    MultiWorker.call_with_interrupt
+    Multi_worker.call_with_interrupt
       workers
       ~job:do_work
       ~merge

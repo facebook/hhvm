@@ -99,7 +99,7 @@ let setup
       ~backend:(Provider_backend.get ())
       ~deps_mode
   in
-  let get_next = MultiWorker.next None [foo_path; bar_path] in
+  let get_next = Multi_worker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
     ( Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal),
       Diagnostics.empty,

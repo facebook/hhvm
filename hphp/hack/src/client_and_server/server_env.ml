@@ -98,7 +98,7 @@ type genv = {
   options: Server_args.options;
   config: Server_config.t;
   local_config: Server_local_config.t;
-  workers: MultiWorker.worker list option;
+  workers: Multi_worker.worker list option;
   notifier: Server_notifier.t;
   indexer: (string -> bool) -> unit -> string list;
       (** Returns the list of files under .hhconfig, subject to a filter *)

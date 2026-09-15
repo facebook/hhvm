@@ -13,12 +13,12 @@ open Symbol_info_service_utils
 (* This module dumps all the symbol info(like fun-calls) in input files *)
 
 let parallel_helper workers filename_l tcopt =
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:(helper tcopt)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers filename_l)
+    ~next:(Multi_worker.next workers filename_l)
 
 (* Entry Point *)
 let go workers file_list env =

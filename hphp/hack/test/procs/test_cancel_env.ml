@@ -11,7 +11,7 @@ let entry =
 let make_workers n =
   let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
-    MultiWorker.make
+    Multi_worker.make
       ~longlived_workers:(not use_worker_clones)
       ~saved_state:!pipe_path
       ~entry
@@ -117,7 +117,7 @@ let test_cancel_env () =
     Bucket.make ~num_workers:num_workers_and_jobs ~max_size:max_job_size work
   in
   let (res, interrupt_env, cancelled) =
-    MultiWorker.call_with_interrupt
+    Multi_worker.call_with_interrupt
       (Some workers)
       ~job:do_work
       ~merge:sum

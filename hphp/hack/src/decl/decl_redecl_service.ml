@@ -238,7 +238,7 @@ let merge_compute_deps
   Return errors raised during decling, fanout and missing old decl count. *)
 let parallel_redecl_compare_and_get_fanout
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (bucket_size : int)
     (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     (fnl : Relative_path.t list) : Fanout.t * int =
@@ -255,12 +255,12 @@ let parallel_redecl_compare_and_get_fanout
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:(fun () -> decl_files_job ctx)
       ~neutral:()
       ~merge:(merge_on_the_fly files_initial_count files_declared_count)
-      ~next:(MultiWorker.next ~max_size:bucket_size workers fnl);
+      ~next:(Multi_worker.next ~max_size:bucket_size workers fnl);
     let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
     Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
@@ -271,12 +271,12 @@ let parallel_redecl_compare_and_get_fanout
       ~unit:"files"
       ~extra:None;
     let (fanout, old_decl_missing_count) =
-      MultiWorker.call
+      Multi_worker.call
         workers
         ~job:(load_defs_compare_and_get_fanout ctx)
         ~neutral:compute_deps_neutral
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
-        ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
+        ~next:(Multi_worker.next ~max_size:bucket_size workers fnl)
     in
     let (_t : float) =
       Hh_logger.log_duration ~lvl "Finished computing dependencies" t
@@ -433,7 +433,7 @@ let merge_descendant_classes
   descendant_classes @ acc
 
 let filter_descendant_classes_parallel
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     (classes : SSet.t)
     (maybe_descendant_classes : string list) : string list =
@@ -453,7 +453,7 @@ let filter_descendant_classes_parallel
       ~unit:"classes"
       ~extra:None;
     let res =
-      MultiWorker.call
+      Multi_worker.call
         workers
         ~job:(fun _ c -> load_and_filter_descendant_classes c)
         ~merge:
@@ -462,7 +462,7 @@ let filter_descendant_classes_parallel
              classes_filtered_count)
         ~neutral:[]
         ~next:
-          (MultiWorker.next
+          (Multi_worker.next
              ~max_size:bucket_size
              workers
              maybe_descendant_classes)
@@ -475,7 +475,7 @@ let filter_descendant_classes_parallel
 
 let get_descendant_classes
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     (classes : SSet.t) : SSet.t =
@@ -502,7 +502,7 @@ let merge_elements
   corresponding to the classes contained in [defs].
   Get them from the element heaps. *)
 let get_elems
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     ~(old : bool)
     (defs : FileInfo.names) : Decl_class_elements.t SMap.t =
@@ -527,13 +527,13 @@ let get_elems
         ~total_count:classes_initial_count
         ~unit:"classes"
         ~extra:None;
-      MultiWorker.call
+      Multi_worker.call
         workers
         ~job:(fun _ c ->
           (Decl_class_elements.get_for_classes ~old c, List.length c))
         ~merge:(merge_elements classes_initial_count classes_processed_count)
         ~neutral:SMap.empty
-        ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
+        ~next:(Multi_worker.next ~max_size:bucket_size workers classes)
   in
 
   let (_t : float) =
@@ -579,7 +579,7 @@ let invalidate_folded_classes
 let redo_type_decl
     (ctx : Provider_context.t)
     ~during_init
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
@@ -666,7 +666,7 @@ let redo_type_decl
 let oldify_decls_and_remove_descendants
     (ctx : Provider_context.t)
     ?(collect_garbage = true)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (get_classes : Relative_path.t -> SSet.t)
     ~(bucket_size : int)
     ~(defs : FileInfo.names) : unit =
@@ -694,7 +694,7 @@ let oldify_decls_and_remove_descendants
 let remove_old_defs
     (ctx : Provider_context.t)
     ~(bucket_size : int)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (names : FileInfo.names) : unit =
   let elems = get_elems workers ~bucket_size names ~old:true in
   remove_old_defs ctx names elems

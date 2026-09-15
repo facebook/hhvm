@@ -236,7 +236,7 @@ let collect_shallow_decls ctx workers classnames =
   (* The 'classnames' came from a SSet, and therefore all elements are unique.
      So we can safely assume there will be no merge collisions. *)
   let classes =
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job
       ~neutral:SMap.empty
@@ -246,7 +246,7 @@ let collect_shallow_decls ctx workers classnames =
                a
              else
                b))
-      ~next:(MultiWorker.next workers classnames)
+      ~next:(Multi_worker.next workers classnames)
   in
   { classes }
 

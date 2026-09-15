@@ -31,7 +31,7 @@ val find_refs_ctx :
 
 val find_references :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   action_internal ->
   bool ->
   Relative_path.t list ->
@@ -73,18 +73,18 @@ val get_files_for_descendants_and_dependents_of_members_in_descendants :
 
 val get_dependent_files_function :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   string ->
   Relative_path.Set.t
 
 val get_dependent_files_gconst :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   string ->
   Relative_path.Set.t
 
 val get_dependent_files :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   SSet.t ->
   Relative_path.Set.t

@@ -11,7 +11,7 @@ val make_genv :
   Server_args.options ->
   Server_config.t ->
   Server_local_config.t ->
-  MultiWorker.worker list ->
+  Multi_worker.worker list ->
   Server_env.genv
 
 val default_genv : Server_env.genv

@@ -10,7 +10,7 @@ open Hh_prelude
 open Option.Monad_infix
 
 let go
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (env : Server_env.env)
     (files : string list)
     (error_filter : Filter_diagnostics.Filter.t)

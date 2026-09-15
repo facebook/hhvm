@@ -27,17 +27,17 @@ let get_ancestors_multiple ctx acc classes ~filter =
   result :: acc
 
 let parallel_helper ctx workers classes filter =
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:(get_ancestors_multiple ctx ~filter)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers classes)
+    ~next:(Multi_worker.next workers classes)
 
 (* Entry Point *)
 let go :
     Provider_context.t ->
-    MultiWorker.worker list option ->
+    Multi_worker.worker list option ->
     Decl_provider.type_key list ->
     Server_command_types.Method_jumps.filter ->
     Server_command_types.Method_jumps.result list =

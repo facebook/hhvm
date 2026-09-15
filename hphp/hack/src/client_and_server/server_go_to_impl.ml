@@ -51,13 +51,14 @@ let find_positions_of_classes
 let parallel_find_positions_of_classes
     (ctx : Provider_context.t)
     (child_classes : string list)
-    (workers : MultiWorker.worker list option) : Search_types.Find_refs.t list =
-  MultiWorker.call
+    (workers : Multi_worker.worker list option) : Search_types.Find_refs.t list
+    =
+  Multi_worker.call
     workers
     ~job:(find_positions_of_classes ctx)
     ~neutral:[]
     ~merge:List.append
-    ~next:(MultiWorker.next workers child_classes)
+    ~next:(Multi_worker.next workers child_classes)
 
 let add_if_valid_origin ctx class_elt child_class method_name result =
   if String.equal class_elt.ce_origin child_class then
@@ -115,13 +116,14 @@ let parallel_find_positions_of_methods
     (ctx : Provider_context.t)
     (child_classes : string list)
     (method_name : string)
-    (workers : MultiWorker.worker list option) : Search_types.Find_refs.t list =
-  MultiWorker.call
+    (workers : Multi_worker.worker list option) : Search_types.Find_refs.t list
+    =
+  Multi_worker.call
     workers
     ~job:(find_positions_of_methods ctx method_name)
     ~neutral:[]
     ~merge:List.append
-    ~next:(MultiWorker.next workers child_classes)
+    ~next:(Multi_worker.next workers child_classes)
 
 let find_child_classes
     (ctx : Provider_context.t)

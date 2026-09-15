@@ -20,7 +20,7 @@ let use_worker_clones =
 let make_workers n =
   let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
-    MultiWorker.make
+    Multi_worker.make
       ~longlived_workers:(not use_worker_clones)
       ~saved_state:handle
       ~entry

@@ -291,7 +291,7 @@ let index_files ctx ~out_dir ~files =
   recheck_job ctx opts JobReturn.neutral idx |> ignore
 
 let go
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (ctx : Provider_context.t)
     (opts : Indexer_options.t)
     ~(namespace_map : (string * string) list)
@@ -304,7 +304,7 @@ let go
   in
   let start_time = Unix.gettimeofday () in
   let jobs =
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:(recheck_job ctx opts)
       ~merge:JobReturn.merge

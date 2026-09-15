@@ -18,7 +18,7 @@ let multi_worker_inner workers ~fail_inner =
     acc ^ x
   in
   let result =
-    MultiWorker.call (Some workers) ~job:concat ~merge:( ^ ) ~neutral:"" ~next
+    Multi_worker.call (Some workers) ~job:concat ~merge:( ^ ) ~neutral:"" ~next
   in
   Printf.printf "Got %s\n" result;
   assert (result = "aaaaaaaaaaaaaaaaaaa")
@@ -62,7 +62,7 @@ let multi_worker_nested workers ?(fail_inner = false) () =
   let do_work acc () = acc + 1 in
   let (result, (), _) =
     try
-      MultiWorker.call_with_interrupt
+      Multi_worker.call_with_interrupt
         (Some workers)
         ~job:do_work
         ~merge:( + )

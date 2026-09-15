@@ -31,7 +31,7 @@ The deferred list needs further explanation, so read below.
 
 ####
 
-Here's how we actually plumb through the workitems and their individual results, via MultiWorker:
+Here's how we actually plumb through the workitems and their individual results, via Multi_worker:
 * We have mutable state [ref files_to_process], a list of filenames still to be processed
     for the entire typecheck.
 * Datatype [progress] represents an input batch of work for a worker to do,
@@ -48,7 +48,7 @@ Here's how we actually plumb through the workitems and their individual results,
 * neutral : typing_result
     This value is just the empty typing_result {diagnostics=Empty; deps=Empty; telemetry=Empty}
 * job : typing_result -> progress -> (typing_result', progress')
-    MultiWorker will invoke this job. For input,
+    Multi_worker will invoke this job. For input,
     it provides a copy of the degenerate [typing_result] that it got from [neutral], and
     it provides the degenerate [progress] i.e. just the bucket of work that it got from [next]
     The behavior of our job is to take items out of progress.remaining and typecheck them.
@@ -60,14 +60,14 @@ Here's how we actually plumb through the workitems and their individual results,
     typing_result it was given as input.
 * merge :  (typing_result * progress) (accumulator : typing_result) -> typing_result
     The initial value of accumulator is the same [neutral] that was given to each job.
-    After each job, MultiWorker calls [merge] to merge the results of that job
+    After each job, Multi_worker calls [merge] to merge the results of that job
     into the accumulator.
     Our merge function looks at the progress {remaining;completed;deferred} that
     came out of the job, and mutates [files_to_process] by sticking back "remaining+deferred" into it.
     It then merges the typing_result {errors;deps;telemetry} that came out of the job
     with those in its accumulator.
 
-The type signatures for MultiWorker look like they'd allow a variety of implementations,
+The type signatures for Multi_worker look like they'd allow a variety of implementations,
 e.g. having just a single accumulator that starts at "neutral" and feeds one by one into
 each job. But we don't do that.
 
@@ -889,7 +889,7 @@ end = struct
 end
 
 let next
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (todo : Todo.t)
     (record : Measure.record) : unit -> TypingProgress.t Bucket.bucket =
   let num_workers =
@@ -901,7 +901,7 @@ let next
     Measure.time ~record "time" @@ fun () ->
     match num_workers with
     | 0 ->
-      (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
+      (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to Multi_worker for execution. *)
       Bucket.Job (TypingProgress.init [])
     | _ ->
       Todo.consume
@@ -1183,7 +1183,7 @@ let process_with_hh_distc
  *)
 let process_in_parallel
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (telemetry : Telemetry.t)
     (workitems : workitem Big_list.t)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
@@ -1230,7 +1230,7 @@ let process_in_parallel
     (worker_id, typing_result, computation_progress)
   in
   let ((warnings_saved_state, typing_result), env, cancelled_results) =
-    MultiWorker.call_with_interrupt
+    Multi_worker.call_with_interrupt
       workers
       ~job
       ~neutral:(warnings_saved_state, neutral ())
@@ -1342,7 +1342,7 @@ type result = {
 
 let go_with_interrupt
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
@@ -1501,7 +1501,7 @@ let go_with_interrupt
 
 let go
     (ctx : Provider_context.t)
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)

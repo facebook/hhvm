@@ -62,12 +62,12 @@ let extend_defs_per_file_batch
       result)
   in
   let next =
-    MultiWorker.next ~max_size:bucket_size genv.workers additional_files
+    Multi_worker.next ~max_size:bucket_size genv.workers additional_files
   in
   let neutral = Relative_path.Map.empty in
   let merge = Relative_path.Map.union in
   let extended_defs_per_file =
-    MultiWorker.call genv.workers ~job ~neutral ~merge ~next
+    Multi_worker.call genv.workers ~job ~neutral ~merge ~next
   in
   Relative_path.Map.union defs_per_file extended_defs_per_file
 

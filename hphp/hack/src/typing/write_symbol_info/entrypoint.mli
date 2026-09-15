@@ -20,7 +20,7 @@ val sym_hashes :
 
 (* namespace_map is the aliases map, used to generate hack.GlobalNamespaceAlias *)
 val go :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   Provider_context.t ->
   Indexer_options.t ->
   namespace_map:(string * string) list ->

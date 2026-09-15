@@ -18,7 +18,7 @@ type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 
 val collect_shallow_decls :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   SSet.t ->
   saved_shallow_decls
 

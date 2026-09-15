@@ -64,7 +64,7 @@ let init
     ~(tcopt : Typechecker_options.t)
     ~(deps_mode : Typing_deps_mode.t)
     ?(gc_control : Gc.control option)
-    (t : float) : Provider_context.t * MultiWorker.worker list * float =
+    (t : float) : Provider_context.t * Multi_worker.worker list * float =
   let nbr_procs = Sys_utils.nbr_procs in
   let heap_handle = SharedMem.init ~num_workers:nbr_procs shmem_config in
   let gc_control =
@@ -74,7 +74,7 @@ let init
   in
   let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =
-    MultiWorker.make
+    Multi_worker.make
       ~call_wrapper:{ Worker_controller.wrap = catch_and_classify_exceptions }
       ~longlived_workers:false
       ~saved_state:state

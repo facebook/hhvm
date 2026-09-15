@@ -22,7 +22,7 @@ let helper ctx acc path_list =
   holes @ acc
 
 let go :
-    MultiWorker.worker list option ->
+    Multi_worker.worker list option ->
     string list ->
     Server_env.env ->
     Tast_holes_service.result =
@@ -36,10 +36,10 @@ let go :
   if List.length file_list < 10 then
     helper ctx [] file_list
   else
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:(fun acc file -> helper ctx acc file)
       ~neutral:[]
       ~merge:List.rev_append
         (* constant stack space, though Base.List will call rev_append anyway past a threshold *)
-      ~next:(MultiWorker.next workers file_list)
+      ~next:(Multi_worker.next workers file_list)

@@ -120,7 +120,7 @@ let indexing genv env to_check cgroup_steps :
 
   SharedMem.GC.collect `gentle;
   let get_next =
-    MultiWorker.next genv.workers (Relative_path.Set.elements to_check)
+    Multi_worker.next genv.workers (Relative_path.Set.elements to_check)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let defs_per_file =

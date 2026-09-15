@@ -29,12 +29,12 @@ let deps_of_paths ctx workers naming_table relative_paths =
     DepSet.union acc (Typing_deps.add_all_deps deps_mode initial_deps)
   in
   let all_deps =
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:find_dependencies
       ~neutral:(DepSet.make ())
       ~merge:DepSet.union
-      ~next:(MultiWorker.next workers relative_paths)
+      ~next:(Multi_worker.next workers relative_paths)
   in
   all_deps |> Naming_provider.get_files ctx |> Relative_path.Set.elements
 

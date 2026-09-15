@@ -152,8 +152,8 @@ let merge_results ~return_expanded_tast (_worker_id, result) acc =
 let go_parallel workers file_inputs ctx ~return_expanded_tast ~error_filter :
     Diagnostics.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let job = worker_job ctx ~error_filter in
-  let next = MultiWorker.next workers file_inputs in
-  MultiWorker.call_with_worker_id
+  let next = Multi_worker.next workers file_inputs in
+  Multi_worker.call_with_worker_id
     workers
     ~job
     ~merge:(merge_results ~return_expanded_tast)

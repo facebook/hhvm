@@ -876,7 +876,7 @@ let initialize_naming_table
   let (get_next, count, t) =
     match fnl with
     | Some fnl ->
-      ( MultiWorker.next genv.workers fnl,
+      ( Multi_worker.next genv.workers fnl,
         Some (List.length fnl),
         Unix.gettimeofday () )
     | None ->
@@ -905,7 +905,7 @@ let initialize_naming_table
             Normal)
       ~telemetry_label:"lazy.nt.parsing"
       ~cgroup_steps
-      ~worker_call:MultiWorker.wrapper
+      ~worker_call:Multi_worker.wrapper
   in
   if do_naming then
     Server_init_common
@@ -1114,7 +1114,7 @@ let update_naming_table
       genv
       env
       ~get_next:
-        (MultiWorker.next
+        (Multi_worker.next
            genv.workers
            (Relative_path.Set.elements naming_files))
       ~count:file_count
@@ -1124,7 +1124,7 @@ let update_naming_table
         (* Don't overwrite old decls loaded from saved state *)
       ~telemetry_label:"post_ss1.parsing"
       ~cgroup_steps
-      ~worker_call:MultiWorker.wrapper
+      ~worker_call:Multi_worker.wrapper
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =

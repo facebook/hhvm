@@ -48,4 +48,4 @@ val setup_server :
   Server_args.options ->
   Server_config.t ->
   Server_local_config.t ->
-  MultiWorker.worker list * Server_env.env
+  Multi_worker.worker list * Server_env.env

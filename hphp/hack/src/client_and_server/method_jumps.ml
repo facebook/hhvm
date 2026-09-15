@@ -126,7 +126,7 @@ let find_extended_classes_in_files_parallel
         classes :: acc)
   in
   if List.length classes > 10 then
-    MultiWorker.call
+    Multi_worker.call
       workers
       ~job:
         (find_extended_classes_in_files
@@ -136,7 +136,7 @@ let find_extended_classes_in_files_parallel
            target_class_pos)
       ~merge:List.rev_append
       ~neutral:[]
-      ~next:(MultiWorker.next workers classes)
+      ~next:(Multi_worker.next workers classes)
   else
     find_extended_classes_in_files
       ctx

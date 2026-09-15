@@ -29,7 +29,7 @@ to their old versions. *)
 val redo_type_decl :
   Provider_context.t ->
   during_init:bool ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   bucket_size:int ->
   get_classes_in_file ->
   previously_oldified_defs:FileInfo.names ->
@@ -45,7 +45,7 @@ redeclaration. *)
 val oldify_decls_and_remove_descendants :
   Provider_context.t ->
   ?collect_garbage:bool ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   get_classes_in_file ->
   bucket_size:int ->
   defs:FileInfo.names ->
@@ -56,7 +56,7 @@ val oldify_decls_and_remove_descendants :
 val remove_old_defs :
   Provider_context.t ->
   bucket_size:int ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   FileInfo.names ->
   unit
 
@@ -67,7 +67,7 @@ val remove_old_defs :
   in a very particular use case of invalidate_type_decl. *)
 val get_descendant_classes :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   bucket_size:int ->
   (Relative_path.t -> SSet.t) ->
   SSet.t ->

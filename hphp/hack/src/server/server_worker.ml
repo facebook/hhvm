@@ -36,7 +36,7 @@ let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
     Exit.exit Exit_status.Worker_not_found_exception
 
 let make ~longlived_workers ~nbr_procs gc_control heap_handle ~logging_init =
-  MultiWorker.make
+  Multi_worker.make
     ~call_wrapper:{ Worker_controller.wrap = catch_and_classify_exceptions }
     ~saved_state:(Server_global_state.save ~logging_init)
     ~entry

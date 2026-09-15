@@ -57,7 +57,7 @@ type result = {
 
 val go :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   Telemetry.t ->
   Relative_path.t list ->
   root:Path.t option ->
@@ -71,11 +71,11 @@ val go :
     processed fully or at all due to interrupts. *)
 val go_with_interrupt :
   Provider_context.t ->
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   Telemetry.t ->
   Relative_path.t list ->
   root:Path.t option ->
-  interrupt:'env MultiWorker.interrupt_config ->
+  interrupt:'env Multi_worker.interrupt_config ->
   longlived_workers:bool ->
   hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->

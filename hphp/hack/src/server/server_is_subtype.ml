@@ -235,13 +235,13 @@ let parallel_helper workers ctx query_with_path_alist :
   let query_with_path_alists =
     query_with_some_path_alists_by_file @ [query_with_none_path_alist]
   in
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:(fun acc query_with_path_alist ->
       helper acc ctx (List.concat query_with_path_alist))
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers query_with_path_alists)
+    ~next:(Multi_worker.next workers query_with_path_alists)
 
 let check workers str env =
   let ctx = Provider_utils.ctx_from_server_env env in

@@ -63,7 +63,7 @@ let lint_all genv ctx code =
       (genv.indexer Find_utils.is_hack)
   in
   let errs =
-    MultiWorker.call
+    Multi_worker.call
       genv.workers
       ~job:(lint_and_filter ctx code)
       ~merge:List.rev_append
@@ -87,12 +87,12 @@ let go genv ctx fnl =
   in
   let errs =
     if List.length files_with_contents > 10 then
-      MultiWorker.call
+      Multi_worker.call
         genv.workers
         ~job:(lint ctx)
         ~merge:List.rev_append
         ~neutral:[]
-        ~next:(MultiWorker.next genv.workers files_with_contents)
+        ~next:(Multi_worker.next genv.workers files_with_contents)
     else
       lint ctx [] files_with_contents
   in

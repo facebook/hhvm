@@ -489,7 +489,7 @@ let parallel_find_refs
     ~(stream_file : Path.t option)
     ~(deadline : float option)
     ~(t_start : float) =
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:
       (find_refs ctx target ~omit_declaration ~stream_file ~deadline ~t_start)
@@ -499,7 +499,7 @@ let parallel_find_refs
       | (Ok output, Ok acc) -> Ok (List.rev_append output acc)
       | _ -> Error ())
     ~next:
-      (let next = MultiWorker.next workers files in
+      (let next = Multi_worker.next workers files in
        (* We create the "next" function just once, now; it will dole
           out chunks of [files] each time it's asked, below. *)
        fun () ->

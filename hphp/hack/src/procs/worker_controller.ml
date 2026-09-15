@@ -17,7 +17,7 @@ open Worker
  *
  * You should first create a fixed amount of workers and then use those
  * because the amount of workers is limited and to make the load-balancing
- * of tasks better (cf multiWorker.ml)
+ * of tasks better (cf multi_worker.ml)
  *
  * On Unix, we spawn workers when initializing Hack. Then, each
  * worker forks a clone process for each incoming request.
@@ -126,7 +126,7 @@ type worker = {
 (*****************************************************************************
  * The handle is what we get back when we start a job. It's a "future"
  * (sometimes called a "promise"). The scheduler uses the handle to retrieve
- * the result of the job when the task is done (cf multiWorker.ml).
+ * the result of the job when the task is done (cf multi_worker.ml).
  *
  *****************************************************************************)
 and ('a, 'b) handle = ('a, 'b) delayed ref

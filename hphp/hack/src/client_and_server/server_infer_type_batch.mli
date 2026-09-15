@@ -15,7 +15,7 @@ val get_tast_map :
   Provider_context.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t
 
 val go :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   (string * File_content.Position.t * File_content.Position.t option) list ->
   Server_env.env ->
   string list

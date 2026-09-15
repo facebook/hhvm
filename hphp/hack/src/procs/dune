@@ -11,7 +11,7 @@
  (modules
   mem_profile
   multiThreadedCall
-  multiWorker
+  multi_worker
   worker
   worker_controller)
  (libraries

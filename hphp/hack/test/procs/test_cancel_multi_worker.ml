@@ -72,7 +72,7 @@ let rec run_until_done fd_in workers (acc, iterations) = function
   | work ->
     Hh_logger.log "Left: %d" (List.length work);
     let (result, (), unfinished_and_reason) =
-      MultiWorker.call_with_interrupt
+      Multi_worker.call_with_interrupt
         (Some workers)
         ~job:do_work
         ~merge:sum

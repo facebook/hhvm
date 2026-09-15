@@ -107,16 +107,16 @@ let helper (h : (_, 'result, 'state) handlers) ctx (acc : string list) pos_list
       h.result_to_string result pos :: acc)
 
 let parallel_helper h workers tcopt pos_list =
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:(helper h tcopt)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers pos_list)
+    ~next:(Multi_worker.next workers pos_list)
 
 (* Entry Point *)
 let go :
-    MultiWorker.worker list option ->
+    Multi_worker.worker list option ->
     (string * int * int) list ->
     Server_env.env ->
     _ handlers ->

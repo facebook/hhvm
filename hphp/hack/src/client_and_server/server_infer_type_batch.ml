@@ -151,7 +151,7 @@ let helper ctx acc (pos_list : pos list) =
 (** This divides files amongst all the workers.
 No file is handled by more than one worker. *)
 let parallel_helper
-    (workers : MultiWorker.worker list option)
+    (workers : Multi_worker.worker list option)
     (ctx : Provider_context.t)
     (pos_list : pos list) : string list =
   let add_pos_to_map map pos =
@@ -170,16 +170,16 @@ let parallel_helper
   (* pos_by_file is a list-of-lists [[posA1;posA2;...];[posB1;...];...]
      where each inner list [posA1;posA2;...] is all for the same file.
      This is so that a given file is only ever processed by a single worker. *)
-  MultiWorker.call
+  Multi_worker.call
     workers
     ~job:(fun acc pos_by_file -> helper ctx acc (List.concat pos_by_file))
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers pos_by_file)
+    ~next:(Multi_worker.next workers pos_by_file)
 
 (* Entry Point *)
 let go :
-    MultiWorker.worker list option ->
+    Multi_worker.worker list option ->
     (string * File_content.Position.t * File_content.Position.t option) list ->
     Server_env.env ->
     string list =

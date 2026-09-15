@@ -1244,7 +1244,7 @@ let make_workers
     shmem_handle
     options
     config
-    local_config : MultiWorker.worker list =
+    local_config : Multi_worker.worker list =
   (* Make a sub-init_id because we use it to name temporary files for piping to
      scuba logging processes. *)
   let worker_logging_init () =
@@ -1284,7 +1284,7 @@ let setup_server
     ~(monitor_pid : int option)
     (options : Server_args.options)
     (config : Server_config.t)
-    (local_config : Server_local_config.t) : MultiWorker.worker list * env =
+    (local_config : Server_local_config.t) : Multi_worker.worker list * env =
   let num_workers = num_workers options local_config in
   let shmem_handle =
     SharedMem.init ~num_workers (Server_config.sharedmem_config config)

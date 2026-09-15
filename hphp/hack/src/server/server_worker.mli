@@ -15,4 +15,4 @@ val make :
   Gc.control ->
   SharedMem.handle ->
   logging_init:(unit -> unit) ->
-  MultiWorker.worker list
+  Multi_worker.worker list

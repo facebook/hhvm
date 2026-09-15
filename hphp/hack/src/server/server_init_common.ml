@@ -38,7 +38,7 @@ let parse_files_and_update_forward_naming_table
     ~(decl_mode : Direct_decl_service.direct_decl_mode)
     ~(telemetry_label : string)
     ~(cgroup_steps : Cgroup_profiler.step_group)
-    ~(worker_call : MultiWorker.call_wrapper) : Server_env.env * float =
+    ~(worker_call : Multi_worker.call_wrapper) : Server_env.env * float =
   Cgroup_profiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   begin

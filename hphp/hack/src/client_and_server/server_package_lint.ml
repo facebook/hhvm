@@ -94,7 +94,7 @@ let references_target names sym =
 let has_prod_ref_to ctx target_names cand =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path:cand in
   (* Use unquarantined because this is a batch operation across multiple
-     files via MultiWorker, not a single-file IDE request.  Quarantined
+     files via Multi_worker, not a single-file IDE request.  Quarantined
      mode is only appropriate for single-file IDE operations. *)
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_unquarantined ~ctx ~entry
@@ -132,7 +132,7 @@ let go genv env file candidate_files =
   in
   (* For each candidate file, check if it contains at least one
      production-affecting reference to any of the target's
-     definitions.  Use MultiWorker to parallelize TAST computation. *)
+     definitions.  Use Multi_worker to parallelize TAST computation. *)
   let job acc candidates =
     List.fold candidates ~init:acc ~f:(fun acc cand ->
         if has_prod_ref_to ctx target_names cand then
@@ -141,12 +141,12 @@ let go genv env file candidate_files =
           acc)
   in
   let ref_files =
-    MultiWorker.call
+    Multi_worker.call
       genv.Server_env.workers
       ~job
       ~merge:Relative_path.Set.union
       ~neutral:Relative_path.Set.empty
-      ~next:(MultiWorker.next genv.Server_env.workers candidate_paths)
+      ~next:(Multi_worker.next genv.Server_env.workers candidate_paths)
   in
   (* Target uses its natural (path-based) package because the question is
      "what if the override on the target were removed?". Dependents use

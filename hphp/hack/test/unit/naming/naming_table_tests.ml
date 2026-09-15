@@ -75,7 +75,7 @@ let write_and_parse_test_files ctx =
       let dir = Path.dirname fn in
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
-  let get_next = MultiWorker.next None (List.map files ~f:fst) in
+  let get_next = Multi_worker.next None (List.map files ~f:fst) in
   let file_infos =
     Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal)
   in

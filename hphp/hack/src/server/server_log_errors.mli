@@ -9,7 +9,7 @@
 
 (** Type check files and generate Telemetry with error diagnostics *)
 val go :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   Server_env.env ->
   string list ->
   Filter_diagnostics.Filter.t ->

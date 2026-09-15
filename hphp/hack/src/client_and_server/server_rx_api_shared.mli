@@ -26,7 +26,7 @@ type ('a, 'r, 's) handlers = {
 }
 
 val go :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   spos list ->
   Server_env.env ->
   ('a, 'b, 'c) handlers ->

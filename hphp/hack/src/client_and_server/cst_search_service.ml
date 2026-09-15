@@ -609,7 +609,7 @@ let go
         Sys_utils.parse_path_list files_to_search
         |> List.filter_map ~f:get_job_info
       in
-      MultiWorker.next genv.Server_env.workers files_to_search ~progress_fn
+      Multi_worker.next genv.Server_env.workers files_to_search ~progress_fn
     | None ->
       let indexer = genv.Server_env.indexer Find_utils.is_hack in
       fun () ->
@@ -640,7 +640,7 @@ let go
           Exception.reraise e)
   in
   let results =
-    MultiWorker.call
+    Multi_worker.call
       genv.Server_env.workers
       ~job
       ~neutral:[]

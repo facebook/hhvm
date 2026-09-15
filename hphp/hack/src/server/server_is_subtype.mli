@@ -7,7 +7,7 @@
  *)
 
 val check :
-  MultiWorker.worker list option ->
+  Multi_worker.worker list option ->
   string ->
   Server_env.env ->
   (string, string) result

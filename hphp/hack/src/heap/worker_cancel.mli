@@ -7,7 +7,7 @@
  *
  *)
 
-(* This exception might be thrown in code which executes in MultiWorker
+(* This exception might be thrown in code which executes in Multi_worker
  * workers. If you happen to catch it, the best course of action is to
  * re-throw it to guarantee speedy cancellation.
  *)

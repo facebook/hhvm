@@ -175,7 +175,7 @@ let handlers :
 
 (* Entry Point *)
 let go :
-    MultiWorker.worker list option ->
+    Multi_worker.worker list option ->
     (string * int * int) list ->
     Server_env.env ->
     _ =

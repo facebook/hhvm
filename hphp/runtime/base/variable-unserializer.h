@@ -23,6 +23,7 @@
 
 namespace HPHP {
 struct StringBuffer;
+struct ZStdDecompressSource;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -211,8 +212,10 @@ private:
                                  bool& hasSerializedNativeData);
 };
 
-// Unserialization always reads from a contiguous in-memory buffer.
+// Default path: a contiguous in-memory buffer, no decompression overhead.
 using VariableUnserializer = VariableUnserializerImpl<ContiguousSource>;
+// Streaming-zstd variant, selected by unserialize()'s zstd option.
+using ZStdVariableUnserializer = VariableUnserializerImpl<ZStdDecompressSource>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

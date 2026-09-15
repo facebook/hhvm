@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zstd-string-buffer.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
@@ -2616,5 +2617,6 @@ void VariableSerializerImpl<Buffer>::serializeObject(const Object& obj) {
 }
 
 template struct VariableSerializerImpl<StringBuffer>;
+template struct VariableSerializerImpl<ZStdStringBuffer>;
 
 }

@@ -72,7 +72,10 @@ namespace {
     <<__AcceptDisposable>> mixed $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function serialize(HH\FIXME\MISSING_PARAM_TYPE $value)[defaults]: string;
+  function serialize(
+    HH\FIXME\MISSING_PARAM_TYPE $value,
+    darray<arraykey, mixed> $options = dict[],
+  )[defaults]: string;
   <<__PHPStdLib>>
   function serialize_pure(HH\FIXME\MISSING_PARAM_TYPE $value)[]: string;
   <<__PHPStdLib>>

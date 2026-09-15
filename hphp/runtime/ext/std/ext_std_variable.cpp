@@ -19,8 +19,10 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/zstd-decompress-source.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -440,11 +442,43 @@ struct SerializeOptions {
   // When serializing a class or lazy class, do not promote them to strings
   bool keepClasses = false;
   bool ignoreStringSizeLimit = false;
+  bool useZstd = false;
 };
+
+// Apply parsed SerializeOptions to a freshly-constructed serializer.
+template <class VS>
+ALWAYS_INLINE void apply_serialize_options(
+    VS& vs,
+    const SerializeOptions& opts,
+    bool pure) {
+  if (opts.keepDVArrays)        vs.keepDVArrays();
+  if (opts.forcePHPArrays)      vs.setForcePHPArrays();
+  if (opts.warnOnHackArrays)    vs.setHackWarn();
+  if (opts.warnOnPHPArrays)     vs.setPHPWarn();
+  if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
+  if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
+  if (opts.disallowObjects)     vs.setDisallowObjects();
+  if (opts.disallowCollections) vs.setDisallowCollections();
+  if (opts.keepClasses)         vs.setKeepClasses();
+  if (opts.ignoreStringSizeLimit) vs.setIgnoreStringSizeLimit();
+  if (pure) vs.setPure();
+}
 
 ALWAYS_INLINE OptString serialize_impl(const Variant& value,
                                        const SerializeOptions& opts,
                                        bool pure) {
+  if (opts.useZstd) {
+    if (isStringType(value.getType())) {
+      auto const size = value.getStringData()->size();
+      if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
+        throw Exception("Size of serialized string (%ld) exceeds max", size);
+      }
+    }
+    ZStdVariableSerializer vs(VariableSerializer::Type::Serialize);
+    apply_serialize_options(vs, opts, pure);
+    return vs.serialize(value, /*ret=*/true, /*keepCount=*/true);
+  }
+
   switch (value.getType()) {
     case KindOfClass:
     case KindOfLazyClass:
@@ -505,29 +539,11 @@ ALWAYS_INLINE OptString serialize_impl(const Variant& value,
       break;
   }
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  if (opts.keepDVArrays)        vs.keepDVArrays();
-  if (opts.forcePHPArrays)      vs.setForcePHPArrays();
-  if (opts.warnOnHackArrays)    vs.setHackWarn();
-  if (opts.warnOnPHPArrays)     vs.setPHPWarn();
-  if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
-  if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
-  if (opts.disallowObjects)     vs.setDisallowObjects();
-  if (opts.disallowCollections) vs.setDisallowCollections();
-  if (opts.keepClasses)         vs.setKeepClasses();
-  if (opts.ignoreStringSizeLimit) vs.setIgnoreStringSizeLimit();
-  if (pure) vs.setPure();
+  apply_serialize_options(vs, opts, pure);
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
 
-}
-
-OptString HHVM_FUNCTION(serialize, const Variant& value) {
-  return serialize_impl(value, SerializeOptions(), false);
-}
-
-OptString HHVM_FUNCTION(serialize_pure, const Variant& value) {
-  return serialize_impl(value, SerializeOptions(), true);
 }
 
 const StaticString
@@ -540,10 +556,13 @@ const StaticString
   s_disallowCollections("disallowCollections"),
   s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy"),
   s_ignoreStringSizeLimit("ignoreStringSizeLimit"),
-  s_keepClasses("keepClasses");
+  s_keepClasses("keepClasses"),
+  s_zstd("zstd");
 
-OptString HHVM_FUNCTION(HH_serialize_with_options,
-                        const Variant& value, const Array& options) {
+namespace {
+
+// Parse the options dict into a SerializeOptions struct.
+ALWAYS_INLINE SerializeOptions build_serialize_options(const Array& options) {
   SerializeOptions opts;
   opts.keepDVArrays = options.exists(s_keepDVArrays) &&
     options[s_keepDVArrays].toBoolean();
@@ -566,7 +585,23 @@ OptString HHVM_FUNCTION(HH_serialize_with_options,
     options[s_keepClasses].toBoolean();
   opts.ignoreStringSizeLimit = options.exists(s_ignoreStringSizeLimit) &&
     options[s_ignoreStringSizeLimit].toBoolean();
-  return serialize_impl(value, opts, false);
+  opts.useZstd = options.exists(s_zstd) && options[s_zstd].toBoolean();
+  return opts;
+}
+
+}  // namespace
+
+OptString HHVM_FUNCTION(serialize, const Variant& value) {
+  return serialize_impl(value, SerializeOptions(), false);
+}
+
+OptString HHVM_FUNCTION(serialize_pure, const Variant& value) {
+  return serialize_impl(value, SerializeOptions(), true);
+}
+
+OptString HHVM_FUNCTION(HH_serialize_with_options,
+                        const Variant& value, const Array& options) {
+  return serialize_impl(value, build_serialize_options(options), false);
 }
 
 OptString serialize_keep_dvarrays(const Variant& value) {
@@ -577,6 +612,28 @@ OptString serialize_keep_dvarrays(const Variant& value) {
 
 Variant HHVM_FUNCTION(unserialize, const OptString& str,
                                    const Array& options) {
+  if (options.exists(s_zstd) && options[s_zstd].toBoolean()) {
+    if (str.get() == nullptr || str.size() <= 0) {
+      return false;
+    }
+    ZStdVariableUnserializer vu(str.data(), str.size(),
+                                VariableUnserializer::Type::Serialize,
+                                /* allowUnknownSerializableClass = */ true,
+                                options);
+    try {
+      return vu.unserialize();
+    } catch (FatalErrorException&) {
+      throw;
+    } catch (InvalidAllowedClassesException&) {
+      raise_warning(
+        "unserialize(): allowed_classes option should be array or boolean"
+      );
+      return false;
+    } catch (Exception& e) {
+      raise_notice("Unable to unserialize: %s.", e.getMessage().c_str());
+      return false;
+    }
+  }
   return unserialize_from_string(
     str,
     VariableUnserializer::Type::Serialize,
@@ -714,7 +771,7 @@ void StandardExtension::registerNativeVariable() {
   HHVM_FE(debug_zval_dump);
   HHVM_FE(debugger_dump);
   HHVM_FE(var_dump);
-  HHVM_FE(serialize);
+  HHVM_FALIAS(serialize, HH_serialize_with_options);
   HHVM_FE(serialize_pure);
   HHVM_FE(unserialize);
   HHVM_FE(unserialize_pure);

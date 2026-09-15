@@ -32,6 +32,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ZStdStringBuffer;
+
 /**
  * Maintaining states during serialization of a variable. We use this single
  * class to uniformly serialize variables according to different formats.
@@ -355,8 +357,10 @@ private:
   const StringData* m_unitFilename{nullptr};
 };
 
-// Serialization always targets a plain StringBuffer.
+// Default path: a plain StringBuffer, no compression overhead.
 using VariableSerializer = VariableSerializerImpl<StringBuffer>;
+// Streaming-zstd variant, selected by serialize()'s zstd option.
+using ZStdVariableSerializer = VariableSerializerImpl<ZStdStringBuffer>;
 
 inline OptString internal_serialize(const Variant& v) {
   VariableSerializer vs{VariableSerializer::Type::Internal};

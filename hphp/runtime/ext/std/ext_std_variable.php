@@ -168,11 +168,18 @@ function debugger_dump(mixed $variable): void;
  * or passing PHP values around without losing their type and structure.  To
  * make the serialized string into a PHP value again, use unserialize().
  *
+ * Set the `zstd` option to true to stream the serialized bytes through zstd and
+ * return a compressed frame without materializing the uncompressed string.
+ * Other options are the same as HH\serialize_with_options().
+ *
  * Calls to serialize are foldable because only objects can invoke user-defined
  * code.
  */
 <<__IsFoldable, __Native>>
-function serialize(mixed $value): ?string;
+function serialize(
+  mixed $value,
+  darray<string, mixed> $options = dict[],
+): ?string;
 
 /**
  * Pure variant of serialize.
@@ -182,6 +189,10 @@ function serialize(mixed $value): ?string;
 <<__IsFoldable, __Native>>
 function serialize_pure(mixed $value)[]: ?string;
 
+/**
+ * Set the `zstd` option to true to decompress the input incrementally while
+ * unserializing it, without materializing the uncompressed serialized string.
+ */
 <<__Native>>
 function unserialize(
   string $str,
@@ -305,6 +316,8 @@ namespace HH {
   * ignoreStringSizeLimit - If true, ignore the ResourceLimit.SerializationSizeLimit
   *                    ini setting and serialize to a string of any size that
   *                    doesn't exceed the request memory limit.
+  * zstd              - If true, stream the serialized bytes through zstd and
+  *                    return the compressed frame.
   */
   <<__Native, __IsFoldable>>
   function serialize_with_options(

@@ -35,8 +35,8 @@
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/contiguous-source.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/zstd-decompress-source.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -1019,9 +1019,24 @@ void VariableUnserializerImpl<Source>::unserializeVariant(
                                            make_tv<KindOfNull>(),
                                            c_Pair::NoIncRef{})};
           } else if (UNLIKELY(cls->hasReifiedGenerics())) {
-            // First prop on the serialized list is the reified generics prop
-            if (!matchString(s_86reified_prop.slice())) {
-              throwInvalidOFormat(clsName);
+            // First prop on the serialized list is the reified generics prop.
+            // matchString() consumes+verifies the name in one shot, but it needs
+            // a backward seek and so only works on a contiguous source; on a
+            // streaming source it always returns false. Rather than treat that
+            // (expected) false as a format error, read the name via the normal
+            // key primitive and verify it explicitly.
+            if constexpr (Source::contiguous) {
+              if (!matchString(s_86reified_prop.slice())) {
+                throwInvalidOFormat(clsName);
+              }
+            } else {
+              Variant reifiedKey;
+              unserializeVariant(reifiedKey.asTypedValue(),
+                                 UnserializeMode::Key);
+              if (!reifiedKey.isString() ||
+                  !reifiedKey.asCStrRef().get()->same(s_86reified_prop.get())) {
+                throwInvalidOFormat(clsName);
+              }
             }
             TypedValue tv = make_tv<KindOfNull>();
             auto const t = tv_lval{&tv};
@@ -1790,6 +1805,10 @@ void VariableUnserializerImpl<Source>::unserializePair(ObjectData* obj, int64_t 
   unserializeVariant(pair->at(1));
 }
 
+// Explicitly instantiate both byte-source variants: the default contiguous
+// in-memory path and the streaming zstd-decompression path. Each is fully
+// monomorphic, so neither pays for the other's dispatch.
 template struct VariableUnserializerImpl<ContiguousSource>;
+template struct VariableUnserializerImpl<ZStdDecompressSource>;
 
 }

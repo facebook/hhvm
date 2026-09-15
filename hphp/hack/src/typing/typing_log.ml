@@ -102,15 +102,15 @@ type delta =
   | Unchanged
   (* Set has had some elements removed, some added *)
   | Set_delta of {
-      added: SSet.t;
-      removed: SSet.t;
+      added: S_set.t;
+      removed: S_set.t;
     }
   (* Map has some new keys, some removed keys, and deltas to existing keys.
    * All other keys assumed to be unchanged.
    *)
   | Map_delta of {
       added: value S_map.t;
-      removed: SSet.t;
+      removed: S_set.t;
       changed: delta S_map.t;
     }
 
@@ -137,9 +137,9 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     else
       Updated newval
   | (Set s1, Set s2) ->
-    let added = SSet.diff s2 s1 in
-    let removed = SSet.diff s1 s2 in
-    if SSet.is_empty added && SSet.is_empty removed then
+    let added = S_set.diff s2 s1 in
+    let removed = S_set.diff s1 s2 in
+    if S_set.is_empty added && S_set.is_empty removed then
       Unchanged
     else
       Set_delta { added; removed }
@@ -153,10 +153,10 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
       S_map.fold
         (fun i _ s ->
           match S_map.find_opt i m2 with
-          | None -> SSet.add i s
+          | None -> S_set.add i s
           | Some _ -> s)
         m1
-        SSet.empty
+        S_set.empty
     in
     let added =
       S_map.fold
@@ -179,7 +179,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
         m1
         S_map.empty
     in
-    if SSet.is_empty removed && S_map.is_empty added && S_map.is_empty changed
+    if S_set.is_empty removed && S_map.is_empty added && S_map.is_empty changed
     then
       Unchanged
     else
@@ -200,7 +200,7 @@ let is_leaf_value v =
 let log_key key = lprintf (Normal Yellow) "%s" key
 
 let log_sset s =
-  match SSet.elements s with
+  match S_set.elements s with
   | [] -> lprintf (Normal Green) "{}"
   | [s] -> lprintf (Normal Green) "{%s}" s
   | s :: ss ->
@@ -262,16 +262,16 @@ let rec log_delta env delta =
   | Updated v -> log_value env v
   | Unchanged -> ()
   | Set_delta { added; removed } ->
-    if not (SSet.is_empty added) then (
+    if not (S_set.is_empty added) then (
       lprintf (Bold Green) " += ";
       log_sset added
     );
-    if not (SSet.is_empty removed) then (
+    if not (S_set.is_empty removed) then (
       lprintf (Bold Red) " -= ";
       log_sset removed
     )
   | Map_delta { added; removed; changed } ->
-    SSet.iter
+    S_set.iter
       (fun k ->
         lprintf (Bold Red) "-";
         log_key k;
@@ -324,7 +324,7 @@ let reify_kind_as_value k =
     | Aast.Reified -> "reified")
 
 let tyset_as_value env tys =
-  Set (TySet.fold (fun t s -> SSet.add (Pr.debug env t) s) tys SSet.empty)
+  Set (TySet.fold (fun t s -> S_set.add (Pr.debug env t) s) tys S_set.empty)
 
 let tparam_info_as_value env tpinfo =
   let Typing_kinding_defs.

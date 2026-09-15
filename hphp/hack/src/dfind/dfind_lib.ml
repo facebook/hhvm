@@ -38,7 +38,7 @@ module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
 
   val pid : t -> int
 
-  val get_changes : t -> SSet.t Marshal_tools.result
+  val get_changes : t -> S_set.t Marshal_tools.result
 
   val stop : t -> unit
 end = struct
@@ -80,13 +80,13 @@ end = struct
        | Dfind_server.Updates s -> Marshal_tools.return s
        | Dfind_server.Ready -> assert false)
       >>= fun diff ->
-      if SSet.is_empty diff then
+      if S_set.is_empty diff then
         Marshal_tools.return acc
       else
-        let acc = SSet.union diff acc in
+        let acc = S_set.union diff acc in
         loop acc
     in
-    loop SSet.empty
+    loop S_set.empty
 
   let stop handle = Daemon.force_quit handle.daemon_handle
 end

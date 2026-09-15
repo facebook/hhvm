@@ -1778,7 +1778,7 @@ let check_arity_and_names
     pos_def
     ft
     (arity : int)
-    ~(arg_names : SSet.t) =
+    ~(arg_names : S_set.t) =
   let (exp_min, required_names) = Typing_defs.arity_and_names_required ft in
   let positional_params =
     List.filter ft.ft_params ~f:(fun fp ->
@@ -1842,24 +1842,24 @@ let check_arity_and_names
                  })
   in
   let check_names () : unit =
-    let missing_names = SSet.diff required_names arg_names in
+    let missing_names = S_set.diff required_names arg_names in
     (* When the callee has a named-variadic parameter, any name the caller
        passes is legal — the variadic absorbs it (with element-type checking
        done separately on each argument). *)
     let extra_names =
       if Option.is_some (Typing_defs.ft_named_variadic_param ft) then
-        SSet.empty
+        S_set.empty
       else
         let all_names =
           Typing_defs.ft_params_without_named_variadic ft
           |> List.filter_map ~f:Typing_defs.Named_params.name_of_named_param
-          |> SSet.of_list
+          |> S_set.of_list
         in
-        SSet.diff arg_names all_names
+        S_set.diff arg_names all_names
     in
     let () =
-      if not (SSet.is_empty missing_names) then
-        let missing_names = SSet.elements missing_names in
+      if not (S_set.is_empty missing_names) then
+        let missing_names = S_set.elements missing_names in
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(
@@ -1867,8 +1867,8 @@ let check_arity_and_names
             @@ Primary.Missing_named_args
                  { missing_names; pos; decl_pos = pos_def })
     in
-    if not (SSet.is_empty extra_names) then
-      let unexpected_names = SSet.elements extra_names in
+    if not (S_set.is_empty extra_names) then
+      let unexpected_names = S_set.elements extra_names in
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(
@@ -6566,11 +6566,11 @@ end = struct
         | Tdependent (_, ty) -> should_use_constraint seen env ty
         | Tgeneric name
         | Tnewtype (name, _, _) ->
-          if not (SSet.mem name seen) then
+          if not (S_set.mem name seen) then
             let (env, ts) =
               TUtils.get_concrete_supertypes ~abstract_enum:true env ty
             in
-            should_use_constraint_for_inter (SSet.add name seen) env ts
+            should_use_constraint_for_inter (S_set.add name seen) env ts
           else
             (env, false)
       and should_use_constraint_for_inter seen env ts =
@@ -6614,7 +6614,7 @@ end = struct
         then
           (* Inside of an expression tree, we can use constraint inference if the appropriate experimental_tc_feature is enabled.
              Many of the features that constraint inference doesn't support are not allowed in expression trees: inout, disposable, etc. *)
-          should_use_constraint SSet.empty env ty1
+          should_use_constraint S_set.empty env ty1
         else
           (env, false)
       in
@@ -8277,14 +8277,14 @@ end = struct
               env
           in
           let (arg_names, duplicate_arg_names) =
-            List.fold el ~init:(SSet.empty, []) ~f:(fun (acc, dupes) arg ->
+            List.fold el ~init:(S_set.empty, []) ~f:(fun (acc, dupes) arg ->
                 match Typing_defs.Named_params.name_of_arg arg with
                 | Some name ->
                   let old_acc = acc in
-                  let acc = SSet.add name acc in
+                  let acc = S_set.add name acc in
                   let dupes =
                     if phys_equal old_acc acc then
-                      (* `SSet.add pre_existing_key` preserves physical equality
+                      (* `S_set.add pre_existing_key` preserves physical equality
                          * https://ocaml.org/manual/5.3/api/Set.S.html *)
                       name :: dupes
                     else
@@ -11584,12 +11584,12 @@ end = struct
        bound in the lambda signature *)
     let no_substs =
       if not declared_decl_ft.ft_instantiated then
-        SSet.of_list
+        S_set.of_list
           (List.map
              declared_decl_ft.ft_tparams
              ~f:(fun { tp_name = (_, nm); _ } -> nm))
       else
-        SSet.empty
+        S_set.empty
     in
     (* For Twildcard types, generate fresh type variables *)
     let ety_env =

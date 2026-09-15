@@ -535,7 +535,7 @@ let check_sealed_allowlist
   match parent_class_elt.ce_sealed_allowlist with
   | None -> ()
   | Some allowlist ->
-    if not (SSet.mem class_elt.ce_origin allowlist) then
+    if not (S_set.mem class_elt.ce_origin allowlist) then
       (* if the origin of class_elt is not in the allowlist we emit an error unless
          the class itself is in the allowlist and the elt is imported from a trait *)
       let is_class_elt_origin_trait =
@@ -544,7 +544,7 @@ let check_sealed_allowlist
           true
         | _ -> false
       in
-      let is_class_in_allowlist = SSet.mem (Cls.name class_) allowlist in
+      let is_class_in_allowlist = S_set.mem (Cls.name class_) allowlist in
       if not (is_class_elt_origin_trait && is_class_in_allowlist) then
         bad_sealed_override_error
           env

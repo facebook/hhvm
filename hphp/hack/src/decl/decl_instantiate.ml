@@ -16,15 +16,18 @@ let make_subst tparams tyl = Subst.make_decl tparams tyl
 let get_tparams_in_ty_and_acc acc ty =
   let tparams_visitor =
     object
-      inherit [SSet.t] Type_visitor.decl_type_visitor
+      inherit [S_set.t] Type_visitor.decl_type_visitor
 
-      method! on_tgeneric acc _ s = SSet.add s acc
+      method! on_tgeneric acc _ s = S_set.add s acc
     end
   in
   tparams_visitor#on_type acc ty
 
 let get_tparams_in_subst subst =
-  S_map.fold (fun _ ty acc -> get_tparams_in_ty_and_acc acc ty) subst SSet.empty
+  S_map.fold
+    (fun _ ty acc -> get_tparams_in_ty_and_acc acc ty)
+    subst
+    S_set.empty
 
 (*****************************************************************************)
 (* Code dealing with instantiation. *)
@@ -124,7 +127,7 @@ and instantiate_ subst x =
     let (subst, tparams) =
       List.fold_map ft.ft_tparams ~init:subst ~f:(fun subst tp ->
           let (pos, name) = tp.tp_name in
-          if SSet.mem name target_generics then
+          if S_set.mem name target_generics then
             (* Fresh only because we don't support nesting of generic function types *)
             let fresh_tp_name = name ^ "#0" in
             let reason = Typing_reason.witness_from_decl pos in

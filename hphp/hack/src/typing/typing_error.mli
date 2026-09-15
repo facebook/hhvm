@@ -772,7 +772,7 @@ module Primary : sig
       }
     | Cyclic_class_def of {
         pos: Pos.t;
-        stack: SSet.t;
+        stack: S_set.t;
       }
     | Trait_reuse_with_final_method of {
         pos: Pos.t;

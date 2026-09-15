@@ -142,11 +142,11 @@ let handler ~as_lint =
       (* for each used trait add the properties defined in the trait, mapped to their origin *)
       List.iter (traits c) ~f:(fun (_, type_name) ->
           let all_trait_ancestors =
-            SSet.of_list (all_trait_ancestors env type_name)
+            S_set.of_list (all_trait_ancestors env type_name)
           in
           List.iter (properties env type_name) ~f:(fun (prop_name, prop_elt) ->
               (* but do not add properties that are imported via require extends *)
-              if SSet.mem prop_elt.ce_origin all_trait_ancestors then
+              if S_set.mem prop_elt.ce_origin all_trait_ancestors then
                 Hashtbl.add_multi
                   props_seen
                   ~key:(strip_dollar prop_name)

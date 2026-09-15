@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Server_env
-open Reordered_argument_collections
 module SLC = Server_local_config
 
 module CheckStats = struct
@@ -51,8 +50,8 @@ let print_fast defs_per_file =
   S_map.iter
     (fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
-      SSet.iter funs ~f:(Printf.printf "  Fun %s\n");
-      SSet.iter classes ~f:(Printf.printf "  Class %s\n"))
+      S_set.iter (Printf.printf "  Fun %s\n") funs;
+      S_set.iter (Printf.printf "  Class %s\n") classes)
     defs_per_file;
   Printf.printf "\n";
   Out_channel.flush stdout;
@@ -152,23 +151,23 @@ let get_interrupt_config genv env =
 let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
   let new_classes =
     match Naming_table.get_file_info new_naming_table path with
-    | None -> SSet.empty
+    | None -> S_set.empty
     | Some info ->
       List.fold
         info.File_info.ids.File_info.classes
-        ~init:SSet.empty
-        ~f:(fun acc id -> SSet.add acc id.File_info.name)
+        ~init:S_set.empty
+        ~f:(fun acc id -> S_set.add id.File_info.name acc)
   in
   let old_classes =
     match Naming_table.get_file_info old_naming_table path with
-    | None -> SSet.empty
+    | None -> S_set.empty
     | Some info ->
       List.fold
         info.File_info.ids.File_info.classes
-        ~init:SSet.empty
-        ~f:(fun acc id -> SSet.add acc id.File_info.name)
+        ~init:S_set.empty
+        ~f:(fun acc id -> S_set.add id.File_info.name acc)
   in
-  SSet.union new_classes old_classes
+  S_set.union new_classes old_classes
 
 type naming_result = {
   failed_naming: Relative_path.Set.t;

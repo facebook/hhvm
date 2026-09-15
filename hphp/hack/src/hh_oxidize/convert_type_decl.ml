@@ -20,13 +20,13 @@ open Rust_type
 (* Types marked with [@@oxidize.exclude] are not generated in Rust.
    GADT constructors whose return type instantiates a type parameter
    with an excluded type are silently filtered out. *)
-let excluded_types : SSet.t ref = ref SSet.empty
+let excluded_types : S_set.t ref = ref S_set.empty
 
-let reset_excluded_types () = excluded_types := SSet.empty
+let reset_excluded_types () = excluded_types := S_set.empty
 
-let add_excluded_type name = excluded_types := SSet.add name !excluded_types
+let add_excluded_type name = excluded_types := S_set.add name !excluded_types
 
-let is_excluded_type name = SSet.mem name !excluded_types
+let is_excluded_type name = S_set.mem name !excluded_types
 
 let has_oxidize_exclude_attr (attrs : attributes) : bool =
   List.exists attrs ~f:(fun { attr_name; attr_payload; _ } ->

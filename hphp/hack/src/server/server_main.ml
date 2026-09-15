@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Server_env
-open Reordered_argument_collections
 
 (*****************************************************************************)
 (* Main initialization *)
@@ -77,11 +76,11 @@ module Program = struct
     exit error_code
 
   (* filter and relativize updated file paths *)
-  let exit_if_critical_update genv ~(raw_updates : SSet.t) : unit =
+  let exit_if_critical_update genv ~(raw_updates : S_set.t) : unit =
     let hhconfig_in_updates =
-      SSet.mem
-        raw_updates
+      S_set.mem
         (Relative_path.to_absolute Server_config.repo_config_path)
+        raw_updates
     in
     if hhconfig_in_updates then begin
       let (new_config, _) =
@@ -101,9 +100,9 @@ module Program = struct
       )
     end;
     let package_config_in_updates =
-      SSet.mem
-        raw_updates
+      S_set.mem
         (Relative_path.to_absolute Package_config.repo_config_path)
+        raw_updates
     in
     if package_config_in_updates then begin
       Hh_logger.log
@@ -188,11 +187,11 @@ let query_notifier
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
         Server_notifier.get_changes_async genv.notifier telemetry )
-    | `Skip -> (env, (Server_notifier.AsyncChanges SSet.empty, None, telemetry))
+    | `Skip -> (env, (Server_notifier.AsyncChanges S_set.empty, None, telemetry))
   in
   let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
-    | Server_notifier.Unavailable -> (true, SSet.empty)
+    | Server_notifier.Unavailable -> (true, S_set.empty)
     | Server_notifier.AsyncChanges updates -> (true, updates)
     | Server_notifier.SyncChanges updates ->
       (* We get SyncChanges either
@@ -222,11 +221,11 @@ let query_notifier
         Server_notifier.get_changes_async genv.notifier telemetry
       in
       let (_, raw_updates) = unpack_updates changes in
-      if stop_pumping_on_empty_updates && SSet.is_empty raw_updates then
+      if stop_pumping_on_empty_updates && S_set.is_empty raw_updates then
         (acc, clock, iteration + 1, telemetry)
       else
         pump_async_updates
-          (SSet.union acc raw_updates)
+          (S_set.union acc raw_updates)
           clock
           (iteration + 1)
           telemetry
@@ -253,11 +252,11 @@ let query_notifier
   let telemetry =
     telemetry
     |> Telemetry.duration ~key:"processed" ~start_time
-    |> Telemetry.int_ ~key:"raw_updates" ~value:(SSet.cardinal raw_updates)
+    |> Telemetry.int_ ~key:"raw_updates" ~value:(S_set.cardinal raw_updates)
     |> Telemetry.int_ ~key:"updates" ~value:(Relative_path.Set.cardinal updates)
   in
   if not @@ Relative_path.Set.is_empty updates then
-    Hack_event_logger.notifier_returned start_time (SSet.cardinal raw_updates);
+    Hack_event_logger.notifier_returned start_time (S_set.cardinal raw_updates);
   (env, updates, clock, updates_stale, telemetry)
 
 let update_stats_after_recheck :

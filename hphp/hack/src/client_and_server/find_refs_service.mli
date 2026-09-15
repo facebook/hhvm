@@ -13,7 +13,7 @@
  *   subtyping relation
  *)
 type member_class =
-  | Class_set of SSet.t
+  | Class_set of S_set.t
   | Subclasses_of of string
 
 type action_internal =
@@ -50,7 +50,7 @@ val find_child_classes_in_files :
   string ->
   Naming_table.t ->
   Relative_path.Set.t ->
-  SSet.t
+  S_set.t
 
 val get_origin_class_name :
   Provider_context.t ->
@@ -86,5 +86,5 @@ val get_dependent_files_gconst :
 val get_dependent_files :
   Provider_context.t ->
   Multi_worker.worker list option ->
-  SSet.t ->
+  S_set.t ->
   Relative_path.Set.t

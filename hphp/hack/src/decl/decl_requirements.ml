@@ -49,11 +49,11 @@ let flatten_parent_class_reqs env class_cache shallow_class acc parent_ty =
     | Ast_defs.Cclass _ ->
       (* not necessary to accumulate req_ancestors_extends for classes --
        * it's not used *)
-      (req_ancestors, SSet.empty)
+      (req_ancestors, S_set.empty)
     | Ast_defs.Ctrait
     | Ast_defs.Cinterface ->
       let req_ancestors_extends =
-        SSet.union parent_type.dc_req_ancestors_extends req_ancestors_extends
+        S_set.union parent_type.dc_req_ancestors_extends req_ancestors_extends
       in
       (req_ancestors, req_ancestors_extends)
     | Ast_defs.Cenum
@@ -71,7 +71,7 @@ let declared_class_req env class_cache acc req_ty =
       env
       req_name
   in
-  let req_extends = SSet.add req_name req_extends in
+  let req_extends = S_set.add req_name req_extends in
   (* since the req is declared on this class, we should
    * emphatically *not* substitute: a require extends Foo<T> is
    * going to be this class's <T> *)
@@ -82,14 +82,14 @@ let declared_class_req env class_cache acc req_ty =
     (requirements, req_extends)
   | Some parent_type ->
     (* The parent class lives in Hack *)
-    let req_extends = SSet.union parent_type.dc_extends req_extends in
-    let req_extends = SSet.union parent_type.dc_xhp_attr_deps req_extends in
+    let req_extends = S_set.union parent_type.dc_extends req_extends in
+    let req_extends = S_set.union parent_type.dc_xhp_attr_deps req_extends in
     (* the req may be of an interface that has reqs of its own; the
      * flattened ancestry required by *those* reqs need to be added
      * in to, e.g., interpret accesses to protected functions inside
      * traits *)
     let req_extends =
-      SSet.union parent_type.dc_req_ancestors_extends req_extends
+      S_set.union parent_type.dc_req_ancestors_extends req_extends
     in
     (requirements, req_extends)
 
@@ -177,7 +177,7 @@ let naive_dedup req_extends =
       | _ -> Some (parent_pos, ty))
 
 let get_class_requirements env class_cache shallow_class =
-  let acc = ([], SSet.empty) in
+  let acc = ([], S_set.empty) in
   let acc =
     List.fold_left
       ~f:(declared_class_req env class_cache)

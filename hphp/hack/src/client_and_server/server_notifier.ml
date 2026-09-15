@@ -11,9 +11,9 @@ open Hh_prelude
 type changes =
   | Unavailable
       (** e.g. because DFind is not available, or watchman subscription is down *)
-  | SyncChanges of SSet.t
+  | SyncChanges of S_set.t
       (** contains all changes up to the point that the notifier was invoked *)
-  | AsyncChanges of SSet.t
+  | AsyncChanges of S_set.t
       (** contains some of the changes up to the point that the notifier was invoked,
           but there may be more pending changes that have not been included *)
 
@@ -69,7 +69,7 @@ type t =
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
-      get_changes_sync: unit -> SSet.t;
+      get_changes_sync: unit -> S_set.t;
     }
 
 type indexer = (string -> bool) -> unit -> string list
@@ -263,13 +263,13 @@ let init
   (notifier, indexer notifier)
 
 let init_mock
-    ~(get_changes_async : unit -> changes) ~(get_changes_sync : unit -> SSet.t)
+    ~(get_changes_async : unit -> changes) ~(get_changes_sync : unit -> S_set.t)
     : t =
   MockChanges { get_changes_async; get_changes_sync }
 
 let init_null () : t =
-  let f () = SyncChanges SSet.empty in
-  let g () = SSet.empty in
+  let f () = SyncChanges S_set.empty in
+  let g () = S_set.empty in
   init_mock ~get_changes_async:f ~get_changes_sync:g
 
 let wait_until_ready (t : t) : unit =
@@ -296,7 +296,7 @@ let wait_until_ready (t : t) : unit =
 let convert_watchman_changes
     ~(root : Path.t)
     ~(local_config : Server_local_config.t)
-    (watchman_changes : Watchman.pushed_changes) : SSet.t =
+    (watchman_changes : Watchman.pushed_changes) : S_set.t =
   match watchman_changes with
   | Watchman.Changed_merge_base _ ->
     let () =
@@ -306,13 +306,13 @@ let convert_watchman_changes
   | Watchman.State_enter (name, _metadata) ->
     if local_config.Server_local_config.hg_aware then
       Server_revision_tracker.Watchman.on_state_enter name;
-    SSet.empty
+    S_set.empty
   | Watchman.State_leave (name, metadata) ->
     if local_config.Server_local_config.hg_aware then
       Server_revision_tracker.Watchman.on_state_leave root name metadata;
-    SSet.empty
+    S_set.empty
   | Watchman.Files_changed changes ->
-    Server_revision_tracker.files_changed local_config (SSet.cardinal changes);
+    Server_revision_tracker.files_changed local_config (S_set.cardinal changes);
     changes
 
 (** Helper to find the earliest translated_at timestamp. The resulting age is added to [telemetry].
@@ -338,7 +338,7 @@ let eden_add_oldest_change_age_telemetry
   | None -> telemetry
 
 let convert_edenfs_watcher_changes
-    local_config root (eden_changes : Edenfs_watcher_types.changes) : SSet.t =
+    local_config root (eden_changes : Edenfs_watcher_types.changes) : S_set.t =
   let state_tracking =
     local_config.Server_local_config.edenfs_file_watcher.state_tracking
   in
@@ -351,31 +351,31 @@ let convert_edenfs_watcher_changes
         Server_revision_tracker.Edenfs_watcher.on_commit_transition
           root
           to_commit;
-      SSet.of_list file_changes
+      S_set.of_list file_changes
     | Edenfs_watcher_types.FileChanges { files; _ } ->
       (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
          similarly to what convert_watchman_changes does *)
-      SSet.of_list files
+      S_set.of_list files
     | Edenfs_watcher_types.StateEnter name ->
       Hh_logger.debug "ServerNotifier: StateEnter(%s)" name;
       if state_tracking && local_config.Server_local_config.hg_aware then
         Server_revision_tracker.Edenfs_watcher.on_state_enter name;
-      SSet.empty
+      S_set.empty
     | Edenfs_watcher_types.StateLeave name ->
       Hh_logger.debug "ServerNotifier: StateLeave(%s)" name;
       if state_tracking && local_config.Server_local_config.hg_aware then
         Server_revision_tracker.Edenfs_watcher.on_state_leave root name;
-      SSet.empty
+      S_set.empty
   in
   Server_revision_tracker.files_changed
     local_config
-    (SSet.cardinal changed_files);
+    (S_set.cardinal changed_files);
   changed_files
 
-let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
+let get_changes_sync (t : t) telemetry : S_set.t * clock option * Telemetry.t =
   let (changes, new_clock, telemetry) =
     match t with
-    | IndexOnly _ -> (SSet.empty, None, telemetry)
+    | IndexOnly _ -> (S_set.empty, None, telemetry)
     | MockChanges { get_changes_sync; _ } ->
       (get_changes_sync (), None, telemetry)
     | Dfind { dfind; _ } ->
@@ -404,8 +404,8 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
       in
       watchman := watchman';
       let changes =
-        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-            SSet.union acc (convert_watchman_changes ~root ~local_config c))
+        List.fold_left changes ~init:S_set.empty ~f:(fun acc c ->
+            S_set.union acc (convert_watchman_changes ~root ~local_config c))
       in
       let clock = Watchman.get_clock !watchman in
       (changes, Some (Server_notifier_types.Watchman clock), telemetry)
@@ -430,22 +430,22 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
       in
       let telemetry = eden_add_oldest_change_age_telemetry changes telemetry in
       let changes_set =
-        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-            SSet.union acc (convert_edenfs_watcher_changes local_config root c))
+        List.fold_left changes ~init:S_set.empty ~f:(fun acc c ->
+            S_set.union acc (convert_edenfs_watcher_changes local_config root c))
       in
-      if not (SSet.is_empty changes_set) then last_clock := new_clock;
+      if not (S_set.is_empty changes_set) then last_clock := new_clock;
       (changes_set, Some (Server_notifier_types.Eden !last_clock), telemetry)
   in
 
   if
     Hh_logger.Level.passes_min_level Hh_logger.Level.Debug
-    && not (SSet.is_empty changes)
+    && not (S_set.is_empty changes)
   then begin
     Hh_logger.log
       ~lvl:Hh_logger.Level.Debug
       "ServerNotifier.get_changes_sync got %d changes"
-      (SSet.cardinal changes);
-    SSet.iter
+      (S_set.cardinal changes);
+    S_set.iter
       (fun file ->
         Hh_logger.log
           ~lvl:Hh_logger.Level.Debug
@@ -458,7 +458,7 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
 let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
   let (changes, new_clock, telemetry) =
     match t with
-    | IndexOnly _ -> (SyncChanges SSet.empty, None, telemetry)
+    | IndexOnly _ -> (SyncChanges S_set.empty, None, telemetry)
     | MockChanges { get_changes_async; _ } ->
       (get_changes_async (), None, telemetry)
     | Dfind _ ->
@@ -478,8 +478,8 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
           AsyncChanges (convert_watchman_changes ~root ~local_config changes)
         | Watchman.Watchman_synchronous changes ->
           let accumulated_changes =
-            List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-                SSet.union acc (convert_watchman_changes ~root ~local_config c))
+            List.fold_left changes ~init:S_set.empty ~f:(fun acc c ->
+                S_set.union acc (convert_watchman_changes ~root ~local_config c))
           in
           SyncChanges accumulated_changes
       in
@@ -507,27 +507,27 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
       in
       let telemetry = eden_add_oldest_change_age_telemetry changes telemetry in
       let changes_set =
-        List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-            SSet.union acc (convert_edenfs_watcher_changes local_config root c))
+        List.fold_left changes ~init:S_set.empty ~f:(fun acc c ->
+            S_set.union acc (convert_edenfs_watcher_changes local_config root c))
       in
-      if not (SSet.is_empty changes_set) then last_clock := new_clock;
+      if not (S_set.is_empty changes_set) then last_clock := new_clock;
       (AsyncChanges changes_set, Some (Eden !last_clock), telemetry)
   in
 
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin
     let change_set =
       match changes with
-      | Unavailable -> SSet.empty
+      | Unavailable -> S_set.empty
       | AsyncChanges set
       | SyncChanges set ->
         set
     in
-    if not (SSet.is_empty change_set) then begin
+    if not (S_set.is_empty change_set) then begin
       Hh_logger.log
         ~lvl:Hh_logger.Level.Debug
         "ServerNotifier.get_changes_async got %d changes"
-        (SSet.cardinal change_set);
-      SSet.iter
+        (S_set.cardinal change_set);
+      S_set.iter
         (fun file ->
           Hh_logger.log
             ~lvl:Hh_logger.Level.Debug

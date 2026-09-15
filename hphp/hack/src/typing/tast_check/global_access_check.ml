@@ -63,7 +63,7 @@ let raise_global_access_error
       "possibly written via function call."
     | GlobalAccessCheck.DefiniteGlobalRead -> "definitely read."
   in
-  let global_vars_str = String.concat ~sep:";" (SSet.elements global_set) in
+  let global_vars_str = String.concat ~sep:";" (S_set.elements global_set) in
   let print_pattern p =
     match p with
     | NoPattern -> None
@@ -137,14 +137,14 @@ let get_patterns_from_written_data_srcs srcs =
     GlobalAccessPatternSet.empty
 
 (* The set of safe/non-sensitive functions or classes *)
-let safe_func_ids = SSet.of_list ["\\microtime"; "\\FlibSL\\PHP\\microtime"]
+let safe_func_ids = S_set.of_list ["\\microtime"; "\\FlibSL\\PHP\\microtime"]
 
-let safe_class_ids = SSet.of_list ["\\Time"]
+let safe_class_ids = S_set.of_list ["\\Time"]
 
 (* The set of functions whose return value's data sources are
    the union of the data sources of all its parameters. *)
 let src_from_para_func_ids =
-  SSet.of_list
+  S_set.of_list
     [
       "\\FlibSL\\Dict\\merge";
       "\\HH\\Lib\\Dict\\merge";
@@ -154,20 +154,20 @@ let src_from_para_func_ids =
 
 (* Functions whose return value is from only its first parameter. *)
 let src_from_first_para_func_ids =
-  SSet.of_list
+  S_set.of_list
     ["\\HH\\idx"; "\\FlibSL\\Dict\\filter_keys"; "\\HH\\Lib\\Dict\\filter_keys"]
 
 (* Functions that check if its first parameter is not null. *)
 let check_non_null_func_ids =
-  SSet.of_list ["\\FlibSL\\C\\contains_key"; "\\HH\\Lib\\C\\contains_key"]
+  S_set.of_list ["\\FlibSL\\C\\contains_key"; "\\HH\\Lib\\C\\contains_key"]
 
 (* The type to represent the super global classes under www/flib/core/superglobals. *)
 type super_global_class_detail = {
   (* global_variable is None if the corresponding super global variable is not fixed,
      but is given as the parameter of get/set methods, e.g. in GlobalVARIABLES. *)
   global_variable: string option;
-  global_write_methods: SSet.t;
-  global_read_methods: SSet.t;
+  global_write_methods: S_set.t;
+  global_read_methods: S_set.t;
 }
 
 (* Map from super global class names to the corresponding details. *)
@@ -178,14 +178,14 @@ let super_global_class_map : super_global_class_detail S_map.t =
         {
           global_variable = Some "$_COOKIE";
           global_write_methods =
-            SSet.of_list
+            S_set.of_list
               [
                 "redactCookieSuperglobal";
                 "overrideCookieSuperglobalForEmulation";
                 "setForCookieMonsterInternalTest";
               ];
           global_read_methods =
-            SSet.of_list
+            S_set.of_list
               [
                 "getInitialKeys";
                 "getCopy_COOKIE_MONSTER_INTERNAL_ONLY";
@@ -195,53 +195,53 @@ let super_global_class_map : super_global_class_detail S_map.t =
       ( "\\GlobalENV",
         {
           global_variable = Some "$_ENV";
-          global_write_methods = SSet.of_list ["set_ENV_DO_NOT_USE"; "set"];
+          global_write_methods = S_set.of_list ["set_ENV_DO_NOT_USE"; "set"];
           global_read_methods =
-            SSet.of_list
+            S_set.of_list
               ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
         } );
       ( "\\GlobalFILES",
         {
           global_variable = Some "$_FILES";
-          global_write_methods = SSet.of_list ["set_FILES_DO_NOT_USE"; "set"];
+          global_write_methods = S_set.of_list ["set_FILES_DO_NOT_USE"; "set"];
           global_read_methods =
-            SSet.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
+            S_set.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
         } );
       ( "\\GlobalGET",
         {
           global_variable = Some "$_GET";
-          global_write_methods = SSet.of_list ["set_GET_DO_NOT_USE"; "set"];
+          global_write_methods = S_set.of_list ["set_GET_DO_NOT_USE"; "set"];
           global_read_methods =
-            SSet.of_list
+            S_set.of_list
               ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
         } );
       ( "\\GlobalPOST",
         {
           global_variable = Some "$_POST";
-          global_write_methods = SSet.of_list ["set_POST_DO_NOT_USE"; "set"];
+          global_write_methods = S_set.of_list ["set_POST_DO_NOT_USE"; "set"];
           global_read_methods =
-            SSet.of_list
+            S_set.of_list
               ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
         } );
       ( "\\GlobalREQUEST",
         {
           global_variable = Some "$_REQUEST";
           global_write_methods =
-            SSet.of_list
+            S_set.of_list
               [
                 "set_REQUEST_DO_NOT_USE";
                 "set";
                 "redactCookiesFromRequestSuperglobal";
               ];
           global_read_methods =
-            SSet.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
+            S_set.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
         } );
       ( "\\GlobalSERVER",
         {
           global_variable = Some "$_SERVER";
-          global_write_methods = SSet.of_list ["set_SERVER_DO_NOT_USE"; "set"];
+          global_write_methods = S_set.of_list ["set_SERVER_DO_NOT_USE"; "set"];
           global_read_methods =
-            SSet.of_list
+            S_set.of_list
               [
                 "getCopy_DO_NOT_USE";
                 "getDocumentRoot";
@@ -285,9 +285,9 @@ let super_global_class_map : super_global_class_detail S_map.t =
         {
           (* The global variable is not fixed but given as the methods's parameter. *)
           global_variable = None;
-          global_write_methods = SSet.of_list ["set"];
+          global_write_methods = S_set.of_list ["set"];
           global_read_methods =
-            SSet.of_list ["idxReadonly"; "idx"; "get"; "getReadonly"];
+            S_set.of_list ["idxReadonly"; "idx"; "get"; "getReadonly"];
         } );
     ]
 
@@ -309,9 +309,9 @@ let check_super_global_method expr env external_fun_name =
     | Some class_detail ->
       (* Check if the method is write or read or not recognized. *)
       let error_code_pattern_opt =
-        if SSet.mem method_name class_detail.global_write_methods then
+        if S_set.mem method_name class_detail.global_write_methods then
           Some (GlobalAccessCheck.DefiniteGlobalWrite, SuperGlobalWrite)
-        else if SSet.mem method_name class_detail.global_read_methods then
+        else if S_set.mem method_name class_detail.global_read_methods then
           Some (GlobalAccessCheck.DefiniteGlobalRead, SuperGlobalRead)
         else
           None
@@ -339,7 +339,7 @@ let check_super_global_method expr env external_fun_name =
           pos
           external_fun_name
           ("superglobal " ^ func_ty_str)
-          (SSet.singleton global_var_name)
+          (S_set.singleton global_var_name)
           (GlobalAccessPatternSet.singleton pattern)
           error_code;
         true
@@ -364,13 +364,13 @@ let check_super_global_method expr env external_fun_name =
    the assignment to Foo::$bar shall be identified as a singleton. *)
 type ctx = {
   var_data_src_tbl: (string, DataSourceSet.t) Hashtbl.t ref;
-  null_global_var_set: SSet.t ref;
+  null_global_var_set: S_set.t ref;
 }
 
 let current_ctx =
   {
     var_data_src_tbl = ref (Hashtbl.create 0);
-    null_global_var_set = ref SSet.empty;
+    null_global_var_set = ref S_set.empty;
   }
 
 (* Add the key (a variable name) and the value (a set of data srcs) to the table. *)
@@ -397,7 +397,7 @@ let get_tbl_total_cardinal tbl =
     tbl
     0
 
-let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
+let rec grab_class_elts_from_ty ~static ?(seen = S_set.empty) env ty prop_id =
   let open Typing_defs in
   (* Given a list of types, find recurse on the first type that
      has the property and return the result *)
@@ -442,10 +442,10 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
      where we find the first prop that works from the upper bounds *)
   | Tgeneric name ->
     (* Avoid circular generics with a set *)
-    if SSet.mem name seen then
+    if S_set.mem name seen then
       []
     else
-      let new_seen = SSet.add name seen in
+      let new_seen = S_set.add name seen in
       let upper_bounds = Tast_env.get_upper_bounds env name in
       find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
       |> Option.value ~default:[]
@@ -537,7 +537,7 @@ let is_value_collection_ty (env : Tast_env.env) ty =
    if so, then it is OK to write to this variable.
    Copied from is_safe_mut_ty in readonly_check.ml.
    To do: check if any change is needed for the global write checker. *)
-let rec has_no_object_ref_ty env (seen : SSet.t) ty =
+let rec has_no_object_ref_ty env (seen : S_set.t) ty =
   let open Typing_defs_core in
   let (env, ty) = Tast_env.expand_type env ty in
   let ty = Tast_env.strip_dynamic env ty in
@@ -572,10 +572,10 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     List.for_all tyl ~f:(fun l -> has_no_object_ref_ty env seen l)
   | Tgeneric name ->
     (* Avoid circular generics with a set *)
-    if SSet.mem name seen then
+    if S_set.mem name seen then
       false
     else
-      let new_seen = SSet.add name seen in
+      let new_seen = S_set.add name seen in
       let upper_bounds = Tast_env.get_upper_bounds env name in
       Typing_set.exists
         (fun l -> has_no_object_ref_ty env new_seen l)
@@ -603,7 +603,7 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
 
 (* Get all possible data sources for the given expression. *)
 let rec get_data_srcs_from_expr env ctx (tp, _, te) =
-  let is_immutable_ty = has_no_object_ref_ty env SSet.empty tp in
+  let is_immutable_ty = has_no_object_ref_ty env S_set.empty tp in
   let convert_ref_to_val srcs =
     DataSourceSet.map
       (fun src ->
@@ -665,15 +665,15 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
          for some special function (i.e. idx), the data source of its return
          is assumed to be the same as its first parameter. *)
       (match func_expr with
-      | Id (_, func_id) when SSet.mem func_id src_from_first_para_func_ids ->
+      | Id (_, func_id) when S_set.mem func_id src_from_first_para_func_ids ->
         (match args with
         | para_expr :: _ ->
           get_data_srcs_from_expr env ctx (Aast_utils.arg_to_expr para_expr)
         | [] -> DataSourceSet.singleton Unknown)
       | Id (_, func_id) ->
-        if SSet.mem func_id safe_func_ids then
+        if S_set.mem func_id safe_func_ids then
           DataSourceSet.singleton NonSensitive
-        else if SSet.mem func_id src_from_para_func_ids then
+        else if S_set.mem func_id src_from_para_func_ids then
           List.fold
             args
             ~init:DataSourceSet.empty
@@ -690,7 +690,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
         (* A static method call is safe if the class name is in "safe_class_ids",
            or it starts with "SV_" (i.e. it's a site var). *)
         let is_class_safe =
-          SSet.mem class_name safe_class_ids
+          S_set.mem class_name safe_class_ids
           || Stdlib.String.starts_with ~prefix:"\\SV_" class_name
         in
         if is_class_safe then
@@ -798,15 +798,15 @@ let get_global_vars_from_expr ?(include_immutable = true) env ctx expr =
   else
     Some
       (DataSourceSet.fold
-         (fun src s -> SSet.add (print_src src) s)
+         (fun src s -> S_set.add (print_src src) s)
          global_srcs
-         SSet.empty)
+         S_set.empty)
 
 (* Given an expression that appears on LHS of an assignment,
    this method gets the set of variables whose value may be assigned. *)
 let rec get_vars_in_expr vars (_, _, te) =
   match te with
-  | Lvar (_, id) -> vars := SSet.add (Local_id.to_string id) !vars
+  | Lvar (_, id) -> vars := S_set.add (Local_id.to_string id) !vars
   | Obj_get (e, _, _, Is_prop) -> get_vars_in_expr vars e
   | Array_get (e, _) -> get_vars_in_expr vars e
   | ReadonlyExpr e -> get_vars_in_expr vars e
@@ -833,12 +833,12 @@ let visitor =
 
     method! on_method_ (env, (ctx, fun_name)) m =
       Hashtbl.clear !(ctx.var_data_src_tbl);
-      ctx.null_global_var_set := SSet.empty;
+      ctx.null_global_var_set := S_set.empty;
       super#on_method_ (env, (ctx, fun_name)) m
 
     method! on_fun_def (env, (ctx, fun_name)) f =
       Hashtbl.clear !(ctx.var_data_src_tbl);
-      ctx.null_global_var_set := SSet.empty;
+      ctx.null_global_var_set := S_set.empty;
       super#on_fun_def (env, (ctx, fun_name)) f
 
     method! on_fun_ (env, (ctx, fun_name)) f =
@@ -878,7 +878,7 @@ let visitor =
           | Unop
               ( Ast_defs.Unot,
                 (_, _, Call { func = (_, _, Id (_, func_id)); args; _ }) )
-            when SSet.mem func_id check_non_null_func_ids ->
+            when S_set.mem func_id check_non_null_func_ids ->
             (match args with
             | [] -> None
             | para_expr :: _ -> Some (Aast_utils.arg_to_expr para_expr, true))
@@ -895,7 +895,7 @@ let visitor =
           (* For the condition of format "C\contains_key(expr, $key)" where expr shall be a
              dictionary, return expr and false (i.e. else branch). *)
           | Call { func = (_, _, Id (_, func_id)); args; _ }
-            when SSet.mem func_id check_non_null_func_ids ->
+            when S_set.mem func_id check_non_null_func_ids ->
             (match args with
             | [] -> None
             | para_expr :: _ -> Some (Aast_utils.arg_to_expr para_expr, false))
@@ -913,10 +913,10 @@ let visitor =
             | (None, _) -> ()
             | (Some vars, true) ->
               ctx.null_global_var_set :=
-                SSet.union !(ctx.null_global_var_set) vars
+                S_set.union !(ctx.null_global_var_set) vars
             | (Some vars, false) ->
               ctx_else_branch.null_global_var_set :=
-                SSet.union !(ctx_else_branch.null_global_var_set) vars)
+                S_set.union !(ctx_else_branch.null_global_var_set) vars)
         in
         (* Check the condition expression and report global reads/writes if any.
            For example, a global read is reported if a global varialbe is directly used;
@@ -1000,7 +1000,7 @@ let visitor =
             p
             fun_name
             ty_str
-            (SSet.singleton expr_str)
+            (S_set.singleton expr_str)
             (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
       | Call { func = (func_ty, _, _) as func_expr; args; _ } ->
@@ -1015,7 +1015,7 @@ let visitor =
               p
               fun_name
               func_ty_str
-              (SSet.singleton memoized_func_name)
+              (S_set.singleton memoized_func_name)
               (GlobalAccessPatternSet.singleton NoPattern)
               GlobalAccessCheck.DefiniteGlobalRead
           | None -> ());
@@ -1070,8 +1070,8 @@ let visitor =
           | (Some _, Some Ast_defs.QuestionQuestion) -> singleton_or_caching
           | (Some le_global, _) ->
             if
-              SSet.exists
-                (fun v -> SSet.mem v !(ctx.null_global_var_set))
+              S_set.exists
+                (fun v -> S_set.mem v !(ctx.null_global_var_set))
                 le_global
             then
               singleton_or_caching
@@ -1091,7 +1091,7 @@ let visitor =
             (GlobalAccessPatternSet.add le_pattern re_patterns)
             GlobalAccessCheck.DefiniteGlobalWrite
         else
-          let vars_in_le = ref SSet.empty in
+          let vars_in_le = ref S_set.empty in
           let () = get_vars_in_expr vars_in_le lhs in
           if has_global_write_access lhs then (
             if Option.is_some le_global_opt then
@@ -1102,12 +1102,12 @@ let visitor =
                 (Option.get le_global_opt)
                 (GlobalAccessPatternSet.add le_pattern re_patterns)
                 GlobalAccessCheck.PossibleGlobalWriteViaReference;
-            SSet.iter
+            S_set.iter
               (fun v ->
                 add_var_data_srcs_to_tbl !(ctx.var_data_src_tbl) v re_data_srcs)
               !vars_in_le
           ) else
-            SSet.iter
+            S_set.iter
               (fun v ->
                 replace_var_data_srcs_in_tbl
                   !(ctx.var_data_src_tbl)

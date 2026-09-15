@@ -13,7 +13,7 @@ type value =
   | Bool of bool
   | Atom of string
   | List of value list
-  | Set of SSet.t
+  | Set of S_set.t
   | Map of value S_map.t
   | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop

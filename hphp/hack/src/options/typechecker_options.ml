@@ -16,10 +16,10 @@ let num_local_workers t = t.Global_options.tco_num_local_workers
 let language_feature_logging t = t.Global_options.tco_language_feature_logging
 
 let legacy_experimental_feature_enabled t feature =
-  SSet.mem feature t.Global_options.tco_legacy_experimental_features
+  S_set.mem feature t.Global_options.tco_legacy_experimental_features
 
 let migration_flag_enabled t flag =
-  SSet.mem flag t.Global_options.tco_migration_flags
+  S_set.mem flag t.Global_options.tco_migration_flags
 
 let log_inference_constraints t = t.Global_options.tco_log_inference_constraints
 
@@ -40,8 +40,8 @@ let experimental_try_constraint_method_inference =
 
 let experimental_all =
   List.fold_right
-    ~f:SSet.add
-    ~init:SSet.empty
+    ~f:S_set.add
+    ~init:S_set.empty
     [
       experimental_supportdynamic_type_hint;
       experimental_consider_type_const_enforceable;
@@ -49,7 +49,7 @@ let experimental_all =
       experimental_try_constraint_method_inference;
     ]
 
-let migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
+let migration_flags_all = List.fold_right ~init:S_set.empty ~f:S_set.add []
 
 let timeout t = t.Global_options.tco_timeout
 
@@ -71,7 +71,7 @@ let disable_rust_provider_shallow_decl_invalidation t =
 let populate_member_heaps t = t.Global_options.tco_populate_member_heaps
 
 let enable_legacy_experimental t feature =
-  SSet.add feature t.Global_options.tco_legacy_experimental_features
+  S_set.add feature t.Global_options.tco_legacy_experimental_features
 
 let skip_hierarchy_checks t = t.Global_options.tco_skip_hierarchy_checks
 
@@ -309,7 +309,7 @@ let enable_recursive_case_types t =
   { t with Global_options.recursive_case_types = true }
 
 let is_unstable_feature_enabled t name =
-  SSet.mem name t.Global_options.tco_enabled_unstable_features
+  S_set.mem name t.Global_options.tco_enabled_unstable_features
   ||
   match S_map.find_opt name t.Global_options.po.experimental_features with
   | Some OngoingRelease -> true

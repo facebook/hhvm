@@ -45,9 +45,9 @@ module type Set = sig
 
   val show : t -> string
 
-  val to_sset_TRANSITIONAL : t -> SSet.t
+  val to_sset_TRANSITIONAL : t -> S_set.t
 
-  val of_sset_TRANSITIONAL : SSet.t -> t
+  val of_sset_TRANSITIONAL : S_set.t -> t
 end
 
 (*****************************************************************************)
@@ -93,7 +93,7 @@ module I_Impl = struct
   let of_string_TRANSITIONAL (t : string) : t = t
 end
 
-(** [Set_Impl] implements an opaque set, via a SSet *)
+(** [Set_Impl] implements an opaque set, via a S_set *)
 module Set_Impl = struct
   include Stdlib.Set.Make (String_key)
 
@@ -111,9 +111,9 @@ module Set_Impl = struct
 
   let show (x : t) : string = Format.asprintf "%a" pp x
 
-  let to_sset_TRANSITIONAL (t : t) : SSet.t = t
+  let to_sset_TRANSITIONAL (t : t) : S_set.t = t
 
-  let of_sset_TRANSITIONAL (ss : SSet.t) : t = ss
+  let of_sset_TRANSITIONAL (ss : S_set.t) : t = ss
 end
 
 (*****************************************************************************)

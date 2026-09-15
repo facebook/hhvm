@@ -18,24 +18,24 @@ let invalidate_shallow_decls symbols local_memory =
     local_memory
   in
   let open Provider_backend.Decl_cache_entry in
-  SSet.iter
+  S_set.iter
     (fun name ->
       Provider_backend.Decl_cache.remove decl_cache ~key:(Fun_decl name))
     n_funs;
-  SSet.iter
+  S_set.iter
     (fun name ->
       Provider_backend.Decl_cache.remove decl_cache ~key:(Gconst_decl name))
     n_consts;
-  SSet.iter
+  S_set.iter
     (fun name ->
       Provider_backend.Decl_cache.remove decl_cache ~key:(Typedef_decl name))
     n_types;
-  SSet.iter
+  S_set.iter
     (fun name ->
       Provider_backend.Decl_cache.remove decl_cache ~key:(Module_decl name))
     n_modules;
   let open Provider_backend.Shallow_decl_cache_entry in
-  SSet.iter
+  S_set.iter
     (fun name ->
       Provider_backend.Shallow_decl_cache.remove
         shallow_decl_cache
@@ -80,7 +80,7 @@ let combine_old_and_new_symbols (changes : File_info.change list) :
     File_info.names =
   (* Helper for merging [File_info.ids] list-of-ids into [File_info.names] set-of-names *)
   let merge_ids (acc : File_info.names) (change : File_info.ids) =
-    let f set id = SSet.add id.File_info.name set in
+    let f set id = S_set.add id.File_info.name set in
     let open File_info in
     {
       n_funs = List.fold change.funs ~init:acc.n_funs ~f;
@@ -100,11 +100,11 @@ let combine_old_and_new_symbols (changes : File_info.change list) :
 
 let resolve_deps
     (dep_table : (Typing_deps.Dep.t, string) Stdlib.Hashtbl.t)
-    (deps : Typing_deps.DepSet.t) : SSet.t =
-  Typing_deps.DepSet.fold deps ~init:SSet.empty ~f:(fun dep set ->
+    (deps : Typing_deps.DepSet.t) : S_set.t =
+  Typing_deps.DepSet.fold deps ~init:S_set.empty ~f:(fun dep set ->
       match Stdlib.Hashtbl.find_opt dep_table dep with
       | None -> set
-      | Some name -> SSet.add name set)
+      | Some name -> S_set.add name set)
 
 (** Optimised folded decl invalidation using the dependency graph.
     This will flush the dependency edges before querying the graph. *)
@@ -115,7 +115,7 @@ let invalidate_folded_decls_flush_deps
   let deps_mode = Provider_context.get_deps_mode ctx in
   Typing_deps.flush_deps deps_mode;
   let classes_depset =
-    SSet.fold
+    S_set.fold
       (fun class_name set ->
         Typing_deps.DepSet.add
           set
@@ -129,7 +129,7 @@ let invalidate_folded_decls_flush_deps
   let to_invalidate_class_names =
     resolve_deps local_memory.Provider_backend.dep_table to_invalidate_depset
   in
-  SSet.iter (remove_folded_decl local_memory) to_invalidate_class_names;
+  S_set.iter (remove_folded_decl local_memory) to_invalidate_class_names;
   ()
 
 let invalidate_upon_file_changes

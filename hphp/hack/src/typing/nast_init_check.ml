@@ -20,41 +20,41 @@ module Native = Typing_native
 module SSetWTop = struct
   type t =
     | Top
-    | Set of SSet.t
+    | Set of S_set.t
 
   let union s1 s2 =
     match (s1, s2) with
     | (Top, _)
     | (_, Top) ->
       Top
-    | (Set s1, Set s2) -> Set (SSet.union s1 s2)
+    | (Set s1, Set s2) -> Set (S_set.union s1 s2)
 
   let inter s1 s2 =
     match (s1, s2) with
     | (Top, s)
     | (s, Top) ->
       s
-    | (Set s1, Set s2) -> Set (SSet.inter s1 s2)
+    | (Set s1, Set s2) -> Set (S_set.inter s1 s2)
 
   let inter_list (sl : t list) = List.fold_left ~f:inter ~init:Top sl
 
   let add x s =
     match s with
     | Top -> Top
-    | Set s -> Set (SSet.add x s)
+    | Set s -> Set (S_set.add x s)
 
   let mem x s =
     match s with
     | Top -> true
-    | Set s -> SSet.mem x s
+    | Set s -> S_set.mem x s
 
-  let empty = Set SSet.empty
+  let empty = Set S_set.empty
 end
 
 let parent_init_prop = "parent::" ^ SN.Members.__construct
 
 let lookup_props env class_name props =
-  SSet.fold
+  S_set.fold
     begin
       fun name map ->
         let ty_opt =
@@ -112,7 +112,7 @@ let filter_props_by_type env cls props =
   lookup_props env cls props
   |> S_map.filter (fun _ ty -> not (type_does_not_require_init env ty))
   |> S_map.keys
-  |> SSet.of_list
+  |> S_set.of_list
 
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
@@ -138,8 +138,8 @@ module Env = struct
     methods: method_status ref S_map.t;
     props: Typing_defs.decl_ty option S_map.t;
     tenv: Typing_env_types.env;
-    parent_cstr_props: SSet.t;
-    init_not_required_props: SSet.t;
+    parent_cstr_props: S_set.t;
+    init_not_required_props: S_set.t;
   }
 
   let rec make tenv c =
@@ -179,7 +179,7 @@ module Env = struct
       | None -> false
     in
     let (private_props, _) =
-      (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
+      (DICheck.private_deferred_init_props ~has_own_cstr c, S_set.empty)
     in
     let private_props = lookup_props tenv (snd c.c_name) private_props in
     (if Ast_defs.is_c_abstract c.c_kind && not has_own_cstr then
@@ -209,9 +209,9 @@ module Env = struct
         DICheck.parent_initialized_members ~get_class_add_dep decl_env c
         |> filter_props_by_type tenv (snd c.c_name) )
     in
-    let init_not_required_props = add_init_not_required_props SSet.empty in
+    let init_not_required_props = add_init_not_required_props S_set.empty in
     let props =
-      SSet.empty
+      S_set.empty
       |> DICheck.own_props c
       (* If we define our own constructor, we need to pretend any traits we use
        * did *not* define a constructor, because they are not reachable through
@@ -524,7 +524,7 @@ and expr_ env acc p e =
     if
       S_map.mem vx env.props
       && (not (S.mem vx acc))
-      && not (SSet.mem vx env.init_not_required_props)
+      && not (S_set.mem vx env.init_not_required_props)
     then (
       let (pos, member_name) = v in
       Diagnostics.add_diagnostic
@@ -532,8 +532,8 @@ and expr_ env acc p e =
           to_user_diagnostic @@ Read_before_write { pos; member_name });
       acc
     ) else if
-        SSet.mem vx env.parent_cstr_props
-        && (not (SSet.mem vx env.init_not_required_props))
+        S_set.mem vx env.parent_cstr_props
+        && (not (S_set.mem vx env.init_not_required_props))
         && (not (S.mem vx acc))
         && not (S.mem parent_init_prop acc)
       then (
@@ -757,7 +757,7 @@ let class_ tenv c =
     let inits = constructor env c_constructor in
     let check_inits inits =
       let uninit_props =
-        S_map.filter (fun k _ -> not (SSet.mem k inits)) env.props
+        S_map.filter (fun k _ -> not (S_set.mem k inits)) env.props
       in
       if not (S_map.is_empty uninit_props) then
         if S_map.mem DICheck.parent_init_prop uninit_props then
@@ -766,7 +766,7 @@ let class_ tenv c =
         else
           let class_uninit_props =
             S_map.filter
-              (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
+              (fun prop _ -> not (S_set.mem prop env.init_not_required_props))
               uninit_props
           in
           if (not (S_map.is_empty class_uninit_props)) && not is_hhi then

@@ -22,8 +22,8 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
   let tracked =
     List.fold_left
       tparams
-      ~f:(fun tracked t -> SSet.add (snd t.tp_name) tracked)
-      ~init:SSet.empty
+      ~f:(fun tracked t -> S_set.add (snd t.tp_name) tracked)
+      ~init:S_set.empty
   in
   let (positive, negative) =
     let Equal = Tast_env.eq_typing_env in
@@ -49,7 +49,7 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
         (* Don't track generics that are mentioned in an <<__Overlapping>> attribute *)
         && not
              (match overlapping with
-             | Some s -> SSet.mem name s
+             | Some s -> S_set.mem name s
              | None -> false)
       then
         let super_bounds =

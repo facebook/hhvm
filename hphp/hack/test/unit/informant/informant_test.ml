@@ -41,7 +41,7 @@ let basic_setup_rev_5_and_200_and_start_informant_watchman temp_dir =
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
-    (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
+    (Watchman.Watchman_pushed (Watchman.Files_changed S_set.empty));
   let informant =
     Informant.init
       {

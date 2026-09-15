@@ -89,10 +89,10 @@ let load_saved_state_exn
   in
   (old_naming_table, { old_errors; old_warnings })
 
-let get_hot_classes (filename : string) : SSet.t =
+let get_hot_classes (filename : string) : S_set.t =
   if not (Disk.file_exists filename) then (
     Hh_logger.log "Hot classes file '%s' was not found" filename;
-    SSet.empty
+    S_set.empty
   ) else
     Disk.cat filename
     |> Yojson.Safe.from_string
@@ -101,7 +101,7 @@ let get_hot_classes (filename : string) : SSet.t =
     |> snd
     |> Hh_json_helpers.get_array_exn
     |> List.map ~f:Hh_json_helpers.get_string_exn
-    |> SSet.of_list
+    |> S_set.of_list
 
 let saved_state_info_file_name ~base_file_name = base_file_name ^ "_info.json"
 

@@ -53,14 +53,14 @@ let go_fast _genv env file =
     Names are already fully qualified (with leading backslash) because
     [Ast_provider.compute_ast] returns a named AST (NAST). *)
 let target_names_of_ast ast =
-  List.fold ast ~init:SSet.empty ~f:(fun acc def ->
+  List.fold ast ~init:S_set.empty ~f:(fun acc def ->
       let open Aast_defs in
       match def with
       | Class { c_name = (_, name); _ }
       | Typedef { t_name = (_, name); _ }
       | Fun { fd_name = (_, name); _ }
       | Constant { cst_name = (_, name); _ } ->
-        SSet.add name acc
+        S_set.add name acc
       | ClassAlias _
       | Stmt _
       | Namespace _
@@ -83,7 +83,7 @@ let references_target names sym =
   | SO.Class _
   | SO.Function
   | SO.GConst ->
-    SSet.mem sym.SO.name names
+    S_set.mem sym.SO.name names
   | _ -> false
 
 (** Does [cand] contain at least one production-affecting reference to

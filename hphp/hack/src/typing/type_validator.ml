@@ -27,7 +27,7 @@ type validation_state = {
   validity: validity;
   inside_reified_class_generic_position: bool;
   reification: reification;
-  expanded_typedefs: SSet.t;
+  expanded_typedefs: S_set.t;
   class_from_taccess_lhs: Folded_class.t option;
 }
 
@@ -133,13 +133,13 @@ class virtual type_validator =
             | CaseType (variant, variants) ->
               Typing_utils.get_case_type_variants_as_type variant variants
           in
-          if SSet.mem name acc.expanded_typedefs then
+          if S_set.mem name acc.expanded_typedefs then
             acc
           else
             let acc =
               {
                 acc with
-                expanded_typedefs = SSet.add name acc.expanded_typedefs;
+                expanded_typedefs = S_set.add name acc.expanded_typedefs;
               }
             in
             let subst = Decl_instantiate.make_subst td_tparams tyl in
@@ -182,7 +182,7 @@ class virtual type_validator =
                     (Env.get_self_ty env)
                     ~default:(MakeType.nothing Reason.none);
               };
-            expanded_typedefs = SSet.empty;
+            expanded_typedefs = S_set.empty;
             validity = Valid;
             inside_reified_class_generic_position = false;
             reification;

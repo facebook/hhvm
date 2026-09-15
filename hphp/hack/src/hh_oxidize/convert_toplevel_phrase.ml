@@ -22,17 +22,17 @@ module Env : sig
 
   val is_defined_submodule : t -> string -> bool
 end = struct
-  type t = { defined_submodules: SSet.t }
+  type t = { defined_submodules: S_set.t }
 
-  let empty = { defined_submodules = SSet.empty }
+  let empty = { defined_submodules = S_set.empty }
 
   let add_defined_module (env : t) (module_name : string) : t =
     let module_name = String.uncapitalize module_name in
-    { defined_submodules = SSet.add module_name env.defined_submodules }
+    { defined_submodules = S_set.add module_name env.defined_submodules }
 
   let is_defined_submodule (env : t) (module_name : string) : bool =
     let module_name = String.uncapitalize module_name in
-    SSet.mem module_name env.defined_submodules
+    S_set.mem module_name env.defined_submodules
 end
 
 (* HACK: These modules are not used in any type declarations, so importing them

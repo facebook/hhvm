@@ -33,7 +33,7 @@ let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
   else
     old_classes
 
-let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
+let get_old_batch (ctx : Provider_context.t) ~during_init (names : S_set.t) :
     shallow_class option S_map.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
@@ -53,7 +53,7 @@ let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
 
-let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
+let oldify_batch (ctx : Provider_context.t) (names : S_set.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->
@@ -64,7 +64,7 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   | Provider_backend.Local_memory _ ->
     failwith "oldify_batch not implemented for Local_memory"
 
-let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
+let remove_old_batch (ctx : Provider_context.t) (names : S_set.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->

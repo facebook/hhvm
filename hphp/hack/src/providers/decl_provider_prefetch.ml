@@ -96,9 +96,9 @@ let find_type_name
   or discovered that it already exists in the cache), then we don't need to do
   the same work a second time. *)
 type visited = {
-  v_fold: SSet.t;
+  v_fold: S_set.t;
       (** Which [types_to_fold] have we already finished work on? *)
-  v_ty: SSet.t;  (** Which [types_to_ty] have we already finished work on? *)
+  v_ty: S_set.t;  (** Which [types_to_ty] have we already finished work on? *)
 }
 
 (** This is the return type from [next_missing_types]. It says what further typenames
@@ -144,11 +144,11 @@ let next_missing_types
     let d = d + 1 in
     match goal with
     | _ when is_reserved_type_name name -> (acc, visited)
-    | `Fold when SSet.mem name visited.v_fold -> (acc, visited)
-    | `Ty when SSet.mem name visited.v_ty -> (acc, visited)
+    | `Fold when S_set.mem name visited.v_fold -> (acc, visited)
+    | `Ty when S_set.mem name visited.v_ty -> (acc, visited)
     | `Ty -> begin
       let visited =
-        { v_ty = SSet.add name visited.v_ty; v_fold = visited.v_fold }
+        { v_ty = S_set.add name visited.v_ty; v_fold = visited.v_fold }
       in
       match find_type_name ~local_memory ~accept_folded:false name with
       | Folded _ -> failwith "didn't ask for folded"
@@ -168,8 +168,8 @@ let next_missing_types
     | `Fold -> begin
       let visited =
         {
-          v_ty = SSet.add name visited.v_ty;
-          v_fold = SSet.add name visited.v_fold;
+          v_ty = S_set.add name visited.v_ty;
+          v_fold = S_set.add name visited.v_fold;
         }
       in
       match find_type_name ~local_memory name with
@@ -423,19 +423,19 @@ let rec prefetch_loop
        but the file is absent, then it won't have been added to the cache and there's no use
        re-visiting it. *)
     let earlier_found =
-      earlier_decls |> List.map ~f:(fun (name, _, _) -> name) |> SSet.of_list
+      earlier_decls |> List.map ~f:(fun (name, _, _) -> name) |> S_set.of_list
     in
     let visited =
       earlier_to_fold
-      |> List.filter ~f:(fun name -> SSet.mem name earlier_found)
+      |> List.filter ~f:(fun name -> S_set.mem name earlier_found)
       |> List.fold ~init:visited ~f:(fun v name ->
-             { v with v_fold = SSet.remove name v.v_fold })
+             { v with v_fold = S_set.remove name v.v_fold })
     in
     let visited =
       earlier_to_ty
-      |> List.filter ~f:(fun name -> SSet.mem name earlier_found)
+      |> List.filter ~f:(fun name -> S_set.mem name earlier_found)
       |> List.fold ~init:visited ~f:(fun v name ->
-             { v with v_ty = SSet.remove name v.v_ty })
+             { v with v_ty = S_set.remove name v.v_ty })
     in
     let to_decl =
       {
@@ -513,5 +513,5 @@ let prefetch_decls ~ctx ~local_memory to_decl =
   let dummy = Relative_path.path_of_prefix Relative_path.Dummy |> Path.make in
   let handle = Concurrent.start ~opts ~root ~hhi ~tmp ~dummy in
   let telemetry = { num_decls_parsed = 0; num_files_parsed = 0 } in
-  let visited = { v_ty = SSet.empty; v_fold = SSet.empty } in
+  let visited = { v_ty = S_set.empty; v_fold = S_set.empty } in
   prefetch_loop ~ctx ~local_memory ~handle ~to_decl ~visited ~telemetry

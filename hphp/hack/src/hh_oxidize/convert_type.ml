@@ -10,7 +10,6 @@ open Core
 open Asttypes
 open Longident
 open Parsetree
-open Reordered_argument_collections
 open Utils
 open State
 open Rust_type
@@ -70,7 +69,7 @@ let should_add_rcoc ty =
 
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
-let indirection_types = SSet.of_list ["Vec"]
+let indirection_types = S_set.of_list ["Vec"]
 
 let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
     Rust_type.t =
@@ -132,7 +131,7 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
     in
     let extern_type = Configuration.extern_type id in
     let id = Option.value extern_type ~default:id in
-    let seen_indirection = seen_indirection || SSet.mem indirection_types id in
+    let seen_indirection = seen_indirection || S_set.mem id indirection_types in
     let args =
       (* HACK: eliminate phase type arguments *)
       match args with

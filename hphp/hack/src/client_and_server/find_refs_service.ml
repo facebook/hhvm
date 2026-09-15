@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Option.Monad_infix
-open Reordered_argument_collections
 open Server_command_types.Find_refs
 open Typing_defs
 module Cls = Folded_class
@@ -18,7 +17,7 @@ module Cls = Folded_class
 (* No typing env here *)
 
 type member_class =
-  | Class_set of SSet.t
+  | Class_set of S_set.t
   | Subclasses_of of string
 
 type action_internal =
@@ -45,7 +44,7 @@ let check_if_extends_class ctx target_class_name class_name =
 
 let is_target_class ctx target_classes class_name =
   match target_classes with
-  | Class_set s -> SSet.mem s class_name
+  | Class_set s -> S_set.mem class_name s
   | Subclasses_of s ->
     String.equal s class_name || check_if_extends_class ctx s class_name
 
@@ -98,13 +97,13 @@ let process_gconst_id target_gconst id =
 
 let add_if_extends_class ctx target_class_name class_name acc =
   if check_if_extends_class ctx target_class_name class_name then
-    SSet.add acc class_name
+    S_set.add class_name acc
   else
     acc
 
 let find_child_classes_in_files ctx target_class_name naming_table files =
   Shared_mem.invalidate_local_caches ();
-  Relative_path.Set.fold files ~init:SSet.empty ~f:(fun fn acc ->
+  Relative_path.Set.fold files ~init:S_set.empty ~f:(fun fn acc ->
       try
         let { File_info.ids = { File_info.classes; _ }; _ } =
           Naming_table.get_file_info_exn naming_table fn
@@ -158,21 +157,18 @@ let get_child_classes_files ctx class_name =
 
 let get_deps_set ctx classes =
   let deps_mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
+  S_set.fold
+    (fun class_name acc ->
+      match Naming_provider.get_type_path ctx class_name with
+      | None -> acc
+      | Some fn ->
+        let dep = Typing_deps.Dep.Type class_name in
+        let ideps = Typing_deps.get_ideps deps_mode dep in
+        let files = Naming_provider.get_files ctx ideps in
+        let files = Relative_path.Set.add files fn in
+        Relative_path.Set.union files acc)
     classes
-    ~f:
-      begin
-        fun class_name acc ->
-          match Naming_provider.get_type_path ctx class_name with
-          | None -> acc
-          | Some fn ->
-            let dep = Typing_deps.Dep.Type class_name in
-            let ideps = Typing_deps.get_ideps deps_mode dep in
-            let files = Naming_provider.get_files ctx ideps in
-            let files = Relative_path.Set.add files fn in
-            Relative_path.Set.union files acc
-      end
-    ~init:Relative_path.Set.empty
+    Relative_path.Set.empty
 
 let get_files_for_descendants_and_dependents_of_members_in_descendants
     ctx ~class_name ~max_deps members =
@@ -512,7 +508,8 @@ let get_definitions ctx action =
   let resolve = Naming_provider.resolve_position ctx in
   match action with
   | IMember (Class_set classes, Method method_name) ->
-    SSet.fold classes ~init:[] ~f:(fun class_name acc ->
+    S_set.fold
+      (fun class_name acc ->
         match Decl_provider.get_class ctx class_name with
         | Decl_entry.Found class_ ->
           let add_meth get acc =
@@ -528,8 +525,11 @@ let get_definitions ctx action =
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->
           acc)
+      classes
+      []
   | IMember (Class_set classes, Class_const class_const_name) ->
-    SSet.fold classes ~init:[] ~f:(fun class_name acc ->
+    S_set.fold
+      (fun class_name acc ->
         match Decl_provider.get_class ctx class_name with
         | Decl_entry.Found class_ ->
           let add_class_const get acc =
@@ -545,6 +545,8 @@ let get_definitions ctx action =
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->
           acc)
+      classes
+      []
   | IExplicitClass class_name
   | IClass class_name ->
     Option.value

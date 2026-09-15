@@ -110,7 +110,7 @@ let try_with_stack (f : unit -> 'a) : ('a, Exception.t) result =
     let e = Exception.wrap exn in
     Error e
 
-let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
+let set_of_list l = List.fold_right l ~f:S_set.add ~init:S_set.empty
 
 (** \A\B\C -> A\B\C *)
 let strip_ns s = String.chop_prefix_if_exists s ~prefix:"\\"

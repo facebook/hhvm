@@ -89,7 +89,7 @@ let scm_changed_merge_base () =
     when Hg.Rev.equal
            rev
            (Hg.Rev.of_string "e0ac0069ccf1a833ec944f280a3448f1327fb9ac")
-         && SSet.mem "/path/to/root/a/b.php" files ->
+         && S_set.mem "/path/to/root/a/b.php" files ->
     true
   | r -> unexpected r
 
@@ -124,7 +124,7 @@ let scm_files_changed () =
   }
 |}
   with
-  | Watchman.Files_changed files when SSet.mem "/path/to/root/c.php" files ->
+  | Watchman.Files_changed files when S_set.mem "/path/to/root/c.php" files ->
     true
   | r -> unexpected r
 
@@ -192,8 +192,8 @@ let noscm_changed_merge_base () =
 }
 |}
   with
-  | Watchman.Files_changed files when SSet.mem "/path/to/root/foo/bar.php" files
-    ->
+  | Watchman.Files_changed files
+    when S_set.mem "/path/to/root/foo/bar.php" files ->
     true
   | r -> unexpected r
 
@@ -216,7 +216,7 @@ let noscm_files_changed () =
 |}
   with
   | Watchman.Files_changed files
-    when SSet.mem "/path/to/root/glib/chessbot.php" files ->
+    when S_set.mem "/path/to/root/glib/chessbot.php" files ->
     true
   | r -> unexpected r
 

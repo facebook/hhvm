@@ -50,14 +50,14 @@ let rec collect_attrs_from_ty env set ty =
       match tys with
       | [] -> set
       | ty :: tys ->
-        let collect = collect_attrs_from_ty env SSet.empty in
-        List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+        let collect = collect_attrs_from_ty env S_set.empty in
+        List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:S_set.inter
     end
   | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true
       env
-      (compose SSet.add fst)
+      (compose S_set.add fst)
       set
       sid
   | _ -> set
@@ -65,10 +65,10 @@ let rec collect_attrs_from_ty env set ty =
 let collect_attrs env attrs =
   let collect_attr set attr =
     match attr with
-    | Xhp_simple { xs_name = (_, n); _ } -> SSet.add (":" ^ n) set
+    | Xhp_simple { xs_name = (_, n); _ } -> S_set.add (":" ^ n) set
     | Xhp_spread (ty, _, _) -> collect_attrs_from_ty env set ty
   in
-  List.fold attrs ~init:SSet.empty ~f:collect_attr
+  List.fold attrs ~init:S_set.empty ~f:collect_attr
 
 let check_attrs pos env sid attrs =
   let collect_with_ty =
@@ -76,7 +76,7 @@ let check_attrs pos env sid attrs =
   in
   let required_attrs = collect_with_ty S_map.empty sid in
   let supplied_attrs = collect_attrs env attrs in
-  let missing_attrs = SSet.fold S_map.remove supplied_attrs required_attrs in
+  let missing_attrs = S_set.fold S_map.remove supplied_attrs required_attrs in
   if S_map.is_empty missing_attrs then
     ()
   else

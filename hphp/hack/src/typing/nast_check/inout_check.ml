@@ -16,7 +16,7 @@ let check_param _env params p user_attributes name =
       match param.param_callconv with
       | Ast_defs.Pinout _ ->
         let pos = param.param_pos in
-        if SSet.mem name SN.Members.as_set then
+        if S_set.mem name SN.Members.as_set then
           Diagnostics.add_diagnostic
             Nast_check_error.(to_user_diagnostic @@ Inout_params_special pos)
       | Ast_defs.Pnormal -> ());

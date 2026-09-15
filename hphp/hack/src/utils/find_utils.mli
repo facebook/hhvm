@@ -39,7 +39,7 @@ takes in the fully-qualified pathnames from watchman, resolves symlinks,
 excludes the ones where the resolved paths are outside root, and runs the same
 file_filter as above. *)
 val post_file_watcher_filter_from_fully_qualified_raw_updates :
-  root:Path.t -> raw_updates:SSet.t -> Relative_path.Set.t
+  root:Path.t -> raw_updates:S_set.t -> Relative_path.Set.t
 
 (* Hash file name and return true for [sample_rate] fraction of hashes *)
 val sample_filter : sample_rate:float -> Relative_path.t -> bool

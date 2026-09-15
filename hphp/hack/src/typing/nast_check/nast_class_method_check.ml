@@ -17,14 +17,14 @@ let error_if_duplicate_method_names methods custom_err_config =
   let _ =
     List.fold_left
       methods
-      ~init:SSet.empty
+      ~init:S_set.empty
       ~f:(fun seen_methods { m_name = (pos, meth_name); _ } ->
-        if SSet.mem meth_name seen_methods then
+        if S_set.mem meth_name seen_methods then
           Diagnostics.add_diagnostic
             (Naming_error_utils.to_user_diagnostic
                (Naming_error.Method_name_already_bound { pos; meth_name })
                custom_err_config);
-        SSet.add meth_name seen_methods)
+        S_set.add meth_name seen_methods)
   in
   ()
 

@@ -7,28 +7,27 @@
  *)
 
 open Core
-open Reordered_argument_collections
 open Oxidized_module
 
 let stringify m =
   let { extern_uses; glob_uses; aliases; includes; ty_reexports; decls } = m in
   let extern_uses =
     extern_uses
-    |> SSet.elements
+    |> S_set.elements
     |> List.map ~f:(sprintf "use %s;")
     |> String.concat ~sep:"\n"
   in
   let uses = "#[allow(unused_imports)]\nuse crate::*;" in
   let glob_uses =
     glob_uses
-    |> SSet.elements
+    |> S_set.elements
     |> List.map ~f:(sprintf "pub use %s::*;")
     |> String.concat ~sep:"\n"
   in
   let bound_aliases =
     aliases
     |> List.map ~f:snd
-    |> List.fold ~init:SSet.empty ~f:(fun bound alias -> SSet.add bound alias)
+    |> List.fold ~init:S_set.empty ~f:(fun bound alias -> S_set.add alias bound)
   in
   let aliases =
     aliases
@@ -66,7 +65,7 @@ let stringify m =
               bound in the same file. *)
            let root_module = String.split m ~on:':' |> List.hd_exn in
            if
-             SSet.mem bound_aliases root_module
+             S_set.mem root_module bound_aliases
              || String.equal root_module "crate"
            then
              sprintf "pub use %s as %s;" m a
@@ -76,7 +75,7 @@ let stringify m =
   in
   let includes =
     includes
-    |> SSet.elements
+    |> S_set.elements
     |> List.map ~f:(fun m -> sprintf "pub use %s::*;" m)
     |> String.concat ~sep:"\n"
   in

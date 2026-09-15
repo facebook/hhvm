@@ -98,8 +98,8 @@ type class_elt = {
   ce_deprecated: string option;
   ce_pos: Pos_or_decl.t Lazy.t;  (** pos of the type of the elt *)
   ce_flags: Typing_defs_flags.ClassElt.t;
-  ce_sealed_allowlist: SSet.t option;
-  ce_overlapping_tparams: SSet.t option;
+  ce_sealed_allowlist: S_set.t option;
+  ce_overlapping_tparams: S_set.t option;
   ce_package_requirement: package_requirement option;
 }
 [@@deriving show]
@@ -380,7 +380,7 @@ type expand_env = {
   make_internal_opaque: bool;
   visibility_behavior: visibility_behavior;
   substs: locl_ty S_map.t;
-  no_substs: SSet.t;
+  no_substs: S_set.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;
@@ -395,7 +395,7 @@ let empty_expand_env =
     visibility_behavior = default_visibility_behaviour;
     make_internal_opaque = true;
     substs = S_map.empty;
-    no_substs = SSet.empty;
+    no_substs = S_set.empty;
     this_ty = mk (Reason.none, Tgeneric Naming_special_names.Typehints.this);
     on_error = None;
     wildcard_action = Wildcard_fresh_tyvar;
@@ -560,7 +560,7 @@ let make_tany () = Tany Tany_sentinel.value
 (* Required parameters (number and names). Does not include optional, variadic, or
  * type-splat parameters
  *)
-let arity_and_names_required ft : int * SSet.t =
+let arity_and_names_required ft : int * S_set.t =
   let non_splat_non_optional =
     List.filter (ft_params_without_named_variadic ft) ~f:(fun fp ->
         (not (get_fp_is_optional fp)) && not (get_fp_splat fp))
@@ -578,7 +578,7 @@ let arity_and_names_required ft : int * SSet.t =
     else
       arity_raw
   in
-  (arity_required, SSet.of_list names_required)
+  (arity_required, S_set.of_list names_required)
 
 let get_param_mode callconv =
   match callconv with

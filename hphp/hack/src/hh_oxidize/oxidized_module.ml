@@ -6,19 +6,17 @@
  *
  *)
 
-open Reordered_argument_collections
-
 (** This type is mostly strings for the sake of making conversion easy, but we
     retain some structure for the postprocessing and formatting we do in
     {!Stringify}. *)
 type t = {
-  extern_uses: SSet.t;
+  extern_uses: S_set.t;
   (* names of types (or derive macros) to import from other Rust crates *)
-  glob_uses: SSet.t;
+  glob_uses: S_set.t;
   (* names of opened modules (to convert to glob-imports in Rust) *)
   aliases: (string * string) list;
   (* (module_name, alias) pairs *)
-  includes: SSet.t;
+  includes: S_set.t;
   (* names of directly-included modules *)
   ty_reexports: string list;
   (* fully-qualified type names to be re-exported *)
@@ -27,10 +25,10 @@ type t = {
 
 let empty =
   {
-    extern_uses = SSet.empty;
-    glob_uses = SSet.empty;
+    extern_uses = S_set.empty;
+    glob_uses = S_set.empty;
     aliases = [];
-    includes = SSet.empty;
+    includes = S_set.empty;
     ty_reexports = [];
     decls = [];
   }

@@ -10,14 +10,13 @@
 
 open Hh_prelude
 open Integration_test_base_types
-open Reordered_argument_collections
 open Server_command_types
 open Int.Replace_polymorphic_compare
 
 exception Integration_test_failure
 
 module FileMap = S_map
-module ErrorSet = SSet
+module ErrorSet = S_set
 
 let root = "/"
 
@@ -139,9 +138,9 @@ let run_loop_once :
   let get_changes_sync () =
     if not !did_read_disk_changes_ref then (
       did_read_disk_changes_ref := true;
-      SSet.of_list (List.map disk_changes ~f:fst)
+      S_set.of_list (List.map disk_changes ~f:fst)
     ) else
-      SSet.empty
+      S_set.empty
   in
   let get_changes_async () =
     Server_notifier.SyncChanges (get_changes_sync ())

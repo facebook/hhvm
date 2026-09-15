@@ -7,17 +7,17 @@
  *)
 
 (* used for validation below *)
-let registered_keys : SSet.t ref = ref SSet.empty
+let registered_keys : S_set.t ref = ref S_set.empty
 
-let registered_hhconf_keys : SSet.t ref = ref SSet.empty
+let registered_hhconf_keys : S_set.t ref = ref S_set.empty
 
 let key (name : string) : string =
-  registered_keys := SSet.add name !registered_keys;
+  registered_keys := S_set.add name !registered_keys;
   name
 
 (** Register an hh.conf config key (ServerLocalConfig). *)
 let hhconf_key (name : string) : string =
-  registered_hhconf_keys := SSet.add name !registered_hhconf_keys;
+  registered_hhconf_keys := S_set.add name !registered_hhconf_keys;
   name
 
 (** Keys valid in .hhconfig files. *)
@@ -635,16 +635,16 @@ let all_hhconfig_keys = !registered_keys
 
 let all_hhconf_keys = !registered_hhconf_keys
 
-let all_keys = SSet.union all_hhconfig_keys all_hhconf_keys
+let all_keys = S_set.union all_hhconfig_keys all_hhconf_keys
 
-let all_hhconfig_keys_list = lazy (SSet.elements all_hhconfig_keys)
+let all_hhconfig_keys_list = lazy (S_set.elements all_hhconfig_keys)
 
-let all_hhconf_keys_list = lazy (SSet.elements all_hhconf_keys)
+let all_hhconf_keys_list = lazy (S_set.elements all_hhconf_keys)
 
-let all_keys_list = lazy (SSet.elements all_keys)
+let all_keys_list = lazy (S_set.elements all_keys)
 
 let validate_hhconfig_key ~(config_key : string) : (unit, did_you_mean) result =
-  if SSet.mem config_key all_hhconfig_keys then
+  if S_set.mem config_key all_hhconfig_keys then
     Ok ()
   else
     let suggestion =
@@ -657,7 +657,7 @@ let validate_hhconfig_key ~(config_key : string) : (unit, did_you_mean) result =
     Error (Did_you_mean suggestion)
 
 let validate_hhconf_key ~(config_key : string) : (unit, did_you_mean) result =
-  if SSet.mem config_key all_hhconf_keys then
+  if S_set.mem config_key all_hhconf_keys then
     Ok ()
   else
     let suggestion =
@@ -670,7 +670,7 @@ let validate_hhconf_key ~(config_key : string) : (unit, did_you_mean) result =
     Error (Did_you_mean suggestion)
 
 let validate ~(config_key : string) : (unit, did_you_mean) result =
-  if SSet.mem config_key all_keys then
+  if S_set.mem config_key all_keys then
     Ok ()
   else
     let suggestion =

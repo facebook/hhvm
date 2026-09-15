@@ -65,8 +65,8 @@ module Types = struct
      *)
     | State_enter of string * (Yojson.Safe.t[@printer pp_yojson]) option
     | State_leave of string * (Yojson.Safe.t[@printer pp_yojson]) option
-    | Changed_merge_base of Hg.Rev.t * SSet.t * clock
-    | Files_changed of SSet.t
+    | Changed_merge_base of Hg.Rev.t * S_set.t * clock
+    | Files_changed of S_set.t
   [@@deriving show]
 
   type changes =

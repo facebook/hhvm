@@ -185,9 +185,9 @@ let find
   let (quickfix_titles, quickfixes) =
     List.fold_map
       quickfixes
-      ~init:SSet.empty
+      ~init:S_set.empty
       ~f:(fun acc (Code_action_types.Quickfix edit) ->
-        ( SSet.add edit.Code_action_types.title acc,
+        ( S_set.add edit.Code_action_types.title acc,
           Code_action_types.Quickfix_action edit ))
   in
   (* Accumulate refactors *)
@@ -197,7 +197,7 @@ let find
       ~init:quickfixes
       ~f:(fun acc Code_action_types.(Refactor edit) ->
         (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
-        if SSet.mem edit.Code_action_types.title quickfix_titles then
+        if S_set.mem edit.Code_action_types.title quickfix_titles then
           acc
         else
           Code_action_types.Refactor_action edit :: acc)

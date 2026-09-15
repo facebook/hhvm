@@ -171,17 +171,17 @@ let get_class
   end)
   |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Folded_class.make)
 
-let remove_classes_from_decl_heap (names : SSet.t) ~old_members ~new_members =
+let remove_classes_from_decl_heap (names : S_set.t) ~old_members ~new_members =
   Decl_class_elements.remove_old_all old_members;
   Decl_class_elements.remove_all new_members;
   Decl_heap.Classes.remove_old_batch names;
   Decl_heap.Classes.remove_batch names;
   ()
 
-let remove_classes ctx (names : SSet.t) ~old_members ~new_members : unit =
+let remove_classes ctx (names : S_set.t) ~old_members ~new_members : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend be ->
-    SSet.iter Cache.remove names;
+    S_set.iter Cache.remove names;
     let names = File_info.{ empty_names with n_classes = names } in
     if
       Typechecker_options.disable_rust_provider_shallow_decl_invalidation
@@ -203,7 +203,7 @@ let remove_classes ctx (names : SSet.t) ~old_members ~new_members : unit =
       ~new_members:(Lazy.force new_members);
     ()
   | Provider_backend.Shared_memory ->
-    SSet.iter Cache.remove names;
+    S_set.iter Cache.remove names;
     remove_classes_from_decl_heap
       names
       ~old_members:(Lazy.force old_members)

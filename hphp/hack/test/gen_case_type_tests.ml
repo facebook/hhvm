@@ -411,7 +411,7 @@ let () =
     |> List.filter_map ~f:(fun ((type1, spec1), (type2, spec2)) ->
            if String.compare type1 type2 <= 0 then
              let ok =
-               SSet.of_list
+               S_set.of_list
                  [
                    "(function(): void)";
                    "HH\\FunctionRef<(function(): void)>";
@@ -432,7 +432,7 @@ let () =
                match (type1, type2) with
                | (x, "MyEnum")
                | ("MyEnum", x) ->
-                 not @@ SSet.mem x ok
+                 not @@ S_set.mem x ok
                | _ -> false
              in
              Some (disable_test, [(type1, spec1); (type2, spec2)])

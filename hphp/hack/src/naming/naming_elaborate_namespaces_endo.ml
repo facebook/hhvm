@@ -30,10 +30,10 @@ module SN = Naming_special_names
 
 type env = {
   namespace: Namespace_env.env;
-  type_params: SSet.t;
+  type_params: S_set.t;
 }
 
-let make_env namespace = { namespace; type_params = SSet.empty }
+let make_env namespace = { namespace; type_params = S_set.empty }
 
 (* While elaboration for codegen and typing is similar, there are currently a
  *   couple differences between the two and are toggled by this flag (XHP).
@@ -65,7 +65,7 @@ let is_reserved_type_hint name =
 
 let elaborate_type_name env ((_, name) as id) =
   if
-    SSet.mem name env.type_params
+    S_set.mem name env.type_params
     || is_special_identifier name
     || (String.length name <> 0 && Char.equal name.[0] '$')
   then
@@ -77,7 +77,7 @@ let extend_tparams env tparaml =
   let type_params =
     List.fold
       tparaml
-      ~f:(fun acc tparam -> SSet.add (snd tparam.tp_name) acc)
+      ~f:(fun acc tparam -> S_set.add (snd tparam.tp_name) acc)
       ~init:env.type_params
   in
   { env with type_params }
@@ -389,7 +389,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           let type_params =
             List.fold_left
               fun_.f_tparams
-              ~f:(fun acc { htp_name = (_, nm); _ } -> SSet.add nm acc)
+              ~f:(fun acc { htp_name = (_, nm); _ } -> S_set.add nm acc)
               ~init:env.type_params
           in
           { env with type_params }
@@ -421,7 +421,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let type_params =
           List.fold_left
             hf.hf_tparams
-            ~f:(fun acc { htp_name = (_, nm); _ } -> SSet.add nm acc)
+            ~f:(fun acc { htp_name = (_, nm); _ } -> S_set.add nm acc)
             ~init:env.type_params
         in
         { env with type_params }

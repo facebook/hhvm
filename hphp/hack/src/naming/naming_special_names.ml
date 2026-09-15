@@ -186,8 +186,8 @@ module Members = struct
 
   let as_set =
     List.fold_right
-      ~f:SSet.add
-      ~init:SSet.empty
+      ~f:S_set.add
+      ~init:S_set.empty
       [
         __construct;
         __destruct;
@@ -208,7 +208,7 @@ module Members = struct
         __wakeup;
       ]
 
-  let as_lowercase_set = SSet.map String.lowercase as_set
+  let as_lowercase_set = S_set.map String.lowercase as_set
 
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)

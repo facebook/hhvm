@@ -470,7 +470,7 @@ val add_lower_bound :
   locl_ty ->
   env
 
-val get_tparams : env -> locl_ty -> SSet.t
+val get_tparams : env -> locl_ty -> S_set.t
 
 val add_lower_bound_global : env -> string -> locl_ty -> env
 
@@ -578,7 +578,7 @@ val is_fresh_generic_parameter : string -> bool
 
 val get_tpenv_size : env -> int
 
-val get_tpenv_tparams : env -> SSet.t
+val get_tpenv_tparams : env -> S_set.t
 
 val set_env_callable_pos : env -> Pos.t -> env
 

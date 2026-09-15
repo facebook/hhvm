@@ -34,7 +34,7 @@ module Variance_analysis : sig
 
   val analyse_ty_params :
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
-    SSet.t ->
+    S_set.t ->
     env:Typing_env_types.env ->
     Ast_defs.variance option S_map.t
 
@@ -332,12 +332,12 @@ end = struct
 
   let mentioned_ty_params ty =
     let open Typing_defs_core in
-    let res = ref SSet.empty in
+    let res = ref S_set.empty in
     let on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound)
     and on_ty ty ~ctx =
       match get_node ty with
       | Tgeneric nm ->
-        res := SSet.add nm !res;
+        res := S_set.add nm !res;
         (ctx, `Stop ty)
       | _ -> (ctx, `Continue ty)
     in
@@ -452,7 +452,7 @@ end = struct
   let update_ty_params ty_param_names ty acc var =
     let open Typing_defs_core in
     match get_node ty with
-    | Tgeneric name when SSet.mem name ty_param_names ->
+    | Tgeneric name when S_set.mem name ty_param_names ->
       S_map.update
         name
         (function
@@ -489,7 +489,7 @@ end = struct
     let update = update_ty_params ty_param_names
     and acc =
       S_map.of_list
-        (List.map (SSet.elements ty_param_names) ~f:(fun name -> (name, None)))
+        (List.map (S_set.elements ty_param_names) ~f:(fun name -> (name, None)))
     in
     let var_opt =
       find_fun_ty
@@ -503,15 +503,15 @@ end = struct
       let open Typing_defs_core in
       List.fold_left
         fun_ty.ft_where_constraints
-        ~init:SSet.empty
+        ~init:S_set.empty
         ~f:(fun acc (ty1, _, ty2) ->
-          SSet.union
-            (SSet.union acc (mentioned_ty_params ty1))
+          S_set.union
+            (S_set.union acc (mentioned_ty_params ty1))
             (mentioned_ty_params ty2))
     in
     S_map.mapi
       (fun nm var_opt ->
-        if SSet.mem nm in_where_constraint then
+        if S_set.mem nm in_where_constraint then
           Some Ast_defs.Invariant
         else
           var_opt)
@@ -1444,7 +1444,7 @@ end = struct
           (* Try and find a substibution for this type *)
           let (root_ty, path) = access_path root_ty [ty_const] in
           let key = String.concat ~sep:"::" (List.map ~f:snd path) in
-          if SSet.mem key ctx then
+          if S_set.mem key ctx then
             (* If we have made this subsitution before doing so again will
                cause us to never terminate so we bail; in practice the
                type constant cycle check should already have caught this
@@ -1476,7 +1476,7 @@ end = struct
               subst_ty_opt
               ~default:(ctx, `Stop ty)
               ~f:(fun ty ->
-                let ctx = SSet.add key ctx in
+                let ctx = S_set.add key ctx in
                 (ctx, `Restart ty))
         end
         | _ -> (ctx, `Continue ty)
@@ -1485,7 +1485,7 @@ end = struct
         ty
         ~on_ty
         ~on_rc_bound
-        ~ctx:SSet.empty
+        ~ctx:S_set.empty
 
     let apply_fun_ty t fun_ty =
       let open Typing_defs_core in
@@ -1813,7 +1813,7 @@ let ty_generics names ty =
     let open Typing_defs_core in
     match get_node decl_ty with
     | Tgeneric nm ->
-      let () = acc := SSet.add nm !acc in
+      let () = acc := S_set.add nm !acc in
       (ctx, `Stop decl_ty)
     | _ -> (ctx, `Continue decl_ty)
   and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
@@ -1897,34 +1897,34 @@ let drop_unused_generics fun_ty ~names =
   (* Now add in any generics which are mentioned in constraints in those
      generics; repeat until we have discovered all transitively used generics *)
   let rec aux (acc, delta) =
-    let acc = SSet.union delta acc in
+    let acc = S_set.union delta acc in
     let delta =
       List.fold_left
-        ~init:SSet.empty
+        ~init:S_set.empty
         ft_tparams
         ~f:(fun acc { tp_name = (_, name); tp_constraints; _ } ->
-          if SSet.mem name delta then
+          if S_set.mem name delta then
             let generics =
               List.fold_left tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
                   ty_generics acc ty)
             in
             (* If the generic has an upper or lower bound which mentions the
                generic we would end up in an infinite loop *)
-            let generics = SSet.remove name generics in
-            SSet.union acc generics
+            let generics = S_set.remove name generics in
+            S_set.union acc generics
           else
             acc)
     in
-    let delta = SSet.diff delta acc in
-    if SSet.is_empty delta then
+    let delta = S_set.diff delta acc in
+    if S_set.is_empty delta then
       acc
     else
       aux (acc, delta)
   in
-  let names = aux (SSet.empty, names) in
+  let names = aux (S_set.empty, names) in
   let ft_tparams =
     List.filter ft_tparams ~f:(fun { tp_name = (_, name); _ } ->
-        SSet.mem name names)
+        S_set.mem name names)
   in
   { fun_ty with ft_tparams }
 
@@ -1932,7 +1932,7 @@ let drop_unused_generics fun_ty ~names =
     function pointers *)
 let gen_this_name ft_tparams =
   let names =
-    SSet.of_list
+    S_set.of_list
       (List.map ft_tparams ~f:(fun Typing_defs_core.{ tp_name = (_, nm); _ } ->
            nm))
   in
@@ -1942,7 +1942,7 @@ let gen_this_name ft_tparams =
       Option.value_map n_opt ~default:base ~f:(fun n ->
           Format.sprintf "%s#%n" base n)
     in
-    if SSet.mem name names then
+    if S_set.mem name names then
       aux (Option.value_map n_opt ~default:(Some 0) ~f:(fun n -> Some (n + 1)))
     else
       name
@@ -1997,7 +1997,7 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
     let names =
       List.map ~f:(fun { tp_name = (_, name); _ } -> name) fun_ty.ft_tparams
     in
-    SSet.of_list names
+    S_set.of_list names
   in
 
   (* Get the class level generics; we need this to build a type for [this] and
@@ -2102,7 +2102,8 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
     let open Typing_defs_core in
     let { ft_tparams; _ } = fun_ty in
     let ty_param_names =
-      SSet.of_list (List.map ft_tparams ~f:(fun { tp_name = (_, nm); _ } -> nm))
+      S_set.of_list
+        (List.map ft_tparams ~f:(fun { tp_name = (_, nm); _ } -> nm))
     in
     let ty_param_bounds =
       S_map.of_list
@@ -2194,5 +2195,5 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
   let fun_ty = Typing_defs_core.{ fun_ty with ft_params } in
   (* In generic methods we don't need to retain unused class-level generics even
      if they are marked [reify] *)
-  let fun_ty = drop_unused_generics fun_ty ~names:SSet.empty in
+  let fun_ty = drop_unused_generics fun_ty ~names:S_set.empty in
   (env, fun_ty)

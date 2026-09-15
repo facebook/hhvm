@@ -87,7 +87,7 @@ let token_kind_fmt = align_fmt (fun x -> x.token_kind) all_tokens
 
 let omit_syntax_record =
   let names =
-    SSet.of_list
+    S_set.of_list
       [
         "anonymous_function";
         "closure_type_specifier";
@@ -98,7 +98,7 @@ let omit_syntax_record =
         "methodish_declaration";
       ]
   in
-  (fun x -> not (SSet.mem x.type_name names))
+  (fun x -> not (S_set.mem x.type_name names))
 
 module GenerateFFSyntaxType = struct
   let to_parse_tree x =

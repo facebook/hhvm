@@ -85,7 +85,7 @@ let param_to_rty param =
   else
     Mut
 
-let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
+let rec grab_class_elts_from_ty ~static ?(seen = S_set.empty) env ty prop_id =
   let open Typing_defs in
   (* Given a list of types, find recurse on the first type that
      has the property and return the result *)
@@ -134,10 +134,10 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
      where we find the first prop that works from the upper bounds *)
   | Tgeneric name ->
     (* Avoid circular generics with a set *)
-    if SSet.mem name seen then
+    if S_set.mem name seen then
       []
     else
-      let new_seen = SSet.add name seen in
+      let new_seen = S_set.add name seen in
       let upper_bounds = Tast_env.get_upper_bounds env name in
       find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
       |> Option.value ~default:[]
@@ -210,7 +210,7 @@ let is_value_collection_ty env ty =
 
 (* Check if type is safe to convert from readonly to mut
     TODO(readonly): Update to include more complex types. *)
-let rec is_safe_mut_ty env (seen : SSet.t) ty =
+let rec is_safe_mut_ty env (seen : S_set.t) ty =
   let open Typing_defs_core in
   let (env, ty) = Tast_env.expand_type env ty in
   (* Strip dynamic from like types (~T = T | dynamic) so we check
@@ -252,10 +252,10 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
     List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Tgeneric name ->
     (* Avoid circular generics with a set *)
-    if SSet.mem name seen then
+    if S_set.mem name seen then
       false
     else
-      let new_seen = SSet.add name seen in
+      let new_seen = S_set.add name seen in
       let upper_bounds = Tast_env.get_upper_bounds env name in
       Typing_set.exists (fun l -> is_safe_mut_ty env new_seen l) upper_bounds
   | _ ->
@@ -501,7 +501,7 @@ let check_special_function env caller args =
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
     let arg = Aast_utils.arg_to_expr arg in
     let arg_ty = Tast.get_type arg in
-    if not (is_safe_mut_ty env SSet.empty arg_ty) then
+    if not (is_safe_mut_ty env S_set.empty arg_ty) then
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(readonly @@ Primary.Readonly.Readonly_invalid_as_mut pos)

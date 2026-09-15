@@ -224,6 +224,6 @@ let strip_root_if_possible s =
 let from_root ~(suffix : string) : t = (Root, suffix)
 
 let relativize_set prefix m =
-  SSet.fold m ~init:Set.empty ~f:(fun k a -> Set.add a (create prefix k))
+  S_set.fold (fun k a -> Set.add a (create prefix k)) m Set.empty
 
 let set_of_list xs = List.fold_left xs ~f:Set.add ~init:Set.empty

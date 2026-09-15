@@ -9,6 +9,6 @@
 
 type msg =
   | Ready
-  | Updates of SSet.t
+  | Updates of S_set.t
 
 val entry_point : (string * Path.t list, unit, msg) Daemon.entry

@@ -16,7 +16,7 @@ val unwrap_class_type :
 (** The names of all the parentish things of a shallow class
     from `extends`, `implements`, `uses`, `require extends`, `require implements`,
     and XHP attribute uses. *)
-val parentish_names : Shallow_decl_defs.shallow_class -> SSet.t
+val parentish_names : Shallow_decl_defs.shallow_class -> S_set.t
 
 val is_literal_with_trivially_inferable_type : ('a, 'b) Aast.expr -> bool
 

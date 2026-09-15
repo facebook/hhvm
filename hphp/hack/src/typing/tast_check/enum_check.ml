@@ -43,12 +43,12 @@ let find_cycle env class_name =
     match te_base with
     | None -> None
     | Some base ->
-      if SSet.mem base seen then
+      if S_set.mem base seen then
         Some seen
       else
-        spot_target (SSet.add base seen) base
+        spot_target (S_set.add base seen) base
   in
-  spot_target SSet.empty class_name
+  spot_target S_set.empty class_name
 
 let handler =
   object

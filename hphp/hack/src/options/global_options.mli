@@ -77,14 +77,14 @@ type extended_reasons_config =
 type t = {
   po: Parser_options.t;
   tco_saved_state: saved_state;
-  tco_legacy_experimental_features: SSet.t;
+  tco_legacy_experimental_features: S_set.t;
       (** Set of typechecker-only experimental features, in lowercase.
           NB, *not* the experimental features that are controlled by the
           file level <<__EnableUnstableFeatures('feature_name')>> attribute.
           Those are in ParserOptions and tco_enabled_unstable_features.
           DO NOT add new features here. Instead, introduce new feature-specific field and add to Config_keys,
           OR use EnableUnstableFeatures as mentioned above. *)
-  tco_migration_flags: SSet.t;
+  tco_migration_flags: S_set.t;
       (** Set of opt-in migration behavior flags, in lowercase. *)
   tco_num_local_workers: int option;
       (** If set to 0, only the type check delegate's logic will be used.
@@ -291,7 +291,7 @@ type t = {
   hh_distc_exponential_backoff_num_retries: int;
       (** Number of retries when uploading/download/executing with hh_distc *)
   recursive_case_types: bool;  (** Enable recursive case types *)
-  tco_enabled_unstable_features: SSet.t;
+  tco_enabled_unstable_features: S_set.t;
       (** Set of unstable features enabled for the current file *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
@@ -323,8 +323,8 @@ val set :
   ?po_disallow_toplevel_requires:bool ->
   ?tco_log_large_fanouts_threshold:int ->
   ?tco_log_inference_constraints:bool ->
-  ?tco_legacy_experimental_features:SSet.t ->
-  ?tco_migration_flags:SSet.t ->
+  ?tco_legacy_experimental_features:S_set.t ->
+  ?tco_migration_flags:S_set.t ->
   ?tco_num_local_workers:int ->
   ?tco_locl_cache_capacity:int ->
   ?tco_locl_cache_node_threshold:int ->
@@ -416,7 +416,7 @@ val set :
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->
   ?recursive_case_types:bool ->
-  ?tco_enabled_unstable_features:SSet.t ->
+  ?tco_enabled_unstable_features:S_set.t ->
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete:bool ->

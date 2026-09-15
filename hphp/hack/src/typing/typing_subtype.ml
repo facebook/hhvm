@@ -1004,10 +1004,10 @@ end = struct
     Typing_set.fold
       (fun bound_ty (g_set, o_set) ->
         match get_node bound_ty with
-        | Tgeneric name -> (SSet.add name g_set, o_set)
+        | Tgeneric name -> (S_set.add name g_set, o_set)
         | _ -> (g_set, Typing_set.add bound_ty o_set))
       lower_bounds
-      (SSet.empty, Typing_set.empty)
+      (S_set.empty, Typing_set.empty)
 
   (** If it's clear from the syntax of the type that null isn't in ty, return true. *)
   let rec null_not_subtype env ty =
@@ -2447,10 +2447,10 @@ end = struct
     let names_of ft =
       List.fold
         (Typing_defs.ft_params_without_named_variadic ft)
-        ~init:SSet.empty
+        ~init:S_set.empty
         ~f:(fun acc fp ->
           match Typing_defs.Named_params.name_of_named_param fp with
-          | Some name -> SSet.add name acc
+          | Some name -> S_set.add name acc
           | None -> acc)
     in
     let sub_named_names = names_of ft_sub in
@@ -2484,7 +2484,7 @@ end = struct
           ~init:(valid env)
           ~f:(fun (env, prop) super_fp ->
             match Typing_defs.Named_params.name_of_named_param super_fp with
-            | Some name when not (SSet.mem name sub_named_names) ->
+            | Some name when not (S_set.mem name sub_named_names) ->
               (env, prop) &&& contra super_fp.fp_type ty_sub_var
             | _ -> (env, prop))
     in
@@ -2501,7 +2501,7 @@ end = struct
             match Typing_defs.Named_params.name_of_named_param sub_fp with
             | Some name
               when Typing_defs_core.get_fp_is_optional sub_fp
-                   && not (SSet.mem name super_named_names) ->
+                   && not (S_set.mem name super_named_names) ->
               (env, prop) &&& contra ty_super_var sub_fp.fp_type
             | _ -> (env, prop))
       | _ -> (env, prop)
@@ -5540,7 +5540,7 @@ end = struct
       when let (generic_lower_bounds, _other_lower_bounds) =
              generic_lower_bounds env ty_super
            in
-           SSet.mem name_sub generic_lower_bounds ->
+           S_set.mem name_sub generic_lower_bounds ->
       valid env
     (* Ensure that higher-ranked type parameters don't escape their scope *)
     | ((r_sub, Tvar tv_sub), (r_super, Tgeneric tp_sup))
@@ -8642,17 +8642,17 @@ end = struct
             let (env, ety) = Env.expand_type env ty in
             (match get_node ety with
             | Tgeneric n ->
-              if SSet.mem n seen then
+              if S_set.mem n seen then
                 iter seen env acc tyl
               else
                 iter
-                  (SSet.add n seen)
+                  (S_set.add n seen)
                   env
                   acc
                   (Typing_set.elements (Env.get_upper_bounds env n) @ tyl)
             | _ -> iter seen env (Typing_set.add ty acc) tyl)
         in
-        let (env, resl) = iter SSet.empty env Typing_set.empty [ty] in
+        let (env, resl) = iter S_set.empty env Typing_set.empty [ty] in
         (env, Typing_set.elements resl)
       in
       let (env, tyl) = get_transitive_upper_bounds env ty_sub in
@@ -9190,17 +9190,17 @@ end = struct
             let (env, ety) = Env.expand_type env ty in
             (match get_node ety with
             | Tgeneric n ->
-              if SSet.mem n seen then
+              if S_set.mem n seen then
                 iter seen env acc tyl
               else
                 iter
-                  (SSet.add n seen)
+                  (S_set.add n seen)
                   env
                   acc
                   (Typing_set.elements (Env.get_upper_bounds env n) @ tyl)
             | _ -> iter seen env (Typing_set.add ty acc) tyl)
         in
-        let (env, resl) = iter SSet.empty env Typing_set.empty [ty] in
+        let (env, resl) = iter S_set.empty env Typing_set.empty [ty] in
         (env, Typing_set.elements resl)
       in
       let (env, tyl) = get_transitive_upper_bounds env ty_sub in
@@ -13314,20 +13314,20 @@ and is_tyvar_disjoint visited env tyvar ty =
 
 and is_generic_disjoint visited env (name : string) gen_ty ty =
   let (visited_tyvars, visited_generics) = visited in
-  if SSet.mem name visited_generics then
+  if S_set.mem name visited_generics then
     false
   else
     let (env, bounds) =
       TUtils.get_concrete_supertypes ~abstract_enum:false env gen_ty
     in
     is_intersection_type_disjoint
-      (visited_tyvars, SSet.add name visited_generics)
+      (visited_tyvars, S_set.add name visited_generics)
       env
       bounds
       ty
 
 let is_type_disjoint env ty1 ty2 =
-  is_type_disjoint_help (Tvid.Set.empty, SSet.empty) env ty1 ty2
+  is_type_disjoint_help (Tvid.Set.empty, S_set.empty) env ty1 ty2
 
 (* == Polymorphic type instatiation ========================================= *)
 

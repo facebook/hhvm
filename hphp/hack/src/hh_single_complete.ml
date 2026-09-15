@@ -805,8 +805,8 @@ let decl_and_run_mode
         let n_of_unique_builtins =
           Array.to_list magic_builtins
           |> List.map ~f:fst
-          |> SSet.of_list
-          |> SSet.cardinal
+          |> S_set.of_list
+          |> S_set.cardinal
         in
         if n_of_builtins <> n_of_unique_builtins then
           die "Multiple magic builtins share the same base name.\n"

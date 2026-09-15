@@ -7,7 +7,6 @@
  *
  *)
 
-open Reordered_argument_collections
 open Aast
 open Typing_defs
 open Hh_prelude
@@ -80,9 +79,9 @@ let parentish_names
   let get_names tys acc =
     List.fold tys ~init:acc ~f:(fun acc ty ->
         let (_, (_, name), _) = unwrap_class_type ty in
-        SSet.add acc name)
+        S_set.add name acc)
   in
-  SSet.empty
+  S_set.empty
   |> get_names sc_extends
   |> get_names sc_implements
   |> get_names sc_uses
@@ -93,7 +92,7 @@ let parentish_names
 (** Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
     that is common with B, and which is unique to A *)
 let split_sets defs split_if_in_defs =
-  SSet.partition (SSet.mem split_if_in_defs) defs
+  S_set.partition (fun x -> S_set.mem x split_if_in_defs) defs
 
 (** Given name sets A and B return a tuple (AnB, A\B), i.e split A into the part
     that is common with B, and which is unique to A *)

@@ -50,7 +50,7 @@ type t = private {
 }
 
 (** all the root (i.e. non-hhi) files referenced by t through xrefs. *)
-val referenced : Provider_context.t -> t -> SSet.t
+val referenced : Provider_context.t -> t -> S_set.t
 
 (** If [gen_sym_hash] is true, computes the [sym_hash] for this file. This
   is needed for incremental indexing, when indexing bases, or increments.

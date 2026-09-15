@@ -781,7 +781,7 @@ type ty_partition = {
 }
 
 let rec split_ty_by_tuple
-    ~(expansions : SSet.t)
+    ~(expansions : S_set.t)
     ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
@@ -881,7 +881,7 @@ and split_ty_by_shape
                   let (env, field_split) =
                     split_ty
                       ~other_intersected_tys:[]
-                      ~expansions:SSet.empty
+                      ~expansions:S_set.empty
                       env
                       ty_field.sft_ty
                       ~predicate:pred_field.sfp_predicate
@@ -989,7 +989,7 @@ and split_ty_by_tag
 
 and split_ty_by_union
     ~(other_intersected_tys : locl_ty list)
-    ~(expansions : SSet.t)
+    ~(expansions : S_set.t)
     (env : env)
     (ty : locl_ty)
     (predicates : type_predicate list) : env * TyPartition.t =
@@ -1019,7 +1019,7 @@ and split_ty_by_union
 
 and split_ty
     ~(other_intersected_tys : locl_ty list)
-    ~(expansions : SSet.t)
+    ~(expansions : S_set.t)
     (env : env)
     (ty : locl_ty)
     ~(predicate : type_predicate) : env * TyPartition.t =
@@ -1190,7 +1190,7 @@ and split_ty
       (env, TyPartition.(meet (mk_span ~env ~predicate ty) partition))
     | Tgeneric name
     | Tnewtype (name, _, _)
-      when SSet.mem name expansions ->
+      when S_set.mem name expansions ->
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tgeneric name
       when match snd predicate with
@@ -1202,7 +1202,7 @@ and split_ty
        * over-approximate DataType collapses the result to [mk_span]. *)
       (env, TyPartition.mk_left ~env ~predicate ty)
     | Tgeneric name ->
-      let expansions = SSet.add name expansions in
+      let expansions = S_set.add name expansions in
       let upper_bounds = Env.get_upper_bounds env name |> Typing_set.elements in
       let init = TyPartition.mk_span ~env ~predicate ty in
       split_intersection
@@ -1215,7 +1215,7 @@ and split_ty
       when String.equal name Naming_special_names.Classes.cRepresentableAs ->
       (* RepresentableAs<T> shares its runtime data type with T, so a
        * predicate splits RepresentableAs<T> exactly as it splits T. *)
-      let expansions = SSet.add name expansions in
+      let expansions = S_set.add name expansions in
       split_ty ~other_intersected_tys ~expansions ~predicate env ty_arg
     | Tnewtype (name, _, _)
       when match snd predicate with
@@ -1227,7 +1227,7 @@ and split_ty
         Typing_utils.get_newtype_super env (get_reason ty) name tyl
       in
       let init = TyPartition.mk_span ~env ~predicate ty in
-      let expansions = SSet.add name expansions in
+      let expansions = S_set.add name expansions in
       begin
         match Env.get_typedef env name with
         | Decl_entry.Found
@@ -1365,7 +1365,7 @@ and split_ty
 
 let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
   let (env, (partition, true_assumptions, false_assumptions)) =
-    split_ty ~other_intersected_tys:[] ~expansions:SSet.empty ~predicate env ty
+    split_ty ~other_intersected_tys:[] ~expansions:S_set.empty ~predicate env ty
   in
   let left = TyPartition.left partition in
   let span = TyPartition.span partition in

@@ -890,9 +890,9 @@ let rec keep_trying_to_open
               raw_updates
               |> List.map ~f:(fun file ->
                      Filename.concat (Path.to_string root) file)
-              |> SSet.of_list
+              |> S_set.of_list
             else
-              SSet.of_list raw_updates
+              S_set.of_list raw_updates
           in
           let updates =
             Find_utils.post_file_watcher_filter_from_fully_qualified_raw_updates

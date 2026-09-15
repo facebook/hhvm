@@ -7,12 +7,11 @@
  *)
 
 open Core
-open Reordered_argument_collections
 
 type t = {
   extern_types: string S_map.t;
-  copy_types: SSet.t option;
-  safe_ints_types: SSet.t;
+  copy_types: S_set.t option;
+  safe_ints_types: S_set.t;
       (** Types for which any ocaml int will be converted to ocamlrep::OCamlInt rather than isize *)
 }
 
@@ -20,7 +19,7 @@ let default =
   {
     extern_types = S_map.empty;
     copy_types = None;
-    safe_ints_types = SSet.empty;
+    safe_ints_types = S_set.empty;
   }
 
 let config : t option ref = ref None
@@ -55,7 +54,7 @@ let copy_type type_name =
                else
                  mod_name ^ "::" ^ type_name
              in
-             SSet.mem copy_types maybe_qualified_type))
+             S_set.mem maybe_qualified_type copy_types))
 
 let is_known v b =
   match v with
@@ -63,6 +62,6 @@ let is_known v b =
   | _ -> false
 
 let safe_ints ~mod_name ~name =
-  SSet.mem
-    (Option.value_exn !config).safe_ints_types
+  S_set.mem
     (Printf.sprintf "%s::%s" mod_name name)
+    (Option.value_exn !config).safe_ints_types

@@ -158,14 +158,14 @@ let collect_inherited_members ctx tast_def =
         in
         let update = update_member_cluster add_type_constant in
         Class.typeconsts class_decl
-        |> List.fold ~init:(mcs, SSet.empty) ~f:(fun (mcs, tcs) (name, elt) ->
+        |> List.fold ~init:(mcs, S_set.empty) ~f:(fun (mcs, tcs) (name, elt) ->
                let origin = elt.Typing_defs.ttc_origin in
                (* Skip if not inherited *)
                if String.equal origin class_name then
                  (mcs, tcs)
                else
                  let mcs = update ~name ~origin mcs in
-                 let tcs = SSet.add name tcs in
+                 let tcs = S_set.add name tcs in
                  (mcs, tcs))
       in
       let mcs =
@@ -185,7 +185,7 @@ let collect_inherited_members ctx tast_def =
                if
                  String.equal origin class_name
                  || String.equal name Naming_special_names.Members.mClass
-                 || SSet.mem name type_constants
+                 || S_set.mem name type_constants
                then
                  mcs
                else
@@ -294,4 +294,4 @@ let referenced ctx t =
       Some (Relative_path.to_absolute path)
     | _ -> None
   in
-  List.filter_map t.symbols ~f:path |> SSet.of_list
+  List.filter_map t.symbols ~f:path |> S_set.of_list

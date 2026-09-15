@@ -136,11 +136,11 @@ val empty_t : t
 (** [File_info.names] is a cut-down version of [File_info.t], one that we use internally
 for decl-diffing and other fanout calculations. *)
 type names = {
-  n_funs: SSet.t;
-  n_classes: SSet.t;
-  n_types: SSet.t;
-  n_consts: SSet.t;
-  n_modules: SSet.t;
+  n_funs: S_set.t;
+  n_classes: S_set.t;
+  n_types: S_set.t;
+  n_consts: S_set.t;
+  n_modules: S_set.t;
 }
 [@@deriving show]
 
@@ -173,16 +173,16 @@ val saved_to_names : saved -> names
 val to_string : t -> string
 
 type diff = {
-  removed_funs: SSet.t;
-  added_funs: SSet.t;
-  removed_classes: SSet.t;
-  added_classes: SSet.t;
-  removed_types: SSet.t;
-  added_types: SSet.t;
-  removed_consts: SSet.t;
-  added_consts: SSet.t;
-  removed_modules: SSet.t;
-  added_modules: SSet.t;
+  removed_funs: S_set.t;
+  added_funs: S_set.t;
+  removed_classes: S_set.t;
+  added_classes: S_set.t;
+  removed_types: S_set.t;
+  added_types: S_set.t;
+  removed_consts: S_set.t;
+  added_consts: S_set.t;
+  removed_modules: S_set.t;
+  added_modules: S_set.t;
 }
 
 val diff : t -> t -> diff option

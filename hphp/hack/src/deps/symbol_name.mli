@@ -42,7 +42,7 @@ module type I = sig
   val of_string_TRANSITIONAL : string -> t
 end
 
-(** [Symbol_name.Set] is a set that's currently implemented as SSet but we're
+(** [Symbol_name.Set] is a set that's currently implemented as S_set but we're
 transitioning to make it into a set of an opaque type. *)
 module type Set = sig
   include Stdlib.Set.S
@@ -51,9 +51,9 @@ module type Set = sig
 
   val show : t -> string
 
-  val to_sset_TRANSITIONAL : t -> SSet.t
+  val to_sset_TRANSITIONAL : t -> S_set.t
 
-  val of_sset_TRANSITIONAL : SSet.t -> t
+  val of_sset_TRANSITIONAL : S_set.t -> t
 end
 
 (*****************************************************************************)

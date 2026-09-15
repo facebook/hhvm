@@ -8,7 +8,7 @@
 
 type summary = {
   count: int;
-  positions: SSet.t; [@to_yojson yojson_of_pos_set]
+  positions: S_set.t; [@to_yojson yojson_of_pos_set]
 }
 [@@deriving yojson_of]
 

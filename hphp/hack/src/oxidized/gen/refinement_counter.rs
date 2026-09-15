@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cdc6851eea591de275fc9c5c31188e0b>>
+// @generated SignedSource<<bb48117880409b50deb1ec9bfa044013>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -42,7 +42,7 @@ pub struct Summary {
     /// This field value is depended on the log level:
     /// refinement_counter = 3: Include all positions
     /// refinement_counter = 2: Include all positions, except for class refinements
-    /// otherwise: Do not include positions (will be SSet.empty)
+    /// otherwise: Do not include positions (will be S_set.empty)
     pub positions: s_set::SSet,
 }
 

@@ -9,7 +9,6 @@
 open Hh_prelude
 module Sys = Stdlib.Sys
 open Printf
-open Reordered_argument_collections
 open Utils
 
 type env = { rustfmt: string }
@@ -175,9 +174,9 @@ let parse_extern_types_file filename =
                   name);
            map)
 
-let parse_copy_types_file filename = SSet.of_list (parse_types_file filename)
+let parse_copy_types_file filename = S_set.of_list (parse_types_file filename)
 
-let parse_safe_ints_file filename = SSet.of_list (parse_types_file filename)
+let parse_safe_ints_file filename = S_set.of_list (parse_types_file filename)
 
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
@@ -242,7 +241,7 @@ let parse_args () =
     Option.value_map
       !safe_ints_types_file
       ~f:parse_safe_ints_file
-      ~default:SSet.empty
+      ~default:S_set.empty
   in
   Configuration.set { extern_types; copy_types; safe_ints_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in

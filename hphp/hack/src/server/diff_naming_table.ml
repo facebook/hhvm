@@ -93,9 +93,9 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
 
 let file_info_diff_to_string path d =
   let open File_info in
-  let set_to_string sset = String.concat (SSet.elements sset) ~sep:", " in
+  let set_to_string sset = String.concat (S_set.elements sset) ~sep:", " in
   let helper acc (description, s) =
-    if SSet.is_empty s then
+    if S_set.is_empty s then
       acc
     else
       description :: set_to_string s :: acc

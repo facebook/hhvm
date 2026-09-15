@@ -41,12 +41,12 @@ let empty_legacy_decls =
     decl_fixmes = Relative_path.Map.empty;
   }
 
-let keys_to_sset smap = S_map.fold (fun k _ s -> SSet.add s k) smap SSet.empty
+let keys_to_sset smap = S_map.fold (fun k _ s -> S_set.add k s) smap S_set.empty
 
 let rec collect_legacy_class
     ?(fail_if_missing = false)
     (ctx : Provider_context.t)
-    (requested_classes : SSet.t)
+    (requested_classes : S_set.t)
     (cid : string)
     (decls : saved_legacy_decls) : saved_legacy_decls =
   let open Decl_defs in
@@ -54,7 +54,7 @@ let rec collect_legacy_class
     decls
   else
     let kind =
-      if SSet.mem requested_classes cid then
+      if S_set.mem cid requested_classes then
         "requested"
       else
         "ancestor"
@@ -89,7 +89,7 @@ let rec collect_legacy_class
         with
         | Exit
         | Decl_defs.Decl_not_found _ ->
-          if not @@ SSet.mem requested_classes cid then
+          if not @@ S_set.mem cid requested_classes then
             failwith @@ "Missing legacy ancestor class " ^ cid
           else (
             Hh_logger.log "Missing legacy requested class %s" cid;
@@ -188,13 +188,13 @@ let rec collect_legacy_class
       in
       let ancestors =
         keys_to_sset data.dc_ancestors
-        |> SSet.union data.dc_xhp_attr_deps
-        |> SSet.union data.dc_req_ancestors_extends
+        |> S_set.union data.dc_xhp_attr_deps
+        |> S_set.union data.dc_req_ancestors_extends
       in
       collect_legacy_classes ctx requested_classes decls ancestors
 
-and collect_legacy_classes ctx requested_classes decls =
-  SSet.fold ~init:decls ~f:(collect_legacy_class ctx requested_classes)
+and collect_legacy_classes ctx requested_classes decls ancestors =
+  S_set.fold (collect_legacy_class ctx requested_classes) ancestors decls
 
 let restore_legacy_decls decls =
   let { classes; props; sprops; meths; smeths; cstrs; fixmes; decl_fixmes } =
@@ -218,7 +218,7 @@ type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class S_map.t }
 [@@deriving show]
 
 let collect_shallow_decls ctx workers classnames =
-  let classnames = SSet.elements classnames in
+  let classnames = S_set.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
      we won't look for ancestors. *)
   let job (init : 'a S_map.t) (classnames : string list) : 'a S_map.t =
@@ -229,7 +229,7 @@ let collect_shallow_decls ctx workers classnames =
           acc
         | Some data -> S_map.add cid data acc)
   in
-  (* The 'classnames' came from a SSet, and therefore all elements are unique.
+  (* The 'classnames' came from a S_set, and therefore all elements are unique.
      So we can safely assume there will be no merge collisions. *)
   let classes =
     Multi_worker.call

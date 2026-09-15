@@ -2823,7 +2823,7 @@ end = struct
     let claim =
       lazy
         (let stack =
-           SSet.fold
+           S_set.fold
              (fun x y ->
                (Render.strip_ns x |> Markdown_lite.md_codify) ^ " " ^ y)
              stack

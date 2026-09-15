@@ -515,18 +515,18 @@ let get_concrete_supertypes
         end
       | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
       | Tgeneric n ->
-        if SSet.mem n seen then
+        if S_set.mem n seen then
           iter seen env acc tyl
         else
           iter
-            (SSet.add n seen)
+            (S_set.add n seen)
             env
             acc
             (TySet.elements (Env.get_upper_bounds env n) @ tyl)
       | Tintersection tyl' -> iter seen env acc (tyl' @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
-  let (env, resl) = iter SSet.empty env TySet.empty [ty] in
+  let (env, resl) = iter S_set.empty env TySet.empty [ty] in
   (env, TySet.elements resl)
 
 (** The dual of [get_concrete_supertypes] *)
@@ -538,11 +538,11 @@ let get_concrete_subtypes env ty =
       let (env, ty) = Env.expand_type env ty in
       (match get_node ty with
       | Tgeneric n ->
-        if SSet.mem n seen then
+        if S_set.mem n seen then
           iter seen env acc tyl
         else
           iter
-            (SSet.add n seen)
+            (S_set.add n seen)
             env
             acc
             (TySet.elements (Env.get_lower_bounds env n) @ tyl)
@@ -557,7 +557,7 @@ let get_concrete_subtypes env ty =
       | Tunion tyl' -> iter seen env acc (tyl' @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
-  let (env, resl) = iter SSet.empty env TySet.empty [ty] in
+  let (env, resl) = iter S_set.empty env TySet.empty [ty] in
   (env, TySet.elements resl)
 
 (** Run a function on an intersection represented by a list of types.
@@ -719,10 +719,10 @@ let get_base_type ?(expand_supportdyn = true) env ty =
       | ty :: _ ->
         if TySet.mem ty (Env.get_lower_bounds env n) then
           (env, ty)
-        else if SSet.mem n seen_generics then
+        else if S_set.mem n seen_generics then
           (env, ty)
         else
-          loop env (SSet.add n seen_generics) ty
+          loop env (S_set.add n seen_generics) ty
       | [] -> (env, ty)
     end
     | Tnewtype (cid, tyargs, _) when Env.is_enum env cid ->
@@ -737,7 +737,7 @@ let get_base_type ?(expand_supportdyn = true) env ty =
       default env
     | _ -> (env, ty)
   in
-  loop env SSet.empty ty
+  loop env S_set.empty ty
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
@@ -804,14 +804,14 @@ let collect_enum_class_upper_bounds env name =
             mk (r, Tintersection [result; lty])
           in
           (seen, true, result)
-        | Tgeneric name when not (SSet.mem name seen) ->
-          collect (SSet.add name seen) ok result name
+        | Tgeneric name when not (S_set.mem name seen) ->
+          collect (S_set.add name seen) ok result name
         | _ -> (seen, ok, result))
       upper_bounds
       (seen, ok, result)
   in
   let mixed = MakeType.mixed Reason.none in
-  let (_, ok, upper_bound) = collect SSet.empty false mixed name in
+  let (_, ok, upper_bound) = collect S_set.empty false mixed name in
   if ok then
     let (env, upper_bound) = simplify_intersections env upper_bound in
     (env, Some upper_bound)
@@ -859,7 +859,7 @@ let rec has_ancestor_including_req ~visited env cls super_id =
          | _ -> false))
 
 and has_ancestor_including_req_refl ~visited env sub_id super_id =
-  (not (SSet.mem sub_id visited))
+  (not (S_set.mem sub_id visited))
   && (String.equal sub_id super_id
      ||
      match Env.get_class env sub_id with
@@ -868,15 +868,15 @@ and has_ancestor_including_req_refl ~visited env sub_id super_id =
        false
      | Decl_entry.Found cls ->
        has_ancestor_including_req
-         ~visited:(SSet.add sub_id visited)
+         ~visited:(S_set.add sub_id visited)
          env
          cls
          super_id)
 
-let has_ancestor_including_req = has_ancestor_including_req ~visited:SSet.empty
+let has_ancestor_including_req = has_ancestor_including_req ~visited:S_set.empty
 
 let has_ancestor_including_req_refl =
-  has_ancestor_including_req_refl ~visited:SSet.empty
+  has_ancestor_including_req_refl ~visited:S_set.empty
 
 let is_tests_bypass_visibility_context env =
   match Env.get_self_id env with
@@ -940,11 +940,11 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
         (is_supportdyn_i ~visited_tyvars ~visited_typarams env)
         upper_bounds
   | Tgeneric name ->
-    if SSet.mem name visited_typarams then
+    if S_set.mem name visited_typarams then
       false
     else
       let upper_bounds = Env.get_upper_bounds env name in
-      let visited_typarams = SSet.add name visited_typarams in
+      let visited_typarams = S_set.add name visited_typarams in
       Typing_set.exists
         (is_supportdyn ~visited_tyvars ~visited_typarams env)
         upper_bounds
@@ -964,7 +964,7 @@ and is_supportdyn_i ~visited_tyvars ~visited_typarams env ty =
 let is_supportdyn_use_tyvar_bounds env ty =
   is_supportdyn
     ~visited_tyvars:Tvid.Set.empty
-    ~visited_typarams:SSet.empty
+    ~visited_typarams:S_set.empty
     env
     ty
 

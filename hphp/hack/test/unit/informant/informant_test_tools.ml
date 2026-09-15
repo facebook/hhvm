@@ -51,7 +51,7 @@ let set_next_watchman_state_transition move (hg_rev : Hg.Rev.t) =
     | State_leave -> Watchman.State_leave ("hg.update", Some json)
     | State_enter -> Watchman.State_enter ("hg.update", Some json)
     | Changed_merge_base ->
-      Watchman.Changed_merge_base (hg_rev, SSet.empty, "dummy_clock")
+      Watchman.Changed_merge_base (hg_rev, S_set.empty, "dummy_clock")
     | Commit_transition ->
       failwith "Commit_transition not supported by Watchman-backed Informant"
   in

@@ -165,17 +165,17 @@ end
     regular enums (HHVM enforces the underlying base type, not the enum
     name), and for enum classes (cannot appear as typehints directly). *)
 let rec typedef_resolves_to_class_like
-    env ?(seen = SSet.empty) (typedef : typedef_type) : bool =
+    env ?(seen = S_set.empty) (typedef : typedef_type) : bool =
   match typedef.td_type_assignment with
   | CaseType _ -> false
   | SimpleTypeDef (_, ty) ->
     let (_r, ty_) = Typing_defs.deref ty in
     (match ty_ with
     | Tapply ((_pos, name), _argl) ->
-      if SSet.mem name seen then
+      if S_set.mem name seen then
         false
       else
-        let seen = SSet.add name seen in
+        let seen = S_set.add name seen in
         (match Env.get_class_or_typedef env name with
         | Decl_entry.Found (Env.ClassResult cls) ->
           let kind = Cls.kind cls in

@@ -180,7 +180,7 @@ let compute_fanout
       ~during_init:false
       None
       ~bucket_size:500
-      (fun _ -> SSet.empty)
+      (fun _ -> S_set.empty)
       ~previously_oldified_defs:File_info.empty_names
       ~defs:old_and_new_defs
   in

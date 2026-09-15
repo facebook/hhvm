@@ -10,7 +10,7 @@ open Hh_prelude
 module SN = Naming_special_names
 
 let vec_classes =
-  SSet.of_list
+  S_set.of_list
     [
       SN.Collections.cVec;
       SN.Collections.cVector;
@@ -26,7 +26,7 @@ let classify_type env ty =
   | Typing_defs.Tclass ((_, name), _, _) ->
     if String.equal name SN.Collections.cPair then
       (Analyze_list_logger_types.Pair, ty)
-    else if SSet.mem name vec_classes then
+    else if S_set.mem name vec_classes then
       (Analyze_list_logger_types.Vec, ty)
     else
       (Analyze_list_logger_types.Misc, ty)

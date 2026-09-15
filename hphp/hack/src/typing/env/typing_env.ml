@@ -504,7 +504,7 @@ module M = struct
     env_with_tpenv env (TPEnv.unbind_generic_parameters (get_tpenv env) tparams)
 
   let is_generic_parameter env name =
-    TPEnv.mem name (get_tpenv env) || SSet.mem name env.fresh_typarams
+    TPEnv.mem name (get_tpenv env) || S_set.mem name env.fresh_typarams
 
   let get_generic_parameters env =
     TPEnv.get_tparam_names (TPEnv.union (get_tpenv env) env.tpenv)
@@ -525,7 +525,7 @@ module M = struct
         name
     in
     let name = iterate 1 in
-    let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
+    let env = { env with fresh_typarams = S_set.add name env.fresh_typarams } in
     (env, name)
 
   (* Generate a fresh generic parameter with a specified prefix but distinct
@@ -558,7 +558,7 @@ module M = struct
 
   let get_tparams_in_ty_and_acc = Typing_env_types.get_tparams_in_ty_and_acc
 
-  let get_tparams env ty = get_tparams_in_ty_and_acc env SSet.empty ty
+  let get_tparams env ty = get_tparams_in_ty_and_acc env S_set.empty ty
 
   let get_tpenv_tparams env =
     TPEnv.fold
@@ -584,7 +584,7 @@ module M = struct
           TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
       end
       (get_tpenv env)
-      SSet.empty
+      S_set.empty
 
   (* Replace types for locals with empty environment *)
   let env_with_locals env locals =

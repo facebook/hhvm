@@ -83,7 +83,7 @@ let oldify_all class_to_elems =
   S_map.iter
     begin
       fun cls elems ->
-        Constructors.oldify_batch (SSet.singleton cls);
+        Constructors.oldify_batch (S_set.singleton cls);
         oldify_batch elems
     end
     class_to_elems
@@ -92,7 +92,7 @@ let remove_old_all class_to_elems =
   S_map.iter
     begin
       fun cls elems ->
-        Constructors.remove_old_batch (SSet.singleton cls);
+        Constructors.remove_old_batch (S_set.singleton cls);
         remove_old_batch elems
     end
     class_to_elems
@@ -101,7 +101,7 @@ let remove_all class_to_elems =
   S_map.iter
     begin
       fun cls elems ->
-        Constructors.remove_batch (SSet.singleton cls);
+        Constructors.remove_batch (S_set.singleton cls);
         remove_batch elems
     end
     class_to_elems

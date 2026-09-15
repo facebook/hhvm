@@ -205,7 +205,7 @@ end = struct
         enforcement ~is_dynamic_enforceable ctx visited ty
       | Tapply ((_, name), tyl) ->
         (* Cyclic type definition error will be produced elsewhere *)
-        if SSet.mem name visited then
+        if S_set.mem name visited then
           unenforced Reason.PRopaque
         else begin
           (* The pessimised definition depends on the class or typedef being referenced,
@@ -230,7 +230,7 @@ end = struct
             enforcement
               ~is_dynamic_enforceable
               ctx
-              (SSet.add name visited)
+              (S_set.add name visited)
               td_type
           | Some (TypedefResult { td_type_assignment = CaseType _; _ }) ->
             unenforced Reason.PRcase
@@ -251,7 +251,7 @@ end = struct
               enforcement
                 ~is_dynamic_enforceable
                 ctx
-                (SSet.add name visited)
+                (S_set.add name visited)
                 td_type
             in
             if transparent then
@@ -313,7 +313,7 @@ end = struct
                 (enforcement
                    ~is_dynamic_enforceable
                    ctx
-                   (SSet.add name visited)
+                   (S_set.add name visited)
                    intersected_type)
                 Reason.PRenum
             | None ->
@@ -408,10 +408,10 @@ end = struct
       match get_node ty with
       | Tapply ((_, name), [ty])
         when String.equal Naming_special_names.Classes.cAwaitable name ->
-        enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
-      | _ -> enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+        enforcement ~is_dynamic_enforceable:false ctx S_set.empty ty
+      | _ -> enforcement ~is_dynamic_enforceable:false ctx S_set.empty ty
     else
-      enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+      enforcement ~is_dynamic_enforceable:false ctx S_set.empty ty
 end
 
 module type ShallowProvider =
@@ -462,14 +462,14 @@ module ShallowContextAccess (Provider : ShallowProvider) :
           | Some (TCConcrete _ as res) -> Some res))
     (* Look for id in c, either locally, or inherited *)
     and find_in_class visited c =
-      if SSet.mem (snd c.sc_name) visited then
+      if S_set.mem (snd c.sc_name) visited then
         None
       else
         match find_locally c with
         | Some tc -> Some tc
         | None ->
           find_in_list
-            (SSet.add (snd c.sc_name) visited)
+            (S_set.add (snd c.sc_name) visited)
             None
             (List.concat
                [
@@ -480,7 +480,7 @@ module ShallowContextAccess (Provider : ShallowProvider) :
                  c.sc_req_implements;
                ])
     in
-    let* tc = find_in_class SSet.empty c in
+    let* tc = find_in_class S_set.empty c in
     match tc with
     | TCAbstract abstract -> abstract.atc_as_constraint
     | TCConcrete concrete -> Some concrete.tc_type

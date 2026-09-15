@@ -321,7 +321,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   match get_node ty with
   | Tgeneric id ->
     (* Only count tracked generic parameters *)
-    if SSet.mem id tracked then
+    if S_set.mem id tracked then
       single id (get_reason ty)
     else
       empty

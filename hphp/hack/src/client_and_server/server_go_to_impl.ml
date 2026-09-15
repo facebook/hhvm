@@ -8,7 +8,6 @@
 
 open Hh_prelude
 open Server_env
-open Reordered_argument_collections
 open Server_command_types.Find_refs
 open Server_command_types.Done_or_retry
 open Typing_defs
@@ -134,7 +133,7 @@ let find_child_classes
     Find_refs_service.get_dependent_files
       ctx
       genv.Server_env.workers
-      (SSet.singleton class_name)
+      (S_set.singleton class_name)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   Find_refs_service.find_child_classes_in_files
@@ -142,7 +141,7 @@ let find_child_classes
     class_name
     env.naming_table
     files
-  |> SSet.elements
+  |> S_set.elements
 
 let find_child_classes_in_file
     (ctx : Provider_context.t)
@@ -155,7 +154,7 @@ let find_child_classes_in_file
     class_name
     naming_table
     fileset
-  |> SSet.elements
+  |> S_set.elements
 
 let search_class
     (ctx : Provider_context.t)

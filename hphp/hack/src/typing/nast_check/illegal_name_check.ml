@@ -17,7 +17,7 @@ let is_magic =
   let h = Stdlib.Hashtbl.create 23 in
   let a x = Stdlib.Hashtbl.add h x true in
   let _ =
-    SSet.iter
+    S_set.iter
       (fun m -> if String.( <> ) m SN.Members.__toString then a m)
       SN.Members.as_set
   in

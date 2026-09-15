@@ -25,7 +25,6 @@ open Hh_prelude
 (* module Bucket = Hack_bucket *)
 open Global_options
 open Result.Export
-open Reordered_argument_collections
 open Server_env
 open Server_init_types
 module SLC = Server_local_config
@@ -491,8 +490,7 @@ let file_names_to_deps names deps =
   let open Typing_deps in
   let { File_info.n_funs; n_classes; n_types; n_consts; n_modules } = names in
   let add_deps_of_sset dep_ctor sset depset =
-    SSet.fold sset ~init:depset ~f:(fun n acc ->
-        DepSet.add acc (Dep.make (dep_ctor n)))
+    S_set.fold (fun n acc -> DepSet.add acc (Dep.make (dep_ctor n))) sset depset
   in
   let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
@@ -553,7 +551,7 @@ let get_files_to_recheck
         | Some info -> Relative_path.Map.add acc ~key:path ~data:info
         | None -> acc)
   in
-  let get_old_and_new_classes path : SSet.t =
+  let get_old_and_new_classes path : S_set.t =
     let old_names =
       Naming_table.get_file_info old_naming_table path
       |> Option.map ~f:File_info.simplify
@@ -565,8 +563,8 @@ let get_files_to_recheck
     let classes_from_names x = x.File_info.n_classes in
     let old_classes = Option.map old_names ~f:classes_from_names in
     let new_classes = Option.map new_names ~f:classes_from_names in
-    Option.merge old_classes new_classes ~f:SSet.union
-    |> Option.value ~default:SSet.empty
+    Option.merge old_classes new_classes ~f:S_set.union
+    |> Option.value ~default:S_set.empty
   in
   let old_dirty_names =
     Relative_path.Map.fold
@@ -852,7 +850,7 @@ let get_updates_exn ~(genv : Server_env.genv) ~(root : Path.t) :
       let filter p =
         String.is_prefix p ~prefix:root && Find_utils.file_filter p
       in
-      SSet.filter updates ~f:filter
+      S_set.filter filter updates
       |> Relative_path.relativize_set Relative_path.Root
   in
   Hh_logger.log

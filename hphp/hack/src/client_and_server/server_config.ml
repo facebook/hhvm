@@ -13,7 +13,6 @@
 
 open Hh_prelude
 open Config_file.Getters
-open Reordered_argument_collections
 open Server_local_config
 
 type t = {
@@ -131,9 +130,13 @@ let config_list_regexp = Str.regexp "[, \t]+"
 
 let process_experimental sl =
   match List.map sl ~f:String.lowercase with
-  | ["false"] -> SSet.empty
+  | ["false"] -> S_set.empty
   | ["true"] -> Typechecker_options.experimental_all
-  | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
+  | features ->
+    List.fold_left
+      features
+      ~f:(fun acc feature -> S_set.add feature acc)
+      ~init:S_set.empty
 
 let config_experimental_tc_features config =
   Option.map
@@ -161,13 +164,16 @@ let config_experimental_stx_features config =
 
 let process_migration_flags sl =
   match sl with
-  | ["false"] -> SSet.empty
+  | ["false"] -> S_set.empty
   | ["true"] -> Typechecker_options.migration_flags_all
   | flags ->
     List.iter flags ~f:(fun s ->
-        if not (SSet.mem Typechecker_options.migration_flags_all s) then
+        if not (S_set.mem s Typechecker_options.migration_flags_all) then
           failwith ("invalid migration flag: " ^ s));
-    List.fold_left flags ~f:SSet.add ~init:SSet.empty
+    List.fold_left
+      flags
+      ~f:(fun acc flag -> S_set.add flag acc)
+      ~init:S_set.empty
 
 let config_tc_migration_flags config =
   Option.map

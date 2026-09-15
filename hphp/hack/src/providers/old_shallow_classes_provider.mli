@@ -11,9 +11,9 @@ open Shallow_decl_defs
 val get_old_batch :
   Provider_context.t ->
   during_init:bool ->
-  SSet.t ->
+  S_set.t ->
   shallow_class option S_map.t
 
-val oldify_batch : Provider_context.t -> SSet.t -> unit
+val oldify_batch : Provider_context.t -> S_set.t -> unit
 
-val remove_old_batch : Provider_context.t -> SSet.t -> unit
+val remove_old_batch : Provider_context.t -> S_set.t -> unit

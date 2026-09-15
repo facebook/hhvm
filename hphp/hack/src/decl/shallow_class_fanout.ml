@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Class_diff
-open Reordered_argument_collections
 open Typing_deps
 
 type changed_class = {
@@ -34,12 +33,15 @@ let get_maximum_fanout
 
 let class_names_from_deps ~ctx ~get_classes_in_file deps =
   let filenames = Naming_provider.get_files ctx deps in
-  Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
-      SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
+  Relative_path.Set.fold filenames ~init:S_set.empty ~f:(fun file acc ->
+      S_set.fold
+        (fun cid acc ->
           if DepSet.mem deps Dep.(make (Type cid)) then
-            SSet.add acc cid
+            S_set.add cid acc
           else
-            acc))
+            acc)
+        (get_classes_in_file file)
+        acc)
 
 let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
     DepSet.t =

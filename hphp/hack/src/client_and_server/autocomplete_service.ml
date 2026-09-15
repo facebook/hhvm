@@ -289,7 +289,7 @@ let required_params_of_fun_type (ft : _ fun_type) : _ Typing_defs.fun_param list
       ~init:(0, [])
       ~f:(fun (positional_param_count, required_params_rev) fp ->
         match Typing_defs.Named_params.name_of_named_param fp with
-        | Some name when SSet.mem name required_named_params ->
+        | Some name when S_set.mem name required_named_params ->
           (positional_param_count, fp :: required_params_rev)
         | Some _ ->
           (* optional named param *)
@@ -579,21 +579,21 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
   (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
   if is_auto_complete (snd id) && Cls.is_xhp class_ then
-    let existing_attr_names : SSet.t =
+    let existing_attr_names : S_set.t =
       attrs
       |> List.filter_map ~f:(fun attr ->
              match attr with
              | Aast.Xhp_simple { Aast.xs_name = id; _ } -> Some (snd id)
              | Aast.Xhp_spread _ -> None)
       |> List.filter ~f:(fun name -> not (matches_auto_complete_suffix name))
-      |> SSet.of_list
+      |> S_set.of_list
     in
     List.iter
       (get_class_elt_types ~is_method:false env class_ cid (Cls.props class_))
       ~f:(fun (name, ty) ->
         if
           not
-            (SSet.exists
+            (S_set.exists
                (fun key -> String.equal (":" ^ key) name)
                existing_attr_names)
         then
@@ -1265,7 +1265,7 @@ let autocomplete_named_argument_in_call
   let used_names =
     args
     |> List.filter_map ~f:Typing_defs.Named_params.name_of_arg
-    |> SSet.of_list
+    |> S_set.of_list
   in
   let add_named_argument_results pos id =
     let prefix = strip_suffix id |> Utils.strip_ns in
@@ -1276,7 +1276,7 @@ let autocomplete_named_argument_in_call
                (Typing_defs.Named_params.name_of_named_param fp)
                ~f:(fun name -> (name, fp)))
       |> List.filter ~f:(fun (name, _) ->
-             String.is_prefix name ~prefix && not (SSet.mem name used_names))
+             String.is_prefix name ~prefix && not (S_set.mem name used_names))
     in
     List.iteri matching_params ~f:(fun declaration_index (name, fp) ->
         let is_optional = Typing_defs_core.get_fp_is_optional fp in
@@ -1542,7 +1542,7 @@ let add_enum_const_result env pos replace_pos prefix const_name =
   in
   add_res complete
 
-let case_names (expected_enum : string) (cases : Tast.case list) : SSet.t =
+let case_names (expected_enum : string) (cases : Tast.case list) : S_set.t =
   let case_name case =
     match fst case with
     | ( _,
@@ -1552,7 +1552,7 @@ let case_names (expected_enum : string) (cases : Tast.case list) : SSet.t =
       Some variant_name
     | _ -> None
   in
-  SSet.of_list (List.filter_map cases ~f:case_name)
+  S_set.of_list (List.filter_map cases ~f:case_name)
 
 (* Autocomplete enum values in case statements.
 
@@ -1574,7 +1574,7 @@ let autocomplete_enum_case env (expr : Tast.expr) (cases : Tast.case list) =
             let used_consts = case_names name cases in
             let unused_consts =
               List.filter consts ~f:(fun const ->
-                  not (SSet.mem const used_consts))
+                  not (S_set.mem const used_consts))
             in
 
             let prefix = Utils.strip_ns name ^ "::" in
@@ -2384,14 +2384,14 @@ let available_keywords existing_modifiers possible_keywords : string list =
            | Syntax.Token _ -> Some (Syntax.text s)
            | _ -> None)
   in
-  let visibility_modifiers = SSet.of_list ["public"; "protected"; "private"] in
+  let visibility_modifiers = S_set.of_list ["public"; "protected"; "private"] in
   let has_visibility =
     List.exists current_modifiers ~f:(fun kw ->
-        SSet.mem kw visibility_modifiers)
+        S_set.mem kw visibility_modifiers)
   in
   List.filter possible_keywords ~f:(fun kw ->
       (not (List.mem current_modifiers kw ~equal:String.equal))
-      && not (SSet.mem kw visibility_modifiers && has_visibility))
+      && not (S_set.mem kw visibility_modifiers && has_visibility))
 
 let class_keywords filename existing_modifiers s : unit =
   let possible_keywords =

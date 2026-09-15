@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-open Reordered_argument_collections
 
 let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
   ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
@@ -934,20 +933,23 @@ let update
          if fails if you try to remove the same thing twice. *)
       let olds = strip_positions olds in
       let news = strip_positions news in
-      let olds_s = SSet.of_list olds in
-      let news_s = SSet.of_list news in
-      let removed = SSet.diff olds_s news_s in
-      let added = SSet.diff news_s olds_s in
-      SSet.iter removed ~f:(fun name ->
-          delta := remove ~case_insensitive !delta path name);
-      SSet.iter added ~f:(fun name ->
+      let olds_s = S_set.of_list olds in
+      let news_s = S_set.of_list news in
+      let removed = S_set.diff olds_s news_s in
+      let added = S_set.diff news_s olds_s in
+      S_set.iter
+        (fun name -> delta := remove ~case_insensitive !delta path name)
+        removed;
+      S_set.iter
+        (fun name ->
           delta :=
             add
               !naming_db_path_ref
               ~case_insensitive
               !delta
               (name_type, path)
-              name);
+              name)
+        added;
       ()
     in
     (* do the update *)

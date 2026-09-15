@@ -7,9 +7,7 @@
  *
  *)
 
-open Reordered_argument_collections
-
-type get_classes_in_file = Relative_path.t -> SSet.t
+type get_classes_in_file = Relative_path.t -> S_set.t
 
 type redo_type_decl_result = {
   fanout: Fanout.t;
@@ -69,9 +67,9 @@ val get_descendant_classes :
   Provider_context.t ->
   Multi_worker.worker list option ->
   bucket_size:int ->
-  (Relative_path.t -> SSet.t) ->
-  SSet.t ->
-  SSet.t
+  (Relative_path.t -> S_set.t) ->
+  S_set.t ->
+  S_set.t
 
 (** Test-only *)
 val remove_defs :

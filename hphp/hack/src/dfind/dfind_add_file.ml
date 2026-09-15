@@ -33,7 +33,7 @@ open Dfind_maybe
  *)
 
 let get_files path dir_handle =
-  let paths = ref SSet.empty in
+  let paths = ref S_set.empty in
   try
     while true do
       let file = Unix.readdir dir_handle in
@@ -41,7 +41,7 @@ let get_files path dir_handle =
         ()
       else
         let path = Filename.concat path file in
-        paths := SSet.add path !paths
+        paths := S_set.add path !paths
     done;
     assert false
   with
@@ -101,7 +101,7 @@ let rec add_file links env path =
   let path = normalize path in
   match is_blacklisted path with
   | true -> return ()
-  | false when not (SSet.mem path env.new_files) -> add_new_file links env path
+  | false when not (S_set.mem path env.new_files) -> add_new_file links env path
   | _ -> return ()
 
 and add_watch links env path =
@@ -114,7 +114,7 @@ and add_fsnotify_watch env path = return (Fsnotify.add_watch env.fsnotify path)
 and add_new_file links env path =
   let time = Time.get () in
   env.files <- TimeFiles.add (time, path) env.files;
-  env.new_files <- SSet.add path env.new_files;
+  env.new_files <- S_set.add path env.new_files;
   call (wrap Unix.lstat) path >>= fun ({ Unix.st_kind = kind; _ } as st) ->
   if ISet.mem st.Unix.st_ino links then
     return ()
@@ -129,22 +129,22 @@ and add_new_file links env path =
       call (add_watch links env) path >>= fun () ->
       call (wrap Unix.opendir) path >>= fun dir_handle ->
       let files = get_files path dir_handle in
-      SSet.iter (fun x -> ignore (add_file links env x)) files;
+      S_set.iter (fun x -> ignore (add_file links env x)) files;
       (try Unix.closedir dir_handle with
       | _ -> ());
       let prev_files =
         match S_map.find_opt path env.dirs with
         | Some files -> files
-        | None -> SSet.empty
+        | None -> S_set.empty
       in
-      let prev_files = SSet.union files prev_files in
+      let prev_files = S_set.union files prev_files in
       let files =
-        SSet.fold
+        S_set.fold
           begin
             fun file all_files ->
               match S_map.find_opt file env.dirs with
-              | Some sub_dir -> SSet.union sub_dir all_files
-              | None -> SSet.add file all_files
+              | Some sub_dir -> S_set.union sub_dir all_files
+              | None -> S_set.add file all_files
           end
           files
           prev_files

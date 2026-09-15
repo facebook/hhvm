@@ -100,8 +100,8 @@ type extended_reasons_config =
 type t = {
   po: Parser_options.t;
   tco_saved_state: saved_state;
-  tco_legacy_experimental_features: SSet.t;
-  tco_migration_flags: SSet.t;
+  tco_legacy_experimental_features: S_set.t;
+  tco_migration_flags: S_set.t;
   tco_num_local_workers: int option;
   tco_locl_cache_capacity: int;
   tco_locl_cache_node_threshold: int;
@@ -196,7 +196,7 @@ type t = {
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
   recursive_case_types: bool;
-  tco_enabled_unstable_features: SSet.t;
+  tco_enabled_unstable_features: S_set.t;
   class_sub_classname: bool;
   class_class_type: bool;
   needs_concrete: bool;
@@ -217,8 +217,8 @@ let default =
   {
     po = Parser_options.default;
     tco_saved_state = default_saved_state;
-    tco_legacy_experimental_features = SSet.empty;
-    tco_migration_flags = SSet.empty;
+    tco_legacy_experimental_features = S_set.empty;
+    tco_migration_flags = S_set.empty;
     tco_num_local_workers = None;
     tco_locl_cache_capacity = 30;
     tco_locl_cache_node_threshold = 10_000;
@@ -314,7 +314,7 @@ let default =
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
     recursive_case_types = false;
-    tco_enabled_unstable_features = SSet.empty;
+    tco_enabled_unstable_features = S_set.empty;
     class_sub_classname = true;
     class_class_type = true;
     needs_concrete = false;

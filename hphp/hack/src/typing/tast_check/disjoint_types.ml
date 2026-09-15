@@ -63,7 +63,7 @@ let has_non_disjoint_attr tp =
 let is_in_overlapping tp overlapping =
   match overlapping with
   | None -> false
-  | Some s -> SSet.mem (snd tp.tp_name) s
+  | Some s -> S_set.mem (snd tp.tp_name) s
 
 let check_function_type_args_non_disjoint
     ~is_dynamic_call

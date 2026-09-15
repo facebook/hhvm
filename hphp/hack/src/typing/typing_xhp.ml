@@ -126,7 +126,7 @@ and walk_list_and_gather_xhp env pos tyl =
 and get_spread_attributes env pos onto_xhp cty =
   let onto_attrs =
     xhp_attributes_for_class onto_xhp
-    |> List.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc)
+    |> List.fold ~init:S_set.empty ~f:(fun acc (k, _) -> S_set.add k acc)
   in
   let (env, possible_xhp, non_xhp) = walk_and_gather_xhp_ ~env ~pos cty in
   let xhp_required_err_opt =
@@ -136,7 +136,7 @@ and get_spread_attributes env pos onto_xhp cty =
   let xhp_to_attrs env (xhp_ty, tparams, xhp_info) =
     let attrs = xhp_attributes_for_class xhp_info in
     (* Compute the intersection and then localize the types *)
-    let attrs = List.filter attrs ~f:(fun (k, _) -> SSet.mem k onto_attrs) in
+    let attrs = List.filter attrs ~f:(fun (k, _) -> S_set.mem k onto_attrs) in
     (* XHP does not allow generics in the class declaration, so
      * we don't need to perform any substitutions *)
     let ety_env =

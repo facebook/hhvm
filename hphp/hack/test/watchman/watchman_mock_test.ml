@@ -7,7 +7,7 @@ module Watchman_changes_comparator = struct
     Watchman.(
       let pushed_to_string = function
         | Changed_merge_base (hg_rev, changes, clock) ->
-          let changes = String.concat ~sep:", " (SSet.elements changes) in
+          let changes = String.concat ~sep:", " (S_set.elements changes) in
           Printf.sprintf
             "Changed_merge_base(%s, %s, %s)"
             (Hg.Rev.to_string hg_rev)
@@ -26,7 +26,7 @@ module Watchman_changes_comparator = struct
         | Files_changed s ->
           Printf.sprintf
             "Watchman_push files [%s]"
-            (String.concat ~sep:", " @@ SSet.elements s)
+            (String.concat ~sep:", " @@ S_set.elements s)
       in
       match changes with
       | Watchman_unavailable -> "Watchman_unavailable"
@@ -39,11 +39,11 @@ module Watchman_changes_comparator = struct
   let pushed_is_equal exp actual =
     Watchman.(
       match (exp, actual) with
-      | (Files_changed exp, Files_changed actual) -> SSet.equal exp actual
+      | (Files_changed exp, Files_changed actual) -> S_set.equal exp actual
       | ( Changed_merge_base (hg_rev_exp, changes_exp, clock_exp),
           Changed_merge_base (hg_rev_actual, changes_actual, clock_actual) ) ->
         Hg.Rev.equal hg_rev_exp hg_rev_actual
-        && SSet.equal changes_exp changes_actual
+        && S_set.equal changes_exp changes_actual
         && String.equal clock_exp clock_actual
       | ( State_enter (state_exp, json_exp),
           State_enter (state_actual, json_actual) )
@@ -89,7 +89,7 @@ let test_mock_basic () =
     "init_returns";
   let expected_changes =
     Watchman.Watchman_synchronous
-      [Watchman.Files_changed (SSet.singleton "some_file.php")]
+      [Watchman.Files_changed (S_set.singleton "some_file.php")]
   in
   Watchman.Mocking.get_changes_returns expected_changes;
   let (_, actual_changes) =

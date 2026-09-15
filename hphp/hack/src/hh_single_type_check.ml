@@ -927,7 +927,7 @@ let parse_options () =
   in
   let tco_legacy_experimental_features =
     if !enable_supportdyn_hint then
-      SSet.add
+      S_set.add
         Typechecker_options.experimental_supportdynamic_type_hint
         tco_legacy_experimental_features
     else
@@ -935,7 +935,7 @@ let parse_options () =
   in
   let tco_legacy_experimental_features =
     if !consider_type_const_enforceable then
-      SSet.add
+      S_set.add
         Typechecker_options.experimental_consider_type_const_enforceable
         tco_legacy_experimental_features
     else
@@ -1397,7 +1397,7 @@ module File_deps = struct
     regular: 'a;
   }
 
-  let scrape_class_names (ast : Nast.program) : SSet.t deps =
+  let scrape_class_names (ast : Nast.program) : S_set.t deps =
     (* Visitor that collects class names from AST *)
     let name_collector () =
       let open Aast in
@@ -1411,10 +1411,10 @@ module File_deps = struct
         (* Note that the unit is not strictly required here, however, this way it's more in line
            with regular OCaml. *)
         method class_names () =
-          HashSet.fold class_names ~init:SSet.empty ~f:SSet.add
+          HashSet.fold class_names ~init:S_set.empty ~f:S_set.add
 
         method function_names () =
-          HashSet.fold function_names ~init:SSet.empty ~f:SSet.add
+          HashSet.fold function_names ~init:S_set.empty ~f:S_set.add
 
         method! on_class_name _ (_p, id) = HashSet.add class_names id
 
@@ -1454,7 +1454,7 @@ module File_deps = struct
     (class_hierarchy_visitor hierarchy_names_collector)#on_program () ast;
     let hierarchy_class_names = hierarchy_names_collector#class_names () in
     let regular_class_names =
-      SSet.diff (all_names_collector#class_names ()) hierarchy_class_names
+      S_set.diff (all_names_collector#class_names ()) hierarchy_class_names
     in
     let function_names = all_names_collector#function_names () in
     {
@@ -1472,7 +1472,7 @@ module File_deps = struct
       |> scrape_class_names
     in
     let resolve_to_path names ~resolve =
-      SSet.fold
+      S_set.fold
         (fun name files ->
           match resolve ctx name with
           | None -> files
@@ -2522,8 +2522,8 @@ let decl_and_run_mode
         let n_of_unique_builtins =
           Array.to_list magic_builtins
           |> List.map ~f:fst
-          |> SSet.of_list
-          |> SSet.cardinal
+          |> S_set.of_list
+          |> S_set.cardinal
         in
         if n_of_builtins <> n_of_unique_builtins then
           die "Multiple magic builtins share the same base name.\n"

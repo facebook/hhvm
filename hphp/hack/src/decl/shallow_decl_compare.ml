@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Class_diff
-open Reordered_argument_collections
 open Shallow_decl_defs
 module VersionedSSet = Decl_compare.VersionedSSet
 module Dep = Typing_deps.Dep
@@ -43,21 +42,29 @@ let compute_class_diffs
   let { VersionedSSet.added; kept; removed } = class_names in
   let acc = [] in
   let acc =
-    SSet.fold added ~init:acc ~f:(fun name acc ->
-        (name, Major_change MajorChange.Added) :: acc)
+    S_set.fold
+      (fun name acc -> (name, Major_change MajorChange.Added) :: acc)
+      added
+      acc
   in
   let acc =
-    SSet.fold removed ~init:acc ~f:(fun name acc ->
-        (name, Major_change MajorChange.Removed) :: acc)
+    S_set.fold
+      (fun name acc -> (name, Major_change MajorChange.Removed) :: acc)
+      removed
+      acc
   in
   let old_classes =
     Old_shallow_classes_provider.get_old_batch ctx ~during_init kept
   in
   let new_classes =
-    SSet.fold kept ~init:S_map.empty ~f:(fun name acc ->
+    S_set.fold
+      (fun name acc ->
         S_map.add name (Decl_provider.get_shallow_class ctx name) acc)
+      kept
+      S_map.empty
   in
-  SSet.fold kept ~init:acc ~f:(fun cid acc ->
+  S_set.fold
+    (fun cid acc ->
       let diff =
         diff_class_in_changed_file
           ~enable_annotation_agnostic_decl_diffing
@@ -68,6 +75,8 @@ let compute_class_diffs
       match diff with
       | Some diff -> (cid, diff) :: acc
       | None -> acc)
+    kept
+    acc
 
 let log_changes (changes : (string * Class_diff.t) list) : unit =
   let change_count = List.length changes in

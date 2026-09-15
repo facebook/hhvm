@@ -37,9 +37,9 @@ let test () =
 
   let get_classes path =
     match Naming_table.get_file_info env.Server_env.naming_table path with
-    | None -> SSet.empty
+    | None -> S_set.empty
     | Some info ->
-      SSet.of_list
+      S_set.of_list
       @@ List.map info.File_info.ids.File_info.classes ~f:(fun id ->
              id.File_info.name)
   in
@@ -49,7 +49,7 @@ let test () =
       None
       ~bucket_size:1
       get_classes
-      (SSet.of_list ["\\C"; "\\H"; "\\J"; "\\:M"])
+      (S_set.of_list ["\\C"; "\\H"; "\\J"; "\\:M"])
   in
   let expected_dependent_classes =
     List.sort
@@ -69,13 +69,13 @@ let test () =
         "\\:N";
       ]
   in
-  List.iter (SSet.elements dependent_classes) ~f:print_endline;
+  List.iter (S_set.elements dependent_classes) ~f:print_endline;
 
   if
     not
       (List.equal
          String.equal
-         (SSet.elements dependent_classes)
+         (S_set.elements dependent_classes)
          expected_dependent_classes)
   then
     Test.fail "Missing dependent classes"

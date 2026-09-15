@@ -54,7 +54,7 @@ let override_method_quickfixes
     (cls : Tast.class_)
     (parent_name : string) : t list =
   let existing_methods =
-    SSet.of_list (List.map cls.Aast.c_methods ~f:(fun m -> snd m.Aast.m_name))
+    S_set.of_list (List.map cls.Aast.c_methods ~f:(fun m -> snd m.Aast.m_name))
   in
 
   match Tast_env.get_class env parent_name with
@@ -65,7 +65,7 @@ let override_method_quickfixes
     let actions_for_methods ~is_static methods =
       methods
       |> List.filter ~f:(fun (name, meth) ->
-             (not (SSet.mem name existing_methods))
+             (not (S_set.mem name existing_methods))
              && (not (Typing_defs.get_ce_final meth))
              && not (Typing_defs.class_elt_is_private_not_lsb meth))
       |> List.map ~f:(stub_method_action ~location ~is_static ~parent_name)

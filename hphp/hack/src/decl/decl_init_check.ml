@@ -34,7 +34,7 @@ let add_parent_construct
     | Some class_ when class_.dc_need_init ->
       let (c_constructor, _, _) = split_methods c.c_methods in
       if Option.is_some c_constructor then
-        SSet.add parent_init_prop props
+        S_set.add parent_init_prop props
       else
         props
     | _ -> props)
@@ -48,7 +48,7 @@ let add_parent_construct_from_shallow_decl
     (match get_class_add_dep decl_env parent with
     | Some class_ when class_.dc_need_init && Option.is_some sc.sc_constructor
       ->
-      SSet.add parent_init_prop props
+      S_set.add parent_init_prop props
     | _ -> props)
   | _ -> props
 
@@ -118,7 +118,7 @@ let shallow_prop_may_need_init sp =
 let own_props c props =
   List.fold_left c.c_vars ~init:props ~f:(fun acc cv ->
       if prop_may_need_init cv then
-        SSet.add (snd cv.cv_id) acc
+        S_set.add (snd cv.cv_id) acc
       else
         acc)
 
@@ -127,7 +127,7 @@ let init_not_required_props c props =
       if prop_may_need_init cv then
         acc
       else
-        SSet.add (snd cv.cv_id) acc)
+        S_set.add (snd cv.cv_id) acc)
 
 let parent_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
   List.fold_left c.c_extends ~init:props ~f:(fun acc parent ->
@@ -137,7 +137,7 @@ let parent_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
         (match tc with
         | None -> acc
         | Some { dc_deferred_init_members = members; _ } ->
-          SSet.union members acc)
+          S_set.union members acc)
       | _ -> acc)
 
 (* As above, but for shallow_class decls rather than class NASTs. *)
@@ -150,7 +150,7 @@ let parent_props_from_shallow_decl
         (match tc with
         | None -> acc
         | Some { dc_deferred_init_members = members; _ } ->
-          SSet.union members acc)
+          S_set.union members acc)
       | _ -> acc)
 
 let trait_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
@@ -169,26 +169,26 @@ let trait_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
            * defining `dc_deferred_init_members`. See logic in `class_` for
            * Ast_defs.Cclass (Abstract) to see where this deviated for traits. *)
           (match fst cstr with
-          | None -> SSet.union members acc
+          | None -> S_set.union members acc
           | Some cstr
             when String.( <> ) cstr.elt_origin trait || get_elt_abstract cstr ->
-            SSet.union members acc
+            S_set.union members acc
           | _ ->
             let (c_constructor, _, _) = split_methods c.c_methods in
             if Option.is_some c_constructor then
-              SSet.union members acc
+              S_set.union members acc
             else
               acc))
       | _ -> acc)
 
 (** return the private init-requiring props of the class from its NAST *)
 let get_private_deferred_init_props c =
-  List.fold_left c.c_vars ~init:SSet.empty ~f:(fun priv_props cv ->
+  List.fold_left c.c_vars ~init:S_set.empty ~f:(fun priv_props cv ->
       let name = snd cv.cv_id in
       let visibility = cv.cv_visibility in
       if prop_may_need_init cv && Aast.(equal_visibility visibility Private)
       then
-        SSet.add name priv_props
+        S_set.add name priv_props
       else
         priv_props)
 
@@ -197,9 +197,9 @@ let get_private_deferred_init_props c =
 let get_nonprivate_deferred_init_props
     ~(get_class_add_dep : get_class_add_dep) decl_env sc =
   let props =
-    List.fold_left sc.sc_props ~init:SSet.empty ~f:(fun props sp ->
+    List.fold_left sc.sc_props ~init:S_set.empty ~f:(fun props sp ->
         if shallow_prop_may_need_init sp then
-          SSet.add (snd sp.sp_name) props
+          S_set.add (snd sp.sp_name) props
         else
           props)
   in
@@ -214,7 +214,7 @@ let private_deferred_init_props ~has_own_cstr c =
   | Ast_defs.Cclass k when Ast_defs.is_abstract k && not has_own_cstr ->
     get_private_deferred_init_props c
   | Ast_defs.Ctrait -> get_private_deferred_init_props c
-  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> SSet.empty
+  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> S_set.empty
 
 let nonprivate_deferred_init_props
     ~has_own_cstr ~(get_class_add_dep : get_class_add_dep) decl_env sc =
@@ -223,7 +223,7 @@ let nonprivate_deferred_init_props
     get_nonprivate_deferred_init_props ~get_class_add_dep decl_env sc
   | Ast_defs.Ctrait ->
     get_nonprivate_deferred_init_props ~get_class_add_dep decl_env sc
-  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> SSet.empty
+  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> S_set.empty
 
 (**
  * [parent_initialized_members decl_env c] returns all members initialized in
@@ -232,17 +232,17 @@ let nonprivate_deferred_init_props
  *)
 let parent_initialized_members ~get_class_add_dep decl_env c =
   let parent_initialized_members_helper = function
-    | None -> SSet.empty
+    | None -> S_set.empty
     | Some { dc_props; _ } ->
       dc_props
       |> S_map.filter (fun _ p -> Decl_defs.get_elt_needs_init p)
       |> S_map.keys
-      |> SSet.of_list
+      |> S_set.of_list
   in
-  List.fold_left c.c_extends ~init:SSet.empty ~f:(fun acc parent ->
+  List.fold_left c.c_extends ~init:S_set.empty ~f:(fun acc parent ->
       match parent with
       | (_, Happly ((_, parent), _)) ->
         get_class_add_dep decl_env parent
         |> parent_initialized_members_helper
-        |> SSet.union acc
+        |> S_set.union acc
       | _ -> acc)

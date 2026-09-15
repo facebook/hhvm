@@ -70,21 +70,21 @@ let test_process_file_deferring () =
     found_declare
     "Should have found the declare file computation";
   let decl_names =
-    List.fold deferred_decls ~init:SSet.empty ~f:(fun s (_, id) ->
-        SSet.add id s)
+    List.fold deferred_decls ~init:S_set.empty ~f:(fun s (_, id) ->
+        S_set.add id s)
   in
   let expected_decl_names =
     ["A"; "B"; "D"; "Foo"; "Bar"]
     |> List.map ~f:(Printf.sprintf "\\%s")
-    |> SSet.of_list
+    |> S_set.of_list
   in
   Asserter.Bool_asserter.assert_equals
     true
-    (SSet.equal decl_names expected_decl_names)
+    (S_set.equal decl_names expected_decl_names)
     (Printf.sprintf
        "Unexpected set of deferred decls. Expected %s, got %s"
-       (SSet.show expected_decl_names)
-       (SSet.show decl_names));
+       (S_set.show expected_decl_names)
+       (S_set.show decl_names));
   Asserter.Int_asserter.assert_equals
     5
     (List.length deferred_decls)

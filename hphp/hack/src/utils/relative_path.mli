@@ -98,7 +98,7 @@ module Map : sig
     Base.Hash.state
 end
 
-val relativize_set : prefix -> SSet.t -> Set.t
+val relativize_set : prefix -> S_set.t -> Set.t
 
 val set_of_list : t list -> Set.t
 

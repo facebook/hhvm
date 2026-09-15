@@ -25,8 +25,8 @@ module type SSet_S = Reordered_argument_collections_sig.SSet_S
 
 module SSet :
   SSet_S
-    with type elt = Reordered_argument_set(SSet).elt
-    with type t = Reordered_argument_set(SSet).t
+    with type elt = Reordered_argument_set(S_set).elt
+    with type t = Reordered_argument_set(S_set).t
 
 module type SMap_S = Reordered_argument_collections_sig.SMap_S
 

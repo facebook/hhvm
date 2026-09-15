@@ -133,7 +133,7 @@ let get_check_info ~check_reason ~log_errors ~discard_warnings (genv : genv) env
 type user_filter =
   | UserFilterInclude of Str.regexp list
   | UserFilterExclude of Str.regexp list
-  | UserFilterFiles of SSet.t
+  | UserFilterFiles of S_set.t
 
 let user_filter_of_json (json : Yojson.Safe.t) : user_filter =
   let open Yojson.Safe.Util in
@@ -174,7 +174,7 @@ let user_filter_of_json (json : Yojson.Safe.t) : user_filter =
     let file_list =
       json |> member "files" |> to_list |> List.map ~f:to_string
     in
-    UserFilterFiles (SSet.of_list file_list)
+    UserFilterFiles (S_set.of_list file_list)
   else
     raise @@ Failure (Printf.sprintf "Unknown filter type: '%s'" type_)
 
@@ -189,7 +189,7 @@ let user_filter_should_type_check
   match user_filter with
   | UserFilterInclude regexes -> matches_any regexes
   | UserFilterExclude regexes -> not (matches_any regexes)
-  | UserFilterFiles files -> SSet.mem (Relative_path.suffix path) files
+  | UserFilterFiles files -> S_set.mem (Relative_path.suffix path) files
 
 let user_filters_should_type_check
     (user_filters : user_filter list) (path : Relative_path.t) : bool =

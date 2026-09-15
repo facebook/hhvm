@@ -168,7 +168,7 @@ end = struct
 
   let min_level_stderr_ref = ref Info
 
-  let categories_ref = ref SSet.empty
+  let categories_ref = ref S_set.empty
 
   let set_min_level_file level = min_level_file_ref := level
 
@@ -183,13 +183,13 @@ end = struct
 
   let min_level_stderr () = !min_level_stderr_ref
 
-  let set_categories categories = categories_ref := SSet.of_list categories
+  let set_categories categories = categories_ref := S_set.of_list categories
 
   let passes level ~category =
     let passes_category =
       match category with
       | None -> true
-      | Some category -> SSet.mem category !categories_ref
+      | Some category -> S_set.mem category !categories_ref
     in
     if not passes_category then
       None

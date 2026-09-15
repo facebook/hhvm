@@ -45,7 +45,7 @@ let names_and_origins_defined_by_cls_t cls =
     ]
   in
   List.fold_left
-    ~init:(SSet.empty, S_map.empty)
+    ~init:(S_set.empty, S_map.empty)
     ~f:(fun set (accessor, condition, sanitize) ->
       List.fold_left
         ~init:set
@@ -53,7 +53,7 @@ let names_and_origins_defined_by_cls_t cls =
           if condition el then
             let name = sanitize el in
             let element = snd el in
-            ( SSet.add name names,
+            ( S_set.add name names,
               S_map.add name element.Typing_defs.ce_origin origins )
           else
             (names, origins))
@@ -64,16 +64,16 @@ let names_and_origins_defined_by_cls_t cls =
 let names_and_pos_defined_by_class_ class_ =
   let method_names_pos =
     List.fold_left
-      ~init:(SSet.empty, S_map.empty)
+      ~init:(S_set.empty, S_map.empty)
       ~f:(fun (names, pos) m ->
-        ( SSet.add (snd m.m_name) names,
+        ( S_set.add (snd m.m_name) names,
           S_map.add (snd m.m_name) (fst m.m_name) pos ))
       class_.c_methods
   in
   List.fold_left
     ~init:method_names_pos
     ~f:(fun (names, pos) cv ->
-      ( SSet.add (snd cv.cv_id) names,
+      ( S_set.add (snd cv.cv_id) names,
         S_map.add (snd cv.cv_id) (fst cv.cv_id) pos ))
     class_.c_vars
 
@@ -146,8 +146,8 @@ let handler =
             let trait_names = fst (names_and_origins_defined_by_cls_t t_cls) in
             if
               List.is_empty (Cls.all_ancestor_req_class_requirements t_cls)
-              && (not (SSet.is_empty trait_names))
-              && SSet.subset trait_names base_names
+              && (not (S_set.is_empty trait_names))
+              && S_set.subset trait_names base_names
               && not (trait_implements_interfaces ctx t_cls)
             then
               Lints_diagnostics.class_overrides_all_trait_methods
@@ -170,8 +170,8 @@ let handler =
             let (class_names, origins) =
               names_and_origins_defined_by_cls_t c_cls
             in
-            let dead_names = SSet.inter class_names base_names in
-            SSet.iter
+            let dead_names = S_set.inter class_names base_names in
+            S_set.iter
               (fun n ->
                 let origin = S_map.find n origins in
                 let method_ =

@@ -168,7 +168,7 @@ module ApiLazy = struct
     Decl_counters.count_subdecl decl (Decl_counters.Requires_ancestor ancestor)
     @@ fun () ->
     let (c, _) = t in
-    SSet.mem ancestor c.Decl_defs.dc_req_ancestors_extends
+    S_set.mem ancestor c.Decl_defs.dc_req_ancestors_extends
 
   let get_const (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_const id) @@ fun () ->
@@ -290,7 +290,7 @@ module ApiEager = struct
     (* The two below will traverse ancestors in different orders.
        But if the typechecker discovers errors in different order, no matter. *)
     let (c, _) = t in
-    SSet.elements c.Decl_defs.dc_req_ancestors_extends
+    S_set.elements c.Decl_defs.dc_req_ancestors_extends
 
   let all_ancestors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->

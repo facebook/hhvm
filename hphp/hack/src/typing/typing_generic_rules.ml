@@ -24,17 +24,17 @@ let get_transitive_upper_bounds env ty =
       let (env, ety) = Env.expand_type env ty in
       (match get_node ety with
       | Tgeneric n ->
-        if SSet.mem n seen then
+        if S_set.mem n seen then
           iter seen env acc tyl
         else
           iter
-            (SSet.add n seen)
+            (S_set.add n seen)
             env
             acc
             (TySet.elements (Env.get_upper_bounds env n) @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
-  let (env, resl) = iter SSet.empty env TySet.empty [ty] in
+  let (env, resl) = iter S_set.empty env TySet.empty [ty] in
   (env, TySet.elements resl)
 
 (* Apply generic typing rules. Here, assume E[e:t] is some expression with a

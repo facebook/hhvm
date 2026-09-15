@@ -17,8 +17,8 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
   let tracked =
     List.fold_left
       tparams
-      ~f:(fun tracked t -> SSet.add (snd t.tp_name) tracked)
-      ~init:SSet.empty
+      ~f:(fun tracked t -> S_set.add (snd t.tp_name) tracked)
+      ~init:S_set.empty
   in
   let Equal = Tast_env.eq_typing_env in
   let (positive, negative) =
@@ -33,14 +33,14 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
   let label_generics =
     let generics_finder =
       object
-        inherit [SSet.t] Type_visitor.decl_type_visitor
+        inherit [S_set.t] Type_visitor.decl_type_visitor
 
-        method! on_tgeneric acc _ n = SSet.add n acc
+        method! on_tgeneric acc _ n = S_set.add n acc
       end
     in
     let finder =
       object
-        inherit [SSet.t] Type_visitor.decl_type_visitor as parent
+        inherit [S_set.t] Type_visitor.decl_type_visitor as parent
 
         method! on_type acc ty =
           match get_node ty with
@@ -51,7 +51,7 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
           | _ -> parent#on_type acc ty
       end
     in
-    finder#on_type SSet.empty ty
+    finder#on_type S_set.empty ty
   in
   List.iter tparams ~f:(fun t ->
       let (pos, name) = t.tp_name in
@@ -114,7 +114,7 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
             | _ -> ()
           end
         (* Only report an error if the generic appears within a enum class label *)
-        | (None, Some _positions) when SSet.mem name label_generics ->
+        | (None, Some _positions) when S_set.mem name label_generics ->
           let bounds_message =
             if List.is_empty super_bounds then
               ""

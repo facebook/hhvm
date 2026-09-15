@@ -8,10 +8,9 @@
  *
  *)
 
-open Reordered_argument_collections
 open Integration_test_base_types
 module FileMap = S_map
-module ErrorSet = SSet
+module ErrorSet = S_set
 
 val in_daemon : (unit -> unit) -> unit
 

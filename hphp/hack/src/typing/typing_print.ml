@@ -1590,8 +1590,8 @@ module Full = struct
       represent this as `as t` or `super t`, otherwise use full `where` syntax *)
   let constraints_for_type ~fuel ~hide_internals to_doc env typ =
     let tparams =
-      SSet.elements
-        (Typing_env_types.get_tparams_in_ty_and_acc env SSet.empty typ)
+      S_set.elements
+        (Typing_env_types.get_tparams_in_ty_and_acc env S_set.empty typ)
     in
     let constraints =
       List.concat_map tparams ~f:(get_constraints_on_tparam env)
@@ -2008,8 +2008,8 @@ module ErrorString = struct
     let (fuel, l) =
       List.fold_map nonnull ~init:fuel ~f:(fun fuel -> to_string ~fuel env)
     in
-    let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
-    let l = SSet.elements s in
+    let s = List.fold_right l ~f:S_set.add ~init:S_set.empty in
+    let l = S_set.elements s in
     let str =
       if List.is_empty null then
         union_ l

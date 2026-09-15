@@ -12,10 +12,9 @@
   work to do. We need to calculate what must be re-checked. *)
 
 open Hh_prelude
-open Reordered_argument_collections
 open Typing_deps
 
-type get_classes_in_file = Relative_path.t -> SSet.t
+type get_classes_in_file = Relative_path.t -> S_set.t
 
 type redo_type_decl_result = {
   fanout: Fanout.t;
@@ -132,7 +131,7 @@ let compare_decls_and_get_fanout
       let non_class_defs =
         {
           File_info.n_funs;
-          n_classes = SSet.empty;
+          n_classes = S_set.empty;
           n_types;
           n_consts;
           n_modules;
@@ -362,7 +361,7 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     class [c] is a member of or is a descendant of
     any of the [classes]. *)
 let is_descendant_of_any_of classes (c : string) : bool =
-  if SSet.mem classes c then
+  if S_set.mem c classes then
     true
   else
     match Decl_heap.Classes.get c with
@@ -371,8 +370,10 @@ let is_descendant_of_any_of classes (c : string) : bool =
      * check for the purpose of invalidating things from the heap
      * - if it's already not there, then we don't care. *)
     | Some c ->
-      let intersection_nonempty s1 s2 = SSet.exists s1 ~f:(SSet.mem s2) in
-      S_map.exists (fun c _ -> SSet.mem classes c) c.Decl_defs.dc_ancestors
+      let intersection_nonempty s1 s2 =
+        S_set.exists (fun x -> S_set.mem x s2) s1
+      in
+      S_map.exists (fun c _ -> S_set.mem c classes) c.Decl_defs.dc_ancestors
       || intersection_nonempty c.Decl_defs.dc_extends classes
       || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
       || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
@@ -381,35 +382,36 @@ let is_descendant_of_any_of classes (c : string) : bool =
     adds to [classes_acc] the classes in [files],
     obtained with [get_classes file] for [file] in [files] *)
 let add_classes_in_files
-    (get_classes : Relative_path.t -> SSet.t)
+    (get_classes : Relative_path.t -> S_set.t)
     (files : Relative_path.Set.t)
-    (classes_acc : SSet.t) : SSet.t =
+    (classes_acc : S_set.t) : S_set.t =
   Relative_path.Set.fold files ~init:classes_acc ~f:(fun fn acc ->
-      SSet.union acc @@ get_classes fn)
+      S_set.union acc @@ get_classes fn)
 
 (** Return the files containing all descendants of provided classes *)
-let get_files_of_descendants (ctx : Provider_context.t) (class_names : SSet.t) :
-    Relative_path.Set.t =
-  SSet.fold
-    class_names
-    ~init:Typing_deps.(DepSet.make ())
-    ~f:(fun c acc ->
+let get_files_of_descendants (ctx : Provider_context.t) (class_names : S_set.t)
+    : Relative_path.Set.t =
+  S_set.fold
+    (fun c acc ->
       Typing_deps.get_extend_deps
         ~mode:(Provider_context.get_deps_mode ctx)
         ~visited:(VisitedSet.make ())
         ~source_class:(Dep.make (Dep.Type c))
         ~acc)
+    class_names
+    Typing_deps.(DepSet.make ())
   |> Naming_provider.get_files ctx
 
 (** [filter_descendant_classes classes ~maybe_descendant_classes]
     filters [maybe_descendant_classes] to keep only those which are
     a descendant or a class in [classes], or a member of [classes]. *)
 let filter_descendant_classes
-    (classes : SSet.t) ~(maybe_descendant_classes : string list) : string list =
+    (classes : S_set.t) ~(maybe_descendant_classes : string list) : string list
+    =
   List.filter maybe_descendant_classes ~f:(is_descendant_of_any_of classes)
 
 module ClassSetStore = Global_storage.Make (struct
-  type t = SSet.t
+  type t = S_set.t
 end)
 
 let load_and_filter_descendant_classes (maybe_descendant_classes : string list)
@@ -435,7 +437,7 @@ let merge_descendant_classes
 let filter_descendant_classes_parallel
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
-    (classes : SSet.t)
+    (classes : S_set.t)
     (maybe_descendant_classes : string list) : string list =
   let classes_initial_count = List.length maybe_descendant_classes in
   if classes_initial_count < 10 then
@@ -477,13 +479,13 @@ let get_descendant_classes
     (ctx : Provider_context.t)
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
-    (get_classes : Relative_path.t -> SSet.t)
-    (classes : SSet.t) : SSet.t =
+    (get_classes : Relative_path.t -> S_set.t)
+    (classes : S_set.t) : S_set.t =
   let files_of_descendants = get_files_of_descendants ctx classes in
   add_classes_in_files get_classes files_of_descendants classes
-  |> SSet.elements
+  |> S_set.elements
   |> filter_descendant_classes_parallel workers ~bucket_size classes
-  |> SSet.of_list
+  |> S_set.of_list
 
 let merge_elements
     classes_initial_count classes_processed_count (elements, count) acc =
@@ -506,7 +508,7 @@ let get_elems
     ~(bucket_size : int)
     ~(old : bool)
     (defs : File_info.names) : Decl_class_elements.t S_map.t =
-  let classes = SSet.elements defs.File_info.n_classes in
+  let classes = S_set.elements defs.File_info.n_classes in
   (* Getting the members of a class requires fetching the class from the heap.
    * Doing this for too many classes will cause a large amount of allocations
    * to be performed on the master process triggering the GC and slowing down
@@ -550,15 +552,15 @@ let invalidate_folded_classes
   let to_invalidate =
     List.fold
       changed_classes
-      ~init:SSet.empty
+      ~init:S_set.empty
       ~f:(fun acc { Shallow_class_fanout.descendant_deps; _ } ->
         Shallow_class_fanout.class_names_from_deps
           ~ctx
           ~get_classes_in_file
           descendant_deps
-        |> SSet.union acc)
+        |> S_set.union acc)
   in
-  Hh_logger.log "Invalidating %d folded classes" (SSet.cardinal to_invalidate);
+  Hh_logger.log "Invalidating %d folded classes" (S_set.cardinal to_invalidate);
   let (old_members, new_members) =
     let get_elems n_classes =
       get_elems workers ~bucket_size File_info.{ empty_names with n_classes }
@@ -581,7 +583,7 @@ let redo_type_decl
     ~during_init
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
-    (get_classes : Relative_path.t -> SSet.t)
+    (get_classes : Relative_path.t -> S_set.t)
     ~(previously_oldified_defs : File_info.names)
     ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     redo_type_decl_result =
@@ -667,7 +669,7 @@ let oldify_decls_and_remove_descendants
     (ctx : Provider_context.t)
     ?(collect_garbage = true)
     (workers : Multi_worker.worker list option)
-    (get_classes : Relative_path.t -> SSet.t)
+    (get_classes : Relative_path.t -> S_set.t)
     ~(bucket_size : int)
     ~(defs : File_info.names) : unit =
   let elems = get_elems workers ~bucket_size defs ~old:false in
@@ -682,7 +684,7 @@ let oldify_decls_and_remove_descendants
   in
   let descendant_classes =
     File_info.
-      { empty_names with n_classes = SSet.diff descendant_classes all_classes }
+      { empty_names with n_classes = S_set.diff descendant_classes all_classes }
   in
   (* This path exists to invalidate folded/member state derived from oldified
    * classes. [remove_defs] also removes descendant shallow decls, but that is

@@ -17,7 +17,7 @@ let static_method_check env reified_params m =
       method! on_hint env (pos, h) =
         match h with
         | Aast.Habstr t ->
-          if SSet.mem t reified_params then
+          if S_set.mem t reified_params then
             let Equal = Tast_env.eq_typing_env in
             Typing_error_utils.add_typing_error
               ~env
@@ -47,7 +47,7 @@ let handler =
                 Some (snd tp.tp_name)
               else
                 None)
-          |> SSet.of_list
+          |> S_set.of_list
         in
         let Equal = Tast_env.eq_typing_env in
         List.iter static_methods ~f:(static_method_check env reified_params)

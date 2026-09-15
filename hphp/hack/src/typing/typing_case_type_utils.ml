@@ -21,10 +21,10 @@ let find_recursive_mentions_in_decl_ty_via_typedef env name ty =
           let mentions =
             if String.equal sid name then
               [Typing_defs.mk (reason, Tapply (id, args))]
-            else if SSet.mem sid seen then
+            else if S_set.mem sid seen then
               []
             else
-              let seen = SSet.add sid seen in
+              let seen = S_set.add sid seen in
               match Env.get_class_or_typedef env sid with
               | Decl_entry.Found (Env.TypedefResult typedef_info) -> begin
                 match typedef_info.td_type_assignment with
@@ -44,7 +44,7 @@ let find_recursive_mentions_in_decl_ty_via_typedef env name ty =
     in
     visitor#on_type [] ty
   in
-  visit SSet.empty ty
+  visit S_set.empty ty
 
 let decl_ty_mentions_name_via_typedef env name ty =
   not

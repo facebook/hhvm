@@ -11,7 +11,6 @@
 open Hh_prelude
 open Option.Monad_infix
 open Server_env
-open Reordered_argument_collections
 open Server_command_types.Find_refs
 open Server_command_types.Done_or_retry
 
@@ -149,7 +148,7 @@ let search_member
       env.naming_table
       descendant_class_files
   in
-  let class_and_descendants = SSet.add descendant_classes origin_class_name in
+  let class_and_descendants = S_set.add origin_class_name descendant_classes in
   let files =
     Relative_path.Set.union descendant_class_files member_use_files
     |> Relative_path.Set.elements
@@ -219,7 +218,7 @@ let search_class
     Find_refs_service.get_dependent_files
       ctx
       genv.Server_env.workers
-      (SSet.singleton class_name)
+      (S_set.singleton class_name)
     |> Relative_path.Set.elements
   in
   search ctx target include_defs ~hints ~files ~stream_file genv

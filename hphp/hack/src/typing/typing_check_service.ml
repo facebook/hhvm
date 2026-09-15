@@ -304,14 +304,14 @@ type process_file_results = {
   deferred_decls: deferment list;
 }
 
-let scrape_class_names (ast : Nast.program) : SSet.t =
-  let names = ref SSet.empty in
+let scrape_class_names (ast : Nast.program) : S_set.t =
+  let names = ref S_set.empty in
   let visitor =
     object
       (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
       inherit [_] Aast.iter as super
 
-      method! on_class_name _ (_p, id) = names := SSet.add id !names
+      method! on_class_name _ (_p, id) = names := S_set.add id !names
 
       (* Before naming, explicit class references in expression position
          (new C(), C::m(), C::BAR, C::class, C::m<>, nameof C) are
@@ -322,7 +322,7 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
          there is unchanged. *)
       method! on_class_id_ env cid =
         match cid with
-        | Aast.CIexpr (_, _, Aast.Id (_, id)) -> names := SSet.add id !names
+        | Aast.CIexpr (_, _, Aast.Id (_, id)) -> names := S_set.add id !names
         | _ -> super#on_class_id_ env cid
     end
   in
@@ -354,7 +354,7 @@ let process_file
         (* Cheap gate: scrape the raw AST (no naming pass) to find decl-heavy
            files. The vast majority of files are below threshold and pay only
            this read-only AST walk instead of a full naming pass. *)
-        let num_refs = SSet.cardinal (scrape_class_names ast) in
+        let num_refs = S_set.cardinal (scrape_class_names ast) in
         if num_refs > prefetch_decls_threshold then begin
           (* Resolve the canonical class names (needs naming) to the files that
              declare them; unresolved refs are dropped, so this list can be
@@ -362,7 +362,7 @@ let process_file
           let deferred =
             Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
             |> scrape_class_names
-            |> SSet.elements
+            |> S_set.elements
             |> List.filter_map ~f:(fun class_name ->
                    Naming_provider.get_class_path ctx class_name >>| fun fn ->
                    (fn, class_name))

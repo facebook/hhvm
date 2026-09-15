@@ -647,7 +647,7 @@ module Watchman_actual : Watchman_sig.S = struct
     let (watched_path_expression_terms, watch_roots, failed_paths) =
       List.fold
         roots
-        ~init:(Some [], SSet.empty, SSet.empty)
+        ~init:(Some [], S_set.empty, S_set.empty)
         ~f:(fun (terms, watch_roots, failed_paths) path ->
           (* Watch this root. If the path doesn't exist, watch_project will throw. In that case catch
            * the error and continue for now. *)
@@ -664,7 +664,7 @@ module Watchman_actual : Watchman_sig.S = struct
           in
           match response with
           | None ->
-            (terms, watch_roots, SSet.add (Path.to_string path) failed_paths)
+            (terms, watch_roots, S_set.add (Path.to_string path) failed_paths)
           | Some response ->
             let watch_root = J.get_string_val "watch" response in
             let relative_path =
@@ -673,18 +673,18 @@ module Watchman_actual : Watchman_sig.S = struct
             let terms =
               prepend_relative_path_of_directory ~relative_path ~terms
             in
-            let watch_roots = SSet.add watch_root watch_roots in
+            let watch_roots = S_set.add watch_root watch_roots in
             (terms, watch_roots, failed_paths))
     in
     (* The failed_paths are likely includes which don't exist on the filesystem, so watch_project
      * returned an error. Let's do a best effort attempt to infer the watch root and relative
      * path for each bad include *)
     let watched_path_expression_terms =
-      SSet.fold
+      S_set.fold
         (fun path terms ->
           String_utils.(
             match
-              SSet.find_first_opt
+              S_set.find_first_opt
                 (fun root -> String.is_prefix path ~prefix:root)
                 watch_roots
             with
@@ -697,14 +697,14 @@ module Watchman_actual : Watchman_sig.S = struct
     in
     (* All of our watched paths should have the same watch root. Let's assert that *)
     let watch_root =
-      match SSet.elements watch_roots with
+      match S_set.elements watch_roots with
       | [] -> failwith "Cannot run watchman with fewer than 1 root"
       | [watch_root] -> watch_root
       | _ ->
         failwith
           (spf
              "Can't watch paths across multiple Watchman watch_roots. Found %d watch_roots"
-             (SSet.cardinal watch_roots))
+             (S_set.cardinal watch_roots))
     in
     (* If we don't have a prior clockspec, grab the current clock *)
     let clockspec =
@@ -1023,7 +1023,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
   let transform_asynchronous_get_changes_response env data =
     match data with
-    | None -> (env, Files_changed SSet.empty)
+    | None -> (env, Files_changed S_set.empty)
     | Some data ->
       let clock = extract_clock data in
       env.clockspec <- clock;

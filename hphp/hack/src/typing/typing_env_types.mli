@@ -36,7 +36,7 @@ type expr_tree_env = {
 type env = {
   expression_id_provider: Expression_id.provider;
   tvar_id_provider: Tvid.provider;
-  fresh_typarams: SSet.t;
+  fresh_typarams: S_set.t;
   lenv: local_env;
   genv: genv;
   decl_env: Decl_env.env;
@@ -136,7 +136,7 @@ val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
 val get_equal_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
-val get_tparams_in_ty_and_acc : env -> SSet.t -> locl_ty -> SSet.t
+val get_tparams_in_ty_and_acc : env -> S_set.t -> locl_ty -> S_set.t
 
 val get_rank : env -> int
 

@@ -9,9 +9,9 @@
 type changes =
   | Unavailable
       (** e.g. because DFind is not available, or watchman subscription is down *)
-  | SyncChanges of SSet.t
+  | SyncChanges of S_set.t
       (** contains all changes up to the point that the notifier was invoked *)
-  | AsyncChanges of SSet.t
+  | AsyncChanges of S_set.t
       (** contains whatever changes have been pushed up to this moment *)
 
 type clock = Server_notifier_types.clock =
@@ -33,7 +33,7 @@ val init :
 val init_null : unit -> t
 
 val init_mock :
-  get_changes_async:(unit -> changes) -> get_changes_sync:(unit -> SSet.t) -> t
+  get_changes_async:(unit -> changes) -> get_changes_sync:(unit -> S_set.t) -> t
 
 val wait_until_ready : t -> unit
 
@@ -44,7 +44,7 @@ val get_changes_async : t -> Telemetry.t -> changes * clock option * Telemetry.t
 (** Returns all changes up to the point this was invoked, represented as a set
 of changed files. This will raise an exception if the file watching service
 is unavailable *)
-val get_changes_sync : t -> Telemetry.t -> SSet.t * clock option * Telemetry.t
+val get_changes_sync : t -> Telemetry.t -> S_set.t * clock option * Telemetry.t
 
 (** If supported by the backend, returns a file descriptor that can be used to
     be notified about file system changes. The FD being read-ready is a

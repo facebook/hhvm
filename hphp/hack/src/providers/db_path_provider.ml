@@ -56,7 +56,7 @@ let set_naming_db_path
   | Provider_backend.Analysis
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
-    Shared_db_settings.remove_batch (SSet.singleton "database_path");
+    Shared_db_settings.remove_batch (S_set.singleton "database_path");
     Option.iter naming_db_path ~f:(Shared_db_settings.add "database_path");
     naming_db_path_cache := `Shmem_cached_path naming_db_path
   | Provider_backend.Rust_provider_backend backend ->

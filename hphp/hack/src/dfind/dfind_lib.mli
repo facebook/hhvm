@@ -18,7 +18,7 @@ val wait_until_ready : t -> unit
 
 val pid : t -> int
 
-val get_changes : t -> SSet.t
+val get_changes : t -> S_set.t
 
 val stop : t -> unit
 
@@ -53,7 +53,7 @@ module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
 
   val pid : t -> int
 
-  val get_changes : t -> SSet.t Marshal_tools.result
+  val get_changes : t -> S_set.t Marshal_tools.result
 
   val stop : t -> unit
 end

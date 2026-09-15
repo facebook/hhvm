@@ -29,7 +29,7 @@ type expr_tree_env = {
 type env = {
   expression_id_provider: Expression_id.provider;
   tvar_id_provider: Tvid.provider;
-  fresh_typarams: SSet.t;
+  fresh_typarams: S_set.t;
   lenv: local_env;
   genv: genv;
   decl_env: Decl_env.env;
@@ -86,7 +86,7 @@ let empty ?origin ?(mode = File_info.Mstrict) ctx file ~droot =
   {
     expression_id_provider = Expression_id.make_provider ();
     tvar_id_provider = Tvid.make_provider ();
-    fresh_typarams = SSet.empty;
+    fresh_typarams = S_set.empty;
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;
     in_try = false;
@@ -176,11 +176,11 @@ let get_equal_bounds env name =
 let get_tparams_in_ty_and_acc env acc ty =
   let tparams_visitor env =
     object (this)
-      inherit [SSet.t] Type_visitor.locl_type_visitor
+      inherit [S_set.t] Type_visitor.locl_type_visitor
 
       method! on_tgeneric acc _ s =
         (* Not traversing args, although they may contain Tgenerics (higher kinds only) *)
-        SSet.add s acc
+        S_set.add s acc
 
       method! on_tvar acc r ix =
         let (_env, ty) =

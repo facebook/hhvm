@@ -1125,7 +1125,7 @@ let hack_symbol_definition_to_lsp_identifier_location
 
 (** See documentation for `args` field `notebook_mode` *)
 let diagnostics_to_exclude_from_notebooks =
-  SSet.of_list
+  S_set.of_list
     [
       "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead";
       "The function prep is deprecated: use await, see https://fburl.com/goodbye-prep";
@@ -1150,7 +1150,7 @@ let filter_diagnostics (diagnostics : Lsp.PublishDiagnostics.diagnostic list) :
               There can be variables that exist the runtime environment
               but aren't written in the notebook and vice-versa. *)
         not @@ Lazy.force is_at_breakpoint
-      | _ -> not @@ SSet.mem message diagnostics_to_exclude_from_notebooks
+      | _ -> not @@ S_set.mem message diagnostics_to_exclude_from_notebooks
     in
     List.filter diagnostics ~f:should_include_diagnostic
   else

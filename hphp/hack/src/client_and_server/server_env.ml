@@ -368,16 +368,16 @@ let list_files_with_errors env =
     List.fold_right
       ~f:
         begin
-          fun { User_diagnostic.claim = (pos, _); severity; _ } (acc : SSet.t) ->
+          fun { User_diagnostic.claim = (pos, _); severity; _ } (acc : S_set.t) ->
             match severity with
             | User_diagnostic.Err ->
-              SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
+              S_set.add (Relative_path.to_absolute (Pos.filename pos)) acc
             | User_diagnostic.Warning _ -> acc
         end
-      ~init:SSet.empty
+      ~init:S_set.empty
       (Diagnostics.get_diagnostic_list env.diagnostics)
   in
-  SSet.elements acc
+  S_set.elements acc
 
 let prechecked_files_ready_for_diagnostics = function
   | Prechecked_files_disabled -> true

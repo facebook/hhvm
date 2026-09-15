@@ -504,7 +504,7 @@ module Make (Set : SET) = struct
   end = struct
     (* Set of interfaces that contain non-object members *)
     let special_interfaces =
-      SSet.of_list
+      S_set.of_list
         [
           SN.Classes.cStringish;
           SN.Classes.cXHPChild;
@@ -602,7 +602,7 @@ module Make (Set : SET) = struct
             (Reason.witness_from_decl pos)
             name
         in
-        SSet.fold
+        S_set.fold
           (fun whitelist_cls acc ->
             cycle_handler ~trail ~default @@ fun env trail ->
             Set.union acc
@@ -712,7 +712,7 @@ module Make (Set : SET) = struct
         (env : env)
         (cls : string)
         (args : Tag.generic list) : env * t =
-      if SSet.mem cls special_interfaces then
+      if S_set.mem cls special_interfaces then
         let (env, tags) =
           match Hashtbl.find special_interface_cache cls with
           | Some tags -> (env, tags)

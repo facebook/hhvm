@@ -132,14 +132,14 @@ module ExprDepTy = struct
         )
       | (_, Tgeneric s) when DependentKind.is_generic_dep_ty s -> (env, ty)
       | (_, Tgeneric name) ->
-        if SSet.mem name seen then
+        if S_set.mem name seen then
           (env, ty)
         else
           let (env, tyl) =
             TUtils.get_concrete_supertypes ~abstract_enum:true env ty
           in
           let (env, tyl') =
-            List.fold_map tyl ~init:env ~f:(make ~seen:(SSet.add name seen))
+            List.fold_map tyl ~init:env ~f:(make ~seen:(S_set.add name seen))
           in
           if tyl_equal tyl tyl' then
             (env, ty)
@@ -171,7 +171,7 @@ module ExprDepTy = struct
           | Tneg _ | Tlabel _ ) ) ->
         (env, ty)
     in
-    make ~seen:SSet.empty env ty
+    make ~seen:S_set.empty env ty
 
   let make env ~cid ty =
     make_with_dep_kind env (from_cid env (get_reason ty) cid) ty

@@ -17,12 +17,12 @@ type t = {
           [Bar.t] in the OCaml source will be converted to [foo::bar::Bar]
           rather than [bar::Bar]. All extern_types are assumed to take no
           lifetime parameter. *)
-  copy_types: SSet.t option;
+  copy_types: S_set.t option;
       (** The owned_types setting allows specifying a set of types which
           implement Copy, and should not be put behind a reference (so that
           hh_oxidize need not use global knowledge of all types being converted
           to track which do and do not implement Copy). *)
-  safe_ints_types: SSet.t;
+  safe_ints_types: S_set.t;
       (** Types for which any ocaml int will be converted to ocamlrep::OCamlInt rather than isize *)
 }
 

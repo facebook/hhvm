@@ -388,7 +388,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     let ty = Tvec_or_dict (tk, tv) in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt, cycles1 @ cycles2), mk (r, ty))
-  | Tgeneric nm when SSet.mem nm ety_env.no_substs ->
+  | Tgeneric nm when S_set.mem nm ety_env.no_substs ->
     (* For polymorphic lambda we want to retain generics bound in the lambda signature *)
     ((env, None, []), mk (r, Tgeneric nm))
   | Tgeneric x -> begin
@@ -1315,7 +1315,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
   in
   let check_tparam_constraints (env, ty_errs, cycles_acc) t =
     let nm = snd t.tp_name in
-    if SSet.mem nm ety_env.no_substs then
+    if S_set.mem nm ety_env.no_substs then
       (env, ty_errs, cycles_acc)
     else
       match S_map.find_opt (snd t.tp_name) ety_env.substs with

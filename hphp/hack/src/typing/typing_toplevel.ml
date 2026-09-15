@@ -470,7 +470,7 @@ let set_tcopt_unstable_features ctx { Aast.fa_user_attributes; _ } =
                   {
                     t with
                     tco_enabled_unstable_features =
-                      SSet.add s t.tco_enabled_unstable_features;
+                      S_set.add s t.tco_enabled_unstable_features;
                   })
               ctx
           in

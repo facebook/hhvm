@@ -51,7 +51,7 @@ val unsafe_opt : 'a option -> 'a
 
 val try_with_stack : (unit -> 'a) -> ('a, Exception.t) result
 
-val set_of_list : SSet.elt list -> SSet.t
+val set_of_list : S_set.elt list -> S_set.t
 
 (** Strip NS removes only the leading backslash *)
 val strip_ns : string -> string

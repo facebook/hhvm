@@ -113,8 +113,8 @@ let add_grand_parents_or_traits
     (parent_pos : Pos_or_decl.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (acc :
-      SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
-    (parent_type : Decl_defs.decl_class_type) : SSet.t * 'a * decl_error list =
+      S_set.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
+    (parent_type : Decl_defs.decl_class_type) : S_set.t * 'a * decl_error list =
   let (extends, pass, decl_errors) = acc in
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
@@ -159,11 +159,11 @@ let add_grand_parents_or_traits
    * as well *)
   let parent_deps =
     if phys_equal pass `Xhp_pass then
-      SSet.union parent_type.dc_extends parent_type.dc_xhp_attr_deps
+      S_set.union parent_type.dc_extends parent_type.dc_xhp_attr_deps
     else
       parent_type.dc_extends
   in
-  let extends' = SSet.union extends parent_deps in
+  let extends' = S_set.union extends parent_deps in
   (extends', pass, decl_errors)
 
 let get_class_parent_or_trait
@@ -171,12 +171,12 @@ let get_class_parent_or_trait
     (shallow_class : Shallow_decl_defs.shallow_class)
     (parent_cache : Decl_store.class_entries S_map.t)
     ((parents, pass, decl_errors) :
-      SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
-    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * _ * decl_error list
+      S_set.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : S_set.t * _ * decl_error list
     =
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
-  let parents = SSet.add parent parents in
+  let parents = S_set.add parent parents in
   let parent_type =
     Decl_env.get_class_and_add_dep
       ~cache:parent_cache
@@ -197,8 +197,8 @@ let get_class_parents_and_traits
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
     ~parent_cache
-    decl_errors : SSet.t * SSet.t * decl_error list =
-  let parents = SSet.empty in
+    decl_errors : S_set.t * S_set.t * decl_error list =
+  let parents = S_set.empty in
   (* extends parents *)
   let acc = (parents, `Extends_pass, decl_errors) in
   let (parents, _, decl_errors) =
@@ -216,7 +216,7 @@ let get_class_parents_and_traits
       ~init:acc
   in
   (* XHP classes whose attributes were imported via "attribute :foo;" syntax *)
-  let acc = (SSet.empty, `Xhp_pass, decl_errors) in
+  let acc = (S_set.empty, `Xhp_pass, decl_errors) in
   let (xhp_parents, _, decl_errors) =
     List.fold_left
       shallow_class.sc_xhp_attr_uses
@@ -227,13 +227,13 @@ let get_class_parents_and_traits
 
 type class_env = {
   ctx: Provider_context.t;
-  stack: SSet.t;
+  stack: S_set.t;
 }
 
 let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) :
     decl_error option =
   let stack = class_env.stack in
-  let is_cyclic = SSet.mem cid stack in
+  let is_cyclic = S_set.mem cid stack in
   if is_cyclic then
     Some (Cyclic_class_def { stack; pos })
   else
@@ -281,7 +281,7 @@ let synthesize_typeconst_defaults
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-let extract_sealed_classnames attrs : SSet.t option =
+let extract_sealed_classnames attrs : S_set.t option =
   match attrs with
   | None -> None
   | Some { ua_params; _ } ->
@@ -292,20 +292,20 @@ let extract_sealed_classnames attrs : SSet.t option =
           | _ -> None)
         ua_params
     in
-    Some (SSet.of_list cn_params)
+    Some (S_set.of_list cn_params)
 
 let get_class_sealed_allowlist (c : Shallow_decl_defs.shallow_class) :
-    SSet.t option =
+    S_set.t option =
   extract_sealed_classnames
     (Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes)
 
 let get_method_sealed_allowlist (m : Shallow_decl_defs.shallow_method) :
-    SSet.t option =
+    S_set.t option =
   extract_sealed_classnames
     (Attributes.find SN.UserAttributes.uaSealed m.sm_attributes)
 
 let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
-    SSet.t option =
+    S_set.t option =
   match Attributes.find SN.UserAttributes.uaOverlapping m.sm_attributes with
   | None -> None
   | Some { ua_params; _ } ->
@@ -316,7 +316,7 @@ let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
           | _ -> None)
         ua_params
     in
-    Some (SSet.of_list params)
+    Some (S_set.of_list params)
 
 let get_instantiated_ancestors_and_self
     (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
@@ -779,7 +779,7 @@ let rec declare_class_and_parents
     (shallow_class : Shallow_decl_defs.shallow_class) : Decl_store.class_entries
     =
   let (_, name) = shallow_class.sc_name in
-  let class_env = { class_env with stack = SSet.add name class_env.stack } in
+  let class_env = { class_env with stack = S_set.add name class_env.stack } in
   let (class_, member_heaps_values) =
     let (parents, errors) = class_parents_decl ~sh class_env shallow_class in
     class_decl ~sh class_env.ctx shallow_class ~parents errors
@@ -938,7 +938,7 @@ and class_decl
       (* HHVM implicitly adds StringishObject interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       (* Declare StringishObject and parents if not already declared *)
-      let class_env = { ctx; stack = SSet.empty } in
+      let class_env = { ctx; stack = S_set.empty } in
       let parents =
         (* Ensure stringishObject is declared. *)
         match
@@ -1098,4 +1098,4 @@ let class_decl_if_missing
     (* Class elements are in memory if and only if the class itself is there.
      * Exiting before class declaration is ready would break this invariant *)
     Worker_cancel.with_no_cancellations @@ fun () ->
-    class_decl_if_missing ~sh { ctx; stack = SSet.empty } class_name
+    class_decl_if_missing ~sh { ctx; stack = S_set.empty } class_name

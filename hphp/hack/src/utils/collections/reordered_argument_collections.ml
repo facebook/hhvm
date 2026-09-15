@@ -112,11 +112,11 @@ end
 module type SSet_S = Reordered_argument_collections_sig.SSet_S
 
 module SSet = struct
-  include Reordered_argument_set (SSet)
+  include Reordered_argument_set (S_set)
 
-  let pp = SSet.pp
+  let pp = S_set.pp
 
-  let show = SSet.show
+  let show = S_set.show
 end
 
 module type SMap_S = Reordered_argument_collections_sig.SMap_S

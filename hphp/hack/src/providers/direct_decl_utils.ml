@@ -97,7 +97,7 @@ let add_extends_dep_edges ctx (cls_name, cls) dep_table =
     dep_table
     (Typing_deps.Dep.make (Typing_deps.Dep.Type cls_name))
     cls_name;
-  SSet.iter
+  S_set.iter
     (fun parent ->
       Typing_deps.(
         add_idep

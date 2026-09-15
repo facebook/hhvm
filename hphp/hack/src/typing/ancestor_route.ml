@@ -60,7 +60,7 @@ let sort_by_num_ancestors env (names : string list) : string list =
     ["Three"; "Two"; "One"]. *)
 let find_route env ~classish ~ancestor : string list =
   let rec classish_between classish ancestor seen : string list =
-    if SSet.mem classish seen then
+    if S_set.mem classish seen then
       (* The class hierarchy is bad: it contains a cycle. Ensure we
          still terminate. *)
       []
@@ -74,9 +74,9 @@ let find_route env ~classish ~ancestor : string list =
       | [] -> []
       | [ancestor] -> [ancestor]
       | anc :: _ ->
-        anc :: classish_between anc ancestor (SSet.add classish seen)
+        anc :: classish_between anc ancestor (S_set.add classish seen)
   in
-  [classish] @ classish_between classish ancestor SSet.empty @ [ancestor]
+  [classish] @ classish_between classish ancestor S_set.empty @ [ancestor]
 
 (** Find the position in [classish_name] that means it depends on
     [ancestor_name].

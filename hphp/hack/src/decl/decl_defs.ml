@@ -94,7 +94,7 @@ type decl_error =
     }
   | Cyclic_class_def of {
       pos: Pos.t;
-      stack: SSet.t;
+      stack: S_set.t;
     }
 [@@deriving show]
 
@@ -103,9 +103,9 @@ type element = {
   elt_origin: string;
   elt_visibility: ce_visibility;
   elt_deprecated: string option;
-  elt_sealed_allowlist: SSet.t option;
+  elt_sealed_allowlist: S_set.t option;
   (* Derived from <<__Overlapping(_)>> attribute *)
-  elt_overlapping_tparams: SSet.t option;
+  elt_overlapping_tparams: S_set.t option;
   elt_package_requirement: package_requirement option;
 }
 [@@deriving show]
@@ -116,7 +116,7 @@ type decl_class_type = {
   dc_final: bool;
   dc_const: bool;
   dc_internal: bool;
-  dc_deferred_init_members: SSet.t;
+  dc_deferred_init_members: S_set.t;
   dc_kind: Ast_defs.classish_kind;
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
@@ -140,7 +140,7 @@ type decl_class_type = {
       (** All the `require extends` and `require implements`,
           possibly inherited from interface or trait ancestors.
           Does not include `require class` *)
-  dc_req_ancestors_extends: SSet.t;
+  dc_req_ancestors_extends: S_set.t;
       (** All the `require extends` and `require implements`,
           possibly inherited from interface or trait ancestors,
           plus some extends and other ancestors of these.
@@ -150,9 +150,9 @@ type decl_class_type = {
           `require this as` requirements declared in ancestors.  Remark that
           `require class` and `require this as` requirements are _not_ stored
            in `dc_req_ancestors` or `dc_req_ancestors_extends` fields. *)
-  dc_extends: SSet.t;
-  dc_sealed_whitelist: SSet.t option;
-  dc_xhp_attr_deps: SSet.t;
+  dc_extends: S_set.t;
+  dc_sealed_whitelist: S_set.t option;
+  dc_xhp_attr_deps: S_set.t;
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list S_map.t;
   dc_xhp_marked_empty: bool;
   dc_enum_type: enum_type option;
@@ -170,7 +170,7 @@ type decl_class_type = {
 
 type class_requirements = {
   cr_req_ancestors: Typing_defs.requirement list;
-  cr_req_ancestors_extends: SSet.t;
+  cr_req_ancestors_extends: S_set.t;
   cr_req_constraints_ancestors: Typing_defs.constraint_requirement list;
 }
 [@@deriving show]

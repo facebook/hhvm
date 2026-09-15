@@ -18,6 +18,6 @@ val fanout_of_changes : ctx:Provider_context.t -> changed_class list -> Fanout.t
 
 val class_names_from_deps :
   ctx:Provider_context.t ->
-  get_classes_in_file:(Relative_path.t -> SSet.t) ->
+  get_classes_in_file:(Relative_path.t -> S_set.t) ->
   Typing_deps.DepSet.t ->
-  SSet.t
+  S_set.t

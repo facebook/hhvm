@@ -21,7 +21,7 @@ type validation_state = {
   validity: validity;
   inside_reified_class_generic_position: bool;
   reification: reification;
-  expanded_typedefs: SSet.t;
+  expanded_typedefs: S_set.t;
       (**
   `Some Klass` if we're traversing a type and have gone through `Klass::TheTy`.
    *)

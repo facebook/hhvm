@@ -11,7 +11,7 @@ type value =
   | Bool of bool
   | Atom of string
   | List of value list
-  | Set of SSet.t
+  | Set of S_set.t
   | Map of value S_map.t
   | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop
@@ -50,13 +50,13 @@ let local_id_as_string id =
 let local_id_set_as_value s =
   Set
     (Local_id.Set.fold
-       (fun id s -> SSet.add (local_id_as_string id) s)
+       (fun id s -> S_set.add (local_id_as_string id) s)
        s
-       SSet.empty)
+       S_set.empty)
 
 let var_as_string (v : Tvid.t) = Printf.sprintf "#%s" (Tvid.show v)
 
 let varset_as_value s =
-  Set (Tvid.Set.fold (fun v s -> SSet.add (var_as_string v) s) s SSet.empty)
+  Set (Tvid.Set.fold (fun v s -> S_set.add (var_as_string v) s) s S_set.empty)
 
 let variant_as_value name v = make_map [(name, v)]

@@ -14,8 +14,8 @@ module JobReturn = struct
   type t = {
     elapsed: float;
     hashes: Md5.Set.t;
-    reindexed: SSet.t;
-    referenced: SSet.t; (* set of files referenced by the indexed files *)
+    reindexed: S_set.t;
+    referenced: S_set.t; (* set of files referenced by the indexed files *)
     index_failures: int;
   }
 
@@ -23,8 +23,8 @@ module JobReturn = struct
     {
       elapsed = 0.0;
       hashes = Md5.Set.empty;
-      reindexed = SSet.empty;
-      referenced = SSet.empty;
+      reindexed = S_set.empty;
+      referenced = S_set.empty;
       index_failures = 0;
     }
 
@@ -32,8 +32,8 @@ module JobReturn = struct
     {
       elapsed = t1.elapsed +. t2.elapsed;
       hashes = Set.union t1.hashes t2.hashes;
-      reindexed = SSet.union t1.reindexed t2.reindexed;
-      referenced = SSet.union t1.referenced t2.referenced;
+      reindexed = S_set.union t1.reindexed t2.reindexed;
+      referenced = S_set.union t1.referenced t2.referenced;
       index_failures = t1.index_failures + t2.index_failures;
     }
 end
@@ -49,7 +49,7 @@ let log_elapsed s elapsed =
 let write_file referenced output_file =
   let open Out_channel in
   let oc = create output_file in
-  SSet.iter
+  S_set.iter
     (fun str ->
       output_string oc str;
       newline oc)
@@ -176,15 +176,15 @@ let write_json
     {
       elapsed;
       hashes;
-      reindexed = SSet.empty;
-      referenced = SSet.empty;
+      reindexed = S_set.empty;
+      referenced = S_set.empty;
       index_failures = 0;
     }
 
 let references_from_files_info ctx files_info =
   List.map files_info ~f:(File_info.referenced ctx)
-  |> List.reduce ~f:SSet.union
-  |> Option.value ~default:SSet.empty
+  |> List.reduce ~f:S_set.union
+  |> Option.value ~default:S_set.empty
 
 let recheck_job
     (ctx : Provider_context.t)
@@ -249,13 +249,13 @@ let recheck_job
       else
         None
     in
-    List.filter_map to_reindex ~f |> SSet.of_list
+    List.filter_map to_reindex ~f |> S_set.of_list
   in
   let referenced =
     if gen_references then
       references_from_files_info ctx files_info
     else
-      SSet.empty
+      S_set.empty
   in
   JobReturn.
     {
@@ -328,7 +328,7 @@ let go
     (`Count (List.length files))
     global_facts;
   (* TODO remove this log once the workflows use the reindexed_file option *)
-  SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
+  S_set.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
   Option.iter
     opts.Indexer_options.referenced_file
     ~f:(write_file jobs.JobReturn.referenced);

@@ -61,8 +61,8 @@ type class_elt = {
   ce_deprecated: string option;
   ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;  (** pos of the type of the elt *)
   ce_flags: Typing_defs_flags.ClassElt.t;
-  ce_sealed_allowlist: SSet.t option;
-  ce_overlapping_tparams: SSet.t option;
+  ce_sealed_allowlist: S_set.t option;
+  ce_overlapping_tparams: S_set.t option;
   ce_package_requirement: package_requirement option;
 }
 [@@deriving show]
@@ -271,7 +271,7 @@ type expand_env = {
       (** Localize internal classes outside their module as if newtypes i.e. opaque *)
   visibility_behavior: visibility_behavior;
   substs: locl_ty S_map.t;
-  no_substs: SSet.t;
+  no_substs: S_set.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;
@@ -369,7 +369,7 @@ val ft_has_positional_variadic : 'a fun_type -> bool
 (* Number of required parameters. Does not include optional, variadic, or
  * type-splat parameters
  *)
-val arity_and_names_required : 'a fun_type -> int * SSet.t
+val arity_and_names_required : 'a fun_type -> int * S_set.t
 
 val get_param_mode : Ast_defs.param_kind -> param_mode
 

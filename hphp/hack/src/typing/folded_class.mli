@@ -40,7 +40,7 @@ val final : t -> bool
 
 val has_const_attribute : t -> bool
 
-val deferred_init_members : t -> SSet.t
+val deferred_init_members : t -> S_set.t
 
 val kind : t -> Ast_defs.classish_kind
 
@@ -81,7 +81,7 @@ val xhp_enum_values : t -> Ast_defs.xhp_enum_value list S_map.t
 
 val xhp_marked_empty : t -> bool
 
-val sealed_whitelist : t -> SSet.t option
+val sealed_whitelist : t -> S_set.t option
 
 val decl_errors : t -> Decl_defs.decl_error list
 

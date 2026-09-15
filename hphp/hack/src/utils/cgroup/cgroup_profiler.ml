@@ -85,7 +85,7 @@ type step_group = {
 let threshold_for_logging = 100 * 1024 * 1024
 
 (** to avoid flooding logs with errors *)
-let has_logged_error = ref SSet.empty
+let has_logged_error = ref S_set.empty
 
 (** prints bytes in gb *)
 let pretty_num i = Printf.sprintf "%0.2fGiB" (float i /. 1073741824.0)
@@ -192,10 +192,10 @@ let log_telemetry
   | (Some (Error e), _)
   | (_, Error e) ->
     telemetry_ref := Telemetry.create () |> Telemetry.error ~e |> Option.some;
-    if SSet.mem e !has_logged_error then
+    if S_set.mem e !has_logged_error then
       ()
     else begin
-      has_logged_error := SSet.add e !has_logged_error;
+      has_logged_error := S_set.add e !has_logged_error;
       Hack_event_logger.CGroup.error e
     end
   | (Some (Ok start_cgroup), Ok cgroup) ->

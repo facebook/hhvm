@@ -669,7 +669,7 @@ let check_parent_sealed (child_pos, child_type) parent_type ~env =
     let parent_name = Cls.name parent_type in
     let child_name = Cls.name child_type in
     let check parent_kind verb =
-      if not (SSet.mem child_name whitelist) then
+      if not (S_set.mem child_name whitelist) then
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(

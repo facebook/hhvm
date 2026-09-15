@@ -46,20 +46,20 @@ end
 
 module VersionedSSet = struct
   type t = {
-    old: SSet.t;
-    new_: SSet.t;
+    old: S_set.t;
+    new_: S_set.t;
   }
 
   type diff = {
-    removed: SSet.t;
-    kept: SSet.t;
-    added: SSet.t;
+    removed: S_set.t;
+    kept: S_set.t;
+    added: S_set.t;
   }
 
-  let empty = { old = SSet.empty; new_ = SSet.empty }
+  let empty = { old = S_set.empty; new_ = S_set.empty }
 
-  let project (project : File_info.names -> SSet.t) (names : VersionedNames.t) :
-      t =
+  let project (project : File_info.names -> S_set.t) (names : VersionedNames.t)
+      : t =
     let { VersionedNames.old_names; new_names } = names in
     { old = project old_names; new_ = project new_names }
 
@@ -69,27 +69,27 @@ module VersionedSSet = struct
     let { old = old_left; new_ = new_left } = left in
     let { old = old_right; new_ = new_right } = right in
     {
-      old = SSet.union old_left old_right;
-      new_ = SSet.union new_left new_right;
+      old = S_set.union old_left old_right;
+      new_ = S_set.union new_left new_right;
     }
 
   let empty_diff =
-    { removed = SSet.empty; kept = SSet.empty; added = SSet.empty }
+    { removed = S_set.empty; kept = S_set.empty; added = S_set.empty }
 
   let diff { old; new_ } : diff =
     let diff =
-      SSet.fold
+      S_set.fold
         (fun old_name diff ->
-          match SSet.find_opt old_name new_ with
-          | None -> { diff with removed = SSet.add old_name diff.removed }
-          | Some n -> { diff with kept = SSet.add n diff.kept })
+          match S_set.find_opt old_name new_ with
+          | None -> { diff with removed = S_set.add old_name diff.removed }
+          | Some n -> { diff with kept = S_set.add n diff.kept })
         old
         empty_diff
     in
-    { diff with added = SSet.diff new_ old }
+    { diff with added = S_set.diff new_ old }
 
   let diff_cardinal { removed; kept; added } =
-    SSet.cardinal removed + SSet.cardinal kept + SSet.cardinal added
+    S_set.cardinal removed + S_set.cardinal kept + S_set.cardinal added
 end
 
 module VersionedFileInfo = struct
@@ -165,37 +165,37 @@ module Class_diff = struct
             if Poly.( = ) ty1 ty2 then
               diff
             else
-              SSet.add x diff
-          | None -> SSet.add x diff
+              S_set.add x diff
+          | None -> S_set.add x diff
       end
       s1
-      SSet.empty
+      S_set.empty
 
-  let smap s1 s2 = SSet.union (smap_left s1 s2) (smap_left s2 s1)
+  let smap s1 s2 = S_set.union (smap_left s1 s2) (smap_left s2 s1)
 
   let compare class1 class2 =
     let is_unchanged = true in
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
-    let is_unchanged = is_unchanged && SSet.is_empty consts_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty consts_diff in
     (* compare class members *)
     let props_diff = smap class1.dc_props class2.dc_props in
-    let is_unchanged = is_unchanged && SSet.is_empty props_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty props_diff in
     (* compare class static members *)
     let sprops_diff = smap class1.dc_sprops class2.dc_sprops in
-    let is_unchanged = is_unchanged && SSet.is_empty sprops_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty sprops_diff in
     (* compare class methods *)
     let methods_diff = smap class1.dc_methods class2.dc_methods in
-    let is_unchanged = is_unchanged && SSet.is_empty methods_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty methods_diff in
     (* compare class static methods *)
     let smethods_diff = smap class1.dc_smethods class2.dc_smethods in
-    let is_unchanged = is_unchanged && SSet.is_empty smethods_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty smethods_diff in
     (* compare class constructors *)
     let ctor_diff = Poly.( <> ) class1.dc_construct class2.dc_construct in
     let is_unchanged = is_unchanged && not ctor_diff in
     (* compare class type constants *)
     let typeconsts_diff = smap class1.dc_typeconsts class2.dc_typeconsts in
-    let is_unchanged = is_unchanged && SSet.is_empty typeconsts_diff in
+    let is_unchanged = is_unchanged && S_set.is_empty typeconsts_diff in
     is_unchanged
 end
 
@@ -405,10 +405,10 @@ let get_funs_deps ~ctx old_funs (funs : VersionedSSet.diff) =
   let { VersionedSSet.removed; kept; added } = funs in
   let fanout =
     Fanout.empty
-    |> SSet.fold (add_fun_fanout mode) removed
-    |> SSet.fold (add_fun_fanout mode) added
+    |> S_set.fold (add_fun_fanout mode) removed
+    |> S_set.fold (add_fun_fanout mode) added
   in
-  SSet.fold (get_fun_deps ~ctx ~mode old_funs) kept (fanout, 0)
+  S_set.fold (get_fun_deps ~ctx ~mode old_funs) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -445,10 +445,10 @@ let get_types_deps ~ctx old_types (types : VersionedSSet.diff) =
   let { VersionedSSet.removed; kept; added } = types in
   let fanout =
     Fanout.empty
-    |> SSet.fold (add_type_fanout mode) removed
-    |> SSet.fold (add_type_fanout mode) added
+    |> S_set.fold (add_type_fanout mode) removed
+    |> S_set.fold (add_type_fanout mode) added
   in
-  SSet.fold (get_type_deps ~ctx ~mode old_types) kept (fanout, 0)
+  S_set.fold (get_type_deps ~ctx ~mode old_types) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -486,10 +486,10 @@ let get_gconsts_deps ~ctx old_gconsts gconsts =
   let { VersionedSSet.removed; kept; added } = gconsts in
   let fanout =
     Fanout.empty
-    |> SSet.fold (add_gconst_fanout mode) removed
-    |> SSet.fold (add_gconst_fanout mode) added
+    |> S_set.fold (add_gconst_fanout mode) removed
+    |> S_set.fold (add_gconst_fanout mode) added
   in
-  SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) kept (fanout, 0)
+  S_set.fold (get_gconst_deps ~ctx ~mode old_gconsts) kept (fanout, 0)
 
 let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
     : Fanout.t * int =
@@ -514,7 +514,7 @@ let get_modules_deps ~ctx ~old_modules ~modules =
   let { VersionedSSet.removed; kept; added } = modules in
   let fanout =
     Fanout.empty
-    |> SSet.fold (add_module_fanout mode) removed
-    |> SSet.fold (add_module_fanout mode) added
+    |> S_set.fold (add_module_fanout mode) removed
+    |> S_set.fold (add_module_fanout mode) added
   in
-  SSet.fold (get_module_deps ~ctx ~mode old_modules) kept (fanout, 0)
+  S_set.fold (get_module_deps ~ctx ~mode old_modules) kept (fanout, 0)

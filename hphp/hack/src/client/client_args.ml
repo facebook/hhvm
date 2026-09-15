@@ -1119,9 +1119,9 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   in
   let argv_has : string -> bool =
     let arg_set =
-      Array.fold Sys.argv ~init:SSet.empty ~f:(fun acc s -> SSet.add s acc)
+      Array.fold Sys.argv ~init:S_set.empty ~f:(fun acc s -> S_set.add s acc)
     in
-    (fun key -> SSet.mem key arg_set)
+    (fun key -> S_set.mem key arg_set)
   in
   let to_arg_specs options =
     List.map options ~f:(fun (key, spec, doc, _kind) -> (key, spec, doc))

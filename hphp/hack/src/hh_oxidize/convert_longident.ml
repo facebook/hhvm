@@ -10,7 +10,7 @@ open Core
 open Longident
 
 let strip_decl_prefix =
-  SSet.of_list
+  S_set.of_list
     [
       "DeclFunArity";
       "DeclFunParam";
@@ -60,7 +60,7 @@ let to_string for_open id =
       let ty =
         if String.equal ty "LoclTy" then
           "Ty"
-        else if SSet.mem ty strip_decl_prefix then
+        else if S_set.mem ty strip_decl_prefix then
           String.chop_prefix_exn ty ~prefix:"Decl"
         else
           ty

@@ -26,14 +26,14 @@ end
 
 module VersionedSSet : sig
   type t = {
-    old: SSet.t;
-    new_: SSet.t;
+    old: S_set.t;
+    new_: S_set.t;
   }
 
   type diff = {
-    removed: SSet.t;
-    kept: SSet.t;
-    added: SSet.t;
+    removed: S_set.t;
+    kept: S_set.t;
+    added: S_set.t;
   }
 
   val get_classes : VersionedNames.t -> t

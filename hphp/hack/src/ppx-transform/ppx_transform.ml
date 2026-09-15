@@ -279,6 +279,7 @@ module Core_ty = struct
         "Either.t";
         "SMap.t";
         "S_map.t";
+        "S_set.t";
         "TShapeMap.t";
         "fun_type";
       ]

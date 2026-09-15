@@ -9,7 +9,7 @@
 
 type saved_legacy_decls [@@deriving show]
 
-val collect_legacy_decls : Provider_context.t -> SSet.t -> saved_legacy_decls
+val collect_legacy_decls : Provider_context.t -> S_set.t -> saved_legacy_decls
 
 val restore_legacy_decls : saved_legacy_decls -> int
 
@@ -19,7 +19,7 @@ type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class S_map.t }
 val collect_shallow_decls :
   Provider_context.t ->
   Multi_worker.worker list option ->
-  SSet.t ->
+  S_set.t ->
   saved_shallow_decls
 
 val restore_shallow_decls : saved_shallow_decls -> int

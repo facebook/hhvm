@@ -182,21 +182,21 @@ type change = {
 
 (** The simplified record used after parsing. *)
 type names = {
-  n_funs: SSet.t;
-  n_classes: SSet.t;
-  n_types: SSet.t;
-  n_consts: SSet.t;
-  n_modules: SSet.t;
+  n_funs: S_set.t;
+  n_classes: S_set.t;
+  n_types: S_set.t;
+  n_consts: S_set.t;
+  n_modules: S_set.t;
 }
 [@@deriving show]
 
 (** The simplified record stored in saved-state.*)
 type saved_names = {
-  sn_funs: SSet.t;
-  sn_classes: SSet.t;
-  sn_types: SSet.t;
-  sn_consts: SSet.t;
-  sn_modules: SSet.t;
+  sn_funs: S_set.t;
+  sn_classes: S_set.t;
+  sn_types: S_set.t;
+  sn_consts: S_set.t;
+  sn_modules: S_set.t;
 }
 
 (** Data structure stored in the saved state *)
@@ -208,11 +208,11 @@ type saved = {
 
 let empty_names =
   {
-    n_funs = SSet.empty;
-    n_classes = SSet.empty;
-    n_types = SSet.empty;
-    n_consts = SSet.empty;
-    n_modules = SSet.empty;
+    n_funs = S_set.empty;
+    n_classes = S_set.empty;
+    n_types = S_set.empty;
+    n_consts = S_set.empty;
+    n_modules = S_set.empty;
   }
 
 (*****************************************************************************)
@@ -220,7 +220,7 @@ let empty_names =
 (*****************************************************************************)
 
 let name_set_of_idl idl =
-  List.fold_left idl ~f:(fun acc id -> SSet.add id.name acc) ~init:SSet.empty
+  List.fold_left idl ~f:(fun acc id -> S_set.add id.name acc) ~init:S_set.empty
 
 let ids_to_names (ids : ids) : names =
   let { funs; classes; typedefs; consts; modules } = ids in
@@ -259,23 +259,23 @@ let from_saved fn saved =
   let { s_names; s_mode; s_position_free_decl_hash } = saved in
   let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
-    List.map (SSet.elements sn_funs) ~f:(fun x ->
+    List.map (S_set.elements sn_funs) ~f:(fun x ->
         { pos = File (Fun, fn); name = x; decl_hash = None })
   in
   let classes =
-    List.map (SSet.elements sn_classes) ~f:(fun x ->
+    List.map (S_set.elements sn_classes) ~f:(fun x ->
         { pos = File (Class, fn); name = x; decl_hash = None })
   in
   let typedefs =
-    List.map (SSet.elements sn_types) ~f:(fun x ->
+    List.map (S_set.elements sn_types) ~f:(fun x ->
         { pos = File (Typedef, fn); name = x; decl_hash = None })
   in
   let consts =
-    List.map (SSet.elements sn_consts) ~f:(fun x ->
+    List.map (S_set.elements sn_consts) ~f:(fun x ->
         { pos = File (Const, fn); name = x; decl_hash = None })
   in
   let modules =
-    List.map (SSet.elements sn_modules) ~f:(fun m ->
+    List.map (S_set.elements sn_modules) ~f:(fun m ->
         { pos = File (Module, fn); name = m; decl_hash = None })
   in
   {
@@ -297,11 +297,11 @@ let saved_to_names saved =
 let merge_names t_names1 t_names2 =
   let { n_funs; n_classes; n_types; n_consts; n_modules } = t_names1 in
   {
-    n_funs = SSet.union n_funs t_names2.n_funs;
-    n_classes = SSet.union n_classes t_names2.n_classes;
-    n_types = SSet.union n_types t_names2.n_types;
-    n_consts = SSet.union n_consts t_names2.n_consts;
-    n_modules = SSet.union n_modules t_names2.n_modules;
+    n_funs = S_set.union n_funs t_names2.n_funs;
+    n_classes = S_set.union n_classes t_names2.n_classes;
+    n_types = S_set.union n_types t_names2.n_types;
+    n_consts = S_set.union n_consts t_names2.n_consts;
+    n_modules = S_set.union n_modules t_names2.n_modules;
   }
 
 let ids_to_string (ids : ids) : string =
@@ -336,16 +336,16 @@ let to_string (t : t) : string =
   ids_to_string ids
 
 type diff = {
-  removed_funs: SSet.t;
-  added_funs: SSet.t;
-  removed_classes: SSet.t;
-  added_classes: SSet.t;
-  removed_types: SSet.t;
-  added_types: SSet.t;
-  removed_consts: SSet.t;
-  added_consts: SSet.t;
-  removed_modules: SSet.t;
-  added_modules: SSet.t;
+  removed_funs: S_set.t;
+  added_funs: S_set.t;
+  removed_classes: S_set.t;
+  added_classes: S_set.t;
+  removed_types: S_set.t;
+  added_types: S_set.t;
+  removed_consts: S_set.t;
+  added_consts: S_set.t;
+  removed_modules: S_set.t;
+  added_modules: S_set.t;
 }
 
 let diff f1 f2 =
@@ -358,8 +358,8 @@ let diff f1 f2 =
     None
   else
     let diff_ids ids1 ids2 =
-      let removed_ids = SSet.diff ids1 ids2 in
-      let added_ids = SSet.diff ids2 ids1 in
+      let removed_ids = S_set.diff ids1 ids2 in
+      let added_ids = S_set.diff ids2 ids1 in
       (removed_ids, added_ids)
     in
     let f1 = simplify f1 in
@@ -371,7 +371,7 @@ let diff f1 f2 =
     let (removed_modules, added_modules) = diff_ids f1.n_modules f2.n_modules in
     let is_empty =
       List.fold
-        ~f:(fun acc s -> (not (SSet.is_empty s)) || acc)
+        ~f:(fun acc s -> (not (S_set.is_empty s)) || acc)
         [
           removed_funs;
           added_funs;

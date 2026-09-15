@@ -13,12 +13,12 @@ open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type summary = {
   count: int;  (** Number of occurrences of a legacy refinement kind *)
-  positions: SSet.t;
+  positions: S_set.t;
       (** The set of positions (stored as a string), where the refinement occurs.
           This field value is depended on the log level:
             refinement_counter = 3: Include all positions
             refinement_counter = 2: Include all positions, except for class refinements
-            otherwise: Do not include positions (will be SSet.empty) *)
+            otherwise: Do not include positions (will be S_set.empty) *)
 }
 [@@deriving yojson_of]
 
@@ -57,7 +57,7 @@ module Summary = struct
               Some
                 {
                   count = c.count + c'.count;
-                  positions = SSet.union c.positions c'.positions;
+                  positions = S_set.union c.positions c'.positions;
                 }
             | (None, Some c)
             | (Some c, None) ->
@@ -78,9 +78,9 @@ module Summary = struct
             count = 1;
             positions =
               (match pos_opt with
-              | None -> SSet.empty
+              | None -> S_set.empty
               | Some pos ->
-                SSet.singleton Pos.(to_relative_string pos |> string));
+                S_set.singleton Pos.(to_relative_string pos |> string));
           };
       new_refinements = 0;
       total_refinements = 1;

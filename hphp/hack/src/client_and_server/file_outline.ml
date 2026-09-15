@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Reordered_argument_collections
 open Symbol_definition
 open Aast
 module Parser = Full_fidelity_ast
@@ -93,7 +92,7 @@ let summarize_property ~(source_text : string option) class_name var =
 let maybe_summarize_property ~(source_text : string option) class_name ~skip var
     =
   let (_, name) = var.cv_id in
-  if SSet.mem skip name then
+  if S_set.mem name skip then
     []
   else
     [summarize_property ~source_text class_name var]
@@ -276,7 +275,10 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
       []
     else
       let implicit_props =
-        List.fold (class_implicit_fields class_) ~f:SSet.add ~init:SSet.empty
+        List.fold
+          (class_implicit_fields class_)
+          ~f:(fun acc name -> S_set.add name acc)
+          ~init:S_set.empty
       in
       let acc =
         (* Summarized class properties *)

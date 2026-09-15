@@ -7,7 +7,6 @@
  *)
 
 open Core
-open Reordered_argument_collections
 module Unix = Caml_unix
 
 (** HACK: Raised when we encounter a construct in a type declaration which we
@@ -46,7 +45,7 @@ let with_tempfile f =
     raise exn
 
 let rust_keywords =
-  SSet.of_list
+  S_set.of_list
     [
       "as";
       "break";
@@ -137,7 +136,7 @@ let split_on_uppercase str =
 let add_trailing_underscore original_name name =
   if
     Char.equal original_name.[String.length original_name - 1] '_'
-    || SSet.mem rust_keywords name
+    || S_set.mem name rust_keywords
   then
     name ^ "_"
   else

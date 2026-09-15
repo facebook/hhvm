@@ -18,7 +18,7 @@ val typedef : Typing_env_types.env -> Nast.typedef -> unit
  * type as invariant, i.e. all type parameters appear both positively and negatively.
  *)
 val get_positive_negative_generics :
-  tracked:SSet.t ->
+  tracked:S_set.t ->
   is_mutable:bool ->
   Typing_env_types.env ->
   Typing_reason.decl_t list S_map.t * Typing_reason.decl_t list S_map.t ->

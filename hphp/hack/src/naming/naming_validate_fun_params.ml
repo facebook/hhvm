@@ -16,7 +16,7 @@ let validate_fun_params ~ctx params =
   snd
   @@ List.fold_left
        params
-       ~init:(SSet.empty, [])
+       ~init:(S_set.empty, [])
        ~f:(fun
             (seen, errs)
             Aast.{ param_name; param_pos; param_user_attributes; _ }
@@ -38,7 +38,7 @@ let validate_fun_params ~ctx params =
          in
          if String.equal SN.SpecialIdents.placeholder param_name then
            (seen, errs)
-         else if SSet.mem param_name seen then
+         else if S_set.mem param_name seen then
            let err =
              Err.naming
              @@ Naming_error.Already_bound
@@ -51,7 +51,7 @@ let validate_fun_params ~ctx params =
            in
            (seen, err :: errs)
          else
-           (SSet.add param_name seen, errs))
+           (S_set.add param_name seen, errs))
 
 let on_method_ on_error m ~ctx =
   List.iter ~f:on_error @@ (validate_fun_params ~ctx) m.Aast.m_params;

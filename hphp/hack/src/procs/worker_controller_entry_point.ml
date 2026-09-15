@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Worker
-open WorkerController
+open Worker_controller
 
 let entry_counter = ref 0
 

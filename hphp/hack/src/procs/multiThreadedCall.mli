@@ -16,10 +16,10 @@
  * No further buckets are distributed to workers.
  *
  * Still-in-progress workers are left to their own accord. *)
-exception Coalesced_failures of WorkerController.worker_failure list
+exception Coalesced_failures of Worker_controller.worker_failure list
 
 val coalesced_failures_to_string :
-  WorkerController.worker_failure list -> string
+  Worker_controller.worker_failure list -> string
 
 (** If an interrupt handler wants the typecheck to be cancelled, it must
 always give a reason. *)
@@ -62,7 +62,7 @@ val no_interrupt : 'a -> 'a interrupt_config
 
 (** Can raise Coalesced_failures exception. *)
 val call :
-  WorkerController.worker list ->
+  Worker_controller.worker list ->
   ('c -> 'a -> 'b) ->
   ('b -> 'c -> 'c) ->
   'c ->
@@ -72,7 +72,7 @@ val call :
 (** Invokes merge with a unique worker id.
     Can raise Coalesced_failures exception. *)
 val call_with_worker_id :
-  WorkerController.worker list ->
+  Worker_controller.worker list ->
   (worker_id * 'c -> 'a -> 'b) ->
   (worker_id * 'b -> 'c -> 'c) ->
   'c ->
@@ -82,7 +82,7 @@ val call_with_worker_id :
 (** The last element returned, a list of job inputs, are the job inputs which have not been
     processed fully or at all due to interrupts. *)
 val call_with_interrupt :
-  WorkerController.worker list ->
+  Worker_controller.worker list ->
   ('c -> 'a -> 'b) ->
   ('b -> 'c -> 'c) ->
   'c ->

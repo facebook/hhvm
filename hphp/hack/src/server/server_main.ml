@@ -62,7 +62,7 @@ module Program = struct
            ~f:User_diagnostic.to_absolute)
       ~recheck_stats;
 
-    WorkerController.force_quit_all ();
+    Worker_controller.force_quit_all ();
 
     let has_errors = Diagnostics.has_errors env.diagnostics in
     let error_code =

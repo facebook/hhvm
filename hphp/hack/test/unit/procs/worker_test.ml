@@ -7,7 +7,7 @@ let entry =
 let num_workers = 2
 
 let make_worker ?call_wrapper ~longlived_workers heap_handle =
-  WorkerController.make
+  Worker_controller.make
     ?call_wrapper
     ~longlived_workers
     ~saved_state:()
@@ -17,8 +17,8 @@ let make_worker ?call_wrapper ~longlived_workers heap_handle =
     ~heap_handle
 
 let rec wait_until_ready handle =
-  let { WorkerController.readys; waiters = _; ready_fds = _ } =
-    WorkerController.select [handle] []
+  let { Worker_controller.readys; waiters = _; ready_fds = _ } =
+    Worker_controller.select [handle] []
   in
   match readys with
   | [] -> wait_until_ready handle
@@ -32,9 +32,9 @@ let catch_exception_and_custom_exit_wrapper : 'x 'b. ('x -> 'b) -> 'x -> 'b =
 
 let call_and_verify_result worker f x expected =
   let result =
-    WorkerController.call worker f x
+    Worker_controller.call worker f x
     |> wait_until_ready
-    |> WorkerController.get_result
+    |> Worker_controller.get_result
   in
   String.equal result expected
 
@@ -45,7 +45,7 @@ let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
   let workers =
     make_worker
       ~call_wrapper:
-        { WorkerController.wrap = catch_exception_and_custom_exit_wrapper }
+        { Worker_controller.wrap = catch_exception_and_custom_exit_wrapper }
       ~longlived_workers:(not use_clones)
       heap_handle
   in
@@ -61,8 +61,8 @@ let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
          ()
          "dummy"
      with
-    | WorkerController.Worker_failed
-        (_, WorkerController.Worker_quit (Unix.WEXITED i)) ->
+    | Worker_controller.Worker_failed
+        (_, Worker_controller.Worker_quit (Unix.WEXITED i)) ->
       i = 17)
 
 let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
@@ -79,8 +79,8 @@ let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
          ()
          "dummy"
      with
-    | WorkerController.Worker_failed
-        (_, WorkerController.Worker_quit (Unix.WEXITED i)) ->
+    | Worker_controller.Worker_failed
+        (_, Worker_controller.Worker_quit (Unix.WEXITED i)) ->
       i = 2)
 
 let test_simple_worker_spawn use_clones heap_handle () =

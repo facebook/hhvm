@@ -75,7 +75,7 @@ let init
   let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =
     MultiWorker.make
-      ~call_wrapper:{ WorkerController.wrap = catch_and_classify_exceptions }
+      ~call_wrapper:{ Worker_controller.wrap = catch_and_classify_exceptions }
       ~longlived_workers:false
       ~saved_state:state
       ~entry

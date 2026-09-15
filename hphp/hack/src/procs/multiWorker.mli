@@ -20,9 +20,9 @@ module type CALLER = sig
   val return : 'a -> 'a result
 
   val multi_threaded_call :
-    WorkerController.worker list ->
-    (WorkerController.worker_id * 'c -> 'a -> 'b) ->
-    (WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    Worker_controller.worker list ->
+    (Worker_controller.worker_id * 'c -> 'a -> 'b) ->
+    (Worker_controller.worker_id * 'b -> 'c -> 'c) ->
     'c ->
     'a Hh_bucket.next ->
     'c result
@@ -30,9 +30,9 @@ end
 
 module CallFunctor (Caller : CALLER) : sig
   val call :
-    WorkerController.worker list option ->
-    job:(WorkerController.worker_id * 'c -> 'a -> 'b) ->
-    merge:(WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    Worker_controller.worker list option ->
+    job:(Worker_controller.worker_id * 'c -> 'a -> 'b) ->
+    merge:(Worker_controller.worker_id * 'b -> 'c -> 'c) ->
     neutral:'c ->
     next:'a Hh_bucket.next ->
     'c Caller.result
@@ -99,8 +99,8 @@ val wrapper : call_wrapper
 (* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
 val call_with_worker_id :
   worker list option ->
-  job:(WorkerController.worker_id * 'c -> 'a -> 'b) ->
-  merge:(WorkerController.worker_id * 'b -> 'c -> 'c) ->
+  job:(Worker_controller.worker_id * 'c -> 'a -> 'b) ->
+  merge:(Worker_controller.worker_id * 'b -> 'c -> 'c) ->
   neutral:'c ->
   next:'a Hh_bucket.next ->
   'c
@@ -125,11 +125,11 @@ val call_with_interrupt :
 (* Creates a pool of workers. *)
 val make :
   ?call_wrapper:
-    (* See docs in WorkerController.worker for call_wrapper. *)
-    WorkerController.call_wrapper ->
+    (* See docs in Worker_controller.worker for call_wrapper. *)
+    Worker_controller.call_wrapper ->
   longlived_workers:bool ->
   saved_state:'a ->
-  entry:'a WorkerController.entry ->
+  entry:'a Worker_controller.entry ->
   int ->
   gc_control:Gc.control ->
   heap_handle:SharedMem.handle ->

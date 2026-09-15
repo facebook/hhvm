@@ -8,4 +8,4 @@
  *)
 
 val register :
-  restore:('a -> worker_id:int -> unit) -> 'a WorkerController.entry
+  restore:('a -> worker_id:int -> unit) -> 'a Worker_controller.entry

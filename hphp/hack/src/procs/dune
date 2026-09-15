@@ -13,7 +13,7 @@
   multiThreadedCall
   multiWorker
   worker
-  workerController)
+  worker_controller)
  (libraries
   core_kernel
   heap_shared_mem

@@ -95,7 +95,7 @@ type 'a entry = ('a worker_params, Worker.request, void) Daemon.entry
 (* Creates a pool of workers. *)
 val make :
   ?call_wrapper:
-    (* See docs in WorkerController.worker for call_wrapper. *)
+    (* See docs in Worker_controller.worker for call_wrapper. *)
     call_wrapper ->
   longlived_workers:bool ->
   saved_state:'a ->

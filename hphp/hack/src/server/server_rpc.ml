@@ -456,7 +456,7 @@ let handle :
     | MultiThreadedCall.Coalesced_failures failures ->
       let failures =
         failures
-        |> List.map ~f:WorkerController.failure_to_string
+        |> List.map ~f:Worker_controller.failure_to_string
         |> String.concat ~sep:"\n"
       in
       ( env,

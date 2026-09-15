@@ -11,7 +11,7 @@ module Hh_bucket = Bucket
 open Hh_prelude
 
 (* Hide the worker type from our users *)
-type worker = WorkerController.worker
+type worker = Worker_controller.worker
 
 type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
 
@@ -42,9 +42,9 @@ module type CALLER = sig
   val return : 'a -> 'a result
 
   val multi_threaded_call :
-    WorkerController.worker list ->
-    (WorkerController.worker_id * 'c -> 'a -> 'b) ->
-    (WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    Worker_controller.worker list ->
+    (Worker_controller.worker_id * 'c -> 'a -> 'b) ->
+    (Worker_controller.worker_id * 'b -> 'c -> 'c) ->
     'c ->
     'a Hh_bucket.next ->
     'c result
@@ -52,9 +52,9 @@ end
 
 module CallFunctor (Caller : CALLER) : sig
   val call :
-    WorkerController.worker list option ->
-    job:(WorkerController.worker_id * 'c -> 'a -> 'b) ->
-    merge:(WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    Worker_controller.worker list option ->
+    job:(Worker_controller.worker_id * 'c -> 'a -> 'b) ->
+    merge:(Worker_controller.worker_id * 'b -> 'c -> 'c) ->
     neutral:'c ->
     next:'a Hh_bucket.next ->
     'c Caller.result
@@ -155,7 +155,7 @@ let next ?progress_fn ?max_size workers =
     ?progress_fn
     ?max_size
 
-let make = WorkerController.make
+let make = Worker_controller.make
 
 type call_wrapper = {
   f:

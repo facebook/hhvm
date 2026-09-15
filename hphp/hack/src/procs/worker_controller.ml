@@ -372,17 +372,17 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
      * that if the clone process fails, the main worker process will see the failure and
      * also fail accordingly, which we will catch in with "with_exit_status_check".
      * This is designed around an assumption that, if the clone fails,
-     * the main worker process will also fail. Therefore, the WorkerController here
+     * the main worker process will also fail. Therefore, the Worker_controller here
      * will see the failure and not attempt to read the result with
      * "Marshal_tools.from_fd_with_preamble"
      *
      * However, there is a scenario in which the assumption above cannot hold when
      * the clone process fails
      * - the worker clone process is forked
-     * - the WorkerController checks the worker's main process's status
+     * - the Worker_controller checks the worker's main process's status
      * - the non-interruptible waitpid call hasn't started yet
      *
-     * Under such circumstances, the WorkerController could try to read the result
+     * Under such circumstances, the Worker_controller could try to read the result
      * with Marshal_tools, get an End_of_file, and crash.
      *
      * To get around this, we give the main worker process time to "catch up" and reach

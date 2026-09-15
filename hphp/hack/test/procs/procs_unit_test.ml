@@ -81,7 +81,7 @@ let multi_worker_one_worker_throws _workers () =
         in
         false
       with
-      | Coalesced_failures [WorkerController.Worker_quit (Unix.WEXITED 3)] ->
+      | Coalesced_failures [Worker_controller.Worker_quit (Unix.WEXITED 3)] ->
         true))
 
 let multi_worker_with_failure_handler _workers () =
@@ -138,7 +138,7 @@ let multi_worker_with_failure_handler _workers () =
           List.fold_left
             (fun acc e ->
               match e with
-              | WorkerController.Worker_quit (Unix.WEXITED 3) -> acc + 3
+              | Worker_controller.Worker_quit (Unix.WEXITED 3) -> acc + 3
               | _ -> failwith "Unexpected worker exit")
             0
             failures

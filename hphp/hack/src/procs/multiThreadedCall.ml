@@ -10,11 +10,11 @@
 module Hh_bucket = Bucket
 open Hh_prelude
 
-exception Coalesced_failures of WorkerController.worker_failure list
+exception Coalesced_failures of Worker_controller.worker_failure list
 
 let coalesced_failures_to_string failures =
   let failure_strings =
-    List.map failures ~f:WorkerController.failure_to_string
+    List.map failures ~f:Worker_controller.failure_to_string
   in
   Printf.sprintf
     "Coalesced_failures[%s]"
@@ -80,11 +80,11 @@ let multi_threaded_call
         (* Note than now some handles have mismatched types. We need to remember
          * to check their get_call_id against this multi_threaded_call call_id
          * before trusting the types. *)
-        match WorkerController.get_handle_UNSAFE worker with
+        match Worker_controller.get_handle_UNSAFE worker with
         | None -> (worker :: workers, handles)
         | Some handle -> (workers, handle :: handles))
   in
-  let is_current handle = call_id = WorkerController.get_call_id handle in
+  let is_current handle = call_id = Worker_controller.get_call_id handle in
   (* merge accumulator, leaving environment and interrupt handlers untouched *)
   let merge x (y1, y2, y3) = (merge x y1, y2, y3) in
   (* interrupt handlers are irrelevant after job is done *)
@@ -127,12 +127,12 @@ let multi_threaded_call
     let res = (acc, env, handlers) in
     match decision with
     | Cancel reason ->
-      WorkerController.cancel handles;
+      Worker_controller.cancel handles;
       let unfinished =
         match on_cancelled with
         | Some f -> f ()
         | None ->
-          let unfinished = List.map handles ~f:WorkerController.get_job in
+          let unfinished = List.map handles ~f:Worker_controller.get_job in
           add_pending unfinished
       in
       (res, Some (unfinished, reason))
@@ -159,9 +159,9 @@ let multi_threaded_call
         dispatch None handles acc
       | Hh_bucket.Job bucket ->
         (* ... send a job to the worker.*)
-        let worker_id = WorkerController.worker_id worker in
+        let worker_id = Worker_controller.worker_id worker in
         let handle =
-          WorkerController.call
+          Worker_controller.call
             ~call_id
             worker
             (fun xl -> job (worker_id, neutral) xl)
@@ -169,10 +169,10 @@ let multi_threaded_call
         in
         dispatch (Some workers) (handle :: handles) acc)
   and collect workers handles acc =
-    let { WorkerController.readys; waiters; ready_fds } =
-      WorkerController.select handles (handler_fds acc)
+    let { Worker_controller.readys; waiters; ready_fds } =
+      Worker_controller.select handles (handler_fds acc)
     in
-    let workers = List.map ~f:WorkerController.get_worker readys @ workers in
+    let workers = List.map ~f:Worker_controller.get_worker readys @ workers in
     (* Collect the results. *)
     let (acc, failures) =
       (* Fold the results of all the finished workers. Also, coalesce the exit
@@ -182,14 +182,14 @@ let multi_threaded_call
           begin
             fun (acc, failures) h ->
               try
-                let res = WorkerController.get_result h in
+                let res = Worker_controller.get_result h in
                 (* Results for handles from other calls are cached by get_result
                  * and will be retrieved later, so we ignore them here *)
                 let acc =
                   if is_current h then
                     let worker_id =
-                      WorkerController.get_worker h
-                      |> WorkerController.worker_id
+                      Worker_controller.get_worker h
+                      |> Worker_controller.worker_id
                     in
                     merge (worker_id, res) acc
                   else
@@ -197,7 +197,7 @@ let multi_threaded_call
                 in
                 (acc, failures)
               with
-              | WorkerController.Worker_failed (_, failure) ->
+              | Worker_controller.Worker_failed (_, failure) ->
                 (acc, failure :: failures)
           end
         ~init:(acc, [])
@@ -248,7 +248,7 @@ let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
   (* Interrupting of nested jobs is not implemented *)
   assert (
     List.for_all workers ~f:(fun x ->
-        Option.is_none @@ WorkerController.get_handle_UNSAFE x));
+        Option.is_none @@ Worker_controller.get_handle_UNSAFE x));
   let job (_id, a) b = job a b in
   let merge (_id, a) b = merge a b in
   let ((res, interrupt_env), unfinished_and_reason) =

@@ -86,7 +86,7 @@ let exit_on_exception (e : Exception.t) =
     Hh_logger.log "%s" failure_msg;
     let is_oom_failure f =
       match f with
-      | WorkerController.Worker_oomed -> true
+      | Worker_controller.Worker_oomed -> true
       | _ -> false
     in
     let has_oom_failure = List.exists ~f:is_oom_failure failures in
@@ -98,7 +98,7 @@ let exit_on_exception (e : Exception.t) =
        * all the failures and looking for a WEXITED. *)
       let worker_exit f =
         match f with
-        | WorkerController.Worker_quit (Unix.WEXITED i) -> Some i
+        | Worker_controller.Worker_quit (Unix.WEXITED i) -> Some i
         | _ -> None
       in
       let exit_code =
@@ -116,20 +116,20 @@ let exit_on_exception (e : Exception.t) =
         (* Exit with same code. *)
         exit i
       | None -> failwith failure_msg)
-  (* In single-threaded mode, WorkerController exceptions are raised directly
+  (* In single-threaded mode, Worker_controller exceptions are raised directly
    * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)
-  | WorkerController.(Worker_failed (_, Worker_oomed)) ->
+  | Worker_controller.(Worker_failed (_, Worker_oomed)) ->
     Hh_logger.exception_ e;
     Exit.exit Exit_status.Worker_oomed
-  | WorkerController.Worker_busy ->
+  | Worker_controller.Worker_busy ->
     Hh_logger.exception_ e;
     Exit.exit Exit_status.Worker_busy
-  | WorkerController.(Worker_failed (_, Worker_quit (Unix.WEXITED i))) ->
+  | Worker_controller.(Worker_failed (_, Worker_quit (Unix.WEXITED i))) ->
     Hh_logger.exception_ e;
 
     (* Exit with the same exit code that that worker used. *)
     exit i
-  | WorkerController.Worker_failed_to_send_job _ ->
+  | Worker_controller.Worker_failed_to_send_job _ ->
     Hh_logger.exception_ e;
     Exit.exit Exit_status.Worker_failed_to_send_job
   | File_provider.File_provider_stale ->

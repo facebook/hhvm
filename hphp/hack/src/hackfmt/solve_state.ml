@@ -17,7 +17,7 @@ type t = {
    * Rules in this map are bound to be broken on or not broken on in this solve
    * state. Rules not in the map are not yet bound. A rule that is bound to be
    * broken on will have all its splits broken in the solution. *)
-  rbm: bool IMap.t;
+  rbm: bool I_map.t;
   nesting_set: ISet.t;
   cost: int;
   overflow: int;
@@ -31,17 +31,17 @@ let chunks t = t.chunk_group.Chunk_group.chunks
 
 let rbm_has_split_before_chunk c rbm =
   let rule_id = c.Chunk.rule in
-  IMap.find_opt rule_id rbm |> Option.value ~default:false
+  I_map.find_opt rule_id rbm |> Option.value ~default:false
 
 let rbm_has_comma_after_chunk c rbm =
   Option.value_map c.Chunk.comma ~default:false ~f:(fun (rule_id, _) ->
-      IMap.find_opt rule_id rbm |> Option.value ~default:false)
+      I_map.find_opt rule_id rbm |> Option.value ~default:false)
 
 let has_split_before_chunk t ~chunk = rbm_has_split_before_chunk chunk t.rbm
 
 let has_comma_after_chunk t ~chunk = rbm_has_comma_after_chunk chunk t.rbm
 
-let get_bound_ruleset rbm = ISet.of_list @@ IMap.keys rbm
+let get_bound_ruleset rbm = ISet.of_list @@ I_map.keys rbm
 
 let get_overflow env len = max (len - env.Env.line_width) 0
 
@@ -127,7 +127,7 @@ let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
   let candidate_rules =
     ISet.fold
       (fun id acc ->
-        let rules = Option.value ~default:[] (IMap.find_opt id deps) in
+        let rules = Option.value ~default:[] (I_map.find_opt id deps) in
         ISet.union acc @@ ISet.of_list rules)
       base_candidate_rules
       base_candidate_rules
@@ -136,8 +136,8 @@ let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
   let rbm =
     ISet.fold
       (fun r acc ->
-        if not (IMap.mem r rbm) then
-          IMap.add r false acc
+        if not (I_map.mem r rbm) then
+          I_map.add r false acc
         else
           acc)
       dead_rules
@@ -198,7 +198,7 @@ let make env chunk_group rbm =
   let span_cost = ISet.cardinal broken_spans in
   (* add to cost the cost of all rules that are split *)
   let rule_cost =
-    IMap.fold
+    I_map.fold
       (fun r_id v acc ->
         if v then
           acc + Rule.get_cost (Chunk_group.get_rule_kind chunk_group r_id)
@@ -244,7 +244,7 @@ let add_breaks_from_source rbm source_text chunk_group =
             i < chunk_start && (Char.equal source_text.[i] '\n' || aux (i + 1))
           in
           if aux prev_chunk_end then
-            IMap.add chunk.Chunk.rule true rbm
+            I_map.add chunk.Chunk.rule true rbm
           else
             rbm
         in
@@ -253,7 +253,7 @@ let add_breaks_from_source rbm source_text chunk_group =
   rbm
 
 let rbm_from_source source_text chunk_group =
-  let rbm = IMap.empty in
+  let rbm = I_map.empty in
   add_breaks_from_source rbm source_text chunk_group
 
 (** When we are unable to find a good solution, this function produces a
@@ -270,11 +270,11 @@ let from_source env source_text chunk_group =
 (** Every rule is broken. Everything is going hog wild. *)
 let rbm_broken_everywhere chunk_group =
   Chunk_group.get_rules chunk_group
-  |> List.fold ~init:IMap.empty ~f:(fun acc k -> IMap.add k true acc)
+  |> List.fold ~init:I_map.empty ~f:(fun acc k -> I_map.add k true acc)
 
 let from_rbm env rbm chunk_group = make env chunk_group rbm
 
-let is_rule_bound t rule_id = IMap.mem rule_id t.rbm
+let is_rule_bound t rule_id = I_map.mem rule_id t.rbm
 
 let get_candidate_rules t = t.candidate_rules
 
@@ -302,16 +302,16 @@ let is_overlapping s1 s2 =
        (fun s1_key ->
          Option.equal
            Bool.equal
-           (IMap.find_opt s1_key s1.rbm)
-           (IMap.find_opt s1_key s2.rbm))
+           (I_map.find_opt s1_key s1.rbm)
+           (I_map.find_opt s1_key s2.rbm))
        s1_rules
 
 let compare_rule_sets s1 s2 =
   let bound_rule_ids =
-    Stdlib.List.sort_uniq Int.compare @@ IMap.keys s1.rbm @ IMap.keys s2.rbm
+    Stdlib.List.sort_uniq Int.compare @@ I_map.keys s1.rbm @ I_map.keys s2.rbm
   in
   let is_split rule_id state =
-    IMap.find_opt rule_id state.rbm |> Option.value ~default:false
+    I_map.find_opt rule_id state.rbm |> Option.value ~default:false
   in
   let rec aux = function
     | [] -> 0
@@ -352,7 +352,7 @@ let compare_overlap s1 s2 =
 let __debug t =
   (* TODO: make a new rule strings string *)
   let rule_strings =
-    List.map (IMap.bindings t.rbm) ~f:(fun (k, v) ->
+    List.map (I_map.bindings t.rbm) ~f:(fun (k, v) ->
         string_of_int k ^ ": " ^ string_of_bool v)
   in
   let rule_count = string_of_int (Chunk_group.get_rule_count t.chunk_group) in

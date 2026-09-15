@@ -104,7 +104,7 @@ let get_ast tcopt path content =
     in
     Diagnostics.merge_into_current errors;
     let fixmes =
-      Fixme_provider.get_hh_fixmes path |> Option.value ~default:IMap.empty
+      Fixme_provider.get_hh_fixmes path |> Option.value ~default:I_map.empty
     in
     IdeAstCache.add digest (ast, fixmes, errors);
     ast

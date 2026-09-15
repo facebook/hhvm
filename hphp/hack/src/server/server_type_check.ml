@@ -1017,7 +1017,7 @@ let type_check_core
          Diagnostics.warning_counts_by_code env.diagnostics
        in
        let warning_counts_telemetry =
-         IMap.fold
+         I_map.fold
            (fun code count acc ->
              Telemetry.int_ acc ~key:(string_of_int code) ~value:count)
            warning_counts

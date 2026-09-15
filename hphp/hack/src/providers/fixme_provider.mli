@@ -8,7 +8,7 @@
  *)
 
 module FixmeMap : sig
-  type t = Pos.t IMap.t IMap.t
+  type t = Pos.t I_map.t I_map.t
 end
 
 val get_hh_fixmes : Relative_path.t -> FixmeMap.t option

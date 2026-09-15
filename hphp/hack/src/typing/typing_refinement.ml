@@ -263,7 +263,7 @@ module TyPredicate = struct
     | NullTag
     | EnumTag _
     | GenericTag _ ->
-      (env, IMap.empty)
+      (env, I_map.empty)
     | ClassTag (id, generics) ->
       let (env, new_tparams) =
         match Env.get_class env id with
@@ -279,7 +279,7 @@ module TyPredicate = struct
           let (env, tyl, new_tparams) =
             List.fold_left
               tparam_generic_pairs
-              ~init:(env, [], IMap.empty)
+              ~init:(env, [], I_map.empty)
               ~f:(fun (env, tyl, new_tparams) (tparam, generic) ->
                 match generic with
                 | Filled ty -> (env, ty :: tyl, new_tparams)
@@ -313,7 +313,7 @@ module TyPredicate = struct
                   in
                   let ty = Typing_make_type.generic reason new_name in
                   let new_tparam = ((tparam, new_name), ty) in
-                  (env, ty :: tyl, IMap.add wildcard_key new_tparam new_tparams))
+                  (env, ty :: tyl, I_map.add wildcard_key new_tparam new_tparams))
           in
           let tyl = List.rev tyl in
           let ety_env =
@@ -342,12 +342,12 @@ module TyPredicate = struct
           (env, new_tparams)
         | Decl_entry.NotYetAvailable
         | Decl_entry.DoesNotExist ->
-          (env, IMap.empty)
+          (env, I_map.empty)
       in
       (env, new_tparams)
 
   let rec instantiate_wildcards_for_predicate env predicate p :
-      Typing_env_types.env * ((decl_tparam * string) * locl_ty) IMap.t =
+      Typing_env_types.env * ((decl_tparam * string) * locl_ty) I_map.t =
     match predicate with
     | (reason, IsTag tag) ->
       let (env, new_tparams) = instantiate_wildcards_for_tag env reason tag p in
@@ -360,7 +360,7 @@ module TyPredicate = struct
             in
             (env, new_tparams))
       in
-      (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
+      (env, List.fold new_tparams ~init:I_map.empty ~f:I_map.union)
     | (_reason, IsShapeOf { sp_fields; sp_allows_unknown_fields = _ }) ->
       let (env, new_tparams) =
         TShapeMap.fold_env
@@ -369,9 +369,9 @@ module TyPredicate = struct
             let (env, new_tparams) =
               instantiate_wildcards_for_predicate env sfp_predicate p
             in
-            (env, IMap.union new_tparams_acc new_tparams))
+            (env, I_map.union new_tparams_acc new_tparams))
           sp_fields
-          IMap.empty
+          I_map.empty
       in
       (env, new_tparams)
     | (_reason, IsUnionOf predicates) ->
@@ -382,7 +382,7 @@ module TyPredicate = struct
             in
             (env, new_tparams))
       in
-      (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
+      (env, List.fold new_tparams ~init:I_map.empty ~f:I_map.union)
     | (_reason, IsNot inner) -> instantiate_wildcards_for_predicate env inner p
 
   let rec to_ty env lookup_wildcard predicate =
@@ -482,7 +482,7 @@ module TyPredicate = struct
     to_ty
       env
       (fun key ->
-        match IMap.find_opt key instantiation_map with
+        match I_map.find_opt key instantiation_map with
         | Some ty -> ty
         | None ->
           Diagnostics.invariant_violation

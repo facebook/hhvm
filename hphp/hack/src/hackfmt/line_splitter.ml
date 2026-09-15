@@ -20,13 +20,13 @@ let expand_state env state =
           (env_rbm, None)
         else
           let next_rbm_opt =
-            Some (IMap.add rule_id true env_rbm)
+            Some (I_map.add rule_id true env_rbm)
             |> Option.filter
                  ~f:(Chunk_group.are_rule_bindings_valid chunk_group)
           in
           let env_rbm =
             if Option.is_some next_rbm_opt then
-              IMap.add rule_id false env_rbm
+              I_map.add rule_id false env_rbm
             else
               env_rbm
           in
@@ -100,11 +100,12 @@ let solve_chunk_group env ?range ?source_text chunk_group =
            range which was broken in the original source, the output will look
            strange if we don't break all of that rule's associated splits inside
            the formatting range, too. *)
-        |> IMap.filter (fun id broke -> broke && ISet.mem id rules_out_of_range)
+        |> I_map.filter (fun id broke ->
+               broke && ISet.mem id rules_out_of_range)
         (* We should also break any rule which is configured to ALWAYS break
            (such as the rule governing the split after a single-line comment)
            and has a split inside the formatting range. *)
-        |> ISet.fold (fun id -> IMap.add id true) always_rules_in_range
+        |> ISet.fold (fun id -> I_map.add id true) always_rules_in_range
       in
       let propagated =
         bindings
@@ -113,9 +114,9 @@ let solve_chunk_group env ?range ?source_text chunk_group =
         |> Chunk_group.propagate_breakage chunk_group
         (* ...But only do this for rules which do not have any associated splits
            outside of the formatting range. *)
-        |> IMap.filter (fun id _ -> ISet.mem id rules_entirely_in_range)
+        |> I_map.filter (fun id _ -> ISet.mem id rules_entirely_in_range)
       in
-      IMap.union bindings propagated
+      I_map.union bindings propagated
     | _ -> Chunk_group.get_initial_rule_bindings chunk_group
   in
   let init_state = Solve_state.make env chunk_group rbm in

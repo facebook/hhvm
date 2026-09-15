@@ -126,7 +126,7 @@ let get_ignores filename =
     Fixme_store.get fixmes.ignores filename
 
 let provide_hh_fixmes filename fixme_map =
-  if not (IMap.is_empty fixme_map) then
+  if not (I_map.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
     | Provider_backend.Rust_provider_backend _
@@ -137,7 +137,7 @@ let provide_hh_fixmes filename fixme_map =
       Fixme_store.add fixmes.hh_fixmes filename fixme_map
 
 let provide_decl_hh_fixmes filename fixme_map =
-  if not (IMap.is_empty fixme_map) then
+  if not (I_map.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
     | Provider_backend.Rust_provider_backend _
@@ -148,7 +148,7 @@ let provide_decl_hh_fixmes filename fixme_map =
       Fixme_store.add fixmes.decl_hh_fixmes filename fixme_map
 
 let provide_disallowed_fixmes filename fixme_map =
-  if not (IMap.is_empty fixme_map) then
+  if not (I_map.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
     | Provider_backend.Rust_provider_backend _
@@ -159,7 +159,7 @@ let provide_disallowed_fixmes filename fixme_map =
       Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
 
 let provide_ignores filename fixme_map =
-  if not (IMap.is_empty fixme_map) then
+  if not (I_map.is_empty fixme_map) then
     match Provider_backend.get () with
     | Provider_backend.Analysis
     | Provider_backend.Rust_provider_backend _
@@ -204,26 +204,26 @@ let local_changes_pop_sharedmem_stack () =
 module UnusedFixmes = struct
   module LineToCodesMap = struct
     (** Mapping error lines to sets of codes *)
-    type t = ISet.t IMap.t
+    type t = ISet.t I_map.t
 
     let find_or_default line m =
-      IMap.find_opt line m |> Option.value ~default:ISet.empty
+      I_map.find_opt line m |> Option.value ~default:ISet.empty
 
     let add (line : int) (code : int) (m : t) =
-      IMap.add line (ISet.add code (find_or_default line m)) m
+      I_map.add line (ISet.add code (find_or_default line m)) m
   end
 
   module FileToLineToCodesMap = struct
     type t = LineToCodesMap.t Relative_path.Map.t
 
     let find_or_default fn m =
-      Relative_path.Map.find_opt m fn |> Option.value ~default:IMap.empty
+      Relative_path.Map.find_opt m fn |> Option.value ~default:I_map.empty
 
     let mem fn line code m =
       match Relative_path.Map.find_opt m fn with
       | None -> false
       | Some m ->
-        (match IMap.find_opt line m with
+        (match I_map.find_opt line m with
         | None -> false
         | Some s -> ISet.mem code s)
 
@@ -299,16 +299,16 @@ let get_entries get_map pos =
   let filename = Pos.filename pos in
   let (line, _, _) = Pos.info_pos pos in
   get_map filename
-  |> Option.value ~default:IMap.empty
-  |> IMap.find_opt line
-  |> Option.value ~default:IMap.empty
+  |> Option.value ~default:I_map.empty
+  |> I_map.find_opt line
+  |> Option.value ~default:I_map.empty
 
 let get_fixmes_for_pos pos = get_entries get_fixmes pos
 
 let get_fixme_codes_for_pos pos =
-  get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
+  get_fixmes_for_pos pos |> I_map.keys |> ISet.of_list
 
-let get_entry get_map pos code = get_entries get_map pos |> IMap.find_opt code
+let get_entry get_map pos code = get_entries get_map pos |> I_map.find_opt code
 
 let get_disallowed_fixme_pos pos code = get_entry get_disallowed_fixmes pos code
 
@@ -324,7 +324,7 @@ let any_inf_err_code imap =
   let rec aux = function
     | [] -> None
     | code :: codes ->
-      let fixme_opt = IMap.find_opt code imap in
+      let fixme_opt = I_map.find_opt code imap in
       if Option.is_none fixme_opt then
         aux codes
       else
@@ -337,12 +337,12 @@ let () =
      fun err_pos err_code ->
        get_fixmes_for_pos err_pos |> fun imap ->
        if !Diagnostics.code_agnostic_fixme then
-         if IMap.is_empty imap then
+         if I_map.is_empty imap then
            None
          else
            Some err_pos
        else
-         match IMap.find_opt err_code imap with
+         match I_map.find_opt err_code imap with
          | None when is_inf_err_code err_code -> any_inf_err_code imap
          | x -> x);
   Diagnostics.get_disallowed_fixme_pos := get_disallowed_fixme_pos;

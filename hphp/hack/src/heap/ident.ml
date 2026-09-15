@@ -15,9 +15,9 @@ type t = int [@@deriving eq, hash, ord, show]
 
 let track_names = ref false
 
-let trace = ref IMap.empty
+let trace = ref I_map.empty
 
-let set_name id name = trace := IMap.add id name !trace
+let set_name id name = trace := I_map.add id name !trace
 
 let tmp () =
   let res = hh_counter_next () in
@@ -25,7 +25,7 @@ let tmp () =
   res
 
 let to_string x =
-  match IMap.find_opt x !trace with
+  match I_map.find_opt x !trace with
   | Some res -> res
   | None -> "v" ^ string_of_int x
 

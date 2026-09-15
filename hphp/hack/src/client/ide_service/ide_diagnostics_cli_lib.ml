@@ -59,7 +59,8 @@ let merge_underlines underlines =
   | [] -> []
   | hd :: tl -> List.sort ~compare (merge_acc [] hd tl)
 
-let pos_to_underlines source_text (pos : Pos.absolute) : underline list IMap.t =
+let pos_to_underlines source_text (pos : Pos.absolute) : underline list I_map.t
+    =
   let (start_line, start_col, end_line, end_col) =
     Pos.destruct_range_one_based pos
   in
@@ -90,9 +91,9 @@ let pos_to_underlines source_text (pos : Pos.absolute) : underline list IMap.t =
   let underlines_per_line =
     List.fold
       underlines_per_line
-      ~init:IMap.empty
+      ~init:I_map.empty
       ~f:(fun m (line_number, ul) ->
-        IMap.update
+        I_map.update
           line_number
           (function
             | None -> Some [ul]
@@ -122,13 +123,13 @@ let underlines_for_line_to_patches (uls : underline list) : string =
   text
 
 let underlines_to_patches
-    filename source_text (underlines_per_line : underline list IMap.t) :
+    filename source_text (underlines_per_line : underline list I_map.t) :
     Server_rename_types.patch list =
   let text_per_line =
-    IMap.map underlines_for_line_to_patches underlines_per_line
+    I_map.map underlines_for_line_to_patches underlines_per_line
   in
   let patch_per_line =
-    IMap.mapi
+    I_map.mapi
       (fun line_number text ->
         let insert_offset =
           Full_fidelity_source_text.position_to_offset
@@ -146,11 +147,11 @@ let underlines_to_patches
         Server_rename_types.(Replace { pos; text }))
       text_per_line
   in
-  IMap.values patch_per_line
+  I_map.values patch_per_line
 
 let diagnostic_to_underlines
     source_text (diagnostic : Client_ide_message.diagnostic) :
-    underline list IMap.t list =
+    underline list I_map.t list =
   let Client_ide_message.{ diagnostic_error; diagnostic_related_hints; _ } =
     diagnostic
   in
@@ -164,12 +165,12 @@ let diagnostic_to_underlines
 
 let diagnostics_to_underlines
     source_text (diagnostics : Client_ide_message.diagnostic list) :
-    underline list IMap.t =
+    underline list I_map.t =
   let underlines =
     List.bind diagnostics ~f:(diagnostic_to_underlines source_text)
   in
-  List.fold underlines ~init:IMap.empty ~f:(fun acc m ->
-      IMap.merge
+  List.fold underlines ~init:I_map.empty ~f:(fun acc m ->
+      I_map.merge
         (fun _key xs ys ->
           match (xs, ys) with
           | (None, None) -> None

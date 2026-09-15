@@ -135,12 +135,12 @@ module FixmeMap = struct
     line number guarded by HH_FIXME =>
     error code =>
     position of HH_FIXME comment *)
-  type t = Pos.t IMap.t IMap.t [@@deriving show]
+  type t = Pos.t I_map.t I_map.t [@@deriving show]
 
   let fold (m : t) ~(init : 'acc) ~(f : 'acc -> int -> int -> Pos.t -> 'acc) =
-    IMap.fold
+    I_map.fold
       (fun line m acc ->
-        IMap.fold (fun code pos acc -> f acc line code pos) m acc)
+        I_map.fold (fun code pos acc -> f acc line code pos) m acc)
       m
       init
 end

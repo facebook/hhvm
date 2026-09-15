@@ -103,8 +103,10 @@ let debug_chunk_groups env ~range source_text chunk_groups =
                c.Chunk.start_char
                c.Chunk.end_char
                (Chunk.text c));
-         Printf.printf "Rule count %d\n" (IMap.cardinal cg.Chunk_group.rule_map);
-         IMap.iter
+         Printf.printf
+           "Rule count %d\n"
+           (I_map.cardinal cg.Chunk_group.rule_map);
+         I_map.iter
            (fun k v -> Printf.printf "%8d - %s\n" k (Rule.to_string v))
            cg.Chunk_group.rule_map;
 

@@ -220,7 +220,7 @@ val fold_errors :
 val get_failed_files : t -> Relative_path.Set.t
 
 (** Count of warnings by error code, excluding fixme'd diagnostics. *)
-val warning_counts_by_code : t -> int IMap.t
+val warning_counts_by_code : t -> int I_map.t
 
 val as_telemetry_summary : t -> Telemetry.t
 

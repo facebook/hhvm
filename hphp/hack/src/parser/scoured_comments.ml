@@ -8,7 +8,7 @@
  *)
 open Hh_prelude
 
-type fixmes = Pos.t IMap.t IMap.t [@@deriving show, eq]
+type fixmes = Pos.t I_map.t I_map.t [@@deriving show, eq]
 
 type t = {
   sc_comments: (Pos.t * Prim_defs.comment) list;
@@ -22,4 +22,4 @@ type t = {
 
 let get_fixme_pos (fixmes : fixmes) (pos : Pos.t) (code : int) : Pos.t option =
   let (line, _, _) = Pos.info_pos pos in
-  Option.bind (IMap.find_opt line fixmes) ~f:(IMap.find_opt code)
+  Option.bind (I_map.find_opt line fixmes) ~f:(I_map.find_opt code)

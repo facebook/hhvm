@@ -96,7 +96,7 @@ module FixmeMap : sig
     line number guarded by HH_FIXME =>
     error code =>
     position of HH_FIXME comment *)
-  type t = Pos.t IMap.t IMap.t [@@deriving show]
+  type t = Pos.t I_map.t I_map.t [@@deriving show]
 
   val fold : t -> init:'acc -> f:('acc -> int -> int -> Pos.t -> 'acc) -> 'acc
 end

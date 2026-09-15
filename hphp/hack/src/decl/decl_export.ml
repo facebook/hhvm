@@ -24,8 +24,8 @@ type saved_legacy_decls = {
   meths: fun_elt CEKMap.t;
   smeths: fun_elt CEKMap.t;
   cstrs: fun_elt SMap.t;
-  fixmes: Pos.t IMap.t IMap.t Relative_path.Map.t;
-  decl_fixmes: Pos.t IMap.t IMap.t Relative_path.Map.t;
+  fixmes: Pos.t I_map.t I_map.t Relative_path.Map.t;
+  decl_fixmes: Pos.t I_map.t I_map.t Relative_path.Map.t;
 }
 [@@deriving show]
 

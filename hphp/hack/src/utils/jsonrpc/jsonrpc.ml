@@ -335,7 +335,7 @@ let get_message (t : t) =
 (* Output functions for request                 *)
 (************************************************)
 
-let requests_counter : IMap.key ref = ref 0
+let requests_counter : I_map.key ref = ref 0
 
 let get_next_request_id () : int =
   incr requests_counter;

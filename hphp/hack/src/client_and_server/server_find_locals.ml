@@ -20,17 +20,17 @@ module LocalPositions = struct
    * Identifiers that identify no known local produce an empty set of
    * positions.
    *)
-  type t = PosSet.t IMap.t
+  type t = PosSet.t I_map.t
 
-  let empty = IMap.empty
+  let empty = I_map.empty
 
   let get ident locals =
-    let current = IMap.find_opt ident locals in
+    let current = I_map.find_opt ident locals in
     Option.value ~default:PosSet.empty current
 
   let add ident pos locals =
     let positions = get ident locals in
-    IMap.add ident (PosSet.add pos positions) locals
+    I_map.add ident (PosSet.add pos positions) locals
 end
 
 (* End of module LocalPositions *)

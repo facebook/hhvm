@@ -8489,19 +8489,19 @@ end = struct
           p
       in
       let generics_map =
-        IMap.map (fun (_tparam, locl_ty) -> locl_ty) instantiated_tparams
+        I_map.map (fun (_tparam, locl_ty) -> locl_ty) instantiated_tparams
       in
       let assumptions = assumptions_f generics_map in
       let env = update_env_with_assumptions env assumptions in
       let (env, tparam_substs) =
         Type_parameter_env_ops.simplify_tpenv
           env
-          (IMap.values
-          @@ IMap.map (fun (tp, ty) -> (Some tp, ty)) instantiated_tparams)
+          (I_map.values
+          @@ I_map.map (fun (tp, ty) -> (Some tp, ty)) instantiated_tparams)
           reason
       in
       let generics_map =
-        IMap.map
+        I_map.map
           (fun ((_tp, name), _ty) -> SMap.find name tparam_substs)
           instantiated_tparams
       in

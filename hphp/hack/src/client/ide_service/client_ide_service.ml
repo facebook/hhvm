@@ -95,7 +95,7 @@ type notification_emitter = Client_ide_message.notification Lwt_message_queue.t
 
 module Active_rpc_requests = struct
   type t = {
-    requests: Telemetry.t IMap.t;
+    requests: Telemetry.t I_map.t;
         (** These are requests which have been sent to the daemon but we haven't yet had
           a response, e.g. if we sent requests #3 and #4 and #5 and a response #5 has come
           back, then active would be #3 and #4. *)
@@ -104,18 +104,18 @@ module Active_rpc_requests = struct
           at one moment have requests #3 and #4 active, while the counter is at #6. *)
   }
 
-  let new_ () : t = { requests = IMap.empty; counter = 0 }
+  let new_ () : t = { requests = I_map.empty; counter = 0 }
 
   let add (telemetry : Telemetry.t) (t : t) : t * int =
     let id = t.counter in
-    ({ requests = IMap.add id telemetry t.requests; counter = id + 1 }, id)
+    ({ requests = I_map.add id telemetry t.requests; counter = id + 1 }, id)
 
   let remove (id : int) (t : t) : t =
-    { t with requests = IMap.remove id t.requests }
+    { t with requests = I_map.remove id t.requests }
 
-  let is_empty (t : t) : bool = IMap.is_empty t.requests
+  let is_empty (t : t) : bool = I_map.is_empty t.requests
 
-  let values (t : t) : Telemetry.t list = IMap.values t.requests
+  let values (t : t) : Telemetry.t list = I_map.values t.requests
 end
 
 type t = {

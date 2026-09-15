@@ -812,7 +812,7 @@ let calculate_fanout_and_defer_or_do_type_check
                   env.init_env.saved_state_revs_info))
     in
     let result =
-      ServerInitCommon.defer_or_do_type_check
+      Server_init_common.defer_or_do_type_check
         genv
         env
         (Relative_path.Set.elements to_recheck)
@@ -881,14 +881,16 @@ let initialize_naming_table
         Unix.gettimeofday () )
     | None ->
       let (get_next, t) =
-        ServerInitCommon.directory_walk ~telemetry_label:"lazy.nt.indexing" genv
+        Server_init_common.directory_walk
+          ~telemetry_label:"lazy.nt.indexing"
+          genv
       in
       (get_next, None, t)
   in
   (* full init - too many files to trace all of them *)
   let trace = false in
   let (env, t) =
-    ServerInitCommon.parse_files_and_update_forward_naming_table
+    Server_init_common.parse_files_and_update_forward_naming_table
       genv
       env
       ~get_next
@@ -906,7 +908,7 @@ let initialize_naming_table
       ~worker_call:MultiWorker.wrapper
   in
   if do_naming then
-    ServerInitCommon
+    Server_init_common
     .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env
       t
@@ -922,7 +924,7 @@ let write_symbol_info
     (t : float) : Server_env.env * float =
   let open Write_symbol_info in
   let (env, t) =
-    ServerInitCommon
+    Server_init_common
     .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env
       t
@@ -1011,9 +1013,9 @@ let full_init
       env
       cgroup_steps
   in
-  ServerInitCommon.validate_no_errors env.diagnostics;
+  Server_init_common.validate_no_errors env.diagnostics;
   let fnl = Naming_table.get_files env.naming_table in
-  ServerInitCommon.defer_or_do_type_check
+  Server_init_common.defer_or_do_type_check
     genv
     env
     fnl
@@ -1108,7 +1110,7 @@ let update_naming_table
   @@ fun _cgroup_step -> Fixme_provider.remove_batch naming_files );
   (* Parse dirty files only *)
   let (env, t) =
-    ServerInitCommon.parse_files_and_update_forward_naming_table
+    Server_init_common.parse_files_and_update_forward_naming_table
       genv
       env
       ~get_next:
@@ -1140,14 +1142,14 @@ let update_naming_table
   else
     (* Do global naming on all dirty files *)
     let (env, t) =
-      ServerInitCommon
+      Server_init_common
       .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
         env
         t
         ~telemetry_label:"post_ss1.naming"
         ~cgroup_steps
     in
-    ServerInitCommon.validate_no_errors env.diagnostics;
+    Server_init_common.validate_no_errors env.diagnostics;
 
     let new_naming_table = env.naming_table in
     let env =

@@ -161,7 +161,7 @@
     client_command_handler
     server_command
     server_init
-    serverInitCommon
+    server_init_common
     server_init_messages
     server_init_types
     server_lazy_init

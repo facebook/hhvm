@@ -277,6 +277,10 @@ module Find_my_tests = struct
     time_limit_secs: int option; [@default None]
     test_count_checkpoint_secs: int list; [@default [20; 30; 40]]
         (** Elapsed-time checkpoints (in seconds) at which to record the number of selected test files. *)
+    symbol_node_count_checkpoint_interval: int option; [@default None]
+        (** Record elapsed time whenever this many symbol nodes have been constructed. *)
+    test_file_node_count_checkpoint_interval: int option; [@default None]
+        (** Record elapsed time whenever this many test file nodes have been constructed. *)
     max_method_parent_steps: int option; [@default None]
     max_class_parent_steps: int option; [@default None]
     parent_max_fanout_files: int option; [@default None]
@@ -299,6 +303,8 @@ module Find_my_tests = struct
       reason_provenance = false;
       time_limit_secs = None;
       test_count_checkpoint_secs = [20; 30; 40];
+      symbol_node_count_checkpoint_interval = None;
+      test_file_node_count_checkpoint_interval = None;
       max_method_parent_steps = None;
       max_class_parent_steps = None;
       parent_max_fanout_files = None;

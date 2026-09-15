@@ -479,10 +479,6 @@ impl HhConfig {
                 }),
             tco_typeconst_concrete_concrete_error: default.tco_typeconst_concrete_concrete_error,
             tco_meth_caller_only_public_visibility: default.tco_meth_caller_only_public_visibility,
-            tco_use_module_error_for_member_access: hhconfig.get_bool_or(
-                "use_module_error_for_member_access",
-                default.tco_use_module_error_for_member_access,
-            )?,
             tco_require_extends_implements_ancestors: default
                 .tco_require_extends_implements_ancestors,
             tco_implicit_inherit_sdt: default.tco_implicit_inherit_sdt,

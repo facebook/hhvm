@@ -109,7 +109,6 @@ impl Default for GlobalOptions {
             tco_allowed_expression_tree_visitors: vec![],
             tco_typeconst_concrete_concrete_error: false,
             tco_meth_caller_only_public_visibility: true,
-            tco_use_module_error_for_member_access: false,
             tco_require_extends_implements_ancestors: false,
             tco_implicit_inherit_sdt: false,
             tco_explicit_consistent_constructors: 0,

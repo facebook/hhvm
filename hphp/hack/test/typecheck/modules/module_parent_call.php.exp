@@ -1,8 +1,8 @@
 ERROR: File "module_parent_call.php--f.php", line 6, characters 13-18:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
+You cannot access internal members outside of a module (Typing[4112])
   File "module_parent_call.php--A.php", line 7, characters 21-26:
-  This is from module `A`
+  This member is internal
 ERROR: File "module_parent_call.php--f.php", line 11, characters 13-15:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
+You cannot access internal members outside of a module (Typing[4112])
   File "module_parent_call.php--A.php", line 8, characters 31-33:
-  This is from module `A`
+  This member is protected internal

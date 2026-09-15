@@ -265,9 +265,6 @@ module Hhconfig = struct
 
   let type_printer_fuel = key "type_printer_fuel"
 
-  let use_module_error_for_member_access =
-    key "use_module_error_for_member_access"
-
   let warnings_default_all = key "warnings_default_all"
 
   let warnings_in_sandcastle = key "warnings_in_sandcastle"

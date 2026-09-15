@@ -26,7 +26,7 @@ val check_class_access :
   ce_visibility * bool ->
   Nast.class_id_ ->
   Decl_provider.class_decl ->
-  Typing_error.t list
+  Typing_error.t option
 
 val check_internal_access :
   in_signature:bool ->
@@ -45,7 +45,7 @@ val check_obj_access :
   tests_bypass_visibility:bool ->
   env ->
   ce_visibility ->
-  Typing_error.t list
+  Typing_error.t option
 
 (** Checks whether access to a symbol is permitted according to package visibility rules. *)
 val check_package_access :

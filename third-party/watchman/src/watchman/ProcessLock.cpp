@@ -55,6 +55,9 @@ std::variant<ProcessLock, ProcessLock::LockError> ProcessLock::tryAcquire(
   if (result != 0) {
     char pidstr[32];
     int len = read(fd.fd(), pidstr, sizeof(pidstr) - 1);
+    if (len < 0) {
+      len = 0;
+    }
     pidstr[len] = '\0';
 
     return fmt::format(

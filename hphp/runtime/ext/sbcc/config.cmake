@@ -1,9 +1,8 @@
 HHVM_DEFINE_EXTENSION("sbcc"
   SOURCES
-    ext_sbcc.cpp
     format/sbcc-cache.cpp
     format/sbcc-reader.cpp
-    format/sbcc-writer.cpp
+    ext_sbcc.cpp
   SYSTEMLIB
     ext_sbcc.php
 )

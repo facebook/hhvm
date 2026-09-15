@@ -36,6 +36,7 @@ set(HHVM_WRAP_SYMS)
 set(HHVM_LINK_LIBRARIES
   $<TARGET_PROPERTY:onig,INTERFACE_LINK_LIBRARIES>
   ${HHVM_WRAP_SYMS}
+  hphp_process_init
   hphp_analysis
   hphp_system
   hphp_zend

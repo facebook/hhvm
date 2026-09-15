@@ -7,7 +7,6 @@ set(
   offline-trans-data.cpp
   perf-events.cpp
   printir-annotation.cpp
-  ../../hhvm/process-init.cpp
   repo-wrapper.cpp
   std-logger.cpp
   tc-print.cpp

@@ -18,6 +18,7 @@ struct
       ~(database_shard_name : string option)
       ~(project_name : string)
       ~(project_metadata : string option)
+      ~(max_expected_age_days : int)
       ~(saved_state_manifold_api_key : string option)
       ~(telemetry : Telemetry.t) :
       (lookup_result, lookup_error * Telemetry.t) result Promise.t =
@@ -28,6 +29,7 @@ struct
         database_shard_name,
         project_name,
         project_metadata,
+        max_expected_age_days,
         saved_state_manifold_api_key,
         telemetry );
     failwith "saved-state lookup is not supported in dune builds"

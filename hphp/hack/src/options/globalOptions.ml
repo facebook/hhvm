@@ -28,6 +28,7 @@ type saved_state_loading = {
   use_eden: bool;
   database_shard_name: string option;
   log_saved_state_age_and_distance: bool;
+  saved_state_max_expected_age_days: int;
   use_manifold_cython_client: bool;
   zstd_decompress_by_file: bool;
   use_compressed_dep_graph: bool;
@@ -42,6 +43,7 @@ let default_saved_state_loading =
     use_eden = false;
     database_shard_name = None;
     log_saved_state_age_and_distance = false;
+    saved_state_max_expected_age_days = 14;
     use_manifold_cython_client = false;
     zstd_decompress_by_file = true;
     use_compressed_dep_graph = true;

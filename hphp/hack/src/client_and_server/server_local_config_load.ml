@@ -846,6 +846,24 @@ let load_
       ~current_version
       config
   in
+  let saved_state_max_expected_age_days =
+    let days =
+      int_
+        Config_keys.Hhconf.saved_state_max_expected_age_days
+        ~default:
+          GlobalOptions.(
+            default_saved_state_loading.saved_state_max_expected_age_days)
+        config
+    in
+    if days > 0 then
+      days
+    else
+      failwith
+        (Printf.sprintf
+           "%s must be positive, got %d"
+           Config_keys.Hhconf.saved_state_max_expected_age_days
+           days)
+  in
   let use_eden =
     bool_
       Config_keys.Hhconf.saved_state_lookup_use_eden
@@ -1122,6 +1140,7 @@ let load_
             use_eden;
             database_shard_name;
             log_saved_state_age_and_distance;
+            saved_state_max_expected_age_days;
             use_manifold_cython_client;
             zstd_decompress_by_file;
             use_compressed_dep_graph;

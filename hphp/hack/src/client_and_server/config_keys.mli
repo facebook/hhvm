@@ -433,6 +433,8 @@ module Hhconf : sig
 
   val log_saved_state_age_and_distance : string
 
+  val saved_state_max_expected_age_days : string
+
   val saved_state_lookup_use_eden : string
 
   val saved_state_database_shard_name : string

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -123,7 +124,22 @@ void optimize(Vunit& vunit, const Abi& abi, bool regalloc) {
 }
 
 void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
-  ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
+  auto const& areas = vtext.areas();
+  if (areas.empty()) {
+    ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
+  } else if (areas.size() == 1) {
+    CodeWriteScope scope(areas[0].code);
+    ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
+  } else if (areas.size() == 2) {
+    CodeWriteScope mainScope(areas[0].code);
+    CodeWriteScope coldScope(areas[1].code);
+    ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
+  } else {
+    CodeWriteScope mainScope(areas[0].code);
+    CodeWriteScope coldScope(areas[1].code);
+    CodeWriteScope frozenScope(areas[2].code);
+    ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
+  }
 }
 
 void emitVunit(Vunit& vunit, const IRUnit* unit,

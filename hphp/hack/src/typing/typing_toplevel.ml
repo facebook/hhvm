@@ -466,7 +466,7 @@ let set_tcopt_unstable_features ctx { Aast.fa_user_attributes; _ } =
           let ctx =
             Provider_context.map_tcopt
               ~f:(fun t ->
-                GlobalOptions.
+                Global_options.
                   {
                     t with
                     tco_enabled_unstable_features =

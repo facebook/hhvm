@@ -319,17 +319,17 @@ let reasons_config_opt config =
     (string_opt Config_keys.Hhconfig.extended_reasons config)
     ~f:(fun data_str ->
       if String.equal data_str "debug" then
-        Some GlobalOptions.Debug
+        Some Global_options.Debug
       else if String.equal data_str "legacy" then
-        Some GlobalOptions.Legacy
+        Some Global_options.Legacy
       else
-        Option.map ~f:(fun n -> GlobalOptions.Extended n)
+        Option.map ~f:(fun n -> Global_options.Extended n)
         @@ int_of_string_opt data_str)
 
-let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
-    GlobalOptions.t =
+let load_config (config : Config_file_common.t) (options : Global_options.t) :
+    Global_options.t =
   let ( >?? ) x y = Option.value x ~default:y in
-  let po_opt = options.GlobalOptions.po in
+  let po_opt = options.Global_options.po in
   let experimental_features = config_experimental_stx_features config in
   let po =
     Parser_options.
@@ -424,7 +424,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
           >?? po_opt.expression_tree_shape_no_unwrap;
       }
   in
-  GlobalOptions.set
+  Global_options.set
     ~po
     ?tco_language_feature_logging:
       (bool_opt Config_keys.Hhconfig.language_feature_logging config)
@@ -590,10 +590,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.hack_warnings config
       |> Option.map ~f:(function
              | true ->
-               GlobalOptions.All_except
+               Global_options.All_except
                  (int_list_opt Config_keys.Hhconfig.disabled_warnings config
                  |> Option.value ~default:[])
-             | false -> GlobalOptions.NNone))
+             | false -> Global_options.NNone))
     ?recursive_case_types:
       (bool_opt Config_keys.Hhconfig.recursive_case_types config)
     ?class_sub_classname:
@@ -749,9 +749,9 @@ let load_with_dynamic_overrides
       Custom_error_config_loader.load_and_parse ()
     in
     let local_config_opts =
-      GlobalOptions.set
+      Global_options.set
         ~po:
-          GlobalOptions.
+          Global_options.
             {
               default.po with
               Parser_options.allow_unstable_features =
@@ -788,11 +788,11 @@ let load_with_dynamic_overrides
         ~tco_custom_error_config
         ~hack_warnings:
           (if local_config.hack_warnings then
-            GlobalOptions.All_except
+            Global_options.All_except
               (int_list_opt Config_keys.Hhconfig.disabled_warnings config
               |> Option.value ~default:[])
           else
-            GlobalOptions.NNone)
+            Global_options.NNone)
         ~warnings_default_all:local_config.warnings_default_all
         ~warnings_in_sandcastle:local_config.warnings_in_sandcastle
         ~warnings_generated_files:
@@ -802,7 +802,7 @@ let load_with_dynamic_overrides
              config)
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
-        GlobalOptions.default
+        Global_options.default
     in
     load_config config local_config_opts
   in
@@ -819,16 +819,16 @@ let load_with_dynamic_overrides
   in
   Package_info.log_package_info package_info;
   let global_opts =
-    GlobalOptions.set
+    Global_options.set
       ~po:
-        GlobalOptions.{ global_opts_without_package_info.po with package_info }
+        Global_options.{ global_opts_without_package_info.po with package_info }
       global_opts_without_package_info
   in
 
   Diagnostics.allowed_fixme_codes_strict :=
-    GlobalOptions.allowed_fixme_codes_strict global_opts;
+    Global_options.allowed_fixme_codes_strict global_opts;
   Diagnostics.code_agnostic_fixme :=
-    GlobalOptions.code_agnostic_fixme global_opts;
+    Global_options.code_agnostic_fixme global_opts;
   ( {
       version;
       load_script_timeout =
@@ -838,7 +838,7 @@ let load_with_dynamic_overrides
       gc_control = make_gc_control config;
       sharedmem_config = make_sharedmem_config config local_config;
       tc_options = global_opts;
-      parser_options = global_opts.GlobalOptions.po;
+      parser_options = global_opts.Global_options.po;
       glean_options = global_opts;
       symbol_write_options = global_opts;
       formatter_override =

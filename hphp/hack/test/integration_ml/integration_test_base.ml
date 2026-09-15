@@ -38,12 +38,12 @@ let po =
     }
 
 let global_opts =
-  GlobalOptions.set
+  Global_options.set
     ~po
     ~tco_num_local_workers:1
-    ~tco_saved_state:GlobalOptions.default_saved_state
+    ~tco_saved_state:Global_options.default_saved_state
     ~tco_fetch_remote_old_decls:false
-    GlobalOptions.default
+    Global_options.default
 
 let server_config = Server_config.set_tc_options server_config global_opts
 

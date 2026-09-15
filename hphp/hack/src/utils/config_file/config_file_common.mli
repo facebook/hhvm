@@ -61,13 +61,14 @@ module type Getters_S = sig
 
   val int_list_opt : string -> t -> int list option
 
-  val all_or_some_ints_opt : string -> t -> int GlobalOptions.all_or_some option
+  val all_or_some_ints_opt :
+    string -> t -> int Global_options.all_or_some option
 
   val all_or_some_ints :
     string ->
-    default:int GlobalOptions.all_or_some ->
+    default:int Global_options.all_or_some ->
     t ->
-    int GlobalOptions.all_or_some
+    int Global_options.all_or_some
 
   val bool_if_min_version :
     string ->

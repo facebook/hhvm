@@ -28,7 +28,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
 
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite Global_options.default ~xhp_as:`Namespaces
   in
 
   (* Compute tast as-is *)
@@ -171,7 +171,7 @@ let test_canon_names_internal
 let test_canon_names_in_entries () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup GlobalOptions.default ~sqlite:false ~xhp_as:`Namespaces
+    Common_setup.setup Global_options.default ~sqlite:false ~xhp_as:`Namespaces
   in
 
   test_canon_names_internal
@@ -229,7 +229,7 @@ let test_canon_names_in_entries () =
 let test_dupe_setup ~(sqlite : bool) =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let setup =
-    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite Global_options.default ~xhp_as:`Namespaces
   in
   let sienv = Search_utils.quiet_si_env in
   let ctx = setup.Common_setup.ctx in
@@ -356,7 +356,7 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
 let test_xhp_name_mangling ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let setup =
-    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`MangledSymbols
+    Common_setup.setup ~sqlite Global_options.default ~xhp_as:`MangledSymbols
   in
   let sienv = Search_utils.quiet_si_env in
   let ctx = setup.Common_setup.ctx in

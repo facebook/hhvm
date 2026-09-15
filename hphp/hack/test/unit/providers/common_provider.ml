@@ -77,14 +77,14 @@ irritatingly slow to have to write hhi to disk. Instead it just sets up Hhi
 to point to the same place as root, and none of the hhi are present. *)
 let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     =
-  let tcopt = GlobalOptions.default in
+  let tcopt = Global_options.default in
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let local_memory =
     match Provider_backend.get () with
     | Provider_backend.Local_memory local_memory -> local_memory
     | _ -> failwith "expected local_memory"
   in
-  let env = { popt = tcopt.GlobalOptions.po; tcopt; local_memory } in
+  let env = { popt = tcopt.Global_options.po; tcopt; local_memory } in
   let ctx = make_empty_ctx env in
   Tempfile.with_real_tempdir (fun path ->
       Relative_path.set_path_prefix Relative_path.Root path;

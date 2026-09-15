@@ -42,5 +42,5 @@ external get_string_list_opt : config -> string -> string list option
   = "hh_config_file_get_string_list_opt"
 
 external get_all_or_some_ints_opt :
-  config -> string -> (int GlobalOptions.all_or_some, string) result option
+  config -> string -> (int Global_options.all_or_some, string) result option
   = "hh_config_file_get_all_or_some_ints_opt"

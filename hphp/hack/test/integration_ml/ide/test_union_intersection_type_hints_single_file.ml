@@ -60,8 +60,8 @@ let test () =
      ([is_unstable_feature_enabled]) dependent solely on the per-file attribute
      being applied -- exactly the code path under test. *)
   let po = Parser_options.{ default with allow_unstable_features = true } in
-  let global_opts : GlobalOptions.t =
-    GlobalOptions.set ~po GlobalOptions.default
+  let global_opts : Global_options.t =
+    Global_options.set ~po Global_options.default
   in
   let custom_config = Server_config.default_config in
   let custom_config = Server_config.set_tc_options custom_config global_opts in

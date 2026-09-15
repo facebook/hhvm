@@ -35,7 +35,7 @@ type options = {
   mode: mode;
   no_builtins: bool;
   naming_table_path: string option;
-  tcopt: GlobalOptions.t;
+  tcopt: Global_options.t;
 }
 
 (* Canonical builtins from our hhi library *)
@@ -264,17 +264,17 @@ let parse_options () =
       }
   in
   let tcopt =
-    GlobalOptions.set
+    Global_options.set
       ~po
       ~tco_saved_state:
-        (GlobalOptions.default_saved_state
-        |> GlobalOptions.with_saved_state_manifold_api_key
+        (Global_options.default_saved_state
+        |> Global_options.with_saved_state_manifold_api_key
              !saved_state_manifold_api_key)
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:I_set.empty)
       ~glean_reponame:!glean_reponame
       ~log_levels:!log_levels
-      GlobalOptions.default
+      Global_options.default
   in
   ( {
       files = fns;
@@ -973,7 +973,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root;
+      decl_and_run_mode opts tcopt.Global_options.po hhi_root;
       Typing_logger.flush_buffers ())
 
 (* command line driver *)

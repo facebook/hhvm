@@ -99,11 +99,11 @@ let test () =
         deregister_php_stdlib = true;
       }
   in
-  let global_opts : GlobalOptions.t =
-    GlobalOptions.set
+  let global_opts : Global_options.t =
+    Global_options.set
       ~po
-      ~tco_saved_state:GlobalOptions.default_saved_state
-      GlobalOptions.default
+      ~tco_saved_state:Global_options.default_saved_state
+      Global_options.default
   in
   let custom_config = Server_config.default_config in
   let custom_config = Server_config.set_tc_options custom_config global_opts in

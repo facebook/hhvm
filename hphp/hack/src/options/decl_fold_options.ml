@@ -13,8 +13,8 @@ type t = {
 }
 [@@deriving show]
 
-let from_global_options (gopt : GlobalOptions.t) =
-  let open GlobalOptions in
+let from_global_options (gopt : Global_options.t) =
+  let open Global_options in
   {
     implicit_inherit_sdt = gopt.tco_implicit_inherit_sdt;
     everything_sdt = gopt.po.Parser_options.everything_sdt;

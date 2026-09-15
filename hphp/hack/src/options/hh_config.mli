@@ -14,7 +14,7 @@ type t = {
   version: string option;
   ignored_paths: string list;
   hash: string;
-  opts: GlobalOptions.t;
+  opts: Global_options.t;
   gc_minor_heap_size: int;
   gc_space_overhead: int;
   sharedmem_global_size: int;

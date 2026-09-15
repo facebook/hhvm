@@ -263,7 +263,7 @@ let empty_saved_env tcopt : saved_env =
 (* Used when an env is needed in codegen.
  * TODO: (arkumar,wilfred,thomasjiang) T42509373 Fix when when needed
  *)
-let dummy_saved_env = empty_saved_env GlobalOptions.default
+let dummy_saved_env = empty_saved_env Global_options.default
 
 let dummy_type_hint (hint : hint option) : ty * hint option =
   (Typing_defs.mk (Typing_reason.none, Typing_defs.Tdynamic None), hint)

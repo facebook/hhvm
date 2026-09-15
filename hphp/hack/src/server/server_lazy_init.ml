@@ -23,7 +23,7 @@
 open Hh_prelude
 
 (* module Bucket = Hack_bucket *)
-open GlobalOptions
+open Global_options
 open Result.Export
 open Reordered_argument_collections
 open Server_env
@@ -960,7 +960,7 @@ let write_symbol_info
     in
     let opts = Indexer_options.create env.swriteopt ~out_dir in
     let namespace_map =
-      env.tcopt.GlobalOptions.po.Parser_options.auto_namespace_map
+      env.tcopt.Global_options.po.Parser_options.auto_namespace_map
     in
     let ctx = Provider_utils.ctx_from_server_env env in
     Entrypoint.go genv.workers ctx opts ~namespace_map ~files;

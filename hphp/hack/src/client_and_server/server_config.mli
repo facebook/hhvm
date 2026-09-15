@@ -37,7 +37,7 @@ val load_with_dynamic_overrides :
   cli_config_overrides:(string * string) list ->
   t * Server_local_config.t
 
-val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
+val load_config : Config_file_common.t -> Global_options.t -> Global_options.t
 
 val set_parser_options : t -> Parser_options.t -> t
 

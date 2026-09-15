@@ -111,10 +111,10 @@ let load_saved_state ~(env : env) ~(local_config : Server_local_config.t) :
   let ssopt =
     {
       local_config.Server_local_config.saved_state with
-      GlobalOptions.loading =
+      Global_options.loading =
         {
-          local_config.Server_local_config.saved_state.GlobalOptions.loading with
-          GlobalOptions.log_saved_state_age_and_distance = false;
+          local_config.Server_local_config.saved_state.Global_options.loading with
+          Global_options.log_saved_state_age_and_distance = false;
           saved_state_manifold_api_key = env.saved_state_manifold_api_key;
         };
     }
@@ -156,14 +156,14 @@ let load_saved_state ~(env : env) ~(local_config : Server_local_config.t) :
     let download_dir =
       State_loader_lwt.prepare_download_dir
         ~saved_state_cache_limit:
-          ssopt.GlobalOptions.loading.saved_state_cache_limit
+          ssopt.Global_options.loading.saved_state_cache_limit
     in
     let target_path =
       State_loader_lwt.get_saved_state_target_path ~download_dir ~manifold_path
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
-        ~ssopt:ssopt.GlobalOptions.loading
+        ~ssopt:ssopt.Global_options.loading
         ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path

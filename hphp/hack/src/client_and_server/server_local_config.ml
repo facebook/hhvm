@@ -199,7 +199,7 @@ type quantile = {
   - overridden by ExperimentsConfig
   - overridden by CLI --config flags *)
 type t = {
-  saved_state: GlobalOptions.saved_state;
+  saved_state: Global_options.saved_state;
   min_log_level: Hh_logger.Level.t;
   attempt_fix_credentials: bool;
       (** Indicates whether we attempt to fix the credentials if they're broken *)

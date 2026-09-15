@@ -196,7 +196,7 @@ let collect_inherited_members ctx tast_def =
   in
   let index_inherited_members =
     (Provider_context.get_tcopt ctx)
-      .GlobalOptions.symbol_write_index_inherited_members
+      .Global_options.symbol_write_index_inherited_members
   in
   let inherited_member_clusters =
     if index_inherited_members then

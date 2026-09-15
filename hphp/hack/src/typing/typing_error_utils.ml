@@ -6184,17 +6184,17 @@ end = struct
     in
 
     let lod =
-      Option.value ~default:GlobalOptions.Legacy
+      Option.value ~default:Global_options.Legacy
       @@ Typechecker_options.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
     in
     let explanation =
       match lod with
-      | GlobalOptions.Legacy ->
+      | Global_options.Legacy ->
         lazy Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity:1)
-      | GlobalOptions.Extended complexity ->
+      | Global_options.Extended complexity ->
         lazy Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
-      | GlobalOptions.Debug ->
+      | Global_options.Debug ->
         lazy Typing_reason.(debug_reason ~sub:r_sub ~super:r_super)
     in
     (reasons, explanation)
@@ -6311,21 +6311,21 @@ end = struct
     in
     let reason_super = Typing_reason.reverse_flow reason_super in
     let lod =
-      Option.value ~default:GlobalOptions.Legacy
+      Option.value ~default:Global_options.Legacy
       @@ Typechecker_options.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
     in
     let explanation =
       match lod with
-      | GlobalOptions.Legacy ->
+      | Global_options.Legacy ->
         lazy
           Typing_reason.(
             explain ~sub:reason_sub ~super:reason_super ~complexity:1)
-      | GlobalOptions.Extended complexity ->
+      | Global_options.Extended complexity ->
         lazy
           Typing_reason.(
             explain ~sub:reason_sub ~super:reason_super ~complexity)
-      | GlobalOptions.Debug ->
+      | Global_options.Debug ->
         lazy Typing_reason.(debug_reason ~sub:reason_sub ~super:reason_super)
     in
     create ~code:Error_code.MissingField ~reasons ~explanation ()
@@ -6501,17 +6501,17 @@ end = struct
     in
     let r_super = Typing_reason.reverse_flow r_super in
     let lod =
-      Option.value ~default:GlobalOptions.Legacy
+      Option.value ~default:Global_options.Legacy
       @@ Typechecker_options.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
     in
     let explanation =
       match lod with
-      | GlobalOptions.Legacy ->
+      | Global_options.Legacy ->
         lazy Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity:1)
-      | GlobalOptions.Extended complexity ->
+      | Global_options.Extended complexity ->
         lazy Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
-      | GlobalOptions.Debug ->
+      | Global_options.Debug ->
         lazy Typing_reason.(debug_reason ~sub:r_sub ~super:r_super)
     in
     create ~code:Error_code.RequiredFieldIsOptional ~reasons ~explanation ()

@@ -283,14 +283,14 @@ let () =
     tcopt
   in
   let tcopt = rust_tcopt_init () in
-  let popt = tcopt.GlobalOptions.po in
+  let popt = tcopt.Global_options.po in
   let rust_decl_map =
     Decl_folded_class_rupro.partition_and_fold_dir
       ~www_root:(Path.to_string www_root)
       Decl_fold_options.
         {
           everything_sdt = popt.Parser_options.everything_sdt;
-          implicit_inherit_sdt = GlobalOptions.(tcopt.tco_implicit_inherit_sdt);
+          implicit_inherit_sdt = Global_options.(tcopt.tco_implicit_inherit_sdt);
         }
       (Decl_parser_options.from_parser_options popt)
       !num_partitions

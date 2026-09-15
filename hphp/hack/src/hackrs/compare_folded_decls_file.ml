@@ -33,7 +33,7 @@ let init tcopt : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
-  let popt = tcopt.GlobalOptions.po in
+  let popt = tcopt.Global_options.po in
   let ctx =
     Provider_context.empty_for_tool
       ~popt
@@ -271,7 +271,7 @@ let () =
         ~everything_sdt
         ~enable_class_pointer_hint
     in
-    let tcopt = GlobalOptions.{ default with po = popt } in
+    let tcopt = Global_options.{ default with po = popt } in
     let tcopt =
       let config =
         List.fold
@@ -341,8 +341,8 @@ let () =
                above. Passing `popt` here made rupro silently ignore every parser
                option set via `--config`, yielding spurious OCaml-vs-rupro
                mismatches (e.g. a test passing `--config everything_sdt=true`).
-               `tcopt.GlobalOptions.po` is that resolved option set. *)
-            (Decl_parser_options.from_parser_options tcopt.GlobalOptions.po)
+               `tcopt.Global_options.po` is that resolved option set. *)
+            (Decl_parser_options.from_parser_options tcopt.Global_options.po)
             files
         with
         | Ok rupro_decls -> rupro_decls

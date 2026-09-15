@@ -2,7 +2,7 @@
  (name global_options)
  (wrapped false)
  (modules
-  globalOptions)
+  global_options)
  (libraries
   collections
   custom_error_types

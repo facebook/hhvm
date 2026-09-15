@@ -28,7 +28,7 @@ type t = {
 }
 
 let create writeopt ~out_dir =
-  let open GlobalOptions in
+  let open Global_options in
   (* Ensure we are writing to fresh files *)
   let is_invalid =
     try

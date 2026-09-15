@@ -13,4 +13,4 @@ type t = {
 }
 [@@deriving show]
 
-val from_global_options : GlobalOptions.t -> t
+val from_global_options : Global_options.t -> t

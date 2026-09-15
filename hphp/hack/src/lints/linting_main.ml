@@ -19,7 +19,7 @@ let typed_linters tcopt =
         if
           (* We only deactivate if all codes for this lint are checked as warnings
              and warnings are turned on by default *)
-          tcopt.GlobalOptions.warnings_default_all
+          tcopt.Global_options.warnings_default_all
           && List.for_all M.error_codes ~f:(fun code ->
                  Typing_warning_utils.code_is_enabled tcopt code)
         then

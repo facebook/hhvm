@@ -39,7 +39,7 @@ let test_dmesg_parser () =
    those files a certain number of times. *)
 let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
-    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false Global_options.default ~xhp_as:`Namespaces
   in
   let file =
     Typing_service_types.{ path = foo_path; was_already_deferred = false }
@@ -98,7 +98,7 @@ let expected_decling_count = 81
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false Global_options.default ~xhp_as:`Namespaces
   in
 
   let (ctx, entry) =
@@ -142,7 +142,7 @@ let test_compute_tast_counting_local_mem () =
       let { Common_setup.ctx; foo_path; foo_contents; _ } =
         Common_setup.setup
           ~sqlite:false
-          GlobalOptions.default
+          Global_options.default
           ~xhp_as:`Namespaces
       in
       let (ctx, entry) =
@@ -205,7 +205,7 @@ let test_should_enable_deferring () =
 let test_quarantine () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; nonexistent_path; _ } =
-    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false Global_options.default ~xhp_as:`Namespaces
   in
   let ctx_orig = ctx in
 

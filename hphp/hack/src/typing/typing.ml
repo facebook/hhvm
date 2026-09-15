@@ -11944,7 +11944,7 @@ end
 
 and Class_id : sig
   val classname_error :
-    env -> (GlobalOptions.t -> int) -> Class_id.classname_expr_error
+    env -> (Global_options.t -> int) -> Class_id.classname_expr_error
 
   type classname_expr_error =
     | Pass

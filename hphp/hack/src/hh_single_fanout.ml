@@ -34,7 +34,7 @@ let popt =
 (* `--config` settings are applied on top, so a test can turn on any `.hhconfig`
    key without this binary having to know about it. *)
 let tcopt config =
-  GlobalOptions.
+  Global_options.
     {
       default with
       po = popt;
@@ -373,7 +373,7 @@ let init (hhi_root : Path.t) config : Provider_context.t =
   let tcopt = tcopt config in
   let ctx =
     Provider_context.empty_for_test
-      ~popt:tcopt.GlobalOptions.po
+      ~popt:tcopt.Global_options.po
       ~tcopt
       ~deps_mode
   in

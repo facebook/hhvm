@@ -367,7 +367,7 @@ module Type_string = struct
          |> Typing_env.map_tcopt ~f:(fun tcopt ->
                 {
                   tcopt with
-                  GlobalOptions.tco_type_printer_fuel =
+                  Global_options.tco_type_printer_fuel =
                     lots_of_typing_print_fuel;
                 })
        in

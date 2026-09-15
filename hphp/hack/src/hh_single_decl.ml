@@ -56,7 +56,7 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
-  let popt = tcopt.GlobalOptions.po in
+  let popt = tcopt.Global_options.po in
   if rust_provider_backend then
     let backend =
       Hh_server_provider_backend.make
@@ -573,7 +573,7 @@ let () =
       ~enable_class_pointer_hint
       ~include_enum_member_values:!include_enum_member_values
   in
-  let tcopt = GlobalOptions.{ default with po = popt } in
+  let tcopt = Global_options.{ default with po = popt } in
   let ctx =
     init (Path.dirname file) tcopt ~rust_provider_backend:!rust_provider_backend
   in

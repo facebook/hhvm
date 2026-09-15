@@ -25,7 +25,7 @@ type t = private {
   incremental: Sym_hash.t option;
 }
 
-val create : GlobalOptions.t -> out_dir:string -> t
+val create : Global_options.t -> out_dir:string -> t
 
 val default : out_dir:string -> t
 

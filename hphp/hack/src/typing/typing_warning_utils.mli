@@ -7,14 +7,14 @@
  *)
 val codes : ('x, 'a) Typing_warning.kind -> Error_codes.Warning.t list
 
-val code_is_enabled : GlobalOptions.t -> Error_codes.Warning.t -> bool
+val code_is_enabled : Global_options.t -> Error_codes.Warning.t -> bool
 
 val add_ : Typechecker_options.t -> ('x, 'a) Typing_warning.t -> unit
 
 val add : Typing_env_types.env -> ('x, 'a) Typing_warning.t -> unit
 
 val add_for_migration :
-  GlobalOptions.t ->
+  Global_options.t ->
   as_lint:Tast.check_status option option ->
   ('x, Typing_warning.migrated) Typing_warning.t ->
   unit

@@ -89,7 +89,7 @@ type options = {
   error_format: Diagnostics.format option;
   no_builtins: bool;
   max_errors: int option;
-  tcopt: GlobalOptions.t;
+  tcopt: Global_options.t;
   batch_mode: bool;
   out_extension: string;
   should_print_position: bool;
@@ -283,7 +283,7 @@ let parse_options () =
   let strict_contexts = ref true in
 
   let enable_supportdyn_hint = ref false in
-  let glean_reponame = ref (Glean_options.reponame GlobalOptions.default) in
+  let glean_reponame = ref (Glean_options.reponame Global_options.default) in
   let disable_xhp_element_mangling = ref false in
   let keep_user_attributes = ref false in
   let enable_xhp_class_modifier = ref false in
@@ -302,12 +302,12 @@ let parse_options () =
   let explicit_consistent_constructors = ref 0 in
   let require_types_class_consts = ref 0 in
   let type_printer_fuel =
-    ref (Typechecker_options.type_printer_fuel GlobalOptions.default)
+    ref (Typechecker_options.type_printer_fuel Global_options.default)
   in
   let profile_type_check_multi = ref None in
   let profile_top_level_definitions =
     ref
-      (Typechecker_options.profile_top_level_definitions GlobalOptions.default)
+      (Typechecker_options.profile_top_level_definitions Global_options.default)
   in
   let memtrace = ref None in
   let enable_global_access_check = ref false in
@@ -697,7 +697,7 @@ let parse_options () =
         Arg.Int (( := ) type_printer_fuel),
         " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
         ^ string_of_int
-            (Typechecker_options.type_printer_fuel GlobalOptions.default) );
+            (Typechecker_options.type_printer_fuel Global_options.default) );
       ( "--enable-global-access-check",
         Arg.Set enable_global_access_check,
         " Run global access checker to check global writes and reads" );
@@ -888,10 +888,10 @@ let parse_options () =
       }
   in
 
-  let tcopt : GlobalOptions.t =
-    GlobalOptions.set
+  let tcopt : Global_options.t =
+    Global_options.set
       ~po
-      ~tco_saved_state:GlobalOptions.default_saved_state
+      ~tco_saved_state:Global_options.default_saved_state
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
       ~allowed_fixme_codes_strict:
@@ -915,15 +915,15 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
-      GlobalOptions.default
+      Global_options.default
   in
   let tcopt = Server_config.load_config config tcopt in
 
   Diagnostics.allowed_fixme_codes_strict :=
-    GlobalOptions.allowed_fixme_codes_strict tcopt;
+    Global_options.allowed_fixme_codes_strict tcopt;
 
   let tco_legacy_experimental_features =
-    tcopt.GlobalOptions.tco_legacy_experimental_features
+    tcopt.Global_options.tco_legacy_experimental_features
   in
   let tco_legacy_experimental_features =
     if !enable_supportdyn_hint then
@@ -942,14 +942,14 @@ let parse_options () =
       tco_legacy_experimental_features
   in
 
-  let tcopt = { tcopt with GlobalOptions.tco_legacy_experimental_features } in
+  let tcopt = { tcopt with Global_options.tco_legacy_experimental_features } in
   let tco_custom_error_config =
     Option.value ~default:Custom_error_config.empty
     @@ Option.bind
          ~f:load_and_parse_custom_error_config
          !custom_error_config_path
   in
-  let tcopt = GlobalOptions.{ tcopt with tco_custom_error_config } in
+  let tcopt = Global_options.{ tcopt with tco_custom_error_config } in
   ( {
       files = fns;
       extra_builtins = !extra_builtins;
@@ -2043,7 +2043,7 @@ let handle_mode
   | Dump_dynamic_inference { as_data } ->
     let ctx =
       Provider_context.map_tcopt ctx ~f:(fun tcopt ->
-          GlobalOptions.{ tcopt with tco_dynamic_inference = true })
+          Global_options.{ tcopt with tco_dynamic_inference = true })
     in
     let (_errors, tasts) = compute_tasts ctx files_info files_contents in
     Relative_path.Map.iter tasts ~f:(fun _fn tast ->
@@ -2103,7 +2103,8 @@ let handle_mode
   | RemoveDeadUnsafeCasts ->
     let ctx =
       Provider_context.map_tcopt ctx ~f:(fun tcopt ->
-          GlobalOptions.{ tcopt with tco_populate_dead_unsafe_cast_heap = true })
+          Global_options.
+            { tcopt with tco_populate_dead_unsafe_cast_heap = true })
     in
     let get_patches ~files_info =
       Remove_dead_unsafe_casts.get_patches
@@ -2612,7 +2613,7 @@ let decl_and_run_mode
           Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
   in
   let tcopt = Typechecker_options.set_package_info tcopt package_info in
-  let popt = tcopt.GlobalOptions.po in
+  let popt = tcopt.Global_options.po in
   let ctx =
     if rust_provider_backend then
       let backend =

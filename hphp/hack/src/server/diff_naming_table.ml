@@ -16,10 +16,10 @@ let get_default_provider_context () =
     Relative_path.set_path_prefix Relative_path.Hhi (Path.make_unsafe "hhi")
   in
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
-  let hh_parser_options = GlobalOptions.default in
+  let hh_parser_options = Global_options.default in
   let provider_backend = Provider_backend.get () in
   Provider_context.empty_for_tool
-    ~popt:hh_parser_options.GlobalOptions.po
+    ~popt:hh_parser_options.Global_options.po
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)

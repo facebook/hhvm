@@ -12,8 +12,8 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-type t = GlobalOptions.t [@@deriving show]
+type t = Global_options.t [@@deriving show]
 
-let reponame t = t.GlobalOptions.glean_reponame
+let reponame t = t.Global_options.glean_reponame
 
-let default = GlobalOptions.default
+let default = Global_options.default

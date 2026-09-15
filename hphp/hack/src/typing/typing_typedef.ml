@@ -300,7 +300,7 @@ let typedef_def ctx typedef =
     | CaseType (variant, variants) ->
       ( (fun env ->
           let recursive_case_types env =
-            (Env.get_tcopt env).GlobalOptions.recursive_case_types
+            (Env.get_tcopt env).Global_options.recursive_case_types
           in
           not (recursive_case_types env)),
         List.map (variant :: variants) ~f:(fun v ->

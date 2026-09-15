@@ -20,7 +20,7 @@ let output_config_section title output_config =
 
 let default =
   {
-    saved_state = GlobalOptions.default_saved_state;
+    saved_state = Global_options.default_saved_state;
     min_log_level = Hh_logger.Level.Info;
     attempt_fix_credentials = false;
     log_categories = [];
@@ -407,7 +407,7 @@ let load_
   let project_metadata_w_flags =
     bool_
       Config_keys.Hhconf.project_metadata_w_flags
-      ~default:default.saved_state.GlobalOptions.project_metadata_w_flags
+      ~default:default.saved_state.Global_options.project_metadata_w_flags
       config
   in
   let attempt_fix_credentials =
@@ -841,7 +841,7 @@ let load_
     bool_if_min_version
       Config_keys.Hhconf.log_saved_state_age_and_distance
       ~default:
-        GlobalOptions.(
+        Global_options.(
           default_saved_state_loading.log_saved_state_age_and_distance)
       ~current_version
       config
@@ -867,7 +867,7 @@ let load_
   let use_eden =
     bool_
       Config_keys.Hhconf.saved_state_lookup_use_eden
-      ~default:GlobalOptions.(default_saved_state_loading.use_eden)
+      ~default:Global_options.(default_saved_state_loading.use_eden)
       config
   in
   let database_shard_name =
@@ -877,7 +877,7 @@ let load_
     bool_if_min_version
       Config_keys.Hhconf.use_manifold_cython_client
       ~default:
-        GlobalOptions.(default_saved_state_loading.use_manifold_cython_client)
+        Global_options.(default_saved_state_loading.use_manifold_cython_client)
       ~current_version
       config
   in
@@ -1023,14 +1023,14 @@ let load_
     bool_
       Config_keys.Hhconf.zstd_decompress_by_file
       ~default:
-        GlobalOptions.(default_saved_state_loading.zstd_decompress_by_file)
+        Global_options.(default_saved_state_loading.zstd_decompress_by_file)
       config
   in
   let saved_state_cache_limit =
     int_
       Config_keys.Hhconf.saved_state_cache_limit
       ~default:
-        GlobalOptions.(default_saved_state_loading.saved_state_cache_limit)
+        Global_options.(default_saved_state_loading.saved_state_cache_limit)
       config
   in
   let warnings_default_all =
@@ -1133,9 +1133,9 @@ let load_
   {
     saved_state =
       {
-        GlobalOptions.loading =
+        Global_options.loading =
           {
-            GlobalOptions.saved_state_manifold_api_key;
+            Global_options.saved_state_manifold_api_key;
             manifold_local_port;
             use_eden;
             database_shard_name;
@@ -1322,10 +1322,10 @@ let to_rollout_flags (options : t) : Hack_event_logger.rollout_flags =
   Hack_event_logger.
     {
       log_saved_state_age_and_distance =
-        GlobalOptions.(
+        Global_options.(
           options.saved_state.loading.log_saved_state_age_and_distance);
       saved_state_lookup_use_eden =
-        GlobalOptions.(options.saved_state.loading.use_eden);
+        Global_options.(options.saved_state.loading.use_eden);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       only_fetch_remote_old_decl_during_init =
         options.only_fetch_remote_old_decl_during_init;
@@ -1338,7 +1338,7 @@ let to_rollout_flags (options : t) : Hack_event_logger.rollout_flags =
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;
       use_manifold_cython_client =
-        GlobalOptions.(options.saved_state.loading.use_manifold_cython_client);
+        Global_options.(options.saved_state.loading.use_manifold_cython_client);
       load_state_natively_v4 = options.load_state_natively;
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;
@@ -1353,9 +1353,9 @@ let to_rollout_flags (options : t) : Hack_event_logger.rollout_flags =
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
-      saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
+      saved_state_rollouts = options.saved_state.Global_options.rollouts;
       zstd_decompress_by_file =
-        GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
+        Global_options.(options.saved_state.loading.zstd_decompress_by_file);
       warnings_default_all = options.warnings_default_all;
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
       edenfs_file_watcher_sync_queries_obey_deferral =

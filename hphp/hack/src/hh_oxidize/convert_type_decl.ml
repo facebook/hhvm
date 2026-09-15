@@ -204,13 +204,13 @@ end = struct
     | "global_options::GlobalOptions"
     | "edenfs_watcher_types::Changes" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
-    (* And GlobalOptions is used in Genv which is used in Env. We
+    (* And Global_options is used in Genv which is used in Env. We
      * don't care about comparison or hashing on environments *)
     | "typing_env_types::Env" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "typing_env_types::Genv" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
-    (* And GlobalOptions is used in SavedEnv. *)
+    (* And Global_options is used in SavedEnv. *)
     | "tast::SavedEnv" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "tast::ByNames" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "ast_defs::Id" -> ["Debug"]

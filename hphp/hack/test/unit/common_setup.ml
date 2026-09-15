@@ -57,7 +57,7 @@ whether we return a ctx where the naming table is backed by sqlite, or
 all in memory. *)
 let setup
     ~(sqlite : bool)
-    (tcopt : GlobalOptions.t)
+    (tcopt : Global_options.t)
     ~(xhp_as : [ `Namespaces | `MangledSymbols ]) : setup =
   (* Set up a simple fake repo *)
   Disk.mkdir_p @@ in_fake_dir "root/";
@@ -88,7 +88,7 @@ let setup
   let tcopt =
     {
       tcopt with
-      GlobalOptions.tco_allow_all_files_for_module_declarations = true;
+      Global_options.tco_allow_all_files_for_module_declarations = true;
     }
   in
   let deps_mode = Typing_deps_mode.InMemoryMode None in

@@ -1123,7 +1123,7 @@ module M = struct
   let set_everything_sdt env b =
     map_tcopt
       ~f:(fun tcopt ->
-        GlobalOptions.
+        Global_options.
           {
             tcopt with
             po = { tcopt.po with Parser_options.everything_sdt = b };

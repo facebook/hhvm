@@ -188,7 +188,7 @@ let handle :
     let ctx = Provider_utils.ctx_from_server_env env in
     let ctx =
       Provider_context.map_tcopt ctx ~f:(fun tcopt ->
-          GlobalOptions.{ tcopt with tco_dynamic_inference = true })
+          Global_options.{ tcopt with tco_dynamic_inference = true })
     in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->

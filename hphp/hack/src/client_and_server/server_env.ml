@@ -356,7 +356,7 @@ type env = {
 
 let discard_warnings env =
   if Sandcastle.is_sandcastle () then
-    not env.tcopt.GlobalOptions.warnings_in_sandcastle
+    not env.tcopt.Global_options.warnings_in_sandcastle
   else
     let open Option.Monad_infix in
     env.init_env.saved_state_revs_info

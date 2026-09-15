@@ -74,9 +74,9 @@ let test_builtin_attribute_change_remains_major_when_enabled _ =
 
 let test_enable_annotation_agnostic_decl_diffing_is_a_typechecker_option _ =
   let options =
-    GlobalOptions.set
+    Global_options.set
       ~tco_enable_annotation_agnostic_decl_diffing:true
-      GlobalOptions.default
+      Global_options.default
   in
   assert_bool
     "Expected annotation-agnostic decl diffing to be enabled"

@@ -145,7 +145,7 @@ val get_tyvar_type_const : t -> Tvid.t -> pos_id -> (pos_id * locl_ty) option
 
 val set_tyvar_type_const : t -> Tvid.t -> pos_id -> locl_ty -> t
 
-val get_tyvar_type_consts : t -> Tvid.t -> (pos_id * locl_ty) SMap.t
+val get_tyvar_type_consts : t -> Tvid.t -> (pos_id * locl_ty) S_map.t
 
 (** Conjoin a subtype proposition onto the subtype_prop in the environment *)
 val add_subtype_prop : t -> Typing_logic.subtype_prop -> t

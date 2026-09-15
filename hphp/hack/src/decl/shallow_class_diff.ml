@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Class_diff
-open Reordered_argument_collections
 open Shallow_decl_defs
 module SN = Naming_special_names
 
@@ -74,22 +73,22 @@ end
 
 let merge_member_lists
     (get_name : 'member -> string) (l1 : 'member list) (l2 : 'member list) :
-    ('member option * 'member option) SMap.t =
+    ('member option * 'member option) S_map.t =
   (* When a member of a given name is declared multiple times, keep the first
      (as Decl_inheritance does). *)
   let map =
-    List.fold l1 ~init:SMap.empty ~f:(fun map x ->
+    List.fold l1 ~init:S_map.empty ~f:(fun map x ->
         let name = get_name x in
-        if SMap.mem map name then
+        if S_map.mem name map then
           map
         else
-          SMap.add map ~key:name ~data:(Some x, None))
+          S_map.add name (Some x, None) map)
   in
   List.fold l2 ~init:map ~f:(fun map y ->
       let name = get_name y in
-      match SMap.find_opt map name with
-      | Some (x, None) -> SMap.add map ~key:name ~data:(x, Some y)
-      | None -> SMap.add map ~key:name ~data:(None, Some y)
+      match S_map.find_opt name map with
+      | Some (x, None) -> S_map.add name (x, Some y) map
+      | None -> S_map.add name (None, Some y) map
       | Some (_, Some _) -> map)
 
 module type Member_S = sig
@@ -116,10 +115,10 @@ end
   impact the constructor. *)
 let diff_members
     (type member)
-    (members_left_right : (member option * member option) SMap.t)
+    (members_left_right : (member option * member option) S_map.t)
     (module Member : Member_S with type t = member)
     (classish_kind : Ast_defs.classish_kind)
-    (module_changed : bool) : member_change SMap.t * constructor_change =
+    (module_changed : bool) : member_change S_map.t * constructor_change =
   (* If both members are internal and the module changed, we have to treat it as a Modified change*)
   let check_module_change_internal m1 m2 diff =
     match diff with
@@ -130,20 +129,16 @@ let diff_members
     | Some _ ->
       diff
   in
-  SMap.fold
-    members_left_right
-    ~init:(SMap.empty, None)
-    ~f:(fun name old_and_new (diff, constructor_change) ->
+  S_map.fold
+    (fun name old_and_new (diff, constructor_change) ->
       match old_and_new with
       | (None, None) -> failwith "merge_member_lists added (None, None)"
       | (Some member, None)
       | (None, Some member)
         when (not Ast_defs.(is_c_trait classish_kind))
              && Member.is_private member ->
-        ( SMap.add diff ~key:name ~data:Private_change_not_in_trait,
-          constructor_change )
-      | (Some _, None) ->
-        (SMap.add diff ~key:name ~data:Removed, constructor_change)
+        (S_map.add name Private_change_not_in_trait diff, constructor_change)
+      | (Some _, None) -> (S_map.add name Removed diff, constructor_change)
       | (None, Some m) ->
         let constructor_change =
           max_constructor_change
@@ -153,13 +148,12 @@ let diff_members
             else
               None)
         in
-        (SMap.add diff ~key:name ~data:Added, constructor_change)
+        (S_map.add name Added diff, constructor_change)
       | (Some old_member, Some new_member) ->
         let member_changes =
           Member.diff old_member new_member
           |> check_module_change_internal old_member new_member
-          |> Option.fold ~init:diff ~f:(fun diff ch ->
-                 SMap.add diff ~key:name ~data:ch)
+          |> Option.fold ~init:diff ~f:(fun diff ch -> S_map.add name ch diff)
         in
         let constructor_change =
           max_constructor_change
@@ -174,6 +168,8 @@ let diff_members
               None)
         in
         (member_changes, constructor_change))
+    members_left_right
+    (S_map.empty, None)
 
 module ClassConst : Member_S with type t = shallow_class_const = struct
   type t = shallow_class_const
@@ -550,24 +546,24 @@ module Bag : sig
 
   val of_list : string list -> t
 end = struct
-  type t = int SMap.t
+  type t = int S_map.t
 
-  let empty = SMap.empty
+  let empty = S_map.empty
 
   let add s t =
-    let v = SMap.find_opt t s |> Option.value ~default:0 in
-    SMap.add ~key:s ~data:(v + 1) t
+    let v = S_map.find_opt s t |> Option.value ~default:0 in
+    S_map.add s (v + 1) t
 
   let remove s t =
-    match SMap.find_opt t s with
+    match S_map.find_opt s t with
     | None -> t
     | Some v ->
       if Int.equal v 1 then
-        SMap.remove t s
+        S_map.remove s t
       else
-        SMap.add ~key:s ~data:(v - 1) t
+        S_map.add s (v - 1) t
 
-  let mem s t = SMap.mem t s
+  let mem s t = S_map.mem s t
 
   let of_list l = List.fold l ~init:empty ~f:(fun bag x -> add x bag)
 end
@@ -618,10 +614,8 @@ let diff_value_lists values1 values2 ~equal ~get_name_value ~diff =
          NamedItemsListChange.order_change =
            order_has_changed (List.map ~f:fst values1) (List.map ~f:fst values2);
          per_name_changes =
-           SMap.merge
-             (SMap.of_list values1)
-             (SMap.of_list values2)
-             ~f:(fun _ value1 value2 ->
+           S_map.merge
+             (fun _ value1 value2 ->
                match (value1, value2) with
                | (None, None) -> None
                | (None, Some _) -> Some ValueChange.Added
@@ -629,7 +623,9 @@ let diff_value_lists values1 values2 ~equal ~get_name_value ~diff =
                | (Some value1, Some value2) ->
                  let open Option.Monad_infix in
                  diff value1 value2 >>| fun change ->
-                 ValueChange.Modified change);
+                 ValueChange.Modified change)
+             (S_map.of_list values1)
+             (S_map.of_list values2);
        })
 
 let diff_of_equal equal x y =

@@ -10,7 +10,7 @@ open Hh_prelude
 open Aast
 
 (** Positions of type parameters that are in scope. *)
-type tparam_info = pos SMap.t
+type tparam_info = pos S_map.t
 
 let error_if_is_this (pos, name) custom_err_config =
   if String.equal (String.lowercase name) "this" then
@@ -39,14 +39,14 @@ let check_tparams (seen : tparam_info) tparams custom_err_config =
            custom_err_config);
       seen
     ) else begin
-      (match SMap.find_opt name seen with
+      (match S_map.find_opt name seen with
       | Some prev_pos ->
         Diagnostics.add_diagnostic
           (Naming_error_utils.to_user_diagnostic
              (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name })
              custom_err_config)
       | None -> ());
-      SMap.add name pos seen
+      S_map.add name pos seen
     end
   in
 
@@ -54,7 +54,7 @@ let check_tparams (seen : tparam_info) tparams custom_err_config =
 
 let check_class class_ custom_err_config =
   let seen_class_tparams =
-    check_tparams SMap.empty class_.c_tparams custom_err_config
+    check_tparams S_map.empty class_.c_tparams custom_err_config
   in
 
   (* Note that the class tparams are still marked as in scope *)
@@ -70,7 +70,7 @@ let handler =
 
     method! at_fun_def env fd =
       let custom_err_config = Nast_check_env.get_custom_error_config env in
-      ignore (check_tparams SMap.empty fd.fd_tparams custom_err_config)
+      ignore (check_tparams S_map.empty fd.fd_tparams custom_err_config)
 
     method! at_class_ env cls =
       let custom_err_config = Nast_check_env.get_custom_error_config env in
@@ -78,5 +78,5 @@ let handler =
 
     method! at_typedef env typedef =
       let custom_err_config = Nast_check_env.get_custom_error_config env in
-      ignore (check_tparams SMap.empty typedef.t_tparams custom_err_config)
+      ignore (check_tparams S_map.empty typedef.t_tparams custom_err_config)
   end

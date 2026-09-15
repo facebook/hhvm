@@ -109,7 +109,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
               is_ctx_json;
             ]
       in
-      [("refs", `List (List.map (SMap.bindings cr_consts) ~f:ref_const))]
+      [("refs", `List (List.map (S_map.bindings cr_consts) ~f:ref_const))]
   in
   let typ ty = [("type", from_type env ~show_like_ty ty)] in
   let result ty = [("result", from_type env ~show_like_ty ty)] in
@@ -822,7 +822,7 @@ let to_locl_ty
   and aux_refs
       (refs : Yojson.Safe.t list) ~(keytrace : Hh_json_helpers.Access.keytrace)
       : (locl_class_refinement, deserialization_error) result =
-    let of_refined_consts consts = { cr_consts = SMap.of_list consts } in
+    let of_refined_consts consts = { cr_consts = S_map.of_list consts } in
     Result.map ~f:of_refined_consts (map_array refs ~keytrace ~f:aux_ref)
   and aux_ref
       (json : Yojson.Safe.t) ~(keytrace : Hh_json_helpers.Access.keytrace) :

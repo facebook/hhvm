@@ -12,10 +12,10 @@
 *)
 
 type class_members = {
-  m_properties: Typing_defs.decl_ty SMap.t;
-  m_static_properties: Typing_defs.decl_ty SMap.t;
-  m_methods: Typing_defs.fun_elt SMap.t;
-  m_static_methods: Typing_defs.fun_elt SMap.t;
+  m_properties: Typing_defs.decl_ty S_map.t;
+  m_static_properties: Typing_defs.decl_ty S_map.t;
+  m_methods: Typing_defs.fun_elt S_map.t;
+  m_static_methods: Typing_defs.fun_elt S_map.t;
   m_constructor: Typing_defs.fun_elt option;
 }
 

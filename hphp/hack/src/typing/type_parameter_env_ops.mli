@@ -20,7 +20,7 @@ val simplify_tpenv :
   env ->
   (('a tparam * string) option * locl_ty) list ->
   Typing_reason.t ->
-  env * locl_ty SMap.t
+  env * locl_ty S_map.t
 
 (** Merge two type parameter environments. Given tpenv1 and tpenv2 we want
     to compute a "merged" environment tpenv such that

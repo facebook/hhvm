@@ -16,7 +16,7 @@ open Int.Replace_polymorphic_compare
 
 exception Integration_test_failure
 
-module FileMap = SMap
+module FileMap = S_map
 module ErrorSet = SSet
 
 let root = "/"
@@ -408,7 +408,7 @@ module Client = struct
       (Relative_path.Set.of_list (List.map files_and_contents ~f:fst))
 
   let edit_file (env : env) (suffix : string) (contents : string) :
-      env * Client_ide_message.diagnostic list SMap.t =
+      env * Client_ide_message.diagnostic list S_map.t =
     let message =
       Client_ide_message.(Did_open_or_change (doc suffix contents))
     in
@@ -419,7 +419,7 @@ module Client = struct
     (env, diagnostics)
 
   let open_file (env : env) (suffix : string) :
-      env * Client_ide_message.diagnostic list SMap.t =
+      env * Client_ide_message.diagnostic list S_map.t =
     let contents =
       Test_disk.get
         (Relative_path.from_root ~suffix |> Relative_path.to_absolute)
@@ -427,7 +427,7 @@ module Client = struct
     edit_file env suffix contents
 
   let close_file (env : env) (suffix : string) :
-      env * Client_ide_message.diagnostic list SMap.t =
+      env * Client_ide_message.diagnostic list S_map.t =
     let message =
       Client_ide_message.(
         Did_close
@@ -448,17 +448,19 @@ module Client = struct
           "%s\n"
           (Diagnostics.to_string diagnostic.Client_ide_message.diagnostic_error))
 
-  let diagnostics_to_string (x : Client_ide_message.diagnostic list SMap.t) =
+  let diagnostics_to_string (x : Client_ide_message.diagnostic list S_map.t) =
     let buf = Buffer.create 1024 in
-    SMap.iter x ~f:(fun path diagnostics ->
+    S_map.iter
+      (fun path diagnostics ->
         Printf.bprintf buf "%s:\n" path;
-        diagnostics_to_string buf diagnostics);
+        diagnostics_to_string buf diagnostics)
+      x;
     Buffer.contents buf
 
   let assert_no_diagnostics
-      (diagnostics : Client_ide_message.diagnostic list SMap.t) =
+      (diagnostics : Client_ide_message.diagnostic list S_map.t) =
     let is_any =
-      FileMap.exists diagnostics ~f:(fun _file d -> not (List.is_empty d))
+      FileMap.exists (fun _file d -> not (List.is_empty d)) diagnostics
     in
     if is_any then begin
       let diagnostics_as_string =
@@ -470,7 +472,7 @@ module Client = struct
     end
 
   let assert_diagnostics_string
-      (diagnostics : Client_ide_message.diagnostic list SMap.t)
+      (diagnostics : Client_ide_message.diagnostic list S_map.t)
       (expected : string) : unit =
     let diagnostics_as_string =
       diagnostics_to_string diagnostics |> relativize

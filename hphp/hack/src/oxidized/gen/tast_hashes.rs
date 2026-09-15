@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc65804d1503bd079a413bc9691dfc10>>
+// @generated SignedSource<<1c8aacfcf98419919edbc8c488c38d87>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -40,19 +40,19 @@ pub type Hash = isize;
 #[repr(C)]
 pub struct ByNames {
     #[serde(default)]
-    #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
+    #[rust_to_ocaml(attr = "yojson_drop_if S_map.is_empty")]
     pub fun_tast_hashes: s_map::SMap<Hash>,
     #[serde(default)]
-    #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
+    #[rust_to_ocaml(attr = "yojson_drop_if S_map.is_empty")]
     pub class_tast_hashes: s_map::SMap<Hash>,
     #[serde(default)]
-    #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
+    #[rust_to_ocaml(attr = "yojson_drop_if S_map.is_empty")]
     pub typedef_tast_hashes: s_map::SMap<Hash>,
     #[serde(default)]
-    #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
+    #[rust_to_ocaml(attr = "yojson_drop_if S_map.is_empty")]
     pub gconst_tast_hashes: s_map::SMap<Hash>,
     #[serde(default)]
-    #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
+    #[rust_to_ocaml(attr = "yojson_drop_if S_map.is_empty")]
     pub module_tast_hashes: s_map::SMap<Hash>,
 }
 

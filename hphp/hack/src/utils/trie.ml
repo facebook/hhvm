@@ -46,13 +46,13 @@ let with_return (type t) (f : _ -> t) =
 
 type 'a t =
   | Leaf of 'a
-  | Node of 'a t SMap.t ref
+  | Node of 'a t S_map.t ref
 
-let create () : 'a t = Node (ref SMap.empty)
+let create () : 'a t = Node (ref S_map.empty)
 
 exception Inconsistent_trie of string
 
-let get_node (trie : 'a t) : 'a t SMap.t ref =
+let get_node (trie : 'a t) : 'a t S_map.t ref =
   match trie with
   | Node n -> n
   | _ -> raise (Inconsistent_trie "Cannot match to leaf")
@@ -71,7 +71,7 @@ let trie_assoc_partial (trie : 'a t) (w : string) : (int * string * 'a t) option
     =
   with_return (fun e ->
       !(get_node trie)
-      |> SMap.iter (fun key elt ->
+      |> S_map.iter (fun key elt ->
              let c = common_prefix key w in
              if (not (c = 0)) || (String.equal key "" && String.equal w "") then
                e.return (Some (c, key, elt)));
@@ -92,7 +92,7 @@ let rec mem (trie : 'a t) (w : string) : bool =
 
 let add_one (node : 'a t) (c : string) (inner : 'a t) : unit =
   let elts = get_node node in
-  elts := SMap.add c inner !elts
+  elts := S_map.add c inner !elts
 
 (* split key in position c, put left part as new key to a new node n
  * and put right part as child of n, then return n *)
@@ -100,7 +100,7 @@ let split_key (parent : 'a t) (key : string) (child : 'a t) (c : int) : 'a t =
   let left_key = take key c in
   let right_key = drop key c in
   let parent_list = get_node parent in
-  parent_list := SMap.remove key !parent_list;
+  parent_list := S_map.remove key !parent_list;
 
   let n = create () in
   add_one parent left_key n;
@@ -164,7 +164,7 @@ let to_list
           ) else
             e.return (List.rev !reslist)
         | Node cs ->
-          SMap.fold (fun tail rhs _acc -> to_list_aux rhs (s ^ tail)) !cs ()
+          S_map.fold (fun tail rhs _acc -> to_list_aux rhs (s ^ tail)) !cs ()
       in
       to_list_aux trie "";
       List.rev !reslist)
@@ -208,7 +208,7 @@ let find_prefix_limit
 
 let remove_one (trie : 'a t) (key : string) : unit =
   let elts = get_node trie in
-  elts := SMap.remove key !elts
+  elts := S_map.remove key !elts
 
 let rec remove_impl (exact : bool) (trie : 'a t) (s : string) : unit =
   with_return (fun e ->
@@ -273,7 +273,7 @@ let remove_prefix (trie : 'a t) (s : string) : unit = remove_impl false trie s
 let rec to_string_impl (buf : Buffer.t) (trie : 'a t) : unit =
   match trie with
   | Node elts ->
-    SMap.fold
+    S_map.fold
       (fun k v _ ->
         Printf.bprintf buf "%S:{" k;
         to_string_impl buf v;

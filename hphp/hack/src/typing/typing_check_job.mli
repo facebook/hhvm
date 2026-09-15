@@ -48,4 +48,4 @@ val calc_errors_and_tast_for :
   (Provider_context.t -> full_ast:'def -> 'res option) ->
   full_ast:'def ->
   File_info.id ->
-  Diagnostics.t * 'res SMap.t
+  Diagnostics.t * 'res S_map.t

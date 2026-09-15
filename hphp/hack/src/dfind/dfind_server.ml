@@ -32,15 +32,15 @@ let (process_fsnotify_event : Dfind_env.t -> SSet.t -> Fsnotify.event -> SSet.t)
    * directory is now "dirty"
    *)
   let dirty =
-    if SMap.mem path env.dirs then
-      SSet.union dirty (SMap.find path env.dirs)
+    if S_map.mem path env.dirs then
+      SSet.union dirty (S_map.find path env.dirs)
     else
       let dir_content =
-        match SMap.find_opt wpath env.dirs with
+        match S_map.find_opt wpath env.dirs with
         | Some content -> content
         | None -> SSet.empty
       in
-      env.dirs <- SMap.add wpath (SSet.add path dir_content) env.dirs;
+      env.dirs <- S_map.add wpath (SSet.add path dir_content) env.dirs;
       dirty
   in
   env.new_files <- SSet.empty;

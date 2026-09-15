@@ -27,7 +27,7 @@ let pos_to_patches (pos : Pos.t) : Server_rename_types.patch list =
 
 let classish_positions_for_class_to_patches
     (cp : Pos.t Classish_positions_types.classish_positions) :
-    Server_rename_types.patch list SMap.t =
+    Server_rename_types.patch list S_map.t =
   let Classish_positions_types.
         {
           classish_start_of_body;
@@ -37,7 +37,7 @@ let classish_positions_for_class_to_patches
         } =
     cp
   in
-  SMap.of_list
+  S_map.of_list
     [
       ("classish_start_of_body", pos_to_patches classish_start_of_body);
       ("classish_end_of_body", pos_to_patches classish_end_of_body);
@@ -47,8 +47,8 @@ let classish_positions_for_class_to_patches
     ]
 
 let classish_positions_to_patches
-    (cps : Pos.t Classish_positions_types.classish_positions SMap.t) :
-    Server_rename_types.patch list SMap.t =
+    (cps : Pos.t Classish_positions_types.classish_positions S_map.t) :
+    Server_rename_types.patch list S_map.t =
   let merge_map_entry _key xs ys =
     match (xs, ys) with
     | (None, None) -> None
@@ -56,8 +56,8 @@ let classish_positions_to_patches
     | (None, Some ys) -> Some ys
     | (Some xs, Some ys) -> Some (xs @ ys)
   in
-  List.fold (SMap.values cps) ~init:SMap.empty ~f:(fun acc cp ->
-      SMap.merge
+  List.fold (S_map.values cps) ~init:S_map.empty ~f:(fun acc cp ->
+      S_map.merge
         merge_map_entry
         acc
         (classish_positions_for_class_to_patches cp))
@@ -80,7 +80,7 @@ let run_exn ctx entry path =
   let named_patches = classish_positions_to_patches classish_positions in
 
   let source_text = Sys_utils.cat @@ Relative_path.to_absolute path in
-  SMap.iter (apply_patch_for source_text) named_patches
+  S_map.iter (apply_patch_for source_text) named_patches
 
 let dump ctx entry path =
   match run_exn ctx entry path with

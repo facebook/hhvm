@@ -165,8 +165,8 @@ val local_changes_pop_sharedmem_stack : unit -> unit
 val remove_classes :
   Provider_context.t ->
   SSet.t ->
-  old_members:Decl_class_elements.t SMap.t lazy_t ->
-  new_members:Decl_class_elements.t SMap.t lazy_t ->
+  old_members:Decl_class_elements.t S_map.t lazy_t ->
+  new_members:Decl_class_elements.t S_map.t lazy_t ->
   unit
 
 val lookup_or_populate_class_cache :

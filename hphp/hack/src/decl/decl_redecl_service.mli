@@ -76,6 +76,6 @@ val get_descendant_classes :
 (** Test-only *)
 val remove_defs :
   File_info.names ->
-  elems:Decl_class_elements.t SMap.t ->
+  elems:Decl_class_elements.t S_map.t ->
   collect_garbage:bool ->
   unit

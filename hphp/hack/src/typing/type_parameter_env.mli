@@ -59,7 +59,7 @@ val get_require_dynamic : t -> tparam_name -> bool
 
 val get_tparam_names : t -> tparam_name list
 
-val get_tparams : t -> (Pos_or_decl.t * tparam_info) SMap.t
+val get_tparams : t -> (Pos_or_decl.t * tparam_info) S_map.t
 
 val get_rank : t -> tparam_name -> int
 

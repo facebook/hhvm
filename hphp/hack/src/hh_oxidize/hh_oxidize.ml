@@ -94,17 +94,17 @@ let make_header regen_command =
 let convert_files env out_dir files regen_command =
   ignore (Sys.command (sprintf "rm -f %S/*.rs" out_dir));
   let header = make_header regen_command in
-  let modules = files |> List.map ~f:oxidize |> SMap.of_list in
+  let modules = files |> List.map ~f:oxidize |> S_map.of_list in
   let () =
     modules
-    |> SMap.map ~f:Stringify.stringify
-    |> SMap.iter ~f:(fun name src ->
+    |> S_map.map Stringify.stringify
+    |> S_map.iter (fun name src ->
            let src = sprintf "%s\n\n%s" header src in
            let out_filename = Filename.concat out_dir (name ^ ".rs") in
            write_format_and_sign env out_filename src)
   in
   let manifest_filename = Filename.concat out_dir "mod.rs" in
-  let module_names = SMap.ordered_keys modules in
+  let module_names = S_map.ordered_keys modules in
   let manifest_mods =
     map_and_concat module_names ~f:(sprintf "pub mod %s;") ~sep:"\n"
   in
@@ -154,7 +154,7 @@ let parse_types_file filename = parse_file filename parse_types_line
 
 let parse_extern_types_file filename =
   parse_types_file filename
-  |> List.fold ~init:SMap.empty ~f:(fun map name ->
+  |> List.fold ~init:S_map.empty ~f:(fun map name ->
          try
            (* Map the name with the crate prefix stripped (since we do not expect to see
               the crate name in our OCaml source) to the fully-qualified name. *)
@@ -164,7 +164,7 @@ let parse_extern_types_file filename =
            let name_without_crate =
              String.subo name ~pos:after_coloncolon_idx
            in
-           SMap.add map ~key:name_without_crate ~data:name
+           S_map.add name_without_crate name map
          with
          | _ ->
            if String.(name <> "") then

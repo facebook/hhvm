@@ -11,16 +11,17 @@ open Hh_prelude
 module Instantiation = struct
   type t = {
     this: Typing_defs.locl_ty option;
-    subst: Typing_defs.locl_ty SMap.t;
+    subst: Typing_defs.locl_ty S_map.t;
   }
 
-  let empty = { this = None; subst = SMap.empty }
+  let empty = { this = None; subst = S_map.empty }
 
-  let is_empty { this; subst } = Option.is_none this && SMap.is_empty subst
+  let is_empty { this; subst } = Option.is_none this && S_map.is_empty subst
 
   let add_this ty { subst; this = _ } = { subst; this = Some ty }
 
-  let add tparam ty { subst; this } = { subst = SMap.add tparam ty subst; this }
+  let add tparam ty { subst; this } =
+    { subst = S_map.add tparam ty subst; this }
 end
 
 (** Given two types ty1 and ty2, assuming ty2 is an instantiation

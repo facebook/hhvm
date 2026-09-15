@@ -567,10 +567,10 @@ let get_repo_states_telemetry (t : t) : Telemetry.t =
     | IndexOnly _
     | Dfind _
     | MockChanges _ ->
-      ([], SMap.empty)
+      ([], S_map.empty)
   in
   let past_states_telemetry =
-    SMap.fold
+    S_map.fold
       (fun name ts t -> Telemetry.float_ ~key:name ~value:ts t)
       past_states
       (Telemetry.create ())

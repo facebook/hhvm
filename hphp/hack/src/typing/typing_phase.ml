@@ -392,7 +392,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     (* For polymorphic lambda we want to retain generics bound in the lambda signature *)
     ((env, None, []), mk (r, Tgeneric nm))
   | Tgeneric x -> begin
-    match SMap.find_opt x ety_env.substs with
+    match S_map.find_opt x ety_env.substs with
     | Some x_ty ->
       let (env, x_ty) = Env.expand_type env x_ty in
       let r_inst =
@@ -825,7 +825,7 @@ and localize_targ_constrain_wildcard (env, ety_env) ty (tparam : decl_tparam) :
     in
     let ty_fresh = mk (r, Tgeneric new_name) in
     (* Substitute fresh type parameters for original formals in constraint *)
-    let substs = SMap.add (snd name) ty_fresh ety_env.substs in
+    let substs = S_map.add (snd name) ty_fresh ety_env.substs in
     let ety_env = { ety_env with substs } in
     let (env, ty_errs, cycles) =
       List.fold_left
@@ -1133,11 +1133,11 @@ and localize_ft
       let tvarl = List.map ~f:fst explicit_targs in
       let ft_subst =
         if List.is_empty explicit_targs then
-          SMap.empty
+          S_map.empty
         else
           Subst.make_locl ft.ft_tparams tvarl
       in
-      ((env, ty_err_opt), SMap.union ft_subst ety_env.substs)
+      ((env, ty_err_opt), S_map.union ft_subst ety_env.substs)
     | None -> ((env, None), ety_env.substs)
   in
   let ety_env = { ety_env with substs } in
@@ -1318,7 +1318,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
     if SSet.mem nm ety_env.no_substs then
       (env, ty_errs, cycles_acc)
     else
-      match SMap.find_opt (snd t.tp_name) ety_env.substs with
+      match S_map.find_opt (snd t.tp_name) ety_env.substs with
       | Some ty ->
         List.fold_left
           t.tp_constraints

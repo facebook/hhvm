@@ -32,7 +32,7 @@ type t = {
   no_parser_readonly_check: bool;
   allowed_decl_fixme_codes: I_set.t;
   use_legacy_experimental_feature_config: bool;
-  experimental_features: Experimental_features.feature_status SMap.t;
+  experimental_features: Experimental_features.feature_status S_map.t;
   consider_unspecified_experimental_features_released: bool;
   package_info: Package_info.t;
   package_support_multifile_tests: bool;
@@ -70,7 +70,7 @@ let default =
     no_parser_readonly_check = false;
     allowed_decl_fixme_codes = I_set.empty;
     use_legacy_experimental_feature_config = true;
-    experimental_features = SMap.empty;
+    experimental_features = S_map.empty;
     consider_unspecified_experimental_features_released = true;
     package_info = Package_info.empty;
     package_support_multifile_tests = false;
@@ -97,7 +97,7 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * Experimental_features.feature_status SMap.t
+  * Experimental_features.feature_status S_map.t
   * bool
   * bool
   * bool

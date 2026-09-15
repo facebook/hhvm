@@ -55,7 +55,7 @@ val write_patches_to_buffer : Buffer.t -> string -> patch list -> unit
 
 (** [map_patches_to_filename patches patch] adds [patch] to the
   filename-indexed [patches] based off of the patch's position filename. *)
-val map_patches_to_filename : patch list SMap.t -> patch -> patch list SMap.t
+val map_patches_to_filename : patch list S_map.t -> patch -> patch list S_map.t
 
 val apply_patches_to_file_contents :
   string Relative_path.Map.t -> patch list -> string Relative_path.Map.t

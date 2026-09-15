@@ -26,7 +26,9 @@ let apply_patches_to_file fn patch_list =
   Server_rename_types.write_string_to_file fn new_file_contents
 
 let list_to_file_map =
-  List.fold_left ~f:Server_rename_types.map_patches_to_filename ~init:SMap.empty
+  List.fold_left
+    ~f:Server_rename_types.map_patches_to_filename
+    ~init:S_map.empty
 
 let plural count one many =
   let obj =
@@ -39,9 +41,9 @@ let plural count one many =
 
 let apply_patches patches =
   let file_map = list_to_file_map patches in
-  SMap.iter apply_patches_to_file file_map;
+  S_map.iter apply_patches_to_file file_map;
   print_endline
-    ("Rewrote " ^ plural (SMap.cardinal file_map) "file" "files" ^ ".")
+    ("Rewrote " ^ plural (S_map.cardinal file_map) "file" "files" ^ ".")
 
 let patch_to_json res =
   let (type_, replacement) =
@@ -69,7 +71,7 @@ let patch_to_json res =
 let patches_to_json_string patches =
   let file_map = list_to_file_map patches in
   let entries =
-    SMap.fold
+    S_map.fold
       begin
         fun fn patch_list acc ->
           `Assoc

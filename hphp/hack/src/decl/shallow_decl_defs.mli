@@ -129,7 +129,8 @@ type shallow_method = {
 }
 [@@deriving eq, show]
 
-type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
+type xhp_enum_values = Ast_defs.xhp_enum_value list S_map.t
+[@@deriving eq, show]
 
 type decl_constraint_requirement =
   | DCR_Equal of decl_ty

@@ -725,11 +725,11 @@ let load_and_process_workitems
 (*****************************************************************************)
 
 module Counts = struct
-  type t = int SMap.t
+  type t = int S_map.t
 
   let increment map key =
-    let prev_count = SMap.find_opt key map |> Option.value ~default:0 in
-    SMap.add key (prev_count + 1) map
+    let prev_count = S_map.find_opt key map |> Option.value ~default:0 in
+    S_map.add key (prev_count + 1) map
 end
 
 module ErrorStats = struct
@@ -1205,7 +1205,7 @@ let process_in_parallel
   let todo = Todo.create workitems in
   let workitems_initial_count = Big_list.length workitems in
   let error_stats = ref ErrorStats.empty in
-  let batch_counts_by_worker_id = ref SMap.empty in
+  let batch_counts_by_worker_id = ref S_map.empty in
 
   let next = next workers todo record in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
@@ -1224,7 +1224,7 @@ let process_in_parallel
         ~typecheck_info
         ~worker_id
         ~batch_number:
-          (SMap.find_opt worker_id !batch_counts_by_worker_id
+          (S_map.find_opt worker_id !batch_counts_by_worker_id
           |> Option.value ~default:0)
         typing_result
         progress

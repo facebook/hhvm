@@ -50,7 +50,7 @@ type t = {
   use_legacy_experimental_feature_config: bool;
       (** Ignore the experimental_features and consider_unspecified_experimental_features_released config
           options and use a hard coded function instead *)
-  experimental_features: Experimental_features.feature_status SMap.t;
+  experimental_features: Experimental_features.feature_status S_map.t;
       (** A mapping of names of experimental features to their status: Unstable/Preview/OngoingRelease *)
   consider_unspecified_experimental_features_released: bool;
       (** Any experimental features not specified in the experimental_features configuration field should
@@ -98,7 +98,7 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * Experimental_features.feature_status SMap.t
+  * Experimental_features.feature_status S_map.t
   * bool
   * bool
   * bool

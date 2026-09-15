@@ -124,7 +124,7 @@ let mark_with_context (pos : Pos.absolute) ~buf ~spans =
   let path = relative_path @@ Pos.filename pos in
   let ctxt_pos_opt =
     Option.bind
-      (SMap.find_opt path spans)
+      (S_map.find_opt path spans)
       ~f:
         (List.find ~f:(fun spos ->
              try Pos.contains spos @@ Pos.to_relative pos with
@@ -276,7 +276,7 @@ let add_span acc p =
   let file_checked = relative_path @@ Pos.filename p in
   try
     let p = Pos.to_relative p in
-    SMap.update
+    S_map.update
       file_checked
       (function
         | Some ps -> Some (p :: ps)
@@ -296,9 +296,9 @@ let to_string
     (* If the explanation is empty then just render the claim and reasons;
        only subtyping errors will have explanations at the moment *)
     let file_checked = relative_path @@ Pos.filename pos in
-    let init = SMap.singleton file_checked [Pos.to_relative pos] in
+    let init = S_map.singleton file_checked [Pos.to_relative pos] in
     let spans =
-      SMap.map (fun ps ->
+      S_map.map (fun ps ->
           merge @@ List.sort ps ~compare:(fun x y -> Pos.compare y x))
       @@ List.fold_left reasons ~init ~f:(fun acc (p, _) -> add_span acc p)
     in
@@ -316,10 +316,10 @@ let to_string
           match elem with
           | Explanation.Witness (p, _) -> add_span acc p
           | _ -> acc)
-        ~init:(SMap.singleton file_checked [Pos.to_relative pos])
+        ~init:(S_map.singleton file_checked [Pos.to_relative pos])
     in
     let spans =
-      SMap.map (fun ps ->
+      S_map.map (fun ps ->
           merge @@ List.sort ps ~compare:(fun x y -> Pos.compare y x))
       @@ List.fold_left reasons ~init ~f:(fun acc (p, _) -> add_span acc p)
     in

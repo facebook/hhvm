@@ -81,7 +81,7 @@ module MemberKind = struct
 end
 
 module MemberKindMap = Wrapped_map.Make (MemberKind)
-module MemberNameMap = SMap
+module MemberNameMap = S_map
 
 (* This is used to merge members from all parents (direct ancestors) of a class.
  * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
@@ -2455,8 +2455,8 @@ let make_parent_member_map parent :
            members
            |> filter_privates_and_synthethized
                 ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
-           |> SMap.of_list
-           |> SMap.map (Inst.instantiate_ce psubst))
+           |> S_map.of_list
+           |> S_map.map (Inst.instantiate_ce psubst))
   in
   ({ ParentClassElt.parent_pos; parent_class; parent_type }, member_map)
 
@@ -2939,7 +2939,7 @@ let merge_member_maps
     ((parent, map) :
       ParentClassElt.parent * class_elt MemberNameMap.t MemberKindMap.t) :
     ParentClassEltSet.t MemberNameMap.t MemberKindMap.t =
-  let errors_per_diamond = ref SMap.empty in
+  let errors_per_diamond = ref S_map.empty in
   let members =
     MemberKindMap.fold
       (fun mem_kind
@@ -2978,14 +2978,14 @@ let merge_member_maps
                        `errors_per_diamond` before adding them later. *)
                     Option.iter error ~f:(fun ((parent, origin), error) ->
                         errors_per_diamond :=
-                          SMap.add
+                          S_map.add
                             parent
-                            (SMap.add
+                            (S_map.add
                                ~combine:(fun x _ -> x)
                                origin
                                error
-                               (SMap.find_opt parent !errors_per_diamond
-                               |> Option.value ~default:SMap.empty))
+                               (S_map.find_opt parent !errors_per_diamond
+                               |> Option.value ~default:S_map.empty))
                             !errors_per_diamond);
                     Some (ParentClassEltSet.add elts elt))
                 members
@@ -2997,12 +2997,12 @@ let merge_member_maps
       map
       acc_map
   in
-  SMap.iter
+  S_map.iter
     (fun _ errors_per_origin ->
-      SMap.keys errors_per_origin
+      S_map.keys errors_per_origin
       |> minimum_classes env
       |> List.iter ~f:(fun origin ->
-             SMap.find origin errors_per_origin
+             S_map.find origin errors_per_origin
              |> Typing_error_utils.add_typing_error ~env))
     !errors_per_diamond;
   members

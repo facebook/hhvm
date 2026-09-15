@@ -18,8 +18,8 @@ type feature_status =
 
 let feature_status_map =
   List.fold_left
-    ~init:SMap.empty
-    ~f:(fun m (k, v) -> SMap.add k v m)
+    ~init:S_map.empty
+    ~f:(fun m (k, v) -> S_map.add k v m)
     [
       ("Unstable", Unstable);
       ("Preview", Preview);
@@ -28,7 +28,7 @@ let feature_status_map =
       ("OngoingRelease", OngoingRelease);
     ]
 
-let feature_status_from_string s = SMap.find_opt s feature_status_map
+let feature_status_from_string s = S_map.find_opt s feature_status_map
 
 type feature_name =
   | UnionIntersectionTypeHints
@@ -86,8 +86,8 @@ type feature_name =
 
 let feature_name_map =
   List.fold_left
-    ~init:SMap.empty
-    ~f:(fun m (k, v) -> SMap.add k v m)
+    ~init:S_map.empty
+    ~f:(fun m (k, v) -> S_map.add k v m)
     [
       ("union_intersection_type_hints", UnionIntersectionTypeHints);
       ("expression_trees", ExpressionTrees);
@@ -142,7 +142,7 @@ let feature_name_map =
       ("shape_splat_expression", ShapeSplatExpression);
     ]
 
-let feature_name_from_string s = SMap.find_opt s feature_name_map
+let feature_name_from_string s = S_map.find_opt s feature_name_map
 
 let parse_experimental_feature (name_string, status_json) =
   let status_string =

@@ -45,7 +45,7 @@ let names_and_origins_defined_by_cls_t cls =
     ]
   in
   List.fold_left
-    ~init:(SSet.empty, SMap.empty)
+    ~init:(SSet.empty, S_map.empty)
     ~f:(fun set (accessor, condition, sanitize) ->
       List.fold_left
         ~init:set
@@ -54,7 +54,7 @@ let names_and_origins_defined_by_cls_t cls =
             let name = sanitize el in
             let element = snd el in
             ( SSet.add name names,
-              SMap.add name element.Typing_defs.ce_origin origins )
+              S_map.add name element.Typing_defs.ce_origin origins )
           else
             (names, origins))
         (accessor cls))
@@ -64,16 +64,17 @@ let names_and_origins_defined_by_cls_t cls =
 let names_and_pos_defined_by_class_ class_ =
   let method_names_pos =
     List.fold_left
-      ~init:(SSet.empty, SMap.empty)
+      ~init:(SSet.empty, S_map.empty)
       ~f:(fun (names, pos) m ->
         ( SSet.add (snd m.m_name) names,
-          SMap.add (snd m.m_name) (fst m.m_name) pos ))
+          S_map.add (snd m.m_name) (fst m.m_name) pos ))
       class_.c_methods
   in
   List.fold_left
     ~init:method_names_pos
     ~f:(fun (names, pos) cv ->
-      (SSet.add (snd cv.cv_id) names, SMap.add (snd cv.cv_id) (fst cv.cv_id) pos))
+      ( SSet.add (snd cv.cv_id) names,
+        S_map.add (snd cv.cv_id) (fst cv.cv_id) pos ))
     class_.c_vars
 
 (* Does this [trait] implement any interfaces?
@@ -172,7 +173,7 @@ let handler =
             let dead_names = SSet.inter class_names base_names in
             SSet.iter
               (fun n ->
-                let origin = SMap.find n origins in
+                let origin = S_map.find n origins in
                 let method_ =
                   List.find c.c_methods ~f:(fun m ->
                       String.equal n (snd m.m_name))
@@ -185,7 +186,7 @@ let handler =
                 if (not (String.equal origin bid)) && not has_semantic_meaning
                 then
                   Lints_diagnostics.trait_requires_class_that_overrides_method
-                    (SMap.find n base_pos_map)
+                    (S_map.find n base_pos_map)
                     cid
                     bid
                     n)

@@ -206,8 +206,8 @@ let make_hover_const_definition entry def_opt =
 (* Return a markdown description of built-in Hack attributes. *)
 let make_hover_attr_docs name =
   Option.first_some
-    (SMap.find_opt name SN.UserAttributes.as_map)
-    (SMap.find_opt name SN.UserAttributes.systemlib_map)
+    (S_map.find_opt name SN.UserAttributes.as_map)
+    (S_map.find_opt name SN.UserAttributes.systemlib_map)
   |> Option.map ~f:(fun attr_info -> attr_info.SN.UserAttributes.doc)
   |> Option.to_list
 
@@ -521,7 +521,7 @@ let make_instantiation_section
         Option.map this ~f:(fun ty -> print_tparam ("this", ty))
       in
       let printed_tparams =
-        SMap.elements subst |> List.rev_map ~f:print_tparam
+        S_map.elements subst |> List.rev_map ~f:print_tparam
       in
       let printed_tparams =
         match printed_this with

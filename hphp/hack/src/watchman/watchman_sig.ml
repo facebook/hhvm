@@ -140,7 +140,7 @@ module type S = sig
     (** Returns (current_states, past_states).
         [past_states] maps each state name to the [Unix.gettimeofday] timestamp
         of the last time it was left. *)
-    val get : unit -> string list * float SMap.t
+    val get : unit -> string list * float S_map.t
   end
 
   (* Expose some things for testing. *)

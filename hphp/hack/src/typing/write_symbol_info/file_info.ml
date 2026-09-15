@@ -97,11 +97,11 @@ let collect_inherited_members ctx tast_def =
       class_constants = [];
     }
   in
-  let update_member_cluster add ~name ~origin (mcs : member_cluster SMap.t) =
+  let update_member_cluster add ~name ~origin (mcs : member_cluster S_map.t) =
     let origin_decl = get_class_exn tast_env origin in
     let kind = Class.kind origin_decl in
     let container = { name = origin; kind } in
-    SMap.update
+    S_map.update
       container.name
       (function
         | None -> Some (add { name } (empty_member_cluster container))
@@ -127,7 +127,7 @@ let collect_inherited_members ctx tast_def =
       let class_name = snd class_.Aast_defs.c_name in
       let class_decl = get_class_exn tast_env class_name in
       (* Collect members indexed by their origin *)
-      let mcs = SMap.empty in
+      let mcs = S_map.empty in
       let mcs =
         let add_method m mc = { mc with methods = m :: mc.methods } in
         let update = update_member_cluster add_method in
@@ -191,7 +191,7 @@ let collect_inherited_members ctx tast_def =
                else
                  update ~name ~origin mcs)
       in
-      SMap.values mcs
+      S_map.values mcs
     | _ -> []
   in
   let index_inherited_members =

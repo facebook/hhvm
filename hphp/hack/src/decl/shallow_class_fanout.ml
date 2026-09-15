@@ -96,11 +96,14 @@ let get_minor_change_fanout
         acc
   in
   let add_member_fanouts ~is_const changes make_member acc =
-    SMap.fold changes ~init:acc ~f:(fun name ->
-        add_member_fanout ~is_const (make_member name))
+    S_map.fold
+      (fun name -> add_member_fanout ~is_const (make_member name))
+      changes
+      acc
   in
   let acc =
-    SMap.fold consts ~init:acc ~f:(fun name change acc ->
+    S_map.fold
+      (fun name change acc ->
         let acc =
           (* If a const has been added or removed in an enum type, we must recheck
              all switch statements which need to have a case for each variant
@@ -114,6 +117,8 @@ let get_minor_change_fanout
           | _ -> acc
         in
         add_member_fanout ~is_const:true (Dep.Member.const name) change acc)
+      consts
+      acc
   in
   let acc =
     acc

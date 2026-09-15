@@ -891,8 +891,8 @@ let add_or_check_is_supertype
   if skip_check_multiple_instantiations env interface_name then
     (env, ancestors)
   else
-    match SMap.find_opt interface_name ancestors with
-    | None -> (env, SMap.add interface_name (ty, parent_pos_id) ancestors)
+    match S_map.find_opt interface_name ancestors with
+    | None -> (env, S_map.add interface_name (ty, parent_pos_id) ancestors)
     | Some (first_ty, first_parent_pos_id) ->
       (* We want this check to break through module boundaries so we disable
        * the localization of internal newtypes outside their module as newtype *)
@@ -944,20 +944,20 @@ let add_or_check_is_supertype
       (env, ancestors)
 
 let get_instantiated_ancestors_and_self env (_pos, type_name) tyargs ty :
-    Typing_defs.decl_ty SMap.t =
+    Typing_defs.decl_ty S_map.t =
   let class_ = Env.get_class env type_name in
   let instantiated_ancestors =
     match class_ with
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
-      SMap.empty
+      S_map.empty
     | Decl_entry.Found class_ ->
       let subst = Decl_instantiate.make_subst (Cls.tparams class_) tyargs in
       Cls.all_ancestors class_
-      |> SMap.of_list
-      |> SMap.map (Decl_instantiate.instantiate subst)
+      |> S_map.of_list
+      |> S_map.map (Decl_instantiate.instantiate subst)
   in
-  SMap.add type_name ty instantiated_ancestors
+  S_map.add type_name ty instantiated_ancestors
 
 (** Check that repeated use of the same interface, but possibly at a different instantiation,
     is textually in subtype order. *)
@@ -985,7 +985,7 @@ let check_multiple_instantiation_inheritance
               parent_tyargs
               parent_ty
           in
-          SMap.fold
+          S_map.fold
             (fun ancestor_name ty (env, ancestors) ->
               add_or_check_is_supertype
                 env
@@ -996,7 +996,7 @@ let check_multiple_instantiation_inheritance
                 ancestors)
             ancestors_and_self
             ancestors)
-        ~init:(env, SMap.empty)
+        ~init:(env, S_map.empty)
     in
     env
 
@@ -1010,11 +1010,11 @@ let check_enum_includes env cls =
   (* checks that there are no duplicated enum-constants when folded-decls are enabled *)
   if is_enum_or_enum_class cls.c_kind then (
     let (dest_class_pos, dest_class_name) = cls.c_name in
-    let enum_constant_map = ref SMap.empty in
+    let enum_constant_map = ref S_map.empty in
     (* prepopulate the map with the constants declared in cls *)
     List.iter cls.c_consts ~f:(fun cc ->
         enum_constant_map :=
-          SMap.add
+          S_map.add
             (snd cc.cc_id)
             (fst cc.cc_id, dest_class_name)
             !enum_constant_map);
@@ -1049,10 +1049,10 @@ let check_enum_includes env cls =
             (* TODO: Check with @fzn *)
             else if is_abstract class_const.cc_abstract then
               ()
-            else if SMap.mem const_name !enum_constant_map then
+            else if S_map.mem const_name !enum_constant_map then
               (* distinguish between multiple inherit and redeclare *)
               let (origin_const_pos, origin_class_name) =
-                SMap.find const_name !enum_constant_map
+                S_map.find const_name !enum_constant_map
               in
               if String.equal origin_class_name dest_class_name then
                 (* redeclare *)
@@ -1084,7 +1084,7 @@ let check_enum_includes env cls =
                            const_name;
                          }));
             enum_constant_map :=
-              SMap.add
+              S_map.add
                 const_name
                 (dest_class_pos, class_const.cc_origin)
                 !enum_constant_map))

@@ -23,7 +23,7 @@ type summary = {
 [@@deriving yojson_of]
 
 type t = {
-  legacy_refinements: summary SMap.t;
+  legacy_refinements: summary S_map.t;
   new_refinements: int;
   total_refinements: int;
 }
@@ -32,7 +32,7 @@ type t = {
 module Summary = struct
   let zero =
     {
-      legacy_refinements = SMap.empty;
+      legacy_refinements = S_map.empty;
       new_refinements = 0;
       total_refinements = 0;
     }
@@ -50,7 +50,7 @@ module Summary = struct
       } =
     {
       legacy_refinements =
-        SMap.merge
+        S_map.merge
           (fun _ c_opt c_opt' ->
             match (c_opt, c_opt') with
             | (Some c, Some c') ->
@@ -72,7 +72,7 @@ module Summary = struct
   let legacy_refinement err pos_opt =
     {
       legacy_refinements =
-        SMap.singleton
+        S_map.singleton
           err
           {
             count = 1;
@@ -88,7 +88,7 @@ module Summary = struct
 
   let new_refinement =
     {
-      legacy_refinements = SMap.empty;
+      legacy_refinements = S_map.empty;
       new_refinements = 1;
       total_refinements = 1;
     }
@@ -111,7 +111,7 @@ let count ctx program =
             let pos_opt =
               let log_level =
                 Typechecker_options.log_levels (Tast_env.get_tcopt env)
-                |> SMap.find_opt "refinement_counter"
+                |> S_map.find_opt "refinement_counter"
               in
               match log_level with
               | Some 3 -> Some (fst hint)
@@ -128,7 +128,7 @@ let count ctx program =
 
 let is_enabled tcopt =
   Typechecker_options.log_levels tcopt
-  |> SMap.find_opt "refinement_counter"
+  |> S_map.find_opt "refinement_counter"
   |> Option.map ~f:(fun level -> level >= 1)
   |> Option.value ~default:false
 

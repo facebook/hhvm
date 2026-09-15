@@ -109,9 +109,9 @@ type delta =
    * All other keys assumed to be unchanged.
    *)
   | Map_delta of {
-      added: value SMap.t;
+      added: value S_map.t;
       removed: SSet.t;
-      changed: delta SMap.t;
+      changed: delta S_map.t;
     }
 
 let rec compute_value_delta (oldval : value) (newval : value) : delta =
@@ -150,36 +150,36 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
       Updated newval
   | (Map m1, Map m2) ->
     let removed =
-      SMap.fold
+      S_map.fold
         (fun i _ s ->
-          match SMap.find_opt i m2 with
+          match S_map.find_opt i m2 with
           | None -> SSet.add i s
           | Some _ -> s)
         m1
         SSet.empty
     in
     let added =
-      SMap.fold
+      S_map.fold
         (fun i v m ->
-          match SMap.find_opt i m1 with
-          | None -> SMap.add i v m
+          match S_map.find_opt i m1 with
+          | None -> S_map.add i v m
           | _ -> m)
         m2
-        SMap.empty
+        S_map.empty
     in
     let changed =
-      SMap.fold
+      S_map.fold
         (fun i oldx m ->
-          match SMap.find_opt i m2 with
+          match S_map.find_opt i m2 with
           | None -> m
           | Some newx ->
             (match compute_value_delta oldx newx with
             | Unchanged -> m
-            | d -> SMap.add i d m))
+            | d -> S_map.add i d m))
         m1
-        SMap.empty
+        S_map.empty
     in
-    if SSet.is_empty removed && SMap.is_empty added && SMap.is_empty changed
+    if SSet.is_empty removed && S_map.is_empty added && S_map.is_empty changed
     then
       Unchanged
     else
@@ -193,7 +193,7 @@ let is_leaf_value v =
   | Bool _
   | List _ ->
     true
-  | Map m when SMap.is_empty m -> true
+  | Map m when S_map.is_empty m -> true
   | Set _ -> true
   | _ -> false
 
@@ -229,10 +229,10 @@ let rec log_value env value =
         log_value env v);
     lprintf (Normal Green) "]"
   | Map m ->
-    if SMap.is_empty m then
+    if S_map.is_empty m then
       lprintf (Normal Green) "{}"
     else
-      SMap.iter (log_key_value env "") m
+      S_map.iter (log_key_value env "") m
   | Set s -> log_sset s
   | Type ty -> Pr.debug_i env ty |> lprintf (Normal Green) "%s"
   | SubtypeProp prop -> Pr.subtype_prop env prop |> lprintf (Normal Green) "%s"
@@ -277,8 +277,8 @@ let rec log_delta env delta =
         log_key k;
         lnewline ())
       removed;
-    SMap.iter (log_key_value env "+") added;
-    SMap.iter (log_key_delta env) changed
+    S_map.iter (log_key_value env "+") added;
+    S_map.iter (log_key_delta env) changed
 
 and log_key_delta env k d =
   if is_leaf_delta d then (
@@ -312,9 +312,9 @@ let return_info_as_value env return_info =
 let local_id_map_as_value f m =
   Map
     (Local_id.Map.fold
-       (fun id x m -> SMap.add (local_id_as_string id) (f x) m)
+       (fun id x m -> S_map.add (local_id_as_string id) (f x) m)
        m
-       SMap.empty)
+       S_map.empty)
 
 let reify_kind_as_value k =
   string_as_value
@@ -357,9 +357,9 @@ let tpenv_as_value env tpenv =
         Map
           (TPEnv.fold
              (fun name tpinfo m ->
-               SMap.add name (tparam_info_as_value env tpinfo) m)
+               S_map.add name (tparam_info_as_value env tpinfo) m)
              tpenv
-             SMap.empty) );
+             S_map.empty) );
       ("consistent", bool_as_value (TPEnv.is_consistent tpenv));
     ]
 
@@ -380,9 +380,9 @@ let per_cont_entry_as_value env f entry =
 let continuations_map_as_value f m =
   Map
     (Typing_continuations.Map.fold
-       (fun k x m -> SMap.add (Typing_continuations.to_string k) (f x) m)
+       (fun k x m -> S_map.add (Typing_continuations.to_string k) (f x) m)
        m
-       SMap.empty)
+       S_map.empty)
 
 let local_as_value
     env Typing_local_types.{ ty; pos = _; eid; macro_splice_vars = _ } =

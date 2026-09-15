@@ -100,12 +100,12 @@ type record_entry = {
   distribution: distribution option;
 }
 
-type record_data = record_entry SMap.t
+type record_data = record_entry S_map.t
 
 type record = record_data ref
 
 (* Creates a new empty record *)
-let create () = ref SMap.empty
+let create () = ref S_map.empty
 
 let global : record list ref = ref [create ()]
 
@@ -142,12 +142,12 @@ let get_record = function
 let track_distribution ?record name ~bucket_size =
   let record = get_record record in
   let entry =
-    match SMap.find_opt name !record with
+    match S_map.find_opt name !record with
     | None -> new_entry
     | Some entry -> entry
   in
   let entry = { entry with distribution = new_distribution ~bucket_size } in
-  record := SMap.add name entry !record
+  record := S_map.add name entry !record
 
 let round_down ~bucket_size value =
   bucket_size *. Float.round_down (value /. bucket_size)
@@ -174,7 +174,7 @@ let sample ?record ?(weight = 1.0) name value =
     min;
     distribution;
   } =
-    match SMap.find_opt name !record with
+    match S_map.find_opt name !record with
     | None -> new_entry
     | Some entry -> entry
   in
@@ -190,11 +190,11 @@ let sample ?record ?(weight = 1.0) name value =
   let min = Stdlib.min min value in
   let distribution = update_distribution ~weight value distribution in
   let entry = { count; mean; variance_sum; max; min; distribution } in
-  record := SMap.add name entry !record
+  record := S_map.add name entry !record
 
 let delete ?record name =
   let record = get_record record in
-  record := SMap.remove name !record
+  record := S_map.remove name !record
 
 let merge_entries name from into =
   match (from, into) with
@@ -251,7 +251,7 @@ let merge_entries name from into =
  * then it uses the global record *)
 let merge ?record from =
   let into = get_record record in
-  into := SMap.merge merge_entries !from !into
+  into := S_map.merge merge_entries !from !into
 
 let time (type a) ?record name (f : unit -> a) : a =
   let record = get_record record in
@@ -263,7 +263,7 @@ let time (type a) ?record name (f : unit -> a) : a =
 
 let get_helper f ?record name =
   let record = get_record record in
-  match SMap.find_opt name !record with
+  match S_map.find_opt name !record with
   | None -> None
   | Some entry -> Some (f entry)
 
@@ -291,7 +291,7 @@ let print_entry_stats ?record ?print_raw name =
   let print_raw = Option.value print_raw ~default:Stdio.prerr_endline in
   let record = get_record record in
   let prefix = Printf.sprintf "%s stats --" name in
-  match SMap.find_opt name !record with
+  match S_map.find_opt name !record with
   | None
   | Some { count = 0.0; _ } ->
     Printf.ksprintf print_raw "%s NO DATA" prefix
@@ -311,7 +311,7 @@ let print_entry_stats ?record ?print_raw name =
 
 let print_stats ?record ?print_raw () =
   let record = get_record record in
-  SMap.iter (fun name _ -> print_entry_stats ~record ?print_raw name) !record
+  S_map.iter (fun name _ -> print_entry_stats ~record ?print_raw name) !record
 
 let stats_to_telemetry ?record () =
   let record = get_record record in
@@ -329,7 +329,7 @@ let stats_to_telemetry ?record () =
   let f key entry acc =
     Telemetry.object_ acc ~key ~value:(entry_to_json entry)
   in
-  SMap.fold f !record init
+  S_map.fold f !record init
 
 let rec print_buckets ~low ~high ~bucket_size buckets =
   if Float.(low <= high) then (
@@ -346,7 +346,7 @@ let rec print_buckets ~low ~high ~bucket_size buckets =
 let print_entry_distribution ?record name =
   let record = get_record record in
   Stdlib.Printf.eprintf "%s distribution -- " name;
-  match SMap.find_opt name !record with
+  match S_map.find_opt name !record with
   | None
   | Some { count = 0.0; _ } ->
     Stdio.prerr_endline "NO DATA"
@@ -360,7 +360,7 @@ let print_entry_distribution ?record name =
 
 let print_distributions ?record () =
   let record = get_record record in
-  SMap.iter
+  S_map.iter
     (fun name { distribution; _ } ->
       match distribution with
       | None -> ()

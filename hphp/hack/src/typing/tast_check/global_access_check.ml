@@ -171,8 +171,8 @@ type super_global_class_detail = {
 }
 
 (* Map from super global class names to the corresponding details. *)
-let super_global_class_map : super_global_class_detail SMap.t =
-  SMap.of_list
+let super_global_class_map : super_global_class_detail S_map.t =
+  S_map.of_list
     [
       ( "\\GlobalCOOKIE",
         {
@@ -305,7 +305,7 @@ let check_super_global_method expr env external_fun_name =
         _;
       } ->
     (* Check if the class is a super global class *)
-    (match SMap.find_opt class_name super_global_class_map with
+    (match S_map.find_opt class_name super_global_class_map with
     | Some class_detail ->
       (* Check if the method is write or read or not recognized. *)
       let error_code_pattern_opt =

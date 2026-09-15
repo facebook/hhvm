@@ -7,7 +7,7 @@
  *
  *)
 
-let lock_fds = ref SMap.empty
+let lock_fds = ref S_map.empty
 
 (**
  * Basic lock operations.
@@ -22,7 +22,7 @@ let register_lock lock_file =
   Sys_utils.with_umask 0o111 (fun () ->
       let fd = Unix.descr_of_out_channel (open_out lock_file) in
       let st = Unix.fstat fd in
-      lock_fds := SMap.add lock_file (fd, st) !lock_fds;
+      lock_fds := S_map.add lock_file (fd, st) !lock_fds;
       fd)
 
 (**
@@ -33,7 +33,7 @@ let register_lock lock_file =
 let _operations lock_file op : bool =
   try
     let fd =
-      match SMap.find_opt lock_file !lock_fds with
+      match S_map.find_opt lock_file !lock_fds with
       | None -> register_lock lock_file
       | Some (fd, st) ->
         let identical_file =
@@ -80,7 +80,7 @@ let blocking_grab_then_release lock_file =
  * Gets the server instance-unique integral fd for a given lock file.
  *)
 let fd_of lock_file : int =
-  match SMap.find_opt lock_file !lock_fds with
+  match S_map.find_opt lock_file !lock_fds with
   | None -> -1
   | Some fd -> Obj.magic fd
 

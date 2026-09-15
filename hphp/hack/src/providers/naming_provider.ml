@@ -223,20 +223,20 @@ let get_and_cache
     ~(ctx : Provider_context.t)
     ~(name : 'name)
     ~(cache :
-       Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t ref)
+       Provider_backend.Reverse_naming_table_delta.pos_or_deleted S_map.t ref)
     ~(fallback :
        Naming_sqlite.db_path ->
        Provider_backend.Reverse_naming_table_delta.pos option) :
     Provider_backend.Reverse_naming_table_delta.pos option =
   let open Provider_backend.Reverse_naming_table_delta in
-  match SMap.find_opt !cache name with
+  match S_map.find_opt name !cache with
   | Some Deleted -> None
   | Some (Pos ((name_type, path), _rest)) -> Some (name_type, path)
   | None ->
     (match Option.bind (db_path_of_ctx ctx) ~f:fallback with
     | None -> None
     | Some (name_type, path) ->
-      cache := SMap.add !cache ~key:name ~data:(Pos ((name_type, path), []));
+      cache := S_map.add name (Pos ((name_type, path), [])) !cache;
       Some (name_type, path))
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
@@ -296,7 +296,7 @@ let add_const
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos ((File_info.Const, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.consts :=
-      SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
+      S_map.add name data !(reverse_naming_table_delta.consts)
 
 let remove_const_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -316,7 +316,7 @@ let remove_const_batch (backend : Provider_backend.t) (names : string list) :
       List.fold
         names
         ~init:!(reverse_naming_table_delta.consts)
-        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
+        ~f:(fun acc name -> S_map.add name Deleted acc)
 
 let get_fun_pos (ctx : Provider_context.t) (name : string) :
     File_info.pos option =
@@ -418,12 +418,12 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : File_info.pos)
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos ((File_info.Fun, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.funs :=
-      SMap.add !(reverse_naming_table_delta.funs) ~key:name ~data;
+      S_map.add name data !(reverse_naming_table_delta.funs);
     reverse_naming_table_delta.funs_canon_key :=
-      SMap.add
+      S_map.add
+        (Naming_sqlite.to_canon_name_key name)
+        data
         !(reverse_naming_table_delta.funs_canon_key)
-        ~key:(Naming_sqlite.to_canon_name_key name)
-        ~data
 
 let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
     =
@@ -443,13 +443,13 @@ let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
       List.fold
         names
         ~init:!(reverse_naming_table_delta.funs)
-        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted);
+        ~f:(fun acc name -> S_map.add name Deleted acc);
     reverse_naming_table_delta.funs_canon_key :=
       List.fold
         names
         ~init:!(reverse_naming_table_delta.funs_canon_key)
         ~f:(fun acc name ->
-          SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
+          S_map.add (Naming_sqlite.to_canon_name_key name) Deleted acc)
 
 let add_type
     (backend : Provider_backend.t)
@@ -470,12 +470,12 @@ let add_type
       Pos ((kind_to_name_type kind, File_info.get_pos_filename pos), [])
     in
     reverse_naming_table_delta.types :=
-      SMap.add !(reverse_naming_table_delta.types) ~key:name ~data;
+      S_map.add name data !(reverse_naming_table_delta.types);
     reverse_naming_table_delta.types_canon_key :=
-      SMap.add
+      S_map.add
+        (Naming_sqlite.to_canon_name_key name)
+        data
         !(reverse_naming_table_delta.types_canon_key)
-        ~key:(Naming_sqlite.to_canon_name_key name)
-        ~data
 
 let remove_type_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -495,13 +495,13 @@ let remove_type_batch (backend : Provider_backend.t) (names : string list) :
       List.fold
         names
         ~init:!(reverse_naming_table_delta.types)
-        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted);
+        ~f:(fun acc name -> S_map.add name Deleted acc);
     reverse_naming_table_delta.types_canon_key :=
       List.fold
         names
         ~init:!(reverse_naming_table_delta.types_canon_key)
         ~f:(fun acc name ->
-          SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
+          S_map.add (Naming_sqlite.to_canon_name_key name) Deleted acc)
 
 let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     (File_info.pos * Naming_types.kind_of_type) option =
@@ -695,7 +695,7 @@ let add_module backend name pos =
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos ((File_info.Module, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.modules :=
-      SMap.add !(reverse_naming_table_delta.modules) ~key:name ~data
+      S_map.add name data !(reverse_naming_table_delta.modules)
 
 let remove_module_batch backend names =
   match backend with
@@ -714,7 +714,7 @@ let remove_module_batch backend names =
       List.fold
         names
         ~init:!(reverse_naming_table_delta.modules)
-        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
+        ~f:(fun acc name -> S_map.add name Deleted acc)
 
 let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
  fun ctx pos ->
@@ -776,10 +776,10 @@ but not in others where enforcing it would involve a sqlite read.
 Invariant: this never transitions an entry from Some to None. *)
 let remove
     ~(case_insensitive : bool)
-    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
+    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted S_map.t)
     (path : Relative_path.t)
     (name : string) :
-    Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
+    Provider_backend.Reverse_naming_table_delta.pos_or_deleted S_map.t =
   let open Provider_backend.Reverse_naming_table_delta in
   let name =
     if case_insensitive then
@@ -787,13 +787,13 @@ let remove
     else
       name
   in
-  match SMap.find_opt delta name with
+  match S_map.find_opt name delta with
   | None ->
     (* We've never yet read/cached from sqlite. Presumably the caller is removing
        the name->path mapping that we assume is present in sqlite. We could read
        from sqlite right now solely to verify that the user-supplied path matches
        the one that's in sqlite, but that'd be costly and doesn't seem worth it. *)
-    SMap.add delta ~key:name ~data:Deleted
+    S_map.add name Deleted delta
   | Some Deleted -> failwith "removing symbol that's already removed"
   | Some (Pos ((_name_type, old_path), [])) ->
     if not (Relative_path.equal path old_path) then
@@ -803,10 +803,10 @@ let remove
            name
            (Relative_path.to_absolute old_path)
            (Relative_path.to_absolute path));
-    SMap.add delta ~key:name ~data:Deleted
+    S_map.add name Deleted delta
   | Some (Pos ((_name_type, old_path), rest_hd :: rest_tl)) ->
     if Relative_path.equal path old_path then
-      SMap.add delta ~key:name ~data:(Pos (rest_hd, rest_tl))
+      S_map.add name (Pos (rest_hd, rest_tl)) delta
     else
       let rest =
         List.filter (rest_hd :: rest_tl) ~f:(fun (_name_type, rest_path) ->
@@ -818,7 +818,7 @@ let remove
              "Naming_provider invariant failed: symbol %s was in several files, but we're trying to remove %s which isn't one of them"
              name
              (Relative_path.to_absolute path));
-      SMap.add delta ~key:name ~data:(Pos ((_name_type, old_path), rest))
+      S_map.add name (Pos ((_name_type, old_path), rest)) delta
 
 (** This adds name->path to the naming table (i.e. the combination of sqlite+delta).
 Invariant: if this function causes the delta for this symbol to go from None->Some,
@@ -827,10 +827,10 @@ in addition to the name->path mapping that we wish to add right now. *)
 let add
     ~(case_insensitive : bool)
     (db_path : Naming_sqlite.db_path option)
-    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
+    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted S_map.t)
     (pos : Provider_backend.Reverse_naming_table_delta.pos)
     (name : string) :
-    Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
+    Provider_backend.Reverse_naming_table_delta.pos_or_deleted S_map.t =
   let open Provider_backend.Reverse_naming_table_delta in
   let name =
     if case_insensitive then
@@ -838,8 +838,8 @@ let add
     else
       name
   in
-  match (SMap.find_opt delta name, db_path) with
-  | (None, None) -> SMap.add delta ~key:name ~data:(Pos (pos, []))
+  match (S_map.find_opt name delta, db_path) with
+  | (None, None) -> S_map.add name (Pos (pos, [])) delta
   | (None, Some db_path) ->
     let (name_type, _) = pos in
     let sqlite_pos =
@@ -875,10 +875,10 @@ let add
       | None -> Pos (pos, [])
       | Some sqlite_pos -> Pos (sqlite_pos, [pos])
     in
-    SMap.add delta ~key:name ~data
-  | (Some Deleted, _) -> SMap.add delta ~key:name ~data:(Pos (pos, []))
+    S_map.add name data delta
+  | (Some Deleted, _) -> S_map.add name (Pos (pos, [])) delta
   | (Some (Pos (old_pos, rest)), _) ->
-    SMap.add delta ~key:name ~data:(Pos (old_pos, pos :: rest))
+    S_map.add name (Pos (old_pos, pos :: rest)) delta
 
 let update
     ~(backend : Provider_backend.t)

@@ -15,7 +15,7 @@ val read_headers : Buffered_line_reader.t -> string list
 
 (* The rest of these methods are exposed solely for unit tests. *)
 
-val parse_headers_to_lowercase_map : string list -> string SMap.t
+val parse_headers_to_lowercase_map : string list -> string S_map.t
 
 val parse_charset : string -> string option
 

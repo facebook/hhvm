@@ -433,7 +433,7 @@ and exact =
 
       Box with {type T = string}
   *)
-and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
+and 'phase class_refinement = { cr_consts: 'phase refined_const S_map.t }
 
 and 'phase refined_const = {
   rc_bound: 'phase refined_const_bound;
@@ -485,7 +485,7 @@ and 'phase tuple_type = {
 and 'phase tuple_extra =
   | Tvariadic of 'phase ty
   | Tsplat of 'phase ty
-[@@deriving hash, transform ~maps:["SMap.t"; "TShapeMap.t"; "fun_type"]]
+[@@deriving hash, transform ~maps:["S_map.t"; "TShapeMap.t"; "fun_type"]]
 
 type decl_ty = decl_phase ty [@@deriving hash]
 
@@ -680,18 +680,18 @@ val equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool
 val equal_decl_tyl : decl_ty list -> decl_ty list -> bool
 
 module Locl_subst : sig
-  type t = locl_ty SMap.t
+  type t = locl_ty S_map.t
 
   val apply :
     locl_ty ->
-    subst:locl_ty SMap.t ->
+    subst:locl_ty S_map.t ->
     combine_reasons:
       (src:Typing_reason.t -> dest:Typing_reason.t -> Typing_reason.t) ->
     locl_ty
 
   val apply_fun :
     locl_phase ty fun_type ->
-    subst:locl_ty SMap.t ->
+    subst:locl_ty S_map.t ->
     combine_reasons:
       (src:Typing_reason.t -> dest:Typing_reason.t -> Typing_reason.t) ->
     locl_phase ty fun_type

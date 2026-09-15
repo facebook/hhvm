@@ -18,12 +18,12 @@ module CEKMap = struct
 end
 
 type saved_legacy_decls = {
-  classes: Decl_defs.decl_class_type SMap.t;
+  classes: Decl_defs.decl_class_type S_map.t;
   props: decl_ty CEKMap.t;
   sprops: decl_ty CEKMap.t;
   meths: fun_elt CEKMap.t;
   smeths: fun_elt CEKMap.t;
-  cstrs: fun_elt SMap.t;
+  cstrs: fun_elt S_map.t;
   fixmes: Pos.t I_map.t I_map.t Relative_path.Map.t;
   decl_fixmes: Pos.t I_map.t I_map.t Relative_path.Map.t;
 }
@@ -31,18 +31,17 @@ type saved_legacy_decls = {
 
 let empty_legacy_decls =
   {
-    classes = SMap.empty;
+    classes = S_map.empty;
     props = CEKMap.empty;
     sprops = CEKMap.empty;
     meths = CEKMap.empty;
     smeths = CEKMap.empty;
-    cstrs = SMap.empty;
+    cstrs = S_map.empty;
     fixmes = Relative_path.Map.empty;
     decl_fixmes = Relative_path.Map.empty;
   }
 
-let keys_to_sset smap =
-  SMap.fold smap ~init:SSet.empty ~f:(fun k _ s -> SSet.add s k)
+let keys_to_sset smap = S_map.fold (fun k _ s -> SSet.add s k) smap SSet.empty
 
 let rec collect_legacy_class
     ?(fail_if_missing = false)
@@ -51,7 +50,7 @@ let rec collect_legacy_class
     (cid : string)
     (decls : saved_legacy_decls) : saved_legacy_decls =
   let open Decl_defs in
-  if SMap.mem decls.classes cid then
+  if S_map.mem cid decls.classes then
     decls
   else
     let kind =
@@ -102,16 +101,14 @@ let rec collect_legacy_class
           )
       )
     | Some data ->
-      let decls =
-        { decls with classes = SMap.add decls.classes ~key:cid ~data }
-      in
+      let decls = { decls with classes = S_map.add cid data decls.classes } in
       let collect_elt add mid { elt_origin; _ } decls =
         if String.equal cid elt_origin then
           add decls cid mid
         else
           decls
       in
-      let collect_elts elts init f = SMap.fold elts ~init ~f:(collect_elt f) in
+      let collect_elts elts init f = S_map.fold (collect_elt f) elts init in
       let decls =
         collect_elts data.dc_props decls @@ fun decls cid mid ->
         match Decl_heap.Props.get (cid, mid) with
@@ -154,8 +151,7 @@ let rec collect_legacy_class
                else
                  match Decl_heap.Constructors.get cid with
                  | None -> failwith @@ "Missing constructor " ^ cid
-                 | Some x ->
-                   { decls with cstrs = SMap.add decls.cstrs ~key:cid ~data:x })
+                 | Some x -> { decls with cstrs = S_map.add cid x decls.cstrs })
       in
       let filename =
         match Naming_provider.get_class_path ctx cid with
@@ -204,34 +200,34 @@ let restore_legacy_decls decls =
   let { classes; props; sprops; meths; smeths; cstrs; fixmes; decl_fixmes } =
     decls
   in
-  SMap.iter classes ~f:Decl_heap.Classes.add;
+  S_map.iter Decl_heap.Classes.add classes;
   CEKMap.iter props ~f:Decl_heap.Props.add;
   CEKMap.iter sprops ~f:Decl_heap.StaticProps.add;
   CEKMap.iter meths ~f:Decl_heap.Methods.add;
   CEKMap.iter smeths ~f:Decl_heap.StaticMethods.add;
-  SMap.iter cstrs ~f:Decl_heap.Constructors.add;
+  S_map.iter Decl_heap.Constructors.add cstrs;
   Relative_path.Map.iter fixmes ~f:Fixme_provider.provide_hh_fixmes;
   Relative_path.Map.iter decl_fixmes ~f:Fixme_provider.provide_decl_hh_fixmes;
   (* return the number of classes that we restored *)
-  SMap.cardinal classes
+  S_map.cardinal classes
 
 let collect_legacy_decls ctx classes =
   collect_legacy_classes ctx classes empty_legacy_decls classes
 
-type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
+type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class S_map.t }
 [@@deriving show]
 
 let collect_shallow_decls ctx workers classnames =
   let classnames = SSet.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
      we won't look for ancestors. *)
-  let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
+  let job (init : 'a S_map.t) (classnames : string list) : 'a S_map.t =
     List.fold classnames ~init ~f:(fun acc cid ->
         match Decl_provider.get_shallow_class ctx cid with
         | None ->
           Hh_logger.log "Missing requested shallow class %s" cid;
           acc
-        | Some data -> SMap.add acc ~key:cid ~data)
+        | Some data -> S_map.add cid data acc)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.
      So we can safely assume there will be no merge collisions. *)
@@ -239,9 +235,9 @@ let collect_shallow_decls ctx workers classnames =
     Multi_worker.call
       workers
       ~job
-      ~neutral:SMap.empty
+      ~neutral:S_map.empty
       ~merge:
-        (SMap.merge ~f:(fun _key a b ->
+        (S_map.merge (fun _key a b ->
              if Option.is_some a then
                a
              else
@@ -251,7 +247,8 @@ let collect_shallow_decls ctx workers classnames =
   { classes }
 
 let restore_shallow_decls decls =
-  SMap.iter decls.classes ~f:(fun name cls ->
-      Shallow_classes_heap.Classes.add name cls);
+  S_map.iter
+    (fun name cls -> Shallow_classes_heap.Classes.add name cls)
+    decls.classes;
   (* return the number of classes that we restored *)
-  SMap.cardinal decls.classes
+  S_map.cardinal decls.classes

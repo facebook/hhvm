@@ -356,7 +356,7 @@ let callable upcasted_info tast_env params body : constraint_ list =
 let program
     (upcasted_info : element_info)
     (ctx : Provider_context.t)
-    (tast : Tast.program) : constraint_ list SMap.t =
+    (tast : Tast.program) : constraint_ list S_map.t =
   let def (def : T.def) : (string * constraint_ list) list =
     let tast_env = Tast_env.def_env ctx def in
     match def with
@@ -372,4 +372,4 @@ let program
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"
   in
-  List.concat_map ~f:def tast |> SMap.of_list
+  List.concat_map ~f:def tast |> S_map.of_list

@@ -13,10 +13,10 @@ type t = {
   smeths: Decl_heap.StaticMethods.KeySet.t;
 }
 
-val get_for_classes : old:bool -> string list -> t SMap.t
+val get_for_classes : old:bool -> string list -> t S_map.t
 
-val oldify_all : t SMap.t -> unit
+val oldify_all : t S_map.t -> unit
 
-val remove_old_all : t SMap.t -> unit
+val remove_old_all : t S_map.t -> unit
 
-val remove_all : t SMap.t -> unit
+val remove_all : t S_map.t -> unit

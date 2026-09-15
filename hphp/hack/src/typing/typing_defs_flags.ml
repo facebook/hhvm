@@ -419,15 +419,15 @@ module ClassElt = struct
     in
     flags |> reset_xhp_attr |> Int.bit_or xhp_attr_as_flags
 
-  let to_string_map (flags : t) : bool SMap.t =
+  let to_string_map (flags : t) : bool S_map.t =
     Field.all
     |> List.map ~f:(fun field -> (Field.show field, is_set field flags))
-    |> SMap.of_list
+    |> S_map.of_list
 
-  let show (flags : t) : string = flags |> to_string_map |> SMap.show Bool.pp
+  let show (flags : t) : string = flags |> to_string_map |> S_map.show Bool.pp
 
   let pp (fmt : Format.formatter) (flags : t) : unit =
-    flags |> to_string_map |> SMap.pp Bool.pp fmt
+    flags |> to_string_map |> S_map.pp Bool.pp fmt
 
   let make
       ~xhp_attr

@@ -235,8 +235,8 @@ let parent_initialized_members ~get_class_add_dep decl_env c =
     | None -> SSet.empty
     | Some { dc_props; _ } ->
       dc_props
-      |> SMap.filter (fun _ p -> Decl_defs.get_elt_needs_init p)
-      |> SMap.keys
+      |> S_map.filter (fun _ p -> Decl_defs.get_elt_needs_init p)
+      |> S_map.keys
       |> SSet.of_list
   in
   List.fold_left c.c_extends ~init:SSet.empty ~f:(fun acc parent ->

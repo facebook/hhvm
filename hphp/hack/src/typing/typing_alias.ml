@@ -49,17 +49,17 @@ module Fake = Typing_fake_members
 module Dep = struct
   let add x1 x2 acc =
     let x2 = Local_id.to_string x2 in
-    let prev = Option.value ~default:[] (SMap.find_opt x1 acc) in
-    SMap.add x1 (x2 :: prev) acc
+    let prev = Option.value ~default:[] (S_map.find_opt x1 acc) in
+    S_map.add x1 (x2 :: prev) acc
 
   let get key acc =
-    match SMap.find_opt key acc with
+    match S_map.find_opt key acc with
     | None -> []
     | Some kl -> kl
 
   let visitor local =
     (object
-       inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
+       inherit [string list S_map.t] Nast.Visitor_DEPRECATED.visitor as parent
 
        method! on_expr acc ((_, _, e_) as e) =
          match e_ with
@@ -76,13 +76,13 @@ module Dep = struct
 end
 
 module AliasMap : sig
-  type t = string list SMap.t
+  type t = string list S_map.t
 
   val get : string -> t -> string list
 
   val make : Nast.stmt -> t
 end = struct
-  type t = string list SMap.t
+  type t = string list S_map.t
 
   let get = Dep.get
 
@@ -96,7 +96,7 @@ end = struct
 
   let visitor =
     (object (this)
-       inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
+       inherit [string list S_map.t] Nast.Visitor_DEPRECATED.visitor as parent
 
        method! on_expr acc ((_, _, e_) as e) =
          match e_ with
@@ -126,7 +126,7 @@ end = struct
     end
     [@alert "-deprecated"])
 
-  let make st = visitor#on_stmt SMap.empty st
+  let make st = visitor#on_stmt S_map.empty st
 end
 
 (*****************************************************************************)
@@ -146,24 +146,24 @@ module Depth : sig
   val get : AliasMap.t -> int
 end = struct
   let rec fold aliases =
-    SMap.fold
+    S_map.fold
       begin
         fun k _ (visited, current_max) ->
           let (visited, n) = key aliases visited k in
           (visited, max n current_max)
       end
       aliases
-      (SMap.empty, 0)
+      (S_map.empty, 0)
 
   and key aliases visited k =
-    if SMap.mem k visited then
-      (visited, SMap.find k visited)
+    if S_map.mem k visited then
+      (visited, S_map.find k visited)
     else
-      let visited = SMap.add k 0 visited in
+      let visited = S_map.add k 0 visited in
       let kl = AliasMap.get k aliases in
       let (visited, depth_l) = List.map_env visited kl ~f:(key aliases) in
       let my_depth = 1 + List.fold_left ~f:max ~init:0 depth_l in
-      (SMap.add k my_depth visited, my_depth)
+      (S_map.add k my_depth visited, my_depth)
 
   let get aliases = snd (fold aliases)
 end

@@ -14,18 +14,18 @@ type value =
   | Atom of string
   | List of value list
   | Set of SSet.t
-  | Map of value SMap.t
+  | Map of value S_map.t
   | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop
 [@@deriving eq]
 
-val make_map : (SMap.key * value) list -> value
+val make_map : (S_map.key * value) list -> value
 
 val bool_as_value : bool -> value
 
 val string_as_value : string -> value
 
-val smap_as_value : ('a -> value) -> 'a SMap.t -> value
+val smap_as_value : ('a -> value) -> 'a S_map.t -> value
 
 val list_as_value : value list -> value
 
@@ -47,4 +47,4 @@ val var_as_string : Tvid.t -> string
 
 val varset_as_value : Tvid.Set.t -> value
 
-val variant_as_value : SMap.key -> value -> value
+val variant_as_value : S_map.key -> value -> value

@@ -302,7 +302,7 @@ let parallel_redecl_compare_and_get_fanout
 let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
-    (elems : Decl_class_elements.t SMap.t)
+    (elems : Decl_class_elements.t S_map.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
@@ -321,7 +321,7 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
 let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
-    (elems : Decl_class_elements.t SMap.t) : unit =
+    (elems : Decl_class_elements.t S_map.t) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
     Rust_provider_backend.Decl.remove_old_defs be names
@@ -342,7 +342,7 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     @param elems  elements, a.k.a. members, to remove *)
 let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
-    ~(elems : Decl_class_elements.t SMap.t)
+    ~(elems : Decl_class_elements.t S_map.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
@@ -372,7 +372,7 @@ let is_descendant_of_any_of classes (c : string) : bool =
      * - if it's already not there, then we don't care. *)
     | Some c ->
       let intersection_nonempty s1 s2 = SSet.exists s1 ~f:(SSet.mem s2) in
-      SMap.exists c.Decl_defs.dc_ancestors ~f:(fun c _ -> SSet.mem classes c)
+      S_map.exists (fun c _ -> SSet.mem classes c) c.Decl_defs.dc_ancestors
       || intersection_nonempty c.Decl_defs.dc_extends classes
       || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
       || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
@@ -489,7 +489,7 @@ let merge_elements
     classes_initial_count classes_processed_count (elements, count) acc =
   classes_processed_count := !classes_processed_count + count;
 
-  let acc = SMap.union elements acc in
+  let acc = S_map.union elements acc in
   Server_progress.write_percentage
     ~operation:"getting members of"
     ~done_count:!classes_processed_count
@@ -505,7 +505,7 @@ let get_elems
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     ~(old : bool)
-    (defs : File_info.names) : Decl_class_elements.t SMap.t =
+    (defs : File_info.names) : Decl_class_elements.t S_map.t =
   let classes = SSet.elements defs.File_info.n_classes in
   (* Getting the members of a class requires fetching the class from the heap.
    * Doing this for too many classes will cause a large amount of allocations
@@ -532,7 +532,7 @@ let get_elems
         ~job:(fun _ c ->
           (Decl_class_elements.get_for_classes ~old c, List.length c))
         ~merge:(merge_elements classes_initial_count classes_processed_count)
-        ~neutral:SMap.empty
+        ~neutral:S_map.empty
         ~next:(Multi_worker.next ~max_size:bucket_size workers classes)
   in
 
@@ -605,7 +605,7 @@ let redo_type_decl
 
   (* Fetch the already oldified elements too so we can remove them later *)
   let oldified_elems = get_elems oldified_defs ~old:true in
-  let all_elems = SMap.union current_elems oldified_elems in
+  let all_elems = S_map.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
 
   Hh_logger.log
@@ -689,7 +689,7 @@ let oldify_decls_and_remove_descendants
    * likely over-broad: a descendant's shallow decl is a direct function of its
    * own file, not of the oldified parent. If we determine there to be
    * performance impact of this consider correcting it. *)
-  remove_defs descendant_classes ~elems:SMap.empty ~collect_garbage
+  remove_defs descendant_classes ~elems:S_map.empty ~collect_garbage
 
 let remove_old_defs
     (ctx : Provider_context.t)

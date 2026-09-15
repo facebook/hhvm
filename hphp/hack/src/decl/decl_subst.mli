@@ -5,12 +5,12 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-type decl_subst = Typing_defs.decl_ty SMap.t
+type decl_subst = Typing_defs.decl_ty S_map.t
 
 val make_locl :
   'ty Typing_defs.tparam list ->
   Typing_defs.locl_ty list ->
-  Typing_defs.locl_ty SMap.t
+  Typing_defs.locl_ty S_map.t
 
 val make_decl :
   'ty Typing_defs.tparam list -> Typing_defs.decl_ty list -> decl_subst

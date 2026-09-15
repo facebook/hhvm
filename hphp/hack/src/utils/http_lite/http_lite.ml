@@ -34,18 +34,18 @@ let read_headers (reader : Buffered_line_reader.t) : string list =
  * multiple headers of the same key, but we prefer the simplicity of
  * returning just a string map so we only take the last header for
  * a given key. Note: if any header isn't in Key:Value format, we ignore it. *)
-let parse_headers_to_lowercase_map (headers : string list) : string SMap.t =
+let parse_headers_to_lowercase_map (headers : string list) : string S_map.t =
   let rec parse_internal acc = function
     | [] -> acc
     | line :: rest -> begin
       match Str.bounded_split (Str.regexp ":") line 2 with
       | [k; v] ->
         let (k', v') = (String.lowercase k, String.strip v) in
-        parse_internal (SMap.add k' v' acc) rest
+        parse_internal (S_map.add k' v' acc) rest
       | _ -> parse_internal acc rest
     end
   in
-  parse_internal SMap.empty headers
+  parse_internal S_map.empty headers
 
 (** parse_charset: given a Content-Type value like "mime/type; charset=foo"
  * it returns the "foo" bit of it, if present.
@@ -75,11 +75,11 @@ let parse_charset (header_value : string) : string option =
 let read_message_utf8 (reader : Buffered_line_reader.t) : string =
   let headers = read_headers reader |> parse_headers_to_lowercase_map in
   let len =
-    try SMap.find "content-length" headers |> int_of_string with
+    try S_map.find "content-length" headers |> int_of_string with
     | _ -> raise (Malformed "Missing Content-Length")
   in
   let charset =
-    try SMap.find "content-type" headers |> parse_charset with
+    try S_map.find "content-type" headers |> parse_charset with
     | _ -> None
   in
   let body = Buffered_line_reader.get_next_bytes reader len in

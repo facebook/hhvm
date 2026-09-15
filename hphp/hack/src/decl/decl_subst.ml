@@ -11,7 +11,7 @@ open Hh_prelude
 open Typing_defs
 module Reason = Typing_reason
 
-type decl_subst = decl_ty SMap.t
+type decl_subst = decl_ty S_map.t
 
 (*****************************************************************************)
 (* Builds a substitution out of a list of type parameters and a list of types.
@@ -31,10 +31,10 @@ let make_locl tparams tyl =
   let make_subst_tparam (subst, tyl) t =
     match tyl with
     | [] -> (subst, [])
-    | ty :: rl -> (SMap.add (snd t.tp_name) ty subst, rl)
+    | ty :: rl -> (S_map.add (snd t.tp_name) ty subst, rl)
   in
   let (subst, _) =
-    List.fold tparams ~init:(SMap.empty, tyl) ~f:make_subst_tparam
+    List.fold tparams ~init:(S_map.empty, tyl) ~f:make_subst_tparam
   in
   subst
 
@@ -49,9 +49,9 @@ let make_decl tparams tyl =
         ((Typing_defs.mk (Reason.none, Typing_defs.make_tany ()) : decl_ty), [])
       | ty :: rl -> (ty, rl)
     in
-    (SMap.add (snd t.tp_name) ty subst, tyl)
+    (S_map.add (snd t.tp_name) ty subst, tyl)
   in
   let (subst, _) =
-    List.fold tparams ~init:(SMap.empty, tyl) ~f:make_subst_tparam
+    List.fold tparams ~init:(S_map.empty, tyl) ~f:make_subst_tparam
   in
   subst

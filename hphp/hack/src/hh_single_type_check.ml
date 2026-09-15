@@ -257,7 +257,7 @@ let parse_options () =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
-  let log_levels = ref SMap.empty in
+  let log_levels = ref S_map.empty in
   let max_errors = ref None in
   let batch_mode = ref false in
   let set_mode x () =
@@ -563,7 +563,7 @@ let parse_options () =
            [
              Arg.String (( := ) log_key);
              Arg.Int
-               (fun level -> log_levels := SMap.add !log_key level !log_levels);
+               (fun level -> log_levels := S_map.add !log_key level !log_levels);
            ]),
         " Set the log level for a key" );
       ( "--batch-files",
@@ -2430,8 +2430,8 @@ let handle_mode
       let results =
         List.map ~f:(Count_imprecise_types.count ctx) tasts
         |> List.fold
-             ~f:(SMap.union ~combine:(fun id _ -> failwith ("Clash at " ^ id)))
-             ~init:SMap.empty
+             ~f:(S_map.union ~combine:(fun id _ -> failwith ("Clash at " ^ id)))
+             ~init:S_map.empty
       in
       let json = Count_imprecise_types.json_of_results results in
       Printf.printf "%s" (Hh_json_helpers.Out.to_string json)

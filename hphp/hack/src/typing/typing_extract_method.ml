@@ -36,16 +36,16 @@ module Variance_analysis : sig
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
     SSet.t ->
     env:Typing_env_types.env ->
-    Ast_defs.variance option SMap.t
+    Ast_defs.variance option S_map.t
 
-  val show_variances : Ast_defs.variance option SMap.t -> string
+  val show_variances : Ast_defs.variance option S_map.t -> string
     [@@warning "-32"]
 end = struct
   let show_variances variances =
     let str =
       String.concat
         ~sep:"\n"
-        (List.map (SMap.elements variances) ~f:(fun (name, variance_opt) ->
+        (List.map (S_map.elements variances) ~f:(fun (name, variance_opt) ->
              let var_str =
                Option.value_map
                  variance_opt
@@ -151,7 +151,7 @@ end = struct
            with the outer context variance using `mul`.
         *)
         find_cr_consts
-          (SMap.values cr_consts)
+          (S_map.values cr_consts)
           ~var
           ~update
           ~is_invariant
@@ -453,7 +453,7 @@ end = struct
     let open Typing_defs_core in
     match get_node ty with
     | Tgeneric name when SSet.mem name ty_param_names ->
-      SMap.update
+      S_map.update
         name
         (function
           | None
@@ -483,12 +483,12 @@ end = struct
     | Tapply _ ->
       acc
 
-  let all_invariant vs = SMap.for_all (fun _ v -> is_invariant v) vs
+  let all_invariant vs = S_map.for_all (fun _ v -> is_invariant v) vs
 
   let analyse_ty_params fun_ty ty_param_names ~env =
     let update = update_ty_params ty_param_names
     and acc =
-      SMap.of_list
+      S_map.of_list
         (List.map (SSet.elements ty_param_names) ~f:(fun name -> (name, None)))
     in
     let var_opt =
@@ -509,7 +509,7 @@ end = struct
             (SSet.union acc (mentioned_ty_params ty1))
             (mentioned_ty_params ty2))
     in
-    SMap.mapi
+    S_map.mapi
       (fun nm var_opt ->
         if SSet.mem nm in_where_constraint then
           Some Ast_defs.Invariant
@@ -529,7 +529,7 @@ module Typeconst_analysis : sig
     this_name: string;
     this_folded_class: Folded_class.t;
     this_trie: Trie.t;
-    tries: (Typing_defs_core.decl_ty * Trie.t) SMap.t;
+    tries: (Typing_defs_core.decl_ty * Trie.t) S_map.t;
   }
 
   (** Generate an analysis of a function type which resolves all type constants
@@ -552,8 +552,9 @@ module Typeconst_analysis : sig
       tparams:
         Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.tparam
         list;
-      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty SMap.t;
-      class_subst: Typing_defs_core.decl_phase Typing_defs_core.ty SMap.t SMap.t;
+      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t;
+      class_subst:
+        Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t S_map.t;
     }
 
     val apply :
@@ -673,7 +674,7 @@ end = struct
 
     type t = {
       base: base;
-      children: status SMap.t;
+      children: status S_map.t;
     }
 
     and status =
@@ -690,7 +691,7 @@ end = struct
 
     and merge t1 t2 : t option =
       let children =
-        SMap.union
+        S_map.union
           ~combine:(fun _key s1 s2 -> merge_help s1 s2)
           t1.children
           t2.children
@@ -699,7 +700,7 @@ end = struct
 
     let rec transform { base; children } ~f =
       let base = transform_base base ~f
-      and children = SMap.map (transform_status ~f) children in
+      and children = S_map.map (transform_status ~f) children in
       { base; children }
 
     and transform_status status ~f =
@@ -709,7 +710,7 @@ end = struct
     (* -- Pretty printing ----------------------------------------------------- *)
 
     let rec show_help t ~indent ~acc ~env =
-      List.fold_left (SMap.bindings t) ~init:acc ~f:(fun acc (nm, status) ->
+      List.fold_left (S_map.bindings t) ~init:acc ~f:(fun acc (nm, status) ->
           show_status (nm, status) ~indent ~acc ~env)
 
     and show_status (nm, status) ~indent ~acc ~env =
@@ -760,18 +761,18 @@ end = struct
       @@ show_help t.children ~indent:4 ~acc:[Format.sprintf "%s\n" name] ~env
 
     (* -- Helpers ------------------------------------------------------------  *)
-    let empty = { base = Root; children = SMap.empty }
+    let empty = { base = Root; children = S_map.empty }
 
-    let constants t = SMap.keys t.children
+    let constants t = S_map.keys t.children
 
     let update t const_name child =
       let { children; _ } = t in
-      let children = SMap.add const_name child children in
+      let children = S_map.add const_name child children in
       { t with children }
 
     let of_typeconst ?origin typeconst ~const_pos =
       let base = Typeconst { typeconst; pos = const_pos; origin } in
-      { base; children = SMap.empty }
+      { base; children = S_map.empty }
 
     let status_of_typeconst ?origin typeconst ~const_pos =
       let t = of_typeconst typeconst ?origin ~const_pos in
@@ -781,7 +782,7 @@ end = struct
       match path with
       | [] -> Some (Defined t)
       | (_, next) :: rest -> begin
-        match SMap.find_opt next t.children with
+        match S_map.find_opt next t.children with
         | None -> None
         | Some Undefined -> Some Undefined
         | Some (Defined t) -> find_path t rest
@@ -794,16 +795,21 @@ end = struct
     this_name: string;
     this_folded_class: Folded_class.t;
     this_trie: Trie.t;
-    tries: (Typing_defs_core.decl_ty * Trie.t) SMap.t;
+    tries: (Typing_defs_core.decl_ty * Trie.t) S_map.t;
   }
 
   let create this_name this_folded_class =
-    { this_name; this_folded_class; this_trie = Trie.empty; tries = SMap.empty }
+    {
+      this_name;
+      this_folded_class;
+      this_trie = Trie.empty;
+      tries = S_map.empty;
+    }
 
   let show { this_name; this_trie; tries; _ } env =
     let this = (Format.sprintf "this (%s)" this_name, this_trie)
     and others =
-      List.map ~f:(fun (key, (_, trie)) -> (key, trie)) (SMap.bindings tries)
+      List.map ~f:(fun (key, (_, trie)) -> (key, trie)) (S_map.bindings tries)
     in
     let lines =
       List.map (this :: others) ~f:(fun (name, trie) ->
@@ -815,7 +821,7 @@ end = struct
     if String.equal class_name this_name then
       Some this_trie
     else
-      Option.map ~f:snd (SMap.find_opt class_name tries)
+      Option.map ~f:snd (S_map.find_opt class_name tries)
   (* -- Helpers ------------------------------------------------------------- *)
 
   type type_for_access =
@@ -979,7 +985,7 @@ end = struct
   let meet_trie_opt trie1 trie2 reason =
     let Trie.{ base = b1; children = c1 } = trie1
     and Trie.{ base = b2; children = c2 } = trie2 in
-    if not (SMap.is_empty c1 && SMap.is_empty c2) then
+    if not (S_map.is_empty c1 && S_map.is_empty c2) then
       None
     else
       let base_opt =
@@ -999,7 +1005,7 @@ end = struct
       we have to look it up from the decl *)
   let rec find_type_const trie tys const prefix analysis env =
     let Trie.{ children; base } = trie and (const_pos, const_name) = const in
-    match SMap.find_opt const_name children with
+    match S_map.find_opt const_name children with
     (* Happy path - we've already seen the constant as part of some other path
        so reuse the result *)
     | Some status -> (status, tys, analysis)
@@ -1158,7 +1164,7 @@ end = struct
     | Trefinement (base_ty, { cr_consts }) -> begin
       (* If there is a refinement check if it contains the contant we want;
          if not, search in the root type *)
-      match SMap.find_opt const_name cr_consts with
+      match S_map.find_opt const_name cr_consts with
       | Some refined_const ->
         (* For the definition of the refined constant [this] is in the same
            class so don't make absolute *)
@@ -1353,7 +1359,7 @@ end = struct
         in
         (* Move the trie for the current class in to the map *)
         let tries =
-          SMap.update
+          S_map.update
             class_name
             (function
               | None -> Some (this_ty, class_trie)
@@ -1378,7 +1384,7 @@ end = struct
     (* For analysis of classes other than this we need to subsitute occurrences
        of [this] at the root of typeconst accesses for the class type *)
     let tries =
-      SMap.map
+      S_map.map
         (fun (replacement, trie) ->
           let f ty = replace_this_with ty ~replacement in
           (replacement, Trie.transform trie ~f))
@@ -1423,8 +1429,9 @@ end = struct
       tparams:
         Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.tparam
         list;
-      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty SMap.t;
-      class_subst: Typing_defs_core.decl_phase Typing_defs_core.ty SMap.t SMap.t;
+      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t;
+      class_subst:
+        Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t S_map.t;
     }
 
     (* -- Application ------------------------------------------------------- *)
@@ -1448,19 +1455,19 @@ end = struct
             let subst_ty_opt =
               match get_node root_ty with
               | Tthis ->
-                let ty_opt = SMap.find_opt key this_subst in
+                let ty_opt = S_map.find_opt key this_subst in
                 if Option.is_some ty_opt then
                   ty_opt
                 else
-                  let subst_opt = SMap.find_opt this_name class_subst in
+                  let subst_opt = S_map.find_opt this_name class_subst in
                   Option.bind subst_opt ~f:(fun subst ->
                       let key =
                         String.concat ~sep:"::" (List.map ~f:snd path)
                       in
-                      SMap.find_opt key subst)
+                      S_map.find_opt key subst)
               | Tapply ((_, class_name), _) ->
-                let subst_opt = SMap.find_opt class_name class_subst in
-                Option.bind subst_opt ~f:(fun subst -> SMap.find_opt key subst)
+                let subst_opt = S_map.find_opt class_name class_subst in
+                Option.bind subst_opt ~f:(fun subst -> S_map.find_opt key subst)
               | _ -> None
             in
             (* If there is no subsitution, stop; if there is record that we've
@@ -1504,7 +1511,7 @@ end = struct
           | Typeconst { typeconst = Typing_defs.(TCConcrete { tc_type }); _ } ->
             let (subst, env, generics) = acc in
             let key = String.concat ~sep:"::" (List.rev rev_path) in
-            (SMap.add key tc_type subst, env, generics)
+            (S_map.add key tc_type subst, env, generics)
           | Typeconst
               {
                 typeconst =
@@ -1526,15 +1533,15 @@ end = struct
               let key = String.concat ~sep:"::" (List.rev rev_path) in
               let reason = Typing_reason.witness_from_decl pos in
               let ty = Typing_defs_core.(mk (reason, Tgeneric generic_name)) in
-              SMap.add key ty subst
+              S_map.add key ty subst
             in
             let generics =
-              SMap.add generic_name { pos; upper_bound; lower_bound } generics
+              S_map.add generic_name { pos; upper_bound; lower_bound } generics
             in
             (subst, env, generics)
           | Root -> acc
         in
-        SMap.fold
+        S_map.fold
           (fun key status acc ->
             match status with
             | Trie.Undefined -> acc
@@ -1542,23 +1549,23 @@ end = struct
           children
           acc
       in
-      aux trie ("", []) (SMap.empty, env, generics)
+      aux trie ("", []) (S_map.empty, env, generics)
 
     let class_subst { tries; _ } env generics =
-      SMap.fold
+      S_map.fold
         (fun class_name (_ty, trie) (tries, env, generics) ->
           let (subst, env, generics) = class_subst_help trie env generics in
-          (SMap.add class_name subst tries, env, generics))
+          (S_map.add class_name subst tries, env, generics))
         tries
-        (SMap.empty, env, generics)
+        (S_map.empty, env, generics)
 
     (* -- Build substitution for abstract type constants -------------------- *)
 
     let add_refinement rfmts const_name ~path ~subst =
       let key = String.concat ~sep:"::" (List.rev (const_name :: path)) in
-      let ty_opt = SMap.find_opt key subst in
+      let ty_opt = S_map.find_opt key subst in
       Option.value_map ty_opt ~default:rfmts ~f:(fun ty ->
-          SMap.add
+          S_map.add
             const_name
             Typing_defs_core.{ rc_bound = TRexact ty; rc_is_ctx = false }
             rfmts)
@@ -1590,14 +1597,14 @@ end = struct
       let open Typing_defs_core in
       match deref decl_ty with
       | (reason, Tapply ((_, class_name), _)) -> begin
-        match SMap.keys children with
+        match S_map.keys children with
         | [] -> decl_ty
         | abstr_consts ->
           let pred = should_refine env class_name in
           let cr_consts =
             List.fold_left
               abstr_consts
-              ~init:SMap.empty
+              ~init:S_map.empty
               ~f:(fun rfmts const_name ->
                 if pred const_name then
                   add_refinement rfmts const_name ~path ~subst
@@ -1610,7 +1617,7 @@ end = struct
       end
       | (reason, Typing_defs_core.Trefinement (inner_decl_ty, { cr_consts })) ->
       begin
-        match SMap.keys children with
+        match S_map.keys children with
         | [] -> decl_ty
         | abstr_consts ->
           let pred =
@@ -1651,7 +1658,7 @@ end = struct
       | Typing_defs.(TCConcrete { tc_type }) ->
         let (subst, env, generics) = acc in
         let subst =
-          SMap.add (String.concat (List.rev path) ~sep:"::") tc_type subst
+          S_map.add (String.concat (List.rev path) ~sep:"::") tc_type subst
         in
         (subst, env, generics)
       | Typing_defs.(TCAbstract { atc_as_constraint; atc_super_constraint; _ })
@@ -1662,7 +1669,7 @@ end = struct
           let key = String.concat (List.rev path) ~sep:"::" in
           let reason = Typing_reason.witness_from_decl pos in
           let ty = Typing_defs_core.(mk (reason, Tgeneric generic_name)) in
-          SMap.add key ty subst
+          S_map.add key ty subst
         in
         let upper_bound =
           Option.map atc_as_constraint ~f:(fun ty ->
@@ -1672,14 +1679,14 @@ end = struct
               refine_ty env ty subst path children)
         in
         let generics =
-          SMap.add generic_name { pos; upper_bound; lower_bound } generics
+          S_map.add generic_name { pos; upper_bound; lower_bound } generics
         in
         (subst, env, generics)
 
     let this_subst { this_trie; _ } env generics =
       let Trie.{ base; children } = this_trie in
       let rec aux children ~path ~init =
-        SMap.fold
+        S_map.fold
           (fun key status acc ->
             match status with
             | Trie.Undefined -> acc
@@ -1694,7 +1701,7 @@ end = struct
           children
           init
       in
-      let init = (SMap.empty, env, generics) in
+      let init = (S_map.empty, env, generics) in
       match base with
       | Trie.Root -> aux children ~path:[] ~init
       | _ -> init
@@ -1720,14 +1727,14 @@ end = struct
           let cr_consts =
             List.fold_left
               ~f:(fun rfmts name ->
-                match SMap.find_opt name this_subst with
+                match S_map.find_opt name this_subst with
                 | Some ty ->
-                  SMap.add
+                  S_map.add
                     name
                     { rc_bound = TRexact ty; rc_is_ctx = false }
                     rfmts
                 | _ -> rfmts)
-              ~init:SMap.empty
+              ~init:S_map.empty
               type_constants
           in
           let class_refinement = Typing_defs.{ cr_consts } in
@@ -1738,9 +1745,9 @@ end = struct
           let cr_consts =
             List.fold_left
               ~f:(fun rfmts name ->
-                match SMap.find_opt name this_subst with
+                match S_map.find_opt name this_subst with
                 | Some ty ->
-                  SMap.add
+                  S_map.add
                     name
                     { rc_bound = TRexact ty; rc_is_ctx = false }
                     rfmts
@@ -1754,7 +1761,7 @@ end = struct
 
     let mk_tparams generics env =
       List.map
-        (SMap.bindings generics)
+        (S_map.bindings generics)
         ~f:(fun (name, { pos; upper_bound; lower_bound }) ->
           (* We're generating a decl type so we need to add implicit
              upper bounds of [supportdyn<mixed>] under sdt or [mixed] otherwise
@@ -1782,7 +1789,7 @@ end = struct
 
     let of_typeconst_analysis analysis this_name this_ty env =
       let (this_subst, class_subst, generics, env) =
-        let generics = SMap.empty in
+        let generics = S_map.empty in
         let (this_subst, env, generics) = this_subst analysis env generics in
         let (class_subst, env, generics) = class_subst analysis env generics in
         (this_subst, class_subst, generics, env)
@@ -1947,7 +1954,7 @@ let apply_subst_generic fun_ty subst =
   let on_ty ty ~ctx =
     match get_node ty with
     | Tgeneric nm ->
-      (match SMap.find_opt nm subst with
+      (match S_map.find_opt nm subst with
       | Some ty ->
         (* Since other type parameters can appear inside bounds of type parameters
            we restart the transform after making a substitution *)
@@ -2098,7 +2105,7 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
       SSet.of_list (List.map ft_tparams ~f:(fun { tp_name = (_, nm); _ } -> nm))
     in
     let ty_param_bounds =
-      SMap.of_list
+      S_map.of_list
         (List.map
            ft_tparams
            ~f:(fun { tp_name = (pos, nm); tp_constraints; _ } ->
@@ -2108,14 +2115,14 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
       Variance_analysis.analyse_ty_params fun_ty ty_param_names ~env
     in
     let subst =
-      SMap.filter_map
+      S_map.filter_map
         (fun name variance_opt ->
           match variance_opt with
           | None
           | Some Ast_defs.Invariant ->
             None
           | Some Ast_defs.Contravariant ->
-            let (pos, constraints) = SMap.find name ty_param_bounds in
+            let (pos, constraints) = S_map.find name ty_param_bounds in
             let ubs =
               List.filter_map constraints ~f:(fun (c, ty) ->
                   match c with
@@ -2128,7 +2135,7 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
             let ub = Typing_make_type.intersection reason ubs in
             Some ub
           | Some Ast_defs.Covariant ->
-            let (pos, constraints) = SMap.find name ty_param_bounds in
+            let (pos, constraints) = S_map.find name ty_param_bounds in
             let lbs =
               List.filter_map constraints ~f:(fun (c, ty) ->
                   match c with

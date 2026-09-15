@@ -27,7 +27,7 @@ module Env = struct
   let add_tparams ps init =
     List.fold
       ps
-      ~f:(fun acc Aast.{ tp_name = (pos, nm); _ } -> SMap.add nm pos acc)
+      ~f:(fun acc Aast.{ tp_name = (pos, nm); _ } -> S_map.add nm pos acc)
       ~init
 
   let extend_tparams t ps = extend_tparams_with t ~add:add_tparams ps
@@ -35,7 +35,7 @@ module Env = struct
   let add_hint_tparams ps init =
     List.fold
       ps
-      ~f:(fun acc Aast.{ htp_name = (pos, nm); _ } -> SMap.add nm pos acc)
+      ~f:(fun acc Aast.{ htp_name = (pos, nm); _ } -> S_map.add nm pos acc)
       ~init
 
   let extend_hint_tparams t ps = extend_tparams_with t ~add:add_hint_tparams ps
@@ -43,33 +43,33 @@ module Env = struct
   let in_class t Aast.{ c_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams c_tparams SMap.empty }
+        { tparams = add_tparams c_tparams S_map.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_fun_def t Aast.{ fd_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams fd_tparams SMap.empty }
+        { tparams = add_tparams fd_tparams S_map.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_typedef t Aast.{ t_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams t_tparams SMap.empty }
+        { tparams = add_tparams t_tparams S_map.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_gconst t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.{ tparams = SMap.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = S_map.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_module_def t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.{ tparams = SMap.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = S_map.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 end
@@ -150,7 +150,7 @@ let canonical_tycon typarams (pos, name) =
   else if String.(equal name SN.Classes.cClassname || equal name "classname")
   then
     Classname pos
-  else if SMap.mem name typarams then
+  else if S_map.mem name typarams then
     Typaram name
   else
     Tycon (pos, name)
@@ -275,7 +275,7 @@ let validate_hint_tparams tparams on_error ~ctx =
       tparams
       ~init:bound
       ~f:(fun bound Aast_defs.{ htp_name = (pos, tparam_name); _ } ->
-        match SMap.find_opt tparam_name bound with
+        match S_map.find_opt tparam_name bound with
         | Some prev_pos ->
           let err =
             Naming_phase_error.naming
@@ -283,7 +283,7 @@ let validate_hint_tparams tparams on_error ~ctx =
           in
           let () = on_error err in
           bound
-        | None -> SMap.add tparam_name pos bound)
+        | None -> S_map.add tparam_name pos bound)
   in
   ()
 

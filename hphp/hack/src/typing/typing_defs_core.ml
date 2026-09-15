@@ -326,7 +326,7 @@ and exact =
   | Nonexact of locl_phase class_refinement
 [@@oxidize.exclude]
 
-and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
+and 'phase class_refinement = { cr_consts: 'phase refined_const S_map.t }
 
 and 'phase refined_const = {
   rc_bound: 'phase refined_const_bound;
@@ -363,13 +363,13 @@ and 'phase tuple_type = {
 and 'phase tuple_extra =
   | Tvariadic of 'phase ty
   | Tsplat of 'phase ty
-[@@deriving hash, transform ~maps:["SMap.t"; "TShapeMap.t"; "fun_type"]]
+[@@deriving hash, transform ~maps:["S_map.t"; "TShapeMap.t"; "fun_type"]]
 
 type decl_ty = decl_phase ty [@@deriving hash]
 
 type locl_ty = locl_phase ty [@@deriving hash]
 
-let nonexact = Nonexact { cr_consts = SMap.empty }
+let nonexact = Nonexact { cr_consts = S_map.empty }
 
 let is_nonexact = function
   | Nonexact _ -> true
@@ -622,7 +622,7 @@ module Pp = struct
    fun fmt { cr_consts } ->
     Format.fprintf fmt "@[<2>{";
     Format.fprintf fmt "cr_consts = ";
-    SMap.pp pp_refined_const fmt cr_consts;
+    S_map.pp pp_refined_const fmt cr_consts;
     Format.fprintf fmt ";@ ";
     Format.fprintf fmt "}@]"
 
@@ -1281,7 +1281,7 @@ and refined_const_compare : type a. a refined_const -> a refined_const -> int =
 and class_refinement_compare :
     type a. a class_refinement -> a class_refinement -> int =
  fun { cr_consts = rcs1 } { cr_consts = rcs2 } ->
-  SMap.compare refined_const_compare rcs1 rcs2
+  S_map.compare refined_const_compare rcs1 rcs2
 
 and exact_compare e1 e2 =
   match (e1, e2) with
@@ -1391,12 +1391,12 @@ let equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
 let equal_type_predicate p1 p2 = Int.equal 0 (compare_type_predicate p1 p2)
 
 module Locl_subst = struct
-  type t = locl_ty SMap.t
+  type t = locl_ty S_map.t
 
   let rec apply_ty (ty : locl_ty) ~subst ~combine_reasons =
     match deref ty with
     | (reason_src, Tgeneric nm) ->
-      (match SMap.find_opt nm subst with
+      (match S_map.find_opt nm subst with
       | Some ty_subst ->
         map_reason ty_subst ~f:(fun reason_dest ->
             combine_reasons ~src:reason_src ~dest:reason_dest)
@@ -1528,7 +1528,7 @@ module Locl_subst = struct
     | Exact -> exact
     | Nonexact { cr_consts } ->
       let cr_consts =
-        SMap.map (apply_refined_const ~subst ~combine_reasons) cr_consts
+        S_map.map (apply_refined_const ~subst ~combine_reasons) cr_consts
       in
       Nonexact { cr_consts }
 
@@ -1547,7 +1547,7 @@ module Locl_subst = struct
 
   let apply ty ~subst ~combine_reasons =
     (* Avoid a pointless traversal *)
-    if SMap.is_empty subst then
+    if S_map.is_empty subst then
       ty
     else
       apply_ty ty ~subst ~combine_reasons
@@ -1712,7 +1712,7 @@ module Find_locl = struct
     match exact with
     | Exact -> None
     | Nonexact { cr_consts } ->
-      find_first_refined_const (SMap.bindings cr_consts) ~p
+      find_first_refined_const (S_map.bindings cr_consts) ~p
 
   and find_first_refined_const cr_consts ~p =
     match cr_consts with
@@ -1787,7 +1787,7 @@ module Transform_top_down_decl = struct
   and traverse_class_refinement { cr_consts } ~on_ty ~on_rc_bound ~ctx =
     {
       cr_consts =
-        SMap.map (traverse_refined_const ~on_ty ~on_rc_bound ~ctx) cr_consts;
+        S_map.map (traverse_refined_const ~on_ty ~on_rc_bound ~ctx) cr_consts;
     }
 
   and traverse_refined_const { rc_bound; rc_is_ctx } ~on_ty ~on_rc_bound ~ctx =

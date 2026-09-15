@@ -135,20 +135,20 @@ type destructure_tuple_entry = (ty, saved_env) Aast.destructure_tuple_entry
 type destructure_target = (ty, saved_env) Aast.destructure_target
 
 type by_names = {
-  fun_tasts: def Tast_with_dynamic.t SMap.t;
-  class_tasts: def Tast_with_dynamic.t SMap.t;
-  typedef_tasts: def SMap.t;
-  gconst_tasts: def SMap.t;
-  module_tasts: def SMap.t;
+  fun_tasts: def Tast_with_dynamic.t S_map.t;
+  class_tasts: def Tast_with_dynamic.t S_map.t;
+  typedef_tasts: def S_map.t;
+  gconst_tasts: def S_map.t;
+  module_tasts: def S_map.t;
 }
 
 let empty_by_names =
   {
-    fun_tasts = SMap.empty;
-    class_tasts = SMap.empty;
-    typedef_tasts = SMap.empty;
-    gconst_tasts = SMap.empty;
-    module_tasts = SMap.empty;
+    fun_tasts = S_map.empty;
+    class_tasts = S_map.empty;
+    typedef_tasts = S_map.empty;
+    gconst_tasts = S_map.empty;
+    module_tasts = S_map.empty;
   }
 
 let map_by_names (x : by_names) ~(f : def -> def) : by_names =
@@ -156,11 +156,11 @@ let map_by_names (x : by_names) ~(f : def -> def) : by_names =
     x
   in
   {
-    fun_tasts = SMap.map (Tast_with_dynamic.map ~f) fun_tasts;
-    class_tasts = SMap.map (Tast_with_dynamic.map ~f) class_tasts;
-    typedef_tasts = SMap.map f typedef_tasts;
-    gconst_tasts = SMap.map f gconst_tasts;
-    module_tasts = SMap.map f module_tasts;
+    fun_tasts = S_map.map (Tast_with_dynamic.map ~f) fun_tasts;
+    class_tasts = S_map.map (Tast_with_dynamic.map ~f) class_tasts;
+    typedef_tasts = S_map.map f typedef_tasts;
+    gconst_tasts = S_map.map f gconst_tasts;
+    module_tasts = S_map.map f module_tasts;
   }
 
 let program_by_names (program : program Tast_with_dynamic.t) : by_names =
@@ -168,9 +168,10 @@ let program_by_names (program : program Tast_with_dynamic.t) : by_names =
       ~(under_normal_assumptions : bool)
       name
       (def : def)
-      (map : def Tast_with_dynamic.t SMap.t) : def Tast_with_dynamic.t SMap.t =
+      (map : def Tast_with_dynamic.t S_map.t) : def Tast_with_dynamic.t S_map.t
+      =
     let entry =
-      match SMap.find_opt name map with
+      match S_map.find_opt name map with
       | None -> Tast_with_dynamic.mk_without_dynamic def
       | Some entry -> entry
     in
@@ -180,7 +181,7 @@ let program_by_names (program : program Tast_with_dynamic.t) : by_names =
       else
         { entry with Tast_with_dynamic.under_dynamic_assumptions = Some def }
     in
-    SMap.add name entry map
+    S_map.add name entry map
   in
   let program_by_names
       ~under_normal_assumptions (by_names : by_names) (program : program) :
@@ -202,17 +203,17 @@ let program_by_names (program : program Tast_with_dynamic.t) : by_names =
         | Typedef td ->
           {
             acc with
-            typedef_tasts = SMap.add (snd td.t_name) def acc.typedef_tasts;
+            typedef_tasts = S_map.add (snd td.t_name) def acc.typedef_tasts;
           }
         | Constant c ->
           {
             acc with
-            gconst_tasts = SMap.add (snd c.cst_name) def acc.gconst_tasts;
+            gconst_tasts = S_map.add (snd c.cst_name) def acc.gconst_tasts;
           }
         | Module m ->
           {
             acc with
-            module_tasts = SMap.add (snd m.md_name) def acc.module_tasts;
+            module_tasts = S_map.add (snd m.md_name) def acc.module_tasts;
           }
         | ClassAlias _
         | Stmt _
@@ -245,11 +246,13 @@ let program_by_names (program : program Tast_with_dynamic.t) : by_names =
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
       by_names) : def Tast_with_dynamic.t list =
-  SMap.values fun_tasts
-  @ SMap.values class_tasts
-  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values typedef_tasts)
-  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values gconst_tasts)
-  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values module_tasts)
+  S_map.values fun_tasts
+  @ S_map.values class_tasts
+  @ List.map
+      ~f:Tast_with_dynamic.mk_without_dynamic
+      (S_map.values typedef_tasts)
+  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (S_map.values gconst_tasts)
+  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (S_map.values module_tasts)
 
 let empty_saved_env tcopt : saved_env =
   {

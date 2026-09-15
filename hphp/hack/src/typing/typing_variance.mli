@@ -21,6 +21,6 @@ val get_positive_negative_generics :
   tracked:SSet.t ->
   is_mutable:bool ->
   Typing_env_types.env ->
-  Typing_reason.decl_t list SMap.t * Typing_reason.decl_t list SMap.t ->
+  Typing_reason.decl_t list S_map.t * Typing_reason.decl_t list S_map.t ->
   Typing_defs.decl_ty ->
-  Typing_reason.decl_t list SMap.t * Typing_reason.decl_t list SMap.t
+  Typing_reason.decl_t list S_map.t * Typing_reason.decl_t list S_map.t

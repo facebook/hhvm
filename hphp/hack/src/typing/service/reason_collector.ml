@@ -277,7 +277,7 @@ let of_collected_reasons (cnts : collected_reason list) =
 
 let is_enabled tcopt =
   Typechecker_options.log_levels tcopt
-  |> SMap.find_opt "reason_collector"
+  |> S_map.find_opt "reason_collector"
   |> Option.map ~f:(fun level -> level = 1)
   |> Option.value ~default:false
 

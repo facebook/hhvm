@@ -329,7 +329,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
     method on_class_refinement acc { cr_consts } =
-      SMap.fold
+      S_map.fold
         (fun _const_name { rc_bound; rc_is_ctx = _ } acc ->
           match rc_bound with
           | TRexact ty -> this#on_type acc ty

@@ -35,10 +35,10 @@ let check_inheritance_case
     (member_type : string)
     (class_id : Aast.sid)
     ((name, elt) : string * class_elt)
-    (acc : (string * class_elt) SMap.t) : (string * class_elt) SMap.t =
+    (acc : (string * class_elt) S_map.t) : (string * class_elt) S_map.t =
   let (p, cls_name) = class_id in
   let canonical_name = String.lowercase name in
-  (match SMap.find_opt canonical_name acc with
+  (match S_map.find_opt canonical_name acc with
   | Some (prev_name, prev_elt) when not (String.equal name prev_name) ->
     (match (elt.ce_origin, prev_elt.ce_origin) with
     (* If they are from the same class, there's already a parsing error *)
@@ -68,7 +68,7 @@ let check_inheritance_case
                  class2_pos = Lazy.force prev_elt.ce_pos;
                }))
   | _ -> ());
-  SMap.add canonical_name (name, elt) acc
+  S_map.add canonical_name (name, elt) acc
 
 let check_inheritance_cases
     env
@@ -78,10 +78,10 @@ let check_inheritance_cases
   (* We keep a map of canonical names for each class element
      and iterate through the list. If we ever see two members with
      the same canonical name, we raise an error. *)
-  let (_ : (string * class_elt) SMap.t) =
+  let (_ : (string * class_elt) S_map.t) =
     List.fold_right
       ~f:(check_inheritance_case env member_type name)
-      ~init:SMap.empty
+      ~init:S_map.empty
       class_elts
   in
   ()

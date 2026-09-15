@@ -23,7 +23,7 @@ external partition_and_fold_dir :
   Decl_parser_options.t ->
   int ->
   int ->
-  Decl_defs.decl_class_type SMap.t = "partition_and_fold_dir_ffi"
+  Decl_defs.decl_class_type S_map.t = "partition_and_fold_dir_ffi"
 
 external decls_equal :
   Decl_defs.decl_class_type -> Decl_defs.decl_class_type -> bool

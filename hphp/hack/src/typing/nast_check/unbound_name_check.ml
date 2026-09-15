@@ -21,9 +21,9 @@ open Hh_prelude
 type env = {
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant;
   ctx: Provider_context.t;
-  type_params: Aast.reify_kind SMap.t;
+  type_params: Aast.reify_kind S_map.t;
   (* Need some context to differentiate global consts and other Id's *)
-  seen_names: Pos.t SMap.t;
+  seen_names: Pos.t S_map.t;
   (* Contexts where typedefs are valid typenames *)
   class_id_allow_typedef: bool;
   hint_allow_typedef: bool;
@@ -147,7 +147,7 @@ let check_type_name
   if String.equal name Naming_special_names.Classes.cHH_BuiltinEnum then
     ()
   else
-    match SMap.find_opt name env.type_params with
+    match S_map.find_opt name env.type_params with
     | Some reified ->
       (* TODO: These throw typing errors instead of naming errors *)
       if not allow_generics then
@@ -218,7 +218,7 @@ let extend_type_params init paraml =
   List.fold_right
     ~init
     ~f:(fun { Aast.tp_name = (_, name); tp_reified; _ } acc ->
-      SMap.add name tp_reified acc)
+      S_map.add name tp_reified acc)
     paraml
 
 let handler ctx =
@@ -230,8 +230,8 @@ let handler ctx =
       {
         droot = Typing_deps.Dep.Fun "";
         ctx;
-        type_params = SMap.empty;
-        seen_names = SMap.empty;
+        type_params = S_map.empty;
+        seen_names = S_map.empty;
         class_id_allow_typedef = false;
         hint_allow_typedef = true;
         hint_context = Name_context.TypeNamespace;
@@ -242,7 +242,7 @@ let handler ctx =
         {
           env with
           droot = Typing_deps.Dep.Type (snd c.Aast.c_name);
-          type_params = extend_type_params SMap.empty c.Aast.c_tparams;
+          type_params = extend_type_params S_map.empty c.Aast.c_tparams;
         }
       in
       let custom_err_config = get_custom_error_config env in
@@ -254,7 +254,7 @@ let handler ctx =
         {
           env with
           droot = Typing_deps.Dep.Type (snd td.Aast.t_name);
-          type_params = extend_type_params SMap.empty td.Aast.t_tparams;
+          type_params = extend_type_params S_map.empty td.Aast.t_tparams;
         }
       in
       let custom_err_config = get_custom_error_config env in
@@ -312,11 +312,11 @@ let handler ctx =
       | Aast.(Call { func = (_, _, Aast.Id ((p, name) as id)); _ }) ->
         let custom_err_config = get_custom_error_config env in
         let () = check_fun_name env custom_err_config id in
-        { env with seen_names = SMap.add name p env.seen_names }
+        { env with seen_names = S_map.add name p env.seen_names }
       | Aast.Id ((p, name) as id) ->
         let custom_err_config = get_custom_error_config env in
         let () =
-          match SMap.find_opt name env.seen_names with
+          match S_map.find_opt name env.seen_names with
           | None -> check_const_name env custom_err_config id
           | Some pos when not @@ Pos.equal p pos ->
             check_const_name env custom_err_config id
@@ -341,7 +341,7 @@ let handler ctx =
         { env with class_id_allow_typedef = true }
       | Aast.Nameof _ -> { env with class_id_allow_typedef = true }
       | Aast.Obj_get (_, (_, _, Aast.Id (p, name)), _, _) ->
-        { env with seen_names = SMap.add name p env.seen_names }
+        { env with seen_names = S_map.add name p env.seen_names }
       | Aast.EnumClassLabel (Some cname, _) ->
         let allow_typedef = (* we might reconsider this ? *) false in
         let custom_err_config = get_custom_error_config env in
@@ -471,7 +471,7 @@ let handler ctx =
               hf_tparams
               ~init:env.type_params
               ~f:(fun acc Aast_defs.{ htp_name = (_, nm); _ } ->
-                SMap.add nm Aast_defs.Erased acc)
+                S_map.add nm Aast_defs.Erased acc)
           in
           { env with type_params }
         in

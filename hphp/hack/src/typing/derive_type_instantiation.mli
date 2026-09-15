@@ -9,7 +9,7 @@
 module Instantiation : sig
   type t = private {
     this: Typing_defs.locl_ty option;
-    subst: Typing_defs.locl_ty SMap.t;
+    subst: Typing_defs.locl_ty S_map.t;
   }
 
   val is_empty : t -> bool

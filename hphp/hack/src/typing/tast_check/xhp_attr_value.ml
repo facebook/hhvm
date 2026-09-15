@@ -20,7 +20,7 @@ let xhp_enum_attr_values (env : Tast_env.env) (cls : Cls.t) (attr_name : string)
   |> Option.bind ~f:(fun cls_name ->
          Decl_entry.to_option @@ Tast_env.get_class env cls_name)
   |> Option.bind ~f:(fun cls ->
-         SMap.find_opt attr_name (Cls.xhp_enum_values cls))
+         S_map.find_opt attr_name (Cls.xhp_enum_values cls))
 
 let split_attr_values (decl_values : Ast_defs.xhp_enum_value list) :
     int list * string list =

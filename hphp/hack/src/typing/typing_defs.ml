@@ -379,7 +379,7 @@ type expand_env = {
   type_expansions: Type_expansions.t;
   make_internal_opaque: bool;
   visibility_behavior: visibility_behavior;
-  substs: locl_ty SMap.t;
+  substs: locl_ty S_map.t;
   no_substs: SSet.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
@@ -394,7 +394,7 @@ let empty_expand_env =
     type_expansions = Type_expansions.empty;
     visibility_behavior = default_visibility_behaviour;
     make_internal_opaque = true;
-    substs = SMap.empty;
+    substs = S_map.empty;
     no_substs = SSet.empty;
     this_ty = mk (Reason.none, Tgeneric Naming_special_names.Typehints.this);
     on_error = None;

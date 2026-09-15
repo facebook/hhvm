@@ -37,4 +37,4 @@ type 'p classish_positions = {
 }
 
 (** Positional information for a collection of classes *)
-type 'p t = 'p classish_positions SMap.t
+type 'p t = 'p classish_positions S_map.t

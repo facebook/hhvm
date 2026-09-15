@@ -72,15 +72,15 @@ let collect_attrs env attrs =
 
 let check_attrs pos env sid attrs =
   let collect_with_ty =
-    collect_attrs_from_ty_sid env (fun (n, c) -> SMap.add n c)
+    collect_attrs_from_ty_sid env (fun (n, c) -> S_map.add n c)
   in
-  let required_attrs = collect_with_ty SMap.empty sid in
+  let required_attrs = collect_with_ty S_map.empty sid in
   let supplied_attrs = collect_attrs env attrs in
-  let missing_attrs = SSet.fold SMap.remove supplied_attrs required_attrs in
-  if SMap.is_empty missing_attrs then
+  let missing_attrs = SSet.fold S_map.remove supplied_attrs required_attrs in
+  if S_map.is_empty missing_attrs then
     ()
   else
-    SMap.iter
+    S_map.iter
       (fun attr origin_sid ->
         let attr_name = Utils.strip_xhp_ns attr in
         let ty_reason_msg =

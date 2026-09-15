@@ -62,31 +62,31 @@ let json_friendly_key (k : string) : string =
   |> Str.global_replace (Str.regexp "_+") "_"
 
 module Histogram = struct
-  type t = int SMap.t
+  type t = int S_map.t
 
   let add (v : string) (hist : t) : t =
-    match SMap.find_opt v hist with
-    | None -> SMap.add v 1 hist
-    | Some count -> SMap.add v (count + 1) hist
+    match S_map.find_opt v hist with
+    | None -> S_map.add v 1 hist
+    | Some count -> S_map.add v (count + 1) hist
 
-  let singleton (v : string) : t = SMap.singleton v 1
+  let singleton (v : string) : t = S_map.singleton v 1
 
   (** If there is only one value in the histogram, just output this value.
       Else if all values have cardinality one, output values as a list.
       Else output the histogram as a dict. *)
   let add_to_telemetry (key : string) (hist : t) (telemetry : Telemetry.t) :
       Telemetry.t =
-    if SMap.cardinal hist |> Int.equal 1 then
-      Telemetry.string_ ~key ~value:(SMap.choose hist |> fst) telemetry
-    else if SMap.for_all (fun _ -> Int.equal 1) hist then
+    if S_map.cardinal hist |> Int.equal 1 then
+      Telemetry.string_ ~key ~value:(S_map.choose hist |> fst) telemetry
+    else if S_map.for_all (fun _ -> Int.equal 1) hist then
       Telemetry.string_list
         ~key
-        ~value:(SMap.keys hist |> List.sort ~compare:String.compare)
+        ~value:(S_map.keys hist |> List.sort ~compare:String.compare)
         telemetry
     else
       let hist_as_telemetry =
         hist
-        |> SMap.bindings
+        |> S_map.bindings
         |> List.sort ~compare:(fun (k1, _) (k2, _) -> String.compare k1 k2)
         |> List.fold
              ~init:(Telemetry.create ())
@@ -96,15 +96,15 @@ module Histogram = struct
       Telemetry.object_ ~key ~value:hist_as_telemetry telemetry
 end
 
-(** Turns an assoc-list [(k,v),...] in an SMap. If there are multiple entries for a key
+(** Turns an assoc-list [(k,v),...] in an S_map. If there are multiple entries for a key
 and they're all the same then we'll keep it, k->v. If there are multiple entries for
 a key and any of them differ then we'll associate k with a histogram of values for v. *)
-let assoc_to_dict (keyvals : (string * string) list) : Histogram.t SMap.t =
+let assoc_to_dict (keyvals : (string * string) list) : Histogram.t S_map.t =
   (* first, turn it into a map {k -> [v1,v2,...]} for all values associated with a key *)
-  List.fold keyvals ~init:SMap.empty ~f:(fun acc (k, v) ->
-      match SMap.find_opt k acc with
-      | None -> SMap.add k (Histogram.singleton v) acc
-      | Some histogram -> SMap.add k (Histogram.add v histogram) acc)
+  List.fold keyvals ~init:S_map.empty ~f:(fun acc (k, v) ->
+      match S_map.find_opt k acc with
+      | None -> S_map.add k (Histogram.singleton v) acc
+      | Some histogram -> S_map.add k (Histogram.add v histogram) acc)
 
 let get_host_hw_telemetry () =
   (* this regexp will turn arbitrary ("key", "<number> <suffix>") into ("key__suffix", "<number>"),
@@ -121,7 +121,7 @@ let get_host_hw_telemetry () =
                (k, v))
       |> assoc_to_dict
     in
-    SMap.fold Histogram.add_to_telemetry dict (Telemetry.create ())
+    S_map.fold Histogram.add_to_telemetry dict (Telemetry.create ())
   in
   let sandcastle_capabilities =
     match

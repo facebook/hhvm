@@ -59,7 +59,7 @@ let raise_decl_not_found (path : Relative_path.t option) (name : string) : 'a =
  * `dc_substs` during inheritance. See Decl_inherit module.
  *)
 type subst_context = {
-  sc_subst: decl_ty SMap.t;
+  sc_subst: decl_ty S_map.t;
   sc_class_context: string;
   sc_from_req_extends: bool;
 }
@@ -125,16 +125,16 @@ type decl_class_type = {
   dc_name: string;
   dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;
-  dc_substs: subst_context SMap.t;
+  dc_substs: subst_context S_map.t;
       (** class name to the subst_context that must be applied to that class *)
-  dc_consts: class_const SMap.t;
-  dc_typeconsts: typeconst_type SMap.t;
-  dc_props: element SMap.t;
-  dc_sprops: element SMap.t;
-  dc_methods: element SMap.t;
-  dc_smethods: element SMap.t;
+  dc_consts: class_const S_map.t;
+  dc_typeconsts: typeconst_type S_map.t;
+  dc_props: element S_map.t;
+  dc_sprops: element S_map.t;
+  dc_methods: element S_map.t;
+  dc_smethods: element S_map.t;
   dc_construct: element option * consistent_kind;
-  dc_ancestors: decl_ty SMap.t;
+  dc_ancestors: decl_ty S_map.t;
   dc_support_dynamic_type: bool;
   dc_req_ancestors: requirement list;
       (** All the `require extends` and `require implements`,
@@ -153,7 +153,7 @@ type decl_class_type = {
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
-  dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  dc_xhp_enum_values: Ast_defs.xhp_enum_value list S_map.t;
   dc_xhp_marked_empty: bool;
   dc_enum_type: enum_type option;
   dc_decl_errors: decl_error list;

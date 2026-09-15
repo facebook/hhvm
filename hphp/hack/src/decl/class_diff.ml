@@ -110,12 +110,12 @@ module MembersChangeCategory = struct
       some_private_change = false;
     }
 
-  let of_member_change_map (changes : member_change SMap.t) : t option =
-    if SMap.is_empty changes then
+  let of_member_change_map (changes : member_change S_map.t) : t option =
+    if S_map.is_empty changes then
       None
     else
       Some
-        (SMap.fold
+        (S_map.fold
            (fun _ change acc ->
              match change with
              | Added -> { acc with some_added = true }
@@ -135,12 +135,12 @@ module MembersChangeCategory = struct
 end
 
 type member_diff = {
-  consts: member_change SMap.t;
-  typeconsts: member_change SMap.t;
-  props: member_change SMap.t;
-  sprops: member_change SMap.t;
-  methods: member_change SMap.t;
-  smethods: member_change SMap.t;
+  consts: member_change S_map.t;
+  typeconsts: member_change S_map.t;
+  props: member_change S_map.t;
+  sprops: member_change S_map.t;
+  methods: member_change S_map.t;
+  smethods: member_change S_map.t;
   constructor: constructor_change;
 }
 [@@deriving eq]
@@ -173,12 +173,12 @@ end
 
 let empty_member_diff =
   {
-    consts = SMap.empty;
-    typeconsts = SMap.empty;
-    props = SMap.empty;
-    sprops = SMap.empty;
-    smethods = SMap.empty;
-    methods = SMap.empty;
+    consts = S_map.empty;
+    typeconsts = S_map.empty;
+    props = S_map.empty;
+    sprops = S_map.empty;
+    smethods = S_map.empty;
+    methods = S_map.empty;
     constructor = None;
   }
 
@@ -191,7 +191,7 @@ let pp_member_diff fmt member_diff =
 
   let sep = ref false in
   let pp_smap_field name data =
-    if not (SMap.is_empty data) then (
+    if not (S_map.is_empty data) then (
       if !sep then
         Format.fprintf fmt ";@ "
       else (
@@ -199,7 +199,7 @@ let pp_member_diff fmt member_diff =
         sep := true
       );
       Format.fprintf fmt "@[%s =@ " name;
-      SMap.pp pp_member_change fmt data;
+      S_map.pp pp_member_change fmt data;
       Format.fprintf fmt "@]"
     )
   in
@@ -255,7 +255,7 @@ end
 
 module NamedItemsListChange = struct
   type 'change t = {
-    per_name_changes: 'change ValueChange.t SMap.t;
+    per_name_changes: 'change ValueChange.t S_map.t;
     order_change: bool;
   }
   [@@deriving eq, show { with_path = false }]
@@ -377,7 +377,7 @@ module ClassShellChangeCategory = struct
 
     let of_list_change_map
         { NamedItemsListChange.per_name_changes = changes; order_change } =
-      SMap.fold
+      S_map.fold
         (fun _ change acc ->
           match change with
           | ValueChange.Added -> { acc with some_added = true }

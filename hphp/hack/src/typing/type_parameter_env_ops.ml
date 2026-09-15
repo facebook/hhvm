@@ -106,7 +106,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   let (env, tpenv, substs) =
     List.fold
       tparams
-      ~init:(env, tpenv, SMap.empty)
+      ~init:(env, tpenv, S_map.empty)
       ~f:(fun (env, tpenv, substs) (p_opt, ty) ->
         let reason = get_reason ty in
         match p_opt with
@@ -130,20 +130,20 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
             match (tp.tp_variance, TySet.choose_opt equal_bounds) with
             | (_, Some bound) ->
               let tpenv = TPEnv.remove tpenv tparam_name in
-              let substs = SMap.add tparam_name bound substs in
+              let substs = S_map.add tparam_name bound substs in
               (tpenv, substs)
             | (Ast_defs.Covariant, _) ->
               let tpenv = TPEnv.remove tpenv tparam_name in
-              let substs = SMap.add tparam_name upper_bound substs in
+              let substs = S_map.add tparam_name upper_bound substs in
               (tpenv, substs)
             | (Ast_defs.Contravariant, _) ->
               let tpenv = TPEnv.remove tpenv tparam_name in
-              let substs = SMap.add tparam_name lower_bound substs in
+              let substs = S_map.add tparam_name lower_bound substs in
               (tpenv, substs)
             | _ ->
               (* TODO see comment at beginning of function *)
               let tparam_ty = mk (r, Tgeneric tparam_name) in
-              let substs = SMap.add tparam_name tparam_ty substs in
+              let substs = S_map.add tparam_name tparam_ty substs in
               (tpenv, substs)
           in
           (env, tpenv, substs))
@@ -158,7 +158,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
    *   Tb -> int
    *)
   let rec reduce substs tparam =
-    match SMap.find_opt tparam substs with
+    match S_map.find_opt tparam substs with
     | None -> (substs, None)
     | Some subst ->
       (match get_node subst with
@@ -169,7 +169,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
           match new_subst_opt with
           | None -> (substs, Some subst)
           | Some new_subst ->
-            let substs = SMap.add tparam new_subst substs in
+            let substs = S_map.add tparam new_subst substs in
             (substs, Some new_subst)
         end
       | _ -> (substs, Some subst))

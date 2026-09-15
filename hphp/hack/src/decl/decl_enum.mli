@@ -41,5 +41,5 @@ val rewrite_class :
   Typing_defs.enum_type option ->
   Typing_defs.decl_ty option ->
   get_ancestor:(string -> Typing_defs.decl_phase Typing_defs.ty option) ->
-  Typing_defs.class_const SMap.t ->
-  Typing_defs.class_const SMap.t
+  Typing_defs.class_const S_map.t ->
+  Typing_defs.class_const S_map.t

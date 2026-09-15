@@ -27,7 +27,7 @@ let select_logger_handlers ctx =
   let tco = Provider_context.get_tcopt ctx in
   let log_levels = Typechecker_options.log_levels tco in
   let add_handler handlers (key, handler) =
-    match SMap.find_opt key log_levels with
+    match S_map.find_opt key log_levels with
     | Some level when level > 0 -> handler ctx :: handlers
     | _ -> handlers
   in

@@ -75,7 +75,7 @@ let die str =
   exit 2
 
 let parse_options () =
-  let log_levels = ref SMap.empty in
+  let log_levels = ref S_map.empty in
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -135,7 +135,7 @@ let parse_options () =
            [
              Arg.String (( := ) log_key);
              Arg.Int
-               (fun level -> log_levels := SMap.add !log_key level !log_levels);
+               (fun level -> log_levels := S_map.add !log_key level !log_levels);
            ]),
         " Set the log level for a key" );
       ( "--auto-complete-manually-invoked",

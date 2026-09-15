@@ -202,7 +202,7 @@ let fold_repo
     rust_decl_map
     output_dir
     print_limit =
-  let rust_decls = SMap.bindings rust_decl_map in
+  let rust_decls = S_map.bindings rust_decl_map in
   measure_time "folding repo" @@ fun () ->
   let (num_correct, _num_checked) =
     Multi_worker.call

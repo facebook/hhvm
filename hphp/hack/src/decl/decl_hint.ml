@@ -316,7 +316,7 @@ and hint_ p env = function
        * already have *)
       List.fold
         members
-        ~init:{ cr_consts = SMap.empty }
+        ~init:{ cr_consts = S_map.empty }
         ~f:(fun { cr_consts } r ->
           let (id, rc) =
             match r with
@@ -341,7 +341,7 @@ and hint_ p env = function
                 { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx = false }
               )
           in
-          { cr_consts = SMap.add id rc cr_consts })
+          { cr_consts = S_map.add id rc cr_consts })
     in
     Trefinement (root_ty, class_ref)
   | Htuple { tup_required; tup_extra } ->

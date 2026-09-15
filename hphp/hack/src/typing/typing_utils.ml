@@ -820,7 +820,7 @@ let collect_enum_class_upper_bounds env name =
 
 let make_locl_subst_for_class_tparams classdef tyl =
   if List.is_empty tyl then
-    SMap.empty
+    S_map.empty
   else
     Decl_subst.make_locl (Cls.tparams classdef) tyl
 

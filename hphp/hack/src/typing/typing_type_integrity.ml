@@ -37,13 +37,13 @@ module Locl_Inst = struct
      * significant amount of CPU by avoiding recursively deconstructing the ty
      * data type.
      *)
-    if SMap.is_empty subst then
+    if S_map.is_empty subst then
       ty
     else
       match deref ty with
       | (r, Tgeneric x) ->
         let args = [] in
-        (match SMap.find_opt x subst with
+        (match S_map.find_opt x subst with
         | Some x_ty -> merge_hk_type r x x_ty args
         | None -> mk (r, Tgeneric x))
       | (r, ty) ->
@@ -84,7 +84,7 @@ module Locl_Inst = struct
         List.fold_left
           ~f:
             begin
-              (fun subst t -> SMap.remove (snd t.tp_name) subst)
+              (fun subst t -> S_map.remove (snd t.tp_name) subst)
             end
           ~init:subst
           tparams

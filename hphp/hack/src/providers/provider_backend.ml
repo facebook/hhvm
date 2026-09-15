@@ -209,30 +209,30 @@ module Reverse_naming_table_delta = struct
     | Deleted
 
   type t = {
-    consts: pos_or_deleted SMap.t ref;
-    funs: pos_or_deleted SMap.t ref;
-    types: pos_or_deleted SMap.t ref;
-    modules: pos_or_deleted SMap.t ref;
-    funs_canon_key: pos_or_deleted SMap.t ref;
-    types_canon_key: pos_or_deleted SMap.t ref;
+    consts: pos_or_deleted S_map.t ref;
+    funs: pos_or_deleted S_map.t ref;
+    types: pos_or_deleted S_map.t ref;
+    modules: pos_or_deleted S_map.t ref;
+    funs_canon_key: pos_or_deleted S_map.t ref;
+    types_canon_key: pos_or_deleted S_map.t ref;
   }
 
   let make () : t =
     {
-      consts = ref SMap.empty;
-      funs = ref SMap.empty;
-      types = ref SMap.empty;
-      modules = ref SMap.empty;
-      funs_canon_key = ref SMap.empty;
-      types_canon_key = ref SMap.empty;
+      consts = ref S_map.empty;
+      funs = ref S_map.empty;
+      types = ref S_map.empty;
+      modules = ref S_map.empty;
+      funs_canon_key = ref S_map.empty;
+      types_canon_key = ref S_map.empty;
     }
 
   let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
       Telemetry.t =
-    let consts = SMap.cardinal !(t.consts) in
-    let funs = SMap.cardinal !(t.funs) in
-    let types = SMap.cardinal !(t.types) in
-    let modules = SMap.cardinal !(t.modules) in
+    let consts = S_map.cardinal !(t.consts) in
+    let funs = S_map.cardinal !(t.funs) in
+    let types = S_map.cardinal !(t.types) in
+    let modules = S_map.cardinal !(t.modules) in
     if consts + funs + types + modules = 0 then
       telemetry
     else

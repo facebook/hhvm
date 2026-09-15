@@ -16,4 +16,4 @@ val callable :
   constraint_ list
 
 val program :
-  element_info -> Provider_context.t -> Tast.program -> constraint_ list SMap.t
+  element_info -> Provider_context.t -> Tast.program -> constraint_ list S_map.t

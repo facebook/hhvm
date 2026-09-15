@@ -40,9 +40,9 @@ module Log = struct
   let iset_imap_as_value map =
     Map
       (Tvid.Map.fold
-         (fun i vars m -> SMap.add (var_as_string i) (varset_as_value vars) m)
+         (fun i vars m -> S_map.add (var_as_string i) (varset_as_value vars) m)
          map
-         SMap.empty)
+         S_map.empty)
 
   let tyvar_occurrences_as_value = iset_imap_as_value
 

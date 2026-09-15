@@ -556,7 +556,7 @@ val get_tyvar_type_const : env -> Tvid.t -> pos_id -> (pos_id * locl_ty) option
 
 val set_tyvar_type_const : env -> Tvid.t -> pos_id -> locl_ty -> env
 
-val get_tyvar_type_consts : env -> Tvid.t -> (pos_id * locl_ty) SMap.t
+val get_tyvar_type_consts : env -> Tvid.t -> (pos_id * locl_ty) S_map.t
 
 val get_all_tyvars : env -> Tvid.t list
 

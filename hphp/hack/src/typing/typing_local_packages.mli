@@ -21,7 +21,7 @@ type loaded_package_info = {
 }
 
 (** Each package maps to its loaded package info *)
-type t = loaded_package_info SMap.t
+type t = loaded_package_info S_map.t
 
 val show : t -> string
 
@@ -34,9 +34,9 @@ val join : t -> t -> t
 val add :
   package_info:Package_info.t ->
   Pos.t ->
-  SMap.key ->
+  S_map.key ->
   local_package_requirement ->
-  loaded_package_info SMap.t ->
-  loaded_package_info SMap.t
+  loaded_package_info S_map.t ->
+  loaded_package_info S_map.t
 
 val sub : t -> t -> bool

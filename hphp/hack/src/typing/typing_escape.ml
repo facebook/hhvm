@@ -591,13 +591,13 @@ let remove_expr_dep_types_from_tpenv types env =
 
   (* Build substitution map: deleted name -> upper bound *)
   let subst =
-    List.fold_left types ~init:SMap.empty ~f:(fun acc name ->
+    List.fold_left types ~init:S_map.empty ~f:(fun acc name ->
         if Typing_defs.DependentKind.is_expr_dep_ty name then
           match
             TySet.elements
               (Type_parameter_env.get_upper_bounds pre_deletion_tpenv name)
           with
-          | [ub] -> SMap.add name ub acc
+          | [ub] -> S_map.add name ub acc
           | _ -> acc
         else
           acc)
@@ -623,7 +623,7 @@ let remove_expr_dep_types_from_tpenv types env =
 
   (* Substitute in remaining entries bounds *)
   let global_tpenv =
-    if SMap.is_empty subst then
+    if S_map.is_empty subst then
       global_tpenv
     else
       List.fold_left
@@ -650,7 +650,7 @@ let remove_expr_dep_types_from_tpenv types env =
   let env = Env.env_with_global_tpenv env global_tpenv in
 
   (* Substitute in solved tyvar solutions *)
-  if SMap.is_empty subst then
+  if S_map.is_empty subst then
     env
   else
     List.fold_left (Env.get_all_tyvars env) ~init:env ~f:(fun env tv ->
@@ -709,7 +709,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
 (********************************************************************)
 
 type snapshot = {
-  tpmap: (Pos_or_decl.t * Typing_kinding_defs.kind) SMap.t;
+  tpmap: (Pos_or_decl.t * Typing_kinding_defs.kind) S_map.t;
   nextid: Expression_id.t;
       (* nextid is used to detect if an expression-dependent type is fresh
          or not; we snapshot it at some time and all ids larger than the
@@ -760,7 +760,7 @@ let cleanup_expr_dep_types snap env result_ty =
 let snapshot_env env =
   let gtp = Type_parameter_env.get_tparams (Env.get_global_tpenv env) in
   let ltp = Type_parameter_env.get_tparams (Env.get_tpenv env) in
-  { tpmap = SMap.union gtp ltp; nextid = Env.make_expression_id env }
+  { tpmap = S_map.union gtp ltp; nextid = Env.make_expression_id env }
 
 let with_expr_dep_cleanup env f =
   let snap = snapshot_env env in
@@ -784,20 +784,20 @@ let escaping_from_snapshot snap env quants :
     Type_parameter_env.get_tparams (Env.get_global_tpenv env)
     |> Typing_continuations.Map.fold
          (fun _ c ->
-           SMap.union
+           S_map.union
              (Type_parameter_env.get_tparams c.Typing_per_cont_env.tpenv))
          (Typing_lenv.get_all_locals env)
-    |> SMap.fold (fun key _ acc -> SMap.remove key acc) snap.tpmap
-    |> SMap.filter (fun tp _ ->
+    |> S_map.fold (fun key _ acc -> S_map.remove key acc) snap.tpmap
+    |> S_map.filter (fun tp _ ->
            (not (is_global tp)) && not (is_old_dep_expr tp))
   in
   let tpmap =
-    List.fold_left quants ~init:tpmap ~f:(fun acc nm -> SMap.remove nm acc)
+    List.fold_left quants ~init:tpmap ~f:(fun acc nm -> S_map.remove nm acc)
   in
-  ( SMap.keys tpmap,
+  ( S_map.keys tpmap,
     function
     | Rtv_tparam name ->
-      Option.map (SMap.find_opt name tpmap) ~f:(fun (pos, tpi) ->
+      Option.map (S_map.find_opt name tpmap) ~f:(fun (pos, tpi) ->
           {
             pos;
             upper_bounds = tpi.Typing_kinding_defs.upper_bounds;

@@ -615,7 +615,7 @@ let equal_errors errors1 errors2 =
   let errors2 = Diagnostics.FinalizedErrorSet.of_list errors2 in
   Diagnostics.FinalizedErrorSet.equal errors1 errors2
 
-type diagnostic_errors = errors SMap.t [@@deriving eq, show]
+type diagnostic_errors = errors S_map.t [@@deriving eq, show]
 
 type 'a message_type =
   | Hello  (** Hello is the first message sent to the client by the server *)

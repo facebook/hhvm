@@ -28,7 +28,7 @@ type tyvar_constraints = {
   type_constants:
     (pos_id (* id of the type constant "T", containing its position. *)
     * locl_ty)
-    SMap.t;
+    S_map.t;
       (** Map associating a type to each type constant id of this variable.
           Whenever we localize "T1::T" in a constraint, we add a fresh type variable
           indexed by "T" in the type_constants of the type variable representing T1.
@@ -121,9 +121,9 @@ module Log = struct
     Map
       (Tvid.Map.fold
          (fun i tvinfo m ->
-           SMap.add (var_as_string i) (tyvar_info_as_value tvinfo) m)
+           S_map.add (var_as_string i) (tyvar_info_as_value tvinfo) m)
          tvenv
-         SMap.empty)
+         S_map.empty)
 
   let tyvars_stack_as_value (tyvars_stack : (Pos.t * Tvid.t list) list) =
     List
@@ -216,7 +216,7 @@ let empty_tyvar_constraints =
     upper_bounds = ITySet.empty;
     appears_covariantly = false;
     appears_contravariantly = false;
-    type_constants = SMap.empty;
+    type_constants = S_map.empty;
   }
 
 let empty_tyvar_info tyvar_pos rank =
@@ -666,15 +666,15 @@ let set_tyvar_appears_contravariantly env v =
 let get_tyvar_type_consts env var =
   match get_tyvar_constraints_opt env var with
   | Some cstr -> cstr.type_constants
-  | None -> SMap.empty
+  | None -> S_map.empty
 
 let get_tyvar_type_const env var (_, tyconstid) =
-  SMap.find_opt tyconstid (get_tyvar_type_consts env var)
+  S_map.find_opt tyconstid (get_tyvar_type_consts env var)
 
 let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let tvinfo = get_tyvar_constraints_exn env var in
   let type_constants =
-    SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
+    S_map.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
   in
   let env = set_tyvar_constraints env var { tvinfo with type_constants } in
   (* We don't want to solve such type variables too early, because of valid
@@ -835,8 +835,8 @@ module Size = struct
     |> List.fold ~init:0 ~f:( + )
 
   let type_constants_size env tconsts =
-    SMap.map (fun (_id, ty) -> ty_size env ty) tconsts |> fun m ->
-    SMap.fold (fun _ x y -> x + y) m 0
+    S_map.map (fun (_id, ty) -> ty_size env ty) tconsts |> fun m ->
+    S_map.fold (fun _ x y -> x + y) m 0
 
   let solving_info_size env solving_info =
     match solving_info with
@@ -916,7 +916,7 @@ let merge_constraints cstr1 cstr2 =
     type_constants =
       (* Type constants must already have been made equivalent, so picking any should be fine *)
       (* TODO: that might actually not be true during initial merging, but let's fix that later. *)
-      SMap.union tc1 tc2;
+      S_map.union tc1 tc2;
   }
 
 let solving_info_as_constraints sinfo =
@@ -928,7 +928,7 @@ let solving_info_as_constraints sinfo =
       upper_bounds = ITySet.singleton (LoclType ty);
       appears_covariantly = false;
       appears_contravariantly = false;
-      type_constants = SMap.empty;
+      type_constants = S_map.empty;
     }
 
 let merge_solving_infos sinfo1 sinfo2 =
@@ -1106,7 +1106,7 @@ let solving_info_carries_information = function
     || appears_covariantly
     || (not @@ ITySet.is_empty upper_bounds)
     || (not @@ ITySet.is_empty lower_bounds)
-    || (not @@ SMap.is_empty type_constants)
+    || (not @@ S_map.is_empty type_constants)
 
 let tyvar_info_carries_information tvinfo =
   let {
@@ -1220,7 +1220,7 @@ let force_lazy_values_tyvar_constraints (cstrs : tyvar_constraints) =
     lower_bounds = ITySet.force_lazy_values lower_bounds;
     upper_bounds = ITySet.force_lazy_values upper_bounds;
     type_constants =
-      SMap.map
+      S_map.map
         (fun (p, ty) -> (p, Type_force_lazy_values.locl_ty ty))
         type_constants;
   }

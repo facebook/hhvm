@@ -88,7 +88,7 @@ type variance =
 
 module Env = struct
   (** The set of type parameters which are in scope, with their variances. *)
-  type type_parameter_env = variance SMap.t
+  type type_parameter_env = variance S_map.t
 
   type t = {
     tpenv: type_parameter_env;
@@ -97,7 +97,7 @@ module Env = struct
   }
 
   let remove_type_parameter : t -> string -> t =
-   (fun env name -> { env with tpenv = SMap.remove name env.tpenv })
+   (fun env name -> { env with tpenv = S_map.remove name env.tpenv })
 end
 
 (*****************************************************************************)
@@ -233,7 +233,7 @@ let compose (pos, param_descr) from to_ =
 (*****************************************************************************)
 
 let get_tparam_variance env name =
-  match SMap.find_opt name env with
+  match S_map.find_opt name env with
   | None -> Vboth
   | Some x -> x
 
@@ -289,8 +289,8 @@ let get_class_variance env class_name =
   List.map tparams ~f:make_decl_tparam_variance
 
 let union (pos1, neg1) (pos2, neg2) =
-  ( SMap.union ~combine:(fun _ x y -> Some (x @ y)) pos1 pos2,
-    SMap.union ~combine:(fun _ x y -> Some (x @ y)) neg1 neg2 )
+  ( S_map.union ~combine:(fun _ x y -> Some (x @ y)) pos1 pos2,
+    S_map.union ~combine:(fun _ x y -> Some (x @ y)) neg1 neg2 )
 
 let flip (pos, neg) = (neg, pos)
 
@@ -298,13 +298,13 @@ let rec get_typarams_union ~tracked tenv acc (ty : decl_ty) =
   union acc (get_typarams ~tracked tenv ty)
 
 and get_typarams ~tracked tenv (ty : decl_ty) =
-  let empty = (SMap.empty, SMap.empty) in
+  let empty = (S_map.empty, S_map.empty) in
   let get_typarams_union = get_typarams_union ~tracked tenv in
   let get_typarams_list tyl =
     List.fold_left tyl ~init:empty ~f:get_typarams_union
   in
   let get_typarams = get_typarams ~tracked tenv in
-  let single id pos = (SMap.singleton id [pos], SMap.empty) in
+  let single id pos = (S_map.singleton id [pos], S_map.empty) in
   let rec get_typarams_variance_list acc variancel tyl =
     match (variancel, tyl) with
     | (variance :: variancel, ty :: tyl) ->
@@ -338,7 +338,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Taccess (ty, _) ->
     get_typarams ty
   | Trefinement (ty, rs) ->
-    SMap.fold
+    S_map.fold
       (fun _ { rc_bound; _ } acc ->
         union acc
         @@
@@ -513,13 +513,13 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
      *)
     let propagate_typarams_tparam acc tp =
       let acc =
-        if SMap.mem (snd tp.tp_name) (fst result) then
+        if S_map.mem (snd tp.tp_name) (fst result) then
           union acc (propagate_covariant_to_lower_bounds tp)
         else
           acc
       in
       let acc =
-        if SMap.mem (snd tp.tp_name) (snd result) then
+        if S_map.mem (snd tp.tp_name) (snd result) then
           union acc (propagate_contravariant_to_upper_bounds tp)
         else
           acc
@@ -1067,8 +1067,8 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
   let env =
     {
       Env.tpenv =
-        List.fold c_tparams ~init:SMap.empty ~f:(fun env tp ->
-            SMap.add (snd tp.Aast.tp_name) (get_declared_variance tp) env);
+        List.fold c_tparams ~init:S_map.empty ~f:(fun env tp ->
+            S_map.add (snd tp.Aast.tp_name) (get_declared_variance tp) env);
       enclosing_class = Some class_;
       env;
     }
@@ -1150,8 +1150,8 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
   let env =
     {
       Env.tpenv =
-        List.fold t_tparams ~init:SMap.empty ~f:(fun env tp ->
-            SMap.add (snd tp.Aast.tp_name) (get_declared_variance tp) env);
+        List.fold t_tparams ~init:S_map.empty ~f:(fun env tp ->
+            S_map.add (snd tp.Aast.tp_name) (get_declared_variance tp) env);
       enclosing_class = None;
       env;
     }

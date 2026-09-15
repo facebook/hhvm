@@ -10,7 +10,7 @@
     configuration is set once at startup and not changed after. *)
 
 type t = {
-  extern_types: string SMap.t;
+  extern_types: string S_map.t;
       (** The extern_types setting allows for the importing of types defined
           outside the set of modules to be oxidized. If our extern_types map has
           an entry mapping ["bar::Bar"] to ["foo::bar::Bar"], then instances of

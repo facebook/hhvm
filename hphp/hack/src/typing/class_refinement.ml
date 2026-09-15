@@ -10,13 +10,13 @@
 open Hh_prelude
 open Typing_defs
 
-let is_empty { cr_consts } = SMap.is_empty cr_consts
+let is_empty { cr_consts } = S_map.is_empty cr_consts
 
-let has_refined_const pos_id cr = SMap.mem (snd pos_id) cr.cr_consts
+let has_refined_const pos_id cr = S_map.mem (snd pos_id) cr.cr_consts
 
-let get_refined_const (_, id) cr = SMap.find_opt id cr.cr_consts
+let get_refined_const (_, id) cr = S_map.find_opt id cr.cr_consts
 
-let fold_refined_consts cr ~init:acc ~f = SMap.fold f cr.cr_consts acc
+let fold_refined_consts cr ~init:acc ~f = S_map.fold f cr.cr_consts acc
 
 let add_refined_const id tr cr =
   let combine (type a) (r1 : a refined_const) (r2 : a refined_const) =
@@ -32,7 +32,7 @@ let add_refined_const id tr cr =
     in
     { rc_bound; rc_is_ctx = r1.rc_is_ctx }
   in
-  { cr_consts = SMap.add ~combine id tr cr.cr_consts }
+  { cr_consts = S_map.add ~combine id tr cr.cr_consts }
 
 let map_refined_const (type a) f ({ rc_bound; rc_is_ctx } : a refined_const) =
   let rc_bound =
@@ -44,7 +44,7 @@ let map_refined_const (type a) f ({ rc_bound; rc_is_ctx } : a refined_const) =
   { rc_bound; rc_is_ctx }
 
 let map f { cr_consts = rcs } =
-  { cr_consts = SMap.map (map_refined_const f) rcs }
+  { cr_consts = S_map.map (map_refined_const f) rcs }
 
 let fold_map_refined_const
     (type ph acc)
@@ -66,7 +66,7 @@ let fold_map_refined_const
 
 let fold_map (f : 'acc -> decl_ty -> 'acc * decl_ty) acc { cr_consts = rcs } :
     'acc * decl_phase class_refinement =
-  let (acc, rcs) = SMap.map_env (fold_map_refined_const f) acc rcs in
+  let (acc, rcs) = S_map.map_env (fold_map_refined_const f) acc rcs in
   (acc, { cr_consts = rcs })
 
 let fold_refined_const { rc_bound; rc_is_ctx = _ } ~init:acc ~f =
@@ -78,7 +78,7 @@ let fold_refined_const { rc_bound; rc_is_ctx = _ } ~init:acc ~f =
     acc
 
 let fold { cr_consts = rcs } ~init:acc ~f =
-  SMap.fold (fun _ rc acc -> fold_refined_const rc ~init:acc ~f) rcs acc
+  S_map.fold (fun _ rc acc -> fold_refined_const rc ~init:acc ~f) rcs acc
 
 let iter f r = fold r ~init:() ~f:(fun () -> f)
 
@@ -96,6 +96,6 @@ let to_string ty_to_string cr =
       let kind = refined_const_kind_str rc in
       (kind ^ " " ^ name ^ " " ^ rc_to_string rc) :: acc
     in
-    SMap.fold f cr.cr_consts []
+    S_map.fold f cr.cr_consts []
   in
   "{" ^ String.concat ~sep:"; " members_list ^ "}"

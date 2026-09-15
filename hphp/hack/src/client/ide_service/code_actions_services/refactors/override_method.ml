@@ -87,8 +87,8 @@ let override_method_refactorings_at classish_positions ~cursor_line ~cursor_col
   in
   let inbetween_class =
     List.hd
-    @@ SMap.elements
-    @@ SMap.filter_map
+    @@ S_map.elements
+    @@ S_map.filter_map
          (fun _cls posl ->
            List.find posl ~f:(fun whitespace_range ->
                Pos.inside_one_based whitespace_range cursor_line cursor_col))

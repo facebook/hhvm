@@ -15,10 +15,10 @@ type mode =
 [@@deriving eq, hash, show, ord]
 
 type env = {
-  ns_ns_uses: string SMap.t; [@opaque]
-  ns_class_uses: string SMap.t; [@opaque]
-  ns_fun_uses: string SMap.t; [@opaque]
-  ns_const_uses: string SMap.t; [@opaque]
+  ns_ns_uses: string S_map.t; [@opaque]
+  ns_class_uses: string S_map.t; [@opaque]
+  ns_fun_uses: string S_map.t; [@opaque]
+  ns_const_uses: string S_map.t; [@opaque]
   ns_name: string option;
   ns_mode: mode;
   ns_disable_xhp_element_mangling: bool;
@@ -26,7 +26,7 @@ type env = {
 [@@deriving eq, hash, show, ord]
 
 let hh_autoimport_map_of_list ids =
-  List.map ids ~f:(fun id -> (id, "HH\\" ^ id)) |> SMap.of_list
+  List.map ids ~f:(fun id -> (id, "HH\\" ^ id)) |> S_map.of_list
 
 let default_class_uses = hh_autoimport_map_of_list Hh_autoimport.types
 
@@ -48,7 +48,7 @@ let empty_with_default : env =
   in
   let ns_disable_xhp_element_mangling = popt.disable_xhp_element_mangling in
   {
-    ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
+    ns_ns_uses = S_map.union (S_map.of_list auto_ns_map) default_ns_uses;
     ns_class_uses = default_class_uses;
     ns_fun_uses = default_fun_uses;
     ns_const_uses = default_const_uses;

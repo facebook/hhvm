@@ -16,11 +16,11 @@ module Dep = Typing_deps.Dep
 
 let diff_class_in_changed_file
     ~(enable_annotation_agnostic_decl_diffing : bool)
-    (old_classes : shallow_class option SMap.t)
-    (new_classes : shallow_class option SMap.t)
+    (old_classes : shallow_class option S_map.t)
+    (new_classes : shallow_class option S_map.t)
     (class_name : string) : Class_diff.t option =
-  let old_class_opt = SMap.find old_classes class_name in
-  let new_class_opt = SMap.find new_classes class_name in
+  let old_class_opt = S_map.find class_name old_classes in
+  let new_class_opt = S_map.find class_name new_classes in
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
     Shallow_class_diff.diff_class
@@ -54,8 +54,8 @@ let compute_class_diffs
     Old_shallow_classes_provider.get_old_batch ctx ~during_init kept
   in
   let new_classes =
-    SSet.fold kept ~init:SMap.empty ~f:(fun name acc ->
-        SMap.add acc ~key:name ~data:(Decl_provider.get_shallow_class ctx name))
+    SSet.fold kept ~init:S_map.empty ~f:(fun name acc ->
+        S_map.add name (Decl_provider.get_shallow_class ctx name) acc)
   in
   SSet.fold kept ~init:acc ~f:(fun cid acc ->
       let diff =

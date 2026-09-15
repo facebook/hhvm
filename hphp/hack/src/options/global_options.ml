@@ -115,7 +115,7 @@ type t = {
   tco_constraint_method_call: bool;
   code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: I_set.t;
-  log_levels: int SMap.t;
+  log_levels: int S_map.t;
   tco_fetch_remote_old_decls: bool;
   tco_only_fetch_remote_old_decl_during_init: bool;
   tco_disable_rust_provider_shallow_decl_invalidation: bool;
@@ -232,7 +232,7 @@ let default =
     tco_constraint_method_call = false;
     code_agnostic_fixme = false;
     allowed_fixme_codes_strict = I_set.empty;
-    log_levels = SMap.empty;
+    log_levels = S_map.empty;
     tco_fetch_remote_old_decls = true;
     tco_only_fetch_remote_old_decl_during_init = true;
     tco_disable_rust_provider_shallow_decl_invalidation = false;

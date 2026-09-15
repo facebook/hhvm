@@ -255,8 +255,8 @@ let bind env var (ty : locl_ty) =
   let proj_ty_err_opt =
     if TUtils.is_tyvar_error env ty then
       None
-    else if TUtils.is_nothing env ty && not (SMap.is_empty tconsts) then
-      let (_, ((proj_pos, tconst_name), _)) = SMap.choose tconsts
+    else if TUtils.is_nothing env ty && not (S_map.is_empty tconsts) then
+      let (_, ((proj_pos, tconst_name), _)) = S_map.choose tconsts
       and pos = Env.get_tyvar_pos env var in
       Some
         Typing_error.(
@@ -681,7 +681,7 @@ let solve_tyvar_wrt_variance env r var =
        *)
       if
         ITySet.is_empty lower_bounds
-        && not (SMap.is_empty (Env.get_tyvar_type_consts env var))
+        && not (S_map.is_empty (Env.get_tyvar_type_consts env var))
       then
         bind_to_upper_bound env r var upper_bounds
       else

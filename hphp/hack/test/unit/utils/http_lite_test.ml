@@ -41,32 +41,32 @@ let test_read_headers () =
 let test_parse_headers () =
   (* lowercase keys *)
   let actual1 = Http_lite.parse_headers_to_lowercase_map ["A:B"; "C:D"] in
-  let expected1 = SMap.(empty |> add "a" "B" |> add "c" "D") in
+  let expected1 = S_map.(empty |> add "a" "B" |> add "c" "D") in
   if actual1 <> expected1 then failwith "aB;cD";
 
   (* colons in values *)
   let actual2 = Http_lite.parse_headers_to_lowercase_map ["a:B:C"] in
-  let expected2 = SMap.(empty |> add "a" "B:C") in
+  let expected2 = S_map.(empty |> add "a" "B:C") in
   if actual2 <> expected2 then failwith "B:C";
 
   (* trim value not key *)
   let actual3 = Http_lite.parse_headers_to_lowercase_map ["a : b"] in
-  let expected3 = SMap.(empty |> add "a " "b") in
+  let expected3 = S_map.(empty |> add "a " "b") in
   if actual3 <> expected3 then failwith "trim value not key";
 
   (* duplicate keys *)
   let actual4 = Http_lite.parse_headers_to_lowercase_map ["a:1"; "a:2"] in
-  let expected4 = SMap.(empty |> add "a" "2") in
+  let expected4 = S_map.(empty |> add "a" "2") in
   if actual4 <> expected4 then failwith "duplicate values";
 
   (* empty *)
   let actual5 = Http_lite.parse_headers_to_lowercase_map [] in
-  let expected5 = SMap.(empty) in
+  let expected5 = S_map.(empty) in
   if actual5 <> expected5 then failwith "empty";
 
   (* malformed *)
   let actual6 = Http_lite.parse_headers_to_lowercase_map ["a"] in
-  let expected6 = SMap.(empty) in
+  let expected6 = S_map.(empty) in
   if actual6 <> expected6 then failwith "missing key";
   true
 

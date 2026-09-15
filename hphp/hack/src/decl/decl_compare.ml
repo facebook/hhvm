@@ -156,10 +156,10 @@ end
 (*****************************************************************************)
 module Class_diff = struct
   let smap_left s1 s2 =
-    SMap.fold
+    S_map.fold
       begin
         fun x ty1 diff ->
-          let ty2 = SMap.find_opt x s2 in
+          let ty2 = S_map.find_opt x s2 in
           match ty2 with
           | Some ty2 ->
             if Poly.( = ) ty1 ty2 then
@@ -210,7 +210,7 @@ module Class_elt_diff = struct
   let acc_diff is_unchanged xmap =
     let is_unchanged =
       match is_unchanged with
-      | `Unchanged when not @@ SMap.is_empty xmap -> `Changed
+      | `Unchanged when not @@ S_map.is_empty xmap -> `Changed
       | x -> x
     in
     is_unchanged
@@ -224,7 +224,7 @@ module Class_elt_diff = struct
       ~elts1
       ~elts2
       ~normalize =
-    SMap.merge
+    S_map.merge
       begin
         fun name elt1 elt2 ->
           let key = (cid, name) in
@@ -372,7 +372,7 @@ let add_module_fanout = add_fanout (fun id -> Dep.Module id)
 
 let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
   match
-    ( SMap.find fid old_funs,
+    ( S_map.find fid old_funs,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
         Rust_provider_backend.Decl.get_fun
@@ -417,7 +417,7 @@ let get_funs_deps ~ctx old_funs (funs : VersionedSSet.diff) =
 (*****************************************************************************)
 let get_type_deps ~ctx ~mode old_types tid (fanout_acc, old_types_missing) =
   match
-    ( SMap.find tid old_types,
+    ( S_map.find tid old_types,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
         Rust_provider_backend.Decl.get_typedef
@@ -457,7 +457,7 @@ let get_types_deps ~ctx old_types (types : VersionedSSet.diff) =
 (*****************************************************************************)
 let get_gconst_deps
     ~ctx ~mode old_gconsts cst_id (fanout_acc, old_gconsts_missing) =
-  let cst1 = SMap.find cst_id old_gconsts in
+  let cst1 = S_map.find cst_id old_gconsts in
   let cst2 =
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend backend ->
@@ -494,7 +494,7 @@ let get_gconsts_deps ~ctx old_gconsts gconsts =
 let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
     : Fanout.t * int =
   match
-    ( SMap.find mid old_modules,
+    ( S_map.find mid old_modules,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
         Rust_provider_backend.Decl.get_module

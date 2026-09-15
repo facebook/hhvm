@@ -681,7 +681,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
     let enum_values =
       match attr_origin with
       | Some cls -> Cls.xhp_enum_values cls
-      | None -> SMap.empty
+      | None -> S_map.empty
     in
 
     let add_enum_value_result xev =
@@ -711,7 +711,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
       add_res complete
     in
 
-    match SMap.find_opt (":" ^ attr_name) enum_values with
+    match S_map.find_opt (":" ^ attr_name) enum_values with
     | Some enum_values -> List.iter enum_values ~f:add_enum_value_result
     | None -> ()
   end
@@ -1480,7 +1480,7 @@ let autocomplete_builtin_attribute
     let prefix = strip_suffix stripped_name in
     (* Built-in attributes that match the prefix the user has typed. *)
     let possible_attrs =
-      SMap.filter
+      S_map.filter
         (fun name attr_info ->
           String.is_prefix name ~prefix
           && attr_info.UA.autocomplete
@@ -1490,7 +1490,7 @@ let autocomplete_builtin_attribute
     (* Sort by attribute name. This isn't necessary in the IDE, which
        does its own sorting, but helps tests. *)
     let sorted_attrs =
-      List.sort (SMap.elements possible_attrs) ~compare:(fun (x, _) (y, _) ->
+      List.sort (S_map.elements possible_attrs) ~compare:(fun (x, _) (y, _) ->
           String.compare x y)
       |> List.rev
     in

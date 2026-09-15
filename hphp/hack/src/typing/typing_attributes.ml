@@ -25,7 +25,7 @@ let check_implements
       Nast.user_attribute)
     (env : env) : env =
   let expr_kind =
-    match SMap.find_opt attr_interface SN.AttributeKinds.plain_english_map with
+    match S_map.find_opt attr_interface SN.AttributeKinds.plain_english_map with
     | Some ek -> ek
     | None -> "this expression"
     (* this case should never execute *)
@@ -36,7 +36,7 @@ let check_implements
   if String.is_prefix attr_name ~prefix:"__" then
     (* Check against builtins *)
     let check_attr map =
-      match SMap.find_opt attr_name map with
+      match S_map.find_opt attr_name map with
       | Some attr_info ->
         if
           not
@@ -61,7 +61,7 @@ let check_implements
         ()
       else
         let all_valid_user_attributes =
-          let bindings = SMap.bindings SN.UserAttributes.as_map in
+          let bindings = S_map.bindings SN.UserAttributes.as_map in
           let filtered_bindings =
             List.filter
               ~f:(fun (_, attr_info) ->

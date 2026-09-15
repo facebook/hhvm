@@ -10,7 +10,7 @@
 
 open Reordered_argument_collections
 open Integration_test_base_types
-module FileMap = SMap
+module FileMap = S_map
 module ErrorSet = SSet
 
 val in_daemon : (unit -> unit) -> unit
@@ -50,18 +50,18 @@ module Client : sig
   val setup_disk : env -> (string * string) list -> env
 
   val open_file :
-    env -> string -> env * Client_ide_message.diagnostic list SMap.t
+    env -> string -> env * Client_ide_message.diagnostic list S_map.t
 
   val close_file :
-    env -> string -> env * Client_ide_message.diagnostic list SMap.t
+    env -> string -> env * Client_ide_message.diagnostic list S_map.t
 
   val edit_file :
-    env -> string -> string -> env * Client_ide_message.diagnostic list SMap.t
+    env -> string -> string -> env * Client_ide_message.diagnostic list S_map.t
 
-  val assert_no_diagnostics : Client_ide_message.diagnostic list SMap.t -> unit
+  val assert_no_diagnostics : Client_ide_message.diagnostic list S_map.t -> unit
 
   val assert_diagnostics_string :
-    Client_ide_message.diagnostic list SMap.t -> string -> unit
+    Client_ide_message.diagnostic list S_map.t -> string -> unit
 end
 
 val doc :

@@ -13,7 +13,7 @@ val collect_legacy_decls : Provider_context.t -> SSet.t -> saved_legacy_decls
 
 val restore_legacy_decls : saved_legacy_decls -> int
 
-type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
+type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class S_map.t }
 [@@deriving show]
 
 val collect_shallow_decls :

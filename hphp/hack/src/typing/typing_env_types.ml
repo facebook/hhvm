@@ -41,7 +41,7 @@ type env = {
   checked: Tast.check_status;
   tracing_info: Decl_counters.tracing_info option;
   tpenv: Type_parameter_env.t;
-  log_levels: int SMap.t;
+  log_levels: int S_map.t;
   inference_env: Typing_inference_env.t;
   rank: int;
   check_rank: bool;
@@ -138,7 +138,7 @@ let empty ?origin ?(mode = File_info.Mstrict) ctx file ~droot =
   }
 
 let get_log_level env key =
-  Option.value (SMap.find_opt key env.log_levels) ~default:0
+  Option.value (S_map.find_opt key env.log_levels) ~default:0
 
 let next_cont_opt env =
   Typing_per_cont_env.get_cont_option

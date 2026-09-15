@@ -346,11 +346,11 @@ module Decl = struct
   external get_old_defs_ffi :
     t ->
     File_info.names ->
-    Shallow_decl_defs.class_decl option SMap.t
-    * Shallow_decl_defs.fun_decl option SMap.t
-    * Shallow_decl_defs.typedef_decl option SMap.t
-    * Shallow_decl_defs.const_decl option SMap.t
-    * Shallow_decl_defs.module_decl option SMap.t
+    Shallow_decl_defs.class_decl option S_map.t
+    * Shallow_decl_defs.fun_decl option S_map.t
+    * Shallow_decl_defs.typedef_decl option S_map.t
+    * Shallow_decl_defs.const_decl option S_map.t
+    * Shallow_decl_defs.module_decl option S_map.t
     = "hh_rust_provider_backend_get_old_defs"
 
   let clear_caches () =

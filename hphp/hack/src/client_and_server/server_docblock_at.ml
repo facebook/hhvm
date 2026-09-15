@@ -47,15 +47,15 @@ let get_docblock_for_member ctx class_info member_name =
 let render_ancestor_docblocks docblocks =
   let docblocks_to_ancestor =
     docblocks
-    |> List.fold ~init:SMap.empty ~f:(fun acc (class_name, docblock) ->
+    |> List.fold ~init:S_map.empty ~f:(fun acc (class_name, docblock) ->
            let existing_ancestors =
-             match SMap.find_opt docblock acc with
+             match S_map.find_opt docblock acc with
              | None -> []
              | Some lst -> lst
            in
-           SMap.add docblock (class_name :: existing_ancestors) acc)
+           S_map.add docblock (class_name :: existing_ancestors) acc)
   in
-  match SMap.elements docblocks_to_ancestor with
+  match S_map.elements docblocks_to_ancestor with
   | [] -> None
   | [(docblock, _)] -> Some docblock
   | docblock_ancestors_pairs ->

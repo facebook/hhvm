@@ -114,7 +114,7 @@ type t = {
       (** HH_FIXME should silence *any* error, not just the one specified by code *)
   allowed_fixme_codes_strict: I_set.t;
       (** Error codes for which we allow HH_FIXMEs in strict mode *)
-  log_levels: int SMap.t;  (** Initial hh_log_level settings *)
+  log_levels: int S_map.t;  (** Initial hh_log_level settings *)
   tco_fetch_remote_old_decls: bool;
       (** Fetch old decls from CAS instead of memcache/manifold *)
   tco_only_fetch_remote_old_decl_during_init: bool;
@@ -335,7 +335,7 @@ val set :
   ?tco_constraint_method_call:bool ->
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:I_set.t ->
-  ?log_levels:int SMap.t ->
+  ?log_levels:int S_map.t ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_only_fetch_remote_old_decl_during_init:bool ->
   ?tco_disable_rust_provider_shallow_decl_invalidation:bool ->

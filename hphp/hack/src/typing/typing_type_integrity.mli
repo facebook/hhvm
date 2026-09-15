@@ -2,7 +2,7 @@ open Typing_defs
 module KindDefs = Typing_kinding_defs
 
 module Locl_Inst : sig
-  val instantiate : locl_ty SMap.t -> locl_ty -> locl_ty
+  val instantiate : locl_ty S_map.t -> locl_ty -> locl_ty
 end
 
 (** Check that the given type is a well-formed. This includes recursively checking that whenever

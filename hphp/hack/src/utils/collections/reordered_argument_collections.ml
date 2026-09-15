@@ -122,9 +122,9 @@ end
 module type SMap_S = Reordered_argument_collections_sig.SMap_S
 
 module SMap = struct
-  include Reordered_argument_map (SMap)
+  include Reordered_argument_map (S_map)
 
-  let pp = SMap.pp
+  let pp = S_map.pp
 
-  let show = SMap.show
+  let show = S_map.show
 end

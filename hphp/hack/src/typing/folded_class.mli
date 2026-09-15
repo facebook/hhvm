@@ -77,7 +77,7 @@ val construct : t -> class_elt option * consistent_kind
 
 val enum_type : t -> enum_type option
 
-val xhp_enum_values : t -> Ast_defs.xhp_enum_value list SMap.t
+val xhp_enum_values : t -> Ast_defs.xhp_enum_value list S_map.t
 
 val xhp_marked_empty : t -> bool
 

@@ -130,15 +130,15 @@ let classish_positions_of_syntax ~(to_pos : int -> int -> Pos.t) (s : Syntax.t)
       (match classish_positions_for ~to_pos c.classish_body with
       | Some classish_positions ->
         let name = name_from_parts (namespace @ [text c.classish_name]) in
-        let positions = SMap.add name classish_positions positions in
+        let positions = S_map.add name classish_positions positions in
         (positions, namespace)
       | _ -> acc)
     | _ -> acc
   in
 
-  fst (aux (SMap.empty, []) s)
+  fst (aux (S_map.empty, []) s)
 
-let empty = SMap.empty
+let empty = S_map.empty
 
 let map_classish_positions ~f (classish_positions : 'pos classish_positions) =
   let {
@@ -156,7 +156,7 @@ let map_classish_positions ~f (classish_positions : 'pos classish_positions) =
     classish_body_elements = List.map ~f classish_body_elements;
   }
 
-let map ~f (t : _ t) = SMap.map (map_classish_positions ~f) t
+let map ~f (t : _ t) = S_map.map (map_classish_positions ~f) t
 
 let extract
     (s : Syntax.t)
@@ -178,7 +178,7 @@ let map_pos ~f = function
     p
 
 let find pos t =
-  let map_class class_name f = SMap.find_opt class_name t |> Option.map ~f in
+  let map_class class_name f = S_map.find_opt class_name t |> Option.map ~f in
   match pos with
   | Precomputed pos -> Some pos
   | Classish_start_of_body class_name ->
@@ -188,7 +188,7 @@ let find pos t =
   | Classish_closing_brace class_name ->
     map_class class_name @@ fun c -> c.classish_closing_brace
 
-let inbetween_body_element_positions t : Pos.t list SMap.t =
+let inbetween_body_element_positions t : Pos.t list S_map.t =
   let inbetween_positions_for (cp : 'a Pos.pos classish_positions) :
       'a Pos.pos list =
     let classish_body_elements =
@@ -214,4 +214,4 @@ let inbetween_body_element_positions t : Pos.t list SMap.t =
          (Pos.shrink_to_start cp.classish_end_of_body)
       :: posl)
   in
-  SMap.map inbetween_positions_for t
+  S_map.map inbetween_positions_for t

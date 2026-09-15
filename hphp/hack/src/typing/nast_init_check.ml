@@ -67,10 +67,10 @@ let lookup_props env class_name props =
             |> Option.bind ~f:(fun ce ->
                    Some (Lazy.force ce.Typing_defs.ce_type))
         in
-        SMap.add name ty_opt map
+        S_map.add name ty_opt map
     end
     props
-    SMap.empty
+    S_map.empty
 
 (* If a type is missing, nullable, or dynamic, initialization is not required *)
 let type_does_not_require_init env ty_opt =
@@ -110,8 +110,8 @@ exception InitReturn of S.t
 
 let filter_props_by_type env cls props =
   lookup_props env cls props
-  |> SMap.filter (fun _ ty -> not (type_does_not_require_init env ty))
-  |> SMap.keys
+  |> S_map.filter (fun _ ty -> not (type_does_not_require_init env ty))
+  |> S_map.keys
   |> SSet.of_list
 
 (* Module initializing the environment
@@ -135,8 +135,8 @@ module Env = struct
     | Todo of func_body
 
   type t = {
-    methods: method_status ref SMap.t;
-    props: Typing_defs.decl_ty option SMap.t;
+    methods: method_status ref S_map.t;
+    props: Typing_defs.decl_ty option S_map.t;
     tenv: Typing_env_types.env;
     parent_cstr_props: SSet.t;
     init_not_required_props: SSet.t;
@@ -144,7 +144,7 @@ module Env = struct
 
   let rec make tenv c =
     let (_, _, methods) = split_methods c.c_methods in
-    let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
+    let methods = List.fold_left ~f:method_ ~init:S_map.empty methods in
 
     (* In Zoncolan, we don't support eviction. We don't support lazy reparsing of
        shallow decls. If we try and the shallow decl is not available, we'll crash
@@ -164,7 +164,7 @@ module Env = struct
     in
     let get_class_add_dep env x =
       Decl_env.get_class_and_add_dep
-        ~cache:SMap.empty
+        ~cache:S_map.empty
         ~shmem_fallback:true
         ~fallback
         env
@@ -184,12 +184,12 @@ module Env = struct
     let private_props = lookup_props tenv (snd c.c_name) private_props in
     (if Ast_defs.is_c_abstract c.c_kind && not has_own_cstr then
       let uninit =
-        SMap.filter
+        S_map.filter
           (fun _ ty_opt -> not (type_does_not_require_init tenv ty_opt))
           private_props
       in
-      if not @@ SMap.is_empty uninit then
-        let prop_names = SMap.bindings uninit |> List.map ~f:fst
+      if not @@ S_map.is_empty uninit then
+        let prop_names = S_map.bindings uninit |> List.map ~f:fst
         and (pos, class_name) = c.c_name in
         Diagnostics.add_diagnostic
           Nast_check_error.(
@@ -220,7 +220,7 @@ module Env = struct
       |> add_parent_props
       |> add_parent
       |> lookup_props tenv (snd c.c_name)
-      |> SMap.filter (fun _ ty_opt ->
+      |> S_map.filter (fun _ ty_opt ->
              not (type_does_not_require_init tenv ty_opt))
     in
     { methods; props; parent_cstr_props; tenv; init_not_required_props }
@@ -236,10 +236,10 @@ module Env = struct
       acc
     else
       let name = snd m.m_name in
-      let acc = SMap.add name (ref (Todo m.m_body)) acc in
+      let acc = S_map.add name (ref (Todo m.m_body)) acc in
       acc
 
-  let get_method env m = SMap.find_opt m env.methods
+  let get_method env m = S_map.find_opt m env.methods
 end
 
 open Env
@@ -483,10 +483,10 @@ and block env acc l =
     raise (InitReturn acc_before_block)
 
 and are_all_init env set =
-  SMap.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
+  S_map.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
 
 and check_all_init pos env acc =
-  SMap.iter
+  S_map.iter
     begin
       fun prop_name _ ->
         if not (S.mem prop_name acc) then
@@ -522,7 +522,7 @@ and expr_ env acc p e =
     acc
   | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, Is_prop) ->
     if
-      SMap.mem vx env.props
+      S_map.mem vx env.props
       && (not (S.mem vx acc))
       && not (SSet.mem vx env.init_not_required_props)
     then (
@@ -757,19 +757,19 @@ let class_ tenv c =
     let inits = constructor env c_constructor in
     let check_inits inits =
       let uninit_props =
-        SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
+        S_map.filter (fun k _ -> not (SSet.mem k inits)) env.props
       in
-      if not (SMap.is_empty uninit_props) then
-        if SMap.mem DICheck.parent_init_prop uninit_props then
+      if not (S_map.is_empty uninit_props) then
+        if S_map.mem DICheck.parent_init_prop uninit_props then
           Diagnostics.add_diagnostic
             Nast_check_error.(to_user_diagnostic @@ No_construct_parent p)
         else
           let class_uninit_props =
-            SMap.filter
+            S_map.filter
               (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
               uninit_props
           in
-          if (not (SMap.is_empty class_uninit_props)) && not is_hhi then
+          if (not (S_map.is_empty class_uninit_props)) && not is_hhi then
             Diagnostics.add_diagnostic
               Nast_check_error.(
                 to_user_diagnostic
@@ -778,7 +778,7 @@ let class_ tenv c =
                        pos = p;
                        class_name = snd c.c_name;
                        props =
-                         SMap.bindings class_uninit_props
+                         S_map.bindings class_uninit_props
                          |> List.map ~f:(fun (name, _) ->
                                 let pos =
                                   class_prop_pos (snd c.c_name) name tenv

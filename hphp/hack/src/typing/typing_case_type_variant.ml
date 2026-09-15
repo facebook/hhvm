@@ -79,7 +79,7 @@ let get_variant_tys env name ty_args :
               empty_expand_env with
               substs =
                 (if List.is_empty ty_args then
-                  SMap.empty
+                  S_map.empty
                 else
                   Decl_subst.make_locl td_tparams ty_args);
             }

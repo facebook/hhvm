@@ -13,7 +13,7 @@ type summary = {
 [@@deriving yojson_of]
 
 type t = {
-  legacy_refinements: summary SMap.t;
+  legacy_refinements: summary S_map.t;
   new_refinements: int;
   total_refinements: int;
 }

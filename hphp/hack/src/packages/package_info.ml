@@ -8,23 +8,24 @@
 open Hh_prelude
 
 type t = {
-  existing_packages: Package.t SMap.t;
+  existing_packages: Package.t S_map.t;
   include_path_to_package_map: (string * Package.t) list;
 }
 [@@deriving eq, show]
 
-let empty = { existing_packages = SMap.empty; include_path_to_package_map = [] }
+let empty =
+  { existing_packages = S_map.empty; include_path_to_package_map = [] }
 
 let log_package_info (info : t) : unit =
   let package_info =
-    SMap.fold
+    S_map.fold
       (fun _ p acc -> Package.show_package p ^ acc)
       info.existing_packages
       ""
   in
   Hh_logger.log
     "*** Package info: %s\n%s"
-    (if SMap.is_empty info.existing_packages then
+    (if S_map.is_empty info.existing_packages then
       "empty"
     else
       "")
@@ -74,13 +75,13 @@ let split_member_name (pkg : string) : (string * string) option =
   | _ -> None
 
 let get_package (info : t) (pkg : string) : Package.t option =
-  match SMap.find_opt pkg info.existing_packages with
+  match S_map.find_opt pkg info.existing_packages with
   | Some p -> Some p
   | None ->
     (* Not declared directly -- it may be a member [F.D] of a declared family. *)
     (match split_member_name pkg with
     | Some (family, member) ->
-      (match SMap.find_opt family info.existing_packages with
+      (match S_map.find_opt family info.existing_packages with
       | Some f when f.Package.is_implicit -> Some (synthesize_member f member)
       | _ -> None)
     | None -> None)
@@ -90,9 +91,9 @@ let package_exists (info : t) (pkg : string) : bool =
 
 let from_packages (packages : Package.t list) : t =
   let existing_packages =
-    List.fold packages ~init:SMap.empty ~f:(fun acc pkg ->
+    List.fold packages ~init:S_map.empty ~f:(fun acc pkg ->
         let pkg_name = Package.get_package_name pkg in
-        SMap.add pkg_name pkg acc)
+        S_map.add pkg_name pkg acc)
   in
 
   let include_path_to_package_map : (string * Package.t) list =

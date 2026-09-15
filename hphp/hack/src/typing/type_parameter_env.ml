@@ -33,7 +33,7 @@ let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
 type t = {
-  tparams: ((Pos_or_decl.t[@hash.ignore]) * tparam_info) SMap.t;
+  tparams: ((Pos_or_decl.t[@hash.ignore]) * tparam_info) S_map.t;
       (** The position indicates where the type parameter was defined.
           It may be Pos.none if the type parameter denotes a fresh type variable
           (i.e., without a source location that defines it) *)
@@ -42,42 +42,42 @@ type t = {
 [@@deriving hash, show { with_path = false }]
 
 let bindings { tparams; _ } =
-  List.map ~f:(fun (k, (_, v)) -> (k, v)) (SMap.bindings tparams)
+  List.map ~f:(fun (k, (_, v)) -> (k, v)) (S_map.bindings tparams)
 
-let empty = { tparams = SMap.empty; consistent = true }
+let empty = { tparams = S_map.empty; consistent = true }
 
-let mem name tpenv = SMap.mem name tpenv.tparams
+let mem name tpenv = S_map.mem name tpenv.tparams
 
-let get_with_pos name tpenv = SMap.find_opt name tpenv.tparams
+let get_with_pos name tpenv = S_map.find_opt name tpenv.tparams
 
 let get name tpenv = Option.map (get_with_pos name tpenv) ~f:snd
 
 let get_tparams tpenv = tpenv.tparams
 
 let add ~def_pos name tpinfo tpenv =
-  { tpenv with tparams = SMap.add name (def_pos, tpinfo) tpenv.tparams }
+  { tpenv with tparams = S_map.add name (def_pos, tpinfo) tpenv.tparams }
 
 let union tpenv1 tpenv2 =
   {
-    tparams = SMap.union tpenv1.tparams tpenv2.tparams;
+    tparams = S_map.union tpenv1.tparams tpenv2.tparams;
     consistent = tpenv1.consistent && tpenv2.consistent;
   }
 
 let size tpenv =
-  SMap.fold
+  S_map.fold
     (fun _ (_, tpinfo) count -> tparam_info_size tpinfo + count)
     tpenv.tparams
     0
 
 let fold f tpenv accu =
-  SMap.fold
+  S_map.fold
     (fun name (_, tparam_info) acc -> f name tparam_info acc)
     tpenv.tparams
     accu
 
 let merge_env env tpenv1 tpenv2 ~combine =
   let (env, tparams) =
-    SMap.merge_env env tpenv1.tparams tpenv2.tparams ~combine
+    S_map.merge_env env tpenv1.tparams tpenv2.tparams ~combine
   in
   (env, { tparams; consistent = tpenv1.consistent || tpenv2.consistent })
 
@@ -121,7 +121,7 @@ let get_rank tpenv name =
   | None -> 0
   | Some { rank; _ } -> rank
 
-let get_tparam_names tpenv = SMap.keys tpenv.tparams
+let get_tparam_names tpenv = S_map.keys tpenv.tparams
 
 let is_consistent tpenv = tpenv.consistent
 
@@ -305,7 +305,7 @@ let remove tpenv name =
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_lower_bounds_of upper_bounds tpenv in
-  { tpenv with tparams = SMap.remove name tpenv.tparams }
+  { tpenv with tparams = S_map.remove name tpenv.tparams }
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
@@ -374,7 +374,7 @@ let force_lazy_values (env : t) =
   let { tparams; consistent } = env in
   {
     tparams =
-      SMap.map
+      S_map.map
         (fun (p, info) -> (p, force_lazy_values_tparam_info info))
         tparams;
     consistent;
@@ -391,5 +391,5 @@ let map f (env : t) =
   {
     env with
     tparams =
-      SMap.map (fun (p, info) -> (p, map_over_tparam_info f info)) env.tparams;
+      S_map.map (fun (p, info) -> (p, map_over_tparam_info f info)) env.tparams;
   }

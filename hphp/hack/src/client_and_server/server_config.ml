@@ -156,7 +156,7 @@ let config_experimental_stx_features config =
         | `Assoc pairs -> pairs
         | _ -> failwith "expected JSON object"
       in
-      SMap.of_list
+      S_map.of_list
         (List.map pairs ~f:Experimental_features.parse_experimental_feature))
 
 let process_migration_flags sl =
@@ -296,7 +296,7 @@ let convert_log_levels_to_map map =
     | `Assoc pairs -> pairs
     | _ -> failwith "expected JSON object"
   in
-  List.map ~f:extract_log_level pairs |> SMap.of_list
+  List.map ~f:extract_log_level pairs |> S_map.of_list
 
 let prepare_log_levels config =
   Option.map

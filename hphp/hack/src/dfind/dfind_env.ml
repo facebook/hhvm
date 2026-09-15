@@ -51,7 +51,7 @@ type t = {
   (* The set of new files (files created during an event) *)
   mutable new_files: SSet.t;
   (* The directories (and the files they contain) *)
-  mutable dirs: SSet.t SMap.t;
+  mutable dirs: SSet.t S_map.t;
 }
 
 (*****************************************************************************)
@@ -66,5 +66,5 @@ let make roots =
     fsnotify;
     files = TimeFiles.empty;
     new_files = SSet.empty;
-    dirs = SMap.empty;
+    dirs = S_map.empty;
   }

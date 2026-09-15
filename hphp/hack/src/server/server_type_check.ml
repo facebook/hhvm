@@ -37,19 +37,23 @@ let print_defs prefix defs =
   List.iter defs ~f:(fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)
 
 let print_defs_per_file_pos defs_per_file_pos =
-  SMap.iter defs_per_file_pos ~f:(fun x (funs, classes) ->
+  S_map.iter
+    (fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
       print_defs "Fun" funs;
-      print_defs "Class" classes);
+      print_defs "Class" classes)
+    defs_per_file_pos;
   Printf.printf "\n";
   Out_channel.flush stdout;
   ()
 
 let print_fast defs_per_file =
-  SMap.iter defs_per_file ~f:(fun x (funs, classes) ->
+  S_map.iter
+    (fun x (funs, classes) ->
       Printf.printf "File: %s\n" x;
       SSet.iter funs ~f:(Printf.printf "  Fun %s\n");
-      SSet.iter classes ~f:(Printf.printf "  Class %s\n"));
+      SSet.iter classes ~f:(Printf.printf "  Class %s\n"))
+    defs_per_file;
   Printf.printf "\n";
   Out_channel.flush stdout;
   ()

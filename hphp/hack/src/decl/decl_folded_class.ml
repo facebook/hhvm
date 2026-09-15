@@ -169,7 +169,7 @@ let add_grand_parents_or_traits
 let get_class_parent_or_trait
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    (parent_cache : Decl_store.class_entries SMap.t)
+    (parent_cache : Decl_store.class_entries S_map.t)
     ((parents, pass, decl_errors) :
       SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
     (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * _ * decl_error list
@@ -260,8 +260,8 @@ let synthesize_typeconst_defaults
     (k : string)
     (tc : Typing_defs.typeconst_type)
     ((typeconsts, consts) :
-      Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t) :
-    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
+      Typing_defs.typeconst_type S_map.t * Typing_defs.class_const S_map.t) :
+    Typing_defs.typeconst_type S_map.t * Typing_defs.class_const S_map.t =
   match tc.ttc_kind with
   | TCAbstract { atc_default = Some default; _ } ->
     let concrete =
@@ -271,12 +271,12 @@ let synthesize_typeconst_defaults
         ttc_concretized = true;
       }
     in
-    let typeconsts = SMap.add k concrete typeconsts in
+    let typeconsts = S_map.add k concrete typeconsts in
     (* OCaml 4.06 has an update method that makes this operation much more ergonomic *)
-    let constant = SMap.find_opt k consts in
+    let constant = S_map.find_opt k consts in
     let consts =
       Option.value_map constant ~default:consts ~f:(fun c ->
-          SMap.add k { c with cc_abstract = CCConcrete } consts)
+          S_map.add k { c with cc_abstract = CCConcrete } consts)
     in
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
@@ -320,7 +320,7 @@ let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
 
 let get_instantiated_ancestors_and_self
     (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
-    Typing_defs.decl_ty SMap.t =
+    Typing_defs.decl_ty S_map.t =
   let (_r, (_p, class_name), paraml) = Decl_utils.unwrap_class_type ht in
   let class_ =
     Decl_env.get_class_and_add_dep
@@ -333,13 +333,13 @@ let get_instantiated_ancestors_and_self
   match class_ with
   | None ->
     (* The class lives in PHP land *)
-    SMap.singleton class_name ht
+    S_map.singleton class_name ht
   | Some class_ ->
     let subst = Inst.make_subst class_.dc_tparams paraml in
     let instantiated_ancestors =
-      SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
+      S_map.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
     in
-    SMap.add class_name ht instantiated_ancestors
+    S_map.add class_name ht instantiated_ancestors
 
 let visibility
     (class_id : string)
@@ -438,9 +438,9 @@ let constructor_decl_eager
 
 let class_const_fold
     (c : Shallow_decl_defs.shallow_class)
-    (acc : Typing_defs.class_const SMap.t)
+    (acc : Typing_defs.class_const S_map.t)
     (scc : Shallow_decl_defs.shallow_class_const) :
-    Typing_defs.class_const SMap.t =
+    Typing_defs.class_const S_map.t =
   let c_name = snd c.sc_name in
   let cc =
     {
@@ -453,7 +453,7 @@ let class_const_fold
       cc_value = scc.scc_const_value;
     }
   in
-  let acc = SMap.add (snd scc.scc_name) cc acc in
+  let acc = S_map.add (snd scc.scc_name) cc acc in
   acc
 
 (* Every class, interface, and trait implicitly defines a ::class to
@@ -501,9 +501,9 @@ let build_prop_sprop_ty
 let prop_decl_eager
     ~(ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) S_map.t)
     (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+    (Decl_defs.element * Typing_defs.decl_ty option) S_map.t =
   let elt_origin = snd c.sc_name in
   let ty =
     build_prop_sprop_ty
@@ -541,15 +541,15 @@ let prop_decl_eager
       elt_package_requirement = None;
     }
   in
-  let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
+  let acc = S_map.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
 
 let static_prop_decl_eager
     ~(ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) S_map.t)
     (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+    (Decl_defs.element * Typing_defs.decl_ty option) S_map.t =
   let elt_origin = snd c.sc_name in
   let ty =
     build_prop_sprop_ty ~ctx ~this_class:(Some c) ~is_static:true ~elt_origin sp
@@ -582,7 +582,7 @@ let static_prop_decl_eager
       elt_package_requirement = None;
     }
   in
-  let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
+  let acc = S_map.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
 
 (* each concrete type constant T = <sometype> implicitly defines a
@@ -636,9 +636,9 @@ let maybe_add_supportdyn_bound ctx p kind =
 let typeconst_fold
     (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
+    (acc : Typing_defs.typeconst_type S_map.t * Typing_defs.class_const S_map.t)
     (stc : Shallow_decl_defs.shallow_typeconst) :
-    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
+    Typing_defs.typeconst_type S_map.t * Typing_defs.class_const S_map.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
   | Ast_defs.Cenum -> acc
@@ -649,8 +649,8 @@ let typeconst_fold
     let name = snd stc.stc_name in
     let c_name = snd c.sc_name in
     let ts = typeconst_structure c stc in
-    let consts = SMap.add name ts consts in
-    let ptc_opt = SMap.find_opt name typeconsts in
+    let consts = S_map.add name ts consts in
+    let ptc_opt = S_map.find_opt name typeconsts in
     let enforceable =
       (* Without the positions, this is a simple OR, but this way allows us to
        * report the position of the <<__Enforceable>> attribute to the user *)
@@ -683,7 +683,7 @@ let typeconst_fold
         ttc_is_ctx = stc.stc_is_ctx;
       }
     in
-    let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
+    let typeconsts = S_map.add (snd stc.stc_name) tc typeconsts in
     (typeconsts, consts)
 
 let build_method_fun_elt
@@ -706,17 +706,17 @@ let method_decl_eager
     ~(ctx : Provider_context.t)
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.fun_elt option) SMap.t)
+    (acc : (Decl_defs.element * Typing_defs.fun_elt option) S_map.t)
     (m : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t =
+    (Decl_defs.element * Typing_defs.fun_elt option) S_map.t =
   (* If method doesn't override anything but has the <<__Override>> attribute, then
    * set the override flag in ce_flags and let typing emit an appropriate error *)
   let superfluous_override =
-    sm_override m && not (SMap.mem (snd m.sm_name) acc)
+    sm_override m && not (S_map.mem (snd m.sm_name) acc)
   in
   let (_pos, id) = m.sm_name in
   let vis =
-    match (SMap.find_opt id acc, m.sm_visibility) with
+    match (S_map.find_opt id acc, m.sm_visibility) with
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
       ->
       parent_vis
@@ -728,7 +728,7 @@ let method_decl_eager
   let support_dynamic_type = sm_support_dynamic_type m in
   let sealed_allowlist = get_method_sealed_allowlist m in
   let parent_no_auto_likes =
-    match SMap.find_opt id acc with
+    match S_map.find_opt id acc with
     | Some ({ elt_flags; _ }, _) ->
       Typing_defs_flags.ClassElt.is_no_auto_likes elt_flags
     | _ -> false
@@ -770,7 +770,7 @@ let method_decl_eager
       ~no_auto_likes
       m
   in
-  let acc = SMap.add id (elt, Some fe) acc in
+  let acc = S_map.add id (elt, Some fe) acc in
   acc
 
 let rec declare_class_and_parents
@@ -790,7 +790,7 @@ and class_parents_decl
     ~(sh : Shared_mem.uses)
     (class_env : class_env)
     (c : Shallow_decl_defs.shallow_class) :
-    Decl_store.class_entries SMap.t * decl_error list =
+    Decl_store.class_entries S_map.t * decl_error list =
   let class_type_decl (parents, errs) class_ty =
     match get_node class_ty with
     | Tapply ((pos, class_name), _) ->
@@ -803,10 +803,10 @@ and class_parents_decl
       | None ->
         (match class_decl_if_missing ~sh class_env class_name with
         | None -> (parents, errs)
-        | Some decls -> (SMap.add class_name decls parents, errs)))
+        | Some decls -> (S_map.add class_name decls parents, errs)))
     | _ -> (parents, errs)
   in
-  let acc = (SMap.empty, []) in
+  let acc = (S_map.empty, []) in
   let acc = List.fold c.sc_extends ~f:class_type_decl ~init:acc in
   let acc = List.fold c.sc_implements ~f:class_type_decl ~init:acc in
   let acc = List.fold c.sc_uses ~f:class_type_decl ~init:acc in
@@ -840,7 +840,7 @@ and class_decl
     ~(sh : Shared_mem.uses)
     (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    ~(parents : Decl_store.class_entries SMap.t)
+    ~(parents : Decl_store.class_entries S_map.t)
     (decl_errors : decl_error list) :
     Decl_defs.decl_class_type * Decl_store.class_members =
   let is_abstract = class_is_abstract c in
@@ -875,7 +875,7 @@ and class_decl
   in
   let consts =
     if not (String.equal SN.Classes.cString (snd c.sc_name)) then
-      SMap.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
+      S_map.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
     else
       consts
   in
@@ -888,8 +888,8 @@ and class_decl
   in
   let (typeconsts, consts) =
     if Ast_defs.is_c_concrete c.sc_kind then
-      let consts = SMap.map synthesize_const_defaults consts in
-      SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
+      let consts = S_map.map synthesize_const_defaults consts in
+      S_map.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else
       (typeconsts, consts)
   in
@@ -946,7 +946,7 @@ and class_decl
         with
         | None -> parents
         | Some stringish_cls ->
-          SMap.add SN.Classes.cStringishObject stringish_cls parents
+          S_map.add SN.Classes.cStringishObject stringish_cls parents
       in
       let ty =
         mk (Reason.hint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
@@ -960,8 +960,8 @@ and class_decl
   let impl =
     List.fold
       impl
-      ~f:(SMap.union ~combine:(fun _ ty1 _ty2 -> Some ty1))
-      ~init:SMap.empty
+      ~f:(S_map.union ~combine:(fun _ ty1 _ty2 -> Some ty1))
+      ~init:S_map.empty
   in
   let (extends, xhp_attr_deps, decl_errors) =
     get_class_parents_and_traits env c ~parent_cache:parents decl_errors
@@ -975,7 +975,7 @@ and class_decl
   in
 
   let enum = c.sc_enum_type in
-  let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
+  let enum_inner_ty = S_map.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
   let consts =
     Decl_enum.rewrite_class
@@ -989,7 +989,7 @@ and class_decl
         match t.ttc_kind with
         | TCConcrete { tc_type } -> Some tc_type
         | TCAbstract { atc_default; _ } -> atc_default)
-      ~get_ancestor:(fun x -> SMap.find_opt x impl)
+      ~get_ancestor:(fun x -> S_map.find_opt x impl)
       consts
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
@@ -1045,10 +1045,10 @@ and class_decl
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;
       dc_typeconsts = typeconsts;
-      dc_props = SMap.map fst props;
-      dc_sprops = SMap.map fst static_props;
-      dc_methods = SMap.map fst methods;
-      dc_smethods = SMap.map fst static_methods;
+      dc_props = S_map.map fst props;
+      dc_sprops = S_map.map fst static_props;
+      dc_methods = S_map.map fst methods;
+      dc_smethods = S_map.map fst static_methods;
       dc_construct = Tuple.T2.map_fst ~f:(Option.map ~f:fst) cstr;
       dc_ancestors = impl;
       dc_support_dynamic_type =
@@ -1077,7 +1077,7 @@ and class_decl
       dc_package = c.sc_package;
     }
   in
-  let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in
+  let filter_snd map = S_map.filter_map (fun _k v -> snd v) map in
   let member_heaps_values =
     {
       Decl_store.m_static_properties = filter_snd static_props;

@@ -27,11 +27,11 @@ let find_names_mismatch
      missing/extra-name matching. *)
   let named_params_of (ft : _ Typing_defs.fun_type) =
     List.fold
-      ~init:SMap.empty
+      ~init:S_map.empty
       (Typing_defs.ft_params_without_named_variadic ft)
       ~f:(fun acc fp ->
         match Typing_defs.Named_params.name_of_named_param fp with
-        | Some name -> SMap.add name fp acc
+        | Some name -> S_map.add name fp acc
         | None -> acc)
   in
   let actual_named_params = named_params_of actual_ft in
@@ -43,10 +43,10 @@ let find_names_mismatch
     Option.is_some (Typing_defs.ft_named_variadic_param expected_ft)
   in
   let extra_names =
-    SMap.fold
+    S_map.fold
       (fun name actual_fp acc ->
         (* function(optional named bool $b): void   <:   function(): void *)
-        let is_expected = SMap.mem name expected_named_params in
+        let is_expected = S_map.mem name expected_named_params in
         let is_required = not (Typing_defs_core.get_fp_is_optional actual_fp) in
         if is_required && not is_expected then
           name :: acc
@@ -64,9 +64,9 @@ let find_names_mismatch
         expected_has_named_variadic && not actual_has_named_variadic;
     }
   in
-  SMap.fold
+  S_map.fold
     (fun name expected_fp acc ->
-      match SMap.find_opt name actual_named_params with
+      match S_map.find_opt name actual_named_params with
       | Some actual_fp ->
         let expected_is_optional =
           Typing_defs_core.get_fp_is_optional expected_fp

@@ -35,7 +35,7 @@ val create : unit -> 'a t
 
 exception Inconsistent_trie of string
 
-val get_node : 'a t -> 'a t SMap.t ref
+val get_node : 'a t -> 'a t S_map.t ref
 
 val get_leaf : 'a t -> 'a
 

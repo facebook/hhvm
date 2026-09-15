@@ -27,12 +27,12 @@ type member_change =
 type constructor_change = member_change option [@@deriving eq]
 
 type member_diff = {
-  consts: member_change SMap.t;
-  typeconsts: member_change SMap.t;
-  props: member_change SMap.t;
-  sprops: member_change SMap.t;
-  methods: member_change SMap.t;
-  smethods: member_change SMap.t;
+  consts: member_change S_map.t;
+  typeconsts: member_change S_map.t;
+  props: member_change S_map.t;
+  sprops: member_change S_map.t;
+  methods: member_change S_map.t;
+  smethods: member_change S_map.t;
   constructor: constructor_change;
 }
 [@@deriving eq, show]
@@ -47,7 +47,7 @@ end
 
 module NamedItemsListChange : sig
   type 'change t = {
-    per_name_changes: 'change ValueChange.t SMap.t;
+    per_name_changes: 'change ValueChange.t S_map.t;
     order_change: bool;
         (** The order has changed if there exists x and y
             such that x comes before y in the list pre-change,

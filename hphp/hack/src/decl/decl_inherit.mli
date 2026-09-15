@@ -18,14 +18,14 @@ open Decl_defs
 open Typing_defs
 
 type inherited = {
-  ih_substs: subst_context SMap.t;
+  ih_substs: subst_context S_map.t;
   ih_cstr: (element * fun_elt option) option * consistent_kind;
-  ih_consts: class_const SMap.t;
-  ih_typeconsts: typeconst_type SMap.t;
-  ih_props: (element * decl_ty option) SMap.t;
-  ih_sprops: (element * decl_ty option) SMap.t;
-  ih_methods: (element * fun_elt option) SMap.t;
-  ih_smethods: (element * fun_elt option) SMap.t;
+  ih_consts: class_const S_map.t;
+  ih_typeconsts: typeconst_type S_map.t;
+  ih_props: (element * decl_ty option) S_map.t;
+  ih_sprops: (element * decl_ty option) S_map.t;
+  ih_methods: (element * fun_elt option) S_map.t;
+  ih_smethods: (element * fun_elt option) S_map.t;
   ih_support_dynamic_type: bool;
 }
 
@@ -34,7 +34,7 @@ type inherited = {
     which acts as a cache for the shared heap. *)
 val make :
   Shallow_decl_defs.shallow_class ->
-  cache:Decl_store.class_entries SMap.t ->
+  cache:Decl_store.class_entries S_map.t ->
   inherited
 
 (** [find_overridden_method cls ~get_method] finds in the parents and

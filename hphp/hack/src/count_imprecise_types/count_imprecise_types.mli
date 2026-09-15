@@ -10,6 +10,6 @@ type result
 
 (** Counts the number of mixed, dynamic, and types occurring in functions and
     methods. *)
-val count : Provider_context.t -> Tast.program -> result SMap.t
+val count : Provider_context.t -> Tast.program -> result S_map.t
 
-val json_of_results : result SMap.t -> Yojson.Safe.t
+val json_of_results : result S_map.t -> Yojson.Safe.t

@@ -31,7 +31,7 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
       ~is_mutable:false
       ~tracked
       env
-      (SMap.empty, SMap.empty)
+      (S_map.empty, S_map.empty)
       ty
   in
   List.iter tparams ~f:(fun t ->
@@ -64,7 +64,7 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
               Ast_defs.(equal_constraint_kind ck Constraint_as))
             t.tp_constraints
         in
-        match (SMap.find_opt name positive, SMap.find_opt name negative) with
+        match (S_map.find_opt name positive, S_map.find_opt name negative) with
         | (Some _, Some _) -> ()
         | (Some _positions, None) ->
           let bounds_message =

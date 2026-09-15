@@ -209,20 +209,20 @@ struct
         List.map dc.dc_req_constraints_ancestors ~f:constraint_requirement;
       dc_tparams = List.map dc.dc_tparams ~f:type_param;
       dc_substs =
-        SMap.map
+        S_map.map
           begin
             fun ({ sc_subst; _ } as sc) ->
-              { sc with sc_subst = SMap.map ty sc_subst }
+              { sc with sc_subst = S_map.map ty sc_subst }
           end
           dc.dc_substs;
-      dc_consts = SMap.map class_const dc.dc_consts;
-      dc_typeconsts = SMap.map typeconst_type dc.dc_typeconsts;
+      dc_consts = S_map.map class_const dc.dc_consts;
+      dc_typeconsts = S_map.map typeconst_type dc.dc_typeconsts;
       dc_props = dc.dc_props;
       dc_sprops = dc.dc_sprops;
       dc_methods = dc.dc_methods;
       dc_smethods = dc.dc_smethods;
       dc_construct = dc.dc_construct;
-      dc_ancestors = SMap.map ty dc.dc_ancestors;
+      dc_ancestors = S_map.map ty dc.dc_ancestors;
       dc_support_dynamic_type = dc.dc_support_dynamic_type;
       dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = [];

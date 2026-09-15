@@ -17,7 +17,7 @@ type env = {
 
 val tcopt : env -> Typechecker_options.t
 
-type class_cache = Decl_store.class_entries SMap.t
+type class_cache = Decl_store.class_entries S_map.t
 
 (** Auxiliary constant fallback function that returns [None]. *)
 val no_fallback : env -> string -> Decl_defs.decl_class_type option

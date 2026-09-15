@@ -158,12 +158,12 @@ module Reverse_naming_table_delta : sig
   (** This stores a multimap from symbol name to the position(s)
   where it's defined. It also stores a lower-case version of the multimap. *)
   type t = {
-    consts: pos_or_deleted SMap.t ref;
-    funs: pos_or_deleted SMap.t ref;
-    types: pos_or_deleted SMap.t ref;
-    modules: pos_or_deleted SMap.t ref;
-    funs_canon_key: pos_or_deleted SMap.t ref;
-    types_canon_key: pos_or_deleted SMap.t ref;
+    consts: pos_or_deleted S_map.t ref;
+    funs: pos_or_deleted S_map.t ref;
+    types: pos_or_deleted S_map.t ref;
+    modules: pos_or_deleted S_map.t ref;
+    funs_canon_key: pos_or_deleted S_map.t ref;
+    types_canon_key: pos_or_deleted S_map.t ref;
   }
 
   val get_telemetry : key:string -> t -> Telemetry.t -> Telemetry.t

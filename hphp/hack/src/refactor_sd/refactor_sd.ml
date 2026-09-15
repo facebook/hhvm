@@ -42,7 +42,7 @@ let do_
       Format.printf "\n"
     in
     Walker.program upcasted_info ctx tast
-    |> SMap.iter print_function_constraints
+    |> S_map.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : refactor_sd_result list)
         : unit =
@@ -53,7 +53,7 @@ let do_
     let process_callable id constraints =
       Solver.simplify empty_tast_env constraints |> print_callable_summary id
     in
-    Walker.program upcasted_info ctx tast |> SMap.iter process_callable
+    Walker.program upcasted_info ctx tast |> S_map.iter process_callable
   | SolveConstraints -> ()
 
 let callable = Walker.callable

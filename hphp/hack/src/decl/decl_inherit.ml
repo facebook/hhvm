@@ -26,27 +26,27 @@ module Inst = Decl_instantiate
 (*****************************************************************************)
 
 type inherited = {
-  ih_substs: subst_context SMap.t;
+  ih_substs: subst_context S_map.t;
   ih_cstr: (Decl_defs.element * fun_elt option) option * consistent_kind;
-  ih_consts: class_const SMap.t;
-  ih_typeconsts: typeconst_type SMap.t;
-  ih_props: (Decl_defs.element * decl_ty option) SMap.t;
-  ih_sprops: (Decl_defs.element * decl_ty option) SMap.t;
-  ih_methods: (Decl_defs.element * fun_elt option) SMap.t;
-  ih_smethods: (Decl_defs.element * fun_elt option) SMap.t;
+  ih_consts: class_const S_map.t;
+  ih_typeconsts: typeconst_type S_map.t;
+  ih_props: (Decl_defs.element * decl_ty option) S_map.t;
+  ih_sprops: (Decl_defs.element * decl_ty option) S_map.t;
+  ih_methods: (Decl_defs.element * fun_elt option) S_map.t;
+  ih_smethods: (Decl_defs.element * fun_elt option) S_map.t;
   ih_support_dynamic_type: bool;
 }
 
 let empty =
   {
-    ih_substs = SMap.empty;
+    ih_substs = S_map.empty;
     ih_cstr = (None, Inconsistent);
-    ih_consts = SMap.empty;
-    ih_typeconsts = SMap.empty;
-    ih_props = SMap.empty;
-    ih_sprops = SMap.empty;
-    ih_methods = SMap.empty;
-    ih_smethods = SMap.empty;
+    ih_consts = S_map.empty;
+    ih_typeconsts = S_map.empty;
+    ih_props = S_map.empty;
+    ih_sprops = S_map.empty;
+    ih_methods = S_map.empty;
+    ih_smethods = S_map.empty;
     ih_support_dynamic_type = false;
   }
 
@@ -152,10 +152,10 @@ let should_keep_old_sig
   OverridePrecedence.(precedence old_sig > precedence sig_)
 
 let add_method name sig_ methods =
-  match SMap.find_opt name methods with
+  match S_map.find_opt name methods with
   | None ->
     (* The method didn't exist so far, let's add it *)
-    SMap.add name sig_ methods
+    S_map.add name sig_ methods
   | Some old_sig ->
     if should_keep_old_sig sig_ old_sig then
       methods
@@ -165,13 +165,13 @@ let add_method name sig_ methods =
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
       let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_superfluous_override in
-      SMap.add name sig_ methods
+      S_map.add name sig_ methods
 
-let add_methods methods' acc = SMap.fold add_method methods' acc
+let add_methods methods' acc = S_map.fold add_method methods' acc
 
 let add_const name const acc =
-  match SMap.find_opt name acc with
-  | None -> SMap.add name const acc
+  match S_map.find_opt name acc with
+  | None -> S_map.add name const acc
   | Some existing_const ->
     (match
        ( const.cc_synthesized,
@@ -197,22 +197,22 @@ let add_const name const acc =
       (* Don't replace a concrete constant with an abstract constant
            found later in the MRO.*)
       acc
-    | (_, _, _, _) -> SMap.add name const acc)
+    | (_, _, _, _) -> S_map.add name const acc)
 
-let add_members members acc = SMap.fold SMap.add members acc
+let add_members members acc = S_map.fold S_map.add members acc
 
 let add_typeconst c name sig_ typeconsts =
-  match SMap.find_opt name typeconsts with
+  match S_map.find_opt name typeconsts with
   | None ->
     (* The type constant didn't exist so far, let's add it *)
-    SMap.add name sig_ typeconsts
+    S_map.add name sig_ typeconsts
   | Some old_sig ->
     let typeconsts =
       (* Boolean OR for the second element of the tuple. If some typeconst in
          some ancestor was enforceable, then the child class' typeconst will be
          enforceable too, even if we didn't take that ancestor typeconst. *)
       if snd sig_.ttc_enforceable && not (snd old_sig.ttc_enforceable) then
-        SMap.add
+        S_map.add
           name
           { old_sig with ttc_enforceable = sig_.ttc_enforceable }
           typeconsts
@@ -289,7 +289,7 @@ let add_typeconst c name sig_ typeconsts =
         else
           sig_
       in
-      SMap.add name sig_ typeconsts)
+      S_map.add name sig_ typeconsts)
 
 let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   let ce =
@@ -303,7 +303,7 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
 let add_inherited c inherited acc =
   {
     ih_substs =
-      SMap.merge
+      S_map.merge
         begin
           fun _ old_subst_opt new_subst_opt ->
             match (old_subst_opt, new_subst_opt) with
@@ -333,9 +333,9 @@ let add_inherited c inherited acc =
         acc.ih_substs
         inherited.ih_substs;
     ih_cstr = add_constructor inherited.ih_cstr acc.ih_cstr;
-    ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
+    ih_consts = S_map.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
-      SMap.fold (add_typeconst c) inherited.ih_typeconsts acc.ih_typeconsts;
+      S_map.fold (add_typeconst c) inherited.ih_typeconsts acc.ih_typeconsts;
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
@@ -355,22 +355,24 @@ let mark_as_synthesized inh =
   let mark_elt elt = Tuple.T2.map_fst elt ~f:set_elt_synthesized in
   {
     ih_substs =
-      SMap.map
+      S_map.map
         begin
           (fun sc -> { sc with sc_from_req_extends = true })
         end
         inh.ih_substs;
     ih_cstr = (Option.map (fst inh.ih_cstr) ~f:mark_elt, snd inh.ih_cstr);
-    ih_props = SMap.map mark_elt inh.ih_props;
-    ih_sprops = SMap.map mark_elt inh.ih_sprops;
-    ih_methods = SMap.map mark_elt inh.ih_methods;
-    ih_smethods = SMap.map mark_elt inh.ih_smethods;
+    ih_props = S_map.map mark_elt inh.ih_props;
+    ih_sprops = S_map.map mark_elt inh.ih_sprops;
+    ih_methods = S_map.map mark_elt inh.ih_methods;
+    ih_smethods = S_map.map mark_elt inh.ih_smethods;
     ih_typeconsts =
-      SMap.map
+      S_map.map
         (fun const -> { const with ttc_synthesized = true })
         inh.ih_typeconsts;
     ih_consts =
-      SMap.map (fun const -> { const with cc_synthesized = true }) inh.ih_consts;
+      S_map.map
+        (fun const -> { const with cc_synthesized = true })
+        inh.ih_consts;
     ih_support_dynamic_type = inh.ih_support_dynamic_type;
   }
 
@@ -397,10 +399,10 @@ let filter_privates class_type =
   in
   {
     class_type with
-    dc_props = SMap.filter should_keep class_type.dc_props;
-    dc_sprops = SMap.filter should_keep class_type.dc_sprops;
-    dc_methods = SMap.filter should_keep class_type.dc_methods;
-    dc_smethods = SMap.filter should_keep class_type.dc_smethods;
+    dc_props = S_map.filter should_keep class_type.dc_props;
+    dc_sprops = S_map.filter should_keep class_type.dc_sprops;
+    dc_methods = S_map.filter should_keep class_type.dc_methods;
+    dc_smethods = S_map.filter should_keep class_type.dc_smethods;
   }
 
 let chown_private_and_protected owner class_type =
@@ -426,10 +428,10 @@ let chown_private_and_protected owner class_type =
   in
   {
     class_type with
-    dc_props = SMap.map chown class_type.dc_props;
-    dc_sprops = SMap.map chown class_type.dc_sprops;
-    dc_methods = SMap.map chown class_type.dc_methods;
-    dc_smethods = SMap.map chown class_type.dc_smethods;
+    dc_props = S_map.map chown class_type.dc_props;
+    dc_sprops = S_map.map chown class_type.dc_sprops;
+    dc_methods = S_map.map chown class_type.dc_methods;
+    dc_smethods = S_map.map chown class_type.dc_smethods;
   }
 
 (*****************************************************************************)
@@ -438,11 +440,11 @@ let chown_private_and_protected owner class_type =
 
 let pair_with_heap_entries :
     type heap_entry.
-    element SMap.t ->
-    heap_entry SMap.t option ->
-    (element * heap_entry option) SMap.t =
+    element S_map.t ->
+    heap_entry S_map.t option ->
+    (element * heap_entry option) S_map.t =
  fun elts heap_entries ->
-  SMap.mapi (fun name elt -> (elt, heap_entries >>= SMap.find_opt name)) elts
+  S_map.mapi (fun name elt -> (elt, heap_entries >>= S_map.find_opt name)) elts
 
 let inherit_hack_class
     child
@@ -464,9 +466,9 @@ let inherit_hack_class
       parent
   in
   let typeconsts =
-    SMap.map (Inst.instantiate_typeconst_type subst) parent.dc_typeconsts
+    S_map.map (Inst.instantiate_typeconst_type subst) parent.dc_typeconsts
   in
-  let consts = SMap.map (Inst.instantiate_cc subst) parent.dc_consts in
+  let consts = S_map.map (Inst.instantiate_cc subst) parent.dc_consts in
   let (cstr, constructor_consistency) = parent.dc_construct in
   let subst_ctx =
     {
@@ -475,7 +477,7 @@ let inherit_hack_class
       sc_from_req_extends = false;
     }
   in
-  let substs = SMap.add parent_name subst_ctx parent.dc_substs in
+  let substs = S_map.add parent_name subst_ctx parent.dc_substs in
   let result =
     {
       ih_substs = substs;
@@ -512,10 +514,10 @@ let inherit_hack_class
 (* mostly copy paste of inherit_hack_class *)
 let inherit_hack_class_constants_only class_type argl _parent_members =
   let subst = make_substitution class_type argl in
-  let instantiate = SMap.map (Inst.instantiate_cc subst) in
+  let instantiate = S_map.map (Inst.instantiate_cc subst) in
   let consts = instantiate class_type.dc_consts in
   let typeconsts =
-    SMap.map (Inst.instantiate_typeconst_type subst) class_type.dc_typeconsts
+    S_map.map (Inst.instantiate_typeconst_type subst) class_type.dc_typeconsts
   in
   let result = { empty with ih_consts = consts; ih_typeconsts = typeconsts } in
   result
@@ -525,16 +527,16 @@ let inherit_hack_class_constants_only class_type argl _parent_members =
 let inherit_hack_xhp_attrs_only class_type members =
   (* Filter out properties that are not XHP attributes *)
   let props =
-    SMap.fold
+    S_map.fold
       begin
         fun name prop acc ->
           if Option.is_some (get_elt_xhp_attr prop) then
-            SMap.add name prop acc
+            S_map.add name prop acc
           else
             acc
       end
       class_type.dc_props
-      SMap.empty
+      S_map.empty
   in
   let result =
     {
@@ -552,12 +554,12 @@ let inherit_hack_xhp_attrs_only class_type members =
 (* Include definitions inherited from a class (extends) or a trait (use)
  * or requires extends
  *)
-let from_class c (parents : Decl_store.class_entries SMap.t) parent_ty :
+let from_class c (parents : Decl_store.class_entries S_map.t) parent_ty :
     inherited =
   let (_, (_, parent_name), parent_class_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
-  match SMap.find_opt parent_name parents with
+  match S_map.find_opt parent_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -565,9 +567,9 @@ let from_class c (parents : Decl_store.class_entries SMap.t) parent_ty :
     (* The class lives in Hack *)
     inherit_hack_class c parent_name class_ parent_class_params parent_members
 
-let from_class_constants_only (parents : Decl_store.class_entries SMap.t) ty =
+let from_class_constants_only (parents : Decl_store.class_entries S_map.t) ty =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
-  match SMap.find_opt class_name parents with
+  match S_map.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -575,11 +577,11 @@ let from_class_constants_only (parents : Decl_store.class_entries SMap.t) ty =
     (* The class lives in Hack *)
     inherit_hack_class_constants_only class_ class_params parent_members
 
-let from_class_xhp_attrs_only (parents : Decl_store.class_entries SMap.t) ty =
+let from_class_xhp_attrs_only (parents : Decl_store.class_entries S_map.t) ty =
   let (_, (_pos, class_name), _class_params) =
     Decl_utils.unwrap_class_type ty
   in
-  match SMap.find_opt class_name parents with
+  match S_map.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -600,7 +602,7 @@ let parents_which_provide_members c =
   | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
 
-let from_parent c (parents : Decl_store.class_entries SMap.t) acc parent =
+let from_parent c (parents : Decl_store.class_entries S_map.t) acc parent =
   let inherited = from_class c parents parent in
   add_inherited c inherited acc
 
@@ -613,13 +615,13 @@ let from_trait c parents acc uses =
   let inherited = from_class c parents uses in
   add_inherited c inherited acc
 
-let from_xhp_attr_use c (parents : Decl_store.class_entries SMap.t) acc uses =
+let from_xhp_attr_use c (parents : Decl_store.class_entries S_map.t) acc uses =
   let inherited = from_class_xhp_attrs_only parents uses in
   add_inherited c inherited acc
 
 (** Inherits constants and type constants from an interface. *)
 let from_interface_constants
-    c (parents : Decl_store.class_entries SMap.t) acc impls =
+    c (parents : Decl_store.class_entries S_map.t) acc impls =
   let inherited = from_class_constants_only parents impls in
   add_inherited c inherited acc
 
@@ -720,7 +722,7 @@ end = struct
         >?? lazy (find_first_with_highest_precedence parents ~f:(f parent_kind)))
 end
 
-let make c ~cache:(parents : Decl_store.class_entries SMap.t) =
+let make c ~cache:(parents : Decl_store.class_entries S_map.t) =
   let acc = empty in
   let acc =
     OrderedParents.get c

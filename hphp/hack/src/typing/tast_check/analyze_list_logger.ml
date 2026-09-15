@@ -197,7 +197,7 @@ let create_handler ctx =
   let level =
     Provider_context.get_tcopt ctx
     |> Typechecker_options.log_levels
-    |> SMap.find_opt "list_logger"
+    |> S_map.find_opt "list_logger"
     |> Option.value ~default:1
   in
   object

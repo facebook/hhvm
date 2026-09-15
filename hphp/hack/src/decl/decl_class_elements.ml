@@ -25,7 +25,7 @@ let from_class { dc_name; dc_props; dc_sprops; dc_methods; dc_smethods; _ } =
         with type key = string * string
          and type KeySet.t = a)
       elts =
-    SMap.fold
+    S_map.fold
       begin
         fun name { elt_origin = cls; _ } set ->
           if String.equal cls dc_name then
@@ -56,10 +56,10 @@ let get_for_classes ~old classes =
         fun acc cls ->
           match get cls with
           | None -> acc
-          | Some c -> SMap.add cls (from_class c) acc
+          | Some c -> S_map.add cls (from_class c) acc
       end
     classes
-    ~init:SMap.empty
+    ~init:S_map.empty
 
 let oldify_batch { props; sprops; meths; smeths } =
   Props.oldify_batch props;
@@ -80,7 +80,7 @@ let remove_batch { props; sprops; meths; smeths } =
   StaticMethods.remove_batch smeths
 
 let oldify_all class_to_elems =
-  SMap.iter
+  S_map.iter
     begin
       fun cls elems ->
         Constructors.oldify_batch (SSet.singleton cls);
@@ -89,7 +89,7 @@ let oldify_all class_to_elems =
     class_to_elems
 
 let remove_old_all class_to_elems =
-  SMap.iter
+  S_map.iter
     begin
       fun cls elems ->
         Constructors.remove_old_batch (SSet.singleton cls);
@@ -98,7 +98,7 @@ let remove_old_all class_to_elems =
     class_to_elems
 
 let remove_all class_to_elems =
-  SMap.iter
+  S_map.iter
     begin
       fun cls elems ->
         Constructors.remove_batch (SSet.singleton cls);

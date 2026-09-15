@@ -114,7 +114,7 @@ let rewrite_class name ~is_enum_class enum inner_ty ~get_ancestor consts =
        * want to rewrite its type.
        * Also for enum class, the type is set in the lowerer.
        *)
-      SMap.mapi
+      S_map.mapi
         (fun k c ->
           if te_enum_class || String.equal k SN.Members.mClass then
             c

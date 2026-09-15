@@ -156,13 +156,13 @@ module ApiLazy = struct
     Decl_counters.count_subdecl decl (Decl_counters.Get_ancestor ancestor)
     @@ fun () ->
     let (c, _) = t in
-    SMap.find_opt ancestor c.Decl_defs.dc_ancestors
+    S_map.find_opt ancestor c.Decl_defs.dc_ancestors
 
   let has_ancestor (decl, t, _ctx) ancestor =
     Decl_counters.count_subdecl decl (Decl_counters.Has_ancestor ancestor)
     @@ fun () ->
     let (c, _) = t in
-    SMap.mem ancestor c.Decl_defs.dc_ancestors
+    S_map.mem ancestor c.Decl_defs.dc_ancestors
 
   let requires_ancestor (decl, t, _ctx) ancestor =
     Decl_counters.count_subdecl decl (Decl_counters.Requires_ancestor ancestor)
@@ -173,24 +173,24 @@ module ApiLazy = struct
   let get_const (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_const id) @@ fun () ->
     let (c, _) = t in
-    SMap.find_opt id c.Decl_defs.dc_consts
+    S_map.find_opt id c.Decl_defs.dc_consts
 
   let has_const (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_const id) @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_consts
+    S_map.mem id c.Decl_defs.dc_consts
 
   let get_typeconst (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_typeconst id)
     @@ fun () ->
     let (c, _) = t in
-    SMap.find_opt id c.Decl_defs.dc_typeconsts
+    S_map.find_opt id c.Decl_defs.dc_typeconsts
 
   let has_typeconst (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_typeconst id)
     @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_typeconsts
+    S_map.mem id c.Decl_defs.dc_typeconsts
 
   let get_typeconst_enforceability (decl, t, _ctx) id =
     Decl_counters.count_subdecl
@@ -198,7 +198,7 @@ module ApiLazy = struct
       (Decl_counters.Get_typeconst_enforceability id)
     @@ fun () ->
     let (c, _) = t in
-    Option.map (SMap.find_opt id c.Decl_defs.dc_typeconsts) ~f:(fun t ->
+    Option.map (S_map.find_opt id c.Decl_defs.dc_typeconsts) ~f:(fun t ->
         t.ttc_enforceable)
 
   let get_prop (decl, t, ctx) id =
@@ -207,7 +207,7 @@ module ApiLazy = struct
     match Hashtbl.find members.props id with
     | Some _ as elt_opt -> elt_opt
     | None ->
-      (match SMap.find_opt id c.Decl_defs.dc_props with
+      (match S_map.find_opt id c.Decl_defs.dc_props with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_property_type_lazy ctx c id elt in
@@ -217,7 +217,7 @@ module ApiLazy = struct
   let has_prop (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_prop id) @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_props
+    S_map.mem id c.Decl_defs.dc_props
 
   let get_sprop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_sprop id) @@ fun () ->
@@ -225,7 +225,7 @@ module ApiLazy = struct
     match Hashtbl.find members.static_props id with
     | Some _ as elt_opt -> elt_opt
     | None ->
-      (match SMap.find_opt id c.Decl_defs.dc_sprops with
+      (match S_map.find_opt id c.Decl_defs.dc_sprops with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_static_property_type_lazy ctx c id elt in
@@ -235,7 +235,7 @@ module ApiLazy = struct
   let has_sprop (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_sprop id) @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_sprops
+    S_map.mem id c.Decl_defs.dc_sprops
 
   let get_method (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_method id) @@ fun () ->
@@ -243,7 +243,7 @@ module ApiLazy = struct
     match Hashtbl.find members.methods id with
     | Some _ as elt_opt -> elt_opt
     | None ->
-      (match SMap.find_opt id c.Decl_defs.dc_methods with
+      (match S_map.find_opt id c.Decl_defs.dc_methods with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_method_type_lazy ctx c id elt in
@@ -253,7 +253,7 @@ module ApiLazy = struct
   let has_method (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_method id) @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_methods
+    S_map.mem id c.Decl_defs.dc_methods
 
   let get_smethod (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_smethod id) @@ fun () ->
@@ -261,7 +261,7 @@ module ApiLazy = struct
     match Hashtbl.find members.static_methods id with
     | Some _ as elt_opt -> elt_opt
     | None ->
-      (match SMap.find_opt id c.Decl_defs.dc_smethods with
+      (match S_map.find_opt id c.Decl_defs.dc_smethods with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_static_method_type_lazy ctx c id elt in
@@ -271,7 +271,7 @@ module ApiLazy = struct
   let has_smethod (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_smethod id) @@ fun () ->
     let (c, _) = t in
-    SMap.mem id c.Decl_defs.dc_smethods
+    S_map.mem id c.Decl_defs.dc_smethods
 
   let get_any_method ~is_static cls id =
     (* tally is already done inside the following three methods *)
@@ -295,12 +295,12 @@ module ApiEager = struct
   let all_ancestors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_ancestors
+    S_map.bindings c.Decl_defs.dc_ancestors
 
   let all_ancestor_names (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->
     let (c, _) = t in
-    SMap.ordered_keys c.Decl_defs.dc_ancestors
+    S_map.ordered_keys c.Decl_defs.dc_ancestors
 
   let all_ancestor_reqs (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
@@ -341,38 +341,38 @@ module ApiEager = struct
   let consts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Consts @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_consts
+    S_map.bindings c.Decl_defs.dc_consts
 
   let typeconsts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Typeconsts @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_typeconsts
+    S_map.bindings c.Decl_defs.dc_typeconsts
 
   let props (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Props @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_props
+    S_map.bindings c.Decl_defs.dc_props
     |> List.map ~f:(fun (id, elt) ->
            (id, Decl_class.lookup_property_type_lazy ctx c id elt))
 
   let sprops (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SProps @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_sprops
+    S_map.bindings c.Decl_defs.dc_sprops
     |> List.map ~f:(fun (id, elt) ->
            (id, Decl_class.lookup_static_property_type_lazy ctx c id elt))
 
   let methods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Methods @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_methods
+    S_map.bindings c.Decl_defs.dc_methods
     |> List.map ~f:(fun (id, elt) ->
            (id, Decl_class.lookup_method_type_lazy ctx c id elt))
 
   let smethods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SMethods @@ fun () ->
     let (c, _) = t in
-    SMap.bindings c.Decl_defs.dc_smethods
+    S_map.bindings c.Decl_defs.dc_smethods
     |> List.map ~f:(fun (id, elt) ->
            (id, Decl_class.lookup_static_method_type_lazy ctx c id elt))
 

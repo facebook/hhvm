@@ -14,7 +14,7 @@ open Hh_prelude
 let test_fixture_filename = ".hh_remote_old_decls_test"
 
 let fetch_old_decls_from_test_fixture ~(ctx : Provider_context.t) names :
-    Shallow_decl_defs.shallow_class option SMap.t option =
+    Shallow_decl_defs.shallow_class option S_map.t option =
   match (Sys.getenv_opt "HH_TEST_MODE", Sys.getenv_opt "HH_LOCALCONF_PATH") with
   | (Some "1", Some root) ->
     let path = Filename.concat root test_fixture_filename in
@@ -32,12 +32,12 @@ let fetch_old_decls_from_test_fixture ~(ctx : Provider_context.t) names :
       Some
         (List.fold
            parsed_file.Direct_decl_parser.pfh_decls
-           ~init:SMap.empty
+           ~init:S_map.empty
            ~f:(fun acc (name, decl, _) ->
              match decl with
              | Shallow_decl_defs.Class cls
                when List.mem names name ~equal:String.equal ->
-               SMap.add name (Some cls) acc
+               S_map.add name (Some cls) acc
              | _ -> acc))
     else
       None
@@ -64,7 +64,7 @@ end
 let fetch_old_decls_via_file_hashes
     ~(ctx : Provider_context.t)
     ~(db_path : Naming_sqlite.db_path)
-    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
+    (names : string list) : Shallow_decl_defs.shallow_class option S_map.t =
   (* TODO(bobren): names should really be a list of deps *)
   let file_hashes =
     List.filter_map
@@ -89,23 +89,24 @@ let fetch_old_decls_via_file_hashes
     (* TODO(bobren) do funs typedefs consts and modules *)
     let old_decls =
       List.fold
-        ~init:SMap.empty
+        ~init:S_map.empty
         ~f:(fun acc ndecl ->
           match ndecl with
-          | Shallow_decl_defs.NClass (name, cls) -> SMap.add name (Some cls) acc
+          | Shallow_decl_defs.NClass (name, cls) ->
+            S_map.add name (Some cls) acc
           | _ -> acc)
         named_old_decls
     in
     old_decls
   | Error msg ->
     Hh_logger.log "Error fetching remote decls: %s" msg;
-    SMap.empty
+    S_map.empty
 
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
-    Shallow_decl_defs.shallow_class option SMap.t =
+    Shallow_decl_defs.shallow_class option S_map.t =
   let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
-  | None -> SMap.empty
+  | None -> S_map.empty
   | Some db_path ->
     (match fetch_old_decls_from_test_fixture ~ctx names with
     | Some old_decls -> old_decls
@@ -121,11 +122,11 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
       let telemetry =
         Telemetry.create ()
         |> Telemetry.int_ ~key:"to_fetch" ~value:to_fetch
-        |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal old_decls)
+        |> Telemetry.int_ ~key:"fetched" ~value:(S_map.cardinal old_decls)
       in
       Hack_event_logger.remote_old_decl_end telemetry start_t;
       Hh_logger.log
         "Fetched %d/%d decls remotely"
-        (SMap.cardinal old_decls)
+        (S_map.cardinal old_decls)
         to_fetch;
       old_decls)

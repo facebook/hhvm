@@ -12,10 +12,10 @@ type mode =
 [@@deriving eq, hash, show, ord]
 
 type env = {
-  ns_ns_uses: string SMap.t;
-  ns_class_uses: string SMap.t;
-  ns_fun_uses: string SMap.t;
-  ns_const_uses: string SMap.t;
+  ns_ns_uses: string S_map.t;
+  ns_class_uses: string S_map.t;
+  ns_fun_uses: string S_map.t;
+  ns_const_uses: string S_map.t;
   ns_name: string option;
   ns_mode: mode;
   ns_disable_xhp_element_mangling: bool;

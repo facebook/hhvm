@@ -22,9 +22,9 @@ include Schema_definition
 
 let schema_map =
   let add map ({ kind_name; _ } as schema_node) =
-    SMap.add kind_name schema_node map
+    S_map.add kind_name schema_node map
   in
-  List.fold_left add SMap.empty
+  List.fold_left add S_map.empty
   @@ {
        kind_name = "Token";
        type_name = "Token.t";

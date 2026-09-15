@@ -151,7 +151,7 @@ let make_all_type_consts_equal
         None
     in
     let (env, ty_errs) =
-      SMap.fold
+      S_map.fold
         (fun _ (tconstid, tconstty) (env, ty_errs_acc) ->
           let (env, err, _cycles) =
             make_type_const_equal

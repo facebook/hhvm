@@ -29,14 +29,14 @@ let make_decl_posed env posed =
 
 let tcopt env = Provider_context.get_tcopt env.ctx
 
-type class_cache = Decl_store.class_entries SMap.t
+type class_cache = Decl_store.class_entries S_map.t
 
 let no_fallback (_ : env) (_ : string) : Decl_defs.decl_class_type option = None
 
 let get_class_and_add_dep
     ~(cache : class_cache) ~(shmem_fallback : bool) ~fallback env x =
   let res =
-    match SMap.find_opt x cache with
+    match S_map.find_opt x cache with
     | Some c -> Some (fst c)
     | None when shmem_fallback -> Decl_store.((get ()).get_class x)
     | None -> None

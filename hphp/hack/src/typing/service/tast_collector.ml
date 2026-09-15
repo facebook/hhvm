@@ -15,11 +15,11 @@ open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 type tast = string [@@deriving yojson_of]
 
 type by_names = {
-  fun_tasts: tast SMap.t;
-  class_tasts: tast SMap.t;
-  typedef_tasts: tast SMap.t;
-  gconst_tasts: tast SMap.t;
-  module_tasts: tast SMap.t;
+  fun_tasts: tast S_map.t;
+  class_tasts: tast S_map.t;
+  typedef_tasts: tast S_map.t;
+  gconst_tasts: tast S_map.t;
+  module_tasts: tast S_map.t;
 }
 [@@deriving yojson_of]
 
@@ -35,11 +35,11 @@ let error_while_mapping tasts msg =
   in
   let error _ = msg in
   {
-    fun_tasts = SMap.map error fun_tasts;
-    class_tasts = SMap.map error class_tasts;
-    typedef_tasts = SMap.map error typedef_tasts;
-    gconst_tasts = SMap.map error gconst_tasts;
-    module_tasts = SMap.map error module_tasts;
+    fun_tasts = S_map.map error fun_tasts;
+    class_tasts = S_map.map error class_tasts;
+    typedef_tasts = S_map.map error typedef_tasts;
+    gconst_tasts = S_map.map error gconst_tasts;
+    module_tasts = S_map.map error module_tasts;
   }
 
 let map ctx path (tasts : Tast.by_names) _errors : t =
@@ -57,12 +57,13 @@ let map ctx path (tasts : Tast.by_names) _errors : t =
         ~do_:(fun _timeout ->
           let tasts = Tast.map_by_names tasts ~f:(Tast_expand.expand_def ctx) in
           {
-            fun_tasts = SMap.map Tast.show_def_with_dynamic tasts.Tast.fun_tasts;
+            fun_tasts =
+              S_map.map Tast.show_def_with_dynamic tasts.Tast.fun_tasts;
             class_tasts =
-              SMap.map Tast.show_def_with_dynamic tasts.Tast.class_tasts;
-            typedef_tasts = SMap.map Tast.show_def tasts.Tast.typedef_tasts;
-            gconst_tasts = SMap.map Tast.show_def tasts.Tast.gconst_tasts;
-            module_tasts = SMap.map Tast.show_def tasts.Tast.module_tasts;
+              S_map.map Tast.show_def_with_dynamic tasts.Tast.class_tasts;
+            typedef_tasts = S_map.map Tast.show_def tasts.Tast.typedef_tasts;
+            gconst_tasts = S_map.map Tast.show_def tasts.Tast.gconst_tasts;
+            module_tasts = S_map.map Tast.show_def tasts.Tast.module_tasts;
           })
     in
     Relative_path.Map.singleton path by_names
@@ -71,11 +72,11 @@ let map ctx path (tasts : Tast.by_names) _errors : t =
 
 let reduce_by_names (x : by_names) (y : by_names) : by_names =
   {
-    fun_tasts = SMap.union x.fun_tasts y.fun_tasts;
-    class_tasts = SMap.union x.class_tasts y.class_tasts;
-    typedef_tasts = SMap.union x.typedef_tasts y.typedef_tasts;
-    gconst_tasts = SMap.union x.gconst_tasts y.gconst_tasts;
-    module_tasts = SMap.union x.module_tasts y.module_tasts;
+    fun_tasts = S_map.union x.fun_tasts y.fun_tasts;
+    class_tasts = S_map.union x.class_tasts y.class_tasts;
+    typedef_tasts = S_map.union x.typedef_tasts y.typedef_tasts;
+    gconst_tasts = S_map.union x.gconst_tasts y.gconst_tasts;
+    module_tasts = S_map.union x.module_tasts y.module_tasts;
   }
 
 let make_filename path def_name =
@@ -120,7 +121,7 @@ let finalize ~progress:_ ~init_id ~recheck_id (tasts : t) : unit =
       List.iter
         [fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts]
         ~f:(fun tasts ->
-          SMap.iter
+          S_map.iter
             (fun def_name tast ->
               let file_path =
                 let file_name = make_filename path def_name in

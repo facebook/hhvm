@@ -63,33 +63,33 @@ module VisitedGoalsFunctor (Tset : Stdlib.Set.S) : sig
 
   val try_add_visited_generic_super : t -> Tset.elt -> string -> t option
 end = struct
-  type t = (Tset.t * Tset.t) SMap.t
+  type t = (Tset.t * Tset.t) S_map.t
 
-  let empty : t = SMap.empty
+  let empty : t = S_map.empty
 
   (* Return None if (name <: ty) is already present, otherwise return Some v'
    * where v' has the pair added
    *)
   let try_add_visited_generic_sub v name ty =
-    match SMap.find_opt name v with
-    | None -> Some (SMap.add name (Tset.empty, Tset.singleton ty) v)
+    match S_map.find_opt name v with
+    | None -> Some (S_map.add name (Tset.empty, Tset.singleton ty) v)
     | Some (lower, upper) ->
       if Tset.mem ty upper then
         None
       else
-        Some (SMap.add name (lower, Tset.add ty upper) v)
+        Some (S_map.add name (lower, Tset.add ty upper) v)
 
   (* Return None if (ty <: name) is already present, otherwise return Some v'
    * where v' has the pair added
    *)
   let try_add_visited_generic_super v ty name =
-    match SMap.find_opt name v with
-    | None -> Some (SMap.add name (Tset.singleton ty, Tset.empty) v)
+    match S_map.find_opt name v with
+    | None -> Some (S_map.add name (Tset.singleton ty, Tset.empty) v)
     | Some (lower, upper) ->
       if Tset.mem ty lower then
         None
       else
-        Some (SMap.add name (Tset.add ty lower, upper) v)
+        Some (S_map.add name (Tset.add ty lower, upper) v)
 end
 
 module VisitedGoals = VisitedGoalsFunctor (Typing_set)
@@ -7093,7 +7093,7 @@ end = struct
                              Type_expansions.Expandable.Type_alias name_super ));
                   substs =
                     (if List.is_empty lty_supers then
-                      SMap.empty
+                      S_map.empty
                     else
                       Decl_subst.make_locl td_tparams lty_supers);
                 }
@@ -12290,7 +12290,7 @@ end = struct
     let (env, ft_tparams_rev, subst) =
       List.fold_left
         fun_ty.ft_tparams
-        ~init:(env, [], SMap.empty)
+        ~init:(env, [], S_map.empty)
         ~f:(fun (env, acc, subst) ({ tp_name = (pos, old_name); _ } as tparam)
            ->
           let (env, new_name) = Typing_env.fresh_param_name env old_name in
@@ -12301,7 +12301,7 @@ end = struct
                   (pos, new_name, old_name, rank),
                 Tgeneric new_name )
           in
-          (env, tparam :: acc, SMap.add old_name ty subst))
+          (env, tparam :: acc, S_map.add old_name ty subst))
     in
     let ft_tparams = List.rev ft_tparams_rev in
     let combine_reasons ~src:_ ~dest = dest in
@@ -12445,7 +12445,7 @@ end = struct
             let (env, ty) = Env.fresh_type_invariant_with_rank env rank pos in
             (env, (name, ty) :: subst))
       in
-      (env, SMap.of_list name_tys)
+      (env, S_map.of_list name_tys)
     in
     (* TODO(mjt) add flow for polymorphic instantiation *)
     let combine_reasons ~src ~dest:_ = src in
@@ -12458,7 +12458,7 @@ end = struct
           ~init:(env, [])
           ~f:(fun (env, err_opts) { tp_name = (_, id); tp_constraints; _ } ->
             (* We know the substituion contains the name so use the unsafe [find] *)
-            let ty_subj = SMap.find id subst in
+            let ty_subj = S_map.find id subst in
             List.fold_left
               tp_constraints
               ~init:(env, err_opts)
@@ -12917,7 +12917,7 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
             (new_nm, old_ty) :: bwds,
             (orig_nm, new_nm) :: nms ))
     in
-    (env, SMap.of_list subst, SMap.of_list subst_bwd, SMap.of_list old_to_new)
+    (env, S_map.of_list subst, S_map.of_list subst_bwd, S_map.of_list old_to_new)
   in
   let combine_reasons ~src ~dest:_ = src in
   (* Apply the substitution to the [where] constraints *)
@@ -12931,7 +12931,7 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
   let (tpenv, err_opt) =
     let tparams =
       List.map tparams ~f:(fun ({ tp_name = (pos, orig_nm); _ } as tparam) ->
-          let new_nm = SMap.find orig_nm old_to_new in
+          let new_nm = S_map.find orig_nm old_to_new in
           let tp_name = (pos, new_nm) in
           { tparam with tp_name })
     in
@@ -12972,7 +12972,7 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
   ( List.map
       tparams
       ~f:(fun ({ tp_name = (_, orig_name); tp_constraints; _ } as default) ->
-        let new_name = SMap.find orig_name old_to_new in
+        let new_name = S_map.find orig_name old_to_new in
         let entry_opt = Type_parameter_env.get new_name tpenv in
         Option.value_map entry_opt ~default ~f:(fun entry ->
             let tp_constraints = apply_bounds tp_constraints entry in

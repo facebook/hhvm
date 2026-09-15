@@ -73,7 +73,7 @@ module M = struct
   let get_tracing_info env = env.tracing_info
 
   let set_log_level env key log_level =
-    { env with log_levels = SMap.add key log_level env.log_levels }
+    { env with log_levels = S_map.add key log_level env.log_levels }
 
   let get_log_level = Typing_env_types.get_log_level
 
@@ -683,7 +683,7 @@ module M = struct
     match LEnvC.get_cont_option C.Next per_cont_env with
     | None -> false
     | Some next_cont -> begin
-      match SMap.find_opt package next_cont.LEnvC.loaded_packages with
+      match S_map.find_opt package next_cont.LEnvC.loaded_packages with
       | None
       | Some { status = Not_exists_in_deployment; _ } ->
         false
@@ -700,7 +700,7 @@ module M = struct
     match LEnvC.get_cont_option C.Next per_cont_env with
     | None -> []
     | Some next_cont ->
-      SMap.fold
+      S_map.fold
         (fun pkg { pos; status; from_includes } acc ->
           match status with
           | Exists_in_deployment ->

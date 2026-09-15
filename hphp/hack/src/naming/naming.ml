@@ -341,8 +341,8 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
     in
     let ns_ns_uses =
       popt.Parser_options.auto_namespace_map
-      |> SMap.of_list
-      |> SMap.union Namespace_env.(empty_with_default.ns_ns_uses)
+      |> S_map.of_list
+      |> S_map.union Namespace_env.(empty_with_default.ns_ns_uses)
     in
     Some
       Aast.

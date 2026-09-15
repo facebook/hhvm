@@ -77,7 +77,7 @@ let unpack_member_lookup_result
     raise_decl_heap_elems_bug ~err ~child_class_name ~elt_origin ~member_name
 
 let rec apply_substs substs class_context (pos, ty) =
-  match SMap.find_opt class_context substs with
+  match S_map.find_opt class_context substs with
   | None -> (pos, ty)
   | Some { sc_subst = subst; sc_class_context = next_class_context; _ } ->
     apply_substs substs next_class_context (pos, Inst.instantiate subst ty)
@@ -330,7 +330,7 @@ let lookup_static_method_type_lazy
 let lookup_constructor_lazy
     (ctx : Provider_context.t option)
     ~(child_class_name : string)
-    (dc_substs : Decl_defs.subst_context SMap.t)
+    (dc_substs : Decl_defs.subst_context S_map.t)
     (dc_construct : Decl_defs.element option * Typing_defs.consistent_kind) :
     Typing_defs.class_elt option * Typing_defs.consistent_kind =
   match dc_construct with

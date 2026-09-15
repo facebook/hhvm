@@ -61,7 +61,7 @@ type env = {
           so we can add up which area contributed most to overall costs. *)
   tpenv: Type_parameter_env.t;
       (** A set of constraints that are global to a given method *)
-  log_levels: int SMap.t;
+  log_levels: int S_map.t;
   inference_env: Typing_inference_env.t;
   rank: int;
       (** The rank at which fresh type variables and type parameters should be generated *)

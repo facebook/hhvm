@@ -278,6 +278,7 @@ module Core_ty = struct
         "Lazy.t";
         "Either.t";
         "SMap.t";
+        "S_map.t";
         "TShapeMap.t";
         "fun_type";
       ]

@@ -651,7 +651,7 @@ module Full = struct
       semi_sep
       "{ "
       f_rc
-      (SMap.bindings cr_consts)
+      (S_map.bindings cr_consts)
       " }"
 
   let refinements ~fuel k e =

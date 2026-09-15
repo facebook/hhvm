@@ -23,11 +23,11 @@ type loaded_package_info = {
 }
 
 (** Each package maps to its loaded package info *)
-type t = loaded_package_info SMap.t
+type t = loaded_package_info S_map.t
 
 (* logging and pretty-printing *)
 let show lp =
-  SMap.fold
+  S_map.fold
     (fun key { pos = _; status; from_includes } acc ->
       Printf.sprintf
         "%s%s: %s%s; "
@@ -45,7 +45,7 @@ let as_log_value lp =
   Typing_log_value.(
     make_map
       (List.map
-         (SMap.elements lp)
+         (S_map.elements lp)
          ~f:(fun (key, { pos = _; status; from_includes }) ->
            ( key,
              Typing_log_value.string_as_value
@@ -58,10 +58,10 @@ let as_log_value lp =
                     "")) ))))
 
 (* typing_local_packages.t algebra *)
-let empty = SMap.empty
+let empty = S_map.empty
 
 let join lp1 lp2 =
-  SMap.merge
+  S_map.merge
     (fun _key op1 op2 ->
       match (op1, op2) with
       | (Some info1, Some info2) ->
@@ -86,7 +86,7 @@ let join lp1 lp2 =
  * Uses the package_info from the parsed PACKAGES.toml to find which packages include pkg.
  *)
 let update_unsatisfiable_packages package_info pkg pos lp =
-  SMap.mapi
+  S_map.mapi
     (fun pkg_name info ->
       match Package_info.get_package package_info pkg_name with
       | None -> info
@@ -130,7 +130,7 @@ let add ~package_info pos pkg status lp =
     let all_pkgs = pkg :: pkgs_included_by_pkg in
     let has_conflict =
       List.exists all_pkgs ~f:(fun pkg_name ->
-          match SMap.find_opt pkg_name lp with
+          match S_map.find_opt pkg_name lp with
           | Some { status = Not_exists_in_deployment; _ } -> true
           | Some { status = Unsatisfiable_package_constraints; _ } -> true
           | Some { status = Exists_in_deployment; _ } -> false
@@ -140,7 +140,7 @@ let add ~package_info pos pkg status lp =
       (* If one is not_exists or unsatisfiable, pkg -> Unsatisfiable
          (no assumption on any of the other included packages) *)
       let lp = update_unsatisfiable_packages package_info pkg pos lp in
-      SMap.add
+      S_map.add
         pkg
         {
           pos;
@@ -151,13 +151,13 @@ let add ~package_info pos pkg status lp =
     else
       (* If all are exists or not found, map includes ∪ pkg to Exists *)
       let lp =
-        SMap.add
+        S_map.add
           pkg
           { pos; status = Exists_in_deployment; from_includes = false }
           lp
       in
       List.fold_left pkgs_included_by_pkg ~init:lp ~f:(fun lp pkg_name ->
-          SMap.add
+          S_map.add
             ~combine:(fun old_value _new_value ->
               (* The old_value.status can only be Exists_in_deployment, otherwise
                  a conflict would have been detected.  For error reporting, preserve
@@ -167,17 +167,17 @@ let add ~package_info pos pkg status lp =
             { pos; status = Exists_in_deployment; from_includes = true }
             lp)
   | Not_exists_in_deployment ->
-    (match SMap.find_opt pkg lp with
+    (match S_map.find_opt pkg lp with
     | None
     | Some { status = Not_exists_in_deployment; _ } ->
-      SMap.add
+      S_map.add
         pkg
         { pos; status = Not_exists_in_deployment; from_includes = false }
         lp
     | Some { status = Exists_in_deployment; _ }
     | Some { status = Unsatisfiable_package_constraints; _ } ->
       let lp = update_unsatisfiable_packages package_info pkg pos lp in
-      SMap.add
+      S_map.add
         pkg
         {
           pos;
@@ -187,14 +187,14 @@ let add ~package_info pos pkg status lp =
         lp)
   | Unsatisfiable_package_constraints ->
     let lp = update_unsatisfiable_packages package_info pkg pos lp in
-    SMap.add
+    S_map.add
       pkg
       { pos; status = Unsatisfiable_package_constraints; from_includes = false }
       lp
 
 (* Assuming a conservative entailement of package requirements *)
 let sub lp1 lp2 =
-  SMap.equal
+  S_map.equal
     (fun info1 info2 ->
       equal_local_package_requirement info1.status info2.status)
     lp1

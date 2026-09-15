@@ -437,7 +437,7 @@ val mk_tany :
   Typing_env_types.env -> Pos.t -> Typing_reason.locl_phase Typing_defs.ty
 
 val make_locl_subst_for_class_tparams :
-  Folded_class.t -> Typing_defs.locl_ty list -> Typing_defs.locl_ty SMap.t
+  Folded_class.t -> Typing_defs.locl_ty list -> Typing_defs.locl_ty S_map.t
 
 val is_sub_class_refl : Typing_env_types.env -> string -> string -> bool
 

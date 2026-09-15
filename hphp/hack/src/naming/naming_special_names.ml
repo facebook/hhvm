@@ -249,8 +249,8 @@ module AttributeKinds = struct
 
   let plain_english_map =
     List.fold_left
-      ~init:SMap.empty
-      ~f:(fun acc (k, v) -> SMap.add k v acc)
+      ~init:S_map.empty
+      ~f:(fun acc (k, v) -> S_map.add k v acc)
       [
         (cls, "a class");
         (clscst, "a constant of a class");
@@ -424,9 +424,9 @@ module UserAttributes = struct
     autocomplete: bool;
   }
 
-  let as_map : attr_info SMap.t =
+  let as_map : attr_info S_map.t =
     AttributeKinds.(
-      SMap.of_list
+      S_map.of_list
         [
           ( uaUnsafeAllowMultipleInstantiations,
             {
@@ -884,7 +884,7 @@ module UserAttributes = struct
             } );
           ( uaSimpliHack,
             {
-              contexts = SMap.keys @@ AttributeKinds.plain_english_map;
+              contexts = S_map.keys @@ AttributeKinds.plain_english_map;
               (* We want this to be able to attached to any valid location for an attribute *)
               autocomplete = false;
               doc = "Demo for SimpliHack";
@@ -915,7 +915,7 @@ module UserAttributes = struct
   (* These are names which are allowed in the systemlib but not in normal programs *)
   let systemlib_map =
     AttributeKinds.(
-      SMap.of_list
+      S_map.of_list
         [
           ( uaAlwaysInline,
             {

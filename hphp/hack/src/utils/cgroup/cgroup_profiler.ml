@@ -150,13 +150,13 @@ let log_cgroup_total cgroup ~step_group ~step ~suffix ~total_hwm =
     end
 
 (** Given a float array [secs_at_gb] where secs_at_gb[0] says how many secs were spent at cgroup memory 0gb,
-secs_at_gb[1] says how many secs were spent at cgroup memory 1gb, and so on, produces an SMap
+secs_at_gb[1] says how many secs were spent at cgroup memory 1gb, and so on, produces an S_map
 where keys are some arbitrary thresholds "secs_above_20gb" and values are (int) number of seconds
 spent at that memory or higher. We pick just a few arbitrary thresholds that we think are useful
 for telemetry, and their sole purpose is telemetry. *)
-let secs_above_gb_summary (secs_at_gb : float array) : int SMap.t =
+let secs_above_gb_summary (secs_at_gb : float array) : int S_map.t =
   if Array.is_empty secs_at_gb then
-    SMap.empty
+    S_map.empty
   else
     List.init 15 ~f:(fun i -> i * 5) (* 0gb, 5gb, ..., 70gb) *)
     |> List.filter_map ~f:(fun threshold ->
@@ -172,7 +172,7 @@ let secs_above_gb_summary (secs_at_gb : float array) : int SMap.t =
            in
            let secs = Float.round secs |> int_of_float in
            Option.some_if (secs > 0) (title, secs))
-    |> SMap.of_list
+    |> S_map.of_list
 
 (** Records to HackEventLogger *)
 let log_telemetry
@@ -204,7 +204,7 @@ let log_telemetry
     let sysinfo = Sys_utils.sysinfo () in
     telemetry_ref :=
       Telemetry.create ()
-      |> SMap.fold
+      |> S_map.fold
            (fun key value -> Telemetry.int_ ~key ~value)
            secs_above_total_gb_summary
       |> Telemetry.int_
@@ -269,7 +269,7 @@ let log_telemetry
       ~shmem:(cgroup.shmem - initial.shmem)
       ~file:(cgroup.file - initial.file)
       ~secs_at_total_gb:None
-      ~secs_above_total_gb_summary:SMap.empty
+      ~secs_above_total_gb_summary:S_map.empty
 
 let step_group name ~log f =
   let profiling =

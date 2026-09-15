@@ -17,11 +17,11 @@ type hash = Hash.hash_value
 let yojson_of_hash = yojson_of_int
 
 type by_names = {
-  fun_tast_hashes: hash SMap.t; [@yojson_drop_if SMap.is_empty]
-  class_tast_hashes: hash SMap.t; [@yojson_drop_if SMap.is_empty]
-  typedef_tast_hashes: hash SMap.t; [@yojson_drop_if SMap.is_empty]
-  gconst_tast_hashes: hash SMap.t; [@yojson_drop_if SMap.is_empty]
-  module_tast_hashes: hash SMap.t; [@yojson_drop_if SMap.is_empty]
+  fun_tast_hashes: hash S_map.t; [@yojson_drop_if S_map.is_empty]
+  class_tast_hashes: hash S_map.t; [@yojson_drop_if S_map.is_empty]
+  typedef_tast_hashes: hash S_map.t; [@yojson_drop_if S_map.is_empty]
+  gconst_tast_hashes: hash S_map.t; [@yojson_drop_if S_map.is_empty]
+  module_tast_hashes: hash S_map.t; [@yojson_drop_if S_map.is_empty]
 }
 [@@deriving yojson_of]
 
@@ -37,20 +37,21 @@ let hash_tasts
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
     by_names =
   {
-    fun_tast_hashes = SMap.map Tast.hash_def_with_dynamic fun_tasts;
-    class_tast_hashes = SMap.map Tast.hash_def_with_dynamic class_tasts;
-    typedef_tast_hashes = SMap.map Tast.hash_def typedef_tasts;
-    gconst_tast_hashes = SMap.map Tast.hash_def gconst_tasts;
-    module_tast_hashes = SMap.map Tast.hash_def module_tasts;
+    fun_tast_hashes = S_map.map Tast.hash_def_with_dynamic fun_tasts;
+    class_tast_hashes = S_map.map Tast.hash_def_with_dynamic class_tasts;
+    typedef_tast_hashes = S_map.map Tast.hash_def typedef_tasts;
+    gconst_tast_hashes = S_map.map Tast.hash_def gconst_tasts;
+    module_tast_hashes = S_map.map Tast.hash_def module_tasts;
   }
 
 let union_by_names x y =
   {
-    fun_tast_hashes = SMap.union x.fun_tast_hashes y.fun_tast_hashes;
-    class_tast_hashes = SMap.union x.class_tast_hashes y.class_tast_hashes;
-    typedef_tast_hashes = SMap.union x.typedef_tast_hashes y.typedef_tast_hashes;
-    gconst_tast_hashes = SMap.union x.gconst_tast_hashes y.gconst_tast_hashes;
-    module_tast_hashes = SMap.union x.module_tast_hashes y.module_tast_hashes;
+    fun_tast_hashes = S_map.union x.fun_tast_hashes y.fun_tast_hashes;
+    class_tast_hashes = S_map.union x.class_tast_hashes y.class_tast_hashes;
+    typedef_tast_hashes =
+      S_map.union x.typedef_tast_hashes y.typedef_tast_hashes;
+    gconst_tast_hashes = S_map.union x.gconst_tast_hashes y.gconst_tast_hashes;
+    module_tast_hashes = S_map.union x.module_tast_hashes y.module_tast_hashes;
   }
 
 let union_file_info x y =
@@ -69,11 +70,11 @@ let error_while_hashing
   let minus_one _ = -1 in
   let tast_hashes =
     {
-      fun_tast_hashes = SMap.map minus_one fun_tasts;
-      class_tast_hashes = SMap.map minus_one class_tasts;
-      typedef_tast_hashes = SMap.map minus_one typedef_tasts;
-      gconst_tast_hashes = SMap.map minus_one gconst_tasts;
-      module_tast_hashes = SMap.map minus_one module_tasts;
+      fun_tast_hashes = S_map.map minus_one fun_tasts;
+      class_tast_hashes = S_map.map minus_one class_tasts;
+      typedef_tast_hashes = S_map.map minus_one typedef_tasts;
+      gconst_tast_hashes = S_map.map minus_one gconst_tasts;
+      module_tast_hashes = S_map.map minus_one module_tasts;
     }
   in
   { tast_hashes; error_hashes = I_set.empty }

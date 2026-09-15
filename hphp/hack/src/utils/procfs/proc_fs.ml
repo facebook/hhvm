@@ -41,29 +41,29 @@ let humanReadableToBytes str =
 let parse_status raw_status_contents =
   let stats =
     String.split raw_status_contents ~on:'\n'
-    |> List.fold_left ~init:SMap.empty ~f:(fun stats line ->
+    |> List.fold_left ~init:S_map.empty ~f:(fun stats line ->
            match String.split line ~on:':' with
            | [raw_key; raw_stat] ->
              let key = String.strip raw_key in
              let stat = String.strip raw_stat in
-             SMap.add key stat stats
+             S_map.add key stat stats
            | _ -> stats)
   in
   {
     rss_anon =
-      SMap.find_opt "RssAnon" stats
+      S_map.find_opt "RssAnon" stats
       |> Option.value_map ~default:0 ~f:humanReadableToBytes;
     rss_file =
-      SMap.find_opt "RssFile" stats
+      S_map.find_opt "RssFile" stats
       |> Option.value_map ~default:0 ~f:humanReadableToBytes;
     rss_shmem =
-      SMap.find_opt "RssShmem" stats
+      S_map.find_opt "RssShmem" stats
       |> Option.value_map ~default:0 ~f:humanReadableToBytes;
     rss_total =
-      SMap.find_opt "VmRSS" stats
+      S_map.find_opt "VmRSS" stats
       |> Option.value_map ~default:0 ~f:humanReadableToBytes;
     rss_hwm =
-      SMap.find_opt "VmHWM" stats
+      S_map.find_opt "VmHWM" stats
       |> Option.value_map ~default:0 ~f:humanReadableToBytes;
   }
 

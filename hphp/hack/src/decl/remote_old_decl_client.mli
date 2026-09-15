@@ -9,7 +9,7 @@
 val fetch_old_decls :
   ctx:Provider_context.t ->
   string list ->
-  Shallow_decl_defs.shallow_class option SMap.t
+  Shallow_decl_defs.shallow_class option S_map.t
 
 module Utils : sig
   val name_to_file_hash_opt :

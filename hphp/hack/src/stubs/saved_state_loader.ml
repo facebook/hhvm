@@ -21,7 +21,7 @@ type process_success = {
 
 type process_failure = string
 
-type config = string * string SMap.t
+type config = string * string S_map.t
 
 module Watchman_options = struct
   type t = {

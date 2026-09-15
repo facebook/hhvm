@@ -100,7 +100,7 @@ let log_iteration_count env pos n =
   let should_log_iteration_count =
     Env.get_tcopt env
     |> TCO.log_levels
-    |> SMap.find_opt "loop_iteration_count"
+    |> S_map.find_opt "loop_iteration_count"
     |> Option.is_some
   in
   if should_log_iteration_count then
@@ -888,7 +888,7 @@ let do_hh_sleep args =
   | [(_, _, Aast.Int seconds_str)] -> Unix.sleep (int_of_string seconds_str)
   | _ -> ()
 
-let hh_time_start_times = ref SMap.empty
+let hh_time_start_times = ref S_map.empty
 
 (* Wrap the code you'd like to profile with `hh_time` annotations, e.g.,
 
@@ -916,11 +916,11 @@ let do_hh_time el =
     match command with
     | Aast.String "start" ->
       let start_time = Unix.gettimeofday () in
-      hh_time_start_times := SMap.add tag start_time !hh_time_start_times
+      hh_time_start_times := S_map.add tag start_time !hh_time_start_times
     | Aast.String "stop" ->
       let stop_time = Unix.gettimeofday () in
       begin
-        match SMap.find_opt tag !hh_time_start_times with
+        match S_map.find_opt tag !hh_time_start_times with
         | Some start_time ->
           let elapsed_time_ms = (stop_time -. start_time) *. 1000. in
           Printf.printf "%s: %0.2fms\n" tag elapsed_time_ms
@@ -2310,7 +2310,7 @@ let safely_refine_class_type
     List.map2_exn tyl_fresh tparams_with_new_names ~f:(fun orig_ty tparam_opt ->
         match tparam_opt with
         | None -> orig_ty
-        | Some (_tp, name) -> SMap.find name tparam_substs)
+        | Some (_tp, name) -> S_map.find name tparam_substs)
   in
   let obj_ty_simplified =
     mk (get_reason obj_ty, Tclass (class_name, nonexact, tyl_fresh))
@@ -7480,10 +7480,10 @@ end = struct
           let named_params =
             List.fold
               non_variadic_non_splat_indexed
-              ~init:SMap.empty
+              ~init:S_map.empty
               ~f:(fun named_params (idx, fp) ->
                 match Typing_defs.Named_params.name_of_named_param fp with
-                | Some name -> SMap.add name (idx, fp) named_params
+                | Some name -> S_map.add name (idx, fp) named_params
                 | None -> named_params)
           in
           let relevant_ambiguous_shape_splat_vars vars =
@@ -7668,12 +7668,12 @@ end = struct
           in
           let get_next_named_param_info
               name named_params_remaining plain_params_remaining =
-            match SMap.find_opt name named_params_remaining with
+            match S_map.find_opt name named_params_remaining with
             | Some (idx, param) ->
               ( idx,
                 ( false,
                   Some param,
-                  SMap.remove name named_params_remaining,
+                  S_map.remove name named_params_remaining,
                   plain_params_remaining ) )
             | None ->
               (* No matching declared name — if the callee has a named
@@ -7830,7 +7830,7 @@ end = struct
               env
               (args_with_result : arg_with_result list)
               (named_params_remaining :
-                (int * Typing_defs.locl_ty Typing_defs.fun_param) SMap.t)
+                (int * Typing_defs.locl_ty Typing_defs.fun_param) S_map.t)
               (plain_params_remaining :
                 (int * Typing_defs.locl_ty Typing_defs.fun_param) list)
                 (* plain params are non-named, non-variadic, non-splat *)
@@ -8502,7 +8502,7 @@ end = struct
       in
       let generics_map =
         I_map.map
-          (fun ((_tp, name), _ty) -> SMap.find name tparam_substs)
+          (fun ((_tp, name), _ty) -> S_map.find name tparam_substs)
           instantiated_tparams
       in
       let predicate_ty =

@@ -10,24 +10,24 @@
 open Hh_prelude
 
 (** For debugging. When we get to [at_exit], we'll log what the current activities are. *)
-let dbg_current_activities : string list SMap.t ref = ref SMap.empty
+let dbg_current_activities : string list S_map.t ref = ref S_map.empty
 
 (** Each activity key is associated with up to five most recent timestamped activity values
 under that key. *)
 let dbg_set_activity ~(key : string) (value : string) : unit =
   let history =
-    SMap.find_opt key !dbg_current_activities |> Option.value ~default:[]
+    S_map.find_opt key !dbg_current_activities |> Option.value ~default:[]
   in
   let history =
     Printf.sprintf "  %s %s" (Unix.gettimeofday () |> Utils.timestring) value
     :: List.take history 4
   in
-  dbg_current_activities := SMap.add key history !dbg_current_activities;
+  dbg_current_activities := S_map.add key history !dbg_current_activities;
   ()
 
 (** This prints a multiline string: for each activity key, the most recent activity values for that key. *)
 let dbg_dump_activity () : string =
-  SMap.bindings !dbg_current_activities
+  S_map.bindings !dbg_current_activities
   |> List.map ~f:(fun (key, history) ->
          key :: List.rev history |> String.concat ~sep:"\n")
   |> String.concat ~sep:"\n"

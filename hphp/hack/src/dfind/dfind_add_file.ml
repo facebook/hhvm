@@ -133,7 +133,7 @@ and add_new_file links env path =
       (try Unix.closedir dir_handle with
       | _ -> ());
       let prev_files =
-        match SMap.find_opt path env.dirs with
+        match S_map.find_opt path env.dirs with
         | Some files -> files
         | None -> SSet.empty
       in
@@ -142,14 +142,14 @@ and add_new_file links env path =
         SSet.fold
           begin
             fun file all_files ->
-              match SMap.find_opt file env.dirs with
+              match S_map.find_opt file env.dirs with
               | Some sub_dir -> SSet.union sub_dir all_files
               | None -> SSet.add file all_files
           end
           files
           prev_files
       in
-      env.dirs <- SMap.add path files env.dirs;
+      env.dirs <- S_map.add path files env.dirs;
       return ()
     | _ -> return ()
 

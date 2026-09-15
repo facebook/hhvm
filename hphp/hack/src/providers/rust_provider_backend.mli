@@ -60,11 +60,11 @@ module Decl : sig
   val get_old_defs :
     t ->
     File_info.names ->
-    Shallow_decl_defs.class_decl option SMap.t
-    * Shallow_decl_defs.fun_decl option SMap.t
-    * Shallow_decl_defs.typedef_decl option SMap.t
-    * Shallow_decl_defs.const_decl option SMap.t
-    * Shallow_decl_defs.module_decl option SMap.t
+    Shallow_decl_defs.class_decl option S_map.t
+    * Shallow_decl_defs.fun_decl option S_map.t
+    * Shallow_decl_defs.typedef_decl option S_map.t
+    * Shallow_decl_defs.const_decl option S_map.t
+    * Shallow_decl_defs.module_decl option S_map.t
 
   val oldify_defs : t -> File_info.names -> unit
 

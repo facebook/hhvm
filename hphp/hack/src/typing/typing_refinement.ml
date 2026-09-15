@@ -549,7 +549,7 @@ module Uninstantiated_typing_logic = struct
     | Exact -> Exact
     | Nonexact { cr_consts } ->
       let cr_consts =
-        SMap.map
+        S_map.map
           (fun { rc_bound; rc_is_ctx } ->
             let rc_bound =
               match rc_bound with
@@ -1243,7 +1243,7 @@ and split_ty
                   empty_expand_env with
                   substs =
                     (if List.is_empty tyl then
-                      SMap.empty
+                      S_map.empty
                     else
                       Decl_subst.make_locl td_tparams tyl);
                 }

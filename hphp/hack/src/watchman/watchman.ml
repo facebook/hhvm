@@ -929,17 +929,17 @@ module Watchman_actual : Watchman_sig.S = struct
     (** Returns (current_states, past_states).
         [past_states] maps each state name to the [Unix.gettimeofday] timestamp
         of the last time it was left. *)
-    val get : unit -> string list * float SMap.t
+    val get : unit -> string list * float S_map.t
   end = struct
     type state = string
 
     type t = {
-      past_states: float SMap.t;
+      past_states: float S_map.t;
           (** Maps state name to [Unix.gettimeofday] timestamp of last leave *)
       current_states: state list;
     }
 
-    let init : t = { past_states = SMap.empty; current_states = [] }
+    let init : t = { past_states = S_map.empty; current_states = [] }
 
     let states : t ref = ref init
 
@@ -962,7 +962,7 @@ module Watchman_actual : Watchman_sig.S = struct
      fun state ->
       let { current_states; past_states } = !states in
       let current_states = remove_first current_states state in
-      let past_states = SMap.add state (Unix.gettimeofday ()) past_states in
+      let past_states = S_map.add state (Unix.gettimeofday ()) past_states in
       states := { current_states; past_states }
 
     let get () =
@@ -1281,7 +1281,7 @@ module Watchman_mock = struct
   end
 
   module RepoStates = struct
-    let get () : string list * float SMap.t = ([], SMap.empty)
+    let get () : string list * float S_map.t = ([], S_map.empty)
   end
 
   let init ?since_clockspec:_ _ () = !Mocking.init

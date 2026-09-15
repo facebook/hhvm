@@ -24,7 +24,7 @@ let get_tparams_in_ty_and_acc acc ty =
   tparams_visitor#on_type acc ty
 
 let get_tparams_in_subst subst =
-  SMap.fold (fun _ ty acc -> get_tparams_in_ty_and_acc acc ty) subst SSet.empty
+  S_map.fold (fun _ ty acc -> get_tparams_in_ty_and_acc acc ty) subst SSet.empty
 
 (*****************************************************************************)
 (* Code dealing with instantiation. *)
@@ -35,12 +35,12 @@ let rec instantiate subst (ty : decl_ty) =
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.
    *)
-  if SMap.is_empty subst then
+  if S_map.is_empty subst then
     ty
   else
     match deref ty with
     | (r, Tgeneric x) ->
-      (match SMap.find_opt x subst with
+      (match S_map.find_opt x subst with
       | Some found_ty ->
         let (found_r, found_ty_) = deref found_ty in
         let new_r = Reason.instantiate ~type_:found_r x ~var:r in
@@ -101,7 +101,7 @@ and instantiate_ subst x =
       List.fold_left
         ~f:
           begin
-            (fun subst t -> SMap.remove (snd t.tp_name) subst)
+            (fun subst t -> S_map.remove (snd t.tp_name) subst)
           end
         ~init:subst
         tparams
@@ -128,7 +128,7 @@ and instantiate_ subst x =
             (* Fresh only because we don't support nesting of generic function types *)
             let fresh_tp_name = name ^ "#0" in
             let reason = Typing_reason.witness_from_decl pos in
-            ( SMap.add name (mk (reason, Tgeneric fresh_tp_name)) subst,
+            ( S_map.add name (mk (reason, Tgeneric fresh_tp_name)) subst,
               { tp with tp_name = (pos, fresh_tp_name) } )
           else
             (subst, tp))

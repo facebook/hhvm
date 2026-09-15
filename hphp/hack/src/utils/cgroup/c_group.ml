@@ -85,16 +85,16 @@ let read_single_number_file path =
 let parse_stat stat_contents =
   let stats =
     String.split stat_contents ~on:'\n'
-    |> List.fold_left ~init:SMap.empty ~f:(fun stats line ->
+    |> List.fold_left ~init:S_map.empty ~f:(fun stats line ->
            match String.split line ~on:' ' with
            | [key; raw_stat] ->
              int_of_string_opt raw_stat
              |> Option.value_map ~default:stats ~f:(fun stat ->
-                    SMap.add key stat stats)
+                    S_map.add key stat stats)
            | _ -> stats)
   in
   let get key =
-    match SMap.find_opt key stats with
+    match S_map.find_opt key stats with
     | Some stat -> Ok stat
     | None -> Error (spf "Failed to find %S in memory.stat" key)
   in

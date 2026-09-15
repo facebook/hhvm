@@ -12,18 +12,18 @@ type value =
   | Atom of string
   | List of value list
   | Set of SSet.t
-  | Map of value SMap.t
+  | Map of value S_map.t
   | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop
 [@@deriving eq]
 
-let make_map l = Map (SMap.of_list l)
+let make_map l = Map (S_map.of_list l)
 
 let bool_as_value v = Bool v
 
 let string_as_value s = Atom s
 
-let smap_as_value f m = Map (SMap.map f m)
+let smap_as_value f m = Map (S_map.map f m)
 
 let list_as_value l = List l
 

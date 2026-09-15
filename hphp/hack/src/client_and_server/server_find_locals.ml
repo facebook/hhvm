@@ -44,7 +44,7 @@ module ScopeChain = struct
    * of the stack, that match shadows any matches in the tail. Otherwise,
    * the tail is checked.
    *)
-  type scope = Ident.t SMap.t
+  type scope = Ident.t S_map.t
 
   type t = scope list
 
@@ -59,9 +59,9 @@ module ScopeChain = struct
    * Therefore we head every scope chain with a "dummy" scope that can be
    * used for these error cases.
    *)
-  let empty = [SMap.empty]
+  let empty = [S_map.empty]
 
-  let push scopechain = SMap.empty :: scopechain
+  let push scopechain = S_map.empty :: scopechain
 
   let pop scopechain =
     match scopechain with
@@ -70,14 +70,14 @@ module ScopeChain = struct
 
   let add name ident scopechain =
     match scopechain with
-    | h :: t -> SMap.add name ident h :: t
+    | h :: t -> S_map.add name ident h :: t
     | _ -> failwith "adding name to empty scope chain"
 
   let rec get name scopechain =
     match scopechain with
     | [] -> None
     | h :: t ->
-      let result = SMap.find_opt name h in
+      let result = S_map.find_opt name h in
       if Option.is_none result then
         get name t
       else

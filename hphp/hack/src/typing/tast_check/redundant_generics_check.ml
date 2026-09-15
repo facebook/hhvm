@@ -26,7 +26,7 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
       ~tracked
       ~is_mutable:false
       env
-      (SMap.empty, SMap.empty)
+      (S_map.empty, S_map.empty)
       ty
   in
   (* Find the set of generics that appear as part of the type HH\EnumClass\Label *)
@@ -73,7 +73,7 @@ let ft_redundant_generics (env : Tast_env.env) tparams ty =
               Ast_defs.(equal_constraint_kind ck Constraint_as))
             t.tp_constraints
         in
-        match (SMap.find_opt name positive, SMap.find_opt name negative) with
+        match (S_map.find_opt name positive, S_map.find_opt name negative) with
         | (Some _, Some _) -> ()
         | (Some _positions, None) ->
           let bounds_message =

@@ -23,18 +23,18 @@ let fetch_remote_old_decls ctx ~during_init =
 let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
   if fetch_remote_old_decls ctx ~during_init then
     let missing_old_classes =
-      SMap.filter (fun _key -> Option.is_none) old_classes |> SMap.keys
+      S_map.filter (fun _key -> Option.is_none) old_classes |> S_map.keys
     in
     let remote_old_classes =
       Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
     in
-    SMap.union old_classes remote_old_classes ~combine:(fun _key decl1 decl2 ->
+    S_map.union old_classes remote_old_classes ~combine:(fun _key decl1 decl2 ->
         Some (Option.first_some decl1 decl2))
   else
     old_classes
 
 let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
-    shallow_class option SMap.t =
+    shallow_class option S_map.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->

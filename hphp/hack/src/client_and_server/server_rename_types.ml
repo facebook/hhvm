@@ -120,9 +120,9 @@ let write_patches_to_buffer buf original_content patch_list =
 let map_patches_to_filename acc patch =
   let pos = get_pos patch in
   let fn = Pos.filename pos in
-  match SMap.find_opt fn acc with
-  | Some lst -> SMap.add fn (patch :: lst) acc
-  | None -> SMap.add fn [patch] acc
+  match S_map.find_opt fn acc with
+  | Some lst -> S_map.add fn (patch :: lst) acc
+  | None -> S_map.add fn [patch] acc
 
 let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
@@ -131,12 +131,12 @@ let apply_patches_to_string old_content patch_list =
   Buffer.contents buf
 
 let list_to_file_map =
-  List.fold_left ~f:map_patches_to_filename ~init:SMap.empty
+  List.fold_left ~f:map_patches_to_filename ~init:S_map.empty
 
 let apply_patches_to_file_contents file_contents patches =
   let file_map = list_to_file_map patches in
   let apply fn old_contents =
-    match SMap.find_opt (Relative_path.to_absolute fn) file_map with
+    match S_map.find_opt (Relative_path.to_absolute fn) file_map with
     | Some patches -> apply_patches_to_string old_contents patches
     | None -> old_contents
   in

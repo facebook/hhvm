@@ -23,6 +23,6 @@ val class_decl :
   sh:Shared_mem.uses ->
   Provider_context.t ->
   Shallow_decl_defs.shallow_class ->
-  parents:Decl_store.class_entries SMap.t ->
+  parents:Decl_store.class_entries S_map.t ->
   Decl_defs.decl_error list ->
   Decl_defs.decl_class_type * Decl_store.class_members

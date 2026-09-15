@@ -12,7 +12,7 @@ val get_old_batch :
   Provider_context.t ->
   during_init:bool ->
   SSet.t ->
-  shallow_class option SMap.t
+  shallow_class option S_map.t
 
 val oldify_batch : Provider_context.t -> SSet.t -> unit
 

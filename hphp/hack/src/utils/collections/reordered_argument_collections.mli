@@ -32,5 +32,5 @@ module type SMap_S = Reordered_argument_collections_sig.SMap_S
 
 module SMap :
   SMap_S
-    with type key = Reordered_argument_map(SMap).key
-    with type 'a t = 'a Reordered_argument_map(SMap).t
+    with type key = Reordered_argument_map(S_map).key
+    with type 'a t = 'a Reordered_argument_map(S_map).t

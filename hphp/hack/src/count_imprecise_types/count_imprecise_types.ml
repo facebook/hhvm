@@ -24,7 +24,7 @@ let json_of_results results =
         ("nonnull_count", `Int result.nonnull_count);
       ]
   in
-  `List (SMap.bindings results |> List.map ~f:json_of_result)
+  `List (S_map.bindings results |> List.map ~f:json_of_result)
 
 let bad_type_visitor_per_def =
   object (self)
@@ -56,20 +56,20 @@ let bad_type_visitor =
   object
     inherit [_] Tast_visitor.reduce
 
-    method zero = SMap.empty
+    method zero = S_map.empty
 
     method plus =
-      SMap.union ~combine:(fun id _ _ -> failwith ("Clash at %s" ^ id))
+      S_map.union ~combine:(fun id _ _ -> failwith ("Clash at %s" ^ id))
 
     method! on_fun_def env ({ Aast.fd_name = (_, id); _ } as fun_def) =
       let result = bad_type_visitor_per_def#on_fun_def env fun_def in
-      SMap.singleton id result
+      S_map.singleton id result
 
     method! on_method_ env (Aast_defs.{ m_name = (_, mid); _ } as method_def) =
       let result = bad_type_visitor_per_def#on_method_ env method_def in
       let cid = Tast_env.get_self_id env |> Option.value_exn in
       let id = cid ^ "::" ^ mid in
-      SMap.singleton id result
+      S_map.singleton id result
   end
 
 let count ctx tast = bad_type_visitor#go ctx tast

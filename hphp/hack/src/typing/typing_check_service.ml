@@ -969,7 +969,7 @@ type 'env distc_outcome =
       * Warnings_saved_state.t option
       * 'env
   | DistCError of log_message
-  | Cancel of 'env * MultiThreadedCall.cancel_reason
+  | Cancel of 'env * Multi_threaded_call.cancel_reason
 
 (**
   This is the event loop that powers hh_distc. It keeps looping and calling
@@ -985,9 +985,9 @@ type 'env distc_outcome =
 let rec event_loop
     ~(done_count : int)
     ~(total_count : int)
-    ~(interrupt : 'env MultiThreadedCall.interrupt_config)
+    ~(interrupt : 'env Multi_threaded_call.interrupt_config)
     ~(handlers :
-       (Unix.file_descr * 'env MultiThreadedCall.interrupt_handler) list)
+       (Unix.file_descr * 'env Multi_threaded_call.interrupt_handler) list)
     ~(fd_distc : Unix.file_descr)
     ~(handle : Hh_distc_ffi.handle)
     ~(check_info : check_info)
@@ -1019,7 +1019,7 @@ let rec event_loop
             Map_reduce.of_ffi map_reduce_data,
             Typing_deps.dep_edges_make (),
             warnings_saved_state,
-            interrupt.MultiThreadedCall.env )
+            interrupt.Multi_threaded_call.env )
       | Error error -> DistCError error)
     | Some _ ->
       (match
@@ -1050,31 +1050,33 @@ let rec event_loop
       List.fold
         handlers
         ~init:
-          (interrupt.MultiThreadedCall.env, MultiThreadedCall.Continue, handlers)
+          ( interrupt.Multi_threaded_call.env,
+            Multi_threaded_call.Continue,
+            handlers )
         ~f:(fun (env, decision, handlers) (fd, handler) ->
           match (decision, not @@ List.mem ~equal:Poly.( = ) ready_fds fd) with
           | (_, false) ->
             (* skip handlers whose fd isn't ready *)
             (env, decision, handlers)
-          | (MultiThreadedCall.Cancel _, _) ->
+          | (Multi_threaded_call.Cancel _, _) ->
             (* if a previous handler has decided to cancel, skip further handlers *)
             (env, decision, handlers)
-          | (MultiThreadedCall.Continue, true) ->
+          | (Multi_threaded_call.Continue, true) ->
             let (env, decision) = handler env in
             (* running a handler could have changed the handlers,
                * so need to regenerate them based on new environment *)
             let handlers =
-              interrupt.MultiThreadedCall.handlers
-                interrupt.MultiThreadedCall.env
+              interrupt.Multi_threaded_call.handlers
+                interrupt.Multi_threaded_call.env
             in
             (env, decision, handlers))
     in
-    let interrupt = { interrupt with MultiThreadedCall.env } in
+    let interrupt = { interrupt with Multi_threaded_call.env } in
     match decision with
-    | MultiThreadedCall.Cancel reason ->
+    | Multi_threaded_call.Cancel reason ->
       let () = Hh_distc_ffi.cancel handle in
-      Cancel (interrupt.MultiThreadedCall.env, reason)
-    | MultiThreadedCall.Continue ->
+      Cancel (interrupt.Multi_threaded_call.env, reason)
+    | Multi_threaded_call.Continue ->
       event_loop
         ~done_count
         ~total_count
@@ -1128,7 +1130,7 @@ let exit_distc_failed ~(phase : distc_failure_phase) (msg : string) : 'a =
 let process_with_hh_distc
     ~(root : Path.t option)
     ~(fanout : Typing_service_types.workitem Big_list.t option)
-    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
+    ~(interrupt : 'a Multi_threaded_call.interrupt_config)
     ~(check_info : check_info)
     ~(tcopt : Typechecker_options.t)
     ~warnings_saved_state : _ distc_outcome =
@@ -1169,7 +1171,7 @@ let process_with_hh_distc
     ~total_count:0
     ~interrupt
     ~handlers:
-      (interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env)
+      (interrupt.Multi_threaded_call.handlers interrupt.Multi_threaded_call.env)
     ~fd_distc:(Hh_distc_ffi.get_fd hh_distc_handle)
     ~handle:hh_distc_handle
     ~check_info
@@ -1186,7 +1188,7 @@ let process_in_parallel
     (workers : Multi_worker.worker list option)
     (telemetry : Telemetry.t)
     (workitems : workitem Big_list.t)
-    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
+    ~(interrupt : 'a Multi_threaded_call.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
@@ -1196,7 +1198,7 @@ let process_in_parallel
     * typing_result
     * Telemetry.t
     * _
-    * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
+    * (Relative_path.t list * Multi_threaded_call.cancel_reason) option
     * seconds_since_epoch option =
   let record = Measure.create () in
   (* [record] is used by [next] *)
@@ -1271,7 +1273,7 @@ let process_in_parallel
     !error_stats.ErrorStats.time_first_error )
 
 type 'a job_result =
-  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
+  'a * (Relative_path.t list * Multi_threaded_call.cancel_reason) option
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -1318,7 +1320,7 @@ module TestMocking = struct
         Some
           ( mock_cancelled,
             {
-              MultiThreadedCall.user_message = "mock cancel";
+              Multi_threaded_call.user_message = "mock cancel";
               log_message = "mock cancel";
               timestamp = 0.0;
             } )
@@ -1346,7 +1348,7 @@ let go_with_interrupt
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
-    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
+    ~(interrupt : 'a Multi_threaded_call.interrupt_config)
     ~(longlived_workers : bool)
     ~(hh_distc_config : distc_config)
     ~(check_info : check_info)
@@ -1509,7 +1511,7 @@ let go
     ~(hh_distc_config : distc_config)
     ~(check_info : check_info)
     ~warnings_saved_state : result =
-  let interrupt = MultiThreadedCall.no_interrupt () in
+  let interrupt = Multi_threaded_call.no_interrupt () in
   let (((), result), unfinished_and_reason) =
     go_with_interrupt
       ctx

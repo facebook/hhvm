@@ -108,7 +108,7 @@ val make :
 (** Call in a sub-process (CAREFUL, GLOBALS ARE COPIED) *)
 val call : ?call_id:int -> worker -> ('a -> 'b) -> 'a -> ('a, 'b) handle
 
-(* See MultiThreadedCall.call_id *)
+(* See Multi_threaded_call.call_id *)
 val get_call_id : ('a, 'b) handle -> int
 
 (* Retrieves the job that the worker is currently processing *)

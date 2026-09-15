@@ -10,7 +10,7 @@
  (wrapped false)
  (modules
   mem_profile
-  multiThreadedCall
+  multi_threaded_call
   multi_worker
   worker
   worker_controller)

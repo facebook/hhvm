@@ -60,9 +60,9 @@ let interrupt_handler fd acc =
    with
   | Stdlib.Not_found -> ());
   ( acc,
-    MultiThreadedCall.Cancel
+    Multi_threaded_call.Cancel
       {
-        MultiThreadedCall.user_message = "cancel";
+        Multi_threaded_call.user_message = "cancel";
         log_message = "";
         timestamp = Unix.gettimeofday ();
       } )
@@ -80,7 +80,7 @@ let rec run_until_done fd_in workers (acc, iterations) = function
         ~next:(Bucket.make ~num_workers ~max_size:10 work)
         ~interrupt:
           {
-            MultiThreadedCall.handlers =
+            Multi_threaded_call.handlers =
               (fun () -> [(fd_in, interrupt_handler fd_in)]);
             env = ();
           }

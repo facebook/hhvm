@@ -89,11 +89,11 @@ let interrupt_handler fd env =
   assert (read = 1 && Bytes.to_string exclamation_mark = "!");
   let env = env + 1 in
   let result =
-    MultiThreadedCall.(
+    Multi_threaded_call.(
       if env = 2 then
         Cancel
           {
-            MultiThreadedCall.user_message = "c";
+            Multi_threaded_call.user_message = "c";
             log_message = "c1";
             timestamp = 0.0;
           }
@@ -125,7 +125,7 @@ let test_cancel_env () =
       ~next
       ~interrupt:
         {
-          MultiThreadedCall.handlers =
+          Multi_threaded_call.handlers =
             (fun _ -> [(interrupt_fd, interrupt_handler interrupt_fd)]);
           env = 0 (* counting number of times interrupt handler ran *);
         }

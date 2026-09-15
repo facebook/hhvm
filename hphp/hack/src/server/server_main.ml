@@ -739,12 +739,12 @@ let serve_one_iteration genv env client_provider =
   in
   env
 
-(** This synthesizes a [MultiThreadedCall.Cancel] in the event that we want
+(** This synthesizes a [Multi_threaded_call.Cancel] in the event that we want
 a typecheck cancelled due to files changing on disk. It constructs the
 human-readable [user_message] and also [log_message] appropriately. *)
 let cancel_due_to_file_changes
     (updates : Relative_path.Set.t) (clock : Server_notifier.clock option) :
-    MultiThreadedCall.interrupt_result =
+    Multi_threaded_call.interrupt_result =
   assert (not (Relative_path.Set.is_empty updates));
   let size = Relative_path.Set.cardinal updates in
   let examples =
@@ -758,9 +758,9 @@ let cancel_due_to_file_changes
   in
   let timestamp = Unix.gettimeofday () in
   let tm = Unix.localtime timestamp in
-  MultiThreadedCall.Cancel
+  Multi_threaded_call.Cancel
     {
-      MultiThreadedCall.user_message =
+      Multi_threaded_call.user_message =
         Printf.sprintf
           "Files have changed on disk! [%02d:%02d:%02d] %s"
           tm.Unix.tm_hour
@@ -777,7 +777,7 @@ let cancel_due_to_file_changes
     }
 
 let file_changes_interrupt_handler genv :
-    env MultiThreadedCall.interrupt_handler =
+    env Multi_threaded_call.interrupt_handler =
  fun env ->
   let start_time = Unix.gettimeofday () in
   let (env, updates, clock, updates_stale, _telemetry) =
@@ -799,12 +799,12 @@ let file_changes_interrupt_handler genv :
       },
       cancel_due_to_file_changes updates clock )
   ) else
-    (env, MultiThreadedCall.Continue)
+    (env, Multi_threaded_call.Continue)
 
 (** Handler for events on the priority socket, which is used for priority commands which
     must be served immediately. *)
 let priority_client_interrupt_handler genv client_provider :
-    env MultiThreadedCall.interrupt_handler =
+    env Multi_threaded_call.interrupt_handler =
  fun env ->
   let t = Unix.gettimeofday () in
   Hh_logger.log "Handling message on priority socket.";
@@ -871,7 +871,7 @@ let priority_client_interrupt_handler genv client_provider :
         | Server_utils.Done env -> env)
     in
 
-    (env, MultiThreadedCall.Continue)
+    (env, Multi_threaded_call.Continue)
 
 let setup_interrupts env client_provider =
   {
@@ -914,7 +914,7 @@ let serve genv env in_fds =
     Typing_deps.allow_dependency_table_reads env.deps_mode false
   in
   let () = Diagnostics.set_allow_errors_in_default_path false in
-  MultiThreadedCall.on_exception (fun e -> Server_utils.exit_on_exception e);
+  Multi_threaded_call.on_exception (fun e -> Server_utils.exit_on_exception e);
   let client_provider = Client_provider.provider_from_file_descriptors in_fds in
 
   (* This is needed when typecheck_after_init option is disabled.

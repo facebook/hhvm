@@ -42,7 +42,7 @@ type worker
 
 (* List of file descriptors that became ready (and triggered interruption),
  * returns whether current job should be cancelled *)
-type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
+type 'a interrupt_config = 'a Multi_threaded_call.interrupt_config
 
 val next :
   ?progress_fn:(total:int -> start:int -> length:int -> unit) ->
@@ -51,7 +51,7 @@ val next :
   'a list ->
   'a list Hh_bucket.next
 
-(** Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
+(** Can raise Multi_threaded_call.Coalesced_failures unless in single-threaded mode. *)
 val call :
   worker list option ->
   job:('acc -> 'input -> 'output) ->
@@ -96,7 +96,7 @@ type call_wrapper = {
 
 val wrapper : call_wrapper
 
-(* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
+(* Can raise Multi_threaded_call.Coalesced_failures unless in single-threaded mode. *)
 val call_with_worker_id :
   worker list option ->
   job:(Worker_controller.worker_id * 'c -> 'a -> 'b) ->
@@ -120,7 +120,7 @@ val call_with_interrupt :
   neutral:'c ->
   next:'a Hh_bucket.next ->
   interrupt:'d interrupt_config ->
-  'c * 'd * ('a list * MultiThreadedCall.cancel_reason) option
+  'c * 'd * ('a list * Multi_threaded_call.cancel_reason) option
 
 (* Creates a pool of workers. *)
 val make :

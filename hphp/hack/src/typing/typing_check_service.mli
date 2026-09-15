@@ -8,7 +8,7 @@
  *)
 
 type 'a job_result =
-  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
+  'a * (Relative_path.t list * Multi_threaded_call.cancel_reason) option
 
 (* distc_config specifies if hh_distc is enabled and its thresholds
  * - hh_distc is disabled (eg. config set to None) in dev testing and non-fb workflows

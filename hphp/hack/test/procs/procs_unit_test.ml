@@ -69,7 +69,7 @@ let multi_worker_one_worker_throws _workers () =
       else
         bucket.work
     in
-    MultiThreadedCall.(
+    Multi_threaded_call.(
       try
         let _result =
           Multi_worker.call
@@ -117,7 +117,7 @@ let multi_worker_with_failure_handler _workers () =
         let () = Unix.sleep 60 in
         work
     in
-    MultiThreadedCall.(
+    Multi_threaded_call.(
       try
         let _ =
           Multi_worker.call

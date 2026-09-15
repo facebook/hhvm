@@ -13,7 +13,7 @@ open Hh_prelude
 (* Hide the worker type from our users *)
 type worker = Worker_controller.worker
 
-type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
+type 'a interrupt_config = 'a Multi_threaded_call.interrupt_config
 
 let single_threaded_call_with_worker_id job merge neutral next =
   let x = ref (next ()) in
@@ -71,7 +71,7 @@ module Call = CallFunctor (struct
 
   let return x = x
 
-  let multi_threaded_call = MultiThreadedCall.call_with_worker_id
+  let multi_threaded_call = Multi_threaded_call.call_with_worker_id
 end)
 
 let call_with_worker_id = Call.call
@@ -130,9 +130,9 @@ let call_with_interrupt
   match workers with
   | Some workers when not (List.is_empty workers) ->
     Hh_logger.log
-      "MultiThreadedCall.call_with_interrupt called with %d workers"
+      "Multi_threaded_call.call_with_interrupt called with %d workers"
       (List.length workers);
-    MultiThreadedCall.call_with_interrupt
+    Multi_threaded_call.call_with_interrupt
       ?on_cancelled
       workers
       job
@@ -143,7 +143,7 @@ let call_with_interrupt
   | _ ->
     Hh_logger.log "single_threaded_call called with zero workers";
     ( single_threaded_call job merge neutral next,
-      interrupt.MultiThreadedCall.env,
+      interrupt.Multi_threaded_call.env,
       None )
 
 let next ?progress_fn ?max_size workers =

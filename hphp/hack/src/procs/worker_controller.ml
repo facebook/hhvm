@@ -132,7 +132,7 @@ type worker = {
 and ('a, 'b) handle = ('a, 'b) delayed ref
 
 (* Integer represents job the handle belongs to.
- * See MultiThreadedCall.call_id. *)
+ * See Multi_threaded_call.call_id. *)
 and ('a, 'b) delayed = ('a * int) * 'b worker_handle
 
 and 'b worker_handle =

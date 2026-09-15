@@ -56,7 +56,7 @@ let multi_worker_nested workers ?(fail_inner = false) () =
         ());
       finish_at := Some (!counter + 100)
     );
-    ((), MultiThreadedCall.Continue)
+    ((), Multi_threaded_call.Continue)
   in
   (* The work is just to count amount of buckets processed *)
   let do_work acc () = acc + 1 in
@@ -70,14 +70,14 @@ let multi_worker_nested workers ?(fail_inner = false) () =
         ~next
         ~interrupt:
           {
-            MultiThreadedCall.handlers =
+            Multi_threaded_call.handlers =
               (fun () -> [(interrupt_fd1, interrupt_handler interrupt_fd1)]);
             env = ();
           }
     with
     (* The mechanism to create Coalesced_failures is too flaky to count on it
      * in tests *)
-    (* MultiThreadedCall.Coalesced_failures *)
+    (* Multi_threaded_call.Coalesced_failures *)
     | _ ->
       kill_interrupter ();
       raise MultiWorkerException

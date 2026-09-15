@@ -42,9 +42,9 @@ Our interrupts are set up in server_main.ml...
 * The file-descr for our "priority channel" i.e. new hh_client connections and a handler for them.
 
 For instance the file change handler might determine that a .php file changed on disk, in
-which cas it returns [Cancel] and MultiThreadCall stops itself and returns all unfinished
+which cas it returns [Cancel] and Multi_threaded_call stops itself and returns all unfinished
 workitems back to its caller; or might determine that no material disk changes
-happened in which case it returns [Continue] and MultiThreadedCall will continue. *)
+happened in which case it returns [Continue] and Multi_threaded_call will continue. *)
 type interrupt_result =
   | Cancel of cancel_reason
   | Continue

@@ -453,7 +453,7 @@ let handle :
     try
       (env, Cst_search_service.go genv env ~sort_results ~files_to_search input)
     with
-    | MultiThreadedCall.Coalesced_failures failures ->
+    | Multi_threaded_call.Coalesced_failures failures ->
       let failures =
         failures
         |> List.map ~f:Worker_controller.failure_to_string

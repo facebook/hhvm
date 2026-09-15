@@ -139,7 +139,7 @@ let indexing genv env to_check cgroup_steps :
   (env, defs_per_file)
 
 let get_interrupt_config genv env =
-  MultiThreadedCall.{ handlers = env.interrupt_handlers genv; env }
+  Multi_threaded_call.{ handlers = env.interrupt_handlers genv; env }
 
 (*****************************************************************************)
 (* Where the action is! *)
@@ -296,7 +296,7 @@ type type_checking_result = {
   needs_recheck: Relative_path.Set.t;
   total_rechecked_count: int;
   time_first_typing_error: seconds option;
-  cancel_reason: MultiThreadedCall.cancel_reason option;
+  cancel_reason: Multi_threaded_call.cancel_reason option;
 }
 
 let do_type_checking
@@ -864,12 +864,12 @@ let type_check_core
          ~key:"cancel_reason"
          ~value:
            (Option.map cancel_reason ~f:(fun r ->
-                r.MultiThreadedCall.user_message))
+                r.Multi_threaded_call.user_message))
     |> Telemetry.string_opt
          ~key:"cancel_details"
          ~value:
            (Option.map cancel_reason ~f:(fun r ->
-                r.MultiThreadedCall.log_message))
+                r.Multi_threaded_call.log_message))
   in
 
   (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
@@ -1178,7 +1178,7 @@ let type_check :
   (* If this was a full check, store in [env] whether+why it got interrupted+cancelled. *)
   let env =
     match cancel_reason with
-    | Some { MultiThreadedCall.user_message; log_message; timestamp = _ } ->
+    | Some { Multi_threaded_call.user_message; log_message; timestamp = _ } ->
       {
         env with
         Server_env.why_needs_server_type_check = (user_message, log_message);

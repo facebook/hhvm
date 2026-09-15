@@ -74,7 +74,7 @@ let test () =
   Typing_check_service.TestMocking.set_is_cancelled bar1_path;
 
   (* Run the recheck *)
-  let interrupt = MultiThreadedCall.no_interrupt () in
+  let interrupt = Multi_threaded_call.no_interrupt () in
   let fnl = Relative_path.Map.keys defs_per_file in
   let check_info =
     {

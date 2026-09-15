@@ -341,7 +341,7 @@ type env = {
   interrupt_handlers:
     genv ->
     env ->
-    (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
+    (Unix.file_descr * env Multi_threaded_call.interrupt_handler) list;
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * Client_provider.client) option;
       [@opaque]

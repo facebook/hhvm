@@ -80,9 +80,11 @@ let exit_on_exception (e : Exception.t) =
     Hh_logger.exception_ e;
     Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
     Exit.exit Exit_status.Watchman_failed
-  | MultiThreadedCall.Coalesced_failures failures ->
+  | Multi_threaded_call.Coalesced_failures failures ->
     Hh_logger.exception_ e;
-    let failure_msg = MultiThreadedCall.coalesced_failures_to_string failures in
+    let failure_msg =
+      Multi_threaded_call.coalesced_failures_to_string failures
+    in
     Hh_logger.log "%s" failure_msg;
     let is_oom_failure f =
       match f with

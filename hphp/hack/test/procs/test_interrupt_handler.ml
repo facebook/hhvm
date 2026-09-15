@@ -4,11 +4,11 @@ let do_work () (_ : unit list) : unit = Unix.sleep 3
 
 let handler1 fd (x, y) =
   let () = read_exclamation_mark fd in
-  ((x + 1, y), MultiThreadedCall.Continue)
+  ((x + 1, y), Multi_threaded_call.Continue)
 
 let handler2 fd (x, y) =
   let () = read_exclamation_mark fd in
-  ((x, y + 1), MultiThreadedCall.Continue)
+  ((x, y + 1), Multi_threaded_call.Continue)
 
 let configure_handlers fd1 fd2 (x, y) =
   let handlers = [] in
@@ -34,7 +34,7 @@ let test_interrupt_handler () =
   let (interrupt_fd2, interrupter_pid2) = run_interrupter (Some 10) in
   let interrupt =
     {
-      MultiThreadedCall.handlers =
+      Multi_threaded_call.handlers =
         configure_handlers interrupt_fd1 interrupt_fd2;
       env = (0, 0) (* counting number of times interrupt handlers ran *);
     }

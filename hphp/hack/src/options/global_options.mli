@@ -211,6 +211,8 @@ type t = {
          in a child class. *)
   tco_meth_caller_only_public_visibility: bool;
       (** meth_caller can only reference public methods *)
+  tco_use_module_error_for_member_access: bool;
+      (** Use the module-specific error for member access across module boundaries. *)
   tco_require_extends_implements_ancestors: bool;
       (** Consider `require extends` and `require implements` as ancestors when checking a class *)
   tco_implicit_inherit_sdt: bool;
@@ -382,6 +384,7 @@ val set :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_meth_caller_only_public_visibility:bool ->
+  ?tco_use_module_error_for_member_access:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_implicit_inherit_sdt:bool ->
   ?tco_repo_stdlib_path:string ->

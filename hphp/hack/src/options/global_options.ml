@@ -162,6 +162,7 @@ type t = {
   tco_allowed_expression_tree_visitors: string list;
   tco_typeconst_concrete_concrete_error: bool;
   tco_meth_caller_only_public_visibility: bool;
+  tco_use_module_error_for_member_access: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_implicit_inherit_sdt: bool;
   tco_repo_stdlib_path: string option;
@@ -279,6 +280,7 @@ let default =
     tco_allowed_expression_tree_visitors = [];
     tco_typeconst_concrete_concrete_error = false;
     tco_meth_caller_only_public_visibility = true;
+    tco_use_module_error_for_member_access = false;
     tco_require_extends_implements_ancestors = false;
     tco_implicit_inherit_sdt = false;
     tco_repo_stdlib_path = None;
@@ -395,6 +397,7 @@ let set
     ?tco_allowed_expression_tree_visitors
     ?tco_typeconst_concrete_concrete_error
     ?tco_meth_caller_only_public_visibility
+    ?tco_use_module_error_for_member_access
     ?tco_require_extends_implements_ancestors
     ?tco_implicit_inherit_sdt
     ?tco_repo_stdlib_path
@@ -622,6 +625,10 @@ let set
       setting
         tco_meth_caller_only_public_visibility
         options.tco_meth_caller_only_public_visibility;
+    tco_use_module_error_for_member_access =
+      setting
+        tco_use_module_error_for_member_access
+        options.tco_use_module_error_for_member_access;
     tco_require_extends_implements_ancestors =
       setting
         tco_require_extends_implements_ancestors

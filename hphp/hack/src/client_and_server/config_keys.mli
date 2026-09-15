@@ -242,6 +242,8 @@ module Hhconfig : sig
 
   val type_printer_fuel : string
 
+  val use_module_error_for_member_access : string
+
   val warnings_default_all : string
 
   val warnings_in_sandcastle : string

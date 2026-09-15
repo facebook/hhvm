@@ -167,9 +167,9 @@ val make_from_lnum_bol_offset :
   pos_end:int * int * int ->
   t
 
-module Map : WrappedMap.S with type key = t
+module Map : Wrapped_map.S with type key = t
 
-module AbsolutePosMap : WrappedMap.S with type key = absolute
+module AbsolutePosMap : Wrapped_map.S with type key = absolute
 
 module Set : Set.S with type elt = t
 

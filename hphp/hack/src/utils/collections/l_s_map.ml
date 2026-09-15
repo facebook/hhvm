@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-include WrappedMap.Make (Lower_string_key)
+include Wrapped_map.Make (Lower_string_key)
 
 let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =
  (fun pp_data -> make_pp Format.pp_print_string pp_data)

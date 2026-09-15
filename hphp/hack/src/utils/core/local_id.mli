@@ -52,7 +52,7 @@ val tmp : unit -> t
 module Set : module type of Stdlib.Set.Make (S)
 
 module Map : sig
-  include module type of WrappedMap.Make (S)
+  include module type of Wrapped_map.Make (S)
 
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 

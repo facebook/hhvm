@@ -8,7 +8,7 @@
  *)
 module type Map_S = Reordered_argument_collections_sig.Map_S
 
-module Reordered_argument_map (S : WrappedMap.S) :
+module Reordered_argument_map (S : Wrapped_map.S) :
   Map_S with type key = S.key with type 'a t = 'a S.t = struct
   include S
 

@@ -253,7 +253,7 @@ module type Heap = sig
 
   module KeySet : Set.S with type elt = key
 
-  module KeyMap : WrappedMap.S with type key = key
+  module KeyMap : Wrapped_map.S with type key = key
 
   (** Adds a binding to the table.
 
@@ -304,7 +304,7 @@ module Heap (_ : Backend) (Key : Key) (Value : Value) :
      and type value = Value.t
      and module KeyHasher = MakeKeyHasher(Key)
      and module KeySet = Set.Make(Key)
-     and module KeyMap = WrappedMap.Make(Key)
+     and module KeyMap = Wrapped_map.Make(Key)
 
 (** A worker-local cache layer.
 
@@ -369,7 +369,7 @@ module HeapWithLocalCache
        and type value = Value.t
        and module KeyHasher = MakeKeyHasher(Key)
        and module KeySet = Set.Make(Key)
-       and module KeyMap = WrappedMap.Make(Key)
+       and module KeyMap = Wrapped_map.Make(Key)
 
   val write_around : key -> value -> unit
 

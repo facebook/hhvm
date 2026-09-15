@@ -7,7 +7,7 @@
  *
  *)
 open Core
-include WrappedMap.Make (String_key)
+include Wrapped_map.Make (String_key)
 
 let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =
  (fun pp_data -> make_pp (fun fmt s -> Format.fprintf fmt "%S" s) pp_data)

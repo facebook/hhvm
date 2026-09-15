@@ -55,7 +55,7 @@ let tmp () =
 module Set = Stdlib.Set.Make (S)
 
 module Map = struct
-  include WrappedMap.Make (S)
+  include Wrapped_map.Make (S)
 
   let pp pp_data = make_pp (fun fmt id -> Format.fprintf fmt "%a" pp id) pp_data
 

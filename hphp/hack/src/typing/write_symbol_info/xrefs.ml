@@ -8,7 +8,7 @@
 
 open Hack
 
-module PosMap = WrappedMap.Make (struct
+module PosMap = Wrapped_map.Make (struct
   let compare = Pos.compare
 
   type t = Pos.t

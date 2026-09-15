@@ -51,7 +51,7 @@ type partial_result_token = PartialResultToken of string
 module DocumentUri : sig
   type t = Uri of string [@@deriving eq, ord]
 
-  module Map : WrappedMap.S with type key := t
+  module Map : Wrapped_map.S with type key := t
 end
 
 val uri_of_string : string -> DocumentUri.t
@@ -1367,7 +1367,7 @@ module IdSet : sig
 end
 
 module IdMap : sig
-  include module type of WrappedMap.Make (IdKey)
+  include module type of Wrapped_map.Make (IdKey)
 end
 
 module UriKey : sig
@@ -1381,7 +1381,7 @@ module UriSet : sig
 end
 
 module UriMap : sig
-  include module type of WrappedMap.Make (UriKey)
+  include module type of Wrapped_map.Make (UriKey)
 end
 
 val lsp_result_to_log_string : lsp_result -> string

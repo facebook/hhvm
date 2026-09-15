@@ -19,7 +19,7 @@ module Symbol = struct
   let compare x y = Typing_deps.Dep.compare_variant x y
 end
 
-module SymbolMap = WrappedMap.Make (Symbol)
+module SymbolMap = Wrapped_map.Make (Symbol)
 module SymbolSet = Stdlib.Set.Make (Symbol)
 
 (** A bidirectional map between file paths and symbol names *)

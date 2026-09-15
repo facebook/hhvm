@@ -76,7 +76,7 @@ let implementation_for (type t) (mr : t map_reducer_type) :
   | TypeForReasonCollector -> (module Reason_collector)
   | TypeForRefinementCounter -> (module Refinement_counter)
 
-module MRMap = WrappedMap.Make (struct
+module MRMap = Wrapped_map.Make (struct
   type t = map_reducer
 
   let compare = compare_map_reducer

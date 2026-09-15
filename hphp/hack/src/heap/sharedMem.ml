@@ -820,7 +820,7 @@ module type Heap = sig
 
   module KeySet : Set.S with type elt = key
 
-  module KeyMap : WrappedMap.S with type key = key
+  module KeyMap : Wrapped_map.S with type key = key
 
   val add : key -> value -> unit
 
@@ -878,10 +878,10 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
      and type value = Value.t
      and module KeyHasher = MakeKeyHasher(Key)
      and module KeySet = Set.Make(Key)
-     and module KeyMap = WrappedMap.Make(Key) = struct
+     and module KeyMap = Wrapped_map.Make(Key) = struct
   module KeyHasher = MakeKeyHasher (Key)
   module KeySet = Set.Make (Key)
-  module KeyMap = WrappedMap.Make (Key)
+  module KeyMap = Wrapped_map.Make (Key)
 
   (** Stacks that keeps track of local, non-committed changes. If
       no stacks are active, changs will be committed immediately to
@@ -1179,7 +1179,7 @@ module HeapWithLocalCache
        and type value = Value.t
        and module KeyHasher = MakeKeyHasher(Key)
        and module KeySet = Set.Make(Key)
-       and module KeyMap = WrappedMap.Make(Key)
+       and module KeyMap = Wrapped_map.Make(Key)
 
   val write_around : key -> value -> unit
 

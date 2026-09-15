@@ -18,7 +18,7 @@
     e.g. error secondary positions. *)
 type t [@@deriving eq, ord, show]
 
-module Map : WrappedMap.S with type key = t
+module Map : Wrapped_map.S with type key = t
 
 module Set : Set.S with type elt = t
 

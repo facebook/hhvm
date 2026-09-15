@@ -6,7 +6,7 @@
  *
  *)
 module type Map_S = sig
-  include WrappedMap.S
+  include Wrapped_map.S
 
   val add : 'a t -> key:key -> data:'a -> 'a t
 

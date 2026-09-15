@@ -80,7 +80,7 @@ module MemberKind = struct
       true
 end
 
-module MemberKindMap = WrappedMap.Make (MemberKind)
+module MemberKindMap = Wrapped_map.Make (MemberKind)
 module MemberNameMap = SMap
 
 (* This is used to merge members from all parents (direct ancestors) of a class.

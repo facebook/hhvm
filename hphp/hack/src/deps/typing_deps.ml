@@ -381,7 +381,7 @@ module Dep = struct
 end
 
 module DepMap = struct
-  include WrappedMap.Make (Dep)
+  include Wrapped_map.Make (Dep)
 
   let pp pp_data = make_pp Dep.pp pp_data
 

@@ -2672,7 +2672,7 @@ module AggregateKey = struct
   let compare (x : t) (y : t) = compare x y
 end
 
-module AggMap = WrappedMap.Make (AggregateKey)
+module AggMap = Wrapped_map.Make (AggregateKey)
 
 let aggregation_of_top_level_declaration =
   List.filter (fun x -> List.mem TopLevelDeclaration x.aggregates) schema

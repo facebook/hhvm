@@ -113,7 +113,7 @@ module TShapeField = struct
 end
 
 module TShapeMap = struct
-  include WrappedMap.Make (TShapeField)
+  include Wrapped_map.Make (TShapeField)
 
   let map_and_rekey m f1 f2 =
     fold (fun k v acc -> add (f1 k) (f2 v) acc) m empty

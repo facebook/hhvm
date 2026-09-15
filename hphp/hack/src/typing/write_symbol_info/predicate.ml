@@ -241,7 +241,7 @@ let should_cache = function
     true
   | _ -> false
 
-module Map = WrappedMap.Make (struct
+module Map = Wrapped_map.Make (struct
   type t = predicate
 
   let compare = compare_predicate
@@ -252,7 +252,7 @@ module Fact_acc = struct
 
   type owned_facts = (ownership_unit * Yojson.Safe.t list) list
 
-  module JsonPredicateMap = WrappedMap.Make (struct
+  module JsonPredicateMap = Wrapped_map.Make (struct
     type json = Yojson.Safe.t
 
     let compare_json (x : json) (y : json) = Stdlib.compare x y

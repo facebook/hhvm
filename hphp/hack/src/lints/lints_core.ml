@@ -153,7 +153,7 @@ let to_json { pos; code; severity; message; bypass_changed_lines; autofix; _ } =
    dynamic and normal assumptions. This helper function filters out the
    remaining ones. *)
 let filter_out_unsound_lints lints =
-  let module LintMap = WrappedMap.Make (struct
+  let module LintMap = Wrapped_map.Make (struct
     type t = int * Pos.t [@@deriving ord]
   end) in
   let module CheckStatusParity = struct

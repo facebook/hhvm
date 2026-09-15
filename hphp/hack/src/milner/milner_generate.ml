@@ -1406,5 +1406,5 @@ end = struct
   let mk = mk ~depth:None ~complexity:default_complexity
 end
 
-and TypeMap : (WrappedMap.S with type key = Type.t) = WrappedMap.Make (Type)
+and TypeMap : (Wrapped_map.S with type key = Type.t) = Wrapped_map.Make (Type)
 and TypeSet : (Stdlib.Set.S with type elt = Type.t) = Stdlib.Set.Make (Type)

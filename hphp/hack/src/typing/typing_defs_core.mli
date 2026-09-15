@@ -92,7 +92,7 @@ end
     instead of Pos.t. Ast_defs.ShapeMap is used in shape expressions,
     while this is used in shape types. *)
 module TShapeMap : sig
-  include WrappedMap.S with type key = TShapeField.t
+  include Wrapped_map.S with type key = TShapeField.t
 
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 

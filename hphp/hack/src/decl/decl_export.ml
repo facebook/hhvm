@@ -12,7 +12,7 @@ open Reordered_argument_collections
 open Typing_defs
 
 module CEKMap = struct
-  include Reordered_argument_map (WrappedMap.Make (Decl_heap.ClassEltKey))
+  include Reordered_argument_map (Wrapped_map.Make (Decl_heap.ClassEltKey))
 
   let pp ppd = make_pp (fun fmt (c, m) -> Format.fprintf fmt "(%S, %S)" c m) ppd
 end

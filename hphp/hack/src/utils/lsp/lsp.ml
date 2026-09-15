@@ -28,7 +28,7 @@ module DocumentUri = struct
   end
 
   include M
-  module Map = WrappedMap.Make (M)
+  module Map = Wrapped_map.Make (M)
 end
 
 let uri_of_string (s : string) : DocumentUri.t = DocumentUri.Uri s
@@ -1160,7 +1160,7 @@ module IdKey = struct
 end
 
 module IdSet = Stdlib.Set.Make (IdKey)
-module IdMap = WrappedMap.Make (IdKey)
+module IdMap = Wrapped_map.Make (IdKey)
 
 module UriKey = struct
   type t = DocumentUri.t
@@ -1169,7 +1169,7 @@ module UriKey = struct
 end
 
 module UriSet = Stdlib.Set.Make (UriKey)
-module UriMap = WrappedMap.Make (UriKey)
+module UriMap = Wrapped_map.Make (UriKey)
 
 let lsp_result_to_log_string = function
   | InitializeResult _ -> "InitializeResult"

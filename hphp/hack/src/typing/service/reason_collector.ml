@@ -71,7 +71,7 @@ end = struct
     type t = logged_type [@@deriving ord]
   end
 
-  open WrappedMap.Make (Key)
+  open Wrapped_map.Make (Key)
 
   type nonrec t = Reason.t list t
 
@@ -135,7 +135,7 @@ end = struct
     type t = category [@@deriving ord]
   end
 
-  open WrappedMap.Make (Key)
+  open Wrapped_map.Make (Key)
 
   type nonrec t = Collection.t t
 

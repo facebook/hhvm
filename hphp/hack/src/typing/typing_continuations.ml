@@ -8,4 +8,4 @@
  *)
 
 include Typing_cont_key
-module Map = WrappedMap.Make (Typing_cont_key)
+module Map = Wrapped_map.Make (Typing_cont_key)

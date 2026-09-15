@@ -80,7 +80,7 @@
 
 open Base
 
-module FloatMap = WrappedMap.Make (struct
+module FloatMap = Wrapped_map.Make (struct
   type t = float
 
   let compare = Float.compare

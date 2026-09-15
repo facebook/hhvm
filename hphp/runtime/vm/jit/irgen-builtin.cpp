@@ -1367,7 +1367,7 @@ const hphp_fast_string_fmap<int> s_vanilla_params{
 // support arbitrary control flow with an inlined NativeImpl.
 bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
   return allowBespokeArrayLikes() &&
-         s_vanilla_params.find(fname->data()) != s_vanilla_params.end();
+         s_vanilla_params.contains(fname->data());
 }
 
 SSATmp* ldOutAddr(IRGS& env, uint32_t inOutIndex) {

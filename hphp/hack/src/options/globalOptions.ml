@@ -114,7 +114,7 @@ type t = {
   tco_constraint_array_index_assign: bool;
   tco_constraint_method_call: bool;
   code_agnostic_fixme: bool;
-  allowed_fixme_codes_strict: ISet.t;
+  allowed_fixme_codes_strict: I_set.t;
   log_levels: int SMap.t;
   tco_fetch_remote_old_decls: bool;
   tco_only_fetch_remote_old_decl_during_init: bool;
@@ -231,7 +231,7 @@ let default =
     tco_constraint_array_index_assign = false;
     tco_constraint_method_call = false;
     code_agnostic_fixme = false;
-    allowed_fixme_codes_strict = ISet.empty;
+    allowed_fixme_codes_strict = I_set.empty;
     log_levels = SMap.empty;
     tco_fetch_remote_old_decls = true;
     tco_only_fetch_remote_old_decl_during_init = true;

@@ -43,13 +43,13 @@ let builder =
 
     val mutable rules = []
 
-    val mutable lazy_rules = ISet.empty
+    val mutable lazy_rules = I_set.empty
 
     val mutable chunks = []
 
     val mutable next_split_rule = NoRule
 
-    val mutable next_lazy_rules = ISet.empty
+    val mutable next_lazy_rules = I_set.empty
 
     val mutable num_pending_spans = 0
 
@@ -84,10 +84,10 @@ let builder =
       env <- new_env;
       Stdlib.Stack.clear open_spans;
       rules <- [];
-      lazy_rules <- ISet.empty;
+      lazy_rules <- I_set.empty;
       chunks <- [];
       next_split_rule <- RuleKind Rule.Always;
-      next_lazy_rules <- ISet.empty;
+      next_lazy_rules <- I_set.empty;
       num_pending_spans <- 0;
       space_if_not_split <- false;
       pending_comma <- None;
@@ -148,8 +148,8 @@ let builder =
       this#advance width;
 
       if not is_trivia then (
-        lazy_rules <- ISet.union next_lazy_rules lazy_rules;
-        next_lazy_rules <- ISet.empty;
+        lazy_rules <- I_set.union next_lazy_rules lazy_rules;
+        next_lazy_rules <- I_set.empty;
 
         for _ = 1 to num_pending_spans do
           Stdlib.Stack.push (open_span (List.length chunks - 1)) open_spans
@@ -229,7 +229,7 @@ let builder =
 
     method private create_lazy_rule ?(rule_kind = Rule.Simple Cost.Base) () =
       let id = this#create_rule rule_kind in
-      next_lazy_rules <- ISet.add id next_lazy_rules;
+      next_lazy_rules <- I_set.add id next_lazy_rules;
       id
 
     (* TODO: after unit tests, make this idempotency a property of method split *)
@@ -263,8 +263,8 @@ let builder =
 
     method private is_at_chunk_group_boundry () =
       List.is_empty rules
-      && ISet.is_empty lazy_rules
-      && ISet.is_empty next_lazy_rules
+      && I_set.is_empty lazy_rules
+      && I_set.is_empty next_lazy_rules
       && not (Nesting_allocator.is_nested nesting_alloc)
 
     method private hard_split () =
@@ -305,11 +305,11 @@ let builder =
       this#start_rule_id rule
 
     method private start_lazy_rule lazy_rule_id =
-      if ISet.mem lazy_rule_id next_lazy_rules then (
-        next_lazy_rules <- ISet.remove lazy_rule_id next_lazy_rules;
+      if I_set.mem lazy_rule_id next_lazy_rules then (
+        next_lazy_rules <- I_set.remove lazy_rule_id next_lazy_rules;
         this#start_rule_id lazy_rule_id
-      ) else if ISet.mem lazy_rule_id lazy_rules then (
-        lazy_rules <- ISet.remove lazy_rule_id lazy_rules;
+      ) else if I_set.mem lazy_rule_id lazy_rules then (
+        lazy_rules <- I_set.remove lazy_rule_id lazy_rules;
         this#start_rule_id lazy_rule_id
       ) else
         raise

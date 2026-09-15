@@ -13,7 +13,7 @@ open Common
 
 let expand_state env state =
   let { Solve_state.chunk_group; rbm; _ } = state in
-  let rule_ids = ISet.elements @@ Solve_state.get_candidate_rules state in
+  let rule_ids = I_set.elements @@ Solve_state.get_candidate_rules state in
   let (_, next_rbms) =
     List.map_env rbm rule_ids ~f:(fun env_rbm rule_id ->
         if Solve_state.is_rule_bound state rule_id then
@@ -84,16 +84,16 @@ let solve_chunk_group env ?range ?source_text chunk_group =
             else
               Second rule)
       in
-      let iset_of_list = List.fold_right ~init:ISet.empty ~f:ISet.add in
+      let iset_of_list = List.fold_right ~init:I_set.empty ~f:I_set.add in
       let rules_in_range = iset_of_list rules_in_range in
       let rules_out_of_range = iset_of_list rules_out_of_range in
       let always_rules =
         iset_of_list (Chunk_group.get_always_rules chunk_group)
       in
       let rules_entirely_in_range =
-        ISet.diff rules_in_range rules_out_of_range
+        I_set.diff rules_in_range rules_out_of_range
       in
-      let always_rules_in_range = ISet.inter always_rules rules_in_range in
+      let always_rules_in_range = I_set.inter always_rules rules_in_range in
       let bindings =
         source_rbm
         (* If we have a rule associated with a split outside of the formatting
@@ -101,11 +101,11 @@ let solve_chunk_group env ?range ?source_text chunk_group =
            strange if we don't break all of that rule's associated splits inside
            the formatting range, too. *)
         |> I_map.filter (fun id broke ->
-               broke && ISet.mem id rules_out_of_range)
+               broke && I_set.mem id rules_out_of_range)
         (* We should also break any rule which is configured to ALWAYS break
            (such as the rule governing the split after a single-line comment)
            and has a split inside the formatting range. *)
-        |> ISet.fold (fun id -> I_map.add id true) always_rules_in_range
+        |> I_set.fold (fun id -> I_map.add id true) always_rules_in_range
       in
       let propagated =
         bindings
@@ -114,7 +114,7 @@ let solve_chunk_group env ?range ?source_text chunk_group =
         |> Chunk_group.propagate_breakage chunk_group
         (* ...But only do this for rules which do not have any associated splits
            outside of the formatting range. *)
-        |> I_map.filter (fun id _ -> ISet.mem id rules_entirely_in_range)
+        |> I_map.filter (fun id _ -> I_set.mem id rules_entirely_in_range)
       in
       I_map.union bindings propagated
     | _ -> Chunk_group.get_initial_rule_bindings chunk_group

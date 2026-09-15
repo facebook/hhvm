@@ -12,7 +12,7 @@ type batch_state = {
   saved_tmp: Path.t;
   trace: bool;
   paths_to_ignore: Str.regexp list;
-  allowed_fixme_codes_strict: ISet.t;
+  allowed_fixme_codes_strict: I_set.t;
   code_agnostic_fixme: bool;
 }
 

@@ -309,7 +309,7 @@ let prepare_iset config config_name =
     ~f:(fun list_str ->
       Str.split config_list_regexp list_str
       |> List.map ~f:int_of_string
-      |> List.fold_right ~init:ISet.empty ~f:ISet.add)
+      |> List.fold_right ~init:I_set.empty ~f:I_set.add)
 
 let prepare_allowed_decl_fixme_codes config =
   prepare_iset config Config_keys.Hhconfig.allowed_decl_fixme_codes

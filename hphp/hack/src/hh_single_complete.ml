@@ -9,8 +9,8 @@
 
 open Hh_prelude
 
-let comma_string_to_iset (s : string) : ISet.t =
-  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
+let comma_string_to_iset (s : string) : I_set.t =
+  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> I_set.of_list
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -271,7 +271,7 @@ let parse_options () =
         |> GlobalOptions.with_saved_state_manifold_api_key
              !saved_state_manifold_api_key)
       ~allowed_fixme_codes_strict:
-        (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
+        (Option.value allowed_fixme_codes_strict ~default:I_set.empty)
       ~glean_reponame:!glean_reponame
       ~log_levels:!log_levels
       GlobalOptions.default

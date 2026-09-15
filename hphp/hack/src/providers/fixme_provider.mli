@@ -15,7 +15,7 @@ val get_hh_fixmes : Relative_path.t -> FixmeMap.t option
 
 val get_decl_hh_fixmes : Relative_path.t -> FixmeMap.t option
 
-val get_fixme_codes_for_pos : Pos.t -> ISet.t
+val get_fixme_codes_for_pos : Pos.t -> I_set.t
 
 val provide_hh_fixmes : Relative_path.t -> FixmeMap.t -> unit
 

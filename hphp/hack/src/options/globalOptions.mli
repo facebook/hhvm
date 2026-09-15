@@ -112,7 +112,7 @@ type t = {
       (** Flag to enable the constraint solver to infer that a type supports method calls *)
   code_agnostic_fixme: bool;
       (** HH_FIXME should silence *any* error, not just the one specified by code *)
-  allowed_fixme_codes_strict: ISet.t;
+  allowed_fixme_codes_strict: I_set.t;
       (** Error codes for which we allow HH_FIXMEs in strict mode *)
   log_levels: int SMap.t;  (** Initial hh_log_level settings *)
   tco_fetch_remote_old_decls: bool;
@@ -334,7 +334,7 @@ val set :
   ?tco_constraint_array_index_assign:bool ->
   ?tco_constraint_method_call:bool ->
   ?code_agnostic_fixme:bool ->
-  ?allowed_fixme_codes_strict:ISet.t ->
+  ?allowed_fixme_codes_strict:I_set.t ->
   ?log_levels:int SMap.t ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_only_fetch_remote_old_decl_during_init:bool ->
@@ -440,7 +440,7 @@ val default : t
 
 val so_naming_sqlite_path : t -> string option
 
-val allowed_fixme_codes_strict : t -> ISet.t
+val allowed_fixme_codes_strict : t -> I_set.t
 
 val code_agnostic_fixme : t -> bool
 

@@ -63,7 +63,7 @@ val num_digits : int -> int
 val add_diagnostic : diagnostic -> unit
 
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
-val allowed_fixme_codes_strict : ISet.t ref
+val allowed_fixme_codes_strict : I_set.t ref
 
 val set_allow_errors_in_default_path : bool -> unit
 

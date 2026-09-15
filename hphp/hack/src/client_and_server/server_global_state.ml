@@ -12,7 +12,7 @@ type t = {
   saved_hhi: Path.t;
   saved_tmp: Path.t;
   trace: bool;
-  allowed_fixme_codes_strict: ISet.t;
+  allowed_fixme_codes_strict: I_set.t;
   code_agnostic_fixme: bool;
   paths_to_ignore: Str.regexp list;
   no_load: bool;

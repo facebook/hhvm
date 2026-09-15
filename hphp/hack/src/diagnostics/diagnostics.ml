@@ -627,7 +627,7 @@ module type Error_category = Error_category.S
 
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
 let hard_banned_codes =
-  ISet.of_list
+  I_set.of_list
     [
       Typing.err_code Typing.InvalidIsAsExpressionHint;
       Typing.err_code Typing.InvalidEnforceableTypeArgument;
@@ -642,12 +642,12 @@ let hard_banned_codes =
       Typing.err_code Typing.ClassGetReified;
     ]
 
-let allowed_fixme_codes_strict = ref ISet.empty
+let allowed_fixme_codes_strict = ref I_set.empty
 
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_allowed_code_strict (code : error_code) =
-  ISet.mem code !allowed_fixme_codes_strict
+  I_set.mem code !allowed_fixme_codes_strict
 
 let code_agnostic_fixme = ref false
 
@@ -781,7 +781,7 @@ let try_apply_fixme pos code severity : fixme_outcome =
     in
     (match (severity_based_on_code, fixme_kind) with
     | (User_diagnostic.Err, Fixme { forbidden_decl_fixme }) ->
-      if ISet.mem code hard_banned_codes then
+      if I_set.mem code hard_banned_codes then
         let explanation =
           Printf.sprintf
             "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
@@ -1033,21 +1033,21 @@ let warning_counts_by_code : t -> int I_map.t =
             I_map.add code (count + 1) acc
           | User_diagnostic.Err -> acc))
 
-exception Done of ISet.t
+exception Done of I_set.t
 
 (** This ignores warnings. *)
 let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
   let codes =
     try
-      Relative_path.Map.fold t ~init:ISet.empty ~f:(fun _path errors codes ->
+      Relative_path.Map.fold t ~init:I_set.empty ~f:(fun _path errors codes ->
           List.fold
             errors
             ~init:codes
             ~f:(fun codes User_diagnostic.{ severity; code; _ } ->
               match severity with
               | User_diagnostic.Err ->
-                let codes = ISet.add code codes in
-                if ISet.cardinal codes >= n then
+                let codes = I_set.add code codes in
+                if I_set.cardinal codes >= n then
                   raise (Done codes)
                 else
                   codes
@@ -1055,7 +1055,7 @@ let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
     with
     | Done codes -> codes
   in
-  ISet.elements codes
+  I_set.elements codes
 
 (** Get the error code of the first error which hasn't been HH_FIXME'd. *)
 let choose_code_opt (t : t) : int option =

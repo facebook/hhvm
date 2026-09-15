@@ -30,7 +30,7 @@ type t = {
   union_intersection_type_hints: bool;
   unwrap_concurrent: bool;
   no_parser_readonly_check: bool;
-  allowed_decl_fixme_codes: ISet.t;
+  allowed_decl_fixme_codes: I_set.t;
   use_legacy_experimental_feature_config: bool;
   experimental_features: Experimental_features.feature_status SMap.t;
   consider_unspecified_experimental_features_released: bool;
@@ -68,7 +68,7 @@ let default =
     union_intersection_type_hints = false;
     unwrap_concurrent = false;
     no_parser_readonly_check = false;
-    allowed_decl_fixme_codes = ISet.empty;
+    allowed_decl_fixme_codes = I_set.empty;
     use_legacy_experimental_feature_config = true;
     experimental_features = SMap.empty;
     consider_unspecified_experimental_features_released = true;

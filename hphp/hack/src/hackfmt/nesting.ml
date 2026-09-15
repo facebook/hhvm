@@ -27,7 +27,7 @@ let get_indent_level nesting nesting_set =
     match n with
     | None -> acc
     | Some n ->
-      let in_set = ISet.mem n.id nesting_set in
+      let in_set = I_set.mem n.id nesting_set in
       let acc =
         if n.indent && in_set then
           acc + 1

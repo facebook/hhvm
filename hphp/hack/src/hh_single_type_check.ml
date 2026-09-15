@@ -214,8 +214,8 @@ let print_errors_if_present (errors : Diagnostics.t) =
         Printf.printf "  %s\n" err_output)
   )
 
-let comma_string_to_iset (s : string) : ISet.t =
-  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
+let comma_string_to_iset (s : string) : I_set.t =
+  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> I_set.of_list
 
 let load_and_parse_custom_error_config path =
   match Custom_error_config.initialize (`Absolute path) with
@@ -873,7 +873,7 @@ let parse_options () =
         include_enum_member_values = default.include_enum_member_values;
         union_intersection_type_hints = default.union_intersection_type_hints;
         allowed_decl_fixme_codes =
-          Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+          Option.value !allowed_decl_fixme_codes ~default:I_set.empty;
         package_info = default.package_info;
         package_support_multifile_tests =
           default.package_support_multifile_tests;
@@ -895,7 +895,7 @@ let parse_options () =
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
       ~allowed_fixme_codes_strict:
-        (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
+        (Option.value !allowed_fixme_codes_strict ~default:I_set.empty)
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_strict_contexts:!strict_contexts

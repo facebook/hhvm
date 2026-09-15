@@ -204,13 +204,13 @@ let local_changes_pop_sharedmem_stack () =
 module UnusedFixmes = struct
   module LineToCodesMap = struct
     (** Mapping error lines to sets of codes *)
-    type t = ISet.t I_map.t
+    type t = I_set.t I_map.t
 
     let find_or_default line m =
-      I_map.find_opt line m |> Option.value ~default:ISet.empty
+      I_map.find_opt line m |> Option.value ~default:I_set.empty
 
     let add (line : int) (code : int) (m : t) =
-      I_map.add line (ISet.add code (find_or_default line m)) m
+      I_map.add line (I_set.add code (find_or_default line m)) m
   end
 
   module FileToLineToCodesMap = struct
@@ -225,7 +225,7 @@ module UnusedFixmes = struct
       | Some m ->
         (match I_map.find_opt line m with
         | None -> false
-        | Some s -> ISet.mem code s)
+        | Some s -> I_set.mem code s)
 
     let add (fn : Relative_path.t) (line : int) (code : int) (m : t) =
       Relative_path.Map.add
@@ -306,7 +306,7 @@ let get_entries get_map pos =
 let get_fixmes_for_pos pos = get_entries get_fixmes pos
 
 let get_fixme_codes_for_pos pos =
-  get_fixmes_for_pos pos |> I_map.keys |> ISet.of_list
+  get_fixmes_for_pos pos |> I_map.keys |> I_set.of_list
 
 let get_entry get_map pos code = get_entries get_map pos |> I_map.find_opt code
 
@@ -317,8 +317,8 @@ let get_ignore_pos pos code = get_entry get_ignores pos code
 let inf_err_codes = [4110; 4323; 4324]
 
 let is_inf_err_code =
-  let inf_err_codes = ISet.of_list inf_err_codes in
-  (fun err_code -> ISet.mem err_code inf_err_codes)
+  let inf_err_codes = I_set.of_list inf_err_codes in
+  (fun err_code -> I_set.mem err_code inf_err_codes)
 
 let any_inf_err_code imap =
   let rec aux = function

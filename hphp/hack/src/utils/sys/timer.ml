@@ -53,7 +53,7 @@ let queue : TimerQueue.t = TimerQueue.make_empty 8
 
 let current_timer : timer option ref = ref None
 
-let cancelled : ISet.t ref = ref ISet.empty
+let cancelled : I_set.t ref = ref I_set.empty
 
 (** Gets the next ongoing timer. Any expired timers have their callbacks invoked *)
 let rec get_next_timer ~exns =
@@ -62,8 +62,8 @@ let rec get_next_timer ~exns =
   else
     let timer = TimerQueue.pop queue in
     (* Skip cancelled timers *)
-    if ISet.mem timer.id !cancelled then begin
-      cancelled := ISet.remove timer.id !cancelled;
+    if I_set.mem timer.id !cancelled then begin
+      cancelled := I_set.remove timer.id !cancelled;
       get_next_timer ~exns
     end else
       let interval = timer.target_time -. Unix.gettimeofday () in
@@ -147,7 +147,7 @@ let set_timer ~interval ~callback =
   id
 
 let cancel_timer id =
-  cancelled := ISet.add id !cancelled;
+  cancelled := I_set.add id !cancelled;
   match !current_timer with
   | Some timer when timer.id = id ->
     current_timer := None;

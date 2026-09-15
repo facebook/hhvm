@@ -27,7 +27,7 @@ type by_names = {
 
 type file_info = {
   tast_hashes: by_names;
-  error_hashes: ISet.t;
+  error_hashes: I_set.t;
 }
 [@@deriving yojson_of]
 
@@ -56,7 +56,7 @@ let union_by_names x y =
 let union_file_info x y =
   {
     tast_hashes = union_by_names x.tast_hashes y.tast_hashes;
-    error_hashes = ISet.union x.error_hashes y.error_hashes;
+    error_hashes = I_set.union x.error_hashes y.error_hashes;
   }
 
 let hash_tasts_by_file :
@@ -76,7 +76,7 @@ let error_while_hashing
       module_tast_hashes = SMap.map minus_one module_tasts;
     }
   in
-  { tast_hashes; error_hashes = ISet.empty }
+  { tast_hashes; error_hashes = I_set.empty }
 
 let is_enabled tcopt = Typechecker_options.dump_tast_hashes tcopt
 
@@ -94,10 +94,10 @@ let map ctx path tasts errors : t =
           in
           Diagnostics.fold_per_file_diagnostics
             errors
-            ~init:ISet.empty
+            ~init:I_set.empty
             ~f:(fun hashes error ->
               let hash = Diagnostics.hash_diagnostic error in
-              ISet.add hash hashes)
+              I_set.add hash hashes)
         in
         { tast_hashes; error_hashes })
   in

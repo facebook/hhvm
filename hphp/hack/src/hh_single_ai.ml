@@ -36,8 +36,8 @@ let print_error ?(oc = stderr) l =
     oc
     (Highlighted_diagnostic_formatter.to_string absolute_errors)
 
-let comma_string_to_iset (s : string) : ISet.t =
-  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
+let comma_string_to_iset (s : string) : I_set.t =
+  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> I_set.of_list
 
 let sound_dynamic = true
 
@@ -108,7 +108,7 @@ let parse_options () =
         enable_xhp_class_modifier = false;
         everything_sdt = sound_dynamic;
         allowed_decl_fixme_codes =
-          Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+          Option.value !allowed_decl_fixme_codes ~default:I_set.empty;
         allow_unstable_features = true;
         ignore_string_methods = !ignore_string_methods;
         enable_intrinsics_extension = false;
@@ -119,7 +119,7 @@ let parse_options () =
       ~po:popt
       ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
-        (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
+        (Option.value !allowed_fixme_codes_strict ~default:I_set.empty)
       GlobalOptions.default
   in
   Diagnostics.allowed_fixme_codes_strict :=

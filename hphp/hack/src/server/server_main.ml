@@ -128,7 +128,7 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.int_
          ~key:"heap_size"
-         ~value:(SharedMem.SMTelemetry.heap_size ())
+         ~value:(Shared_mem.SMTelemetry.heap_size ())
   in
   Hack_event_logger.server_is_ready telemetry;
   Hh_logger.log
@@ -521,13 +521,13 @@ let idle_if_no_client env waiting_client =
     (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
      * count so that we can figure out if the largest reclamations
      * correspond to massive rebases. However, the logging call is done in
-     * the SharedMem module, which doesn't know anything about Server stuff.
+     * the Shared_mem module, which doesn't know anything about Server stuff.
      * So we wrap the call here. *)
     Hack_event_logger.with_rechecked_stats
       ~update_batch_count:(List.length per_batch_telemetry)
       ~total_changed_files:total_changed_files_count
       ~total_rechecked:total_rechecked_count
-      (fun () -> SharedMem.GC.collect `aggressive);
+      (fun () -> Shared_mem.GC.collect `aggressive);
     let t = Unix.gettimeofday () in
     if Float.(t -. env.last_idle_job_time > 0.5) then
       let env = Server_idle.go env in
@@ -1287,7 +1287,7 @@ let setup_server
     (local_config : Server_local_config.t) : Multi_worker.worker list * env =
   let num_workers = num_workers options local_config in
   let shmem_handle =
-    SharedMem.init ~num_workers (Server_config.sharedmem_config config)
+    Shared_mem.init ~num_workers (Server_config.sharedmem_config config)
   in
   let init_id = Random_id.short_string () in
   let root = Server_args.root options in

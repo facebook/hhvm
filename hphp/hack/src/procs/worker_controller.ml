@@ -188,7 +188,7 @@ let wrap_request w f x metadata_in =
   | Some { wrap } -> Request ((fun { send } -> send (wrap f x)), metadata_in)
   | None -> Request ((fun { send } -> send (f x)), metadata_in)
 
-type 'a entry_state = 'a * Gc.control * SharedMem.handle * int
+type 'a entry_state = 'a * Gc.control * Shared_mem.handle * int
 
 (* The first bool parameter specifies whether to use worker clones
  * or not: for non-longlived-workers, we must clone. *)
@@ -255,7 +255,7 @@ let make
       (None, None)
   in
   let spawn worker_id name child_fd () =
-    SharedMem.clear_close_on_exec heap_handle;
+    Shared_mem.clear_close_on_exec heap_handle;
 
     (* Daemon.spawn runs exec after forking. We explicitly *do* want to "leak"
      * child_fd to this one spawned process because it will be using that FD to
@@ -270,7 +270,7 @@ let make
         entry
         { longlived_workers; entry_state = state; controller_fd = child_fd }
     in
-    SharedMem.set_close_on_exec heap_handle;
+    Shared_mem.set_close_on_exec heap_handle;
 
     (* This process no longer needs child_fd after its spawned the child.
      * Messages are read using controller_fd. *)
@@ -324,7 +324,7 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
     in
     match pid_stat with
     | Unix.WEXITED i when i = Exit_status.(exit_code Out_of_shared_memory) ->
-      raise SharedMem.Out_of_shared_memory
+      raise Shared_mem.Out_of_shared_memory
     | Unix.WEXITED i ->
       Printf.eprintf "Subprocess(%d): fail %d" worker_pid i;
       raise (Worker_failed (worker_pid, Worker_quit (Unix.WEXITED i)))

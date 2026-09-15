@@ -14,8 +14,8 @@ module IntVal = struct
 end
 
 module TestHeap =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (IntVal)
 
 let sum acc x = acc + x

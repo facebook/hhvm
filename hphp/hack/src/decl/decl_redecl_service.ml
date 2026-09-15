@@ -106,11 +106,11 @@ let compare_modules_and_get_fanout
 
 (** Compute decls in files. Return errors raised during decling. *)
 let redeclare_files ctx filel =
-  List.iter filel ~f:(fun fn -> Decl.make_env ~sh:SharedMem.Uses ctx fn)
+  List.iter filel ~f:(fun fn -> Decl.make_env ~sh:Shared_mem.Uses ctx fn)
 
 (** Invalidate local caches and compute decls in files. Return errors raised during decling. *)
 let decl_files ctx filel =
-  SharedMem.invalidate_local_caches ();
+  Shared_mem.invalidate_local_caches ();
   redeclare_files ctx filel
 
 let compare_decls_and_get_fanout
@@ -286,7 +286,7 @@ let parallel_redecl_compare_and_get_fanout
   with
   | exn ->
     let e = Exception.wrap exn in
-    if SharedMem.SMTelemetry.is_heap_overflow () then
+    if Shared_mem.SMTelemetry.is_heap_overflow () then
       Exit.exit Exit_status.Redecl_heap_overflow
     else
       Exception.reraise e
@@ -315,7 +315,7 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     Decl_heap.Typedefs.oldify_batch n_types;
     Decl_heap.GConsts.oldify_batch n_consts;
     Decl_heap.Modules.oldify_batch n_modules;
-    if collect_garbage then SharedMem.GC.collect `gentle;
+    if collect_garbage then Shared_mem.GC.collect `gentle;
     ()
 
 let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
@@ -333,7 +333,7 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     Decl_heap.Typedefs.remove_old_batch n_types;
     Decl_heap.GConsts.remove_old_batch n_consts;
     Decl_heap.Modules.remove_old_batch n_modules;
-    SharedMem.GC.collect `gentle;
+    Shared_mem.GC.collect `gentle;
     ()
 
 (** Remove provided defs and elements from the heap of current decls.
@@ -355,7 +355,7 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     Decl_heap.Typedefs.remove_batch n_types;
     Decl_heap.GConsts.remove_batch n_consts;
     Decl_heap.Modules.remove_batch n_modules;
-    if collect_garbage then SharedMem.GC.collect `gentle;
+    if collect_garbage then Shared_mem.GC.collect `gentle;
     ()
 
 (** [is_descendant_of_any_of classes c] returns whether
@@ -567,8 +567,8 @@ let invalidate_folded_classes
       lazy (get_elems to_invalidate ~old:false) )
   in
   Decl_provider.remove_classes ctx to_invalidate ~old_members ~new_members;
-  SharedMem.invalidate_local_caches ();
-  SharedMem.GC.collect `gentle;
+  Shared_mem.invalidate_local_caches ();
+  Shared_mem.GC.collect `gentle;
   ()
 
 (*****************************************************************************)

@@ -124,13 +124,13 @@ let lookup_store_or ctx =
           @@ Provider_context.get_tcopt ctx))
 
 let find_method_in_shallow_class
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (ctx : Provider_context.t)
     ~(is_static : bool)
     ~(elt_origin : string)
     ~no_auto_likes
     ~(sm_name : string) : (Typing_defs.fun_elt, member_lookup_error) result =
-  let SharedMem.Uses = sh in
+  let Shared_mem.Uses = sh in
   match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error MLEShallowClassNotFound
   | Some class_ ->
@@ -156,7 +156,7 @@ let find_method ctx ~child_class_name ~no_auto_likes x =
       ctx
       ~f:
         (find_method_in_shallow_class
-           ~sh:SharedMem.Uses
+           ~sh:Shared_mem.Uses
            ~is_static:false
            ~elt_origin
            ~no_auto_likes
@@ -176,7 +176,7 @@ let find_static_method ctx ~child_class_name ~no_auto_likes x =
       ctx
       ~f:
         (find_method_in_shallow_class
-           ~sh:SharedMem.Uses
+           ~sh:Shared_mem.Uses
            ~is_static:true
            ~elt_origin
            ~no_auto_likes
@@ -190,11 +190,11 @@ let find_static_method ctx ~child_class_name ~no_auto_likes x =
   fun_elt_to_ty fun_elt
 
 let find_property_in_shallow_class
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (ctx : Provider_context.t)
     ~(elt_origin : string)
     ~(sp_name : string) : (Typing_defs.decl_ty, member_lookup_error) result =
-  let SharedMem.Uses = sh in
+  let Shared_mem.Uses = sh in
   match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error MLEShallowClassNotFound
   | Some class_ ->
@@ -212,7 +212,10 @@ let find_property ctx ~child_class_name (x : Decl_store.ClassEltKey.t) =
     Option.map
       ctx
       ~f:
-        (find_property_in_shallow_class ~sh:SharedMem.Uses ~elt_origin ~sp_name)
+        (find_property_in_shallow_class
+           ~sh:Shared_mem.Uses
+           ~elt_origin
+           ~sp_name)
     |> unpack_member_lookup_result
          ~child_class_name
          ~elt_origin
@@ -221,11 +224,11 @@ let find_property ctx ~child_class_name (x : Decl_store.ClassEltKey.t) =
   (get_pos ty, ty)
 
 let find_static_property_in_shallow_class
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (ctx : Provider_context.t)
     ~(elt_origin : string)
     ~(sp_name : string) : (Typing_defs.decl_ty, member_lookup_error) result =
-  let SharedMem.Uses = sh in
+  let Shared_mem.Uses = sh in
   match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error MLEShallowClassNotFound
   | Some class_ ->
@@ -244,7 +247,7 @@ let find_static_property ctx ~child_class_name x =
       ctx
       ~f:
         (find_static_property_in_shallow_class
-           ~sh:SharedMem.Uses
+           ~sh:Shared_mem.Uses
            ~elt_origin
            ~sp_name)
     |> unpack_member_lookup_result
@@ -255,9 +258,9 @@ let find_static_property ctx ~child_class_name x =
   (get_pos ty, ty)
 
 let find_constructor_in_shallow_class
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
+    ~(sh : Shared_mem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
     (Typing_defs.fun_elt, member_lookup_error) result =
-  let SharedMem.Uses = sh in
+  let Shared_mem.Uses = sh in
   match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error MLEShallowClassNotFound
   | Some class_ ->
@@ -269,7 +272,7 @@ let find_constructor ctx ~child_class_name ~elt_origin =
   lookup_store_or ctx Decl_store.Constructor elt_origin @@ fun elt_origin ->
   Option.map
     ctx
-    ~f:(find_constructor_in_shallow_class ~sh:SharedMem.Uses ~elt_origin)
+    ~f:(find_constructor_in_shallow_class ~sh:Shared_mem.Uses ~elt_origin)
   |> unpack_member_lookup_result
        ~child_class_name
        ~elt_origin

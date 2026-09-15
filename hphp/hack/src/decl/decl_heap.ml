@@ -57,28 +57,28 @@ module Module = struct
 end
 
 module Funs =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (Fun)
     (Capacity)
 module Classes =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (Class)
     (Capacity)
 module Typedefs =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (Typedef)
     (Capacity)
 module GConsts =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (GConst)
     (Capacity)
 module Modules =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (Module)
     (Capacity)
 
@@ -126,27 +126,27 @@ module ClassEltKey = struct
 end
 
 module Props =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (ClassEltKey)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (ClassEltKey)
     (Property)
     (Capacity)
 module StaticProps =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (ClassEltKey)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (ClassEltKey)
     (StaticProperty)
     (Capacity)
 module Methods =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (ClassEltKey)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (ClassEltKey)
     (Method)
     (Capacity)
 module StaticMethods =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (ClassEltKey)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (ClassEltKey)
     (StaticMethod)
     (Capacity)
 module Constructors =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (String_key)
     (Constructor)
     (Capacity)

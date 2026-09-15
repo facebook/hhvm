@@ -89,8 +89,8 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 SharedMem.default_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 Shared_mem.default_config
   in
 
   (* Scan the repo folder *)

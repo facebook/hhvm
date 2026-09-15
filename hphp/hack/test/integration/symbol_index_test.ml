@@ -101,8 +101,8 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 SharedMem.default_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 Shared_mem.default_config
   in
 
   (* Scan the repo folder *)
@@ -201,8 +201,8 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
       Server_config.default_config
   in
-  let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
-  ignore (handle : SharedMem.handle);
+  let handle = Shared_mem.init ~num_workers:0 Shared_mem.default_config in
+  ignore (handle : Shared_mem.handle);
 
   (* Search for docblocks for various items *)
   let ctx = Provider_utils.ctx_from_server_env env in

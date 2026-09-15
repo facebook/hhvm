@@ -30,7 +30,7 @@ type module_decl = Typing_defs.module_def_type
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
-  SharedMem.FreqCache
+  Shared_mem.FreqCache
     (String_key)
     (struct
       type t = Typing_class_types.class_t
@@ -46,7 +46,7 @@ let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
   let f () =
     match
       Diagnostics.run_in_decl_mode (fun () ->
-          Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
+          Decl_folded_class.class_decl_if_missing ~sh:Shared_mem.Uses ctx name)
     with
     | None -> Decl_defs.raise_decl_not_found None name
     | Some decl_and_members -> decl_and_members

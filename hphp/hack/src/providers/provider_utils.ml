@@ -195,7 +195,7 @@ let respect_but_quarantine_unsaved_changes
         File_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
         Naming_provider.local_changes_push_sharedmem_stack ();
-        SharedMem.set_allow_hashtable_writes_by_current_process false
+        Shared_mem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Rust_provider_backend backend ->
         Rust_provider_backend.push_local_changes backend;
 
@@ -205,7 +205,7 @@ let respect_but_quarantine_unsaved_changes
            to push/pop the sharedmem stack for member filters. *)
         Decl_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
-        SharedMem.set_allow_hashtable_writes_by_current_process false
+        Shared_mem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
         let start_time = Unix.gettimeofday () in
         let entries = Provider_context.get_entries ctx in
@@ -260,16 +260,16 @@ let respect_but_quarantine_unsaved_changes
         File_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
         Naming_provider.local_changes_pop_sharedmem_stack ();
-        SharedMem.set_allow_hashtable_writes_by_current_process true;
-        SharedMem.invalidate_local_caches ()
+        Shared_mem.set_allow_hashtable_writes_by_current_process true;
+        Shared_mem.invalidate_local_caches ()
       | Provider_backend.Rust_provider_backend backend ->
         Rust_provider_backend.pop_local_changes backend;
 
         Ast_provider.local_changes_pop_sharedmem_stack ();
         Decl_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
-        SharedMem.set_allow_hashtable_writes_by_current_process true;
-        SharedMem.invalidate_local_caches ()
+        Shared_mem.set_allow_hashtable_writes_by_current_process true;
+        Shared_mem.invalidate_local_caches ()
       | Provider_backend.Local_memory local ->
         if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
           invalidate_named_shallow_and_some_folded_decls_for_entry

@@ -77,7 +77,7 @@ let rec collect_legacy_class
             let (_ : _ option) =
               Diagnostics.run_in_decl_mode (fun () ->
                   Decl_folded_class.class_decl_if_missing
-                    ~sh:SharedMem.Uses
+                    ~sh:Shared_mem.Uses
                     ctx
                     cid)
             in

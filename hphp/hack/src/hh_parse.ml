@@ -208,6 +208,6 @@ let rec main args files =
 let () =
   let args = parse_args () in
   Event_logger.init_fake ();
-  let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
-  ignore (handle : SharedMem.handle);
+  let handle = Shared_mem.init ~num_workers:0 Shared_mem.default_config in
+  ignore (handle : Shared_mem.handle);
   main args args.files

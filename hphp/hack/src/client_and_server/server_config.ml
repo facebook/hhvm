@@ -23,7 +23,7 @@ type t = {
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
   gc_control: Gc.control; [@printer (fun fmt _ -> fprintf fmt "control")]
-  sharedmem_config: SharedMem.config;
+  sharedmem_config: Shared_mem.config;
   tc_options: Typechecker_options.t;
   parser_options: Parser_options.t;
   glean_options: Glean_options.t;
@@ -71,8 +71,8 @@ let make_gc_control config =
   { Global_config.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
 let make_sharedmem_config config local_config =
-  let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
-    SharedMem.default_config
+  let { Shared_mem.global_size; heap_size; shm_min_avail; _ } =
+    Shared_mem.default_config
   in
   let shm_dirs = local_config.Server_local_config.shm_dirs in
   let global_size =
@@ -115,7 +115,7 @@ let make_sharedmem_config config local_config =
       config
   in
   {
-    SharedMem.global_size;
+    Shared_mem.global_size;
     heap_size;
     hash_table_pow;
     log_level;
@@ -888,7 +888,7 @@ let default_config =
     version = Config_file.Opaque_version None;
     load_script_timeout = 0;
     gc_control = Global_config.gc_control;
-    sharedmem_config = SharedMem.default_config;
+    sharedmem_config = Shared_mem.default_config;
     tc_options = Typechecker_options.default;
     glean_options = Glean_options.default;
     symbol_write_options = Symbol_write_options.default;

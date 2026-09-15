@@ -59,7 +59,7 @@ val extra_paths : t -> Path.t list
 
 val gc_control : t -> Gc.control
 
-val sharedmem_config : t -> SharedMem.config
+val sharedmem_config : t -> Shared_mem.config
 
 val typechecker_options : t -> Typechecker_options.t
 
@@ -84,7 +84,7 @@ val convert_auto_namespace_to_map : string -> (string * string) list
 val warnings_generated_files : t -> string list
 
 val make_sharedmem_config :
-  Config_file.t -> Server_local_config.t -> SharedMem.config
+  Config_file.t -> Server_local_config.t -> Shared_mem.config
 
 val update_config_with_ai_options :
   t -> Server_local_config.t -> Ai_options.t option -> t * Server_local_config.t

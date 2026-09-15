@@ -24,8 +24,8 @@ open Provider_backend.Fixmes
 module FixmeMap = Provider_backend.FixmeMap
 
 module HH_FIXMES =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (Relative_path.S)
     (struct
       type t = FixmeMap.t
 
@@ -36,8 +36,8 @@ module HH_FIXMES =
     end)
 
 module IGNORES =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (Relative_path.S)
     (struct
       type t = FixmeMap.t
 
@@ -48,8 +48,8 @@ module IGNORES =
     end)
 
 module DECL_HH_FIXMES =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (Relative_path.S)
     (struct
       type t = FixmeMap.t
 
@@ -60,8 +60,8 @@ module DECL_HH_FIXMES =
     end)
 
 module DISALLOWED_FIXMES =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (Relative_path.S)
     (struct
       type t = FixmeMap.t
 

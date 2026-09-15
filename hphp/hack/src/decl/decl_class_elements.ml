@@ -21,7 +21,7 @@ type t = {
 let from_class { dc_name; dc_props; dc_sprops; dc_methods; dc_smethods; _ } =
   let filter_inherited_elements
       (type a)
-      (module EltHeap : SharedMem.Heap
+      (module EltHeap : Shared_mem.Heap
         with type key = string * string
          and type KeySet.t = a)
       elts =

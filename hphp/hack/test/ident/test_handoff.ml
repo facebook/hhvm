@@ -12,10 +12,10 @@ let () =
   (* Initializing shared mem will switch over to the concurrent counter, even
    * if we never connect any workers. *)
   let handle =
-    SharedMem.init
+    Shared_mem.init
       ~num_workers:0
       {
-        SharedMem.global_size = 0;
+        Shared_mem.global_size = 0;
         heap_size = 0;
         hash_table_pow = 0;
         shm_dirs = [];
@@ -27,7 +27,7 @@ let () =
         compression = 0;
       }
   in
-  ignore (handle : SharedMem.handle);
+  ignore (handle : Shared_mem.handle);
 
   loop early 10_000;
 

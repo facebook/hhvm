@@ -20,8 +20,8 @@ exception File_provider_stale
 
 module FileHeap = struct
   include
-    SharedMem.Heap
-      (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
+    Shared_mem.Heap
+      (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (Relative_path.S)
       (struct
         type t = string
 

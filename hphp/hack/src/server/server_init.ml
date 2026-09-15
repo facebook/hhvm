@@ -15,7 +15,7 @@ include Server_init_types
 
 let post_init genv (env, _t) =
   ignore genv;
-  SharedMem.SMTelemetry.init_done ();
+  Shared_mem.SMTelemetry.init_done ();
   env
 
 let full_init genv env profiling =

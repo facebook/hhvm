@@ -34,7 +34,7 @@
 (library
  (name heap_shared_mem)
  (wrapped false)
- (modules prefix sharedMem)
+ (modules prefix shared_mem)
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
  (libraries

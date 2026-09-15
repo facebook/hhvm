@@ -18,7 +18,7 @@ let use_worker_clones =
   Array.length Sys.argv < 2 || not (String.equal Sys.argv.(1) "NO_CLONES")
 
 let make_workers n =
-  let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
+  let handle = Shared_mem.init ~num_workers:n Shared_mem.default_config in
   let workers =
     Multi_worker.make
       ~longlived_workers:(not use_worker_clones)

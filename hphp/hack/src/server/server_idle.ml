@@ -147,7 +147,7 @@ let init (genv : Server_env.genv) (root : Path.t) : unit =
           env );
       ( Periodical.always,
         fun ~env ->
-          SharedMem.GC.collect `aggressive;
+          Shared_mem.GC.collect `aggressive;
           env );
       ( Periodical.always,
         fun ~env ->

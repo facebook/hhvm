@@ -25,7 +25,7 @@ let register ~restore =
   incr entry_counter;
   let restore (st, gc_control, heap_handle, worker_id) =
     restore st ~worker_id;
-    SharedMem.connect heap_handle ~worker_id;
+    Shared_mem.connect heap_handle ~worker_id;
     Gc.set gc_control
   in
   let name = Printf.sprintf "subprocess_%d" !entry_counter in

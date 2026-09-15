@@ -45,23 +45,23 @@ let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
 
 let gentle_collect () =
-  if SharedMem.GC.should_collect `gentle then hh_collect ()
+  if Shared_mem.GC.should_collect `gentle then hh_collect ()
 
 let aggressive_collect () =
-  if SharedMem.GC.should_collect `aggressive then hh_collect ()
+  if Shared_mem.GC.should_collect `aggressive then hh_collect ()
 
 let expect_equals ~name value expected =
   expect
     ~msg:
       (Printf.sprintf
-         "Expected SharedMem.%s to equal %d, got %d"
+         "Expected Shared_mem.%s to equal %d, got %d"
          name
          expected
          value)
     (value = expected)
 
 let expect_stats ~nonempty ~used =
-  SharedMem.SMTelemetry.(
+  Shared_mem.SMTelemetry.(
     let expected =
       { nonempty_slots = nonempty; used_slots = used; slots = 8 }
     in
@@ -103,7 +103,7 @@ let expect_gentle_collect expected =
            ""
          else
            "not "))
-    (SharedMem.GC.should_collect `gentle = expected)
+    (Shared_mem.GC.should_collect `gentle = expected)
 
 let expect_aggressive_collect expected =
   expect
@@ -114,7 +114,7 @@ let expect_aggressive_collect expected =
            ""
          else
            "not "))
-    (SharedMem.GC.should_collect `aggressive = expected)
+    (Shared_mem.GC.should_collect `aggressive = expected)
 
 let test_ops () =
   expect_stats ~nonempty:0 ~used:0;
@@ -151,7 +151,7 @@ let test_hashtbl_full_hh_add () =
     add "8" "";
     expect ~msg:"Expected the hash table to be full" false
   with
-  | SharedMem.Hash_table_full -> ()
+  | Shared_mem.Hash_table_full -> ()
 
 let test_hashtbl_full_hh_move () =
   expect_stats ~nonempty:0 ~used:0;
@@ -171,7 +171,7 @@ let test_hashtbl_full_hh_move () =
     move "7" "8";
     expect ~msg:"Expected the hash table to be full" false
   with
-  | SharedMem.Hash_table_full -> ()
+  | Shared_mem.Hash_table_full -> ()
 
 (**
  * An important property to remember about the shared hash table is if a key
@@ -331,10 +331,10 @@ let tests () =
       fun () ->
         let num_workers = 0 in
         let handle =
-          SharedMem.init
+          Shared_mem.init
             ~num_workers
             {
-              SharedMem.global_size = 16;
+              Shared_mem.global_size = 16;
               heap_size = 1024;
               hash_table_pow = 3;
               shm_dirs = [];
@@ -346,7 +346,7 @@ let tests () =
               compression = 0;
             }
         in
-        ignore (handle : SharedMem.handle);
+        ignore (handle : Shared_mem.handle);
         test ();
         true )
   in

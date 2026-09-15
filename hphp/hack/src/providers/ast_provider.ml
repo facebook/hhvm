@@ -14,8 +14,8 @@ type parse_type =
   | Full
 
 module ParserHeap =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.Evictable)) (Relative_path.S)
     (struct
       type t = Nast.program * parse_type
 
@@ -26,7 +26,7 @@ module ParserHeap =
     end)
 
 module LocalParserCache =
-  SharedMem.FreqCache
+  Shared_mem.FreqCache
     (Relative_path.S)
     (struct
       type t = Nast.program

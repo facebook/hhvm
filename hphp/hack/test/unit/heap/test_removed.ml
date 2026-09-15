@@ -17,19 +17,21 @@ module IntVal = struct
 end
 
 let test_add_remove
-    (module IntHeap : SharedMem.Heap with type value = int and type key = string)
+    (module IntHeap : Shared_mem.Heap
+      with type value = int
+       and type key = string)
     () =
-  assert (SharedMem.SMTelemetry.hh_removed_count () = 0);
+  assert (Shared_mem.SMTelemetry.hh_removed_count () = 0);
   IntHeap.add "a" 4;
-  assert (SharedMem.SMTelemetry.hh_removed_count () = 0);
+  assert (Shared_mem.SMTelemetry.hh_removed_count () = 0);
   assert (IntHeap.mem "a");
   IntHeap.remove_batch (IntHeap.KeySet.singleton "a");
   assert (not @@ IntHeap.mem "a");
-  assert (SharedMem.SMTelemetry.hh_removed_count () = 1)
+  assert (Shared_mem.SMTelemetry.hh_removed_count () = 1)
 
 module TestNoCache =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (IntVal)
 
 let tests () =
@@ -39,10 +41,10 @@ let tests () =
       fun () ->
         let num_workers = 0 in
         let handle =
-          SharedMem.init
+          Shared_mem.init
             ~num_workers
             {
-              SharedMem.global_size = 16;
+              Shared_mem.global_size = 16;
               heap_size = 1024;
               hash_table_pow = 3;
               shm_dirs = [];
@@ -54,7 +56,7 @@ let tests () =
               compression = 0;
             }
         in
-        ignore (handle : SharedMem.handle);
+        ignore (handle : Shared_mem.handle);
         test ();
         true )
   in

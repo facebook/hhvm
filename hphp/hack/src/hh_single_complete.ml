@@ -215,7 +215,7 @@ let parse_options () =
     match !root with
     | None ->
       let allowed_fixme_codes_strict = None in
-      let sharedmem_config = SharedMem.default_config in
+      let sharedmem_config = Shared_mem.default_config in
       let root = Path.make "/" (* if none specified, we use this dummy *) in
       (allowed_fixme_codes_strict, sharedmem_config, root)
     | Some root ->
@@ -337,7 +337,7 @@ let parse_name_and_decl ctx files_contents =
       (* Decl.make_env has the side effect of updating the decl heap, and
          reporting errors. *)
       Relative_path.Map.iter files_info_and_addenda ~f:(fun fn _ ->
-          Decl.make_env ~sh:SharedMem.Uses ctx fn);
+          Decl.make_env ~sh:Shared_mem.Uses ctx fn);
       files_info_and_addenda)
 
 (** Our tests expect files that contain newline-separated queries.
@@ -959,14 +959,15 @@ let decl_and_run_mode
   handle_mode mode files ctx sienv naming_table
 
 let main_hack
-    ({ tcopt; _ } as opts) (root : Path.t) (sharedmem_config : SharedMem.config)
-    : unit =
+    ({ tcopt; _ } as opts)
+    (root : Path.t)
+    (sharedmem_config : Shared_mem.config) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   Event_logger.init_fake ();
 
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 sharedmem_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 sharedmem_config
   in
   Tempfile.with_tempdir (fun hhi_root ->
       Hhi.set_hhi_root_for_unit_test hhi_root;

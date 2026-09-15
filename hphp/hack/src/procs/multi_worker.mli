@@ -132,5 +132,5 @@ val make :
   entry:'a Worker_controller.entry ->
   int ->
   gc_control:Gc.control ->
-  heap_handle:SharedMem.handle ->
+  heap_handle:Shared_mem.handle ->
   worker list

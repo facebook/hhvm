@@ -17,10 +17,10 @@ type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
     guarantee that it returns all the member heap entries for that class
     as some might have already been added previously when decling the ancestors. *)
 val class_decl_if_missing :
-  sh:SharedMem.uses -> Provider_context.t -> string -> class_entries option
+  sh:Shared_mem.uses -> Provider_context.t -> string -> class_entries option
 
 val class_decl :
-  sh:SharedMem.uses ->
+  sh:Shared_mem.uses ->
   Provider_context.t ->
   Shallow_decl_defs.shallow_class ->
   parents:Decl_store.class_entries SMap.t ->

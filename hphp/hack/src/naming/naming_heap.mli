@@ -13,9 +13,9 @@ results of lookups in sqlite table. *)
 module type ReverseNamingTable = sig
   type pos
 
-  module Position : SharedMem.Value with type t = pos
+  module Position : Shared_mem.Value with type t = pos
 
-  module CanonName : SharedMem.Value with type t = string
+  module CanonName : Shared_mem.Value with type t = string
 
   val add : string -> pos -> unit
 
@@ -31,30 +31,30 @@ module type ReverseNamingTable = sig
 end
 
 module Types : sig
-  module TypeCanonHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module TypeCanonHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
-  module TypePosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module TypePosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
   include
     ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
 end
 
 module Funs : sig
-  module FunCanonHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module FunCanonHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
-  module FunPosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module FunPosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end
 
 module Consts : sig
-  module ConstPosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module ConstPosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end
 
 module Modules : sig
-  module ModulePosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
+  module ModulePosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end

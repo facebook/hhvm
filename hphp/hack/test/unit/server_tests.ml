@@ -331,7 +331,7 @@ let () =
   Event_logger.init_fake ();
   (* The parsing service needs shared memory to be set up *)
   let config =
-    SharedMem.
+    Shared_mem.
       {
         global_size = 1024;
         heap_size = 1024 * 8;
@@ -345,7 +345,7 @@ let () =
         compression = 0;
       }
   in
-  let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  let (_ : Shared_mem.handle) = Shared_mem.init config ~num_workers:0 in
   tests
   |> List.map ~f:(fun (name, do_) ->
          ( name,

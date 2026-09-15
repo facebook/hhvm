@@ -336,7 +336,7 @@ type daemon_args = {
   init_id: string;
   verbose_to_stderr: bool;
   verbose_to_file: bool;
-  shm_handle: SharedMem.handle;
+  shm_handle: Shared_mem.handle;
   client_lsp_log_fn: string;
   error_filter: Filter_diagnostics.Filter.t;
 }

@@ -20,7 +20,7 @@ module Class = struct
 end
 
 module Classes =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (Class)
     (Capacity)

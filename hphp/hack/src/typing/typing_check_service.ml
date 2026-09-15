@@ -469,7 +469,7 @@ let get_stats ~include_slightly_costly_stats tally :
   Hack_event_logger.ProfileTypeCheck.get_stats
     ~include_current_process:true
     ~include_slightly_costly_stats
-    ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
+    ~shmem_heap_size:(Shared_mem.SMTelemetry.heap_size ())
     telemetry
 
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
@@ -588,7 +588,7 @@ let process_one_workitem
     if workitem_ends_under_cap || not longlived_workers then
       workitem_ends_under_cap
     else begin
-      SharedMem.invalidate_local_caches ();
+      Shared_mem.invalidate_local_caches ();
       Hack_event_logger.flush ();
       Gc.compact ();
       hh_malloc_trim ();
@@ -638,7 +638,7 @@ let process_workitems
         (get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty)
   in
 
-  if not longlived_workers then SharedMem.invalidate_local_caches ();
+  if not longlived_workers then Shared_mem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
@@ -1361,7 +1361,7 @@ let go_with_interrupt
         (Hack_event_logger.ProfileTypeCheck.get_stats
            ~include_current_process:false
            ~include_slightly_costly_stats:true
-           ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
+           ~shmem_heap_size:(Shared_mem.SMTelemetry.heap_size ())
            (Telemetry.create ()))
       ~config:check_info.per_file_profiling
   in

@@ -72,8 +72,8 @@ let test_init_common ?(hhi_files = []) () =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
   Server_progress.disable ();
 
-  let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
-  ignore (handle : SharedMem.handle);
+  let handle = Shared_mem.init ~num_workers:0 Shared_mem.default_config in
+  ignore (handle : Shared_mem.handle);
 
   Server_main.force_break_recheck_loop_for_test true;
 

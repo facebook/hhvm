@@ -13,6 +13,6 @@ val make :
   longlived_workers:bool ->
   nbr_procs:int ->
   Gc.control ->
-  SharedMem.handle ->
+  Shared_mem.handle ->
   logging_init:(unit -> unit) ->
   Multi_worker.worker list

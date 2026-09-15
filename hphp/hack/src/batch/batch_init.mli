@@ -9,7 +9,7 @@ open Hh_prelude
 
 val init :
   root:Path.t ->
-  shmem_config:SharedMem.config ->
+  shmem_config:Shared_mem.config ->
   popt:Parser_options.t ->
   tcopt:Typechecker_options.t ->
   deps_mode:Typing_deps_mode.t ->

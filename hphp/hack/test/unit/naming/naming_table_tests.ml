@@ -87,7 +87,7 @@ let run_naming_table_test f =
         Relative_path.Root
         (Path.concat path "root/");
       let config =
-        SharedMem.
+        Shared_mem.
           {
             global_size = 1024;
             heap_size = 1024 * 1024;
@@ -112,7 +112,7 @@ let run_naming_table_test f =
           ~backend:(Provider_backend.get ())
           ~deps_mode
       in
-      let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+      let (_ : Shared_mem.handle) = Shared_mem.init config ~num_workers:0 in
       let unbacked_naming_table = write_and_parse_test_files ctx in
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
@@ -839,7 +839,7 @@ let test_naming_table_query_by_dep_hash () =
 
 let () =
   let config =
-    SharedMem.
+    Shared_mem.
       {
         global_size = 1024;
         heap_size = 1024 * 1024;
@@ -853,7 +853,7 @@ let () =
         compression = 0;
       }
   in
-  let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  let (_ : Shared_mem.handle) = Shared_mem.init config ~num_workers:0 in
   Event_logger.init_fake ();
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Warn;
   Unit_test.run_all

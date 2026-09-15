@@ -15,11 +15,11 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : SharedMem.Value with type t = shallow_class
+module Class : Shared_mem.Value with type t = shallow_class
 
 module Classes :
     module type of
-      SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+      Shared_mem.HeapWithLocalCache
+        (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
         (Class)
         (Capacity)

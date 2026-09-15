@@ -769,8 +769,8 @@ let main_internal
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_OUTLINE
   | Client_env.MODE_OUTLINE2 ->
-    let (_handle : SharedMem.handle) =
-      SharedMem.init ~num_workers:0 SharedMem.default_config
+    let (_handle : Shared_mem.handle) =
+      Shared_mem.init ~num_workers:0 Shared_mem.default_config
     in
     let content = Sys_utils.read_stdin_to_string () in
     let results =

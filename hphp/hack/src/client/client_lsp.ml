@@ -4974,9 +4974,9 @@ let main
   Hack_event_logger.client_lsp_start
     ~init_proc_stack
     ~hhconfig_version_and_switch;
-  (* [SharedMem.empty_config] will give us shared globals like [hh_shared.c:workers_should_exit]
+  (* [Shared_mem.empty_config] will give us shared globals like [hh_shared.c:workers_should_exit]
      but no key/value heaps. *)
-  let shm_handle = SharedMem.init SharedMem.empty_config ~num_workers:1 in
+  let shm_handle = Shared_mem.init Shared_mem.empty_config ~num_workers:1 in
 
   env := { args; hhconfig_version_and_switch; root; local_config };
 

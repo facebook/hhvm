@@ -10,8 +10,8 @@ module IntKey = struct
 end
 
 module Ids =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (IntKey)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (IntKey)
     (struct
       type t = int array
 
@@ -27,10 +27,10 @@ let () =
 
   let num_workers = 4 in
   let handle =
-    SharedMem.init
+    Shared_mem.init
       ~num_workers
       {
-        SharedMem.global_size = 0;
+        Shared_mem.global_size = 0;
         heap_size = 10 * 1024 * 1024;
         (* 10 MiB *)
         hash_table_pow = 14;

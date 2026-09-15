@@ -125,7 +125,7 @@ let parse_options () =
   Diagnostics.allowed_fixme_codes_strict :=
     Global_options.allowed_fixme_codes_strict tcopt;
   ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
-    Ai_options.modify_shared_mem ai_options SharedMem.default_config )
+    Ai_options.modify_shared_mem ai_options Shared_mem.default_config )
 
 let get_parse_errors ctx files_contents =
   Diagnostics.do_ (fun () ->
@@ -297,14 +297,14 @@ let write_file_to_root ~(root : Path.t) ~file =
   in
   List.map files_and_content ~f:write
 
-let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
+let main_hack ({ tcopt; _ } as opts) (sharedmem_config : Shared_mem.config) :
     unit =
   Folly.ensure_folly_init ();
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   Event_logger.init_fake ();
 
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 sharedmem_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 sharedmem_config
   in
   Decl_store.set Ai_decl_heap.decl_store;
   Tempfile.with_tempdir (fun root ->

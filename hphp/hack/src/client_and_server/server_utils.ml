@@ -44,7 +44,7 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
     | Ok telemetry -> telemetry
     | Error telemetry -> telemetry
   in
-  Utils.try_with_stack SharedMem.SMTelemetry.hash_stats
+  Utils.try_with_stack Shared_mem.SMTelemetry.hash_stats
   |> Result.map_error ~f:(fun e ->
          Hh_logger.exception_ e;
          Telemetry.string_
@@ -52,7 +52,7 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
            ~key:"hashtable_stats_error"
            ~value:(Exception.get_ctor_string e))
   |> Result.map
-       ~f:(fun { SharedMem.SMTelemetry.used_slots; slots; nonempty_slots } ->
+       ~f:(fun { Shared_mem.SMTelemetry.used_slots; slots; nonempty_slots } ->
          let load_factor = float_of_int used_slots /. float_of_int slots in
          Hh_logger.log
            "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
@@ -68,11 +68,11 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
 
 let exit_on_exception (e : Exception.t) =
   match Exception.to_exn e with
-  | SharedMem.Out_of_shared_memory ->
+  | Shared_mem.Out_of_shared_memory ->
     ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
     Exit.exit Exit_status.Out_of_shared_memory
-  | SharedMem.Hash_table_full ->
+  | Shared_mem.Hash_table_full ->
     ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit.exit Exit_status.Hash_table_full
@@ -141,10 +141,10 @@ let exit_on_exception (e : Exception.t) =
   | Decl_class.Decl_heap_elems_bug _ ->
     Exit.exit Exit_status.Decl_heap_elems_bug
   | Decl_defs.Decl_not_found _ -> Exit.exit Exit_status.Decl_not_found
-  | SharedMem.C_assertion_failure _ ->
+  | Shared_mem.C_assertion_failure _ ->
     Hh_logger.exception_ e;
     Exit.exit Exit_status.Shared_mem_assertion_failure
-  | SharedMem.Sql_assertion_failure err_num ->
+  | Shared_mem.Sql_assertion_failure err_num ->
     Hh_logger.exception_ e;
     let exit_code =
       match err_num with

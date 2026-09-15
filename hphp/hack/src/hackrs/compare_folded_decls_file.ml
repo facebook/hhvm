@@ -30,8 +30,8 @@ let popt
     }
 
 let init tcopt : Provider_context.t =
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 SharedMem.default_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 Shared_mem.default_config
   in
   let popt = tcopt.Global_options.po in
   let ctx =
@@ -328,7 +328,7 @@ let () =
       in
       (* Compute OCaml folded decls *)
       List.iter files ~f:(fun filename ->
-          Decl.make_env ~sh:SharedMem.Uses ctx filename);
+          Decl.make_env ~sh:Shared_mem.Uses ctx filename);
       (* Compute rupro folded decls *)
       let rupro_decls =
         match

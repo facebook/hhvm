@@ -57,7 +57,7 @@ let parse_files_and_update_forward_naming_table
       ~decl_mode
   in
   let naming_table = Naming_table.update_many env.naming_table defs_per_file in
-  let hs = SharedMem.SMTelemetry.heap_size () in
+  let hs = Shared_mem.SMTelemetry.heap_size () in
   Stats.(stats.init_parsing_heap_size <- hs);
 
   (* The true count of how many files we parsed is wrapped up in the get_next closure.
@@ -100,7 +100,7 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
   Hack_event_logger.global_naming_end
     ~count:!count
     ~desc:telemetry_label
-    ~heap_size:(SharedMem.SMTelemetry.heap_size ())
+    ~heap_size:(Shared_mem.SMTelemetry.heap_size ())
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
@@ -146,7 +146,7 @@ let log_type_check_end
   in
   Hack_event_logger.type_check_end
     (Some telemetry)
-    ~heap_size:(SharedMem.SMTelemetry.heap_size ())
+    ~heap_size:(Shared_mem.SMTelemetry.heap_size ())
     ~started_count:total_rechecked_count
     ~total_rechecked_count
     ~desc

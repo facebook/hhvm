@@ -10,15 +10,15 @@ open Hh_prelude
 
 (** This sharedmem is used only for the Shared_memory and Analysis backends *)
 module Shared_db_settings =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (struct
       type t = Naming_sqlite.db_path
 
       let description = "NamingTableDatabaseSettings"
     end)
 
-(** SharedMem doesn't cache absences. So we write our own cache. *)
+(** Shared_mem doesn't cache absences. So we write our own cache. *)
 let naming_db_path_cache :
     [ `Shmem_not_yet_cached_path
     | `Shmem_cached_path of Naming_sqlite.db_path option

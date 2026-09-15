@@ -295,7 +295,7 @@ let parse_options () =
   let meth_caller_only_public_visibility = ref true in
   let naming_table = ref None in
   let root = ref None in
-  let sharedmem_config = ref SharedMem.default_config in
+  let sharedmem_config = ref Shared_mem.default_config in
   let print_position = ref true in
   let custom_hhi_path = ref None in
   let force_allow_builtins_in_custom_hhi_path = ref false in
@@ -971,7 +971,7 @@ let parse_options () =
     },
     root,
     if rust_provider_backend then
-      SharedMem.
+      Shared_mem.
         {
           !sharedmem_config with
           shm_use_sharded_hashtbl = true;
@@ -1105,7 +1105,7 @@ let parse_name_and_decl ctx files_contents =
           in
           ());
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
-          Decl.make_env ~sh:SharedMem.Uses ctx fn);
+          Decl.make_env ~sh:Shared_mem.Uses ctx fn);
 
       files_info)
 
@@ -2688,7 +2688,7 @@ let decl_and_run_mode
     ~profile_type_check_multi
     ~memtrace
 
-let main_hack opts (root : Path.t) (sharedmem_config : SharedMem.config) : unit
+let main_hack opts (root : Path.t) (sharedmem_config : Shared_mem.config) : unit
     =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -2696,8 +2696,8 @@ let main_hack opts (root : Path.t) (sharedmem_config : SharedMem.config) : unit
   Server_progress.disable ();
   Measure.push_global ();
 
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 sharedmem_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 sharedmem_config
   in
   let process custom hhi_root =
     if custom then

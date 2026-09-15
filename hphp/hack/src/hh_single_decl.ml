@@ -43,18 +43,18 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
 
   let sharedmem_config =
     if rust_provider_backend then
-      SharedMem.
+      Shared_mem.
         {
           default_config with
           shm_use_sharded_hashtbl = true;
           shm_cache_size =
-            max SharedMem.default_config.shm_cache_size (2 * 1024 * 1024 * 1024);
+            max Shared_mem.default_config.shm_cache_size (2 * 1024 * 1024 * 1024);
         }
     else
-      SharedMem.default_config
+      Shared_mem.default_config
   in
-  let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 sharedmem_config
+  let (_handle : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 sharedmem_config
   in
   let popt = tcopt.Global_options.po in
   if rust_provider_backend then
@@ -312,7 +312,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
         let _conflict_filenames =
           Naming_global.ndecl_file_and_get_conflict_files ctx fn fi.FileInfo.ids
         in
-        if decl_make_env then Decl.make_env ~sh:SharedMem.Uses ctx fn;
+        if decl_make_env then Decl.make_env ~sh:Shared_mem.Uses ctx fn;
         (* Here we assemble top-level definitions as discovered by
            AST, and also as discovered by direct-decl-parser. We include
            them both so as to exercise any differences between the two! *)

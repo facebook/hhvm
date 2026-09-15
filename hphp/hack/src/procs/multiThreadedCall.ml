@@ -243,7 +243,7 @@ let call workers job merge neutral next =
   res
 
 let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
-  SharedMem.set_allow_removes false;
+  Shared_mem.set_allow_removes false;
 
   (* Interrupting of nested jobs is not implemented *)
   assert (
@@ -254,7 +254,7 @@ let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
   let ((res, interrupt_env), unfinished_and_reason) =
     multi_threaded_call workers job merge neutral next ?on_cancelled interrupt
   in
-  SharedMem.set_allow_removes true;
+  Shared_mem.set_allow_removes true;
   (res, interrupt_env, unfinished_and_reason)
 
 let on_exception f = on_exception_ref := f

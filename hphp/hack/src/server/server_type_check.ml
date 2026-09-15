@@ -118,7 +118,7 @@ let indexing genv env to_check cgroup_steps :
   Ast_provider.remove_batch to_check;
   Fixme_provider.remove_batch to_check;
 
-  SharedMem.GC.collect `gentle;
+  Shared_mem.GC.collect `gentle;
   let get_next =
     Multi_worker.next genv.workers (Relative_path.Set.elements to_check)
   in
@@ -224,7 +224,7 @@ let do_naming
   in
   (* final telemetry *)
   let t3 = Hh_logger.log_duration "Update_many (filename->names)" t2 in
-  let heap_size = SharedMem.SMTelemetry.heap_size () in
+  let heap_size = Shared_mem.SMTelemetry.heap_size () in
   Hack_event_logger.naming_end ~count start_t heap_size;
   let telemetry =
     telemetry
@@ -543,7 +543,7 @@ let type_check_core
     indexing genv env files_to_parse cgroup_steps
   in
 
-  let hs = SharedMem.SMTelemetry.heap_size () in
+  let hs = Shared_mem.SMTelemetry.heap_size () in
   let telemetry =
     telemetry
     |> Telemetry.duration ~key:"parse_end" ~start_time
@@ -625,7 +625,7 @@ let type_check_core
          ~value:old_decl_missing_count
   in
 
-  let hs = SharedMem.SMTelemetry.heap_size () in
+  let hs = Shared_mem.SMTelemetry.heap_size () in
   Hack_event_logger.first_redecl_end t hs;
   let t = Hh_logger.log_duration logstring t in
   let telemetry =
@@ -818,7 +818,7 @@ let type_check_core
     Option.first_some time_first_error time_first_typing_error
   in
 
-  let heap_size = SharedMem.SMTelemetry.heap_size () in
+  let heap_size = Shared_mem.SMTelemetry.heap_size () in
 
   Server_progress.write "typecheck ending";
   let logstring =
@@ -925,16 +925,16 @@ let type_check_core
   in
 
   (* STATS LOGGING *********************************************************)
-  if SharedMem.SMTelemetry.hh_log_level () > 0 then begin
+  if Shared_mem.SMTelemetry.hh_log_level () > 0 then begin
     Measure.print_stats ();
     Measure.print_distributions ()
   end;
   let telemetry =
-    if SharedMem.SMTelemetry.hh_log_level () > 0 then
+    if Shared_mem.SMTelemetry.hh_log_level () > 0 then
       Telemetry.object_
         telemetry
         ~key:"shmem"
-        ~value:(SharedMem.SMTelemetry.get_telemetry ())
+        ~value:(Shared_mem.SMTelemetry.get_telemetry ())
     else
       telemetry
   in

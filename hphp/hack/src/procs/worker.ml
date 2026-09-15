@@ -182,10 +182,10 @@ let read_and_process_job ic oc : job_outcome =
     `Success
   with
   | Worker_cancel.Worker_should_exit -> `Worker_cancelled
-  | SharedMem.Out_of_shared_memory -> `Error Exit_status.Out_of_shared_memory
-  | SharedMem.Hash_table_full -> `Error Exit_status.Hash_table_full
-  | SharedMem.Heap_full -> `Error Exit_status.Heap_full
-  | SharedMem.Sql_assertion_failure err_num ->
+  | Shared_mem.Out_of_shared_memory -> `Error Exit_status.Out_of_shared_memory
+  | Shared_mem.Hash_table_full -> `Error Exit_status.Hash_table_full
+  | Shared_mem.Heap_full -> `Error Exit_status.Heap_full
+  | Shared_mem.Sql_assertion_failure err_num ->
     `Error
       begin
         match err_num with

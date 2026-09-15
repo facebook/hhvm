@@ -160,7 +160,7 @@ module Env = struct
         fun _env x ->
       Option.map
         ~f:fst
-        (Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx x)
+        (Decl_folded_class.class_decl_if_missing ~sh:Shared_mem.Uses ctx x)
     in
     let get_class_add_dep env x =
       Decl_env.get_class_and_add_dep

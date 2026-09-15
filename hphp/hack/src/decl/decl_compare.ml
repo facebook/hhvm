@@ -217,7 +217,7 @@ module Class_elt_diff = struct
 
   let diff_elts
       (type t)
-      (module EltHeap : SharedMem.Heap
+      (module EltHeap : Shared_mem.Heap
         with type key = string * string
          and type value = t)
       ~cid

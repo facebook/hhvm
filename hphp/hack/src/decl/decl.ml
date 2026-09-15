@@ -10,7 +10,7 @@
 open Hh_prelude
 
 let make_env
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
+    ~(sh : Shared_mem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
   match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
   | None -> ()

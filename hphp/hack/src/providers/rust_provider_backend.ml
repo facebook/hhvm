@@ -134,8 +134,8 @@ module Decl = struct
   end
 
   module StoreWithLocalCache
-      (Key : SharedMem.Key)
-      (Value : SharedMem.Value) (Ffi : sig
+      (Key : Shared_mem.Key)
+      (Value : Shared_mem.Value) (Ffi : sig
         val get : t -> Key.t -> Value.t option
       end) : Store with type key = Key.t and type value = Value.t = struct
     type key = Key.t
@@ -143,7 +143,7 @@ module Decl = struct
     type value = Value.t
 
     module Cache =
-      SharedMem.FreqCache (Key) (Value)
+      Shared_mem.FreqCache (Key) (Value)
         (struct
           let capacity = 1000
         end)
@@ -162,7 +162,7 @@ module Decl = struct
 
     let get t key =
       let v = Cache.get key in
-      if SharedMem.SMTelemetry.hh_log_level () > 0 then
+      if Shared_mem.SMTelemetry.hh_log_level () > 0 then
         log_hit_rate ~hit:(Option.is_some v);
       match v with
       | Some _ -> v

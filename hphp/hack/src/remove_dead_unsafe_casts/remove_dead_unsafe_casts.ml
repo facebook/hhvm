@@ -14,8 +14,8 @@ type can_be_captured = bool
 
 module PatchHeap = struct
   include
-    SharedMem.Heap
-      (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    Shared_mem.Heap
+      (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (Relative_path.S)
       (struct
         type t = can_be_captured * Pos.t * Pos.t
 

@@ -253,7 +253,7 @@ module SMTelemetry = struct
    * it doesn't have to report telemetry since each of its constituents already
    * reports telemetry on its own.
    * Anyway, each cache registers in the global "get_telemetry_list" so that
-   * callers can do SharedMem.get_telemetry and pick up from all caches.
+   * callers can do Shared_mem.get_telemetry and pick up from all caches.
    *
    * Caveats:
    * Note that Obj.reachable_words may double-count stuff if it's in both

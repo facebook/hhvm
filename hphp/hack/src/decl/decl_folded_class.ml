@@ -407,7 +407,7 @@ let build_constructor
   Some (cstr, Some fe)
 
 let constructor_decl_eager
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     ~(ctx : Provider_context.t)
     ((parent_cstr, pconsist) :
       (Decl_defs.element * Typing_defs.fun_elt option) option
@@ -415,7 +415,7 @@ let constructor_decl_eager
     (class_ : Shallow_decl_defs.shallow_class) :
     (Decl_defs.element * Typing_defs.fun_elt option) option
     * Typing_defs.consistent_kind =
-  let SharedMem.Uses = sh in
+  let Shared_mem.Uses = sh in
   (* constructors in children of class_ must be consistent? *)
   let cconsist =
     if class_.sc_final then
@@ -774,7 +774,7 @@ let method_decl_eager
   acc
 
 let rec declare_class_and_parents
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (class_env : class_env)
     (shallow_class : Shallow_decl_defs.shallow_class) : Decl_store.class_entries
     =
@@ -787,7 +787,7 @@ let rec declare_class_and_parents
   (class_, Some member_heaps_values)
 
 and class_parents_decl
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (class_env : class_env)
     (c : Shallow_decl_defs.shallow_class) :
     Decl_store.class_entries SMap.t * decl_error list =
@@ -820,7 +820,7 @@ and class_parents_decl
   acc
 
 and class_decl_if_missing
-    ~(sh : SharedMem.uses) (class_env : class_env) (class_name : string) :
+    ~(sh : Shared_mem.uses) (class_env : class_env) (class_name : string) :
     Decl_store.class_entries option =
   match Decl_store.((get ()).get_class class_name) with
   | Some decl -> Some (decl, None)
@@ -837,7 +837,7 @@ and class_decl_if_missing
       Some result)
 
 and class_decl
-    ~(sh : SharedMem.uses)
+    ~(sh : Shared_mem.uses)
     (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     ~(parents : Decl_store.class_entries SMap.t)
@@ -1090,7 +1090,7 @@ and class_decl
   (tc, member_heaps_values)
 
 let class_decl_if_missing
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (class_name : string) :
+    ~(sh : Shared_mem.uses) (ctx : Provider_context.t) (class_name : string) :
     Decl_store.class_entries option =
   match Decl_store.((get ()).get_class class_name) with
   | Some class_ -> Some (class_, None)

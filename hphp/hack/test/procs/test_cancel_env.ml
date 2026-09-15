@@ -9,7 +9,7 @@ let entry =
       Hh_logger.set_id (Printf.sprintf "test_cancel_env %d" worker_id))
 
 let make_workers n =
-  let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
+  let handle = Shared_mem.init ~num_workers:n Shared_mem.default_config in
   let workers =
     Multi_worker.make
       ~longlived_workers:(not use_worker_clones)
@@ -28,8 +28,8 @@ module UnitVal = struct
 end
 
 module TestHeap =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (UnitVal)
 
 (* The tasks will be numbers 1...num_workers_and_jobs,

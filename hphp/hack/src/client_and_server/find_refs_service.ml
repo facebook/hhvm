@@ -103,7 +103,7 @@ let add_if_extends_class ctx target_class_name class_name acc =
     acc
 
 let find_child_classes_in_files ctx target_class_name naming_table files =
-  SharedMem.invalidate_local_caches ();
+  Shared_mem.invalidate_local_caches ();
   Relative_path.Set.fold files ~init:SSet.empty ~f:(fun fn acc ->
       try
         let { FileInfo.ids = { FileInfo.classes; _ }; _ } =

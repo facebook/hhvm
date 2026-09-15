@@ -366,8 +366,8 @@ let make_dep_to_symbol_map ctx options (files : Relative_path.Set.t) :
   for the typechecker to function. *)
 let init (hhi_root : Path.t) config : Provider_context.t =
   Event_logger.init_fake ();
-  let (_ : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 SharedMem.default_config
+  let (_ : Shared_mem.handle) =
+    Shared_mem.init ~num_workers:0 Shared_mem.default_config
   in
   init_paths hhi_root;
   let tcopt = tcopt config in

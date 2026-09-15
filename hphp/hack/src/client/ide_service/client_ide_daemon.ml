@@ -1479,7 +1479,7 @@ let daemon_main
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
 
   (* in hh_shared.c, worker_id=0 is used for main process, and _id=1 for the first worker. *)
-  SharedMem.connect shm_handle ~worker_id:1;
+  Shared_mem.connect shm_handle ~worker_id:1;
 
   Stdlib.at_exit (fun () ->
       try

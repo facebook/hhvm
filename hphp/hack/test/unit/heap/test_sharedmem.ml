@@ -45,7 +45,9 @@ let expect_equals ~name value expected =
     (value = expected)
 
 let test_local_changes
-    (module IntHeap : SharedMem.Heap with type value = int and type key = string)
+    (module IntHeap : Shared_mem.Heap
+      with type value = int
+       and type key = string)
     () =
   let expect_value ~name expected =
     expect_equals ~name (IntHeap.get name) expected;
@@ -127,8 +129,8 @@ let test_local_changes
 
 module type HeapWithLocalCache =
     module type of
-      SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+      Shared_mem.HeapWithLocalCache
+        (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
         (IntVal)
         (Capacity)
 
@@ -160,19 +162,19 @@ let test_cache_behavior (module IntHeap : HeapWithLocalCache) () =
    in the combined cache. *)
 
 module TestNoCache =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.Heap
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (IntVal)
 
 (* We shall not mix compressions, so create 2 separate caches  *)
 module TestWithCacheLz4 =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (IntVal)
     (Capacity)
 module TestWithCacheZstd =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (String_key)
+  Shared_mem.HeapWithLocalCache
+    (Shared_mem.ImmediateBackend (Shared_mem.NonEvictable)) (String_key)
     (IntVal)
     (Capacity)
 
@@ -203,10 +205,10 @@ let tests () =
       fun () ->
         let num_workers = 0 in
         let handle =
-          SharedMem.init
+          Shared_mem.init
             ~num_workers
             {
-              SharedMem.global_size = 16;
+              Shared_mem.global_size = 16;
               heap_size = 409600;
               hash_table_pow = 12;
               shm_dirs = [];
@@ -218,7 +220,7 @@ let tests () =
               compression;
             }
         in
-        ignore (handle : SharedMem.handle);
+        ignore (handle : Shared_mem.handle);
         test ();
         true )
   in

@@ -59,14 +59,14 @@ let init_state
 
 let init
     ~(root : Path.t)
-    ~(shmem_config : SharedMem.config)
+    ~(shmem_config : Shared_mem.config)
     ~(popt : Parser_options.t)
     ~(tcopt : Typechecker_options.t)
     ~(deps_mode : Typing_deps_mode.t)
     ?(gc_control : Gc.control option)
     (t : float) : Provider_context.t * Multi_worker.worker list * float =
   let nbr_procs = Sys_utils.nbr_procs in
-  let heap_handle = SharedMem.init ~num_workers:nbr_procs shmem_config in
+  let heap_handle = Shared_mem.init ~num_workers:nbr_procs shmem_config in
   let gc_control =
     match gc_control with
     | Some c -> c
@@ -90,7 +90,7 @@ let init
 let init_with_defaults =
   init
     ~root:(Path.make "/")
-    ~shmem_config:SharedMem.default_config
+    ~shmem_config:Shared_mem.default_config
     ~popt:Parser_options.default
     ~tcopt:Typechecker_options.default
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)

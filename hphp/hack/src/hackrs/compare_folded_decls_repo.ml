@@ -23,7 +23,7 @@ let make_workers
     server_config |> Server_config.version |> Config_file.version_to_string_opt
   in
   let shmem_config = Server_config.sharedmem_config server_config in
-  let heap_handle = SharedMem.init ~num_workers shmem_config in
+  let heap_handle = Shared_mem.init ~num_workers shmem_config in
   Server_worker.make
     ~longlived_workers:true
     ~nbr_procs:num_workers
@@ -104,7 +104,7 @@ let fold_and_compare_single_decl
     : bool =
   let ocaml_decl_opt =
     Decl_folded_class.class_decl_if_missing
-      ~sh:SharedMem.Uses
+      ~sh:Shared_mem.Uses
       ctx
       decl_class_name
   in

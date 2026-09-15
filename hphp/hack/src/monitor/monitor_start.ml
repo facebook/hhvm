@@ -194,6 +194,7 @@ let start () =
     end else
       monitor_daemon_main options ~proc_stack
   with
-  | SharedMem.Out_of_shared_memory -> Exit.exit Exit_status.Out_of_shared_memory
+  | Shared_mem.Out_of_shared_memory ->
+    Exit.exit Exit_status.Out_of_shared_memory
   | Exit_status.Exit_with status -> Exit.exit status
   | exn -> Exit.exit (Exit_status.Uncaught_exception (Exception.wrap exn))

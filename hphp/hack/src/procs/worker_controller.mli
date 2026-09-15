@@ -80,7 +80,7 @@ val close : worker -> (void, Worker.request) Daemon.handle -> unit
 
 type call_wrapper = { wrap: 'x 'b. ('x -> 'b) -> 'x -> 'b }
 
-type 'a entry_state = 'a * Gc.control * SharedMem.handle * int
+type 'a entry_state = 'a * Gc.control * Shared_mem.handle * int
 
 (* The first bool parameter specifies whether to use worker clones
  * or not: for non-longlived-workers, we must clone. *)
@@ -102,7 +102,7 @@ val make :
   entry:'a entry ->
   int ->
   gc_control:Gc.control ->
-  heap_handle:SharedMem.handle ->
+  heap_handle:Shared_mem.handle ->
   worker list
 
 (** Call in a sub-process (CAREFUL, GLOBALS ARE COPIED) *)

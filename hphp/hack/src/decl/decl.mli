@@ -9,12 +9,12 @@
 
 (*
  * This function works by side effects. It is adding in the Naming_table the
- * nast produced from the filename passed as a parameter (the SharedMem must
- * thus have been initialized via SharedMem.init prior to calling this
+ * nast produced from the filename passed as a parameter (the Shared_mem must
+ * thus have been initialized via Shared_mem.init prior to calling this
  * function). Its performance benefits if the Parser_heap has been previously
  * populated. It finally adds all the typing information about classes, functions, typedefs,
  * respectively in the globals in Typing_env.Class, Typing_env.Fun, and
  * Typing_env.Typedef.
  *)
 val make_env :
-  sh:SharedMem.uses -> Provider_context.t -> Relative_path.t -> unit
+  sh:Shared_mem.uses -> Provider_context.t -> Relative_path.t -> unit

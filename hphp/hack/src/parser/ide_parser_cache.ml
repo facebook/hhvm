@@ -42,7 +42,7 @@ let with_ide_cache f =
     ~finally:deactivate
 
 module IdeAstCache =
-  SharedMem.FreqCache
+  Shared_mem.FreqCache
     (String_key)
     (struct
       type t = Parser_return.t * Fixme_provider.FixmeMap.t * Diagnostics.t
@@ -54,7 +54,7 @@ module IdeAstCache =
     end)
 
 module IdeCstCache =
-  SharedMem.FreqCache
+  Shared_mem.FreqCache
     (String_key)
     (struct
       type t = SyntaxTree.t

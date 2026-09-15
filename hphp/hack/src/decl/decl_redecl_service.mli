@@ -32,7 +32,7 @@ val redo_type_decl :
   Multi_worker.worker list option ->
   bucket_size:int ->
   get_classes_in_file ->
-  previously_oldified_defs:FileInfo.names ->
+  previously_oldified_defs:File_info.names ->
   defs:Decl_compare.VersionedNames.t Relative_path.Map.t ->
   redo_type_decl_result
 
@@ -48,7 +48,7 @@ val oldify_decls_and_remove_descendants :
   Multi_worker.worker list option ->
   get_classes_in_file ->
   bucket_size:int ->
-  defs:FileInfo.names ->
+  defs:File_info.names ->
   unit
 
 (** Remove provided defs from the heap of old decls.
@@ -57,7 +57,7 @@ val remove_old_defs :
   Provider_context.t ->
   bucket_size:int ->
   Multi_worker.worker list option ->
-  FileInfo.names ->
+  File_info.names ->
   unit
 
 (** Exposed for tests only!
@@ -75,7 +75,7 @@ val get_descendant_classes :
 
 (** Test-only *)
 val remove_defs :
-  FileInfo.names ->
+  File_info.names ->
   elems:Decl_class_elements.t SMap.t ->
   collect_garbage:bool ->
   unit

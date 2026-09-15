@@ -138,7 +138,7 @@ module Fixmes : sig
 end
 
 module Reverse_naming_table_delta : sig
-  type pos = FileInfo.name_type * Relative_path.t
+  type pos = File_info.name_type * Relative_path.t
 
   type pos_or_deleted =
     | Pos of pos * pos list
@@ -184,7 +184,7 @@ type local_memory = {
         The other top-level definitions correspond to Decl_heap.Typedefs/GConsts/Modules/etc.
         See comment in Provider_utils.mli for invariant. *)
   decls_reflect_this_file:
-    (Relative_path.t * FileInfo.t * FileInfo.pfh_hash) option ref;
+    (Relative_path.t * File_info.t * File_info.pfh_hash) option ref;
       (** This relates to the invariant for the contents of [shallow_decl_cache],
       [folded_class_cache] and [decl_cache]. See comment in Provider_utils.mli. *)
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
@@ -199,7 +199,7 @@ type local_memory = {
           them up on subsequent queries, since sqlite is slow.
           (3) If a symbol is defined in two files, the delta will only point
           to an arbitrary one of those files.
-          (4) It stores "FileInfo.pos" positions. These can be either filename-only
+          (4) It stores "File_info.pos" positions. These can be either filename-only
           or filename-line-col positions. There's no particular invariant enforced
           about this. We happen to store filename-only for file changes.
           (5) It stores names, and also canon_key (lowercase) names. For authoritative

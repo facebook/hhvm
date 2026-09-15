@@ -125,7 +125,7 @@ let on_expr_top_down
     end
     | Aast.Omitted -> begin
       match Env.in_mode ctx with
-      | FileInfo.Mhhi -> (ctx, Ok expr)
+      | File_info.Mhhi -> (ctx, Ok expr)
       | _ ->
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);
         (ctx, Error (Err.invalid_expr expr))

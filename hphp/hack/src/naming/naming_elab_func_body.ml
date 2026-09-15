@@ -24,7 +24,7 @@ end
 
 let on_func_body func_body ~ctx =
   let func_body =
-    if FileInfo.is_hhi @@ Env.in_mode ctx then
+    if File_info.is_hhi @@ Env.in_mode ctx then
       Aast.{ fb_ast = [] }
     else
       func_body

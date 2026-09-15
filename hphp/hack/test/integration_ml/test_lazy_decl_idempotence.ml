@@ -50,7 +50,7 @@ let test () =
   (* Remove things from shared memory (that were put there by Test.setup_disk)
    * to simulate lazy saved state init. *)
   let defs =
-    { FileInfo.empty_names with FileInfo.n_classes = SSet.of_list classes }
+    { File_info.empty_names with File_info.n_classes = SSet.of_list classes }
   in
   let elems = Decl_class_elements.get_for_classes ~old:false classes in
   Decl_redecl_service.remove_defs ~collect_garbage:false defs ~elems;

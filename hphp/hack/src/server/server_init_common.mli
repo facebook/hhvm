@@ -15,7 +15,7 @@ val directory_walk :
   Server_env.genv ->
   Relative_path.t list Bucket.next * float
 
-(** This parses all the lazy list of files provided by [get_next] to get [FileInfo.t]
+(** This parses all the lazy list of files provided by [get_next] to get [File_info.t]
   information for all of them, then updates the forward naming table [env.naming_table]. *)
 val parse_files_and_update_forward_naming_table :
   Server_env.genv ->

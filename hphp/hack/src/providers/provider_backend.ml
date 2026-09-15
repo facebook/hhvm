@@ -202,7 +202,7 @@ let empty_fixmes =
     }
 
 module Reverse_naming_table_delta = struct
-  type pos = FileInfo.name_type * Relative_path.t
+  type pos = File_info.name_type * Relative_path.t
 
   type pos_or_deleted =
     | Pos of pos * pos list
@@ -251,7 +251,7 @@ type local_memory = {
   folded_class_cache: Folded_class_cache.t;
   decl_cache: Decl_cache.t;
   decls_reflect_this_file:
-    (Relative_path.t * FileInfo.t * FileInfo.pfh_hash) option ref;
+    (Relative_path.t * File_info.t * File_info.pfh_hash) option ref;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;

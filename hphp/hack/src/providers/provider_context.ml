@@ -248,7 +248,7 @@ let get_telemetry (t : t) : Telemetry.t =
              Printf.sprintf
                "%s [%s] #%s"
                (Relative_path.suffix path)
-               (FileInfo.to_string file_info)
+               (File_info.to_string file_info)
                (Int64.Hex.to_string pfh_hash)
            in
            Telemetry.string_ ~key:"decls_for_file" ~value telemetry)

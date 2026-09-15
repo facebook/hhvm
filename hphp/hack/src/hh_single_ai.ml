@@ -151,7 +151,7 @@ let parse_name_and_skip_decl ctx files_contents =
             Naming_global.ndecl_file_and_get_conflict_files
               ctx
               fn
-              fileinfo.FileInfo.ids
+              fileinfo.File_info.ids
           in
           ());
       files_info)

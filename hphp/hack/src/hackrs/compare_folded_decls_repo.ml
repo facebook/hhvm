@@ -87,8 +87,8 @@ let init (root : Path.t) (naming_table_path : string option) :
 let parse_repo
     (ctx : Provider_context.t)
     (root : Path.t)
-    (workers : Multi_worker.worker list option) : FileInfo.t Relative_path.Map.t
-    =
+    (workers : Multi_worker.worker list option) :
+    File_info.t Relative_path.Map.t =
   let get_next =
     Server_utils.make_next
       ~hhi_filter:(fun _ -> true)

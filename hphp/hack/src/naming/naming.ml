@@ -359,7 +359,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
                   popt.Parser_options.disable_xhp_element_mangling;
               };
           fd_file_attributes = [];
-          fd_mode = FileInfo.Mstrict;
+          fd_mode = File_info.Mstrict;
           fd_fun =
             {
               f_span = pos;

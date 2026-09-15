@@ -27,13 +27,13 @@ val name_kind_to_enum : name_kind -> int
 
 val name_kind_of_enum : int -> name_kind option
 
-(* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
+(* The types in this file duplicate what's in File_info.name_type, but with more structure.
    It'd be nice to unify them. *)
 
-val name_kind_to_name_type : name_kind -> FileInfo.name_type
+val name_kind_to_name_type : name_kind -> File_info.name_type
 
-val type_kind_to_name_type : kind_of_type -> FileInfo.name_type
+val type_kind_to_name_type : kind_of_type -> File_info.name_type
 
-val name_kind_of_name_type : FileInfo.name_type -> name_kind
+val name_kind_of_name_type : File_info.name_type -> name_kind
 
-val type_kind_of_name_type : FileInfo.name_type -> kind_of_type option
+val type_kind_of_name_type : File_info.name_type -> kind_of_type option

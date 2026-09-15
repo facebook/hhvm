@@ -44,14 +44,15 @@ type 'a forward_naming_table_delta =
   | Deleted
 [@@deriving show]
 
-type file_deltas = FileInfo.t forward_naming_table_delta Relative_path.Map.t
+type file_deltas = File_info.t forward_naming_table_delta Relative_path.Map.t
 
-type blob_format = FileInfo.saved forward_naming_table_delta Relative_path.Map.t
+type blob_format =
+  File_info.saved forward_naming_table_delta Relative_path.Map.t
 
 let pp_file_deltas =
   Relative_path.Map.make_pp
     Relative_path.pp
-    (pp_forward_naming_table_delta FileInfo.pp)
+    (pp_forward_naming_table_delta File_info.pp)
 
 type local_changes = {
   file_deltas: file_deltas;
@@ -154,7 +155,7 @@ module LocalChanges = struct
       let file_deltas =
         Relative_path.Map.mapi local_changes_saved ~f:(fun path delta ->
             match delta with
-            | Modified saved -> Modified (FileInfo.from_saved path saved)
+            | Modified saved -> Modified (File_info.from_saved path saved)
             | Deleted -> Deleted)
       in
       if Relative_path.Map.cardinal file_deltas > 0 then
@@ -300,13 +301,13 @@ module FileInfoTable = struct
       db
       stmt_cache
       relative_path
-      ~(type_checker_mode : FileInfo.mode option)
+      ~(type_checker_mode : File_info.mode option)
       ~(file_decls_hash : Int64.t option)
-      ~(classes : FileInfo.id list)
-      ~(consts : FileInfo.id list)
-      ~(funs : FileInfo.id list)
-      ~(typedefs : FileInfo.id list)
-      ~(modules : FileInfo.id list) =
+      ~(classes : File_info.id list)
+      ~(consts : File_info.id list)
+      ~(funs : File_info.id list)
+      ~(typedefs : File_info.id list)
+      ~(modules : File_info.id list) =
     let prefix_type =
       Sqlite3.Data.INT
         (Int64.of_int
@@ -317,7 +318,7 @@ module FileInfoTable = struct
       match type_checker_mode with
       | Some type_checker_mode ->
         Sqlite3.Data.INT
-          (Int64.of_int (FileInfo.mode_to_enum type_checker_mode))
+          (Int64.of_int (File_info.mode_to_enum type_checker_mode))
       | None -> Sqlite3.Data.NULL
     in
     let file_decls_hash =
@@ -327,7 +328,7 @@ module FileInfoTable = struct
     in
     let names_to_data_type ids =
       let open Core in
-      let open FileInfo in
+      let open File_info in
       let names =
         String.concat ~sep:"|" (List.map ids ~f:(fun id -> id.name))
       in
@@ -355,7 +356,7 @@ module FileInfoTable = struct
       let open Option in
       column_int64_option stmt base_index
       >>= Int64.to_int
-      >>= FileInfo.mode_of_enum
+      >>= File_info.mode_of_enum
     in
     let position_free_decl_hash = Some (column_int64 stmt (base_index + 1)) in
     let to_ids ~value ~name_type =
@@ -363,37 +364,37 @@ module FileInfoTable = struct
       | Sqlite3.Data.TEXT s ->
         Core.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
-              let pos = FileInfo.File (name_type, path) in
-              FileInfo.{ pos; name; decl_hash = None }))
+              let pos = File_info.File (name_type, path) in
+              File_info.{ pos; name; decl_hash = None }))
       | Sqlite3.Data.NULL -> []
       | _ -> failwith "Unexpected column type when retrieving names"
     in
     let classes =
       to_ids
         ~value:(Sqlite3.column stmt (base_index + 2))
-        ~name_type:FileInfo.Class
+        ~name_type:File_info.Class
     in
     let consts =
       to_ids
         ~value:(Sqlite3.column stmt (base_index + 3))
-        ~name_type:FileInfo.Const
+        ~name_type:File_info.Const
     in
     let funs =
       to_ids
         ~value:(Sqlite3.column stmt (base_index + 4))
-        ~name_type:FileInfo.Fun
+        ~name_type:File_info.Fun
     in
     let typedefs =
       to_ids
         ~value:(Sqlite3.column stmt (base_index + 5))
-        ~name_type:FileInfo.Typedef
+        ~name_type:File_info.Typedef
     in
     let modules =
       to_ids
         ~value:(Sqlite3.column stmt (base_index + 6))
-        ~name_type:FileInfo.Module
+        ~name_type:File_info.Module
     in
-    FileInfo.
+    File_info.
       {
         position_free_decl_hash;
         file_mode;
@@ -630,10 +631,10 @@ let free_db_cache () : unit = db_cache := `Not_yet_cached
 let save_file_info db stmt_cache relative_path checksum file_info : save_result
     =
   let {
-    FileInfo.file_mode;
+    File_info.file_mode;
     position_free_decl_hash;
     comments = _;
-    ids = { FileInfo.classes; funs; typedefs; modules; consts };
+    ids = { File_info.classes; funs; typedefs; modules; consts };
   } =
     file_info
   in
@@ -666,7 +667,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let insert ~name_kind ~dep_ctor (symbols_inserted, errors, checksum) file_info
       =
-    let { FileInfo.pos = _; name; decl_hash } = file_info in
+    let { File_info.pos = _; name; decl_hash } = file_info in
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64

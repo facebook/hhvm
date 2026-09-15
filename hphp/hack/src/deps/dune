@@ -1,7 +1,7 @@
 (library
  (name file_info)
  (wrapped false)
- (modules fileInfo)
+ (modules file_info)
  (libraries opaque_digest pos symbol_name utils_core)
  (preprocess
   (pps

@@ -16,13 +16,14 @@ let remove_defs_from_reverse_naming_table
       | None -> ()
       | Some
           {
-            FileInfo.ids = { FileInfo.funs; classes; typedefs; consts; modules };
+            File_info.ids =
+              { File_info.funs; classes; typedefs; consts; modules };
             file_mode = _;
             comments = _;
             position_free_decl_hash = _;
           } ->
         (* we use [snd] to strip away positions *)
-        let snd id = id.FileInfo.name in
+        let snd id = id.File_info.name in
         Naming_global.remove_decls
           ~backend:(Provider_backend.get ())
           ~funs:(List.map funs ~f:snd)
@@ -43,11 +44,11 @@ let get_old_and_new_defs_in_files
         fun path acc ->
           let old_names =
             Naming_table.get_file_info old_naming_table path
-            |> Option.map ~f:FileInfo.simplify
+            |> Option.map ~f:File_info.simplify
           in
           let new_names =
             Naming_table.get_file_info new_naming_table path
-            |> Option.map ~f:FileInfo.simplify
+            |> Option.map ~f:File_info.simplify
           in
           match (old_names, new_names) with
           | (None, None) -> acc
@@ -58,9 +59,9 @@ let get_old_and_new_defs_in_files
               ~data:
                 {
                   Decl_compare.VersionedNames.old_names =
-                    Option.value old_names ~default:FileInfo.empty_names;
+                    Option.value old_names ~default:File_info.empty_names;
                   new_names =
-                    Option.value new_names ~default:FileInfo.empty_names;
+                    Option.value new_names ~default:File_info.empty_names;
                 }
       end
     ~init:Relative_path.Map.empty

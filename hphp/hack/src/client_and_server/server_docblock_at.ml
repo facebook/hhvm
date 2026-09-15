@@ -164,7 +164,7 @@ let go_comments_for_symbol_ctx
 
 (* Locate a symbol and return file, line, column, and base_class *)
 let go_locate_symbol
-    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : FileInfo.si_kind) :
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : File_info.si_kind) :
     Docblock_service.dbs_symbol_location_result =
   (* Look up this class name *)
   match Symbol_index_core.get_position_for_symbol ctx symbol kind with
@@ -174,13 +174,13 @@ let go_locate_symbol
     (* Determine base class properly *)
     let base_class_name =
       match kind with
-      | FileInfo.SI_Class
-      | FileInfo.SI_Enum
-      | FileInfo.SI_Function
-      | FileInfo.SI_GlobalConstant
-      | FileInfo.SI_Interface
-      | FileInfo.SI_Trait
-      | FileInfo.SI_Typedef ->
+      | File_info.SI_Class
+      | File_info.SI_Enum
+      | File_info.SI_Function
+      | File_info.SI_GlobalConstant
+      | File_info.SI_Interface
+      | File_info.SI_Trait
+      | File_info.SI_Typedef ->
         Some (Utils.add_ns symbol)
       | _ -> None
     in
@@ -192,47 +192,47 @@ let go_locate_symbol
         dbs_base_class = base_class_name;
       }
 
-let symboldefinition_kind_from_si_kind (kind : FileInfo.si_kind) :
+let symboldefinition_kind_from_si_kind (kind : File_info.si_kind) :
     'a Symbol_definition.kind =
   match kind with
-  | FileInfo.SI_Class
-  | FileInfo.SI_Unknown
-  | FileInfo.SI_XHP ->
+  | File_info.SI_Class
+  | File_info.SI_Unknown
+  | File_info.SI_XHP ->
     Symbol_definition.(Classish { members = []; classish_kind = Class })
-  | FileInfo.SI_Interface ->
+  | File_info.SI_Interface ->
     Symbol_definition.(Classish { members = []; classish_kind = Interface })
-  | FileInfo.SI_Enum ->
+  | File_info.SI_Enum ->
     Symbol_definition.(Classish { members = []; classish_kind = Enum })
-  | FileInfo.SI_Trait ->
+  | File_info.SI_Trait ->
     Symbol_definition.(Classish { members = []; classish_kind = Trait })
-  | FileInfo.SI_Mixed -> Symbol_definition.LocalVar
-  | FileInfo.SI_Function -> Symbol_definition.Function
-  | FileInfo.SI_Typedef -> Symbol_definition.Typedef
-  | FileInfo.SI_GlobalConstant -> Symbol_definition.GlobalConst
-  | FileInfo.SI_ClassMethod ->
+  | File_info.SI_Mixed -> Symbol_definition.LocalVar
+  | File_info.SI_Function -> Symbol_definition.Function
+  | File_info.SI_Typedef -> Symbol_definition.Typedef
+  | File_info.SI_GlobalConstant -> Symbol_definition.GlobalConst
+  | File_info.SI_ClassMethod ->
     Symbol_definition.(Member { class_name = ""; member_kind = Method })
-  | FileInfo.SI_Literal -> Symbol_definition.LocalVar
-  | FileInfo.SI_ClassConstant ->
+  | File_info.SI_Literal -> Symbol_definition.LocalVar
+  | File_info.SI_ClassConstant ->
     Symbol_definition.(Member { class_name = ""; member_kind = ClassConst })
-  | FileInfo.SI_Property ->
+  | File_info.SI_Property ->
     Symbol_definition.(Member { class_name = ""; member_kind = Property })
-  | FileInfo.SI_LocalVariable -> Symbol_definition.LocalVar
-  | FileInfo.SI_Constructor ->
+  | File_info.SI_LocalVariable -> Symbol_definition.LocalVar
+  | File_info.SI_Constructor ->
     Symbol_definition.(Member { class_name = ""; member_kind = Method })
-  | FileInfo.SI_Keyword -> failwith "Cannot look up a keyword"
-  | FileInfo.SI_Namespace -> failwith "Cannot look up a namespace"
+  | File_info.SI_Keyword -> failwith "Cannot look up a keyword"
+  | File_info.SI_Namespace -> failwith "Cannot look up a namespace"
 
 let rec go_docblock_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     pos
-    ~(kind : FileInfo.si_kind) : Docblock_service.result =
+    ~(kind : File_info.si_kind) : Docblock_service.result =
   let def_kind = symboldefinition_kind_from_si_kind kind in
   match go_comments_from_source_text ~ctx ~entry pos ~kind:def_kind with
   | None ->
     (* Special case: Classes with an assumed default constructor *)
-    if FileInfo.equal_si_kind kind FileInfo.SI_Constructor then
-      go_docblock_ctx ~ctx ~entry pos ~kind:FileInfo.SI_Class
+    if File_info.equal_si_kind kind File_info.SI_Constructor then
+      go_docblock_ctx ~ctx ~entry pos ~kind:File_info.SI_Class
     else
       []
   | Some "" -> []
@@ -240,13 +240,13 @@ let rec go_docblock_ctx
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
-    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : FileInfo.si_kind) :
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : File_info.si_kind) :
     Docblock_service.result =
   (* Shortcut for namespaces, since they don't have locations *)
-  if FileInfo.equal_si_kind kind FileInfo.SI_Namespace then
+  if File_info.equal_si_kind kind File_info.SI_Namespace then
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
     [Docblock_service.HackSnippet namespace_declaration]
-  else if FileInfo.equal_si_kind kind FileInfo.SI_Keyword then
+  else if File_info.equal_si_kind kind File_info.SI_Keyword then
     let txt = Printf.sprintf "Hack language keyword: %s;" symbol in
     [Docblock_service.HackSnippet txt]
   else
@@ -256,7 +256,7 @@ let go_docblock_for_symbol
         Printf.sprintf
           "Could not find the symbol '%s' (expected to be a %s). This symbol may need namespace information (e.g. HH\\a\\b\\c) to resolve correctly. You can also consider rebasing."
           symbol
-          (FileInfo.show_si_kind kind)
+          (File_info.show_si_kind kind)
       in
       [Docblock_service.Markdown msg]
     | Some location ->

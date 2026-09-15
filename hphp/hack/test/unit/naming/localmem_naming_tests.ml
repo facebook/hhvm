@@ -378,7 +378,7 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
   in
   let new_ids =
     match changes with
-    | [{ FileInfo.new_ids; _ }] -> new_ids
+    | [{ File_info.new_ids; _ }] -> new_ids
     | _ -> failwith "expected one change"
   in
 
@@ -386,9 +386,10 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
     (Some "\\:my:xhp:cls")
     Option.(
       new_ids
-      >>| (fun info -> info.FileInfo.classes)
-      >>= List.find ~f:(fun id -> String.equal id.FileInfo.name "\\:my:xhp:cls")
-      >>| fun id -> id.FileInfo.name)
+      >>| (fun info -> info.File_info.classes)
+      >>= List.find ~f:(fun id ->
+              String.equal id.File_info.name "\\:my:xhp:cls")
+      >>| fun id -> id.File_info.name)
     "xhp_name_mangling: expected new file info to contain `\\:my:xhp:cls`";
   true
 

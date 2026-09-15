@@ -36,7 +36,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       root: Syntax.t;
       rust_tree: Rust_pointer.t option;
       errors: SyntaxError.t list;
-      mode: FileInfo.mode option;
+      mode: File_info.mode option;
       state: SCI.t;
     }
     [@@deriving show, sexp_of]
@@ -64,7 +64,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         (root : Syntax.t)
         (rust_tree : Rust_pointer.t option)
         (errors : SyntaxError.t list)
-        (mode : FileInfo.mode option)
+        (mode : File_info.mode option)
         (state : SCI.t) : t =
       { text; root; rust_tree; errors; mode; state }
 
@@ -107,12 +107,12 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     let is_strict tree =
       match tree.mode with
-      | Some FileInfo.Mstrict -> true
+      | Some File_info.Mstrict -> true
       | _ -> false
 
     let is_hhi tree =
       match tree.mode with
-      | Some FileInfo.Mhhi -> true
+      | Some File_info.Mhhi -> true
       | _ -> false
 
     let errors_no_bodies tree =

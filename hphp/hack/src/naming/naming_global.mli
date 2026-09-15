@@ -17,13 +17,13 @@
 (** GEnv is solely a set of thin wrappers around Naming_provider. *)
 module GEnv : sig
   val get_fun_full_pos :
-    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
+    Provider_context.t -> File_info.pos * string -> Pos.t * string
 
   val get_type_full_pos :
-    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
+    Provider_context.t -> File_info.pos * string -> Pos.t * string
 
   val get_const_full_pos :
-    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
+    Provider_context.t -> File_info.pos * string -> Pos.t * string
 
   val type_pos : Provider_context.t -> string -> Pos.t option
 
@@ -48,7 +48,7 @@ val remove_decls :
   unit
 
 (* Same as remove_decls but extracts definition identifiers from the file_info *)
-val remove_decls_using_file_info : Provider_backend.t -> FileInfo.ids -> unit
+val remove_decls_using_file_info : Provider_backend.t -> File_info.ids -> unit
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider
 (which is a wrapper for the reverse naming table). As for duplicate name definitions, they
@@ -56,11 +56,11 @@ are a joint responsibility between the reverse-naming-table and [env.failed_nami
 this function is responsible for maintaining the invariant...
 - The invariant is that if there are duplicate names, then [env.failed_naming] contains all
 filenames that declare those duplicate names (both winners and losers).
-- If any symbol from the FileInfo.t is already defined in a different file (with or without the
+- If any symbol from the File_info.t is already defined in a different file (with or without the
 same case), that other file is deemed to have the "winner" definition of the symbol; this
 function leaves the reverse-naming-table for the conflicting name as it is, and also returns the
 winner's filename plus this filename.
-- If any symbol from the FileInfo.t is defined twice within the FileInfo.t (with or without
+- If any symbol from the File_info.t is defined twice within the File_info.t (with or without
 the same case), then the first occurrence is deemed to be the "winner" definition of the symbol;
 this function ends with the first occurrence in the reverse-naming-table, and returns this filename.
 - Actually, the way serverTypeCheck works is that whenever it is asked to do a typecheck, then
@@ -82,11 +82,11 @@ There are expectations of the caller:
 - This function doesn't touch the forward naming table; that's left to the caller.
 - The caller is expected to ensure that all names from the specified file have already been removed
 from the naming-table provider prior to calling this function.
-- The caller is expected to provide "full" positions in its FileInfo.t. *)
+- The caller is expected to provide "full" positions in its File_info.t. *)
 val ndecl_file_and_get_conflict_files :
-  Provider_context.t -> Relative_path.t -> FileInfo.ids -> Relative_path.Set.t
+  Provider_context.t -> Relative_path.t -> File_info.ids -> Relative_path.Set.t
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider.
 This caller is expected to ensure that there are no naming-collisons and no case-insensitive naming collisions. *)
 val ndecl_file_skip_if_already_bound :
-  Provider_context.t -> Relative_path.t -> FileInfo.ids -> unit
+  Provider_context.t -> Relative_path.t -> File_info.ids -> unit

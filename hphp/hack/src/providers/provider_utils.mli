@@ -125,7 +125,7 @@ and decl-caches in [local_memory]. *)
 val invalidate_upon_file_changes :
   ctx:Provider_context.t ->
   local_memory:Provider_backend.local_memory ->
-  changes:FileInfo.change list ->
+  changes:File_info.change list ->
   entries:Provider_context.entries ->
   Telemetry.t
 

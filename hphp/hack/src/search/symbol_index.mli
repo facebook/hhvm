@@ -20,7 +20,7 @@ val mock :
   on_find:
     (query_text:string ->
     context:Search_types.autocomplete_type ->
-    kind_filter:FileInfo.si_kind option ->
+    kind_filter:File_info.si_kind option ->
     Search_types.si_item list) ->
   Search_utils.si_env
 
@@ -33,7 +33,7 @@ val find_matching_symbols :
   query_text:string ->
   max_results:int ->
   context:Search_types.autocomplete_type ->
-  kind_filter:FileInfo.si_kind option ->
+  kind_filter:File_info.si_kind option ->
   Search_types.si_item list * Search_types.si_complete
 
 (** Does an approximate search for find-all-refs candidates.

@@ -13,7 +13,7 @@ module Hashtbl = Stdlib.Hashtbl
 module Mode = Typing_deps_mode
 open Typing_deps_mode
 open Utils
-open FileInfo
+open File_info
 
 let worker_id : int option ref = ref None
 
@@ -886,9 +886,9 @@ end
 (** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
-let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
+let deps_of_file_info (file_info : File_info.t) : Dep.t list =
   let {
-    FileInfo.ids = { FileInfo.funs; classes; typedefs; consts; modules };
+    File_info.ids = { File_info.funs; classes; typedefs; consts; modules };
     comments = _;
     file_mode = _;
     position_free_decl_hash = _;
@@ -900,7 +900,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       consts
       ~f:
         begin
-          (fun acc (id : FileInfo.id) -> Dep.make (Dep.GConst id.name) :: acc)
+          (fun acc (id : File_info.id) -> Dep.make (Dep.GConst id.name) :: acc)
         end
       ~init:[]
   in
@@ -909,7 +909,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       funs
       ~f:
         begin
-          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Fun id.name) :: acc)
+          (fun acc (id : File_info.id) -> Dep.make (Dep.Fun id.name) :: acc)
         end
       ~init:defs
   in
@@ -918,7 +918,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       classes
       ~f:
         begin
-          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
+          (fun acc (id : File_info.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -927,7 +927,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       typedefs
       ~f:
         begin
-          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
+          (fun acc (id : File_info.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -936,7 +936,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       modules
       ~f:
         begin
-          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Module id.name) :: acc)
+          (fun acc (id : File_info.id) -> Dep.make (Dep.Module id.name) :: acc)
         end
       ~init:defs
   in

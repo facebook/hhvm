@@ -11,7 +11,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module Env = Full_fidelity_parser_env
 module PositionedSyntax = Full_fidelity_positioned_syntax
 
-external parse_mode : SourceText.t -> FileInfo.mode option = "rust_parse_mode"
+external parse_mode : SourceText.t -> File_info.mode option = "rust_parse_mode"
 
 type ('a, 'b) result = 'a * 'b * SyntaxError.t list * Rust_pointer.t option
 

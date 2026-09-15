@@ -9,8 +9,8 @@
 open Hh_prelude
 
 type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
-  pfh_mode: FileInfo.mode option;
-  pfh_hash: FileInfo.pfh_hash;
+  pfh_mode: File_info.mode option;
+  pfh_hash: File_info.pfh_hash;
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
 }
 

@@ -10,7 +10,7 @@
 (*****************************************************************************)
 (* This module defines the data structured used to describe the content of
  * a file.
- * The parser constructs FileInfo.t structs, that contain names and positions
+ * The parser constructs File_info.t structs, that contain names and positions
  * plus some extra info required for the build.
  * After the names have been checked (Naming.make_env), we "simplify" the
  * struct and only keep the names defined in the files we know about.
@@ -111,7 +111,7 @@ type ids = {
 }
 [@@deriving show]
 
-(** [FileInfo.t] is (1) what we get out of the parser, with Full positions;
+(** [File_info.t] is (1) what we get out of the parser, with Full positions;
 (2) the API for putting stuff into and taking stuff out of saved-state naming table (with File positions)
 *)
 type t = {
@@ -133,7 +133,7 @@ val empty_t : t
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
 
-(** [FileInfo.names] is a cut-down version of [FileInfo.t], one that we use internally
+(** [File_info.names] is a cut-down version of [File_info.t], one that we use internally
 for decl-diffing and other fanout calculations. *)
 type names = {
   n_funs: SSet.t;
@@ -148,8 +148,8 @@ type names = {
 (* The record used in our saved state. *)
 (*****************************************************************************)
 
-(** Although [FileInfo.t] is the public API for storing/retrieving entries in the naming-table,
-we actually store the naming-table on disk as [FileInfo.saved] - it's basically the same but
+(** Although [File_info.t] is the public API for storing/retrieving entries in the naming-table,
+we actually store the naming-table on disk as [File_info.saved] - it's basically the same but
 has a slightly more compact representation in order to save space. *)
 type saved
 

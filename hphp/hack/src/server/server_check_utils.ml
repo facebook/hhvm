@@ -34,7 +34,7 @@ let extend_defs_per_file_sequential defs_per_file naming_table additional_files
       | None ->
         (try
            let info = Naming_table.get_file_info_exn naming_table path in
-           let info_names = FileInfo.simplify info in
+           let info_names = File_info.simplify info in
            Relative_path.Map.add acc ~key:path ~data:info_names
          with
         | Naming_table.File_info_not_found -> acc)
@@ -51,12 +51,12 @@ let extend_defs_per_file_batch
   let get_one acc x =
     try
       let info = Naming_table.get_file_info_exn naming_table x in
-      let info_names = FileInfo.simplify info in
+      let info_names = File_info.simplify info in
       Relative_path.Map.add acc ~key:x ~data:info_names
     with
     | Naming_table.File_info_not_found -> acc
   in
-  let job (acc : FileInfo.names Relative_path.Map.t) additional_files =
+  let job (acc : File_info.names Relative_path.Map.t) additional_files =
     Core.(
       let result = List.fold_left additional_files ~f:get_one ~init:acc in
       result)
@@ -77,10 +77,10 @@ let extend_defs_per_file_batch
   Does so either sequentially or in batches depending on how many files to add. *)
 let extend_defs_per_file
     genv
-    (defs_per_file : FileInfo.names Relative_path.Map.t)
+    (defs_per_file : File_info.names Relative_path.Map.t)
     (naming_table : Naming_table.t)
     (additional_files : Relative_path.Set.t) :
-    FileInfo.names Relative_path.Map.t =
+    File_info.names Relative_path.Map.t =
   let additional_count = Relative_path.Set.cardinal additional_files in
   if additional_count = 0 then
     defs_per_file

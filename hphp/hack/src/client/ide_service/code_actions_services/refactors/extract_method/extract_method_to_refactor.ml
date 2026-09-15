@@ -12,7 +12,7 @@ module SyntaxTree =
 
 (* note: returns None iff there are syntax errros *)
 let tree_from_source_text source_text : SyntaxTree.t option =
-  let env = Full_fidelity_parser_env.make ~mode:FileInfo.Mstrict () in
+  let env = Full_fidelity_parser_env.make ~mode:File_info.Mstrict () in
   let tree = SyntaxTree.make ~env source_text in
 
   if List.is_empty (SyntaxTree.all_errors tree) then

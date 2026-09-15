@@ -19,13 +19,13 @@ let test_string : string = "example_id"
 
 let assert_glean_autocomplete_results
     ~(query_text : string)
-    ~(kind : FileInfo.si_kind option)
+    ~(kind : File_info.si_kind option)
     ~(expected : int)
     ~(sienv_ref : si_env ref) : unit =
   let context =
     match kind with
-    | Some FileInfo.SI_Interface
-    | Some FileInfo.SI_Enum ->
+    | Some File_info.SI_Interface
+    | Some File_info.SI_Enum ->
       Actype
       (* the `Acid` context rules out interfaces+enums, so we pick one that allows them *)
     | _ -> Acid
@@ -127,7 +127,7 @@ let test_builder_names (harness : Test_harness.t) : bool =
   let sienv_ref = ref sienv in
   assert_glean_autocomplete_results
     ~query_text:":bk:ig:ndx:bullet-cell-w-learn"
-    ~kind:(Some FileInfo.SI_Class)
+    ~kind:(Some File_info.SI_Class)
     ~expected:1
     ~sienv_ref;
 

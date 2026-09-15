@@ -36,7 +36,7 @@ module Types : sig
   module TypePosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
   include
-    ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
+    ReverseNamingTable with type pos = File_info.pos * Naming_types.kind_of_type
 end
 
 module Funs : sig
@@ -44,19 +44,19 @@ module Funs : sig
 
   module FunPosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
-  include ReverseNamingTable with type pos = FileInfo.pos
+  include ReverseNamingTable with type pos = File_info.pos
 end
 
 module Consts : sig
   module ConstPosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
-  include ReverseNamingTable with type pos = FileInfo.pos
+  include ReverseNamingTable with type pos = File_info.pos
 end
 
 module Modules : sig
   module ModulePosHeap : Shared_mem.Heap with type key = Typing_deps.Dep.t
 
-  include ReverseNamingTable with type pos = FileInfo.pos
+  include ReverseNamingTable with type pos = File_info.pos
 end
 
 (** This function searches all three namespaces (types, funs, consts) to

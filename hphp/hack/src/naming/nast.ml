@@ -208,12 +208,12 @@ let get_simple_xhp_attrs =
       | Xhp_spread _ -> None)
 
 type defs = {
-  funs: (FileInfo.id * fun_def) list;
-  classes: (FileInfo.id * class_) list;
-  typedefs: (FileInfo.id * typedef) list;
-  constants: (FileInfo.id * gconst) list;
-  modules: (FileInfo.id * module_def) list;
-  stmts: (FileInfo.id * stmt) list;
+  funs: (File_info.id * fun_def) list;
+  classes: (File_info.id * class_) list;
+  typedefs: (File_info.id * typedef) list;
+  constants: (File_info.id * gconst) list;
+  modules: (File_info.id * module_def) list;
+  stmts: (File_info.id * stmt) list;
 }
 
 let get_defs (ast : program) : defs =
@@ -228,24 +228,24 @@ let get_defs (ast : program) : defs =
         Aast.(
           match def with
           | Fun f ->
-            let f = (FileInfo.pos_full (to_id f.fd_name), f) in
+            let f = (File_info.pos_full (to_id f.fd_name), f) in
             ({ defs with funs = f :: defs.funs }, stmt_count)
           | Class c ->
-            let c = (FileInfo.pos_full (to_id c.c_name), c) in
+            let c = (File_info.pos_full (to_id c.c_name), c) in
             ({ defs with classes = c :: defs.classes }, stmt_count)
           | Typedef t ->
-            let t = (FileInfo.pos_full (to_id t.t_name), t) in
+            let t = (File_info.pos_full (to_id t.t_name), t) in
             ({ defs with typedefs = t :: defs.typedefs }, stmt_count)
           | Constant cst ->
-            let cst = (FileInfo.pos_full (to_id cst.cst_name), cst) in
+            let cst = (File_info.pos_full (to_id cst.cst_name), cst) in
             ({ defs with constants = cst :: defs.constants }, stmt_count)
           | Module md ->
-            let md = (FileInfo.pos_full (to_id md.md_name), md) in
+            let md = (File_info.pos_full (to_id md.md_name), md) in
             ({ defs with modules = md :: defs.modules }, stmt_count)
           | Stmt st ->
             let pos = fst st in
             let id = "#stmt_" ^ string_of_int stmt_count in
-            let st = (FileInfo.pos_full (pos, id, None), st) in
+            let st = (File_info.pos_full (pos, id, None), st) in
             ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
           | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
           | ClassAlias _
@@ -268,9 +268,9 @@ let get_defs (ast : program) : defs =
   in
   fst @@ get_defs ast acc
 
-let get_def_names ast : FileInfo.ids =
+let get_def_names ast : File_info.ids =
   let { funs; classes; typedefs; constants; modules; _ } = get_defs ast in
-  FileInfo.
+  File_info.
     {
       funs = List.map funs ~f:fst;
       classes = List.map classes ~f:fst;

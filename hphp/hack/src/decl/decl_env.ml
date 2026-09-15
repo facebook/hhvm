@@ -10,7 +10,7 @@
 open Hh_prelude
 
 type env = {
-  mode: FileInfo.mode;
+  mode: File_info.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
   droot_member: Typing_pessimisation_deps.dependent_member option;
   ctx: Provider_context.t;

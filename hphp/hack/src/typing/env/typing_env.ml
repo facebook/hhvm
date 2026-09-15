@@ -1191,9 +1191,9 @@ module M = struct
 
   let get_mode env = env.decl_env.mode
 
-  let is_strict env = FileInfo.is_strict (get_mode env)
+  let is_strict env = File_info.is_strict (get_mode env)
 
-  let is_hhi env = FileInfo.is_hhi (get_mode env)
+  let is_hhi env = File_info.is_hhi (get_mode env)
 
   (*****************************************************************************)
   (* Locals *)

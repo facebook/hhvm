@@ -13,9 +13,9 @@ module Elab_happly_hint = struct
 end
 
 module Elab_func_body = struct
-  type t = { in_mode: FileInfo.mode }
+  type t = { in_mode: File_info.mode }
 
-  let empty = { in_mode = FileInfo.Mstrict }
+  let empty = { in_mode = File_info.Mstrict }
 end
 
 module Elab_haccess_hint = struct
@@ -79,14 +79,14 @@ module Elab_const_expr = struct
   type t = {
     enforce_const_expr: bool;
     in_enum_class: bool;
-    in_mode: FileInfo.mode;
+    in_mode: File_info.mode;
   }
 
   let empty =
     {
       enforce_const_expr = false;
       in_enum_class = false;
-      in_mode = FileInfo.Mstrict;
+      in_mode = File_info.Mstrict;
     }
 end
 

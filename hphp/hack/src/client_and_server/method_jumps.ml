@@ -100,7 +100,7 @@ let filter_extended_classes
         target_class_name
         get_method
         target_class_pos
-        id.FileInfo.name
+        id.File_info.name
         acc)
 
 let find_extended_classes_in_files
@@ -120,7 +120,7 @@ let find_extended_classes_in_files_parallel
     =
   let classes =
     Relative_path.Set.fold files ~init:[] ~f:(fun fn acc ->
-        let { FileInfo.ids = { FileInfo.classes; _ }; _ } =
+        let { File_info.ids = { File_info.classes; _ }; _ } =
           Naming_table.get_file_info_exn naming_table fn
         in
         classes :: acc)

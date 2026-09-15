@@ -14,20 +14,22 @@ open Asserter
 let change_class path name =
   if not (String.is_prefix name ~prefix:"\\") then
     failwith "names should start with \\";
-  FileInfo.
+  File_info.
     {
       path;
       old_ids =
         Some
           {
             empty_ids with
-            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+            classes =
+              [File_info.{ pos = Full Pos.none; name; decl_hash = None }];
           };
       new_ids =
         Some
           {
             empty_ids with
-            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+            classes =
+              [File_info.{ pos = Full Pos.none; name; decl_hash = None }];
           };
       new_pfh_hash = None;
     }

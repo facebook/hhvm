@@ -442,14 +442,14 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
             ()
           | Some
               {
-                FileInfo.ids =
-                  { FileInfo.funs; classes; typedefs; consts; modules };
+                File_info.ids =
+                  { File_info.funs; classes; typedefs; consts; modules };
                 position_free_decl_hash = _;
                 file_mode = _;
                 comments = _;
               } ->
             let backend = Provider_context.get_backend ctx in
-            let snd id = id.FileInfo.name in
+            let snd id = id.File_info.name in
             Naming_provider.remove_type_batch
               backend
               (classes |> List.map ~f:snd);
@@ -474,7 +474,10 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
             not (Relative_path.Set.mem parsing_files k))
       in
       Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
-          Naming_global.ndecl_file_skip_if_already_bound ctx k info.FileInfo.ids)
+          Naming_global.ndecl_file_skip_if_already_bound
+            ctx
+            k
+            info.File_info.ids)
   end;
   Hack_event_logger.naming_from_saved_state_end t;
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t
@@ -486,7 +489,7 @@ let use_prechecked_files (genv : Server_env.genv) : bool =
 
 let file_names_to_deps names deps =
   let open Typing_deps in
-  let { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } = names in
+  let { File_info.n_funs; n_classes; n_types; n_consts; n_modules } = names in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
@@ -553,13 +556,13 @@ let get_files_to_recheck
   let get_old_and_new_classes path : SSet.t =
     let old_names =
       Naming_table.get_file_info old_naming_table path
-      |> Option.map ~f:FileInfo.simplify
+      |> Option.map ~f:File_info.simplify
     in
     let new_names =
       Naming_table.get_file_info new_naming_table path
-      |> Option.map ~f:FileInfo.simplify
+      |> Option.map ~f:File_info.simplify
     in
-    let classes_from_names x = x.FileInfo.n_classes in
+    let classes_from_names x = x.File_info.n_classes in
     let old_classes = Option.map old_names ~f:classes_from_names in
     let new_classes = Option.map new_names ~f:classes_from_names in
     Option.merge old_classes new_classes ~f:SSet.union
@@ -568,9 +571,9 @@ let get_files_to_recheck
   let old_dirty_names =
     Relative_path.Map.fold
       defs_per_dirty_file
-      ~init:FileInfo.empty_names
+      ~init:File_info.empty_names
       ~f:(fun _fn { Decl_compare.VersionedNames.old_names; new_names = _ } acc
-         -> FileInfo.merge_names old_names acc)
+         -> File_info.merge_names old_names acc)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   Decl_redecl_service.oldify_decls_and_remove_descendants
@@ -1050,7 +1053,7 @@ let parse_only_init
     1. [old_naming_table], which we got from the saved-state, is a [NamingTable.t]
        that's "backed" i.e. it reflects just the sqlite file plus a delta, initially empty.
     2. [env.naming_table] starts out as [Naming_table.empty] as it was created in
-       [Server_main.setup_server]. We will add to it the forward-naming-table FileInfo.t
+       [Server_main.setup_server]. We will add to it the forward-naming-table File_info.t
        for all files discussed above, [parsing_files]
     3. The reverse naming-table is made up of global mutable shmem delta with
        eventual fallback to sqlite. We will write into that delta the reverse-names
@@ -1224,8 +1227,8 @@ let compute_fanout
         match (old_info, new_info) with
         | (Some x, Some y) ->
           (match
-             ( x.FileInfo.position_free_decl_hash,
-               y.FileInfo.position_free_decl_hash )
+             ( x.File_info.position_free_decl_hash,
+               y.File_info.position_free_decl_hash )
            with
           | (Some x, Some y) -> Int64.equal x y
           | _ -> false)

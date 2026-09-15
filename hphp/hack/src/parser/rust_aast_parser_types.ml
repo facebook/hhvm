@@ -24,7 +24,7 @@ type env = {
 }
 
 type result = {
-  file_mode: FileInfo.mode;
+  file_mode: File_info.mode;
   scoured_comments: Scoured_comments.t;
   aast: (unit, unit) Aast.program;
   lowerer_parsing_errors: (Pos.t * string) list;

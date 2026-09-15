@@ -98,7 +98,7 @@ let split_sets defs split_if_in_defs =
 (** Given name sets A and B return a tuple (AnB, A\B), i.e split A into the part
     that is common with B, and which is unique to A *)
 let split_defs defs split_if_in_defs =
-  FileInfo.(
+  File_info.(
     let (n_funs1, n_funs2) = split_sets defs.n_funs split_if_in_defs.n_funs in
     let (n_classes1, n_classes2) =
       split_sets defs.n_classes split_if_in_defs.n_classes

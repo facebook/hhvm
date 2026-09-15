@@ -591,10 +591,10 @@ let state_to_string (state : state) : string =
 
 (** This conversion is imprecise.  Comments indicate potential gaps *)
 let completion_kind_to_si_kind
-    (completion_kind : Completion.completionItemKind option) : FileInfo.si_kind
+    (completion_kind : Completion.completionItemKind option) : File_info.si_kind
     =
   let open Lsp in
-  let open FileInfo in
+  let open File_info in
   match completion_kind with
   | Some Completion.Class -> SI_Class
   | Some Completion.Method -> SI_ClassMethod
@@ -613,30 +613,30 @@ let completion_kind_to_si_kind
   (* The completion enum includes things we don't really support *)
   | _ -> SI_Unknown
 
-let si_kind_to_completion_kind (kind : FileInfo.si_kind) :
+let si_kind_to_completion_kind (kind : File_info.si_kind) :
     Completion.completionItemKind option =
   match kind with
-  | FileInfo.SI_XHP
-  | FileInfo.SI_Class ->
+  | File_info.SI_XHP
+  | File_info.SI_Class ->
     Some Completion.Class
-  | FileInfo.SI_ClassMethod -> Some Completion.Method
-  | FileInfo.SI_Function -> Some Completion.Function
-  | FileInfo.SI_Mixed
-  | FileInfo.SI_LocalVariable ->
+  | File_info.SI_ClassMethod -> Some Completion.Method
+  | File_info.SI_Function -> Some Completion.Function
+  | File_info.SI_Mixed
+  | File_info.SI_LocalVariable ->
     Some Completion.Variable
-  | FileInfo.SI_Property -> Some Completion.Field
-  | FileInfo.SI_ClassConstant -> Some Completion.Constant
-  | FileInfo.SI_Interface
-  | FileInfo.SI_Trait ->
+  | File_info.SI_Property -> Some Completion.Field
+  | File_info.SI_ClassConstant -> Some Completion.Constant
+  | File_info.SI_Interface
+  | File_info.SI_Trait ->
     Some Completion.Interface
-  | FileInfo.SI_Enum -> Some Completion.Enum
-  | FileInfo.SI_Namespace -> Some Completion.Module
-  | FileInfo.SI_Constructor -> Some Completion.Constructor
-  | FileInfo.SI_Keyword -> Some Completion.Keyword
-  | FileInfo.SI_Literal -> Some Completion.Value
-  | FileInfo.SI_GlobalConstant -> Some Completion.Constant
-  | FileInfo.SI_Typedef -> Some Completion.TypeParameter
-  | FileInfo.SI_Unknown -> None
+  | File_info.SI_Enum -> Some Completion.Enum
+  | File_info.SI_Namespace -> Some Completion.Module
+  | File_info.SI_Constructor -> Some Completion.Constructor
+  | File_info.SI_Keyword -> Some Completion.Keyword
+  | File_info.SI_Literal -> Some Completion.Value
+  | File_info.SI_GlobalConstant -> Some Completion.Constant
+  | File_info.SI_Typedef -> Some Completion.TypeParameter
+  | File_info.SI_Unknown -> None
 
 let read_hhconfig_version (root : Path.t) : string Lwt.t =
   let file = Filename.concat (Path.to_string root) ".hhconfig" in
@@ -2462,7 +2462,8 @@ let docblock_with_ranking_detail
   | None -> raw_docblock
 
 let resolve_ranking_source
-    (kind : FileInfo.si_kind) (ranking_source : int option) : FileInfo.si_kind =
+    (kind : File_info.si_kind) (ranking_source : int option) : File_info.si_kind
+    =
   match ranking_source with
   | Some x -> Search_types.int_to_kind x
   | None -> kind
@@ -2561,28 +2562,28 @@ let hack_symbol_to_lsp (symbol : Search_utils.symbol) =
      here. If it does, then it'll pick up our default path (also empty),
      which will throw and go into our telemetry. That's the best we can do. *)
   let hack_to_lsp_kind = function
-    | FileInfo.SI_Class -> SymbolInformation.Class
-    | FileInfo.SI_Interface -> SymbolInformation.Interface
-    | FileInfo.SI_Trait -> SymbolInformation.Interface
+    | File_info.SI_Class -> SymbolInformation.Class
+    | File_info.SI_Interface -> SymbolInformation.Interface
+    | File_info.SI_Trait -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
-    | FileInfo.SI_Enum -> SymbolInformation.Enum
+    | File_info.SI_Enum -> SymbolInformation.Enum
     (* TODO(T36697624): Add SymbolInformation.Record *)
-    | FileInfo.SI_ClassMethod -> SymbolInformation.Method
-    | FileInfo.SI_Function -> SymbolInformation.Function
-    | FileInfo.SI_Typedef -> SymbolInformation.Class
+    | File_info.SI_ClassMethod -> SymbolInformation.Method
+    | File_info.SI_Function -> SymbolInformation.Function
+    | File_info.SI_Typedef -> SymbolInformation.Class
     (* LSP doesn't have typedef, so we approximate with class *)
-    | FileInfo.SI_GlobalConstant -> SymbolInformation.Constant
-    | FileInfo.SI_Namespace -> SymbolInformation.Namespace
-    | FileInfo.SI_Mixed -> SymbolInformation.Variable
-    | FileInfo.SI_XHP -> SymbolInformation.Class
-    | FileInfo.SI_Literal -> SymbolInformation.Variable
-    | FileInfo.SI_ClassConstant -> SymbolInformation.Constant
-    | FileInfo.SI_Property -> SymbolInformation.Property
-    | FileInfo.SI_LocalVariable -> SymbolInformation.Variable
-    | FileInfo.SI_Constructor -> SymbolInformation.Constructor
+    | File_info.SI_GlobalConstant -> SymbolInformation.Constant
+    | File_info.SI_Namespace -> SymbolInformation.Namespace
+    | File_info.SI_Mixed -> SymbolInformation.Variable
+    | File_info.SI_XHP -> SymbolInformation.Class
+    | File_info.SI_Literal -> SymbolInformation.Variable
+    | File_info.SI_ClassConstant -> SymbolInformation.Constant
+    | File_info.SI_Property -> SymbolInformation.Property
+    | File_info.SI_LocalVariable -> SymbolInformation.Variable
+    | File_info.SI_Constructor -> SymbolInformation.Constructor
     (* Do these happen in practice? *)
-    | FileInfo.SI_Keyword
-    | FileInfo.SI_Unknown ->
+    | File_info.SI_Keyword
+    | File_info.SI_Unknown ->
       failwith "Unknown symbol kind"
   in
   {

@@ -18,9 +18,9 @@ type t [@@deriving show]
 
 type changes_since_baseline
 
-type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
+type defs_per_file = File_info.names Relative_path.Map.t [@@deriving show]
 
-type saved_state_info = FileInfo.saved Relative_path.Map.t
+type saved_state_info = File_info.saved Relative_path.Map.t
 
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
@@ -33,13 +33,13 @@ val empty : t
   * make a new empty one and add elements to it). On non-SQLite backed tables
   * we remove entries, so it's no more or less efficient depending on how many
   * are removed. *)
-val filter : t -> f:(Relative_path.t -> FileInfo.t -> bool) -> t
+val filter : t -> f:(Relative_path.t -> File_info.t -> bool) -> t
 
 val fold :
   ?warn_on_naming_costly_iter:bool ->
   t ->
   init:'b ->
-  f:(Relative_path.t -> FileInfo.t -> 'b -> 'b) ->
+  f:(Relative_path.t -> File_info.t -> 'b -> 'b) ->
   'b
 
 val get_files : t -> Relative_path.t list
@@ -47,12 +47,12 @@ val get_files : t -> Relative_path.t list
 val get_files_changed_since_baseline :
   changes_since_baseline -> Relative_path.t list
 
-val get_file_info : t -> Relative_path.t -> FileInfo.t option
+val get_file_info : t -> Relative_path.t -> File_info.t option
 
 exception File_info_not_found
 
 (** Might raise {!File_info_not_found} *)
-val get_file_info_exn : t -> Relative_path.t -> FileInfo.t
+val get_file_info_exn : t -> Relative_path.t -> File_info.t
 
 (** Look up the files declaring the symbols provided in the given set of
 dependency hashes. Only works for backed naming tables, and 64bit dep_sets *)
@@ -60,20 +60,20 @@ val get_64bit_dep_set_files : t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
 val has_file : t -> Relative_path.t -> bool
 
-val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
+val iter : t -> f:(Relative_path.t -> File_info.t -> unit) -> unit
 
 val remove : t -> Relative_path.t -> t
 
-val update : t -> Relative_path.t -> FileInfo.t -> t
+val update : t -> Relative_path.t -> File_info.t -> t
 
-val update_many : t -> FileInfo.t Relative_path.Map.t -> t
+val update_many : t -> File_info.t Relative_path.Map.t -> t
 
 val update_from_deltas : t -> Naming_sqlite.file_deltas -> t
 
 val save : t -> string -> Naming_sqlite.save_result
 
 (* Creation functions. *)
-val create : FileInfo.t Relative_path.Map.t -> t
+val create : File_info.t Relative_path.Map.t -> t
 
 (* The common path for loading a save state from a SQLite database *)
 val load_from_sqlite : Provider_context.t -> string -> t
@@ -111,7 +111,7 @@ val load_from_sqlite_with_changes_since_baseline :
   a list of changed file infos since naming table base. *)
 val load_from_sqlite_with_changed_file_infos :
   Provider_context.t ->
-  (Relative_path.t * FileInfo.t option) list ->
+  (Relative_path.t * File_info.t option) list ->
   string ->
   t
 

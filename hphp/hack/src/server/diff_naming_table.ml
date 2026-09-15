@@ -39,7 +39,7 @@ let get_naming_table_and_errors provider_context path =
 type diff = {
   added_files: Relative_path.t list;
   removed_files: Relative_path.t list;
-  changed_files: (Relative_path.t * FileInfo.diff) list;
+  changed_files: (Relative_path.t * File_info.diff) list;
   removed_errors: Relative_path.t list;
   added_errors: Relative_path.t list;
 }
@@ -71,7 +71,7 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
         match Naming_table.get_file_info naming_table2 path with
         | None -> { acc with removed_files = path :: acc.removed_files }
         | Some fileinfo2 -> begin
-          match FileInfo.diff fileinfo1 fileinfo2 with
+          match File_info.diff fileinfo1 fileinfo2 with
           | None -> acc
           | Some file_diff ->
             { acc with changed_files = (path, file_diff) :: acc.changed_files }
@@ -92,7 +92,7 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
   { diff with removed_errors; added_errors }
 
 let file_info_diff_to_string path d =
-  let open FileInfo in
+  let open File_info in
   let set_to_string sset = String.concat (SSet.elements sset) ~sep:", " in
   let helper acc (description, s) =
     if SSet.is_empty s then

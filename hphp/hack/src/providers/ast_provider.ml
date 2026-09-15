@@ -181,7 +181,7 @@ let compute_comments
   comments
 
 let compute_file_info
-    ~(popt : Parser_options.t) ~(entry : Provider_context.entry) : FileInfo.ids
+    ~(popt : Parser_options.t) ~(entry : Provider_context.entry) : File_info.ids
     =
   let ast = compute_ast ~popt ~entry in
   Nast.get_def_names ast

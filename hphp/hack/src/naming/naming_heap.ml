@@ -73,7 +73,7 @@ end
    * same namespace. That is, one cannot both define a class Foo and a typedef Foo
    * (or FOO or fOo, due to case insensitivity). *)
 module Types = struct
-  type pos = FileInfo.pos * Naming_types.kind_of_type
+  type pos = File_info.pos * Naming_types.kind_of_type
 
   module Position = struct
     type t = pos
@@ -132,7 +132,7 @@ module Types = struct
   let get_pos db_path_opt id =
     let map_result (path, kind_of_type) =
       let name_type = Naming_types.type_kind_to_name_type kind_of_type in
-      Some (FileInfo.File (name_type, path), kind_of_type)
+      Some (File_info.File (name_type, path), kind_of_type)
     in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path hash ->
@@ -206,7 +206,7 @@ module Types = struct
 end
 
 module Funs = struct
-  type pos = FileInfo.pos
+  type pos = File_info.pos
 
   module Position = struct
     type t = pos
@@ -256,7 +256,7 @@ module Funs = struct
     ()
 
   let get_pos db_path_opt (id : string) =
-    let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
+    let map_result path = Some (File_info.File (File_info.Fun, path)) in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path dep ->
           Naming_sqlite.get_path_by_64bit_dep db_path dep |> Option.map ~f:fst)
@@ -311,7 +311,7 @@ module Funs = struct
 end
 
 module Consts = struct
-  type pos = FileInfo.pos
+  type pos = File_info.pos
 
   module Position = struct
     type t = pos
@@ -353,7 +353,7 @@ module Consts = struct
   let add id pos = ConstPosHeap.add (hash id) pos
 
   let get_pos db_path_opt id =
-    let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
+    let map_result path = Some (File_info.File (File_info.Const, path)) in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path hash ->
           Naming_sqlite.get_path_by_64bit_dep db_path hash |> Option.map ~f:fst)
@@ -390,7 +390,7 @@ module Consts = struct
 end
 
 module Modules = struct
-  type pos = FileInfo.pos
+  type pos = File_info.pos
 
   module Position = struct
     type t = pos
@@ -432,7 +432,7 @@ module Modules = struct
   let add id pos = ModulePosHeap.add (hash id) pos
 
   let get_pos db_path_opt id =
-    let map_result path = Some (FileInfo.File (FileInfo.Module, path)) in
+    let map_result path = Some (File_info.File (File_info.Module, path)) in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path hash ->
           Naming_sqlite.get_path_by_64bit_dep db_path hash |> Option.map ~f:fst)
@@ -487,7 +487,7 @@ let get_filename_by_hash
       | None -> Consts.ConstPosHeap.get hash)
   in
   match (pos, db_path_opt) with
-  | (Some pos, _) -> Some (FileInfo.get_pos_filename pos)
+  | (Some pos, _) -> Some (File_info.get_pos_filename pos)
   | (None, None) -> None
   | (None, Some db_path) ->
     (match Naming_sqlite.get_path_by_64bit_dep db_path hash with

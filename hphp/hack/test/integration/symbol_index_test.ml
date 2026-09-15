@@ -45,13 +45,13 @@ let assert_ns_matches
 
 let assert_autocomplete
     ~(query_text : string)
-    ~(kind : FileInfo.si_kind)
+    ~(kind : File_info.si_kind)
     ~(expected : int)
     ~(sienv_ref : si_env ref) : unit =
   let context =
     match kind with
-    | FileInfo.SI_Interface
-    | FileInfo.SI_Enum ->
+    | File_info.SI_Interface
+    | File_info.SI_Enum ->
       Actype
       (* the `Acid` context rules out interfaces+enums, so we pick one that allows them *)
     | _ -> Acid
@@ -139,42 +139,42 @@ let test_builder_names (harness : Test_harness.t) : bool =
   (* Assert that we can capture all kinds of symbols *)
   assert_autocomplete
     ~query_text:"UsesA"
-    ~kind:FileInfo.SI_Class
+    ~kind:File_info.SI_Class
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"NoBigTrait"
-    ~kind:FileInfo.SI_Trait
+    ~kind:File_info.SI_Trait
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
-    ~kind:FileInfo.SI_Function
+    ~kind:File_info.SI_Function
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
-    ~kind:FileInfo.SI_Class
+    ~kind:File_info.SI_Class
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"CONST_SOME_COOL_VALUE"
-    ~kind:FileInfo.SI_GlobalConstant
+    ~kind:File_info.SI_GlobalConstant
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"IMyFooInterface"
-    ~kind:FileInfo.SI_Interface
+    ~kind:File_info.SI_Interface
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"SomeTypeAlias"
-    ~kind:FileInfo.SI_Typedef
+    ~kind:File_info.SI_Typedef
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"FbidMapField"
-    ~kind:FileInfo.SI_Enum
+    ~kind:File_info.SI_Enum
     ~expected:1
     ~sienv_ref;
 
@@ -184,7 +184,7 @@ let test_builder_names (harness : Test_harness.t) : bool =
    * text for XHP class autocomplete. *)
   assert_autocomplete
     ~query_text:":xhp:helloworld"
-    ~kind:FileInfo.SI_Class
+    ~kind:File_info.SI_Class
     ~expected:1
     ~sienv_ref;
 
@@ -217,7 +217,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
       ~ctx
       ~entry
       (File_content.Position.from_one_based 6 7)
-      ~kind:FileInfo.SI_Trait
+      ~kind:File_info.SI_Trait
   in
   assert_docblock_markdown
     [Docblock_service.Markdown "This is a docblock for NoBigTrait"]

@@ -18,23 +18,23 @@ open Hh_prelude
 let deps_mode = Typing_deps_mode.InMemoryMode None
 
 module Types_pos_asserter = Asserter.Make_asserter (struct
-  type t = FileInfo.pos * Naming_types.kind_of_type
+  type t = File_info.pos * Naming_types.kind_of_type
 
   let to_string (pos, kind_of_type) =
     Printf.sprintf
       "(%s, %s)"
-      (FileInfo.show_pos pos)
+      (File_info.show_pos pos)
       (Naming_types.show_kind_of_type kind_of_type)
 
   let is_equal = Poly.( = )
 end)
 
 module Pos_asserter = Asserter.Make_asserter (struct
-  type t = FileInfo.pos
+  type t = File_info.pos
 
-  let to_string pos = Printf.sprintf "(%s)" (FileInfo.show_pos pos)
+  let to_string pos = Printf.sprintf "(%s)" (File_info.show_pos pos)
 
-  let is_equal = FileInfo.equal_pos
+  let is_equal = File_info.equal_pos
 end)
 
 let files =
@@ -186,34 +186,34 @@ let test_get_pos () =
     ->
       Types_pos_asserter.assert_option_equals
         (Some
-           ( FileInfo.File
-               (FileInfo.Class, Relative_path.from_root ~suffix:"foo.php"),
+           ( File_info.File
+               (File_info.Class, Relative_path.from_root ~suffix:"foo.php"),
              Naming_types.TClass ))
         (Naming_provider.get_type_pos_and_kind ctx "\\Foo")
         "Check for class type";
       Pos_asserter.assert_option_equals
         (Some
-           (FileInfo.File
-              (FileInfo.Fun, Relative_path.from_root ~suffix:"bar.php")))
+           (File_info.File
+              (File_info.Fun, Relative_path.from_root ~suffix:"bar.php")))
         (Naming_provider.get_fun_pos ctx "\\bar")
         "Check for function";
       Types_pos_asserter.assert_option_equals
         (Some
-           ( FileInfo.File
-               (FileInfo.Typedef, Relative_path.from_root ~suffix:"baz.php"),
+           ( File_info.File
+               (File_info.Typedef, Relative_path.from_root ~suffix:"baz.php"),
              Naming_types.TTypedef ))
         (Naming_provider.get_type_pos_and_kind ctx "\\Baz")
         "Check for typedef type";
       Pos_asserter.assert_option_equals
         (Some
-           (FileInfo.File
-              (FileInfo.Const, Relative_path.from_root ~suffix:"qux.php")))
+           (File_info.File
+              (File_info.Const, Relative_path.from_root ~suffix:"qux.php")))
         (Naming_provider.get_const_pos ctx "\\Qux")
         "Check for const";
       Pos_asserter.assert_option_equals
         (Some
-           (FileInfo.File
-              (FileInfo.Module, Relative_path.from_root ~suffix:"corge.php")))
+           (File_info.File
+              (File_info.Module, Relative_path.from_root ~suffix:"corge.php")))
         (Naming_provider.get_module_pos ctx "Corge")
         "Check for module")
 
@@ -304,17 +304,17 @@ let test_local_changes () =
       let a_name = "CONST_IN_A" in
 
       let a_file = Relative_path.from_root ~suffix:"a.php" in
-      let a_pos = FileInfo.File (FileInfo.Const, a_file) in
+      let a_pos = File_info.File (File_info.Const, a_file) in
       let decl_hash = None in
       let a_file_info =
-        FileInfo.
+        File_info.
           {
-            FileInfo.empty_t with
+            File_info.empty_t with
             ids =
               {
-                FileInfo.empty_ids with
-                FileInfo.consts =
-                  [FileInfo.{ pos = a_pos; name = a_name; decl_hash }];
+                File_info.empty_ids with
+                File_info.consts =
+                  [File_info.{ pos = a_pos; name = a_name; decl_hash }];
               };
             position_free_decl_hash = Some (Int64.of_int 1234567);
           }
@@ -347,16 +347,16 @@ let test_local_changes () =
       in
       Asserter.Bool_asserter.assert_equals
         true
-        (FileInfo.equal_hash_type
-           a_file_info.FileInfo.position_free_decl_hash
-           a_file_info'.FileInfo.position_free_decl_hash)
+        (File_info.equal_hash_type
+           a_file_info.File_info.position_free_decl_hash
+           a_file_info'.File_info.position_free_decl_hash)
         "Expected file info to be found in the naming table";
       let a_pos' =
         Option.value_exn (Naming_provider.get_const_pos ctx a_name)
       in
       Asserter.Bool_asserter.assert_equals
         true
-        (FileInfo.equal_pos a_pos a_pos')
+        (File_info.equal_pos a_pos a_pos')
         "Expected position of constant to be found in the naming table")
 
 let test_context_changes_consts () =
@@ -787,7 +787,7 @@ let test_naming_table_query_by_dep_hash () =
         "Bulk lookup for multiple elements should be correct";
 
       (* Simulate moving \Baz from baz.php to bar.php. *)
-      let baz_file_info = FileInfo.empty_t in
+      let baz_file_info = File_info.empty_t in
       let bar_file_info =
         {
           (* Might raise {!Naming_table.File_info_not_found} *)
@@ -795,16 +795,16 @@ let test_naming_table_query_by_dep_hash () =
              backed_naming_table
              (Relative_path.from_root ~suffix:"bar.php"))
           with
-          FileInfo.ids =
+          File_info.ids =
             {
-              FileInfo.empty_ids with
-              FileInfo.classes =
+              File_info.empty_ids with
+              File_info.classes =
                 [
-                  FileInfo.
+                  File_info.
                     {
                       pos =
-                        FileInfo.File
-                          ( FileInfo.Class,
+                        File_info.File
+                          ( File_info.Class,
                             Relative_path.from_root ~suffix:"bar.php" );
                       name = "\\Baz";
                       decl_hash = None;

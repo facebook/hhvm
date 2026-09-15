@@ -151,12 +151,12 @@ that filename to resolve winners/loosers that come from different files,
 and we'll have this function take an [file_ast] parameter to resolve winners/loosers
 that come from the same file. *)
 val is_this_def_the_winner :
-  Provider_context.t -> FileInfo.name_type -> Ast_defs.id -> winner
+  Provider_context.t -> File_info.name_type -> Ast_defs.id -> winner
 
 (** Internal helper used by [is_this_def_the_winner].
 Exposed solely for testing in hh_single_decl; must not be used elsewhere *)
 val get_pos_from_decl_of_winner_FOR_TESTS_ONLY :
-  Provider_context.t -> FileInfo.name_type -> string -> Pos.t option
+  Provider_context.t -> File_info.name_type -> string -> Pos.t option
 
 val local_changes_push_sharedmem_stack : unit -> unit
 

@@ -18,4 +18,4 @@ val go :
   ?worker_call:Multi_worker.call_wrapper ->
   Multi_worker.worker list option ->
   get_next:Relative_path.t list Multi_worker.Hh_bucket.next ->
-  FileInfo.t Relative_path.Map.t
+  File_info.t Relative_path.Map.t

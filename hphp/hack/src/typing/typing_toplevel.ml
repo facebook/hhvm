@@ -75,7 +75,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     Counters.count Counters.Category.Typing_toplevel @@ fun () ->
     Diagnostics.run_with_span f.f_span @@ fun () ->
     let (_ : bool) =
-      check_if_this_def_is_the_winner ctx FileInfo.Fun fd.fd_name
+      check_if_this_def_is_the_winner ctx File_info.Fun fd.fd_name
     in
     let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
     with_timeout env fd.fd_name @@ fun env ->
@@ -322,7 +322,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
 let class_def ctx class_ =
   Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Diagnostics.run_with_span class_.c_span @@ fun () ->
-  if check_if_this_def_is_the_winner ctx FileInfo.Class class_.c_name then
+  if check_if_this_def_is_the_winner ctx File_info.Class class_.c_name then
     (* [Typing_class.class_def] is unusual in that it can't work properly
        unless it's the winner and has the same capitalization.
        If either isn't met, it will report to telemetry and return None. *)
@@ -335,7 +335,7 @@ let typedef_def ctx typedef =
   Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
   Diagnostics.run_with_span typedef.t_span @@ fun () ->
   let (_ : bool) =
-    check_if_this_def_is_the_winner ctx FileInfo.Typedef typedef.t_name
+    check_if_this_def_is_the_winner ctx File_info.Typedef typedef.t_name
   in
   Typing_typedef.typedef_def ctx typedef
 
@@ -345,7 +345,7 @@ let gconst_def ctx cst =
   Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Diagnostics.run_with_span cst.cst_span @@ fun () ->
   let (_ : bool) =
-    check_if_this_def_is_the_winner ctx FileInfo.Const cst.cst_name
+    check_if_this_def_is_the_winner ctx File_info.Const cst.cst_name
   in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_current_package_membership env cst.cst_package in
@@ -423,7 +423,7 @@ let module_def ctx md =
   Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Diagnostics.run_with_span md.md_span @@ fun () ->
   let (_ : bool) =
-    check_if_this_def_is_the_winner ctx FileInfo.Module md.md_name
+    check_if_this_def_is_the_winner ctx File_info.Module md.md_name
   in
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
   let pos = fst md.md_name in

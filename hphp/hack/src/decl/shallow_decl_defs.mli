@@ -139,7 +139,7 @@ type decl_constraint_requirement =
 val to_decl_constraint : decl_constraint_requirement -> decl_ty
 
 type shallow_class = {
-  sc_mode: FileInfo.mode;
+  sc_mode: File_info.mode;
   sc_final: bool;
   sc_abstract: bool;
   sc_is_xhp: bool;

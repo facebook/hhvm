@@ -93,11 +93,11 @@ val compute_comments :
   entry:Provider_context.entry ->
   Parser_return.comments
 
-(** Compute the [FileInfo.t] associated with the given entry, doing a parse
+(** Compute the [File_info.t] associated with the given entry, doing a parse
 if necessary.
     This is cached in the entry itself, but not in the AST provider's cache. *)
 val compute_file_info :
-  popt:Parser_options.t -> entry:Provider_context.entry -> FileInfo.ids
+  popt:Parser_options.t -> entry:Provider_context.entry -> File_info.ids
 
 (** Compute the [Full_fidelity_source_text.t] for this [Provider_context.entry].
     This is cached in the entry itself, but not in the AST provider's cache. *)

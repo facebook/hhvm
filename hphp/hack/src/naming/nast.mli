@@ -167,18 +167,18 @@ val get_simple_xhp_attrs :
 
 (** Definitions appearing in a Nast.program *)
 type defs = {
-  funs: (FileInfo.id * fun_def) list;
-  classes: (FileInfo.id * class_) list;
-  typedefs: (FileInfo.id * typedef) list;
-  constants: (FileInfo.id * gconst) list;
-  modules: (FileInfo.id * module_def) list;
-  stmts: (FileInfo.id * stmt) list;
+  funs: (File_info.id * fun_def) list;
+  classes: (File_info.id * class_) list;
+  typedefs: (File_info.id * typedef) list;
+  constants: (File_info.id * gconst) list;
+  modules: (File_info.id * module_def) list;
+  stmts: (File_info.id * stmt) list;
 }
 
 (** Given a Nast.program, give me the list of entities it defines *)
 val get_defs : program -> defs
 
-val get_def_names : program -> FileInfo.ids
+val get_def_names : program -> File_info.ids
 
 type ignore_attribute_env = { ignored_attributes: string list }
 

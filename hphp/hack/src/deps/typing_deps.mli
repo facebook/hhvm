@@ -214,7 +214,7 @@ module VisitedSet : sig
   val make : unit -> t
 end
 
-val deps_of_file_info : FileInfo.t -> Dep.t list
+val deps_of_file_info : File_info.t -> Dep.t list
 
 type dep_edge
 

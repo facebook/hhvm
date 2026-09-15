@@ -7,8 +7,8 @@
  *)
 
 type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
-  pfh_mode: FileInfo.mode option;
-  pfh_hash: FileInfo.pfh_hash;
+  pfh_mode: File_info.mode option;
+  pfh_hash: File_info.pfh_hash;
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
 }
 
@@ -31,6 +31,6 @@ val cache_decls :
   (string * Shallow_decl_defs.decl * Int64.t) list ->
   unit
 
-(** NOTE: this takes decls in reverse lexical order, and emits a FileInfo.t with them in forward lexical order *)
+(** NOTE: this takes decls in reverse lexical order, and emits a File_info.t with them in forward lexical order *)
 val decls_to_fileinfo :
-  Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes -> FileInfo.t
+  Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes -> File_info.t

@@ -28,9 +28,9 @@ let find_positions_of_classes
         match Naming_provider.get_type_pos ctx child_class with
         | None ->
           failwith ("Could not find definition of child class: " ^ child_class)
-        | Some (FileInfo.Full pos) ->
+        | Some (File_info.Full pos) ->
           Search_types.Find_refs.{ name = child_class; pos }
-        | Some (FileInfo.File (FileInfo.Class, path)) ->
+        | Some (File_info.File (File_info.Class, path)) ->
           (match
              Ast_provider.find_class_in_file ctx path child_class ~full:false
            with
@@ -42,7 +42,7 @@ let find_positions_of_classes
                  (Relative_path.to_absolute path))
           | Some { Aast.c_name = (name_pos, _); _ } ->
             Search_types.Find_refs.{ name = child_class; pos = name_pos })
-        | Some FileInfo.(File ((Fun | Typedef | Const | Module), _path)) ->
+        | Some File_info.(File ((Fun | Typedef | Const | Module), _path)) ->
           failwith
             (Printf.sprintf
                "Information for class %s was returned as not a class"

@@ -142,19 +142,21 @@ let show_name_results
     ~f_name_pos
     ~f_name_canon
     ~f_decl_exists =
-  let show_pos (pos : FileInfo.pos) : string =
+  let show_pos (pos : File_info.pos) : string =
     match pos with
-    | FileInfo.Full pos ->
+    | File_info.Full pos ->
       Printf.sprintf
-        "(FileInfo.Full: %s)"
+        "(File_info.Full: %s)"
         (Pos.to_relative_string pos |> Pos.string)
-    | FileInfo.File (name_type, fn) ->
+    | File_info.File (name_type, fn) ->
       Printf.sprintf
-        "(FileInfo.File: %s %s)"
-        (FileInfo.show_name_type name_type)
+        "(File_info.File: %s %s)"
+        (File_info.show_name_type name_type)
         (Relative_path.show fn)
   in
-  let name_type_lower = FileInfo.show_name_type name_type |> String.lowercase in
+  let name_type_lower =
+    File_info.show_name_type name_type |> String.lowercase
+  in
   let show_winner (winner : Decl_provider.winner) : string =
     match winner with
     | Decl_provider.Winner -> "winner"
@@ -175,7 +177,7 @@ let show_name_results
   Printf.eprintf
     "name=%s, name_type=%s, pos=%s\n%!"
     name
-    (FileInfo.show_name_type name_type)
+    (File_info.show_name_type name_type)
     (Pos.to_relative_string pos |> Pos.string);
   print_item
     "   Naming_provider.%s_exists(name): %s"
@@ -216,15 +218,15 @@ let show_name_results
 (** Constructs a list of [name_type * id] pairs for each top-level declaration
 we find in the AST. *)
 let ast_to_toplevels (ast : Nast.program) :
-    (FileInfo.name_type * Ast_defs.id) list =
+    (File_info.name_type * Ast_defs.id) list =
   List.filter_map ast ~f:(fun def ->
       match def with
-      | Aast.Fun { Aast_defs.fd_name; _ } -> Some (FileInfo.Fun, fd_name)
+      | Aast.Fun { Aast_defs.fd_name; _ } -> Some (File_info.Fun, fd_name)
       | Aast.Constant { Aast_defs.cst_name; _ } ->
-        Some (FileInfo.Const, cst_name)
-      | Aast.Typedef { Aast_defs.t_name; _ } -> Some (FileInfo.Typedef, t_name)
-      | Aast.Class { Aast_defs.c_name; _ } -> Some (FileInfo.Class, c_name)
-      | Aast.Module { Aast_defs.md_name; _ } -> Some (FileInfo.Module, md_name)
+        Some (File_info.Const, cst_name)
+      | Aast.Typedef { Aast_defs.t_name; _ } -> Some (File_info.Typedef, t_name)
+      | Aast.Class { Aast_defs.c_name; _ } -> Some (File_info.Class, c_name)
+      | Aast.Module { Aast_defs.md_name; _ } -> Some (File_info.Module, md_name)
       | Aast.(
           ( ClassAlias _ | Stmt _ | SetModule _ | Namespace _ | NamespaceUse _
           | SetNamespaceEnv _ | FileAttributes _ )) ->
@@ -233,21 +235,21 @@ let ast_to_toplevels (ast : Nast.program) :
 (** Constructs a list of [name_type * id] pairs for each top-level declaration
 we find from the direct-decl-parser. *)
 let decls_to_toplevels (decls : Direct_decl_parser.parsed_file_with_hashes) :
-    (FileInfo.name_type * Ast_defs.id) list =
+    (File_info.name_type * Ast_defs.id) list =
   List.map decls.pfh_decls ~f:(fun (name, decl, _hash) ->
       let (name_type, pos) =
         match decl with
         | Shallow_decl_defs.Class { Shallow_decl_defs.sc_name = (pos, _id); _ }
           ->
-          (FileInfo.Class, pos)
+          (File_info.Class, pos)
         | Shallow_decl_defs.Fun { Typing_defs.fe_pos; _ } ->
-          (FileInfo.Fun, fe_pos)
+          (File_info.Fun, fe_pos)
         | Shallow_decl_defs.Typedef { Typing_defs.td_pos; _ } ->
-          (FileInfo.Typedef, td_pos)
+          (File_info.Typedef, td_pos)
         | Shallow_decl_defs.Const { Typing_defs.cd_pos; _ } ->
-          (FileInfo.Const, cd_pos)
+          (File_info.Const, cd_pos)
         | Shallow_decl_defs.Module { Typing_defs.mdt_pos; _ } ->
-          (FileInfo.Module, mdt_pos)
+          (File_info.Module, mdt_pos)
       in
       let pos = Pos_or_decl.unsafe_to_raw_pos pos in
       (name_type, (pos, name)))
@@ -262,7 +264,7 @@ let compare_toplevels
     if c <> 0 then
       c
     else
-      let c = FileInfo.compare_name_type a_name_type b_name_type in
+      let c = File_info.compare_name_type a_name_type b_name_type in
       if c <> 0 then
         c
       else
@@ -310,7 +312,10 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
         in
         let fi = Direct_decl_utils.decls_to_fileinfo fn decls in
         let _conflict_filenames =
-          Naming_global.ndecl_file_and_get_conflict_files ctx fn fi.FileInfo.ids
+          Naming_global.ndecl_file_and_get_conflict_files
+            ctx
+            fn
+            fi.File_info.ids
         in
         if decl_make_env then Decl.make_env ~sh:Shared_mem.Uses ctx fn;
         (* Here we assemble top-level definitions as discovered by
@@ -329,7 +334,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
         Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
       in
       match name_type with
-      | FileInfo.Fun ->
+      | File_info.Fun ->
         show_name_results
           ~ctx
           ~ctx_with_entry
@@ -340,7 +345,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           ~f_name_canon:Naming_provider.get_fun_canon_name
           ~f_decl_exists:(fun ctx x ->
             Decl_provider.get_fun ctx x |> Decl_entry.to_option)
-      | FileInfo.Class ->
+      | File_info.Class ->
         show_name_results
           ~ctx
           ~ctx_with_entry
@@ -352,7 +357,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           ~f_name_canon:Naming_provider.get_type_canon_name
           ~f_decl_exists:(fun ctx x ->
             Decl_provider.get_class ctx x |> Decl_entry.to_option)
-      | FileInfo.Typedef ->
+      | File_info.Typedef ->
         show_name_results
           ~ctx
           ~ctx_with_entry
@@ -364,7 +369,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           ~f_name_canon:Naming_provider.get_type_canon_name
           ~f_decl_exists:(fun ctx x ->
             Decl_provider.get_typedef ctx x |> Decl_entry.to_option)
-      | FileInfo.Const ->
+      | File_info.Const ->
         show_name_results
           ~ctx
           ~ctx_with_entry
@@ -374,7 +379,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           ~f_name_pos:Naming_provider.get_const_pos
           ~f_name_canon:(fun _ _ -> Some "[undefined]")
           ~f_decl_exists:Decl_provider.get_gconst
-      | FileInfo.Module ->
+      | File_info.Module ->
         show_name_results
           ~ctx
           ~ctx_with_entry

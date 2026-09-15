@@ -8,7 +8,7 @@
 open Hh_prelude
 
 let invalidate_shallow_decls symbols local_memory =
-  let FileInfo.{ n_classes; n_types; n_funs; n_consts; n_modules } = symbols in
+  let File_info.{ n_classes; n_types; n_funs; n_consts; n_modules } = symbols in
   let {
     Provider_backend.decl_cache;
     shallow_decl_cache;
@@ -55,10 +55,11 @@ let remove_folded_decl local_memory name =
 (** This is a leftover function, because we haven't yet migrated to
 sticky decls and more correct invalidation. *)
 let invalidate_shallow_and_some_folded_decls
-    (local_memory : Provider_backend.local_memory) (ids : FileInfo.ids) : unit =
-  invalidate_shallow_decls (FileInfo.ids_to_names ids) local_memory;
-  let { FileInfo.classes; _ } = ids in
-  List.iter classes ~f:(fun { FileInfo.name; _ } ->
+    (local_memory : Provider_backend.local_memory) (ids : File_info.ids) : unit
+    =
+  invalidate_shallow_decls (File_info.ids_to_names ids) local_memory;
+  let { File_info.classes; _ } = ids in
+  List.iter classes ~f:(fun { File_info.name; _ } ->
       remove_folded_decl local_memory name);
   ()
 
@@ -75,12 +76,12 @@ let invalidate_named_shallow_and_some_folded_decls_for_entry
         invalidate_shallow_and_some_folded_decls local_memory ids);
   ()
 
-let combine_old_and_new_symbols (changes : FileInfo.change list) :
-    FileInfo.names =
-  (* Helper for merging [FileInfo.ids] list-of-ids into [FileInfo.names] set-of-names *)
-  let merge_ids (acc : FileInfo.names) (change : FileInfo.ids) =
-    let f set id = SSet.add id.FileInfo.name set in
-    let open FileInfo in
+let combine_old_and_new_symbols (changes : File_info.change list) :
+    File_info.names =
+  (* Helper for merging [File_info.ids] list-of-ids into [File_info.names] set-of-names *)
+  let merge_ids (acc : File_info.names) (change : File_info.ids) =
+    let f set id = SSet.add id.File_info.name set in
+    let open File_info in
     {
       n_funs = List.fold change.funs ~init:acc.n_funs ~f;
       n_classes = List.fold change.classes ~init:acc.n_classes ~f;
@@ -91,8 +92,8 @@ let combine_old_and_new_symbols (changes : FileInfo.change list) :
   in
   List.fold
     changes
-    ~init:FileInfo.empty_names
-    ~f:(fun acc FileInfo.{ old_ids; new_ids; _ } ->
+    ~init:File_info.empty_names
+    ~f:(fun acc File_info.{ old_ids; new_ids; _ } ->
       let acc = Option.value_map old_ids ~default:acc ~f:(merge_ids acc) in
       let acc = Option.value_map new_ids ~default:acc ~f:(merge_ids acc) in
       acc)
@@ -109,7 +110,7 @@ let resolve_deps
     This will flush the dependency edges before querying the graph. *)
 let invalidate_folded_decls_flush_deps
     ctx
-    ({ FileInfo.n_classes; _ } : FileInfo.names)
+    ({ File_info.n_classes; _ } : File_info.names)
     ~(local_memory : Provider_backend.local_memory) =
   let deps_mode = Provider_context.get_deps_mode ctx in
   Typing_deps.flush_deps deps_mode;
@@ -134,7 +135,7 @@ let invalidate_folded_decls_flush_deps
 let invalidate_upon_file_changes
     ~(ctx : Provider_context.t)
     ~(local_memory : Provider_backend.local_memory)
-    ~(changes : FileInfo.change list)
+    ~(changes : File_info.change list)
     ~(entries : Provider_context.entries) : Telemetry.t =
   let start_time = Unix.gettimeofday () in
 
@@ -143,7 +144,7 @@ let invalidate_upon_file_changes
       (changes, !(local_memory.Provider_backend.decls_reflect_this_file))
     with
     | ([], _) -> ("no_changes", None, Relative_path.Map.empty)
-    | ( [FileInfo.{ path; new_pfh_hash = Some pfh_hash; _ }],
+    | ( [File_info.{ path; new_pfh_hash = Some pfh_hash; _ }],
         Some (path2, _, pfh_hash2) )
       when Relative_path.equal path path2 && Int64.equal pfh_hash pfh_hash2 ->
       let tasts_to_invalidate =

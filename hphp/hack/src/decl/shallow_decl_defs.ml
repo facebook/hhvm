@@ -271,7 +271,7 @@ let to_decl_constraint dcr =
     ty
 
 type shallow_class = {
-  sc_mode: FileInfo.mode;
+  sc_mode: File_info.mode;
   sc_final: bool;
   sc_abstract: bool;
   sc_is_xhp: bool;

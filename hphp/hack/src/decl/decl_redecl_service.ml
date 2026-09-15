@@ -124,14 +124,14 @@ let compare_decls_and_get_fanout
   in
   (* Fetching everything at once is faster *)
   let (old_funs, old_types, old_consts, old_modules) =
-    let { FileInfo.n_classes = _; n_funs; n_types; n_consts; n_modules } =
+    let { File_info.n_classes = _; n_funs; n_types; n_consts; n_modules } =
       all_defs.Decl_compare.VersionedNames.old_names
     in
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend be ->
       let non_class_defs =
         {
-          FileInfo.n_funs;
+          File_info.n_funs;
           n_classes = SSet.empty;
           n_types;
           n_consts;
@@ -301,7 +301,7 @@ let parallel_redecl_compare_and_get_fanout
     For classes, it oldifies both shallow and folded classes *)
 let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
+    ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
@@ -320,7 +320,7 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
 
 let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
+    ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
@@ -341,7 +341,7 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
 
     @param elems  elements, a.k.a. members, to remove *)
 let[@warning "-21"] remove_defs (* -21 for dune stubs *)
-    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
+    ({ File_info.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     ~(elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
@@ -505,8 +505,8 @@ let get_elems
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     ~(old : bool)
-    (defs : FileInfo.names) : Decl_class_elements.t SMap.t =
-  let classes = SSet.elements defs.FileInfo.n_classes in
+    (defs : File_info.names) : Decl_class_elements.t SMap.t =
+  let classes = SSet.elements defs.File_info.n_classes in
   (* Getting the members of a class requires fetching the class from the heap.
    * Doing this for too many classes will cause a large amount of allocations
    * to be performed on the master process triggering the GC and slowing down
@@ -561,7 +561,7 @@ let invalidate_folded_classes
   Hh_logger.log "Invalidating %d folded classes" (SSet.cardinal to_invalidate);
   let (old_members, new_members) =
     let get_elems n_classes =
-      get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
+      get_elems workers ~bucket_size File_info.{ empty_names with n_classes }
     in
     ( lazy (get_elems to_invalidate ~old:true),
       lazy (get_elems to_invalidate ~old:false) )
@@ -582,7 +582,7 @@ let redo_type_decl
     (workers : Multi_worker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
-    ~(previously_oldified_defs : FileInfo.names)
+    ~(previously_oldified_defs : File_info.names)
     ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     redo_type_decl_result =
   Hh_logger.log "Decl_redecl_service.redo_type_decl: oldifying defs";
@@ -669,19 +669,19 @@ let oldify_decls_and_remove_descendants
     (workers : Multi_worker.worker list option)
     (get_classes : Relative_path.t -> SSet.t)
     ~(bucket_size : int)
-    ~(defs : FileInfo.names) : unit =
+    ~(defs : File_info.names) : unit =
   let elems = get_elems workers ~bucket_size defs ~old:false in
   oldify_defs ctx defs elems ~collect_garbage;
 
   (* Oldifying/removing classes also affects their elements
    * (see Decl_class_elements), which might be shared with other classes. We
    * need to remove all of them too to avoid dangling references *)
-  let all_classes = defs.FileInfo.n_classes in
+  let all_classes = defs.File_info.n_classes in
   let descendant_classes =
     get_descendant_classes ctx workers get_classes ~bucket_size all_classes
   in
   let descendant_classes =
-    FileInfo.
+    File_info.
       { empty_names with n_classes = SSet.diff descendant_classes all_classes }
   in
   (* This path exists to invalidate folded/member state derived from oldified
@@ -695,6 +695,6 @@ let remove_old_defs
     (ctx : Provider_context.t)
     ~(bucket_size : int)
     (workers : Multi_worker.worker list option)
-    (names : FileInfo.names) : unit =
+    (names : File_info.names) : unit =
   let elems = get_elems workers ~bucket_size names ~old:true in
   remove_old_defs ctx names elems

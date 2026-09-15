@@ -223,7 +223,7 @@ let visitor =
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
       if
         not
-          (FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          (File_info.(equal_mode decl_env.Decl_env.mode Mhhi)
           ||
           let Equal = Tast_env.eq_typing_env in
           Typing_native.is_native_fun ~env fun_)
@@ -243,7 +243,7 @@ let visitor =
       if
         not
           (method_.m_abstract
-          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          || File_info.(equal_mode decl_env.Decl_env.mode Mhhi)
           ||
           let Equal = Tast_env.eq_typing_env in
           Typing_native.is_native_meth ~env method_)

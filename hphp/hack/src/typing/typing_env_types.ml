@@ -82,7 +82,7 @@ let initial_local tpenv =
     local_using_vars = Local_id.Set.empty;
   }
 
-let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
+let empty ?origin ?(mode = File_info.Mstrict) ctx file ~droot =
   {
     expression_id_provider = Expression_id.make_provider ();
     tvar_id_provider = Tvid.make_provider ();

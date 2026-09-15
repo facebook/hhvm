@@ -10,7 +10,7 @@
 type update_result = {
   naming_table: Naming_table.t;
   sienv: Search_utils.si_env;
-  changes: FileInfo.change list;
+  changes: File_info.change list;
 }
 
 (** Updates the reverse-naming-table (which is inside ctx for the local

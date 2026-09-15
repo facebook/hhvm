@@ -49,7 +49,7 @@ let log_section ~name ~content =
   ()
 
 let parse_defs (ctx : Provider_context.t) (files : Relative_path.Set.t) :
-    FileInfo.t Relative_path.Map.t =
+    File_info.t Relative_path.Map.t =
   let workers = None in
   let done_ = ref false in
   Direct_decl_service.(
@@ -70,14 +70,14 @@ let parse_defs (ctx : Provider_context.t) (files : Relative_path.Set.t) :
         )))
 
 let update_reverse_naming_table
-    ctx (defs_per_file : FileInfo.t Relative_path.Map.t) symbols_to_files :
+    ctx (defs_per_file : File_info.t Relative_path.Map.t) symbols_to_files :
     Relative_path.t SymbolMap.t =
   Relative_path.Map.fold
     defs_per_file
     ~init:symbols_to_files
     ~f:(fun file file_info symbols_to_files ->
       let {
-        FileInfo.ids;
+        File_info.ids;
         comments = _;
         file_mode = _;
         position_free_decl_hash = _;
@@ -85,10 +85,10 @@ let update_reverse_naming_table
         file_info
       in
       Naming_global.ndecl_file_skip_if_already_bound ctx file ids;
-      let { FileInfo.funs; classes; typedefs; consts; modules } = ids in
+      let { File_info.funs; classes; typedefs; consts; modules } = ids in
       let add_symbols names make_dep symbols_to_files =
         List.fold names ~init:symbols_to_files ~f:(fun symbols_to_files id ->
-            SymbolMap.add (make_dep id.FileInfo.name) file symbols_to_files)
+            SymbolMap.add (make_dep id.File_info.name) file symbols_to_files)
       in
       symbols_to_files
       |> add_symbols funs (fun name -> Typing_deps.Dep.Fun name)
@@ -181,7 +181,7 @@ let compute_fanout
       None
       ~bucket_size:500
       (fun _ -> SSet.empty)
-      ~previously_oldified_defs:FileInfo.empty_names
+      ~previously_oldified_defs:File_info.empty_names
       ~defs:old_and_new_defs
   in
   fanout
@@ -388,7 +388,7 @@ let commit_dep_edges () : unit =
 
 (** Build and return the naming table and build the reverse naming table as a side-effect. *)
 let make_naming_table
-    ctx options (defs_per_file : FileInfo.t Relative_path.Map.t) : naming_table
+    ctx options (defs_per_file : File_info.t Relative_path.Map.t) : naming_table
     =
   let naming_table = Naming_table.create defs_per_file in
   if options.debug then

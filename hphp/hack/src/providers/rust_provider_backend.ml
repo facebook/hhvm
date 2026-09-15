@@ -25,11 +25,11 @@ external set_ctx_empty : t -> bool -> unit
   = "hh_rust_provider_backend_set_ctx_empty"
   [@@noalloc]
 
-type find_symbol_fn = string -> (FileInfo.pos * FileInfo.name_type) option
+type find_symbol_fn = string -> (File_info.pos * File_info.name_type) option
 
 type ctx_proxy = {
   get_entry_contents: Relative_path.t -> string option;
-  is_pos_in_ctx: FileInfo.pos -> bool;
+  is_pos_in_ctx: File_info.pos -> bool;
   find_fun_canon_name_in_context: string -> string option;
   find_type_canon_name_in_context: string -> string option;
   find_const_in_context: find_symbol_fn;
@@ -331,21 +331,21 @@ module Decl = struct
     set_decl_store t;
     with_ctx_proxy_opt t ctx @@ fun () -> FoldedClasses.get t name
 
-  external oldify_defs_ffi : t -> FileInfo.names -> unit
+  external oldify_defs_ffi : t -> File_info.names -> unit
     = "hh_rust_provider_backend_oldify_defs"
 
-  external remove_old_defs_ffi : t -> FileInfo.names -> unit
+  external remove_old_defs_ffi : t -> File_info.names -> unit
     = "hh_rust_provider_backend_remove_old_defs"
 
-  external remove_defs_ffi : t -> FileInfo.names -> unit
+  external remove_defs_ffi : t -> File_info.names -> unit
     = "hh_rust_provider_backend_remove_defs"
 
-  external remove_folded_classes_ffi : t -> FileInfo.names -> unit
+  external remove_folded_classes_ffi : t -> File_info.names -> unit
     = "hh_rust_provider_backend_remove_folded_classes"
 
   external get_old_defs_ffi :
     t ->
-    FileInfo.names ->
+    File_info.names ->
     Shallow_decl_defs.class_decl option SMap.t
     * Shallow_decl_defs.fun_decl option SMap.t
     * Shallow_decl_defs.typedef_decl option SMap.t
@@ -431,7 +431,7 @@ module Naming = struct
   end
 
   module Types = struct
-    type pos = FileInfo.pos * Naming_types.kind_of_type
+    type pos = File_info.pos * Naming_types.kind_of_type
 
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_types_add"
@@ -453,7 +453,7 @@ module Naming = struct
   end
 
   module Funs = struct
-    type pos = FileInfo.pos
+    type pos = File_info.pos
 
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_funs_add"
@@ -475,7 +475,7 @@ module Naming = struct
   end
 
   module Consts = struct
-    type pos = FileInfo.pos
+    type pos = File_info.pos
 
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_consts_add"
@@ -491,7 +491,7 @@ module Naming = struct
   end
 
   module Modules = struct
-    type pos = FileInfo.pos
+    type pos = File_info.pos
 
     external add : t -> string -> pos -> unit
       = "hh_rust_provider_backend_naming_modules_add"

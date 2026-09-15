@@ -10,7 +10,7 @@
 (*****************************************************************************)
 (* This module defines the data structured used to describe the content of
  * a file.
- * The parser constructs FileInfo.t structs, that contain names and positions
+ * The parser constructs File_info.t structs, that contain names and positions
  * plus some extra info required for the build.
  * After the names have been checked (Naming.make_env), we "simplify" the
  * struct and only keep the names defined in the files we know about.
@@ -127,7 +127,7 @@ let pp_hash_type fmt hash =
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (Int64.to_string hash)
 
-(* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::FileInfo] *)
+(* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::File_info] *)
 
 type ids = {
   funs: id list;

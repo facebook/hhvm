@@ -59,7 +59,7 @@ let should_surface_errors env =
   (not env.quick_mode) || env.show_all_errors
 
 type aast_result = {
-  fi_mode: FileInfo.mode;
+  fi_mode: File_info.mode;
   ast: (unit, unit) Aast.program;
   content: string;
   comments: Scoured_comments.t;

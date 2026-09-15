@@ -37,7 +37,7 @@ type autocomplete_item = {
   res_additional_edits: (string * Ide_api_types.range) list;
   (* res_fullname is res_label without trimming the namespace. *)
   res_fullname: string;
-  res_kind: FileInfo.si_kind;
+  res_kind: File_info.si_kind;
   (* documentation (in markdown); if absent, then it will be resolved on-demand later *)
   res_documentation: string option;
 }

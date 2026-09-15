@@ -331,7 +331,7 @@ let parse_name_and_decl ctx files_contents =
             Naming_global.ndecl_file_and_get_conflict_files
               ctx
               fn
-              fileinfo.FileInfo.ids
+              fileinfo.File_info.ids
           in
           ());
       (* Decl.make_env has the side effect of updating the decl heap, and
@@ -412,7 +412,7 @@ let do_glean_symbol_searches
       (string
       * string
       * Search_types.autocomplete_type
-      * FileInfo.si_kind option)
+      * File_info.si_kind option)
       list) : unit =
   let handle =
     if dry_run then
@@ -436,7 +436,7 @@ let do_glean_symbol_searches
           "%s [%s,%s]"
           query_text
           (Search_types.show_autocomplete_type context)
-          (Option.value_map kind_filter ~default:"*" ~f:FileInfo.show_si_kind)
+          (Option.value_map kind_filter ~default:"*" ~f:File_info.show_si_kind)
       in
       if show_query_text then
         Printf.printf "query_text:\n%s\n\n" query_text_for_show;
@@ -461,7 +461,7 @@ let do_glean_symbol_searches
             in
             Printf.printf
               "[%s] %s - %s\n%!"
-              (FileInfo.show_si_kind si_kind)
+              (File_info.show_si_kind si_kind)
               si_name
               file);
         Printf.printf
@@ -703,7 +703,7 @@ let handle_search ctx sienv ~glean_only ~dry_run filename =
             Printf.printf
               "  %s:%s - %s:%d:%d-%d\n%!"
               name
-              (FileInfo.show_si_kind result_type)
+              (File_info.show_si_kind result_type)
               filename
               line
               start_
@@ -867,7 +867,7 @@ let decl_and_run_mode
      is stored (1) through ctx pointing to the backing sqlite file if desired, (2) plus
      a delta stored in a shmem heap, as per Provider_backend.
 
-     The forward naming table (filename->FileInfo.t, used for incremental updates and also for
+     The forward naming table (filename->File_info.t, used for incremental updates and also for
      fake-arrow autocomplete) is stored (1) through our [Naming_table.t] having a pointer
      to the sqlitefile if desired, (2) plus a delta stored in [Naming_table.t] ocaml data structures.
 
@@ -890,10 +890,10 @@ let decl_and_run_mode
         let file_info = Naming_table.get_file_info naming_table file in
         Option.iter file_info ~f:(fun file_info ->
             let ids_to_strings ids =
-              List.map ids ~f:(fun id -> id.FileInfo.name)
+              List.map ids ~f:(fun id -> id.File_info.name)
             in
-            let { FileInfo.funs; classes; typedefs; consts; modules } =
-              file_info.FileInfo.ids
+            let { File_info.funs; classes; typedefs; consts; modules } =
+              file_info.File_info.ids
             in
             Naming_global.remove_decls
               ~backend:(Provider_context.get_backend ctx)

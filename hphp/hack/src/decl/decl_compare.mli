@@ -12,14 +12,14 @@ open Decl_heap
 
 module VersionedNames : sig
   type t = {
-    old_names: FileInfo.names;
-    new_names: FileInfo.names;
+    old_names: File_info.names;
+    new_names: File_info.names;
   }
   [@@deriving show]
 
   val empty : t
 
-  val make_unchanged : FileInfo.names -> t
+  val make_unchanged : File_info.names -> t
 
   val merge : t -> t -> t
 end

@@ -21,7 +21,7 @@ val parentish_names : Shallow_decl_defs.shallow_class -> SSet.t
 val is_literal_with_trivially_inferable_type : ('a, 'b) Aast.expr -> bool
 
 val split_defs :
-  FileInfo.names -> FileInfo.names -> FileInfo.names * FileInfo.names
+  File_info.names -> File_info.names -> File_info.names * File_info.names
 
 val coalesce_consistent :
   Typing_defs.consistent_kind ->

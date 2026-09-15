@@ -1,6 +1,6 @@
 name=F, name_type=Module, pos=File "module.php--b.php", line 2, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--b.php", line 2, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--b.php", line 2, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--b.php", line 2, characters 12-12:
@@ -8,7 +8,7 @@ name=F, name_type=Module, pos=File "module.php--b.php", line 2, characters 12-12
 
 name=f, name_type=Module, pos=File "module.php--a.php", line 2, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 2, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 2, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 2, characters 12-12:
@@ -16,7 +16,7 @@ name=f, name_type=Module, pos=File "module.php--a.php", line 2, characters 12-12
 
 name=g, name_type=Module, pos=File "module.php--a.php", line 3, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 3, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 3, characters 12-12:
@@ -24,7 +24,7 @@ name=g, name_type=Module, pos=File "module.php--a.php", line 3, characters 12-12
 
 name=g, name_type=Module, pos=File "module.php--b.php", line 3, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 3, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 3, characters 12-12:
@@ -32,7 +32,7 @@ name=g, name_type=Module, pos=File "module.php--b.php", line 3, characters 12-12
 
 name=H, name_type=Module, pos=File "module.php--a.php", line 5, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 5, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 5, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 5, characters 12-12:
@@ -40,7 +40,7 @@ name=H, name_type=Module, pos=File "module.php--a.php", line 5, characters 12-12
 
 name=h, name_type=Module, pos=File "module.php--a.php", line 4, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 4, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 4, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 4, characters 12-12:
@@ -48,7 +48,7 @@ name=h, name_type=Module, pos=File "module.php--a.php", line 4, characters 12-12
 
 name=i, name_type=Module, pos=File "module.php--a.php", line 6, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 6, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 6, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 6, characters 12-12:
@@ -56,7 +56,7 @@ name=i, name_type=Module, pos=File "module.php--a.php", line 6, characters 12-12
 
 name=i, name_type=Module, pos=File "module.php--a.php", line 7, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 6, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 6, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 6, characters 12-12:
@@ -64,7 +64,7 @@ name=i, name_type=Module, pos=File "module.php--a.php", line 7, characters 12-12
 
 name=j, name_type=Module, pos=File "module.php--a.php", line 8, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 8, characters 12-12:)
+   Naming_provider.get_module_pos(name): (File_info.Full: File "module.php--a.php", line 8, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 8, characters 12-12:

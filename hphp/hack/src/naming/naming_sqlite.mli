@@ -31,7 +31,7 @@ type 'a forward_naming_table_delta =
   | Deleted
 [@@deriving show]
 
-type file_deltas = FileInfo.t forward_naming_table_delta Relative_path.Map.t
+type file_deltas = File_info.t forward_naming_table_delta Relative_path.Map.t
 
 type local_changes = {
   file_deltas: file_deltas;
@@ -45,7 +45,7 @@ val free_db_cache : unit -> unit
 
 val save_file_infos :
   string ->
-  FileInfo.t Relative_path.Map.t ->
+  File_info.t Relative_path.Map.t ->
   base_content_version:string ->
   save_result
 
@@ -58,11 +58,11 @@ val fold :
   ?warn_on_naming_costly_iter:bool ->
   db_path:db_path ->
   init:'a ->
-  f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->
+  f:(Relative_path.t -> File_info.t -> 'a -> 'a) ->
   file_deltas:file_deltas ->
   'a
 
-val get_file_info : db_path -> Relative_path.t -> FileInfo.t option
+val get_file_info : db_path -> Relative_path.t -> File_info.t option
 
 val get_path_by_64bit_dep :
   db_path ->

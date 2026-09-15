@@ -182,7 +182,7 @@ let remove_classes ctx (names : SSet.t) ~old_members ~new_members : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend be ->
     SSet.iter Cache.remove names;
-    let names = FileInfo.{ empty_names with n_classes = names } in
+    let names = File_info.{ empty_names with n_classes = names } in
     if
       Typechecker_options.disable_rust_provider_shallow_decl_invalidation
         (Provider_context.get_tcopt ctx)
@@ -327,31 +327,31 @@ let get_pos_from_decl_of_winner_FOR_TESTS_ONLY ctx name_type name : Pos.t option
     =
   let pos_opt =
     match name_type with
-    | FileInfo.Fun ->
+    | File_info.Fun ->
       if Naming_provider.get_fun_path ctx name |> Option.is_some then
         get_fun ctx name
         |> Decl_entry.to_option
         |> Option.map ~f:(fun { Typing_defs.fe_pos; _ } -> fe_pos)
       else
         None
-    | FileInfo.Typedef ->
+    | File_info.Typedef ->
       if Naming_provider.get_typedef_path ctx name |> Option.is_some then
         get_typedef ctx name
         |> Decl_entry.to_option
         |> Option.map ~f:(fun { Typing_defs.td_pos; _ } -> td_pos)
       else
         None
-    | FileInfo.Class ->
+    | File_info.Class ->
       if Naming_provider.get_class_path ctx name |> Option.is_some then
         get_class ctx name
         |> Decl_entry.to_option
         |> Option.map ~f:(fun cls -> Class.pos cls)
       else
         None
-    | FileInfo.Const ->
+    | File_info.Const ->
       Option.map (get_gconst ctx name) ~f:(fun { Typing_defs.cd_pos; _ } ->
           cd_pos)
-    | FileInfo.Module ->
+    | File_info.Module ->
       Option.map (get_module ctx name) ~f:(fun { Typing_defs.mdt_pos; _ } ->
           mdt_pos)
   in
@@ -378,11 +378,11 @@ let is_this_def_the_winner ctx name_type (pos, name) =
     (* There is a winner decl for [name_type name], the exact same name_type and capitalization
        as we provided, but it is at a different position. Therefore we are the loser. *)
     Loser_to winner_pos
-  | (None, FileInfo.(Const | Module)) ->
+  | (None, File_info.(Const | Module)) ->
     (* There is no winner decl for [name_type name]. These name-types are case-sensitive,
        so we don't need to look further. *)
     Not_found
-  | (None, FileInfo.Fun) -> begin
+  | (None, File_info.Fun) -> begin
     (* If there wasn't a winner decl for [Fun name], then maybe there is for a different
        capitalization of [Name]? Note: this codepath results in either [Not_found] or [Loser_to],
        neither of which occur in a program that typechecks clean, so it's okay if they're a little slow.
@@ -401,7 +401,7 @@ let is_this_def_the_winner ctx name_type (pos, name) =
       | Some winner_pos -> Loser_to winner_pos
     end
   end
-  | (None, FileInfo.(Class | Typedef)) ->
+  | (None, File_info.(Class | Typedef)) ->
     (* If there wasn't a winner decl for [name_type name], then maybe there is a winning
        decl for a different capitalization of [name]? or for the other [name_type]?
        Note: this codepath results in either [Not_found] or [Loser_to], niether of which
@@ -412,10 +412,10 @@ let is_this_def_the_winner ctx name_type (pos, name) =
     | Some cname ->
       let winner_pos_opt =
         Option.first_some
-          (get_pos_from_decl_of_winner_FOR_TESTS_ONLY ctx FileInfo.Class cname)
+          (get_pos_from_decl_of_winner_FOR_TESTS_ONLY ctx File_info.Class cname)
           (get_pos_from_decl_of_winner_FOR_TESTS_ONLY
              ctx
-             FileInfo.Typedef
+             File_info.Typedef
              cname)
       in
       (match winner_pos_opt with

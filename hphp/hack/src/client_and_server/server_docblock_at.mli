@@ -20,14 +20,14 @@ val go_docblock_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   File_content.Position.t ->
-  kind:FileInfo.si_kind ->
+  kind:File_info.si_kind ->
   Docblock_service.result
 
 (** Simplified one-step symbol/docblock *)
 val go_docblock_for_symbol :
   ctx:Provider_context.t ->
   symbol:string ->
-  kind:FileInfo.si_kind ->
+  kind:File_info.si_kind ->
   Docblock_service.result
 
 (** strips boilerplate copyright/codegen comments *)

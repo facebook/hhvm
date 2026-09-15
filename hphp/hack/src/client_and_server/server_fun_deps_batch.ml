@@ -9,11 +9,11 @@
 
 open Hh_prelude
 
-(* In order to run recheck_typing, workers need access to the FileInfo for each
- * file to be typechecked, so a FileInfo is paired with each query.
+(* In order to run recheck_typing, workers need access to the File_info for each
+ * file to be typechecked, so a File_info is paired with each query.
  *
  * Note that this means that many queries on the same file result in needlessly
- * marshalling and unmarshalling the same FileInfo many times over. There are
+ * marshalling and unmarshalling the same File_info many times over. There are
  * probably ways we could avoid this, but it doesn't seem to be a major problem.
  *)
 

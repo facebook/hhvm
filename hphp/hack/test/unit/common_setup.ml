@@ -111,7 +111,7 @@ let setup
       Naming_global.ndecl_file_skip_if_already_bound
         ctx
         fn
-        fileinfo.FileInfo.ids);
+        fileinfo.File_info.ids);
 
   let (ctx, naming_table) =
     if sqlite then (

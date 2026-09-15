@@ -994,7 +994,7 @@ let check_file
     : Diagnostics.t =
   let profiling = Option.is_some profile_type_check_multi in
   if profiling then
-    Relative_path.Map.iter files_info ~f:(fun fn (_fileinfo : FileInfo.t) ->
+    Relative_path.Map.iter files_info ~f:(fun fn (_fileinfo : File_info.t) ->
         let full_ast = Ast_provider.get_ast ctx fn ~full:true in
         let start_time = Unix.gettimeofday () in
         let _ = Typing_check_job.calc_errors_and_tast ctx fn ~full_ast in
@@ -1101,7 +1101,7 @@ let parse_name_and_decl ctx files_contents =
             Naming_global.ndecl_file_and_get_conflict_files
               ctx
               fn
-              fileinfo.FileInfo.ids
+              fileinfo.File_info.ids
           in
           ());
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
@@ -1341,8 +1341,8 @@ let handle_constraint_mode
     ~memtrace =
   (* Process a single typechecked file *)
   let process_file path info =
-    match info.FileInfo.file_mode with
-    | Some FileInfo.Mstrict ->
+    match info.File_info.file_mode with
+    | Some File_info.Mstrict ->
       let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       let { Tast_provider.Compute_tast.tast; _ } =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
@@ -1550,7 +1550,7 @@ let codemod
     ~files_contents
     ctx
     (get_patches :
-      files_info:FileInfo.t Relative_path.Map.t ->
+      files_info:File_info.t Relative_path.Map.t ->
       Server_rename_types.patch list) =
   let decl_parse_typecheck_and_then = decl_parse_typecheck_and_then ctx in
   let backend = Provider_context.get_backend ctx in
@@ -1566,15 +1566,15 @@ let codemod
     let names_to_purge =
       Relative_path.Map.fold
         files_info
-        ~init:FileInfo.empty_names
+        ~init:File_info.empty_names
         ~f:(fun path file_info acc ->
           (* Don't invalidate builtins, otherwise, we can't find them. *)
           if Relative_path.prefix path |> Relative_path.is_hhi then
             acc
           else
-            FileInfo.merge_names
+            File_info.merge_names
               acc
-              (FileInfo.ids_to_names file_info.FileInfo.ids))
+              (File_info.ids_to_names file_info.File_info.ids))
     in
     begin
       match backend with
@@ -1599,7 +1599,7 @@ let codemod
         if not (Relative_path.prefix path |> Relative_path.is_hhi) then
           Naming_global.remove_decls_using_file_info
             backend
-            file_info.FileInfo.ids)
+            file_info.File_info.ids)
       files_info
   in
   let final_files_info = ref files_info in
@@ -1919,15 +1919,15 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else (
-          List.iter fileinfo.FileInfo.ids.FileInfo.classes ~f:(fun id ->
+          List.iter fileinfo.File_info.ids.File_info.classes ~f:(fun id ->
               Printf.printf
                 "Ancestors of %s and their overridden methods:\n"
-                id.FileInfo.name;
+                id.File_info.name;
               let ancestors =
                 (* Might raise {!Naming_table.File_info_not_found} *)
                 Method_jumps.get_inheritance
                   ctx
-                  id.FileInfo.name
+                  id.File_info.name
                   ~filter:No_filter
                   ~find_children:false
                   naming_table
@@ -1938,15 +1938,15 @@ let handle_mode
                 ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
-          List.iter fileinfo.FileInfo.ids.FileInfo.classes ~f:(fun id ->
+          List.iter fileinfo.File_info.ids.File_info.classes ~f:(fun id ->
               Printf.printf
                 "Children of %s and the methods they override:\n"
-                id.FileInfo.name;
+                id.File_info.name;
               let children =
                 (* Might raise {!Naming_table.File_info_not_found} *)
                 Method_jumps.get_inheritance
                   ctx
-                  id.FileInfo.name
+                  id.File_info.name
                   ~filter:No_filter
                   ~find_children:true
                   naming_table
@@ -2651,10 +2651,10 @@ let decl_and_run_mode
           in
           Option.iter file_info ~f:(fun file_info ->
               let ids_to_strings ids =
-                List.map ids ~f:(fun id -> id.FileInfo.name)
+                List.map ids ~f:(fun id -> id.File_info.name)
               in
-              let { FileInfo.funs; classes; typedefs; consts; modules } =
-                file_info.FileInfo.ids
+              let { File_info.funs; classes; typedefs; consts; modules } =
+                file_info.File_info.ids
               in
               Naming_global.remove_decls
                 ~backend:(Provider_context.get_backend ctx)

@@ -306,7 +306,8 @@ let batch_update_naming_table_and_invalidate_caches
   Hack_event_logger.ProfileTypeCheck.invalidate
     ~count:(List.length changes)
     ~start_time
-    ~path:(List.hd changes |> Option.map ~f:(fun change -> change.FileInfo.path))
+    ~path:
+      (List.hd changes |> Option.map ~f:(fun change -> change.File_info.path))
     telemetry;
   (naming_table, sienv)
 

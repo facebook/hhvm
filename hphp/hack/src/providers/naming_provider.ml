@@ -13,19 +13,19 @@ let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
   ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
 let attach_name_type_to_tuple (name_type, path) =
-  (FileInfo.File (name_type, path), name_type)
+  (File_info.File (name_type, path), name_type)
 
-let attach_name_type (name_type : FileInfo.name_type) (x : 'a) :
-    'a * FileInfo.name_type =
+let attach_name_type (name_type : File_info.name_type) (x : 'a) :
+    'a * File_info.name_type =
   (x, name_type)
 
-let remove_name_type (x : 'a * FileInfo.name_type) : 'a = fst x
+let remove_name_type (x : 'a * File_info.name_type) : 'a = fst x
 
 let kind_to_name_type (kind_of_type : Naming_types.kind_of_type) :
-    FileInfo.name_type =
+    File_info.name_type =
   Naming_types.type_kind_to_name_type kind_of_type
 
-let name_type_to_kind (name_type : FileInfo.name_type) :
+let name_type_to_kind (name_type : File_info.name_type) :
     Naming_types.kind_of_type =
   match Naming_types.type_kind_of_name_type name_type with
   | Some kind_of_type -> kind_of_type
@@ -33,13 +33,14 @@ let name_type_to_kind (name_type : FileInfo.name_type) :
     failwith
       (Printf.sprintf
          "Unexpected name type %s"
-         (FileInfo.show_name_type name_type))
+         (File_info.show_name_type name_type))
 
 let find_symbol_in_context
     ~(ctx : Provider_context.t)
     ~(get_entry_symbols :
-       FileInfo.ids -> (FileInfo.id * FileInfo.name_type) list)
-    ~(is_symbol : string -> bool) : (FileInfo.pos * FileInfo.name_type) option =
+       File_info.ids -> (File_info.id * File_info.name_type) list)
+    ~(is_symbol : string -> bool) : (File_info.pos * File_info.name_type) option
+    =
   Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun _path entry ->
          (* CARE! This obtains names from the AST. They're usually similar to what we get from direct-decl-parser
@@ -55,27 +56,27 @@ let find_symbol_in_context
          in
          let symbols = get_entry_symbols ids in
          List.find_map symbols ~f:(fun (id, kind) ->
-             if is_symbol id.FileInfo.name then
-               Some (id.FileInfo.pos, kind)
+             if is_symbol id.File_info.name then
+               Some (id.File_info.pos, kind)
              else
                None))
   |> Relative_path.Map.choose_opt
   |> Option.map ~f:snd
 
 let find_const_in_context (ctx : Provider_context.t) (name : string) :
-    (FileInfo.pos * FileInfo.name_type) option =
+    (File_info.pos * File_info.name_type) option =
   find_symbol_in_context
     ~ctx
-    ~get_entry_symbols:(fun { FileInfo.consts; _ } ->
-      List.map consts ~f:(attach_name_type FileInfo.Const))
+    ~get_entry_symbols:(fun { File_info.consts; _ } ->
+      List.map consts ~f:(attach_name_type File_info.Const))
     ~is_symbol:(String.equal name)
 
 let find_fun_in_context (ctx : Provider_context.t) (name : string) :
-    (FileInfo.pos * FileInfo.name_type) option =
+    (File_info.pos * File_info.name_type) option =
   find_symbol_in_context
     ~ctx
-    ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
-      List.map funs ~f:(attach_name_type FileInfo.Fun))
+    ~get_entry_symbols:(fun { File_info.funs; _ } ->
+      List.map funs ~f:(attach_name_type File_info.Fun))
     ~is_symbol:(String.equal name)
 
 let compute_fun_canon_name ctx path name =
@@ -89,23 +90,23 @@ let find_fun_canon_name_in_context (ctx : Provider_context.t) (name : string) :
   let symbol_opt =
     find_symbol_in_context
       ~ctx
-      ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
-        List.map funs ~f:(attach_name_type FileInfo.Fun))
+      ~get_entry_symbols:(fun { File_info.funs; _ } ->
+        List.map funs ~f:(attach_name_type File_info.Fun))
       ~is_symbol:(fun symbol_name ->
         String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
   match symbol_opt with
   | Some (pos, _name_type) ->
-    compute_fun_canon_name ctx (FileInfo.get_pos_filename pos) name
+    compute_fun_canon_name ctx (File_info.get_pos_filename pos) name
   | None -> None
 
-let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
-  let classes = List.map classes ~f:(attach_name_type FileInfo.Class) in
-  let typedefs = List.map typedefs ~f:(attach_name_type FileInfo.Typedef) in
+let get_entry_symbols_for_type { File_info.classes; typedefs; _ } =
+  let classes = List.map classes ~f:(attach_name_type File_info.Class) in
+  let typedefs = List.map typedefs ~f:(attach_name_type File_info.Typedef) in
   List.concat [classes; typedefs]
 
 let find_type_in_context (ctx : Provider_context.t) (name : string) :
-    (FileInfo.pos * FileInfo.name_type) option =
+    (File_info.pos * File_info.name_type) option =
   find_symbol_in_context
     ~ctx
     ~get_entry_symbols:get_entry_symbols_for_type
@@ -135,17 +136,17 @@ let find_type_canon_name_in_context (ctx : Provider_context.t) (name : string) :
   | Some (pos, name_type) ->
     compute_type_canon_name
       ctx
-      (FileInfo.get_pos_filename pos)
+      (File_info.get_pos_filename pos)
       (name_type_to_kind name_type)
       name
   | None -> None
 
 let find_module_in_context (ctx : Provider_context.t) (name : string) :
-    (FileInfo.pos * FileInfo.name_type) option =
+    (File_info.pos * File_info.name_type) option =
   find_symbol_in_context
     ~ctx
-    ~get_entry_symbols:(fun { FileInfo.modules; _ } ->
-      List.map modules ~f:(attach_name_type FileInfo.Module))
+    ~get_entry_symbols:(fun { File_info.modules; _ } ->
+      List.map modules ~f:(attach_name_type File_info.Module))
     ~is_symbol:(String.equal name)
 
 let get_entry_contents ctx filename =
@@ -160,8 +161,8 @@ let get_entry_contents ctx filename =
 let is_path_in_ctx ~(ctx : Provider_context.t) (path : Relative_path.t) : bool =
   Relative_path.Map.mem (Provider_context.get_entries ctx) path
 
-let is_pos_in_ctx ~(ctx : Provider_context.t) (pos : FileInfo.pos) : bool =
-  is_path_in_ctx ~ctx (FileInfo.get_pos_filename pos)
+let is_pos_in_ctx ~(ctx : Provider_context.t) (pos : File_info.pos) : bool =
+  is_path_in_ctx ~ctx (File_info.get_pos_filename pos)
 
 let rust_backend_ctx_proxy (ctx : Provider_context.t) :
     Rust_provider_backend.ctx_proxy option =
@@ -186,9 +187,9 @@ let find_symbol_in_context_with_suppression
     ~(find_symbol_in_context :
        Provider_context.t ->
        string ->
-       (FileInfo.pos * FileInfo.name_type) option)
-    ~(fallback : unit -> (FileInfo.pos * FileInfo.name_type) option)
-    (name : string) : (FileInfo.pos * FileInfo.name_type) option =
+       (File_info.pos * File_info.name_type) option)
+    ~(fallback : unit -> (File_info.pos * File_info.name_type) option)
+    (name : string) : (File_info.pos * File_info.name_type) option =
   let from_context = find_symbol_in_context ctx name in
   let from_fallback = fallback () in
   match (from_context, from_fallback) with
@@ -205,8 +206,8 @@ let find_symbol_in_context_with_suppression
   | ( Some (context_pos, context_name_type),
       Some (fallback_pos, fallback_name_type) ) ->
     (* The alphabetically first filename wins *)
-    let context_fn = FileInfo.get_pos_filename context_pos in
-    let fallback_fn = FileInfo.get_pos_filename fallback_pos in
+    let context_fn = File_info.get_pos_filename context_pos in
+    let fallback_fn = File_info.get_pos_filename fallback_pos in
     if Relative_path.compare context_fn fallback_fn <= 0 then
       (* symbol is either (1) a duplicate in both context and fallback, and context is the winner,
          or (2) not a duplicate, and both context and fallback claim it to be defined
@@ -239,7 +240,7 @@ let get_and_cache
       Some (name_type, path))
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
-    FileInfo.pos option =
+    File_info.pos option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Naming.Consts.get_pos
@@ -258,7 +259,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
         | Provider_backend.Pessimised_shared_memory _
         | Provider_backend.Shared_memory ->
           Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
-          >>| attach_name_type FileInfo.Const
+          >>| attach_name_type File_info.Const
         | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
         | Provider_backend.Local_memory
             { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -269,7 +270,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
             ~cache:reverse_naming_table_delta.consts
             ~fallback:(fun db_path ->
               Naming_sqlite.get_const_path_by_name db_path name
-              |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
+              |> Option.map ~f:(fun path -> (File_info.Const, path)))
           >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
@@ -278,10 +279,11 @@ let const_exists (ctx : Provider_context.t) (name : string) : bool =
 
 let get_const_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
-  get_const_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
+  get_const_pos ctx name |> Option.map ~f:File_info.get_pos_filename
 
 let add_const
-    (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
+    (backend : Provider_backend.t) (name : string) (pos : File_info.pos) : unit
+    =
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
@@ -292,7 +294,7 @@ let add_const
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
+    let data = Pos ((File_info.Const, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.consts :=
       SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
 
@@ -316,8 +318,8 @@ let remove_const_batch (backend : Provider_backend.t) (names : string list) :
         ~init:!(reverse_naming_table_delta.consts)
         ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
 
-let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
-    =
+let get_fun_pos (ctx : Provider_context.t) (name : string) :
+    File_info.pos option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Naming.Funs.get_pos
@@ -336,7 +338,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
         | Provider_backend.Pessimised_shared_memory _
         | Provider_backend.Shared_memory ->
           Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
-          >>| attach_name_type FileInfo.Fun
+          >>| attach_name_type File_info.Fun
         | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
         | Provider_backend.Local_memory
             { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -347,7 +349,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
             ~cache:reverse_naming_table_delta.funs
             ~fallback:(fun db_path ->
               Naming_sqlite.get_fun_path_by_name db_path name
-              |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
+              |> Option.map ~f:(fun path -> (File_info.Fun, path)))
           >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
@@ -356,7 +358,7 @@ let fun_exists (ctx : Provider_context.t) (name : string) : bool =
 
 let get_fun_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
-  get_fun_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
+  get_fun_pos ctx name |> Option.map ~f:File_info.get_pos_filename
 
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
@@ -393,7 +395,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
           ~cache:reverse_naming_table_delta.funs_canon_key
           ~fallback:(fun db_path ->
             Naming_sqlite.get_ifun_path_by_name db_path name
-            |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
+            |> Option.map ~f:(fun path -> (File_info.Fun, path)))
         >>= fun (_name_type, path) ->
         (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
            know that it isn't, then it isn't. *)
@@ -402,7 +404,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         else
           compute_fun_canon_name ctx path name))
 
-let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
+let add_fun (backend : Provider_backend.t) (name : string) (pos : File_info.pos)
     : unit =
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
@@ -414,7 +416,7 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos ((FileInfo.Fun, FileInfo.get_pos_filename pos), []) in
+    let data = Pos ((File_info.Fun, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.funs :=
       SMap.add !(reverse_naming_table_delta.funs) ~key:name ~data;
     reverse_naming_table_delta.funs_canon_key :=
@@ -452,7 +454,7 @@ let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
 let add_type
     (backend : Provider_backend.t)
     (name : string)
-    (pos : FileInfo.pos)
+    (pos : File_info.pos)
     (kind : Naming_types.kind_of_type) : unit =
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
@@ -465,7 +467,7 @@ let add_type
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     let data =
-      Pos ((kind_to_name_type kind, FileInfo.get_pos_filename pos), [])
+      Pos ((kind_to_name_type kind, File_info.get_pos_filename pos), [])
     in
     reverse_naming_table_delta.types :=
       SMap.add !(reverse_naming_table_delta.types) ~key:name ~data;
@@ -502,7 +504,7 @@ let remove_type_batch (backend : Provider_backend.t) (names : string list) :
           SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
 
 let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
-    (FileInfo.pos * Naming_types.kind_of_type) option =
+    (File_info.pos * Naming_types.kind_of_type) option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Naming.Types.get_pos
@@ -535,11 +537,11 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
               |> Option.map ~f:(fun (path, kind) ->
                      (kind_to_name_type kind, path)))
           >>| fun (name_type, path) ->
-          (FileInfo.File (name_type, path), name_type))
+          (File_info.File (name_type, path), name_type))
     >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :
-    FileInfo.pos option =
+    File_info.pos option =
   match get_type_pos_and_kind ctx name with
   | Some (pos, _kind) -> Some pos
   | None -> None
@@ -547,13 +549,13 @@ let get_type_pos (ctx : Provider_context.t) (name : string) :
 let get_type_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   match get_type_pos_and_kind ctx name with
-  | Some (pos, _kind) -> Some (FileInfo.get_pos_filename pos)
+  | Some (pos, _kind) -> Some (File_info.get_pos_filename pos)
   | None -> None
 
 let get_type_path_and_kind (ctx : Provider_context.t) (name : string) :
     (Relative_path.t * Naming_types.kind_of_type) option =
   match get_type_pos_and_kind ctx name with
-  | Some (pos, kind) -> Some (FileInfo.get_pos_filename pos, kind)
+  | Some (pos, kind) -> Some (File_info.get_pos_filename pos, kind)
   | None -> None
 
 let get_type_kind (ctx : Provider_context.t) (name : string) :
@@ -616,7 +618,8 @@ let get_class_path (ctx : Provider_context.t) (name : string) :
     None
 
 let add_class
-    (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
+    (backend : Provider_backend.t) (name : string) (pos : File_info.pos) : unit
+    =
   add_type backend name pos Naming_types.TClass
 
 let get_typedef_path (ctx : Provider_context.t) (name : string) :
@@ -630,11 +633,12 @@ let get_typedef_path (ctx : Provider_context.t) (name : string) :
     None
 
 let add_typedef
-    (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
+    (backend : Provider_backend.t) (name : string) (pos : File_info.pos) : unit
+    =
   add_type backend name pos Naming_types.TTypedef
 
 let get_module_pos (ctx : Provider_context.t) (name : string) :
-    FileInfo.pos option =
+    File_info.pos option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Naming.Modules.get_pos
@@ -653,7 +657,7 @@ let get_module_pos (ctx : Provider_context.t) (name : string) :
         | Provider_backend.Pessimised_shared_memory _
         | Provider_backend.Shared_memory ->
           Naming_heap.Modules.get_pos (db_path_of_ctx ctx) name
-          >>| attach_name_type FileInfo.Module
+          >>| attach_name_type File_info.Module
         | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
         | Provider_backend.Local_memory
             { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -664,13 +668,13 @@ let get_module_pos (ctx : Provider_context.t) (name : string) :
             ~cache:reverse_naming_table_delta.modules
             ~fallback:(fun db_path ->
               Naming_sqlite.get_module_path_by_name db_path name
-              |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
+              |> Option.map ~f:(fun path -> (File_info.Module, path)))
           >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
 let get_module_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
-  get_module_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
+  get_module_pos ctx name |> Option.map ~f:File_info.get_pos_filename
 
 let module_exists (ctx : Provider_context.t) (name : string) : bool =
   if String.equal name Naming_special_names.Modules.default then
@@ -689,7 +693,7 @@ let add_module backend name pos =
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos ((FileInfo.Module, FileInfo.get_pos_filename pos), []) in
+    let data = Pos ((File_info.Module, File_info.get_pos_filename pos), []) in
     reverse_naming_table_delta.modules :=
       SMap.add !(reverse_naming_table_delta.modules) ~key:name ~data
 
@@ -730,40 +734,40 @@ let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
 
 let get_module_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Module, fn) ->
+  | File_info.Full p -> Some p
+  | File_info.File (File_info.Module, fn) ->
     Ast_provider.find_module_in_file ctx fn name ~full:false
     |> Option.map ~f:(fun md -> fst md.Aast.md_name)
-  | FileInfo.(File ((Fun | Class | Typedef | Const), _fn)) -> None
+  | File_info.(File ((Fun | Class | Typedef | Const), _fn)) -> None
 
 let get_const_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Const, fn) ->
+  | File_info.Full p -> Some p
+  | File_info.File (File_info.Const, fn) ->
     Ast_provider.find_gconst_in_file ctx fn name ~full:false
     |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
-  | FileInfo.(File ((Fun | Class | Typedef | Module), _fn)) -> None
+  | File_info.(File ((Fun | Class | Typedef | Module), _fn)) -> None
 
 let get_fun_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Fun, fn) ->
+  | File_info.Full p -> Some p
+  | File_info.File (File_info.Fun, fn) ->
     Ast_provider.find_fun_in_file ctx fn name ~full:false
     |> Option.map ~f:(fun fd -> fst fd.Aast.fd_name)
-  | FileInfo.(File ((Class | Typedef | Const | Module), _fn)) -> None
+  | File_info.(File ((Class | Typedef | Const | Module), _fn)) -> None
 
 let get_type_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
-  | FileInfo.Full p -> Some p
-  | FileInfo.File (name_type, fn) ->
+  | File_info.Full p -> Some p
+  | File_info.File (name_type, fn) ->
     (match name_type with
-    | FileInfo.Class ->
+    | File_info.Class ->
       Ast_provider.find_class_in_file ctx fn name ~full:false
       |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
-    | FileInfo.Typedef ->
+    | File_info.Typedef ->
       Ast_provider.find_typedef_in_file ctx fn name ~full:false
       |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
-    | FileInfo.(Fun | Const | Module) -> None)
+    | File_info.(Fun | Const | Module) -> None)
 
 (** This removes the name->path mapping from the naming table (i.e. the combination
 of sqlite and delta). It is an error to call this method unless name->path exists.
@@ -840,23 +844,23 @@ let add
     let (name_type, _) = pos in
     let sqlite_pos =
       match name_type with
-      | FileInfo.Const ->
+      | File_info.Const ->
         Option.map
           (Naming_sqlite.get_const_path_by_name db_path name)
-          ~f:(fun sqlite_path -> (FileInfo.Const, sqlite_path))
-      | FileInfo.Fun ->
+          ~f:(fun sqlite_path -> (File_info.Const, sqlite_path))
+      | File_info.Fun ->
         let pos =
           if case_insensitive then
             Naming_sqlite.get_ifun_path_by_name db_path name
           else
             Naming_sqlite.get_fun_path_by_name db_path name
         in
-        Option.map pos ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
-      | FileInfo.Module ->
+        Option.map pos ~f:(fun sqlite_path -> (File_info.Fun, sqlite_path))
+      | File_info.Module ->
         let pos = Naming_sqlite.get_module_path_by_name db_path name in
-        Option.map pos ~f:(fun sqlite_path -> (FileInfo.Module, sqlite_path))
-      | FileInfo.Class
-      | FileInfo.Typedef ->
+        Option.map pos ~f:(fun sqlite_path -> (File_info.Module, sqlite_path))
+      | File_info.Class
+      | File_info.Typedef ->
         let pos =
           if case_insensitive then
             Naming_sqlite.get_itype_path_by_name db_path name
@@ -879,9 +883,9 @@ let add
 let update
     ~(backend : Provider_backend.t)
     ~(path : Relative_path.t)
-    ~(old_ids : FileInfo.ids option)
-    ~(new_ids : FileInfo.ids option) : unit =
-  let open FileInfo in
+    ~(old_ids : File_info.ids option)
+    ~(new_ids : File_info.ids option) : unit =
+  let open File_info in
   let strip_positions symbols = List.map symbols ~f:(fun id -> id.name) in
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
@@ -947,8 +951,8 @@ let update
       ()
     in
     (* do the update *)
-    let oldfi = Option.value old_ids ~default:FileInfo.empty_ids in
-    let newfi = Option.value new_ids ~default:FileInfo.empty_ids in
+    let oldfi = Option.value old_ids ~default:File_info.empty_ids in
+    let newfi = Option.value new_ids ~default:File_info.empty_ids in
     let {
       classes = old_classes;
       typedefs = old_typedefs;
@@ -967,16 +971,16 @@ let update
     } =
       newfi
     in
-    update old_funs new_funs deltas.funs FileInfo.Fun;
-    update old_consts new_consts deltas.consts FileInfo.Const;
-    update old_classes new_classes deltas.types FileInfo.Class;
-    update old_typedefs new_typedefs deltas.types FileInfo.Typedef;
-    update old_modules new_modules deltas.modules FileInfo.Module;
+    update old_funs new_funs deltas.funs File_info.Fun;
+    update old_consts new_consts deltas.consts File_info.Const;
+    update old_classes new_classes deltas.types File_info.Class;
+    update old_typedefs new_typedefs deltas.types File_info.Typedef;
+    update old_modules new_modules deltas.modules File_info.Module;
     (* update canon names too *)
     let updatei = update ~case_insensitive:true in
-    updatei old_funs new_funs deltas.funs_canon_key FileInfo.Fun;
-    updatei old_classes new_classes deltas.types_canon_key FileInfo.Class;
-    updatei old_typedefs new_typedefs deltas.types_canon_key FileInfo.Typedef;
+    updatei old_funs new_funs deltas.funs_canon_key File_info.Fun;
+    updatei old_classes new_classes deltas.types_canon_key File_info.Class;
+    updatei old_typedefs new_typedefs deltas.types_canon_key File_info.Typedef;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

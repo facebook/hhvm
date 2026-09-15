@@ -9,7 +9,7 @@
 type comments = (Pos.t * Prim_defs.comment) list
 
 type t = {
-  file_mode: FileInfo.mode option;
+  file_mode: File_info.mode option;
   comments: comments;
   ast: Nast.program;
   content: string;

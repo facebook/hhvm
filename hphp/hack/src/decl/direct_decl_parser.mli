@@ -9,7 +9,7 @@
 type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
 type parsed_file = {
-  pf_mode: FileInfo.mode option;
+  pf_mode: File_info.mode option;
   pf_file_attributes: Typing_defs.user_attribute list;
   pf_function_attributes: (string * Typing_defs.user_attribute list) list;
   pf_decls: decls;
@@ -17,8 +17,8 @@ type parsed_file = {
 }
 
 type parsed_file_with_hashes = {
-  pfh_mode: FileInfo.mode option;
-  pfh_hash: FileInfo.pfh_hash;
+  pfh_mode: File_info.mode option;
+  pfh_hash: File_info.pfh_hash;
       (** position insensitive hash of all decls in the file *)
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
       (** (name, decl, position-sensitive hash of this decl) *)
@@ -36,10 +36,11 @@ val parse_and_hash_decls :
   string ->
   parsed_file_with_hashes
 
-(** NOTE: this takes input in reverse-lexical-order, and emits FileInfo.t in forward lexical order *)
-val decls_to_fileinfo : Relative_path.t -> parsed_file_with_hashes -> FileInfo.t
+(** NOTE: this takes input in reverse-lexical-order, and emits File_info.t in forward lexical order *)
+val decls_to_fileinfo :
+  Relative_path.t -> parsed_file_with_hashes -> File_info.t
 
-val decls_to_addenda : parsed_file_with_hashes -> FileInfo.si_addendum list
+val decls_to_addenda : parsed_file_with_hashes -> File_info.si_addendum list
 
 module type Metadata = sig
   type t

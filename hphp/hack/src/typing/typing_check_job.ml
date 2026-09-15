@@ -145,11 +145,11 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
   let calc_tast
       (type def res)
       (typecheck : Provider_context.t -> full_ast:def -> res option)
-      (defs : (FileInfo.id * def) list) : res SMap.t =
+      (defs : (File_info.id * def) list) : res SMap.t =
     List.fold defs ~init:SMap.empty ~f:(fun acc (id, full_ast) ->
         typecheck ctx ~full_ast
         |> Option.fold ~init:acc ~f:(fun acc tast ->
-               SMap.add id.FileInfo.name tast acc))
+               SMap.add id.File_info.name tast acc))
   in
   Diagnostics.do_with_context ~drop_fixmed fn (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
@@ -175,7 +175,7 @@ let calc_errors_and_tast_for
     (fn : Relative_path.t)
     (typecheck : Provider_context.t -> full_ast:def -> res option)
     ~(full_ast : def)
-    (id : FileInfo.id) : Diagnostics.t * res SMap.t =
+    (id : File_info.id) : Diagnostics.t * res SMap.t =
   Diagnostics.do_with_context ~drop_fixmed fn (fun () ->
       typecheck ctx ~full_ast
       |> Option.fold ~init:SMap.empty ~f:(fun acc tast ->

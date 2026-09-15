@@ -115,7 +115,7 @@ and genv = {
 
 val empty :
   ?origin:Decl_counters.origin ->
-  ?mode:FileInfo.mode ->
+  ?mode:File_info.mode ->
   Provider_context.t ->
   Relative_path.t ->
   droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->

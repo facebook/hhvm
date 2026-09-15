@@ -21,20 +21,20 @@ external batch_index_root_relative_paths_only :
   Path.t ->
   (Relative_path.t * string option option) list ->
   (Relative_path.t
-  * (FileInfo.t * FileInfo.pfh_hash * FileInfo.si_addendum list) option)
+  * (File_info.t * File_info.pfh_hash * File_info.si_addendum list) option)
   list = "batch_index_hackrs_ffi_root_relative_paths_only"
 
 type update_result = {
   naming_table: Naming_table.t;
   sienv: Search_utils.si_env;
-  changes: FileInfo.change list;
+  changes: File_info.change list;
 }
 
 (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, return [None]. *)
 let compute_file_info_batch_root_relative_paths_only
     (popt : Parser_options.t) (paths : Relative_path.t list) :
     (Relative_path.t
-    * (FileInfo.t * FileInfo.pfh_hash * FileInfo.si_addendum list) option)
+    * (File_info.t * File_info.pfh_hash * File_info.si_addendum list) option)
     list =
   let paths =
     if Disk.is_real_disk then
@@ -80,15 +80,15 @@ let update_naming_tables_and_si
     List.map parse_results ~f:(fun (path, new_info) ->
         let old_file_info = Naming_table.get_file_info naming_table path in
         {
-          FileInfo.path;
-          new_ids = Option.map new_info ~f:(fun (fi, _, _) -> fi.FileInfo.ids);
+          File_info.path;
+          new_ids = Option.map new_info ~f:(fun (fi, _, _) -> fi.File_info.ids);
           new_pfh_hash = Option.map new_info ~f:(fun (_, hash, _) -> hash);
-          old_ids = Option.map old_file_info ~f:(fun fi -> fi.FileInfo.ids);
+          old_ids = Option.map old_file_info ~f:(fun fi -> fi.File_info.ids);
         })
   in
   (* update the reverse-naming-table, which is mutable storage owned by backend *)
   let t_update_reverse_nt = Unix.gettimeofday () in
-  List.iter changed_ids ~f:(fun { FileInfo.path; new_ids; old_ids; _ } ->
+  List.iter changed_ids ~f:(fun { File_info.path; new_ids; old_ids; _ } ->
       Naming_provider.update
         ~backend:(Provider_context.get_backend ctx)
         ~path
@@ -101,7 +101,7 @@ let update_naming_tables_and_si
     List.fold_left
       changed_ids
       ~init:naming_table
-      ~f:(fun naming_table { FileInfo.path; old_ids; _ } ->
+      ~f:(fun naming_table { File_info.path; old_ids; _ } ->
         match old_ids with
         | None -> naming_table
         | Some _ -> Naming_table.remove naming_table path)
@@ -120,9 +120,9 @@ let update_naming_tables_and_si
   (* remove paths without new file info *)
   let t_si = Unix.gettimeofday () in
   let paths_without_new_ids =
-    List.filter changed_ids ~f:(fun { FileInfo.new_ids; _ } ->
+    List.filter changed_ids ~f:(fun { File_info.new_ids; _ } ->
         Option.is_none new_ids)
-    |> List.map ~f:(fun { FileInfo.path; _ } -> path)
+    |> List.map ~f:(fun { File_info.path; _ } -> path)
     |> Relative_path.Set.of_list
   in
   let sienv =

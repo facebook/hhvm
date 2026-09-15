@@ -13,7 +13,7 @@ type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
   codegen: bool;
-  mode: FileInfo.mode option;
+  mode: File_info.mode option;
   rust: bool;
   leak_rust_tree: bool;
   enable_xhp_class_modifier: bool;
@@ -78,7 +78,7 @@ let codegen e = e.codegen
 
 let mode e = e.mode
 
-let is_strict e = e.mode = Some FileInfo.Mstrict
+let is_strict e = e.mode = Some File_info.Mstrict
 
 let rust e = e.rust
 

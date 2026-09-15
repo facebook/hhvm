@@ -291,7 +291,7 @@ let test_autocomplete_sort_text () =
         res_filter_text = None;
         res_additional_edits = [];
         res_fullname = label;
-        res_kind = FileInfo.SI_Class;
+        res_kind = File_info.SI_Class;
         res_documentation = None;
       }
   in

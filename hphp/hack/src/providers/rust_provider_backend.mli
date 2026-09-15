@@ -16,11 +16,11 @@ val push_local_changes : t -> unit
 
 val pop_local_changes : t -> unit
 
-type find_symbol_fn = string -> (FileInfo.pos * FileInfo.name_type) option
+type find_symbol_fn = string -> (File_info.pos * File_info.name_type) option
 
 type ctx_proxy = {
   get_entry_contents: Relative_path.t -> string option;
-  is_pos_in_ctx: FileInfo.pos -> bool;
+  is_pos_in_ctx: File_info.pos -> bool;
   find_fun_canon_name_in_context: string -> string option;
   find_type_canon_name_in_context: string -> string option;
   find_const_in_context: find_symbol_fn;
@@ -59,20 +59,20 @@ module Decl : sig
 
   val get_old_defs :
     t ->
-    FileInfo.names ->
+    File_info.names ->
     Shallow_decl_defs.class_decl option SMap.t
     * Shallow_decl_defs.fun_decl option SMap.t
     * Shallow_decl_defs.typedef_decl option SMap.t
     * Shallow_decl_defs.const_decl option SMap.t
     * Shallow_decl_defs.module_decl option SMap.t
 
-  val oldify_defs : t -> FileInfo.names -> unit
+  val oldify_defs : t -> File_info.names -> unit
 
-  val remove_defs : t -> FileInfo.names -> unit
+  val remove_defs : t -> File_info.names -> unit
 
-  val remove_folded_classes : t -> FileInfo.names -> unit
+  val remove_folded_classes : t -> File_info.names -> unit
 
-  val remove_old_defs : t -> FileInfo.names -> unit
+  val remove_old_defs : t -> File_info.names -> unit
 end
 
 module File : sig
@@ -97,23 +97,23 @@ module Naming : sig
   module Types : sig
     include
       ReverseNamingTable
-        with type pos = FileInfo.pos * Naming_types.kind_of_type
+        with type pos = File_info.pos * Naming_types.kind_of_type
 
     val get_canon_name : t -> ctx_proxy option -> string -> string option
   end
 
   module Funs : sig
-    include ReverseNamingTable with type pos = FileInfo.pos
+    include ReverseNamingTable with type pos = File_info.pos
 
     val get_canon_name : t -> ctx_proxy option -> string -> string option
   end
 
   module Consts : sig
-    include ReverseNamingTable with type pos = FileInfo.pos
+    include ReverseNamingTable with type pos = File_info.pos
   end
 
   module Modules : sig
-    include ReverseNamingTable with type pos = FileInfo.pos
+    include ReverseNamingTable with type pos = File_info.pos
   end
 
   val get_db_path : t -> Naming_sqlite.db_path option

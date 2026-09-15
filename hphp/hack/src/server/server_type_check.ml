@@ -74,7 +74,7 @@ let print_fast defs_per_file =
 
 let add_old_decls
     (old_naming_table : Naming_table.t)
-    (defs_per_file : FileInfo.names Relative_path.Map.t) :
+    (defs_per_file : File_info.names Relative_path.Map.t) :
     Decl_compare.VersionedNames.t Relative_path.Map.t =
   Relative_path.Map.mapi
     defs_per_file
@@ -83,8 +83,8 @@ let add_old_decls
         fun filename new_names ->
           let old_names =
             match Naming_table.get_file_info old_naming_table filename with
-            | None -> FileInfo.empty_names
-            | Some old_info -> FileInfo.simplify old_info
+            | None -> File_info.empty_names
+            | Some old_info -> File_info.simplify old_info
           in
           { Decl_compare.VersionedNames.old_names; new_names }
       end
@@ -113,7 +113,7 @@ let push_errors_outside_files_to_errors_file
   ()
 
 let indexing genv env to_check cgroup_steps :
-    env * FileInfo.t Relative_path.Map.t =
+    env * File_info.t Relative_path.Map.t =
   File_provider.remove_batch to_check;
   Ast_provider.remove_batch to_check;
   Fixme_provider.remove_batch to_check;
@@ -151,18 +151,18 @@ let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
     | None -> SSet.empty
     | Some info ->
       List.fold
-        info.FileInfo.ids.FileInfo.classes
+        info.File_info.ids.File_info.classes
         ~init:SSet.empty
-        ~f:(fun acc id -> SSet.add acc id.FileInfo.name)
+        ~f:(fun acc id -> SSet.add acc id.File_info.name)
   in
   let old_classes =
     match Naming_table.get_file_info old_naming_table path with
     | None -> SSet.empty
     | Some info ->
       List.fold
-        info.FileInfo.ids.FileInfo.classes
+        info.File_info.ids.File_info.classes
         ~init:SSet.empty
-        ~f:(fun acc id -> SSet.add acc id.FileInfo.name)
+        ~f:(fun acc id -> SSet.add acc id.File_info.name)
   in
   SSet.union new_classes old_classes
 
@@ -194,7 +194,7 @@ type naming_result = {
 let do_naming
     (env : env)
     (ctx : Provider_context.t)
-    ~(defs_per_file_parsed : FileInfo.t Relative_path.Map.t)
+    ~(defs_per_file_parsed : File_info.t Relative_path.Map.t)
     ~(cgroup_steps : Cgroup_profiler.step_group) : naming_result =
   let telemetry = Telemetry.create () in
   let start_t = Unix.gettimeofday () in
@@ -213,12 +213,12 @@ let do_naming
           Naming_global.ndecl_file_and_get_conflict_files
             ctx
             file
-            fileinfo.FileInfo.ids
+            fileinfo.File_info.ids
         in
         Relative_path.Set.union failed' failed)
   in
   let t2 = Hh_logger.log_duration "Declare_names (name->filename)" start_t in
-  (* Update filename->FileInfo.t forward naming table (into this local variable) *)
+  (* Update filename->File_info.t forward naming table (into this local variable) *)
   let naming_table =
     Naming_table.update_many env.naming_table defs_per_file_parsed
   in
@@ -269,7 +269,7 @@ let do_redecl
       ~during_init:false
       genv.workers
       get_classes
-      ~previously_oldified_defs:FileInfo.empty_names
+      ~previously_oldified_defs:File_info.empty_names
       ~defs:defs_per_file
   in
   let to_recheck =
@@ -586,8 +586,8 @@ let type_check_core
   Hh_logger.log "(Recomputing type declarations in relation to naming)";
   (* failed_naming can be a superset of keys in defs_per_file - see comment in Naming_global.ndecl_file *)
   (* The term [defs_per_file] doesn't mean anything. It's just exactly the same as defs_per_file_parsed,
-     that is a filename->FileInfo.t map of the files we just parsed,
-     except it's just filename->FileInfo.names -- i.e. purely the names, without positions. *)
+     that is a filename->File_info.t map of the files we just parsed,
+     except it's just filename->File_info.names -- i.e. purely the names, without positions. *)
   let defs_per_file =
     Naming_table.to_defs_per_file (Naming_table.create defs_per_file_parsed)
   in

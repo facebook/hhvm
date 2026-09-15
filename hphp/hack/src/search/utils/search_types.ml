@@ -27,7 +27,7 @@ type si_file =
 
 type si_item = {
   si_name: string;
-  si_kind: FileInfo.si_kind;
+  si_kind: File_info.si_kind;
   si_file: si_file;
       (** needed so that local file deletes can "tombstone" the item *)
   si_fullname: string;
@@ -48,8 +48,8 @@ type si_complete =
  * mismatches between the [@@deriving] ordinal values and the integers
  * stored in sqlite.
  *)
-let kind_to_int (kind : FileInfo.si_kind) : int =
-  let open FileInfo in
+let kind_to_int (kind : File_info.si_kind) : int =
+  let open File_info in
   match kind with
   | SI_Class -> 1
   | SI_Interface -> 2
@@ -71,8 +71,8 @@ let kind_to_int (kind : FileInfo.si_kind) : int =
   | SI_Constructor -> 18
 
 (** Convert an integer back to an enum *)
-let int_to_kind (kind_num : int) : FileInfo.si_kind =
-  let open FileInfo in
+let int_to_kind (kind_num : int) : File_info.si_kind =
+  let open File_info in
   match kind_num with
   | 1 -> SI_Class
   | 2 -> SI_Interface
@@ -95,8 +95,8 @@ let int_to_kind (kind_num : int) : FileInfo.si_kind =
   | _ -> SI_Unknown
 
 (** ACID represents a statement.  Everything other than interfaces are valid *)
-let valid_for_acid (kind : FileInfo.si_kind) : bool =
-  let open FileInfo in
+let valid_for_acid (kind : File_info.si_kind) : bool =
+  let open File_info in
   match kind with
   | SI_Mixed
   | SI_Unknown
@@ -105,8 +105,8 @@ let valid_for_acid (kind : FileInfo.si_kind) : bool =
   | _ -> true
 
 (** ACTYPE represents a type definition that can be passed as a parameter *)
-let valid_for_actype (kind : FileInfo.si_kind) : bool =
-  let open FileInfo in
+let valid_for_actype (kind : File_info.si_kind) : bool =
+  let open File_info in
   match kind with
   | SI_Mixed
   | SI_Unknown
@@ -117,8 +117,8 @@ let valid_for_actype (kind : FileInfo.si_kind) : bool =
   | _ -> true
 
 (** Acclassish represents entities that parse as ClassishDeclaration *)
-let valid_for_acclassish (kind : FileInfo.si_kind) : bool =
-  let open FileInfo in
+let valid_for_acclassish (kind : File_info.si_kind) : bool =
+  let open File_info in
   match kind with
   | SI_Class
   | SI_Interface
@@ -129,8 +129,8 @@ let valid_for_acclassish (kind : FileInfo.si_kind) : bool =
   | _ -> false
 
 (** ACNEW represents instantiation of an object. (Caller should also verify that it's not abstract.) *)
-let valid_for_acnew (kind : FileInfo.si_kind) : bool =
-  let open FileInfo in
+let valid_for_acnew (kind : File_info.si_kind) : bool =
+  let open File_info in
   match kind with
   | SI_Class
   | SI_XHP ->

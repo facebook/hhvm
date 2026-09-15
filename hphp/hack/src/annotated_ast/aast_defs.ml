@@ -1047,7 +1047,7 @@ and package_membership =
 and ('ex, 'en) class_ = {
   c_span: pos; [@transform.opaque]
   c_annotation: 'en;
-  c_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  c_mode: File_info.mode; [@visitors.opaque] [@transform.opaque]
   c_final: bool;
   c_is_xhp: bool;
   c_has_xhp_keyword: bool;
@@ -1231,7 +1231,7 @@ and ('ex, 'en) typedef = {
       (** Always a single type -- excludes where clauses for case types *)
   t_user_attributes: ('ex, 'en) user_attributes;
   t_file_attributes: ('ex, 'en) file_attribute list;
-  t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  t_mode: File_info.mode; [@visitors.opaque] [@transform.opaque]
   t_namespace: nsenv;
   t_span: pos; [@transform.opaque]
   t_emit_id: emit_id option;
@@ -1245,7 +1245,7 @@ and ('ex, 'en) typedef = {
 
 and ('ex, 'en) gconst = {
   cst_annotation: 'en;
-  cst_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  cst_mode: File_info.mode; [@visitors.opaque] [@transform.opaque]
   cst_name: sid;
   cst_type: hint option;
   cst_value: ('ex, 'en) expr; [@transform.explicit]
@@ -1259,7 +1259,7 @@ and ('ex, 'en) gconst = {
 and ('ex, 'en) fun_def = {
   fd_namespace: nsenv;
   fd_file_attributes: ('ex, 'en) file_attribute list;
-  fd_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  fd_mode: File_info.mode; [@visitors.opaque] [@transform.opaque]
   fd_name: sid;
   fd_fun: ('ex, 'en) fun_;
   fd_internal: bool;
@@ -1275,7 +1275,7 @@ and ('ex, 'en) module_def = {
   md_user_attributes: ('ex, 'en) user_attributes;
   md_file_attributes: ('ex, 'en) file_attribute list;
   md_span: pos; [@transform.opaque]
-  md_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  md_mode: File_info.mode; [@visitors.opaque] [@transform.opaque]
   md_doc_comment: doc_comment option;
 }
 

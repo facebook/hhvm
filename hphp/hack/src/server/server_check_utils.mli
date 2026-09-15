@@ -26,7 +26,7 @@ val get_naming_table_fallback_path : Server_env.genv -> string option
   by querying [naming_table] for their definitions. *)
 val extend_defs_per_file :
   Server_env.genv ->
-  FileInfo.names Relative_path.Map.t ->
+  File_info.names Relative_path.Map.t ->
   Naming_table.t ->
   Relative_path.Set.t ->
-  FileInfo.names Relative_path.Map.t
+  File_info.names Relative_path.Map.t

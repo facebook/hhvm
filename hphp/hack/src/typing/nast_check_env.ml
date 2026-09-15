@@ -21,7 +21,7 @@ type env = {
   class_name: string option;
   is_final: bool;
   function_name: Ast_defs.id option;
-  file_mode: FileInfo.mode;
+  file_mode: File_info.mode;
   function_kind: Ast_defs.fun_kind option;
   is_finally: bool;
   control_context: control_context;
@@ -70,7 +70,7 @@ let get_empty_env ctx =
     class_name = None;
     is_final = false;
     function_name = None;
-    file_mode = FileInfo.Mstrict;
+    file_mode = File_info.Mstrict;
     function_kind = None;
     is_finally = false;
     control_context = Toplevel;

@@ -88,7 +88,7 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       ~f:(fun k fi env ->
         count := !count + 1;
         let failed_naming =
-          Naming_global.ndecl_file_and_get_conflict_files ctx k fi.FileInfo.ids
+          Naming_global.ndecl_file_and_get_conflict_files ctx k fi.File_info.ids
         in
         {
           env with

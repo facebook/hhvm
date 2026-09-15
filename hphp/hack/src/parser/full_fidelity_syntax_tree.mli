@@ -22,7 +22,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
       Syntax.t ->
       Rust_pointer.t option ->
       Full_fidelity_syntax_error.t list ->
-      FileInfo.mode option ->
+      File_info.mode option ->
       SmartConstructors.t ->
       t
 
@@ -31,7 +31,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
       Syntax.t ->
       Rust_pointer.t option ->
       Full_fidelity_syntax_error.t list ->
-      FileInfo.mode option ->
+      File_info.mode option ->
       SmartConstructors.t ->
       t
 
@@ -47,7 +47,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
 
     val errors : t -> Full_fidelity_syntax_error.t list
 
-    val mode : t -> FileInfo.mode option
+    val mode : t -> File_info.mode option
 
     val is_strict : t -> bool
 
@@ -66,13 +66,13 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
     Full_fidelity_source_text.t ->
     Syntax.t ->
     Full_fidelity_syntax_error.t list ->
-    FileInfo.mode option ->
+    File_info.mode option ->
     t
 
   val build :
     Full_fidelity_source_text.t ->
     Syntax.t ->
     Full_fidelity_syntax_error.t list ->
-    FileInfo.mode option ->
+    File_info.mode option ->
     t
 end

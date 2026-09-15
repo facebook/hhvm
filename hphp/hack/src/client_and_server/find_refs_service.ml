@@ -106,11 +106,11 @@ let find_child_classes_in_files ctx target_class_name naming_table files =
   Shared_mem.invalidate_local_caches ();
   Relative_path.Set.fold files ~init:SSet.empty ~f:(fun fn acc ->
       try
-        let { FileInfo.ids = { FileInfo.classes; _ }; _ } =
+        let { File_info.ids = { File_info.classes; _ }; _ } =
           Naming_table.get_file_info_exn naming_table fn
         in
         List.fold_left classes ~init:acc ~f:(fun acc id ->
-            add_if_extends_class ctx target_class_name id.FileInfo.name acc)
+            add_if_extends_class ctx target_class_name id.File_info.name acc)
       with
       | Naming_table.File_info_not_found -> acc)
 

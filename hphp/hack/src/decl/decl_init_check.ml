@@ -53,7 +53,7 @@ let add_parent_construct_from_shallow_decl
   | _ -> props
 
 let parent ~(get_class_add_dep : get_class_add_dep) decl_env c acc =
-  if FileInfo.is_hhi c.c_mode then
+  if File_info.is_hhi c.c_mode then
     acc
   else if Ast_defs.is_c_trait c.c_kind then
     let (req_extends, _req_implements, _req_class, req_this_as) =
@@ -72,7 +72,7 @@ let parent ~(get_class_add_dep : get_class_add_dep) decl_env c acc =
 (* As above, but for shallow_class decls rather than class NASTs. *)
 let parent_from_shallow_decl
     ~(get_class_add_dep : get_class_add_dep) decl_env sc acc =
-  if FileInfo.is_hhi sc.sc_mode then
+  if File_info.is_hhi sc.sc_mode then
     acc
   else if Ast_defs.is_c_trait sc.sc_kind then
     List.fold_left

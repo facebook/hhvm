@@ -16,16 +16,16 @@ val get_const_path : Provider_context.t -> string -> Relative_path.t option
 
 (** Look up the position at which the given global constant was declared in
 the reverse naming table. *)
-val get_const_pos : Provider_context.t -> string -> FileInfo.pos option
+val get_const_pos : Provider_context.t -> string -> File_info.pos option
 
-(** Resolve the given name+FileInfo.pos (which might only have filename) into
+(** Resolve the given name+File_info.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
 val get_const_full_pos_by_parsing_file :
-  Provider_context.t -> FileInfo.pos * string -> Pos.t option
+  Provider_context.t -> File_info.pos * string -> Pos.t option
 
 (** Record that a global constant with the given name was declared at the
 given position. *)
-val add_const : Provider_backend.t -> string -> FileInfo.pos -> unit
+val add_const : Provider_backend.t -> string -> File_info.pos -> unit
 
 (** Remove all global constants with the given names from the reverse naming
 table. *)
@@ -41,12 +41,12 @@ val get_fun_path : Provider_context.t -> string -> Relative_path.t option
 
 (** Look up the position at which the given global function was declared in
 the reverse naming table. *)
-val get_fun_pos : Provider_context.t -> string -> FileInfo.pos option
+val get_fun_pos : Provider_context.t -> string -> File_info.pos option
 
-(** Resolve the given name+FileInfo.pos (which might only have filename) into
+(** Resolve the given name+File_info.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
 val get_fun_full_pos_by_parsing_file :
-  Provider_context.t -> FileInfo.pos * string -> Pos.t option
+  Provider_context.t -> File_info.pos * string -> Pos.t option
 
 (** Look up the canonical name for the given global function.
 THIS IS A BAD API. The reverse-naming-table should solely be a multimap from
@@ -60,7 +60,7 @@ val get_fun_canon_name : Provider_context.t -> string -> string option
 
 (** Record that a global function with the given name was declared at the
 given position. *)
-val add_fun : Provider_backend.t -> string -> FileInfo.pos -> unit
+val add_fun : Provider_backend.t -> string -> File_info.pos -> unit
 
 (** Remove all global functions with the given names from the reverse naming
 table. *)
@@ -72,7 +72,7 @@ functions and constants. *)
 val add_type :
   Provider_backend.t ->
   string ->
-  FileInfo.pos ->
+  File_info.pos ->
   Naming_types.kind_of_type ->
   unit
 
@@ -81,12 +81,12 @@ val remove_type_batch : Provider_backend.t -> string list -> unit
 
 (** Look up the position at which the given type was declared in the reverse
 naming table. *)
-val get_type_pos : Provider_context.t -> string -> FileInfo.pos option
+val get_type_pos : Provider_context.t -> string -> File_info.pos option
 
-(** Resolve the given name+FileInfo.pos (which might only have filename) into
+(** Resolve the given name+File_info.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
 val get_type_full_pos_by_parsing_file :
-  Provider_context.t -> FileInfo.pos * string -> Pos.t option
+  Provider_context.t -> File_info.pos * string -> Pos.t option
 
 (** Look up the file path declaring the given type in the reverse naming
 table. *)
@@ -102,7 +102,7 @@ the reverse naming table. *)
 val get_type_pos_and_kind :
   Provider_context.t ->
   string ->
-  (FileInfo.pos * Naming_types.kind_of_type) option
+  (File_info.pos * Naming_types.kind_of_type) option
 
 (** Look up the path and kind with which the given type was declared in the
 reverse naming table. *)
@@ -130,7 +130,7 @@ val get_class_path : Provider_context.t -> string -> Relative_path.t option
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TClass].
 *)
-val add_class : Provider_backend.t -> string -> FileInfo.pos -> unit
+val add_class : Provider_backend.t -> string -> File_info.pos -> unit
 
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result
@@ -140,14 +140,14 @@ val get_typedef_path : Provider_context.t -> string -> Relative_path.t option
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TTypedef].
 *)
-val add_typedef : Provider_backend.t -> string -> FileInfo.pos -> unit
+val add_typedef : Provider_backend.t -> string -> File_info.pos -> unit
 
 (** Updates the reverse naming table based on old+new names in this file *)
 val update :
   backend:Provider_backend.t ->
   path:Relative_path.t ->
-  old_ids:FileInfo.ids option ->
-  new_ids:FileInfo.ids option ->
+  old_ids:File_info.ids option ->
+  new_ids:File_info.ids option ->
   unit
 
 val local_changes_push_sharedmem_stack : unit -> unit
@@ -160,17 +160,17 @@ val resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t
 val get_files :
   Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
-(** Resolve the given name & FileInfo.pos into an actual position*)
+(** Resolve the given name & File_info.pos into an actual position*)
 val get_module_full_pos_by_parsing_file :
-  Provider_context.t -> FileInfo.pos * string -> Pos.t option
+  Provider_context.t -> File_info.pos * string -> Pos.t option
 
-val get_module_pos : Provider_context.t -> string -> FileInfo.pos option
+val get_module_pos : Provider_context.t -> string -> File_info.pos option
 
 val get_module_path : Provider_context.t -> string -> Relative_path.t option
 
 val module_exists : Provider_context.t -> string -> bool
 
-val add_module : Provider_backend.t -> string -> FileInfo.pos -> unit
+val add_module : Provider_backend.t -> string -> File_info.pos -> unit
 
 val remove_module_batch : Provider_backend.t -> string list -> unit
 

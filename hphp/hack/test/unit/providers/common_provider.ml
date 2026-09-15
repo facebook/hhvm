@@ -102,7 +102,7 @@ let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
             Naming_global.ndecl_file_and_get_conflict_files
               ctx
               path
-              fileinfo.FileInfo.ids
+              fileinfo.File_info.ids
           in
           ());
       f env)

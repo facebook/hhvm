@@ -17,8 +17,8 @@ let parse
     (ctx : Provider_context.t)
     ~(trace : bool)
     ~(decl_mode : direct_decl_mode)
-    (acc : FileInfo.t Relative_path.Map.t)
-    (fn : Relative_path.t) : FileInfo.t Relative_path.Map.t =
+    (acc : File_info.t Relative_path.Map.t)
+    (fn : Relative_path.t) : File_info.t Relative_path.Map.t =
   if not (Find_utils.path_filter fn) then
     acc
   else
@@ -38,7 +38,7 @@ let parse
           "[%.1fms] %s - %s"
           ((end_parse_time -. start_parse_time) *. 1000.0)
           (Relative_path.suffix fn)
-          (FileInfo.to_string fileinfo);
+          (File_info.to_string fileinfo);
       Relative_path.Map.add acc ~key:fn ~data:fileinfo
 
 let go
@@ -48,7 +48,7 @@ let go
     ?(worker_call : Multi_worker.call_wrapper = Multi_worker.wrapper)
     (workers : Multi_worker.worker list option)
     ~(get_next : Relative_path.t list Multi_worker.Hh_bucket.next) :
-    FileInfo.t Relative_path.Map.t =
+    File_info.t Relative_path.Map.t =
   worker_call.Multi_worker.f
     workers
     ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~decl_mode))

@@ -119,7 +119,7 @@ let is_auto_complete str : bool =
   let results_without_keywords =
     List.filter !autocomplete_items ~f:(fun res ->
         match res.res_kind with
-        | FileInfo.SI_Keyword -> false
+        | File_info.SI_Keyword -> false
         | _ -> true)
   in
   if List.is_empty results_without_keywords then
@@ -359,7 +359,7 @@ let autocomplete_shape_key autocomplete_context fields id =
       let (code, kind, pos) =
         match name with
         | Typing_defs.TSFregex_group (pos, str) ->
-          (str, FileInfo.SI_Literal, pos)
+          (str, File_info.SI_Literal, pos)
         | Typing_defs.TSFlit_str (pos, str) ->
           let quote =
             if have_prefix then
@@ -367,9 +367,9 @@ let autocomplete_shape_key autocomplete_context fields id =
             else
               "'"
           in
-          (quote ^ str ^ quote, FileInfo.SI_Literal, pos)
+          (quote ^ str ^ quote, File_info.SI_Literal, pos)
         | Typing_defs.TSFclass_const ((pos, cid), (_, mid)) ->
-          (Printf.sprintf "%s::%s" cid mid, FileInfo.SI_ClassConstant, pos)
+          (Printf.sprintf "%s::%s" cid mid, File_info.SI_ClassConstant, pos)
       in
       if (not have_prefix) || String.is_prefix code ~prefix then
         let res_insert_text =
@@ -516,7 +516,7 @@ let autocomplete_member
            class_
            cid
            (Cls.smethods class_ |> sort))
-        ~f:(add FileInfo.SI_ClassMethod);
+        ~f:(add File_info.SI_ClassMethod);
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -524,10 +524,10 @@ let autocomplete_member
            class_
            cid
            (Cls.sprops class_ |> sort))
-        ~f:(add FileInfo.SI_Property);
+        ~f:(add File_info.SI_Property);
       List.iter
         (Tast_env.consts env class_ |> sort)
-        ~f:(fun (name, cc) -> add FileInfo.SI_ClassConstant (name, cc.cc_type))
+        ~f:(fun (name, cc) -> add File_info.SI_ClassConstant (name, cc.cc_type))
     );
     if (not is_static) || parent_receiver then (
       List.iter
@@ -543,7 +543,8 @@ let autocomplete_member
             | Tfun ft -> check_where_constraints ft
             | _ -> true
           in
-          if satisfies_where_constraints then add FileInfo.SI_ClassMethod (s, ty));
+          if satisfies_where_constraints then
+            add File_info.SI_ClassMethod (s, ty));
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -551,7 +552,7 @@ let autocomplete_member
            class_
            cid
            (Cls.props class_ |> sort))
-        ~f:(add FileInfo.SI_Property)
+        ~f:(add File_info.SI_Property)
     );
     (* Only complete __construct() when we see parent::, as we don't
        allow __construct to be called as e.g. $foo->__construct(). *)
@@ -568,7 +569,7 @@ let autocomplete_member
            class_
            cid
            (Option.to_list constructor))
-        ~f:(add FileInfo.SI_ClassMethod)
+        ~f:(add File_info.SI_ClassMethod)
   )
 
 (*
@@ -596,7 +597,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
                (fun key -> String.equal (":" ^ key) name)
                existing_attr_names)
         then
-          let kind = FileInfo.SI_Property in
+          let kind = File_info.SI_Property in
           let res_detail = Tast_env.print_decl_ty env ty in
           let ty = Phase.decl ty in
           let complete =
@@ -632,7 +633,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
     in
 
     if is_bool_or_bool_option attr_ty then (
-      let kind = FileInfo.SI_Literal in
+      let kind = File_info.SI_Literal in
       let ty = Phase.locl attr_ty in
       let complete =
         {
@@ -689,7 +690,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
         | Ast_defs.XEV_String value -> "\"" ^ value ^ "\""
       in
       let name = suggestion xev in
-      let kind = FileInfo.SI_Enum in
+      let kind = File_info.SI_Enum in
       let ty = Phase.locl ty in
       let complete =
         {
@@ -771,7 +772,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
            |> List.iter ~f:(fun (const_name, ty) ->
                   let dty = Phase.decl ty.cc_type in
                   let name = Utils.strip_ns class_name ^ "::" ^ const_name in
-                  let kind = FileInfo.SI_Enum in
+                  let kind = File_info.SI_Enum in
                   let res_base_class = Option.map ~f:Cls.name enum_class in
 
                   let complete =
@@ -812,8 +813,8 @@ let hhi_funs (naming_table : Naming_table.t) : string list =
   |> List.map ~f:(fun fn ->
          match Naming_table.get_file_info naming_table fn with
          | Some info ->
-           List.map info.FileInfo.ids.FileInfo.funs ~f:(fun id ->
-               id.FileInfo.name)
+           List.map info.File_info.ids.File_info.funs ~f:(fun id ->
+               id.File_info.name)
          | None -> [])
   |> List.concat
   |> List.sort ~compare:String.compare
@@ -935,7 +936,7 @@ let autocomplete_hack_fake_arrow
 
     List.iter compatible_funs ~f:(fun (fun_name, fun_decl) ->
         let name = Utils.strip_hh_lib_ns fun_name in
-        let kind = FileInfo.SI_Function in
+        let kind = File_info.SI_Function in
 
         (* We want to transform $some_vec-> to e.g.
 
@@ -1098,7 +1099,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
           Tast_env.print_decl_ty env (unwrap_enum_memberof cc.cc_type)
         in
         let ty = Phase.decl cc.cc_type in
-        let kind = FileInfo.SI_ClassConstant in
+        let kind = File_info.SI_ClassConstant in
         let complete =
           {
             res_decl_pos = get_pos_for env ty;
@@ -1233,7 +1234,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 res_label = name;
                 res_insert_text = InsertLiterally name;
                 res_fullname = name;
-                res_kind = FileInfo.SI_ClassConstant;
+                res_kind = File_info.SI_ClassConstant;
                 res_documentation = None;
                 res_sort_text = None;
                 res_filter_text = None;
@@ -1306,7 +1307,7 @@ let autocomplete_named_argument_in_call
               InsertAsSnippet
                 { snippet = snippet_for_params [fp]; fallback = name ^ "=" };
             res_fullname = name;
-            res_kind = FileInfo.SI_LocalVariable;
+            res_kind = File_info.SI_LocalVariable;
             res_documentation = None;
             res_sort_text = Some sort_text;
             res_filter_text = None;
@@ -1335,7 +1336,7 @@ let autocomplete_shape_literal_in_call
   let add_shape_key_result pos key =
     let reason = Typing_reason.witness pos in
     let ty = Typing_make_type.string reason in
-    let kind = FileInfo.SI_Literal in
+    let kind = File_info.SI_Literal in
     let lty = Phase.locl ty in
     let complete =
       {
@@ -1402,7 +1403,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_label = name;
       res_insert_text = InsertLiterally name;
       res_fullname = name;
-      res_kind = FileInfo.SI_Class;
+      res_kind = File_info.SI_Class;
       res_documentation = Some doc;
       res_sort_text = None;
       res_filter_text = None;
@@ -1460,7 +1461,7 @@ let autocomplete_overriding_method env m : unit =
               res_label = name;
               res_insert_text = InsertLiterally name;
               res_fullname = name;
-              res_kind = FileInfo.SI_ClassMethod;
+              res_kind = File_info.SI_ClassMethod;
               res_documentation = None;
               res_sort_text = None;
               res_filter_text = None;
@@ -1520,7 +1521,7 @@ let enum_consts (env : Tast_env.env) name : string list option =
 let add_enum_const_result env pos replace_pos prefix const_name =
   let reason = Typing_reason.witness pos in
   let ty = Typing_make_type.string reason in
-  let kind = FileInfo.SI_ClassConstant in
+  let kind = File_info.SI_ClassConstant in
   let lty = Phase.locl ty in
   let key = prefix ^ const_name in
   let complete =
@@ -1700,8 +1701,8 @@ let find_global_results
     let absolute_none = Pos.none |> Pos.to_absolute in
     let kind_filter =
       match completion_type with
-      | Acnew -> Some FileInfo.SI_Class
-      | Actrait_only -> Some FileInfo.SI_Trait
+      | Acnew -> Some File_info.SI_Class
+      | Actrait_only -> Some File_info.SI_Trait
       | Acclassish
       | Acid
       | Actype
@@ -1738,7 +1739,7 @@ let find_global_results
         let (res_detail, res_insert_text) =
           if
             !sienv_ref.sie_resolve_signatures
-            && FileInfo.equal_si_kind r.si_kind FileInfo.SI_Function
+            && File_info.equal_si_kind r.si_kind File_info.SI_Function
           then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
@@ -1804,7 +1805,7 @@ let find_global_results
       |> List.filter ~f:(fun (_, name) ->
              String.is_prefix name ~prefix:query_text)
       |> List.iter ~f:(fun (hint, name) ->
-             let kind = FileInfo.SI_Typedef in
+             let kind = File_info.SI_Typedef in
              let documentation = Symbol_occurrence.built_in_type_hover hint in
              add_res
                {
@@ -1849,8 +1850,8 @@ let complete_xhp_tag
       in
       let res_insert_text =
         match r.si_kind with
-        | FileInfo.SI_XHP
-        | FileInfo.SI_Class
+        | File_info.SI_XHP
+        | File_info.SI_Class
           when does_autocomplete_snippet ->
           let classname = Utils.add_ns res_fullname in
           let attrs =
@@ -1962,7 +1963,7 @@ let compute_complete_local env ctx tast =
 
   Local_id.Map.iter
     (fun id ty ->
-      let kind = FileInfo.SI_LocalVariable in
+      let kind = File_info.SI_LocalVariable in
       let name = Local_id.get_name id in
       if String.is_prefix name ~prefix:id_prefix then
         let complete =
@@ -2269,7 +2270,7 @@ let complete_keywords_at possible_keywords text pos : unit =
     |> List.filter ~f:(fun possible_keyword ->
            String.is_prefix possible_keyword ~prefix)
     |> List.iter ~f:(fun keyword ->
-           let kind = FileInfo.SI_Keyword in
+           let kind = File_info.SI_Keyword in
            let complete =
              {
                res_decl_pos = Pos.none |> Pos.to_absolute;

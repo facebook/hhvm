@@ -155,13 +155,13 @@ open Hh_prelude
 type changes_since_baseline = Naming_sqlite.local_changes option
 
 type t =
-  | Unbacked of FileInfo.t Relative_path.Map.t
+  | Unbacked of File_info.t Relative_path.Map.t
   | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
-type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
+type defs_per_file = File_info.names Relative_path.Map.t [@@deriving show]
 
-type saved_state_info = FileInfo.saved Relative_path.Map.t
+type saved_state_info = File_info.saved Relative_path.Map.t
 
 (*****************************************************************************)
 (* Forward naming table functions *)
@@ -459,7 +459,7 @@ let from_saved saved =
          saved
          ~init:Relative_path.Map.empty
          ~f:(fun fn saved acc ->
-           let file_info = FileInfo.from_saved fn saved in
+           let file_info = File_info.from_saved fn saved in
            Relative_path.Map.add acc ~key:fn ~data:file_info))
   in
   let _t = Hh_logger.log_duration "Loaded naming table from blob" t in
@@ -467,24 +467,24 @@ let from_saved saved =
 
 let to_saved a =
   match a with
-  | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.to_saved
+  | Unbacked a -> Relative_path.Map.map a ~f:File_info.to_saved
   | Backed _ ->
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
-        Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi))
+        Relative_path.Map.add acc ~key:path ~data:(File_info.to_saved fi))
 
 let to_defs_per_file ?(warn_on_naming_costly_iter = true) a =
   match a with
-  | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.simplify
+  | Unbacked a -> Relative_path.Map.map a ~f:File_info.simplify
   | Backed _ ->
     fold
       a
       ~warn_on_naming_costly_iter
       ~init:Relative_path.Map.empty
       ~f:(fun path fi acc ->
-        Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi))
+        Relative_path.Map.add acc ~key:path ~data:(File_info.simplify fi))
 
 let saved_to_defs_per_file saved =
-  Relative_path.Map.map saved ~f:FileInfo.saved_to_names
+  Relative_path.Map.map saved ~f:File_info.saved_to_names
 
 (*****************************************************************************)
 (* Forward naming table creation functions *)
@@ -495,7 +495,7 @@ let create a = Unbacked a
 (* Helper function to apply new files info to reverse naming table *)
 let update_reverse_entries_helper
     (ctx : Provider_context.t)
-    (changed_ids : (Relative_path.t * FileInfo.t option) list) : unit =
+    (changed_ids : (Relative_path.t * File_info.t option) list) : unit =
   let backend = Provider_context.get_backend ctx in
   let db_path_opt = Db_path_provider.get_naming_db_path backend in
   (* Remove all old file symbols first *)
@@ -507,24 +507,24 @@ let update_reverse_entries_helper
       in
       match fi_opt with
       | Some fi ->
-        let { FileInfo.classes; typedefs; funs; consts; modules } =
-          fi.FileInfo.ids
+        let { File_info.classes; typedefs; funs; consts; modules } =
+          fi.File_info.ids
         in
         Naming_provider.remove_type_batch
           backend
-          (classes |> List.map ~f:(fun id -> id.FileInfo.name));
+          (classes |> List.map ~f:(fun id -> id.File_info.name));
         Naming_provider.remove_type_batch
           backend
-          (typedefs |> List.map ~f:(fun id -> id.FileInfo.name));
+          (typedefs |> List.map ~f:(fun id -> id.File_info.name));
         Naming_provider.remove_fun_batch
           backend
-          (funs |> List.map ~f:(fun id -> id.FileInfo.name));
+          (funs |> List.map ~f:(fun id -> id.File_info.name));
         Naming_provider.remove_const_batch
           backend
-          (consts |> List.map ~f:(fun id -> id.FileInfo.name));
+          (consts |> List.map ~f:(fun id -> id.File_info.name));
         Naming_provider.remove_module_batch
           backend
-          (modules |> List.map ~f:(fun id -> id.FileInfo.name))
+          (modules |> List.map ~f:(fun id -> id.File_info.name))
       | None -> ())
     changed_ids;
 
@@ -533,28 +533,34 @@ let update_reverse_entries_helper
     ~f:(fun (_path, new_file_info) ->
       match new_file_info with
       | Some fi ->
-        let { FileInfo.classes; typedefs; funs; consts; modules } =
-          fi.FileInfo.ids
+        let { File_info.classes; typedefs; funs; consts; modules } =
+          fi.File_info.ids
         in
         List.iter
           ~f:(fun id ->
-            Naming_provider.add_class backend id.FileInfo.name id.FileInfo.pos)
+            Naming_provider.add_class backend id.File_info.name id.File_info.pos)
           classes;
         List.iter
           ~f:(fun id ->
-            Naming_provider.add_typedef backend id.FileInfo.name id.FileInfo.pos)
+            Naming_provider.add_typedef
+              backend
+              id.File_info.name
+              id.File_info.pos)
           typedefs;
         List.iter
           ~f:(fun id ->
-            Naming_provider.add_fun backend id.FileInfo.name id.FileInfo.pos)
+            Naming_provider.add_fun backend id.File_info.name id.File_info.pos)
           funs;
         List.iter
           ~f:(fun id ->
-            Naming_provider.add_const backend id.FileInfo.name id.FileInfo.pos)
+            Naming_provider.add_const backend id.File_info.name id.File_info.pos)
           consts;
         List.iter
           ~f:(fun id ->
-            Naming_provider.add_module backend id.FileInfo.name id.FileInfo.pos)
+            Naming_provider.add_module
+              backend
+              id.File_info.name
+              id.File_info.pos)
           modules
       | None -> ())
     changed_ids
@@ -630,7 +636,7 @@ let load_from_sqlite_for_type_checking
 
 let load_from_sqlite_with_changed_file_infos
     (ctx : Provider_context.t)
-    (changed_file_infos : (Relative_path.t * FileInfo.t option) list)
+    (changed_file_infos : (Relative_path.t * File_info.t option) list)
     (db_path : string) : t =
   Hh_logger.log "Loading naming table from SQLite...";
   let db_path = Naming_sqlite.Db_path db_path in

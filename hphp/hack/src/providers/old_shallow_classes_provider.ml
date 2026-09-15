@@ -44,7 +44,7 @@ let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
     let (old_classes, _funs, _typedefs, _consts, _modules) =
       Rust_provider_backend.Decl.get_old_defs
         be
-        FileInfo.{ empty_names with n_classes = names }
+        File_info.{ empty_names with n_classes = names }
     in
     fetch_missing_old_classes_remotely ctx ~during_init old_classes
   | Provider_backend.Shared_memory ->

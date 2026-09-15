@@ -358,9 +358,9 @@ val set_static : env -> env
 
 val set_val_kind : env -> Typing_defs.val_kind -> env
 
-val set_mode : env -> FileInfo.mode -> env
+val set_mode : env -> File_info.mode -> env
 
-val get_mode : env -> FileInfo.mode
+val get_mode : env -> File_info.mode
 
 val is_strict : env -> bool
 

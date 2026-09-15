@@ -7,7 +7,7 @@
  *)
 
 type env = {
-  mode: FileInfo.mode;
+  mode: File_info.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
   droot_member: Typing_pessimisation_deps.dependent_member option;
       (** The child/member of [droot] currently under consideration.

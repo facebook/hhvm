@@ -11,7 +11,7 @@ open Aast
 
 let error_if_no_typehint
     { cst_mode; cst_type; cst_name; cst_value; _ } custom_err_config =
-  if (not (FileInfo.is_hhi cst_mode)) && Option.is_none cst_type then
+  if (not (File_info.is_hhi cst_mode)) && Option.is_none cst_type then
     let (_, _, expr) = cst_value in
     let (pos, const_name) = cst_name
     and ty_name =

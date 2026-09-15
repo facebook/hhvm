@@ -1026,9 +1026,6 @@ function get_html_translation_table(
   int $quote_style = ENT_COMPAT,
   string $encoding = "UTF-8",
 )[]: darray<string, string>;
-// TODO(T120001721) This type is nullable, specifically a
-// `?darray<string, string>`; HHVM's native interface doesn't allow us to
-// differentiate between nullable and non-nullable strings, arrays, or objects.
 
 /**
  * Converts logical Hebrew text to visual text.  The function tries to avoid

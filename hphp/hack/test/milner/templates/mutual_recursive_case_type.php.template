@@ -4,5 +4,5 @@
 
 // Mutually recursive case types with random base type
 // Tests that the type checker terminates and correctly rejects mutual cycles
-case type MutRecA = TYPE#1 | MutRecB;
+case type MutRecA = ALIAS_TYPE#1 | MutRecB;
 case type MutRecB = vec<MutRecA>;

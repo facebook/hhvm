@@ -24,3 +24,7 @@ Every identifier has one generated type and environment, including identifiers
 that occur only in expressions. Their auxiliary declarations are retained.
 Repeated placeholders share their replacement; longer numeric identifiers are
 substituted first so `#1` cannot consume the prefix of `#10`.
+
+`ALIAS_TYPE#1` constrains that identifier's type and subtype choices everywhere
+to legal alias right-hand sides. It excludes direct type-constant references;
+type constants nested in other type constructors remain available.

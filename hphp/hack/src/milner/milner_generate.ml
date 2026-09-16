@@ -120,6 +120,8 @@ module ReadOnlyEnvironment : sig
 
   val default : verbose:int -> debug_pattern:string option -> t
 
+  val for_alias : t -> t
+
   val debug :
     level:int ->
     t ->
@@ -162,6 +164,8 @@ end = struct
             Option.is_none debug_pattern;
         };
     }
+
+  let for_alias renv = { renv with for_alias_def = true }
 
   let show
       {

@@ -14,6 +14,10 @@ let type_prefix = "TYPE"
 
 let type_regexp = Pcre.regexp @@ type_prefix ^ "#([0-9]+)"
 
+let alias_type_prefix = "ALIAS_TYPE"
+
+let alias_type_regexp = Pcre.regexp @@ alias_type_prefix ^ "#([0-9]+)"
+
 let subtype_prefix = "SUBTYPE"
 
 let subtype_regexp = Pcre.regexp @@ subtype_prefix ^ "#([0-9]+)"
@@ -40,24 +44,31 @@ let init_table contents placeholder =
 let generate_tables ~verbose ~debug_pattern template =
   let renv = Gen.ReadOnlyEnvironment.default ~verbose ~debug_pattern in
   let env = Gen.Environment.default in
-  let mk_type () = Gen.Type.mk renv env in
+  let alias_types = init_table template alias_type_regexp in
+  let renv_for key =
+    if Hashtbl.mem alias_types key then
+      Gen.ReadOnlyEnvironment.for_alias renv
+    else
+      renv
+  in
+  let mk_type ~key ~data:() = Gen.Type.mk (renv_for key) env in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let expr_table = init_table template expr_regexp in
   let subty_table = init_table template subtype_regexp in
-  List.iter [expr_table; subty_table] ~f:(fun table ->
+  List.iter [expr_table; subty_table; alias_types] ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
-  let ty_table = Hashtbl.map ty_table ~f:mk_type in
+  let ty_table = Hashtbl.mapi ty_table ~f:mk_type in
 
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
-    Gen.Type.subtype_of renv env ty
+    Gen.Type.subtype_of (renv_for key) env ty
   in
   let subty_table = Hashtbl.mapi subty_table ~f:gen_subty_from_ty_table in
 
   let gen_expr_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
-    Gen.Type.inhabitant_of renv env ty
+    Gen.Type.inhabitant_of (renv_for key) env ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 
@@ -87,8 +98,10 @@ let fill_in_template ty_table subty_table expr_table template =
 
   let ty_str_table = Hashtbl.map ty_table ~f:Gen.Type.show in
   let subty_str_table = Hashtbl.map subty_table ~f:Gen.Type.show in
+  (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
   |> fill_table subty_str_table ~prefix:subtype_prefix
+  |> fill_table ty_str_table ~prefix:alias_type_prefix
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
 

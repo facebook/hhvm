@@ -16,6 +16,9 @@ module ReadOnlyEnvironment : sig
   type t
 
   val default : verbose:int -> debug_pattern:string option -> t
+
+  (** Restrict the outer type to legal alias right-hand sides. *)
+  val for_alias : t -> t
 end
 
 module Environment : sig

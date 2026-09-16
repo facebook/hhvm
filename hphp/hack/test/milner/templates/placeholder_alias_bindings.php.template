@@ -1,0 +1,11 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+type AliasOnly = ALIAS_TYPE#1;
+type SharedAlias = ALIAS_TYPE#10;
+type RepeatedAlias = ALIAS_TYPE#100;
+
+function alias_subtype(SUBTYPE#10 $value): SharedAlias { return $value; }
+function alias_type(TYPE#10 $value): SharedAlias { return $value; }
+function alias_witness(): SharedAlias { return expr#10; }
+function alias_repeated(ALIAS_TYPE#100 $value): RepeatedAlias { return $value; }

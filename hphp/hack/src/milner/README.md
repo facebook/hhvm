@@ -16,3 +16,6 @@ typing contexts.
 Every generated value type has an inhabited subtype. Immediate inhabitance is a
 pure structural check: selecting an inhabited subtype does not construct an
 expression or consume randomness merely to decide whether a witness exists.
+
+Expression construction carries the same generation context and nominal
+environment through recursive witnesses.

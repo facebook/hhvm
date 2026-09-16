@@ -654,7 +654,7 @@ end = struct
     | Like _ ->
       false
 
-  let rec expr_of = function
+  let rec expr_of renv env = function
     | Primitive prim -> begin
       let open Primitive in
       match prim with
@@ -689,13 +689,15 @@ end = struct
       if open_ then
         None
       else
-        List.map ~f:expr_of conjuncts
+        List.map ~f:(expr_of renv env) conjuncts
         |> Option.all
         |> Option.map ~f:(fun exprl ->
                String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
     | Shape { fields; open_ = _ } -> begin
       (* Check that all types are inhabited even if we won't end up using all of them. *)
-      match List.map fields ~f:(fun { ty; _ } -> expr_of ty) |> Option.all with
+      match
+        List.map fields ~f:(fun { ty; _ } -> expr_of renv env ty) |> Option.all
+      with
       | None -> None
       | Some _ ->
         let fields =
@@ -703,7 +705,7 @@ end = struct
         in
         let fields = List.permute fields in
         let show_field { key; ty; _ } =
-          expr_of ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
+          expr_of renv env ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
         in
         List.map ~f:show_field fields
         |> Option.all
@@ -712,7 +714,7 @@ end = struct
     end
     | Awaitable ty ->
       let open Option.Let_syntax in
-      let+ expr = expr_of ty in
+      let+ expr = expr_of renv env ty in
       Format.sprintf "async { return %s; }" expr
     | Function { parameters; variadic; return_ } ->
       let variadic =
@@ -731,7 +733,7 @@ end = struct
         |> String.concat ~sep:", "
       in
       let open Option.Let_syntax in
-      let+ return_expr = expr_of return_ in
+      let+ return_expr = expr_of renv env return_ in
       Format.sprintf
         "(%s%s): %s ==> { return %s; }"
         parameters
@@ -1094,7 +1096,7 @@ end = struct
   let inhabitant_of (renv : REnv.t) (env : Env.t) (ty : t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = true } in
     let subtype = subtype_of renv env ty in
-    let inhabitant = expr_of subtype in
+    let inhabitant = expr_of renv env subtype in
     match inhabitant with
     | Some inhabitant -> inhabitant
     | None ->

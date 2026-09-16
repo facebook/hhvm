@@ -19,83 +19,132 @@ use crate::r#gen::package_info::PackageInfo;
 
 pub type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
 
-pub fn package_info_to_vec(
-    filename: &str,
-    info: &packages::PackageInfo,
-) -> Result<Vec<Package>, Errors> {
-    let pos_from_span = |span: (usize, usize)| {
-        let (start_offset, end_offset) = span;
-        let start_lnum = info.line_number(start_offset);
-        let start_bol = info.beginning_of_line(start_lnum);
-        let end_lnum = info.line_number(end_offset);
-        let end_bol = info.beginning_of_line(end_lnum);
+/// Converts parser package data into its position-bearing oxidized form.
+pub struct PackageConverter<'a> {
+    filename: &'a str,
+    info: &'a packages::PackageInfo,
+}
+
+impl<'a> PackageConverter<'a> {
+    pub fn new(filename: &'a str, info: &'a packages::PackageInfo) -> Self {
+        Self { filename, info }
+    }
+
+    fn pos_from_span(&self, (start_offset, end_offset): (usize, usize)) -> Pos {
+        let start_lnum = self.info.line_number(start_offset);
+        let start_bol = self.info.beginning_of_line(start_lnum);
+        let end_lnum = self.info.line_number(end_offset);
+        let end_bol = self.info.beginning_of_line(end_lnum);
 
         Pos::from_lnum_bol_offset(
-            Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(filename))),
+            Arc::new(RelativePath::make(
+                Prefix::Dummy,
+                PathBuf::from(self.filename),
+            )),
             (start_lnum, start_bol, start_offset),
             (end_lnum, end_bol, end_offset),
         )
-    };
-    let errors = info
-        .errors()
-        .iter()
-        .map(|e| {
-            let pos = pos_from_span(e.span());
-            let msg = e.msg();
-            let reasons = e
-                .reasons()
-                .into_iter()
-                .map(|(start, end, reason)| (pos_from_span((start, end)), reason))
-                .collect();
-            (pos, msg, reasons)
-        })
-        .collect::<Errors>();
-    if !errors.is_empty() {
-        return Err(errors);
-    };
-    let convert = |x: &Spanned<String>| -> PosId {
-        let Range { start, end } = x.span();
-        let pos = pos_from_span((start, end));
-        let id = x.to_owned().into_inner();
-        PosId(pos, id)
-    };
-    let convert_many = |xs: &Option<packages::NameSet>| -> Vec<PosId> {
-        xs.as_ref()
-            .unwrap_or_default()
-            .iter()
-            .map(convert)
-            .collect()
-    };
+    }
 
-    let mut packages: Vec<Package> = info
-        .packages()
-        .iter()
-        .map(|(name, package)| Package {
-            name: convert(name),
-            includes: convert_many(&package.includes),
-            soft_includes: convert_many(&package.soft_includes),
-            include_paths: convert_many(&package.include_paths),
+    fn convert_name(&self, value: &Spanned<String>) -> PosId {
+        let Range { start, end } = value.span();
+        PosId(self.pos_from_span((start, end)), value.get_ref().clone())
+    }
+
+    fn convert_names(&self, values: Option<&packages::NameSet>) -> Vec<PosId> {
+        values
+            .into_iter()
+            .flat_map(|values| values.iter())
+            .map(|value| self.convert_name(value))
+            .collect()
+    }
+
+    fn convert_package(&self, name: &Spanned<String>, package: &packages::Package) -> Package {
+        Package {
+            name: self.convert_name(name),
+            includes: self.convert_names(package.includes.as_ref()),
+            soft_includes: self.convert_names(package.soft_includes.as_ref()),
+            include_paths: self.convert_names(package.include_paths.as_ref()),
             enable_strict_isolation: package.enable_strict_isolation,
             is_implicit: false,
-        })
-        .collect();
+        }
+    }
 
-    // Append one entry per implicit-package family. The family's `path` becomes
-    // its sole include_path and the entry is flagged `is_implicit`. Members
-    // `F.D` are synthesized lazily during lookup (see `package_info.ml` and
-    // `PackageInfo::get_package_for_file`), never materialized here.
-    for (name, fam) in info.implicit_packages().iter() {
-        packages.push(Package {
-            name: convert(name),
-            includes: convert_many(&fam.includes),
-            soft_includes: convert_many(&fam.soft_includes),
-            include_paths: vec![convert(&fam.path)],
-            // Implicit packages opt into strict isolation.
+    fn convert_implicit_package(
+        &self,
+        name: &Spanned<String>,
+        family: &packages::ImplicitPackage,
+    ) -> Package {
+        Package {
+            name: self.convert_name(name),
+            includes: self.convert_names(family.includes.as_ref()),
+            soft_includes: self.convert_names(family.soft_includes.as_ref()),
+            include_paths: vec![self.convert_name(&family.path)],
             enable_strict_isolation: true,
             is_implicit: true,
-        });
+        }
     }
-    Ok(packages)
+
+    fn convert_package_or_implicit(&self, package: &packages::PackageOrImplicitPackage) -> Package {
+        match package {
+            packages::PackageOrImplicitPackage::Package(name, package) => {
+                self.convert_package(name, package)
+            }
+            packages::PackageOrImplicitPackage::ImplicitPackage(name, family) => {
+                self.convert_implicit_package(name, family)
+            }
+        }
+    }
+
+    /// Converts all declared packages and implicit families.
+    pub fn package_info_to_vec(&self) -> Result<Vec<Package>, Errors> {
+        let errors = self
+            .info
+            .errors()
+            .iter()
+            .map(|e| {
+                let pos = self.pos_from_span(e.span());
+                let msg = e.msg();
+                let reasons = e
+                    .reasons()
+                    .into_iter()
+                    .map(|(start, end, reason)| (self.pos_from_span((start, end)), reason))
+                    .collect();
+                (pos, msg, reasons)
+            })
+            .collect::<Errors>();
+        if !errors.is_empty() {
+            return Err(errors);
+        };
+        let mut packages: Vec<Package> = self
+            .info
+            .packages()
+            .iter()
+            .map(|(name, package)| self.convert_package(name, package))
+            .collect();
+
+        // Convert each family declaration into a family-level package. Members
+        // remain synthesized during lookup.
+        for (name, fam) in self.info.implicit_packages().iter() {
+            packages.push(self.convert_implicit_package(name, fam));
+        }
+        Ok(packages)
+    }
+
+    /// Converts the parser's ordered package path map to its oxidized form.
+    fn convert_include_path_to_package_map(&self) -> Vec<(String, Package)> {
+        let paths = self
+            .info
+            .include_path_to_package_map()
+            .iter()
+            .map(|(path, package)| (path.clone(), self.convert_package_or_implicit(package)))
+            .collect::<Vec<_>>();
+        debug_assert!(
+            paths.windows(2).all(|pair| pair[0].0 >= pair[1].0),
+            "package paths should remain in reverse lexicographic order"
+        );
+        paths
+    }
 }
 
 /// Converts parser package data into the complete oxidized package information.
@@ -103,23 +152,13 @@ pub fn package_info_to_oxidized(
     filename: &str,
     info: packages::PackageInfo,
 ) -> Result<PackageInfo, Errors> {
-    let packages = package_info_to_vec(filename, &info)?;
-    let existing_packages = packages
+    let converter = PackageConverter::new(filename, &info);
+    let packages = converter.package_info_to_vec()?;
+    let existing_packages: crate::s_map::SMap<Package> = packages
         .iter()
         .map(|package| (package.name.1.clone(), package.clone()))
         .collect();
-    // Sort by reverse-lexicographic include_path order so a simple linear
-    // search returns the most precise path that includes a given file.
-    let mut include_path_to_package_map: Vec<_> = packages
-        .iter()
-        .flat_map(|package| {
-            package
-                .include_paths
-                .iter()
-                .map(move |include_path| (include_path.1.clone(), package.clone()))
-        })
-        .collect();
-    include_path_to_package_map.sort_by(|(left, _), (right, _)| right.cmp(left));
+    let include_path_to_package_map = converter.convert_include_path_to_package_map();
 
     Ok(PackageInfo {
         existing_packages,

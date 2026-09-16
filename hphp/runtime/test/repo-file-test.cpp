@@ -941,15 +941,24 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedImplicitPackageFamily) {
 TEST(RepoFileTest, RoundTripsImplicitPackageFamilies) {
   folly::test::TemporaryDirectory temp{"repo-file-package-info"};
   auto const repoPath = temp.path() / "repo.hhbc";
+  auto const configPath = temp.path() / "PACKAGES.toml";
 
-  PackageInfo packageInfo;
-  PackageInfo::ImplicitPackageFamily family;
-  family.m_path = "www/prototypes/";
-  family.m_includes.emplace("intern");
-  family.m_soft_includes.emplace("soft");
-  packageInfo.m_implicitPackageFamilies.emplace(
-    "prototypes",
-    std::move(family)
+  std::ofstream out{configPath};
+  out << R"(
+[packages]
+[packages.intern]
+include_paths = ["//www/"]
+[packages.soft]
+
+[implicit_packages.prototypes]
+path = "//www/prototypes/"
+includes = ["intern"]
+soft_includes = ["soft"]
+  )";
+  out.close();
+  auto const packageInfo = PackageInfo::fromFile(
+    std::filesystem::path{configPath.native()},
+    true
   );
   {
     RepoFileBuilder builder{repoPath.string()};
@@ -965,6 +974,15 @@ TEST(RepoFileTest, RoundTripsImplicitPackageFamilies) {
   EXPECT_EQ(roundTrippedFamily.m_path, "www/prototypes/");
   EXPECT_TRUE(roundTrippedFamily.m_includes.contains("intern"));
   EXPECT_TRUE(roundTrippedFamily.m_soft_includes.contains("soft"));
+  auto const& paths = roundTripped.packageAndImplicitFamilyPathsInLookupOrder();
+  ASSERT_EQ(paths.size(), 2);
+  auto const& packagePath = paths.front();
+  EXPECT_EQ(packagePath.m_path, "www/prototypes/");
+  EXPECT_EQ(packagePath.m_package, "prototypes");
+  EXPECT_TRUE(packagePath.m_isImplicit);
+  EXPECT_EQ(paths[1].m_path, "www/");
+  EXPECT_EQ(paths[1].m_package, "intern");
+  EXPECT_FALSE(paths[1].m_isImplicit);
 }
 
 // Checks that incremental builds accept equivalent package metadata.

@@ -24,7 +24,6 @@
 
 #include "hphp/util/configs/eval.h"
 
-#include <fmt/format.h>
 #include <re2/re2.h>
 #include "hphp/util/rds-local.h"
 
@@ -48,16 +47,23 @@ folly::SharedMutex s_patternCacheLock;
 
 PackageInfo::PackageInfo(const PackageMap& packages,
                          const DeploymentMap& deployments,
-                         const ImplicitPackageFamilyMap& implicitPackageFamilies)
+                         const ImplicitPackageFamilyMap& implicitPackageFamilies,
+                         PackageAndImplicitFamilyPathsInLookupOrder
+                           packageAndImplicitFamilyPathsInLookupOrder)
   : m_packages(packages)
   , m_deployments(deployments)
-  , m_implicitPackageFamilies(implicitPackageFamilies) {}
+  , m_implicitPackageFamilies(implicitPackageFamilies)
+  , m_packageAndImplicitFamilyPathsInLookupOrder(
+      std::move(packageAndImplicitFamilyPathsInLookupOrder)
+    ) {}
 
 PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
                                   bool enableImplicitPackages) {
   PackageMap packages;
   DeploymentMap deployments;
   ImplicitPackageFamilyMap implicitPackageFamilies;
+  PackageAndImplicitFamilyPathsInLookupOrder
+    packageAndImplicitFamilyPathsInLookupOrder;
 
   try {
     if (!std::filesystem::exists(path)) {
@@ -109,6 +115,16 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
         }
       );
     }
+    auto const& paths =
+      info.package_and_implicit_family_paths_in_lookup_order;
+    packageAndImplicitFamilyPathsInLookupOrder.reserve(paths.size());
+    for (auto& entry : paths) {
+      packageAndImplicitFamilyPathsInLookupOrder.push_back({
+        std::string(entry.path),
+        std::string(entry.package.name),
+        entry.package.package.is_implicit,
+      });
+    }
     if (info.errors.size() > 0) {
       std::vector<folly::StringPiece> packageConfigErrors;
       for (auto& error : info.errors) {
@@ -120,7 +136,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
     return PackageInfo(
       packages,
       deployments,
-      implicitPackageFamilies
+      implicitPackageFamilies,
+      std::move(packageAndImplicitFamilyPathsInLookupOrder)
     );
   } catch (const std::exception& e) {
     Logger::Warning(

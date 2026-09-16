@@ -13,8 +13,10 @@ use toml::Spanned;
 use crate::config::*;
 use crate::error::*;
 use crate::types::DeploymentMap;
+use crate::types::ImplicitPackage;
 use crate::types::ImplicitPackageMap;
 pub use crate::types::NameSet;
+use crate::types::Package;
 use crate::types::PackageMap;
 
 struct PackagePathValidation {
@@ -118,11 +120,19 @@ fn validate_implicit_member_paths(config: &Config, packages_toml: &str, errors: 
     }
 }
 
+/// A declaration referenced by the ordered package path map.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PackageOrImplicitPackage {
+    Package(Spanned<String>, Package),
+    ImplicitPackage(Spanned<String>, ImplicitPackage),
+}
+
 #[derive(Debug, Default)]
 pub struct PackageInfo {
     packages: PackageMap,
     deployments: Option<DeploymentMap>,
     implicit_packages: ImplicitPackageMap,
+    include_path_to_package_map: Vec<(String, PackageOrImplicitPackage)>,
     line_offsets: Vec<usize>,
     errors: Vec<Error>,
 }
@@ -201,10 +211,38 @@ impl PackageInfo {
         }
         config.check_config(&mut errors);
 
+        // Sort paths in reverse lexicographic order so the first prefix match
+        // is the most specific package path.
+        let mut include_path_to_package_map = config
+            .packages
+            .iter()
+            .flat_map(|(name, package)| {
+                package
+                    .include_paths
+                    .as_ref()
+                    .into_iter()
+                    .flat_map(|paths| paths.iter())
+                    .map(|path| {
+                        (
+                            path.get_ref().clone(),
+                            PackageOrImplicitPackage::Package(name.clone(), package.clone()),
+                        )
+                    })
+            })
+            .chain(config.implicit_packages.iter().map(|(name, family)| {
+                (
+                    family.path.get_ref().clone(),
+                    PackageOrImplicitPackage::ImplicitPackage(name.clone(), family.clone()),
+                )
+            }))
+            .collect::<Vec<_>>();
+        include_path_to_package_map.sort_by(|(left, _), (right, _)| right.cmp(left));
+
         Ok(Self {
             packages: config.packages,
             deployments: config.deployments,
             implicit_packages: config.implicit_packages,
+            include_path_to_package_map,
             line_offsets,
             errors,
         })
@@ -234,6 +272,12 @@ impl PackageInfo {
 
     pub fn implicit_packages(&self) -> &ImplicitPackageMap {
         &self.implicit_packages
+    }
+
+    /// Returns package paths in reverse lexicographic order so prefix lookup
+    /// selects the most specific configured path first.
+    pub fn include_path_to_package_map(&self) -> &[(String, PackageOrImplicitPackage)] {
+        &self.include_path_to_package_map
     }
 
     pub fn errors(&self) -> &[Error] {
@@ -498,6 +542,17 @@ mod test {
         // `path` is normalized to the leading-`//`-stripped form, like include_paths.
         assert_eq!(fam.path.get_ref(), "www/prototypes/");
         assert_eq!(fam.includes.as_ref().unwrap()[0].get_ref(), "intern");
+        assert_eq!(info.include_path_to_package_map().len(), 2);
+        assert_eq!(info.include_path_to_package_map()[0].0, "www/prototypes/");
+        assert!(matches!(
+            &info.include_path_to_package_map()[0].1,
+            PackageOrImplicitPackage::ImplicitPackage(name, _) if name.get_ref() == "prototypes"
+        ));
+        assert_eq!(info.include_path_to_package_map()[1].0, "www/");
+        assert!(matches!(
+            &info.include_path_to_package_map()[1].1,
+            PackageOrImplicitPackage::Package(name, _) if name.get_ref() == "intern"
+        ));
     }
 
     #[test]
@@ -552,6 +607,7 @@ mod test {
         );
         // Every family was dropped, so nothing is carried downstream.
         assert!(info.implicit_packages().is_empty());
+        assert_eq!(info.include_path_to_package_map().len(), 1);
     }
 
     #[test]

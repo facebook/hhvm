@@ -21,6 +21,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <tuple>
 
 namespace HPHP {
 namespace {
@@ -33,6 +34,7 @@ TEST(PackageInfoTest, LoadsImplicitPackageFamiliesOnlyWhenEnabled) {
   out << R"(
 [packages]
 [packages.intern]
+include_paths = ["//alpha/", "//www/"]
 [packages.soft]
 
 [packages.strict]
@@ -63,6 +65,25 @@ soft_includes = ["soft"]
   EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes"));
   EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes.example"));
   EXPECT_FALSE(enabled.isStrictIsolationPackage("unknown"));
+
+  std::vector<std::tuple<std::string, std::string, bool>>
+    packageAndImplicitFamilyPathsInLookupOrder;
+  for (auto const& entry :
+       enabled.packageAndImplicitFamilyPathsInLookupOrder()) {
+    packageAndImplicitFamilyPathsInLookupOrder.emplace_back(
+      entry.m_path,
+      entry.m_package,
+      entry.m_isImplicit
+    );
+  }
+  EXPECT_EQ(
+    packageAndImplicitFamilyPathsInLookupOrder,
+    (std::vector<std::tuple<std::string, std::string, bool>>{
+      {"www/prototypes/", "prototypes", true},
+      {"www/", "intern", false},
+      {"alpha/", "intern", false},
+    })
+  );
 }
 
 // Checks that strict-isolation metadata contributes to the package cache key.

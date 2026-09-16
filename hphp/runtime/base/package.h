@@ -18,8 +18,14 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <re2/re2.h>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
+
+#include <folly/container/HeterogeneousAccess.h>
 
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
@@ -91,19 +97,37 @@ struct PackageInfo {
 
   using PackageMap = hphp_vector_map<std::string, Package>;
   using DeploymentMap = hphp_vector_map<std::string, Deployment>;
-  using ImplicitPackageFamilyMap =
-    hphp_vector_map<std::string, ImplicitPackageFamily>;
+  using ImplicitPackageFamilyMap = hphp_vector_map<
+    std::string,
+    ImplicitPackageFamily,
+    folly::HeterogeneousAccessHash<std::string>,
+    folly::HeterogeneousAccessEqualTo<std::string>
+  >;
+
+  struct PackageOrImplicitFamilyPath {
+    std::string m_path;
+    std::string m_package;
+    bool m_isImplicit;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_path)(m_package)(m_isImplicit);
+    }
+  };
+
+  using PackageAndImplicitFamilyPathsInLookupOrder =
+    std::vector<PackageOrImplicitFamilyPath>;
 
   const PackageMap& packages() const { return m_packages; }
   const DeploymentMap& deployments() const { return m_deployments; }
   const ImplicitPackageFamilyMap& implicitPackageFamilies() const {
     return m_implicitPackageFamilies;
   }
+  const PackageAndImplicitFamilyPathsInLookupOrder&
+  packageAndImplicitFamilyPathsInLookupOrder() const {
+    return m_packageAndImplicitFamilyPathsInLookupOrder;
+  }
   bool isStrictIsolationPackage(const std::string& package) const;
 
-  PackageInfo(const PackageMap& packages,
-              const DeploymentMap& deployments,
-              const ImplicitPackageFamilyMap& implicitPackageFamilies);
   PackageInfo() = default;
 
   const Deployment* getActiveDeployment() const;
@@ -115,6 +139,7 @@ struct PackageInfo {
     sd(m_packages, stdltstr{})
       (m_deployments, stdltstr{})
       (m_implicitPackageFamilies, stdltstr{})
+      (m_packageAndImplicitFamilyPathsInLookupOrder)
       ;
   }
 
@@ -127,6 +152,15 @@ public:
   DeploymentMap m_deployments;
   ImplicitPackageFamilyMap m_implicitPackageFamilies;
 
+private:
+  PackageInfo(const PackageMap& packages,
+              const DeploymentMap& deployments,
+              const ImplicitPackageFamilyMap& implicitPackageFamilies,
+              PackageAndImplicitFamilyPathsInLookupOrder
+                packageAndImplicitFamilyPathsInLookupOrder);
+
+  PackageAndImplicitFamilyPathsInLookupOrder
+    m_packageAndImplicitFamilyPathsInLookupOrder;
 };
 
 } // namespace HPHP

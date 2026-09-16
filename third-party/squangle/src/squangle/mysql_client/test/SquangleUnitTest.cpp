@@ -1631,6 +1631,77 @@ TEST_F(QueryTest, PercentHIsIndependentOfEscapeMode) {
   EXPECT_EQ(query.render(nullptr), "SELECT X'00ff'");
 }
 
+TEST_F(QueryTest, UnknownListSubTypeIsRejectedOnTheLegacyPath) {
+  // checked() has always rejected these at compile time; the legacy path let
+  // them through to the value renderer, which ignores the sub-type char for
+  // sub-query and NULL elements. So %Lj rendered a list of sub-queries.
+  std::vector<QueryArgument> queries{Query("SELECT 1"), Query("SELECT 2")};
+  EXPECT_THROW(
+      Query("SELECT %Lj", QueryArgument(queries)).renderInsecure(),
+      std::invalid_argument);
+
+  std::vector<QueryArgument> nulls{QueryArgument(nullptr)};
+  EXPECT_THROW(
+      Query("SELECT %Lj", QueryArgument(nulls)).renderInsecure(),
+      std::invalid_argument);
+
+  // The sub-type is rejected before the argument is inspected, so the shape of
+  // the argument does not matter.
+  EXPECT_THROW(
+      Query("SELECT %Lj", std::string("not a list")).renderInsecure(),
+      std::invalid_argument);
+
+  try {
+    Query("SELECT %Lz", QueryArgument(queries)).renderInsecure();
+    FAIL() << "expected a parse error for an unknown %L sub-type";
+  } catch (const std::invalid_argument& e) {
+    EXPECT_NE(
+        std::string(e.what()).find("unknown %L sub-type"), std::string::npos)
+        << "actual: " << e.what();
+  }
+}
+
+TEST_F(QueryTest, KnownListSubTypesStillRender) {
+  // Every sub-type the legacy renderer supports must survive the new
+  // allowlist. %LQ in particular has real call sites and is only reachable
+  // through the value renderer's sub-query branch.
+  std::vector<QueryArgument> queries{Query("SELECT 1"), Query("SELECT 2")};
+  EXPECT_EQ(
+      Query("SELECT %LQ", QueryArgument(queries)).renderInsecure(),
+      "SELECT SELECT 1, SELECT 2");
+  // %LQ with a null element keeps rendering NULL via the same branch.
+  std::vector<QueryArgument> withNull{
+      Query("SELECT 1"), QueryArgument(nullptr)};
+  EXPECT_EQ(
+      Query("SELECT %LQ", QueryArgument(withNull)).renderInsecure(),
+      "SELECT SELECT 1, NULL");
+
+  EXPECT_EQ(
+      Query("SELECT %Ls", std::vector<std::string>{"a", "b"}).renderInsecure(),
+      "SELECT \"a\", \"b\"");
+  EXPECT_EQ(
+      Query("SELECT %Ld", std::vector<int>{1, 2}).renderInsecure(),
+      "SELECT 1, 2");
+  EXPECT_EQ(
+      Query("SELECT %Lu", std::vector<int>{1, 2}).renderInsecure(),
+      "SELECT 1, 2");
+  EXPECT_EQ(
+      Query("SELECT %Lm", std::vector<std::string>{"a"}).renderInsecure(),
+      "SELECT \"a\"");
+  EXPECT_EQ(
+      Query("SELECT %LC", std::vector<std::string>{"a", "b"}).renderInsecure(),
+      "SELECT `a`, `b`");
+  EXPECT_EQ(
+      Query("SELECT %Lq", QueryArgument(queries)).renderInsecure(),
+      "SELECT SELECT 1, SELECT 2");
+  EXPECT_EQ(
+      Query("SELECT %Lh", std::vector<std::string>{"A"}).renderInsecure(),
+      "SELECT X'41'");
+  EXPECT_EQ(
+      Query("SELECT %Lf", std::vector<double>{1.5}).renderInsecure(),
+      "SELECT 1.5");
+}
+
 TEST_F(QueryTest, QueryAcceptsMutableCharArray) {
   // Regression: a non-const char[] argument must be treated as a string, not a
   // QueryArgumentCollection. decay_t<char[N]> is char* (not const char*), so

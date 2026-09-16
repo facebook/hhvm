@@ -557,6 +557,17 @@ void QueryRenderer<StringType>::renderAppend(
             &output, queryText, &clauseIdx, sep, param, escapeMode, conn);
         output.append(")");
       } else {
+        // Reject unknown sub-types before touching the argument. Without this
+        // the char falls through to appendValue, which ignores it for the
+        // sub-query and NULL cases -- so %L<anything> behaved as a list of
+        // sub-queries-or-NULLs and threw only for other element types.
+        // %Q belongs here but not in checked()'s allowlist, which is stricter.
+        if (type != 's' && type != 'd' && type != 'u' && type != 'f' &&
+            type != 'm' && type != 'q' && type != 'h' && type != 'C' &&
+            type != 'Q') {
+          parseError(queryText, idx - 1, "unknown %L sub-type");
+        }
+
         if (!param.isList()) {
           parseError(queryText, idx - 1, "expected array for %L formatter");
         }

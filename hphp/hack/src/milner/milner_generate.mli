@@ -34,6 +34,10 @@ module Type : sig
 
   val show : t -> string
 
+  (** Exclude the documented like/nullable intersection-commutativity bug. *)
+  val intersection_law_compatible :
+    Environment.t -> t -> Environment.t -> t -> bool
+
   val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
   val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t

@@ -18,6 +18,11 @@ let alias_type_prefix = "ALIAS_TYPE"
 
 let alias_type_regexp = Pcre.regexp @@ alias_type_prefix ^ "#([0-9]+)"
 
+let intersection_type_prefix = "INTERSECTION_TYPE"
+
+let intersection_type_regexp =
+  Pcre.regexp @@ intersection_type_prefix ^ "#([0-9]+)"
+
 let subtype_prefix = "SUBTYPE"
 
 let subtype_regexp = Pcre.regexp @@ subtype_prefix ^ "#([0-9]+)"
@@ -45,6 +50,7 @@ let generate_tables ~verbose ~debug_pattern template =
   let renv = Gen.ReadOnlyEnvironment.default ~verbose ~debug_pattern in
   let env = Gen.Environment.default in
   let alias_types = init_table template alias_type_regexp in
+  let intersection_types = init_table template intersection_type_regexp in
   let renv_for key =
     if Hashtbl.mem alias_types key then
       Gen.ReadOnlyEnvironment.for_alias renv
@@ -58,7 +64,33 @@ let generate_tables ~verbose ~debug_pattern template =
   let subty_table = init_table template subtype_regexp in
   List.iter [expr_table; subty_table; alias_types] ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
-  let ty_table = Hashtbl.mapi ty_table ~f:mk_type in
+  let ty_table =
+    Hashtbl.fold
+      ty_table
+      ~init:(Hashtbl.create (module Int))
+      ~f:(fun ~key ~data table ->
+        let rec generate () =
+          let (env, ty) = mk_type ~key ~data in
+          let compatible =
+            (not (Hashtbl.mem intersection_types key))
+            || Hashtbl.for_alli
+                 table
+                 ~f:(fun ~key:other ~data:(other_env, other_ty) ->
+                   (not (Hashtbl.mem intersection_types other))
+                   || Gen.Type.intersection_law_compatible
+                        env
+                        ty
+                        other_env
+                        other_ty)
+          in
+          if compatible then
+            (env, ty)
+          else
+            generate ()
+        in
+        Hashtbl.set table ~key ~data:(generate ());
+        table)
+  in
 
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
@@ -102,6 +134,7 @@ let fill_in_template ty_table subty_table expr_table template =
   template
   |> fill_table subty_str_table ~prefix:subtype_prefix
   |> fill_table ty_str_table ~prefix:alias_type_prefix
+  |> fill_table ty_str_table ~prefix:intersection_type_prefix
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
 

@@ -492,6 +492,9 @@ and Type : sig
 
   val show : t -> string
 
+  val intersection_law_compatible :
+    Environment.t -> t -> Environment.t -> t -> bool
+
   val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
   val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t
@@ -631,6 +634,71 @@ end = struct
     | Like ty -> "~" ^ show ty
 
   let show_tys tys = List.map ~f:show tys |> String.concat ~sep:", "
+
+  let intersection_law_compatible env1 ty1 env2 ty2 =
+    (* T288868888: like/nullable intersection reordering can fail subtyping. *)
+    let rec has_like_head env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Like _ -> true
+        | Tuple { conjuncts; _ } ->
+          List.exists conjuncts ~f:(has_like_head env seen)
+        | Shape { fields; _ } ->
+          List.exists fields ~f:(fun { ty; _ } -> has_like_head env seen ty)
+        | Alias _
+        | Newtype _
+        | TypeConst _ ->
+          List.exists (Env.get_subtypes env ty) ~f:(has_like_head env seen)
+        | _ -> false
+    in
+    let rec is_only_null env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Primitive Primitive.Null -> true
+        | Alias _
+        | Newtype _
+        | TypeConst _
+        | Case _ ->
+          let subtypes = Env.get_subtypes env ty in
+          (not (List.is_empty subtypes))
+          && List.for_all subtypes ~f:(is_only_null env seen)
+        | _ -> false
+    in
+    let rec has_nullable_form env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Option _ -> true
+        | Tuple { conjuncts; _ } ->
+          List.exists conjuncts ~f:(has_nullable_form env seen)
+        | Shape { fields; _ } ->
+          List.exists fields ~f:(fun { ty; _ } -> has_nullable_form env seen ty)
+        | Alias _
+        | Newtype _
+        | TypeConst _ ->
+          List.exists (Env.get_subtypes env ty) ~f:(has_nullable_form env seen)
+        | Case _ ->
+          let subtypes = Env.get_subtypes env ty in
+          List.exists subtypes ~f:(has_nullable_form env seen)
+          || List.exists subtypes ~f:(is_only_null env TypeSet.empty)
+             && List.exists
+                  subtypes
+                  ~f:(Fn.non (is_only_null env TypeSet.empty))
+        | _ -> false
+    in
+    let hazardous env_like ty_like env_nullable ty_nullable =
+      has_like_head env_like TypeSet.empty ty_like
+      && has_nullable_form env_nullable TypeSet.empty ty_nullable
+    in
+    not (hazardous env1 ty1 env2 ty2 || hazardous env2 ty2 env1 ty1)
 
   let rec is_immediately_inhabited = function
     | Primitive Primitive.(Null | Int | String | Float | Bool)

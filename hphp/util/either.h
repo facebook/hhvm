@@ -21,19 +21,6 @@
 #include <type_traits>
 #include <utility>
 
-// Workaround a bug that using std::common_type<void, void> causes error with
-// libc++. See https://llvm.org/bugs/show_bug.cgi?id=22135
-#ifdef _LIBCPP_VERSION
-namespace std {
-
-template<>
-struct common_type<void, void> {
-  typedef void type;
-};
-
-}
-#endif
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

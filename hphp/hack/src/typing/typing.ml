@@ -6897,7 +6897,7 @@ end = struct
           _;
         } ->
       let def_pos = get_pos m in
-      Option.iter
+      List.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_obj_access
            ~is_method:true
@@ -9210,16 +9210,17 @@ end = struct
     and (use_pos, method_name) = method_name in
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
-      (TVis.check_class_access
-         ~is_method:true
-         ~use_pos
-         ~def_pos:class_pos
-         ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
-         ~tests_bypass_visibility_static_properties_blocked:false
-         env
-         (ce_visibility, get_ce_lsb class_elt)
-         class_id_
-         folded_class);
+      (Typing_error.multiple_opt
+      @@ TVis.check_class_access
+           ~is_method:true
+           ~use_pos
+           ~def_pos:class_pos
+           ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
+           ~tests_bypass_visibility_static_properties_blocked:false
+           env
+           (ce_visibility, get_ce_lsb class_elt)
+           class_id_
+           folded_class);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       (TVis.check_deprecated ~use_pos ~def_pos:class_pos env ce_deprecated);
@@ -9596,7 +9597,7 @@ end = struct
 
     (* Visibility *)
     let () =
-      Option.iter
+      List.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (Typing_visibility.check_obj_access
            ~is_method:true
@@ -14117,7 +14118,7 @@ end = struct
             | Expr.Skip_all_access -> ()
             | Expr.Check_all
             | Expr.Skip_package ->
-              Option.iter
+              List.iter
                 ~f:(Typing_error_utils.add_typing_error ~env)
                 (TVis.check_class_access
                    ~is_method

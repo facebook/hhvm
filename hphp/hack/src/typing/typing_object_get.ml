@@ -694,14 +694,16 @@ and obj_get_concrete_class_with_member_info
                      })
           else
             None);
-      TVis.check_obj_access
-        ~is_method:args.is_method
-        ~is_receiver_interface:(Ast_defs.is_c_interface (Cls.kind class_info))
-        ~use_pos:id_pos
-        ~def_pos:mem_pos
-        ~tests_bypass_visibility:(get_ce_tests_bypass_visibility member_info)
-        env
-        vis;
+      Typing_error.multiple_opt
+      @@ TVis.check_obj_access
+           ~is_method:args.is_method
+           ~is_receiver_interface:
+             (Ast_defs.is_c_interface (Cls.kind class_info))
+           ~use_pos:id_pos
+           ~def_pos:mem_pos
+           ~tests_bypass_visibility:(get_ce_tests_bypass_visibility member_info)
+           env
+           vis;
       TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
       TVis.check_cross_package
         ~use_pos:id_pos

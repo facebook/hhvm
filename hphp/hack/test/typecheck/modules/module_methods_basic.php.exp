@@ -1,12 +1,12 @@
 ERROR: File "module_methods_basic.php--B.php", line 8, characters 9-9:
-You cannot access internal members from module `A` in module `B` (Typing[4112])
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
   File "module_methods_basic.php--A.php", line 7, characters 21-21:
-  This member is internal
+  This is from module `A`
 ERROR: File "module_methods_basic.php--B.php", line 12, characters 30-30:
-You cannot access internal members from module `A` in module `B` (Typing[4112])
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
   File "module_methods_basic.php--A.php", line 7, characters 21-21:
-  This member is internal
+  This is from module `A`
 ERROR: File "module_methods_basic.php--main.php", line 2, characters 33-33:
-You cannot access internal members outside of a module (Typing[4112])
+Cannot access an internal element from module `A` in the default module (Typing[4444])
   File "module_methods_basic.php--A.php", line 7, characters 21-21:
-  This member is internal
+  This is from module `A`

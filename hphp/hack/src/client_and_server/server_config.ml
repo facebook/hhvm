@@ -528,6 +528,8 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt Config_keys.Hhconfig.typeconst_concrete_concrete_error config)
     ?tco_meth_caller_only_public_visibility:
       (bool_opt Config_keys.Hhconfig.meth_caller_only_public_visibility config)
+    ?tco_use_module_error_for_member_access:
+      (bool_opt Config_keys.Hhconfig.use_module_error_for_member_access config)
     ?tco_require_extends_implements_ancestors:
       (bool_opt
          Config_keys.Hhconfig.require_extends_implements_ancestors

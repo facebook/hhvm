@@ -160,6 +160,9 @@ let typeconst_concrete_concrete_error t =
 let meth_caller_only_public_visibility t =
   t.Global_options.tco_meth_caller_only_public_visibility
 
+let use_module_error_for_member_access t =
+  t.Global_options.tco_use_module_error_for_member_access
+
 let require_extends_implements_ancestors t =
   t.Global_options.tco_require_extends_implements_ancestors
 

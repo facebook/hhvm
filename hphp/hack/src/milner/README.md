@@ -56,3 +56,38 @@ The union-introduction template also constructs typed witnesses before widening
 them into the union. This avoids the existing nullable case-type closure
 contextual-coercion bug, [T201523298](https://www.internalfb.com/tasks/T201523298),
 while retaining function-bearing case types.
+
+## Verification and retained failures
+
+The static verifier checks every diagnostic against `--hhstc-pattern`; one
+matching expected error cannot hide an unrelated error or warning. Positive
+`No errors` checks require a successful exit and no diagnostics. Explicit
+negative-test alternatives remain in `test/milner/BUCK`. Timeouts and process failures fail verification.
+
+Both verifiers accept `--timeout SECONDS` (default 180 per process) and
+`--output-dir NEW_DIRECTORY`. The directory retains generated sources, a summary, and failure records with commands, exit status and
+output. It must not already exist. Omitting the option preserves temporary-file
+cleanup; HHBBC repositories remain temporary even when sources are retained.
+
+From `hphp/hack`, set `MILNER_EXE`, `HHSTC_EXE`, and `HHVM_EXE` to absolute paths
+to saved binaries before running these examples:
+
+```sh
+buck run @//mode/opt-clang //hphp/hack/test/milner:verify_well_typed -- \
+  --milner-exe "$MILNER_EXE" --hhstc-exe "$HHSTC_EXE" \
+  --template "$PWD/test/milner/templates/TypehintViolationException.php.template" \
+  --hhstc-pattern 'No errors' --seed-range 1 1001 \
+  --output-dir /tmp/milner-verify-static --timeout 180
+
+buck run @//mode/opt-clang //hphp/hack/test/milner:verify_runtime -- \
+  --milner-exe "$MILNER_EXE" --hhvm-exe "$HHVM_EXE" \
+  --template "$PWD/test/milner/templates/TypehintViolationException.php.template" \
+  --mode HHBBC --sample-size 200 --global-seed 42 \
+  --output-dir /tmp/milner-verify-hhbbc --timeout 180
+```
+
+Static seed ranges exclude their upper bound. Runtime samples distinct seeds
+before starting workers and refuses to overwrite generated files. A global seed
+repeats that sample with the same harness; replaying an individual failure uses
+its recorded generator seed with the same template and binary. Use
+`--mode Sandbox` with a different output directory for the other runtime mode.

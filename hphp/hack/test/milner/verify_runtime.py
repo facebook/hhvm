@@ -1,14 +1,16 @@
 # pyre-strict
 import concurrent
+import json
 import os
 import random
+import shlex
 import subprocess
 import sys
 import tempfile
 from concurrent.futures import as_completed
 from dataclasses import dataclass
 from subprocess import CompletedProcess
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, TextIO, Tuple, Union
 
 from tqdm import tqdm
 
@@ -25,22 +27,81 @@ class MilnerSuccess:
 @dataclass
 class Failure:
     seed: int
-    process: CompletedProcess[bytes]
+    process: Optional[CompletedProcess[bytes]]
     cmds: List[str]
+    program_file: str = ""
+    error: Optional[str] = None
+    stdout: bytes = b""
+    stderr: bytes = b""
 
 
-def bad_exit(msg: str, proc: CompletedProcess[bytes], cmds: List[str]) -> None:
+def record_failure(out_dir: str, failure: Failure) -> None:
+    filename = failure.program_file or os.path.join(out_dir, str(failure.seed))
+    process = failure.process
+    with open(filename + ".failure.json", "w") as output:
+        json.dump(
+            {
+                "program": failure.program_file,
+                "seed": failure.seed,
+                "commands": failure.cmds,
+                "returncode": process.returncode if process is not None else None,
+                "error": failure.error,
+                "stdout": (
+                    (process.stdout or b"") if process is not None else failure.stdout
+                ).decode(errors="replace"),
+                "stderr": (
+                    (process.stderr or b"") if process is not None else failure.stderr
+                ).decode(errors="replace"),
+            },
+            output,
+            indent=2,
+        )
+        output.write("\n")
+
+
+def bad_exit(msg: str, failure: Failure) -> None:
     tqdm.write(msg)
+    if failure.error is not None:
+        tqdm.write(failure.error)
     tqdm.write("Steps to repro:")
-    tqdm.write("\n".join(cmds))
+    tqdm.write("\n".join(failure.cmds))
+    proc = failure.process
     tqdm.write("stdout:")
-    tqdm.write(proc.stdout.decode() if proc.stdout is not None else "N/A")
+    stdout = (proc.stdout or b"") if proc is not None else failure.stdout
+    tqdm.write(stdout.decode(errors="replace"))
     tqdm.write("stderr:")
-    tqdm.write(proc.stderr.decode() if proc.stderr is not None else "N/A")
+    stderr = (proc.stderr or b"") if proc is not None else failure.stderr
+    tqdm.write(stderr.decode(errors="replace"))
 
 
-def mk_cmd(process: CompletedProcess[bytes]) -> str:
-    return " ".join(process.args)
+def run_command(
+    command: List[str],
+    seed: int,
+    program_file: str,
+    cmds: List[str],
+    timeout: float,
+    stdout: Union[int, TextIO] = subprocess.PIPE,
+) -> Union[CompletedProcess[bytes], Failure]:
+    cmds.append(shlex.join(command))
+    try:
+        process = subprocess.run(
+            command, stdout=stdout, stderr=subprocess.PIPE, timeout=timeout
+        )
+    except subprocess.TimeoutExpired as error:
+        return Failure(
+            seed,
+            None,
+            cmds,
+            program_file,
+            f"Command timed out after {timeout} seconds",
+            error.stdout or b"",
+            error.stderr or b"",
+        )
+    except OSError as error:
+        return Failure(seed, None, cmds, program_file, str(error))
+    if process.returncode != 0:
+        return Failure(seed, process, cmds, program_file)
+    return process
 
 
 def generate_hhvm_compilation_and_run_commands(
@@ -52,6 +113,7 @@ def generate_hhvm_compilation_and_run_commands(
         "-l3",
         "-c",
         "/usr/local/hphpi/cli.hdf",
+        "-vParserThreadCount=1",
         "-vRuntime.Eval.JitEnableRenameFunction=0",
         "-vRuntime.Eval.GdbSyncChunks=1",
         "-vRuntime.Eval.AllowHhas=true",
@@ -81,48 +143,68 @@ def generate_hhvm_compilation_and_run_commands(
 
 
 def generate_program(
-    milner_exe: str, out_dir: str, template: str, cmds: List[str]
+    milner_exe: str,
+    out_dir: str,
+    template: str,
+    cmds: List[str],
+    timeout: float = 180,
+    seed: Optional[int] = None,
 ) -> Union[MilnerSuccess, Failure]:
-    seed = random.randint(0, 2**31 - 1)
+    if seed is None:
+        seed = random.randint(0, 2**31 - 1)
     basename = os.path.basename(template)
     program_file = os.path.join(out_dir, f"{basename}.{seed}.out")
 
     # Generate a Hack program with the randomly chosen seed
-    process = subprocess.run(
-        [milner_exe, os.path.abspath(template), "--seed", str(seed)],
-        stdout=open(program_file, "w"),
-        stderr=subprocess.PIPE,
-    )
     cmds = cmds.copy()
-    cmds.append(mk_cmd(process))
-    if process.returncode != 0:
-        return Failure(seed, process, cmds)
+    try:
+        with open(program_file, "x") as output:
+            result = run_command(
+                [milner_exe, os.path.abspath(template), "--seed", str(seed)],
+                seed,
+                program_file,
+                cmds,
+                timeout,
+                stdout=output,
+            )
+    except OSError as error:
+        return Failure(seed, None, cmds, program_file, str(error))
+    if isinstance(result, Failure):
+        return result
 
     return MilnerSuccess(seed, program_file, cmds)
 
 
 def generate_programs(
-    milner_exe: str, out_dir: str, template: str, sample_size: int, cmds: List[str]
+    milner_exe: str,
+    out_dir: str,
+    template: str,
+    sample_size: int,
+    cmds: List[str],
+    timeout: float = 180,
 ) -> Tuple[int, List[MilnerSuccess]]:
     programs: List[MilnerSuccess] = []
     exit_codes = [0]
+    seeds = random.sample(range(2**31), sample_size)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
-        for _ in range(0, sample_size):
+        for seed in seeds:
             futures.append(
-                executor.submit(generate_program, milner_exe, out_dir, template, cmds)
+                executor.submit(
+                    generate_program, milner_exe, out_dir, template, cmds, timeout, seed
+                )
             )
         res: Union[Failure, MilnerSuccess]
         for future in tqdm(as_completed(futures), total=len(futures)):
             res = future.result()
             if type(res) is Failure:
                 exit_codes.append(3)
+                record_failure(out_dir, res)
                 bad_exit(
                     "milner failed while generating a program with seed {}".format(
                         res.seed
                     ),
-                    res.process,
-                    res.cmds,
+                    res,
                 )
             elif type(res) is MilnerSuccess:
                 programs.append(res)
@@ -138,58 +220,55 @@ def run_hhvm_program(
     hhvm_run_args: List[str],
     program: MilnerSuccess,
     mode: Mode,
+    timeout: float = 180,
 ) -> Optional[Failure]:
     cmds = program.cmds.copy()
-    match mode:
-        case "HHBBC":
-            # Run HHBBC
-            compilation_dir = tempfile.TemporaryDirectory(dir=out_dir)
-            process = subprocess.run(
-                hhbbc_compilation_args
-                + ["--output-dir", compilation_dir.name, program.program_file],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            cmds.append(mk_cmd(process))
-            if process.returncode != 0:
-                return Failure(seed=program.seed, process=process, cmds=cmds)
-
-            # Run HHVM
-            process = subprocess.run(
-                hhvm_run_args
-                + [
-                    "-vRepo.Path={}/hhvm.hhbc".format(compilation_dir.name),
-                    "--file",
+    try:
+        match mode:
+            case "HHBBC":
+                with tempfile.TemporaryDirectory(dir=out_dir) as compilation_dir:
+                    result = run_command(
+                        hhbbc_compilation_args
+                        + ["--output-dir", compilation_dir]
+                        + [program.program_file],
+                        program.seed,
+                        program.program_file,
+                        cmds,
+                        timeout,
+                    )
+                    if isinstance(result, Failure):
+                        return result
+                    result = run_command(
+                        hhvm_run_args
+                        + [
+                            f"-vRepo.Path={compilation_dir}/hhvm.hhbc",
+                            "--file",
+                            program.program_file,
+                        ],
+                        program.seed,
+                        program.program_file,
+                        cmds,
+                        timeout,
+                    )
+                    if isinstance(result, Failure):
+                        return result
+            case "Sandbox":
+                result = run_command(
+                    [
+                        hhvm_exe,
+                        "-vHack.Lang.AllowUnstableFeatures=1",
+                        program.program_file,
+                    ],
+                    program.seed,
                     program.program_file,
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            cmds.append(mk_cmd(process))
-            if process.returncode != 0:
-                return Failure(
-                    seed=program.seed,
-                    process=process,
-                    cmds=cmds,
+                    cmds,
+                    timeout,
                 )
-        case "Sandbox":
-            # Run HHVM
-            process = subprocess.run(
-                [
-                    hhvm_exe,
-                    "-vHack.Lang.AllowUnstableFeatures=1",
-                    program.program_file,
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            cmds.append(mk_cmd(process))
-            if process.returncode != 0:
-                return Failure(
-                    seed=program.seed,
-                    process=process,
-                    cmds=cmds,
-                )
+                if isinstance(result, Failure):
+                    return result
+    except (OSError, ValueError) as error:
+        return Failure(program.seed, None, cmds, program.program_file, str(error))
+    return None
 
 
 def run_hhvm_programs(
@@ -199,6 +278,7 @@ def run_hhvm_programs(
     hhvm_run_args: List[str],
     programs: List[MilnerSuccess],
     mode: Mode,
+    timeout: float = 180,
 ) -> int:
     exit_codes = [0]
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -213,6 +293,7 @@ def run_hhvm_programs(
                     hhvm_run_args,
                     program,
                     mode,
+                    timeout,
                 )
             )
         res: Optional[Failure]
@@ -220,12 +301,12 @@ def run_hhvm_programs(
             res = future.result()
             if res is not None:
                 exit_codes.append(4)
+                record_failure(out_dir, res)
                 bad_exit(
                     "HHVM while compiling/running a program with seed {}".format(
                         res.seed
                     ),
-                    res.process,
-                    res.cmds,
+                    res,
                 )
     return max(exit_codes)
 
@@ -237,6 +318,7 @@ def verify_runtime(
     template: str,
     sample_size: int,
     mode: Mode,
+    timeout: float = 180,
 ) -> int:
     cmds = []
     print("Generating programs...")
@@ -246,6 +328,7 @@ def verify_runtime(
         template=template,
         sample_size=sample_size,
         cmds=cmds,
+        timeout=timeout,
     )
     if exit_code != 0:
         return exit_code
@@ -266,6 +349,7 @@ def verify_runtime(
         hhvm_run_args=hhvm_run_args,
         programs=programs,
         mode=mode,
+        timeout=timeout,
     )
     if exit_code != 0:
         return exit_code
@@ -300,8 +384,22 @@ def main() -> None:
         type=int,
         help="Set the global seed to deterministically reproduce another run with a given seed",
     )
+    parser.add_argument(
+        "--output-dir", help="Keep generated programs and results in a new directory"
+    )
+
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=180,
+        help="Maximum seconds for each generator, compiler, or runtime process",
+    )
 
     args: argparse.Namespace = parser.parse_args()
+    if not 0 <= args.sample_size <= 2**31:
+        parser.error("--sample-size must be between 0 and 2147483648")
+    if args.timeout <= 0:
+        parser.error("--timeout must be positive")
 
     # Set a seed for reproducibility of runs
     seed = args.global_seed
@@ -310,17 +408,33 @@ def main() -> None:
     print("Global seed for this run: {}".format(seed))
     random.seed(seed)
 
-    # Temporary directory to store generated programs
-    out_dir = tempfile.TemporaryDirectory()
-    exit_code = verify_runtime(
-        milner_exe=args.milner_exe,
-        hhvm_exe=args.hhvm_exe,
-        template=args.template,
-        out_dir=out_dir.name,
-        sample_size=args.sample_size,
-        mode=args.mode,
-    )
-    out_dir.cleanup()
+    if args.output_dir is None:
+        temporary_out = tempfile.TemporaryDirectory()
+        out_dir = temporary_out.name
+    else:
+        temporary_out = None
+        out_dir = os.path.abspath(args.output_dir)
+        os.makedirs(out_dir)
+    try:
+        exit_code = verify_runtime(
+            milner_exe=args.milner_exe,
+            hhvm_exe=args.hhvm_exe,
+            template=args.template,
+            out_dir=out_dir,
+            sample_size=args.sample_size,
+            mode=args.mode,
+            timeout=args.timeout,
+        )
+        with open(os.path.join(out_dir, "summary.json"), "w") as output:
+            json.dump(
+                {"exit_code": exit_code, "global_seed": seed, "arguments": vars(args)},
+                output,
+                indent=2,
+            )
+            output.write("\n")
+    finally:
+        if temporary_out is not None:
+            temporary_out.cleanup()
 
     exit(exit_code)
 

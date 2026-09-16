@@ -18,6 +18,8 @@ let min_tuple_arity = 0
 
 let max_tuple_arity = 3
 
+let max_container_length = 3
+
 let shape_keys = ["'a'"; "'b'"; "'c'"]
 
 let name_ctr = ref 0
@@ -226,6 +228,8 @@ module rec Environment : sig
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
+    typedef_bodies: Type.t list TypeMap.t;
+    case_bounds: Type.t TypeMap.t;
   }
 
   val default : t
@@ -237,13 +241,29 @@ module rec Environment : sig
   val record_subtype : t -> super:Type.t -> sub:Type.t -> t
 
   val get_subtypes : t -> Type.t -> Type.t list
+
+  val record_typedef_body : t -> ty:Type.t -> body:Type.t list -> t
+
+  val get_typedef_body : t -> Type.t -> Type.t list option
+
+  val record_case_bound : t -> ty:Type.t -> bound:Type.t -> t
+
+  val get_case_bound : t -> Type.t -> Type.t option
 end = struct
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
+    typedef_bodies: Type.t list TypeMap.t;
+    case_bounds: Type.t TypeMap.t;
   }
 
-  let default = { definitions = []; subtypes = TypeMap.empty }
+  let default =
+    {
+      definitions = [];
+      subtypes = TypeMap.empty;
+      typedef_bodies = TypeMap.empty;
+      case_bounds = TypeMap.empty;
+    }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
 
@@ -258,6 +278,16 @@ end = struct
 
   let get_subtypes env super =
     Option.value ~default:[] @@ TypeMap.find_opt super env.subtypes
+
+  let record_typedef_body env ~ty ~body =
+    { env with typedef_bodies = TypeMap.add ty body env.typedef_bodies }
+
+  let get_typedef_body env ty = TypeMap.find_opt ty env.typedef_bodies
+
+  let record_case_bound env ~ty ~bound =
+    { env with case_bounds = TypeMap.add ty bound env.case_bounds }
+
+  let get_case_bound env ty = TypeMap.find_opt ty env.case_bounds
 end
 
 and Kind : sig
@@ -272,6 +302,7 @@ and Kind : sig
     | Case
     | Enum
     | Container
+    | BuiltinContainer
     | Tuple
     | Shape
     | Awaitable
@@ -309,6 +340,7 @@ end = struct
     | Case
     | Enum
     | Container
+    | BuiltinContainer
     | Tuple
     | Shape
     | Awaitable
@@ -346,6 +378,7 @@ end = struct
       | Option
       | Classish
       | Container
+      | BuiltinContainer
       | Tuple
       | Shape
       | Awaitable
@@ -536,6 +569,25 @@ end = struct
         value: t;
       }
     | Keyset of t
+    | Traversable of t
+    | ContainerInterface of t
+    | Iterator of t
+    | KeyedTraversable of {
+        key: t;
+        value: t;
+      }
+    | KeyedContainer of {
+        key: t;
+        value: t;
+      }
+    | KeyedIterator of {
+        key: t;
+        value: t;
+      }
+    | VecOrDict of {
+        key: t;
+        value: t;
+      }
     | Tuple of {
         conjuncts: t list;
         open_: bool;
@@ -592,6 +644,20 @@ end = struct
     | Dict { key; value } ->
       Format.sprintf "dict<%s, %s>" (show key) (show value)
     | Keyset ty -> Format.sprintf "keyset<%s>" (show ty)
+    | Traversable ty -> Format.sprintf "Traversable<%s>" (show ty)
+    | ContainerInterface ty -> Format.sprintf "Container<%s>" (show ty)
+    | Iterator ty -> Format.sprintf "Iterator<%s>" (show ty)
+    | KeyedTraversable { key; value } ->
+      Format.sprintf "KeyedTraversable<%s, %s>" (show key) (show value)
+    | KeyedContainer { key; value } ->
+      Format.sprintf "KeyedContainer<%s, %s>" (show key) (show value)
+    | KeyedIterator { key; value } ->
+      Format.sprintf "KeyedIterator<%s, %s>" (show key) (show value)
+    | VecOrDict { key; value } ->
+      if equal key (Primitive Primitive.Arraykey) then
+        Format.sprintf "vec_or_dict<%s>" (show value)
+      else
+        Format.sprintf "vec_or_dict<%s, %s>" (show key) (show value)
     | Tuple { conjuncts; open_ } ->
       let is_nullary = List.length conjuncts = 0 in
       let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
@@ -698,7 +764,175 @@ end = struct
       has_like_head env_like TypeSet.empty ty_like
       && has_nullable_form env_nullable TypeSet.empty ty_nullable
     in
-    not (hazardous env1 ty1 env2 ty2 || hazardous env2 ty2 env1 ty1)
+    let has_exposed_head env ty ~f =
+      let rec visit seen ty =
+        if TypeSet.mem ty seen then
+          false
+        else if f ty then
+          true
+        else
+          let seen = TypeSet.add ty seen in
+          match ty with
+          | Alias _
+          | Newtype _
+          | TypeConst _ ->
+            List.exists (Env.get_subtypes env ty) ~f:(visit seen)
+          | _ -> false
+      in
+      visit TypeSet.empty ty
+    in
+    (* T288865283: case/nullable-function intersections can fail reflexivity. *)
+    let case_function_hazard env_case ty_case env_function ty_function =
+      has_exposed_head env_case ty_case ~f:(function
+          | Case _ -> true
+          | _ -> false)
+      && has_exposed_head env_function ty_function ~f:(function
+             | Option ty ->
+               has_exposed_head env_function ty ~f:(function
+                   | Function _ -> true
+                   | _ -> false)
+             | _ -> false)
+    in
+    let rec null_head env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Primitive Primitive.Null -> true
+        | Option inner -> null_head env seen inner
+        | Alias _
+        | Newtype _
+        | TypeConst _ ->
+          Option.exists (Env.get_typedef_body env ty) ~f:(function
+              | [inner] -> null_head env seen inner
+              | _ -> false)
+        | _ -> false
+    in
+    let rec admits_null env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Mixed
+        | Option _
+        | Like _
+        | Primitive Primitive.Null ->
+          true
+        | Alias _
+        | Newtype _
+        | TypeConst _
+        | Case _ ->
+          Option.exists (Env.get_typedef_body env ty) ~f:(fun body ->
+              List.exists body ~f:(admits_null env seen))
+        | _ -> false
+    in
+    let rec known_nonnull env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Primitive Primitive.Null -> false
+        | Primitive _
+        | Awaitable _
+        | Classish _
+        | Enum _
+        | Vec _
+        | Dict _
+        | Keyset _
+        | Traversable _
+        | ContainerInterface _
+        | Iterator _
+        | KeyedTraversable _
+        | KeyedContainer _
+        | KeyedIterator _
+        | VecOrDict _
+        | Tuple _
+        | Shape _
+        | Function _ ->
+          true
+        | Like inner -> known_nonnull env seen inner
+        | Alias _
+        | Newtype _
+        | TypeConst _ ->
+          Option.exists (Env.get_typedef_body env ty) ~f:(function
+              | [inner] -> known_nonnull env seen inner
+              | _ -> false)
+        | Case _ ->
+          Option.exists (Env.get_case_bound env ty) ~f:(known_nonnull env seen)
+        | _ -> false
+    in
+    (* T288865283: opaque case/null intersections can fail reflexivity. *)
+    let case_null_hazard env_case ty_case env_null ty_null =
+      let rec exposed_case seen ty =
+        if TypeSet.mem ty seen then
+          false
+        else
+          let seen = TypeSet.add ty seen in
+          match ty with
+          | Case _ ->
+            (not (admits_null env_case TypeSet.empty ty))
+            && not
+                 (Option.exists
+                    (Env.get_case_bound env_case ty)
+                    ~f:(known_nonnull env_case TypeSet.empty))
+          | Alias _
+          | Newtype _
+          | TypeConst _ ->
+            Option.exists (Env.get_typedef_body env_case ty) ~f:(function
+                | [inner] -> exposed_case seen inner
+                | _ -> false)
+          | _ -> false
+      in
+      null_head env_null TypeSet.empty ty_null
+      && exposed_case TypeSet.empty ty_case
+    in
+    let rec case_variants env seen ty =
+      if TypeSet.mem ty seen then
+        None
+      else
+        let seen = TypeSet.add ty seen in
+        match (ty, Env.get_typedef_body env ty) with
+        | (Case _, Some (_ :: _ :: _ as variants)) -> Some variants
+        | ((Alias _ | Newtype _ | TypeConst _ | Case _), Some [inner]) ->
+          case_variants env seen inner
+        | _ -> None
+    in
+    let rec has_nullable_head env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Option _ -> true
+        | Alias _
+        | Newtype _
+        | TypeConst _ ->
+          Option.exists (Env.get_typedef_body env ty) ~f:(fun body ->
+              List.exists body ~f:(has_nullable_head env seen))
+        | _ -> false
+    in
+    (* T288865283 also affects nullable variants in multi-variant case types. *)
+    let case_union_hazard env_case ty_case env_nullable ty_nullable =
+      match
+        ( case_variants env_case TypeSet.empty ty_case,
+          case_variants env_nullable TypeSet.empty ty_nullable )
+      with
+      | (Some _, Some variants) ->
+        List.exists variants ~f:(has_nullable_head env_nullable TypeSet.empty)
+      | _ -> false
+    in
+    not
+      (hazardous env1 ty1 env2 ty2
+      || hazardous env2 ty2 env1 ty1
+      || case_function_hazard env1 ty1 env2 ty2
+      || case_function_hazard env2 ty2 env1 ty1
+      || case_null_hazard env1 ty1 env2 ty2
+      || case_null_hazard env2 ty2 env1 ty1
+      || case_union_hazard env1 ty1 env2 ty2
+      || case_union_hazard env2 ty2 env1 ty1)
 
   let rec is_immediately_inhabited = function
     | Primitive Primitive.(Null | Int | String | Float | Bool)
@@ -706,7 +940,14 @@ end = struct
     | Enum _
     | Vec _
     | Dict _
-    | Keyset _ ->
+    | Keyset _
+    | Traversable _
+    | ContainerInterface _
+    | Iterator _
+    | KeyedTraversable _
+    | KeyedContainer _
+    | KeyedIterator _
+    | VecOrDict _ ->
       true
     | Tuple { conjuncts; open_ } ->
       (not open_) && List.for_all conjuncts ~f:is_immediately_inhabited
@@ -725,101 +966,6 @@ end = struct
     | Case _
     | Like _ ->
       false
-
-  let rec expr_of renv env = function
-    | Primitive prim -> begin
-      let open Primitive in
-      match prim with
-      | Null -> Some "null"
-      | Int -> Some "42"
-      | String -> Some "'apple'"
-      | Float -> Some "42.0"
-      | Bool -> Some "true"
-      | Arraykey
-      | Num ->
-        None
-    end
-    | Classish info -> begin
-      match info.kind with
-      | Kind.AbstractClass
-      | Kind.Interface ->
-        None
-      | Kind.Class ->
-        let generic =
-          match info.generic with
-          | Some generic when generic.is_reified || Random.bool () ->
-            Format.sprintf "<%s>" (Type.show generic.instantiation)
-          | _ -> ""
-        in
-        Some (Format.sprintf "new %s%s()" info.name generic)
-    end
-    | Enum info -> Some (info.name ^ "::A")
-    | Vec _ -> Some "vec[]"
-    | Dict _ -> Some "dict[]"
-    | Keyset _ -> Some "keyset[]"
-    | Tuple { conjuncts; open_ } ->
-      if open_ then
-        None
-      else
-        List.map ~f:(expr_of renv env) conjuncts
-        |> Option.all
-        |> Option.map ~f:(fun exprl ->
-               String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
-    | Shape { fields; open_ = _ } -> begin
-      (* Check that all types are inhabited even if we won't end up using all of them. *)
-      match
-        List.map fields ~f:(fun { ty; _ } -> expr_of renv env ty) |> Option.all
-      with
-      | None -> None
-      | Some _ ->
-        let fields =
-          List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
-        in
-        let fields = List.permute fields in
-        let show_field { key; ty; _ } =
-          expr_of renv env ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
-        in
-        List.map ~f:show_field fields
-        |> Option.all
-        |> Option.map ~f:(fun fields ->
-               String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
-    end
-    | Awaitable ty ->
-      let open Option.Let_syntax in
-      let+ expr = expr_of renv env ty in
-      Format.sprintf "async { return %s; }" expr
-    | Function { parameters; variadic; return_ } ->
-      let variadic =
-        match variadic with
-        | Some ty ->
-          (if List.is_empty parameters then
-            ""
-          else
-            ", ")
-          ^ show ty
-          ^ " ...$_"
-        | None -> ""
-      in
-      let parameters =
-        List.map ~f:(fun param -> show param ^ " $_") parameters
-        |> String.concat ~sep:", "
-      in
-      let open Option.Let_syntax in
-      let+ return_expr = expr_of renv env return_ in
-      Format.sprintf
-        "(%s%s): %s ==> { return %s; }"
-        parameters
-        variadic
-        (Type.show return_)
-        return_expr
-    | Mixed
-    | Option _
-    | Alias _
-    | Newtype _
-    | TypeConst _
-    | Case _
-    | Like _ ->
-      None
 
   let ty_filter
       REnv.
@@ -841,6 +987,25 @@ end = struct
     | _ -> true
 
   exception Backtrack
+
+  let admits_int_keys = function
+    | Primitive Primitive.(Int | Arraykey) -> true
+    | _ -> false
+
+  let is_known_arraykey = function
+    | Primitive Primitive.(Int | String | Arraykey)
+    | Enum _ ->
+      true
+    | _ -> false
+
+  let keyset_subtypes key value =
+    if
+      is_known_arraykey value
+      && (equal key value || equal key (Primitive Primitive.Arraykey))
+    then
+      [Keyset value]
+    else
+      []
 
   (** Goes on a backtracking stochastic walk to pick an inhabited subtype of the
       given type.
@@ -959,6 +1124,70 @@ end = struct
           in
           let ty = driver renv ty in
           [Keyset ty]
+        | Traversable value
+        | ContainerInterface value
+        | Iterator value ->
+          let renv =
+            REnv.
+              {
+                renv with
+                pick_immediately_inhabited = false;
+                for_alias_def = false;
+              }
+          in
+          let value = driver renv value in
+          let key = Primitive Primitive.Arraykey in
+          begin
+            match ty with
+            | Traversable _ ->
+              [
+                Traversable value;
+                ContainerInterface value;
+                Iterator value;
+                KeyedTraversable { key; value };
+              ]
+            | ContainerInterface _ ->
+              [ContainerInterface value; KeyedContainer { key; value }]
+              @ keyset_subtypes key value
+            | _ -> [Iterator value; KeyedIterator { key; value }]
+          end
+        | KeyedTraversable { key; value }
+        | KeyedContainer { key; value }
+        | KeyedIterator { key; value }
+        | VecOrDict { key; value } ->
+          let renv =
+            REnv.
+              {
+                renv with
+                pick_immediately_inhabited = false;
+                for_alias_def = false;
+              }
+          in
+          let key = driver renv key in
+          let value = driver renv value in
+          let arrays =
+            Dict { key; value }
+            ::
+            (if admits_int_keys key then
+              [Vec value]
+            else
+              [])
+          in
+          begin
+            match ty with
+            | KeyedTraversable _ ->
+              [
+                KeyedTraversable { key; value };
+                KeyedContainer { key; value };
+                KeyedIterator { key; value };
+              ]
+            | KeyedContainer _ ->
+              [KeyedContainer { key; value }; VecOrDict { key; value }]
+              @ keyset_subtypes key value
+              @ arrays
+            | KeyedIterator _ -> [KeyedIterator { key; value }]
+            | _ -> VecOrDict { key; value } :: arrays
+          end
         | Tuple { conjuncts; open_ } ->
           let conjuncts =
             List.map
@@ -1099,6 +1328,17 @@ end = struct
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable _ -> [Awaitable Mixed]
         | Enum _ -> Primitive.[Primitive Int; Primitive String]
+        | Traversable _
+        | ContainerInterface _
+        | Iterator _
+        | KeyedTraversable _
+        | KeyedContainer _
+        | KeyedIterator _ ->
+          [Mixed]
+        | VecOrDict _ ->
+          [
+            Vec Mixed; Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+          ]
         | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
         | Dict _ ->
           [
@@ -1165,7 +1405,7 @@ end = struct
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
 
-  let inhabitant_of (renv : REnv.t) (env : Env.t) (ty : t) =
+  let rec inhabitant_of (renv : REnv.t) (env : Env.t) (ty : t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = true } in
     let subtype = subtype_of renv env ty in
     let inhabitant = expr_of renv env subtype in
@@ -1177,6 +1417,144 @@ end = struct
            ("Tried to find an inhabitant for a type: "
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
+
+  and expr_of renv env = function
+    | Primitive prim -> begin
+      let open Primitive in
+      match prim with
+      | Null -> Some "null"
+      | Int -> Some "42"
+      | String -> Some "'apple'"
+      | Float -> Some "42.0"
+      | Bool -> Some "true"
+      | Arraykey
+      | Num ->
+        None
+    end
+    | Classish info -> begin
+      match info.kind with
+      | Kind.AbstractClass
+      | Kind.Interface ->
+        None
+      | Kind.Class ->
+        let generic =
+          match info.generic with
+          | Some generic when generic.is_reified || Random.bool () ->
+            Format.sprintf "<%s>" (Type.show generic.instantiation)
+          | _ -> ""
+        in
+        Some (Format.sprintf "new %s%s()" info.name generic)
+    end
+    | Enum info -> Some (info.name ^ "::A")
+    | Traversable value
+    | ContainerInterface value ->
+      Some (Format.sprintf "vec[%s]" (inhabitant_of renv env value))
+    | KeyedTraversable { key; value }
+    | KeyedContainer { key; value }
+    | VecOrDict { key; value } ->
+      Some
+        (Format.sprintf
+           "dict[%s => %s]"
+           (inhabitant_of renv env key)
+           (inhabitant_of renv env value))
+    | Iterator value ->
+      Some
+        (Format.sprintf
+           "(new Vector<%s>(vec[%s]))->getIterator()"
+           (show value)
+           (inhabitant_of renv env value))
+    | KeyedIterator { key; value } ->
+      Some
+        (Format.sprintf
+           "(new Map<%s, %s>(dict[%s => %s]))->getIterator()"
+           (show key)
+           (show value)
+           (inhabitant_of renv env key)
+           (inhabitant_of renv env value))
+    | Vec ty ->
+      let elements =
+        List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
+            inhabitant_of renv env ty)
+      in
+      Some (Format.sprintf "vec[%s]" (String.concat ~sep:", " elements))
+    | Dict { key; value } ->
+      let fields =
+        List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
+            Format.sprintf
+              "%s => %s"
+              (inhabitant_of renv env key)
+              (inhabitant_of renv env value))
+      in
+      Some (Format.sprintf "dict[%s]" (String.concat ~sep:", " fields))
+    | Keyset ty ->
+      let elements =
+        List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
+            inhabitant_of renv env ty)
+      in
+      Some (Format.sprintf "keyset[%s]" (String.concat ~sep:", " elements))
+    | Tuple { conjuncts; open_ } ->
+      if open_ then
+        None
+      else
+        List.map ~f:(expr_of renv env) conjuncts
+        |> Option.all
+        |> Option.map ~f:(fun exprl ->
+               String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
+    | Shape { fields; open_ = _ } -> begin
+      (* Check that all types are inhabited even if we won't end up using all of them. *)
+      match
+        List.map fields ~f:(fun { ty; _ } -> expr_of renv env ty) |> Option.all
+      with
+      | None -> None
+      | Some _ ->
+        let fields =
+          List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
+        in
+        let fields = List.permute fields in
+        let show_field { key; ty; _ } =
+          expr_of renv env ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
+        in
+        List.map ~f:show_field fields
+        |> Option.all
+        |> Option.map ~f:(fun fields ->
+               String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
+    end
+    | Awaitable ty ->
+      let open Option.Let_syntax in
+      let+ expr = expr_of renv env ty in
+      Format.sprintf "async { return %s; }" expr
+    | Function { parameters; variadic; return_ } ->
+      let variadic =
+        match variadic with
+        | Some ty ->
+          (if List.is_empty parameters then
+            ""
+          else
+            ", ")
+          ^ show ty
+          ^ " ...$_"
+        | None -> ""
+      in
+      let parameters =
+        List.map ~f:(fun param -> show param ^ " $_") parameters
+        |> String.concat ~sep:", "
+      in
+      let open Option.Let_syntax in
+      let+ return_expr = expr_of renv env return_ in
+      Format.sprintf
+        "(%s%s): %s ==> { return %s; }"
+        parameters
+        variadic
+        (Type.show return_)
+        return_expr
+    | Mixed
+    | Option _
+    | Alias _
+    | Newtype _
+    | TypeConst _
+    | Case _
+    | Like _ ->
+      None
 
   let mk_arraykey (renv : REnv.t) (env : Env.t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = false } in
@@ -1315,6 +1693,7 @@ end = struct
         mk ~complexity:default_complexity renv env ~for_alias_def:true
       in
       let env = Env.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.record_typedef_body env ~ty ~body:[aliased] in
       let env = Env.add_definition env @@ Definition.alias ~name aliased in
       (env, ty)
     | Kind.Newtype ->
@@ -1332,6 +1711,7 @@ end = struct
           (env, aliased, None)
       in
       let env = Env.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.record_typedef_body env ~ty ~body:[aliased] in
       let env =
         Env.add_definition env @@ Definition.newtype ~name ~bound aliased
       in
@@ -1344,6 +1724,7 @@ end = struct
       let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
       let ty = TypeConst { name = qualified_name } in
       let env = Env.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.record_typedef_body env ~ty ~body:[aliased] in
       let env =
         Env.add_definition env
         @@ Definition.classish
@@ -1397,11 +1778,13 @@ end = struct
       let (env, disjunct) = mk renv env in
       let env = Env.record_subtype env ~super:ty ~sub:disjunct in
       let (env, disjuncts) = add_disjuncts (env, [disjunct]) in
+      let env = Env.record_typedef_body env ~ty ~body:disjuncts in
       let env =
         Env.add_definition env @@ Definition.case_type ~name ~bound disjuncts
       in
       let env =
         Option.fold bound ~init:env ~f:(fun env bound ->
+            let env = Env.record_case_bound env ~ty ~bound in
             Env.record_subtype env ~super:bound ~sub:ty)
       in
       (env, ty)
@@ -1444,6 +1827,23 @@ end = struct
         let ty = mk_arraykey renv env in
         (env, Keyset ty)
     end
+    | Kind.BuiltinContainer ->
+      let renv = REnv.{ renv with for_option_ty = false } in
+      let (env, value) = mk ~complexity:(complexity - 1) renv env in
+      let key = mk_arraykey renv env in
+      let ty =
+        select
+          [
+            Traversable value;
+            ContainerInterface value;
+            Iterator value;
+            KeyedTraversable { key; value };
+            KeyedContainer { key; value };
+            KeyedIterator { key; value };
+            VecOrDict { key; value };
+          ]
+      in
+      (env, ty)
     | Kind.Tuple ->
       let n = geometric_between min_tuple_arity max_tuple_arity in
       let renv = REnv.{ renv with for_option_ty = false } in

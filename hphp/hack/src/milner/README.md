@@ -30,7 +30,7 @@ to legal alias right-hand sides. It excludes direct type-constant references;
 type constants nested in other type constructors remain available.
 
 `INTERSECTION_TYPE#1` chooses types jointly with other marked identifiers to
-avoid the documented intersection law bug. This is a structural restriction,
+avoid the documented intersection law bugs. This is a structural restriction,
 independent of checker execution.
 
 ## Intersection commutativity with like and nullable types
@@ -56,6 +56,60 @@ The union-introduction template also constructs typed witnesses before widening
 them into the union. This avoids the existing nullable case-type closure
 contextual-coercion bug, [T201523298](https://www.internalfb.com/tasks/T201523298),
 while retaining function-bearing case types.
+
+## Case types intersected with nullable functions
+
+[T288865283](https://www.internalfb.com/tasks/T288865283) tracks a completeness
+bug exposed by the collection/container diff's intersection template, seed 365.
+The checker rejects even this identity function with three `Typing[4110]` errors:
+
+```hack
+<?hh
+<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'case_types')>>
+case type C = Awaitable<mixed>;
+function test((C & ?(function(): int)) $x): (C & ?(function(): int)) { return $x; }
+```
+
+Inlining `Awaitable<mixed>`, replacing the case declaration with
+`type C = Awaitable<mixed>`, adding `C as nonnull`, or removing the function's
+nullable wrapper makes this pass.
+`INTERSECTION_TYPE` conservatively excludes an exposed case type paired with
+an exposed nullable function, in either order. Aliases, newtypes, and type
+constants are followed on both operands and inside the nullable wrapper;
+structural fields and case bodies are not treated as exposed function heads. Some case
+bodies containing null or functions pass but are included in this narrow
+syntactic exclusion. Ordinary `TYPE` generation retains these forms. Remove
+this exception when the task's reproduction and controls pass.
+
+The same task also covers an inhabited case-union identity failure:
+
+```hack
+<?hh
+<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'case_types')>>
+case type C = int | bool;
+case type F = int | ?bool;
+function test((C & F) $x): (C & F) { return $x; }
+```
+
+The intersection-law guard also excludes two exposed case types with multiple
+variants when one has a nullable variant. Exact definition bodies are retained
+separately from subtype edges, since case bounds add reverse edges that are not
+variants. Aliases, newtypes, type constants, and singleton case chains are
+followed to the outer case union. The nullable variant can be exposed through
+an alias, newtype, or type constant. The guard does not scan structural fields
+or nested case variants. A singleton case wrapping a nullable type, and a case
+union with a separate literal `null` variant, remain available. This is a
+conservative syntax guard: explicit nonnull bounds and some primitive unions
+also pass, but are not distinguished by the guard.
+
+The task also rejects `C & null` identities for unbounded, nonnullable case
+bodies. The intersection guard follows exact aliases and type constants to
+this case/null pair, including `?null` on the null side. It retains case bodies
+with an explicit nullable, null, mixed, or like variant, including nested case
+and alias definitions, and case bounds known to be nonnull. Exact declared
+case bounds are stored separately from subtype edges. A case wrapping the
+null operand remains available; it is a passing control. Ordinary type
+generation is unchanged.
 
 ## Verification and retained failures
 
@@ -91,3 +145,19 @@ before starting workers and refuses to overwrite generated files. A global seed
 repeats that sample with the same harness; replaying an individual failure uses
 its recorded generator seed with the same template and binary. Use
 `--mode Sandbox` with a different output directory for the other runtime mode.
+
+## Collections
+
+Collection lengths are bounded; empty and populated vec, dict, and keyset values
+are generated. Each element is an inhabitant of its declared type in the same
+environment. The collection template checks reads, writes, iteration, and shape
+operations with observable assertions.
+
+## Builtin container abstractions
+
+`Traversable`, `Container`, `KeyedTraversable`, `KeyedContainer`, `Iterator`,
+`KeyedIterator`, and `vec_or_dict` have explicit covariance and subtype edges.
+Arrays witness the container interfaces; iterator witnesses come from `Vector`
+and `Map` iterators. Keys satisfy the arraykey bound, and vec witnesses require
+an admitted int key type. Shared runtime representations are treated
+conservatively when checking case-type disjointness.

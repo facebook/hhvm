@@ -827,17 +827,12 @@ mod test {
     }
 
     #[test]
-    fn test_implicit_family_and_member_deployment_conflict() {
+    fn test_implicit_family_and_member_deployment_override() {
         let test_path = SRCDIR
             .as_path()
             .join("tests/package-implicit-deployment-conflict.toml");
         let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
-        assert_eq!(
-            info.errors().iter().map(|e| e.msg()).collect::<Vec<_>>(),
-            vec![String::from(
-                "Deployment prod cannot contain both implicit package family prototypes and member prototypes.checkout",
-            )]
-        );
+        assert!(info.errors().is_empty());
     }
 
     #[test]

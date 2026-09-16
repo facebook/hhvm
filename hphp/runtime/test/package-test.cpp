@@ -153,5 +153,35 @@ TEST(PackageInfoTest, EveryImplicitFamilyFieldChangesCacheMangle) {
   EXPECT_NE(baseMangle, softIncludesChanged.mangleForCacheKey());
 }
 
+PackageInfo implicitPackageInfo() {
+  PackageInfo info;
+  PackageInfo::ImplicitPackageFamily family;
+  family.m_path = "www/prototypes/";
+  info.m_implicitPackageFamilies.emplace("prototypes", std::move(family));
+  return info;
+}
+
+// Checks that an implicit package name resolves to its path prefix.
+TEST(PackageInfoTest, ResolvesImplicitPackageNamesToPathPrefixes) {
+  auto const info = implicitPackageInfo();
+  EXPECT_EQ(
+    info.implicitPackageNameToPathPrefix("prototypes.alpha"),
+    std::optional<std::string>{"www/prototypes/alpha/"}
+  );
+}
+
+// Checks that names without a declared implicit family do not resolve.
+TEST(PackageInfoTest, RejectsUnknownImplicitPackageNamesToPathPrefixes) {
+  auto const info = implicitPackageInfo();
+  for (auto const name : {
+         "prototypes",
+         ".alpha",
+         "prototypes.",
+         "unknown.alpha",
+       }) {
+    EXPECT_FALSE(info.implicitPackageNameToPathPrefix(name).has_value()) << name;
+  }
+}
+
 } // namespace
 } // namespace HPHP

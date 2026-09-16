@@ -1,0 +1,2 @@
+-vRuntime.Eval.ActiveDeployment="prod"
+--dir=__DIR__

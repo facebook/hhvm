@@ -1,0 +1,11 @@
+hard alpha
+
+Warning: File %s/implicit-deployment/directory/hard/beta/hard.inc.php is soft-deployed, but its unit was merged in %s/implicit-deployment/directory/test.php on line 8
+hard beta
+
+Warning: File %s/implicit-deployment/directory/soft/member/soft.inc.php is soft-deployed, but its unit was merged in %s/implicit-deployment/directory/test.php on line 9
+soft
+absent: missing
+soft sibling: missing
+override-out: missing
+override-in

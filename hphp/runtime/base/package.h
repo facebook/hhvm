@@ -133,6 +133,9 @@ struct PackageInfo {
   const Deployment* getActiveDeployment() const;
   bool implPackageExists(const StringData* package) const;
 
+  std::optional<std::string>
+  implicitPackageNameToPathPrefix(std::string_view name) const;
+
   std::string mangleForCacheKey() const;
 
   template <typename SerDe> void serde(SerDe& sd) {

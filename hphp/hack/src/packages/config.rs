@@ -239,36 +239,6 @@ impl Config {
                 check_member_names(errors, &deployment.packages);
                 check_member_names(errors, &deployment.soft_packages);
                 check_packages_are_defined(errors, &deployment.packages, &deployment.soft_packages);
-                let deployed = deployment
-                    .packages
-                    .iter()
-                    .flat_map(|packages| packages.iter())
-                    .chain(
-                        deployment
-                            .soft_packages
-                            .iter()
-                            .flat_map(|packages| packages.iter()),
-                    )
-                    .collect::<Vec<_>>();
-                for family in self
-                    .implicit_packages
-                    .keys()
-                    .map(|name| name.get_ref().as_str())
-                {
-                    if !deployed.iter().any(|name| name.get_ref() == family) {
-                        continue;
-                    }
-                    for member in deployed.iter().filter(|name| {
-                        split_member_name(name.get_ref())
-                            .is_some_and(|(member_family, _)| member_family == family)
-                    }) {
-                        errors.push(Error::implicit_deployment_family_member_conflict(
-                            positioned_name,
-                            family,
-                            member,
-                        ));
-                    }
-                }
                 check_deployed_packages_are_transitively_closed(
                     errors,
                     positioned_name,

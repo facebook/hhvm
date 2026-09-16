@@ -72,12 +72,6 @@ pub enum Error {
         member: String,
         span: (usize, usize),
     },
-    ImplicitDeploymentFamilyMemberConflict {
-        deployment: String,
-        family: String,
-        member: String,
-        span: (usize, usize),
-    },
     ImplicitMemberDoesNotExist {
         name: String,
         path: String,
@@ -208,20 +202,6 @@ impl Error {
         }
     }
 
-    pub fn implicit_deployment_family_member_conflict(
-        deployment: &Spanned<String>,
-        family: &str,
-        member: &Spanned<String>,
-    ) -> Self {
-        let Range { start, end } = member.span();
-        Self::ImplicitDeploymentFamilyMemberConflict {
-            deployment: deployment.get_ref().into(),
-            family: family.into(),
-            member: member.get_ref().into(),
-            span: (start, end),
-        }
-    }
-
     pub fn implicit_member_does_not_exist(member_name: &Spanned<String>, path: String) -> Self {
         let Range { start, end } = member_name.span();
         Self::ImplicitMemberDoesNotExist {
@@ -246,8 +226,7 @@ impl Error {
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
             | Self::ImplicitMemberNameInvalid { span, .. }
-            | Self::ImplicitMemberDoesNotExist { span, .. }
-            | Self::ImplicitDeploymentFamilyMemberConflict { span, .. } => *span,
+            | Self::ImplicitMemberDoesNotExist { span, .. } => *span,
         }
     }
 
@@ -369,18 +348,6 @@ impl Display for Error {
                     f,
                     "Implicit package member {} does not exist at //{}",
                     name, path
-                )?;
-            }
-            Self::ImplicitDeploymentFamilyMemberConflict {
-                deployment,
-                family,
-                member,
-                ..
-            } => {
-                write!(
-                    f,
-                    "Deployment {} cannot contain both implicit package family {} and member {}",
-                    deployment, family, member
                 )?;
             }
         };

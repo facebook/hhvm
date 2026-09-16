@@ -1,0 +1,16 @@
+[packages]
+
+[packages.entrypoint]
+
+[implicit_packages]
+
+[implicit_packages.hard_family]
+path = "//hard/"
+
+[implicit_packages.absent_family]
+path = "//absent/"
+
+[deployments]
+
+[deployments.prod]
+packages = ["hard_family", "entrypoint"]

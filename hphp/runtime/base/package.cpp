@@ -259,4 +259,27 @@ bool PackageInfo::implPackageExists(const StringData* package) const {
   }
 }
 
+std::optional<std::string>
+PackageInfo::implicitPackageNameToPathPrefix(std::string_view name) const {
+  auto const separator = name.find('.');
+  if (separator == std::string_view::npos) return std::nullopt;
+
+  auto const familyName = name.substr(0, separator);
+  auto const member = name.substr(separator + 1);
+  if (familyName.empty() || member.empty()) return std::nullopt;
+
+  auto const& families = implicitPackageFamilies();
+  auto const family = families.find(familyName);
+  if (family == families.end()) return std::nullopt;
+
+  // Package config parsing normalizes family roots to end in `/`.
+  assertx(family->second.m_path.empty() || family->second.m_path.ends_with('/'));
+  std::string includePath;
+  includePath.reserve(family->second.m_path.size() + member.size() + 1);
+  includePath.append(family->second.m_path);
+  includePath.append(member);
+  includePath.push_back('/');
+  return includePath;
+}
+
 } // namespace HPHP

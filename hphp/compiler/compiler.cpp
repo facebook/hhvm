@@ -1281,24 +1281,39 @@ bool process(CompilerOptions &po) {
       return false;
     }
 
-    // Precompute a sorted mapping (include_paths -> in_active_deployment)
-    for (auto const& it : packageInfo.packages()) {
-      auto const deployKind =
-        activeDeployment->second.getDeployKind(it.first);
-      for (const auto& ip : it.second.m_include_paths) {
-        pathsInDeployment.push_back(std::pair(ip, deployKind));
-      }
+    for (auto const& entry :
+         packageInfo.packageAndImplicitFamilyPathsInLookupOrder()) {
+      pathsInDeployment.push_back(std::pair(
+        entry.m_path,
+        activeDeployment->second.getDeployKind(entry.m_package)
+      ));
     }
+    auto const addImplicitMembers = [&] (auto const& packages) {
+      for (auto const& name : packages) {
+        auto pathPrefix = packageInfo.implicitPackageNameToPathPrefix(name);
+        if (!pathPrefix) continue;
+        pathsInDeployment.push_back(std::pair(
+          std::move(*pathPrefix),
+          activeDeployment->second.getDeployKind(name)
+        ));
+      }
+    };
+    addImplicitMembers(activeDeployment->second.m_packages);
+    addImplicitMembers(activeDeployment->second.m_soft_packages);
+
     std::sort(pathsInDeployment.begin(), pathsInDeployment.end(), std::greater());
+
     // Files that do not have a __PackageOverride and do not match an
     // include_path belong to the default package, which is always included
     // in the active deployment
-    pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, DeployKind::Hard));
+    pathsInDeployment.push_back(std::pair(
+      Cfg::Server::SourceRoot + po.inputDir,
+      DeployKind::Hard
+    ));
   }
 
   auto const mode = buildMode();
   auto const& packageInfo = RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
-
   auto deployedByPackages = [&](const StringData* filepath, const StringData* packageOverride) {
     if (isPackagesEnabled(mode) && !Cfg::Eval::ActiveDeployment.empty()) {
       if (packageOverride) {

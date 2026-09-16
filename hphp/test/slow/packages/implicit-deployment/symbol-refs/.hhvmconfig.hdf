@@ -1,0 +1,4 @@
+Parser {
+  Hack.Lang.AllowUnstableFeatures = true
+  Hack.Lang.EnableImplicitPackages = true
+}

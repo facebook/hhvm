@@ -1,0 +1,13 @@
+[packages]
+
+[packages.entrypoint]
+
+[implicit_packages]
+
+[implicit_packages.absent_family]
+path = "//input/absent/"
+
+[deployments]
+
+[deployments.prod]
+packages = ["entrypoint"]

@@ -1,0 +1,22 @@
+[packages]
+
+[packages.override_in]
+
+[packages.override_out]
+
+[implicit_packages]
+
+[implicit_packages.hard_family]
+path = "//hard/"
+
+[implicit_packages.soft_family]
+path = "//soft/"
+
+[implicit_packages.absent_family]
+path = "//absent/"
+
+[deployments]
+
+[deployments.prod]
+packages = ["hard_family.alpha", "hard_family.missing", "override_in"]
+soft_packages = ["hard_family", "soft_family.member"]

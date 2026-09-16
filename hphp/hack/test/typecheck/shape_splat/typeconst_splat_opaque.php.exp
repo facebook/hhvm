@@ -1,1 +1,54 @@
-No errors
+ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 21, characters 28-65:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 21, characters 52-64:
+  But got `A::TSPlain`
+ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 21, characters 28-65:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 21, characters 52-64:
+  But got `mixed`
+ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 21, characters 28-65:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 21, characters 52-64:
+  But got `this::TSPlain`
+ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 40, characters 29-51:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 40, characters 38-50:
+  But got `A::TSPlain`
+ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 40, characters 29-51:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 40, characters 38-50:
+  But got `mixed`
+ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 40, characters 29-51:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 40, characters 38-50:
+  But got `this::TSPlain`
+ERROR: File "typeconst_splat_opaque.php", line 53, characters 50-62:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 53, characters 26-63:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 53, characters 50-62:
+  But got `A::TSPlain super this::TSPlain`
+ERROR: File "typeconst_splat_opaque.php", line 53, characters 50-62:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 53, characters 26-63:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 53, characters 50-62:
+  But got `mixed`
+ERROR: File "typeconst_splat_opaque.php", line 53, characters 50-62:
+Some type arguments violate their constraints (Typing[4323])
+  File "typeconst_splat_opaque.php", line 53, characters 26-63:
+  Expected `shape(...)`
+  File "typeconst_splat_opaque.php", line 53, characters 50-62:
+  But got `this::TSPlain as A::TSPlain`

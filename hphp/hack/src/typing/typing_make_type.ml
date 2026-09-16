@@ -180,6 +180,8 @@ let closed_shape r map = shape r (nothing r) map
 
 let open_shape ~kind r map = shape r kind map
 
+let top_shape r = shape r (mixed r) TShapeMap.empty
+
 let supportdyn_mixed r = supportdyn r (mixed r)
 
 let representable_as r ty =

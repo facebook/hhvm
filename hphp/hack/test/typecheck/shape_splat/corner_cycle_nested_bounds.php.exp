@@ -1,3 +1,75 @@
+ERROR: File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 7, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+  But got `T1`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+    by the definition of `T2`
+ERROR: File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 7, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+  But got `T2`
+ERROR: File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 7, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+  But got `T2`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+    by the definition of `T2`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+    by the definition of `T1`
+ERROR: File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 8, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+  But got `T1`
+ERROR: File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 8, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+  But got `T1`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+    by the definition of `T1`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+    by the definition of `T2`
+ERROR: File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 8, characters 9-20:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+  But got `T2`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+    by the definition of `T1`
+ERROR: File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+  But got `T1`
+ERROR: File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+  But got `T1`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+    by the definition of `T1`
+  File "corner_cycle_nested_bounds.php", line 8, characters 18-19:
+    by the definition of `T2`
+ERROR: File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
+  Expected `shape(...)`
+  File "corner_cycle_nested_bounds.php", line 10, characters 12-13:
+  But got `T2`
+  File "corner_cycle_nested_bounds.php", line 7, characters 18-19:
+    by the definition of `T1`
 ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
 Invalid return type (Typing[4110])
   File "corner_cycle_nested_bounds.php", line 11, characters 4-36:

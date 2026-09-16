@@ -7,6 +7,12 @@ Invalid type hint (Typing[4419])
   File "splat_operand_illformed.php", line 13, characters 24-30:
   Only shapes can be unpacked with `...` inside a shape type
 ERROR: File "splat_operand_illformed.php", line 13, characters 24-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "splat_operand_illformed.php", line 13, characters 15-43:
+  Expected `shape(...)`
+  File "splat_operand_illformed.php", line 13, characters 24-30:
+  But got `MyTrait`
+ERROR: File "splat_operand_illformed.php", line 13, characters 24-30:
 `MyTrait` is uninstantiable (Typing[4002])
   File "splat_operand_illformed.php", line 11, characters 7-13:
   Declaration is here
@@ -15,6 +21,18 @@ Invalid type hint (Typing[4419])
   File "splat_operand_illformed.php", line 14, characters 26-30:
   Only shapes can be unpacked with `...` inside a shape type
 ERROR: File "splat_operand_illformed.php", line 14, characters 26-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "splat_operand_illformed.php", line 14, characters 17-43:
+  Expected `shape(...)`
+  File "splat_operand_illformed.php", line 14, characters 27-30:
+  But got `void`
+ERROR: File "splat_operand_illformed.php", line 14, characters 26-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "splat_operand_illformed.php", line 14, characters 17-43:
+  Expected `~shape(...)`
+  File "splat_operand_illformed.php", line 14, characters 26-30:
+  But got `?void`
+ERROR: File "splat_operand_illformed.php", line 14, characters 26-30:
 `?void` is a nonsensical typehint; a function cannot both only return implicitly and return null. (Typing[4066])
 ERROR: File "splat_operand_illformed.php", line 15, characters 15-54:
 Invalid type hint (Typing[4419])
@@ -22,3 +40,9 @@ Invalid type hint (Typing[4419])
   Only shapes can be unpacked with `...` inside a shape type
 ERROR: File "splat_operand_illformed.php", line 15, characters 24-28:
 Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` (Typing[4100])
+ERROR: File "splat_operand_illformed.php", line 15, characters 24-41:
+Some type arguments violate their constraints (Typing[4323])
+  File "splat_operand_illformed.php", line 15, characters 15-54:
+  Expected `shape(...)`
+  File "splat_operand_illformed.php", line 15, characters 24-41:
+  But got `Tuple<int, string>`

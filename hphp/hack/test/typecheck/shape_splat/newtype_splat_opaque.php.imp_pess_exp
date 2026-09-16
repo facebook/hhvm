@@ -9,7 +9,7 @@ Some type arguments violate their constraints (Typing[4323])
   File "newtype_splat_opaque.php--file2.php", line 26, characters 33-39:
   But got `mixed`
   File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
-    by the definition of `NTPlain` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `NTPlain`
 ERROR: File "newtype_splat_opaque.php--file2.php", line 35, characters 57-57:
 Some type arguments violate their constraints (Typing[4323])
   File "newtype_splat_opaque.php--file2.php", line 35, characters 48-58:
@@ -25,4 +25,4 @@ Some type arguments violate their constraints (Typing[4323])
   File "newtype_splat_opaque.php--file2.php", line 35, characters 39-45:
     by the definition of `T`
   File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
-    by the definition of `NTPlain` arising from an implicit `as ?nonnull` constraint on this type
+    by the definition of `NTPlain`

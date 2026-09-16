@@ -139,7 +139,31 @@ let check_happly unchecked_tparams env h =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 
-let check_splat_hint env p h =
+let check_shape_splat_hint env p h =
+  let (tenv, hint_pos, locl_ty) =
+    loclty_of_hint
+      ~visibility_behavior:Expand_visible_newtype_only
+      env.typedef_tparams
+      env.tenv
+      h
+  in
+  (* The top shape(mixed...) *)
+  let cstr_ty =
+    let reason = Reason.witness p in
+    let top = Typing_make_type.top_shape reason in
+    Typing_make_type.locl_like reason top
+  in
+  let (_env, err) =
+    Typing_generic_constraint.check_tparams_constraint
+      tenv
+      ~use_pos:hint_pos
+      Ast_defs.Constraint_as
+      ~cstr_ty
+      locl_ty
+  in
+  err
+
+let check_tuple_splat_hint env p h =
   (* It's important that we pass tenv down to subtyping
    * because tpenv might have been updated during localization *)
   let (tenv, hint_pos, locl_ty) =
@@ -219,7 +243,7 @@ and hint_ ~in_signature env p h_ =
         match tup_extra with
         | Hextra { tup_optional; tup_variadic } ->
           hints env tup_optional @ hint_opt env tup_variadic
-        | Hsplat h -> hint env h @ check_splat_hint env p h
+        | Hsplat h -> hint env h @ check_tuple_splat_hint env p h
       end
   | Hclass_ptr (_, h)
   | Hoption h
@@ -241,7 +265,7 @@ and hint_ ~in_signature env p h_ =
     let splat_err =
       match (List.rev hl, List.rev hf_param_info) with
       | (h :: _, Some { hfparam_splat = Some Ast_defs.Splat; _ } :: _) ->
-        check_splat_hint env p h
+        check_tuple_splat_hint env p h
       | _ -> []
     in
     (* Bind any type parameters bound in the function hint and check the hint *)
@@ -322,7 +346,10 @@ and hint_ ~in_signature env p h_ =
          gated above via [splat_feature_errors]. *)
       List.concat_map nsi_field_map ~f:(function
           | SE_field { sfi_hint; _ } -> hint env sfi_hint
-          | SE_splat h -> hint env h)
+          | SE_splat h ->
+            let errs = hint env h in
+            let err_opt = check_shape_splat_hint env p h in
+            Option.value_map err_opt ~default:errs ~f:(fun err -> err :: errs))
     in
     let unknown_fields_errors =
       match nsi_unknown_fields_type with
@@ -420,7 +447,7 @@ let check_splat_is_tuple env params =
       _;
     }
     :: _ ->
-    check_splat_hint env param_pos h
+    check_tuple_splat_hint env param_pos h
   | _ -> []
 
 let fun_ tenv f =

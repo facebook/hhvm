@@ -1,0 +1,18 @@
+[packages]
+
+[packages.consumer]
+includes = ["family.existing"]
+soft_includes = ["family.missing_package"]
+
+[implicit_packages]
+
+[implicit_packages.family]
+path = "//strict-members/"
+includes = ["family.missing_family"]
+soft_includes = ["family.missing_family_soft"]
+
+[deployments]
+
+[deployments.prod]
+packages = ["consumer", "family.missing_deployment"]
+soft_packages = ["family.missing_soft_deployment"]

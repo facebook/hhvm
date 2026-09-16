@@ -7,6 +7,7 @@ use std::path::Path;
 
 use anyhow::Context;
 use anyhow::Result;
+use hack_name::is_valid_identifier;
 use toml::Spanned;
 
 use crate::config::*;
@@ -74,6 +75,46 @@ impl PackagePathValidator<'_> {
             valid,
             is_directory,
         }
+    }
+}
+
+fn validate_implicit_member_paths(config: &Config, packages_toml: &str, errors: &mut Vec<Error>) {
+    let packages_toml_path = Path::new(packages_toml).parent().unwrap_or(Path::new("/"));
+    let validate_names = |names: &Option<NameSet>, errors: &mut Vec<Error>| {
+        for name in names.iter().flat_map(|names| names.iter()) {
+            let Some((family_name, member_name)) = split_member_name(name.get_ref()) else {
+                continue;
+            };
+            if !is_valid_identifier(member_name) {
+                continue;
+            }
+            let Some(family) = config
+                .implicit_packages
+                .iter()
+                .find_map(|(name, family)| (name.get_ref() == family_name).then_some(family))
+            else {
+                continue;
+            };
+            let member_path = format!("{}{}/", family.path.get_ref(), member_name);
+            if !packages_toml_path.join(&member_path).is_dir() {
+                errors.push(Error::implicit_member_does_not_exist(name, member_path));
+            }
+        }
+    };
+
+    for package in config.packages.values() {
+        validate_names(&package.includes, errors);
+        validate_names(&package.soft_includes, errors);
+    }
+    if let Some(deployments) = &config.deployments {
+        for deployment in deployments.values() {
+            validate_names(&deployment.packages, errors);
+            validate_names(&deployment.soft_packages, errors);
+        }
+    }
+    for family in config.implicit_packages.values() {
+        validate_names(&family.includes, errors);
+        validate_names(&family.soft_includes, errors);
     }
 }
 
@@ -155,6 +196,9 @@ impl PackageInfo {
             }
         }
 
+        if strict {
+            validate_implicit_member_paths(&config, packages_toml, &mut errors);
+        }
         config.check_config(&mut errors);
 
         Ok(Self {
@@ -535,6 +579,51 @@ mod test {
                 .map(|name| name.get_ref().as_str())
                 .collect::<Vec<_>>(),
             vec!["root"]
+        );
+    }
+
+    #[test]
+    fn test_implicit_member_strict_path_validation() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-strict-members.toml");
+
+        let non_strict = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        assert!(
+            !non_strict
+                .errors()
+                .iter()
+                .any(|error| matches!(error, Error::ImplicitMemberDoesNotExist { .. })),
+            "non-strict parsing must not validate implicit member paths"
+        );
+
+        let strict = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let mut errors = strict
+            .errors()
+            .iter()
+            .filter(|error| matches!(error, Error::ImplicitMemberDoesNotExist { .. }))
+            .map(|error| error.msg())
+            .collect::<Vec<_>>();
+        errors.sort();
+        assert_eq!(
+            errors,
+            vec![
+                String::from(
+                    "Implicit package member family.missing_deployment does not exist at //strict-members/missing_deployment/",
+                ),
+                String::from(
+                    "Implicit package member family.missing_family does not exist at //strict-members/missing_family/",
+                ),
+                String::from(
+                    "Implicit package member family.missing_family_soft does not exist at //strict-members/missing_family_soft/",
+                ),
+                String::from(
+                    "Implicit package member family.missing_package does not exist at //strict-members/missing_package/",
+                ),
+                String::from(
+                    "Implicit package member family.missing_soft_deployment does not exist at //strict-members/missing_soft_deployment/",
+                ),
+            ]
         );
     }
 

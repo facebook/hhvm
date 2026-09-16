@@ -31,7 +31,7 @@ pub struct Config {
 /// and member segment `D`, splitting on the *first* `.`. Returns `None` if there
 /// is no `.` separator, or if either side is empty. Both `F` and `D` must be
 /// valid Hack identifiers; `PackageInfo` reports invalid names separately.
-fn split_member_name(name: &str) -> Option<(&str, &str)> {
+pub(crate) fn split_member_name(name: &str) -> Option<(&str, &str)> {
     let (family, member) = name.split_once('.')?;
     if family.is_empty() || member.is_empty() {
         None

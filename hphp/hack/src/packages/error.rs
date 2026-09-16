@@ -78,6 +78,11 @@ pub enum Error {
         member: String,
         span: (usize, usize),
     },
+    ImplicitMemberDoesNotExist {
+        name: String,
+        path: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -216,6 +221,16 @@ impl Error {
             span: (start, end),
         }
     }
+
+    pub fn implicit_member_does_not_exist(member_name: &Spanned<String>, path: String) -> Self {
+        let Range { start, end } = member_name.span();
+        Self::ImplicitMemberDoesNotExist {
+            name: member_name.get_ref().into(),
+            path,
+            span: (start, end),
+        }
+    }
+
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateIncludePath { span, .. }
@@ -231,6 +246,7 @@ impl Error {
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
             | Self::ImplicitMemberNameInvalid { span, .. }
+            | Self::ImplicitMemberDoesNotExist { span, .. }
             | Self::ImplicitDeploymentFamilyMemberConflict { span, .. } => *span,
         }
     }
@@ -346,6 +362,13 @@ impl Display for Error {
                     f,
                     "Implicit package member segment {} in {} must be a valid Hack identifier",
                     member, name
+                )?;
+            }
+            Self::ImplicitMemberDoesNotExist { name, path, .. } => {
+                write!(
+                    f,
+                    "Implicit package member {} does not exist at //{}",
+                    name, path
                 )?;
             }
             Self::ImplicitDeploymentFamilyMemberConflict {

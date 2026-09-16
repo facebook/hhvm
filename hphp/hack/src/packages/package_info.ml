@@ -101,10 +101,8 @@ let get_package_for_file (info : t) ~(path : string) : Package.t option =
   | None -> None
   | Some (_, p) when not p.Package.is_implicit -> Some p
   | Some (ip, p) ->
-    (* Implicit family match: the member directory [D] is the first path segment
-     * after the family [path]. Only direct child *directories* denote members,
-     * so a file lying directly in the family path (no [/] after the prefix)
-     * belongs to no package. *)
+    (* The typechecker rejects files directly under a family path. Return None
+     * defensively if one reaches package lookup without a member directory. *)
     let remainder = String.drop_prefix path (String.length ip) in
     (match String.lsplit2 remainder ~on:'/' with
     | Some (dir, _) when not (String.is_empty dir) ->

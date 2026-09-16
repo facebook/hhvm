@@ -1,0 +1,19 @@
+[packages]
+
+[packages.explicit]
+include_paths = ["//explicit/"]
+
+[packages.explicit_nested]
+include_paths = ["//explicit/nested/"]
+
+[packages.override]
+
+[implicit_packages]
+
+[implicit_packages.atoms]
+path = "//atoms/"
+
+[deployments]
+
+[deployments.test]
+packages = ["atoms.checkout"]

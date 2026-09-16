@@ -1,0 +1,7 @@
+OK atoms/checkout/member.inc => atoms.checkout
+OK atoms/profile/nested/member.inc => atoms.profile
+OK atoms/unicode/member.inc => atoms.unicode
+OK explicit/member.inc => explicit
+OK explicit/nested/member.inc => explicit_nested
+OK atoms/checkout/override-explicit.inc => override
+OK atoms/missing/member.inc => null

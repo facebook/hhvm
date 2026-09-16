@@ -1,0 +1,8 @@
+[packages]
+
+[implicit_packages]
+
+[implicit_packages.root]
+path = "//"
+
+[deployments]

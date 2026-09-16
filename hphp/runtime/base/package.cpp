@@ -282,4 +282,28 @@ PackageInfo::implicitPackageNameToPathPrefix(std::string_view name) const {
   return includePath;
 }
 
+std::optional<std::string>
+PackageInfo::pathToPackageName(std::string_view path) const {
+  for (auto const& entry : packageAndImplicitFamilyPathsInLookupOrder()) {
+    if (!path.starts_with(entry.m_path)) continue;
+    if (!entry.m_isImplicit) {
+      return entry.m_package;
+    }
+
+    auto const remainder = path.substr(entry.m_path.size());
+    auto const separator = remainder.find('/');
+    if (separator == std::string_view::npos || separator == 0) {
+      return std::nullopt;
+    }
+    auto const member = remainder.substr(0, separator);
+    std::string package;
+    package.reserve(entry.m_package.size() + member.size() + 1);
+    package.append(entry.m_package);
+    package.push_back('.');
+    package.append(member);
+    return package;
+  }
+  return std::nullopt;
+}
+
 } // namespace HPHP

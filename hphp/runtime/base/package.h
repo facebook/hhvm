@@ -135,6 +135,8 @@ struct PackageInfo {
 
   std::optional<std::string>
   implicitPackageNameToPathPrefix(std::string_view name) const;
+  std::optional<std::string>
+  pathToPackageName(std::string_view path) const;
 
   std::string mangleForCacheKey() const;
 

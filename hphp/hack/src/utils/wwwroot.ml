@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-(* Keep in sync with //hphp/hack/src/facebook/utils/repo_root.rs *)
+(* Keep in sync with //hphp/hack/src/utils/repo_root.rs *)
 
 (**
  * Checks if x is a www directory by looking for ".hhconfig".

@@ -198,6 +198,30 @@ void QueryRenderer<StringType>::appendComment(
 }
 
 template <typename StringType>
+void QueryRenderer<StringType>::appendHex(
+    StringType* s,
+    std::string_view queryText,
+    size_t offset,
+    const QueryArgument& d) {
+  if (d.isNull()) {
+    s->append("NULL");
+    return;
+  }
+  // Runs in both modes: a type-erased QueryArgument is accepted for every
+  // specifier at compile time and is only resolved here.
+  if (!d.isString()) {
+    formatStringParseError(queryText, offset, 'h', d.typeName());
+  }
+
+  // Single quotes, unlike the double quotes %s uses: MySQL accepts only
+  // X'val' (or 0xval), never X"val". An empty value yields X'', which is a
+  // legal empty binary string.
+  s->append("X'");
+  folly::hexlify(d.getString(), *s, /*append_output=*/true);
+  s->push_back('\'');
+}
+
+template <typename StringType>
 void QueryRenderer<StringType>::appendColumnTableName(
     StringType* s,
     const QueryArgument& d) {
@@ -445,6 +469,8 @@ void QueryRenderer<StringType>::renderAppend(
             "%m expects int/float/string/null or a sub-query");
       }
       appendValue(&output, queryText, idx - 1, c, param, escapeMode, conn);
+    } else if (c == 'h') {
+      appendHex(&output, queryText, idx - 1, param);
     } else if (c == 'K') {
       output.append("/*");
       appendComment(&output, param);
@@ -459,12 +485,16 @@ void QueryRenderer<StringType>::renderAppend(
 
       char type = queryText.data()[idx++];
       if (type != 'd' && type != 's' && type != 'f' && type != 'u' &&
-          type != 'm') {
-        parseError(queryText, idx - 1, "expected %=d, %=f, %=s, %=u, or %=m");
+          type != 'm' && type != 'h') {
+        parseError(
+            queryText, idx - 1, "expected %=d, %=f, %=s, %=u, %=m, or %=h");
       }
 
       if (param.isNull()) {
         output.append(" IS NULL");
+      } else if (type == 'h') {
+        output.append(" = ");
+        appendHex(&output, queryText, idx - 1, param);
       } else {
         output.append(" = ");
         appendValue(&output, queryText, idx - 1, type, param, escapeMode, conn);
@@ -541,6 +571,8 @@ void QueryRenderer<StringType>::renderAppend(
             appendColumnTableName(&output, val);
           } else if (type == 'q') {
             appendSubQuery(output, queryText, idx - 1, val, escapeMode, conn);
+          } else if (type == 'h') {
+            appendHex(&output, queryText, idx - 1, val);
           } else {
             appendValue(
                 &output, queryText, idx - 1, type, val, escapeMode, conn);

@@ -117,6 +117,14 @@ class QueryRenderer {
   static void appendColumnTableName(StringType* s, const QueryArgument& d);
   static void appendComment(StringType* s, const QueryArgument& d);
 
+  // Render one %h argument as a MySQL binary literal. Hex output is already
+  // safe, so this takes no EscapeMode or connection.
+  static void appendHex(
+      StringType* s,
+      std::string_view queryText,
+      size_t offset,
+      const QueryArgument& d);
+
   // Truncate output to maxSize if exceeded. Returns true if truncated.
   static bool checkTruncation(
       StringType& output,

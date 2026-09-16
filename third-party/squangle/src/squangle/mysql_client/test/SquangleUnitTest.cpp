@@ -644,6 +644,58 @@ static_assert(!valid_value_row_schema<fixed_string{"%d %q"}>());
 // There is no %=q.
 static_assert(!parse_ok_fixed<fixed_string{"SELECT * FROM t WHERE %C%=q"}>());
 
+// ----------------------------------------------------------------------------
+// %h — a MySQL binary literal, X'<hex>'.
+//
+// Takes the same string-like types as %s, but renders their bytes hex-encoded
+// instead of quoting them. Numbers are rejected: hex-encoding the decimal text
+// of an int is never what a caller means.
+// ----------------------------------------------------------------------------
+static_assert(parse_ok_fixed<fixed_string{"SELECT %h"}>());
+static_assert(count_specs_fixed<fixed_string{"SELECT %h"}>() == 1);
+static_assert(check_args_fixed<fixed_string{"%h"}, std::string>());
+static_assert(check_args_fixed<fixed_string{"%h"}, std::string_view>());
+static_assert(check_args_fixed<fixed_string{"%h"}, folly::fbstring>());
+static_assert(check_args_fixed<fixed_string{"%h"}, folly::StringPiece>());
+static_assert(check_args_fixed<fixed_string{"%h"}, const char*>());
+static_assert(check_args_fixed<fixed_string{"%h"}, char*>());
+static_assert(
+    check_args_fixed<fixed_string{"%h"}, std::optional<std::string>>());
+static_assert(check_args_fixed<fixed_string{"%h"}, std::nullptr_t>());
+static_assert(check_args_fixed<fixed_string{"%h"}, std::nullopt_t>());
+static_assert(!check_args_fixed<fixed_string{"%h"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%h"}, double>());
+static_assert(!check_args_fixed<fixed_string{"%h"}, bool>());
+static_assert(!check_args_fixed<fixed_string{"%h"}, Query>());
+static_assert(
+    !check_args_fixed<fixed_string{"%h"}, std::vector<std::string>>());
+// Byte-range types are not accepted: every hex-literal call site in fbcode
+// today hands the bytes over as a std::string, so there is nothing to serve.
+// Supporting one means a new QueryArgument constructor, because
+// ByteRange -> StringPiece is an explicit conversion.
+static_assert(!check_args_fixed<fixed_string{"%h"}, folly::ByteRange>());
+// The type-erased escape hatch, validated at render time like every other
+// specifier.
+static_assert(check_args_fixed<fixed_string{"%h"}, QueryArgument>());
+// %Lh is a comma-separated list of binary literals, taking the same element
+// types %h takes as a scalar.
+static_assert(parse_ok_fixed<fixed_string{"SELECT %Lh"}>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lh"}, std::vector<std::string>>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lh"}, std::vector<folly::StringPiece>>());
+static_assert(!check_args_fixed<fixed_string{"%Lh"}, std::vector<int>>());
+static_assert(!check_args_fixed<fixed_string{"%Lh"}, std::string>());
+static_assert(
+    check_args_fixed<fixed_string{"%Lh"}, std::vector<QueryArgument>>());
+// %=h compares against a binary literal, and takes what scalar %h takes.
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM t WHERE %C%=h"}>());
+static_assert(check_args_fixed<fixed_string{"%=h"}, std::string>());
+static_assert(check_args_fixed<fixed_string{"%=h"}, std::nullptr_t>());
+static_assert(!check_args_fixed<fixed_string{"%=h"}, int>());
+// %h remains invalid as a ValueRow cell.
+static_assert(!valid_value_row_schema<fixed_string{"%h"}>());
+
 } // namespace checked_compile_tests
 
 // ============================================================================
@@ -1436,6 +1488,147 @@ TEST_F(QueryTest, PercentLqRendersAListOfSubQueries) {
   EXPECT_EQ(
       Query::checked("UPDATE t SET %Lq", std::vector<Query>{}).renderInsecure(),
       "UPDATE t SET ");
+}
+
+TEST_F(QueryTest, PercentHRendersBinaryLiteral) {
+  EXPECT_EQ(
+      Query::checked("SELECT %h", std::string("A")).renderInsecure(),
+      "SELECT X'41'");
+  EXPECT_EQ(
+      Query::checked("SELECT %h", std::string("AB")).renderInsecure(),
+      "SELECT X'4142'");
+
+  // Arbitrary bytes, including a high byte and an embedded NUL -- the reason
+  // this cannot be done by quoting a string.
+  EXPECT_EQ(
+      Query::checked("SELECT %h", std::string("\x00\x80\xff", 3))
+          .renderInsecure(),
+      "SELECT X'0080ff'");
+
+  // An empty value stays in the X'' form, which MySQL accepts as an empty
+  // binary string. Rendering a bare '' instead would silently switch the
+  // literal from binary to a character string in the connection charset.
+  EXPECT_EQ(
+      Query::checked("SELECT %h", std::string()).renderInsecure(),
+      "SELECT X''");
+
+  // Single-quoted, unlike %s, which double-quotes its value.
+  EXPECT_EQ(
+      Query::checked("SELECT %s", std::string("A")).renderInsecure(),
+      "SELECT \"A\"");
+
+  // Nulls render as NULL, matching %s.
+  EXPECT_EQ(
+      Query::checked("SELECT %h", nullptr).renderInsecure(), "SELECT NULL");
+  EXPECT_EQ(
+      Query::checked("SELECT %h", std::optional<std::string>())
+          .renderInsecure(),
+      "SELECT NULL");
+
+  // The renderer is shared, so the legacy constructor gets %h too.
+  EXPECT_EQ(
+      Query("SELECT %h", std::string("A")).renderInsecure(), "SELECT X'41'");
+}
+
+TEST_F(QueryTest, PercentLhRendersAListOfBinaryLiterals) {
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM t WHERE k IN (%Lh)",
+          std::vector<std::string>{"A", "B"})
+          .renderInsecure(),
+      "SELECT * FROM t WHERE k IN (X'41', X'42')");
+
+  // Single element, and an empty list, which renders nothing at all -- the
+  // same dangling-clause hazard every %L form has.
+  EXPECT_EQ(
+      Query::checked("SELECT %Lh", std::vector<std::string>{"A"})
+          .renderInsecure(),
+      "SELECT X'41'");
+  EXPECT_EQ(
+      Query::checked("SELECT %Lh", std::vector<std::string>{}).renderInsecure(),
+      "SELECT ");
+
+  // A null element renders NULL, matching %Ls rather than %Lq (which throws).
+  // An empty element stays in the X'' form, like the scalar.
+  std::vector<QueryArgument> mixed{
+      std::string("A"), QueryArgument(nullptr), std::string()};
+  EXPECT_EQ(
+      Query::checked("SELECT %Lh", QueryArgument(mixed)).renderInsecure(),
+      "SELECT X'41', NULL, X''");
+}
+
+TEST_F(QueryTest, PercentEqualsHComparesAgainstBinaryLiteral) {
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM t WHERE %C%=h", "k", std::string("A"))
+          .renderInsecure(),
+      "SELECT * FROM t WHERE `k` = X'41'");
+
+  // Null takes the IS NULL form, like the other %= specifiers, rather than
+  // the NULL that scalar %h renders.
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM t WHERE %C%=h", "k", nullptr)
+          .renderInsecure(),
+      "SELECT * FROM t WHERE `k` IS NULL");
+
+  // An empty value keeps the X'' form here too.
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM t WHERE %C%=h", "k", std::string())
+          .renderInsecure(),
+      "SELECT * FROM t WHERE `k` = X''");
+}
+
+TEST_F(QueryTest, PercentHRejectsNonStringAtRenderTime) {
+  // A type-erased QueryArgument passes the compile-time check for every
+  // specifier, so %h has to reject a non-string when it renders.
+  try {
+    Query::checked("SELECT %h", QueryArgument(7)).renderInsecure();
+    FAIL() << "expected a parse error for an int at %h";
+  } catch (const std::invalid_argument& e) {
+    EXPECT_NE(
+        std::string(e.what()).find(
+            "invalid value type int64_t for format string %h"),
+        std::string::npos)
+        << "actual: " << e.what();
+  }
+}
+
+TEST_F(QueryTest, PercentHRejectsNonStringInEveryForm) {
+  // The scalar case is covered above; the list and comparison forms route
+  // through the same check and must reject too.
+  EXPECT_THROW(
+      Query::checked("SELECT %Lh", QueryArgument(std::vector<QueryArgument>{7}))
+          .renderInsecure(),
+      std::invalid_argument);
+  EXPECT_THROW(
+      Query::checked("SELECT * FROM t WHERE %C%=h", "k", QueryArgument(7))
+          .renderInsecure(),
+      std::invalid_argument);
+
+  // A default-constructed QueryArgument holds an empty pair list, not a null
+  // and not an empty string, so it must take the type-error path rather than
+  // rendering X''.
+  try {
+    Query::checked("SELECT %h", QueryArgument()).renderInsecure();
+    FAIL() << "expected a parse error for a default-constructed QueryArgument";
+  } catch (const std::invalid_argument& e) {
+    EXPECT_NE(
+        std::string(e.what()).find("for format string %h"), std::string::npos)
+        << "actual: " << e.what();
+  }
+
+  // %=h through the legacy constructor, which shares the renderer.
+  EXPECT_EQ(
+      Query("SELECT * FROM t WHERE %C%=h", "k", std::string("A"))
+          .renderInsecure(),
+      "SELECT * FROM t WHERE `k` = X'41'");
+}
+
+TEST_F(QueryTest, PercentHIsIndependentOfEscapeMode) {
+  // Hex output is [0-9a-f], so there is nothing to escape and no connection to
+  // consult. renderInsecure() therefore matches what is sent to the server.
+  const auto query = Query::checked("SELECT %h", std::string("\x00\xff", 2));
+  EXPECT_EQ(query.renderInsecure(), "SELECT X'00ff'");
+  EXPECT_EQ(query.render(nullptr), "SELECT X'00ff'");
 }
 
 TEST_F(QueryTest, QueryAcceptsMutableCharArray) {

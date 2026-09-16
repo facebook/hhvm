@@ -48,8 +48,15 @@
 //      tinyint(1)), so QueryArgument has no bool alternative.
 // %m - any single value: string, integer (including bool), float, or sub-query.
 //      nullptr becomes "NULL", throws otherwise.
-// %=s, %=d, %=u, %=f, %=m - like the previous except suitable for comparison,
-//      so "%s" becomes " = VALUE".  nullptr becomes "IS NULL"
+// %h - a MySQL binary literal: the argument's bytes are hex-encoded and
+//      rendered as X'<hex>'.  Takes any string-like value; the bytes are
+//      arbitrary, so embedded NULs are fine.  nullptr / nullopt becomes NULL.
+//      An empty value renders as X'', a legal empty binary string.
+//      Note the single quotes -- unlike %s, which double-quotes.  The hex
+//      output needs no escaping, so %h renders the same under every
+//      EscapeMode and does not consult the connection.
+// %=s, %=d, %=u, %=f, %=m, %=h - like the previous except suitable for
+//      comparison, so "%s" becomes " = VALUE".  nullptr becomes "IS NULL"
 // %T - a table name.  enclosed with ``.
 // %C - like %T, except for column names. Optionally supply two-/three-tuple
 //      to define qualified column name or qualified column name with
@@ -59,8 +66,8 @@
 //      will become "`table_name`.`column_name` AS `alias`"
 // %V - VALUES style row list; expects a list of lists, each of the same
 //      length.
-// %Ls, %Ld, %Lu, %Lf, %Lm - strings/ints/uints/floats separated by commas.
-//      nullptr becomes "NULL"
+// %Ls, %Ld, %Lu, %Lf, %Lm, %Lh - strings/ints/uints/floats/binary literals
+//      separated by commas.  nullptr becomes "NULL"
 // %LC - list of column names separated by commas. Optionally supplied as
 //       a list of two-/three-tuples to define qualified column names or
 //       qualified column names with aliases. Similar to %C.
@@ -196,10 +203,10 @@ constexpr size_t kMaxCheckedSpecs = 256;
 // which accepts only the plain forms) read this instead of re-parsing the
 // format string.
 enum class SpecForm : uint8_t {
-  Plain, // %s %d %u %f %m %T %C %q %U %W %V %K
-  Equals, // %=s %=d %=u %=f %=m
-  List, // %Ls %Ld %Lu %Lf %Lm %Lq %LC -- argument must be a list, not a
-        // scalar
+  Plain, // %s %d %u %f %m %h %T %C %q %U %W %V %K
+  Equals, // %=s %=d %=u %=f %=m %=h
+  List, // %Ls %Ld %Lu %Lf %Lm %Lh %Lq %LC -- argument must be a list, not
+        // a scalar
   PairList, // %LO %LA -- argument must be a pair list
 };
 
@@ -272,13 +279,18 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
         if (!push_spec(res, n)) {
           return res;
         }
+      } else if (n == 'h') {
+        // binary literal: one string-like value, hex-encoded
+        if (!push_spec(res, n)) {
+          return res;
+        }
       } else if (n == 'T' || n == 'C') {
         // table or column identifier
         if (!push_spec(res, n)) {
           return res;
         }
       } else if (n == '=') {
-        // expect %=s %=d %=u %=f %=m
+        // expect %=s %=d %=u %=f %=m %=h
         if (i >= s.size()) {
           res.ok = false;
           res.error = CheckedParseError::BadFormat;
@@ -286,7 +298,8 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
         }
         char t = s[i];
         i++;
-        if (t != 's' && t != 'd' && t != 'u' && t != 'f' && t != 'm') {
+        if (t != 's' && t != 'd' && t != 'u' && t != 'f' && t != 'm' &&
+            t != 'h') {
           res.ok = false;
           res.error = CheckedParseError::BadFormat;
           return res;
@@ -295,7 +308,7 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
           return res;
         }
       } else if (n == 'L') {
-        // list variants: %Ls %Ld %Lu %Lf %Lm %Lq %LC %LO %LA
+        // list variants: %Ls %Ld %Lu %Lf %Lm %Lh %Lq %LC %LO %LA
         // %Q is explicitly disallowed.
         if (i >= s.size()) {
           res.ok = false;
@@ -305,8 +318,9 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
         char t = s[i];
         i++;
         if (t == 's' || t == 'd' || t == 'u' || t == 'f' || t == 'm' ||
-            t == 'q') {
-          // list of values, or of sub-queries for %Lq
+            t == 'q' || t == 'h') {
+          // list of values, of sub-queries for %Lq, or of binary literals
+          // for %Lh
           if (!push_spec(res, t, SpecForm::List)) {
             return res;
           }
@@ -552,8 +566,9 @@ inline constexpr bool
 //
 // The only list forms a QueryArgument can hold are vector<QueryArgument> and
 // initializer_list<QueryArgument>, so that is what every element-list specifier
-// (%Ls/%Ld/%Lu/%Lf/%Lm/%LC) accepts; per-element types are validated at render
-// time (as the legacy QueryRenderer does) since the elements are type-erased.
+// (%Ls/%Ld/%Lu/%Lf/%Lm/%Lh/%Lq/%LC) accepts; per-element types are validated at
+// render time (as the legacy QueryRenderer does) since the elements are
+// type-erased.
 template <typename T>
 concept ListArg = is_list_of_values_v<std::decay_t<T>>;
 
@@ -690,6 +705,8 @@ constexpr bool check_arg_for_spec_precise(char spec, bool is_list) {
           return is_value_arg_or_optional_v<E>;
         case 'q':
           return std::is_same_v<std::decay_t<E>, Query>;
+        case 'h':
+          return is_string_like_v<E>;
         case 'C':
           return is_identifier_arg_v<E>;
         default:
@@ -713,6 +730,9 @@ constexpr bool check_arg_for_spec_precise(char spec, bool is_list) {
         return ValueArg<T>;
       case 'q': // sub-query, and nothing else
         return std::is_same_v<std::decay_t<T>, Query>;
+      case 'h': // binary literal: string-like bytes, hex-encoded
+        return is_string_like_v<T> || is_optional_string_like_v<T> ||
+            is_null_arg_v<T>;
       case 'T': // table or column identifier
       case 'C':
         return IdentifierArg<T>;
@@ -1163,9 +1183,10 @@ class Query {
   // %s and %m; none of them constrain what that sub-query contains, since
   // checked-ness is a runtime property of a Query, not part of its type.
   //
-  // Allowed specifiers: %%  %s %d %u %f %m  %T %C  %q  %LC %Ls %Ld %Lu %Lf
-  // %Lm %Lq
-  // %=s %=d %=u %=f %=m  %U %W %V %K %LO %LA. %Q is intentionally unsupported;
+  // Allowed specifiers: %%  %s %d %u %f %m %h  %T %C  %q  %LC %Ls %Ld %Lu %Lf
+  // %Lm %Lq %Lh
+  // %=s %=d %=u %=f %=m %=h  %U %W %V %K %LO %LA. %Q is intentionally
+  // unsupported;
   // use %q for a sub-query, or the unsafe Query() constructor if you truly need
   // raw SQL (discouraged).
   //

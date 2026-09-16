@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -420,8 +421,18 @@ bool valueMatchesPattern(const std::string &value,
                          std::string &pattern,
                          const std::string &suffix) {
   if (!suffix.empty()) pattern += suffix;
-  Variant ret = preg_match(OptString(pattern.c_str(), pattern.size(),
-                                     CopyString),
+  auto const patternString = OptString(
+    pattern.c_str(), pattern.size(), CopyString
+  );
+  auto const error = preg_get_error_message_if_invalid(patternString);
+  if (!error.isNull()) {
+    throw std::runtime_error(folly::sformat(
+      "Invalid configuration regex '{}': {}",
+      pattern,
+      error.toCppString()
+    ));
+  }
+  Variant ret = preg_match(patternString,
                            OptString(value.c_str(), value.size(),
                                      CopyString));
   return ret.toInt64() > 0;
@@ -448,18 +459,16 @@ bool Config::matchHdfPatternSet(const std::string &value,
                                                            name,
                                                            std::vector<std::string>{},
                                                            false);
+  auto matched = true;
   if (!patterns.empty()) {
-    OptString valueString = OptString(value.c_str(), value.size(), CopyString);
     for (std::string pattern: patterns) {
       if (!pattern.empty()) {
         // PatternSets are applied only to multiline values
-        if (!valueMatchesPattern(value, pattern, "m")) {
-          return false;
-        }
+        matched &= valueMatchesPattern(value, pattern, "m");
       }
     }
   }
-  return true;
+  return matched;
 }
 
 }

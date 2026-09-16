@@ -10,11 +10,11 @@ open Hh_prelude
 type errors = (Pos.t * string * (Pos.t * string) list) list
 
 external extract_packages_from_text_strict :
-  string -> bool -> (Package.t list, errors) result
+  string -> bool -> (Package_info.t, errors) result
   = "extract_packages_from_text_strict_ffi"
 
 external extract_packages_from_text_non_strict :
-  string -> bool -> (Package.t list, errors) result
+  string -> bool -> (Package_info.t, errors) result
   = "extract_packages_from_text_non_strict_ffi"
 
 let repo_config_path =
@@ -48,7 +48,7 @@ let parse ~(enable_implicit_packages : bool) (strict : bool) (path : string) =
         errors
     in
     failwith (String.concat strings)
-  | Ok packages -> Package_info.from_packages packages
+  | Ok package_info -> package_info
 
 let load_and_parse
     ~(strict : bool)

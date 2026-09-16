@@ -89,27 +89,6 @@ let get_package (info : t) (pkg : string) : Package.t option =
 let package_exists (info : t) (pkg : string) : bool =
   Option.is_some (get_package info pkg)
 
-let from_packages (packages : Package.t list) : t =
-  let existing_packages =
-    List.fold packages ~init:S_map.empty ~f:(fun acc pkg ->
-        let pkg_name = Package.get_package_name pkg in
-        S_map.add pkg_name pkg acc)
-  in
-
-  let include_path_to_package_map : (string * Package.t) list =
-    List.sort
-      (List.fold
-         ~init:[]
-         ~f:(fun acc (p : Package.t) ->
-           List.fold
-             ~f:(fun (acc : (string * Package.t) list) ip -> (snd ip, p) :: acc)
-             p.Package.include_paths
-             ~init:acc)
-         packages)
-      ~compare:(fun (p1, _) (p2, _) -> String.compare p2 p1)
-  in
-  { existing_packages; include_path_to_package_map }
-
 (** The get_package_for_file returns the package a file path belongs to;
   * it ignores PackageOverride annotations. 
   *)

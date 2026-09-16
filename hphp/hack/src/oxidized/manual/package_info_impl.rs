@@ -21,7 +21,7 @@ pub type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
 
 pub fn package_info_to_vec(
     filename: &str,
-    info: packages::PackageInfo,
+    info: &packages::PackageInfo,
 ) -> Result<Vec<Package>, Errors> {
     let pos_from_span = |span: (usize, usize)| {
         let (start_offset, end_offset) = span;
@@ -98,6 +98,35 @@ pub fn package_info_to_vec(
     Ok(packages)
 }
 
+/// Converts parser package data into the complete oxidized package information.
+pub fn package_info_to_oxidized(
+    filename: &str,
+    info: packages::PackageInfo,
+) -> Result<PackageInfo, Errors> {
+    let packages = package_info_to_vec(filename, &info)?;
+    let existing_packages = packages
+        .iter()
+        .map(|package| (package.name.1.clone(), package.clone()))
+        .collect();
+    // Sort by reverse-lexicographic include_path order so a simple linear
+    // search returns the most precise path that includes a given file.
+    let mut include_path_to_package_map: Vec<_> = packages
+        .iter()
+        .flat_map(|package| {
+            package
+                .include_paths
+                .iter()
+                .map(move |include_path| (include_path.1.clone(), package.clone()))
+        })
+        .collect();
+    include_path_to_package_map.sort_by(|(left, _), (right, _)| right.cmp(left));
+
+    Ok(PackageInfo {
+        existing_packages,
+        include_path_to_package_map,
+    })
+}
+
 /// Synthesize the member package `F.D` of an implicit family. `family` is the
 /// flagged family entry (its single `include_path` is the family `path`);
 /// `member_dir` is the first path segment `D` below that path. This is a pure
@@ -130,34 +159,7 @@ fn synthesize_member(family: &Package, member_dir: &str) -> Package {
 impl TryFrom<packages::PackageInfo> for PackageInfo {
     type Error = Errors;
     fn try_from(info: packages::PackageInfo) -> Result<Self, Errors> {
-        let result = package_info_to_vec("PACKAGES.toml", info);
-        match result {
-            Ok(packages) => {
-                let existing_packages = packages
-                    .iter()
-                    .map(|package| (package.name.1.clone(), package.clone()))
-                    .collect();
-                // Build include_path_to_package_map, sorted by anti-lexicographic include_path
-                // order so a simple linear search returns the most precise path that includes
-                // a given file.
-                let mut include_path_pairs: Vec<_> = packages
-                    .iter()
-                    .flat_map(|package| {
-                        package
-                            .include_paths
-                            .iter()
-                            .map(move |include_path| (include_path.1.clone(), package.clone()))
-                    })
-                    .collect();
-                include_path_pairs.sort_by(|(a, _), (b, _)| b.cmp(a));
-                let include_path_to_package_map = include_path_pairs.into_iter().collect();
-                Ok(PackageInfo {
-                    existing_packages,
-                    include_path_to_package_map,
-                })
-            }
-            Err(err) => Err(err),
-        }
+        package_info_to_oxidized("PACKAGES.toml", info)
     }
 }
 

@@ -39,7 +39,11 @@
 // Codes:
 //
 // %s, %d, %u, %f - strings, integers, unsigned integers or floats;
-//      NULL if a nullptr is passed in. Boolean is supported for %d and %u and
+//      NULL if a nullptr is passed in. A Query argument is rendered as a
+//      sub-query rather than a value -- %s accepts one in both modes, and
+//      %d/%u/%f splice one on the legacy path, or under checked() when it
+//      arrives type-erased in a QueryArgument; prefer %q, which says so.
+//      Boolean is supported for %d and %u and
 //      renders as 0/1: MySQL has no boolean type (BOOL is an alias for
 //      tinyint(1)), so QueryArgument has no bool alternative.
 // %m - any single value: string, integer (including bool), float, or sub-query.
@@ -66,7 +70,19 @@
 //       respectively.  %U becomes "`col1` = val1, `col2` = val2" and %W becomes
 //       "`col1` = val1 AND `col2` = val2". Does not currently support unsigned
 //       integers.
-// %Q - literal string, evil evil.  don't use.
+// %q - a sub-query, rendered in place, unquoted, with no space added on
+//      either side.  %Lq renders a comma-separated list of them, which is what
+//      clauses like ON DUPLICATE KEY UPDATE need.
+//      The argument must be a Query -- there is no NULL form, so nullptr and
+//      optional<Query> are rejected.  %q constrains only the argument's type:
+//      the sub-query's text is validated by that Query on its own terms, so an
+//      unsafe one still splices verbatim, as it does under %s and %Q.
+//      Converting %LQ -> %Lq is not always mechanical: %LQ renders a null
+//      element as NULL, where %Lq throws.  An empty list renders as nothing
+//      under either, so a caller building one at runtime needs its own guard
+//      against a bare "SET" or "ON DUPLICATE KEY UPDATE".
+// %Q - literal string, evil evil.  don't use.  Prefer %q, which takes only a
+//      Query; %Q is unsupported under Query::checked().
 // %K - an SQL comment.  Will put the /* and */ for you.
 // %% - literal % character.
 //
@@ -180,9 +196,10 @@ constexpr size_t kMaxCheckedSpecs = 256;
 // which accepts only the plain forms) read this instead of re-parsing the
 // format string.
 enum class SpecForm : uint8_t {
-  Plain, // %s %d %u %f %m %T %C %U %W %V %K
+  Plain, // %s %d %u %f %m %T %C %q %U %W %V %K
   Equals, // %=s %=d %=u %=f %=m
-  List, // %Ls %Ld %Lu %Lf %Lm %LC -- argument must be a list, not a scalar
+  List, // %Ls %Ld %Lu %Lf %Lm %Lq %LC -- argument must be a list, not a
+        // scalar
   PairList, // %LO %LA -- argument must be a pair list
 };
 
@@ -278,7 +295,7 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
           return res;
         }
       } else if (n == 'L') {
-        // list variants: %Ls %Ld %Lu %Lf %Lm %LC %LO %LA
+        // list variants: %Ls %Ld %Lu %Lf %Lm %Lq %LC %LO %LA
         // %Q is explicitly disallowed.
         if (i >= s.size()) {
           res.ok = false;
@@ -287,8 +304,9 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
         }
         char t = s[i];
         i++;
-        if (t == 's' || t == 'd' || t == 'u' || t == 'f' || t == 'm') {
-          // list of values
+        if (t == 's' || t == 'd' || t == 'u' || t == 'f' || t == 'm' ||
+            t == 'q') {
+          // list of values, or of sub-queries for %Lq
           if (!push_spec(res, t, SpecForm::List)) {
             return res;
           }
@@ -320,6 +338,12 @@ consteval CheckedParseResult consteval_parse_checked(std::string_view s) {
         }
       } else if (n == 'K') {
         if (!push_spec(res, 'K')) {
+          return res;
+        }
+      } else if (n == 'q') {
+        // sub-query; the argument must be a Query (%Lq takes a list of
+        // them).
+        if (!push_spec(res, 'q')) {
           return res;
         }
       } else {
@@ -664,6 +688,8 @@ constexpr bool check_arg_for_spec_precise(char spec, bool is_list) {
           return is_float_v<E>;
         case 'm':
           return is_value_arg_or_optional_v<E>;
+        case 'q':
+          return std::is_same_v<std::decay_t<E>, Query>;
         case 'C':
           return is_identifier_arg_v<E>;
         default:
@@ -685,6 +711,8 @@ constexpr bool check_arg_for_spec_precise(char spec, bool is_list) {
         return is_float_v<T> || is_optional_float_v<T> || is_null_arg_v<T>;
       case 'm': // any value
         return ValueArg<T>;
+      case 'q': // sub-query, and nothing else
+        return std::is_same_v<std::decay_t<T>, Query>;
       case 'T': // table or column identifier
       case 'C':
         return IdentifierArg<T>;
@@ -1131,11 +1159,15 @@ class Query {
   // e.g. that each row of a %V matrix is itself a list, that a folly::dynamic
   // passed to %W is actually an object, or that a %Ls list's elements match the
   // sub-type. Those remain runtime checks (and a bad folly::dynamic can still
-  // throw at construction). A sub-Query value is accepted for %s and %m.
+  // throw at construction). A sub-Query value is accepted for %q, and also for
+  // %s and %m; none of them constrain what that sub-query contains, since
+  // checked-ness is a runtime property of a Query, not part of its type.
   //
-  // Allowed specifiers: %%  %s %d %u %f %m  %T %C  %LC %Ls %Ld %Lu %Lf %Lm
+  // Allowed specifiers: %%  %s %d %u %f %m  %T %C  %q  %LC %Ls %Ld %Lu %Lf
+  // %Lm %Lq
   // %=s %=d %=u %=f %=m  %U %W %V %K %LO %LA. %Q is intentionally unsupported;
-  // use the unsafe Query() constructor if you truly need raw SQL (discouraged).
+  // use %q for a sub-query, or the unsafe Query() constructor if you truly need
+  // raw SQL (discouraged).
   //
   // Diagnostic gotcha: a bad arg type/count normally errors right at the
   // checked() call. But if the call sits inside a folly::coro lambda that is

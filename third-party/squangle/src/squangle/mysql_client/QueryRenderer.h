@@ -71,6 +71,16 @@ class QueryRenderer {
       EscapeMode escapeMode,
       const InternalConnection* conn);
 
+  // Render one %q / %Lq argument: check it really is a Query, then splice it
+  // in via renderSubQuery.
+  static void appendSubQuery(
+      StringType& output,
+      std::string_view queryText,
+      size_t offset,
+      const QueryArgument& param,
+      EscapeMode escapeMode,
+      const InternalConnection* conn);
+
   static void escapeAndAppend(
       StringType* dest,
       const folly::fbstring& value,

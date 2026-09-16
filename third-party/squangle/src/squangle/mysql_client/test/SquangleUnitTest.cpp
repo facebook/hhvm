@@ -17,6 +17,7 @@
 // tests, so suppress the deprecation lint for the whole file.
 // @lint-ignore-every CLANGTIDY facebook-hte-Deprecated
 
+#include <fmt/core.h>
 #include <folly/FixedString.h>
 #include <folly/Optional.h>
 #include <folly/container/F14Map.h>
@@ -104,7 +105,7 @@ static_assert(!parse_ok_fixed<fixed_string{
                   "SELECT * FROM %i WHERE id = 1"}>()); // simplified %i alias
                                                         // not supported
 static_assert(!parse_ok_fixed<fixed_string{
-                  "SELECT * FROM users WHERE x = %q"}>()); // unknown specifier
+                  "SELECT * FROM users WHERE x = %z"}>()); // unknown specifier
 static_assert(
     !parse_ok_fixed<fixed_string{
         "SELECT * FROM users WHERE x = %LT"}>()); // %LT historically not
@@ -604,6 +605,44 @@ static_assert(!valid_value_row_schema<fixed_string{"%d s"}>());
 // A format the main parser rejects is not a valid schema either.
 static_assert(!valid_value_row_schema<fixed_string{"%d %"}>());
 static_assert(!valid_value_row_schema<fixed_string{"%z"}>());
+
+// ----------------------------------------------------------------------------
+// %q — sub-query, and only a sub-query.
+//
+// A Query is also accepted by %s and %m (and renders as a spliced sub-query
+// there), but those accept plain strings too, which render as a quoted literal
+// instead. %q makes the intent explicit and the wrong type a compile error.
+// ----------------------------------------------------------------------------
+static_assert(parse_ok_fixed<fixed_string{"SELECT * FROM (%q) t"}>());
+static_assert(count_specs_fixed<fixed_string{"SELECT * FROM (%q) t"}>() == 1);
+static_assert(check_args_fixed<fixed_string{"%q"}, Query>());
+// Everything that is not a Query is rejected, including the things %s allows.
+static_assert(!check_args_fixed<fixed_string{"%q"}, std::string>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, std::string_view>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, const char*>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, char*>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, int>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, std::nullptr_t>());
+static_assert(!check_args_fixed<fixed_string{"%q"}, std::optional<Query>>());
+static_assert(
+    !check_args_fixed<fixed_string{"%q"}, std::vector<QueryArgument>>());
+// A bare QueryArgument is the type-erased escape hatch and is accepted for any
+// specifier; %q validates it at render time instead.
+static_assert(check_args_fixed<fixed_string{"%q"}, QueryArgument>());
+// %Lq takes a list of sub-queries.
+static_assert(parse_ok_fixed<fixed_string{"UPDATE t SET %Lq"}>());
+static_assert(check_args_fixed<fixed_string{"%Lq"}, std::vector<Query>>());
+static_assert(
+    !check_args_fixed<fixed_string{"%Lq"}, std::vector<std::string>>());
+static_assert(!check_args_fixed<fixed_string{"%Lq"}, Query>());
+// A type-erased list is accepted and validated per element at render time.
+static_assert(
+    check_args_fixed<fixed_string{"%Lq"}, std::vector<QueryArgument>>());
+// %q is not a ValueRow cell type either.
+static_assert(!valid_value_row_schema<fixed_string{"%q"}>());
+static_assert(!valid_value_row_schema<fixed_string{"%d %q"}>());
+// There is no %=q.
+static_assert(!parse_ok_fixed<fixed_string{"SELECT * FROM t WHERE %C%=q"}>());
 
 } // namespace checked_compile_tests
 
@@ -1229,6 +1268,174 @@ TEST_F(QueryTest, PairRangeOfPlainStringsIsAPairList) {
   EXPECT_EQ(
       Query("UPDATE %T SET %U", "t", update).renderInsecure(),
       "UPDATE `t` SET `a` = \"1\", `b` = \"2\"");
+}
+
+TEST_F(QueryTest, CheckedQueryRendersSubQueryForPercentQ) {
+  auto sub = Query::checked("SELECT id FROM %T WHERE x = %d", "inner", 5);
+
+  // %q splices the sub-query in place, unquoted.
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%q) t", sub).renderInsecure(),
+      "SELECT * FROM (SELECT id FROM `inner` WHERE x = 5) t");
+
+  // %s accepts a Query too and renders identically -- but it also accepts a
+  // plain string, which renders as a quoted literal. That ambiguity is the
+  // reason %q exists.
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%s) t", sub).renderInsecure(),
+      "SELECT * FROM (SELECT id FROM `inner` WHERE x = 5) t");
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%s) t", "inner").renderInsecure(),
+      "SELECT * FROM (\"inner\") t");
+
+  // Nesting works: the inner query is rendered with its own validation.
+  auto outer = Query::checked("SELECT * FROM (%q) t", sub);
+  EXPECT_EQ(
+      Query::checked("SELECT count(*) FROM (%q) u", outer).renderInsecure(),
+      "SELECT count(*) FROM (SELECT * FROM "
+      "(SELECT id FROM `inner` WHERE x = 5) t) u");
+
+  // The legacy constructor reaches the same renderer branch.
+  EXPECT_EQ(
+      Query("SELECT * FROM (%q) t", sub).renderInsecure(),
+      "SELECT * FROM (SELECT id FROM `inner` WHERE x = 5) t");
+}
+
+TEST_F(QueryTest, PercentQRejectsNonQueryAtRenderTime) {
+  // A type-erased QueryArgument passes the compile-time check for any
+  // specifier, so %q has to reject a non-Query when it renders. The legacy
+  // constructor has no compile-time check at all, so the same guard is what
+  // stops an arbitrary argument reaching renderSubQuery there.
+  auto expectRejects = [](auto&& query, std::string_view typeName) {
+    try {
+      query.renderInsecure();
+      FAIL() << "expected a parse error for " << typeName;
+    } catch (const std::invalid_argument& e) {
+      EXPECT_NE(
+          std::string(e.what()).find(
+              fmt::format(
+                  "invalid value type {} for format string %q", typeName)),
+          std::string::npos)
+          << "actual: " << e.what();
+    }
+  };
+
+  expectRejects(
+      Query::checked("SELECT * FROM (%q) t", QueryArgument("oops")), "string");
+  expectRejects(
+      Query::checked("SELECT * FROM (%q) t", QueryArgument(7)), "int64_t");
+  // No compile-time net on the legacy path -- this is the case that needs it.
+  expectRejects(Query("SELECT * FROM (%q) t", 7), "int64_t");
+
+  // A null is rejected too: unlike every other value specifier, %q has no NULL
+  // rendering. It gets its own message rather than the type error above,
+  // because this is the case %LQ accepted and so the one a migration hits.
+  for (auto&& q : {
+           Query::checked("SELECT * FROM (%q) t", QueryArgument(nullptr)),
+           Query("SELECT * FROM (%q) t", QueryArgument(nullptr)),
+       }) {
+    try {
+      q.renderInsecure();
+      FAIL() << "expected a parse error for a NULL sub-query";
+    } catch (const std::invalid_argument& e) {
+      EXPECT_NE(
+          std::string(e.what()).find("a sub-query position cannot be NULL"),
+          std::string::npos)
+          << "actual: " << e.what();
+    }
+  }
+}
+
+TEST_F(QueryTest, PercentQDelegatesValidationToTheSubQuery) {
+  // %q constrains the argument's type, not its contents. What happens to the
+  // sub-query's text depends on how that sub-query was built.
+
+  // Legacy but clean: scanned as it renders, and renders.
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%q) t", Query("SELECT 1"))
+          .renderInsecure(),
+      "SELECT * FROM (SELECT 1) t");
+
+  // Legacy with a dangerous character: the sub-query's own scan rejects it,
+  // even though the enclosing query is checked.
+  EXPECT_THROW(
+      Query::checked("SELECT * FROM (%q) t", Query("SELECT 'x'"))
+          .renderInsecure(),
+      std::invalid_argument);
+
+  // Built with Query::unsafe: spliced verbatim, in both modes. %q could refuse
+  // this -- it has the Query in hand -- but does not, so %Q -> %q conversion
+  // stays mechanical. Asserted alongside %Q and %s, which do the same.
+  const auto unsafeSub = Query::unsafe("SELECT 'x'; --");
+  const std::string spliced = "SELECT * FROM (SELECT 'x'; --) t";
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%q) t", unsafeSub).renderInsecure(),
+      spliced);
+  EXPECT_EQ(Query("SELECT * FROM (%q) t", unsafeSub).renderInsecure(), spliced);
+  EXPECT_EQ(Query("SELECT * FROM (%Q) t", unsafeSub).renderInsecure(), spliced);
+  EXPECT_EQ(
+      Query::checked("SELECT * FROM (%s) t", unsafeSub).renderInsecure(),
+      spliced);
+
+  // Why refusing an unsafe sub-query at %q would not mean anything: the
+  // intervening query embeds the unsafe one through %s, which never reaches
+  // appendSubQuery, so a check there sees only the (safe) middle query. Note
+  // the inner query must use %s rather than %q -- %q at any depth routes
+  // through the same handler, so it would not demonstrate the hole.
+  EXPECT_EQ(
+      Query::checked(
+          "SELECT * FROM (%q) t", Query("SELECT * FROM (%s) u", unsafeSub))
+          .renderInsecure(),
+      "SELECT * FROM (SELECT * FROM (SELECT 'x'; --) u) t");
+}
+
+TEST_F(QueryTest, PercentLqRendersAListOfSubQueries) {
+  // The %LQ shape this replaces: a comma-joined list of SQL fragments, as an
+  // ON DUPLICATE KEY UPDATE clause needs.
+  std::vector<Query> updates{
+      Query::checked("%C=VALUES(%C)", "a", "a"),
+      Query::checked("%C=VALUES(%C)", "b", "b")};
+  EXPECT_EQ(
+      Query::checked(
+          "INSERT INTO %T VALUES (1) ON DUPLICATE KEY UPDATE %Lq", "t", updates)
+          .renderInsecure(),
+      "INSERT INTO `t` VALUES (1) ON DUPLICATE KEY UPDATE "
+      "`a`=VALUES(`a`), `b`=VALUES(`b`)");
+
+  // Same rendering as the %LQ it replaces. Pinned to a literal rather than
+  // just comparing the two, which would also hold if both were wrong.
+  std::vector<QueryArgument> erased{updates[0], updates[1]};
+  const std::string expected = "UPDATE t SET `a`=VALUES(`a`), `b`=VALUES(`b`)";
+  EXPECT_EQ(
+      Query("UPDATE t SET %LQ", QueryArgument(erased)).renderInsecure(),
+      expected);
+  EXPECT_EQ(
+      Query("UPDATE t SET %Lq", QueryArgument(erased)).renderInsecure(),
+      expected);
+
+  // Elements are type-checked at render time when the list is type-erased.
+  std::vector<QueryArgument> bad{Query::checked("SELECT 1"), QueryArgument(7)};
+  EXPECT_THROW(
+      Query::checked("UPDATE t SET %Lq", QueryArgument(bad)).renderInsecure(),
+      std::invalid_argument);
+
+  // A null element is where %Lq and %LQ part company: %LQ renders NULL, %q
+  // has no NULL form. Worth knowing before converting a %LQ site.
+  std::vector<QueryArgument> withNull{
+      Query("SELECT 1"), QueryArgument(nullptr)};
+  EXPECT_EQ(
+      Query("SELECT %LQ", QueryArgument(withNull)).renderInsecure(),
+      "SELECT SELECT 1, NULL");
+  EXPECT_THROW(
+      Query("SELECT %Lq", QueryArgument(withNull)).renderInsecure(),
+      std::invalid_argument);
+
+  // An empty list renders as nothing at all, leaving a dangling clause for the
+  // server to reject. Same as %Ls and %LQ, but the motivating use case builds
+  // this list at runtime, so callers need their own guard.
+  EXPECT_EQ(
+      Query::checked("UPDATE t SET %Lq", std::vector<Query>{}).renderInsecure(),
+      "UPDATE t SET ");
 }
 
 TEST_F(QueryTest, QueryAcceptsMutableCharArray) {

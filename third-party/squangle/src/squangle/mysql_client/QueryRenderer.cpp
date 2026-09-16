@@ -255,6 +255,28 @@ void QueryRenderer<StringType>::appendColumnTableName(
 }
 
 template <typename StringType>
+void QueryRenderer<StringType>::appendSubQuery(
+    StringType& output,
+    std::string_view queryText,
+    size_t offset,
+    const QueryArgument& param,
+    EscapeMode escapeMode,
+    const InternalConnection* conn) {
+  // Runs in both modes. checked() cannot prove this on its own: a type-erased
+  // QueryArgument is accepted for every specifier and is only resolved here.
+  // Separate from the type error below so the message names the problem
+  // instead of leaking "monostate", the variant's alternative name.
+  if (param.isNull()) {
+    parseError(
+        queryText, offset, "a sub-query position cannot be NULL (%q, %Lq)");
+  }
+  if (!param.isQuery()) {
+    formatStringParseError(queryText, offset, 'q', param.typeName());
+  }
+  renderSubQuery(output, param.getQuery(), escapeMode, conn);
+}
+
+template <typename StringType>
 void QueryRenderer<StringType>::renderSubQuery(
     StringType& output,
     const Query& subQuery,
@@ -517,6 +539,8 @@ void QueryRenderer<StringType>::renderAppend(
           first_param = false;
           if (type == 'C') {
             appendColumnTableName(&output, val);
+          } else if (type == 'q') {
+            appendSubQuery(output, queryText, idx - 1, val, escapeMode, conn);
           } else {
             appendValue(
                 &output, queryText, idx - 1, type, val, escapeMode, conn);
@@ -532,6 +556,10 @@ void QueryRenderer<StringType>::renderAppend(
         appendValueClauses(
             &output, queryText, &clauseIdx, ", ", param, escapeMode, conn);
       }
+    } else if (c == 'q') {
+      // Sub-query only: %q takes a Query and nothing else, where %Q also
+      // accepts arbitrary text.
+      appendSubQuery(output, queryText, idx - 1, param, escapeMode, conn);
     } else if (c == 'Q') {
       if (param.isQuery()) {
         renderSubQuery(output, param.getQuery(), escapeMode, conn);

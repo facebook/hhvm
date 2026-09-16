@@ -628,15 +628,32 @@ end = struct
 
   let show_tys tys = List.map ~f:show tys |> String.concat ~sep:", "
 
-  (** Generate an expression if the type is immediately inhabited.
+  let rec is_immediately_inhabited = function
+    | Primitive Primitive.(Null | Int | String | Float | Bool)
+    | Classish { kind = Kind.Class; _ }
+    | Enum _
+    | Vec _
+    | Dict _
+    | Keyset _ ->
+      true
+    | Tuple { conjuncts; open_ } ->
+      (not open_) && List.for_all conjuncts ~f:is_immediately_inhabited
+    | Shape { fields; open_ = _ } ->
+      List.for_all fields ~f:(fun { ty; _ } -> is_immediately_inhabited ty)
+    | Awaitable ty
+    | Function { return_ = ty; _ } ->
+      is_immediately_inhabited ty
+    | Primitive Primitive.(Arraykey | Num)
+    | Classish { kind = Kind.(Interface | AbstractClass); _ }
+    | Mixed
+    | Option _
+    | Alias _
+    | Newtype _
+    | TypeConst _
+    | Case _
+    | Like _ ->
+      false
 
-      This function needs to be deterministic in whether it turns `Some` or
-      `None` as this information is used first in the `subtype_of` relation to
-      determine if the type is inhabited and later to actually generate the
-      expression.
-
-      TODO: if this turns out to cause slowness make it return `string lazy
-      option` so that it is cheaper when used within the `subtype_of` check. *)
   let rec expr_of = function
     | Primitive prim -> begin
       let open Primitive in
@@ -741,7 +758,7 @@ end = struct
           _;
         }
       ty =
-    ((not pick_immediately_inhabited) || expr_of ty |> Option.is_some)
+    ((not pick_immediately_inhabited) || is_immediately_inhabited ty)
     &&
     match ty with
     | Case _ -> not (for_option_ty || for_enum_def)

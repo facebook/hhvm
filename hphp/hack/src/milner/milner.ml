@@ -43,25 +43,20 @@ let generate_tables ~verbose ~debug_pattern template =
   let mk_type () = Gen.Type.mk renv env in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
+  let expr_table = init_table template expr_regexp in
+  let subty_table = init_table template subtype_regexp in
+  List.iter [expr_table; subty_table] ~f:(fun table ->
+      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table = Hashtbl.map ty_table ~f:mk_type in
 
-  let subty_table = init_table template subtype_regexp in
   let gen_subty_from_ty_table ~key ~data:_ =
-    let (env, ty) =
-      Hashtbl.find ty_table key |> Option.value_or_thunk ~default:mk_type
-    in
+    let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of renv env ty
   in
   let subty_table = Hashtbl.mapi subty_table ~f:gen_subty_from_ty_table in
 
-  (* Generate expressions that conform to the types in the type table.
-     If there are expression placeholders without a corresponding type, generate
-     a random type and use that to generate an expression. *)
-  let expr_table = init_table template expr_regexp in
   let gen_expr_from_ty_table ~key ~data:_ =
-    let (env, ty) =
-      Hashtbl.find ty_table key |> Option.value_or_thunk ~default:mk_type
-    in
+    let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.inhabitant_of renv env ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
@@ -84,7 +79,10 @@ let fill_in_template ty_table subty_table expr_table template =
         ~with_:data
         contents
     in
-    Hashtbl.fold table ~init:contents ~f:replace
+    Hashtbl.to_alist table
+    |> List.sort ~compare:(fun (left, _) (right, _) -> Int.compare right left)
+    |> List.fold ~init:contents ~f:(fun contents (key, data) ->
+           replace ~key ~data contents)
   in
 
   let ty_str_table = Hashtbl.map ty_table ~f:Gen.Type.show in

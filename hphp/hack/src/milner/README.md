@@ -19,3 +19,8 @@ expression or consume randomness merely to decide whether a witness exists.
 
 Expression construction carries the same generation context and nominal
 environment through recursive witnesses.
+
+Every identifier has one generated type and environment, including identifiers
+that occur only in expressions. Their auxiliary declarations are retained.
+Repeated placeholders share their replacement; longer numeric identifiers are
+substituted first so `#1` cannot consume the prefix of `#10`.

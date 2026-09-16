@@ -851,7 +851,7 @@ let load_
       int_
         Config_keys.Hhconf.saved_state_max_expected_age_days
         ~default:
-          GlobalOptions.(
+          Global_options.(
             default_saved_state_loading.saved_state_max_expected_age_days)
         config
     in

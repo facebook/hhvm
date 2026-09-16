@@ -1,0 +1,11 @@
+[packages]
+
+[packages.explicit]
+include_paths = ["//explicit/"]
+
+[implicit_packages]
+
+[implicit_packages.alpha]
+path = "//implicit/"
+
+[deployments]

@@ -15,8 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include <algorithm>
 #include <atomic>
 #include <cstdint>
+#include <utility>
+#include <vector>
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
 #include <folly/synchronization/AtomicNotification.h>
@@ -1533,6 +1536,7 @@ namespace {
 const StaticString
   s_uses("uses"),
   s_includes("includes"),
+  s_path("path"),
   s_include_paths("include_paths"),
   s_soft_includes("soft_includes"),
   s_packages("packages"),
@@ -1559,6 +1563,56 @@ Array HHVM_FUNCTION(get_all_packages) {
     result.set(makeStaticString(name), package.toVariant());
   }
 
+  return result.toArray();
+}
+
+bool HHVM_FUNCTION(implicit_package_family_exists, StringArg family) {
+  assertx(family.get());
+  auto const& packageInfo = g_context->getPackageInfo();
+  auto const familyName = family->toCppString();
+  if (!packageInfo.implicitPackageFamilies().contains(familyName)) {
+    return false;
+  }
+
+  auto const activeDeployment = packageInfo.getActiveDeployment();
+  if (!activeDeployment) return true;
+  if (activeDeployment->getDeployKind(familyName) == DeployKind::Hard) {
+    return true;
+  }
+  auto const memberPrefix = familyName + ".";
+  return std::any_of(
+    activeDeployment->m_packages.begin(),
+    activeDeployment->m_packages.end(),
+    [&] (auto const& package) {
+      return package.starts_with(memberPrefix);
+    }
+  );
+}
+
+Array HHVM_FUNCTION(get_all_implicit_package_families) {
+  auto const& families = g_context->getPackageInfo().implicitPackageFamilies();
+  DictInit result(families.size());
+  for (auto const& [name, family] : families) {
+    DictInit metadata(3);
+    metadata.set(
+      s_path.get(),
+      OptString{makeStaticString(family.m_path)}
+    );
+
+    VecInit includes(family.m_includes.size());
+    for (auto const& include : family.m_includes) {
+      includes.append(OptString{makeStaticString(include)});
+    }
+    metadata.set(s_includes.get(), includes.toVariant());
+
+    VecInit softIncludes(family.m_soft_includes.size());
+    for (auto const& include : family.m_soft_includes) {
+      softIncludes.append(OptString{makeStaticString(include)});
+    }
+    metadata.set(s_soft_includes.get(), softIncludes.toVariant());
+
+    result.set(makeStaticString(name), metadata.toVariant());
+  }
   return result.toArray();
 }
 
@@ -1667,6 +1721,8 @@ static struct HHExtension final : Extension {
     X(enable_function_coverage);
     X(collect_function_coverage);
     X(get_all_packages);
+    X(implicit_package_family_exists);
+    X(get_all_implicit_package_families);
     X(get_all_deployments);
     X(package_exists);
     X(active_config_experiments);

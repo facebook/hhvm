@@ -1,0 +1,3 @@
+Parser {
+  Hack.Lang.EnableImplicitPackages = true
+}

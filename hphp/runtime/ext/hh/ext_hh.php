@@ -361,6 +361,23 @@ function get_all_packages()[]: dict<string, shape(
 )>;
 
 /**
+ * Return whether an implicit package family is declared and hard-available in
+ * the current deployment.
+ */
+<<__Native>>
+function implicit_package_family_exists(string $family)[]: bool;
+
+/**
+ * Return all implicit package family information from PACKAGES.toml.
+ */
+<<__Native>>
+function get_all_implicit_package_families()[]: dict<string, shape(
+  'path' => string,
+  'includes' => vec<string>,
+  'soft_includes' => vec<string>,
+)>;
+
+/**
  * Return all deployment information from PACKAGES.toml
  */
 <<__Native>>

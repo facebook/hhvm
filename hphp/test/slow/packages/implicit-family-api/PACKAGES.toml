@@ -1,0 +1,29 @@
+[packages]
+
+[packages.shared]
+include_paths = ["//shared/"]
+
+[packages.optional]
+include_paths = ["//optional/"]
+
+[packages.explicit]
+include_paths = ["//explicit/"]
+
+[implicit_packages]
+
+[implicit_packages.zeta]
+path = "//families/zeta/"
+
+[implicit_packages.alpha]
+path = "//families/alpha/"
+includes = ["shared"]
+soft_includes = ["optional"]
+
+[implicit_packages.soft]
+path = "//families/soft/"
+
+[deployments]
+
+[deployments.prod]
+packages = ["alpha", "shared", "zeta.one"]
+soft_packages = ["soft", "optional"]

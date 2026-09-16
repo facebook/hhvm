@@ -71,12 +71,18 @@ namespace HH {
   // Hack specific existence functions
   function module_exists(string $module_name, bool $autoload = true)[]: bool;
   function package_exists(string $name)[]: bool;
+  function implicit_package_family_exists(string $family)[]: bool;
   // Every package/deployment declared in PACKAGES.toml, not just those in the
   // active deployment. Keys of the returned dicts are the declared names.
   function get_all_packages()[]: dict<string, shape(
     'includes' => vec<string>,
     'soft_includes' => vec<string>,
     'include_paths' => vec<string>,
+  )>;
+  function get_all_implicit_package_families()[]: dict<string, shape(
+    'path' => string,
+    'includes' => vec<string>,
+    'soft_includes' => vec<string>,
   )>;
   function get_all_deployments()[]: dict<string, shape(
     'packages' => vec<string>,

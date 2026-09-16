@@ -16,6 +16,67 @@ use crate::types::ImplicitPackageMap;
 pub use crate::types::NameSet;
 use crate::types::PackageMap;
 
+struct PackagePathValidation {
+    valid: bool,
+    is_directory: Option<bool>,
+}
+
+struct PackagePathValidator<'a> {
+    packages_toml_dir: &'a Path,
+    strict: bool,
+}
+
+impl PackagePathValidator<'_> {
+    fn validate_and_normalize(
+        &self,
+        configured_path: &mut Spanned<String>,
+        errors: &mut Vec<Error>,
+    ) -> PackagePathValidation {
+        let original = configured_path.get_ref().clone();
+        let span = configured_path.span();
+        let relative = original.strip_prefix("//").unwrap_or(&original).to_owned();
+        *configured_path.get_mut() = relative.clone();
+
+        let mut valid = true;
+        if !original.starts_with("//") || original.contains("./") {
+            errors.push(Error::malformed_include_path(
+                original.clone(),
+                span.clone(),
+            ));
+            valid = false;
+        }
+
+        if !self.strict {
+            return PackagePathValidation {
+                valid,
+                is_directory: None,
+            };
+        }
+
+        let filesystem_path = relative.trim_end_matches('/');
+        let is_directory = match std::fs::metadata(self.packages_toml_dir.join(filesystem_path)) {
+            Ok(metadata) => {
+                if metadata.is_dir() && !original.ends_with('/') {
+                    if valid {
+                        errors.push(Error::malformed_include_path(relative, span.clone()));
+                    }
+                    valid = false;
+                }
+                Some(metadata.is_dir())
+            }
+            Err(_) => {
+                errors.push(Error::invalid_include_path(relative, span));
+                valid = false;
+                None
+            }
+        };
+        PackagePathValidation {
+            valid,
+            is_directory,
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct PackageInfo {
     packages: PackageMap,
@@ -43,6 +104,10 @@ impl PackageInfo {
             .filter(|&(_i, c)| c == '\n')
             .map(|(i, _)| i)
             .collect::<Vec<_>>();
+        let path_validator = PackagePathValidator {
+            packages_toml_dir: Path::new(packages_toml).parent().unwrap_or(Path::new("/")),
+            strict,
+        };
 
         // perform error check on include_paths
         for (_, package) in config.packages.iter_mut() {
@@ -50,39 +115,7 @@ impl PackageInfo {
                 let dirs_cloned = dirs.clone();
                 dirs_cloned.iter().for_each(|d| {
                     let mut spanned_dir = dirs.take(d).unwrap();
-                    let span = spanned_dir.span();
-                    let dir = spanned_dir.get_ref();
-
-                    if !dir.starts_with("//") || dir.contains("./") {
-                        errors.push(Error::malformed_include_path(dir.clone(), span.clone()))
-                    }
-                    let include_path = Path::new(dir.strip_prefix("//").unwrap_or(dir));
-                    let relative_include_path = include_path.to_path_buf();
-
-                    if strict {
-                        let packages_toml_path =
-                            Path::new(packages_toml).parent().unwrap_or(Path::new("/"));
-                        let include_path_abs = packages_toml_path.join(include_path).canonicalize();
-                        match include_path_abs {
-                            Ok(p) => {
-                                let metadata = std::fs::metadata(&p).unwrap();
-                                if metadata.is_dir() && !dir.ends_with("/") {
-                                    errors.push(Error::malformed_include_path(
-                                        include_path.to_string_lossy().into_owned(),
-                                        span.clone(),
-                                    ));
-                                }
-                            }
-                            Err(_) => {
-                                errors.push(Error::invalid_include_path(
-                                    include_path.to_string_lossy().into_owned(),
-                                    span.clone(),
-                                ));
-                            }
-                        }
-                    }
-
-                    *spanned_dir.get_mut() = relative_include_path.to_string_lossy().into_owned();
+                    path_validator.validate_and_normalize(&mut spanned_dir, &mut errors);
                     dirs.insert(spanned_dir);
                 });
                 dirs.sort_by(|a, b| b.get_ref().cmp(a.get_ref()));
@@ -94,27 +127,30 @@ impl PackageInfo {
             // before validating or transporting package configuration.
             config.implicit_packages.clear();
         } else {
-            // Normalize implicit-package family paths to the same leading-`//`-
-            // stripped form used for include_paths. Crucially, this performs NO
-            // filesystem access -- not even in strict mode -- because a family's
-            // members are resolved lazily at lookup time, so the directories
-            // under `path` need not exist (or be checked out) when PACKAGES.toml
-            // is read. A family whose `path` is malformed is dropped after
-            // reporting, so it does not produce confusing secondary errors from
-            // the disjointness / closure checks in `check_config`.
-            let mut malformed: Vec<Spanned<String>> = vec![];
+            // Normalize family paths like include_paths. A family path is always
+            // directory-shaped, and strict parsing also validates it against the
+            // filesystem through the same helper used for include_paths.
+            let mut invalid: Vec<Spanned<String>> = vec![];
             for (name, fam) in config.implicit_packages.iter_mut() {
+                let original = fam.path.get_ref().clone();
                 let span = fam.path.span();
-                let dir = fam.path.get_ref().clone();
-                if !dir.starts_with("//") || dir.contains("./") || !dir.ends_with('/') {
-                    errors.push(Error::malformed_include_path(dir.clone(), span));
-                    malformed.push(name.clone());
-                    continue;
+                let mut validation =
+                    path_validator.validate_and_normalize(&mut fam.path, &mut errors);
+                if validation.valid && !original.ends_with('/') {
+                    errors.push(Error::malformed_include_path(original, span.clone()));
+                    validation.valid = false;
+                } else if validation.valid && validation.is_directory == Some(false) {
+                    errors.push(Error::package_path_not_directory(
+                        fam.path.get_ref().clone(),
+                        span,
+                    ));
+                    validation.valid = false;
                 }
-                let relative = dir.strip_prefix("//").unwrap_or(&dir).to_string();
-                *fam.path.get_mut() = relative;
+                if !validation.valid {
+                    invalid.push(name.clone());
+                }
             }
-            for name in malformed {
+            for name in invalid {
                 config.implicit_packages.shift_remove(&name);
             }
         }
@@ -472,6 +508,34 @@ mod test {
         );
         // Every family was dropped, so nothing is carried downstream.
         assert!(info.implicit_packages().is_empty());
+    }
+
+    #[test]
+    fn test_implicit_family_strict_path_validation() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-implicit-strict-paths.toml");
+        let info = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let errors = info
+            .errors
+            .iter()
+            .map(|error| error.msg())
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            errors,
+            vec![
+                String::from("include_path missing-family-root/ does not exist"),
+                String::from("package path //package-implicit.toml/ must be a directory"),
+            ]
+        );
+        assert_eq!(
+            info.implicit_packages()
+                .keys()
+                .map(|name| name.get_ref().as_str())
+                .collect::<Vec<_>>(),
+            vec!["root"]
+        );
     }
 
     #[test]

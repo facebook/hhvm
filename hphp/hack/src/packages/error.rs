@@ -33,6 +33,10 @@ pub enum Error {
         include_path: String,
         span: (usize, usize),
     },
+    PackagePathNotDirectory {
+        path: String,
+        span: (usize, usize),
+    },
     IncompleteIncludes {
         name: String,
         span: (usize, usize),
@@ -105,6 +109,14 @@ impl Error {
         let Range { start, end } = span;
         Self::MalformedIncludePath {
             include_path,
+            span: (start, end),
+        }
+    }
+
+    pub fn package_path_not_directory(path: String, span: Range<usize>) -> Self {
+        let Range { start, end } = span;
+        Self::PackagePathNotDirectory {
+            path,
             span: (start, end),
         }
     }
@@ -211,6 +223,7 @@ impl Error {
             | Self::IncompleteDeployment { span, .. }
             | Self::InvalidIncludePath { span, .. }
             | Self::MalformedIncludePath { span, .. }
+            | Self::PackagePathNotDirectory { span, .. }
             | Self::IncompleteIncludes { span, .. }
             | Self::ImplicitIncludePathsNotAllowed { span, .. }
             | Self::OverlappingImplicitPath { span, .. }
@@ -273,6 +286,9 @@ impl Display for Error {
                     "include_path {} is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
                     include_path
                 )?;
+            }
+            Self::PackagePathNotDirectory { path, .. } => {
+                write!(f, "package path //{} must be a directory", path)?;
             }
             Self::IncompleteIncludes {
                 name,

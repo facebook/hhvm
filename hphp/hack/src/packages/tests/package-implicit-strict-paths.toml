@@ -1,0 +1,15 @@
+[packages]
+
+[implicit_packages]
+
+# The PACKAGES.toml parent directory is a valid family root.
+[implicit_packages.root]
+path = "//"
+
+# Strict parsing rejects family roots that do not exist.
+[implicit_packages.missing]
+path = "//missing-family-root/"
+
+# Strict parsing rejects files used as family roots.
+[implicit_packages.file]
+path = "//package-implicit.toml/"

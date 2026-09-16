@@ -337,6 +337,22 @@ mod test {
     }
 
     #[test]
+    fn test_contradictory_observability_flags() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-contradictory-flags.toml");
+        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        assert_eq!(
+            errors,
+            vec![String::from(
+                "contradictory declares both enable_strict_isolation and \
+                 allow_deployed_packages_checking, which contradict each other"
+            )]
+        );
+    }
+
+    #[test]
     fn test_config_errors1() {
         let test_path = SRCDIR.as_path().join("tests/package-3.toml");
         let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();

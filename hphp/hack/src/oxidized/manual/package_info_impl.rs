@@ -66,6 +66,7 @@ impl<'a> PackageConverter<'a> {
             soft_includes: self.convert_names(package.soft_includes.as_ref()),
             include_paths: self.convert_names(package.include_paths.as_ref()),
             enable_strict_isolation: package.enable_strict_isolation,
+            allow_deployed_packages_checking: package.allow_deployed_packages_checking,
             is_implicit: false,
         }
     }
@@ -81,6 +82,7 @@ impl<'a> PackageConverter<'a> {
             soft_includes: self.convert_names(family.soft_includes.as_ref()),
             include_paths: vec![self.convert_name(&family.path)],
             enable_strict_isolation: true,
+            allow_deployed_packages_checking: false,
             is_implicit: true,
         }
     }
@@ -189,8 +191,9 @@ fn synthesize_member(family: &Package, member_dir: &str) -> Package {
             family_path_pos.clone(),
             format!("{}{}/", family_path, member_dir),
         )],
-        // Members inherit the family's strict-isolation setting.
+        // Members inherit the family's observability settings.
         enable_strict_isolation: family.enable_strict_isolation,
+        allow_deployed_packages_checking: family.allow_deployed_packages_checking,
         is_implicit: true,
     }
 }
@@ -319,6 +322,7 @@ mod test {
             soft_includes: vec![],
             include_paths: vec![pos_id("www/prototypes/")],
             enable_strict_isolation: true,
+            allow_deployed_packages_checking: false,
             is_implicit: true,
         };
         let info = PackageInfo {
@@ -336,8 +340,9 @@ mod test {
         assert_eq!(member.include_paths[0].1, "www/prototypes/alpha/");
         assert_eq!(member.includes[0].1, "intern");
         assert!(member.is_implicit);
-        // Members inherit the family's strict-isolation setting.
+        // Members inherit the family's observability settings.
         assert!(member.enable_strict_isolation);
+        assert!(!member.allow_deployed_packages_checking);
 
         // A deeper file resolves to the same first-segment member.
         assert_eq!(
@@ -381,6 +386,7 @@ mod test {
             soft_includes: vec![],
             include_paths: vec![pos_id("www/prototypes/")],
             enable_strict_isolation: true,
+            allow_deployed_packages_checking: false,
             is_implicit: true,
         };
         let info = PackageInfo {
@@ -420,6 +426,7 @@ mod test {
             soft_includes: vec![],
             include_paths: vec![pos_id("www/prototypes/")],
             enable_strict_isolation: true,
+            allow_deployed_packages_checking: false,
             is_implicit: true,
         };
         let info = PackageInfo {

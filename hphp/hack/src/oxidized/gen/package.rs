@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3941042515ea75de8f0db346cc273726>>
+// @generated SignedSource<<36cd2230714877e78715f49f53977ed6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -67,6 +67,15 @@ pub struct Package {
     /// for it), and [package_exclude_patterns] (e.g. [__tests__]) do not
     /// grant a typecheck exemption for references into it.
     pub enable_strict_isolation: bool,
+    /// Opt-in: when true, code may check at runtime whether this package is
+    /// deployed (the [package] expression and the [__RequirePackage] /
+    /// [__SoftRequirePackage] attributes). A package that does not declare it
+    /// may not be checked for, so a new package is closed by default. It does
+    /// not restrict [__PackageOverride], which is the only way into a package
+    /// declaring no [include_paths]. Independent of [enable_strict_isolation],
+    /// which forbids the same checks: declaring both is contradictory and is
+    /// rejected when the config is parsed.
+    pub allow_deployed_packages_checking: bool,
     /// True for an implicit-package family entry (from an
     /// [implicit_packages] stanza) and for the members synthesized from it.
     /// A family entry's [include_paths] holds the family [path]; member

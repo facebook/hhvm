@@ -28,6 +28,15 @@ type t = {
           [__RequirePackage] / [__SoftRequirePackage] attributes are rejected
           for it), and [package_exclude_patterns] (e.g. [__tests__]) do not
           grant a typecheck exemption for references into it. *)
+  allow_deployed_packages_checking: bool;
+      (** Opt-in: when true, code may check at runtime whether this package is
+          deployed (the [package] expression and the [__RequirePackage] /
+          [__SoftRequirePackage] attributes). A package that does not declare it
+          may not be checked for, so a new package is closed by default. It does
+          not restrict [__PackageOverride], which is the only way into a package
+          declaring no [include_paths]. Independent of [enable_strict_isolation],
+          which forbids the same checks: declaring both is contradictory and is
+          rejected when the config is parsed. *)
   is_implicit: bool;
       (** True for an implicit-package family entry (from an
           [implicit_packages] stanza) and for the members synthesized from it.

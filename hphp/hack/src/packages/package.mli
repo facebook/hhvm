@@ -16,6 +16,10 @@ type t = {
       (** When true, this package opts into strict isolation: its presence
           cannot be dynamically observed, and [package_exclude_patterns] do not
           grant a typecheck exemption for references into it. *)
+  allow_deployed_packages_checking: bool;
+      (** Opt-in: when true, code may check at runtime whether this package is
+          deployed. Absent means it may not be checked for. Does not restrict
+          [__PackageOverride]. Contradicts [enable_strict_isolation]. *)
   is_implicit: bool;
       (** True for an implicit-package family entry (from an
           [implicit_packages] stanza) and for the members synthesized from it. *)

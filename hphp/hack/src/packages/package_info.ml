@@ -54,8 +54,10 @@ let synthesize_member (family : Package.t) (member_dir : string) : Package.t =
     Package.includes = family.Package.includes;
     Package.soft_includes = family.Package.soft_includes;
     Package.include_paths = [member_path];
-    (* Members inherit the family's strict-isolation setting. *)
+    (* Members inherit the family's observability settings. *)
     Package.enable_strict_isolation = family.Package.enable_strict_isolation;
+    Package.allow_deployed_packages_checking =
+      family.Package.allow_deployed_packages_checking;
     Package.is_implicit = true;
   }
 

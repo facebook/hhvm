@@ -59,6 +59,10 @@ pub enum Error {
         package: String,
         span: (usize, usize),
     },
+    ContradictoryObservabilityFlags {
+        name: String,
+        span: (usize, usize),
+    },
     PackageNameInvalid {
         name: String,
         span: (usize, usize),
@@ -177,6 +181,14 @@ impl Error {
         }
     }
 
+    pub fn contradictory_observability_flags(package: &Spanned<String>) -> Self {
+        let Range { start, end } = package.span();
+        Self::ContradictoryObservabilityFlags {
+            name: package.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
     pub fn package_name_invalid(package: &Spanned<String>) -> Self {
         let Range { start, end } = package.span();
         Self::PackageNameInvalid {
@@ -223,6 +235,7 @@ impl Error {
             | Self::ImplicitIncludePathsNotAllowed { span, .. }
             | Self::OverlappingImplicitPath { span, .. }
             | Self::PackageNamePrefixCollision { span, .. }
+            | Self::ContradictoryObservabilityFlags { span, .. }
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
             | Self::ImplicitMemberNameInvalid { span, .. }
@@ -324,6 +337,13 @@ impl Display for Error {
                     f,
                     "implicit_packages family {} collides with package {} (a family name may not equal or be a prefix of a package name)",
                     name, package
+                )?;
+            }
+            Self::ContradictoryObservabilityFlags { name, .. } => {
+                write!(
+                    f,
+                    "{} declares both enable_strict_isolation and allow_deployed_packages_checking, which contradict each other",
+                    name
                 )?;
             }
             Self::PackageNameInvalid { name, .. } => {

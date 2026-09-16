@@ -1,0 +1,7 @@
+[packages]
+
+[packages.contradictory]
+enable_strict_isolation = true
+allow_deployed_packages_checking = true
+
+[deployments]

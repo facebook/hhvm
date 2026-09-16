@@ -117,8 +117,9 @@ impl Config {
                         soft_includes: fam.soft_includes.clone(),
                         include_paths: None,
                         // Synthetic node used only for include-closure checks;
-                        // the flag is irrelevant here.
+                        // the flags are irrelevant here.
                         enable_strict_isolation: false,
+                        allow_deployed_packages_checking: false,
                     },
                 )
             }));
@@ -139,7 +140,10 @@ impl Config {
                         includes: family.includes.clone(),
                         soft_includes: family.soft_includes.clone(),
                         include_paths: None,
+                        // Synthetic node used only for include-closure checks;
+                        // the flags are irrelevant here.
                         enable_strict_isolation: false,
+                        allow_deployed_packages_checking: false,
                     },
                 );
             };
@@ -227,6 +231,9 @@ impl Config {
         for (package_name, package) in self.packages.iter() {
             if !is_valid_identifier(package_name.get_ref()) {
                 errors.push(Error::package_name_invalid(package_name));
+            }
+            if package.enable_strict_isolation && package.allow_deployed_packages_checking {
+                errors.push(Error::contradictory_observability_flags(package_name));
             }
             check_member_names(errors, &package.includes);
             check_member_names(errors, &package.soft_includes);
@@ -330,8 +337,9 @@ impl Config {
                     soft_includes: fam.soft_includes.clone(),
                     include_paths: None,
                     // Synthetic node used only for include-closure checks; the
-                    // flag is irrelevant here.
+                    // flags are irrelevant here.
                     enable_strict_isolation: false,
+                    allow_deployed_packages_checking: false,
                 },
             );
         }

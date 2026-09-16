@@ -30,6 +30,9 @@ pub struct Package {
     /// `enable_strict_isolation` key is absent from the `[packages.*]` stanza.
     #[serde(default)]
     pub enable_strict_isolation: bool,
+    /// Opt-in (see the OCaml `Package.t`); absent means not checkable.
+    #[serde(default)]
+    pub allow_deployed_packages_checking: bool,
 }
 
 /// A single `[implicit_packages.<family>]` stanza. It declares a *family* of

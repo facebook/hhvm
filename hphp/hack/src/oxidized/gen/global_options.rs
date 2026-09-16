@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<18af90487bdd06efee8a8230a030a63a>>
+// @generated SignedSource<<6547b2212b12cdcf9d3cc13864eb4e85>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -408,8 +408,10 @@ pub struct GlobalOptions {
     /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
     /// Excludes hierarchy/override check, which is covered by `needs_concrete_override_check`
     pub needs_concrete: bool,
-    /// Enable override check for __NeedsConcrete methods https://fburl.com/hack-needs-concrete
-    pub needs_concrete_override_check: bool,
+    /// Configure override checks for __NeedsConcrete methods: 0 disables the
+    /// check, 1 emits a warning, and 2 emits a Hack error.
+    /// https://fburl.com/hack-needs-concrete
+    pub needs_concrete_override_check: isize,
     /// When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes
     pub strict_consistent_construct: bool,
     /// Admits (string)$c when $c: class<T>

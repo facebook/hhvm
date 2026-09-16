@@ -605,10 +605,17 @@ impl HhConfig {
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
-            needs_concrete_override_check: hhconfig.get_bool_or(
-                "needs_concrete_override_check",
-                default.needs_concrete_override_check,
-            )?,
+            needs_concrete_override_check: (|| {
+                let value = hhconfig.get_int_or(
+                    "needs_concrete_override_check",
+                    default.needs_concrete_override_check,
+                )?;
+                anyhow::ensure!(
+                    (0..=2).contains(&value),
+                    "needs_concrete_override_check must be 0, 1, or 2"
+                );
+                Ok::<_, anyhow::Error>(value)
+            })()?,
             strict_consistent_construct: hhconfig.get_bool_or(
                 "strict_consistent_construct",
                 default.strict_consistent_construct,

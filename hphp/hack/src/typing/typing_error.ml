@@ -881,6 +881,12 @@ module Primary = struct
         pos: Pos.t;
         class_name: string;
       }
+    | Needs_concrete_override of {
+        pos: Pos.t;
+        method_pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+        method_name_for_method_defined_outside_class: string option;
+      }
     | Trivial_strict_eq of {
         pos: Pos.t;
         result: bool;

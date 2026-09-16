@@ -201,7 +201,7 @@ type t = {
   class_sub_classname: bool;
   class_class_type: bool;
   needs_concrete: bool;
-  needs_concrete_override_check: bool;
+  needs_concrete_override_check: int;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_classname_static_meth: int;
@@ -320,7 +320,7 @@ let default =
     class_sub_classname = true;
     class_class_type = true;
     needs_concrete = false;
-    needs_concrete_override_check = false;
+    needs_concrete_override_check = 0;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
     class_pointer_ban_classname_static_meth = 0;

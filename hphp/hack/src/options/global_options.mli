@@ -300,8 +300,10 @@ type t = {
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
        * Excludes hierarchy/override check, which is covered by `needs_concrete_override_check` *)
-  needs_concrete_override_check: bool;
-      (** Enable override check for __NeedsConcrete methods https://fburl.com/hack-needs-concrete *)
+  needs_concrete_override_check: int;
+      (** Configure override checks for __NeedsConcrete methods: 0 disables the
+       * check, 1 emits a warning, and 2 emits a Hack error.
+       * https://fburl.com/hack-needs-concrete *)
   strict_consistent_construct: bool;
       (** When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
@@ -423,7 +425,7 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete:bool ->
-  ?needs_concrete_override_check:bool ->
+  ?needs_concrete_override_check:int ->
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_classname_static_meth:int ->

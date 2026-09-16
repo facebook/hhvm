@@ -907,8 +907,11 @@ let check_needs_concrete_override
     class_elt
     ~class_pos
     ~member_name =
-  if
+  let check_level =
     Typechecker_options.needs_concrete_override_check env.genv.tcopt
+  in
+  if
+    (Int.equal check_level 1 || Int.equal check_level 2)
     && (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
     && get_ce_readonly_prop_or_needs_concrete class_elt
   then
@@ -924,16 +927,32 @@ let check_needs_concrete_override
       | `Decl_ref _ ->
         (class_pos, Some member_name)
     in
-    Typing_warning_utils.add
-      env
-      ( error_pos,
-        Typing_warning.Needs_concrete_override,
-        {
-          Typing_warning.Needs_concrete_override.pos =
-            Lazy.force class_elt.ce_pos;
-          method_name_for_method_defined_outside_class;
-          parent_pos = Lazy.force parent_class_elt.ce_pos;
-        } )
+    let method_pos = Lazy.force class_elt.ce_pos in
+    let parent_pos = Lazy.force parent_class_elt.ce_pos in
+    match check_level with
+    | 1 ->
+      Typing_warning_utils.add
+        env
+        ( error_pos,
+          Typing_warning.Needs_concrete_override,
+          {
+            Typing_warning.Needs_concrete_override.pos = method_pos;
+            method_name_for_method_defined_outside_class;
+            parent_pos;
+          } )
+    | 2 ->
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Needs_concrete_override
+               {
+                 pos = error_pos;
+                 method_pos;
+                 parent_pos;
+                 method_name_for_method_defined_outside_class;
+               })
+    | _ -> ()
 
 let detect_multiple_concrete_defs
     (class_elt, class_) (parent_class_elt, parent_class) =

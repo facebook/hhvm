@@ -3042,6 +3042,30 @@ end = struct
     in
     create ~code:Error_code.NeedsConcreteOnConstructor ~claim ()
 
+  let needs_concrete_override
+      pos method_pos parent_pos method_name_for_method_defined_outside_class =
+    let method_text =
+      match method_name_for_method_defined_outside_class with
+      | Some method_name -> Printf.sprintf "Method `%s`" method_name
+      | None -> "This method"
+    in
+    let claim =
+      lazy
+        ( pos,
+          method_text
+          ^ " is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class)"
+        )
+    and reasons =
+      lazy
+        [
+          ( method_pos,
+            "It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method"
+          );
+          (parent_pos, "Previously defined here");
+        ]
+    in
+    create ~code:Error_code.NeedsConcreteOverride ~claim ~reasons ()
+
   let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
   let trivial_strict_eq p b left right left_trail right_trail =
@@ -5290,6 +5314,18 @@ end = struct
       needs_concrete_on_instance_method pos class_name meth_name
     | Needs_concrete_on_constructor { pos; class_name } ->
       needs_concrete_on_constructor pos class_name
+    | Needs_concrete_override
+        {
+          pos;
+          method_pos;
+          parent_pos;
+          method_name_for_method_defined_outside_class;
+        } ->
+      needs_concrete_override
+        pos
+        method_pos
+        parent_pos
+        method_name_for_method_defined_outside_class
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
       trivial_strict_eq pos result left right left_trail right_trail
     | Trivial_strict_not_nullable_compare_null { pos; result; ty_reason_msg } ->

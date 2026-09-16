@@ -823,6 +823,7 @@ module Typing = struct
     | SplatFieldNotKnown [@value 4523]
     | RedeclaringPromotedProperty [@value 4524]
     | RequireDynamicObjGet [@value 4525]
+    | NeedsConcreteOverride [@value 4526]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

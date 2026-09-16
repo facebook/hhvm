@@ -1,6 +1,6 @@
 <?hh
 // Test that __NeedsConcrete methods can override non-__NeedsConcrete methods
-// when needs_concrete_override_check is disabled (default)
+// when needs_concrete_override_check=0 (the default)
 
 class Base {
   public function foo(): void {}

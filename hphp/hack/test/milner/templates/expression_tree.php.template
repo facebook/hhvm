@@ -1,0 +1,12 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints', 'expression_trees')>>
+
+<<__EntryPoint>>
+function main(): void {
+  $value = expr#0;
+  $tree = (tree_value#0)($value);
+  $lifted = (tree_lift#0)($tree);
+  $spliced = (tree_splice#0)($lifted);
+  $actual = (tree_visit#0)($spliced);
+  invariant(vec[$actual] === vec[$value], 'splice preserves payload');
+}

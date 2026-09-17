@@ -61,3 +61,40 @@ let xhp ~name ~value_hint ~child =
         ("xhp_child", child);
       ];
   }
+
+let expression_tree ~value_hint =
+  let value = fresh_local "value" in
+  let tree = fresh_local "tree" in
+  let tree_hint = "MilnerTree<" ^ value_hint ^ ">" in
+  {
+    definitions = [];
+    expressions =
+      [
+        ( "tree_value",
+          function_
+            [parameter value_hint value]
+            []
+            tree_hint
+            (Call
+               ( StaticMember ("MilnerDsl", "valueTree<" ^ value_hint ^ ">"),
+                 [Local value] )) );
+        ( "tree_splice",
+          function_
+            [parameter tree_hint tree]
+            ["defaults"]
+            tree_hint
+            (Quote ("MilnerDsl", Splice (Local tree))) );
+        ( "tree_lift",
+          function_
+            [parameter tree_hint tree]
+            []
+            tree_hint
+            (Call (StaticMember ("MilnerDsl", "lift"), [Local tree])) );
+        ( "tree_visit",
+          function_
+            [parameter tree_hint tree]
+            ["defaults"]
+            "mixed"
+            (Call (Member (Local tree, "visit"), [New ("MilnerDsl", [])])) );
+      ];
+  }

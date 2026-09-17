@@ -26,3 +26,35 @@ final class MilnerPayload<T> {
   public function __construct(public T $value)[] {}
 }
 |}
+
+let expression_tree =
+  {|
+type MilnerPos = shape(...);
+interface Spliceable<TVisitor, +TResult, +TInfer> {
+  public function visit(TVisitor $visitor): TResult;
+}
+final class MilnerTree<T> implements Spliceable<MilnerDsl, mixed, T> {
+  public function __construct(private (function(MilnerDsl): mixed) $ast)[] {}
+  public function visit(MilnerDsl $visitor): mixed { return ($this->ast)($visitor); }
+}
+final class MilnerDsl {
+  const type TAst = mixed;
+  public static function makeTree<T>(
+    ?MilnerPos $_pos,
+    shape(
+      'splices' => dict<string,mixed>,
+      'functions' => vec<mixed>,
+      'static_methods' => vec<mixed>,
+      ?'type' => (function(): T),
+      'variables' => vec<string>,
+      'lexically_enclosing_tree' => ?MilnerPos,
+    ) $_metadata,
+    (function(MilnerDsl): mixed) $ast,
+  )[]: MilnerTree<T> { return new MilnerTree($ast); }
+  public static function valueTree<T>(T $value)[]: MilnerTree<T> {
+    return new MilnerTree($_ ==> $value);
+  }
+  public static function lift<T>(MilnerTree<T> $tree)[]: MilnerTree<T> { return $tree; }
+  public function splice<T>(?MilnerPos $_pos, string $_key, MilnerTree<T> $tree, ?vec<string> $_vars = null): mixed { return $tree->visit($this); }
+}
+|}

@@ -500,3 +500,10 @@ xhp attribute hints". `MilnerPayload<T>` keeps that attribute nominal while
 retaining arbitrary generated payloads inside it. The wrapper also satisfies
 the separate restrictions on nullable required attributes and direct
 type-constant hints.
+
+## Expression trees
+
+Value-tree creation, quote/splice, lifting, and visiting are independent typed
+operations. The splice law compares one visited result with its original input.
+A shared fixture supplies only the visitor protocol and value/visit/lift helpers;
+the quote/splice and visit operations explicitly require defaults capabilities.

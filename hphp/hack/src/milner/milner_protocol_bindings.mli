@@ -15,3 +15,5 @@ type t = {
     [child] must be a closed string expression. The payload hint is the shared
     type of this placeholder group. *)
 val xhp : name:string -> value_hint:string -> child:Milner_syntax.expr -> t
+
+val expression_tree : value_hint:string -> t

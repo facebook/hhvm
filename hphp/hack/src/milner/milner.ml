@@ -123,6 +123,8 @@ let identity_prefixes =
     "identity_is_child";
   ]
 
+let tree_prefixes = ["tree_value"; "tree_splice"; "tree_lift"; "tree_visit"]
+
 let xhp_prefixes =
   ["xhp_box"; "xhp_make"; "xhp_attribute"; "xhp_children"; "xhp_child"]
 
@@ -200,6 +202,10 @@ let generate_tables ~verbose ~debug_pattern template =
   List.iter xhp_prefixes ~f:(fun prefix ->
       let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set xhps ~key ~data:()));
+  let trees = Hashtbl.create (module Int) in
+  List.iter tree_prefixes ~f:(fun prefix ->
+      let table = init_table template (family_regexp prefix) in
+      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set trees ~key ~data:()));
   let renv_for key =
     let renv =
       if Hashtbl.mem alias_types key then
@@ -232,6 +238,7 @@ let generate_tables ~verbose ~debug_pattern template =
        enums;
        identities;
        xhps;
+       trees;
        enum_value_types;
      ]
     @ List.map operations ~f:(fun (_, _, table) -> table))
@@ -391,6 +398,24 @@ let generate_tables ~verbose ~debug_pattern template =
             (prefix, Milner_syntax.render_expr expression)))
   in
 
+  let tree_table =
+    Hashtbl.mapi trees ~f:(fun ~key ~data:() ->
+        let (_, value) = Hashtbl.find_exn ty_table key in
+        let witness =
+          Protocol.expression_tree ~value_hint:(Gen.Type.show value)
+        in
+        List.map witness.Protocol.expressions ~f:(fun (prefix, expression) ->
+            (prefix, Milner_syntax.render_expr expression)))
+  in
+  let protocol_definitions =
+    protocol_definitions
+    @
+    if Hashtbl.is_empty trees then
+      []
+    else
+      [Fixture.expression_tree]
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -425,7 +450,8 @@ let generate_tables ~verbose ~debug_pattern template =
     operation_tables,
     enum_table,
     identity_table,
-    xhp_table )
+    xhp_table,
+    tree_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -442,6 +468,7 @@ let fill_in_template
     enum_table
     identity_table
     xhp_table
+    tree_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
@@ -531,6 +558,14 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
+  let template =
+    List.fold tree_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map tree_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
   let template = fill_table ty_str_table ~prefix:enum_value_prefix template in
   (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
@@ -572,7 +607,8 @@ let milner verbose debug_pattern seed template_path destination_path =
         operation_tables,
         enum_table,
         identity_table,
-        xhp_table ) =
+        xhp_table,
+        tree_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -590,6 +626,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       enum_table
       identity_table
       xhp_table
+      tree_table
       template
     |> add_missing_definitions defs
   in

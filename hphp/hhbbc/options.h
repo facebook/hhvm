@@ -144,6 +144,15 @@ struct Options {
   bool useExternWorkerForFullAnalysis = false;
 
   /*
+   * Select the local HHBBC flow. This is distinct from disabling
+   * useExternWorkerForFullAnalysis, which still uses extern-worker for other
+   * HHBBC stages. This is the rollout switch for the flow intended to remove
+   * HHBBC's extern-worker dependency as local implementations become
+   * available. Full extern-worker analysis takes precedence when enabled.
+   */
+  bool useLocalHHBBC = false;
+
+  /*
    * Extern-worker config
    */
   std::string ExternWorkerUseCase;

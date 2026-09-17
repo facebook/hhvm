@@ -1844,6 +1844,7 @@ bool process(CompilerOptions &po) {
   }
   HHBBC::options.useExternWorkerForFullAnalysis =
     Option::UseExternWorkerForFullAnalysis;
+  HHBBC::options.useLocalHHBBC = Option::UseLocalHHBBC;
   HHBBC::options.CoreDump = po.coredump;
 
   Timer timer{Timer::WallTime, "running HHBBC"};

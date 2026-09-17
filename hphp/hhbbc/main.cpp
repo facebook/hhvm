@@ -127,6 +127,7 @@ void parse_options(int argc, char** argv) {
     ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ("public-sprop-refine-limit", po::value(&options.publicSPropRefineLimit))
+    ("local-hhbbc", po::value(&options.useLocalHHBBC))
     ;
 
   po::options_description oflags("Optimization Flags");

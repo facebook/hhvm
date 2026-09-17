@@ -80,6 +80,27 @@ let procedure_prefixes = ["PROCEDURE_TYPE"; "procedure"; "THROWS"]
 let callable_prefixes =
   ["CALLABLE_TYPE"; "CALLABLE_THROWS"; "callable"; "invoke_statement"; "invoke"]
 
+let enum_value_prefix = "ENUM_VALUE_TYPE"
+
+let enum_prefixes =
+  [
+    "ENUM_SUBTYPE";
+    "enum_member";
+    "enum_label";
+    "enum_base_member";
+    "enum_base_label";
+    "enum_child_member";
+    "enum_child_label";
+    "enum_unwrap";
+    "enum_unwrap_narrow";
+    "enum_lookup";
+    "enum_lookup_narrow";
+    "enum_owner_upcast";
+    "enum_label_owner_upcast";
+    "enum_payload_upcast";
+    "enum_label_payload_upcast";
+  ]
+
 let family_regexp prefix =
   Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")
 
@@ -128,9 +149,22 @@ let generate_tables ~verbose ~debug_pattern template =
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set callables ~key ~data:()));
   let calls = init_table template (family_regexp "CALL") in
+  let enum_value_types =
+    init_table template (family_regexp enum_value_prefix)
+  in
+  let enums = Hashtbl.create (module Int) in
+  List.iter enum_prefixes ~f:(fun prefix ->
+      let table = init_table template (family_regexp prefix) in
+      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set enums ~key ~data:()));
   let renv_for key =
-    if Hashtbl.mem alias_types key then
-      Gen.ReadOnlyEnvironment.for_alias renv
+    let renv =
+      if Hashtbl.mem alias_types key then
+        Gen.ReadOnlyEnvironment.for_alias renv
+      else
+        renv
+    in
+    if Hashtbl.mem enum_value_types key || Hashtbl.mem enums key then
+      Gen.ReadOnlyEnvironment.for_enum_initializer renv
     else
       renv
   in
@@ -151,6 +185,8 @@ let generate_tables ~verbose ~debug_pattern template =
       dependents;
       procedures;
       callables;
+      enums;
+      enum_value_types;
       calls;
     ]
     ~f:(fun table ->
@@ -264,6 +300,16 @@ let generate_tables ~verbose ~debug_pattern template =
         |> Milner_syntax.render_expr)
   in
 
+  let enum_table =
+    Hashtbl.mapi enums ~f:(fun ~key ~data:() ->
+        let (env, value) = Hashtbl.find_exn ty_table key in
+        let (env, bindings) =
+          Gen.Type.mk_enum_bindings (renv_for key) env ~value
+        in
+        Hashtbl.set ty_table ~key ~data:(env, value);
+        bindings)
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -294,7 +340,8 @@ let generate_tables ~verbose ~debug_pattern template =
     dependent_table,
     procedure_table,
     callable_table,
-    call_table )
+    call_table,
+    enum_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -308,13 +355,17 @@ let fill_in_template
     procedure_table
     callable_table
     call_table
+    enum_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
-      String.substr_replace_all
-        ~pattern:(placeholder prefix key)
-        ~with_:data
-        contents
+      let rex =
+        Pcre.regexp
+          ("(?<![A-Za-z0-9_])"
+          ^ Pcre.quote (placeholder prefix key)
+          ^ "(?![0-9])")
+      in
+      Pcre.substitute ~rex ~subst:(fun _ -> data) contents
     in
     Hashtbl.to_alist table
     |> List.sort ~compare:(fun (left, _) (right, _) -> Int.compare right left)
@@ -365,6 +416,15 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
+  let template =
+    List.fold enum_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map enum_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
+  let template = fill_table ty_str_table ~prefix:enum_value_prefix template in
   (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
   |> fill_table subty_str_table ~prefix:subtype_prefix
@@ -402,7 +462,8 @@ let milner verbose debug_pattern seed template_path destination_path =
         dependent_table,
         procedure_table,
         callable_table,
-        call_table ) =
+        call_table,
+        enum_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -417,6 +478,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       procedure_table
       callable_table
       call_table
+      enum_table
       template
     |> add_missing_definitions defs
   in

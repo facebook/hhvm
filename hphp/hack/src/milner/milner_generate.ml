@@ -166,6 +166,8 @@ module ReadOnlyEnvironment : sig
     for_alias_def: bool;
         (** Aliases (including vanilla aliases, newtypes, and case types) cannot
             refer to type constants due to an HHVM issues (T29968063). *)
+    for_enum_class_value: bool;
+        (** Avoid HHVM's abort when dynamic enum constants copy label values. *)
     for_enum_def: bool;
         (** There is a check that bans case types to be used as a bound or the
             underlying type of an enum. *)
@@ -184,6 +186,8 @@ module ReadOnlyEnvironment : sig
   val default : verbose:int -> debug_pattern:string option -> t
 
   val for_alias : t -> t
+
+  val for_enum_initializer : t -> t
 
   val debug :
     level:int ->
@@ -204,6 +208,7 @@ end = struct
     for_option_ty: bool;
     for_reified_ty: bool;
     for_alias_def: bool;
+    for_enum_class_value: bool;
     for_enum_def: bool;
     pick_immediately_inhabited: bool;
     debug_info: debug_info;
@@ -214,6 +219,7 @@ end = struct
       for_option_ty = false;
       for_reified_ty = false;
       for_alias_def = false;
+      for_enum_class_value = false;
       for_enum_def = false;
       pick_immediately_inhabited = false;
       debug_info =
@@ -230,21 +236,26 @@ end = struct
 
   let for_alias renv = { renv with for_alias_def = true }
 
+  (* T288868934: indirect label-valued enum initializers abort in HHVM. *)
+  let for_enum_initializer renv = { renv with for_enum_class_value = true }
+
   let show
       {
         for_option_ty;
         for_reified_ty;
         for_alias_def;
+        for_enum_class_value;
         for_enum_def;
         pick_immediately_inhabited;
         debug_info = _;
       } =
     Format.sprintf
-      "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; pick_immediately_inhabited: %b}"
+      "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; for_enum_class_value: %b; pick_immediately_inhabited: %b}"
       for_option_ty
       for_reified_ty
       for_alias_def
       for_enum_def
+      for_enum_class_value
       pick_immediately_inhabited
 
   let debug ~level ({ debug_info; _ } as renv) ~start ~end_ f =
@@ -458,6 +469,7 @@ and Kind : sig
     | TypeConst
     | Case
     | Enum
+    | EnumClass
     | Container
     | BuiltinContainer
     | Tuple
@@ -499,6 +511,7 @@ end = struct
     | TypeConst
     | Case
     | Enum
+    | EnumClass
     | Container
     | BuiltinContainer
     | Tuple
@@ -540,6 +553,7 @@ end = struct
         true
       | Option
       | Classish
+      | EnumClass
       | GenericClass
       | Dependent
       | Container
@@ -623,6 +637,14 @@ and Definition : sig
   val case_type : name:string -> bound:Type.t option -> Type.t list -> t
 
   val enum : name:string -> bound:Type.t option -> Type.t -> value:string -> t
+
+  val enum_class :
+    name:string ->
+    parent:string option ->
+    members:(string * Type.t * Milner_syntax.expr) list ->
+    t
+
+  val enum_unwrap : name:string -> enum_name:string -> t
 
   val effect_state : name:string -> t
 end = struct
@@ -888,6 +910,27 @@ end = struct
         value
     | None -> Format.sprintf "enum %s: %s { A = %s; }" name (Type.show ty) value
 
+  let enum_class ~name ~parent ~members =
+    let parent =
+      Option.value_map parent ~default:"" ~f:(Format.sprintf " extends %s")
+    in
+    let members =
+      List.map members ~f:(fun (name, ty, value) ->
+          Format.sprintf
+            "  %s %s = %s;"
+            (Type.show ty)
+            name
+            (Milner_syntax.render_expr value))
+      |> String.concat ~sep:"\n"
+    in
+    Format.sprintf "enum class %s: mixed%s {\n%s\n}" name parent members
+
+  let enum_unwrap ~name ~enum_name =
+    Format.sprintf
+      "function %s<TValue>(HH\\MemberOf<%s, TValue> $member)[]: TValue { return $member; }"
+      name
+      enum_name
+
   let effect_state ~name =
     Format.sprintf
       "final class %s { public int $value = 0; public static int $calls = 0; }"
@@ -964,6 +1007,12 @@ and Type : sig
     value:t ->
     Environment.t * (string * string) list
 
+  val mk_enum_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
@@ -988,6 +1037,12 @@ end = struct
   and generic = {
     instantiation: t;
     is_reified: bool;
+  }
+
+  and enum_class_member = {
+    enum_name: string;
+    member: string;
+    payload: t;
   }
 
   and function_return =
@@ -1017,6 +1072,8 @@ end = struct
     | TypeConst of { name: string }
     | Case of { name: string }
     | Enum of { name: string }
+    | EnumClassMember of enum_class_member
+    | EnumClassLabel of enum_class_member
     | Vec of t
     | Dict of {
         key: t;
@@ -1101,6 +1158,10 @@ end = struct
     | TypeConst info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
+    | EnumClassMember { enum_name; payload; _ } ->
+      Format.sprintf "HH\\MemberOf<%s, %s>" enum_name (show payload)
+    | EnumClassLabel { enum_name; payload; _ } ->
+      Format.sprintf "HH\\EnumClass\\Label<%s, %s>" enum_name (show payload)
     | Vec ty -> Format.sprintf "vec<%s>" (show ty)
     | Dict { key; value } ->
       Format.sprintf "dict<%s, %s>" (show key) (show value)
@@ -1412,6 +1473,106 @@ end = struct
       null_head env_null TypeSet.empty ty_null
       && exposed_case TypeSet.empty ty_case
     in
+    let rec expose_definition env seen ty =
+      if TypeSet.mem ty seen then
+        ty
+      else
+        match (ty, Env.get_typedef_body env ty) with
+        | ((Alias _ | Newtype _ | TypeConst _ | Dependent _), Some [inner]) ->
+          expose_definition env (TypeSet.add ty seen) inner
+        | _ -> ty
+    in
+    let rec null_function_partition env seen ty =
+      let ty = expose_definition env TypeSet.empty ty in
+      if TypeSet.mem ty seen then
+        None
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Primitive Primitive.Null -> Some true
+        | Function _ -> Some false
+        | Option inner ->
+          Option.map (null_function_partition env seen inner) ~f:(Fn.const true)
+        | Case _ ->
+          Option.bind (Env.get_typedef_body env ty) ~f:(fun variants ->
+              List.fold variants ~init:(Some false) ~f:(fun acc variant ->
+                  match (acc, null_function_partition env seen variant) with
+                  | (Some has_null, Some variant_null) ->
+                    Some (has_null || variant_null)
+                  | _ -> None))
+        | _ -> None
+    in
+    (* T288865283: opaque enum/null partitions can fail reflexivity. *)
+    let enum_null_partition_hazard env_enum ty_enum env_other ty_other =
+      match null_function_partition env_other TypeSet.empty ty_other with
+      | Some true ->
+        let function_type =
+          match expose_definition env_other TypeSet.empty ty_other with
+          | Option inner -> begin
+            match expose_definition env_other TypeSet.empty inner with
+            | Function _ as ty -> Some ty
+            | _ -> None
+          end
+          | _ -> None
+        in
+        let rec payload_hazard seen ~like ty =
+          let ty = expose_definition env_enum TypeSet.empty ty in
+          if TypeSet.mem ty seen then
+            false
+          else
+            let seen = TypeSet.add ty seen in
+            match ty with
+            | Mixed
+            | EnumClassLabel _ ->
+              true
+            | Case _ ->
+              Option.value_map
+                (Env.get_case_bound env_enum ty)
+                ~default:true
+                ~f:(payload_hazard seen ~like)
+            | EnumClassMember { payload; _ } ->
+              payload_hazard seen ~like payload
+            | Like inner -> payload_hazard seen ~like:true inner
+            | Primitive Primitive.Null -> like
+            | Option inner ->
+              let null_only =
+                match expose_definition env_enum TypeSet.empty inner with
+                | Primitive Primitive.Null -> true
+                | _ -> false
+              in
+              let same_function =
+                match
+                  (expose_definition env_enum TypeSet.empty inner, function_type)
+                with
+                | ((Function _ as payload_function), Some other_function) ->
+                  (* Witness state is absent from the emitted signature. *)
+                  String.equal (show payload_function) (show other_function)
+                | _ -> false
+              in
+              like || not (null_only || same_function)
+            | _ -> false
+        in
+        let rec exposed_enum seen ty =
+          let ty = expose_definition env_enum TypeSet.empty ty in
+          if TypeSet.mem ty seen then
+            false
+          else
+            let seen = TypeSet.add ty seen in
+            match ty with
+            | EnumClassLabel _ -> true
+            | EnumClassMember { payload; _ } ->
+              payload_hazard TypeSet.empty ~like:false payload
+            | Like inner -> exposed_enum seen inner
+            | Case _ -> begin
+              match Env.get_typedef_body env_enum ty with
+              | Some [inner] -> exposed_enum seen inner
+              | _ -> false
+            end
+            | _ -> false
+        in
+        exposed_enum TypeSet.empty ty_enum
+      | _ -> false
+    in
     let rec case_variants env seen ty =
       if TypeSet.mem ty seen then
         None
@@ -1456,6 +1617,8 @@ end = struct
       || case_function_hazard env2 ty2 env1 ty1
       || case_null_hazard env1 ty1 env2 ty2
       || case_null_hazard env2 ty2 env1 ty1
+      || enum_null_partition_hazard env1 ty1 env2 ty2
+      || enum_null_partition_hazard env2 ty2 env1 ty1
       || case_union_hazard env1 ty1 env2 ty2
       || case_union_hazard env2 ty2 env1 ty1)
 
@@ -1465,6 +1628,8 @@ end = struct
     | GenericClass _
     | Dependent _
     | Enum _
+    | EnumClassMember _
+    | EnumClassLabel _
     | Vec _
     | Dict _
     | Keyset _
@@ -1507,6 +1672,7 @@ end = struct
           for_reified_ty;
           for_alias_def;
           for_enum_def;
+          for_enum_class_value;
           _;
         }
       ty =
@@ -1514,6 +1680,7 @@ end = struct
     &&
     match ty with
     | Case _ -> not (for_option_ty || for_enum_def)
+    | EnumClassLabel _ -> not for_enum_class_value
     | Function _ -> not for_reified_ty
     | TypeConst _
     | Dependent _ ->
@@ -1620,7 +1787,9 @@ end = struct
         | Alias _
         | Classish _
         | Case _
-        | Enum _ ->
+        | Enum _
+        | EnumClassMember _
+        | EnumClassLabel _ ->
           []
         | Option ty ->
           (* The parser hates ??ty, so we don't return `Option (driver renv ty)`
@@ -1880,6 +2049,46 @@ end = struct
           (lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty)))
         ~end_:show_tys
       @@ fun renv ->
+      let rec has_exposed_enum_member seen ty =
+        if TypeSet.mem ty seen then
+          false
+        else
+          let seen = TypeSet.add ty seen in
+          match ty with
+          | EnumClassMember _ -> true
+          | Option ty -> has_exposed_enum_member seen ty
+          | Alias _
+          | Newtype _
+          | TypeConst _
+          | Dependent _
+          | Case _ ->
+            List.exists
+              (Env.get_subtypes env ty)
+              ~f:(has_exposed_enum_member seen)
+          | Mixed
+          | Nonnull
+          | Primitive _
+          | Awaitable _
+          | Classish _
+          | GenericClass _
+          | Enum _
+          | EnumClassLabel _
+          | Vec _
+          | Dict _
+          | Keyset _
+          | Traversable _
+          | ContainerInterface _
+          | Iterator _
+          | KeyedTraversable _
+          | KeyedContainer _
+          | KeyedIterator _
+          | VecOrDict _
+          | Tuple _
+          | Shape _
+          | Function _
+          | Like _ ->
+            false
+      in
       let step ty =
         REnv.debug
           ~level:4
@@ -1907,6 +2116,13 @@ end = struct
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable _ -> [Awaitable Mixed]
         | Enum _ -> Primitive.[Primitive Int; Primitive String]
+        | EnumClassMember { payload; _ } ->
+          (* T288894213: repeated MemberOf upper bounds are misidentified as cycles. *)
+          if has_exposed_enum_member TypeSet.empty payload then
+            [Mixed]
+          else
+            [payload]
+        | EnumClassLabel _ -> [Mixed]
         | Traversable _
         | ContainerInterface _
         | Iterator _
@@ -2040,6 +2256,10 @@ end = struct
       Some
         (Syntax.Call (Syntax.Member (Syntax.New (concrete, [value]), "get"), []))
     | Enum info -> Some (StaticMember (info.name, "A"))
+    | EnumClassMember { enum_name; member; _ } ->
+      Some (Milner_syntax.StaticMember (enum_name, member))
+    | EnumClassLabel { enum_name; member; _ } ->
+      Some (Milner_syntax.EnumLabel (enum_name, member))
     | Traversable value
     | ContainerInterface value ->
       Some (Array ("vec", [inhabitant renv env value]))
@@ -2345,6 +2565,59 @@ end = struct
         dependent_read_bound = read_function ^ "_bound";
       }
     | _ -> invalid_arg "dependent_witness_of expects a dependent type"
+
+  type enum_family = {
+    enum_base: string;
+    enum_child: string;
+    enum_payload: t;
+    enum_narrower: t;
+  }
+
+  let declare_enum_family value_renv env ~payload ~narrower =
+    let base_name = fresh "EC" in
+    let child_name = fresh "EC" in
+    let base_value = inhabitant value_renv env payload in
+    let child_value = inhabitant value_renv env narrower in
+    let env =
+      Env.add_definition env
+      @@ Definition.enum_class
+           ~name:base_name
+           ~parent:None
+           ~members:[("A", payload, base_value)]
+    in
+    let env =
+      Env.add_definition env
+      @@ Definition.enum_class
+           ~name:child_name
+           ~parent:(Some base_name)
+           ~members:[("B", narrower, child_value)]
+    in
+    ( env,
+      {
+        enum_base = base_name;
+        enum_child = child_name;
+        enum_payload = payload;
+        enum_narrower = narrower;
+      } )
+
+  let enum_view ~is_label enum_name member payload =
+    let member = { enum_name; member; payload } in
+    if is_label then
+      EnumClassLabel member
+    else
+      EnumClassMember member
+
+  let record_enum_views env family ~is_label =
+    let base = enum_view ~is_label family.enum_base "A" family.enum_payload in
+    let inherited =
+      enum_view ~is_label family.enum_child "A" family.enum_payload
+    in
+    let child =
+      enum_view ~is_label family.enum_child "B" family.enum_narrower
+    in
+    let env = Env.record_subtype env ~super:inherited ~sub:base in
+    let env = Env.record_subtype env ~super:inherited ~sub:child in
+    (env, [base; inherited; child])
 
   let make_member_contract env value_type =
     let contract =
@@ -2725,6 +2998,16 @@ end = struct
         @@ Definition.enum ~name ~bound underlying_ty ~value
       in
       (env, ty)
+    | Kind.EnumClass ->
+      let value_renv = REnv.for_enum_initializer renv in
+      let (env, payload) = mk ~complexity:(complexity - 1) value_renv env in
+      let narrower = subtype_of value_renv env payload in
+      let (env, family) =
+        declare_enum_family value_renv env ~payload ~narrower
+      in
+      let is_label = (not renv.REnv.for_enum_class_value) && Random.bool () in
+      let (env, views) = record_enum_views env family ~is_label in
+      (env, select views)
     | Kind.Container -> begin
       let renv = REnv.{ renv with for_option_ty = false } in
       match Container.pick () with
@@ -2813,6 +3096,113 @@ end = struct
     | Kind.Like ->
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
+
+  let mk_enum_bindings renv env ~value:payload =
+    if not renv.REnv.for_enum_class_value then
+      invalid_arg
+        "mk_enum_bindings requires for_enum_initializer before generating value";
+    let value_renv = renv in
+    let narrower = subtype_of value_renv env payload in
+    let (env, family) = declare_enum_family value_renv env ~payload ~narrower in
+    let (env, _) = record_enum_views env family ~is_label:false in
+    let (env, _) = record_enum_views env family ~is_label:true in
+    let unwrap_name = fresh "unwrap_member" in
+    (* T288868928: keep the payload conversion generic for nested members. *)
+    let env =
+      Env.add_definition env
+      @@ Definition.enum_unwrap ~name:unwrap_name ~enum_name:family.enum_child
+    in
+    let member owner payload = enum_view ~is_label:false owner "A" payload in
+    let label owner payload = enum_view ~is_label:true owner "A" payload in
+    let identity argument_type return_type =
+      let value = Milner_syntax.fresh_local "enum_value" in
+      Milner_syntax.Lambda
+        ( [Milner_syntax.parameter (show argument_type) value],
+          [],
+          show return_type,
+          [Milner_syntax.Return (Some (Milner_syntax.Local value))] )
+    in
+    let unwrap payload =
+      let value = Milner_syntax.fresh_local "member" in
+      Milner_syntax.Lambda
+        ( [
+            Milner_syntax.parameter
+              (show (member family.enum_child payload))
+              value;
+          ],
+          [],
+          show payload,
+          [
+            Milner_syntax.Return
+              (Some
+                 (Milner_syntax.Call
+                    ( Milner_syntax.Atom
+                        (Format.sprintf "%s<%s>" unwrap_name (show payload)),
+                      [Milner_syntax.Local value] )));
+          ] )
+    in
+    let lookup payload =
+      let value = Milner_syntax.fresh_local "label" in
+      (* T288868921: specify both type arguments to valueOf. *)
+      Milner_syntax.Lambda
+        ( [
+            Milner_syntax.parameter
+              (show (label family.enum_child payload))
+              value;
+          ],
+          ["defaults"],
+          show (member family.enum_child payload),
+          [
+            Milner_syntax.Return
+              (Some
+                 (Milner_syntax.Call
+                    ( Milner_syntax.StaticMember
+                        ( family.enum_child,
+                          Format.sprintf
+                            "valueOf<%s, %s>"
+                            family.enum_child
+                            (show payload) ),
+                      [Milner_syntax.Local value] )));
+          ] )
+    in
+    let expressions =
+      [
+        ("enum_member", Milner_syntax.StaticMember (family.enum_child, "A"));
+        ("enum_label", Milner_syntax.EnumLabel (family.enum_child, "A"));
+        ("enum_base_member", Milner_syntax.StaticMember (family.enum_base, "A"));
+        ("enum_base_label", Milner_syntax.EnumLabel (family.enum_base, "A"));
+        ( "enum_child_member",
+          Milner_syntax.StaticMember (family.enum_child, "B") );
+        ("enum_child_label", Milner_syntax.EnumLabel (family.enum_child, "B"));
+        ("enum_unwrap", unwrap payload);
+        ("enum_unwrap_narrow", unwrap narrower);
+        ("enum_lookup", lookup payload);
+        ("enum_lookup_narrow", lookup narrower);
+        ( "enum_owner_upcast",
+          identity
+            (member family.enum_base payload)
+            (member family.enum_child payload) );
+        ( "enum_label_owner_upcast",
+          identity
+            (label family.enum_base payload)
+            (label family.enum_child payload) );
+        ( "enum_payload_upcast",
+          identity
+            (member family.enum_child narrower)
+            (member family.enum_child payload) );
+        ( "enum_label_payload_upcast",
+          identity
+            (label family.enum_child narrower)
+            (label family.enum_child payload) );
+      ]
+    in
+    let bindings =
+      ("ENUM_VALUE_TYPE", show payload)
+      :: ("ENUM_SUBTYPE", show narrower)
+      :: List.map expressions ~f:(fun (prefix, expression) ->
+             (prefix, Milner_syntax.render_expr expression))
+    in
+    (env, bindings)
 
   let mk_generic_witness renv env ~value =
     let key = mk_arraykey renv env in

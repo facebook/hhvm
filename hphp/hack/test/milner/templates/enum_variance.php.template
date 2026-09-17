@@ -1,0 +1,13 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+<<__EntryPoint>> function main(): void {
+  $inherited = (enum_owner_upcast#1)(enum_base_member#1);
+  $inherited_label = (enum_label_owner_upcast#1)(enum_base_label#1);
+  $inherited_lookup = (enum_lookup#1)($inherited_label);
+  invariant(vec[(enum_unwrap#1)($inherited), (enum_unwrap#1)($inherited_lookup)] === vec[(enum_unwrap#1)(enum_member#1), (enum_unwrap#1)(enum_member#1)], 'owner contravariance');
+  $wide_member = (enum_payload_upcast#1)(enum_child_member#1);
+  $wide_label = (enum_label_payload_upcast#1)(enum_child_label#1);
+  $wide_lookup = (enum_lookup#1)($wide_label);
+  invariant(vec[(enum_unwrap#1)($wide_member), (enum_unwrap#1)($wide_lookup)] === vec[(enum_unwrap_narrow#1)(enum_child_member#1), (enum_unwrap_narrow#1)(enum_child_member#1)], 'payload covariance');
+}

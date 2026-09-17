@@ -297,3 +297,138 @@ chains and asynchronous invocation.
 The generator composes only the assignments permitted by each function context.
 The property and global templates separately observe one forwarded effect and
 its returned payload. Assertions stay in those small laws.
+
+## Enum classes and labels
+
+Enum classes have inherited members with generated payloads. `HH\MemberOf` and
+`HH\EnumClass\Label` use contravariant owners and covariant payloads; the model
+records both relations. Labels remain available in ordinary value contexts.
+
+## Enum-class checker and runtime gaps
+
+Two checker completeness gaps affect label/member consumption:
+
+- [T288868921](https://www.internalfb.com/tasks/T288868921):
+  `Values::valueOf($label)` can fail with an expected-`dynamic` constraint when
+  `$label` has type `Label<Values, nonnull>` and the enclosing return expects
+  `nonnull`. Explicit `<Values, nonnull>` arguments or an intermediate local
+  make the same operation typecheck. The enum template uses explicit arguments.
+- [T288868928](https://www.internalfb.com/tasks/T288868928):
+  `MemberOf<Outer, MemberOf<Inner, mixed>>` fails conversion to
+  `MemberOf<Inner, mixed>`, despite `MemberOf<E, T> as T`. Same-name newtype
+  comparison checks parameter variance and misses the outer upper bound. A
+  checked helper `unwrap<T>(MemberOf<Outer, T> $x)[]: T { return $x; }` provides
+  that derivation; the template instantiates it at the exact payload type.
+
+These reductions illustrate both failures:
+
+```hack
+<?hh
+enum class Inner: mixed { mixed A = 42; }
+enum class Outer: mixed { HH\MemberOf<Inner, mixed> A = Inner::A; }
+enum class Values: mixed { nonnull A = 42; }
+function nested(HH\MemberOf<Outer, HH\MemberOf<Inner, mixed>> $x):
+  HH\MemberOf<Inner, mixed> { return $x; }
+function inferred(HH\EnumClass\Label<Values, nonnull> $x): nonnull {
+  return Values::valueOf($x);
+}
+```
+
+[T288868934](https://www.internalfb.com/tasks/T288868934) tracks a separate
+runtime bug that aborts dynamic initialization when an enum member copies
+another member whose value is a label. This program typechecks, but interpreter
+and JIT execution hit `always_assert(false)` in `Class::clsCnsGet`:
+
+```hack
+<?hh
+enum class Values: int { int A = 42; }
+enum class Labels: mixed { HH\EnumClass\Label<Values, int> A = Values#A; }
+enum class Nested: mixed { HH\EnumClass\Label<Values, int> A = Labels::A; }
+<<__EntryPoint>>
+function main(): void { $value = Nested::A; }
+```
+
+Literal-label initialization and object-box containment pass. The indirect
+reproducer also passes after HHBBC optimization. Dynamic constant validation
+rejects `KindOfEnumClassLabel`, including inside arrays, and the enum initializer
+asserts on that result.
+
+`ENUM_VALUE_TYPE` and generated enum-member payloads therefore exclude labels
+through their construction context. The restriction propagates conservatively
+through functions and objects too, although those wrappers can be safe. Ordinary
+value contexts retain labels. The same context must be used to construct the
+type, select its subtype, and generate its witness; it is not a way to validate
+an arbitrary previously generated type. No checker diagnostic or failed seed
+is suppressed by these workarounds.
+
+### Nested enum members in case-type alternatives
+
+Tracked in [T288894213](https://www.internalfb.com/tasks/T288894213).
+
+The typechecker's runtime-tag approximation treats repeated `HH\MemberOf`
+upper-bound expansion as a cycle, even when the type arguments differ and the
+nesting is finite. For example, this lawful case declaration is rejected with
+`Typing[4475]` because the member alternative is incorrectly widened to `mixed`:
+
+```hack
+<?hh
+<<file: __EnableUnstableFeatures('case_types')>>
+enum class Inner: mixed { int A = 42; }
+enum class Outer: mixed { HH\MemberOf<Inner, int> A = Inner::A; }
+case type C = Awaitable<mixed> | HH\MemberOf<Outer, HH\MemberOf<Inner, int>>;
+```
+
+The nested member is bounded by `int` and cannot be an `Awaitable`. The failure
+also occurs with the same enum owner and through nullable types, aliases, local
+newtype right-hand sides, type constants, and other case types. A single-variant
+case declaration is accepted. This is separate from T288868928's nested-member
+value coercion issue.
+
+Until T288894213 is fixed, disjointness comparison conservatively treats a member
+as `mixed` when its payload exposes another member through those wrappers. This
+prevents selecting competing case alternatives; it does not change ordinary
+member generation or remove single-variant cases. Traversal stops at tuples,
+shapes, arrays, containers, classes, function types, and `Awaitable`, whose outer
+runtime tags hide their payloads from this expansion. Local newtypes are followed
+through their generated right-hand sides: a member appearing only in a declared
+upper bound is not enough to trigger the exception when the visible body is
+`null`. The exception neither suppresses checker diagnostics nor retries
+checker-rejected programs. Optional-tuple seeds 438, 601, and 684 cover the three
+original generator failures.
+
+## Opaque enum types intersected with null or nullable functions
+
+[T288865283](https://www.internalfb.com/tasks/T288865283) also affects opaque enum
+labels. Even an identity function whose parameter and return are both
+`HH\EnumClass\Label<E, int> & ?(function(): int)` fails with `Typing[4110]`.
+The checker retains a `Label & null` branch, rewrites it to
+`Label <: nonnull | (Label & null)`, and cannot prove that partition using the
+label's opaque `mixed` bound.
+
+`INTERSECTION_TYPE` excludes an exposed label paired with an exposed nullable
+function, through aliases, newtypes and concrete type constants. Nullable
+primitive, class, tuple and Awaitable operands pass and remain available.
+Ordinary label generation and consumption are unchanged.
+
+The same failure affects `HH\MemberOf<E, T>` when its payload exposes `mixed`,
+an unbounded case type, a label, or certain nullable bounds. Bare `null` and
+case types containing only null/function variants also reveal this partition
+failure. Exact alias, newtype, concrete type-constant and dependent definitions
+are followed; structural fields are not inspected. Nested members follow their
+payload, and like wrappers retain the nullable-bound hazard.
+
+The positive intersection guard retains nonnullable payloads, null-only nullable
+payloads, and matching emitted nullable-function signatures. It does not model
+function subtyping, so some other passing nullable-function payloads are
+conservatively omitted. Declared case bounds are recorded separately from
+variants and subtype edges: a case bounded by `nonnull` or a matching function
+can remain available even when its unbounded form fails. Outer nullable members
+and ordinary enum member generation remain available. Seed 320 covers the
+original label failure; additional member payload reproducers and passing
+controls are recorded in T288865283.
+
+Enum operations share their payload with other families. Initializer restrictions
+apply before generating that payload. Member references, labels, lookups,
+unwrapping, and variance conversions are separate expressions; templates state
+the member/label agreement and variance laws. Placeholder replacement observes
+identifier boundaries so operations from different families compose on one ID.

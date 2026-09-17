@@ -19,6 +19,8 @@ module ReadOnlyEnvironment : sig
 
   (** Restrict the outer type to legal alias right-hand sides. *)
   val for_alias : t -> t
+
+  val for_enum_initializer : t -> t
 end
 
 module Environment : sig
@@ -92,6 +94,12 @@ module Type : sig
   (** A separate callable completion witness associated with the existing
       payload binding. Does not replace the supplied payload type. *)
   val mk_callable_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
+  val mk_enum_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
     value:t ->

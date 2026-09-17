@@ -64,6 +64,17 @@ let generic_prefixes =
     "generic_key";
   ]
 
+let dependent_prefixes =
+  [
+    "DEPENDENT_READ_BOUND";
+    "DEPENDENT_REFINED";
+    "DEPENDENT_CLASS";
+    "DEPENDENT_BOUND";
+    "DEPENDENT_BASE";
+    "DEPENDENT_ITEM";
+    "DEPENDENT_READ";
+  ]
+
 let placeholder prefix key = prefix ^ "#" ^ string_of_int key
 
 let init_table contents placeholder =
@@ -93,6 +104,11 @@ let generate_tables ~verbose ~debug_pattern template =
   List.iter generic_prefixes ~f:(fun prefix ->
       let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set generics ~key ~data:()));
+  let dependents = Hashtbl.create (module Int) in
+  List.iter dependent_prefixes ~f:(fun prefix ->
+      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      Hashtbl.iter_keys table ~f:(fun key ->
+          Hashtbl.set dependents ~key ~data:()));
   let renv_for key =
     if Hashtbl.mem alias_types key then
       Gen.ReadOnlyEnvironment.for_alias renv
@@ -106,7 +122,15 @@ let generate_tables ~verbose ~debug_pattern template =
   let another_table = init_table template (Pcre.regexp "another#([0-9]+)") in
   let subty_table = init_table template subtype_regexp in
   List.iter
-    [expr_table; another_table; subty_table; alias_types; hierarchies; generics]
+    [
+      expr_table;
+      another_table;
+      subty_table;
+      alias_types;
+      hierarchies;
+      generics;
+      dependents;
+    ]
     ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table =
@@ -171,6 +195,27 @@ let generate_tables ~verbose ~debug_pattern template =
         ])
   in
 
+  let dependent_table =
+    Hashtbl.mapi dependents ~f:(fun ~key ~data:() ->
+        let (env, value) = Hashtbl.find_exn ty_table key in
+        let (env, witness) =
+          Gen.Type.mk_dependent_witness (renv_for key) env ~value
+        in
+        Hashtbl.set ty_table ~key ~data:(env, value);
+        let open Gen.Type in
+        [
+          ("DEPENDENT_CLASS", witness.dependent_class);
+          ("DEPENDENT_BASE", witness.dependent_base);
+          ("DEPENDENT_ITEM", show witness.dependent_item);
+          ("DEPENDENT_BOUND", show witness.dependent_bound);
+          ("DEPENDENT_READ", witness.dependent_read);
+          ("DEPENDENT_READ_BOUND", witness.dependent_read_bound);
+          ( "DEPENDENT_REFINED",
+            witness.dependent_base ^ " with { type Item = " ^ show value ^ " }"
+          );
+        ])
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -197,7 +242,8 @@ let generate_tables ~verbose ~debug_pattern template =
     expr_table,
     another_table,
     hierarchy_table,
-    generic_table )
+    generic_table,
+    dependent_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -207,6 +253,7 @@ let fill_in_template
     another_table
     hierarchy_table
     generic_table
+    dependent_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
@@ -235,6 +282,14 @@ let fill_in_template
     List.fold generic_prefixes ~init:template ~f:(fun contents prefix ->
         let table =
           Hashtbl.map generic_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
+  let template =
+    List.fold dependent_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map dependent_table ~f:(fun bindings ->
               List.Assoc.find_exn bindings ~equal:String.equal prefix)
         in
         fill_table table ~prefix contents)
@@ -272,7 +327,8 @@ let milner verbose debug_pattern seed template_path destination_path =
         expr_table,
         another_table,
         hierarchy_table,
-        generic_table ) =
+        generic_table,
+        dependent_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -283,6 +339,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       another_table
       hierarchy_table
       generic_table
+      dependent_table
       template
     |> add_missing_definitions defs
   in

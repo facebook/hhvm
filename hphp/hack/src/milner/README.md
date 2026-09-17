@@ -94,8 +94,8 @@ function test((C & F) $x): (C & F) { return $x; }
 The intersection-law guard also excludes two exposed case types with multiple
 variants when one has a nullable variant. Exact definition bodies are retained
 separately from subtype edges, since case bounds add reverse edges that are not
-variants. Aliases, newtypes, type constants, and singleton case chains are
-followed to the outer case union. The nullable variant can be exposed through
+variants. Aliases, newtypes, type constants, concrete dependent constants, and
+singleton case chains are followed to the outer case union. The nullable variant can be exposed through
 an alias, newtype, or type constant. The guard does not scan structural fields
 or nested case variants. A singleton case wrapping a nullable type, and a case
 union with a separate literal `null` variant, remain available. This is a
@@ -226,3 +226,14 @@ Generic values construct one family instance from independently generated key an
 payload expressions. The generic templates check construction/projection,
 variance with tagged storage updates, and method bounds as separate laws. Family
 bindings extend the existing `TYPE#N` environment; they never replace its payload.
+
+## Dependent types and refinements
+
+Dependent constants have a closed witness, optional bound, inherited `this::Item`
+storage and consumers using equality/upper refinements. The witness and its
+constructor metadata are generated together. No unbound type parameter or
+unjustified bound witness enters ordinary type generation.
+
+Dependent expressions consist of construction followed by one getter. The
+refinement and mutation laws share their generated payload and nominal family;
+exact and upper-bound reads are visible as separate calls in the template.

@@ -65,6 +65,22 @@ module Type : sig
     value:t ->
     Environment.t * generic_witness
 
+  type dependent_witness = {
+    dependent_class: string;
+    dependent_base: string;
+    dependent_payload: t;
+    dependent_bound: t;
+    dependent_item: t;
+    dependent_read: string;
+    dependent_read_bound: string;
+  }
+
+  val mk_dependent_witness :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * dependent_witness
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->

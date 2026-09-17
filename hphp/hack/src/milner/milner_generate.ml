@@ -249,6 +249,14 @@ module rec Environment : sig
     probe_value: int;
   }
 
+  type dependent_info = {
+    concrete: string;
+    base: string;
+    bound: Type.t option;
+    value_type: Type.t;
+    read_function: string;
+  }
+
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
@@ -256,6 +264,7 @@ module rec Environment : sig
     case_bounds: Type.t TypeMap.t;
     nominals: nominal_info S_map.t;
     generic_families: string list;
+    dependents: dependent_info S_map.t;
   }
 
   val default : t
@@ -283,6 +292,10 @@ module rec Environment : sig
   val add_generic_family : t -> string -> t
 
   val generic_families : t -> string list
+
+  val add_dependent : t -> name:string -> dependent_info -> t
+
+  val get_dependent : t -> string -> dependent_info
 end = struct
   type member_contract = {
     value_type: Type.t;
@@ -304,6 +317,14 @@ end = struct
     probe_value: int;
   }
 
+  type dependent_info = {
+    concrete: string;
+    base: string;
+    bound: Type.t option;
+    value_type: Type.t;
+    read_function: string;
+  }
+
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
@@ -311,6 +332,7 @@ end = struct
     case_bounds: Type.t TypeMap.t;
     nominals: nominal_info S_map.t;
     generic_families: string list;
+    dependents: dependent_info S_map.t;
   }
 
   let default =
@@ -321,6 +343,7 @@ end = struct
       case_bounds = TypeMap.empty;
       nominals = S_map.empty;
       generic_families = [];
+      dependents = S_map.empty;
     }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
@@ -356,6 +379,11 @@ end = struct
     { env with generic_families = name :: env.generic_families }
 
   let generic_families env = env.generic_families
+
+  let add_dependent env ~name info =
+    { env with dependents = S_map.add name info env.dependents }
+
+  let get_dependent env name = S_map.find name env.dependents
 end
 
 and Kind : sig
@@ -365,6 +393,7 @@ and Kind : sig
     | Option
     | Classish
     | GenericClass
+    | Dependent
     | Alias
     | Newtype
     | TypeConst
@@ -404,6 +433,7 @@ end = struct
     | Option
     | Classish
     | GenericClass
+    | Dependent
     | Alias
     | Newtype
     | TypeConst
@@ -431,7 +461,9 @@ end = struct
     let kind_filter = function
       | Case -> not for_option_ty
       | Function -> not for_reified_ty
-      | TypeConst -> not for_alias_def
+      | TypeConst
+      | Dependent ->
+        not for_alias_def
       | _ -> true
     in
     (* Complexity filter ensures that we don't generate heavily nested types
@@ -448,6 +480,7 @@ end = struct
       | Option
       | Classish
       | GenericClass
+      | Dependent
       | Container
       | BuiltinContainer
       | Tuple
@@ -513,6 +546,14 @@ and Definition : sig
   val use_trait : string -> t
 
   val generic_family : name:string -> t list
+
+  val dependent_family :
+    name:string ->
+    base:string ->
+    bound:Type.t option ->
+    value_type:Type.t ->
+    read_function:string ->
+    t list
 
   val alias : name:string -> Type.t -> t
 
@@ -723,6 +764,36 @@ end = struct
         name;
     ]
 
+  let dependent_family ~name ~base ~bound ~value_type ~read_function =
+    let bound_type = Option.value_map bound ~default:"mixed" ~f:Type.show in
+    let bound_clause =
+      Option.value_map bound ~default:"" ~f:(fun bound_ty ->
+          " as " ^ Type.show bound_ty)
+    in
+    let value_type = Type.show value_type in
+    [
+      Format.sprintf
+        "abstract class %s { abstract const type Item%s; public function __construct(protected this::Item $value)[write_props] {} public function get()[]: this::Item { return $this->value; } public function set(this::Item $value)[write_props]: void { $this->value = $value; } }"
+        base
+        bound_clause;
+      Format.sprintf
+        "final class %s extends %s { const type Item = %s; }"
+        name
+        base
+        value_type;
+      Format.sprintf
+        "function %s<TItem%s>(%s with { type Item = TItem } $source)[]: TItem { return $source->get(); }"
+        read_function
+        bound_clause
+        base;
+      Format.sprintf
+        "function %s_bound(%s with { type Item as %s } $source)[]: %s { return $source->get(); }"
+        read_function
+        base
+        bound_type
+        bound_type;
+    ]
+
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
 
@@ -793,6 +864,22 @@ and Type : sig
     value:t ->
     Environment.t * generic_witness
 
+  type dependent_witness = {
+    dependent_class: string;
+    dependent_base: string;
+    dependent_payload: t;
+    dependent_bound: t;
+    dependent_item: t;
+    dependent_read: string;
+    dependent_read_bound: string;
+  }
+
+  val mk_dependent_witness :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * dependent_witness
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
@@ -828,6 +915,7 @@ end = struct
         key: t;
         value: t;
       }
+    | Dependent of { name: string }
     | Alias of { name: string }
     | Newtype of { name: string }
     | TypeConst of { name: string }
@@ -907,6 +995,7 @@ end = struct
       Format.sprintf "%s%s" name generic
     | GenericClass { name; key; value } ->
       Format.sprintf "%s<%s, %s>" name (show key) (show value)
+    | Dependent info -> info.name
     | Alias info -> info.name
     | Newtype info -> info.name
     | TypeConst info -> info.name
@@ -988,6 +1077,7 @@ end = struct
           List.exists fields ~f:(fun { ty; _ } -> has_like_head env seen ty)
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _ ->
           List.exists (Env.get_subtypes env ty) ~f:(has_like_head env seen)
         | _ -> false
@@ -1001,6 +1091,7 @@ end = struct
         | Primitive Primitive.Null -> true
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _
         | Case _ ->
           let subtypes = Env.get_subtypes env ty in
@@ -1021,6 +1112,7 @@ end = struct
           List.exists fields ~f:(fun { ty; _ } -> has_nullable_form env seen ty)
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _ ->
           List.exists (Env.get_subtypes env ty) ~f:(has_nullable_form env seen)
         | Case _ ->
@@ -1047,7 +1139,8 @@ end = struct
           match ty with
           | Alias _
           | Newtype _
-          | TypeConst _ ->
+          | TypeConst _
+          | Dependent _ ->
             List.exists (Env.get_subtypes env ty) ~f:(visit seen)
           | _ -> false
       in
@@ -1075,6 +1168,7 @@ end = struct
         | Option inner -> null_head env seen inner
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _ ->
           Option.exists (Env.get_typedef_body env ty) ~f:(function
               | [inner] -> null_head env seen inner
@@ -1094,6 +1188,7 @@ end = struct
           true
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _
         | Case _ ->
           Option.exists (Env.get_typedef_body env ty) ~f:(fun body ->
@@ -1128,6 +1223,7 @@ end = struct
         | Like inner -> known_nonnull env seen inner
         | Alias _
         | Newtype _
+        | Dependent _
         | TypeConst _ ->
           Option.exists (Env.get_typedef_body env ty) ~f:(function
               | [inner] -> known_nonnull env seen inner
@@ -1152,6 +1248,7 @@ end = struct
                     ~f:(known_nonnull env_case TypeSet.empty))
           | Alias _
           | Newtype _
+          | Dependent _
           | TypeConst _ ->
             Option.exists (Env.get_typedef_body env_case ty) ~f:(function
                 | [inner] -> exposed_case seen inner
@@ -1168,7 +1265,8 @@ end = struct
         let seen = TypeSet.add ty seen in
         match (ty, Env.get_typedef_body env ty) with
         | (Case _, Some (_ :: _ :: _ as variants)) -> Some variants
-        | ((Alias _ | Newtype _ | TypeConst _ | Case _), Some [inner]) ->
+        | ( (Alias _ | Newtype _ | TypeConst _ | Dependent _ | Case _),
+            Some [inner] ) ->
           case_variants env seen inner
         | _ -> None
     in
@@ -1181,7 +1279,8 @@ end = struct
         | Option _ -> true
         | Alias _
         | Newtype _
-        | TypeConst _ ->
+        | TypeConst _
+        | Dependent _ ->
           Option.exists (Env.get_typedef_body env ty) ~f:(fun body ->
               List.exists body ~f:(has_nullable_head env seen))
         | _ -> false
@@ -1210,6 +1309,7 @@ end = struct
     | Primitive Primitive.(Null | Int | String | Float | Bool)
     | Classish { kind = Kind.Class; _ }
     | GenericClass _
+    | Dependent _
     | Enum _
     | Vec _
     | Dict _
@@ -1256,7 +1356,9 @@ end = struct
     match ty with
     | Case _ -> not (for_option_ty || for_enum_def)
     | Function _ -> not for_reified_ty
-    | TypeConst _ -> not for_alias_def
+    | TypeConst _
+    | Dependent _ ->
+      not for_alias_def
     | _ -> true
 
   exception Backtrack
@@ -1346,6 +1448,7 @@ end = struct
         | Mixed
         | Primitive _
         | TypeConst _
+        | Dependent _
         | GenericClass _
         | Newtype _
         | Alias _
@@ -1599,6 +1702,7 @@ end = struct
         | Classish _
         | Alias _
         | TypeConst _
+        | Dependent _
         | Newtype _
         | Case _ ->
           Env.get_subtypes env ty
@@ -1723,6 +1827,11 @@ end = struct
       let key_expr = inhabitant renv env key in
       let value_expr = inhabitant renv env value in
       Some (Syntax.New (show ty, [key_expr; value_expr]))
+    | Dependent { name } ->
+      let Env.{ concrete; value_type; _ } = Env.get_dependent env name in
+      let value = inhabitant renv env value_type in
+      Some
+        (Syntax.Call (Syntax.Member (Syntax.New (concrete, [value]), "get"), []))
     | Enum info -> Some (StaticMember (info.name, "A"))
     | Traversable value
     | ContainerInterface value ->
@@ -1901,6 +2010,59 @@ end = struct
     let env = Env.record_subtype env ~super:reader ~sub:ty in
     let env = Env.record_subtype env ~super:writer ~sub:ty in
     (env, name, ty, reader, writer)
+
+  type dependent_witness = {
+    dependent_class: string;
+    dependent_base: string;
+    dependent_payload: t;
+    dependent_bound: t;
+    dependent_item: t;
+    dependent_read: string;
+    dependent_read_bound: string;
+  }
+
+  let declare_dependent env ~value_type ~bound =
+    let concrete = fresh "Dependent" in
+    let base = concrete ^ "Base" in
+    let read_function = fresh "read_dependent" in
+    let name = concrete ^ "::Item" in
+    let ty = Dependent { name } in
+    let env =
+      Env.add_dependent
+        env
+        ~name
+        Env.{ concrete; base; bound; value_type; read_function }
+    in
+    let env = Env.record_subtype env ~super:ty ~sub:value_type in
+    let env = Env.record_typedef_body env ~ty ~body:[value_type] in
+    let env =
+      List.fold
+        (Definition.dependent_family
+           ~name:concrete
+           ~base
+           ~bound
+           ~value_type
+           ~read_function)
+        ~init:env
+        ~f:Env.add_definition
+    in
+    (env, ty)
+
+  let dependent_witness_of env = function
+    | Dependent { name } as ty ->
+      let Env.{ concrete; base; bound; value_type; read_function } =
+        Env.get_dependent env name
+      in
+      {
+        dependent_class = concrete;
+        dependent_base = base;
+        dependent_payload = value_type;
+        dependent_bound = Option.value bound ~default:Mixed;
+        dependent_item = ty;
+        dependent_read = read_function;
+        dependent_read_bound = read_function ^ "_bound";
+      }
+    | _ -> invalid_arg "dependent_witness_of expects a dependent type"
 
   let make_member_contract env value_type =
     let contract =
@@ -2137,6 +2299,15 @@ end = struct
       in
       let (env, _, ty, reader, writer) = declare_generic env ~key ~value in
       (env, select [ty; reader; writer])
+    | Kind.Dependent ->
+      let (env, value_type, bound) =
+        if Random.bool () then
+          (env, mk_arraykey renv env, Some (Primitive Primitive.Arraykey))
+        else
+          let (env, value_type) = mk renv env ~complexity:(complexity - 1) in
+          (env, value_type, None)
+      in
+      declare_dependent env ~value_type ~bound
     | Kind.Alias ->
       let name = fresh "A" in
       let ty = Alias { name } in
@@ -2377,6 +2548,17 @@ end = struct
         generic_tagged_class = tagged_class;
         generic_tagged_writer = tagged_writer;
       } )
+
+  let mk_dependent_witness _renv env ~value =
+    let bound =
+      Some
+        (if Random.bool () then
+          Mixed
+        else
+          value)
+    in
+    let (env, ty) = declare_dependent env ~value_type:value ~bound in
+    (env, dependent_witness_of env ty)
 
   let mk = mk ~depth:None ~complexity:default_complexity
 

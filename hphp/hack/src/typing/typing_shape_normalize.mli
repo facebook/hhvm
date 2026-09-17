@@ -13,6 +13,8 @@ type merge_result =
       (** A union operand was distributed outward: one fully-finalised type per
           union member (supportdyn already applied per member). The caller unions
           these with its own reason. *)
+  | Intersection of locl_phase ty list
+      (** As [Union], for an intersection operand. *)
 
 val merge_field_descs :
   fd_left:locl_phase shape_field_type ->
@@ -35,6 +37,7 @@ val merge :
 type normalize_result =
   | Normalized_shape of locl_phase shape_type
   | Normalized_union of locl_phase ty list
+  | Normalized_intersection of locl_phase ty list
   | Normalized_bottom
       (** The merge collapsed to the bottom row [nothing]: the row is
           uninhabited. *)
@@ -86,7 +89,11 @@ module Row : sig
   val as_row : normalized -> t option
 
   val fold_normalized :
-    normalized -> row:(t -> 'a) -> union:(locl_phase ty list -> 'a) -> 'a
+    normalized ->
+    row:(t -> 'a) ->
+    union:(locl_phase ty list -> 'a) ->
+    intersection:(locl_phase ty list -> 'a) ->
+    'a
 
   (** Eliminate a row without exposing its normalized representation.
       [elements] receives the spread-position sequence for every inhabited row

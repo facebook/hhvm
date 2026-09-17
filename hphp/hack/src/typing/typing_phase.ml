@@ -743,6 +743,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
            applied per member), so union them and mark sd already-applied. *)
         let (env, ty) = Typing_union.union_list env r tys in
         (env, ty, false)
+      | Intersection tys ->
+        let (env, ty) = Typing_intersection.intersect_list env r tys in
+        (env, ty, false)
     in
     (* If any element was [supportdyn<...>] (e.g. an open shape under sound
        dynamic), the stripped, normalized result must be re-wrapped to stay

@@ -547,7 +547,8 @@ end = struct
       (env, Upper.Bottom)
     | Some row -> (env, Upper.Shapes [row])
     | None ->
-      (* A union upper bound does not require every branch simultaneously. *)
+      (* A distributed result is not one row. Ordinary subtyping retains its
+         connective; bound projection falls back conservatively. *)
       (env, Upper.Unconstrained)
 
   let normalized_lower env r shape_ty =
@@ -711,7 +712,10 @@ module Dependency_graph = struct
           normalized
           ~row:(fun row -> (env, Row.spread_elements row))
           ~union:(spread_elements_of_tys env)
-      | Tunion tys -> spread_elements_of_tys env tys
+          ~intersection:(spread_elements_of_tys env)
+      | Tunion tys
+      | Tintersection tys ->
+        spread_elements_of_tys env tys
       | _ -> (env, [])
     and spread_elements_of_tys env tys =
       let (env, elements) =
@@ -1171,6 +1175,8 @@ let resolve_for_read env r elems : env * locl_ty =
       else
         project env row)
     ~union:(fun _ ->
+      Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
+    ~intersection:(fun _ ->
       Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
 
 let proj = Row.proj

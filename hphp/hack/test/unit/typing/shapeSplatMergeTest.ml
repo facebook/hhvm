@@ -39,7 +39,8 @@ let r = Reason.none
 let expect_row normalized =
   match Norm.Row.as_row normalized with
   | Some row -> row
-  | None -> assert_failure "expected one normalized row, got a union"
+  | None ->
+    assert_failure "expected one normalized row, got a distributed result"
 
 let tint = MakeType.int r
 
@@ -84,7 +85,9 @@ let assert_merge_result_is_bottom label = function
     assert_failure (label ^ ": expected Full nothing, got empty shape")
   | Norm.Partial _ ->
     assert_failure (label ^ ": expected Full nothing, got residual")
-  | Norm.Union _ -> assert_failure (label ^ ": expected Full nothing, got union")
+  | Norm.Union _
+  | Norm.Intersection _ ->
+    assert_failure (label ^ ": expected Full nothing, got distributed result")
 
 let is_dynamic ty =
   match get_node ty with
@@ -128,6 +131,73 @@ let rightmost_wins _ =
   in
   assert_required "a" (get_field merged "a");
   assert_prim "a" Aast.Tbool (get_field merged "a")
+
+let normalize_shape_type_preserves_distributed_intersection _ =
+  let intersection =
+    mk
+      ( r,
+        Tintersection
+          [
+            shape_ty (simple [("x", field tint)]);
+            shape_ty (simple [("x", field tbool)]);
+          ] )
+  in
+  let (_, err, result) =
+    Norm.normalize_shape_type
+      ~on_error:None
+      r
+      (Shape_splat { ss_elems = [intersection] })
+      dummy_env
+  in
+  assert_equal None err;
+  match result with
+  | Norm.Normalized_shape (Shape_simple shape) ->
+    assert_required "x" (get_field shape "x");
+    (match get_field shape "x" with
+    | Some { sft_ty; _ } ->
+      assert_bool "the intersected field should be nothing" (is_nothing sft_ty)
+    | None -> assert_failure "missing field x")
+  | Norm.Normalized_shape (Shape_splat _) ->
+    assert_failure "intersection branches were re-spliced"
+  | Norm.Normalized_union _
+  | Norm.Normalized_intersection _ ->
+    assert_failure "concrete intersection branches did not merge"
+  | Norm.Normalized_bottom ->
+    assert_failure "a required field of type nothing is not the bottom row"
+
+let normalize_shape_type_preserves_distributed_union _ =
+  let union =
+    mk
+      ( r,
+        Tunion
+          [
+            shape_ty (simple [("x", field tint)]);
+            shape_ty (simple [("x", field tbool)]);
+          ] )
+  in
+  let (_, err, result) =
+    Norm.normalize_shape_type
+      ~on_error:None
+      r
+      (Shape_splat { ss_elems = [union] })
+      dummy_env
+  in
+  assert_equal None err;
+  match result with
+  | Norm.Normalized_shape (Shape_simple shape) ->
+    assert_required "x" (get_field shape "x");
+    (match get_field shape "x" with
+    | Some { sft_ty; _ } ->
+      (match get_node sft_ty with
+      | Tunion tys -> assert_equal 2 (List.length tys)
+      | _ -> assert_failure "the unioned field should be a union")
+    | None -> assert_failure "missing field x")
+  | Norm.Normalized_shape (Shape_splat _) ->
+    assert_failure "union branches were re-spliced"
+  | Norm.Normalized_union _
+  | Norm.Normalized_intersection _ ->
+    assert_failure "concrete union branches did not merge"
+  | Norm.Normalized_bottom -> assert_failure "the union should be inhabited"
 
 (* Required left, optional right -> required (union of types). *)
 let required_optional_union _ =
@@ -185,6 +255,32 @@ let union_with_bottom_absorbs _ =
   check "union,nothing" [union; tnothing];
   check "nothing,union" [tnothing; union]
 
+let intersection_with_bottom_absorbs _ =
+  let intersection =
+    mk (r, Tintersection [mk (r, Tgeneric "T1"); mk (r, Tgeneric "T2")])
+  in
+  let check label elems =
+    let (_, err, result) = Norm.merge ~on_error:None elems dummy_env in
+    assert_equal None err;
+    assert_merge_result_is_bottom label result;
+    let (_, err, normalized) =
+      Norm.Row.normalize
+        ~on_error:None
+        r
+        (Shape_splat { ss_elems = elems })
+        dummy_env
+    in
+    assert_equal None err;
+    match Norm.Row.as_row normalized with
+    | Some row ->
+      assert_bool
+        (label ^ ": should normalize to bottom")
+        (Norm.Row.is_bottom row)
+    | None -> assert_failure (label ^ ": normalized to a distributed result")
+  in
+  check "intersection,nothing" [intersection; tnothing];
+  check "nothing,intersection" [tnothing; intersection]
+
 let malformed_union_with_bottom_still_reports _ =
   let union = mk (r, Tunion [tint; mk (r, Tgeneric "T")]) in
   let check label elems =
@@ -214,10 +310,34 @@ let normalize_shape_type_keeps_union_explicit _ =
   assert_equal None err;
   match normalized with
   | Norm.Normalized_union tys -> assert_equal 2 (List.length tys)
+  | Norm.Normalized_intersection _ ->
+    assert_failure "a union normalized to an intersection"
   | Norm.Normalized_shape _ ->
     assert_failure "a distributed union was returned as a normalized shape"
   | Norm.Normalized_bottom ->
     assert_failure "a union of type parameters normalized to bottom"
+
+let normalize_shape_type_keeps_intersection_explicit _ =
+  let intersection =
+    mk (r, Tintersection [mk (r, Tgeneric "T1"); mk (r, Tgeneric "T2")])
+  in
+  let (_, err, normalized) =
+    Norm.normalize_shape_type
+      ~on_error:None
+      r
+      (Shape_splat { ss_elems = [intersection] })
+      dummy_env
+  in
+  assert_equal None err;
+  match normalized with
+  | Norm.Normalized_intersection tys -> assert_equal 2 (List.length tys)
+  | Norm.Normalized_union _ ->
+    assert_failure "an intersection normalized to a union"
+  | Norm.Normalized_shape _ ->
+    assert_failure
+      "a distributed intersection was returned as a normalized shape"
+  | Norm.Normalized_bottom ->
+    assert_failure "an intersection of type parameters normalized to bottom"
 
 (* A residual operand (type variable) cannot be flattened: a residual list. *)
 let residual_tyvar _ =
@@ -231,7 +351,8 @@ let residual_tyvar _ =
   | Norm.Partial _ -> ()
   | Norm.Full _
   | Norm.Empty_shape _
-  | Norm.Union _ ->
+  | Norm.Union _
+  | Norm.Intersection _ ->
     assert_failure "expected residual list for a free type variable"
 
 let normalized_row_is_aligned _ =
@@ -369,7 +490,8 @@ let repeated_generic_bottom_query_is_memoized _ =
     assert_failure "expected exactly one non-supportdyn residual"
   | Norm.Full _
   | Norm.Empty_shape _
-  | Norm.Union _ ->
+  | Norm.Union _
+  | Norm.Intersection _ ->
     assert_failure "expected T0 to remain residual"
 
 let malformed_operands_before_union_are_processed_once _ =
@@ -407,8 +529,48 @@ let malformed_operands_before_union_are_processed_once _ =
   | Norm.Full _
   | Norm.Empty_shape _
   | Norm.Partial _
-  | Norm.Union _ ->
+  | Norm.Union _
+  | Norm.Intersection _ ->
     assert_failure "expected one branch per union member"
+
+let malformed_operands_before_intersection_are_processed_once _ =
+  let intersection = mk (r, Tintersection [tgeneric "T1"; tgeneric "T2"]) in
+  let (_, err, result) =
+    Norm.merge
+      ~on_error:(Some (Typing_error.Reasons_callback.unify_error_at Pos.none))
+      [tint; tint; intersection]
+      dummy_env
+  in
+  (match err with
+  | Some err -> assert_equal 2 (Typing_error.count err)
+  | None -> assert_failure "expected one error per malformed source operand");
+  let error_tyvars ty =
+    match get_node ty with
+    | Tshape (Shape_splat { ss_elems = first :: second :: _ }) ->
+      (match (get_node first, get_node second) with
+      | (Tvar _, Tvar _) -> (first, second)
+      | _ -> assert_failure "expected error type variables")
+    | _ -> assert_failure "expected a residual shape splat"
+  in
+  match result with
+  | Norm.Intersection [first_branch; second_branch] ->
+    let (first_1, first_2) = error_tyvars first_branch in
+    let (second_1, second_2) = error_tyvars second_branch in
+    assert_bool
+      "the first malformed operand should reuse its error type variable"
+      (Typing_defs.ty_equal first_1 second_1);
+    assert_bool
+      "the second malformed operand should reuse its error type variable"
+      (Typing_defs.ty_equal first_2 second_2);
+    assert_bool
+      "distinct malformed operands should have distinct error type variables"
+      (not (Typing_defs.ty_equal first_1 first_2))
+  | Norm.Full _
+  | Norm.Empty_shape _
+  | Norm.Partial _
+  | Norm.Union _
+  | Norm.Intersection _ ->
+    assert_failure "expected one branch per intersection member"
 
 let empty_closed = simple []
 
@@ -491,8 +653,9 @@ let full_shape label = function
   | (_, _, Norm.Empty_shape _) -> empty_closed
   | (_, _, Norm.Partial _) ->
     assert_failure (label ^ ": expected Full/Empty_shape, got residual")
-  | (_, _, Norm.Union _) ->
-    assert_failure (label ^ ": expected Full/Empty_shape, got union")
+  | (_, _, (Norm.Union _ | Norm.Intersection _)) ->
+    assert_failure
+      (label ^ ": expected Full/Empty_shape, got union/intersection")
 
 (* Rightmost wins: any field required in the right operand appears required with
    the right operand's exact type in the merge. *)
@@ -539,7 +702,10 @@ let prop_bottom_absorbs _ =
         match Norm.merge ~on_error:None elems dummy_env with
         | (_, _, Norm.Full (ty, _)) ->
           assert_bool (label ^ ": should collapse to nothing") (is_nothing ty)
-        | (_, _, (Norm.Empty_shape _ | Norm.Partial _ | Norm.Union _)) ->
+        | ( _,
+            _,
+            ( Norm.Empty_shape _ | Norm.Partial _ | Norm.Union _
+            | Norm.Intersection _ ) ) ->
           assert_failure (label ^ ": expected Full nothing")
       in
       check "s,nothing" [shape_ty s; tnothing];
@@ -628,20 +794,29 @@ let () =
   >::: [
          "disjoint_closed" >:: disjoint_closed;
          "rightmost_wins" >:: rightmost_wins;
+         "normalize_shape_type_preserves_distributed_intersection"
+         >:: normalize_shape_type_preserves_distributed_intersection;
+         "normalize_shape_type_preserves_distributed_union"
+         >:: normalize_shape_type_preserves_distributed_union;
          "required_optional_union" >:: required_optional_union;
          "open_right_absorbs" >:: open_right_absorbs;
          "bottom_absorbs" >:: bottom_absorbs;
          "union_with_bottom_absorbs" >:: union_with_bottom_absorbs;
+         "intersection_with_bottom_absorbs" >:: intersection_with_bottom_absorbs;
          "malformed_union_with_bottom_still_reports"
          >:: malformed_union_with_bottom_still_reports;
          "normalize_shape_type_keeps_union_explicit"
          >:: normalize_shape_type_keeps_union_explicit;
+         "normalize_shape_type_keeps_intersection_explicit"
+         >:: normalize_shape_type_keeps_intersection_explicit;
          "residual_tyvar" >:: residual_tyvar;
          "normalized_row_is_aligned" >:: normalized_row_is_aligned;
          "repeated_generic_bottom_query_is_memoized"
          >:: repeated_generic_bottom_query_is_memoized;
          "malformed_operands_before_union_are_processed_once"
          >:: malformed_operands_before_union_are_processed_once;
+         "malformed_operands_before_intersection_are_processed_once"
+         >:: malformed_operands_before_intersection_are_processed_once;
          "dynamic_on_right_unions" >:: dynamic_on_right_unions;
          "dynamic_on_left_field_wins" >:: dynamic_on_left_field_wins;
          "prop_rightmost_wins" >:: prop_rightmost_wins;

@@ -48,7 +48,8 @@ let r = Reason.none
 let expect_row normalized =
   match Typing_shape_normalize.Row.as_row normalized with
   | Some row -> row
-  | None -> assert_failure "expected one normalized row, got a union"
+  | None ->
+    assert_failure "expected one normalized row, got a distributed result"
 
 let normalize_row env shape =
   let (env, err, normalized) =
@@ -410,6 +411,30 @@ let a_spread_parameter_is_found _ =
                    (param_name holder)
                    (show recorded))
                 (List.mem recorded expected ~equal:String.equal)))
+
+let a_spread_parameter_in_a_nested_intersection_is_found _ =
+  let dependency = tgeneric "T1" in
+  let nested_intersection =
+    mk
+      ( r,
+        Tintersection
+          [splat [dependency]; simple_shape [("y", MakeType.int r)] ~open_:true]
+      )
+  in
+  let bound =
+    mk
+      ( r,
+        Tunion
+          [
+            nested_intersection;
+            simple_shape [("z", MakeType.bool r)] ~open_:true;
+          ] )
+  in
+  let env = Env.add_upper_bound (dummy_env ()) "T2" bound in
+  let recorded =
+    names (Typing_corners.type_params_in_upper_bound env (tgeneric "T2") r)
+  in
+  assert_equal ~printer:show ["T1"] recorded
 
 (* == A parameter used as a field type must not be recorded ================= *)
 
@@ -1538,6 +1563,8 @@ let () =
          "every_parameter_in_a_bound_is_recorded"
          >:: every_parameter_in_a_bound_is_recorded;
          "a_spread_parameter_is_found" >:: a_spread_parameter_is_found;
+         "a_spread_parameter_in_a_nested_intersection_is_found"
+         >:: a_spread_parameter_in_a_nested_intersection_is_found;
          "a_field_type_is_not_a_dependency" >:: a_field_type_is_not_a_dependency;
          "following_bounds_reaches_everything"
          >:: following_bounds_reaches_everything;

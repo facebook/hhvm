@@ -4059,6 +4059,9 @@ end = struct
           ~union:(fun _ ->
             (* Leave this special case and use coupled inference instead. *)
             None)
+          ~intersection:(fun _ ->
+            (* Leave this special case and use coupled inference instead. *)
+            None)
     in
     let bottom_field = { sft_optional = false; sft_ty = MakeType.nothing r } in
     match

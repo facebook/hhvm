@@ -76,6 +76,9 @@ let expand_ty ?var_hook ?pos env ty =
                the union and discard it. *)
             let (_menv, ty) = Typing_union.union_list menv p tys in
             (ty, false)
+          | Intersection tys ->
+            let (_menv, ty) = Typing_intersection.intersect_list menv p tys in
+            (ty, false)
         in
         if sd then
           Typing_make_type.supportdyn (get_reason ty) ty

@@ -10,7 +10,7 @@ open Typing_defs_core
 type nothing_cache =
   (Typing_inference_env.t * bool) Typing_shape_splat_key.Map.t ref
 
-(** A path identifies an operand in the original nested splat/union tree.
+(** A path identifies an operand in the original nested splat/distribution tree.
 
     Union distribution reprocesses the unvisited prefix once per element, so one
     input operand may be visited in several generated branches. Its path is a
@@ -59,6 +59,9 @@ type merge_result =
           union member (supportdyn already applied per member, so no [bool]). The
           caller unions these with its own reason (mirrors [Empty_shape], where
           the caller supplies the reason). *)
+  | Intersection of locl_phase ty list
+      (** As [Union], for an intersection operand: a value that is every member
+          spreads to a row that is every member's row. *)
 
 (** Merge field descriptors: under right-most wins semantics, we have:
     - (Req _ | Opt _) , Req t -> Req t
@@ -169,9 +172,9 @@ let finalize (merge_elem : merge_elem) (elems : locl_phase ty list) (sd : bool)
     Empty_shape sd
   | (Empty, _) -> Partial (elems, sd)
 
-(** Finalise one distributed union branch to a single type, built with the union
-    member's [reason]. supportdyn is applied per-branch here, so the [Union]
-    result carries no sd flag. *)
+(** Finalise one distributed branch to a single type, built with the member's
+    [reason]. supportdyn is applied per-branch here, so distributed results
+    carry no sd flag. *)
 let result_to_ty
     ~(reason : Typing_reason.t)
     (env : Typing_env_types.env)
@@ -193,6 +196,7 @@ let result_to_ty
   | Union tys ->
     (* Nested union (a member itself distributed): flatten by unioning. *)
     Typing_union.union_list env reason tys
+  | Intersection tys -> Typing_intersection.intersect_list env reason tys
 
 (** Merge adjacent simple shapes in a list. Used during shape normalization in
     localization and subtyping. If all elements are simple shapes the result
@@ -378,6 +382,34 @@ let merge
           | _ -> Union branch_tys
         in
         (env, branch_errs @ errs, result)
+      (* -- Distribute an intersection operand ----------------------------- *)
+      (* [shape(...A, ...(m1 & ... & mk), ...B)] is
+         [shape(...A, ...m1, ...B) & ... & shape(...A, ...mk, ...B)] *)
+      | ((_, Tintersection members), _) ->
+        let sd = sd || sd_elem in
+        let (env, branch_errs, branch_tys) =
+          List.fold_left
+            (fun (env, errs_acc, tys) (path, member) ->
+              let (env, branch_errs, res) =
+                loop
+                  ((path, member) :: rev_elems)
+                  (merge_elem, elems, [], sd, env)
+              in
+              let (env, ty) =
+                result_to_ty ~reason:(get_reason member) env res
+              in
+              (env, branch_errs @ errs_acc, ty :: tys))
+            (env, [], [])
+            (List.mapi (fun index member -> (index :: path, member)) members)
+        in
+        let branch_tys = List.rev branch_tys in
+        let result =
+          match List.find_opt Typing_defs.is_nothing branch_tys with
+          | Some bottom ->
+            Full (Typing_make_type.nothing (get_reason bottom), false)
+          | None -> Intersection branch_tys
+        in
+        (env, branch_errs @ errs, result)
       (* -- Error conditions ------------------------------------------------ *)
       | ((reason, _), Merging (shape_reason, shape)) ->
         let (env, elem_err) = error_tyvar path reason env in
@@ -402,7 +434,7 @@ let merge
   let (env, errs, result) =
     (* Merge simple shape elements from right to left so reverse the list.
        [loop] finalises via [finalize] at its base case (and via [result_to_ty]
-       per branch for a distributed union). *)
+       per branch for a distributed union or intersection). *)
     let rev_elems =
       List.rev (List.mapi (fun index ty -> ([index], ty)) elems)
     in
@@ -413,6 +445,7 @@ let merge
 type normalize_result =
   | Normalized_shape of locl_phase shape_type
   | Normalized_union of locl_phase ty list
+  | Normalized_intersection of locl_phase ty list
   | Normalized_bottom
       (** The merge collapsed to the bottom row [nothing]: the row is
           uninhabited. *)
@@ -477,15 +510,19 @@ module Row = struct
   type normalized =
     | Normalized_row of t
     | Normalized_union of locl_phase ty list
+    | Normalized_intersection of locl_phase ty list
 
   let as_row = function
     | Normalized_row row -> Some row
-    | Normalized_union _ -> None
+    | Normalized_union _
+    | Normalized_intersection _ ->
+      None
 
-  let fold_normalized normalized ~row ~union =
+  let fold_normalized normalized ~row ~union ~intersection =
     match normalized with
     | Normalized_row normalized -> row normalized
     | Normalized_union tys -> union tys
+    | Normalized_intersection tys -> intersection tys
 
   let of_opaque opaque : t =
     match Opaque.view opaque with
@@ -651,7 +688,9 @@ module Row = struct
           s_fields = TShapeMap.empty;
         }
     | Partial (elems, _) -> splat_of_elems elems
-    | Union _ -> failwith "a distributed union is not a normalized row"
+    | Union _
+    | Intersection _ ->
+      failwith "a distributed result is not a normalized row"
 
   let to_ty ~(reason : Typing_reason.t) (row : t) =
     match row with
@@ -682,6 +721,7 @@ module Row = struct
     let normalized =
       match result with
       | Union tys -> Normalized_union tys
+      | Intersection tys -> Normalized_intersection tys
       | result -> Normalized_row (of_merge_result ~reason result)
     in
     (env, err_opt, normalized)
@@ -693,6 +733,8 @@ module Row = struct
     match normalized with
     | Normalized_row row -> (env, to_ty ~reason row)
     | Normalized_union tys -> Typing_union.union_list env reason tys
+    | Normalized_intersection tys ->
+      Typing_intersection.intersect_list env reason tys
 end
 
 let normalize_shape_type
@@ -711,6 +753,7 @@ let normalize_shape_type
     match deref ty with
     | (_, Tunion []) -> (env, err_opt, Normalized_bottom)
     | (_, Tunion tys) -> (env, err_opt, Normalized_union tys)
+    | (_, Tintersection tys) -> (env, err_opt, Normalized_intersection tys)
     | (_, Tshape shape_ty) -> (env, err_opt, Normalized_shape shape_ty)
     | _ -> (env, err_opt, Normalized_shape (Shape_splat { ss_elems = [ty] }))
   in
@@ -727,6 +770,9 @@ let normalize_shape_type
       | Row.Bottom -> (env, err_opt, Normalized_bottom))
     ~union:(fun tys ->
       let (env, ty) = Typing_union.union_list env reason tys in
+      distributed_to_shape env ty)
+    ~intersection:(fun tys ->
+      let (env, ty) = Typing_intersection.intersect_list env reason tys in
       distributed_to_shape env ty)
 
 (** Canonical constructor for a shape splat: normalize [elems] and return the

@@ -1,9 +1,9 @@
 <?hh
 <<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
 function procedure(): PROCEDURE_TYPE#0 { return procedure#0; }
-function invoke((function(): void) $callback): void { $callback(); }
-async function invoke_async((function(): void) $callback): Awaitable<void> { invoke($callback); }
-function run((function(): void) $callback, bool $expected_throw): void {
+function invoke((function()[_]: void) $callback)[ctx $callback]: void { $callback(); }
+async function invoke_async((function()[_]: void) $callback)[ctx $callback]: Awaitable<void> { invoke($callback); }
+function run((function()[defaults]: void) $callback, bool $expected_throw): void {
   $caught = false;
   try { invoke($callback); } catch (Exception $error) {
     invariant($error->getMessage() === 'milner expected nothing', 'unexpected exception');

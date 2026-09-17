@@ -78,6 +78,64 @@ module Container = struct
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
+module FunctionContext = struct
+  type t =
+    | Pure
+    | WriteProps
+    | LeakSafe
+    | Globals
+    | WritePropsGlobals
+    | LeakSafeGlobals
+    | Defaults
+  [@@deriving eq, ord]
+
+  let all =
+    [
+      Pure;
+      WriteProps;
+      LeakSafe;
+      Globals;
+      WritePropsGlobals;
+      LeakSafeGlobals;
+      Defaults;
+    ]
+
+  let names = function
+    | Pure -> []
+    | WriteProps -> ["write_props"]
+    | LeakSafe -> ["leak_safe"]
+    | Globals -> ["globals"]
+    | WritePropsGlobals -> ["write_props"; "globals"]
+    | LeakSafeGlobals -> ["leak_safe"; "globals"]
+    | Defaults -> ["defaults"]
+
+  let show context = "[" ^ String.concat ~sep:", " (names context) ^ "]"
+
+  let writes_properties = function
+    | Pure
+    | Globals ->
+      false
+    | _ -> true
+
+  let uses_globals = function
+    | Globals
+    | WritePropsGlobals
+    | LeakSafeGlobals
+    | Defaults ->
+      true
+    | _ -> false
+
+  let subcontexts = function
+    | Pure -> [Pure]
+    | WriteProps -> [Pure; WriteProps]
+    | LeakSafe -> [Pure; WriteProps; LeakSafe]
+    | Globals -> [Pure; Globals]
+    | WritePropsGlobals -> [Pure; WriteProps; Globals; WritePropsGlobals]
+    | LeakSafeGlobals ->
+      [Pure; WriteProps; LeakSafe; Globals; WritePropsGlobals; LeakSafeGlobals]
+    | Defaults -> all
+end
+
 module ReadOnlyEnvironment : sig
   type debug_info = {
     verbose: int;
@@ -565,6 +623,8 @@ and Definition : sig
   val case_type : name:string -> bound:Type.t option -> Type.t list -> t
 
   val enum : name:string -> bound:Type.t option -> Type.t -> value:string -> t
+
+  val effect_state : name:string -> t
 end = struct
   type t = string
 
@@ -827,6 +887,11 @@ end = struct
         (Type.show bound)
         value
     | None -> Format.sprintf "enum %s: %s { A = %s; }" name (Type.show ty) value
+
+  let effect_state ~name =
+    Format.sprintf
+      "final class %s { public int $value = 0; public static int $calls = 0; }"
+      name
 end
 
 and Type : sig
@@ -990,6 +1055,8 @@ end = struct
         parameters: t list;
         variadic: t option;
         return_: function_return;
+        context: FunctionContext.t;
+        effect_state: string;
       }
     | Like of t
   [@@deriving eq, ord]
@@ -1083,7 +1150,7 @@ end = struct
           ""
       in
       Format.sprintf "shape(%s%s)" fields open_
-    | Function { parameters; variadic; return_ } ->
+    | Function { parameters; variadic; return_; context; _ } ->
       let variadic =
         match variadic with
         | Some ty ->
@@ -1097,13 +1164,50 @@ end = struct
       in
       let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
       let return_ = show_return return_ in
-      Format.sprintf "(function(%s%s): %s)" parameters variadic return_
+      Format.sprintf
+        "(function(%s%s)%s: %s)"
+        parameters
+        variadic
+        (FunctionContext.show context)
+        return_
     | Like ty -> "~" ^ show ty
 
   and show_return = function
     | ReturnsValue ty -> show ty
     | ReturnsVoid -> "void"
     | ReturnsNothing -> "nothing"
+
+  let supports_return return_ context =
+    match return_ with
+    | ReturnsValue _ -> FunctionContext.writes_properties context
+    | ReturnsVoid
+    | ReturnsNothing ->
+      true
+
+  let function_context return_ =
+    FunctionContext.all |> List.filter ~f:(supports_return return_) |> select
+
+  let function_effects context name =
+    let open Syntax in
+    let candidates =
+      (if FunctionContext.writes_properties context then
+        [
+          (fun () ->
+            let state = fresh_local "state" in
+            [
+              Bind (state, New (name, []));
+              Assign (Member (Local state, "value"), Atom "42");
+            ]);
+        ]
+      else
+        [])
+      @
+      if FunctionContext.uses_globals context then
+        [(fun () -> [Assign (StaticProperty (name, "calls"), Atom "42")])]
+      else
+        []
+    in
+    List.permute candidates |> List.concat_map ~f:(fun effect -> effect ())
 
   let show_tys tys = List.map ~f:show tys |> String.concat ~sep:", "
 
@@ -1669,7 +1773,7 @@ end = struct
               false
           in
           [Shape { fields; open_ }]
-        | Function { parameters; variadic; return_ } ->
+        | Function { parameters; variadic; return_; context; effect_state } ->
           let widen_parameter ty =
             if Random.bool () then
               Mixed
@@ -1701,7 +1805,12 @@ end = struct
               Lazy.force @@ select [lazy None; variadic_subtype]
             | Some ty -> Some (widen_parameter ty)
           in
-          [Function { parameters; variadic; return_ }]
+          let context =
+            FunctionContext.subcontexts context
+            |> List.filter ~f:(supports_return return_)
+            |> select
+          in
+          [Function { parameters; variadic; return_; context; effect_state }]
       end
     and driver renv candidate =
       try
@@ -2020,7 +2129,7 @@ end = struct
       let open Option.Let_syntax in
       let+ expr = expr_of renv env ty in
       Async [Return (Some expr)]
-    | Function { parameters; variadic; return_ } ->
+    | Function { parameters; variadic; return_; context; effect_state } ->
       let named_parameters =
         List.map parameters ~f:(fun ty -> (ty, Syntax.fresh_local "argument"))
       in
@@ -2066,7 +2175,11 @@ end = struct
                    ("Exception", [Syntax.Atom "'milner expected nothing'"]));
             ]
       in
-      Syntax.Lambda (parameters, ["defaults"], show_return return_, result)
+      Syntax.Lambda
+        ( parameters,
+          FunctionContext.names context,
+          show_return return_,
+          function_effects context effect_state @ result )
     | Mixed
     | Nonnull
     | Option _
@@ -2691,7 +2804,12 @@ end = struct
           let (env, ty) = mk ~complexity:(complexity - 1) renv env in
           (env, Some ty)
       in
-      (env, Function { parameters; variadic; return_ })
+      let context = function_context return_ in
+      let effect_state = fresh "EffectState" in
+      let env =
+        Env.add_definition env @@ Definition.effect_state ~name:effect_state
+      in
+      (env, Function { parameters; variadic; return_; context; effect_state })
     | Kind.Like ->
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
@@ -3013,7 +3131,14 @@ end = struct
       else
         ReturnsNothing
     in
-    (env, Function { parameters = []; variadic = None; return_ })
+    let context = function_context return_ in
+    let effect_state = fresh "EffectState" in
+    let env =
+      Env.add_definition env @@ Definition.effect_state ~name:effect_state
+    in
+    ( env,
+      Function
+        { parameters = []; variadic = None; return_; context; effect_state } )
 
   let procedure_throws = function
     | Function { parameters = []; variadic = None; return_ = ReturnsVoid; _ } ->

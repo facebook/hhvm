@@ -250,7 +250,7 @@ become required fields or standalone value types. `PROCEDURE_TYPE#N` requests a
 nullary procedure and `THROWS#N` supplies its expected completion mode. Procedure
 witnesses either return normally or throw the recognized exception; the template
 checks both synchronous and asynchronous invocation. Generated function witnesses
-use an explicit default context so they do not inherit a stricter context.
+use explicit contexts so they do not inherit a stricter enclosing context.
 
 `procedure#N`, `PROCEDURE_TYPE#N`, and `THROWS#N` describe a separate nullary
 completion witness. They retain the payload shared by `TYPE#N`, `expr#N`, and
@@ -280,3 +280,20 @@ iterator can make a legal `mixed ...$xs` call require an incompatible `dynamic`
 constraint. Binding the callee or unpacking the same arguments passes. Generated
 multi-element variadic tails therefore use `...vec[...]`; ordinary zero/one-tail
 calls remain available. The type and value witnesses are unchanged.
+
+## Callable coeffects
+
+Function types carry explicit capability contexts. Subtyping may decrease a
+function's required capabilities, and generated bodies perform only the
+property/global operations allowed by that context. A callable returning a
+constructed value retains enough capabilities to construct that value. Pure
+procedures and non-returning bodies also cover stricter contexts.
+
+Generated function witnesses have explicit contexts, including `[defaults]`:
+omitting a lambda context inherits the enclosing context and can invalidate its
+operations. Procedure and coeffect templates exercise context-polymorphic callback
+chains and asynchronous invocation.
+
+The generator composes only the assignments permitted by each function context.
+The property and global templates separately observe one forwarded effect and
+its returned payload. Assertions stay in those small laws.

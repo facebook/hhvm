@@ -23,6 +23,7 @@ type expr =
   | New of string * expr list
   | Member of expr * string
   | StaticMember of string * string
+  | StaticProperty of string * string
   | Call of expr * expr list
   | Index of expr * expr
   | Inout of expr
@@ -63,6 +64,7 @@ let rec render_expr = function
     Format.sprintf "new %s(%s)" class_name (render_arguments arguments)
   | Member (receiver, name) ->
     Format.sprintf "(%s)->%s" (render_expr receiver) name
+  | StaticProperty (class_name, name) -> class_name ^ "::$" ^ name
   | StaticMember (class_name, name) -> class_name ^ "::" ^ name
   | Call (callee, arguments) ->
     Format.sprintf "%s(%s)" (render_expr callee) (render_arguments arguments)

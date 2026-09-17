@@ -22,6 +22,7 @@ type expr =
   | New of string * expr list
   | Member of expr * string
   | StaticMember of string * string
+  | StaticProperty of string * string
   | Call of expr * expr list
   | Index of expr * expr
   | Inout of expr

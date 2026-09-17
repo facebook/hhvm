@@ -1,8 +1,0 @@
-<?hh
-<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
-
-function accept_callback(CALLABLE_TYPE#1 $_)[]: void {}
-
-<<__EntryPoint>> function main(): void {
-  accept_callback(callable#1);
-}

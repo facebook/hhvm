@@ -4,127 +4,100 @@ Milner generates Hack programs from templates using an independent model of
 typing and subtyping. The typechecker and runtime are test oracles, not filters
 used to choose which generated programs to retain.
 
-```
+```sh
 buck run @//mode/opt-clang //hphp/hack/src/milner:milner -- TEMPLATE --seed 42
 ```
 
-`TYPE#1`, `SUBTYPE#1`, and `expr#1` request a type, a subtype, and an
-inhabitant with the same integer identifier. Auxiliary definitions are appended
-to the generated program. Templates supply the property under test and its legal
-typing contexts.
+## Template interface
 
+The interface has three placeholders:
+
+| Placeholder | Meaning |
+| --- | --- |
+| `TYPE#1` | A generated value type. |
+| `SUBTYPE#1` | A model-justified subtype of that type. |
+| `expr#1` | An expression inhabiting that type. |
+
+Each integer identifier has one type and one declaration environment, including
+identifiers occurring only in expressions. Repeated placeholders have identical
+substitutions; identifier boundaries distinguish `#1` from `#10`. The expression
+inhabits `TYPE#1`, not necessarily the independently selected `SUBTYPE#1`.
+
+The ten templates state general properties: runtime type boundaries, subtype
+substitution, method variance, union/intersection laws, and case-type rejection
+or termination. New constructs belong in type and expression generation, so the
+same templates can combine them without new placeholder vocabulary.
+
+Generation constraints come from context. A type placeholder on the right-hand
+side of a `type`, `newtype`, or `case type` declaration excludes direct
+type-constant references; nested references remain available. Placeholders
+joined by `&` receive the intersection compatibility checks documented below.
+These restrictions use template syntax, independently of checker execution.
+
+## Generation model
+
+Types, subtype edges, exact nominal definitions, and construction witnesses share
+an environment. Exact alias and case bodies are distinct from subtype edges:
+case bounds can introduce reverse edges without adding declaration variants.
 Every generated value type has an inhabited subtype. Immediate inhabitance is a
-pure structural check: selecting an inhabited subtype does not construct an
-expression or consume randomness merely to decide whether a witness exists.
+structural check that neither builds an expression nor consumes randomness.
 
-Expression construction carries the same generation context and nominal
-environment through recursive witnesses.
+`Type.inhabitant_of` builds a scoped expression and retains any declarations it
+introduces. Its bounded grammar combines calls, captures, inout and variadic
+arguments, control flow, mutation, exception handling, and asynchronous tasks
+with operations justified by the generated nominal environment. The same shared
+size budget bounds recursive expression and task composition. Optional tuple
+and nullsafe projections coalesce boxes before extracting their payload, keeping
+`Awaitable` payloads legal. Reduced-capability callbacks capture an already
+evaluated value.
 
-Every identifier has one generated type and environment, including identifiers
-that occur only in expressions. Their auxiliary declarations are retained.
-Repeated placeholders share their replacement; longer numeric identifiers are
-substituted first so `#1` cannot consume the prefix of `#10`.
+These operations preserve the result type; they may change the value. A generic
+write can select another inhabitant, an enum lookup can return another member,
+and a dispatch call can select an overridden implementation. The original
+positive templates check typing laws and successful runtime execution. They do
+not assert exact returned values, dispatch results, or effect counts.
 
-`ALIAS_TYPE#1` constrains that identifier's type and subtype choices everywhere
-to legal alias right-hand sides. It excludes direct type-constant references;
-type constants nested in other type constructors remain available.
+The type model includes bounded collections, optional tuples, container
+interfaces, class hierarchies, traits, generic variance and bounds, dependent
+type constants and refinements, callable contexts, enum members and labels, and
+class names/pointers. Collection elements and constructor arguments are generated
+in the same environment. Closed tuple witnesses omit only an optional suffix;
+`void` and `nothing` are function results, never standalone value types or
+required fields. Function subtyping can widen parameters, narrow value results,
+and decrease required capabilities. Lambdas carry explicit contexts, including
+`[defaults]`, rather than inheriting an accidental enclosing context.
 
-`INTERSECTION_TYPE#1` chooses types jointly with other marked identifiers to
-avoid the documented intersection law bugs. This is a structural restriction,
-independent of checker execution.
+Protocol fixtures are internal declarations. XHP uses nominal payload boxes;
+string payloads also admit child projections. Expression-tree composition uses
+`mixed` payloads. Composed enum lookup/unwrap operations use primitive payloads,
+while the ordinary type grammar retains richer enum members and labels. Class
+identity types remain excluded from reified positions.
 
-## Intersection commutativity with like and nullable types
-
-[T288868888](https://www.internalfb.com/tasks/T288868888): the checker rejects
-this valid reordering with `Typing[4110]`:
-
-```hack
-<?hh
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'like_type_hints')>>
-function takes((?string & ~int) $_): void {}
-function test((~int & ?string) $x): void { takes($x); }
-```
-
-The same operand order, the reverse direction, and removing the like operator
-pass. The `INTERSECTION_TYPE` context conservatively excludes a like head paired
-with a nullable form. It follows aliases, newtypes and type constants; a case
-type can hide a nullable union. Required tuple elements and shape fields are
-followed as well, but a case type wrapping the like head does not
-trigger the bug. Ordinary `TYPE` generation keeps these forms available.
-
-The union-introduction template also constructs typed witnesses before widening
-them into the union. This avoids the existing nullable case-type closure
-contextual-coercion bug, [T201523298](https://www.internalfb.com/tasks/T201523298),
-while retaining function-bearing case types.
-
-## Case types intersected with nullable functions
-
-[T288865283](https://www.internalfb.com/tasks/T288865283) tracks a completeness
-bug exposed by the collection/container diff's intersection template, seed 365.
-The checker rejects even this identity function with three `Typing[4110]` errors:
-
-```hack
-<?hh
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'case_types')>>
-case type C = Awaitable<mixed>;
-function test((C & ?(function(): int)) $x): (C & ?(function(): int)) { return $x; }
-```
-
-Inlining `Awaitable<mixed>`, replacing the case declaration with
-`type C = Awaitable<mixed>`, adding `C as nonnull`, or removing the function's
-nullable wrapper makes this pass.
-`INTERSECTION_TYPE` conservatively excludes an exposed case type paired with
-an exposed nullable function, in either order. Aliases, newtypes, and type
-constants are followed on both operands and inside the nullable wrapper;
-structural fields and case bodies are not treated as exposed function heads. Some case
-bodies containing null or functions pass but are included in this narrow
-syntactic exclusion. Ordinary `TYPE` generation retains these forms. Remove
-this exception when the task's reproduction and controls pass.
-
-The same task also covers an inhabited case-union identity failure:
-
-```hack
-<?hh
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'case_types')>>
-case type C = int | bool;
-case type F = int | ?bool;
-function test((C & F) $x): (C & F) { return $x; }
-```
-
-The intersection-law guard also excludes two exposed case types with multiple
-variants when one has a nullable variant. Exact definition bodies are retained
-separately from subtype edges, since case bounds add reverse edges that are not
-variants. Aliases, newtypes, type constants, concrete dependent constants, and
-singleton case chains are followed to the outer case union. The nullable variant can be exposed through
-an alias, newtype, or type constant. The guard does not scan structural fields
-or nested case variants. A singleton case wrapping a nullable type, and a case
-union with a separate literal `null` variant, remain available. This is a
-conservative syntax guard: explicit nonnull bounds and some primitive unions
-also pass, but are not distinguished by the guard.
-
-The task also rejects `C & null` identities for unbounded, nonnullable case
-bodies. The intersection guard follows exact aliases and type constants to
-this case/null pair, including `?null` on the null side. It retains case bodies
-with an explicit nullable, null, mixed, or like variant, including nested case
-and alias definitions, and case bounds known to be nonnull. Exact declared
-case bounds are stored separately from subtype edges. A case wrapping the
-null operand remains available; it is a passing control. Ordinary type
-generation is unchanged.
+Eligible entrypoint programs may use a module layout with separate module,
+definition, and main files. Internal helper calls cross files within the same
+module. Programs with local newtypes stay in one file so their representations
+remain visible. This layout is selected by generation, without a dedicated
+template.
+Each virtual file has its own `<?hh` header and uses `//// relative/path.php`
+delimiters. The generated entrypoint loads declarations before invoking the
+original entrypoint.
 
 ## Verification and retained failures
 
 The static verifier checks every diagnostic against `--hhstc-pattern`; one
 matching expected error cannot hide an unrelated error or warning. Positive
 `No errors` checks require a successful exit and no diagnostics. Explicit
-negative-test alternatives remain in `test/milner/BUCK`. Timeouts and process failures fail verification.
+negative and recursive acceptance policies are in `test/milner/BUCK`. Timeouts
+and process failures fail verification.
 
 Both verifiers accept `--timeout SECONDS` (default 180 per process) and
-`--output-dir NEW_DIRECTORY`. The directory retains generated sources, a summary, and failure records with commands, exit status and
-output. It must not already exist. Omitting the option preserves temporary-file
-cleanup; HHBBC repositories remain temporary even when sources are retained.
+`--output-dir NEW_DIRECTORY`. The directory must not already exist. It retains
+generated sources, a summary, and failure records containing commands, exit
+status, and output. Without it, temporary files are cleaned up. HHBBC repositories
+remain temporary even when sources are retained.
 
 From `hphp/hack`, set `MILNER_EXE`, `HHSTC_EXE`, and `HHVM_EXE` to absolute paths
-to saved binaries before running these examples:
+to saved binaries:
 
 ```sh
 buck run @//mode/opt-clang //hphp/hack/test/milner:verify_well_typed -- \
@@ -142,202 +115,135 @@ buck run @//mode/opt-clang //hphp/hack/test/milner:verify_runtime -- \
 
 Static seed ranges exclude their upper bound. Runtime samples distinct seeds
 before starting workers and refuses to overwrite generated files. A global seed
-repeats that sample with the same harness; replaying an individual failure uses
-its recorded generator seed with the same template and binary. Use
-`--mode Sandbox` with a different output directory for the other runtime mode.
+repeats the sample with the same harness; replay an individual failure with its
+recorded generator seed, template, and binary. Use `--mode Sandbox` with another
+output directory to exercise that runtime mode separately.
 
-## Collections
+The checker receives a multifile bundle intact. Runtime checks split validated,
+unique relative paths into a fresh directory, select `main.php` or the unique
+entrypoint, and pass every physical file to HHBBC. Retained output includes the
+split files. Runtime success alone does not compare Sandbox and HHBBC results.
 
-Collection lengths are bounded; empty and populated vec, dict, and keyset values
-are generated. Each element is an inhabitant of its declared type in the same
-environment. The collection template checks reads, writes, iteration, and shape
-operations with observable assertions.
+## Known completeness and runtime constraints
 
-## Builtin container abstractions
+The following structural restrictions keep known bugs out of lawful positive
+generation. They do not suppress diagnostics or discard checker-rejected seeds.
+Remove a restriction only after its reproduction and passing controls support
+doing so.
 
-`Traversable`, `Container`, `KeyedTraversable`, `KeyedContainer`, `Iterator`,
-`KeyedIterator`, and `vec_or_dict` have explicit covariance and subtype edges.
-Arrays witness the container interfaces; iterator witnesses come from `Vector`
-and `Map` iterators. Keys satisfy the arraykey bound, and vec witnesses require
-an admitted int key type. Shared runtime representations are treated
-conservatively when checking case-type disjointness.
+### Intersection laws
 
-## Stateful hierarchies, traits and interfaces
+[T288868888](https://www.internalfb.com/tasks/T288868888): reordering
+`~int & ?string` to `?string & ~int` fails with `Typing[4110]`. The same order,
+reverse direction, and removal of the like operator pass. Intersection operands
+therefore exclude a like head paired with a nullable form. The guard follows
+aliases, newtypes, type constants, tuple elements, shape fields, and nullable
+unions hidden by cases. A case wrapping the like head does not trigger it.
+Ordinary type generation retains these forms.
 
-Class hierarchies share a typed constructor/member contract. Construction only
-constructs the object; it does not run a test scenario. Expressions compose
-syntax nodes for their constituent operations, and the typing model establishes
-argument types, receiver relationships, lexical scope and required coeffects.
-Assertions belong to small law templates.
-
-`construct#1`, `read#1`, `write#1`, and `identity#1` are independent operations
-from one generated hierarchy with payload `TYPE#1`. Reads and writes cross an
-ancestor-typed function boundary. Static calls can select inherited members.
-`hierarchy#1` composes compatible operations with bounded depth and a typed input;
-it preserves that input without embedding any assertions. `dispatch#1` calls an
-overridden constant-returning method through its ancestor; `DISPATCH#1` records
-the concrete implementation's expected result.
-
-`another#1` requests another inhabitant of the same type and environment. Literal
-values vary, but two inhabitants need not differ, especially for singleton types.
-The put/get law remains valid in either case; seeds with distinct values make a
-dropped write observable.
-
-`trait_read#1`, `interface_read#1`, and `interface_write#1` use the same
-contract through trait and interface views. They are independent operations,
-and the value-preserving calls also participate in expression composition.
-
-## Nullable enum case returns in getter overrides
-
-[T288899890](https://www.internalfb.com/tasks/T288899890) tracks a checker completeness
-bug in concrete method overrides:
+[T288865283](https://www.internalfb.com/tasks/T288865283) covers several related
+identity and projection failures:
 
 ```hack
 <?hh
-<<file: __EnableUnstableFeatures('case_types')>>
-enum E: int as int { A = 42; }
-case type C = ?E;
-class ParentClass { public function get()[]: C { return E::A; } }
-class ChildClass extends ParentClass { <<__Override>> public function get()[]: C { return parent::get(); } }
-```
-
-Both signatures declare `C`, but return pessimisation produces `?int & ~C`
-and the checker rejects the override with `Typing[4341]`. The runtime call
-returns `42`. Removing the nullable wrapper, using a transparent alias, or
-writing the equivalent multi-variant case `E | null` makes it pass.
-
-For this payload shape, inherited getters remain inherited instead of emitting
-a redundant override. The predicate follows actual singleton-case, alias,
-local-newtype and like definitions to a nullable enum; subtype edges introduced
-by case bounds do not count as definition variants. It stops at outer nullable
-types, type constants and structural containers. Other getters still override,
-and ordinary enum/case generation, setters, properties and dispatch remain.
-
-## Constrained generic families
-
-Generic families bind two lexical parameters (`TKey as arraykey`, `TValue`) and
-use them in storage, method bounds, covariant readers and contravariant writers.
-Their declarations can be reused at different closed applications. Disjointness
-erases type arguments before comparing runtime class identities. Recorded
-protocol edges retain their exact payload type so subtype-based construction
-cannot recurse through a broader interface back into its own constructor.
-
-Generic values construct one family instance from independently generated key and
-payload expressions. The generic templates check construction/projection,
-variance with tagged storage updates, and method bounds as separate laws. Family
-bindings extend the existing `TYPE#N` environment; they never replace its payload.
-
-## Dependent types and refinements
-
-Dependent constants have a closed witness, optional bound, inherited `this::Item`
-storage and consumers using equality/upper refinements. The witness and its
-constructor metadata are generated together. No unbound type parameter or
-unjustified bound witness enters ordinary type generation.
-
-Dependent expressions consist of construction followed by one getter. The
-refinement and mutation laws share their generated payload and nominal family;
-exact and upper-bound reads are visible as separate calls in the template.
-
-## Position-aware types
-
-`nonnull` has non-null primitive witnesses. Tuple generation separates a required
-prefix from an optional suffix. Closed witnesses omit only a suffix of optional
-elements; open subtypes retain constraints on every optional position. The known
-like/nullable intersection guard conservatively follows optional tuple elements.
-
-Function results distinguish values, `void`, and `nothing`. The latter two never
-become required fields or standalone value types. `PROCEDURE_TYPE#N` requests a
-nullary procedure and `THROWS#N` supplies its expected completion mode. Procedure
-witnesses either return normally or throw the recognized exception; the template
-checks both synchronous and asynchronous invocation. Generated function witnesses
-use explicit contexts so they do not inherit a stricter enclosing context.
-
-`procedure#N`, `PROCEDURE_TYPE#N`, and `THROWS#N` describe a separate nullary
-completion witness. They retain the payload shared by `TYPE#N`, `expr#N`, and
-other operation families with that ID. Invocation and completion assertions stay
-in the template; constructing the closure does not execute it.
-
-## Callable subtyping and operations
-
-Function parameters may widen during subtyping while value results narrow.
-Bodies return a compatible parameter or an independent inhabitant. A separate
-callable family supplies `CALLABLE_TYPE#N`, `callable#N`, and `invoke#N`; its
-`CALLABLE_THROWS#N` oracle is independent of the procedure's `THROWS#N`.
-`invoke#N` is one typed application, including optional variadic unpacking.
-
-`CALL#N` is a bounded composition of value-preserving functions over the shared
-payload. Each rule adds one capture, higher-order call, inout update, variadic
-projection, or optional argument. The small template binds the payload once and
-checks the composed result. Generated expressions contain no assertions.
-
-`invoke_statement#N` binds a value result to a fresh local or emits a void/nothing
-call statement. This preserves the completion law without illegally discarding
-an `Awaitable` or assigning a `void` result.
-
-[T288960552](https://www.internalfb.com/tasks/T288960552) tracks a completeness
-bug in immediate variadic lambda calls. Two array literals followed by an
-iterator can make a legal `mixed ...$xs` call require an incompatible `dynamic`
-constraint. Binding the callee or unpacking the same arguments passes. Generated
-multi-element variadic tails therefore use `...vec[...]`; ordinary zero/one-tail
-calls remain available. The type and value witnesses are unchanged.
-
-## Callable coeffects
-
-Function types carry explicit capability contexts. Subtyping may decrease a
-function's required capabilities, and generated bodies perform only the
-property/global operations allowed by that context. A callable returning a
-constructed value retains enough capabilities to construct that value. Pure
-procedures and non-returning bodies also cover stricter contexts.
-
-Generated function witnesses have explicit contexts, including `[defaults]`:
-omitting a lambda context inherits the enclosing context and can invalidate its
-operations. Procedure and coeffect templates exercise context-polymorphic callback
-chains and asynchronous invocation.
-
-The generator composes only the assignments permitted by each function context.
-The property and global templates separately observe one forwarded effect and
-its returned payload. Assertions stay in those small laws.
-
-## Enum classes and labels
-
-Enum classes have inherited members with generated payloads. `HH\MemberOf` and
-`HH\EnumClass\Label` use contravariant owners and covariant payloads; the model
-records both relations. Labels remain available in ordinary value contexts.
-
-## Enum-class checker and runtime gaps
-
-Two checker completeness gaps affect label/member consumption:
-
-- [T288868921](https://www.internalfb.com/tasks/T288868921):
-  `Values::valueOf($label)` can fail with an expected-`dynamic` constraint when
-  `$label` has type `Label<Values, nonnull>` and the enclosing return expects
-  `nonnull`. Explicit `<Values, nonnull>` arguments or an intermediate local
-  make the same operation typecheck. The enum template uses explicit arguments.
-- [T288868928](https://www.internalfb.com/tasks/T288868928):
-  `MemberOf<Outer, MemberOf<Inner, mixed>>` fails conversion to
-  `MemberOf<Inner, mixed>`, despite `MemberOf<E, T> as T`. Same-name newtype
-  comparison checks parameter variance and misses the outer upper bound. A
-  checked helper `unwrap<T>(MemberOf<Outer, T> $x)[]: T { return $x; }` provides
-  that derivation; the template instantiates it at the exact payload type.
-
-These reductions illustrate both failures:
-
-```hack
-<?hh
-enum class Inner: mixed { mixed A = 42; }
-enum class Outer: mixed { HH\MemberOf<Inner, mixed> A = Inner::A; }
-enum class Values: mixed { nonnull A = 42; }
-function nested(HH\MemberOf<Outer, HH\MemberOf<Inner, mixed>> $x):
-  HH\MemberOf<Inner, mixed> { return $x; }
-function inferred(HH\EnumClass\Label<Values, nonnull> $x): nonnull {
-  return Values::valueOf($x);
+<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'case_types')>>
+case type C = Awaitable<mixed>;
+function test((C & ?(function(): int)) $x): (C & ?(function(): int)) {
+  return $x;
 }
 ```
 
-[T288868934](https://www.internalfb.com/tasks/T288868934) tracks a separate
-runtime bug that aborts dynamic initialization when an enum member copies
-another member whose value is a label. This program typechecks, but interpreter
-and JIT execution hit `always_assert(false)` in `Class::clsCnsGet`:
+Inlining the case body, making it a transparent alias, adding `C as nonnull`,
+or removing the function's nullable wrapper passes. The guard excludes exposed
+case types paired with exposed nullable functions in either order. It follows
+aliases, newtypes, and type constants, including inside the nullable wrapper;
+structural fields and case bodies are not exposed function heads. Some passing
+case bodies remain conservatively excluded.
+
+The task also covers `C = int | bool`, `F = int | ?bool`, and the identity at
+`C & F`. The guard excludes two exposed multi-variant cases when one has a
+nullable variant. It follows exact aliases, newtypes, type constants, dependent
+constants, and singleton case chains, without scanning structural fields or
+nested case variants. A singleton case wrapping a nullable type, or a separate
+literal `null` variant, remains available. Some passing primitive unions and
+nonnull-bounded cases are conservatively excluded.
+
+An unbounded nonnullable case intersected with `null` or `?null` can fail too.
+The guard follows exact definitions, retaining cases with known nullable, null,
+`mixed`, or like variants and cases with known nonnull bounds. A case wrapping
+the null operand remains available as a passing control.
+
+Opaque labels also fail against nullable functions: an identity at
+`HH\EnumClass\Label<E, int> & ?(function(): int)` cannot prove the checker's
+`Label <: nonnull | (Label & null)` partition. This pair is excluded through
+aliases, newtypes, and concrete type constants. Nullable primitive, class,
+tuple, and Awaitable operands remain available.
+
+The same partition failure affects `HH\MemberOf<E, T>` when the payload exposes
+`mixed`, an unbounded case, a label, or certain nullable bounds; bare `null` and
+null/function-only cases can expose it. The guard follows exact alias, newtype,
+type-constant, dependent, and nested-member payload definitions, but not
+structural fields. Like wrappers retain the nullable-bound hazard. Nonnullable
+payloads, null-only nullable payloads, matching emitted nullable-function
+signatures, and suitable declared case bounds remain available. The guard does
+not model full function subtyping, so some passing signatures are omitted.
+Outer nullable members and ordinary enum generation remain available.
+
+[T288868918](https://www.internalfb.com/tasks/T288868918): projecting
+`classname<D> & class<C>` to `class<C>`, with `D extends C`, fails because
+intersection normalization produces `classname<C & D>` and loses the pointer
+constraint. `D::class` inhabits the intersection; pointer-only and same-class
+controls pass. The guard follows name/pointer heads through transparent wrappers,
+case branches, tuple slots, and shape fields. It also follows vec elements when
+the other operand exposes a tuple. Vec/vec, shape/dict, function, and generic
+container controls pass and do not receive that extra traversal.
+
+### Contextual returns and calls
+
+[T201523298](https://www.internalfb.com/tasks/T201523298): nullable unions can
+reject directly contextualized case-type closures. The union-introduction
+template first constructs explicitly typed witnesses, then widens their results
+into the union, retaining function-bearing case types.
+
+[T288899890](https://www.internalfb.com/tasks/T288899890): a redundant getter
+override returning a singleton case around a nullable enum can fail with
+`Typing[4341]`. For `enum E: int as int` and `case type C = ?E`, both methods
+can declare `C` while return pessimisation produces `?int & ~C`. Runtime returns
+the enum value; a transparent alias, a nonnullable case, or `E | null` passes.
+
+Such getters remain inherited. The predicate follows singleton-case, alias,
+local-newtype, and like definitions to a nullable enum, ignoring reverse case
+bound edges. It stops at outer nullable types, type constants, and structural
+containers. Other getter overrides, setters, properties, and dispatch remain.
+
+A singleton case around `?classname<C>` also rejects identical getter overrides
+with `Typing[4341]`, with or without a generic parent. A transparent alias, a
+nonnullable classname case, and a nullable `class<C>` case pass. The same
+inherited-getter restriction covers this case; class names remain generated.
+
+[T288960552](https://www.internalfb.com/tasks/T288960552): an immediate variadic
+lambda called with two arrays followed by an iterator can acquire an incompatible
+`dynamic` constraint despite its legal `mixed ...$xs` parameter. Binding the
+callee or unpacking the arguments passes. Callable application uses `...vec[...]`
+for multi-element independently generated tails; zero/one-tail calls remain.
+
+### Enum initialization and consumption
+
+[T288868921](https://www.internalfb.com/tasks/T288868921):
+`Values::valueOf($label)` may require `dynamic` when a
+`Label<Values, nonnull>` is consumed as `nonnull`. Explicit
+`<Values, nonnull>` arguments or an intermediate local pass. Generated lookups
+supply the exact owner and payload arguments.
+
+[T288868928](https://www.internalfb.com/tasks/T288868928): coercing
+`MemberOf<Outer, MemberOf<Inner, mixed>>` to `MemberOf<Inner, mixed>` misses the
+outer upper bound while comparing same-name newtypes. Generated consumption uses
+a checked helper `unwrap<T>(MemberOf<Outer, T> $x)[]: T { return $x; }`,
+instantiated at the exact payload type.
+
+[T288868934](https://www.internalfb.com/tasks/T288868934): copying another enum
+member whose value is a label can typecheck but abort interpreter/JIT dynamic
+initialization in `Class::clsCnsGet`:
 
 ```hack
 <?hh
@@ -348,173 +254,34 @@ enum class Nested: mixed { HH\EnumClass\Label<Values, int> A = Labels::A; }
 function main(): void { $value = Nested::A; }
 ```
 
-Literal-label initialization and object-box containment pass. The indirect
-reproducer also passes after HHBBC optimization. Dynamic constant validation
-rejects `KindOfEnumClassLabel`, including inside arrays, and the enum initializer
-asserts on that result.
+Literal-label initialization and object-box containment pass, as does this
+indirect example after HHBBC optimization. Dynamic constant validation rejects
+`KindOfEnumClassLabel`, including inside arrays. Enum initializer contexts
+therefore exclude labels before type, subtype, and witness generation. The
+restriction propagates conservatively through functions and objects even when
+those wrappers are safe. Ordinary value contexts retain labels; the context is
+not a validator for an arbitrary previously generated type.
 
-`ENUM_VALUE_TYPE` and generated enum-member payloads therefore exclude labels
-through their construction context. The restriction propagates conservatively
-through functions and objects too, although those wrappers can be safe. Ordinary
-value contexts retain labels. The same context must be used to construct the
-type, select its subtype, and generate its witness; it is not a way to validate
-an arbitrary previously generated type. No checker diagnostic or failed seed
-is suppressed by these workarounds.
+[T288894213](https://www.internalfb.com/tasks/T288894213): repeated
+`HH\MemberOf` upper-bound expansion is mistaken for a cycle even when nesting is
+finite. The alternative
+`HH\MemberOf<Outer, HH\MemberOf<Inner, int>>` can be widened to `mixed`, causing
+its case union with `Awaitable<mixed>` to fail `Typing[4475]`. Same-owner nesting,
+nullable wrappers, aliases, local newtypes, type constants, and other cases can
+reproduce this; a single-variant case passes.
 
-### Nested enum members in case-type alternatives
+Disjointness comparison treats a member as `mixed` when its payload exposes
+another member through these wrappers. This prevents competing case alternatives
+without removing ordinary nested members or singleton cases. Traversal stops at
+tuples, shapes, arrays, containers, classes, functions, and Awaitable because
+their outer runtime tags hide the payload. Newtypes follow their actual bodies:
+a nested member only in an upper bound does not trigger the guard when the body
+is `null`. This is distinct from the nested-member coercion bug above.
 
-Tracked in [T288894213](https://www.internalfb.com/tasks/T288894213).
-
-The typechecker's runtime-tag approximation treats repeated `HH\MemberOf`
-upper-bound expansion as a cycle, even when the type arguments differ and the
-nesting is finite. For example, this lawful case declaration is rejected with
-`Typing[4475]` because the member alternative is incorrectly widened to `mixed`:
-
-```hack
-<?hh
-<<file: __EnableUnstableFeatures('case_types')>>
-enum class Inner: mixed { int A = 42; }
-enum class Outer: mixed { HH\MemberOf<Inner, int> A = Inner::A; }
-case type C = Awaitable<mixed> | HH\MemberOf<Outer, HH\MemberOf<Inner, int>>;
-```
-
-The nested member is bounded by `int` and cannot be an `Awaitable`. The failure
-also occurs with the same enum owner and through nullable types, aliases, local
-newtype right-hand sides, type constants, and other case types. A single-variant
-case declaration is accepted. This is separate from T288868928's nested-member
-value coercion issue.
-
-Until T288894213 is fixed, disjointness comparison conservatively treats a member
-as `mixed` when its payload exposes another member through those wrappers. This
-prevents selecting competing case alternatives; it does not change ordinary
-member generation or remove single-variant cases. Traversal stops at tuples,
-shapes, arrays, containers, classes, function types, and `Awaitable`, whose outer
-runtime tags hide their payloads from this expansion. Local newtypes are followed
-through their generated right-hand sides: a member appearing only in a declared
-upper bound is not enough to trigger the exception when the visible body is
-`null`. The exception neither suppresses checker diagnostics nor retries
-checker-rejected programs. Optional-tuple seeds 438, 601, and 684 cover the three
-original generator failures.
-
-## Opaque enum types intersected with null or nullable functions
-
-[T288865283](https://www.internalfb.com/tasks/T288865283) also affects opaque enum
-labels. Even an identity function whose parameter and return are both
-`HH\EnumClass\Label<E, int> & ?(function(): int)` fails with `Typing[4110]`.
-The checker retains a `Label & null` branch, rewrites it to
-`Label <: nonnull | (Label & null)`, and cannot prove that partition using the
-label's opaque `mixed` bound.
-
-`INTERSECTION_TYPE` excludes an exposed label paired with an exposed nullable
-function, through aliases, newtypes and concrete type constants. Nullable
-primitive, class, tuple and Awaitable operands pass and remain available.
-Ordinary label generation and consumption are unchanged.
-
-The same failure affects `HH\MemberOf<E, T>` when its payload exposes `mixed`,
-an unbounded case type, a label, or certain nullable bounds. Bare `null` and
-case types containing only null/function variants also reveal this partition
-failure. Exact alias, newtype, concrete type-constant and dependent definitions
-are followed; structural fields are not inspected. Nested members follow their
-payload, and like wrappers retain the nullable-bound hazard.
-
-The positive intersection guard retains nonnullable payloads, null-only nullable
-payloads, and matching emitted nullable-function signatures. It does not model
-function subtyping, so some other passing nullable-function payloads are
-conservatively omitted. Declared case bounds are recorded separately from
-variants and subtype edges: a case bounded by `nonnull` or a matching function
-can remain available even when its unbounded form fails. Outer nullable members
-and ordinary enum member generation remain available. Seed 320 covers the
-original label failure; additional member payload reproducers and passing
-controls are recorded in T288865283.
-
-Enum operations share their payload with other families. Initializer restrictions
-apply before generating that payload. Member references, labels, lookups,
-unwrapping, and variance conversions are separate expressions; templates state
-the member/label agreement and variance laws. Placeholder replacement observes
-identifier boundaries so operations from different families compose on one ID.
-
-## Class-name and class-pointer values
-
-Class identity types use consistent-constructor hierarchies with both classname
-and class-pointer covariance and pointer-to-name edges. Independent operations
-cover dynamic construction, late-static identity, and conversion. The two small
-laws check constructor/read agreement and class-name agreement across pointer
-and object views. All operations keep the shared payload and environment. Class
-identity types are excluded from reified positions, where Hack rejects them.
-
-## Class-pointer intersection projection
-
-[T288868918](https://www.internalfb.com/tasks/T288868918): the checker rejects
-this inhabited intersection projection with `Typing[4110]`:
-
-```hack
-<?hh
-<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
-class C {}
-class D extends C {}
-function project((classname<D> & class<C>) $x): class<C> { return $x; }
-```
-
-`D::class` can be returned at the intersection type. Pointer-only and same-class
-controls pass. The intersection normalizer currently produces
-`classname<C & D>`, losing the pointer constraint. `INTERSECTION_TYPE` excludes
-name/pointer head combinations through transparent wrappers and case branches;
-both intersection law templates use it. Required tuple slots and shape fields
-reproduce the lost constraint. Intersecting a pointer-containing tuple with a
-name-containing vec does too, so the guard follows vec elements when the other
-operand exposes a tuple. Vec/vec, shape/dict, function, and generic-container
-controls pass and do not receive that additional traversal.
-
-## Control flow and mutation
-
-`FLOW#N` composes bounded branches, loops, container reads and writes, exception
-handling, nullable receivers, and callable operations over the existing payload.
-Each rule preserves its typed input; children consume one shared size budget.
-The template binds that input once and checks the composed result. No assertion
-or prearranged multi-operation test scenario is generated.
-
-Indexed vector stores participate in the same expression composition. Their
-initial empty slot makes a dropped store observable at the subsequent read.
-The separate `flow_invalidation` law checks that clearing a nullable property
-invalidates the earlier refinement before a nullsafe read and fallback.
-
-## Asynchronous composition
-
-`ASYNC#N` adds typed lift, suspension, await binding, concurrent selection, and
-finally suspension to the shared expression rules. Every await is inside an
-explicit async lambda. Concurrent children bind independent fresh locals and
-read results only after the block. Task and expression recursion consume the
-same finite size budget. The small law checks that the result preserves the
-original payload, including object and Awaitable identity.
-
-## XHP
-
-XHP construction, payload boxing, attribute projection, and child projection are
-independent operations sharing the identifier's payload. Two small laws observe
-attribute identity and the actual child values. A shared protocol fixture
-provides the constructor and attribute lookup required by XHP lowering.
+### XHP attribute hints
 
 [T288868908](https://www.internalfb.com/tasks/T288868908): direct structural XHP
 attribute hints typecheck but fail emission with "There are no other possible
-xhp attribute hints". `MilnerPayload<T>` keeps that attribute nominal while
-retaining arbitrary generated payloads inside it. The wrapper also satisfies
-the separate restrictions on nullable required attributes and direct
-type-constant hints.
-
-## Expression trees
-
-Value-tree creation, quote/splice, lifting, and visiting are independent typed
-operations. The splice law compares one visited result with its original input.
-A shared fixture supplies only the visitor protocol and value/visit/lift helpers;
-the quote/splice and visit operations explicitly require defaults capabilities.
-
-## Modules and multifile programs
-
-Module templates use `//// relative/path.php` delimiters. Each virtual file has
-its own `<?hh` header. Member files declare their module; module definitions
-use separate files. The final file receives generated auxiliary definitions.
-The checker receives the original bundle. Runtime checks preserve it, split
-unique relative paths into a fresh directory, select the entrypoint in
-`main.php` (or the unique entrypoint file), and pass every physical file to HHBBC.
-Main must explicitly require any definitions it needs at runtime. Malformed
-layouts fail verification; retained output includes the split runtime files.
+xhp attribute hints". `MilnerPayload<T>` keeps the attribute nominal and the
+payload general. It also handles the separate restrictions on nullable required
+attributes and direct type-constant hints.

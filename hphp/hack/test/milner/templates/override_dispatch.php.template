@@ -1,8 +1,0 @@
-<?hh
-<<file: __EnableUnstableFeatures('case_types')>>
-<<file: __EnableUnstableFeatures('like_type_hints')>>
-
-<<__EntryPoint>> function main(): void {
-  $object = (construct#1)(expr#1);
-  invariant((dispatch#1)($object) === DISPATCH#1, 'override dispatch');
-}

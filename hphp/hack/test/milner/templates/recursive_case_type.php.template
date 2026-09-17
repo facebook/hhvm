@@ -4,4 +4,4 @@
 
 // Self-recursive case type with random base type
 // Tests that the type checker terminates and correctly rejects cycles
-case type RecCT = ALIAS_TYPE#1 | vec<RecCT>;
+case type RecCT = TYPE#1 | vec<RecCT>;

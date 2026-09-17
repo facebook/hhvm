@@ -1,7 +1,0 @@
-<?hh
-<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
-
-function subtype_only(SUBTYPE#1 $value): SUBTYPE#1 { return $value; }
-function shared_subtype(SUBTYPE#10 $value): TYPE#10 { return $value; }
-function shared_witness(): TYPE#10 { return expr#10; }
-function expression_only(): mixed { return expr#100; }

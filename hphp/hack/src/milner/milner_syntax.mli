@@ -39,6 +39,7 @@ type expr =
   | StaticProperty of string * string
   | Call of expr * expr list
   | Index of expr * expr
+  | Append of expr
   | Inout of expr
   | Unpack of expr
   | Lambda of parameter list * string list * string * stmt list
@@ -58,7 +59,7 @@ and parameter = {
 and stmt =
   | If of expr * stmt list * stmt list
   | While of expr * stmt list
-  | Foreach of expr * local * stmt list
+  | Foreach of expr * local option * local * stmt list
   | Try of stmt list * (string * local * stmt list) list * stmt list
   | Concurrent of stmt list
   | Bind of local * expr

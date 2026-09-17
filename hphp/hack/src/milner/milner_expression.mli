@@ -6,13 +6,10 @@
  *
  *)
 
-type family =
-  | Atom
-  | Flow
-  | Async
-  | Callable
-
-(** A function that preserves its argument's type and value, constructed from
-    bounded compositions of expressions and statements. Its caller must provide
-    the default callable context. *)
-val operation : family -> ty:Milner_generate.Type.t -> Milner_syntax.expr
+(** Evaluate [value] once, then compose bounded expressions and statements that
+    preserve its type. Supplied operations must accept and produce [ty]. The enclosing context must provide [defaults]. *)
+val compose :
+  ty:string ->
+  value:Milner_syntax.expr ->
+  operations:(Milner_syntax.expr -> Milner_syntax.expr) list ->
+  Milner_syntax.expr

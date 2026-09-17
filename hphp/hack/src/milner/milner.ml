@@ -9,473 +9,133 @@
 open Hh_prelude
 open Cmdliner
 module Gen = Milner_generate
-module Protocol = Milner_protocol_bindings
-module Fixture = Milner_protocol_fixture
 
 let type_prefix = "TYPE"
 
-let type_regexp = Pcre.regexp @@ type_prefix ^ "#([0-9]+)"
-
-let alias_type_prefix = "ALIAS_TYPE"
-
-let alias_type_regexp = Pcre.regexp @@ alias_type_prefix ^ "#([0-9]+)"
-
-let intersection_type_prefix = "INTERSECTION_TYPE"
-
-let intersection_type_regexp =
-  Pcre.regexp @@ intersection_type_prefix ^ "#([0-9]+)"
-
 let subtype_prefix = "SUBTYPE"
-
-let subtype_regexp = Pcre.regexp @@ subtype_prefix ^ "#([0-9]+)"
 
 let expr_prefix = "expr"
 
-let expr_regexp = Pcre.regexp @@ expr_prefix ^ "#([0-9]+)"
-
-let hierarchy_prefixes =
-  [
-    "CLASS_TYPE";
-    "ANCESTOR_TYPE";
-    "construct";
-    "read";
-    "write";
-    "identity";
-    "hierarchy";
-    "dispatch";
-    "DISPATCH";
-    "trait_read";
-    "interface_read";
-    "interface_write";
-  ]
-  |> List.sort ~compare:(fun left right ->
-         Int.compare (String.length right) (String.length left))
-
-let generic_prefixes =
-  [
-    "GENERIC_TAGGED_WRITER";
-    "GENERIC_TAGGED_CLASS";
-    "GENERIC_SUBTYPE";
-    "generic_subexpr";
-    "GENERIC_READER";
-    "GENERIC_WRITER";
-    "GENERIC_FAMILY";
-    "GENERIC_CLASS";
-    "GENERIC_WIDE";
-    "GENERIC_KEY";
-    "generic_key";
-  ]
-
-let dependent_prefixes =
-  [
-    "DEPENDENT_READ_BOUND";
-    "DEPENDENT_REFINED";
-    "DEPENDENT_CLASS";
-    "DEPENDENT_BOUND";
-    "DEPENDENT_BASE";
-    "DEPENDENT_ITEM";
-    "DEPENDENT_READ";
-  ]
-
-let procedure_prefixes = ["PROCEDURE_TYPE"; "procedure"; "THROWS"]
-
-let callable_prefixes =
-  ["CALLABLE_TYPE"; "CALLABLE_THROWS"; "callable"; "invoke_statement"; "invoke"]
-
-let enum_value_prefix = "ENUM_VALUE_TYPE"
-
-let enum_prefixes =
-  [
-    "ENUM_SUBTYPE";
-    "enum_member";
-    "enum_label";
-    "enum_base_member";
-    "enum_base_label";
-    "enum_child_member";
-    "enum_child_label";
-    "enum_unwrap";
-    "enum_unwrap_narrow";
-    "enum_lookup";
-    "enum_lookup_narrow";
-    "enum_owner_upcast";
-    "enum_label_owner_upcast";
-    "enum_payload_upcast";
-    "enum_label_payload_upcast";
-  ]
-
-let identity_prefixes =
-  [
-    "IDENTITY_BASE";
-    "IDENTITY_CHILD";
-    "IDENTITY_POINTER_TYPE";
-    "IDENTITY_NAME_TYPE";
-    "identity_child_pointer";
-    "identity_base_pointer";
-    "identity_child_name";
-    "identity_base_name";
-    "identity_construct";
-    "identity_read";
-    "identity_static";
-    "identity_object_name";
-    "identity_pointer_name";
-    "identity_widen_pointer";
-    "identity_widen_name";
-    "identity_is_child";
-  ]
-
-let tree_prefixes = ["tree_value"; "tree_splice"; "tree_lift"; "tree_visit"]
-
-let xhp_prefixes =
-  ["xhp_box"; "xhp_make"; "xhp_attribute"; "xhp_children"; "xhp_child"]
-
-let operation_families =
-  [
-    ("CALL", Milner_expression.Callable);
-    ("FLOW", Milner_expression.Flow);
-    ("ASYNC", Milner_expression.Async);
-  ]
-
-let family_regexp prefix =
+let placeholder_regexp prefix =
   Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")
 
-let placeholder prefix key = prefix ^ "#" ^ string_of_int key
+let type_regexp = placeholder_regexp type_prefix
 
-let init_table contents placeholder =
-  let placeholders =
-    try Pcre.exec_all ~rex:placeholder contents |> Array.to_list with
-    | _ -> []
-  in
+let subtype_regexp = placeholder_regexp subtype_prefix
+
+let expr_regexp = placeholder_regexp expr_prefix
+
+let matches template regexp =
+  try Pcre.exec_all ~rex:regexp template |> Array.to_list with
+  | Stdlib.Not_found -> []
+
+let init_table contents regexp =
   let table = Hashtbl.create (module Int) in
-  List.iter placeholders ~f:(fun placeholder ->
+  List.iter (matches contents regexp) ~f:(fun placeholder ->
       let key = (Pcre.get_substrings placeholder).(1) |> int_of_string in
       Hashtbl.set ~key ~data:() table);
   table
 
-(* Generate types and conforming expressions for all placeholders in the
-   template *)
+let context_types template regexp =
+  let table = Hashtbl.create (module Int) in
+  List.iter (matches template regexp) ~f:(fun context ->
+      let contents = (Pcre.get_substrings context).(1) in
+      init_table contents type_regexp
+      |> Hashtbl.iter_keys ~f:(fun key -> Hashtbl.set ~key ~data:() table));
+  table
+
 let generate_tables ~verbose ~debug_pattern template =
   let renv = Gen.ReadOnlyEnvironment.default ~verbose ~debug_pattern in
-  let env = Gen.Environment.default in
-  let alias_types = init_table template alias_type_regexp in
-  let intersection_types = init_table template intersection_type_regexp in
-  let hierarchies = Hashtbl.create (module Int) in
-  List.iter hierarchy_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key ->
-          Hashtbl.set hierarchies ~key ~data:()));
-  let generics = Hashtbl.create (module Int) in
-  List.iter generic_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set generics ~key ~data:()));
-  let dependents = Hashtbl.create (module Int) in
-  List.iter dependent_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key ->
-          Hashtbl.set dependents ~key ~data:()));
-  let procedures = Hashtbl.create (module Int) in
-  List.iter procedure_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key ->
-          Hashtbl.set procedures ~key ~data:()));
-  let callables = Hashtbl.create (module Int) in
-  List.iter callable_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key ->
-          Hashtbl.set callables ~key ~data:()));
-  let operations =
-    List.map operation_families ~f:(fun (prefix, family) ->
-        (prefix, family, init_table template (family_regexp prefix)))
+  let alias_types =
+    context_types
+      template
+      (Pcre.regexp
+         "(?m)^\\s*(?:case\\s+type|newtype|type)\\s+[^;=]+=(\\s*[^;]+);")
   in
-  let enum_value_types =
-    init_table template (family_regexp enum_value_prefix)
+  let intersection_types =
+    context_types
+      template
+      (Pcre.regexp "(?<![A-Za-z0-9_])(TYPE#[0-9]+(?:\\s*&\\s*TYPE#[0-9]+)+)")
   in
-  let enums = Hashtbl.create (module Int) in
-  List.iter enum_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set enums ~key ~data:()));
-  let identities = Hashtbl.create (module Int) in
-  List.iter identity_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key ->
-          Hashtbl.set identities ~key ~data:()));
-  let xhps = Hashtbl.create (module Int) in
-  List.iter xhp_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set xhps ~key ~data:()));
-  let trees = Hashtbl.create (module Int) in
-  List.iter tree_prefixes ~f:(fun prefix ->
-      let table = init_table template (family_regexp prefix) in
-      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set trees ~key ~data:()));
   let renv_for key =
-    let renv =
-      if Hashtbl.mem alias_types key then
-        Gen.ReadOnlyEnvironment.for_alias renv
-      else
-        renv
-    in
-    if Hashtbl.mem enum_value_types key || Hashtbl.mem enums key then
-      Gen.ReadOnlyEnvironment.for_enum_initializer renv
+    if Hashtbl.mem alias_types key then
+      Gen.ReadOnlyEnvironment.for_alias renv
     else
       renv
   in
-  let mk_type ~key ~data:() = Gen.Type.mk (renv_for key) env in
-  (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let expr_table = init_table template expr_regexp in
-  let another_table = init_table template (Pcre.regexp "another#([0-9]+)") in
   let subty_table = init_table template subtype_regexp in
-  List.iter
-    ([
-       expr_table;
-       another_table;
-       subty_table;
-       alias_types;
-       hierarchies;
-       generics;
-       dependents;
-       procedures;
-       callables;
-       enums;
-       identities;
-       xhps;
-       trees;
-       enum_value_types;
-     ]
-    @ List.map operations ~f:(fun (_, _, table) -> table))
-    ~f:(fun table ->
+  List.iter [expr_table; subty_table] ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table =
-    Hashtbl.fold
-      ty_table
-      ~init:(Hashtbl.create (module Int))
-      ~f:(fun ~key ~data table ->
-        let rec generate () =
-          let (env, ty) = mk_type ~key ~data in
-          let compatible =
-            (not (Hashtbl.mem intersection_types key))
-            || Hashtbl.for_alli
-                 table
-                 ~f:(fun ~key:other ~data:(other_env, other_ty) ->
-                   (not (Hashtbl.mem intersection_types other))
-                   || Gen.Type.intersection_law_compatible
-                        env
-                        ty
-                        other_env
-                        other_ty)
-          in
-          if compatible then
-            (env, ty)
-          else
-            generate ()
-        in
-        Hashtbl.set table ~key ~data:(generate ());
-        table)
+    Hashtbl.keys ty_table
+    |> List.sort ~compare:Int.compare
+    |> List.fold
+         ~init:(Hashtbl.create (module Int))
+         ~f:(fun table key ->
+           let rec generate () =
+             let (env, ty) =
+               Gen.Type.mk (renv_for key) Gen.Environment.default
+             in
+             let compatible =
+               (not (Hashtbl.mem intersection_types key))
+               || Hashtbl.for_alli
+                    table
+                    ~f:(fun ~key:other ~data:(other_env, other_ty) ->
+                      (not (Hashtbl.mem intersection_types other))
+                      || Gen.Type.intersection_law_compatible
+                           env
+                           ty
+                           other_env
+                           other_ty)
+             in
+             if compatible then
+               (env, ty)
+             else
+               generate ()
+           in
+           Hashtbl.set table ~key ~data:(generate ());
+           table)
   in
-
-  let hierarchy_table =
-    Hashtbl.mapi hierarchies ~f:(fun ~key ~data:() ->
+  let subty_table =
+    Hashtbl.mapi subty_table ~f:(fun ~key ~data:() ->
         let (env, ty) = Hashtbl.find_exn ty_table key in
-        let (env, bindings) =
-          Gen.Type.hierarchy_bindings (renv_for key) env ty
-        in
+        Gen.Type.subtype_of (renv_for key) env ty)
+  in
+  let expr_table =
+    Hashtbl.mapi expr_table ~f:(fun ~key ~data:() ->
+        let (env, ty) = Hashtbl.find_exn ty_table key in
+        let (env, expression) = Gen.Type.inhabitant_of (renv_for key) env ty in
         Hashtbl.set ty_table ~key ~data:(env, ty);
-        bindings)
+        expression)
   in
-
-  let generic_table =
-    Hashtbl.mapi generics ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, witness) =
-          Gen.Type.mk_generic_witness (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        let open Gen.Type in
-        [
-          ("GENERIC_CLASS", show witness.generic_class);
-          ("GENERIC_WIDE", show witness.generic_wide);
-          ("GENERIC_READER", show witness.generic_reader);
-          ("GENERIC_WRITER", show witness.generic_writer);
-          ("GENERIC_KEY", show witness.generic_key);
-          ("GENERIC_SUBTYPE", show witness.generic_narrow);
-          ("GENERIC_TAGGED_CLASS", show witness.generic_tagged_class);
-          ("GENERIC_TAGGED_WRITER", show witness.generic_tagged_writer);
-          ("GENERIC_FAMILY", witness.generic_family);
-          ("generic_key", inhabitant_of (renv_for key) env witness.generic_key);
-          ( "generic_subexpr",
-            inhabitant_of (renv_for key) env witness.generic_narrow );
-        ])
-  in
-
-  let dependent_table =
-    Hashtbl.mapi dependents ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, witness) =
-          Gen.Type.mk_dependent_witness (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        let open Gen.Type in
-        [
-          ("DEPENDENT_CLASS", witness.dependent_class);
-          ("DEPENDENT_BASE", witness.dependent_base);
-          ("DEPENDENT_ITEM", show witness.dependent_item);
-          ("DEPENDENT_BOUND", show witness.dependent_bound);
-          ("DEPENDENT_READ", witness.dependent_read);
-          ("DEPENDENT_READ_BOUND", witness.dependent_read_bound);
-          ( "DEPENDENT_REFINED",
-            witness.dependent_base ^ " with { type Item = " ^ show value ^ " }"
-          );
-        ])
-  in
-
-  let procedure_table =
-    Hashtbl.mapi procedures ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, bindings) =
-          Gen.Type.mk_procedure_bindings (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        bindings)
-  in
-
-  let callable_table =
-    Hashtbl.mapi callables ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, bindings) =
-          Gen.Type.mk_callable_bindings (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        bindings)
-  in
-  let operation_tables =
-    List.map operations ~f:(fun (prefix, family, table) ->
-        let table =
-          Hashtbl.mapi table ~f:(fun ~key ~data:() ->
-              let (_, ty) = Hashtbl.find_exn ty_table key in
-              Milner_expression.operation family ~ty
-              |> Milner_syntax.render_expr)
-        in
-        (prefix, table))
-  in
-
-  let enum_table =
-    Hashtbl.mapi enums ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, bindings) =
-          Gen.Type.mk_enum_bindings (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        bindings)
-  in
-
-  let identity_table =
-    Hashtbl.mapi identities ~f:(fun ~key ~data:() ->
-        let (env, value) = Hashtbl.find_exn ty_table key in
-        let (env, bindings) =
-          Gen.Type.mk_identity_bindings (renv_for key) env ~value
-        in
-        Hashtbl.set ty_table ~key ~data:(env, value);
-        bindings)
-  in
-  let xhp_witnesses =
-    Hashtbl.mapi xhps ~f:(fun ~key ~data:() ->
-        let (_, value) = Hashtbl.find_exn ty_table key in
-        Protocol.xhp
-          ~name:(Format.sprintf "milner-node_%d" key)
-          ~value_hint:(Gen.Type.show value)
-          ~child:(Gen.string_literal ()))
-  in
-  let protocol_definitions =
-    if Hashtbl.is_empty xhp_witnesses then
-      []
-    else
-      Fixture.xhp
-      :: List.concat_map (Hashtbl.data xhp_witnesses) ~f:(fun witness ->
-             witness.Protocol.definitions)
-  in
-  let xhp_table =
-    Hashtbl.map xhp_witnesses ~f:(fun witness ->
-        List.map witness.Protocol.expressions ~f:(fun (prefix, expression) ->
-            (prefix, Milner_syntax.render_expr expression)))
-  in
-
-  let tree_table =
-    Hashtbl.mapi trees ~f:(fun ~key ~data:() ->
-        let (_, value) = Hashtbl.find_exn ty_table key in
-        let witness =
-          Protocol.expression_tree ~value_hint:(Gen.Type.show value)
-        in
-        List.map witness.Protocol.expressions ~f:(fun (prefix, expression) ->
-            (prefix, Milner_syntax.render_expr expression)))
-  in
-  let protocol_definitions =
-    protocol_definitions
-    @
-    if Hashtbl.is_empty trees then
-      []
-    else
-      [Fixture.expression_tree]
-  in
-
-  let gen_subty_from_ty_table ~key ~data:_ =
-    let (env, ty) = Hashtbl.find_exn ty_table key in
-    Gen.Type.subtype_of (renv_for key) env ty
-  in
-  let subty_table = Hashtbl.mapi subty_table ~f:gen_subty_from_ty_table in
-
-  let gen_expr_from_ty_table ~key ~data:_ =
-    let (env, ty) = Hashtbl.find_exn ty_table key in
-    Gen.Type.inhabitant_of (renv_for key) env ty
-  in
-  let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
-  let another_table = Hashtbl.mapi another_table ~f:gen_expr_from_ty_table in
-
   let defs =
-    let get_defs (_, (env, _)) = Gen.Environment.definitions env in
-    let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
-    List.concat ty_defs |> List.map ~f:Gen.Definition.show
+    Hashtbl.to_alist ty_table
+    |> List.sort ~compare:(fun (left, _) (right, _) -> Int.compare left right)
+    |> List.concat_map ~f:(fun (_, (env, _)) -> Gen.Environment.definitions env)
+    |> List.map ~f:Gen.Definition.show
   in
-  let defs = defs @ protocol_definitions in
+  let seen_defs = Hash_set.create (module String) in
+  let defs =
+    List.filter defs ~f:(fun definition ->
+        if Hash_set.mem seen_defs definition then
+          false
+        else begin
+          Hash_set.add seen_defs definition;
+          true
+        end)
+  in
   let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
+  (defs, ty_table, subty_table, expr_table)
 
-  ( defs,
-    ty_table,
-    subty_table,
-    expr_table,
-    another_table,
-    hierarchy_table,
-    generic_table,
-    dependent_table,
-    procedure_table,
-    callable_table,
-    operation_tables,
-    enum_table,
-    identity_table,
-    xhp_table,
-    tree_table )
-
-(* Add generated types and expressions back in the template *)
-let fill_in_template
-    ty_table
-    subty_table
-    expr_table
-    another_table
-    hierarchy_table
-    generic_table
-    dependent_table
-    procedure_table
-    callable_table
-    operation_tables
-    enum_table
-    identity_table
-    xhp_table
-    tree_table
-    template =
+let fill_in_template ty_table subty_table expr_table template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
       let rex =
         Pcre.regexp
           ("(?<![A-Za-z0-9_])"
-          ^ Pcre.quote (placeholder prefix key)
+          ^ Pcre.quote (prefix ^ "#" ^ string_of_int key)
           ^ "(?![0-9])")
       in
       Pcre.substitute ~rex ~subst:(fun _ -> data) contents
@@ -485,103 +145,12 @@ let fill_in_template
     |> List.fold ~init:contents ~f:(fun contents (key, data) ->
            replace ~key ~data contents)
   in
-
   let ty_str_table = Hashtbl.map ty_table ~f:Gen.Type.show in
   let subty_str_table = Hashtbl.map subty_table ~f:Gen.Type.show in
-  let template =
-    List.fold hierarchy_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map hierarchy_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold generic_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map generic_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold dependent_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map dependent_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold callable_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map callable_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold
-      operation_tables
-      ~init:template
-      ~f:(fun template (prefix, table) -> fill_table table ~prefix template)
-  in
-  let template =
-    List.fold procedure_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map procedure_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold enum_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map enum_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold identity_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map identity_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold xhp_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map xhp_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template =
-    List.fold tree_prefixes ~init:template ~f:(fun contents prefix ->
-        let table =
-          Hashtbl.map tree_table ~f:(fun bindings ->
-              List.Assoc.find_exn bindings ~equal:String.equal prefix)
-        in
-        fill_table table ~prefix contents)
-  in
-  let template = fill_table ty_str_table ~prefix:enum_value_prefix template in
-  (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
   |> fill_table subty_str_table ~prefix:subtype_prefix
-  |> fill_table ty_str_table ~prefix:alias_type_prefix
-  |> fill_table ty_str_table ~prefix:intersection_type_prefix
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
-  |> fill_table another_table ~prefix:"another"
-
-let add_missing_definitions defs output =
-  output
-  ^ "\n"
-  ^ "// Auxiliary definitions\n"
-  ^ String.concat ~sep:"\n" defs
-  ^ "\n"
 
 let milner verbose debug_pattern seed template_path destination_path =
   if verbose > 0 then begin
@@ -594,41 +163,12 @@ let milner verbose debug_pattern seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let ( defs,
-        ty_table,
-        subty_table,
-        expr_table,
-        another_table,
-        hierarchy_table,
-        generic_table,
-        dependent_table,
-        procedure_table,
-        callable_table,
-        operation_tables,
-        enum_table,
-        identity_table,
-        xhp_table,
-        tree_table ) =
+  let (defs, ty_table, subty_table, expr_table) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
-    fill_in_template
-      ty_table
-      subty_table
-      expr_table
-      another_table
-      hierarchy_table
-      generic_table
-      dependent_table
-      procedure_table
-      callable_table
-      operation_tables
-      enum_table
-      identity_table
-      xhp_table
-      tree_table
-      template
-    |> add_missing_definitions defs
+    fill_in_template ty_table subty_table expr_table template
+    |> Milner_program.render ~definitions:defs
   in
   match destination_path with
   | Some path -> Out_channel.write_all path ~data:output

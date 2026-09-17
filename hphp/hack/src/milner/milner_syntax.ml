@@ -40,6 +40,7 @@ type expr =
   | StaticProperty of string * string
   | Call of expr * expr list
   | Index of expr * expr
+  | Append of expr
   | Inout of expr
   | Unpack of expr
   | Lambda of parameter list * string list * string * stmt list
@@ -59,7 +60,7 @@ and parameter = {
 and stmt =
   | If of expr * stmt list * stmt list
   | While of expr * stmt list
-  | Foreach of expr * local * stmt list
+  | Foreach of expr * local option * local * stmt list
   | Try of stmt list * (string * local * stmt list) list * stmt list
   | Concurrent of stmt list
   | Bind of local * expr
@@ -95,6 +96,7 @@ let rec render_expr = function
     "(" ^ render_expr receiver ^ ")?->" ^ name
   | Index (receiver, index) ->
     "(" ^ render_expr receiver ^ ")[" ^ render_expr index ^ "]"
+  | Append receiver -> "(" ^ render_expr receiver ^ ")[]"
   | Inout expression -> "inout " ^ render_expr expression
   | Unpack expression -> "..." ^ render_expr expression
   | Atom source -> source
@@ -168,10 +170,11 @@ and render_stmt = function
       " else { " ^ render_body alternative ^ " }"
   | While (condition, body) ->
     "while (" ^ render_expr condition ^ ") { " ^ render_body body ^ " }"
-  | Foreach (collection, local, body) ->
+  | Foreach (collection, key, local, body) ->
     "foreach ("
     ^ render_expr collection
     ^ " as "
+    ^ Option.value_map key ~default:"" ~f:(fun key -> key ^ " => ")
     ^ local
     ^ ") { "
     ^ render_body body
@@ -194,6 +197,7 @@ and render_stmt = function
   | Bind (local, value) -> local ^ " = " ^ render_expr value ^ ";"
   | Assign (target, value) ->
     render_expr target ^ " = " ^ render_expr value ^ ";"
+  | Eval (Unary ("++", target)) -> "++" ^ render_expr target ^ ";"
   | Eval expression -> render_expr expression ^ ";"
   | Throw expression -> "throw " ^ render_expr expression ^ ";"
   | Return None -> "return;"

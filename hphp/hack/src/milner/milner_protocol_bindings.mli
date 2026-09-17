@@ -8,12 +8,16 @@
 
 type t = {
   definitions: string list;
-  expressions: (string * Milner_syntax.expr) list;
+  operations: (Milner_syntax.expr -> Milner_syntax.expr) list;
 }
 
 (** [name] must be a fresh valid XHP identifier, for example [milner-node_42].
-    [child] must be a closed string expression. The payload hint is the shared
-    type of this placeholder group. *)
+    [child] must be a closed string expression. Operations preserve the supplied
+    value's type and identity and require the XHP protocol fixture. *)
 val xhp : name:string -> value_hint:string -> child:Milner_syntax.expr -> t
 
-val expression_tree : value_hint:string -> t
+(** Construct and visit a tree with a bounded number of lifts and splices. The
+    resulting expression has type [mixed] and preserves the supplied value.
+    Requires the expression-tree fixture and [defaults] capabilities. *)
+val expression_tree :
+  value_hint:string -> Milner_syntax.expr -> Milner_syntax.expr

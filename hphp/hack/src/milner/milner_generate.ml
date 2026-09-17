@@ -657,10 +657,14 @@ and Definition : sig
     name:string -> parent:string option -> payload:Type.t option -> t
 
   val effect_state : name:string -> t
+
+  val raw : string -> t
 end = struct
   type t = string
 
   let show def = def
+
+  let raw source = source
 
   let typeconst ~name aliased =
     Format.sprintf "const type %s = %s;" name (Type.show aliased)
@@ -843,7 +847,7 @@ end = struct
         "interface %sWriter<-T> { public function set(T $value)[write_props]: void; }"
         name;
       Format.sprintf
-        "final class %s<TKey as arraykey, TValue> implements %sReader<TValue>, %sWriter<TValue> { public function __construct(private TKey $key, private TValue $value)[write_props] {} public function get()[]: TValue { return $this->value; } public function set(TValue $value)[write_props]: void { $this->value = $value; } public function keyed()[]: dict<TKey, TValue> { return dict[$this->key => $this->value]; } public function project<TProjected as TValue>(TProjected $value)[]: TProjected { return $value; } public function widen<TWide super TValue>(TWide $_witness)[write_props]: %s<TKey, TWide> { return new %s<TKey, TWide>($this->key, $this->value); } public static function identity<TItem>(TItem $value)[]: TItem { return $value; } }"
+        "final class %s<TKey as arraykey, TValue> implements %sReader<TValue>, %sWriter<TValue> { public ?Vector<TValue> $items; public function __construct(private TKey $key, private TValue $value)[write_props] { $this->items = new Vector(vec[$value]); } public function clear()[write_props]: void { $this->items = null; } public function get()[]: TValue { return $this->value; } public function set(TValue $value)[write_props]: void { $this->value = $value; } public function keyed()[]: dict<TKey, TValue> { return dict[$this->key => $this->value]; } public function project<TProjected as TValue>(TProjected $value)[]: TProjected { return $value; } public function widen<TWide super TValue>(TWide $_witness)[write_props]: %s<TKey, TWide> { return new %s<TKey, TWide>($this->key, $this->value); } public static function identity<TItem>(TItem $value)[]: TItem { return $value; } }"
         name
         name
         name
@@ -989,86 +993,12 @@ and Type : sig
   val intersection_law_compatible :
     Environment.t -> t -> Environment.t -> t -> bool
 
-  val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
+  val inhabitant_of :
+    ReadOnlyEnvironment.t -> Environment.t -> t -> Environment.t * string
 
   val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t
 
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
-
-  type generic_witness = {
-    generic_family: string;
-    generic_key: t;
-    generic_payload: t;
-    generic_narrow: t;
-    generic_class: t;
-    generic_wide: t;
-    generic_reader: t;
-    generic_writer: t;
-    generic_tagged_class: t;
-    generic_tagged_writer: t;
-  }
-
-  val mk_generic_witness :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * generic_witness
-
-  type dependent_witness = {
-    dependent_class: string;
-    dependent_base: string;
-    dependent_payload: t;
-    dependent_bound: t;
-    dependent_item: t;
-    dependent_read: string;
-    dependent_read_bound: string;
-  }
-
-  val mk_dependent_witness :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * dependent_witness
-
-  (** A separate nullary completion witness associated with the existing payload
-      binding. This does not replace the supplied payload type. *)
-  val mk_procedure_bindings :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * (string * string) list
-
-  (** A separate callable completion witness associated with the existing
-      payload binding. Does not replace the supplied payload type. *)
-  val mk_callable_bindings :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * (string * string) list
-
-  val mk_enum_bindings :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * (string * string) list
-
-  val mk_identity_bindings :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    value:t ->
-    Environment.t * (string * string) list
-
-  val hierarchy_bindings :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    t ->
-    Environment.t * (string * string) list
-
-  val mk_callable : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
-
-  val mk_procedure : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
-
-  val procedure_throws : t -> bool
 end = struct
   module Env = Environment
   module REnv = ReadOnlyEnvironment
@@ -2547,8 +2477,7 @@ end = struct
     | Like _ ->
       None
 
-  let inhabitant_of renv env ty =
-    inhabitant renv env ty |> Milner_syntax.render_expr
+  let constant renv env ty = inhabitant renv env ty |> Milner_syntax.render_expr
 
   let callable_application renv env ty ~value =
     match ty with
@@ -2573,17 +2502,12 @@ end = struct
       Syntax.Call (value, arguments)
     | _ -> invalid_arg "callable_application expects a generated function"
 
-  let callable_throws = function
-    | Function { return_ = ReturnsNothing; _ } -> true
-    | Function _ -> false
-    | _ -> invalid_arg "callable_throws expects a generated function"
-
   let mk_arraykey (renv : REnv.t) (env : Env.t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = false } in
     subtype_of renv env (Primitive Primitive.Arraykey)
 
-  let has_nullable_enum_case_return env ty =
-    (* T288899890: identical nullable enum case returns can fail overriding. *)
+  let has_nullable_nominal_case_return env ty =
+    (* Identical nullable enum/name case returns can fail override checking. *)
     let rec visit seen ~inside_case ~nullable ty =
       if TypeSet.mem ty seen then
         false
@@ -2602,23 +2526,12 @@ end = struct
         | Like ty -> visit seen ~inside_case ~nullable ty
         | Option ty when inside_case ->
           visit seen ~inside_case ~nullable:true ty
-        | Enum _ -> inside_case && nullable
+        | Enum _
+        | ClassIdentity { is_pointer = false; _ } ->
+          inside_case && nullable
         | _ -> false
     in
     visit TypeSet.empty ~inside_case:false ~nullable:false ty
-
-  type generic_witness = {
-    generic_family: string;
-    generic_key: t;
-    generic_payload: t;
-    generic_narrow: t;
-    generic_class: t;
-    generic_wide: t;
-    generic_reader: t;
-    generic_writer: t;
-    generic_tagged_class: t;
-    generic_tagged_writer: t;
-  }
 
   let generic_protocol name suffix instantiation =
     Classish
@@ -2650,16 +2563,6 @@ end = struct
     let env = Env.record_subtype env ~super:writer ~sub:ty in
     (env, name, ty, reader, writer)
 
-  type dependent_witness = {
-    dependent_class: string;
-    dependent_base: string;
-    dependent_payload: t;
-    dependent_bound: t;
-    dependent_item: t;
-    dependent_read: string;
-    dependent_read_bound: string;
-  }
-
   let declare_dependent env ~value_type ~bound =
     let concrete = fresh "Dependent" in
     let base = concrete ^ "Base" in
@@ -2686,22 +2589,6 @@ end = struct
         ~f:Env.add_definition
     in
     (env, ty)
-
-  let dependent_witness_of env = function
-    | Dependent { name } as ty ->
-      let Env.{ concrete; base; bound; value_type; read_function } =
-        Env.get_dependent env name
-      in
-      {
-        dependent_class = concrete;
-        dependent_base = base;
-        dependent_payload = value_type;
-        dependent_bound = Option.value bound ~default:Mixed;
-        dependent_item = ty;
-        dependent_read = read_function;
-        dependent_read_bound = read_function ^ "_bound";
-      }
-    | _ -> invalid_arg "dependent_witness_of expects a dependent type"
 
   type enum_family = {
     enum_base: string;
@@ -2976,7 +2863,7 @@ end = struct
                contract
                ~inherited
                ~omit_getter_override:
-                 (has_nullable_enum_case_return env contract.Env.value_type)
+                 (has_nullable_nominal_case_return env contract.Env.value_type)
                ~identity
                ~probe_value
         in
@@ -3166,14 +3053,14 @@ end = struct
           let underlying_ty =
             subtype_of REnv.{ renv with for_enum_def = true } env bound
           in
-          let value = inhabitant_of renv env underlying_ty in
+          let value = constant renv env underlying_ty in
           let env = Env.record_subtype env ~super:bound ~sub:ty in
           (env, Some bound, underlying_ty, value)
         else
           let underlying_ty =
             mk_arraykey REnv.{ renv with for_enum_def = true } env
           in
-          let value = inhabitant_of renv env underlying_ty in
+          let value = constant renv env underlying_ty in
           let env = Env.record_subtype env ~super:Mixed ~sub:ty in
           (env, None, underlying_ty, value)
       in
@@ -3291,532 +3178,817 @@ end = struct
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
 
-  let mk_identity_bindings _renv env ~value:payload =
-    let (env, family) = declare_identity_family env ~payload:(Some payload) in
-    let unary hint contexts return_hint body =
-      let value = Milner_syntax.fresh_local "identity" in
-      Milner_syntax.Lambda
-        ( [Milner_syntax.parameter hint value],
-          contexts,
-          return_hint,
-          [Milner_syntax.Return (Some (body value))] )
-    in
-    let forward source target =
-      unary (show source) [] (show target) (fun value ->
-          Milner_syntax.Local value)
-    in
-    let pointer = Milner_syntax.fresh_local "class_pointer" in
-    let value = Milner_syntax.fresh_local "payload" in
-    let construct =
-      Milner_syntax.Lambda
-        ( [
-            Milner_syntax.parameter (show family.identity_base_pointer) pointer;
-            Milner_syntax.parameter (show payload) value;
-          ],
-          ["write_props"],
-          family.identity_base,
-          [
-            Milner_syntax.Return
-              (Some
-                 (Milner_syntax.NewDynamic (pointer, [Milner_syntax.Local value])));
-          ] )
-    in
-    let read =
-      unary family.identity_base [] (show payload) (fun value ->
-          Milner_syntax.Call
-            (Milner_syntax.Member (Milner_syntax.Local value, "get"), []))
-    in
-    let static_identity hint =
-      unary hint [] (show family.identity_base_name) (fun value ->
-          Milner_syntax.Call
-            (Milner_syntax.DynamicStaticMember (value, "identity"), []))
-    in
-    let expressions =
-      [
-        ( "identity_child_pointer",
-          Milner_syntax.StaticMember (family.identity_child, "class") );
-        ( "identity_base_pointer",
-          Milner_syntax.StaticMember (family.identity_base, "class") );
-        ("identity_child_name", Milner_syntax.Nameof family.identity_child);
-        ("identity_base_name", Milner_syntax.Nameof family.identity_base);
-        ("identity_construct", construct);
-        ("identity_read", read);
-        ("identity_static", static_identity (show family.identity_base_pointer));
-        ("identity_object_name", static_identity family.identity_base);
-        ( "identity_pointer_name",
-          forward family.identity_base_pointer family.identity_base_name );
-        ( "identity_widen_pointer",
-          forward family.identity_child_pointer family.identity_base_pointer );
-        ( "identity_widen_name",
-          forward family.identity_child_name family.identity_base_name );
-        ( "identity_is_child",
-          unary family.identity_base [] "bool" (fun value ->
-              Milner_syntax.Is (Milner_syntax.Local value, family.identity_child))
-        );
-      ]
-    in
-    let bindings =
-      [
-        ("IDENTITY_BASE", family.identity_base);
-        ("IDENTITY_CHILD", family.identity_child);
-        ("IDENTITY_POINTER_TYPE", show family.identity_base_pointer);
-        ("IDENTITY_NAME_TYPE", show family.identity_base_name);
-      ]
-      @ List.map expressions ~f:(fun (prefix, expression) ->
-            (prefix, Milner_syntax.render_expr expression))
-    in
-    (env, bindings)
+  let apply ty parameters body arguments =
+    Syntax.Call
+      (Syntax.Lambda (parameters, ["defaults"], show ty, body), arguments)
 
-  let mk_enum_bindings renv env ~value:payload =
-    if not renv.REnv.for_enum_class_value then
-      invalid_arg
-        "mk_enum_bindings requires for_enum_initializer before generating value";
-    let value_renv = renv in
-    let narrower = subtype_of value_renv env payload in
-    let (env, family) = declare_enum_family value_renv env ~payload ~narrower in
-    let (env, _) = record_enum_views env family ~is_label:false in
-    let (env, _) = record_enum_views env family ~is_label:true in
-    let unwrap_name = fresh "unwrap_member" in
-    (* T288868928: keep the payload conversion generic for nested members. *)
-    let env =
-      Env.add_definition env
-      @@ Definition.enum_unwrap ~name:unwrap_name ~enum_name:family.enum_child
-    in
-    let member owner payload = enum_view ~is_label:false owner "A" payload in
-    let label owner payload = enum_view ~is_label:true owner "A" payload in
-    let identity argument_type return_type =
-      let value = Milner_syntax.fresh_local "enum_value" in
-      Milner_syntax.Lambda
-        ( [Milner_syntax.parameter (show argument_type) value],
-          [],
-          show return_type,
-          [Milner_syntax.Return (Some (Milner_syntax.Local value))] )
-    in
-    let unwrap payload =
-      let value = Milner_syntax.fresh_local "member" in
-      Milner_syntax.Lambda
-        ( [
-            Milner_syntax.parameter
-              (show (member family.enum_child payload))
-              value;
-          ],
-          [],
-          show payload,
-          [
-            Milner_syntax.Return
-              (Some
-                 (Milner_syntax.Call
-                    ( Milner_syntax.Atom
-                        (Format.sprintf "%s<%s>" unwrap_name (show payload)),
-                      [Milner_syntax.Local value] )));
-          ] )
-    in
-    let lookup payload =
-      let value = Milner_syntax.fresh_local "label" in
-      (* T288868921: specify both type arguments to valueOf. *)
-      Milner_syntax.Lambda
-        ( [
-            Milner_syntax.parameter
-              (show (label family.enum_child payload))
-              value;
-          ],
-          ["defaults"],
-          show (member family.enum_child payload),
-          [
-            Milner_syntax.Return
-              (Some
-                 (Milner_syntax.Call
-                    ( Milner_syntax.StaticMember
-                        ( family.enum_child,
-                          Format.sprintf
-                            "valueOf<%s, %s>"
-                            family.enum_child
-                            (show payload) ),
-                      [Milner_syntax.Local value] )));
-          ] )
-    in
-    let expressions =
-      [
-        ("enum_member", Milner_syntax.StaticMember (family.enum_child, "A"));
-        ("enum_label", Milner_syntax.EnumLabel (family.enum_child, "A"));
-        ("enum_base_member", Milner_syntax.StaticMember (family.enum_base, "A"));
-        ("enum_base_label", Milner_syntax.EnumLabel (family.enum_base, "A"));
-        ( "enum_child_member",
-          Milner_syntax.StaticMember (family.enum_child, "B") );
-        ("enum_child_label", Milner_syntax.EnumLabel (family.enum_child, "B"));
-        ("enum_unwrap", unwrap payload);
-        ("enum_unwrap_narrow", unwrap narrower);
-        ("enum_lookup", lookup payload);
-        ("enum_lookup_narrow", lookup narrower);
-        ( "enum_owner_upcast",
-          identity
-            (member family.enum_base payload)
-            (member family.enum_child payload) );
-        ( "enum_label_owner_upcast",
-          identity
-            (label family.enum_base payload)
-            (label family.enum_child payload) );
-        ( "enum_payload_upcast",
-          identity
-            (member family.enum_child narrower)
-            (member family.enum_child payload) );
-        ( "enum_label_payload_upcast",
-          identity
-            (label family.enum_child narrower)
-            (label family.enum_child payload) );
-      ]
-    in
-    let bindings =
-      ("ENUM_VALUE_TYPE", show payload)
-      :: ("ENUM_SUBTYPE", show narrower)
-      :: List.map expressions ~f:(fun (prefix, expression) ->
-             (prefix, Milner_syntax.render_expr expression))
-    in
-    (env, bindings)
+  let returning value = Syntax.Return (Some value)
 
-  let mk_generic_witness renv env ~value =
-    let key = mk_arraykey renv env in
-    let (env, name, ty, _, _) = declare_generic env ~key ~value in
-    let narrower =
-      subtype_of
-        REnv.
-          {
-            renv with
-            pick_immediately_inhabited = false;
-            for_alias_def = false;
-          }
-        env
-        value
-    in
-    let wide = GenericClass { name; key; value = Mixed } in
-    let reader = generic_protocol name "Reader" Mixed in
-    let writer = generic_protocol name "Writer" narrower in
-    let env = Env.record_subtype env ~super:reader ~sub:ty in
-    let env = Env.record_subtype env ~super:reader ~sub:wide in
-    let env = Env.record_subtype env ~super:writer ~sub:ty in
-    let env = Env.record_subtype env ~super:writer ~sub:wide in
-    let tagged ty =
-      Tuple
-        {
-          conjuncts = [Primitive Primitive.Int; ty];
-          optional_conjuncts = [];
-          open_ = false;
-        }
-    in
-    let tagged_class = GenericClass { name; key; value = tagged value } in
-    let tagged_writer = generic_protocol name "Writer" (tagged narrower) in
-    let env = Env.record_subtype env ~super:tagged_writer ~sub:tagged_class in
-    let env = Env.record_subtype env ~super:tagged_writer ~sub:wide in
-    ( env,
-      {
-        generic_family = name;
-        generic_key = key;
-        generic_payload = value;
-        generic_narrow = narrower;
-        generic_class = ty;
-        generic_wide = wide;
-        generic_reader = reader;
-        generic_writer = writer;
-        generic_tagged_class = tagged_class;
-        generic_tagged_writer = tagged_writer;
-      } )
+  let forward source target value =
+    let local = Syntax.fresh_local "forward" in
+    Syntax.Call
+      ( Syntax.Lambda
+          ( [Syntax.parameter source local],
+            [],
+            target,
+            [returning (Syntax.Local local)] ),
+        [value] )
 
-  let mk_dependent_witness _renv env ~value =
-    let bound =
-      Some
-        (if Random.bool () then
-          Mixed
-        else
-          value)
-    in
-    let (env, ty) = declare_dependent env ~value_type:value ~bound in
-    (env, dependent_witness_of env ty)
+  let member receiver name arguments =
+    Syntax.Call (Syntax.Member (receiver, name), arguments)
 
-  let mk_callable renv env =
-    mk ~kind:Kind.Function renv env ~depth:None ~complexity:default_complexity
+  let bind_value ty value body =
+    let local = Syntax.fresh_local "input" in
+    apply
+      ty
+      [Syntax.parameter (show ty) local]
+      (body (Syntax.Local local))
+      [value]
 
-  let mk_callable_bindings renv env ~value:_ =
-    let (env, callable_type) = mk_callable renv env in
-    let callable = inhabitant renv env callable_type in
-    let invocation =
-      callable_application renv env callable_type ~value:callable
-    in
-    let statement =
-      match callable_type with
-      | Function { return_ = ReturnsValue _; _ } ->
-        Syntax.Bind (Syntax.fresh_local "result", invocation)
-      | Function _ -> Syntax.Eval invocation
-      | _ -> invalid_arg "Expected a generated callable"
-    in
-    ( env,
-      [
-        ("CALLABLE_TYPE", show callable_type);
-        ("callable", Syntax.render_expr callable);
-        ("invoke", Syntax.render_expr invocation);
-        ("invoke_statement", Syntax.render_stmt statement);
-        ("CALLABLE_THROWS", string_of_bool (callable_throws callable_type));
-      ] )
-
-  let mk renv env = mk renv env ~depth:None ~complexity:default_complexity
-
-  type operation = {
-    parameters: t list;
-    result: t;
-    apply: Milner_syntax.expr list -> Milner_syntax.expr;
-  }
-
-  let compose operations ~locals ~fuel ty =
-    let rec available fuel ty =
-      List.exists locals ~f:(fun (local_ty, _) -> equal local_ty ty)
-      || fuel > 0
-         && List.exists operations ~f:(fun operation ->
-                equal operation.result ty
-                && List.for_all operation.parameters ~f:(available (fuel - 1)))
-    in
-    let rec generate fuel ty =
-      let locals =
-        List.filter_map locals ~f:(fun (local_ty, expression) ->
-            if equal local_ty ty then
-              Some (fun () -> expression)
-            else
-              None)
-      in
-      let calls =
-        if fuel <= 0 then
-          []
-        else
-          List.filter_map operations ~f:(fun operation ->
-              if
-                equal operation.result ty
-                && List.for_all operation.parameters ~f:(available (fuel - 1))
-              then
-                Some
-                  (fun () ->
-                    operation.apply
-                      (List.map operation.parameters ~f:(generate (fuel - 1))))
-              else
-                None)
-      in
-      (select (locals @ calls)) ()
-    in
-    generate fuel ty
-
-  let hierarchy_bindings renv env value_type =
-    let open Milner_syntax in
-    let (env, contract) = make_member_contract env value_type in
+  let hierarchy_operations renv env ty =
+    let (env, contract) = make_member_contract env ty in
     let (env, root) =
       mk_classish
         renv
         env
         ~parent:None
         ~contract:(Some contract)
-        ~complexity:default_complexity
+        ~complexity:2
         ~depth:0
     in
-    let rec class_ancestor = function
+    let rec ancestor = function
       | Classish { kind = Kind.Interface; _ } as ty ->
-        class_ancestor (select (Env.get_subtypes env ty))
+        ancestor (select (Env.get_subtypes env ty))
       | Classish _ as ty -> ty
-      | _ -> failwith "Expected a generated nominal hierarchy"
+      | _ -> failwith "Expected a nominal ancestor"
     in
-    let ancestor = class_ancestor root in
+    let ancestor = ancestor root in
     let concrete =
       subtype_of
         REnv.{ renv with pick_immediately_inhabited = true }
         env
         ancestor
     in
-    let owner =
-      if Random.bool () then
-        ancestor
-      else
-        concrete
-    in
-    let (owner_name, identity) =
-      match owner with
-      | Classish { name; _ } -> (name, (Env.get_nominal env name).Env.identity)
-      | _ -> failwith "Expected a generated class"
-    in
-    let concrete_name =
+    let name =
       match concrete with
-      | Classish { name; kind = Kind.Class; _ } -> name
-      | _ -> failwith "Expected an instantiable class"
+      | Classish { name; _ } -> name
+      | _ -> failwith "Expected a concrete class"
     in
-    let value = fresh_local "value" in
-    let object_ = fresh_local "object" in
-    let expected_dispatch =
-      (Env.get_nominal env concrete_name).Env.probe_value
+    let info = Env.get_nominal env name in
+    let (static_owner, static_identity) =
+      let owner =
+        if Random.bool () then
+          ancestor
+        else
+          concrete
+      in
+      match owner with
+      | Classish { name = owner_name; _ } ->
+        ( (if Random.bool () then
+            owner_name
+          else
+            name),
+          (Env.get_nominal env owner_name).Env.identity )
+      | _ -> failwith "Expected a nominal owner"
     in
-    let dispatch =
-      Lambda
-        ( [parameter (show ancestor) object_],
-          [],
-          "int",
+    let construct value = Syntax.New (show concrete, [value]) in
+    let read value =
+      let receiver = Syntax.fresh_local "receiver" in
+      apply
+        ty
+        [Syntax.parameter (show ancestor) receiver]
+        [returning (member (Syntax.Local receiver) contract.Env.getter [])]
+        [construct value]
+    in
+    let write value =
+      bind_value ty value (fun value ->
+          let receiver = Syntax.fresh_local "receiver" in
           [
-            Return (Some (Call (Member (Local object_, contract.Env.probe), [])));
-          ] )
+            Syntax.Bind (receiver, construct (inhabitant renv env ty));
+            Syntax.Eval
+              (Syntax.Call
+                 ( Syntax.Atom contract.Env.write_function,
+                   [Syntax.Local receiver; value] ));
+            returning
+              (Syntax.Call
+                 ( Syntax.Atom contract.Env.read_function,
+                   [Syntax.Local receiver] ));
+          ])
     in
-    let construct =
-      Lambda
-        ( [parameter (show value_type) value],
-          ["write_props"],
-          show concrete,
-          [Return (Some (New (show concrete, [Local value])))] )
-    in
-    let read =
-      Lambda
-        ( [parameter (show ancestor) object_],
-          [],
-          show value_type,
-          [
-            Return
-              (Some (Call (Member (Local object_, contract.Env.getter), [])));
-          ] )
-    in
-    let write =
-      Lambda
-        ( [parameter (show ancestor) object_; parameter (show value_type) value],
-          ["write_props"],
-          "void",
-          [
-            Eval
-              (Call (Member (Local object_, contract.Env.setter), [Local value]));
-          ] )
-    in
-    let static_owner =
-      if Random.bool () then
-        owner_name
-      else
-        concrete_name
-    in
-    let identity =
-      Lambda
-        ( [parameter (show value_type) value],
-          [],
-          show value_type,
-          [
-            Return
-              (Some
-                 (Call (StaticMember (static_owner, identity), [Local value])));
-          ] )
-    in
-    let operation parameters result callee =
-      {
-        parameters;
-        result;
-        apply = (fun arguments -> Call (callee, arguments));
-      }
-    in
-    let interface_read =
-      Lambda
-        ( [parameter contract.Env.reader object_],
-          [],
-          show value_type,
-          [
-            Return
-              (Some (Call (Atom contract.Env.read_function, [Local object_])));
-          ] )
-    in
-    let interface_write =
-      Lambda
-        ( [
-            parameter contract.Env.writer object_;
-            parameter (show value_type) value;
-          ],
-          ["write_props"],
-          "void",
-          [
-            Eval
-              (Call
-                 (Atom contract.Env.write_function, [Local object_; Local value]));
-          ] )
-    in
-    let trait_read =
-      let method_name = (Env.get_nominal env concrete_name).Env.dispatch in
-      Lambda
-        ( [parameter (show concrete) object_],
-          [],
-          show value_type,
-          [Return (Some (Call (Member (Local object_, method_name), [])))] )
+    let write_ancestor value =
+      let receiver = Syntax.fresh_local "ancestor" in
+      let input = Syntax.fresh_local "input" in
+      apply
+        ty
+        [
+          Syntax.parameter (show ancestor) receiver;
+          Syntax.parameter (show ty) input;
+        ]
+        [
+          Syntax.Eval
+            (member
+               (Syntax.Local receiver)
+               contract.Env.setter
+               [Syntax.Local input]);
+          returning (member (Syntax.Local receiver) contract.Env.getter []);
+        ]
+        [construct (inhabitant renv env ty); value]
     in
     let operations =
       [
-        operation [value_type] concrete construct;
-        operation [concrete] value_type read;
-        operation [value_type] value_type identity;
-        operation [concrete] value_type trait_read;
-        operation [concrete] value_type interface_read;
+        read;
+        write;
+        write_ancestor;
+        (fun value -> member (construct value) info.Env.dispatch []);
+        (fun value ->
+          Syntax.Call
+            (Syntax.StaticMember (static_owner, static_identity), [value]));
       ]
     in
-    let transform =
-      Lambda
-        ( [parameter (show value_type) value],
-          ["write_props"],
-          show value_type,
+    let operations =
+      (fun value ->
+        let receiver = Syntax.fresh_local "receiver" in
+        apply
+          ty
+          [Syntax.parameter (show ancestor) receiver]
           [
-            Return
-              (Some
-                 (compose
-                    operations
-                    ~locals:[(value_type, Local value)]
-                    ~fuel:(geometric_between 2 6)
-                    value_type));
-          ] )
+            returning
+              (Syntax.Index
+                 ( Syntax.Array
+                     ( "vec",
+                       [member (Syntax.Local receiver) contract.Env.getter []]
+                     ),
+                   Syntax.Binary
+                     ( "-",
+                       member (Syntax.Local receiver) contract.Env.probe [],
+                       Syntax.Atom (string_of_int info.Env.probe_value) ) ));
+          ]
+          [construct value])
+      :: operations
     in
-    let bindings =
-      List.map
+    (env, operations)
+
+  let generic_operations renv env ty =
+    let key = mk_arraykey renv env in
+    let (env, name, concrete, reader, _) = declare_generic env ~key ~value:ty in
+    let construct value =
+      Syntax.New (show concrete, [inhabitant renv env key; value])
+    in
+    let narrower = subtype_of renv env ty in
+    let construct_narrow () =
+      Syntax.New
+        ( show (GenericClass { name; key; value = narrower }),
+          [inhabitant renv env key; inhabitant renv env narrower] )
+    in
+    let read value =
+      let receiver = Syntax.fresh_local "reader" in
+      apply
+        ty
+        [Syntax.parameter (show reader) receiver]
+        [returning (member (Syntax.Local receiver) "get" [])]
         [
-          ("construct", construct);
-          ("read", read);
-          ("write", write);
-          ("identity", identity);
-          ("hierarchy", transform);
-          ("dispatch", dispatch);
-          ("trait_read", trait_read);
-          ("interface_read", interface_read);
-          ("interface_write", interface_write);
+          (if Random.bool () then
+            construct value
+          else
+            construct_narrow ());
         ]
-        ~f:(fun (prefix, expression) -> (prefix, render_expr expression))
     in
-    ( env,
-      ("CLASS_TYPE", show concrete)
-      :: ("ANCESTOR_TYPE", show ancestor)
-      :: ("DISPATCH", string_of_int expected_dispatch)
-      :: bindings )
-
-  let mk_procedure _renv env =
-    let return_ =
-      if Random.bool () then
-        ReturnsVoid
-      else
-        ReturnsNothing
+    let write value =
+      bind_value ty value (fun value ->
+          let receiver = Syntax.fresh_local "generic" in
+          [
+            Syntax.Bind (receiver, construct value);
+            Syntax.Eval
+              (Syntax.Call
+                 ( Syntax.Atom (name ^ "_write<" ^ show narrower ^ ">"),
+                   [Syntax.Local receiver; inhabitant renv env narrower] ));
+            returning (member (Syntax.Local receiver) "get" []);
+          ])
     in
-    let context = function_context return_ in
-    let effect_state = fresh "EffectState" in
-    let env =
-      Env.add_definition env @@ Definition.effect_state ~name:effect_state
+    let project value =
+      member
+        (construct value)
+        ("project<" ^ show narrower ^ ">")
+        [inhabitant renv env narrower]
     in
-    ( env,
-      Function
-        { parameters = []; variadic = None; return_; context; effect_state } )
-
-  let procedure_throws = function
-    | Function { parameters = []; variadic = None; return_ = ReturnsVoid; _ } ->
-      false
-    | Function { parameters = []; variadic = None; return_ = ReturnsNothing; _ }
-      ->
-      true
-    | _ -> invalid_arg "procedure_throws expects a generated procedure"
-
-  let mk_procedure_bindings renv env ~value:_ =
-    let (env, procedure_type) = mk_procedure renv env in
-    let procedure = inhabitant renv env procedure_type in
+    let widen value =
+      bind_value ty value (fun value ->
+          [
+            returning
+              (member
+                 (member
+                    (construct_narrow ())
+                    ("widen<" ^ show ty ^ ">")
+                    [value])
+                 "get"
+                 []);
+          ])
+    in
+    let keyed value =
+      let index = Syntax.fresh_local "key" in
+      let input = Syntax.fresh_local "input" in
+      apply
+        ty
+        [Syntax.parameter (show key) index; Syntax.parameter (show ty) input]
+        [
+          returning
+            (Syntax.Index
+               ( member
+                   (Syntax.New
+                      (show concrete, [Syntax.Local index; Syntax.Local input]))
+                   "keyed"
+                   [],
+                 Syntax.Local index ));
+        ]
+        [inhabitant renv env key; value]
+    in
+    let invalidate value =
+      bind_value ty value (fun value ->
+          let receiver = Syntax.fresh_local "cell" in
+          let items = Syntax.Member (Syntax.Local receiver, "items") in
+          [
+            Syntax.Bind (receiver, construct value);
+            Syntax.If
+              ( Syntax.Is (items, "null"),
+                [returning value],
+                [
+                  Syntax.Eval (member (Syntax.Local receiver) "clear" []);
+                  returning
+                    (Syntax.Index
+                       ( Syntax.Array ("vec", [value]),
+                         Syntax.Binary
+                           ( "??",
+                             Syntax.Call
+                               (Syntax.NullsafeMember (items, "count"), []),
+                             Syntax.Atom "0" ) ));
+                ] );
+          ])
+    in
+    let tagged_write value =
+      let tagged value =
+        Tuple
+          {
+            conjuncts = [Primitive Primitive.Int; value];
+            optional_conjuncts = [];
+            open_ = false;
+          }
+      in
+      bind_value ty value (fun value ->
+          let receiver = Syntax.fresh_local "tagged" in
+          let wide = Syntax.fresh_local "wide" in
+          let replacement = Syntax.fresh_local "replacement" in
+          let put receiver =
+            Syntax.Eval
+              (Syntax.Call
+                 ( Syntax.Atom (name ^ "_write<" ^ show (tagged narrower) ^ ">"),
+                   [Syntax.Local receiver; Syntax.Local replacement] ))
+          in
+          [
+            Syntax.Bind
+              ( receiver,
+                Syntax.New
+                  ( show (GenericClass { name; key; value = tagged ty }),
+                    [
+                      inhabitant renv env key;
+                      Syntax.Tuple [Syntax.Atom "0"; value];
+                    ] ) );
+            Syntax.Bind
+              ( wide,
+                member
+                  (Syntax.Local receiver)
+                  "widen<mixed>"
+                  [Syntax.Atom "null"] );
+            Syntax.Eval
+              (Syntax.Call
+                 (Syntax.Atom (name ^ "_read"), [Syntax.Local receiver]));
+            Syntax.Bind
+              ( replacement,
+                Syntax.Tuple [Syntax.Atom "1"; inhabitant renv env narrower] );
+            put receiver;
+            put wide;
+            Syntax.Eval
+              (Syntax.Call
+                 ( Syntax.Atom "invariant",
+                   [
+                     Syntax.Binary
+                       ( "===",
+                         Syntax.Array
+                           ("vec", [member (Syntax.Local wide) "get" []]),
+                         Syntax.Array ("vec", [Syntax.Local replacement]) );
+                     Syntax.Atom
+                       "'contravariant write preserves the new payload'";
+                   ] ));
+            returning
+              (Syntax.Index
+                 (member (Syntax.Local receiver) "get" [], Syntax.Atom "1"));
+          ])
+    in
     ( env,
       [
-        ("PROCEDURE_TYPE", show procedure_type);
-        ("procedure", Milner_syntax.render_expr procedure);
-        ("THROWS", string_of_bool (procedure_throws procedure_type));
+        read;
+        write;
+        project;
+        widen;
+        keyed;
+        invalidate;
+        tagged_write;
+        (fun value ->
+          Syntax.Call
+            (Syntax.StaticMember (name, "identity<" ^ show ty ^ ">"), [value]));
       ] )
+
+  let dependent_operations renv env ty =
+    let bound =
+      if Random.bool () then
+        ty
+      else
+        Mixed
+    in
+    let (env, dependent) =
+      declare_dependent env ~value_type:ty ~bound:(Some bound)
+    in
+    let name =
+      match dependent with
+      | Dependent { name } -> name
+      | _ -> failwith "Expected a dependent type"
+    in
+    let info = Env.get_dependent env name in
+    let construct value = Syntax.New (info.Env.concrete, [value]) in
+    let read value =
+      Syntax.Call
+        ( Syntax.Atom (info.Env.read_function ^ "<" ^ show ty ^ ">"),
+          [construct value] )
+    in
+    let read_bound value =
+      bind_value ty value (fun value ->
+          let result =
+            Syntax.Call
+              ( Syntax.Atom (info.Env.read_function ^ "_bound"),
+                [construct value] )
+          in
+          if equal bound ty then
+            [returning result]
+          else
+            [
+              Syntax.Eval
+                (Syntax.Call
+                   ( Syntax.Atom "invariant",
+                     [
+                       Syntax.Binary
+                         ( "===",
+                           Syntax.Array ("vec", [result]),
+                           Syntax.Array ("vec", [value]) );
+                       Syntax.Atom "'upper-bound read preserves the payload'";
+                     ] ));
+              returning value;
+            ])
+    in
+    let write value =
+      let receiver = Syntax.fresh_local "dependent" in
+      let input = Syntax.fresh_local "input" in
+      apply
+        dependent
+        [
+          Syntax.parameter
+            (info.Env.base ^ " with { type Item = " ^ show ty ^ " }")
+            receiver;
+          Syntax.parameter (show ty) input;
+        ]
+        [
+          Syntax.Eval (member (Syntax.Local receiver) "set" [Syntax.Local input]);
+          returning (member (Syntax.Local receiver) "get" []);
+        ]
+        [construct (inhabitant renv env ty); value]
+    in
+    (env, [read; read_bound; write])
+
+  let identity_operations _renv env ty =
+    let (env, family) = declare_identity_family env ~payload:(Some ty) in
+    let pointer () =
+      if Random.bool () then
+        forward
+          (show family.identity_child_pointer)
+          (show family.identity_base_pointer)
+          (Syntax.StaticMember (family.identity_child, "class"))
+      else
+        Syntax.StaticMember (family.identity_base, "class")
+    in
+    let classname () =
+      if Random.bool () then
+        forward
+          (show family.identity_child_name)
+          (show family.identity_base_name)
+          (Syntax.Nameof family.identity_child)
+      else
+        Syntax.Nameof family.identity_base
+    in
+    let construct value =
+      let class_pointer = Syntax.fresh_local "class_pointer" in
+      let input = Syntax.fresh_local "input" in
+      apply
+        ty
+        [
+          Syntax.parameter (show family.identity_base_pointer) class_pointer;
+          Syntax.parameter (show ty) input;
+        ]
+        [
+          returning
+            (member
+               (Syntax.NewDynamic (class_pointer, [Syntax.Local input]))
+               "get"
+               []);
+        ]
+        [pointer (); value]
+    in
+    let named_construct value =
+      let name = Syntax.fresh_local "class_name" in
+      let class_pointer = Syntax.fresh_local "class_pointer" in
+      let input = Syntax.fresh_local "input" in
+      let name_value =
+        if Random.bool () then
+          classname ()
+        else
+          forward
+            (show family.identity_base_pointer)
+            (show family.identity_base_name)
+            (pointer ())
+      in
+      apply
+        ty
+        [
+          Syntax.parameter (show family.identity_base_name) name;
+          Syntax.parameter (show ty) input;
+        ]
+        [
+          Syntax.Bind
+            ( class_pointer,
+              Syntax.Call
+                (Syntax.Atom "HH\\classname_to_class", [Syntax.Local name]) );
+          returning
+            (member
+               (Syntax.NewDynamic (class_pointer, [Syntax.Local input]))
+               "get"
+               []);
+        ]
+        [name_value; value]
+    in
+    let late_static ~object_receiver value =
+      bind_value ty value (fun value ->
+          let receiver = Syntax.fresh_local "identity_receiver" in
+          let class_pointer = Syntax.fresh_local "identity_pointer" in
+          let input = Syntax.fresh_local "input" in
+          let receiver_type =
+            if object_receiver then
+              family.identity_base
+            else
+              show family.identity_base_pointer
+          in
+          let receiver_value =
+            if object_receiver then
+              Syntax.New
+                ( (if Random.bool () then
+                    family.identity_base
+                  else
+                    family.identity_child),
+                  [value] )
+            else
+              pointer ()
+          in
+          [
+            returning
+              (apply
+                 ty
+                 [
+                   Syntax.parameter receiver_type receiver;
+                   Syntax.parameter (show ty) input;
+                 ]
+                 [
+                   Syntax.Bind
+                     ( class_pointer,
+                       Syntax.Call
+                         ( Syntax.Atom "HH\\classname_to_class",
+                           [
+                             Syntax.Call
+                               ( Syntax.DynamicStaticMember
+                                   (receiver, "identity"),
+                                 [] );
+                           ] ) );
+                   returning
+                     (member
+                        (Syntax.NewDynamic (class_pointer, [Syntax.Local input]))
+                        "get"
+                        []);
+                 ]
+                 [receiver_value; value]);
+          ])
+    in
+    let nominal_test value =
+      let receiver = Syntax.fresh_local "identity_object" in
+      apply
+        ty
+        [Syntax.parameter family.identity_base receiver]
+        [
+          Syntax.If
+            ( Syntax.Is (Syntax.Local receiver, family.identity_child),
+              [returning (member (Syntax.Local receiver) "get" [])],
+              [
+                returning
+                  (member
+                     (Syntax.New
+                        ( family.identity_child,
+                          [member (Syntax.Local receiver) "get" []] ))
+                     "get"
+                     []);
+              ] );
+        ]
+        [
+          Syntax.New
+            ( (if Random.bool () then
+                family.identity_base
+              else
+                family.identity_child),
+              [value] );
+        ]
+    in
+    ( env,
+      [
+        construct;
+        named_construct;
+        late_static ~object_receiver:true;
+        late_static ~object_receiver:false;
+        nominal_test;
+      ] )
+
+  let enum_operations renv env ty =
+    let payload =
+      if equal ty Mixed then
+        Primitive (select [Primitive.Arraykey; Primitive.Num])
+      else
+        ty
+    in
+    let value_renv = REnv.for_enum_initializer renv in
+    let narrower = subtype_of value_renv env payload in
+    let (env, family) = declare_enum_family value_renv env ~payload ~narrower in
+    let (env, _) = record_enum_views env family ~is_label:false in
+    let (env, _) = record_enum_views env family ~is_label:true in
+    let unwrap_name = fresh "unwrap_member" in
+    let env =
+      Env.add_definition
+        env
+        (Definition.enum_unwrap ~name:unwrap_name ~enum_name:family.enum_child)
+    in
+    let view ~is_label owner payload =
+      show (enum_view ~is_label owner "A" payload)
+    in
+    let unwrap payload value =
+      Syntax.Call (Syntax.Atom (unwrap_name ^ "<" ^ show payload ^ ">"), [value])
+    in
+    let lookup payload label =
+      Syntax.Call
+        ( Syntax.StaticMember
+            ( family.enum_child,
+              "valueOf<" ^ family.enum_child ^ ", " ^ show payload ^ ">" ),
+          [label] )
+    in
+    let inherited ~is_label =
+      let value =
+        if is_label then
+          Syntax.EnumLabel (family.enum_base, "A")
+        else
+          Syntax.StaticMember (family.enum_base, "A")
+      in
+      forward
+        (view ~is_label family.enum_base payload)
+        (view ~is_label family.enum_child payload)
+        value
+    in
+    let widened ~is_label =
+      let value =
+        if is_label then
+          Syntax.EnumLabel (family.enum_child, "B")
+        else
+          Syntax.StaticMember (family.enum_child, "B")
+      in
+      forward
+        (view ~is_label family.enum_child narrower)
+        (view ~is_label family.enum_child payload)
+        value
+    in
+    ( env,
+      [
+        (fun _ -> unwrap payload (Syntax.StaticMember (family.enum_child, "A")));
+        (fun _ ->
+          unwrap
+            payload
+            (lookup payload (Syntax.EnumLabel (family.enum_child, "A"))));
+        (fun _ ->
+          unwrap narrower (Syntax.StaticMember (family.enum_child, "B")));
+        (fun _ ->
+          unwrap
+            narrower
+            (lookup narrower (Syntax.EnumLabel (family.enum_child, "B"))));
+        (fun _ -> unwrap payload (inherited ~is_label:false));
+        (fun _ -> unwrap payload (lookup payload (inherited ~is_label:true)));
+        (fun _ -> unwrap payload (widened ~is_label:false));
+        (fun _ -> unwrap payload (lookup payload (widened ~is_label:true)));
+      ] )
+
+  let callable_operations renv env ty =
+    let (env, callable_ty) =
+      mk ~kind:Kind.Function renv env ~depth:None ~complexity:2
+    in
+    let complete callable_ty call value =
+      match callable_ty with
+      | Function { return_ = ReturnsNothing; _ } ->
+        let caught = Syntax.fresh_local "exception" in
+        [
+          Syntax.Try
+            ([Syntax.Eval call], [("Exception", caught, [returning value])], []);
+          returning value;
+        ]
+      | Function { return_ = ReturnsVoid; _ } ->
+        [Syntax.Eval call; returning value]
+      | Function { return_ = ReturnsValue _; _ } ->
+        [Syntax.Bind (Syntax.fresh_local "result", call); returning value]
+      | _ -> failwith "Expected a callable"
+    in
+    let invoke value =
+      let callback = Syntax.fresh_local "callback" in
+      let input = Syntax.fresh_local "input" in
+      let subtype = subtype_of renv env callable_ty in
+      apply
+        ty
+        [
+          Syntax.parameter (show callable_ty) callback;
+          Syntax.parameter (show ty) input;
+        ]
+        (complete
+           callable_ty
+           (callable_application
+              renv
+              env
+              callable_ty
+              ~value:(Syntax.Local callback))
+           (Syntax.Local input))
+        [
+          forward (show subtype) (show callable_ty) (inhabitant renv env subtype);
+          value;
+        ]
+    in
+    let procedure value =
+      let return_ =
+        if Random.bool () then
+          ReturnsVoid
+        else
+          ReturnsNothing
+      in
+      let effect_state =
+        match callable_ty with
+        | Function { effect_state; _ } -> effect_state
+        | _ -> failwith "Expected a callable"
+      in
+      let procedure_ty =
+        Function
+          {
+            parameters = [];
+            variadic = None;
+            return_;
+            context = function_context return_;
+            effect_state;
+          }
+      in
+      bind_value ty value (fun value ->
+          let callback = inhabitant renv env procedure_ty in
+          let call =
+            if Random.bool () then
+              Syntax.Call (Syntax.Atom "milner_procedure", [callback])
+            else
+              Syntax.Call
+                ( Syntax.Atom "HH\\Asio\\join",
+                  [
+                    Syntax.Call
+                      (Syntax.Atom "milner_procedure_async", [callback]);
+                  ] )
+          in
+          complete procedure_ty call value)
+    in
+    let effect value =
+      let effect_state =
+        match callable_ty with
+        | Function { effect_state; _ } -> effect_state
+        | _ -> failwith "Expected a callable"
+      in
+      bind_value ty value (fun value ->
+          let state = Syntax.fresh_local "state" in
+          let result = Syntax.fresh_local "effect_result" in
+          let (context, initialize, slot) =
+            if Random.bool () then
+              let slot = Syntax.StaticProperty (effect_state, "calls") in
+              (["globals"], Syntax.Assign (slot, Syntax.Atom "0"), slot)
+            else
+              ( ["write_props"],
+                Syntax.Bind (state, Syntax.New (effect_state, [])),
+                Syntax.Member (Syntax.Local state, "value") )
+          in
+          [
+            initialize;
+            Syntax.Bind
+              ( result,
+                Syntax.Call
+                  ( Syntax.Atom ("milner_invoke<" ^ show ty ^ ">"),
+                    [
+                      Syntax.Lambda
+                        ( [],
+                          context,
+                          show ty,
+                          [
+                            Syntax.Eval (Syntax.Unary ("++", slot));
+                            returning value;
+                          ] );
+                    ] ) );
+            returning
+              (Syntax.Index
+                 ( Syntax.Array ("vec", [Syntax.Local result]),
+                   Syntax.Binary ("-", slot, Syntax.Atom "1") ));
+          ])
+    in
+    (env, [invoke; procedure; effect])
+
+  let add_fixture env source =
+    if
+      List.exists (Env.definitions env) ~f:(fun definition ->
+          String.equal (Definition.show definition) source)
+    then
+      env
+    else
+      Env.add_definition env (Definition.raw source)
+
+  let protocol_operations _renv env ty =
+    if equal ty Mixed && Random.bool () then
+      let env = add_fixture env Milner_protocol_fixture.expression_tree in
+      (env, [Milner_protocol_bindings.expression_tree ~value_hint:(show ty)])
+    else
+      let env = add_fixture env Milner_protocol_fixture.xhp in
+      let witness =
+        Milner_protocol_bindings.xhp
+          ~name:(fresh "milner-node")
+          ~value_hint:(show ty)
+          ~child:(string_literal ())
+      in
+      let env =
+        List.fold
+          witness.Milner_protocol_bindings.definitions
+          ~init:env
+          ~f:(fun env source -> Env.add_definition env (Definition.raw source))
+      in
+      (env, witness.Milner_protocol_bindings.operations)
+
+  let inhabitant_of renv env ty =
+    let env =
+      add_fixture
+        env
+        "function milner_invoke<T>((function()[_]: T) $callback)[ctx $callback]: T { return $callback(); }"
+    in
+    let env =
+      add_fixture
+        env
+        "function milner_procedure((function()[_]: void) $callback)[ctx $callback]: void { $callback(); }"
+    in
+    let env =
+      add_fixture
+        env
+        "async function milner_procedure_async((function()[_]: void) $callback)[ctx $callback]: Awaitable<void> { milner_procedure($callback); }"
+    in
+    let builders =
+      [
+        hierarchy_operations;
+        generic_operations;
+        dependent_operations;
+        identity_operations;
+        callable_operations;
+        protocol_operations;
+      ]
+    in
+    let builders =
+      match ty with
+      | Mixed
+      | Primitive _ ->
+        enum_operations :: builders
+      | _ -> builders
+    in
+    let (env, operations) =
+      List.init (1 + Random.int 3) ~f:(fun _ -> select builders)
+      |> List.fold ~init:(env, []) ~f:(fun (env, operations) build ->
+             let (env, added) = build renv env ty in
+             (env, operations @ added))
+    in
+    let value = inhabitant renv env ty in
+    let expression =
+      Milner_expression.compose ~ty:(show ty) ~value ~operations
+    in
+    (env, Syntax.render_expr expression)
+
+  let mk renv env = mk renv env ~depth:None ~complexity:default_complexity
 end
 
 and TypeMap : (Wrapped_map.S with type key = Type.t) = Wrapped_map.Make (Type)

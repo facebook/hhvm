@@ -24,10 +24,12 @@ let shape_keys = ["'a'"; "'b'"; "'c'"]
 
 let name_ctr = ref 0
 
-let fresh prefix =
+let fresh_id () =
   let n = !name_ctr in
   name_ctr := !name_ctr + 1;
-  prefix ^ "_" ^ string_of_int n
+  n
+
+let fresh prefix = prefix ^ "_" ^ string_of_int (fresh_id ())
 
 (** Utility function for choosing numbers between `min` and `max` where
     approaching `max` gets harder and harder. *)
@@ -225,11 +227,28 @@ end = struct
 end
 
 module rec Environment : sig
+  type member_contract = {
+    value_type: Type.t;
+    property: string;
+    getter: string;
+    setter: string;
+    probe: string;
+  }
+
+  type nominal_info = {
+    constructor: Type.t list;
+        (** Closed parameter types whose definitions precede this hierarchy. *)
+    contract: member_contract;
+    identity: string;
+    probe_value: int;
+  }
+
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
     typedef_bodies: Type.t list TypeMap.t;
     case_bounds: Type.t TypeMap.t;
+    nominals: nominal_info S_map.t;
   }
 
   val default : t
@@ -249,12 +268,32 @@ module rec Environment : sig
   val record_case_bound : t -> ty:Type.t -> bound:Type.t -> t
 
   val get_case_bound : t -> Type.t -> Type.t option
+
+  val add_nominal : t -> name:string -> nominal_info -> t
+
+  val get_nominal : t -> string -> nominal_info
 end = struct
+  type member_contract = {
+    value_type: Type.t;
+    property: string;
+    getter: string;
+    setter: string;
+    probe: string;
+  }
+
+  type nominal_info = {
+    constructor: Type.t list;
+    contract: member_contract;
+    identity: string;
+    probe_value: int;
+  }
+
   type t = {
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
     typedef_bodies: Type.t list TypeMap.t;
     case_bounds: Type.t TypeMap.t;
+    nominals: nominal_info S_map.t;
   }
 
   let default =
@@ -263,6 +302,7 @@ end = struct
       subtypes = TypeMap.empty;
       typedef_bodies = TypeMap.empty;
       case_bounds = TypeMap.empty;
+      nominals = S_map.empty;
     }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
@@ -288,6 +328,11 @@ end = struct
     { env with case_bounds = TypeMap.add ty bound env.case_bounds }
 
   let get_case_bound env ty = TypeMap.find_opt ty env.case_bounds
+
+  let add_nominal env ~name info =
+    { env with nominals = S_map.add name info env.nominals }
+
+  let get_nominal env name = S_map.find name env.nominals
 end
 
 and Kind : sig
@@ -421,6 +466,14 @@ and Definition : sig
     Kind.classish ->
     t
 
+  val stateful_members :
+    Environment.member_contract ->
+    inherited:bool ->
+    omit_getter_override:bool ->
+    identity:string ->
+    probe_value:int ->
+    t list
+
   val alias : name:string -> Type.t -> t
 
   val newtype : name:string -> bound:Type.t option -> Type.t -> t
@@ -483,6 +536,59 @@ end = struct
     in
     Format.sprintf "%s %s%s %s%s" kind name generic parent body
 
+  let stateful_members
+      Environment.{ value_type; property; getter; setter; probe }
+      ~inherited
+      ~omit_getter_override
+      ~identity
+      ~probe_value =
+    let value_type = Type.show value_type in
+    let stateful =
+      if inherited && omit_getter_override then
+        []
+      else if inherited then
+        [
+          Format.sprintf
+            "<<__Override>> public function %s()[]: %s { return parent::%s(); }"
+            getter
+            value_type
+            getter;
+        ]
+      else
+        [
+          Format.sprintf
+            "public function __construct(protected %s $%s)[write_props] {}"
+            value_type
+            property;
+          Format.sprintf
+            "public function %s()[]: %s { return $this->%s; }"
+            getter
+            value_type
+            property;
+          Format.sprintf
+            "public function %s(%s $value)[write_props]: void { $this->%s = $value; }"
+            setter
+            value_type
+            property;
+        ]
+    in
+    stateful
+    @ [
+        Format.sprintf
+          "%spublic function %s()[]: int { return %d; }"
+          (if inherited then
+            "<<__Override>> "
+          else
+            "")
+          probe
+          probe_value;
+        Format.sprintf
+          "public static function %s(%s $value)[]: %s { return $value; }"
+          identity
+          value_type
+          value_type;
+      ]
+
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
 
@@ -533,6 +639,12 @@ and Type : sig
   val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t
 
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
+
+  val hierarchy_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    t ->
+    Environment.t * (string * string) list
 end = struct
   module Env = Environment
   module REnv = ReadOnlyEnvironment
@@ -1405,7 +1517,7 @@ end = struct
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
 
-  let rec inhabitant_of (renv : REnv.t) (env : Env.t) (ty : t) =
+  let rec inhabitant (renv : REnv.t) (env : Env.t) (ty : t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = true } in
     let subtype = subtype_of renv env ty in
     let inhabitant = expr_of renv env subtype in
@@ -1418,15 +1530,17 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  and expr_of renv env = function
+  and expr_of renv env ty =
+    let open Milner_syntax in
+    match ty with
     | Primitive prim -> begin
       let open Primitive in
       match prim with
-      | Null -> Some "null"
-      | Int -> Some "42"
-      | String -> Some "'apple'"
-      | Float -> Some "42.0"
-      | Bool -> Some "true"
+      | Null -> Some (Atom "null")
+      | Int -> Some (Atom (string_of_int (Random.int_incl (-2) 2)))
+      | String -> Some (Atom (select ["''"; "'apple'"; "'pear'"]))
+      | Float -> Some (Atom (select ["0.0"; "42.0"; "-1.0"]))
+      | Bool -> Some (Atom (string_of_bool (Random.bool ())))
       | Arraykey
       | Num ->
         None
@@ -1437,69 +1551,71 @@ end = struct
       | Kind.Interface ->
         None
       | Kind.Class ->
-        let generic =
-          match info.generic with
-          | Some generic when generic.is_reified || Random.bool () ->
-            Format.sprintf "<%s>" (Type.show generic.instantiation)
-          | _ -> ""
-        in
-        Some (Format.sprintf "new %s%s()" info.name generic)
+        let Env.{ constructor; _ } = Env.get_nominal env info.name in
+        Some (New (show ty, List.map constructor ~f:(inhabitant renv env)))
     end
-    | Enum info -> Some (info.name ^ "::A")
+    | Enum info -> Some (StaticMember (info.name, "A"))
     | Traversable value
     | ContainerInterface value ->
-      Some (Format.sprintf "vec[%s]" (inhabitant_of renv env value))
+      Some (Array ("vec", [inhabitant renv env value]))
     | KeyedTraversable { key; value }
     | KeyedContainer { key; value }
     | VecOrDict { key; value } ->
       Some
-        (Format.sprintf
-           "dict[%s => %s]"
-           (inhabitant_of renv env key)
-           (inhabitant_of renv env value))
+        (Array
+           ( "dict",
+             [KeyValue (inhabitant renv env key, inhabitant renv env value)] ))
     | Iterator value ->
       Some
-        (Format.sprintf
-           "(new Vector<%s>(vec[%s]))->getIterator()"
-           (show value)
-           (inhabitant_of renv env value))
+        (Call
+           ( Member
+               ( New
+                   ( "Vector<" ^ show value ^ ">",
+                     [Array ("vec", [inhabitant renv env value])] ),
+                 "getIterator" ),
+             [] ))
     | KeyedIterator { key; value } ->
       Some
-        (Format.sprintf
-           "(new Map<%s, %s>(dict[%s => %s]))->getIterator()"
-           (show key)
-           (show value)
-           (inhabitant_of renv env key)
-           (inhabitant_of renv env value))
+        (Call
+           ( Member
+               ( New
+                   ( "Map<" ^ show key ^ ", " ^ show value ^ ">",
+                     [
+                       Array
+                         ( "dict",
+                           [
+                             KeyValue
+                               ( inhabitant renv env key,
+                                 inhabitant renv env value );
+                           ] );
+                     ] ),
+                 "getIterator" ),
+             [] ))
     | Vec ty ->
       let elements =
         List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
-            inhabitant_of renv env ty)
+            inhabitant renv env ty)
       in
-      Some (Format.sprintf "vec[%s]" (String.concat ~sep:", " elements))
+      Some (Array ("vec", elements))
     | Dict { key; value } ->
       let fields =
         List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
-            Format.sprintf
-              "%s => %s"
-              (inhabitant_of renv env key)
-              (inhabitant_of renv env value))
+            KeyValue (inhabitant renv env key, inhabitant renv env value))
       in
-      Some (Format.sprintf "dict[%s]" (String.concat ~sep:", " fields))
+      Some (Array ("dict", fields))
     | Keyset ty ->
       let elements =
         List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
-            inhabitant_of renv env ty)
+            inhabitant renv env ty)
       in
-      Some (Format.sprintf "keyset[%s]" (String.concat ~sep:", " elements))
+      Some (Array ("keyset", elements))
     | Tuple { conjuncts; open_ } ->
       if open_ then
         None
       else
         List.map ~f:(expr_of renv env) conjuncts
         |> Option.all
-        |> Option.map ~f:(fun exprl ->
-               String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
+        |> Option.map ~f:(fun expressions -> Tuple expressions)
     | Shape { fields; open_ = _ } -> begin
       (* Check that all types are inhabited even if we won't end up using all of them. *)
       match
@@ -1512,41 +1628,27 @@ end = struct
         in
         let fields = List.permute fields in
         let show_field { key; ty; _ } =
-          expr_of renv env ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
+          expr_of renv env ty |> Option.map ~f:(fun value -> (key, value))
         in
         List.map ~f:show_field fields
         |> Option.all
-        |> Option.map ~f:(fun fields ->
-               String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
+        |> Option.map ~f:(fun fields -> Shape fields)
     end
     | Awaitable ty ->
       let open Option.Let_syntax in
       let+ expr = expr_of renv env ty in
-      Format.sprintf "async { return %s; }" expr
+      Async [Return (Some expr)]
     | Function { parameters; variadic; return_ } ->
-      let variadic =
-        match variadic with
-        | Some ty ->
-          (if List.is_empty parameters then
-            ""
-          else
-            ", ")
-          ^ show ty
-          ^ " ...$_"
-        | None -> ""
-      in
       let parameters =
-        List.map ~f:(fun param -> show param ^ " $_") parameters
-        |> String.concat ~sep:", "
+        List.map parameters ~f:(fun ty -> (show ty, fresh_local "argument"))
+        @ Option.to_list
+            (Option.map variadic ~f:(fun ty ->
+                 (show ty ^ " ...", fresh_local "rest")))
       in
       let open Option.Let_syntax in
       let+ return_expr = expr_of renv env return_ in
-      Format.sprintf
-        "(%s%s): %s ==> { return %s; }"
-        parameters
-        variadic
-        (Type.show return_)
-        return_expr
+      Lambda
+        (parameters, ["defaults"], show return_, [Return (Some return_expr)])
     | Mixed
     | Option _
     | Alias _
@@ -1556,14 +1658,43 @@ end = struct
     | Like _ ->
       None
 
+  let inhabitant_of renv env ty =
+    inhabitant renv env ty |> Milner_syntax.render_expr
+
   let mk_arraykey (renv : REnv.t) (env : Env.t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = false } in
     subtype_of renv env (Primitive Primitive.Arraykey)
+
+  let has_nullable_enum_case_return env ty =
+    (* T288899890: identical nullable enum case returns can fail overriding. *)
+    let rec visit seen ~inside_case ~nullable ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Alias _
+        | Newtype _ ->
+          (match Env.get_typedef_body env ty with
+          | Some [body] -> visit seen ~inside_case ~nullable body
+          | _ -> false)
+        | Case _ ->
+          (match Env.get_typedef_body env ty with
+          | Some [body] -> visit seen ~inside_case:true ~nullable body
+          | _ -> false)
+        | Like ty -> visit seen ~inside_case ~nullable ty
+        | Option ty when inside_case ->
+          visit seen ~inside_case ~nullable:true ty
+        | Enum _ -> inside_case && nullable
+        | _ -> false
+    in
+    visit TypeSet.empty ~inside_case:false ~nullable:false ty
 
   let rec mk_classish
       (renv : REnv.t)
       (env : Env.t)
       ~(parent : (Kind.classish * string * generic option) option)
+      ~(contract : Env.member_contract option)
       ~(complexity : int)
       ~(depth : int) =
     REnv.debug
@@ -1583,6 +1714,32 @@ end = struct
         | None ->
           Kind.pick_classish ()
     in
+    let (env, contract) =
+      match contract with
+      | Some contract -> (env, contract)
+      | None ->
+        let (env, value_type) =
+          if depth >= max_hierarchy_depth then
+            (env, Primitive (Primitive.pick ()))
+          else
+            mk
+              REnv.{ renv with for_option_ty = false; for_alias_def = false }
+              env
+              ~complexity:(complexity - 1)
+              ~depth:(Some (depth + 1))
+        in
+        let contract =
+          Env.
+            {
+              value_type;
+              property = fresh "value";
+              getter = fresh "get";
+              setter = fresh "set";
+              probe = fresh "probe";
+            }
+        in
+        (env, contract)
+    in
     let gen_children env ~parent n =
       let (kind, name, generic) = parent in
       let super = Classish { kind; name; generic } in
@@ -1591,7 +1748,13 @@ end = struct
              let parent = Some parent in
              let depth = depth + 1 in
              let (env, child) =
-               mk_classish renv env ~parent ~complexity ~depth
+               mk_classish
+                 renv
+                 env
+                 ~parent
+                 ~contract:(Some contract)
+                 ~complexity
+                 ~depth
              in
              Env.record_subtype env ~super ~sub:child)
     in
@@ -1641,12 +1804,48 @@ end = struct
       else
         (env, None)
     in
+    let ty = Classish { kind; name; generic } in
+    let (env, members) =
+      match kind with
+      | Kind.Interface -> (env, [])
+      | Kind.Class
+      | Kind.AbstractClass ->
+        let identity = fresh "identity" in
+        let probe_value = fresh_id () in
+        let info =
+          Env.
+            {
+              constructor = [contract.value_type];
+              contract;
+              identity;
+              probe_value;
+            }
+        in
+        let env = Env.add_nominal env ~name info in
+        let inherited =
+          match parent with
+          | Some (Kind.(Class | AbstractClass), _, _) -> true
+          | Some (Kind.Interface, _, _)
+          | None ->
+            false
+        in
+        let members =
+          Definition.stateful_members
+            contract
+            ~inherited
+            ~omit_getter_override:
+              (has_nullable_enum_case_return env contract.Env.value_type)
+            ~identity
+            ~probe_value
+        in
+        (env, members)
+    in
     let env = gen_children env ~parent:(kind, name, generic) num_of_children in
     let env =
       Env.add_definition env
-      @@ Definition.classish kind ~name ~parent ~generic ~members:[]
+      @@ Definition.classish kind ~name ~parent ~generic ~members
     in
-    (env, Classish { kind; name; generic })
+    (env, ty)
 
   and mk (renv : REnv.t) (env : Env.t) ~(complexity : int) ~(depth : int option)
       : Env.t * t =
@@ -1685,7 +1884,8 @@ end = struct
           env
       in
       (env, Awaitable ty)
-    | Kind.Classish -> mk_classish renv env ~parent:None ~complexity ~depth
+    | Kind.Classish ->
+      mk_classish renv env ~parent:None ~contract:None ~complexity ~depth
     | Kind.Alias ->
       let name = fresh "A" in
       let ty = Alias { name } in
@@ -1885,6 +2085,203 @@ end = struct
       (env, Like ty)
 
   let mk = mk ~depth:None ~complexity:default_complexity
+
+  type operation = {
+    parameters: t list;
+    result: t;
+    apply: Milner_syntax.expr list -> Milner_syntax.expr;
+  }
+
+  let compose operations ~locals ~fuel ty =
+    let rec available fuel ty =
+      List.exists locals ~f:(fun (local_ty, _) -> equal local_ty ty)
+      || fuel > 0
+         && List.exists operations ~f:(fun operation ->
+                equal operation.result ty
+                && List.for_all operation.parameters ~f:(available (fuel - 1)))
+    in
+    let rec generate fuel ty =
+      let locals =
+        List.filter_map locals ~f:(fun (local_ty, expression) ->
+            if equal local_ty ty then
+              Some (fun () -> expression)
+            else
+              None)
+      in
+      let calls =
+        if fuel <= 0 then
+          []
+        else
+          List.filter_map operations ~f:(fun operation ->
+              if
+                equal operation.result ty
+                && List.for_all operation.parameters ~f:(available (fuel - 1))
+              then
+                Some
+                  (fun () ->
+                    operation.apply
+                      (List.map operation.parameters ~f:(generate (fuel - 1))))
+              else
+                None)
+      in
+      (select (locals @ calls)) ()
+    in
+    generate fuel ty
+
+  let hierarchy_bindings renv env value_type =
+    let open Milner_syntax in
+    let contract =
+      Env.
+        {
+          value_type;
+          property = fresh "value";
+          getter = fresh "get";
+          setter = fresh "set";
+          probe = fresh "probe";
+        }
+    in
+    let (env, root) =
+      mk_classish
+        renv
+        env
+        ~parent:None
+        ~contract:(Some contract)
+        ~complexity:default_complexity
+        ~depth:0
+    in
+    let rec class_ancestor = function
+      | Classish { kind = Kind.Interface; _ } as ty ->
+        class_ancestor (select (Env.get_subtypes env ty))
+      | Classish _ as ty -> ty
+      | _ -> failwith "Expected a generated nominal hierarchy"
+    in
+    let ancestor = class_ancestor root in
+    let concrete =
+      subtype_of
+        REnv.{ renv with pick_immediately_inhabited = true }
+        env
+        ancestor
+    in
+    let owner =
+      if Random.bool () then
+        ancestor
+      else
+        concrete
+    in
+    let (owner_name, identity) =
+      match owner with
+      | Classish { name; _ } -> (name, (Env.get_nominal env name).Env.identity)
+      | _ -> failwith "Expected a generated class"
+    in
+    let concrete_name =
+      match concrete with
+      | Classish { name; kind = Kind.Class; _ } -> name
+      | _ -> failwith "Expected an instantiable class"
+    in
+    let value = fresh_local "value" in
+    let object_ = fresh_local "object" in
+    let expected_dispatch =
+      (Env.get_nominal env concrete_name).Env.probe_value
+    in
+    let dispatch =
+      Lambda
+        ( [(show ancestor, object_)],
+          [],
+          "int",
+          [
+            Return (Some (Call (Member (Local object_, contract.Env.probe), [])));
+          ] )
+    in
+    let construct =
+      Lambda
+        ( [(show value_type, value)],
+          ["write_props"],
+          show concrete,
+          [Return (Some (New (show concrete, [Local value])))] )
+    in
+    let read =
+      Lambda
+        ( [(show ancestor, object_)],
+          [],
+          show value_type,
+          [
+            Return
+              (Some (Call (Member (Local object_, contract.Env.getter), [])));
+          ] )
+    in
+    let write =
+      Lambda
+        ( [(show ancestor, object_); (show value_type, value)],
+          ["write_props"],
+          "void",
+          [
+            Eval
+              (Call (Member (Local object_, contract.Env.setter), [Local value]));
+          ] )
+    in
+    let static_owner =
+      if Random.bool () then
+        owner_name
+      else
+        concrete_name
+    in
+    let identity =
+      Lambda
+        ( [(show value_type, value)],
+          [],
+          show value_type,
+          [
+            Return
+              (Some
+                 (Call (StaticMember (static_owner, identity), [Local value])));
+          ] )
+    in
+    let operation parameters result callee =
+      {
+        parameters;
+        result;
+        apply = (fun arguments -> Call (callee, arguments));
+      }
+    in
+    let operations =
+      [
+        operation [value_type] concrete construct;
+        operation [concrete] value_type read;
+        operation [value_type] value_type identity;
+      ]
+    in
+    let transform =
+      Lambda
+        ( [(show value_type, value)],
+          ["write_props"],
+          show value_type,
+          [
+            Return
+              (Some
+                 (compose
+                    operations
+                    ~locals:[(value_type, Local value)]
+                    ~fuel:(geometric_between 2 6)
+                    value_type));
+          ] )
+    in
+    let bindings =
+      List.map
+        [
+          ("construct", construct);
+          ("read", read);
+          ("write", write);
+          ("identity", identity);
+          ("hierarchy", transform);
+          ("dispatch", dispatch);
+        ]
+        ~f:(fun (prefix, expression) -> (prefix, render_expr expression))
+    in
+    ( env,
+      ("CLASS_TYPE", show concrete)
+      :: ("ANCESTOR_TYPE", show ancestor)
+      :: ("DISPATCH", string_of_int expected_dispatch)
+      :: bindings )
 end
 
 and TypeMap : (Wrapped_map.S with type key = Type.t) = Wrapped_map.Make (Type)

@@ -1,0 +1,9 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('like_type_hints')>>
+
+<<__EntryPoint>> function main(): void {
+  $value = expr#1;
+  $result = (hierarchy#1)($value);
+  invariant(vec[$result] === vec[$value], 'composition preserves payload');
+}

@@ -1,0 +1,11 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('like_type_hints')>>
+
+<<__EntryPoint>> function main(): void {
+  $object = (construct#1)(expr#1);
+  $value = another#1;
+  (write#1)($object, $value);
+  $read = (read#1)($object);
+  invariant(vec[$read] === vec[$value], 'read after write');
+}

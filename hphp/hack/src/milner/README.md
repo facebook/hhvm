@@ -161,3 +161,51 @@ Arrays witness the container interfaces; iterator witnesses come from `Vector`
 and `Map` iterators. Keys satisfy the arraykey bound, and vec witnesses require
 an admitted int key type. Shared runtime representations are treated
 conservatively when checking case-type disjointness.
+
+## Stateful class hierarchies
+
+Class hierarchies share a typed constructor/member contract. Construction only
+constructs the object; it does not run a test scenario. Expressions compose
+syntax nodes for their constituent operations, and the typing model establishes
+argument types, receiver relationships, lexical scope and required coeffects.
+Assertions belong to small law templates.
+
+`construct#1`, `read#1`, `write#1`, and `identity#1` are independent operations
+from one generated hierarchy with payload `TYPE#1`. Reads and writes cross an
+ancestor-typed function boundary. Static calls can select inherited members.
+`hierarchy#1` composes compatible operations with bounded depth and a typed input;
+it preserves that input without embedding any assertions. `dispatch#1` calls an
+overridden constant-returning method through its ancestor; `DISPATCH#1` records
+the concrete implementation's expected result.
+
+`another#1` requests another inhabitant of the same type and environment. Literal
+values vary, but two inhabitants need not differ, especially for singleton types.
+The put/get law remains valid in either case; seeds with distinct values make a
+dropped write observable.
+
+
+## Nullable enum case returns in getter overrides
+
+[T288899890](https://www.internalfb.com/tasks/T288899890) tracks a checker completeness
+bug in concrete method overrides:
+
+```hack
+<?hh
+<<file: __EnableUnstableFeatures('case_types')>>
+enum E: int as int { A = 42; }
+case type C = ?E;
+class ParentClass { public function get()[]: C { return E::A; } }
+class ChildClass extends ParentClass { <<__Override>> public function get()[]: C { return parent::get(); } }
+```
+
+Both signatures declare `C`, but return pessimisation produces `?int & ~C`
+and the checker rejects the override with `Typing[4341]`. The runtime call
+returns `42`. Removing the nullable wrapper, using a transparent alias, or
+writing the equivalent multi-variant case `E | null` makes it pass.
+
+For this payload shape, inherited getters remain inherited instead of emitting
+a redundant override. The predicate follows actual singleton-case, alias,
+local-newtype and like definitions to a nullable enum; subtype edges introduced
+by case bounds do not count as definition variants. It stops at outer nullable
+types, type constants and structural containers. Other getters still override,
+and ordinary enum/case generation, setters, properties and dispatch remain.

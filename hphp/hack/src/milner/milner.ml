@@ -31,6 +31,19 @@ let expr_prefix = "expr"
 
 let expr_regexp = Pcre.regexp @@ expr_prefix ^ "#([0-9]+)"
 
+let hierarchy_prefixes =
+  [
+    "CLASS_TYPE";
+    "ANCESTOR_TYPE";
+    "construct";
+    "read";
+    "write";
+    "identity";
+    "hierarchy";
+    "dispatch";
+    "DISPATCH";
+  ]
+
 let placeholder prefix key = prefix ^ "#" ^ string_of_int key
 
 let init_table contents placeholder =
@@ -51,6 +64,11 @@ let generate_tables ~verbose ~debug_pattern template =
   let env = Gen.Environment.default in
   let alias_types = init_table template alias_type_regexp in
   let intersection_types = init_table template intersection_type_regexp in
+  let hierarchies = Hashtbl.create (module Int) in
+  List.iter hierarchy_prefixes ~f:(fun prefix ->
+      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      Hashtbl.iter_keys table ~f:(fun key ->
+          Hashtbl.set hierarchies ~key ~data:()));
   let renv_for key =
     if Hashtbl.mem alias_types key then
       Gen.ReadOnlyEnvironment.for_alias renv
@@ -61,8 +79,11 @@ let generate_tables ~verbose ~debug_pattern template =
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let expr_table = init_table template expr_regexp in
+  let another_table = init_table template (Pcre.regexp "another#([0-9]+)") in
   let subty_table = init_table template subtype_regexp in
-  List.iter [expr_table; subty_table; alias_types] ~f:(fun table ->
+  List.iter
+    [expr_table; another_table; subty_table; alias_types; hierarchies]
+    ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table =
     Hashtbl.fold
@@ -92,6 +113,16 @@ let generate_tables ~verbose ~debug_pattern template =
         table)
   in
 
+  let hierarchy_table =
+    Hashtbl.mapi hierarchies ~f:(fun ~key ~data:() ->
+        let (env, ty) = Hashtbl.find_exn ty_table key in
+        let (env, bindings) =
+          Gen.Type.hierarchy_bindings (renv_for key) env ty
+        in
+        Hashtbl.set ty_table ~key ~data:(env, ty);
+        bindings)
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -103,6 +134,7 @@ let generate_tables ~verbose ~debug_pattern template =
     Gen.Type.inhabitant_of (renv_for key) env ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
+  let another_table = Hashtbl.mapi another_table ~f:gen_expr_from_ty_table in
 
   let defs =
     let get_defs (_, (env, _)) = Gen.Environment.definitions env in
@@ -111,10 +143,11 @@ let generate_tables ~verbose ~debug_pattern template =
   in
   let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
 
-  (defs, ty_table, subty_table, expr_table)
+  (defs, ty_table, subty_table, expr_table, another_table, hierarchy_table)
 
 (* Add generated types and expressions back in the template *)
-let fill_in_template ty_table subty_table expr_table template =
+let fill_in_template
+    ty_table subty_table expr_table another_table hierarchy_table template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
       String.substr_replace_all
@@ -130,6 +163,14 @@ let fill_in_template ty_table subty_table expr_table template =
 
   let ty_str_table = Hashtbl.map ty_table ~f:Gen.Type.show in
   let subty_str_table = Hashtbl.map subty_table ~f:Gen.Type.show in
+  let template =
+    List.fold hierarchy_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map hierarchy_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
   (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
   |> fill_table subty_str_table ~prefix:subtype_prefix
@@ -137,6 +178,7 @@ let fill_in_template ty_table subty_table expr_table template =
   |> fill_table ty_str_table ~prefix:intersection_type_prefix
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
+  |> fill_table another_table ~prefix:"another"
 
 let add_missing_definitions defs output =
   output
@@ -156,11 +198,18 @@ let milner verbose debug_pattern seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (defs, ty_table, subty_table, expr_table) =
+  let (defs, ty_table, subty_table, expr_table, another_table, hierarchy_table)
+      =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
-    fill_in_template ty_table subty_table expr_table template
+    fill_in_template
+      ty_table
+      subty_table
+      expr_table
+      another_table
+      hierarchy_table
+      template
     |> add_missing_definitions defs
   in
   match destination_path with

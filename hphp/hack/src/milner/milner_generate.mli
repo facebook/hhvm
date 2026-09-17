@@ -43,4 +43,12 @@ module Type : sig
   val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t
 
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
+
+  (** Independent constructor and member operations for one generated hierarchy.
+      The supplied type is the payload; all operations share its environment. *)
+  val hierarchy_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    t ->
+    Environment.t * (string * string) list
 end

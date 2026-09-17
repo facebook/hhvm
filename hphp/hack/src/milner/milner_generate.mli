@@ -6,6 +6,8 @@
  *
  *)
 
+val string_literal : unit -> Milner_syntax.expr
+
 module Definition : sig
   type t
 

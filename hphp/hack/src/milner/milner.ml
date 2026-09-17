@@ -9,6 +9,8 @@
 open Hh_prelude
 open Cmdliner
 module Gen = Milner_generate
+module Protocol = Milner_protocol_bindings
+module Fixture = Milner_protocol_fixture
 
 let type_prefix = "TYPE"
 
@@ -121,6 +123,9 @@ let identity_prefixes =
     "identity_is_child";
   ]
 
+let xhp_prefixes =
+  ["xhp_box"; "xhp_make"; "xhp_attribute"; "xhp_children"; "xhp_child"]
+
 let operation_families =
   [
     ("CALL", Milner_expression.Callable);
@@ -191,6 +196,10 @@ let generate_tables ~verbose ~debug_pattern template =
       let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set identities ~key ~data:()));
+  let xhps = Hashtbl.create (module Int) in
+  List.iter xhp_prefixes ~f:(fun prefix ->
+      let table = init_table template (family_regexp prefix) in
+      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set xhps ~key ~data:()));
   let renv_for key =
     let renv =
       if Hashtbl.mem alias_types key then
@@ -222,6 +231,7 @@ let generate_tables ~verbose ~debug_pattern template =
        callables;
        enums;
        identities;
+       xhps;
        enum_value_types;
      ]
     @ List.map operations ~f:(fun (_, _, table) -> table))
@@ -359,6 +369,28 @@ let generate_tables ~verbose ~debug_pattern template =
         Hashtbl.set ty_table ~key ~data:(env, value);
         bindings)
   in
+  let xhp_witnesses =
+    Hashtbl.mapi xhps ~f:(fun ~key ~data:() ->
+        let (_, value) = Hashtbl.find_exn ty_table key in
+        Protocol.xhp
+          ~name:(Format.sprintf "milner-node_%d" key)
+          ~value_hint:(Gen.Type.show value)
+          ~child:(Gen.string_literal ()))
+  in
+  let protocol_definitions =
+    if Hashtbl.is_empty xhp_witnesses then
+      []
+    else
+      Fixture.xhp
+      :: List.concat_map (Hashtbl.data xhp_witnesses) ~f:(fun witness ->
+             witness.Protocol.definitions)
+  in
+  let xhp_table =
+    Hashtbl.map xhp_witnesses ~f:(fun witness ->
+        List.map witness.Protocol.expressions ~f:(fun (prefix, expression) ->
+            (prefix, Milner_syntax.render_expr expression)))
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -375,8 +407,9 @@ let generate_tables ~verbose ~debug_pattern template =
   let defs =
     let get_defs (_, (env, _)) = Gen.Environment.definitions env in
     let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
-    List.concat ty_defs
+    List.concat ty_defs |> List.map ~f:Gen.Definition.show
   in
+  let defs = defs @ protocol_definitions in
   let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
 
   ( defs,
@@ -391,7 +424,8 @@ let generate_tables ~verbose ~debug_pattern template =
     callable_table,
     operation_tables,
     enum_table,
-    identity_table )
+    identity_table,
+    xhp_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -407,6 +441,7 @@ let fill_in_template
     operation_tables
     enum_table
     identity_table
+    xhp_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
@@ -488,6 +523,14 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
+  let template =
+    List.fold xhp_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map xhp_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
   let template = fill_table ty_str_table ~prefix:enum_value_prefix template in
   (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
@@ -502,7 +545,7 @@ let add_missing_definitions defs output =
   output
   ^ "\n"
   ^ "// Auxiliary definitions\n"
-  ^ String.concat ~sep:"\n" (List.map ~f:Gen.Definition.show defs)
+  ^ String.concat ~sep:"\n" defs
   ^ "\n"
 
 let milner verbose debug_pattern seed template_path destination_path =
@@ -528,7 +571,8 @@ let milner verbose debug_pattern seed template_path destination_path =
         callable_table,
         operation_tables,
         enum_table,
-        identity_table ) =
+        identity_table,
+        xhp_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -545,6 +589,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       operation_tables
       enum_table
       identity_table
+      xhp_table
       template
     |> add_missing_definitions defs
   in

@@ -44,6 +44,8 @@ let rec geometric_between min max =
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
+let string_literal () = Milner_syntax.Atom (select ["''"; "'apple'"; "'pear'"])
+
 let choose_nondet = List.filter ~f:(fun _ -> Random.bool ())
 
 module Primitive = struct
@@ -2363,7 +2365,7 @@ end = struct
       match prim with
       | Null -> Some (Atom "null")
       | Int -> Some (Atom (string_of_int (Random.int_incl (-2) 2)))
-      | String -> Some (Atom (select ["''"; "'apple'"; "'pear'"]))
+      | String -> Some (string_literal ())
       | Float -> Some (Atom (select ["0.0"; "42.0"; "-1.0"]))
       | Bool -> Some (Atom (string_of_bool (Random.bool ())))
       | Arraykey

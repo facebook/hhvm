@@ -24,6 +24,7 @@ type expr =
   | NullsafeMember of expr * string
   | AsyncLambda of parameter list * string list * string * stmt list
   | Await of expr
+  | Xhp of string * (string * expr) list * expr list
   | Atom of string
   | Local of local
   | New of string * expr list
@@ -70,6 +71,17 @@ let parameter ?(variadic = false) ?default hint local =
   { hint; local; variadic; default }
 
 let rec render_expr = function
+  | Xhp (name, attributes, children) ->
+    let attributes =
+      List.map attributes ~f:(fun (name, value) ->
+          " " ^ name ^ "={" ^ render_expr value ^ "}")
+      |> String.concat ~sep:""
+    in
+    let children =
+      List.map children ~f:(fun child -> "{" ^ render_expr child ^ "}")
+      |> String.concat ~sep:""
+    in
+    "<" ^ name ^ attributes ^ ">" ^ children ^ "</" ^ name ^ ">"
   | Unary (operator, expression) ->
     "(" ^ operator ^ render_expr expression ^ ")"
   | Binary (operator, left, right) ->

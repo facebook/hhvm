@@ -22,6 +22,7 @@ type expr =
   | NullsafeMember of expr * string
   | AsyncLambda of parameter list * string list * string * stmt list
   | Await of expr
+  | Xhp of string * (string * expr) list * expr list
   | Atom of string
       (** Compatibility with existing literal leaves and qualified names. *)
   | Local of local

@@ -486,3 +486,17 @@ explicit async lambda. Concurrent children bind independent fresh locals and
 read results only after the block. Task and expression recursion consume the
 same finite size budget. The small law checks that the result preserves the
 original payload, including object and Awaitable identity.
+
+## XHP
+
+XHP construction, payload boxing, attribute projection, and child projection are
+independent operations sharing the identifier's payload. Two small laws observe
+attribute identity and the actual child values. A shared protocol fixture
+provides the constructor and attribute lookup required by XHP lowering.
+
+[T288868908](https://www.internalfb.com/tasks/T288868908): direct structural XHP
+attribute hints typecheck but fail emission with "There are no other possible
+xhp attribute hints". `MilnerPayload<T>` keeps that attribute nominal while
+retaining arbitrary generated payloads inside it. The wrapper also satisfies
+the separate restrictions on nullable required attributes and direct
+type-constant hints.

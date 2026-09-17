@@ -378,7 +378,7 @@ let merge
       (* -- Distribute an intersection operand ----------------------------- *)
       (* [shape(...A, ...(m1 & ... & mk), ...B)] is
          [shape(...A, ...m1, ...B) & ... & shape(...A, ...mk, ...B)] *)
-      | ((_, Tintersection members), _) ->
+      | ((_, Tintersection (_ :: _ as members)), _) ->
         distribute
           path
           rev_elems

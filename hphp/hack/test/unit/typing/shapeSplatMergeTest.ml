@@ -339,6 +339,24 @@ let normalize_shape_type_keeps_intersection_explicit _ =
   | Norm.Normalized_bottom ->
     assert_failure "an intersection of type parameters normalized to bottom"
 
+let empty_intersection_is_not_a_shape _ =
+  let empty_intersection = mk (r, Tintersection []) in
+  let (_, err, result) =
+    Norm.merge
+      ~on_error:(Some (Typing_error.Reasons_callback.unify_error_at Pos.none))
+      [empty_intersection]
+      dummy_env
+  in
+  assert_bool "spreading mixed should report an error" (Option.is_some err);
+  match result with
+  | Norm.Intersection _ ->
+    assert_failure "an empty intersection was distributed"
+  | Norm.Full _
+  | Norm.Empty_shape _
+  | Norm.Partial _
+  | Norm.Union _ ->
+    ()
+
 (* A residual operand (type variable) cannot be flattened: a residual list. *)
 let residual_tyvar _ =
   let (env, tv) =
@@ -809,6 +827,8 @@ let () =
          >:: normalize_shape_type_keeps_union_explicit;
          "normalize_shape_type_keeps_intersection_explicit"
          >:: normalize_shape_type_keeps_intersection_explicit;
+         "empty_intersection_is_not_a_shape"
+         >:: empty_intersection_is_not_a_shape;
          "residual_tyvar" >:: residual_tyvar;
          "normalized_row_is_aligned" >:: normalized_row_is_aligned;
          "repeated_generic_bottom_query_is_memoized"

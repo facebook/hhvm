@@ -121,6 +121,9 @@ let identity_prefixes =
     "identity_is_child";
   ]
 
+let operation_families =
+  [("CALL", Milner_expression.Callable); ("FLOW", Milner_expression.Flow)]
+
 let family_regexp prefix =
   Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")
 
@@ -168,7 +171,10 @@ let generate_tables ~verbose ~debug_pattern template =
       let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set callables ~key ~data:()));
-  let calls = init_table template (family_regexp "CALL") in
+  let operations =
+    List.map operation_families ~f:(fun (prefix, family) ->
+        (prefix, family, init_table template (family_regexp prefix)))
+  in
   let enum_value_types =
     init_table template (family_regexp enum_value_prefix)
   in
@@ -200,21 +206,21 @@ let generate_tables ~verbose ~debug_pattern template =
   let another_table = init_table template (Pcre.regexp "another#([0-9]+)") in
   let subty_table = init_table template subtype_regexp in
   List.iter
-    [
-      expr_table;
-      another_table;
-      subty_table;
-      alias_types;
-      hierarchies;
-      generics;
-      dependents;
-      procedures;
-      callables;
-      enums;
-      identities;
-      enum_value_types;
-      calls;
-    ]
+    ([
+       expr_table;
+       another_table;
+       subty_table;
+       alias_types;
+       hierarchies;
+       generics;
+       dependents;
+       procedures;
+       callables;
+       enums;
+       identities;
+       enum_value_types;
+     ]
+    @ List.map operations ~f:(fun (_, _, table) -> table))
     ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table =
@@ -319,11 +325,15 @@ let generate_tables ~verbose ~debug_pattern template =
         Hashtbl.set ty_table ~key ~data:(env, value);
         bindings)
   in
-  let call_table =
-    Hashtbl.mapi calls ~f:(fun ~key ~data:() ->
-        let (_, ty) = Hashtbl.find_exn ty_table key in
-        Milner_expression.operation Milner_expression.Callable ~ty
-        |> Milner_syntax.render_expr)
+  let operation_tables =
+    List.map operations ~f:(fun (prefix, family, table) ->
+        let table =
+          Hashtbl.mapi table ~f:(fun ~key ~data:() ->
+              let (_, ty) = Hashtbl.find_exn ty_table key in
+              Milner_expression.operation family ~ty
+              |> Milner_syntax.render_expr)
+        in
+        (prefix, table))
   in
 
   let enum_table =
@@ -375,7 +385,7 @@ let generate_tables ~verbose ~debug_pattern template =
     dependent_table,
     procedure_table,
     callable_table,
-    call_table,
+    operation_tables,
     enum_table,
     identity_table )
 
@@ -390,7 +400,7 @@ let fill_in_template
     dependent_table
     procedure_table
     callable_table
-    call_table
+    operation_tables
     enum_table
     identity_table
     template =
@@ -444,7 +454,12 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
-  let template = fill_table call_table ~prefix:"CALL" template in
+  let template =
+    List.fold
+      operation_tables
+      ~init:template
+      ~f:(fun template (prefix, table) -> fill_table table ~prefix template)
+  in
   let template =
     List.fold procedure_prefixes ~init:template ~f:(fun contents prefix ->
         let table =
@@ -507,7 +522,7 @@ let milner verbose debug_pattern seed template_path destination_path =
         dependent_table,
         procedure_table,
         callable_table,
-        call_table,
+        operation_tables,
         enum_table,
         identity_table ) =
     generate_tables ~verbose ~debug_pattern template
@@ -523,7 +538,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       dependent_table
       procedure_table
       callable_table
-      call_table
+      operation_tables
       enum_table
       identity_table
       template

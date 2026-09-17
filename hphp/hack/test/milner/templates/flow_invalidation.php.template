@@ -1,0 +1,19 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+final class Cell<T> {
+  public function __construct(public ?Vector<T> $items)[write_props] {}
+  public function clear()[write_props]: void { $this->items = null; }
+}
+
+function read_after_clear<T>(Cell<T> $cell)[write_props]: int {
+  if ($cell->items is nonnull) {
+    $cell->clear();
+  }
+  return $cell->items?->count() ?? 0;
+}
+
+<<__EntryPoint>> function main(): void {
+  $cell = new Cell(new Vector<TYPE#1>(vec[expr#1]));
+  invariant(read_after_clear($cell) === 0, 'mutation invalidates property refinement');
+}

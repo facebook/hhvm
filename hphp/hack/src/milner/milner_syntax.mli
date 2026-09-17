@@ -16,6 +16,10 @@ type local
 val fresh_local : string -> local
 
 type expr =
+  | Unary of string * expr
+  | Binary of string * expr * expr
+  | As of expr * string
+  | NullsafeMember of expr * string
   | Atom of string
       (** Compatibility with existing literal leaves and qualified names. *)
   | Local of local
@@ -47,6 +51,10 @@ and parameter = {
 }
 
 and stmt =
+  | If of expr * stmt list * stmt list
+  | While of expr * stmt list
+  | Foreach of expr * local * stmt list
+  | Try of stmt list * (string * local * stmt list) list * stmt list
   | Bind of local * expr
   | Assign of expr * expr
   | Eval of expr

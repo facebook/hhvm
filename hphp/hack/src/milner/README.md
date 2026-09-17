@@ -464,3 +464,16 @@ reproduce the lost constraint. Intersecting a pointer-containing tuple with a
 name-containing vec does too, so the guard follows vec elements when the other
 operand exposes a tuple. Vec/vec, shape/dict, function, and generic-container
 controls pass and do not receive that additional traversal.
+
+## Control flow and mutation
+
+`FLOW#N` composes bounded branches, loops, container reads and writes, exception
+handling, nullable receivers, and callable operations over the existing payload.
+Each rule preserves its typed input; children consume one shared size budget.
+The template binds that input once and checks the composed result. No assertion
+or prearranged multi-operation test scenario is generated.
+
+Indexed vector stores participate in the same expression composition. Their
+initial empty slot makes a dropped store observable at the subsequent read.
+The separate `flow_invalidation` law checks that clearing a nullable property
+invalidates the earlier refinement before a nullsafe read and fallback.

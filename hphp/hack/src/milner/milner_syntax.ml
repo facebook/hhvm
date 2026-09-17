@@ -18,6 +18,10 @@ let fresh_local hint =
   Format.sprintf "$milner_%s_%d" hint id
 
 type expr =
+  | Unary of string * expr
+  | Binary of string * expr * expr
+  | As of expr * string
+  | NullsafeMember of expr * string
   | Atom of string
   | Local of local
   | New of string * expr list
@@ -48,6 +52,10 @@ and parameter = {
 }
 
 and stmt =
+  | If of expr * stmt list * stmt list
+  | While of expr * stmt list
+  | Foreach of expr * local * stmt list
+  | Try of stmt list * (string * local * stmt list) list * stmt list
   | Bind of local * expr
   | Assign of expr * expr
   | Eval of expr
@@ -59,6 +67,13 @@ let parameter ?(variadic = false) ?default hint local =
   { hint; local; variadic; default }
 
 let rec render_expr = function
+  | Unary (operator, expression) ->
+    "(" ^ operator ^ render_expr expression ^ ")"
+  | Binary (operator, left, right) ->
+    "(" ^ render_expr left ^ " " ^ operator ^ " " ^ render_expr right ^ ")"
+  | As (expression, hint) -> "(" ^ render_expr expression ^ " as " ^ hint ^ ")"
+  | NullsafeMember (receiver, name) ->
+    "(" ^ render_expr receiver ^ ")?->" ^ name
   | Index (receiver, index) ->
     "(" ^ render_expr receiver ^ ")[" ^ render_expr index ^ "]"
   | Inout expression -> "inout " ^ render_expr expression
@@ -113,6 +128,42 @@ and render_arguments arguments =
   List.map arguments ~f:render_expr |> String.concat ~sep:", "
 
 and render_stmt = function
+  | If (condition, consequent, alternative) ->
+    "if ("
+    ^ render_expr condition
+    ^ ") { "
+    ^ render_body consequent
+    ^ " }"
+    ^
+    if List.is_empty alternative then
+      ""
+    else
+      " else { " ^ render_body alternative ^ " }"
+  | While (condition, body) ->
+    "while (" ^ render_expr condition ^ ") { " ^ render_body body ^ " }"
+  | Foreach (collection, local, body) ->
+    "foreach ("
+    ^ render_expr collection
+    ^ " as "
+    ^ local
+    ^ ") { "
+    ^ render_body body
+    ^ " }"
+  | Try (body, catches, finally) ->
+    let catches =
+      List.map catches ~f:(fun (hint, local, body) ->
+          " catch (" ^ hint ^ " " ^ local ^ ") { " ^ render_body body ^ " }")
+      |> String.concat ~sep:""
+    in
+    "try { "
+    ^ render_body body
+    ^ " }"
+    ^ catches
+    ^
+    if List.is_empty finally then
+      ""
+    else
+      " finally { " ^ render_body finally ^ " }"
   | Bind (local, value) -> local ^ " = " ^ render_expr value ^ ";"
   | Assign (target, value) ->
     render_expr target ^ " = " ^ render_expr value ^ ";"

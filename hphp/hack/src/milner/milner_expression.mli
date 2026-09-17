@@ -8,8 +8,10 @@
 
 type family =
   | Atom
+  | Flow
   | Callable
 
-(** A bounded composition of callable operations preserving the argument's
-    type and value. Calling the result requires the default context. *)
+(** A function that preserves its argument's type and value, constructed from
+    bounded compositions of expressions and statements. Its caller must provide
+    the default callable context. *)
 val operation : family -> ty:Milner_generate.Type.t -> Milner_syntax.expr

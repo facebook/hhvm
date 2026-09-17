@@ -1,0 +1,8 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+<<__EntryPoint>> function main(): void {
+  $value = expr#1;
+  $transform = FLOW#1;
+  invariant(vec[$transform($value)] === vec[$value], 'flow composition preserves payload');
+}

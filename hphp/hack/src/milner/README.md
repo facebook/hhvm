@@ -507,3 +507,14 @@ Value-tree creation, quote/splice, lifting, and visiting are independent typed
 operations. The splice law compares one visited result with its original input.
 A shared fixture supplies only the visitor protocol and value/visit/lift helpers;
 the quote/splice and visit operations explicitly require defaults capabilities.
+
+## Modules and multifile programs
+
+Module templates use `//// relative/path.php` delimiters. Each virtual file has
+its own `<?hh` header. Member files declare their module; module definitions
+use separate files. The final file receives generated auxiliary definitions.
+The checker receives the original bundle. Runtime checks preserve it, split
+unique relative paths into a fresh directory, select the entrypoint in
+`main.php` (or the unique entrypoint file), and pass every physical file to HHBBC.
+Main must explicitly require any definitions it needs at runtime. Malformed
+layouts fail verification; retained output includes the split runtime files.

@@ -3,12 +3,14 @@ import concurrent
 import json
 import os
 import random
+import re
 import shlex
 import subprocess
 import sys
 import tempfile
 from concurrent.futures import as_completed
 from dataclasses import dataclass
+from pathlib import Path
 from subprocess import CompletedProcess
 from typing import List, Literal, Optional, TextIO, Tuple, Union
 
@@ -33,6 +35,44 @@ class Failure:
     error: Optional[str] = None
     stdout: bytes = b""
     stderr: bytes = b""
+
+
+def prepare_runtime_files(program_file: str) -> Tuple[str, List[str]]:
+    contents = Path(program_file).read_bytes()
+    parts = re.split(rb"(?m)^////[ \t]+([^\r\n]+)\r?\n", contents)
+    if len(parts) == 1:
+        return (program_file, [program_file])
+    if parts[0].strip():
+        raise ValueError("Unexpected contents before the first virtual file")
+    files: List[Tuple[Path, bytes]] = []
+    for name, body in zip(parts[1::2], parts[2::2]):
+        path = Path(name.decode().strip())
+        if path.is_absolute() or not path.parts or ".." in path.parts:
+            raise ValueError(f"Invalid virtual file path: {name!r}")
+        if any(existing == path for existing, _ in files):
+            raise ValueError(f"Duplicate virtual file path: {name!r}")
+        files.append((path, body))
+    entrypoints = [path for path, body in files if b"__EntryPoint" in body]
+    if Path("main.php") in entrypoints:
+        entrypoint = Path("main.php")
+    elif len(entrypoints) == 1:
+        entrypoint = entrypoints[0]
+    else:
+        raise ValueError("Expected main.php or a unique virtual entrypoint file")
+    directory = Path(
+        tempfile.mkdtemp(
+            prefix=os.path.basename(program_file) + ".files.",
+            dir=os.path.dirname(program_file),
+        )
+    )
+    for path, body in files:
+        destination = directory / path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(body)
+    return (
+        str(directory / entrypoint),
+        [str(directory / path) for path, _ in files],
+    )
 
 
 def record_failure(out_dir: str, failure: Failure) -> None:
@@ -224,13 +264,14 @@ def run_hhvm_program(
 ) -> Optional[Failure]:
     cmds = program.cmds.copy()
     try:
+        entrypoint, input_files = prepare_runtime_files(program.program_file)
         match mode:
             case "HHBBC":
                 with tempfile.TemporaryDirectory(dir=out_dir) as compilation_dir:
                     result = run_command(
                         hhbbc_compilation_args
                         + ["--output-dir", compilation_dir]
-                        + [program.program_file],
+                        + input_files,
                         program.seed,
                         program.program_file,
                         cmds,
@@ -243,7 +284,7 @@ def run_hhvm_program(
                         + [
                             f"-vRepo.Path={compilation_dir}/hhvm.hhbc",
                             "--file",
-                            program.program_file,
+                            entrypoint,
                         ],
                         program.seed,
                         program.program_file,
@@ -254,11 +295,7 @@ def run_hhvm_program(
                         return result
             case "Sandbox":
                 result = run_command(
-                    [
-                        hhvm_exe,
-                        "-vHack.Lang.AllowUnstableFeatures=1",
-                        program.program_file,
-                    ],
+                    [hhvm_exe, "-vHack.Lang.AllowUnstableFeatures=1", entrypoint],
                     program.seed,
                     program.program_file,
                     cmds,

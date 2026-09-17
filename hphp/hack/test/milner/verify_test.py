@@ -382,5 +382,143 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(run.call_args.kwargs["timeout"], 7)
 
 
+class VirtualFileTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.folder = Path(self.temp.name)
+        self.source = self.folder / "bundle.php"
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def bundle(self) -> bytes:
+        text = (
+            b"//// modules.php\n<?hh\nnew module milner {}\n"
+            b"//// library.php\n<?hh\nmodule milner;\ninternal function id(int $x): int { return $x; }\n"
+            b"//// main.php\n<?hh\nmodule milner;\n<<__EntryPoint>>\nfunction main(): void {}\n"
+            b"// Auxiliary definitions\nclass Generated {}\n"
+        )
+        self.source.write_bytes(text)
+        return text
+
+    def test_plain_file_keeps_its_path(self) -> None:
+        self.source.write_bytes(b"<?hh\n<<__EntryPoint>>\nfunction main():void{}\n")
+        self.assertEqual(
+            runtime.prepare_runtime_files(str(self.source)),
+            (str(self.source), [str(self.source)]),
+        )
+
+    def test_split_preserves_original_and_main_auxiliaries(self) -> None:
+        original = self.bundle()
+        main, files = runtime.prepare_runtime_files(str(self.source))
+        self.assertEqual(self.source.read_bytes(), original)
+        self.assertEqual(Path(main).name, "main.php")
+        self.assertEqual(
+            [Path(path).name for path in files],
+            ["modules.php", "library.php", "main.php"],
+        )
+        self.assertTrue(
+            Path(main)
+            .read_bytes()
+            .endswith(b"// Auxiliary definitions\nclass Generated {}\n")
+        )
+        self.assertIn(b"module milner;", Path(main).read_bytes())
+
+    def test_escape_and_absolute_paths_are_rejected(self) -> None:
+        for path in (
+            "../outside.php",
+            "/absolute.php",
+            "inside/../../outside.php",
+            " ",
+        ):
+            self.source.write_text(
+                f"//// {path}\n<?hh\n<<__EntryPoint>>\nfunction main():void{{}}\n"
+            )
+            with self.assertRaises(ValueError):
+                runtime.prepare_runtime_files(str(self.source))
+
+    def test_duplicate_paths_are_rejected(self) -> None:
+        self.source.write_text(
+            "//// main.php\n<?hh\n//// ./main.php\n<?hh\n<<__EntryPoint>>\nfunction main():void{}\n"
+        )
+        with self.assertRaises(ValueError):
+            runtime.prepare_runtime_files(str(self.source))
+
+    def test_preamble_is_not_silently_discarded(self) -> None:
+        self.source.write_text(
+            "<?hh\n//// main.php\n<?hh\n<<__EntryPoint>>\nfunction main():void{}\n"
+        )
+        with self.assertRaises(ValueError):
+            runtime.prepare_runtime_files(str(self.source))
+
+    def test_ambiguous_entrypoint_is_rejected(self) -> None:
+        self.source.write_text(
+            "//// a.php\n<?hh\n<<__EntryPoint>>\nfunction a():void{}\n//// b.php\n<?hh\n<<__EntryPoint>>\nfunction b():void{}\n"
+        )
+        with self.assertRaises(ValueError):
+            runtime.prepare_runtime_files(str(self.source))
+
+    def test_hhbbc_compiles_all_files_and_runs_main(self) -> None:
+        self.bundle()
+        commands: list[list[str]] = []
+
+        def run(
+            command: list[str], **kwargs: object
+        ) -> subprocess.CompletedProcess[bytes]:
+            commands.append(command)
+            return subprocess.CompletedProcess(command, 0, b"", b"")
+
+        program = runtime.MilnerSuccess(1, str(self.source), ["generate"])
+        with patch.object(runtime.subprocess, "run", side_effect=run):
+            result = runtime.run_hhvm_program(
+                "hhvm", str(self.folder), ["hhvm", "--hphp"], ["hhvm"], program, "HHBBC"
+            )
+        self.assertIsNone(result)
+        self.assertEqual(
+            [Path(path).name for path in commands[0][-3:]],
+            ["modules.php", "library.php", "main.php"],
+        )
+        self.assertEqual(Path(commands[1][-1]).name, "main.php")
+        self.assertNotIn(str(self.source), commands[0])
+
+    def test_sandbox_runs_physical_main(self) -> None:
+        self.bundle()
+        commands: list[list[str]] = []
+
+        def run(
+            command: list[str], **kwargs: object
+        ) -> subprocess.CompletedProcess[bytes]:
+            commands.append(command)
+            return subprocess.CompletedProcess(command, 0, b"", b"")
+
+        program = runtime.MilnerSuccess(1, str(self.source), ["generate"])
+        with patch.object(runtime.subprocess, "run", side_effect=run):
+            self.assertIsNone(
+                runtime.run_hhvm_program(
+                    "hhvm", str(self.folder), [], [], program, "Sandbox"
+                )
+            )
+        self.assertEqual(Path(commands[0][-1]).name, "main.php")
+        self.assertNotIn(str(self.source), commands[0])
+
+    def test_invalid_bundle_is_a_retained_failure(self) -> None:
+        self.source.write_bytes(b"//// ../main.php\n<?hh\n<<__EntryPoint>>\n")
+        original = self.source.read_bytes()
+        program = runtime.MilnerSuccess(1, str(self.source), ["generate"])
+        with patch.object(runtime.subprocess, "run") as run:
+            result = runtime.run_hhvm_program(
+                "hhvm", str(self.folder), [], [], program, "Sandbox"
+            )
+        assert result is not None
+        self.assertIsNone(result.process)
+        self.assertIn("Invalid virtual file", result.error or "")
+        run.assert_not_called()
+        runtime.record_failure(str(self.folder), result)
+        saved = json.loads(Path(str(self.source) + ".failure.json").read_text())
+        self.assertIsNone(saved["returncode"])
+        self.assertEqual(saved["commands"], ["generate"])
+        self.assertEqual(self.source.read_bytes(), original)
+
+
 if __name__ == "__main__":
     unittest.main()

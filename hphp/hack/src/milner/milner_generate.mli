@@ -81,9 +81,23 @@ module Type : sig
     value:t ->
     Environment.t * dependent_witness
 
+  (** A separate nullary completion witness associated with the existing payload
+      binding. This does not replace the supplied payload type. *)
+  val mk_procedure_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
     t ->
     Environment.t * (string * string) list
+
+  (** Generate a nullary procedure that either returns void or throws. *)
+  val mk_procedure : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
+
+  (** Expected completion mode for a type returned by [mk_procedure]. *)
+  val procedure_throws : t -> bool
 end

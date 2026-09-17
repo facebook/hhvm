@@ -389,6 +389,7 @@ end
 and Kind : sig
   type t =
     | Mixed
+    | Nonnull
     | Primitive
     | Option
     | Classish
@@ -429,6 +430,7 @@ and Kind : sig
 end = struct
   type t =
     | Mixed
+    | Nonnull
     | Primitive
     | Option
     | Classish
@@ -470,6 +472,7 @@ end = struct
        which make program generation expensive. *)
     let complexity_filter = function
       | Mixed
+      | Nonnull
       | Primitive
       | Alias
       | Newtype
@@ -880,11 +883,23 @@ and Type : sig
     value:t ->
     Environment.t * dependent_witness
 
+  (** A separate nullary completion witness associated with the existing payload
+      binding. This does not replace the supplied payload type. *)
+  val mk_procedure_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
     t ->
     Environment.t * (string * string) list
+
+  val mk_procedure : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
+
+  val procedure_throws : t -> bool
 end = struct
   module Env = Environment
   module REnv = ReadOnlyEnvironment
@@ -900,8 +915,14 @@ end = struct
     is_reified: bool;
   }
 
+  and function_return =
+    | ReturnsValue of t
+    | ReturnsVoid
+    | ReturnsNothing
+
   and t =
     | Mixed
+    | Nonnull
     | Primitive of Primitive.t
     | Option of t
     | Awaitable of t
@@ -948,6 +969,7 @@ end = struct
       }
     | Tuple of {
         conjuncts: t list;
+        optional_conjuncts: t list;
         open_: bool;
       }
     | Shape of {
@@ -957,7 +979,7 @@ end = struct
     | Function of {
         parameters: t list;
         variadic: t option;
-        return_: t;
+        return_: function_return;
       }
     | Like of t
   [@@deriving eq, ord]
@@ -973,6 +995,7 @@ end = struct
 
   and show = function
     | Mixed -> "mixed"
+    | Nonnull -> "nonnull"
     | Primitive prim -> begin
       let open Primitive in
       match prim with
@@ -1019,11 +1042,18 @@ end = struct
         Format.sprintf "vec_or_dict<%s>" (show value)
       else
         Format.sprintf "vec_or_dict<%s, %s>" (show key) (show value)
-    | Tuple { conjuncts; open_ } ->
-      let is_nullary = List.length conjuncts = 0 in
-      let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
+    | Tuple { conjuncts; optional_conjuncts; open_ } ->
+      let has_optional = not (List.is_empty optional_conjuncts) in
+      let fields =
+        List.map ~f:show conjuncts
+        @ List.map optional_conjuncts ~f:(fun ty -> "optional " ^ show ty)
+      in
+      let is_nullary = List.is_empty fields in
+      let conjuncts = String.concat ~sep:", " fields in
       let open_ =
-        if open_ && is_nullary then
+        if open_ && has_optional then
+          ", mixed..."
+        else if open_ && is_nullary then
           "..."
         else if open_ then
           ", ..."
@@ -1056,9 +1086,14 @@ end = struct
         | None -> ""
       in
       let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
-      let return_ = show return_ in
+      let return_ = show_return return_ in
       Format.sprintf "(function(%s%s): %s)" parameters variadic return_
     | Like ty -> "~" ^ show ty
+
+  and show_return = function
+    | ReturnsValue ty -> show ty
+    | ReturnsVoid -> "void"
+    | ReturnsNothing -> "nothing"
 
   let show_tys tys = List.map ~f:show tys |> String.concat ~sep:", "
 
@@ -1071,8 +1106,10 @@ end = struct
         let seen = TypeSet.add ty seen in
         match ty with
         | Like _ -> true
-        | Tuple { conjuncts; _ } ->
-          List.exists conjuncts ~f:(has_like_head env seen)
+        | Tuple { conjuncts; optional_conjuncts; _ } ->
+          List.exists
+            (conjuncts @ optional_conjuncts)
+            ~f:(has_like_head env seen)
         | Shape { fields; _ } ->
           List.exists fields ~f:(fun { ty; _ } -> has_like_head env seen ty)
         | Alias _
@@ -1106,8 +1143,10 @@ end = struct
         let seen = TypeSet.add ty seen in
         match ty with
         | Option _ -> true
-        | Tuple { conjuncts; _ } ->
-          List.exists conjuncts ~f:(has_nullable_form env seen)
+        | Tuple { conjuncts; optional_conjuncts; _ } ->
+          List.exists
+            (conjuncts @ optional_conjuncts)
+            ~f:(has_nullable_form env seen)
         | Shape { fields; _ } ->
           List.exists fields ~f:(fun { ty; _ } -> has_nullable_form env seen ty)
         | Alias _
@@ -1202,6 +1241,7 @@ end = struct
         let seen = TypeSet.add ty seen in
         match ty with
         | Primitive Primitive.Null -> false
+        | Nonnull
         | Primitive _
         | Awaitable _
         | Classish _
@@ -1322,16 +1362,21 @@ end = struct
     | KeyedIterator _
     | VecOrDict _ ->
       true
-    | Tuple { conjuncts; open_ } ->
-      (not open_) && List.for_all conjuncts ~f:is_immediately_inhabited
+    | Tuple { conjuncts; optional_conjuncts; open_ } ->
+      (not open_)
+      && List.for_all
+           (conjuncts @ optional_conjuncts)
+           ~f:is_immediately_inhabited
     | Shape { fields; open_ = _ } ->
       List.for_all fields ~f:(fun { ty; _ } -> is_immediately_inhabited ty)
     | Awaitable ty
-    | Function { return_ = ty; _ } ->
+    | Function { return_ = ReturnsValue ty; _ } ->
       is_immediately_inhabited ty
+    | Function { return_ = ReturnsVoid | ReturnsNothing; _ } -> true
     | Primitive Primitive.(Arraykey | Num)
     | Classish { kind = Kind.(Interface | AbstractClass); _ }
     | Mixed
+    | Nonnull
     | Option _
     | Alias _
     | Newtype _
@@ -1434,6 +1479,12 @@ end = struct
              @
              match ty with
              | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+             | Nonnull ->
+               List.filter_map Primitive.all ~f:(fun prim ->
+                   if Primitive.equal prim Primitive.Null then
+                     None
+                   else
+                     Some (Primitive prim))
              | Primitive prim -> begin
                let open Primitive in
                match prim with
@@ -1446,6 +1497,7 @@ end = struct
       else begin
         match ty with
         | Mixed
+        | Nonnull
         | Primitive _
         | TypeConst _
         | Dependent _
@@ -1565,7 +1617,7 @@ end = struct
             | KeyedIterator _ -> [KeyedIterator { key; value }]
             | _ -> VecOrDict { key; value } :: arrays
           end
-        | Tuple { conjuncts; open_ } ->
+        | Tuple { conjuncts; optional_conjuncts; open_ } ->
           let conjuncts =
             List.map
               ~f:(driver REnv.{ renv with for_alias_def = false })
@@ -1579,7 +1631,23 @@ end = struct
             else
               false
           in
-          [Tuple { conjuncts; open_ }]
+          let optional_conjuncts =
+            List.map
+              ~f:(driver REnv.{ renv with for_alias_def = false })
+              optional_conjuncts
+          in
+          let retained =
+            if open_ then
+              optional_conjuncts
+            else
+              List.take
+                optional_conjuncts
+                (geometric_between 0 (List.length optional_conjuncts))
+          in
+          let required = Random.int_incl 0 (List.length retained) in
+          let conjuncts = conjuncts @ List.take retained required in
+          let optional_conjuncts = List.drop retained required in
+          [Tuple { conjuncts; optional_conjuncts; open_ }]
         | Shape { fields; open_ } ->
           let fields = List.map ~f:(subfield_of renv) fields in
           let open_ =
@@ -1593,7 +1661,11 @@ end = struct
           [Shape { fields; open_ }]
         | Function { parameters; variadic; return_ } ->
           let return_ =
-            driver REnv.{ renv with for_alias_def = false } return_
+            match return_ with
+            | ReturnsValue ty ->
+              ReturnsValue (driver REnv.{ renv with for_alias_def = false } ty)
+            | ReturnsVoid -> ReturnsVoid
+            | ReturnsNothing -> ReturnsNothing
           in
           let variadic =
             match variadic with
@@ -1720,14 +1792,22 @@ end = struct
           [
             Vec Mixed; Dict { key = Primitive Primitive.Arraykey; value = Mixed };
           ]
-        | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
+        | Vec _ ->
+          [
+            Vec Mixed;
+            Tuple { conjuncts = []; optional_conjuncts = []; open_ = true };
+          ]
         | Dict _ ->
           [
             Dict { key = Primitive Primitive.Arraykey; value = Mixed };
             Shape { fields = []; open_ = true };
           ]
         | Keyset _ -> [Keyset (Primitive Primitive.Arraykey)]
-        | Tuple _ -> [Tuple { conjuncts = []; open_ = true }; Vec Mixed]
+        | Tuple _ ->
+          [
+            Tuple { conjuncts = []; optional_conjuncts = []; open_ = true };
+            Vec Mixed;
+          ]
         | Shape _ ->
           [
             Shape { fields = []; open_ = true };
@@ -1736,6 +1816,7 @@ end = struct
         | Function _ ->
           [Classish { kind = Kind.Class; name = "Closure"; generic = None }]
         | Mixed -> [ty]
+        | Nonnull -> [Mixed]
         | Primitive Primitive.Arraykey ->
           Primitive.[Primitive Int; Primitive String]
         | Primitive Primitive.Num -> Primitive.[Primitive Int; Primitive Float]
@@ -1887,13 +1968,19 @@ end = struct
             inhabitant renv env ty)
       in
       Some (Array ("keyset", elements))
-    | Tuple { conjuncts; open_ } ->
+    | Tuple { conjuncts; optional_conjuncts; open_ } ->
       if open_ then
         None
       else
-        List.map ~f:(expr_of renv env) conjuncts
+        let present =
+          conjuncts
+          @ List.take
+              optional_conjuncts
+              (geometric_between 0 (List.length optional_conjuncts))
+        in
+        List.map present ~f:(expr_of renv env)
         |> Option.all
-        |> Option.map ~f:(fun expressions -> Tuple expressions)
+        |> Option.map ~f:(fun values -> Milner_syntax.Tuple values)
     | Shape { fields; open_ = _ } -> begin
       (* Check that all types are inhabited even if we won't end up using all of them. *)
       match
@@ -1918,16 +2005,31 @@ end = struct
       Async [Return (Some expr)]
     | Function { parameters; variadic; return_ } ->
       let parameters =
-        List.map parameters ~f:(fun ty -> (show ty, fresh_local "argument"))
+        List.map parameters ~f:(fun ty ->
+            (show ty, Milner_syntax.fresh_local "argument"))
         @ Option.to_list
             (Option.map variadic ~f:(fun ty ->
-                 (show ty ^ " ...", fresh_local "rest")))
+                 (show ty ^ " ...", Milner_syntax.fresh_local "rest")))
       in
       let open Option.Let_syntax in
-      let+ return_expr = expr_of renv env return_ in
-      Lambda
-        (parameters, ["defaults"], show return_, [Return (Some return_expr)])
+      let+ body =
+        match return_ with
+        | ReturnsValue ty ->
+          Option.map (expr_of renv env ty) ~f:(fun value ->
+              [Milner_syntax.Return (Some value)])
+        | ReturnsVoid -> Some [Milner_syntax.Return None]
+        | ReturnsNothing ->
+          Some
+            [
+              Milner_syntax.Throw
+                (Milner_syntax.New
+                   ( "Exception",
+                     [Milner_syntax.Atom "'milner expected nothing'"] ));
+            ]
+      in
+      Milner_syntax.Lambda (parameters, ["defaults"], show_return return_, body)
     | Mixed
+    | Nonnull
     | Option _
     | Alias _
     | Newtype _
@@ -2268,6 +2370,7 @@ end = struct
     @@ fun renv ->
     match kind with
     | Kind.Mixed -> (env, Mixed)
+    | Kind.Nonnull -> (env, Nonnull)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
     | Kind.Option -> begin
       match
@@ -2475,7 +2578,10 @@ end = struct
         |> List.fold_map ~init:env ~f:(fun env _ ->
                mk ~complexity:(complexity - 1) renv env)
       in
-      (env, Tuple { conjuncts; open_ = false })
+      let required = Random.int_incl 0 n in
+      let optional_conjuncts = List.drop conjuncts required in
+      let conjuncts = List.take conjuncts required in
+      (env, Tuple { conjuncts; optional_conjuncts; open_ = false })
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
       let renv = REnv.{ renv with for_option_ty = false } in
@@ -2494,7 +2600,14 @@ end = struct
         |> List.fold_map ~init:env ~f:(fun env _ ->
                mk ~complexity:(complexity - 1) renv env)
       in
-      let (env, return_) = mk ~complexity:(complexity - 1) renv env in
+      let (env, return_) =
+        match Random.int_incl 0 4 with
+        | 0 -> (env, ReturnsVoid)
+        | 1 -> (env, ReturnsNothing)
+        | _ ->
+          let (env, ty) = mk ~complexity:(complexity - 1) renv env in
+          (env, ReturnsValue ty)
+      in
       let (env, variadic) =
         if Random.bool () then
           (env, None)
@@ -2529,7 +2642,12 @@ end = struct
     let env = Env.record_subtype env ~super:writer ~sub:ty in
     let env = Env.record_subtype env ~super:writer ~sub:wide in
     let tagged ty =
-      Tuple { conjuncts = [Primitive Primitive.Int; ty]; open_ = false }
+      Tuple
+        {
+          conjuncts = [Primitive Primitive.Int; ty];
+          optional_conjuncts = [];
+          open_ = false;
+        }
     in
     let tagged_class = GenericClass { name; key; value = tagged value } in
     let tagged_writer = generic_protocol name "Writer" (tagged narrower) in
@@ -2783,6 +2901,33 @@ end = struct
       :: ("ANCESTOR_TYPE", show ancestor)
       :: ("DISPATCH", string_of_int expected_dispatch)
       :: bindings )
+
+  let mk_procedure _renv env =
+    let return_ =
+      if Random.bool () then
+        ReturnsVoid
+      else
+        ReturnsNothing
+    in
+    (env, Function { parameters = []; variadic = None; return_ })
+
+  let procedure_throws = function
+    | Function { parameters = []; variadic = None; return_ = ReturnsVoid; _ } ->
+      false
+    | Function { parameters = []; variadic = None; return_ = ReturnsNothing; _ }
+      ->
+      true
+    | _ -> invalid_arg "procedure_throws expects a generated procedure"
+
+  let mk_procedure_bindings renv env ~value:_ =
+    let (env, procedure_type) = mk_procedure renv env in
+    let procedure = inhabitant renv env procedure_type in
+    ( env,
+      [
+        ("PROCEDURE_TYPE", show procedure_type);
+        ("procedure", Milner_syntax.render_expr procedure);
+        ("THROWS", string_of_bool (procedure_throws procedure_type));
+      ] )
 end
 
 and TypeMap : (Wrapped_map.S with type key = Type.t) = Wrapped_map.Make (Type)

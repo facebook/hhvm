@@ -1,0 +1,9 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+function empty_bottom()[]: vec<nothing> { return vec[]; }
+function widen_empty()[]: vec<TYPE#1> { return empty_bottom(); }
+
+<<__EntryPoint>> function main(): void {
+  invariant(widen_empty() === vec[], 'empty bottom widens to any element type');
+}

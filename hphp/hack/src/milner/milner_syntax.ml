@@ -38,6 +38,7 @@ and stmt =
   | Assign of expr * expr
   | Eval of expr
   | Return of expr option
+  | Throw of expr
   | Block of stmt list
 
 let rec render_expr = function
@@ -79,6 +80,7 @@ and render_stmt = function
   | Assign (target, value) ->
     render_expr target ^ " = " ^ render_expr value ^ ";"
   | Eval expression -> render_expr expression ^ ";"
+  | Throw expression -> "throw " ^ render_expr expression ^ ";"
   | Return None -> "return;"
   | Return (Some expression) -> "return " ^ render_expr expression ^ ";"
   | Block statements -> "{ " ^ render_body statements ^ " }"

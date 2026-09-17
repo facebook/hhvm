@@ -237,3 +237,22 @@ unjustified bound witness enters ordinary type generation.
 Dependent expressions consist of construction followed by one getter. The
 refinement and mutation laws share their generated payload and nominal family;
 exact and upper-bound reads are visible as separate calls in the template.
+
+## Position-aware types
+
+`nonnull` has non-null primitive witnesses. Tuple generation separates a required
+prefix from an optional suffix. Closed witnesses omit only a suffix of optional
+elements; open subtypes retain constraints on every optional position. The known
+like/nullable intersection guard conservatively follows optional tuple elements.
+
+Function results distinguish values, `void`, and `nothing`. The latter two never
+become required fields or standalone value types. `PROCEDURE_TYPE#N` requests a
+nullary procedure and `THROWS#N` supplies its expected completion mode. Procedure
+witnesses either return normally or throw the recognized exception; the template
+checks both synchronous and asynchronous invocation. Generated function witnesses
+use an explicit default context so they do not inherit a stricter context.
+
+`procedure#N`, `PROCEDURE_TYPE#N`, and `THROWS#N` describe a separate nullary
+completion witness. They retain the payload shared by `TYPE#N`, `expr#N`, and
+other operation families with that ID. Invocation and completion assertions stay
+in the template; constructing the closure does not execute it.

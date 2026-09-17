@@ -37,6 +37,7 @@ and stmt =
   | Assign of expr * expr
   | Eval of expr
   | Return of expr option
+  | Throw of expr
   | Block of stmt list
 
 val render_expr : expr -> string

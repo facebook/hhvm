@@ -1,0 +1,10 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+<<__EntryPoint>> function main(): void {
+  $object = new GENERIC_CLASS#1(generic_key#1, expr#1);
+  $next = generic_subexpr#1;
+  $projected = $object->project<GENERIC_SUBTYPE#1>($next);
+  $identity = GENERIC_FAMILY#1::identity<GENERIC_SUBTYPE#1>($next);
+  invariant(vec[$projected, $identity] === vec[$next, $next], 'method bounds and lexical type parameter');
+}

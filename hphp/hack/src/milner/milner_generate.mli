@@ -46,6 +46,25 @@ module Type : sig
 
   (** Independent constructor and member operations for one generated hierarchy.
       The supplied type is the payload; all operations share its environment. *)
+  type generic_witness = {
+    generic_family: string;
+    generic_key: t;
+    generic_payload: t;
+    generic_narrow: t;
+    generic_class: t;
+    generic_wide: t;
+    generic_reader: t;
+    generic_writer: t;
+    generic_tagged_class: t;
+    generic_tagged_writer: t;
+  }
+
+  val mk_generic_witness :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * generic_witness
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->

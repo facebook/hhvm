@@ -1,0 +1,18 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+function put(GENERIC_TAGGED_WRITER#1 $writer, GENERIC_SUBTYPE#1 $value)[write_props]: void {
+  $writer->set(tuple(1, $value));
+}
+
+<<__EntryPoint>> function main(): void {
+  $initial = tuple(0, expr#1);
+  $object = new GENERIC_TAGGED_CLASS#1(generic_key#1, $initial);
+  $wide = $object->widen<mixed>(null);
+  invariant(vec[$wide->get()] === vec[$initial], 'widen preserves value');
+  $next = generic_subexpr#1;
+  put($object, $next);
+  put($wide, $next);
+  $expected = tuple(1, $next);
+  invariant(vec[$object->get(), $wide->get()] === vec[$expected, $expected], 'contravariant writes and lower-bound widening');
+}

@@ -1,0 +1,12 @@
+<?hh
+<<file: __EnableUnstableFeatures('case_types', 'like_type_hints')>>
+
+function read(GENERIC_READER#1 $reader)[]: mixed { return $reader->get(); }
+
+<<__EntryPoint>> function main(): void {
+  $key = generic_key#1;
+  $value = expr#1;
+  $object = new GENERIC_CLASS#1($key, $value);
+  $mapping = $object->keyed();
+  invariant(vec[read($object), $mapping[$key]] === vec[$value, $value], 'constructor, covariance, and keyed projection');
+}

@@ -49,6 +49,21 @@ let hierarchy_prefixes =
   |> List.sort ~compare:(fun left right ->
          Int.compare (String.length right) (String.length left))
 
+let generic_prefixes =
+  [
+    "GENERIC_TAGGED_WRITER";
+    "GENERIC_TAGGED_CLASS";
+    "GENERIC_SUBTYPE";
+    "generic_subexpr";
+    "GENERIC_READER";
+    "GENERIC_WRITER";
+    "GENERIC_FAMILY";
+    "GENERIC_CLASS";
+    "GENERIC_WIDE";
+    "GENERIC_KEY";
+    "generic_key";
+  ]
+
 let placeholder prefix key = prefix ^ "#" ^ string_of_int key
 
 let init_table contents placeholder =
@@ -74,6 +89,10 @@ let generate_tables ~verbose ~debug_pattern template =
       let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set hierarchies ~key ~data:()));
+  let generics = Hashtbl.create (module Int) in
+  List.iter generic_prefixes ~f:(fun prefix ->
+      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set generics ~key ~data:()));
   let renv_for key =
     if Hashtbl.mem alias_types key then
       Gen.ReadOnlyEnvironment.for_alias renv
@@ -87,7 +106,7 @@ let generate_tables ~verbose ~debug_pattern template =
   let another_table = init_table template (Pcre.regexp "another#([0-9]+)") in
   let subty_table = init_table template subtype_regexp in
   List.iter
-    [expr_table; another_table; subty_table; alias_types; hierarchies]
+    [expr_table; another_table; subty_table; alias_types; hierarchies; generics]
     ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
   let ty_table =
@@ -128,6 +147,30 @@ let generate_tables ~verbose ~debug_pattern template =
         bindings)
   in
 
+  let generic_table =
+    Hashtbl.mapi generics ~f:(fun ~key ~data:() ->
+        let (env, value) = Hashtbl.find_exn ty_table key in
+        let (env, witness) =
+          Gen.Type.mk_generic_witness (renv_for key) env ~value
+        in
+        Hashtbl.set ty_table ~key ~data:(env, value);
+        let open Gen.Type in
+        [
+          ("GENERIC_CLASS", show witness.generic_class);
+          ("GENERIC_WIDE", show witness.generic_wide);
+          ("GENERIC_READER", show witness.generic_reader);
+          ("GENERIC_WRITER", show witness.generic_writer);
+          ("GENERIC_KEY", show witness.generic_key);
+          ("GENERIC_SUBTYPE", show witness.generic_narrow);
+          ("GENERIC_TAGGED_CLASS", show witness.generic_tagged_class);
+          ("GENERIC_TAGGED_WRITER", show witness.generic_tagged_writer);
+          ("GENERIC_FAMILY", witness.generic_family);
+          ("generic_key", inhabitant_of (renv_for key) env witness.generic_key);
+          ( "generic_subexpr",
+            inhabitant_of (renv_for key) env witness.generic_narrow );
+        ])
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -148,11 +191,23 @@ let generate_tables ~verbose ~debug_pattern template =
   in
   let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
 
-  (defs, ty_table, subty_table, expr_table, another_table, hierarchy_table)
+  ( defs,
+    ty_table,
+    subty_table,
+    expr_table,
+    another_table,
+    hierarchy_table,
+    generic_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
-    ty_table subty_table expr_table another_table hierarchy_table template =
+    ty_table
+    subty_table
+    expr_table
+    another_table
+    hierarchy_table
+    generic_table
+    template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
       String.substr_replace_all
@@ -172,6 +227,14 @@ let fill_in_template
     List.fold hierarchy_prefixes ~init:template ~f:(fun contents prefix ->
         let table =
           Hashtbl.map hierarchy_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
+  let template =
+    List.fold generic_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map generic_table ~f:(fun bindings ->
               List.Assoc.find_exn bindings ~equal:String.equal prefix)
         in
         fill_table table ~prefix contents)
@@ -203,8 +266,13 @@ let milner verbose debug_pattern seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (defs, ty_table, subty_table, expr_table, another_table, hierarchy_table)
-      =
+  let ( defs,
+        ty_table,
+        subty_table,
+        expr_table,
+        another_table,
+        hierarchy_table,
+        generic_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -214,6 +282,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       expr_table
       another_table
       hierarchy_table
+      generic_table
       template
     |> add_missing_definitions defs
   in

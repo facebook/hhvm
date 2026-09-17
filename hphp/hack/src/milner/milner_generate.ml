@@ -7,6 +7,7 @@
  *)
 
 open Hh_prelude
+module Syntax = Milner_syntax
 
 let default_complexity = 5
 
@@ -254,6 +255,7 @@ module rec Environment : sig
     typedef_bodies: Type.t list TypeMap.t;
     case_bounds: Type.t TypeMap.t;
     nominals: nominal_info S_map.t;
+    generic_families: string list;
   }
 
   val default : t
@@ -277,6 +279,10 @@ module rec Environment : sig
   val add_nominal : t -> name:string -> nominal_info -> t
 
   val get_nominal : t -> string -> nominal_info
+
+  val add_generic_family : t -> string -> t
+
+  val generic_families : t -> string list
 end = struct
   type member_contract = {
     value_type: Type.t;
@@ -304,6 +310,7 @@ end = struct
     typedef_bodies: Type.t list TypeMap.t;
     case_bounds: Type.t TypeMap.t;
     nominals: nominal_info S_map.t;
+    generic_families: string list;
   }
 
   let default =
@@ -313,6 +320,7 @@ end = struct
       typedef_bodies = TypeMap.empty;
       case_bounds = TypeMap.empty;
       nominals = S_map.empty;
+      generic_families = [];
     }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
@@ -343,6 +351,11 @@ end = struct
     { env with nominals = S_map.add name info env.nominals }
 
   let get_nominal env name = S_map.find name env.nominals
+
+  let add_generic_family env name =
+    { env with generic_families = name :: env.generic_families }
+
+  let generic_families env = env.generic_families
 end
 
 and Kind : sig
@@ -351,6 +364,7 @@ and Kind : sig
     | Primitive
     | Option
     | Classish
+    | GenericClass
     | Alias
     | Newtype
     | TypeConst
@@ -389,6 +403,7 @@ end = struct
     | Primitive
     | Option
     | Classish
+    | GenericClass
     | Alias
     | Newtype
     | TypeConst
@@ -432,6 +447,7 @@ end = struct
         true
       | Option
       | Classish
+      | GenericClass
       | Container
       | BuiltinContainer
       | Tuple
@@ -495,6 +511,8 @@ and Definition : sig
     t
 
   val use_trait : string -> t
+
+  val generic_family : name:string -> t list
 
   val alias : name:string -> Type.t -> t
 
@@ -680,6 +698,31 @@ end = struct
 
   let use_trait name = Format.sprintf "use %s;" name
 
+  let generic_family ~name =
+    [
+      Format.sprintf
+        "interface %sReader<+T> { public function get()[]: T; }"
+        name;
+      Format.sprintf
+        "interface %sWriter<-T> { public function set(T $value)[write_props]: void; }"
+        name;
+      Format.sprintf
+        "final class %s<TKey as arraykey, TValue> implements %sReader<TValue>, %sWriter<TValue> { public function __construct(private TKey $key, private TValue $value)[write_props] {} public function get()[]: TValue { return $this->value; } public function set(TValue $value)[write_props]: void { $this->value = $value; } public function keyed()[]: dict<TKey, TValue> { return dict[$this->key => $this->value]; } public function project<TProjected as TValue>(TProjected $value)[]: TProjected { return $value; } public function widen<TWide super TValue>(TWide $_witness)[write_props]: %s<TKey, TWide> { return new %s<TKey, TWide>($this->key, $this->value); } public static function identity<TItem>(TItem $value)[]: TItem { return $value; } }"
+        name
+        name
+        name
+        name
+        name;
+      Format.sprintf
+        "function %s_read(%sReader<mixed> $reader)[]: mixed { return $reader->get(); }"
+        name
+        name;
+      Format.sprintf
+        "function %s_write<TWrite>(%sWriter<TWrite> $writer, TWrite $value)[write_props]: void { $writer->set($value); }"
+        name
+        name;
+    ]
+
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
 
@@ -731,6 +774,25 @@ and Type : sig
 
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 
+  type generic_witness = {
+    generic_family: string;
+    generic_key: t;
+    generic_payload: t;
+    generic_narrow: t;
+    generic_class: t;
+    generic_wide: t;
+    generic_reader: t;
+    generic_writer: t;
+    generic_tagged_class: t;
+    generic_tagged_writer: t;
+  }
+
+  val mk_generic_witness :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * generic_witness
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
@@ -760,6 +822,11 @@ end = struct
         name: string;
         kind: Kind.classish;
         generic: generic option;
+      }
+    | GenericClass of {
+        name: string;
+        key: t;
+        value: t;
       }
     | Alias of { name: string }
     | Newtype of { name: string }
@@ -838,6 +905,8 @@ end = struct
         | None -> ""
       in
       Format.sprintf "%s%s" name generic
+    | GenericClass { name; key; value } ->
+      Format.sprintf "%s<%s, %s>" name (show key) (show value)
     | Alias info -> info.name
     | Newtype info -> info.name
     | TypeConst info -> info.name
@@ -1140,6 +1209,7 @@ end = struct
   let rec is_immediately_inhabited = function
     | Primitive Primitive.(Null | Int | String | Float | Bool)
     | Classish { kind = Kind.Class; _ }
+    | GenericClass _
     | Enum _
     | Vec _
     | Dict _
@@ -1276,6 +1346,7 @@ end = struct
         | Mixed
         | Primitive _
         | TypeConst _
+        | GenericClass _
         | Newtype _
         | Alias _
         | Classish _
@@ -1518,6 +1589,9 @@ end = struct
           ~end_:show_tys
         @@ fun _renv ->
         match ty with
+        | GenericClass { name; _ } ->
+          (* Distinct applications of an erased generic share a runtime class. *)
+          [Classish { kind = Kind.Class; name; generic = None }]
         | Classish info when Kind.equal_classish info.kind Kind.Interface ->
           (* This can be improved on if we introduce an internal Object type which
              is still disjoint to non classish types. *)
@@ -1645,6 +1719,10 @@ end = struct
         let Env.{ constructor; _ } = Env.get_nominal env info.name in
         Some (New (show ty, List.map constructor ~f:(inhabitant renv env)))
     end
+    | GenericClass { key; value; _ } as ty ->
+      let key_expr = inhabitant renv env key in
+      let value_expr = inhabitant renv env value in
+      Some (Syntax.New (show ty, [key_expr; value_expr]))
     | Enum info -> Some (StaticMember (info.name, "A"))
     | Traversable value
     | ContainerInterface value ->
@@ -1780,6 +1858,49 @@ end = struct
         | _ -> false
     in
     visit TypeSet.empty ~inside_case:false ~nullable:false ty
+
+  type generic_witness = {
+    generic_family: string;
+    generic_key: t;
+    generic_payload: t;
+    generic_narrow: t;
+    generic_class: t;
+    generic_wide: t;
+    generic_reader: t;
+    generic_writer: t;
+    generic_tagged_class: t;
+    generic_tagged_writer: t;
+  }
+
+  let generic_protocol name suffix instantiation =
+    Classish
+      {
+        name = name ^ suffix;
+        kind = Kind.Interface;
+        generic = Some { instantiation; is_reified = false };
+      }
+
+  let declare_generic env ~key ~value =
+    let families = Env.generic_families env in
+    let (env, name) =
+      if (not (List.is_empty families)) && Random.bool () then
+        (env, select families)
+      else
+        let name = fresh "Generic" in
+        let env =
+          List.fold
+            (Definition.generic_family ~name)
+            ~init:env
+            ~f:Env.add_definition
+        in
+        (Env.add_generic_family env name, name)
+    in
+    let ty = GenericClass { name; key; value } in
+    let reader = generic_protocol name "Reader" value in
+    let writer = generic_protocol name "Writer" value in
+    let env = Env.record_subtype env ~super:reader ~sub:ty in
+    let env = Env.record_subtype env ~super:writer ~sub:ty in
+    (env, name, ty, reader, writer)
 
   let make_member_contract env value_type =
     let contract =
@@ -2006,6 +2127,16 @@ end = struct
       (env, Awaitable ty)
     | Kind.Classish ->
       mk_classish renv env ~parent:None ~contract:None ~complexity ~depth
+    | Kind.GenericClass ->
+      let key = mk_arraykey renv env in
+      let (env, value) =
+        mk
+          REnv.{ renv with for_option_ty = false }
+          env
+          ~complexity:(complexity - 1)
+      in
+      let (env, _, ty, reader, writer) = declare_generic env ~key ~value in
+      (env, select [ty; reader; writer])
     | Kind.Alias ->
       let name = fresh "A" in
       let ty = Alias { name } in
@@ -2204,6 +2335,48 @@ end = struct
     | Kind.Like ->
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
+
+  let mk_generic_witness renv env ~value =
+    let key = mk_arraykey renv env in
+    let (env, name, ty, _, _) = declare_generic env ~key ~value in
+    let narrower =
+      subtype_of
+        REnv.
+          {
+            renv with
+            pick_immediately_inhabited = false;
+            for_alias_def = false;
+          }
+        env
+        value
+    in
+    let wide = GenericClass { name; key; value = Mixed } in
+    let reader = generic_protocol name "Reader" Mixed in
+    let writer = generic_protocol name "Writer" narrower in
+    let env = Env.record_subtype env ~super:reader ~sub:ty in
+    let env = Env.record_subtype env ~super:reader ~sub:wide in
+    let env = Env.record_subtype env ~super:writer ~sub:ty in
+    let env = Env.record_subtype env ~super:writer ~sub:wide in
+    let tagged ty =
+      Tuple { conjuncts = [Primitive Primitive.Int; ty]; open_ = false }
+    in
+    let tagged_class = GenericClass { name; key; value = tagged value } in
+    let tagged_writer = generic_protocol name "Writer" (tagged narrower) in
+    let env = Env.record_subtype env ~super:tagged_writer ~sub:tagged_class in
+    let env = Env.record_subtype env ~super:tagged_writer ~sub:wide in
+    ( env,
+      {
+        generic_family = name;
+        generic_key = key;
+        generic_payload = value;
+        generic_narrow = narrower;
+        generic_class = ty;
+        generic_wide = wide;
+        generic_reader = reader;
+        generic_writer = writer;
+        generic_tagged_class = tagged_class;
+        generic_tagged_writer = tagged_writer;
+      } )
 
   let mk = mk ~depth:None ~complexity:default_complexity
 

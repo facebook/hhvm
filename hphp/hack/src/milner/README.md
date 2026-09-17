@@ -212,3 +212,17 @@ local-newtype and like definitions to a nullable enum; subtype edges introduced
 by case bounds do not count as definition variants. It stops at outer nullable
 types, type constants and structural containers. Other getters still override,
 and ordinary enum/case generation, setters, properties and dispatch remain.
+
+## Constrained generic families
+
+Generic families bind two lexical parameters (`TKey as arraykey`, `TValue`) and
+use them in storage, method bounds, covariant readers and contravariant writers.
+Their declarations can be reused at different closed applications. Disjointness
+erases type arguments before comparing runtime class identities. Recorded
+protocol edges retain their exact payload type so subtype-based construction
+cannot recurse through a broader interface back into its own constructor.
+
+Generic values construct one family instance from independently generated key and
+payload expressions. The generic templates check construction/projection,
+variance with tagged storage updates, and method bounds as separate laws. Family
+bindings extend the existing `TYPE#N` environment; they never replace its payload.

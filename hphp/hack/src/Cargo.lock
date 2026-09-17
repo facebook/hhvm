@@ -3992,6 +3992,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "repo_root"
+version = "0.0.0"
+dependencies = [
+ "hh_config",
+ "pretty_assertions",
+ "tempfile",
+ "thiserror 2.0.20",
+]
+
+[[package]]
+name = "repo_root_rust_ffi"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep_ocamlpool",
+ "repo_root",
+]
+
+[[package]]
 name = "rescan_trivia"
 version = "0.0.0"
 dependencies = [

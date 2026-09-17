@@ -33,6 +33,23 @@
  (libraries collections sys_utils))
 
 (library
+ (name repo_root_ffi)
+ (wrapped false)
+ (modules repo_root_ffi)
+ (foreign_archives repo_root_rust_ffi))
+
+(rule
+ (targets librepo_root_rust_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   repo_root_rust_ffi
+   repo_root_rust_ffi)))
+
+(library
  (name utils_www_root)
  (wrapped false)
  (modules wwwroot)

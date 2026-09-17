@@ -107,7 +107,7 @@ typedef binary BinaryHash
  */
 typedef binary PathString
 
-@cpp.Type{name = "::facebook::eden::GlobPath"}
+@cpp.Adapter{name = "::facebook::eden::GlobPathAdapter"}
 typedef PathString GlobPathValue
 
 /**

@@ -243,8 +243,8 @@ let parse_without_command options usage command =
   | x :: rest when String.(lowercase x = lowercase command) -> rest
   | args -> args
 
-let interpret_root ?config paths =
-  match Wwwroot.interpret_command_line_root_parameter ?config paths with
+let interpret_root paths =
+  match Wwwroot.interpret_command_line_root_parameter paths with
   | exception e -> Die.internal_exception (Exception.wrap e)
   | Ok root -> root
   | Error message -> Die.bad_www_root ~message:("Error: " ^ message)

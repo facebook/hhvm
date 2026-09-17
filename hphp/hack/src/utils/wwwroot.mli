@@ -7,10 +7,10 @@
  *
  *)
 
-val is_www_directory : ?config:string -> Path.t -> bool
+val is_www_directory : Path.t -> bool
 
 (** Print a diagnostic to stderr and exit 1 if [path] is not a www directory. *)
-val assert_www_directory : ?config:string -> Path.t -> unit
+val assert_www_directory : Path.t -> unit
 
 (** Traverse parent directories until a directory containing [.hhconfig] is found. *)
 val guess_root : Path.t -> Path.t option
@@ -31,4 +31,4 @@ CARE! Don't call this from arbitrary code in client or server, passing in
 None in the hope that you'll pick up the root directory for your current process.
 Doing so will mean you ignore the "root" parameter at the command-line! *)
 val interpret_command_line_root_parameter :
-  ?config:string -> string list -> (Path.t, string) result
+  string list -> (Path.t, string) result

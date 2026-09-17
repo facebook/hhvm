@@ -14,51 +14,48 @@ open Hh_prelude
 (**
  * Checks if x is a www directory by looking for ".hhconfig".
  *)
-let is_www_directory ?(config = ".hhconfig") (path : Path.t) : bool =
-  let arcconfig = Path.concat path config in
-  Path.file_exists arcconfig
+let is_www_directory (path : Path.t) : bool =
+  let hhconfig = Path.concat path ".hhconfig" in
+  Path.file_exists hhconfig
 
-let validate_www_directory ~config (path : Path.t) : (unit, string) result =
+let validate_www_directory (path : Path.t) : (unit, string) result =
   if not (Path.file_exists path && Path.is_directory path) then
     Error (Printf.sprintf "%s is not a directory" (Path.to_string path))
-  else if not (is_www_directory ~config path) then
+  else if not (is_www_directory path) then
     Error
       (Printf.sprintf
-         "could not find a %s file in %s or any of its parent directories. Do you have a %s in your code's root directory?"
-         config
-         (Path.to_string path)
-         config)
+         "could not find a .hhconfig file in %s or any of its parent directories. Do you have a .hhconfig in your code's root directory?"
+         (Path.to_string path))
   else
     Ok ()
 
-let assert_www_directory ?(config = ".hhconfig") (path : Path.t) : unit =
-  match validate_www_directory ~config path with
+let assert_www_directory (path : Path.t) : unit =
+  match validate_www_directory path with
   | Ok () -> ()
   | Error message ->
     Printf.eprintf "Error: %s\n%!" message;
     exit 1
 
-let rec guess_root_with_limit config start ~recursion_limit : Path.t option =
+let rec guess_root_with_limit start ~recursion_limit : Path.t option =
   if not (Path.file_exists start) then
     None
   else if Path.equal start (Path.dirname start) then
     (* Reached file system root *)
     None
-  else if is_www_directory ~config start then
+  else if is_www_directory start then
     Some start
   else if recursion_limit <= 0 then
     None
   else
     guess_root_with_limit
-      config
       (Path.dirname start)
       ~recursion_limit:(recursion_limit - 1)
 
 let guess_root (start : Path.t) : Path.t option =
-  guess_root_with_limit ".hhconfig" start ~recursion_limit:50
+  guess_root_with_limit start ~recursion_limit:50
 
-let interpret_command_line_root_parameter
-    ?(config = ".hhconfig") (paths : string list) : (Path.t, string) result =
+let interpret_command_line_root_parameter (paths : string list) :
+    (Path.t, string) result =
   let open Result.Let_syntax in
   let* path =
     match paths with
@@ -68,9 +65,9 @@ let interpret_command_line_root_parameter
   in
   let start_path = Path.make path in
   let root =
-    match guess_root_with_limit config start_path ~recursion_limit:50 with
+    match guess_root start_path with
     | None -> start_path
     | Some root -> root
   in
-  let* () = validate_www_directory ~config root in
+  let* () = validate_www_directory root in
   Ok root

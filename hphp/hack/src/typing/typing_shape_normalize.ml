@@ -241,6 +241,22 @@ let merge
           err :: errs)
     end
   in
+  let bottom_result ty =
+    Full (Typing_make_type.nothing (get_reason ty), false)
+  in
+  let union_result tys =
+    match tys with
+    | first :: rest
+      when Typing_defs.is_nothing first
+           && List.for_all Typing_defs.is_nothing rest ->
+      bottom_result first
+    | _ -> Union tys
+  in
+  let intersection_result tys =
+    match List.find_opt Typing_defs.is_nothing tys with
+    | Some bottom -> bottom_result bottom
+    | None -> Intersection tys
+  in
   let rec loop rev_elems (merge_elem, elems, errs, sd, env) =
     match rev_elems with
     | [] -> (env, errs, finalize merge_elem elems sd)
@@ -353,63 +369,22 @@ let merge
       (* [shape(...A, ...(m1 | ... | mk), ...B)] distributes to
          [shape(...A, ...m1, ...B) | ... | shape(...A, ...mk, ...B)] *)
       | ((_, Tunion members), _) ->
-        let sd = sd || sd_elem in
-        let (env, branch_errs, branch_tys) =
-          List.fold_left
-            (fun (env, errs_acc, tys) (path, member) ->
-              (* [errs] belongs to the already-processed suffix. Branch-local
-                 errors start empty; the per-element cache below prevents a
-                 shared prefix from reporting the same malformed operand again. *)
-              let (env, branch_errs, res) =
-                loop
-                  ((path, member) :: rev_elems)
-                  (merge_elem, elems, [], sd, env)
-              in
-              let (env, ty) =
-                result_to_ty ~reason:(get_reason member) env res
-              in
-              (env, branch_errs @ errs_acc, ty :: tys))
-            (env, [], [])
-            (List.mapi (fun index member -> (index :: path, member)) members)
-        in
-        let branch_tys = List.rev branch_tys in
-        let result =
-          match branch_tys with
-          | first :: rest
-            when Typing_defs.is_nothing first
-                 && List.for_all Typing_defs.is_nothing rest ->
-            Full (Typing_make_type.nothing (get_reason first), false)
-          | _ -> Union branch_tys
-        in
-        (env, branch_errs @ errs, result)
+        distribute
+          path
+          rev_elems
+          (merge_elem, elems, errs, sd || sd_elem, env)
+          members
+          ~make_result:union_result
       (* -- Distribute an intersection operand ----------------------------- *)
       (* [shape(...A, ...(m1 & ... & mk), ...B)] is
          [shape(...A, ...m1, ...B) & ... & shape(...A, ...mk, ...B)] *)
       | ((_, Tintersection members), _) ->
-        let sd = sd || sd_elem in
-        let (env, branch_errs, branch_tys) =
-          List.fold_left
-            (fun (env, errs_acc, tys) (path, member) ->
-              let (env, branch_errs, res) =
-                loop
-                  ((path, member) :: rev_elems)
-                  (merge_elem, elems, [], sd, env)
-              in
-              let (env, ty) =
-                result_to_ty ~reason:(get_reason member) env res
-              in
-              (env, branch_errs @ errs_acc, ty :: tys))
-            (env, [], [])
-            (List.mapi (fun index member -> (index :: path, member)) members)
-        in
-        let branch_tys = List.rev branch_tys in
-        let result =
-          match List.find_opt Typing_defs.is_nothing branch_tys with
-          | Some bottom ->
-            Full (Typing_make_type.nothing (get_reason bottom), false)
-          | None -> Intersection branch_tys
-        in
-        (env, branch_errs @ errs, result)
+        distribute
+          path
+          rev_elems
+          (merge_elem, elems, errs, sd || sd_elem, env)
+          members
+          ~make_result:intersection_result
       (* -- Error conditions ------------------------------------------------ *)
       | ((reason, _), Merging (shape_reason, shape)) ->
         let (env, elem_err) = error_tyvar path reason env in
@@ -430,6 +405,23 @@ let merge
         (* Still report malformed splats despite being bottom. *)
         let errs = add_splat_not_a_shape_error path reason errs in
         loop rev_elems (merge_elem, elems, errs, sd, env))
+  and distribute
+      path rev_elems (merge_elem, elems, errs, sd, env) members ~make_result =
+    let (env, error_groups, branch_tys) =
+      List.fold_left
+        (fun (env, error_groups, tys) (path, member) ->
+          (* [errs] belongs to the already-processed suffix. Branch-local
+             errors start empty; the per-element cache prevents a shared
+             prefix from reporting the same malformed operand again. *)
+          let (env, branch_errs, res) =
+            loop ((path, member) :: rev_elems) (merge_elem, elems, [], sd, env)
+          in
+          let (env, ty) = result_to_ty ~reason:(get_reason member) env res in
+          (env, branch_errs :: error_groups, ty :: tys))
+        (env, [errs], [])
+        (List.mapi (fun index member -> (index :: path, member)) members)
+    in
+    (env, List.concat error_groups, make_result (List.rev branch_tys))
   in
   let (env, errs, result) =
     (* Merge simple shape elements from right to left so reverse the list.

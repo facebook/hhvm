@@ -9,6 +9,7 @@
 type family =
   | Atom
   | Flow
+  | Async
   | Callable
 
 (** A function that preserves its argument's type and value, constructed from

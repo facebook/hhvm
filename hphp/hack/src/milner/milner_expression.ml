@@ -13,6 +13,7 @@ module Syntax = Milner_syntax
 type family =
   | Atom
   | Flow
+  | Async
   | Callable
 
 let return value = Syntax.Return (Some value)
@@ -38,9 +39,10 @@ let boolean () =
       "false")
 
 let random_family () =
-  match Random.int 3 with
+  match Random.int 4 with
   | 0 -> Atom
   | 1 -> Flow
+  | 2 -> Async
   | _ -> Callable
 
 let consume budget =
@@ -89,6 +91,7 @@ let rec expression budget family ty value =
   match family with
   | Atom -> value
   | Flow
+  | Async
   | Callable ->
     if not (consume budget) then
       value
@@ -97,6 +100,7 @@ let rec expression budget family ty value =
       (match family with
       | Atom -> value
       | Flow -> flow budget child ty value
+      | Async -> async budget child ty value
       | Callable -> callable child ty value)
 
 and flow budget child ty value =
@@ -318,6 +322,56 @@ and callable child ty value =
         [value]
       else
         [value; zero])
+
+and async budget child ty value =
+  let task body =
+    Syntax.Call
+      (Syntax.AsyncLambda ([], ["defaults"], "Awaitable<" ^ ty ^ ">", body), [])
+  in
+  let suspend =
+    Syntax.Eval
+      (Syntax.Await
+         (Syntax.Call
+            ( Syntax.StaticMember ("RescheduleWaitHandle", "create"),
+              [integer 0; integer 0] )))
+  in
+  let rec awaitable value =
+    if not (consume budget) then
+      task [return value]
+    else
+      match Random.int 5 with
+      | 0 -> task [return (child value)]
+      | 1 -> task [suspend; return (child value)]
+      | 2 ->
+        let result = Syntax.fresh_local "awaited" in
+        task
+          [
+            Syntax.Bind (result, Syntax.Await (awaitable value));
+            return (child (Syntax.Local result));
+          ]
+      | 3 ->
+        let results =
+          List.init
+            (2 + Random.int 2)
+            ~f:(fun _ -> (Syntax.fresh_local "concurrent", awaitable value))
+        in
+        let (selected, _) =
+          List.nth_exn results (Random.int (List.length results))
+        in
+        task
+          [
+            Syntax.Concurrent
+              (List.map results ~f:(fun (result, pending) ->
+                   Syntax.Bind (result, Syntax.Await pending)));
+            return (child (Syntax.Local selected));
+          ]
+      | _ ->
+        task
+          [
+            Syntax.Try ([return (Syntax.Await (awaitable value))], [], [suspend]);
+          ]
+  in
+  Syntax.Call (Syntax.Atom "HH\\Asio\\join", [awaitable value])
 
 let operation family ~ty =
   let ty = Gen.Type.show ty in

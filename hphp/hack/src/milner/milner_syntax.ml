@@ -22,6 +22,8 @@ type expr =
   | Binary of string * expr * expr
   | As of expr * string
   | NullsafeMember of expr * string
+  | AsyncLambda of parameter list * string list * string * stmt list
+  | Await of expr
   | Atom of string
   | Local of local
   | New of string * expr list
@@ -56,6 +58,7 @@ and stmt =
   | While of expr * stmt list
   | Foreach of expr * local * stmt list
   | Try of stmt list * (string * local * stmt list) list * stmt list
+  | Concurrent of stmt list
   | Bind of local * expr
   | Assign of expr * expr
   | Eval of expr
@@ -104,30 +107,38 @@ let rec render_expr = function
     "shape(" ^ String.concat ~sep:", " fields ^ ")"
   | Async body -> "async { " ^ render_body body ^ " }"
   | Lambda (parameters, contexts, return_hint, body) ->
-    let parameters =
-      List.map parameters ~f:(fun { hint; local; variadic; default } ->
-          hint
-          ^ " "
-          ^ (if variadic then
-              "..."
-            else
-              "")
-          ^ local
-          ^ Option.value_map default ~default:"" ~f:(fun expression ->
-                " = " ^ render_expr expression))
-      |> String.concat ~sep:", "
-    in
-    Format.sprintf
-      "((%s)[%s]: %s ==> { %s })"
-      parameters
-      (String.concat ~sep:", " contexts)
-      return_hint
-      (render_body body)
+    render_lambda "" parameters contexts return_hint body
+  | AsyncLambda (parameters, contexts, return_hint, body) ->
+    render_lambda "async " parameters contexts return_hint body
+  | Await expression -> "(await " ^ render_expr expression ^ ")"
+
+and render_lambda prefix parameters contexts return_hint body =
+  let parameters =
+    List.map parameters ~f:(fun { hint; local; variadic; default } ->
+        hint
+        ^ " "
+        ^ (if variadic then
+            "..."
+          else
+            "")
+        ^ local
+        ^ Option.value_map default ~default:"" ~f:(fun expression ->
+              " = " ^ render_expr expression))
+    |> String.concat ~sep:", "
+  in
+  Format.sprintf
+    "(%s(%s)[%s]: %s ==> { %s })"
+    prefix
+    parameters
+    (String.concat ~sep:", " contexts)
+    return_hint
+    (render_body body)
 
 and render_arguments arguments =
   List.map arguments ~f:render_expr |> String.concat ~sep:", "
 
 and render_stmt = function
+  | Concurrent statements -> "concurrent { " ^ render_body statements ^ " }"
   | If (condition, consequent, alternative) ->
     "if ("
     ^ render_expr condition

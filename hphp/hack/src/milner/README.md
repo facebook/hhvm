@@ -477,3 +477,12 @@ Indexed vector stores participate in the same expression composition. Their
 initial empty slot makes a dropped store observable at the subsequent read.
 The separate `flow_invalidation` law checks that clearing a nullable property
 invalidates the earlier refinement before a nullsafe read and fallback.
+
+## Asynchronous composition
+
+`ASYNC#N` adds typed lift, suspension, await binding, concurrent selection, and
+finally suspension to the shared expression rules. Every await is inside an
+explicit async lambda. Concurrent children bind independent fresh locals and
+read results only after the block. Task and expression recursion consume the
+same finite size budget. The small law checks that the result preserves the
+original payload, including object and Awaitable identity.

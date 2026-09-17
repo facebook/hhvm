@@ -20,6 +20,8 @@ type expr =
   | Binary of string * expr * expr
   | As of expr * string
   | NullsafeMember of expr * string
+  | AsyncLambda of parameter list * string list * string * stmt list
+  | Await of expr
   | Atom of string
       (** Compatibility with existing literal leaves and qualified names. *)
   | Local of local
@@ -55,6 +57,7 @@ and stmt =
   | While of expr * stmt list
   | Foreach of expr * local * stmt list
   | Try of stmt list * (string * local * stmt list) list * stmt list
+  | Concurrent of stmt list
   | Bind of local * expr
   | Assign of expr * expr
   | Eval of expr

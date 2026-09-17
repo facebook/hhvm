@@ -122,7 +122,11 @@ let identity_prefixes =
   ]
 
 let operation_families =
-  [("CALL", Milner_expression.Callable); ("FLOW", Milner_expression.Flow)]
+  [
+    ("CALL", Milner_expression.Callable);
+    ("FLOW", Milner_expression.Flow);
+    ("ASYNC", Milner_expression.Async);
+  ]
 
 let family_regexp prefix =
   Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")

@@ -415,8 +415,6 @@ module Bounds : sig
 
   val strip_supportdyn : env -> locl_ty -> env * locl_ty
 
-  val shape_types : env -> locl_ty list -> env * locl_phase shape_type list
-
   module Upper : sig
     type t =
       | Shapes of Typing_shape_normalize.Row.t list
@@ -541,22 +539,26 @@ end = struct
   (* Reading a row that is already known to be a shape, in each direction's own
      answer type. *)
   let normalized_upper env r shape_ty =
-    let (env, _err, row) =
+    let (env, _err, normalized) =
       Typing_shape_normalize.Row.normalize r shape_ty env ~on_error:None
     in
-    if Typing_shape_normalize.Row.is_bottom row then
+    match Typing_shape_normalize.Row.as_row normalized with
+    | Some row when Typing_shape_normalize.Row.is_bottom row ->
       (env, Upper.Bottom)
-    else
-      (env, Upper.Shapes [row])
+    | Some row -> (env, Upper.Shapes [row])
+    | None ->
+      (* A union upper bound does not require every branch simultaneously. *)
+      (env, Upper.Unconstrained)
 
   let normalized_lower env r shape_ty =
-    let (env, _err, row) =
+    let (env, _err, normalized) =
       Typing_shape_normalize.Row.normalize r shape_ty env ~on_error:None
     in
-    if Typing_shape_normalize.Row.is_bottom row then
+    match Typing_shape_normalize.Row.as_row normalized with
+    | Some row when Typing_shape_normalize.Row.is_bottom row ->
       (env, Lower.Bottom)
-    else
-      (env, Lower.Shapes [row])
+    | Some row -> (env, Lower.Shapes [row])
+    | None -> (env, Lower.Bottom)
 
   (* Spreading [dynamic] is an open row whose unknown fields are [dynamic]
      ([shape(_ => dynamic)]), matching [Typing_shape_normalize]. *)
@@ -694,6 +696,29 @@ module Dependency_graph = struct
     let (env, bound_ty) = Bounds.combined_upper_bound cache env name r in
     let (env, bound_ty) = Typing_env.expand_type env bound_ty in
     let (env, bound_ty) = Bounds.strip_supportdyn env bound_ty in
+    let rec spread_elements_of_ty env ty =
+      let (env, ty) = Bounds.strip_supportdyn env ty in
+      match get_node ty with
+      | Tgeneric _ -> (env, [ty])
+      | Tnewtype (n, _, _)
+        when not (String.equal n Naming_special_names.Classes.cSupportDyn) ->
+        (env, [ty])
+      | Tshape shape_ty ->
+        let (env, _err, normalized) =
+          Typing_shape_normalize.Row.normalize ~on_error:None r shape_ty env
+        in
+        Typing_shape_normalize.Row.fold_normalized
+          normalized
+          ~row:(fun row -> (env, Row.spread_elements row))
+          ~union:(spread_elements_of_tys env)
+      | Tunion tys -> spread_elements_of_tys env tys
+      | _ -> (env, [])
+    and spread_elements_of_tys env tys =
+      let (env, elements) =
+        List.fold_map tys ~init:env ~f:spread_elements_of_ty
+      in
+      (env, List.concat elements)
+    in
     match get_node bound_ty with
     (* A bound that IS a parameter: the upper view projects [shape(...T)]. *)
     | Tgeneric _ -> [bound_ty]
@@ -702,18 +727,13 @@ module Dependency_graph = struct
       [bound_ty]
     | _ ->
       (* Every shape the bound can resolve to, not only the one the view happens
-         to pick. An intersection offers several, and a parameter spread into one
-         that is not picked would otherwise never be found, leaving it unordered.
+            to pick. An intersection offers several, and a parameter spread into one
+            that is not picked would otherwise never be found, leaving it unordered.
          Reporting one that turns out not to be read only adds an ordering
          constraint that was not needed. *)
       let (env, supers) = Bounds.concrete_supertypes cache env bound_ty in
-      let (env, shapes) = Bounds.shape_types env supers in
-      ignore env;
-      List.concat_map shapes ~f:(fun shape_ty ->
-          let (_env, _err, row) =
-            Typing_shape_normalize.Row.normalize ~on_error:None r shape_ty env
-          in
-          Row.spread_elements row)
+      let (_env, elements) = spread_elements_of_tys env supers in
+      elements
 
   let type_params_in_lower_bound cache env name r =
     let (env, view) =
@@ -1054,11 +1074,23 @@ module Spread_var = struct
      next to another simple shape, so the rewritten row is re-normalized
      before it goes back to the corner. *)
   let solve env r (row : Typing_shape_normalize.Row.t) :
-      env * Typing_shape_normalize.Row.t =
+      env * Typing_shape_normalize.Row.normalized =
+    let normalize env ss_elems =
+      let (env, _err, normalized) =
+        Typing_shape_normalize.Row.normalize
+          ~on_error:None
+          r
+          (Shape_splat { ss_elems })
+          env
+      in
+      (env, normalized)
+    in
     Typing_shape_normalize.Row.fold
       row
-      ~bottom:(fun () -> (env, row))
-      ~simple:(fun _ -> (env, row))
+      ~bottom:(fun () ->
+        normalize env [Typing_shape_normalize.Row.to_ty ~reason:r row])
+      ~simple:(fun _ ->
+        normalize env [Typing_shape_normalize.Row.to_ty ~reason:r row])
       ~elements:(fun elements ->
         let ss_elems = element_tys elements in
         let (env, rev) =
@@ -1071,11 +1103,7 @@ module Spread_var = struct
                 | _ -> (env, ty' :: acc))
               | _ -> (env, ty :: acc))
         in
-        let solved = Shape_splat { ss_elems = List.rev rev } in
-        let (env, _err, row) =
-          Typing_shape_normalize.Row.normalize ~on_error:None r solved env
-        in
-        (env, row))
+        normalize env (List.rev rev))
 end
 
 (* -- API ------------------------------------------------------------------- *)
@@ -1131,14 +1159,19 @@ let resolve_for_read env r elems : env * locl_ty =
                  s_fields = known;
                }) ) )
   in
-  let (env, _err, row) =
+  let (env, _err, normalized) =
     let shape_ty = Shape_splat { ss_elems = elems } and on_error = None in
     Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
   in
-  if Typing_shape_normalize.Row.is_bottom row then
-    (env, Typing_shape_normalize.Row.to_ty ~reason:r row)
-  else
-    project env row
+  Typing_shape_normalize.Row.fold_normalized
+    normalized
+    ~row:(fun row ->
+      if Typing_shape_normalize.Row.is_bottom row then
+        (env, Typing_shape_normalize.Row.to_ty ~reason:r row)
+      else
+        project env row)
+    ~union:(fun _ ->
+      Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
 
 let proj = Row.proj
 

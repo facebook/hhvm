@@ -1,0 +1,4 @@
+File "union_distribute_cartesian_product.php", line 24, characters 3-13:
+  (shape(...T1, ...T3, ...T5) | shape(...T1, ...T3, ...T6) | shape(...T1, ...T4, ...T5) | shape(...T1, ...T4, ...T6) | shape(...T2, ...T3, ...T5) | shape(...T2, ...T3, ...T6) | shape(...T2, ...T4, ...T5) | shape(...T2, ...T4, ...T6))
+   where T1 as shape(...), T2 as shape(...), T3 as shape(...), T4 as shape(...), T5 as shape(...), T6 as shape(...)
+No errors

@@ -53,7 +53,7 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tshape (Shape_splat { ss_elems })) ->
         let expanded = exp_tys ss_elems in
         let Equal = Tast_env.eq_typing_env in
-        let (_env, _errs, result) =
+        let (menv, _errs, result) =
           Typing_shape_normalize.merge ~on_error:None expanded env
         in
         let (ty, sd) =
@@ -70,6 +70,12 @@ let expand_ty ?var_hook ?pos env ty =
             (mk (p, Tshape (Shape_simple shape)), sd)
           | Partial (ss_elems, sd) ->
             (mk (p, Tshape (Shape_splat { ss_elems })), sd)
+          | Union tys ->
+            (* Union operand distributed: members already finalised. This is a
+               TAST-expansion (display) pass, so use the merge-returned env for
+               the union and discard it. *)
+            let (_menv, ty) = Typing_union.union_list menv p tys in
+            (ty, false)
         in
         if sd then
           Typing_make_type.supportdyn (get_reason ty) ty

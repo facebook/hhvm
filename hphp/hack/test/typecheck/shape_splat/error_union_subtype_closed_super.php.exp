@@ -1,0 +1,24 @@
+ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
+Invalid argument (Typing[4110])
+  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
+  Expected `shape('x' => int)`
+  File "error_union_subtype_closed_super.php", line 17, characters 22-23:
+  But got `T1 as shape('x' => int, ...)`
+ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
+Invalid argument (Typing[4110])
+  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
+  Expected `shape('x' => int)`
+  File "error_union_subtype_closed_super.php", line 17, characters 37-38:
+  But got `T2 as shape('x' => int, ...)`
+ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
+Invalid argument (Typing[4138])
+  File "error_union_subtype_closed_super.php", line 15, characters 9-30:
+  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
+  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
+  It is incompatible with a shape that does not allow unknown fields.
+ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
+Invalid argument (Typing[4138])
+  File "error_union_subtype_closed_super.php", line 16, characters 9-30:
+  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
+  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
+  It is incompatible with a shape that does not allow unknown fields.

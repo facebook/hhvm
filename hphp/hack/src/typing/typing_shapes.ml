@@ -262,6 +262,7 @@ let bound_proves_field_absent env bound field_name =
     (match view with
     | Typing_shape_normalize.Normalized_shape shape_ty ->
       (env, shape_type_proves_field_absent field_name shape_ty)
+    | Typing_shape_normalize.Normalized_union _ -> (env, false)
     (* An uninhabited bound has no values, so the field is vacuously absent. *)
     | Typing_shape_normalize.Normalized_bottom -> (env, true))
   | _ -> (env, false)
@@ -595,7 +596,8 @@ let to_collection env pos shape_ty res return_type =
                    s_unknown_value = MakeType.nothing r;
                    s_fields = TShapeMap.empty;
                  })
-          | Typing_shape_normalize.Partial _ ->
+          | Typing_shape_normalize.Partial _
+          | Typing_shape_normalize.Union _ ->
             return_type
               env
               (get_reason res)

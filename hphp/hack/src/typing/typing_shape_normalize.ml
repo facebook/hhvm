@@ -10,6 +10,24 @@ open Typing_defs_core
 type nothing_cache =
   (Typing_inference_env.t * bool) Typing_shape_splat_key.Map.t ref
 
+(** A path identifies an operand in the original nested splat/union tree.
+
+    Union distribution reprocesses the unvisited prefix once per element, so one
+    input operand may be visited in several generated branches. Its path is a
+    merge-local identity used to reuse one recovery type variable and report one
+    error, while keeping distinct equal-looking operands separate. *)
+module Elem_path = struct
+  module Ord = struct
+    type t = int list
+
+    let compare = List.compare Int.compare
+  end
+
+  include Ord
+  module Map = Stdlib.Map.Make (Ord)
+  module Set = Stdlib.Set.Make (Ord)
+end
+
 let splat_is_nothing
     (cache : nothing_cache) (env : Typing_env_types.env) (ty : locl_phase ty) :
     bool =
@@ -36,6 +54,11 @@ type merge_result =
   | Partial of locl_phase ty list * bool
       (** The operands could not be fully merged (e.g. a residual type variable);
           the remaining element list must be kept as a splat. *)
+  | Union of locl_phase ty list
+      (** A union operand was distributed outward: one fully-finalised type per
+          union member (supportdyn already applied per member, so no [bool]). The
+          caller unions these with its own reason (mirrors [Empty_shape], where
+          the caller supplies the reason). *)
 
 (** Merge field descriptors: under right-most wins semantics, we have:
     - (Req _ | Opt _) , Req t -> Req t
@@ -127,6 +150,50 @@ type merge_elem =
   | Merging of Typing_reason.t * locl_phase shape_type_simple
   | Bottom of Typing_reason.t
 
+(** Turn the merge accumulator (once the element list is exhausted) into a
+    [merge_result]. Pure; no [env]. *)
+let finalize (merge_elem : merge_elem) (elems : locl_phase ty list) (sd : bool)
+    : merge_result =
+  match (merge_elem, elems) with
+  | (Bottom reason, _) ->
+    (* The whole type is [nothing]. *)
+    Full (Typing_make_type.nothing reason, false)
+  | (Merging (reason, shape_simple), []) ->
+    Full (mk (reason, Tshape (Shape_simple shape_simple)), sd)
+  | (Merging (reason, shape_simple), _) ->
+    let elem = mk (reason, Tshape (Shape_simple shape_simple)) in
+    Partial (elem :: elems, sd)
+  | (Empty, []) ->
+    (* Everything cancelled to the unit element: the empty closed shape. The
+       caller supplies the reason with which to build [shape()]. *)
+    Empty_shape sd
+  | (Empty, _) -> Partial (elems, sd)
+
+(** Finalise one distributed union branch to a single type, built with the union
+    member's [reason]. supportdyn is applied per-branch here, so the [Union]
+    result carries no sd flag. *)
+let result_to_ty
+    ~(reason : Typing_reason.t)
+    (env : Typing_env_types.env)
+    (res : merge_result) : Typing_env_types.env * locl_phase ty =
+  let wrap sd ty =
+    if sd then
+      Typing_make_type.supportdyn (get_reason ty) ty
+    else
+      ty
+  in
+  match res with
+  | Full (ty, sd) -> (env, wrap sd ty)
+  | Empty_shape sd ->
+    (env, wrap sd (Typing_make_type.closed_shape reason TShapeMap.empty))
+  (* A splat of one element and nothing else IS that element. *)
+  | Partial ([elem], sd) -> (env, wrap sd elem)
+  | Partial (ss_elems, sd) ->
+    (env, wrap sd (mk (reason, Tshape (Shape_splat { ss_elems }))))
+  | Union tys ->
+    (* Nested union (a member itself distributed): flatten by unioning. *)
+    Typing_union.union_list env reason tys
+
 (** Merge adjacent simple shapes in a list. Used during shape normalization in
     localization and subtyping. If all elements are simple shapes the result
     will be a single element list which is itself a simple shape. Otherwise,
@@ -142,10 +209,38 @@ let merge
     (env : Typing_env_types.env) :
     Typing_env_types.env * Typing_error.t option * merge_result =
   let nothing_cache = ref Typing_shape_splat_key.Map.empty in
-  let rec loop rev_elems ((merge_elem, elems, errs, sd, env) as acc) =
+  let invalid_tyvars = ref Elem_path.Map.empty in
+  let reported_invalids = ref Elem_path.Set.empty in
+  let error_tyvar path reason env =
+    match Elem_path.Map.find_opt path !invalid_tyvars with
+    | Some ty -> (env, ty)
+    | None ->
+      let (env, ty) =
+        Typing_env.fresh_type_error
+          env
+          (Pos_or_decl.unsafe_to_raw_pos (Typing_reason.to_pos reason))
+      in
+      invalid_tyvars := Elem_path.Map.add path ty !invalid_tyvars;
+      (env, ty)
+  in
+  let add_splat_not_a_shape_error path reason errs =
+    if Elem_path.Set.mem path !reported_invalids then
+      errs
+    else begin
+      reported_invalids := Elem_path.Set.add path !reported_invalids;
+      Option.fold on_error ~none:errs ~some:(fun on_error ->
+          let err =
+            Typing_error.apply_reasons
+              ~on_error
+              (Typing_error.Secondary.Splat_not_a_shape (Reason.to_pos reason))
+          in
+          err :: errs)
+    end
+  in
+  let rec loop rev_elems (merge_elem, elems, errs, sd, env) =
     match rev_elems with
-    | [] -> acc
-    | ty :: rev_elems ->
+    | [] -> (env, errs, finalize merge_elem elems sd)
+    | (path, ty) :: rev_elems ->
       (* Under sound dynamic a non-enforceable splat operand (e.g. an open
          shape, whose unknown fields are [mixed]) is localized wrapped in
          [supportdyn<...>]. Strip it so we can see the underlying shape, and
@@ -245,97 +340,79 @@ let merge
          here would leave them as separate un-merged elements. *)
       | ((_, Tshape (Shape_splat { ss_elems })), (Empty | Merging _)) ->
         let sd = sd || sd_elem in
-        let rev_elems = List.rev ss_elems @ rev_elems in
+        let rev_elems =
+          List.rev (List.mapi (fun index ty -> (index :: path, ty)) ss_elems)
+          @ rev_elems
+        in
         loop rev_elems (merge_elem, elems, errs, sd, env)
+      (* -- Distribute a union operand -------------------------------------- *)
+      (* [shape(...A, ...(m1 | ... | mk), ...B)] distributes to
+         [shape(...A, ...m1, ...B) | ... | shape(...A, ...mk, ...B)] *)
+      | ((_, Tunion members), _) ->
+        let sd = sd || sd_elem in
+        let (env, branch_errs, branch_tys) =
+          List.fold_left
+            (fun (env, errs_acc, tys) (path, member) ->
+              (* [errs] belongs to the already-processed suffix. Branch-local
+                 errors start empty; the per-element cache below prevents a
+                 shared prefix from reporting the same malformed operand again. *)
+              let (env, branch_errs, res) =
+                loop
+                  ((path, member) :: rev_elems)
+                  (merge_elem, elems, [], sd, env)
+              in
+              let (env, ty) =
+                result_to_ty ~reason:(get_reason member) env res
+              in
+              (env, branch_errs @ errs_acc, ty :: tys))
+            (env, [], [])
+            (List.mapi (fun index member -> (index :: path, member)) members)
+        in
+        let branch_tys = List.rev branch_tys in
+        let result =
+          match branch_tys with
+          | first :: rest
+            when Typing_defs.is_nothing first
+                 && List.for_all Typing_defs.is_nothing rest ->
+            Full (Typing_make_type.nothing (get_reason first), false)
+          | _ -> Union branch_tys
+        in
+        (env, branch_errs @ errs, result)
       (* -- Error conditions ------------------------------------------------ *)
       | ((reason, _), Merging (shape_reason, shape)) ->
-        let (env, elem_err) =
-          Typing_env.fresh_type_error
-            env
-            (Pos_or_decl.unsafe_to_raw_pos (Typing_reason.to_pos reason))
-        in
+        let (env, elem_err) = error_tyvar path reason env in
         let elems =
           let elem_shape = mk (shape_reason, Tshape (Shape_simple shape)) in
           elem_err :: elem_shape :: elems
         in
-        let errs =
-          Option.fold on_error ~none:errs ~some:(fun on_error ->
-              let err =
-                Typing_error.apply_reasons
-                  ~on_error
-                  (Typing_error.Secondary.Splat_not_a_shape
-                     (Reason.to_pos reason))
-              in
-              err :: errs)
-        in
+        let errs = add_splat_not_a_shape_error path reason errs in
         let merge_elem = Empty in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       | ((reason, _), Empty) ->
-        let (env, elem_err) =
-          Typing_env.fresh_type_error
-            env
-            (Pos_or_decl.unsafe_to_raw_pos (Typing_reason.to_pos reason))
-        in
+        let (env, elem_err) = error_tyvar path reason env in
         let elems = elem_err :: elems in
         let merge_elem = Empty in
-        let errs =
-          Option.fold on_error ~none:errs ~some:(fun on_error ->
-              let err =
-                Typing_error.apply_reasons
-                  ~on_error
-                  (Typing_error.Secondary.Splat_not_a_shape
-                     (Reason.to_pos reason))
-              in
-              err :: errs)
-        in
+        let errs = add_splat_not_a_shape_error path reason errs in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       | ((reason, _), Bottom _) ->
-        let errs =
-          Option.fold on_error ~none:errs ~some:(fun on_error ->
-              (* Still report malformed splats despite being bottom *)
-              let err =
-                Typing_error.apply_reasons
-                  ~on_error
-                  (Typing_error.Secondary.Splat_not_a_shape
-                     (Reason.to_pos reason))
-              in
-              err :: errs)
-        in
+        (* Still report malformed splats despite being bottom. *)
+        let errs = add_splat_not_a_shape_error path reason errs in
         loop rev_elems (merge_elem, elems, errs, sd, env))
   in
-  let (merge_elem, elems, errs, sd, env) =
-    (* Merge simple shape elements from right to left so reverse the list *)
-    let rev_elems = List.rev elems in
+  let (env, errs, result) =
+    (* Merge simple shape elements from right to left so reverse the list.
+       [loop] finalises via [finalize] at its base case (and via [result_to_ty]
+       per branch for a distributed union). *)
+    let rev_elems =
+      List.rev (List.mapi (fun index ty -> ([index], ty)) elems)
+    in
     loop rev_elems (Empty, [], [], false, env)
   in
-  let err_opt = Typing_error.multiple_opt errs in
-  (* Combine the current merging element with any others; there two special
-     cases here:
-     1) The merge elem is [Bottom]: this means that the entire type is [nothing]
-     2) The merge elem is the only element; since
-        `shape(...shape([whatever])) = shape([whatever])`
-        we can flatten *)
-  let result =
-    match (merge_elem, elems) with
-    | (Bottom reason, _) ->
-      let ty = Typing_make_type.nothing reason in
-      Full (ty, false)
-    | (Merging (reason, shape_simple), []) ->
-      let ty = mk (reason, Tshape (Shape_simple shape_simple)) in
-      Full (ty, sd)
-    | (Merging (reason, shape_simple), _) ->
-      let elem = mk (reason, Tshape (Shape_simple shape_simple)) in
-      Partial (elem :: elems, sd)
-    | (Empty, []) ->
-      (* Everything cancelled to the unit element: the empty closed shape. The
-         caller supplies the reason with which to build [shape()]. *)
-      Empty_shape sd
-    | (Empty, _) -> Partial (elems, sd)
-  in
-  (env, err_opt, result)
+  (env, Typing_error.multiple_opt errs, result)
 
 type normalize_result =
   | Normalized_shape of locl_phase shape_type
+  | Normalized_union of locl_phase ty list
   | Normalized_bottom
       (** The merge collapsed to the bottom row [nothing]: the row is
           uninhabited. *)
@@ -396,6 +473,19 @@ module Row = struct
     | Newtype of locl_phase ty
     | Opaque_first of Opaque.t * after_opaque_nonempty
     | Shape_first of simple * Opaque.t * after_opaque
+
+  type normalized =
+    | Normalized_row of t
+    | Normalized_union of locl_phase ty list
+
+  let as_row = function
+    | Normalized_row row -> Some row
+    | Normalized_union _ -> None
+
+  let fold_normalized normalized ~row ~union =
+    match normalized with
+    | Normalized_row normalized -> row normalized
+    | Normalized_union tys -> union tys
 
   let of_opaque opaque : t =
     match Opaque.view opaque with
@@ -561,6 +651,7 @@ module Row = struct
           s_fields = TShapeMap.empty;
         }
     | Partial (elems, _) -> splat_of_elems elems
+    | Union _ -> failwith "a distributed union is not a normalized row"
 
   let to_ty ~(reason : Typing_reason.t) (row : t) =
     match row with
@@ -581,14 +672,27 @@ module Row = struct
       (reason : Typing_reason.t)
       (shape_ty : locl_phase shape_type)
       (env : Typing_env_types.env) :
-      Typing_env_types.env * Typing_error.t option * t =
+      Typing_env_types.env * Typing_error.t option * normalized =
     let elems =
       match shape_ty with
       | Shape_simple _ -> [mk (reason, Tshape shape_ty)]
       | Shape_splat { ss_elems } -> ss_elems
     in
     let (env, err_opt, result) = merge ~on_error elems env in
-    (env, err_opt, of_merge_result ~reason result)
+    let normalized =
+      match result with
+      | Union tys -> Normalized_union tys
+      | result -> Normalized_row (of_merge_result ~reason result)
+    in
+    (env, err_opt, normalized)
+
+  let normalized_to_ty
+      (env : Typing_env_types.env)
+      ~(reason : Typing_reason.t)
+      (normalized : normalized) =
+    match normalized with
+    | Normalized_row row -> (env, to_ty ~reason row)
+    | Normalized_union tys -> Typing_union.union_list env reason tys
 end
 
 let normalize_shape_type
@@ -600,30 +704,30 @@ let normalize_shape_type
   (* [_sd] (whether an element carried [supportdyn]) is unused here: the return
      is a bare [shape_type] which cannot hold a [supportdyn] wrapper, and
      subtyping reasons about dynamic separately. *)
-  let (env, err_opt, row) = Row.normalize ~on_error reason shape_ty env in
-  match row with
-  | Row.Simple shape -> (env, err_opt, Normalized_shape (Shape_simple shape))
-  | Row.Type_parameter _
-  | Row.Type_variable _
-  | Row.Newtype _
-  | Row.Opaque_first _
-  | Row.Shape_first _ ->
-    let ty = Row.to_ty ~reason row in
-    (match deref ty with
+  let (env, err_opt, normalized) =
+    Row.normalize ~on_error reason shape_ty env
+  in
+  let distributed_to_shape env ty =
+    match deref ty with
+    | (_, Tunion []) -> (env, err_opt, Normalized_bottom)
+    | (_, Tunion tys) -> (env, err_opt, Normalized_union tys)
     | (_, Tshape shape_ty) -> (env, err_opt, Normalized_shape shape_ty)
-    | _ -> (env, err_opt, Normalized_shape (Shape_splat { ss_elems = [ty] })))
-  | Row.Bottom -> (env, err_opt, Normalized_bottom)
-
-(** The type denoted by a merge result, in normal form. A lone element IS the
-    splat, so it is lifted out rather than left wrapped. *)
-let ty_of_merge_result ~(reason : Typing_reason.t) (res : merge_result) :
-    locl_phase ty * bool =
-  match res with
-  | Full (ty, sd) -> (ty, sd)
-  | Empty_shape sd -> (Typing_make_type.closed_shape reason TShapeMap.empty, sd)
-  | Partial ([elem], sd) -> (elem, sd)
-  | Partial (ss_elems, sd) ->
-    (mk (reason, Tshape (Shape_splat { ss_elems })), sd)
+    | _ -> (env, err_opt, Normalized_shape (Shape_splat { ss_elems = [ty] }))
+  in
+  Row.fold_normalized
+    normalized
+    ~row:(function
+      | Row.Simple shape -> (env, err_opt, Normalized_shape (Shape_simple shape))
+      | ( Row.Type_parameter _ | Row.Type_variable _ | Row.Newtype _
+        | Row.Opaque_first _ | Row.Shape_first _ ) as row ->
+        let ty = Row.to_ty ~reason row in
+        (match deref ty with
+        | (_, Tshape shape_ty) -> (env, err_opt, Normalized_shape shape_ty)
+        | _ -> (env, err_opt, Normalized_shape (Shape_splat { ss_elems = [ty] })))
+      | Row.Bottom -> (env, err_opt, Normalized_bottom))
+    ~union:(fun tys ->
+      let (env, ty) = Typing_union.union_list env reason tys in
+      distributed_to_shape env ty)
 
 (** Canonical constructor for a shape splat: normalize [elems] and return the
     result in normal form. Every operation that rewrites a row must build its
@@ -637,13 +741,7 @@ let splat
     (env : Typing_env_types.env) :
     Typing_env_types.env * Typing_error.t option * locl_phase ty =
   let (env, err_opt, res) = merge ~on_error elems env in
-  let (ty, sd) = ty_of_merge_result ~reason res in
-  let ty =
-    if sd then
-      Typing_make_type.supportdyn (get_reason ty) ty
-    else
-      ty
-  in
+  let (env, ty) = result_to_ty ~reason env res in
   (env, err_opt, ty)
 
 let rec pessimize_existing_fields

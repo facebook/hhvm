@@ -1,0 +1,12 @@
+ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
+Invalid argument (Typing[4110])
+  File "error_dynamic_splat_closed_super.php", line 11, characters 22-38:
+  Expected `shape('x' => int)`
+  File "error_dynamic_splat_closed_super.php", line 13, characters 66-66:
+  But got `T as shape('x' => int, dynamic...)`
+ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
+Invalid argument (Typing[4138])
+  File "error_dynamic_splat_closed_super.php", line 13, characters 26-54:
+  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
+  File "error_dynamic_splat_closed_super.php", line 11, characters 22-38:
+  It is incompatible with a shape that does not allow unknown fields.

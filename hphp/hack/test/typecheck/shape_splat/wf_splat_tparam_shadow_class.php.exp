@@ -1,0 +1,6 @@
+ERROR: File "wf_splat_tparam_shadow_class.php", line 12, characters 21-21:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "wf_splat_tparam_shadow_class.php", line 11, characters 9-9:
+  `T` is already bound here
+ERROR: File "wf_splat_tparam_shadow_class.php", line 11, characters 9-9:
+A type parameter or `newtype` spread in a shape (`...T`) must have an upper bound that can itself be spread (e.g. `T as shape(...)` or `T as dynamic`, or a union of such); otherwise it would spread a non-shape type (Typing[4419])

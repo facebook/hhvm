@@ -1,0 +1,14 @@
+ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
+Invalid argument (Typing[4110])
+  File "error_union_subtype_missing_field.php", line 12, characters 20-41:
+  Expected `shape('x' => int, ...)`
+  File "error_union_subtype_missing_field.php", line 15, characters 37-38:
+  But got `T2 as shape(...)`
+ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
+Invalid argument (Typing[4163])
+  File "error_union_subtype_missing_field.php", line 14, characters 55-64:
+  The field `x` is **optional**
+  File "error_union_subtype_missing_field.php", line 12, characters 20-41:
+  The field `x` is defined as **required**
+  File "error_union_subtype_missing_field.php", line 12, characters 33-35:
+  `x` is defined here

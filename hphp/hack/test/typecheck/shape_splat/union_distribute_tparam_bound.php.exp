@@ -1,0 +1,26 @@
+File "union_distribute_tparam_bound.php", line 15, characters 3-13:
+  shape(...T, ...shape('x' => int)) where T as (T1 | T2)
+File "union_distribute_tparam_bound.php", line 21, characters 3-13:
+  shape(...T, ...shape('x' => int)) where T as ~shape('a' => int)
+File "union_distribute_tparam_bound.php", line 29, characters 3-13:
+  shape(...T, ...shape('x' => int)) where T as shape(?'a' => int, ?'b' => bool)
+File "union_distribute_tparam_bound.php", line 41, characters 3-13:
+  T as (T1 | T2)
+File "union_distribute_tparam_bound.php", line 42, characters 3-18:
+  (int | string)
+File "union_distribute_tparam_bound.php", line 50, characters 3-13:
+  T as (T1 | T2)
+File "union_distribute_tparam_bound.php", line 51, characters 3-18:
+  (int | string)
+ERROR: File "union_distribute_tparam_bound.php", line 33, characters 60-60:
+Some type arguments violate their constraints (Typing[4323])
+  File "union_distribute_tparam_bound.php", line 33, characters 51-73:
+  Expected `shape(...)`
+  File "union_distribute_tparam_bound.php", line 33, characters 45-47:
+  But got `int`
+ERROR: File "union_distribute_tparam_bound.php", line 33, characters 60-60:
+Some type arguments violate their constraints (Typing[4323])
+  File "union_distribute_tparam_bound.php", line 33, characters 51-73:
+  Expected `shape(...)`
+  File "union_distribute_tparam_bound.php", line 33, characters 60-60:
+  But got `T`

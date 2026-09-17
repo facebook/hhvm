@@ -45,12 +45,17 @@ let dummy_env () =
 
 let r = Reason.none
 
+let expect_row normalized =
+  match Typing_shape_normalize.Row.as_row normalized with
+  | Some row -> row
+  | None -> assert_failure "expected one normalized row, got a union"
+
 let normalize_row env shape =
-  let (env, err, row) =
+  let (env, err, normalized) =
     Typing_shape_normalize.Row.normalize ~on_error:None r shape env
   in
   assert_equal None err;
-  (env, row)
+  (env, expect_row normalized)
 
 let tgeneric name = mk (r, Tgeneric name)
 

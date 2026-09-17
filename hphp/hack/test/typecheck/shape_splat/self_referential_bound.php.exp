@@ -1,0 +1,2 @@
+ERROR: File "self_referential_bound.php", line 28, characters 29-29:
+A type parameter or `newtype` spread in a shape (`...T`) must have an upper bound that can itself be spread (e.g. `T as shape(...)` or `T as dynamic`, or a union of such); otherwise it would spread a non-shape type (Typing[4419])

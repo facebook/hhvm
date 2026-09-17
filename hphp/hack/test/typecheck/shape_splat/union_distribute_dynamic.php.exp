@@ -1,0 +1,3 @@
+File "union_distribute_dynamic.php", line 13, characters 3-13:
+  (shape(...T1, ...shape(dynamic...)) | shape(...T2, ...shape(dynamic...))) where T1 as shape(...), T2 as shape(...)
+No errors

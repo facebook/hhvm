@@ -9,6 +9,10 @@ type merge_result =
           has no [Reason.t] to build the type, so the caller constructs it. The
           [bool] is the supportdyn flag. *)
   | Partial of locl_phase ty list * bool
+  | Union of locl_phase ty list
+      (** A union operand was distributed outward: one fully-finalised type per
+          union member (supportdyn already applied per member). The caller unions
+          these with its own reason. *)
 
 val merge_field_descs :
   fd_left:locl_phase shape_field_type ->
@@ -30,6 +34,7 @@ val merge :
 
 type normalize_result =
   | Normalized_shape of locl_phase shape_type
+  | Normalized_union of locl_phase ty list
   | Normalized_bottom
       (** The merge collapsed to the bottom row [nothing]: the row is
           uninhabited. *)
@@ -42,6 +47,8 @@ module Row : sig
       operands, contains at least one opaque operand, and never contains
       adjacent shape fragments. *)
   type t
+
+  type normalized
 
   module Opaque : sig
     type t
@@ -76,6 +83,11 @@ module Row : sig
 
   val of_simple : locl_phase shape_type_simple -> t
 
+  val as_row : normalized -> t option
+
+  val fold_normalized :
+    normalized -> row:(t -> 'a) -> union:(locl_phase ty list -> 'a) -> 'a
+
   (** Eliminate a row without exposing its normalized representation.
       [elements] receives the spread-position sequence for every inhabited row
       that is not a simple shape. *)
@@ -91,9 +103,15 @@ module Row : sig
     Reason.t ->
     locl_phase shape_type ->
     Typing_env_types.env ->
-    Typing_env_types.env * Typing_error.t option * t
+    Typing_env_types.env * Typing_error.t option * normalized
 
   val to_ty : reason:Reason.t -> t -> locl_phase ty
+
+  val normalized_to_ty :
+    Typing_env_types.env ->
+    reason:Reason.t ->
+    normalized ->
+    Typing_env_types.env * locl_phase ty
 end
 
 val normalize_shape_type :
@@ -102,10 +120,6 @@ val normalize_shape_type :
   locl_phase shape_type ->
   Typing_env_types.env ->
   Typing_env_types.env * Typing_error.t option * normalize_result
-
-(** The type denoted by a merge result, in normal form. A lone element IS the
-    splat, so it is lifted out rather than left wrapped. *)
-val ty_of_merge_result : reason:Reason.t -> merge_result -> locl_phase ty * bool
 
 (** Canonical constructor: normalize [elems] into a shape type in normal form.
     Operations that rewrite a row must build their result with this rather than

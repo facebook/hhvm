@@ -6,3 +6,7 @@ Invalid return type (Typing[4523])
   The field `x` here is not compatible with every instantiation of `T`
   File "infer_masked_required_nothing_bad.php", line 9, characters 74-74:
   `T` may provide `x` with a type of its own
+  File "infer_masked_required_nothing_bad.php", line 11, characters 3-12:
+  Expected `nothing`
+  File "infer_masked_required_nothing_bad.php", line 9, characters 55-57:
+  But got `int`

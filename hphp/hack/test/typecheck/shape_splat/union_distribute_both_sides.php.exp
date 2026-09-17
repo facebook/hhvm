@@ -1,0 +1,4 @@
+File "union_distribute_both_sides.php", line 12, characters 3-13:
+  (shape(...shape('c' => int), ...T1, ...shape('d' => bool)) | shape(...shape('c' => int), ...T2, ...shape('d' => bool)))
+   where T1 as shape(...), T2 as shape(...)
+No errors

@@ -171,7 +171,7 @@ val solve_spread_vars :
   env ->
   Typing_reason.t ->
   Typing_shape_normalize.Row.t ->
-  env * Typing_shape_normalize.Row.t
+  env * Typing_shape_normalize.Row.normalized
 
 (* == Exported only so the tests can reach them =============================
  *

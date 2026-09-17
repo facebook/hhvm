@@ -4,3 +4,7 @@ Invalid return type (Typing[4523])
   The field `id` here is not compatible with every instantiation of `T`
   File "field_assign_generic_after_bad.php", line 6, characters 31-31:
   `T` may provide `id` with a type of its own
+  File "field_assign_generic_after_bad.php", line 8, characters 3-12:
+  Expected `nothing`
+  File "field_assign_generic_after_bad.php", line 7, characters 14-25:
+  But got `string`

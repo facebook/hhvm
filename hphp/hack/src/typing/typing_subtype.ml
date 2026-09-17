@@ -3036,69 +3036,113 @@ end = struct
     match err_opt with
     | Some _ as fail -> invalid ~fail env
     | None ->
-      let simple_sub = Typing_shape_normalize.Row.as_simple norm_sub
-      and simple_super = Typing_shape_normalize.Row.as_simple norm_super in
-      let super_is_top_shape =
-        match simple_super with
-        | Some { s_fields; s_unknown_value; s_origin = _ } ->
-          TShapeMap.is_empty s_fields && TUtils.is_mixed env s_unknown_value
-        | None -> false
+      let sub_supportdyn_reason =
+        if supportdyn_sub then
+          Some r_sub
+        else
+          None
       in
-      if (not supportdyn_super) && super_is_top_shape then
-        (* [shape(...)] is the top row. Its [supportdyn] counterpart still
-           imposes dynamic-support obligations on every field. *)
-        valid env
-      else if Typing_shape_normalize.Row.is_bottom norm_sub then
-        valid env
-      else if Typing_shape_normalize.Row.is_bottom norm_super then
-        (* A non-bottom subrow may still be opaque and constrained to [nothing]. *)
-        let ty_sub = Typing_shape_normalize.Row.to_ty ~reason:r_sub norm_sub in
-        let ty_super =
-          Typing_shape_normalize.Row.to_ty ~reason:r_super norm_super
+      let simplify_normalized env norm_sub norm_super =
+        let (env, ty_sub) =
+          Typing_shape_normalize.Row.normalized_to_ty env ~reason:r_sub norm_sub
+        in
+        let (env, ty_super) =
+          Typing_shape_normalize.Row.normalized_to_ty
+            env
+            ~reason:r_super
+            norm_super
         in
         simplify_
           ~subtype_env
           ~this_ty
-          ~lhs:{ sub_supportdyn = None; ty_sub }
-          ~rhs:{ super_supportdyn = false; super_like; ty_super }
+          ~lhs:{ sub_supportdyn = sub_supportdyn_reason; ty_sub }
+          ~rhs:{ super_supportdyn = supportdyn_super; super_like; ty_super }
           env
-      else
-        let sv_sub = Typing_corners.spread_tyvar_ids norm_sub
-        and sv_super = Typing_corners.spread_tyvar_ids norm_super in
-        (match (sv_sub, sv_super) with
-        | (_ :: _ :: _, _)
-          when subtype_env.Subtype_env.report_ambiguous_shape_splat ->
-          (env, TL.AmbiguousShapeSplat sv_sub)
-        | ([], []) ->
-          (match (simple_sub, simple_super) with
-          | ( Some
-                {
-                  s_origin = origin_sub;
-                  s_unknown_value = kind_sub;
-                  s_fields = fdm_sub;
-                },
-              Some
-                {
-                  s_origin = origin_super;
-                  s_unknown_value = kind_super;
-                  s_fields = fdm_super;
-                } ) ->
-            if same_type_origin origin_super origin_sub then
-              (* Same origin fast path *)
-              valid env
-            else
-              (* Dispatch to simple shape subtyping *)
-              simplify_subtype_shape
+      in
+      (match
+         ( Typing_shape_normalize.Row.as_row norm_sub,
+           Typing_shape_normalize.Row.as_row norm_super )
+       with
+      | (None, _)
+      | (_, None) ->
+        simplify_normalized env norm_sub norm_super
+      | (Some norm_sub, Some norm_super) ->
+        let simple_sub = Typing_shape_normalize.Row.as_simple norm_sub
+        and simple_super = Typing_shape_normalize.Row.as_simple norm_super in
+        let super_is_top_shape =
+          match simple_super with
+          | Some { s_fields; s_unknown_value; s_origin = _ } ->
+            TShapeMap.is_empty s_fields && TUtils.is_mixed env s_unknown_value
+          | None -> false
+        in
+        if (not supportdyn_super) && super_is_top_shape then
+          (* [shape(...)] is the top row. Its [supportdyn] counterpart still
+             imposes dynamic-support obligations on every field. *)
+          valid env
+        else if Typing_shape_normalize.Row.is_bottom norm_sub then
+          valid env
+        else if Typing_shape_normalize.Row.is_bottom norm_super then
+          (* A non-bottom subrow may still be opaque and constrained to [nothing]. *)
+          let ty_sub =
+            Typing_shape_normalize.Row.to_ty ~reason:r_sub norm_sub
+          in
+          let ty_super =
+            Typing_shape_normalize.Row.to_ty ~reason:r_super norm_super
+          in
+          simplify_
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn = None; ty_sub }
+            ~rhs:{ super_supportdyn = false; super_like; ty_super }
+            env
+        else
+          let sv_sub = Typing_corners.spread_tyvar_ids norm_sub
+          and sv_super = Typing_corners.spread_tyvar_ids norm_super in
+          (match (sv_sub, sv_super) with
+          | (_ :: _ :: _, _)
+            when subtype_env.Subtype_env.report_ambiguous_shape_splat ->
+            (env, TL.AmbiguousShapeSplat sv_sub)
+          | ([], []) ->
+            (match (simple_sub, simple_super) with
+            | ( Some
+                  {
+                    s_origin = origin_sub;
+                    s_unknown_value = kind_sub;
+                    s_fields = fdm_sub;
+                  },
+                Some
+                  {
+                    s_origin = origin_super;
+                    s_unknown_value = kind_super;
+                    s_fields = fdm_super;
+                  } ) ->
+              if same_type_origin origin_super origin_sub then
+                (* Same origin fast path *)
+                valid env
+              else
+                (* Dispatch to simple shape subtyping *)
+                simplify_subtype_shape
+                  ~subtype_env
+                  ~env
+                  ~this_ty
+                  ~super_like
+                  (supportdyn_sub, r_sub, kind_sub, fdm_sub)
+                  (supportdyn_super, r_super, kind_super, fdm_super)
+            | _ ->
+              (* At least one type is a splat and neither have tyvars so use the
+                 ground corners procedure *)
+              subrow_splat
                 ~subtype_env
                 ~env
+                ~cache
                 ~this_ty
                 ~super_like
-                (supportdyn_sub, r_sub, kind_sub, fdm_sub)
-                (supportdyn_super, r_super, kind_super, fdm_super)
-          | _ ->
-            (* At least one type is a splat and neither have tyvars so use the
-               ground corners procedure *)
-            subrow_splat
+                ~r:r_sub
+                ~sub:norm_sub
+                ~super:norm_super)
+          | ([], _ :: _) ->
+            (* At least one type variable in the supertype, none in the subtype *)
+            subrow_infer_super
               ~subtype_env
               ~env
               ~cache
@@ -3106,54 +3150,10 @@ end = struct
               ~super_like
               ~r:r_sub
               ~sub:norm_sub
-              ~super:norm_super)
-        | ([], _ :: _) ->
-          (* At least one type variable in the supertype, none in the subtype *)
-          subrow_infer_super
-            ~subtype_env
-            ~env
-            ~cache
-            ~this_ty
-            ~super_like
-            ~r:r_sub
-            ~sub:norm_sub
-            ~super:norm_super
-            sv_super
-        | (_ :: _, []) ->
-          (* At least one type variable in the subtype, none in the supertype *)
-          subrow_infer_sub
-            ~subtype_env
-            ~env
-            ~cache
-            ~this_ty
-            ~super_like
-            ~r:r_sub
-            ~sub:norm_sub
-            ~super:norm_super
-            sv_sub
-        | ([sub_v], [super_v]) ->
-          (* Exactly on tyvar in each of the sub- and supertypes; solve using
-             a fresh coupled tyvar acting as upperbound for one and lowerbound
-             for the other *)
-          subrow_infer_couple
-            ~subtype_env
-            ~env
-            ~cache
-            ~this_ty
-            ~super_like
-            ~r:r_sub
-            ~sub:norm_sub
-            ~sub_spread_var:sub_v
-            ~super:norm_super
-            ~super_spread_var:super_v
-        | (_ :: _, _ :: _) ->
-          (* Multiple spread vars on at least one side: decoupled fallback.
-             Resolve the other side's spread vars to their current solutions,
-             then run single-side inference each way. *)
-          let (env, super') =
-            Typing_corners.solve_spread_vars env r_sub norm_super
-          in
-          let (env, prop_sub) =
+              ~super:norm_super
+              sv_super
+          | (_ :: _, []) ->
+            (* At least one type variable in the subtype, none in the supertype *)
             subrow_infer_sub
               ~subtype_env
               ~env
@@ -3162,25 +3162,104 @@ end = struct
               ~super_like
               ~r:r_sub
               ~sub:norm_sub
-              ~super:super'
+              ~super:norm_super
               sv_sub
-          in
-          let (env, sub') =
-            Typing_corners.solve_spread_vars env r_sub norm_sub
-          in
-          let (env, prop_super) =
-            subrow_infer_super
+          | ([sub_v], [super_v]) ->
+            (* Exactly one tyvar in each of the sub- and supertypes; solve using
+               a fresh coupled tyvar acting as upper bound for one and lower bound
+               for the other. *)
+            subrow_infer_couple
               ~subtype_env
               ~env
               ~cache
               ~this_ty
               ~super_like
               ~r:r_sub
-              ~sub:sub'
+              ~sub:norm_sub
+              ~sub_spread_var:sub_v
               ~super:norm_super
-              sv_super
-          in
-          (env, TL.conj prop_sub prop_super))
+              ~super_spread_var:super_v
+          | (_ :: _, _ :: _) ->
+            (* Multiple spread vars on at least one side: decoupled fallback.
+               Resolve the other side's spread vars to their current solutions,
+               then run single-side inference each way. *)
+            let (env, solved_super) =
+              Typing_corners.solve_spread_vars env r_sub norm_super
+            in
+            let (env, prop_sub) =
+              match Typing_shape_normalize.Row.as_row solved_super with
+              | Some super' ->
+                subrow_infer_sub
+                  ~subtype_env
+                  ~env
+                  ~cache
+                  ~this_ty
+                  ~super_like
+                  ~r:r_sub
+                  ~sub:norm_sub
+                  ~super:super'
+                  sv_sub
+              | None ->
+                let ty_sub =
+                  Typing_shape_normalize.Row.to_ty ~reason:r_sub norm_sub
+                in
+                let (env, ty_super) =
+                  Typing_shape_normalize.Row.normalized_to_ty
+                    env
+                    ~reason:r_super
+                    solved_super
+                in
+                simplify_
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = sub_supportdyn_reason; ty_sub }
+                  ~rhs:
+                    {
+                      super_supportdyn = supportdyn_super;
+                      super_like;
+                      ty_super;
+                    }
+                  env
+            in
+            let (env, solved_sub) =
+              Typing_corners.solve_spread_vars env r_sub norm_sub
+            in
+            let (env, prop_super) =
+              match Typing_shape_normalize.Row.as_row solved_sub with
+              | Some sub' ->
+                subrow_infer_super
+                  ~subtype_env
+                  ~env
+                  ~cache
+                  ~this_ty
+                  ~super_like
+                  ~r:r_sub
+                  ~sub:sub'
+                  ~super:norm_super
+                  sv_super
+              | None ->
+                let (env, ty_sub) =
+                  Typing_shape_normalize.Row.normalized_to_ty
+                    env
+                    ~reason:r_sub
+                    solved_sub
+                in
+                let ty_super =
+                  Typing_shape_normalize.Row.to_ty ~reason:r_super norm_super
+                in
+                simplify_
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = sub_supportdyn_reason; ty_sub }
+                  ~rhs:
+                    {
+                      super_supportdyn = supportdyn_super;
+                      super_like;
+                      ty_super;
+                    }
+                  env
+            in
+            (env, TL.conj prop_sub prop_super)))
 
   (* -- Splat subtyping ----------------------------------------------------- *)
 
@@ -3293,17 +3372,16 @@ end = struct
         | None -> None
         | Some (decl_pos, name) ->
           Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-              Typing_error.Reasons_callback.always
-                Typing_error.(
-                  apply_reasons ~on_error
-                  @@ Secondary.Splat_field_not_known
-                       {
-                         pos = Reason.to_pos r;
-                         decl_pos;
-                         name;
-                         field =
-                           TUtils.get_printable_shape_field_name field_name;
-                       }))
+              Typing_error.(
+                Reasons_callback.prepend_on_apply
+                  on_error
+                  (Secondary.Splat_field_not_known
+                     {
+                       pos = Reason.to_pos r;
+                       decl_pos;
+                       name;
+                       field = TUtils.get_printable_shape_field_name field_name;
+                     })))
       in
       (match
          simplify_subtype_shape_projection
@@ -3376,24 +3454,34 @@ end = struct
             in
             (env, super_pre, super_post)
           in
-          if
-            (not (Typing_shape_normalize.Row.is_bottom super_pre))
-            && not (Typing_shape_normalize.Row.is_bottom super_post)
-          then
-            subrow_infer_super_part
-              ~subtype_env
-              ~env
-              ~cache
-              ~this_ty
-              ~super_like
-              ~r
-              ~spread_var_ty:(mk (r, Tvar v))
-              ~sub
-              ~super_pre
-              ~super_post
-              ~super
-          else
-            valid env)
+          (match
+             ( Typing_shape_normalize.Row.as_row super_pre,
+               Typing_shape_normalize.Row.as_row super_post )
+           with
+          | (Some super_pre, Some super_post) ->
+            if
+              (not (Typing_shape_normalize.Row.is_bottom super_pre))
+              && not (Typing_shape_normalize.Row.is_bottom super_post)
+            then
+              subrow_infer_super_part
+                ~subtype_env
+                ~env
+                ~cache
+                ~this_ty
+                ~super_like
+                ~r
+                ~spread_var_ty:(mk (r, Tvar v))
+                ~sub
+                ~super_pre
+                ~super_post
+                ~super
+            else
+              valid env
+          | (None, _)
+          | (_, None) ->
+            (* A partition cannot currently distribute a union. Keep this
+               conservative fallback if that invariant changes. *)
+            invalid ~fail:None env))
 
   (* Build a shape lower bound for the spread variable, using fresh type variables
      for fields it may contribute. Generate per-field constraints relating the
@@ -3644,24 +3732,34 @@ end = struct
             in
             (env, sub_pre, sub_post)
           in
-          if
-            (not (Typing_shape_normalize.Row.is_bottom sub_pre))
-            && not (Typing_shape_normalize.Row.is_bottom sub_post)
-          then
-            subrow_infer_sub_part
-              ~subtype_env
-              ~env
-              ~cache
-              ~this_ty
-              ~super_like
-              ~r
-              ~spread_var_ty:(mk (r, Tvar v))
-              ~sub_pre
-              ~sub_post
-              ~sub
-              ~super
-          else
-            valid env)
+          (match
+             ( Typing_shape_normalize.Row.as_row sub_pre,
+               Typing_shape_normalize.Row.as_row sub_post )
+           with
+          | (Some sub_pre, Some sub_post) ->
+            if
+              (not (Typing_shape_normalize.Row.is_bottom sub_pre))
+              && not (Typing_shape_normalize.Row.is_bottom sub_post)
+            then
+              subrow_infer_sub_part
+                ~subtype_env
+                ~env
+                ~cache
+                ~this_ty
+                ~super_like
+                ~r
+                ~spread_var_ty:(mk (r, Tvar v))
+                ~sub_pre
+                ~sub_post
+                ~sub
+                ~super
+            else
+              valid env
+          | (None, _)
+          | (_, None) ->
+            (* A partition cannot currently distribute a union. Keep this
+               conservative fallback if that invariant changes. *)
+            invalid ~fail:None env))
 
   (* Construct an upper-bound shape for a sub-row spread type variable after
      partitioning the sub row into [sub_pre] and [sub_post]. For each field, infer
@@ -3951,10 +4049,16 @@ end = struct
           let on_error = subtype_env.Subtype_env.on_error in
           Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
         in
-        if Typing_shape_normalize.Row.is_bottom row then
-          None
-        else
-          Some (env, row)
+        Typing_shape_normalize.Row.fold_normalized
+          row
+          ~row:(fun row ->
+            if Typing_shape_normalize.Row.is_bottom row then
+              None
+            else
+              Some (env, row))
+          ~union:(fun _ ->
+            (* Leave this special case and use coupled inference instead. *)
+            None)
     in
     let bottom_field = { sft_optional = false; sft_ty = MakeType.nothing r } in
     match

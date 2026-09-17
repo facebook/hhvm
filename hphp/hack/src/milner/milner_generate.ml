@@ -470,6 +470,7 @@ and Kind : sig
     | Case
     | Enum
     | EnumClass
+    | ClassIdentity
     | Container
     | BuiltinContainer
     | Tuple
@@ -512,6 +513,7 @@ end = struct
     | Case
     | Enum
     | EnumClass
+    | ClassIdentity
     | Container
     | BuiltinContainer
     | Tuple
@@ -533,7 +535,9 @@ end = struct
     in
     let kind_filter = function
       | Case -> not for_option_ty
-      | Function -> not for_reified_ty
+      | Function
+      | ClassIdentity ->
+        not for_reified_ty
       | TypeConst
       | Dependent ->
         not for_alias_def
@@ -549,7 +553,8 @@ end = struct
       | Newtype
       | TypeConst
       | Case
-      | Enum ->
+      | Enum
+      | ClassIdentity ->
         true
       | Option
       | Classish
@@ -645,6 +650,9 @@ and Definition : sig
     t
 
   val enum_unwrap : name:string -> enum_name:string -> t
+
+  val identity_class :
+    name:string -> parent:string option -> payload:Type.t option -> t
 
   val effect_state : name:string -> t
 end = struct
@@ -931,6 +939,35 @@ end = struct
       name
       enum_name
 
+  let identity_class ~name ~parent ~payload =
+    let (constructor, getter) =
+      match (payload, parent) with
+      | (None, None) -> ("public function __construct()[] {}", "")
+      | (None, Some _) ->
+        ("public function __construct()[] { parent::__construct(); }", "")
+      | (Some ty, None) ->
+        ( Format.sprintf
+            "public function __construct(protected %s $payload)[write_props] {}"
+            (Type.show ty),
+          Format.sprintf
+            "public function get()[]: %s { return $this->payload; }"
+            (Type.show ty) )
+      | (Some ty, Some _) ->
+        ( Format.sprintf
+            "public function __construct(%s $payload)[write_props] { parent::__construct($payload); }"
+            (Type.show ty),
+          "" )
+    in
+    let parent =
+      Option.value_map parent ~default:"" ~f:(Format.sprintf " extends %s")
+    in
+    Format.sprintf
+      "<<__ConsistentConstruct>>\nclass %s%s {\n  %s\n  %s\n  public static function identity()[]: classname<this> { return static::class; }\n}"
+      name
+      parent
+      constructor
+      getter
+
   let effect_state ~name =
     Format.sprintf
       "final class %s { public int $value = 0; public static int $calls = 0; }"
@@ -1013,6 +1050,12 @@ and Type : sig
     value:t ->
     Environment.t * (string * string) list
 
+  val mk_identity_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
@@ -1074,6 +1117,10 @@ end = struct
     | Enum of { name: string }
     | EnumClassMember of enum_class_member
     | EnumClassLabel of enum_class_member
+    | ClassIdentity of {
+        name: string;
+        is_pointer: bool;
+      }
     | Vec of t
     | Dict of {
         key: t;
@@ -1162,6 +1209,14 @@ end = struct
       Format.sprintf "HH\\MemberOf<%s, %s>" enum_name (show payload)
     | EnumClassLabel { enum_name; payload; _ } ->
       Format.sprintf "HH\\EnumClass\\Label<%s, %s>" enum_name (show payload)
+    | ClassIdentity { name; is_pointer } ->
+      Format.sprintf
+        "%s<%s>"
+        (if is_pointer then
+          "class"
+        else
+          "classname")
+        name
     | Vec ty -> Format.sprintf "vec<%s>" (show ty)
     | Dict { key; value } ->
       Format.sprintf "dict<%s, %s>" (show key) (show value)
@@ -1337,6 +1392,75 @@ end = struct
                   subtypes
                   ~f:(Fn.non (is_only_null env TypeSet.empty))
         | _ -> false
+    in
+    let rec has_structural_tuple env seen ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | Tuple _ -> true
+        | Shape { fields; _ } ->
+          List.exists fields ~f:(fun { ty; _ } ->
+              has_structural_tuple env seen ty)
+        | Alias _
+        | Newtype _
+        | TypeConst _
+        | Dependent _
+        | Case _ ->
+          List.exists
+            (Env.get_subtypes env ty)
+            ~f:(has_structural_tuple env seen)
+        | Like ty
+        | Option ty
+        | EnumClassMember { payload = ty; _ } ->
+          has_structural_tuple env seen ty
+        | _ -> false
+    in
+    let rec has_class_identity env seen ~is_pointer ~through_vec ty =
+      if TypeSet.mem ty seen then
+        false
+      else
+        let seen = TypeSet.add ty seen in
+        match ty with
+        | ClassIdentity info -> Bool.equal is_pointer info.is_pointer
+        | Vec ty when through_vec ->
+          has_class_identity env seen ~is_pointer ~through_vec ty
+        | Tuple { conjuncts; optional_conjuncts; _ } ->
+          List.exists
+            (conjuncts @ optional_conjuncts)
+            ~f:(has_class_identity env seen ~is_pointer ~through_vec)
+        | Shape { fields; _ } ->
+          List.exists fields ~f:(fun { ty; _ } ->
+              has_class_identity env seen ~is_pointer ~through_vec ty)
+        | Alias _
+        | Newtype _
+        | TypeConst _
+        | Dependent _
+        | Case _ ->
+          List.exists
+            (Env.get_subtypes env ty)
+            ~f:(has_class_identity env seen ~is_pointer ~through_vec)
+        | Like ty
+        | Option ty
+        | EnumClassMember { payload = ty; _ } ->
+          has_class_identity env seen ~is_pointer ~through_vec ty
+        | _ -> false
+    in
+    (* T288868918: classname/class intersections can lose the pointer constraint. *)
+    let identity_hazard env1 ty1 env2 ty2 =
+      has_class_identity
+        env1
+        TypeSet.empty
+        ~is_pointer:false
+        ~through_vec:(has_structural_tuple env2 TypeSet.empty ty2)
+        ty1
+      && has_class_identity
+           env2
+           TypeSet.empty
+           ~is_pointer:true
+           ~through_vec:(has_structural_tuple env1 TypeSet.empty ty1)
+           ty2
     in
     let hazardous env_like ty_like env_nullable ty_nullable =
       has_like_head env_like TypeSet.empty ty_like
@@ -1613,6 +1737,8 @@ end = struct
     not
       (hazardous env1 ty1 env2 ty2
       || hazardous env2 ty2 env1 ty1
+      || identity_hazard env1 ty1 env2 ty2
+      || identity_hazard env2 ty2 env1 ty1
       || case_function_hazard env1 ty1 env2 ty2
       || case_function_hazard env2 ty2 env1 ty1
       || case_null_hazard env1 ty1 env2 ty2
@@ -1630,6 +1756,7 @@ end = struct
     | Enum _
     | EnumClassMember _
     | EnumClassLabel _
+    | ClassIdentity _
     | Vec _
     | Dict _
     | Keyset _
@@ -1681,7 +1808,9 @@ end = struct
     match ty with
     | Case _ -> not (for_option_ty || for_enum_def)
     | EnumClassLabel _ -> not for_enum_class_value
-    | Function _ -> not for_reified_ty
+    | Function _
+    | ClassIdentity _ ->
+      not for_reified_ty
     | TypeConst _
     | Dependent _ ->
       not for_alias_def
@@ -1789,7 +1918,8 @@ end = struct
         | Case _
         | Enum _
         | EnumClassMember _
-        | EnumClassLabel _ ->
+        | EnumClassLabel _
+        | ClassIdentity _ ->
           []
         | Option ty ->
           (* The parser hates ??ty, so we don't return `Option (driver renv ty)`
@@ -2071,6 +2201,7 @@ end = struct
           | Awaitable _
           | Classish _
           | GenericClass _
+          | ClassIdentity _
           | Enum _
           | EnumClassLabel _
           | Vec _
@@ -2122,7 +2253,9 @@ end = struct
             [Mixed]
           else
             [payload]
-        | EnumClassLabel _ -> [Mixed]
+        | EnumClassLabel _
+        | ClassIdentity _ ->
+          [Mixed]
         | Traversable _
         | ContainerInterface _
         | Iterator _
@@ -2260,6 +2393,8 @@ end = struct
       Some (Milner_syntax.StaticMember (enum_name, member))
     | EnumClassLabel { enum_name; member; _ } ->
       Some (Milner_syntax.EnumLabel (enum_name, member))
+    | ClassIdentity { name; _ } ->
+      Some (Milner_syntax.StaticMember (name, "class"))
     | Traversable value
     | ContainerInterface value ->
       Some (Array ("vec", [inhabitant renv env value]))
@@ -2642,6 +2777,53 @@ end = struct
     in
     (env, contract)
 
+  type identity_family = {
+    identity_base: string;
+    identity_child: string;
+    identity_base_name: t;
+    identity_child_name: t;
+    identity_base_pointer: t;
+    identity_child_pointer: t;
+  }
+
+  let declare_identity_family env ~payload =
+    let base_name = fresh "CI" in
+    let child_name = fresh "CI" in
+    let env =
+      Env.add_definition env
+      @@ Definition.identity_class ~name:base_name ~parent:None ~payload
+    in
+    let env =
+      Env.add_definition env
+      @@ Definition.identity_class
+           ~name:child_name
+           ~parent:(Some base_name)
+           ~payload
+    in
+    let name name = ClassIdentity { name; is_pointer = false } in
+    let pointer name = ClassIdentity { name; is_pointer = true } in
+    let base_name_ty = name base_name in
+    let child_name_ty = name child_name in
+    let base_pointer_ty = pointer base_name in
+    let child_pointer_ty = pointer child_name in
+    let env = Env.record_subtype env ~super:base_name_ty ~sub:child_name_ty in
+    let env =
+      Env.record_subtype env ~super:base_pointer_ty ~sub:child_pointer_ty
+    in
+    let env = Env.record_subtype env ~super:base_name_ty ~sub:base_pointer_ty in
+    let env =
+      Env.record_subtype env ~super:child_name_ty ~sub:child_pointer_ty
+    in
+    ( env,
+      {
+        identity_base = base_name;
+        identity_child = child_name;
+        identity_base_name = base_name_ty;
+        identity_child_name = child_name_ty;
+        identity_base_pointer = base_pointer_ty;
+        identity_child_pointer = child_pointer_ty;
+      } )
+
   let rec mk_classish
       (renv : REnv.t)
       (env : Env.t)
@@ -3008,6 +3190,16 @@ end = struct
       let is_label = (not renv.REnv.for_enum_class_value) && Random.bool () in
       let (env, views) = record_enum_views env family ~is_label in
       (env, select views)
+    | Kind.ClassIdentity ->
+      let (env, family) = declare_identity_family env ~payload:None in
+      ( env,
+        select
+          [
+            family.identity_base_name;
+            family.identity_child_name;
+            family.identity_base_pointer;
+            family.identity_child_pointer;
+          ] )
     | Kind.Container -> begin
       let renv = REnv.{ renv with for_option_ty = false } in
       match Container.pick () with
@@ -3096,6 +3288,82 @@ end = struct
     | Kind.Like ->
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
+
+  let mk_identity_bindings _renv env ~value:payload =
+    let (env, family) = declare_identity_family env ~payload:(Some payload) in
+    let unary hint contexts return_hint body =
+      let value = Milner_syntax.fresh_local "identity" in
+      Milner_syntax.Lambda
+        ( [Milner_syntax.parameter hint value],
+          contexts,
+          return_hint,
+          [Milner_syntax.Return (Some (body value))] )
+    in
+    let forward source target =
+      unary (show source) [] (show target) (fun value ->
+          Milner_syntax.Local value)
+    in
+    let pointer = Milner_syntax.fresh_local "class_pointer" in
+    let value = Milner_syntax.fresh_local "payload" in
+    let construct =
+      Milner_syntax.Lambda
+        ( [
+            Milner_syntax.parameter (show family.identity_base_pointer) pointer;
+            Milner_syntax.parameter (show payload) value;
+          ],
+          ["write_props"],
+          family.identity_base,
+          [
+            Milner_syntax.Return
+              (Some
+                 (Milner_syntax.NewDynamic (pointer, [Milner_syntax.Local value])));
+          ] )
+    in
+    let read =
+      unary family.identity_base [] (show payload) (fun value ->
+          Milner_syntax.Call
+            (Milner_syntax.Member (Milner_syntax.Local value, "get"), []))
+    in
+    let static_identity hint =
+      unary hint [] (show family.identity_base_name) (fun value ->
+          Milner_syntax.Call
+            (Milner_syntax.DynamicStaticMember (value, "identity"), []))
+    in
+    let expressions =
+      [
+        ( "identity_child_pointer",
+          Milner_syntax.StaticMember (family.identity_child, "class") );
+        ( "identity_base_pointer",
+          Milner_syntax.StaticMember (family.identity_base, "class") );
+        ("identity_child_name", Milner_syntax.Nameof family.identity_child);
+        ("identity_base_name", Milner_syntax.Nameof family.identity_base);
+        ("identity_construct", construct);
+        ("identity_read", read);
+        ("identity_static", static_identity (show family.identity_base_pointer));
+        ("identity_object_name", static_identity family.identity_base);
+        ( "identity_pointer_name",
+          forward family.identity_base_pointer family.identity_base_name );
+        ( "identity_widen_pointer",
+          forward family.identity_child_pointer family.identity_base_pointer );
+        ( "identity_widen_name",
+          forward family.identity_child_name family.identity_base_name );
+        ( "identity_is_child",
+          unary family.identity_base [] "bool" (fun value ->
+              Milner_syntax.Is (Milner_syntax.Local value, family.identity_child))
+        );
+      ]
+    in
+    let bindings =
+      [
+        ("IDENTITY_BASE", family.identity_base);
+        ("IDENTITY_CHILD", family.identity_child);
+        ("IDENTITY_POINTER_TYPE", show family.identity_base_pointer);
+        ("IDENTITY_NAME_TYPE", show family.identity_base_name);
+      ]
+      @ List.map expressions ~f:(fun (prefix, expression) ->
+            (prefix, Milner_syntax.render_expr expression))
+    in
+    (env, bindings)
 
   let mk_enum_bindings renv env ~value:payload =
     if not renv.REnv.for_enum_class_value then

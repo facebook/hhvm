@@ -101,6 +101,26 @@ let enum_prefixes =
     "enum_label_payload_upcast";
   ]
 
+let identity_prefixes =
+  [
+    "IDENTITY_BASE";
+    "IDENTITY_CHILD";
+    "IDENTITY_POINTER_TYPE";
+    "IDENTITY_NAME_TYPE";
+    "identity_child_pointer";
+    "identity_base_pointer";
+    "identity_child_name";
+    "identity_base_name";
+    "identity_construct";
+    "identity_read";
+    "identity_static";
+    "identity_object_name";
+    "identity_pointer_name";
+    "identity_widen_pointer";
+    "identity_widen_name";
+    "identity_is_child";
+  ]
+
 let family_regexp prefix =
   Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")
 
@@ -156,6 +176,11 @@ let generate_tables ~verbose ~debug_pattern template =
   List.iter enum_prefixes ~f:(fun prefix ->
       let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set enums ~key ~data:()));
+  let identities = Hashtbl.create (module Int) in
+  List.iter identity_prefixes ~f:(fun prefix ->
+      let table = init_table template (family_regexp prefix) in
+      Hashtbl.iter_keys table ~f:(fun key ->
+          Hashtbl.set identities ~key ~data:()));
   let renv_for key =
     let renv =
       if Hashtbl.mem alias_types key then
@@ -186,6 +211,7 @@ let generate_tables ~verbose ~debug_pattern template =
       procedures;
       callables;
       enums;
+      identities;
       enum_value_types;
       calls;
     ]
@@ -310,6 +336,15 @@ let generate_tables ~verbose ~debug_pattern template =
         bindings)
   in
 
+  let identity_table =
+    Hashtbl.mapi identities ~f:(fun ~key ~data:() ->
+        let (env, value) = Hashtbl.find_exn ty_table key in
+        let (env, bindings) =
+          Gen.Type.mk_identity_bindings (renv_for key) env ~value
+        in
+        Hashtbl.set ty_table ~key ~data:(env, value);
+        bindings)
+  in
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -341,7 +376,8 @@ let generate_tables ~verbose ~debug_pattern template =
     procedure_table,
     callable_table,
     call_table,
-    enum_table )
+    enum_table,
+    identity_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -356,6 +392,7 @@ let fill_in_template
     callable_table
     call_table
     enum_table
+    identity_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
@@ -424,6 +461,14 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
+  let template =
+    List.fold identity_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map identity_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
   let template = fill_table ty_str_table ~prefix:enum_value_prefix template in
   (* Replace longer prefixes before TYPE, which is their common suffix. *)
   template
@@ -463,7 +508,8 @@ let milner verbose debug_pattern seed template_path destination_path =
         procedure_table,
         callable_table,
         call_table,
-        enum_table ) =
+        enum_table,
+        identity_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -479,6 +525,7 @@ let milner verbose debug_pattern seed template_path destination_path =
       callable_table
       call_table
       enum_table
+      identity_table
       template
     |> add_missing_definitions defs
   in

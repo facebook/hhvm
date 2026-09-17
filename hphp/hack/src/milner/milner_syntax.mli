@@ -20,6 +20,10 @@ type expr =
       (** Compatibility with existing literal leaves and qualified names. *)
   | Local of local
   | New of string * expr list
+  | NewDynamic of local * expr list
+  | DynamicStaticMember of local * string
+  | Is of expr * string
+  | Nameof of string
   | Member of expr * string
   | StaticMember of string * string
   | EnumLabel of string * string

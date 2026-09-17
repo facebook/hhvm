@@ -4,10 +4,10 @@
 <<file: __EnableUnstableFeatures('case_types')>>
 <<file: __EnableUnstableFeatures('like_type_hints')>>
 
-function proj1(TYPE#1 $_): void {}
-function proj2(TYPE#2 $_): void {}
+function proj1(INTERSECTION_TYPE#1 $_): void {}
+function proj2(INTERSECTION_TYPE#2 $_): void {}
 
-function main((TYPE#1 & TYPE#2) $e): void {
+function main((INTERSECTION_TYPE#1 & INTERSECTION_TYPE#2) $e): void {
     proj1($e);
     proj2($e);
 }

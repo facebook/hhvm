@@ -105,6 +105,12 @@ module Type : sig
     value:t ->
     Environment.t * (string * string) list
 
+  val mk_identity_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->

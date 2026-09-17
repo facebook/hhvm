@@ -432,3 +432,35 @@ apply before generating that payload. Member references, labels, lookups,
 unwrapping, and variance conversions are separate expressions; templates state
 the member/label agreement and variance laws. Placeholder replacement observes
 identifier boundaries so operations from different families compose on one ID.
+
+## Class-name and class-pointer values
+
+Class identity types use consistent-constructor hierarchies with both classname
+and class-pointer covariance and pointer-to-name edges. Independent operations
+cover dynamic construction, late-static identity, and conversion. The two small
+laws check constructor/read agreement and class-name agreement across pointer
+and object views. All operations keep the shared payload and environment. Class
+identity types are excluded from reified positions, where Hack rejects them.
+
+## Class-pointer intersection projection
+
+[T288868918](https://www.internalfb.com/tasks/T288868918): the checker rejects
+this inhabited intersection projection with `Typing[4110]`:
+
+```hack
+<?hh
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
+class C {}
+class D extends C {}
+function project((classname<D> & class<C>) $x): class<C> { return $x; }
+```
+
+`D::class` can be returned at the intersection type. Pointer-only and same-class
+controls pass. The intersection normalizer currently produces
+`classname<C & D>`, losing the pointer constraint. `INTERSECTION_TYPE` excludes
+name/pointer head combinations through transparent wrappers and case branches;
+both intersection law templates use it. Required tuple slots and shape fields
+reproduce the lost constraint. Intersecting a pointer-containing tuple with a
+name-containing vec does too, so the guard follows vec elements when the other
+operand exposes a tuple. Vec/vec, shape/dict, function, and generic-container
+controls pass and do not receive that additional traversal.

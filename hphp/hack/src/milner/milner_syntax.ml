@@ -21,6 +21,10 @@ type expr =
   | Atom of string
   | Local of local
   | New of string * expr list
+  | NewDynamic of local * expr list
+  | DynamicStaticMember of local * string
+  | Is of expr * string
+  | Nameof of string
   | Member of expr * string
   | StaticMember of string * string
   | EnumLabel of string * string
@@ -63,6 +67,11 @@ let rec render_expr = function
   | Local local -> local
   | New (class_name, arguments) ->
     Format.sprintf "new %s(%s)" class_name (render_arguments arguments)
+  | NewDynamic (class_local, arguments) ->
+    Format.sprintf "new %s(%s)" class_local (render_arguments arguments)
+  | DynamicStaticMember (class_local, member) -> class_local ^ "::" ^ member
+  | Is (value, hint) -> Format.sprintf "(%s is %s)" (render_expr value) hint
+  | Nameof class_name -> "nameof " ^ class_name
   | Member (receiver, name) ->
     Format.sprintf "(%s)->%s" (render_expr receiver) name
   | StaticProperty (class_name, name) -> class_name ^ "::$" ^ name

@@ -256,3 +256,27 @@ use an explicit default context so they do not inherit a stricter context.
 completion witness. They retain the payload shared by `TYPE#N`, `expr#N`, and
 other operation families with that ID. Invocation and completion assertions stay
 in the template; constructing the closure does not execute it.
+
+## Callable subtyping and operations
+
+Function parameters may widen during subtyping while value results narrow.
+Bodies return a compatible parameter or an independent inhabitant. A separate
+callable family supplies `CALLABLE_TYPE#N`, `callable#N`, and `invoke#N`; its
+`CALLABLE_THROWS#N` oracle is independent of the procedure's `THROWS#N`.
+`invoke#N` is one typed application, including optional variadic unpacking.
+
+`CALL#N` is a bounded composition of value-preserving functions over the shared
+payload. Each rule adds one capture, higher-order call, inout update, variadic
+projection, or optional argument. The small template binds the payload once and
+checks the composed result. Generated expressions contain no assertions.
+
+`invoke_statement#N` binds a value result to a fresh local or emits a void/nothing
+call statement. This preserves the completion law without illegally discarding
+an `Awaitable` or assigning a `void` result.
+
+[T288960552](https://www.internalfb.com/tasks/T288960552) tracks a completeness
+bug in immediate variadic lambda calls. Two array literals followed by an
+iterator can make a legal `mixed ...$xs` call require an incompatible `dynamic`
+constraint. Binding the callee or unpacking the same arguments passes. Generated
+multi-element variadic tails therefore use `...vec[...]`; ordinary zero/one-tail
+calls remain available. The type and value witnesses are unchanged.

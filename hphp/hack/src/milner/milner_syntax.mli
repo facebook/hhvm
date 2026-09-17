@@ -23,6 +23,9 @@ type expr =
   | Member of expr * string
   | StaticMember of string * string
   | Call of expr * expr list
+  | Index of expr * expr
+  | Inout of expr
+  | Unpack of expr
   | Lambda of parameter list * string list * string * stmt list
   | Array of string * expr list
   | KeyValue of expr * expr
@@ -30,7 +33,12 @@ type expr =
   | Shape of (string * expr) list
   | Async of stmt list
 
-and parameter = string * local
+and parameter = {
+  hint: string;
+  local: local;
+  variadic: bool;
+  default: expr option;
+}
 
 and stmt =
   | Bind of local * expr
@@ -39,6 +47,8 @@ and stmt =
   | Return of expr option
   | Throw of expr
   | Block of stmt list
+
+val parameter : ?variadic:bool -> ?default:expr -> string -> local -> parameter
 
 val render_expr : expr -> string
 

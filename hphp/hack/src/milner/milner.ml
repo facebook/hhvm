@@ -77,6 +77,12 @@ let dependent_prefixes =
 
 let procedure_prefixes = ["PROCEDURE_TYPE"; "procedure"; "THROWS"]
 
+let callable_prefixes =
+  ["CALLABLE_TYPE"; "CALLABLE_THROWS"; "callable"; "invoke_statement"; "invoke"]
+
+let family_regexp prefix =
+  Pcre.regexp ("(?<![A-Za-z0-9_])" ^ prefix ^ "#([0-9]+)")
+
 let placeholder prefix key = prefix ^ "#" ^ string_of_int key
 
 let init_table contents placeholder =
@@ -99,23 +105,29 @@ let generate_tables ~verbose ~debug_pattern template =
   let intersection_types = init_table template intersection_type_regexp in
   let hierarchies = Hashtbl.create (module Int) in
   List.iter hierarchy_prefixes ~f:(fun prefix ->
-      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set hierarchies ~key ~data:()));
   let generics = Hashtbl.create (module Int) in
   List.iter generic_prefixes ~f:(fun prefix ->
-      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set generics ~key ~data:()));
   let dependents = Hashtbl.create (module Int) in
   List.iter dependent_prefixes ~f:(fun prefix ->
-      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set dependents ~key ~data:()));
   let procedures = Hashtbl.create (module Int) in
   List.iter procedure_prefixes ~f:(fun prefix ->
-      let table = init_table template (Pcre.regexp (prefix ^ "#([0-9]+)")) in
+      let table = init_table template (family_regexp prefix) in
       Hashtbl.iter_keys table ~f:(fun key ->
           Hashtbl.set procedures ~key ~data:()));
+  let callables = Hashtbl.create (module Int) in
+  List.iter callable_prefixes ~f:(fun prefix ->
+      let table = init_table template (family_regexp prefix) in
+      Hashtbl.iter_keys table ~f:(fun key ->
+          Hashtbl.set callables ~key ~data:()));
+  let calls = init_table template (family_regexp "CALL") in
   let renv_for key =
     if Hashtbl.mem alias_types key then
       Gen.ReadOnlyEnvironment.for_alias renv
@@ -138,6 +150,8 @@ let generate_tables ~verbose ~debug_pattern template =
       generics;
       dependents;
       procedures;
+      callables;
+      calls;
     ]
     ~f:(fun table ->
       Hashtbl.iter_keys table ~f:(fun key -> Hashtbl.set ty_table ~key ~data:()));
@@ -234,6 +248,22 @@ let generate_tables ~verbose ~debug_pattern template =
         bindings)
   in
 
+  let callable_table =
+    Hashtbl.mapi callables ~f:(fun ~key ~data:() ->
+        let (env, value) = Hashtbl.find_exn ty_table key in
+        let (env, bindings) =
+          Gen.Type.mk_callable_bindings (renv_for key) env ~value
+        in
+        Hashtbl.set ty_table ~key ~data:(env, value);
+        bindings)
+  in
+  let call_table =
+    Hashtbl.mapi calls ~f:(fun ~key ~data:() ->
+        let (_, ty) = Hashtbl.find_exn ty_table key in
+        Milner_expression.operation Milner_expression.Callable ~ty
+        |> Milner_syntax.render_expr)
+  in
+
   let gen_subty_from_ty_table ~key ~data:_ =
     let (env, ty) = Hashtbl.find_exn ty_table key in
     Gen.Type.subtype_of (renv_for key) env ty
@@ -262,7 +292,9 @@ let generate_tables ~verbose ~debug_pattern template =
     hierarchy_table,
     generic_table,
     dependent_table,
-    procedure_table )
+    procedure_table,
+    callable_table,
+    call_table )
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template
@@ -274,6 +306,8 @@ let fill_in_template
     generic_table
     dependent_table
     procedure_table
+    callable_table
+    call_table
     template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
@@ -314,6 +348,15 @@ let fill_in_template
         in
         fill_table table ~prefix contents)
   in
+  let template =
+    List.fold callable_prefixes ~init:template ~f:(fun contents prefix ->
+        let table =
+          Hashtbl.map callable_table ~f:(fun bindings ->
+              List.Assoc.find_exn bindings ~equal:String.equal prefix)
+        in
+        fill_table table ~prefix contents)
+  in
+  let template = fill_table call_table ~prefix:"CALL" template in
   let template =
     List.fold procedure_prefixes ~init:template ~f:(fun contents prefix ->
         let table =
@@ -357,7 +400,9 @@ let milner verbose debug_pattern seed template_path destination_path =
         hierarchy_table,
         generic_table,
         dependent_table,
-        procedure_table ) =
+        procedure_table,
+        callable_table,
+        call_table ) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
@@ -370,6 +415,8 @@ let milner verbose debug_pattern seed template_path destination_path =
       generic_table
       dependent_table
       procedure_table
+      callable_table
+      call_table
       template
     |> add_missing_definitions defs
   in

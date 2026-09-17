@@ -24,6 +24,9 @@ type expr =
   | Member of expr * string
   | StaticMember of string * string
   | Call of expr * expr list
+  | Index of expr * expr
+  | Inout of expr
+  | Unpack of expr
   | Lambda of parameter list * string list * string * stmt list
   | Array of string * expr list
   | KeyValue of expr * expr
@@ -31,7 +34,12 @@ type expr =
   | Shape of (string * expr) list
   | Async of stmt list
 
-and parameter = string * local
+and parameter = {
+  hint: string;
+  local: local;
+  variadic: bool;
+  default: expr option;
+}
 
 and stmt =
   | Bind of local * expr
@@ -41,7 +49,14 @@ and stmt =
   | Throw of expr
   | Block of stmt list
 
+let parameter ?(variadic = false) ?default hint local =
+  { hint; local; variadic; default }
+
 let rec render_expr = function
+  | Index (receiver, index) ->
+    "(" ^ render_expr receiver ^ ")[" ^ render_expr index ^ "]"
+  | Inout expression -> "inout " ^ render_expr expression
+  | Unpack expression -> "..." ^ render_expr expression
   | Atom source -> source
   | Local local -> local
   | New (class_name, arguments) ->
@@ -62,7 +77,16 @@ let rec render_expr = function
   | Async body -> "async { " ^ render_body body ^ " }"
   | Lambda (parameters, contexts, return_hint, body) ->
     let parameters =
-      List.map parameters ~f:(fun (hint, local) -> hint ^ " " ^ local)
+      List.map parameters ~f:(fun { hint; local; variadic; default } ->
+          hint
+          ^ " "
+          ^ (if variadic then
+              "..."
+            else
+              "")
+          ^ local
+          ^ Option.value_map default ~default:"" ~f:(fun expression ->
+                " = " ^ render_expr expression))
       |> String.concat ~sep:", "
     in
     Format.sprintf

@@ -89,11 +89,21 @@ module Type : sig
     value:t ->
     Environment.t * (string * string) list
 
+  (** A separate callable completion witness associated with the existing
+      payload binding. Does not replace the supplied payload type. *)
+  val mk_callable_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
     t ->
     Environment.t * (string * string) list
+
+  val mk_callable : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 
   (** Generate a nullary procedure that either returns void or throws. *)
   val mk_procedure : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t

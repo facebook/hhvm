@@ -891,11 +891,21 @@ and Type : sig
     value:t ->
     Environment.t * (string * string) list
 
+  (** A separate callable completion witness associated with the existing
+      payload binding. Does not replace the supplied payload type. *)
+  val mk_callable_bindings :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    value:t ->
+    Environment.t * (string * string) list
+
   val hierarchy_bindings :
     ReadOnlyEnvironment.t ->
     Environment.t ->
     t ->
     Environment.t * (string * string) list
+
+  val mk_callable : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 
   val mk_procedure : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 
@@ -1660,6 +1670,13 @@ end = struct
           in
           [Shape { fields; open_ }]
         | Function { parameters; variadic; return_ } ->
+          let widen_parameter ty =
+            if Random.bool () then
+              Mixed
+            else
+              ty
+          in
+          let parameters = List.map parameters ~f:widen_parameter in
           let return_ =
             match return_ with
             | ReturnsValue ty ->
@@ -1682,7 +1699,7 @@ end = struct
                 lazy (Some (driver renv Mixed))
               in
               Lazy.force @@ select [lazy None; variadic_subtype]
-            | Some ty -> Some ty
+            | Some ty -> Some (widen_parameter ty)
           in
           [Function { parameters; variadic; return_ }]
       end
@@ -2004,30 +2021,52 @@ end = struct
       let+ expr = expr_of renv env ty in
       Async [Return (Some expr)]
     | Function { parameters; variadic; return_ } ->
+      let named_parameters =
+        List.map parameters ~f:(fun ty -> (ty, Syntax.fresh_local "argument"))
+      in
+      let rest =
+        Option.map variadic ~f:(fun ty -> (ty, Syntax.fresh_local "rest"))
+      in
       let parameters =
-        List.map parameters ~f:(fun ty ->
-            (show ty, Milner_syntax.fresh_local "argument"))
+        List.map named_parameters ~f:(fun (ty, local) ->
+            Syntax.parameter (show ty) local)
         @ Option.to_list
-            (Option.map variadic ~f:(fun ty ->
-                 (show ty ^ " ...", Milner_syntax.fresh_local "rest")))
+            (Option.map rest ~f:(fun (ty, local) ->
+                 Syntax.parameter ~variadic:true (show ty) local))
+      in
+      let locals =
+        named_parameters
+        @ Option.to_list
+            (Option.map rest ~f:(fun (ty, local) -> (Vec ty, local)))
       in
       let open Option.Let_syntax in
-      let+ body =
+      let+ result =
         match return_ with
         | ReturnsValue ty ->
-          Option.map (expr_of renv env ty) ~f:(fun value ->
-              [Milner_syntax.Return (Some value)])
-        | ReturnsVoid -> Some [Milner_syntax.Return None]
+          let matching_arguments =
+            List.filter_map locals ~f:(fun (parameter, local) ->
+                if equal ty parameter then
+                  Some (Syntax.Local local)
+                else
+                  None)
+          in
+          let value =
+            if (not (List.is_empty matching_arguments)) && Random.bool () then
+              Some (select matching_arguments)
+            else
+              expr_of renv env ty
+          in
+          Option.map value ~f:(fun value -> [Syntax.Return (Some value)])
+        | ReturnsVoid -> Some [Syntax.Return None]
         | ReturnsNothing ->
           Some
             [
-              Milner_syntax.Throw
-                (Milner_syntax.New
-                   ( "Exception",
-                     [Milner_syntax.Atom "'milner expected nothing'"] ));
+              Syntax.Throw
+                (Syntax.New
+                   ("Exception", [Syntax.Atom "'milner expected nothing'"]));
             ]
       in
-      Milner_syntax.Lambda (parameters, ["defaults"], show_return return_, body)
+      Syntax.Lambda (parameters, ["defaults"], show_return return_, result)
     | Mixed
     | Nonnull
     | Option _
@@ -2040,6 +2079,34 @@ end = struct
 
   let inhabitant_of renv env ty =
     inhabitant renv env ty |> Milner_syntax.render_expr
+
+  let callable_application renv env ty ~value =
+    match ty with
+    | Function { parameters; variadic; _ } ->
+      let tail =
+        Option.value_map variadic ~default:[] ~f:(fun ty ->
+            List.init (geometric_between 0 max_container_length) ~f:(fun _ ->
+                inhabitant renv env ty))
+      in
+      let arguments =
+        let positional = List.map parameters ~f:(inhabitant renv env) in
+        match variadic with
+        | Some _ ->
+          let unpack = Random.bool () in
+          (* T288960552: direct multi-tail calls can infer invalid dynamic bounds. *)
+          if unpack || List.length tail > 1 then
+            positional @ [Syntax.Unpack (Syntax.Array ("vec", tail))]
+          else
+            positional @ tail
+        | None -> positional
+      in
+      Syntax.Call (value, arguments)
+    | _ -> invalid_arg "callable_application expects a generated function"
+
+  let callable_throws = function
+    | Function { return_ = ReturnsNothing; _ } -> true
+    | Function _ -> false
+    | _ -> invalid_arg "callable_throws expects a generated function"
 
   let mk_arraykey (renv : REnv.t) (env : Env.t) =
     let renv = REnv.{ renv with pick_immediately_inhabited = false } in
@@ -2352,10 +2419,16 @@ end = struct
     in
     (env, ty)
 
-  and mk (renv : REnv.t) (env : Env.t) ~(complexity : int) ~(depth : int option)
-      : Env.t * t =
+  and mk
+      ?kind
+      (renv : REnv.t)
+      (env : Env.t)
+      ~(complexity : int)
+      ~(depth : int option) : Env.t * t =
     let depth = Option.value ~default:0 depth in
-    let kind = Kind.pick ~complexity renv in
+    let kind =
+      Option.value_or_thunk kind ~default:(fun () -> Kind.pick ~complexity renv)
+    in
     let mk ?(for_alias_def = false) renv env =
       mk REnv.{ renv with for_alias_def } env ~depth:(Some depth)
     in
@@ -2605,8 +2678,11 @@ end = struct
         | 0 -> (env, ReturnsVoid)
         | 1 -> (env, ReturnsNothing)
         | _ ->
-          let (env, ty) = mk ~complexity:(complexity - 1) renv env in
-          (env, ReturnsValue ty)
+          if (not (List.is_empty parameters)) && Random.bool () then
+            (env, ReturnsValue (select parameters))
+          else
+            let (env, ty) = mk ~complexity:(complexity - 1) renv env in
+            (env, ReturnsValue ty)
       in
       let (env, variadic) =
         if Random.bool () then
@@ -2678,7 +2754,32 @@ end = struct
     let (env, ty) = declare_dependent env ~value_type:value ~bound in
     (env, dependent_witness_of env ty)
 
-  let mk = mk ~depth:None ~complexity:default_complexity
+  let mk_callable renv env =
+    mk ~kind:Kind.Function renv env ~depth:None ~complexity:default_complexity
+
+  let mk_callable_bindings renv env ~value:_ =
+    let (env, callable_type) = mk_callable renv env in
+    let callable = inhabitant renv env callable_type in
+    let invocation =
+      callable_application renv env callable_type ~value:callable
+    in
+    let statement =
+      match callable_type with
+      | Function { return_ = ReturnsValue _; _ } ->
+        Syntax.Bind (Syntax.fresh_local "result", invocation)
+      | Function _ -> Syntax.Eval invocation
+      | _ -> invalid_arg "Expected a generated callable"
+    in
+    ( env,
+      [
+        ("CALLABLE_TYPE", show callable_type);
+        ("callable", Syntax.render_expr callable);
+        ("invoke", Syntax.render_expr invocation);
+        ("invoke_statement", Syntax.render_stmt statement);
+        ("CALLABLE_THROWS", string_of_bool (callable_throws callable_type));
+      ] )
+
+  let mk renv env = mk renv env ~depth:None ~complexity:default_complexity
 
   type operation = {
     parameters: t list;
@@ -2770,7 +2871,7 @@ end = struct
     in
     let dispatch =
       Lambda
-        ( [(show ancestor, object_)],
+        ( [parameter (show ancestor) object_],
           [],
           "int",
           [
@@ -2779,14 +2880,14 @@ end = struct
     in
     let construct =
       Lambda
-        ( [(show value_type, value)],
+        ( [parameter (show value_type) value],
           ["write_props"],
           show concrete,
           [Return (Some (New (show concrete, [Local value])))] )
     in
     let read =
       Lambda
-        ( [(show ancestor, object_)],
+        ( [parameter (show ancestor) object_],
           [],
           show value_type,
           [
@@ -2796,7 +2897,7 @@ end = struct
     in
     let write =
       Lambda
-        ( [(show ancestor, object_); (show value_type, value)],
+        ( [parameter (show ancestor) object_; parameter (show value_type) value],
           ["write_props"],
           "void",
           [
@@ -2812,7 +2913,7 @@ end = struct
     in
     let identity =
       Lambda
-        ( [(show value_type, value)],
+        ( [parameter (show value_type) value],
           [],
           show value_type,
           [
@@ -2830,7 +2931,7 @@ end = struct
     in
     let interface_read =
       Lambda
-        ( [(contract.Env.reader, object_)],
+        ( [parameter contract.Env.reader object_],
           [],
           show value_type,
           [
@@ -2840,7 +2941,10 @@ end = struct
     in
     let interface_write =
       Lambda
-        ( [(contract.Env.writer, object_); (show value_type, value)],
+        ( [
+            parameter contract.Env.writer object_;
+            parameter (show value_type) value;
+          ],
           ["write_props"],
           "void",
           [
@@ -2852,7 +2956,7 @@ end = struct
     let trait_read =
       let method_name = (Env.get_nominal env concrete_name).Env.dispatch in
       Lambda
-        ( [(show concrete, object_)],
+        ( [parameter (show concrete) object_],
           [],
           show value_type,
           [Return (Some (Call (Member (Local object_, method_name), [])))] )
@@ -2868,7 +2972,7 @@ end = struct
     in
     let transform =
       Lambda
-        ( [(show value_type, value)],
+        ( [parameter (show value_type) value],
           ["write_props"],
           show value_type,
           [

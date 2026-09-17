@@ -233,12 +233,17 @@ module rec Environment : sig
     getter: string;
     setter: string;
     probe: string;
+    reader: string;
+    writer: string;
+    read_function: string;
+    write_function: string;
   }
 
   type nominal_info = {
     constructor: Type.t list;
         (** Closed parameter types whose definitions precede this hierarchy. *)
     contract: member_contract;
+    dispatch: string;
     identity: string;
     probe_value: int;
   }
@@ -279,11 +284,16 @@ end = struct
     getter: string;
     setter: string;
     probe: string;
+    reader: string;
+    writer: string;
+    read_function: string;
+    write_function: string;
   }
 
   type nominal_info = {
     constructor: Type.t list;
     contract: member_contract;
+    dispatch: string;
     identity: string;
     probe_value: int;
   }
@@ -461,10 +471,13 @@ and Definition : sig
   val classish :
     name:string ->
     parent:(Kind.classish * string * Type.generic option) option ->
+    interfaces:string list ->
     generic:Type.generic option ->
     members:t list ->
     Kind.classish ->
     t
+
+  val member_interfaces : Environment.member_contract -> t list
 
   val stateful_members :
     Environment.member_contract ->
@@ -473,6 +486,15 @@ and Definition : sig
     identity:string ->
     probe_value:int ->
     t list
+
+  val member_trait :
+    Environment.member_contract ->
+    name:string ->
+    parent:(Kind.classish * string * Type.generic option) option ->
+    dispatch:string ->
+    t
+
+  val use_trait : string -> t
 
   val alias : name:string -> Type.t -> t
 
@@ -489,28 +511,37 @@ end = struct
   let typeconst ~name aliased =
     Format.sprintf "const type %s = %s;" name (Type.show aliased)
 
+  let show_application name generic =
+    match generic with
+    | Some generic ->
+      Format.sprintf "%s<%s>" name Type.(show generic.instantiation)
+    | None -> name
+
   let classish
       ~name
       ~(parent : (Kind.classish * string * Type.generic option) option)
+      ~interfaces
       ~(generic : Type.generic option)
       ~(members : t list)
       kind =
-    let parent =
-      match parent with
-      | Some (parent_kind, name, generic) -> begin
-        let generic =
-          match generic with
-          | Some generic ->
-            Format.sprintf "<%s>" Type.(show generic.instantiation)
-          | None -> ""
-        in
-        match parent_kind with
-        | Kind.Interface when not (Kind.equal_classish kind Kind.Interface) ->
-          Format.sprintf "implements %s%s " name generic
-        | _ -> Format.sprintf "extends %s%s " name generic
-      end
-      | None -> ""
+    let (extends, implements) =
+      match (kind, parent) with
+      | (Kind.Interface, Some (Kind.Interface, name, generic)) ->
+        (show_application name generic :: interfaces, [])
+      | (Kind.Interface, None) -> (interfaces, [])
+      | (_, Some (Kind.Interface, name, generic)) ->
+        ([], show_application name generic :: interfaces)
+      | (_, Some (_, name, generic)) ->
+        ([show_application name generic], interfaces)
+      | (_, None) -> ([], interfaces)
     in
+    let clause keyword names =
+      if List.is_empty names then
+        ""
+      else
+        Format.sprintf "%s %s " keyword (String.concat ~sep:", " names)
+    in
+    let parent = clause "extends" extends ^ clause "implements" implements in
     let generic =
       match generic with
       | Some Type.{ is_reified; _ } ->
@@ -536,8 +567,47 @@ end = struct
     in
     Format.sprintf "%s %s%s %s%s" kind name generic parent body
 
+  let member_interfaces
+      Environment.
+        {
+          value_type;
+          getter;
+          setter;
+          reader;
+          writer;
+          read_function;
+          write_function;
+          property = _;
+          probe = _;
+        } =
+    let value_type = Type.show value_type in
+    [
+      Format.sprintf
+        "interface %s { public function %s()[]: %s; }"
+        reader
+        getter
+        value_type;
+      Format.sprintf
+        "interface %s { public function %s(%s $value)[write_props]: void; }"
+        writer
+        setter
+        value_type;
+      Format.sprintf
+        "function %s(%s $reader)[]: %s { return $reader->%s(); }"
+        read_function
+        reader
+        value_type
+        getter;
+      Format.sprintf
+        "function %s(%s $writer, %s $value)[write_props]: void { $writer->%s($value); }"
+        write_function
+        writer
+        value_type
+        setter;
+    ]
+
   let stateful_members
-      Environment.{ value_type; property; getter; setter; probe }
+      Environment.{ value_type; property; getter; setter; probe; _ }
       ~inherited
       ~omit_getter_override
       ~identity
@@ -588,6 +658,27 @@ end = struct
           value_type
           value_type;
       ]
+
+  let member_trait
+      Environment.{ value_type; getter; reader; _ } ~name ~parent ~dispatch =
+    let parent =
+      match parent with
+      | Some (Kind.(Class | AbstractClass), name, generic) ->
+        Format.sprintf "require extends %s; " (show_application name generic)
+      | Some (Kind.Interface, _, _)
+      | None ->
+        ""
+    in
+    Format.sprintf
+      "trait %s { %srequire implements %s; public function %s()[]: %s { return $this->%s(); } }"
+      name
+      parent
+      reader
+      dispatch
+      (Type.show value_type)
+      getter
+
+  let use_trait name = Format.sprintf "use %s;" name
 
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
@@ -1690,6 +1781,29 @@ end = struct
     in
     visit TypeSet.empty ~inside_case:false ~nullable:false ty
 
+  let make_member_contract env value_type =
+    let contract =
+      Env.
+        {
+          value_type;
+          property = fresh "value";
+          getter = fresh "get";
+          setter = fresh "set";
+          probe = fresh "probe";
+          reader = fresh "Reader";
+          writer = fresh "Writer";
+          read_function = fresh "read";
+          write_function = fresh "write";
+        }
+    in
+    let env =
+      List.fold
+        (Definition.member_interfaces contract)
+        ~init:env
+        ~f:Env.add_definition
+    in
+    (env, contract)
+
   let rec mk_classish
       (renv : REnv.t)
       (env : Env.t)
@@ -1728,17 +1842,7 @@ end = struct
               ~complexity:(complexity - 1)
               ~depth:(Some (depth + 1))
         in
-        let contract =
-          Env.
-            {
-              value_type;
-              property = fresh "value";
-              getter = fresh "get";
-              setter = fresh "set";
-              probe = fresh "probe";
-            }
-        in
-        (env, contract)
+        make_member_contract env value_type
     in
     let gen_children env ~parent n =
       let (kind, name, generic) = parent in
@@ -1805,11 +1909,21 @@ end = struct
         (env, None)
     in
     let ty = Classish { kind; name; generic } in
+    let interfaces = Env.[contract.reader; contract.writer] in
+    let env =
+      List.fold interfaces ~init:env ~f:(fun env name ->
+          Env.record_subtype
+            env
+            ~super:(Classish { kind = Kind.Interface; name; generic = None })
+            ~sub:ty)
+    in
     let (env, members) =
       match kind with
       | Kind.Interface -> (env, [])
       | Kind.Class
       | Kind.AbstractClass ->
+        let trait_name = fresh "Trait" in
+        let dispatch = fresh "dispatch" in
         let identity = fresh "identity" in
         let probe_value = fresh_id () in
         let info =
@@ -1819,9 +1933,14 @@ end = struct
               contract;
               identity;
               probe_value;
+              dispatch;
             }
         in
         let env = Env.add_nominal env ~name info in
+        let env =
+          Env.add_definition env
+          @@ Definition.member_trait contract ~name:trait_name ~parent ~dispatch
+        in
         let inherited =
           match parent with
           | Some (Kind.(Class | AbstractClass), _, _) -> true
@@ -1830,20 +1949,21 @@ end = struct
             false
         in
         let members =
-          Definition.stateful_members
-            contract
-            ~inherited
-            ~omit_getter_override:
-              (has_nullable_enum_case_return env contract.Env.value_type)
-            ~identity
-            ~probe_value
+          Definition.use_trait trait_name
+          :: Definition.stateful_members
+               contract
+               ~inherited
+               ~omit_getter_override:
+                 (has_nullable_enum_case_return env contract.Env.value_type)
+               ~identity
+               ~probe_value
         in
         (env, members)
     in
     let env = gen_children env ~parent:(kind, name, generic) num_of_children in
     let env =
       Env.add_definition env
-      @@ Definition.classish kind ~name ~parent ~generic ~members
+      @@ Definition.classish kind ~name ~parent ~interfaces ~generic ~members
     in
     (env, ty)
 
@@ -1930,6 +2050,7 @@ end = struct
         @@ Definition.classish
              ~name:class_name
              ~parent:None
+             ~interfaces:[]
              ~generic:None
              ~members:[typeconst_def]
              Kind.Class
@@ -2130,16 +2251,7 @@ end = struct
 
   let hierarchy_bindings renv env value_type =
     let open Milner_syntax in
-    let contract =
-      Env.
-        {
-          value_type;
-          property = fresh "value";
-          getter = fresh "get";
-          setter = fresh "set";
-          probe = fresh "probe";
-        }
-    in
+    let (env, contract) = make_member_contract env value_type in
     let (env, root) =
       mk_classish
         renv
@@ -2243,11 +2355,42 @@ end = struct
         apply = (fun arguments -> Call (callee, arguments));
       }
     in
+    let interface_read =
+      Lambda
+        ( [(contract.Env.reader, object_)],
+          [],
+          show value_type,
+          [
+            Return
+              (Some (Call (Atom contract.Env.read_function, [Local object_])));
+          ] )
+    in
+    let interface_write =
+      Lambda
+        ( [(contract.Env.writer, object_); (show value_type, value)],
+          ["write_props"],
+          "void",
+          [
+            Eval
+              (Call
+                 (Atom contract.Env.write_function, [Local object_; Local value]));
+          ] )
+    in
+    let trait_read =
+      let method_name = (Env.get_nominal env concrete_name).Env.dispatch in
+      Lambda
+        ( [(show concrete, object_)],
+          [],
+          show value_type,
+          [Return (Some (Call (Member (Local object_, method_name), [])))] )
+    in
     let operations =
       [
         operation [value_type] concrete construct;
         operation [concrete] value_type read;
         operation [value_type] value_type identity;
+        operation [concrete] value_type trait_read;
+        operation [concrete] value_type interface_read;
       ]
     in
     let transform =
@@ -2274,6 +2417,9 @@ end = struct
           ("identity", identity);
           ("hierarchy", transform);
           ("dispatch", dispatch);
+          ("trait_read", trait_read);
+          ("interface_read", interface_read);
+          ("interface_write", interface_write);
         ]
         ~f:(fun (prefix, expression) -> (prefix, render_expr expression))
     in

@@ -42,7 +42,12 @@ let hierarchy_prefixes =
     "hierarchy";
     "dispatch";
     "DISPATCH";
+    "trait_read";
+    "interface_read";
+    "interface_write";
   ]
+  |> List.sort ~compare:(fun left right ->
+         Int.compare (String.length right) (String.length left))
 
 let placeholder prefix key = prefix ^ "#" ^ string_of_int key
 

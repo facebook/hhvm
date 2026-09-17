@@ -162,7 +162,7 @@ and `Map` iterators. Keys satisfy the arraykey bound, and vec witnesses require
 an admitted int key type. Shared runtime representations are treated
 conservatively when checking case-type disjointness.
 
-## Stateful class hierarchies
+## Stateful hierarchies, traits and interfaces
 
 Class hierarchies share a typed constructor/member contract. Construction only
 constructs the object; it does not run a test scenario. Expressions compose
@@ -183,6 +183,9 @@ values vary, but two inhabitants need not differ, especially for singleton types
 The put/get law remains valid in either case; seeds with distinct values make a
 dropped write observable.
 
+`trait_read#1`, `interface_read#1`, and `interface_write#1` use the same
+contract through trait and interface views. They are independent operations,
+and the value-preserving calls also participate in expression composition.
 
 ## Nullable enum case returns in getter overrides
 

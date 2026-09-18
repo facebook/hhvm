@@ -1,0 +1,8 @@
+ERROR: File "blobkv_no_delete.php", line 5, characters 12-17:
+No instance method `delete` in `HH\BlobKV\Writer` (Typing[4053])
+  File "ext_blobkv-writer.hhi", line 7, characters 19-23:
+  Did you mean `write` instead?
+  File "blobkv_no_delete.php", line 4, characters 17-32:
+  This is why I think it is an object of type HH\BlobKV\Writer
+  File "ext_blobkv-writer.hhi", line 5, characters 13-18:
+  Declaration of `HH\BlobKV\Writer` is here

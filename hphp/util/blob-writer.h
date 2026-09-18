@@ -26,6 +26,9 @@
 #include <fmt/core.h>
 #include <folly/system/MemoryMapping.h>
 #include <magic_enum/magic_enum.hpp>
+#include <limits>
+#include <stdexcept>
+#include <utility>
 
 namespace HPHP {
 
@@ -35,21 +38,38 @@ using Magic = std::array<char, 4>;
 using Version = uint16_t;
 
 enum class ReadMode { PReadOnly, MMap };
+enum class ErrorMode { Assert, Throw };
+
+template <typename... Args>
+[[noreturn]] inline void fail(
+  ErrorMode mode,
+  const char* format,
+  Args&&... args
+) {
+  if (mode == ErrorMode::Throw) {
+    throw std::runtime_error(
+      fmt::format(fmt::runtime(format), std::forward<Args>(args)...)
+    );
+  }
+  always_assert_flog(false, format, std::forward<Args>(args)...);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Wrapper around file descriptor for automatic closing and wrapping
 // operations in a nicer interface.
 struct FD {
   FD() : m_fd{-1} {}
-  FD(const std::string& path, int flags) : m_path{path}
+  FD(
+    const std::string& path,
+    int flags,
+    ErrorMode errorMode = ErrorMode::Assert
+  ) : m_path{path}
+    , m_errorMode{errorMode}
   {
     auto fd = folly::openNoInt(m_path.c_str(), flags, 0644);
     if (fd < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Unable to open {}: {}", m_path, error
-      );
+      fail(m_errorMode, "Unable to open {}: {}", m_path, error);
     }
     m_fd = fd;
   }
@@ -62,16 +82,20 @@ struct FD {
     if (written == size) return;
     if (written < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
+      fail(
+        m_errorMode,
         "Failed writing {} bytes to {}: {}",
-        size, m_path, error
+        size,
+        m_path,
+        error
       );
     }
-    always_assert_flog(
-      false,
+    fail(
+      m_errorMode,
       "Partial write to {} (expected {}, actual {})",
-      m_path, size, written
+      m_path,
+      size,
+      written
     );
   }
 
@@ -86,16 +110,20 @@ struct FD {
     if (read == size) return;
     if (read < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
+      fail(
+        m_errorMode,
         "Failed reading {} bytes from {}: {}",
-        size, m_path, error
+        size,
+        m_path,
+        error
       );
     }
-    always_assert_flog(
-      false,
+    fail(
+      m_errorMode,
       "Partial read from {} (expected {}, actual {})",
-      m_path, size, read
+      m_path,
+      size,
+      read
     );
   }
 
@@ -111,16 +139,22 @@ struct FD {
     if (read == size) return;
     if (read < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
+      fail(
+        m_errorMode,
         "Failed reading {} bytes from {} at {}: {}",
-        size, m_path, offset, error
+        size,
+        m_path,
+        offset,
+        error
       );
     }
-    always_assert_flog(
-      false,
+    fail(
+      m_errorMode,
       "Partial read from {} at {} (expected {}, actual {})",
-      m_path, offset, size, read
+      m_path,
+      offset,
+      size,
+      read
     );
   }
 
@@ -129,16 +163,20 @@ struct FD {
     if (actualOffset == offset) return;
     if (actualOffset < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
+      fail(
+        m_errorMode,
         "Failed to seek to {} in {}: {}",
-        offset, m_path, error
+        offset,
+        m_path,
+        error
       );
     }
-    always_assert_flog(
-      false,
+    fail(
+      m_errorMode,
       "Partial seek in {} (expected {}, actual {})",
-      m_path, offset, actualOffset
+      m_path,
+      offset,
+      actualOffset
     );
   }
 
@@ -146,10 +184,11 @@ struct FD {
     auto const size = ::lseek(m_fd, 0, SEEK_END);
     if (size >= 0) return size;
     auto const error = folly::errnoStr(errno);
-    always_assert_flog(
-      false,
+    fail(
+      m_errorMode,
       "Failed to seek to end of {}: {}",
-      m_path, error
+      m_path,
+      error
     );
   }
 
@@ -161,11 +200,16 @@ struct FD {
   Blob readBlob(size_t offset, size_t size) const {
     if (m_mapping) {
       auto range = m_mapping->range();
-      always_assert_flog(
-        offset + size <= range.size(),
-        "readBlob out of bounds in {}: offset {} + size {} > mapLen {}",
-        m_path, offset, size, range.size()
-      );
+      if (size > range.size() || offset > range.size() - size) {
+        fail(
+          m_errorMode,
+          "readBlob out of bounds in {}: offset {} + size {} > mapLen {}",
+          m_path,
+          offset,
+          size,
+          range.size()
+        );
+      }
       BlobDecoder decoder{
         reinterpret_cast<const char*>(range.data() + offset), size};
       return { nullptr, std::move(decoder) };
@@ -183,6 +227,7 @@ struct FD {
     : m_fd{o.m_fd}
     , m_path{std::move(o.m_path)}
     , m_mapping{std::move(o.m_mapping)}
+    , m_errorMode{o.m_errorMode}
   {
     o.m_fd = -1;
   }
@@ -191,12 +236,15 @@ struct FD {
     std::swap(m_fd, o.m_fd);
     std::swap(m_path, o.m_path);
     std::swap(m_mapping, o.m_mapping);
+    std::swap(m_errorMode, o.m_errorMode);
     return *this;
   }
 
   // mmap the file for zero-copy reads. CHECKs on failure.
   void enableMmap(size_t fileSize) {
-    always_assert(fileSize > 0);
+    if (fileSize == 0) {
+      fail(m_errorMode, "Unable to mmap empty file {}", m_path);
+    }
     m_mapping.emplace(m_fd, 0, fileSize);
   }
 
@@ -214,6 +262,7 @@ private:
   int m_fd;
   std::string m_path;
   std::optional<folly::MemoryMapping> m_mapping;
+  ErrorMode m_errorMode{ErrorMode::Assert};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -297,14 +346,50 @@ struct Writer {
   std::string destFilename;
   uint64_t sizeHeaderOffset = 0;
   SizeHeader<Chunk, Index> sizes;
+  ErrorMode errorMode{ErrorMode::Assert};
 
-  void header(const std::string& path, const Magic& magic, Version version) {
+  void header(
+    const std::string& path,
+    const Magic& magic,
+    Version version,
+    ErrorMode mode = ErrorMode::Assert
+  ) {
+    headerImpl(
+      path,
+      magic,
+      version,
+      O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY,
+      mode
+    );
+  }
+
+  void exclusiveHeader(
+    const std::string& path,
+    const Magic& magic,
+    Version version,
+    ErrorMode mode = ErrorMode::Assert
+  ) {
+    headerImpl(
+      path,
+      magic,
+      version,
+      O_CLOEXEC | O_CREAT | O_EXCL | O_WRONLY,
+      mode
+    );
+  }
+
+private:
+  void headerImpl(
+    const std::string& path,
+    const Magic& magic,
+    Version version,
+    int openFlags,
+    ErrorMode mode
+  ) {
+    errorMode = mode;
     sourceFilename = fmt::format("{}.part", path);
     destFilename = path;
-    fd = Blob::FD{
-      sourceFilename,
-      O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY
-    };
+    fd = Blob::FD{sourceFilename, openFlags, errorMode};
 
     fd.write(magic.data(), sizeof(Magic));
     fd.writeInt(version);
@@ -323,6 +408,7 @@ struct Writer {
     sizes.write(fd);
   }
 
+public:
   void write(Chunk chunk, const void* data, size_t size) {
     fd.write(data, size);
     sizes.add(chunk, size);
@@ -401,6 +487,17 @@ struct Writer {
         dataBlob(item.key)(*(item.value));
       }
     }
+    if (errorMode == ErrorMode::Throw &&
+        dataBlob.size() > std::numeric_limits<uint32_t>::max()) {
+      fail(
+        errorMode,
+        "Hash-map index data for {} is {} bytes, exceeding the {}-byte "
+        "addressable limit",
+        destFilename,
+        dataBlob.size(),
+        std::numeric_limits<uint32_t>::max()
+      );
+    }
     indexBlob.fixedWidth(uint32_t(dataBlob.size()));
 
     fd.write(indexBlob.data(), indexBlob.size());
@@ -462,10 +559,12 @@ struct Writer {
     // Signify completion of the file by renaming it to its final name.
     if (::rename(sourceFilename.c_str(), destFilename.c_str()) < 0) {
       auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
+      fail(
+        errorMode,
         "Unable to rename {} to {}: {}",
-        sourceFilename, destFilename, error
+        sourceFilename,
+        destFilename,
+        error
       );
     }
   }
@@ -508,30 +607,35 @@ struct Reader {
   uint64_t fileSize = 0;
   SizeHeader<Chunk, Index> sizes;
   Offsets<Chunk, Index> offsets;
+  ErrorMode errorMode{ErrorMode::Assert};
 
   void init(const std::string& p, const Magic& expectedMagic,
-              Version expectedVersion,
-              ReadMode mode = ReadMode::PReadOnly) {
+            Version expectedVersion,
+            ReadMode mode = ReadMode::PReadOnly,
+            ErrorMode errors = ErrorMode::Assert) {
     path = p;
-    fd = Blob::FD{path, O_CLOEXEC | O_RDONLY};
+    errorMode = errors;
+    fd = Blob::FD{path, O_CLOEXEC | O_RDONLY, errorMode};
 
     {
       Magic magic;
       fd.read(magic.data(), sizeof(magic));
-      always_assert_flog(
-        magic == expectedMagic,
-        "Incorrect magic bytes in {}",
-        path
-      );
+      if (magic != expectedMagic) {
+        fail(errorMode, "Incorrect magic bytes in {}", path);
+      }
     }
 
     {
       auto const version = fd.readInt<Version>();
-      always_assert_flog(
-        version == expectedVersion,
-        "Unsupported version in {} (expected {}, got {})",
-        path, expectedVersion, version
-      );
+      if (version != expectedVersion) {
+        fail(
+          errorMode,
+          "Unsupported version in {} (expected {}, got {})",
+          path,
+          expectedVersion,
+          version
+        );
+      }
     }
 
     auto const repoSchemaSize = fd.readInt<uint8_t>();
@@ -539,11 +643,15 @@ struct Reader {
       std::string repoSchema;
       repoSchema.resize(repoSchemaSize);
       fd.read(repoSchema.data(), repoSchema.size());
-      always_assert_flog(
-        repoSchema == repoSchemaId(),
-        "Mismatched repo-schema in {} (expected {}, got {})",
-        path, repoSchemaId(), repoSchema
-      );
+      if (repoSchema != repoSchemaId()) {
+        fail(
+          errorMode,
+          "Mismatched repo-schema in {} (expected {}, got {})",
+          path,
+          repoSchemaId(),
+          repoSchema
+        );
+      }
     }
 
     {
@@ -557,12 +665,16 @@ struct Reader {
 
       offset = offsets.init(offset, sizes);
 
-      always_assert_flog(
-        offset == fileSize,
-        "Corrupted size table for {}: "
-        "calculated end of data offset {} does not match file size {}",
-        path, offset, fileSize
-      );
+      if (offset != fileSize) {
+        fail(
+          errorMode,
+          "Corrupted size table for {}: "
+          "calculated end of data offset {} does not match file size {}",
+          path,
+          offset,
+          fileSize
+        );
+      }
     }
 
     if (mode == ReadMode::MMap) {
@@ -616,8 +728,24 @@ struct Reader {
     indexBlob.decoder.fixedWidth(currentOffset);
     indexBlob.decoder.fixedWidth(nextOffset);
 
-    assertx(currentOffset <= map.dataBounds.size);
-    assertx(nextOffset <= map.dataBounds.size);
+    if (errorMode == ErrorMode::Throw) {
+      if (nextOffset < currentOffset ||
+          currentOffset > map.dataBounds.size ||
+          nextOffset > map.dataBounds.size) {
+        fail(
+          errorMode,
+          "Corrupt hash-map index in {}: bucket data range [{}, {}] is out of "
+          "bounds (index data size {})",
+          path,
+          currentOffset,
+          nextOffset,
+          map.dataBounds.size
+        );
+      }
+    } else {
+      assertx(currentOffset <= map.dataBounds.size);
+      assertx(nextOffset <= map.dataBounds.size);
+    }
 
     if (currentOffset == nextOffset) {
       return {};
@@ -668,49 +796,79 @@ struct Reader {
   void check(Chunk chunk, size_t limit) {
     auto size = sizes.get(chunk);
     auto offset = offsets.get(chunk);
-    always_assert_flog(
-      limit == 0 || size <= limit,
-      "Invalid section size for {}: Chunk {} is {} (larger than limit of {})",
-      path, uint32_t(chunk), size, limit
-    );
-    always_assert_flog(
-      offset <= fileSize,
-      "Corrupted size table for {}: "
-      "Chunk {} starts at {} (is greater than file size {})",
-      path, uint32_t(chunk), offset, fileSize
-    );
+    if (limit != 0 && size > limit) {
+      fail(
+        errorMode,
+        "Invalid section size for {}: Chunk {} is {} (larger than limit of {})",
+        path,
+        uint32_t(chunk),
+        size,
+        limit
+      );
+    }
+    if (offset > fileSize) {
+      fail(
+        errorMode,
+        "Corrupted size table for {}: "
+        "Chunk {} starts at {} (is greater than file size {})",
+        path,
+        uint32_t(chunk),
+        offset,
+        fileSize
+      );
+    }
   }
 
   void check(Index index, size_t indexLimit, size_t dataLimit) {
     auto index_int = uint32_t(index);
     auto indexSize = sizes.indexes[index_int * 2];
     auto indexOffset = offsets.indexes[index_int * 2];
-    always_assert_flog(
-      indexSize <= indexLimit,
-      "Invalid section size for {}: Index {} is {} (larger than limit of {})",
-      path, index_int, indexSize, indexLimit
-    );
-    always_assert_flog(
-      indexOffset <= fileSize,
-      "Corrupted size table for {}: "
-      "Index {} starts at {} (is greater than file size {})",
-      path, index_int, indexOffset, fileSize
-    );
+    if (indexSize > indexLimit) {
+      fail(
+        errorMode,
+        "Invalid section size for {}: Index {} is {} (larger than limit of {})",
+        path,
+        index_int,
+        indexSize,
+        indexLimit
+      );
+    }
+    if (indexOffset > fileSize) {
+      fail(
+        errorMode,
+        "Corrupted size table for {}: "
+        "Index {} starts at {} (is greater than file size {})",
+        path,
+        index_int,
+        indexOffset,
+        fileSize
+      );
+    }
 
     auto dataSize = sizes.indexes[index_int * 2 + 1];
     auto dataOffset = offsets.indexes[index_int * 2 + 1];
-    always_assert_flog(
-      dataSize <= dataLimit,
-      "Invalid section size for {}: "
-      "Index Data {} is {} (larger than limit of {})",
-      path, index_int, dataSize, dataLimit
-    );
-    always_assert_flog(
-      dataOffset <= fileSize,
-      "Corrupted size table for {}: "
-      "Index Data {} starts at {} (is greater than file size {})",
-      path, index_int, dataOffset, fileSize
-    );
+    if (dataSize > dataLimit) {
+      fail(
+        errorMode,
+        "Invalid section size for {}: "
+        "Index Data {} is {} (larger than limit of {})",
+        path,
+        index_int,
+        dataSize,
+        dataLimit
+      );
+    }
+    if (dataOffset > fileSize) {
+      fail(
+        errorMode,
+        "Corrupted size table for {}: "
+        "Index Data {} starts at {} (is greater than file size {})",
+        path,
+        index_int,
+        dataOffset,
+        fileSize
+      );
+    }
   }
 
 };

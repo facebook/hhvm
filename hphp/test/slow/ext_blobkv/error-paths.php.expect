@@ -1,0 +1,6 @@
+corrupt reader: RuntimeException: Incorrect magic bytes in <path>
+finalize over directory: RuntimeException: Unable to rename <path>.part to <path>: Is a directory
+write after finalize failure: InvalidOperationException: HH\BlobKV\Writer object is not open for writes
+finalize after finalize failure: InvalidOperationException: HH\BlobKV\Writer object is not open for writes
+bool(false)
+corrupt entry bounds: RuntimeException: Corrupt BlobKV entry for key bounded in <path>: value offset 6 and size 5 exceed VALUES chunk size 5

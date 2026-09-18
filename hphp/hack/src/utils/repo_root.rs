@@ -10,20 +10,21 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
+/// Maximum number of parent steps after checking the starting directory.
 pub const TRAVERSAL_LIMIT: usize = 50;
 
-/// Check the current dir and its parents, returning the first one containing an
-/// hh config file until `TRAVERSAL_LIMIT` is reached.
+/// Check the current dir and up to `TRAVERSAL_LIMIT` ancestors, returning the
+/// first one containing an hh config file.
 pub fn guess_root_from_current_dir() -> Result<PathBuf, GuessRootError> {
     let root = std::env::current_dir().map_err(GuessRootError::CurrentDir)?;
     guess_root_from(&root)
 }
 
-/// Check the starting dir and its parents, returning the first one containing an
-/// hh config file until `TRAVERSAL_LIMIT` is reached.
+/// Check the starting dir and up to `TRAVERSAL_LIMIT` ancestors, returning the
+/// first one containing an hh config file.
 pub fn guess_root_from(start: &std::path::Path) -> Result<PathBuf, GuessRootError> {
     let mut possible_root = start;
-    for _ in 0..TRAVERSAL_LIMIT {
+    for _ in 0..=TRAVERSAL_LIMIT {
         if is_root(possible_root) {
             return Ok(possible_root.to_owned());
         }
@@ -94,8 +95,24 @@ mod tests {
     }
 
     #[test]
+    fn guess_root_finds_root_at_traversal_limit() {
+        let repo_root = TempDir::with_prefix("repo_root_tests.").unwrap();
+        touch(&repo_root.path().join(".hhconfig"));
+        let mut current_dir = repo_root.path().to_owned();
+        for _ in 0..50 {
+            current_dir.push("dir");
+        }
+        create_dir_all(&current_dir).unwrap();
+
+        assert_eq!(guess_root_from(&current_dir).unwrap(), repo_root.path());
+        current_dir.pop();
+        assert_eq!(guess_root_from(&current_dir).unwrap(), repo_root.path());
+    }
+
+    #[test]
     fn guess_root_traversal_limit() {
         let repo_parent = TempDir::with_prefix("repo_root_tests.").unwrap();
+        touch(&repo_parent.path().join(".hhconfig"));
         let mut current_dir = repo_parent.path().to_owned();
         // The TRAVERSAL_LIMIT is 50. We could do TRAVERSAL_LIMIT + 1 here, but
         // maybe it's better to avoid a test accidentally creating a million

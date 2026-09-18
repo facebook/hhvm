@@ -26,15 +26,51 @@ let entrypoint =
 let append_definitions definitions source =
   source ^ "\n// Auxiliary definitions\n" ^ definitions ^ "\n"
 
+let enable_named_parameters source =
+  let enabled =
+    matches file_attributes source
+    |> List.exists ~f:(fun attribute ->
+           let attribute = Pcre.get_substring attribute 0 in
+           String.is_substring attribute ~substring:"__EnableUnstableFeatures"
+           && Pcre.pmatch
+                ~rex:(Pcre.regexp "['\"]named_parameters['\"]")
+                attribute)
+  in
+  if enabled then
+    source
+  else
+    Pcre.substitute
+      ~rex:header
+      ~subst:(fun _ ->
+        "<?hh\n<<file: __EnableUnstableFeatures('named_parameters')>>\n")
+      source
+
 let render ~definitions source =
   let definitions = String.concat ~sep:"\n" definitions in
   let ordinary () = append_definitions definitions source in
-  if
-    Pcre.pmatch ~rex:(Pcre.regexp "(?m)^////[ \\t]") source
-    || not (Pcre.pmatch ~rex:header source)
-  then
+  if Pcre.pmatch ~rex:(Pcre.regexp "(?m)^////[ \\t]") source then
+    let source = ordinary () in
+    if Pcre.pmatch ~rex:(Pcre.regexp "\\bnamed[ \\t]+") source then
+      Pcre.full_split
+        ~rex:(Pcre.regexp "(?m)^////[ \\t][^\\r\\n]*(?:\\r?\\n|\\z)")
+        source
+      |> List.map ~f:(function
+             | Pcre.Text file -> enable_named_parameters file
+             | Pcre.Delim separator -> separator
+             | _ -> assert false)
+      |> String.concat ~sep:""
+    else
+      source
+  else if not (Pcre.pmatch ~rex:header source) then
     ordinary ()
   else
+    let source =
+      if Pcre.pmatch ~rex:(Pcre.regexp "\\bnamed[ \\t]+") (source ^ definitions)
+      then
+        enable_named_parameters source
+      else
+        source
+    in
     let source =
       if
         (String.is_substring source ~substring:"MilnerDsl"

@@ -17,8 +17,80 @@ let bind ty value body =
   let local = Syntax.fresh_local "value" in
   scope ty (Syntax.Bind (local, value) :: body (Syntax.Local local))
 
-let apply ty parameters body arguments =
-  Syntax.Call (Syntax.Lambda (parameters, ["defaults"], ty, body), arguments)
+let permute_named is_named values =
+  let (named, positional) = List.partition_tf values ~f:is_named in
+  let rec interleave named positional =
+    match (named, positional) with
+    | ([], values)
+    | (values, []) ->
+      values
+    | (name :: names, value :: values) ->
+      if Random.bool () then
+        name :: interleave names positional
+      else
+        value :: interleave named values
+  in
+  interleave (List.permute named) positional
+
+let apply ?(contexts = ["defaults"]) ty parameters body arguments =
+  let plain () =
+    Syntax.Call (Syntax.Lambda (parameters, contexts, ty, body), arguments)
+  in
+  if
+    List.exists arguments ~f:(function
+        | Syntax.Inout _
+        | Syntax.NamedArgument _ ->
+          true
+        | _ -> false)
+  then
+    plain ()
+  else
+    let rec promote parameters arguments =
+      match (parameters, arguments) with
+      | ([], _)
+      | ({ Syntax.variadic = true; _ } :: _, _)
+      | (_, Syntax.Unpack _ :: _) ->
+        (parameters, arguments)
+      | (parameter :: parameters, arguments) ->
+        let parameter =
+          {
+            parameter with
+            Syntax.named = parameter.Syntax.named || Random.bool ();
+          }
+        in
+        let (argument, arguments) =
+          match arguments with
+          | [] -> ([], [])
+          | argument :: arguments ->
+            let argument =
+              if parameter.Syntax.named then
+                Syntax.NamedArgument
+                  (Syntax.local_name parameter.Syntax.local, argument)
+              else
+                argument
+            in
+            ([argument], arguments)
+        in
+        let (parameters, arguments) = promote parameters arguments in
+        (parameter :: parameters, argument @ arguments)
+    in
+    let (parameters, arguments) = promote parameters arguments in
+    let (variadic, parameters) =
+      List.partition_tf parameters ~f:(fun parameter ->
+          parameter.Syntax.variadic)
+    in
+    let parameters =
+      permute_named (fun parameter -> parameter.Syntax.named) parameters
+      @ variadic
+    in
+    let arguments =
+      permute_named
+        (function
+          | Syntax.NamedArgument _ -> true
+          | _ -> false)
+        arguments
+    in
+    Syntax.Call (Syntax.Lambda (parameters, contexts, ty, body), arguments)
 
 let integer value = Syntax.Atom (string_of_int value)
 
@@ -432,7 +504,7 @@ and nullable_box ty value body =
     ]
 
 and callable child ty value =
-  match Random.int 6 with
+  match Random.int 7 with
   | 0 -> apply ty [] [return (child value)] []
   | 1 ->
     let callback = Syntax.fresh_local "callback" in
@@ -498,6 +570,7 @@ and callable child ty value =
         [value]
       else
         [value; zero])
+  | 5 -> ordered_call child ty value
   | _ ->
     bind ty value (fun value ->
         let (contexts, result) =
@@ -518,8 +591,132 @@ and callable child ty value =
             (child
                (Syntax.Call
                   ( Syntax.Atom ("milner_invoke<" ^ ty ^ ">"),
-                    [Syntax.Lambda ([], contexts, ty, [return result])] )));
+                    [
+                      Syntax.NamedArgument
+                        ( "callback",
+                          Syntax.Lambda ([], contexts, ty, [return result]) );
+                    ] )));
         ])
+
+and ordered_call child ty value =
+  let trace = Syntax.fresh_local "argument_order" in
+  let result = Syntax.fresh_local "call_result" in
+  let box_ty = "shape('tag' => int, 'value' => " ^ ty ^ ")" in
+  let parameters =
+    List.init
+      (3 + Random.int 3)
+      ~f:(fun index ->
+        let local = Syntax.fresh_local "ordered_argument" in
+        (Syntax.parameter ~named:(index <> 1) box_ty local, index))
+  in
+  let declaration =
+    permute_named (fun (parameter, _) -> parameter.Syntax.named) parameters
+  in
+  let callsite =
+    permute_named (fun (parameter, _) -> parameter.Syntax.named) parameters
+  in
+  let default = Syntax.fresh_local "default_argument" in
+  let supplied = Random.bool () in
+  let assert_equal left right message =
+    Syntax.Eval
+      (Syntax.Call
+         ( Syntax.Atom "invariant",
+           [
+             Syntax.Binary ("===", left, right);
+             Syntax.Atom ("'" ^ message ^ "'");
+           ] ))
+  in
+  let body =
+    List.map parameters ~f:(fun (parameter, index) ->
+        assert_equal
+          (Syntax.Index
+             (Syntax.Local parameter.Syntax.local, Syntax.Atom "'tag'"))
+          (integer index)
+          "argument binding preserves labels")
+    @ [
+        assert_equal
+          (Syntax.Local default)
+          (integer
+             (if supplied then
+               13
+             else
+               7))
+          "omitted named arguments use their defaults";
+        return
+          (child
+             (Syntax.Index
+                ( Syntax.Local
+                    (fst
+                       (List.nth_exn
+                          parameters
+                          (Random.int (List.length parameters))))
+                      .Syntax.local,
+                  Syntax.Atom "'value'" )));
+      ]
+  in
+  let arguments =
+    List.map callsite ~f:(fun (parameter, index) ->
+        let argument =
+          scope
+            box_ty
+            [
+              Syntax.Eval
+                (Syntax.Call
+                   (Syntax.Member (Syntax.Local trace, "add"), [integer index]));
+              return
+                (Syntax.Shape [("'tag'", integer index); ("'value'", value)]);
+            ]
+        in
+        if parameter.Syntax.named then
+          Syntax.NamedArgument
+            (Syntax.local_name parameter.Syntax.local, argument)
+        else
+          argument)
+    @
+    if supplied then
+      [Syntax.NamedArgument (Syntax.local_name default, integer 13)]
+    else
+      []
+  in
+  let parameters =
+    Syntax.parameter ~named:true ~default:(integer 7) "int" default
+    :: List.map declaration ~f:fst
+  in
+  let call =
+    if Random.bool () then
+      let suspend =
+        Syntax.Eval
+          (Syntax.Await
+             (Syntax.Call
+                ( Syntax.StaticMember ("RescheduleWaitHandle", "create"),
+                  [zero; zero] )))
+      in
+      Syntax.Call
+        ( Syntax.Atom "HH\\Asio\\join",
+          [
+            Syntax.Call
+              ( Syntax.AsyncLambda
+                  ( parameters,
+                    ["defaults"],
+                    "Awaitable<" ^ ty ^ ">",
+                    suspend :: body ),
+                arguments );
+          ] )
+    else
+      Syntax.Call (Syntax.Lambda (parameters, ["defaults"], ty, body), arguments)
+  in
+  scope
+    ty
+    [
+      Syntax.Bind (trace, Syntax.New ("Vector<int>", [Syntax.Array ("vec", [])]));
+      Syntax.Bind (result, call);
+      assert_equal
+        (Syntax.Call (Syntax.Atom "vec", [Syntax.Local trace]))
+        (Syntax.Array
+           ("vec", List.map callsite ~f:(fun (_, index) -> integer index)))
+        "arguments execute in callsite order";
+      return (Syntax.Local result);
+    ]
 
 and async budget child ty value =
   let task body =
@@ -537,7 +734,7 @@ and async budget child ty value =
     if not (consume budget) then
       task [return value]
     else
-      match Random.int 5 with
+      match Random.int 6 with
       | 0 -> task [return (child value)]
       | 1 -> task [suspend; return (child value)]
       | 2 ->
@@ -563,11 +760,20 @@ and async budget child ty value =
                    Syntax.Bind (result, Syntax.Await pending)));
             return (child (Syntax.Local selected));
           ]
-      | _ ->
+      | 4 ->
         task
           [
             Syntax.Try ([return (Syntax.Await (awaitable value))], [], [suspend]);
           ]
+      | _ ->
+        let argument = Syntax.fresh_local "async_argument" in
+        Syntax.Call
+          ( Syntax.AsyncLambda
+              ( [Syntax.parameter ~named:true ty argument],
+                ["defaults"],
+                "Awaitable<" ^ ty ^ ">",
+                [suspend; return (child (Syntax.Local argument))] ),
+            [Syntax.NamedArgument (Syntax.local_name argument, value)] )
   in
   let join pending = Syntax.Call (Syntax.Atom "HH\\Asio\\join", [pending]) in
   if Random.int 4 = 0 then

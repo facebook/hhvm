@@ -44,8 +44,14 @@ let context_types template regexp =
       |> Hashtbl.iter_keys ~f:(fun key -> Hashtbl.set ~key ~data:() table));
   table
 
-let generate_tables ~verbose ~debug_pattern template =
-  let renv = Gen.ReadOnlyEnvironment.default ~verbose ~debug_pattern in
+let generate_tables
+    ~verbose ~debug_pattern ~allow_unsafe_named_parameter_order template =
+  let renv =
+    Gen.ReadOnlyEnvironment.default
+      ~verbose
+      ~debug_pattern
+      ~allow_unsafe_named_parameter_order
+  in
   let alias_types =
     context_types
       template
@@ -152,7 +158,13 @@ let fill_in_template ty_table subty_table expr_table template =
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
 
-let milner verbose debug_pattern seed template_path destination_path =
+let milner
+    verbose
+    debug_pattern
+    allow_unsafe_named_parameter_order
+    seed
+    template_path
+    destination_path =
   if verbose > 0 then begin
     Format.eprintf "Seed: %d\n" seed;
     Format.eprintf "Template: %s\n" template_path;
@@ -164,7 +176,11 @@ let milner verbose debug_pattern seed template_path destination_path =
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
   let (defs, ty_table, subty_table, expr_table) =
-    generate_tables ~verbose ~debug_pattern template
+    generate_tables
+      ~verbose
+      ~debug_pattern
+      ~allow_unsafe_named_parameter_order
+      template
   in
   let output =
     fill_in_template ty_table subty_table expr_table template
@@ -189,6 +205,12 @@ let seed =
   let doc = "Seed for the random nubmer generator" in
   Arg.(value & opt int 0 & info ["s"; "seed"] ~docv:"SEED" ~doc)
 
+let allow_unsafe_named_parameter_order =
+  let doc =
+    "Disable the T289079831 declaration-order guard for generated functions and methods"
+  in
+  Arg.(value & flag & info ["allow-unsafe-named-parameter-order"] ~doc)
+
 let template =
   let doc = "Template file to generate well-typed programs from" in
   Arg.(required & pos 0 (some file) None & info [] ~docv:"TEMPLATE" ~doc)
@@ -199,7 +221,14 @@ let destination =
     value & opt (some string) None & info ["d"; "destination"] ~docv:"PATH" ~doc)
 
 let milner_t =
-  Term.(const milner $ verbose $ debug_pattern $ seed $ template $ destination)
+  Term.(
+    const milner
+    $ verbose
+    $ debug_pattern
+    $ allow_unsafe_named_parameter_order
+    $ seed
+    $ template
+    $ destination)
 
 let cmd =
   let doc = "a random well-typed program generator for Hack" in

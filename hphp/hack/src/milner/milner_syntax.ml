@@ -17,6 +17,10 @@ let fresh_local hint =
   incr next_local;
   Format.sprintf "$milner_%s_%d" hint id
 
+let named_local name = "$" ^ name
+
+let local_name local = String.drop_prefix local 1
+
 type expr =
   | Unary of string * expr
   | Binary of string * expr * expr
@@ -39,6 +43,7 @@ type expr =
   | EnumLabel of string * string
   | StaticProperty of string * string
   | Call of expr * expr list
+  | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
   | Inout of expr
@@ -54,6 +59,7 @@ and parameter = {
   hint: string;
   local: local;
   variadic: bool;
+  named: bool;
   default: expr option;
 }
 
@@ -70,8 +76,8 @@ and stmt =
   | Throw of expr
   | Block of stmt list
 
-let parameter ?(variadic = false) ?default hint local =
-  { hint; local; variadic; default }
+let parameter ?(variadic = false) ?(named = false) ?default hint local =
+  { hint; local; variadic; named; default }
 
 let rec render_expr = function
   | Quote (visitor, body) -> visitor ^ "`" ^ render_expr body ^ "`"
@@ -115,6 +121,7 @@ let rec render_expr = function
   | StaticMember (class_name, name) -> class_name ^ "::" ^ name
   | Call (callee, arguments) ->
     Format.sprintf "%s(%s)" (render_expr callee) (render_arguments arguments)
+  | NamedArgument (name, expression) -> name ^ "=" ^ render_expr expression
   | Array (kind, elements) -> kind ^ "[" ^ render_arguments elements ^ "]"
   | KeyValue (key, value) -> render_expr key ^ " => " ^ render_expr value
   | Tuple elements -> "tuple(" ^ render_arguments elements ^ ")"
@@ -130,24 +137,41 @@ let rec render_expr = function
     render_lambda "async " parameters contexts return_hint body
   | Await expression -> "(await " ^ render_expr expression ^ ")"
 
-and render_lambda prefix parameters contexts return_hint body =
+and render_parameters ?(canonical = true) parameters =
+  (* T289079831: runtime type-structure checks require declarations to follow
+     the sorted parameter slots. *)
   let parameters =
-    List.map parameters ~f:(fun { hint; local; variadic; default } ->
-        hint
-        ^ " "
-        ^ (if variadic then
-            "..."
-          else
-            "")
-        ^ local
-        ^ Option.value_map default ~default:"" ~f:(fun expression ->
-              " = " ^ render_expr expression))
-    |> String.concat ~sep:", "
+    if canonical then
+      let (named, positional) =
+        List.partition_tf parameters ~f:(fun parameter -> parameter.named)
+      in
+      List.sort named ~compare:(fun left right ->
+          String.compare left.local right.local)
+      @ positional
+    else
+      parameters
   in
+  List.map parameters ~f:(fun { hint; local; variadic; named; default } ->
+      (if named then
+        "named "
+      else
+        "")
+      ^ hint
+      ^ " "
+      ^ (if variadic then
+          "..."
+        else
+          "")
+      ^ local
+      ^ Option.value_map default ~default:"" ~f:(fun expression ->
+            " = " ^ render_expr expression))
+  |> String.concat ~sep:", "
+
+and render_lambda prefix parameters contexts return_hint body =
   Format.sprintf
     "(%s(%s)[%s]: %s ==> { %s })"
     prefix
-    parameters
+    (render_parameters parameters)
     (String.concat ~sep:", " contexts)
     return_hint
     (render_body body)

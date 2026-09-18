@@ -15,6 +15,11 @@ type local
     composed scopes may capture existing tokens without renaming them. *)
 val fresh_local : string -> local
 
+(** Reuse the identifier carried by a named parameter's function type. *)
+val named_local : string -> local
+
+val local_name : local -> string
+
 type expr =
   | Unary of string * expr
   | Binary of string * expr * expr
@@ -38,6 +43,7 @@ type expr =
   | EnumLabel of string * string
   | StaticProperty of string * string
   | Call of expr * expr list
+  | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
   | Inout of expr
@@ -53,6 +59,7 @@ and parameter = {
   hint: string;
   local: local;
   variadic: bool;
+  named: bool;
   default: expr option;
 }
 
@@ -69,7 +76,11 @@ and stmt =
   | Throw of expr
   | Block of stmt list
 
-val parameter : ?variadic:bool -> ?default:expr -> string -> local -> parameter
+val parameter :
+  ?variadic:bool -> ?named:bool -> ?default:expr -> string -> local -> parameter
+
+(** Canonical order avoids T289079831 in executable declarations. *)
+val render_parameters : ?canonical:bool -> parameter list -> string
 
 val render_expr : expr -> string
 

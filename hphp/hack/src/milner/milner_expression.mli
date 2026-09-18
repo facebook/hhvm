@@ -13,3 +13,16 @@ val compose :
   value:Milner_syntax.expr ->
   operations:(Milner_syntax.expr -> Milner_syntax.expr) list ->
   Milner_syntax.expr
+
+(** Shuffle and interleave named items while preserving positional order. *)
+val permute_named : ('a -> bool) -> 'a list -> 'a list
+
+(** Apply a lambda, optionally promoting its parameters and arguments to named
+    form and varying argument order. *)
+val apply :
+  ?contexts:string list ->
+  string ->
+  Milner_syntax.parameter list ->
+  Milner_syntax.stmt list ->
+  Milner_syntax.expr list ->
+  Milner_syntax.expr

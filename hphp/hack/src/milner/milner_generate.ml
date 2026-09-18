@@ -182,10 +182,15 @@ module ReadOnlyEnvironment : sig
 
             This option guides the search so that `subtype_of` produces an
             immediately inhabited type. *)
+    allow_unsafe_named_parameter_order: bool;
     debug_info: debug_info;
   }
 
-  val default : verbose:int -> debug_pattern:string option -> t
+  val default :
+    verbose:int ->
+    debug_pattern:string option ->
+    allow_unsafe_named_parameter_order:bool ->
+    t
 
   val for_alias : t -> t
 
@@ -213,10 +218,11 @@ end = struct
     for_enum_class_value: bool;
     for_enum_def: bool;
     pick_immediately_inhabited: bool;
+    allow_unsafe_named_parameter_order: bool;
     debug_info: debug_info;
   }
 
-  let default ~verbose ~debug_pattern =
+  let default ~verbose ~debug_pattern ~allow_unsafe_named_parameter_order =
     {
       for_option_ty = false;
       for_reified_ty = false;
@@ -224,6 +230,7 @@ end = struct
       for_enum_class_value = false;
       for_enum_def = false;
       pick_immediately_inhabited = false;
+      allow_unsafe_named_parameter_order;
       debug_info =
         {
           verbose;
@@ -249,16 +256,18 @@ end = struct
         for_enum_class_value;
         for_enum_def;
         pick_immediately_inhabited;
+        allow_unsafe_named_parameter_order;
         debug_info = _;
       } =
     Format.sprintf
-      "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; for_enum_class_value: %b; pick_immediately_inhabited: %b}"
+      "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; for_enum_class_value: %b; pick_immediately_inhabited: %b; allow_unsafe_named_parameter_order: %b}"
       for_option_ty
       for_reified_ty
       for_alias_def
       for_enum_def
       for_enum_class_value
       pick_immediately_inhabited
+      allow_unsafe_named_parameter_order
 
   let debug ~level ({ debug_info; _ } as renv) ~start ~end_ f =
     if debug_info.verbose >= level then begin
@@ -301,6 +310,7 @@ end
 module rec Environment : sig
   type member_contract = {
     value_type: Type.t;
+    named: bool;
     property: string;
     getter: string;
     setter: string;
@@ -370,6 +380,7 @@ module rec Environment : sig
 end = struct
   type member_contract = {
     value_type: Type.t;
+    named: bool;
     property: string;
     getter: string;
     setter: string;
@@ -729,6 +740,7 @@ end = struct
       Environment.
         {
           value_type;
+          named;
           getter;
           setter;
           reader;
@@ -739,6 +751,18 @@ end = struct
           probe = _;
         } =
     let value_type = Type.show value_type in
+    let modifier =
+      if named then
+        "named "
+      else
+        ""
+    in
+    let argument =
+      if named then
+        "value=$value"
+      else
+        "$value"
+    in
     [
       Format.sprintf
         "interface %s { public function %s()[]: %s; }"
@@ -746,9 +770,10 @@ end = struct
         getter
         value_type;
       Format.sprintf
-        "interface %s { public function %s(%s $value)[write_props]: void; }"
+        "interface %s { public function %s(%s%s $value)[write_props]: void; }"
         writer
         setter
+        modifier
         value_type;
       Format.sprintf
         "function %s(%s $reader)[]: %s { return $reader->%s(); }"
@@ -757,20 +782,27 @@ end = struct
         value_type
         getter;
       Format.sprintf
-        "function %s(%s $writer, %s $value)[write_props]: void { $writer->%s($value); }"
+        "function %s(%s $writer, %s $value)[write_props]: void { $writer->%s(%s); }"
         write_function
         writer
         value_type
-        setter;
+        setter
+        argument;
     ]
 
   let stateful_members
-      Environment.{ value_type; property; getter; setter; probe; _ }
+      Environment.{ value_type; named; property; getter; setter; probe; _ }
       ~inherited
       ~omit_getter_override
       ~identity
       ~probe_value =
     let value_type = Type.show value_type in
+    let modifier =
+      if named then
+        "named "
+      else
+        ""
+    in
     let stateful =
       if inherited && omit_getter_override then
         []
@@ -785,7 +817,8 @@ end = struct
       else
         [
           Format.sprintf
-            "public function __construct(protected %s $%s)[write_props] {}"
+            "public function __construct(protected %s%s $%s)[write_props] {}"
+            modifier
             value_type
             property;
           Format.sprintf
@@ -794,13 +827,32 @@ end = struct
             value_type
             property;
           Format.sprintf
-            "public function %s(%s $value)[write_props]: void { $this->%s = $value; }"
+            "public function %s(%s%s $value)[write_props]: void { $this->%s = $value; }"
             setter
+            modifier
             value_type
             property;
         ]
     in
+    let overrides =
+      if inherited && Random.bool () then
+        [
+          Format.sprintf
+            "<<__Override>> public function %s(%s%s $value)[write_props]: void { parent::%s(%s); }"
+            setter
+            modifier
+            value_type
+            setter
+            (if named then
+              "value=$value"
+            else
+              "$value");
+        ]
+      else
+        []
+    in
     stateful
+    @ overrides
     @ [
         Format.sprintf
           "%spublic function %s()[]: int { return %d; }"
@@ -811,8 +863,9 @@ end = struct
           probe
           probe_value;
         Format.sprintf
-          "public static function %s(%s $value)[]: %s { return $value; }"
+          "public static function %s(%s%s $value)[]: %s { return $value; }"
           identity
+          modifier
           value_type
           value_type;
       ]
@@ -1025,6 +1078,12 @@ end = struct
     | ReturnsVoid
     | ReturnsNothing
 
+  and function_parameter = {
+    parameter_type: t;
+    parameter_name: string option;
+    parameter_optional: bool;
+  }
+
   and t =
     | Mixed
     | Nonnull
@@ -1088,7 +1147,7 @@ end = struct
         open_: bool;
       }
     | Function of {
-        parameters: t list;
+        parameters: function_parameter list;
         variadic: t option;
         return_: function_return;
         context: FunctionContext.t;
@@ -1210,7 +1269,27 @@ end = struct
           ^ "..."
         | None -> ""
       in
-      let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
+      let parameters =
+        List.map parameters ~f:(fun parameter ->
+            let prefix =
+              (if parameter.parameter_optional then
+                "optional "
+              else
+                "")
+              ^ Option.value_map
+                  parameter.parameter_name
+                  ~default:""
+                  ~f:(fun _ -> "named ")
+            in
+            let name =
+              Option.value_map
+                parameter.parameter_name
+                ~default:""
+                ~f:(fun name -> " $" ^ name)
+            in
+            prefix ^ show parameter.parameter_type ^ name)
+        |> String.concat ~sep:", "
+      in
       let return_ = show_return return_ in
       Format.sprintf
         "(function(%s%s)%s: %s)"
@@ -1224,6 +1303,45 @@ end = struct
     | ReturnsValue ty -> show ty
     | ReturnsVoid -> "void"
     | ReturnsNothing -> "nothing"
+
+  let rec parameter_default = function
+    | Mixed
+    | Option _
+    | Primitive Primitive.Null ->
+      Some (Syntax.Atom "null")
+    | Nonnull
+    | Primitive Primitive.(Int | Num | Arraykey) ->
+      Some (Syntax.Atom "0")
+    | Primitive Primitive.String -> Some (Syntax.Atom "''")
+    | Primitive Primitive.Float -> Some (Syntax.Atom "0.0")
+    | Primitive Primitive.Bool -> Some (Syntax.Atom "false")
+    | Vec _ -> Some (Syntax.Array ("vec", []))
+    | Dict _ -> Some (Syntax.Array ("dict", []))
+    | Keyset _ -> Some (Syntax.Array ("keyset", []))
+    | Tuple { conjuncts; _ } ->
+      List.map conjuncts ~f:parameter_default
+      |> Option.all
+      |> Option.map ~f:(fun values -> Syntax.Tuple values)
+    | Shape { fields; _ } ->
+      List.filter fields ~f:(fun { optional; _ } -> not optional)
+      |> List.map ~f:(fun { key; ty; _ } ->
+             Option.map (parameter_default ty) ~f:(fun value -> (key, value)))
+      |> Option.all
+      |> Option.map ~f:(fun fields -> Syntax.Shape fields)
+    | _ -> None
+
+  let named_parameter parameter = Option.is_some parameter.parameter_name
+
+  let function_variadic parameters variadic =
+    (* T289079753: the subtype checker compares named parameters against the
+       variadic type when there are no fixed positional parameters. *)
+    if
+      (not (List.is_empty parameters))
+      && List.for_all parameters ~f:named_parameter
+    then
+      Option.map variadic ~f:(fun _ -> Mixed)
+    else
+      variadic
 
   let supports_return return_ context =
     match return_ with
@@ -2011,7 +2129,33 @@ end = struct
             else
               ty
           in
-          let parameters = List.map parameters ~f:widen_parameter in
+          let parameters =
+            List.map parameters ~f:(fun parameter ->
+                let parameter_type = widen_parameter parameter.parameter_type in
+                let parameter_optional =
+                  parameter.parameter_optional
+                  || named_parameter parameter
+                     && Option.is_some (parameter_default parameter_type)
+                     && Random.bool ()
+                in
+                { parameter with parameter_type; parameter_optional })
+          in
+          let parameters =
+            if List.length parameters < 5 && Random.bool () then
+              parameters
+              @ [
+                  {
+                    parameter_type = Mixed;
+                    parameter_name = Some (fresh "optional");
+                    parameter_optional = true;
+                  };
+                ]
+            else
+              parameters
+          in
+          let parameters =
+            Milner_expression.permute_named named_parameter parameters
+          in
           let return_ =
             match return_ with
             | ReturnsValue ty ->
@@ -2041,6 +2185,7 @@ end = struct
             |> List.filter ~f:(supports_return return_)
             |> select
           in
+          let variadic = function_variadic parameters variadic in
           [Function { parameters; variadic; return_; context; effect_state }]
       end
     and driver renv candidate =
@@ -2308,8 +2453,16 @@ end = struct
       | Kind.Interface ->
         None
       | Kind.Class ->
-        let Env.{ constructor; _ } = Env.get_nominal env info.name in
-        Some (New (show ty, List.map constructor ~f:(inhabitant renv env)))
+        let Env.{ constructor; contract; _ } = Env.get_nominal env info.name in
+        let arguments =
+          List.map constructor ~f:(fun ty ->
+              let value = inhabitant renv env ty in
+              if contract.Env.named then
+                NamedArgument (contract.Env.property, value)
+              else
+                value)
+        in
+        Some (New (show ty, arguments))
     end
     | GenericClass { key; value; _ } as ty ->
       let key_expr = inhabitant renv env key in
@@ -2417,21 +2570,44 @@ end = struct
       let+ expr = expr_of renv env ty in
       Async [Return (Some expr)]
     | Function { parameters; variadic; return_; context; effect_state } ->
-      let named_parameters =
-        List.map parameters ~f:(fun ty -> (ty, Syntax.fresh_local "argument"))
+      let bound_parameters =
+        List.map parameters ~f:(fun parameter ->
+            let local =
+              Option.value_map
+                parameter.parameter_name
+                ~default:(Syntax.fresh_local "argument")
+                ~f:Syntax.named_local
+            in
+            (parameter, local))
       in
       let rest =
         Option.map variadic ~f:(fun ty -> (ty, Syntax.fresh_local "rest"))
       in
       let parameters =
-        List.map named_parameters ~f:(fun (ty, local) ->
-            Syntax.parameter (show ty) local)
+        List.map bound_parameters ~f:(fun (parameter, local) ->
+            let default =
+              if parameter.parameter_optional then
+                parameter_default parameter.parameter_type
+              else
+                None
+            in
+            Syntax.parameter
+              ~named:(named_parameter parameter)
+              ?default
+              (show parameter.parameter_type)
+              local)
+        |> Milner_expression.permute_named (fun parameter ->
+               parameter.Syntax.named)
+      in
+      let parameters =
+        parameters
         @ Option.to_list
             (Option.map rest ~f:(fun (ty, local) ->
                  Syntax.parameter ~variadic:true (show ty) local))
       in
       let locals =
-        named_parameters
+        List.map bound_parameters ~f:(fun (parameter, local) ->
+            (parameter.parameter_type, local))
         @ Option.to_list
             (Option.map rest ~f:(fun (ty, local) -> (Vec ty, local)))
       in
@@ -2488,16 +2664,32 @@ end = struct
                 inhabitant renv env ty))
       in
       let arguments =
-        let positional = List.map parameters ~f:(inhabitant renv env) in
+        let arguments =
+          List.filter parameters ~f:(fun parameter ->
+              (not parameter.parameter_optional) || Random.bool ())
+          |> List.map ~f:(fun parameter ->
+                 let value = inhabitant renv env parameter.parameter_type in
+                 Option.value_map
+                   parameter.parameter_name
+                   ~default:value
+                   ~f:(fun name -> Syntax.NamedArgument (name, value)))
+        in
         match variadic with
         | Some _ ->
           let unpack = Random.bool () in
           (* T288960552: direct multi-tail calls can infer invalid dynamic bounds. *)
           if unpack || List.length tail > 1 then
-            positional @ [Syntax.Unpack (Syntax.Array ("vec", tail))]
+            arguments @ [Syntax.Unpack (Syntax.Array ("vec", tail))]
           else
-            positional @ tail
-        | None -> positional
+            arguments @ tail
+        | None -> arguments
+      in
+      let arguments =
+        Milner_expression.permute_named
+          (function
+            | Syntax.NamedArgument _ -> true
+            | _ -> false)
+          arguments
       in
       Syntax.Call (value, arguments)
     | _ -> invalid_arg "callable_application expects a generated function"
@@ -2648,6 +2840,7 @@ end = struct
       Env.
         {
           value_type;
+          named = Random.bool ();
           property = fresh "value";
           getter = fresh "get";
           setter = fresh "set";
@@ -3148,7 +3341,21 @@ end = struct
       let (env, parameters) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
         |> List.fold_map ~init:env ~f:(fun env _ ->
-               mk ~complexity:(complexity - 1) renv env)
+               let (env, parameter_type) =
+                 mk ~complexity:(complexity - 1) renv env
+               in
+               let parameter_name =
+                 if Random.bool () then
+                   Some (fresh "argument")
+                 else
+                   None
+               in
+               let parameter_optional =
+                 Option.is_some parameter_name
+                 && Option.is_some (parameter_default parameter_type)
+                 && Random.bool ()
+               in
+               (env, { parameter_type; parameter_name; parameter_optional }))
       in
       let (env, return_) =
         match Random.int_incl 0 4 with
@@ -3156,7 +3363,7 @@ end = struct
         | 1 -> (env, ReturnsNothing)
         | _ ->
           if (not (List.is_empty parameters)) && Random.bool () then
-            (env, ReturnsValue (select parameters))
+            (env, ReturnsValue (select parameters).parameter_type)
           else
             let (env, ty) = mk ~complexity:(complexity - 1) renv env in
             (env, ReturnsValue ty)
@@ -3173,26 +3380,25 @@ end = struct
       let env =
         Env.add_definition env @@ Definition.effect_state ~name:effect_state
       in
+      let variadic = function_variadic parameters variadic in
       (env, Function { parameters; variadic; return_; context; effect_state })
     | Kind.Like ->
       let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
 
   let apply ty parameters body arguments =
-    Syntax.Call
-      (Syntax.Lambda (parameters, ["defaults"], show ty, body), arguments)
+    Milner_expression.apply (show ty) parameters body arguments
 
   let returning value = Syntax.Return (Some value)
 
   let forward source target value =
     let local = Syntax.fresh_local "forward" in
-    Syntax.Call
-      ( Syntax.Lambda
-          ( [Syntax.parameter source local],
-            [],
-            target,
-            [returning (Syntax.Local local)] ),
-        [value] )
+    Milner_expression.apply
+      ~contexts:[]
+      target
+      [Syntax.parameter source local]
+      [returning (Syntax.Local local)]
+      [value]
 
   let member receiver name arguments =
     Syntax.Call (Syntax.Member (receiver, name), arguments)
@@ -3251,7 +3457,15 @@ end = struct
           (Env.get_nominal env owner_name).Env.identity )
       | _ -> failwith "Expected a nominal owner"
     in
-    let construct value = Syntax.New (show concrete, [value]) in
+    let argument name value =
+      if contract.Env.named then
+        Syntax.NamedArgument (name, value)
+      else
+        value
+    in
+    let construct value =
+      Syntax.New (show concrete, [argument contract.Env.property value])
+    in
     let read value =
       let receiver = Syntax.fresh_local "receiver" in
       apply
@@ -3289,7 +3503,7 @@ end = struct
             (member
                (Syntax.Local receiver)
                contract.Env.setter
-               [Syntax.Local input]);
+               [argument "value" (Syntax.Local input)]);
           returning (member (Syntax.Local receiver) contract.Env.getter []);
         ]
         [construct (inhabitant renv env ty); value]
@@ -3302,7 +3516,8 @@ end = struct
         (fun value -> member (construct value) info.Env.dispatch []);
         (fun value ->
           Syntax.Call
-            (Syntax.StaticMember (static_owner, static_identity), [value]));
+            ( Syntax.StaticMember (static_owner, static_identity),
+              [argument "value" value] ));
       ]
     in
     let operations =
@@ -3803,8 +4018,24 @@ end = struct
         let caught = Syntax.fresh_local "exception" in
         [
           Syntax.Try
-            ([Syntax.Eval call], [("Exception", caught, [returning value])], []);
-          returning value;
+            ( [Syntax.Eval call],
+              [
+                ( "Exception",
+                  caught,
+                  [
+                    Syntax.If
+                      ( Syntax.Binary
+                          ( "===",
+                            member (Syntax.Local caught) "getMessage" [],
+                            Syntax.Atom "'milner expected nothing'" ),
+                        [returning value],
+                        [Syntax.Throw (Syntax.Local caught)] );
+                  ] );
+              ],
+              [] );
+          Syntax.Throw
+            (Syntax.New
+               ("Exception", [Syntax.Atom "'milner nothing callable returned'"]));
         ]
       | Function { return_ = ReturnsVoid; _ } ->
         [Syntax.Eval call; returning value]
@@ -3897,14 +4128,16 @@ end = struct
                 Syntax.Call
                   ( Syntax.Atom ("milner_invoke<" ^ show ty ^ ">"),
                     [
-                      Syntax.Lambda
-                        ( [],
-                          context,
-                          show ty,
-                          [
-                            Syntax.Eval (Syntax.Unary ("++", slot));
-                            returning value;
-                          ] );
+                      Syntax.NamedArgument
+                        ( "callback",
+                          Syntax.Lambda
+                            ( [],
+                              context,
+                              show ty,
+                              [
+                                Syntax.Eval (Syntax.Unary ("++", slot));
+                                returning value;
+                              ] ) );
                     ] ) );
             returning
               (Syntax.Index
@@ -3947,7 +4180,7 @@ end = struct
     let env =
       add_fixture
         env
-        "function milner_invoke<T>((function()[_]: T) $callback)[ctx $callback]: T { return $callback(); }"
+        "function milner_invoke<T>(named (function()[_]: T) $callback, named int $z = 0)[ctx $callback]: T { return $callback(); }"
     in
     let env =
       add_fixture
@@ -3985,6 +4218,38 @@ end = struct
     let value = inhabitant renv env ty in
     let expression =
       Milner_expression.compose ~ty:(show ty) ~value ~operations
+    in
+    let forbidden_method_returns =
+      TypeMap.bindings env.Env.typedef_bodies
+      |> List.concat_map ~f:(fun (ty, _) ->
+             if has_nullable_nominal_case_return env ty then
+               [ty; Like ty]
+             else
+               [])
+    in
+    let forbidden_sync_returns = List.map forbidden_method_returns ~f:show in
+    let forbidden_async_returns =
+      List.map forbidden_method_returns ~f:(fun ty -> show (Awaitable ty))
+    in
+    let avoid_method_override ~is_async ~return_hint =
+      List.mem
+        (if is_async then
+          forbidden_async_returns
+        else
+          forbidden_sync_returns)
+        return_hint
+        ~equal:String.equal
+    in
+    let (definitions, expression) =
+      Milner_callable.materialize
+        ~allow_unsafe_named_parameter_order:
+          renv.ReadOnlyEnvironment.allow_unsafe_named_parameter_order
+        ~avoid_method_override
+        expression
+    in
+    let env =
+      List.fold (List.rev definitions) ~init:env ~f:(fun env definition ->
+          Env.add_definition env (Definition.raw definition))
     in
     (env, Syntax.render_expr expression)
 

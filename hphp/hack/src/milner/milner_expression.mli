@@ -26,3 +26,11 @@ val apply :
   Milner_syntax.stmt list ->
   Milner_syntax.expr list ->
   Milner_syntax.expr
+
+(** Apply a declared callable with the same named-argument choices as [apply].
+    Materialization must place the declaration at top level. *)
+val apply_declared :
+  ?type_arguments:string list ->
+  Milner_syntax.declaration ->
+  Milner_syntax.expr list ->
+  Milner_syntax.expr

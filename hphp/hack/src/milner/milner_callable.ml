@@ -9,7 +9,8 @@
 open Hh_prelude
 module Syntax = Milner_syntax
 
-type callable = {
+type callable = Syntax.declaration = {
+  type_parameters: string list;
   is_async: bool;
   parameters: Syntax.parameter list;
   contexts: string list;
@@ -51,6 +52,9 @@ let rec closed_expression bound = function
   | Syntax.Index (left, right)
   | Syntax.KeyValue (left, right) ->
     closed_expression bound left && closed_expression bound right
+  | Syntax.DeclaredCall (declaration, _, arguments) ->
+    closed_body [] declaration.parameters declaration.contexts declaration.body
+    && List.for_all arguments ~f:(closed_expression bound)
   | Syntax.Call (callee, arguments) ->
     closed_expression bound callee
     && List.for_all arguments ~f:(closed_expression bound)
@@ -163,6 +167,70 @@ let arguments parameters =
          | Syntax.NamedArgument _ -> true
          | _ -> false)
 
+let add_named_arguments original additions =
+  let names =
+    List.map additions ~f:(fun (parameter, _) ->
+        Syntax.local_name parameter.Syntax.local)
+  in
+  let additions =
+    List.map additions ~f:(fun (parameter, value) ->
+        Syntax.NamedArgument (Syntax.local_name parameter.Syntax.local, value))
+  in
+  (* Existing argument order can carry evaluation or inference dependencies. *)
+  Milner_expression.permute_named
+    (function
+      | Syntax.NamedArgument (name, _) ->
+        List.mem names name ~equal:String.equal
+      | _ -> false)
+    (additions @ original)
+
+let fresh_named_parameter ?default hint parameters =
+  let last =
+    List.filter_map parameters ~f:(fun parameter ->
+        if parameter.Syntax.named then
+          Some (Syntax.local_name parameter.Syntax.local)
+        else
+          None)
+    |> List.max_elt ~compare:String.compare
+    |> Option.value ~default:""
+  in
+  Syntax.parameter
+    ~named:true
+    ?default
+    hint
+    (Syntax.named_local (last ^ "_" ^ fresh_name "probe"))
+
+let probe_value = function
+  | "int" -> Syntax.Atom (string_of_int (Random.int 100))
+  | "string" -> Syntax.Atom ("'probe_" ^ string_of_int (Random.int 100) ^ "'")
+  | "bool" -> Syntax.Atom (string_of_bool (Random.bool ()))
+  | _ -> invalid_arg "Milner: non-primitive probe domain"
+
+let widen_probe_hint = function
+  | "int" ->
+    if Random.bool () then
+      "num"
+    else
+      "arraykey"
+  | "string" -> "arraykey"
+  | "bool"
+  | "num"
+  | "arraykey"
+  | "nonnull" ->
+    (* T289176736: these named probes acquire defaults later in the hierarchy. *)
+    "nonnull"
+  | _ -> invalid_arg "Milner: non-primitive probe hint"
+
+let check_parameter parameter expected =
+  Syntax.Eval
+    (Syntax.Call
+       ( Syntax.Atom "invariant",
+         [
+           Syntax.Binary ("===", Syntax.Local parameter.Syntax.local, expected);
+           Syntax.Atom
+             "'method dispatch preserves named arguments and defaults'";
+         ] ))
+
 let primitive_hint hint =
   List.mem
     [
@@ -256,7 +324,9 @@ let materialize
   let definitions = ref [] in
   let add_definition source = definitions := source :: !definitions in
   let declaration ~prefix ~name ~abstract callable =
-    let { is_async; parameters; contexts; return_hint; body } = callable in
+    let { type_parameters; is_async; parameters; contexts; return_hint; body } =
+      callable
+    in
     let canonical =
       (not abstract)
       && (not allow_unsafe_named_parameter_order)
@@ -274,10 +344,14 @@ let materialize
         ""
     in
     Format.sprintf
-      "%s%sfunction %s(%s)[%s]: %s%s"
+      "%s%sfunction %s%s(%s)[%s]: %s%s"
       prefix
       async
       name
+      (if List.is_empty type_parameters then
+        ""
+      else
+        "<" ^ String.concat ~sep:", " type_parameters ^ ">")
       parameters
       (String.concat ~sep:", " contexts)
       return_hint
@@ -286,13 +360,28 @@ let materialize
       else
         " { " ^ Syntax.render_body body ^ " }")
   in
-  let materialized callable call_arguments =
+  let materialized ?(type_arguments = []) callable call_arguments =
     let { parameters; contexts; return_hint; _ } = callable in
+    let typed callee =
+      if List.is_empty type_arguments then
+        callee
+      else
+        Syntax.Atom
+          (Syntax.render_expr callee
+          ^ "<"
+          ^ String.concat ~sep:", " type_arguments
+          ^ ">")
+    in
+    let declared_only =
+      (not (List.is_empty callable.type_parameters))
+      || List.exists contexts ~f:(fun context ->
+             String.is_prefix context ~prefix:"ctx ")
+    in
     let invoke callee =
       Option.value_map
         call_arguments
         ~default:(Syntax.Atom ("(" ^ Syntax.render_expr callee ^ "<>)"))
-        ~f:(fun arguments -> Syntax.Call (callee, arguments))
+        ~f:(fun arguments -> Syntax.Call (typed callee, arguments))
     in
     let forms =
       if
@@ -305,7 +394,8 @@ let materialize
     in
     let forms =
       if
-        (not callable.is_async)
+        (not declared_only)
+        && (not callable.is_async)
         && not (List.mem ["void"; "nothing"] return_hint ~equal:String.equal)
       then
         Constructor :: forms
@@ -383,47 +473,136 @@ let materialize
         else
           "public "
       in
+      let domain = List.nth_exn ["int"; "string"; "bool"] (Random.int 3) in
+      let probe = fresh_named_parameter domain parameters in
       let signature =
-        declaration ~prefix ~name:method_name ~abstract:true callable
-      in
-      let implementation =
-        declaration ~prefix ~name:method_name ~abstract:false callable
+        declaration
+          ~prefix
+          ~name:method_name
+          ~abstract:true
+          { callable with parameters = probe :: parameters }
       in
       add_definition (Format.sprintf "interface %s { %s }" interface signature);
-      add_definition
-        (Format.sprintf
-           "class %s implements %s { %s }"
-           base
-           interface
-           implementation);
-      let derived ~name ~parent =
-        let call =
-          Syntax.Call
-            (Syntax.StaticMember ("parent", method_name), arguments parameters)
-        in
-        let body = call_body ~is_async:callable.is_async ~return_hint call in
-        let method_ =
-          declaration
-            ~prefix:("<<__Override>> " ^ prefix)
-            ~name:method_name
-            ~abstract:false
-            { callable with body }
-        in
-        add_definition
-          (Format.sprintf "class %s extends %s { %s }" name parent method_)
+      let names =
+        [base; child]
+        @
+        if Random.bool () then
+          [fresh_name "Grandchild"]
+        else
+          []
       in
-      derived ~name:child ~parent:base;
-      let leaf =
-        if Random.bool () then (
-          let grandchild = fresh_name "Grandchild" in
-          derived ~name:grandchild ~parent:child;
-          grandchild
-        ) else
-          child
+      let optional_from = Random.int (List.length names) in
+      let add_optional_names =
+        (* T289098968: trailing new names must not shift required positional
+           slots beyond the parent's required prefix. *)
+        not
+          (List.exists parameters ~f:(fun parameter ->
+               (not parameter.Syntax.named)
+               && (not parameter.Syntax.variadic)
+               && Option.is_none parameter.Syntax.default))
+      in
+      let rec levels index probe extras = function
+        | [] -> []
+        | name :: names ->
+          let probe =
+            {
+              probe with
+              Syntax.hint = widen_probe_hint probe.Syntax.hint;
+              default =
+                (if index >= optional_from then
+                  Some (probe_value domain)
+                else
+                  None);
+            }
+          in
+          let extras =
+            List.map extras ~f:(fun parameter ->
+                { parameter with Syntax.default = Some (probe_value "int") })
+          in
+          let extras =
+            if add_optional_names && Random.bool () then
+              extras
+              @ [
+                  fresh_named_parameter
+                    ~default:(probe_value "int")
+                    "int"
+                    ((probe :: extras) @ parameters);
+                ]
+            else
+              extras
+          in
+          (name, probe, extras) :: levels (index + 1) probe extras names
+      in
+      let levels = levels 0 probe [] names in
+      let (leaf, leaf_probe, _) = List.last_exn levels in
+      let omit_probe = Random.bool () in
+      let expected =
+        if omit_probe then
+          Option.value_exn leaf_probe.Syntax.default
+        else
+          probe_value domain
+      in
+      List.iteri levels ~f:(fun index (name, probe, extras) ->
+          let (parent, method_prefix, body) =
+            if index = 0 then
+              ("implements " ^ interface, prefix, callable.body)
+            else
+              let (parent, parent_probe, _) = List.nth_exn levels (index - 1) in
+              let value = Syntax.Local probe.Syntax.local in
+              let call =
+                Syntax.Call
+                  ( Syntax.StaticMember
+                      ( "parent",
+                        method_name
+                        ^
+                        if List.is_empty callable.type_parameters then
+                          ""
+                        else
+                          "<"
+                          ^ String.concat ~sep:", " callable.type_parameters
+                          ^ ">" ),
+                    add_named_arguments
+                      (arguments parameters)
+                      [(parent_probe, value)] )
+              in
+              ( "extends " ^ parent,
+                "<<__Override>> " ^ prefix,
+                call_body ~is_async:callable.is_async ~return_hint call )
+          in
+          let checks =
+            check_parameter probe expected
+            :: List.map extras ~f:(fun parameter ->
+                   check_parameter
+                     parameter
+                     (Option.value_exn parameter.Syntax.default))
+          in
+          let method_ =
+            declaration
+              ~prefix:method_prefix
+              ~name:method_name
+              ~abstract:false
+              {
+                callable with
+                parameters = (probe :: extras) @ parameters;
+                body = checks @ body;
+              }
+          in
+          add_definition
+            (Format.sprintf "class %s %s { %s }" name parent method_));
+      let method_arguments ~omit original =
+        add_named_arguments
+          original
+          (if omit then
+            []
+          else
+            [(leaf_probe, expected)])
       in
       let adapter ~hint ~receiver ~callee original_arguments =
         let local = Syntax.fresh_local "receiver" in
-        let call = Syntax.Call (callee local, arguments parameters) in
+        let call =
+          Syntax.Call
+            (callee local, method_arguments ~omit:false (arguments parameters))
+        in
         Syntax.Call
           ( Syntax.Lambda
               ( Syntax.parameter hint local :: parameters,
@@ -434,20 +613,37 @@ let materialize
       in
       if is_static then
         match call_arguments with
-        | Some original_arguments when Random.bool () ->
+        | Some original_arguments when (not declared_only) && Random.bool () ->
           adapter
             ~hint:("classname<" ^ base ^ ">")
             ~receiver:(Syntax.Nameof leaf)
             ~callee:(fun local ->
               Syntax.DynamicStaticMember (local, method_name))
             original_arguments
-        | _ -> invoke (Syntax.StaticMember (leaf, method_name))
+        | Some original_arguments ->
+          Syntax.Call
+            ( typed (Syntax.StaticMember (leaf, method_name)),
+              method_arguments ~omit:omit_probe original_arguments )
+        | None ->
+          Syntax.Lambda
+            ( parameters,
+              contexts,
+              return_hint,
+              call_body
+                ~is_async:false
+                ~return_hint
+                (Syntax.Call
+                   ( Syntax.StaticMember (leaf, method_name),
+                     method_arguments ~omit:omit_probe (arguments parameters) ))
+            )
       else
         let callee = Syntax.Member (Syntax.New (leaf, []), method_name) in
         (match call_arguments with
         | Some original_arguments ->
-          if Random.bool () then
-            Syntax.Call (callee, original_arguments)
+          if declared_only || Random.bool () then
+            Syntax.Call
+              ( typed callee,
+                method_arguments ~omit:omit_probe original_arguments )
           else
             adapter
               ~hint:
@@ -467,9 +663,37 @@ let materialize
               call_body
                 ~is_async:false
                 ~return_hint
-                (Syntax.Call (callee, arguments parameters)) ))
+                (Syntax.Call
+                   ( callee,
+                     method_arguments ~omit:omit_probe (arguments parameters) ))
+            ))
   in
   let rec map_expression = function
+    | Syntax.DeclaredCall (callable, type_arguments, arguments) ->
+      if
+        not (closed_body [] callable.parameters callable.contexts callable.body)
+      then
+        failwith "Milner: declared call captures a local";
+      let callable =
+        {
+          callable with
+          parameters =
+            List.map callable.parameters ~f:(fun parameter ->
+                {
+                  parameter with
+                  Syntax.default =
+                    Option.map parameter.Syntax.default ~f:map_expression;
+                });
+          body = List.map callable.body ~f:map_statement;
+        }
+      in
+      materialized
+        ~type_arguments
+        callable
+        (Some (List.map arguments ~f:map_expression))
+    | Syntax.Quote (visitor, Syntax.Splice value) ->
+      Syntax.Quote (visitor, Syntax.Splice (map_expression value))
+    | Syntax.Splice value -> Syntax.Splice (map_expression value)
     | Syntax.Call
         (Syntax.Lambda (parameters, contexts, return_hint, body), arguments) ->
       map_callable false parameters contexts return_hint body (Some arguments)
@@ -521,8 +745,7 @@ let materialize
     | Syntax.Async body -> Syntax.Async (List.map body ~f:map_statement)
     | ( Syntax.Atom _ | Syntax.Local _ | Syntax.DynamicStaticMember _
       | Syntax.Nameof _ | Syntax.StaticMember _ | Syntax.EnumLabel _
-      | Syntax.StaticProperty _ | Syntax.Quote _ | Syntax.Splice _ ) as
-      expression ->
+      | Syntax.StaticProperty _ | Syntax.Quote _ ) as expression ->
       expression
   and map_callable is_async parameters contexts return_hint body call_arguments
       =
@@ -530,7 +753,11 @@ let materialize
       !remaining > 0
       && List.exists parameters ~f:(fun parameter -> parameter.Syntax.named)
       && List.for_all parameters ~f:(fun parameter ->
-             not (String.is_substring parameter.Syntax.hint ~substring:"inout "))
+             (not (String.is_empty parameter.Syntax.hint))
+             && not
+                  (String.is_substring
+                     parameter.Syntax.hint
+                     ~substring:"inout "))
       && Option.for_all call_arguments ~f:(fun arguments ->
              List.for_all arguments ~f:(function
                  | Syntax.Inout _ -> false
@@ -551,7 +778,16 @@ let materialize
     let call_arguments =
       Option.map call_arguments ~f:(List.map ~f:map_expression)
     in
-    let callable = { is_async; parameters; contexts; return_hint; body } in
+    let callable =
+      {
+        type_parameters = [];
+        is_async;
+        parameters;
+        contexts;
+        return_hint;
+        body;
+      }
+    in
     if lift then
       materialized callable call_arguments
     else

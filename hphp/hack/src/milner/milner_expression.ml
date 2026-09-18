@@ -32,10 +32,7 @@ let permute_named is_named values =
   in
   interleave (List.permute named) positional
 
-let apply ?(contexts = ["defaults"]) ty parameters body arguments =
-  let plain () =
-    Syntax.Call (Syntax.Lambda (parameters, contexts, ty, body), arguments)
-  in
+let call_parameters parameters arguments =
   if
     List.exists arguments ~f:(function
         | Syntax.Inout _
@@ -43,7 +40,7 @@ let apply ?(contexts = ["defaults"]) ty parameters body arguments =
           true
         | _ -> false)
   then
-    plain ()
+    (parameters, arguments)
   else
     let rec promote parameters arguments =
       match (parameters, arguments) with
@@ -55,7 +52,11 @@ let apply ?(contexts = ["defaults"]) ty parameters body arguments =
         let parameter =
           {
             parameter with
-            Syntax.named = parameter.Syntax.named || Random.bool ();
+            Syntax.named =
+              parameter.Syntax.named
+              || (Option.is_none parameter.Syntax.default
+                 || Syntax.supports_named_default parameter.Syntax.hint)
+                 && Random.bool ();
           }
         in
         let (argument, arguments) =
@@ -90,11 +91,29 @@ let apply ?(contexts = ["defaults"]) ty parameters body arguments =
           | _ -> false)
         arguments
     in
-    Syntax.Call (Syntax.Lambda (parameters, contexts, ty, body), arguments)
+    (parameters, arguments)
+
+let apply ?(contexts = ["defaults"]) ty parameters body arguments =
+  let (parameters, arguments) = call_parameters parameters arguments in
+  Syntax.Call (Syntax.Lambda (parameters, contexts, ty, body), arguments)
+
+let apply_declared ?(type_arguments = []) declaration arguments =
+  let (parameters, arguments) =
+    call_parameters declaration.Syntax.parameters arguments
+  in
+  Syntax.DeclaredCall
+    ({ declaration with Syntax.parameters }, type_arguments, arguments)
 
 let integer value = Syntax.Atom (string_of_int value)
 
 let zero = integer 0
+
+let assert_equal left right message =
+  Syntax.Eval
+    (Syntax.Call
+       ( Syntax.Atom "invariant",
+         [Syntax.Binary ("===", left, right); Syntax.Atom ("'" ^ message ^ "'")]
+       ))
 
 let boolean () =
   Syntax.Atom
@@ -571,100 +590,195 @@ and callable child ty value =
       else
         [value; zero])
   | 5 -> ordered_call child ty value
-  | _ ->
-    bind ty value (fun value ->
-        let (contexts, result) =
-          match Random.int 3 with
-          | 0 -> ([], value)
-          | 1 ->
-            ( ["write_props"],
-              Syntax.Call
-                ( Syntax.Member
-                    ( Syntax.New
-                        ("Vector<" ^ ty ^ ">", [Syntax.Array ("vec", [value])]),
-                      "at" ),
-                  [zero] ) )
-          | _ -> (["defaults"], child value)
-        in
-        [
-          return
-            (child
-               (Syntax.Call
-                  ( Syntax.Atom ("milner_invoke<" ^ ty ^ ">"),
-                    [
-                      Syntax.NamedArgument
-                        ( "callback",
-                          Syntax.Lambda ([], contexts, ty, [return result]) );
-                    ] )));
-        ])
+  | _ -> coeffect_call child ty value
+
+and coeffect_call child ty value =
+  bind ty value (fun value ->
+      let trace = Syntax.fresh_local "callback_order" in
+      let result = Syntax.fresh_local "callback_value" in
+      let box_ty = "shape('tag' => int, 'value' => " ^ ty ^ ")" in
+      let callbacks =
+        List.init
+          (1 + Random.int 3)
+          ~f:(fun index ->
+            let callback = Syntax.fresh_local "callback" in
+            let result = Syntax.fresh_local "callback_result" in
+            let contexts =
+              match Random.int 3 with
+              | 0 -> []
+              | 1 -> ["write_props"]
+              | _ -> ["defaults"]
+            in
+            ( Syntax.parameter ("(function()[_]: " ^ box_ty ^ ")") callback,
+              result,
+              index,
+              contexts ))
+      in
+      let invocation_order = List.permute callbacks in
+      let (_, selected, _, _) =
+        List.nth_exn callbacks (Random.int (List.length callbacks))
+      in
+      let call =
+        apply_declared
+          {
+            Syntax.type_parameters = [];
+            is_async = false;
+            parameters =
+              List.map callbacks ~f:(fun (parameter, _, _, _) -> parameter);
+            contexts =
+              List.map callbacks ~f:(fun (parameter, _, _, _) ->
+                  "ctx $" ^ Syntax.local_name parameter.Syntax.local);
+            return_hint = ty;
+            body =
+              List.concat_map
+                invocation_order
+                ~f:(fun (parameter, result, index, _) ->
+                  [
+                    Syntax.Bind
+                      ( result,
+                        Syntax.Call (Syntax.Local parameter.Syntax.local, []) );
+                    assert_equal
+                      (Syntax.Index (Syntax.Local result, Syntax.Atom "'tag'"))
+                      (integer index)
+                      "callback binding preserves labels";
+                  ])
+              @ [
+                  return
+                    (Syntax.Index (Syntax.Local selected, Syntax.Atom "'value'"));
+                ];
+          }
+          (List.map callbacks ~f:(fun (_, _, index, contexts) ->
+               let effects =
+                 if List.is_empty contexts then
+                   []
+                 else
+                   [
+                     Syntax.Eval
+                       (Syntax.Call
+                          ( Syntax.Member (Syntax.Local trace, "add"),
+                            [integer index] ));
+                   ]
+               in
+               Syntax.Lambda
+                 ( [],
+                   contexts,
+                   box_ty,
+                   effects
+                   @ [
+                       return
+                         (Syntax.Shape
+                            [("'tag'", integer index); ("'value'", value)]);
+                     ] )))
+      in
+      [
+        Syntax.Bind
+          (trace, Syntax.New ("Vector<int>", [Syntax.Array ("vec", [])]));
+        Syntax.Bind (result, call);
+        assert_equal
+          (Syntax.Call (Syntax.Atom "vec", [Syntax.Local trace]))
+          (Syntax.Array
+             ( "vec",
+               List.filter_map
+                 invocation_order
+                 ~f:(fun (_, _, index, contexts) ->
+                   if List.is_empty contexts then
+                     None
+                   else
+                     Some (integer index)) ))
+          "callback effects follow invocation order";
+        return (child (Syntax.Local result));
+      ])
 
 and ordered_call child ty value =
   let trace = Syntax.fresh_local "argument_order" in
   let result = Syntax.fresh_local "call_result" in
   let box_ty = "shape('tag' => int, 'value' => " ^ ty ^ ")" in
-  let parameters =
+  let payloads =
     List.init
       (3 + Random.int 3)
       ~f:(fun index ->
         let local = Syntax.fresh_local "ordered_argument" in
         (Syntax.parameter ~named:(index <> 1) box_ty local, index))
   in
-  let declaration =
-    permute_named (fun (parameter, _) -> parameter.Syntax.named) parameters
-  in
-  let callsite =
-    permute_named (fun (parameter, _) -> parameter.Syntax.named) parameters
-  in
-  let default = Syntax.fresh_local "default_argument" in
-  let supplied = Random.bool () in
-  let assert_equal left right message =
-    Syntax.Eval
-      (Syntax.Call
-         ( Syntax.Atom "invariant",
-           [
-             Syntax.Binary ("===", left, right);
-             Syntax.Atom ("'" ^ message ^ "'");
-           ] ))
+  let defaults =
+    List.init
+      (2 + Random.int 3)
+      ~f:(fun index ->
+        let local = Syntax.fresh_local "default_argument" in
+        let (hint, default, explicit, nullable) =
+          match Random.int 3 with
+          | 0 -> ("int", integer (7 + index), integer (13 + index), false)
+          | 1 -> ("?int", integer (7 + index), integer (13 + index), true)
+          | _ ->
+            ( "?string",
+              Syntax.Atom ("'default_" ^ string_of_int index ^ "'"),
+              Syntax.Atom ("'argument_" ^ string_of_int index ^ "'"),
+              true )
+        in
+        let supplied =
+          if Random.bool () then
+            Some explicit
+          else if nullable then
+            Some (Syntax.Atom "null")
+          else
+            None
+        in
+        (* T289176736: nullable named parameters remain required. *)
+        let parameter_default =
+          if nullable then
+            None
+          else
+            Some default
+        in
+        ( Syntax.parameter ~named:true ?default:parameter_default hint local,
+          List.length payloads + index,
+          supplied,
+          Option.value supplied ~default ))
   in
   let body =
-    List.map parameters ~f:(fun (parameter, index) ->
+    List.map payloads ~f:(fun (parameter, index) ->
         assert_equal
           (Syntax.Index
              (Syntax.Local parameter.Syntax.local, Syntax.Atom "'tag'"))
           (integer index)
           "argument binding preserves labels")
+    @ List.map defaults ~f:(fun (parameter, _, _, expected) ->
+          assert_equal
+            (Syntax.Local parameter.Syntax.local)
+            expected
+            "named arguments distinguish omission from explicit values")
     @ [
-        assert_equal
-          (Syntax.Local default)
-          (integer
-             (if supplied then
-               13
-             else
-               7))
-          "omitted named arguments use their defaults";
         return
           (child
              (Syntax.Index
                 ( Syntax.Local
                     (fst
                        (List.nth_exn
-                          parameters
-                          (Random.int (List.length parameters))))
+                          payloads
+                          (Random.int (List.length payloads))))
                       .Syntax.local,
                   Syntax.Atom "'value'" )));
       ]
   in
+  let callsite =
+    List.map payloads ~f:(fun (parameter, index) ->
+        ( parameter,
+          index,
+          Syntax.Shape [("'tag'", integer index); ("'value'", value)] ))
+    @ List.filter_map defaults ~f:(fun (parameter, index, supplied, _) ->
+          Option.map supplied ~f:(fun value -> (parameter, index, value)))
+    |> permute_named (fun (parameter, _, _) -> parameter.Syntax.named)
+  in
   let arguments =
-    List.map callsite ~f:(fun (parameter, index) ->
+    List.map callsite ~f:(fun (parameter, index, value) ->
         let argument =
           scope
-            box_ty
+            parameter.Syntax.hint
             [
               Syntax.Eval
                 (Syntax.Call
                    (Syntax.Member (Syntax.Local trace, "add"), [integer index]));
-              return
-                (Syntax.Shape [("'tag'", integer index); ("'value'", value)]);
+              return value;
             ]
         in
         if parameter.Syntax.named then
@@ -672,15 +786,11 @@ and ordered_call child ty value =
             (Syntax.local_name parameter.Syntax.local, argument)
         else
           argument)
-    @
-    if supplied then
-      [Syntax.NamedArgument (Syntax.local_name default, integer 13)]
-    else
-      []
   in
   let parameters =
-    Syntax.parameter ~named:true ~default:(integer 7) "int" default
-    :: List.map declaration ~f:fst
+    List.map payloads ~f:fst
+    @ List.map defaults ~f:(fun (parameter, _, _, _) -> parameter)
+    |> permute_named (fun parameter -> parameter.Syntax.named)
   in
   let call =
     if Random.bool () then
@@ -713,7 +823,7 @@ and ordered_call child ty value =
       assert_equal
         (Syntax.Call (Syntax.Atom "vec", [Syntax.Local trace]))
         (Syntax.Array
-           ("vec", List.map callsite ~f:(fun (_, index) -> integer index)))
+           ("vec", List.map callsite ~f:(fun (_, index, _) -> integer index)))
         "arguments execute in callsite order";
       return (Syntax.Local result);
     ]

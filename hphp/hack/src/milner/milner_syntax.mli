@@ -43,6 +43,10 @@ type expr =
   | EnumLabel of string * string
   | StaticProperty of string * string
   | Call of expr * expr list
+  | DeclaredCall of declaration * string list * expr list
+      (** A closed declaration and its invocation. Materialization is mandatory:
+          generic parameters and polymorphic contexts cannot be lambda syntax.
+          An empty type argument list requests inference. *)
   | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
@@ -63,6 +67,15 @@ and parameter = {
   default: expr option;
 }
 
+and declaration = {
+  type_parameters: string list;
+  is_async: bool;
+  parameters: parameter list;
+  contexts: string list;
+  return_hint: string;
+  body: stmt list;
+}
+
 and stmt =
   | If of expr * stmt list * stmt list
   | While of expr * stmt list
@@ -78,6 +91,10 @@ and stmt =
 
 val parameter :
   ?variadic:bool -> ?named:bool -> ?default:expr -> string -> local -> parameter
+
+(** Whether a generated hint can have a named default under T289176736.
+    Nominal hints require the generator to establish nonnullability separately. *)
+val supports_named_default : string -> bool
 
 (** Canonical order avoids T289079831 in executable declarations. *)
 val render_parameters : ?canonical:bool -> parameter list -> string

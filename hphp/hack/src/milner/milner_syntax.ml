@@ -43,6 +43,7 @@ type expr =
   | EnumLabel of string * string
   | StaticProperty of string * string
   | Call of expr * expr list
+  | DeclaredCall of declaration * string list * expr list
   | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
@@ -63,6 +64,15 @@ and parameter = {
   default: expr option;
 }
 
+and declaration = {
+  type_parameters: string list;
+  is_async: bool;
+  parameters: parameter list;
+  contexts: string list;
+  return_hint: string;
+  body: stmt list;
+}
+
 and stmt =
   | If of expr * stmt list * stmt list
   | While of expr * stmt list
@@ -78,6 +88,14 @@ and stmt =
 
 let parameter ?(variadic = false) ?(named = false) ?default hint local =
   { hint; local; variadic; named; default }
+
+let supports_named_default hint =
+  (* T289176736: named default initialization confuses null with an omitted slot.
+     Nullable members of a nonnullable container do not have this problem. *)
+  not
+    (String.is_prefix hint ~prefix:"?"
+    || String.is_prefix hint ~prefix:"~"
+    || List.mem ["mixed"; "null"; "dynamic"] hint ~equal:String.equal)
 
 let rec render_expr = function
   | Quote (visitor, body) -> visitor ^ "`" ^ render_expr body ^ "`"
@@ -121,6 +139,7 @@ let rec render_expr = function
   | StaticMember (class_name, name) -> class_name ^ "::" ^ name
   | Call (callee, arguments) ->
     Format.sprintf "%s(%s)" (render_expr callee) (render_arguments arguments)
+  | DeclaredCall _ -> failwith "Milner: unmaterialized declaration"
   | NamedArgument (name, expression) -> name ^ "=" ^ render_expr expression
   | Array (kind, elements) -> kind ^ "[" ^ render_arguments elements ^ "]"
   | KeyValue (key, value) -> render_expr key ^ " => " ^ render_expr value

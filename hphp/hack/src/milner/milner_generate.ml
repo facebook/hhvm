@@ -1333,6 +1333,14 @@ end = struct
       |> Option.map ~f:(fun fields -> Syntax.Shape fields)
     | _ -> None
 
+  (* T289176736: restrict the outer type; nullable tuple/shape members are safe. *)
+  let named_parameter_default = function
+    | Mixed
+    | Option _
+    | Primitive Primitive.Null ->
+      None
+    | ty -> parameter_default ty
+
   let named_parameter parameter = Option.is_some parameter.parameter_name
 
   let function_variadic parameters variadic =
@@ -2126,19 +2134,28 @@ end = struct
           in
           [Shape { fields; open_ }]
         | Function { parameters; variadic; return_; context; effect_state } ->
-          let widen_parameter ty =
+          let widen_parameter ~upper ty =
             if Random.bool () then
-              Mixed
+              upper
             else
               ty
           in
           let parameters =
             List.map parameters ~f:(fun parameter ->
-                let parameter_type = widen_parameter parameter.parameter_type in
+                let upper =
+                  if parameter.parameter_optional && named_parameter parameter
+                  then
+                    Nonnull
+                  else
+                    Mixed
+                in
+                let parameter_type =
+                  widen_parameter ~upper parameter.parameter_type
+                in
                 let parameter_optional =
                   parameter.parameter_optional
                   || named_parameter parameter
-                     && Option.is_some (parameter_default parameter_type)
+                     && Option.is_some (named_parameter_default parameter_type)
                      && Random.bool ()
                 in
                 { parameter with parameter_type; parameter_optional })
@@ -2148,7 +2165,7 @@ end = struct
               parameters
               @ [
                   {
-                    parameter_type = Mixed;
+                    parameter_type = Nonnull;
                     parameter_name = Some (fresh "optional");
                     parameter_optional = true;
                   };
@@ -2181,7 +2198,7 @@ end = struct
                 lazy (Some (driver renv Mixed))
               in
               Lazy.force @@ select [lazy None; variadic_subtype]
-            | Some ty -> Some (widen_parameter ty)
+            | Some ty -> Some (widen_parameter ~upper:Mixed ty)
           in
           let context =
             FunctionContext.subcontexts context
@@ -3356,7 +3373,7 @@ end = struct
                in
                let parameter_optional =
                  Option.is_some parameter_name
-                 && Option.is_some (parameter_default parameter_type)
+                 && Option.is_some (named_parameter_default parameter_type)
                  && Random.bool ()
                in
                (env, { parameter_type; parameter_name; parameter_optional }))
@@ -4013,6 +4030,102 @@ end = struct
         (fun _ -> unwrap payload (lookup payload (widened ~is_label:true)));
       ] )
 
+  let higher_order_operations _renv env ty =
+    let project value =
+      let input = Syntax.fresh_local "input" in
+      let callback = Syntax.fresh_local "callback" in
+      let argument = Syntax.fresh_local "argument" in
+      let box_hint = "shape('value' => " ^ show ty ^ ")" in
+      let declaration =
+        {
+          Syntax.type_parameters = ["TInput"; "TOutput"];
+          is_async = false;
+          parameters =
+            [
+              Syntax.parameter "(function(TInput)[_]: TOutput)" callback;
+              Syntax.parameter "TInput" input;
+            ];
+          contexts = ["ctx $" ^ Syntax.local_name callback];
+          return_hint = "TOutput";
+          body =
+            [
+              returning
+                (Syntax.Call (Syntax.Local callback, [Syntax.Local input]));
+            ];
+        }
+      in
+      let call =
+        Milner_expression.apply_declared
+          ~type_arguments:
+            (if Random.bool () then
+              []
+            else
+              [box_hint; show ty])
+          declaration
+          [
+            Syntax.Lambda
+              ( [
+                  Syntax.parameter
+                    (if Random.bool () then
+                      ""
+                    else
+                      box_hint)
+                    argument;
+                ],
+                [],
+                show ty,
+                [
+                  returning
+                    (Syntax.Index (Syntax.Local argument, Syntax.Atom "'value'"));
+                ] );
+            Syntax.Shape [("'value'", value)];
+          ]
+      in
+      let call =
+        match call with
+        | Syntax.DeclaredCall
+            ( declaration,
+              [],
+              Syntax.NamedArgument
+                (name, Syntax.Lambda ([parameter], contexts, hint, body))
+              :: arguments ) ->
+          (* T289176746: named callbacks preceding their data argument do not
+             receive its inferred input type. *)
+          Syntax.DeclaredCall
+            ( declaration,
+              [],
+              Syntax.NamedArgument
+                ( name,
+                  Syntax.Lambda
+                    ( [{ parameter with Syntax.hint = box_hint }],
+                      contexts,
+                      hint,
+                      body ) )
+              :: arguments )
+        | _ -> call
+      in
+      match call with
+      | Syntax.DeclaredCall (declaration, [], arguments)
+        when List.exists arguments ~f:(function
+                 | Syntax.NamedArgument (_, Syntax.Lambda (parameters, _, _, _))
+                 | Syntax.Lambda (parameters, _, _, _) ->
+                   List.exists parameters ~f:(fun parameter ->
+                       not (String.is_empty parameter.Syntax.hint))
+                 | _ -> false) ->
+        (* T289177548: captured data can be inferred as dynamic with annotated
+           callbacks. A typed boundary preserves its known input type. *)
+        let arguments =
+          List.map arguments ~f:(function
+              | Syntax.NamedArgument (name, (Syntax.Shape _ as value)) ->
+                Syntax.NamedArgument (name, forward box_hint box_hint value)
+              | Syntax.Shape _ as value -> forward box_hint box_hint value
+              | argument -> argument)
+        in
+        Syntax.DeclaredCall (declaration, [], arguments)
+      | _ -> call
+    in
+    (env, [project])
+
   let callable_operations renv env ty =
     let (env, callable_ty) =
       mk ~kind:Kind.Function renv env ~depth:None ~complexity:2
@@ -4130,20 +4243,31 @@ end = struct
             initialize;
             Syntax.Bind
               ( result,
-                Syntax.Call
-                  ( Syntax.Atom ("milner_invoke<" ^ show ty ^ ">"),
-                    [
-                      Syntax.NamedArgument
-                        ( "callback",
-                          Syntax.Lambda
-                            ( [],
-                              context,
-                              show ty,
-                              [
-                                Syntax.Eval (Syntax.Unary ("++", slot));
-                                returning value;
-                              ] ) );
-                    ] ) );
+                let callback = Syntax.fresh_local "callback" in
+                Milner_expression.apply_declared
+                  {
+                    Syntax.type_parameters = [];
+                    is_async = false;
+                    parameters =
+                      [
+                        Syntax.parameter
+                          ("(function()[_]: " ^ show ty ^ ")")
+                          callback;
+                      ];
+                    contexts = ["ctx $" ^ Syntax.local_name callback];
+                    return_hint = show ty;
+                    body = [returning (Syntax.Call (Syntax.Local callback, []))];
+                  }
+                  [
+                    Syntax.Lambda
+                      ( [],
+                        context,
+                        show ty,
+                        [
+                          Syntax.Eval (Syntax.Unary ("++", slot));
+                          returning value;
+                        ] );
+                  ] );
             returning
               (Syntax.Index
                  ( Syntax.Array ("vec", [Syntax.Local result]),
@@ -4185,11 +4309,6 @@ end = struct
     let env =
       add_fixture
         env
-        "function milner_invoke<T>(named (function()[_]: T) $callback, named int $z = 0)[ctx $callback]: T { return $callback(); }"
-    in
-    let env =
-      add_fixture
-        env
         "function milner_procedure((function()[_]: void) $callback)[ctx $callback]: void { $callback(); }"
     in
     let env =
@@ -4204,6 +4323,7 @@ end = struct
         dependent_operations;
         identity_operations;
         callable_operations;
+        higher_order_operations;
         protocol_operations;
       ]
     in

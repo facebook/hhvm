@@ -38,7 +38,7 @@ module Type : sig
 
   val show : t -> string
 
-  (** Exclude the documented completeness bugs in intersection-law templates. *)
+  (** Exclude known completeness bugs in intersection-law templates. *)
   val intersection_law_compatible :
     Environment.t -> t -> Environment.t -> t -> bool
 

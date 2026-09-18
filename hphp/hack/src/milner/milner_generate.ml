@@ -245,7 +245,8 @@ end = struct
 
   let for_alias renv = { renv with for_alias_def = true }
 
-  (* T288868934: indirect label-valued enum initializers abort in HHVM. *)
+  (* T288868934: indirect label-valued enum initializers abort in HHVM.
+     This constrains future generation; it does not validate an existing type. *)
   let for_enum_initializer renv = { renv with for_enum_class_value = true }
 
   let show
@@ -993,6 +994,8 @@ end = struct
     Format.sprintf "enum class %s: mixed%s {\n%s\n}" name parent members
 
   let enum_unwrap ~name ~enum_name =
+    (* T288868928: direct nested MemberOf coercions can miss the outer bound.
+       Coercion through a type parameter preserves that bound. *)
     Format.sprintf
       "function %s<TValue>(HH\\MemberOf<%s, TValue> $member)[]: TValue { return $member; }"
       name
@@ -2699,7 +2702,8 @@ end = struct
     subtype_of renv env (Primitive Primitive.Arraykey)
 
   let has_nullable_nominal_case_return env ty =
-    (* Identical nullable enum/name case returns can fail override checking. *)
+    (* T288899890: identical nullable enum/name case returns can fail override checking.
+       Follow declaration bodies: reverse case-bound edges are not variants. *)
     let rec visit seen ~inside_case ~nullable ty =
       if TypeSet.mem ty seen then
         false
@@ -3959,6 +3963,7 @@ end = struct
       Syntax.Call (Syntax.Atom (unwrap_name ^ "<" ^ show payload ^ ">"), [value])
     in
     let lookup payload label =
+      (* T288868921: inferred valueOf arguments can introduce a dynamic constraint. *)
       Syntax.Call
         ( Syntax.StaticMember
             ( family.enum_child,

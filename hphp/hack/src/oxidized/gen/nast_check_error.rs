@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<820db341c9b849db4c118b516c1933cc>>
+// @generated SignedSource<<58bec3ce064698dd18bb616d1f8c6982>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -208,6 +208,8 @@ pub enum NastCheckError {
     EntrypointGenerics(pos::Pos),
     #[rust_to_ocaml(name = "Variadic_memoize")]
     VariadicMemoize(pos::Pos),
+    #[rust_to_ocaml(name = "Named_params_memoize")]
+    NamedParamsMemoize(pos::Pos),
     #[rust_to_ocaml(name = "Abstract_method_memoize")]
     AbstractMethodMemoize(pos::Pos),
     #[rust_to_ocaml(name = "Instance_property_in_abstract_final_class")]

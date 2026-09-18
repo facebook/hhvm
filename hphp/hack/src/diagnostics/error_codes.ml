@@ -294,6 +294,7 @@ module NastCheck = struct
     | StrictIsolationPackageNotObservable [@value 3110]
     | PackageOverrideTargetNotIncluded [@value 3111]
     | RedundantPackageOverride [@value 3112]
+    | NamedParamsMemoize [@value 3113]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

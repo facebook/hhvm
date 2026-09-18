@@ -105,6 +105,7 @@ type t =
   | Entrypoint_arguments of Pos.t
   | Entrypoint_generics of Pos.t
   | Variadic_memoize of Pos.t
+  | Named_params_memoize of Pos.t
   | Abstract_method_memoize of Pos.t
   | Instance_property_in_abstract_final_class of Pos.t
   | Inout_params_special of Pos.t
@@ -512,6 +513,14 @@ let variadic_memoize pos =
     Error_code.(to_enum VariadicMemoize)
     ( pos,
       "Memoized functions cannot be variadic or use the type-splat operator." )
+    []
+
+let named_params_memoize pos =
+  User_diagnostic.make_err
+    Error_code.(to_enum NamedParamsMemoize)
+    ( pos,
+      "Memoized functions cannot have named parameters yet. Make this parameter positional or drop the memoization."
+    )
     []
 
 let abstract_method_memoize pos =
@@ -1052,6 +1061,7 @@ let to_user_diagnostic t =
     | Entrypoint_arguments pos -> entrypoint_arguments pos
     | Entrypoint_generics pos -> entrypoint_generics pos
     | Variadic_memoize pos -> variadic_memoize pos
+    | Named_params_memoize pos -> named_params_memoize pos
     | Abstract_method_memoize pos -> abstract_method_memoize pos
     | Instance_property_in_abstract_final_class pos ->
       instance_property_in_abstract_final_class pos

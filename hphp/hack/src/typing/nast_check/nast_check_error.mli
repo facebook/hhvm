@@ -104,6 +104,7 @@ type t =
   | Entrypoint_arguments of Pos.t
   | Entrypoint_generics of Pos.t
   | Variadic_memoize of Pos.t
+  | Named_params_memoize of Pos.t
   | Abstract_method_memoize of Pos.t
   | Instance_property_in_abstract_final_class of Pos.t
   | Inout_params_special of Pos.t

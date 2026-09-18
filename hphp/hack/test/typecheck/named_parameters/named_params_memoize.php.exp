@@ -1,0 +1,6 @@
+ERROR: File "named_params_memoize.php", line 6, characters 40-41:
+Memoized functions cannot have named parameters yet. Make this parameter positional or drop the memoization. (NastCheck[3113])
+ERROR: File "named_params_memoize.php", line 9, characters 53-54:
+Memoized functions cannot have named parameters yet. Make this parameter positional or drop the memoization. (NastCheck[3113])
+ERROR: File "named_params_memoize.php", line 18, characters 42-48:
+Memoized functions cannot have named parameters yet. Make this parameter positional or drop the memoization. (NastCheck[3113])

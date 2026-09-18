@@ -47,6 +47,9 @@ type expr =
       (** A closed declaration and its invocation. Materialization is mandatory:
           generic parameters and polymorphic contexts cannot be lambda syntax.
           An empty type argument list requests inference. *)
+  | DeclaredCallable of declaration * string list
+      (** A closed declaration materialized as a reusable callable value. Currently
+          requires a monomorphic declaration and concrete contexts. *)
   | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
@@ -74,6 +77,7 @@ and declaration = {
   contexts: string list;
   return_hint: string;
   body: stmt list;
+  memoize: bool;
 }
 
 and stmt =

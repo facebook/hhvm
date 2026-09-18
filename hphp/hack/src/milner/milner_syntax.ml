@@ -44,6 +44,7 @@ type expr =
   | StaticProperty of string * string
   | Call of expr * expr list
   | DeclaredCall of declaration * string list * expr list
+  | DeclaredCallable of declaration * string list
   | NamedArgument of string * expr
   | Index of expr * expr
   | Append of expr
@@ -71,6 +72,7 @@ and declaration = {
   contexts: string list;
   return_hint: string;
   body: stmt list;
+  memoize: bool;
 }
 
 and stmt =
@@ -139,7 +141,9 @@ let rec render_expr = function
   | StaticMember (class_name, name) -> class_name ^ "::" ^ name
   | Call (callee, arguments) ->
     Format.sprintf "%s(%s)" (render_expr callee) (render_arguments arguments)
-  | DeclaredCall _ -> failwith "Milner: unmaterialized declaration"
+  | DeclaredCall _
+  | DeclaredCallable _ ->
+    failwith "Milner: unmaterialized declaration"
   | NamedArgument (name, expression) -> name ^ "=" ^ render_expr expression
   | Array (kind, elements) -> kind ^ "[" ^ render_arguments elements ^ "]"
   | KeyValue (key, value) -> render_expr key ^ " => " ^ render_expr value

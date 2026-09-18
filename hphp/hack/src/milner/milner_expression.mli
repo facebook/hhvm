@@ -17,6 +17,20 @@ val compose :
 (** Shuffle and interleave named items while preserving positional order. *)
 val permute_named : ('a -> bool) -> 'a list -> 'a list
 
+(** Choose named parameters and their declaration order once for a callable. *)
+val promote_parameters :
+  ?allow_named:bool ->
+  Milner_syntax.parameter list ->
+  Milner_syntax.parameter list
+
+(** Plan a call against an existing signature. [None] omits an optional
+    argument; positional holes before supplied arguments use their defaults.
+    Variadic values are unpacked. Required arguments must be supplied. *)
+val call_arguments :
+  Milner_syntax.parameter list ->
+  value:(Milner_syntax.parameter -> Milner_syntax.expr option) ->
+  Milner_syntax.expr list
+
 (** Apply a lambda, optionally promoting its parameters and arguments to named
     form and varying argument order. *)
 val apply :

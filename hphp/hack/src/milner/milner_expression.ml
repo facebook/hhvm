@@ -32,6 +32,67 @@ let permute_named is_named values =
   in
   interleave (List.permute named) positional
 
+let permute_parameters parameters =
+  let (variadic, fixed) =
+    List.partition_tf parameters ~f:(fun parameter -> parameter.Syntax.variadic)
+  in
+  permute_named (fun parameter -> parameter.Syntax.named) fixed @ variadic
+
+let promote_parameters ?(allow_named = true) parameters =
+  List.map parameters ~f:(fun parameter ->
+      {
+        parameter with
+        Syntax.named =
+          parameter.Syntax.named
+          || allow_named
+             && (not parameter.Syntax.variadic)
+             && (Option.is_none parameter.Syntax.default
+                || Syntax.supports_named_default parameter.Syntax.hint)
+             && Random.bool ();
+      })
+  |> permute_parameters
+
+let permute_arguments arguments =
+  permute_named
+    (function
+      | Syntax.NamedArgument _ -> true
+      | _ -> false)
+    arguments
+
+let call_arguments parameters ~value =
+  let supplied =
+    List.map parameters ~f:(fun parameter -> (parameter, value parameter))
+  in
+  let (_, arguments) =
+    List.fold_right
+      supplied
+      ~init:(false, [])
+      ~f:(fun (parameter, value) (later_positional, arguments) ->
+        let value =
+          match (value, parameter.Syntax.default) with
+          | (None, None) when not parameter.Syntax.variadic ->
+            invalid_arg "Milner: required call parameter has no argument"
+          | (None, Some default)
+            when later_positional && not parameter.Syntax.named ->
+            Some default
+          | _ -> value
+        in
+        match value with
+        | None -> (later_positional, arguments)
+        | Some value ->
+          let argument =
+            if parameter.Syntax.variadic then
+              Syntax.Unpack value
+            else if parameter.Syntax.named then
+              Syntax.NamedArgument
+                (Syntax.local_name parameter.Syntax.local, value)
+            else
+              value
+          in
+          (later_positional || not parameter.Syntax.named, argument :: arguments))
+  in
+  permute_arguments arguments
+
 let call_parameters parameters arguments =
   if
     List.exists arguments ~f:(function
@@ -42,56 +103,33 @@ let call_parameters parameters arguments =
   then
     (parameters, arguments)
   else
-    let rec promote parameters arguments =
+    let rec split parameters arguments =
       match (parameters, arguments) with
       | ([], _)
       | ({ Syntax.variadic = true; _ } :: _, _)
       | (_, Syntax.Unpack _ :: _) ->
-        (parameters, arguments)
+        ([], parameters, arguments)
       | (parameter :: parameters, arguments) ->
-        let parameter =
-          {
-            parameter with
-            Syntax.named =
-              parameter.Syntax.named
-              || (Option.is_none parameter.Syntax.default
-                 || Syntax.supports_named_default parameter.Syntax.hint)
-                 && Random.bool ();
-          }
-        in
         let (argument, arguments) =
           match arguments with
-          | [] -> ([], [])
-          | argument :: arguments ->
-            let argument =
-              if parameter.Syntax.named then
-                Syntax.NamedArgument
-                  (Syntax.local_name parameter.Syntax.local, argument)
-              else
-                argument
-            in
-            ([argument], arguments)
+          | [] -> (None, [])
+          | argument :: arguments -> (Some argument, arguments)
         in
-        let (parameters, arguments) = promote parameters arguments in
-        (parameter :: parameters, argument @ arguments)
+        let (fixed, parameters, arguments) = split parameters arguments in
+        ((parameter, argument) :: fixed, parameters, arguments)
     in
-    let (parameters, arguments) = promote parameters arguments in
-    let (variadic, parameters) =
-      List.partition_tf parameters ~f:(fun parameter ->
-          parameter.Syntax.variadic)
-    in
-    let parameters =
-      permute_named (fun parameter -> parameter.Syntax.named) parameters
-      @ variadic
-    in
+    let (fixed, tail_parameters, tail_arguments) = split parameters arguments in
+    let parameters = promote_parameters (List.map fixed ~f:fst) in
     let arguments =
-      permute_named
-        (function
-          | Syntax.NamedArgument _ -> true
-          | _ -> false)
-        arguments
+      call_arguments parameters ~value:(fun parameter ->
+          List.find_exn fixed ~f:(fun (original, _) ->
+              String.equal
+                (Syntax.local_name parameter.Syntax.local)
+                (Syntax.local_name original.Syntax.local))
+          |> snd)
     in
-    (parameters, arguments)
+    ( permute_parameters (parameters @ tail_parameters),
+      permute_arguments (arguments @ tail_arguments) )
 
 let apply ?(contexts = ["defaults"]) ty parameters body arguments =
   let (parameters, arguments) = call_parameters parameters arguments in
@@ -622,6 +660,7 @@ and coeffect_call child ty value =
         apply_declared
           {
             Syntax.type_parameters = [];
+            memoize = false;
             is_async = false;
             parameters =
               List.map callbacks ~f:(fun (parameter, _, _, _) -> parameter);

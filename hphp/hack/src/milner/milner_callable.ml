@@ -16,6 +16,7 @@ type callable = Syntax.declaration = {
   contexts: string list;
   return_hint: string;
   body: Syntax.stmt list;
+  memoize: bool;
 }
 
 type form =
@@ -52,6 +53,8 @@ let rec closed_expression bound = function
   | Syntax.Index (left, right)
   | Syntax.KeyValue (left, right) ->
     closed_expression bound left && closed_expression bound right
+  | Syntax.DeclaredCallable (declaration, _) ->
+    closed_body [] declaration.parameters declaration.contexts declaration.body
   | Syntax.DeclaredCall (declaration, _, arguments) ->
     closed_body [] declaration.parameters declaration.contexts declaration.body
     && List.for_all arguments ~f:(closed_expression bound)
@@ -155,17 +158,8 @@ let permute_parameters parameters =
   @ variadic
 
 let arguments parameters =
-  List.map parameters ~f:(fun parameter ->
-      let value = Syntax.Local parameter.Syntax.local in
-      if parameter.Syntax.variadic then
-        Syntax.Unpack value
-      else if parameter.Syntax.named then
-        Syntax.NamedArgument (Syntax.local_name parameter.Syntax.local, value)
-      else
-        value)
-  |> Milner_expression.permute_named (function
-         | Syntax.NamedArgument _ -> true
-         | _ -> false)
+  Milner_expression.call_arguments parameters ~value:(fun parameter ->
+      Some (Syntax.Local parameter.Syntax.local))
 
 let add_named_arguments original additions =
   let names =
@@ -292,6 +286,31 @@ let call_body ~is_async ~return_hint call =
   else
     [Syntax.Return (Some call)]
 
+let callable_hint callable =
+  let parameters =
+    List.map callable.parameters ~f:(fun parameter ->
+        let hint = parameter.Syntax.hint in
+        if parameter.Syntax.variadic then
+          hint ^ "..."
+        else
+          (if Option.is_some parameter.Syntax.default then
+            "optional "
+          else
+            "")
+          ^
+          if parameter.Syntax.named then
+            "named " ^ hint ^ " $" ^ Syntax.local_name parameter.Syntax.local
+          else
+            hint)
+  in
+  "(function("
+  ^ String.concat ~sep:", " parameters
+  ^ ")["
+  ^ String.concat ~sep:", " callable.contexts
+  ^ "]: "
+  ^ callable.return_hint
+  ^ ")"
+
 let rec constructor_body target body =
   List.map body ~f:(function
       | Syntax.Return (Some value) ->
@@ -323,9 +342,35 @@ let materialize
   let remaining = ref 8 in
   let definitions = ref [] in
   let add_definition source = definitions := source :: !definitions in
-  let declaration ~prefix ~name ~abstract callable =
-    let { type_parameters; is_async; parameters; contexts; return_hint; body } =
+  let declaration
+      ?(attributes = []) ?(memoize_lsb = false) ~prefix ~name ~abstract callable
+      =
+    let {
+      type_parameters;
+      is_async;
+      parameters;
+      contexts;
+      return_hint;
+      body;
+      memoize;
+    } =
       callable
+    in
+    let attributes =
+      if memoize && not abstract then
+        (if memoize_lsb then
+          "__MemoizeLSB"
+        else
+          "__Memoize")
+        :: attributes
+      else
+        attributes
+    in
+    let attributes =
+      if List.is_empty attributes then
+        ""
+      else
+        "<<" ^ String.concat ~sep:", " attributes ^ ">> "
     in
     let canonical =
       (not abstract)
@@ -344,7 +389,8 @@ let materialize
         ""
     in
     Format.sprintf
-      "%s%sfunction %s%s(%s)[%s]: %s%s"
+      "%s%s%sfunction %s%s(%s)[%s]: %s%s"
+      attributes
       prefix
       async
       name
@@ -395,6 +441,7 @@ let materialize
     let forms =
       if
         (not declared_only)
+        && (not callable.memoize)
         && (not callable.is_async)
         && not (List.mem ["void"; "nothing"] return_hint ~equal:String.equal)
       then
@@ -473,14 +520,21 @@ let materialize
         else
           "public "
       in
+      let memoize_lsb = is_static && callable.memoize && Random.bool () in
       let domain = List.nth_exn ["int"; "string"; "bool"] (Random.int 3) in
-      let probe = fresh_named_parameter domain parameters in
+      let probe =
+        (* T289176741: memo wrappers do not forward named arguments. *)
+        if callable.memoize then
+          None
+        else
+          Some (fresh_named_parameter domain parameters)
+      in
       let signature =
         declaration
           ~prefix
           ~name:method_name
           ~abstract:true
-          { callable with parameters = probe :: parameters }
+          { callable with parameters = Option.to_list probe @ parameters }
       in
       add_definition (Format.sprintf "interface %s { %s }" interface signature);
       let names =
@@ -495,25 +549,27 @@ let materialize
       let add_optional_names =
         (* T289098968: trailing new names must not shift required positional
            slots beyond the parent's required prefix. *)
-        not
-          (List.exists parameters ~f:(fun parameter ->
-               (not parameter.Syntax.named)
-               && (not parameter.Syntax.variadic)
-               && Option.is_none parameter.Syntax.default))
+        Option.is_some probe
+        && not
+             (List.exists parameters ~f:(fun parameter ->
+                  (not parameter.Syntax.named)
+                  && (not parameter.Syntax.variadic)
+                  && Option.is_none parameter.Syntax.default))
       in
       let rec levels index probe extras = function
         | [] -> []
         | name :: names ->
           let probe =
-            {
-              probe with
-              Syntax.hint = widen_probe_hint probe.Syntax.hint;
-              default =
-                (if index >= optional_from then
-                  Some (probe_value domain)
-                else
-                  None);
-            }
+            Option.map probe ~f:(fun probe ->
+                {
+                  probe with
+                  Syntax.hint = widen_probe_hint probe.Syntax.hint;
+                  default =
+                    (if index >= optional_from then
+                      Some (probe_value domain)
+                    else
+                      None);
+                })
           in
           let extras =
             List.map extras ~f:(fun parameter ->
@@ -526,7 +582,7 @@ let materialize
                   fresh_named_parameter
                     ~default:(probe_value "int")
                     "int"
-                    ((probe :: extras) @ parameters);
+                    (Option.to_list probe @ extras @ parameters);
                 ]
             else
               extras
@@ -534,21 +590,26 @@ let materialize
           (name, probe, extras) :: levels (index + 1) probe extras names
       in
       let levels = levels 0 probe [] names in
-      let (leaf, leaf_probe, _) = List.last_exn levels in
-      let omit_probe = Random.bool () in
+      let (leaf, leaf_probe, leaf_extras) = List.last_exn levels in
+      let omit_probe = Option.is_some leaf_probe && Random.bool () in
       let expected =
-        if omit_probe then
-          Option.value_exn leaf_probe.Syntax.default
-        else
-          probe_value domain
+        Option.map leaf_probe ~f:(fun probe ->
+            if omit_probe then
+              Option.value_exn probe.Syntax.default
+            else
+              probe_value domain)
       in
       List.iteri levels ~f:(fun index (name, probe, extras) ->
-          let (parent, method_prefix, body) =
+          let (parent, attributes, body) =
             if index = 0 then
-              ("implements " ^ interface, prefix, callable.body)
+              ("implements " ^ interface, [], callable.body)
             else
               let (parent, parent_probe, _) = List.nth_exn levels (index - 1) in
-              let value = Syntax.Local probe.Syntax.local in
+              let probe_argument =
+                Option.to_list
+                  (Option.map parent_probe ~f:(fun parameter ->
+                       (parameter, Syntax.Local parameter.Syntax.local)))
+              in
               let call =
                 Syntax.Call
                   ( Syntax.StaticMember
@@ -561,29 +622,31 @@ let materialize
                           "<"
                           ^ String.concat ~sep:", " callable.type_parameters
                           ^ ">" ),
-                    add_named_arguments
-                      (arguments parameters)
-                      [(parent_probe, value)] )
+                    add_named_arguments (arguments parameters) probe_argument )
               in
               ( "extends " ^ parent,
-                "<<__Override>> " ^ prefix,
+                ["__Override"],
                 call_body ~is_async:callable.is_async ~return_hint call )
           in
           let checks =
-            check_parameter probe expected
-            :: List.map extras ~f:(fun parameter ->
-                   check_parameter
-                     parameter
-                     (Option.value_exn parameter.Syntax.default))
+            Option.to_list
+              (Option.map probe ~f:(fun parameter ->
+                   check_parameter parameter (Option.value_exn expected)))
+            @ List.map extras ~f:(fun parameter ->
+                  check_parameter
+                    parameter
+                    (Option.value_exn parameter.Syntax.default))
           in
           let method_ =
             declaration
-              ~prefix:method_prefix
+              ~attributes
+              ~memoize_lsb
+              ~prefix
               ~name:method_name
               ~abstract:false
               {
                 callable with
-                parameters = (probe :: extras) @ parameters;
+                parameters = Option.to_list probe @ extras @ parameters;
                 body = checks @ body;
               }
           in
@@ -595,7 +658,9 @@ let materialize
           (if omit then
             []
           else
-            [(leaf_probe, expected)])
+            Option.to_list
+              (Option.map leaf_probe ~f:(fun parameter ->
+                   (parameter, Option.value_exn expected))))
       in
       let adapter ~hint ~receiver ~callee original_arguments =
         let local = Syntax.fresh_local "receiver" in
@@ -624,6 +689,8 @@ let materialize
           Syntax.Call
             ( typed (Syntax.StaticMember (leaf, method_name)),
               method_arguments ~omit:omit_probe original_arguments )
+        | None when Option.is_none leaf_probe && List.is_empty leaf_extras ->
+          invoke (Syntax.StaticMember (leaf, method_name))
         | None ->
           Syntax.Lambda
             ( parameters,
@@ -656,41 +723,44 @@ let materialize
                 Syntax.Member (Syntax.Local local, method_name))
               original_arguments
         | None ->
-          Syntax.Lambda
-            ( parameters,
-              contexts,
-              return_hint,
-              call_body
-                ~is_async:false
-                ~return_hint
-                (Syntax.Call
-                   ( callee,
-                     method_arguments ~omit:omit_probe (arguments parameters) ))
-            ))
+          let receiver = Syntax.fresh_local "receiver" in
+          let closure =
+            Syntax.Lambda
+              ( parameters,
+                contexts,
+                return_hint,
+                call_body
+                  ~is_async:false
+                  ~return_hint
+                  (Syntax.Call
+                     ( Syntax.Member (Syntax.Local receiver, method_name),
+                       method_arguments ~omit:omit_probe (arguments parameters)
+                     )) )
+          in
+          Syntax.Call
+            ( Syntax.Lambda
+                ( [Syntax.parameter leaf receiver],
+                  [],
+                  callable_hint callable,
+                  [Syntax.Return (Some closure)] ),
+              [Syntax.New (leaf, [])] ))
   in
   let rec map_expression = function
     | Syntax.DeclaredCall (callable, type_arguments, arguments) ->
-      if
-        not (closed_body [] callable.parameters callable.contexts callable.body)
-      then
-        failwith "Milner: declared call captures a local";
-      let callable =
-        {
-          callable with
-          parameters =
-            List.map callable.parameters ~f:(fun parameter ->
-                {
-                  parameter with
-                  Syntax.default =
-                    Option.map parameter.Syntax.default ~f:map_expression;
-                });
-          body = List.map callable.body ~f:map_statement;
-        }
-      in
       materialized
         ~type_arguments
-        callable
+        (map_declaration callable)
         (Some (List.map arguments ~f:map_expression))
+    | Syntax.DeclaredCallable (callable, type_arguments) ->
+      if
+        (not (List.is_empty callable.type_parameters))
+        || (not (List.is_empty type_arguments))
+        || List.exists callable.contexts ~f:(fun context ->
+               String.is_substring context ~substring:"$")
+      then
+        invalid_arg
+          "Milner: callable values require monomorphic contexts and types";
+      materialized (map_declaration callable) None
     | Syntax.Quote (visitor, Syntax.Splice value) ->
       Syntax.Quote (visitor, Syntax.Splice (map_expression value))
     | Syntax.Splice value -> Syntax.Splice (map_expression value)
@@ -747,6 +817,21 @@ let materialize
       | Syntax.Nameof _ | Syntax.StaticMember _ | Syntax.EnumLabel _
       | Syntax.StaticProperty _ | Syntax.Quote _ ) as expression ->
       expression
+  and map_declaration callable =
+    if not (closed_body [] callable.parameters callable.contexts callable.body)
+    then
+      failwith "Milner: declared callable captures a local";
+    {
+      callable with
+      parameters =
+        List.map callable.parameters ~f:(fun parameter ->
+            {
+              parameter with
+              Syntax.default =
+                Option.map parameter.Syntax.default ~f:map_expression;
+            });
+      body = List.map callable.body ~f:map_statement;
+    }
   and map_callable is_async parameters contexts return_hint body call_arguments
       =
     let lift =
@@ -781,6 +866,7 @@ let materialize
     let callable =
       {
         type_parameters = [];
+        memoize = false;
         is_async;
         parameters;
         contexts;

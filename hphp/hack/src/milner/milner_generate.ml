@@ -4039,6 +4039,7 @@ end = struct
       let declaration =
         {
           Syntax.type_parameters = ["TInput"; "TOutput"];
+          memoize = false;
           is_async = false;
           parameters =
             [
@@ -4247,6 +4248,7 @@ end = struct
                 Milner_expression.apply_declared
                   {
                     Syntax.type_parameters = [];
+                    memoize = false;
                     is_async = false;
                     parameters =
                       [
@@ -4324,6 +4326,8 @@ end = struct
         identity_operations;
         callable_operations;
         higher_order_operations;
+        (fun _renv env ty ->
+          (env, [(fun value -> Milner_memoize.operation ~ty:(show ty) ~value)]));
         protocol_operations;
       ]
     in

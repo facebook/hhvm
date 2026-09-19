@@ -212,7 +212,6 @@ type t =
       current: string;
       current_pos: Pos.t;
       attribute_name: string;
-      soft_included: bool;
       current_package_assignment_kind: string;
     }
   | Package_expression_strict_inclusion of {
@@ -221,7 +220,6 @@ type t =
       def_pos: Pos_or_decl.t;
       current: string;
       current_pos: Pos.t;
-      soft_included: bool;
       current_package_assignment_kind: string;
     }
   | Observation_not_allowed_for_package of {
@@ -917,7 +915,6 @@ let package_strict_inclusion
     ~def_pos
     ~current
     ~current_pos
-    ~soft_included
     ~current_package_assignment_kind
     ~(ctx : package_strict_inclusion_context) =
   let (error_code, primary_msg, location_msg) =
@@ -937,34 +934,23 @@ let package_strict_inclusion
           current
           current_package_assignment_kind )
   in
-  let (pkg_label, soft_includes_label) =
+  let pkg_label =
     match ctx with
-    | Ctx_require_package _ -> ("required", "required")
-    | Ctx_package_expression -> ("checked", "checked")
-  in
-  let last_reason =
-    if soft_included then
-      ( def_pos,
-        Printf.sprintf
-          "`%s` soft-includes the %s package `%s`, so this %s is not allowed"
-          current
-          pkg_label
-          pkg
-          (match ctx with
-          | Ctx_require_package _ -> "requirement"
-          | Ctx_package_expression -> "check") )
-    else
-      ( def_pos,
-        Printf.sprintf
-          "The %s package `%s` must strictly include (i.e. cannot equal) `%s`"
-          soft_includes_label
-          pkg
-          current )
+    | Ctx_require_package _ -> "required"
+    | Ctx_package_expression -> "checked"
   in
   User_diagnostic.make_err
     error_code
     (pos, primary_msg)
-    [(Pos_or_decl.of_raw_pos current_pos, location_msg); last_reason]
+    [
+      (Pos_or_decl.of_raw_pos current_pos, location_msg);
+      ( def_pos,
+        Printf.sprintf
+          "The %s package `%s` must strictly include (i.e. cannot equal) `%s`"
+          pkg_label
+          pkg
+          current );
+    ]
 
 let observation_not_allowed_for_package ~pos ~pkg ~def_pos ~construct =
   let construct =
@@ -1140,7 +1126,6 @@ let to_user_diagnostic t =
           current;
           current_pos;
           attribute_name;
-          soft_included;
           current_package_assignment_kind;
         } ->
       package_strict_inclusion
@@ -1149,7 +1134,6 @@ let to_user_diagnostic t =
         ~def_pos
         ~current
         ~current_pos
-        ~soft_included
         ~current_package_assignment_kind
         ~ctx:(Ctx_require_package attribute_name)
     | Package_expression_strict_inclusion
@@ -1159,7 +1143,6 @@ let to_user_diagnostic t =
           def_pos;
           current;
           current_pos;
-          soft_included;
           current_package_assignment_kind;
         } ->
       package_strict_inclusion
@@ -1168,7 +1151,6 @@ let to_user_diagnostic t =
         ~def_pos
         ~current
         ~current_pos
-        ~soft_included
         ~current_package_assignment_kind
         ~ctx:Ctx_package_expression
     | Observation_not_allowed_for_package { pos; pkg; def_pos; construct } ->

@@ -211,7 +211,6 @@ type t =
       current: string;
       current_pos: Pos.t;
       attribute_name: string;
-      soft_included: bool;
       current_package_assignment_kind: string;
     }
   | Package_expression_strict_inclusion of {
@@ -220,7 +219,6 @@ type t =
       def_pos: Pos_or_decl.t;
       current: string;
       current_pos: Pos.t;
-      soft_included: bool;
       current_package_assignment_kind: string;
     }
   | Observation_not_allowed_for_package of {

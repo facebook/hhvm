@@ -43,24 +43,4 @@ PACKAGES.toml:7:11
 8 | include_paths=[
 9 |     "//cross_package_access_internal1_foo.php",
 
-error: NastCheck[3109] Invalid package expression [1]
--> This code belongs to package `pkg2` by this entry in the package config [2]
--> `pkg2` soft-includes the checked package `pkg2_soft`, so this check is not allowed [2]
-
-package_expression_strict_inclusion.php--pkg2/c.php:6:15
-4 | function test_soft_includes(): void {
-5 |   // Error: pkg2 soft-includes pkg2_soft
-6 |   if (package pkg2_soft) {
-  |               ^^^^^^^^^ [1]
-7 |     // ...
-8 |   }
-
-PACKAGES.toml:7:11
-5 | allow_deployed_packages_checking = true
-6 | 
-7 | [packages.pkg2]
-  |           ^^^^ [2]
-8 | include_paths=[
-9 |     "//cross_package_access_internal1_foo.php",
-
-3 errors found
+2 errors found

@@ -33,23 +33,15 @@ let get_current_package_info env current_pkg_membership =
     (pkg, pkg_name, pkg_pos, "package override")
 
 (** Check package strict inclusion and emit diagnostics.
-    [~emit_error] is called with (soft_included, def_pos) when an error should be emitted *)
+    [~emit_error] is called with the required package's [def_pos] on failure. *)
 let check_package_strict_inclusion
     ~required_package ~current_package ~emit_error =
-  (* Check if required_package strictly includes current_package *)
-  (match Package.relationship required_package current_package with
+  match Package.relationship required_package current_package with
   | Package.Includes -> ()
   | Package.Equal
   | Package.Unrelated
   | Package.Soft_includes ->
-    let def_pos = Package.get_package_pos required_package in
-    emit_error ~soft_included:false ~def_pos);
-  (* Check the opposite direction for soft-includes *)
-  match Package.relationship current_package required_package with
-  | Package.Soft_includes ->
-    let def_pos = Package.get_package_pos current_package in
-    emit_error ~soft_included:true ~def_pos
-  | _ -> ()
+    emit_error ~def_pos:(Package.get_package_pos required_package)
 
 let override_not_allowed ~pos ~pkg_name ~attr p =
   Diagnostics.add_diagnostic
@@ -154,7 +146,7 @@ let require_package_strict_inclusion env attr =
           check_package_strict_inclusion
             ~required_package
             ~current_package
-            ~emit_error:(fun ~soft_included ~def_pos ->
+            ~emit_error:(fun ~def_pos ->
               Diagnostics.add_diagnostic
                 Nast_check_error.(
                   to_user_diagnostic
@@ -166,7 +158,6 @@ let require_package_strict_inclusion env attr =
                          current = current_pkg_name;
                          current_pos = current_pkg_pos;
                          attribute_name = name;
-                         soft_included;
                          current_package_assignment_kind;
                        }))
         | None -> ())
@@ -198,7 +189,7 @@ let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
         check_package_strict_inclusion
           ~required_package
           ~current_package
-          ~emit_error:(fun ~soft_included ~def_pos ->
+          ~emit_error:(fun ~def_pos ->
             Diagnostics.add_diagnostic
               Nast_check_error.(
                 to_user_diagnostic
@@ -209,7 +200,6 @@ let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
                        def_pos = Pos_or_decl.of_raw_pos def_pos;
                        current = current_pkg_name;
                        current_pos = current_pkg_pos;
-                       soft_included;
                        current_package_assignment_kind;
                      }))
       | None -> ())

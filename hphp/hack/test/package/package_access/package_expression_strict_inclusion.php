@@ -40,7 +40,8 @@ function test_in_pkg1(): void {
 // package pkg2
 
 function test_soft_includes(): void {
-  // Error: pkg2 soft-includes pkg2_soft
+  // OK: a soft include no longer bans the check. pkg2_soft strictly includes
+  // pkg2, which is all the strict-inclusion rule asks for.
   if (package pkg2_soft) {
     // ...
   }

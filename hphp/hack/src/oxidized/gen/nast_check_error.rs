@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<df220d86cbb4c0b44dea65f20bf38b2b>>
+// @generated SignedSource<<9e2c783cfa378935aa379d3ec8e871a3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -351,7 +351,6 @@ pub enum NastCheckError {
         current: String,
         current_pos: pos::Pos,
         attribute_name: String,
-        soft_included: bool,
         current_package_assignment_kind: String,
     },
     #[rust_to_ocaml(name = "Package_expression_strict_inclusion")]
@@ -361,7 +360,6 @@ pub enum NastCheckError {
         def_pos: pos_or_decl::PosOrDecl,
         current: String,
         current_pos: pos::Pos,
-        soft_included: bool,
         current_package_assignment_kind: String,
     },
     #[rust_to_ocaml(name = "Observation_not_allowed_for_package")]

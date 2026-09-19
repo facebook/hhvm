@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/jit/align-arm.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
@@ -101,6 +102,7 @@ inline uint32_t makeTarget32(T target) {
 }
 
 inline void patchTarget32(TCA inst, TCA target) {
+  CodeWriteScope scope(inst, inst + 4);
   *reinterpret_cast<uint32_t*>(inst) = makeTarget32(target);
   auto const begin = inst;
   auto const end = begin + 4;
@@ -109,6 +111,7 @@ inline void patchTarget32(TCA inst, TCA target) {
 
 inline void patchTarget64(TCA inst, TCA target) {
   assertx(is_aligned(inst - kSmashMovqImmOff, Alignment::SmashMovq));
+  CodeWriteScope scope(inst, inst + 8);
   *reinterpret_cast<uint64_t*>(inst) = reinterpret_cast<uint64_t>(target);
   auto const begin = inst;
   auto const end = begin + 8;
@@ -117,6 +120,7 @@ inline void patchTarget64(TCA inst, TCA target) {
 
 inline void smashInst(TCA addr, uint32_t newInst) {
   assertx(((uint64_t)addr & 3) == 0);
+  CodeWriteScope scope(addr, addr + 4);
   *reinterpret_cast<uint32_t*>(addr) = newInst;
   auto const begin = addr;
   auto const end = begin + 4;

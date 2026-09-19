@@ -7624,22 +7624,28 @@ end = struct
            *)
           let check_pass_and_set_tyvar_variance pass env arg opt_param =
             match arg with
-            (* We first check lambdas that have fully explicit parameters *)
-            | Aast_defs.Anormal (_, _, Efun { ef_fun = { f_params; _ }; _ })
-            | Aast_defs.Anormal (_, _, Lfun ({ f_params; _ }, _))
-              when List.for_all f_params ~f:(fun param ->
-                       Option.is_some (hint_of_type_hint param.param_type_hint))
-              ->
-              (env, pass = 0)
-            (* Lastly we check lambdas that have some parameters whose types must be inferred *)
-            | Aast_defs.Anormal (_, _, (Efun _ | Lfun _)) ->
-              (* On the first pass we need to set the type variable variance *)
-              if pass = 0 then
-                (set_tyvar_variance_from_lambda_param env opt_param, false)
-              else
-                (env, pass = 2)
-            (* Second we check non-lambdas *)
-            | _ -> (env, pass = 1)
+            | Aast_defs.Anormal (_, _, e) ->
+              (match e with
+              (* We first check lambdas that have fully explicit parameters *)
+              | Efun { ef_fun = { f_params; _ }; _ }
+              | Lfun ({ f_params; _ }, _)
+                when List.for_all f_params ~f:(fun param ->
+                         Option.is_some
+                           (hint_of_type_hint param.param_type_hint)) ->
+                (env, pass = 0)
+              (* Lastly we check lambdas that have some parameters whose types must be inferred *)
+              | Efun _
+              | Lfun _ ->
+                (* On the first pass we need to set the type variable variance *)
+                if pass = 0 then
+                  (set_tyvar_variance_from_lambda_param env opt_param, false)
+                else
+                  (env, pass = 2)
+              (* Second we check non-lambdas *)
+              | _ -> (env, pass = 1))
+            | Aast_defs.Ainout _
+            | Aast_defs.Anamed _ ->
+              (env, pass = 1)
           in
           let is_single_argument = List.length el = 1 in
           let get_next_positional_param_info

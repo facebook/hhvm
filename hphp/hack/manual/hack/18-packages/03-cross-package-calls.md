@@ -98,7 +98,9 @@ Explicit transitivity prevents types from escaping their boundaries and clarifie
 
 ### The `package` Expression
 
-The `package <packagename>` expression returns whether a package is loaded. In an `if` statement, the typechecker allows symbol access to the checked package within the conditional block:
+The `package <packagename>` expression returns whether a package is loaded. In an `if` statement, the typechecker allows symbol access to the checked package within the conditional block.
+
+The checked package must declare [`allow_deployed_packages_checking`](04-configuration-spec.md).
 
 ```hack no-extract
 //// test package
@@ -144,10 +146,12 @@ if (package foo) {
 
 ### Runtime Behavior
 
-- `package foo` desugars to `package_exists("foo")`
 - Returns `true` if package is in the active deployment
 - If the active deployment is *unset*, returns `true` for all existent packages
 - Const-folded in repo-authoritative mode for zero runtime cost
+
+The underlying builtin is intentionally unlisted, so `package` and the
+attributes below are the only ways to ask whether a package is deployed.
 
 ## Cross-Package Methods
 
@@ -158,6 +162,8 @@ Note that unlike `__PackageOverride`, these attributes **do not** move the defin
 ### Overview
 
 Hack provides two attributes for enabling cross-package method access: `__RequirePackage` and `__SoftRequirePackage`. Both allow methods and functions to be called from packages other than the one they're defined in, subject to specific constraints.
+
+Both require the named package to declare [`allow_deployed_packages_checking`](04-configuration-spec.md).
 
 | Aspect | `__RequirePackage` | `__SoftRequirePackage` |
 |--------|-------------------|----------------------|

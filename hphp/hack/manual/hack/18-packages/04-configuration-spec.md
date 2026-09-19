@@ -120,6 +120,31 @@ Here:
 - At runtime, `migrate_me` is still deployed (via `soft_packages`), so existing dynamic references won't fatal
 - Developers systematically fix typechecker errors to remove the dependency
 
+### `allow_deployed_packages_checking`
+
+**Type:** Boolean (optional, defaults to `false`)
+
+**Purpose:** Declares that code may check whether this package is deployed, via the `package` expression or the `__RequirePackage` / `__SoftRequirePackage` attributes.
+
+**Use Case:** Checking for a package treats its presence as a stable fact. That holds for a durable package, not for a migratory one that exists only until its symbols are drained.
+
+**Rules:**
+- Without it, the `package` expression and both `Require` attributes are rejected for this package
+- The rule applies to the package being checked, not the package of the file doing the checking, so `__PackageOverride` on the caller does not bypass it
+- It does not restrict `__PackageOverride` into this package
+
+**Example:**
+```toml
+[packages.intern]
+include_paths = ["//flib/intern/"]
+allow_deployed_packages_checking = true
+
+# No opt-in: `package legacy` and `__RequirePackage('legacy')` are errors,
+# though files may still join it with `__PackageOverride`.
+[packages.legacy]
+includes = ["production"]
+```
+
 ## Deployments Section
 
 Defines which packages are built and deployed together. Each deployment is a nested table with a unique name.
@@ -211,8 +236,10 @@ includes = ["core"]
 include_paths = ["//flib/prod/"]
 includes = ["prod_utils", "core"]
 soft_includes = ["legacy_feature"]  # Migrating away from this
+allow_deployed_packages_checking = true  # Durable, so may be checked for
 
-# Legacy feature being phased out
+# Legacy feature being phased out. No opt-in: it exists only until its symbols
+# are drained, so code must not branch on whether it is deployed.
 [packages.legacy_feature]
 include_paths = ["//flib/legacy/"]
 includes = ["core"]

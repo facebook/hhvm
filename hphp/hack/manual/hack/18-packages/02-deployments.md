@@ -88,4 +88,4 @@ Accessing soft-deployed package symbols logs a warning instead of throwing an er
 **Rules:**
 - Soft-included packages must be at least soft-deployed
 - Hard-included packages must be hard-deployed
-- `package_exists()` returns `false` for soft packages. See [Cross Package Usage](/hack/packages/cross-package-calls) for details.
+- A `package` check returns `false` for soft packages. See [Cross Package Usage](/hack/packages/cross-package-calls) for details.

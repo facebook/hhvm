@@ -1556,11 +1556,6 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
   }
 }
 
-void save_next_state(Global& genv, const IRInstruction& inst,
-                     const State& state) {
-  if (inst.next()) genv.blockInfo[inst.block()].stateOutNext = state;
-}
-
 void analyze(Global& genv) {
   FTRACE(1, "\nAnalyze:\n");
 
@@ -1623,7 +1618,9 @@ void analyze(Global& genv) {
     for (auto& inst : *blk) {
       save_taken_state(genv, inst, env.state);
       analyze_inst(env, inst);
-      save_next_state(genv, inst, env.state);
+      if (inst.next()) {
+        genv.blockInfo[inst.block()].stateOutNext = std::move(env.state);
+      }
     }
     if (auto const t = blk->taken()) propagate(t);
     if (auto const n = blk->next())  propagate(n);

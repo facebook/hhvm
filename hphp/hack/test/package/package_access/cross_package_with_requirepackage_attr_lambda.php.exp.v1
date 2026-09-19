@@ -17,17 +17,18 @@ cross_package_with_requirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot reference this __RequirePackage function [1]
 -> This function is marked with `__RequirePackage("pkg2")` [2]
@@ -54,7 +55,7 @@ PACKAGES.toml:3:11
  3 | [packages.pkg1]
    |           ^^^^ [3]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -75,17 +76,18 @@ cross_package_with_requirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot reference this __RequirePackage function [1]
 -> This function is marked with `__RequirePackage("pkg3")` [2]
@@ -120,14 +122,14 @@ PACKAGES.toml:3:11
  3 | [packages.pkg1]
    |           ^^^^ [3]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-10 |     "//pkg2/",
-11 | ]
-12 | includes = ["pkg1"]
+11 |     "//pkg2/",
+12 | ]
+13 | includes = ["pkg1"]
    |             ^^^^^^ [5]
-13 | soft_includes=["pkg2_soft"]
-14 | 
+14 | soft_includes=["pkg2_soft"]
+15 | allow_deployed_packages_checking = true
 
 error: Typing[4472] Cannot access function `pkg3_call` defined in package `pkg3` which may not be available [1]
 -> `pkg3_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php [2]
@@ -156,27 +158,27 @@ cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php:2:10
  2 | function pkg3_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:18:11
+PACKAGES.toml:21:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-10 |     "//pkg2/",
-11 | ]
-12 | includes = ["pkg1"]
+11 |     "//pkg2/",
+12 | ]
+13 | includes = ["pkg1"]
    |             ^^^^^^ [6]
-13 | soft_includes=["pkg2_soft"]
-14 | 
-15 | [packages.pkg2_soft]
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+14 | soft_includes=["pkg2_soft"]
+15 | allow_deployed_packages_checking = true
+   :
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [3]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg3_call` defined in package `pkg3` which may not be available [1]
 -> `pkg3_call` is defined in cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php [2]
@@ -205,26 +207,26 @@ cross_package_with_requirepackage_attr_lambda.php--pkg3/c.php:2:10
  2 | function pkg3_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:18:11
+PACKAGES.toml:21:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-10 |     "//pkg2/",
-11 | ]
-12 | includes = ["pkg1"]
+11 |     "//pkg2/",
+12 | ]
+13 | includes = ["pkg1"]
    |             ^^^^^^ [6]
-13 | soft_includes=["pkg2_soft"]
-14 | 
-15 | [packages.pkg2_soft]
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+14 | soft_includes=["pkg2_soft"]
+15 | allow_deployed_packages_checking = true
+   :
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [3]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 6 errors found

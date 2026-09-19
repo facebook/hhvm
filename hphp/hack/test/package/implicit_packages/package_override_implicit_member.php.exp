@@ -1,12 +1,12 @@
-error: NastCheck[3110] `__PackageOverride` is not supported for package `prototypes.foo`, which has strict isolation enabled [1]
--> `prototypes.foo` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+error: NastCheck[3114] `__PackageOverride` is not supported for package `prototypes.foo`, which has strict isolation enabled [1]
+-> `prototypes.foo` is declared here with strict isolation [2]
 
 package_override_implicit_member.php--prototypes/foo/override_from_member.php:3:9
  1 | <?hh
  2 | // Directory placement fixes this file's implicit package membership.
  3 | <<file: __PackageOverride('standalone')>>
    |         ^^^^^^^^^^^^^^^^^ [1]
- 4 | 
+ 4 |
  5 | type OverrideFromImplicitMember = int;
 
 PACKAGES.toml:18:20
@@ -17,15 +17,15 @@ PACKAGES.toml:18:20
 19 | path = "//prototypes/"
 20 | includes = ["intern", "shared"]
 
-error: NastCheck[3110] `__PackageOverride` is not supported for package `prototypes`, which has strict isolation enabled [1]
--> `prototypes` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+error: NastCheck[3114] `__PackageOverride` is not supported for package `prototypes`, which has strict isolation enabled [1]
+-> `prototypes` is declared here with strict isolation [2]
 
 package_override_implicit_member.php--unpackaged/override_family.php:3:9
  1 | <?hh
  2 | // Naming the family itself is likewise refused.
  3 | <<file: __PackageOverride('prototypes')>>
    |         ^^^^^^^^^^^^^^^^^ [1]
- 4 | 
+ 4 |
  5 | function test_override_family(): void {}
 
 PACKAGES.toml:18:20
@@ -36,15 +36,15 @@ PACKAGES.toml:18:20
 19 | path = "//prototypes/"
 20 | includes = ["intern", "shared"]
 
-error: NastCheck[3110] `__PackageOverride` is not supported for package `prototypes.foo`, which has strict isolation enabled [1]
--> `prototypes.foo` has strict isolation enabled; membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute [2]
+error: NastCheck[3114] `__PackageOverride` is not supported for package `prototypes.foo`, which has strict isolation enabled [1]
+-> `prototypes.foo` is declared here with strict isolation [2]
 
 package_override_implicit_member.php--unpackaged/override_member.php:3:9
  1 | <?hh
  2 | // Implicit families are unconditionally strictly isolated, so members are too.
  3 | <<file: __PackageOverride('prototypes.foo')>>
    |         ^^^^^^^^^^^^^^^^^ [1]
- 4 | 
+ 4 |
  5 | function test_override_member(): void {}
 
 PACKAGES.toml:18:20

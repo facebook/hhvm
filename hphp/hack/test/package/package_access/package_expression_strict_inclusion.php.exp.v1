@@ -16,7 +16,7 @@ PACKAGES.toml:3:11
 3 | [packages.pkg1]
   |           ^^^^ [2]
 4 | include_paths=["//"]
-5 | 
+5 | allow_deployed_packages_checking = true
 
 error: NastCheck[3109] Invalid package expression [1]
 -> This code belongs to package `pkg2` by this entry in the package config [2]
@@ -30,17 +30,18 @@ package_expression_strict_inclusion.php--pkg2/a.php:6:15
 7 |     // ...
 8 |   }
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [3]
 4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [2]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 error: NastCheck[3109] Invalid package expression [1]
 -> This code belongs to package `pkg2` by this entry in the package config [2]
@@ -54,12 +55,12 @@ package_expression_strict_inclusion.php--pkg2/c.php:6:15
 7 |     // ...
 8 |   }
 
-PACKAGES.toml:6:11
-4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+PACKAGES.toml:7:11
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [2]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 3 errors found

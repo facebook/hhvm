@@ -19,17 +19,18 @@ cross_package_enforceable_type_alias_generics.php--pkg2/foo.php:3:6
  4 | type TInt = int;
  5 | type TClassAlias = Exception;
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
 -> `TInt` is defined in cross_package_enforceable_type_alias_generics.php--pkg2/foo.php [2]
@@ -52,17 +53,18 @@ cross_package_enforceable_type_alias_generics.php--pkg2/foo.php:4:6
  5 | type TClassAlias = Exception;
  6 | class Foo {}
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access class `Box` defined in package `pkg2` which may not be available [1]
 -> `Box` is defined in cross_package_enforceable_type_alias_generics.php--pkg2/foo.php [2]
@@ -83,16 +85,17 @@ cross_package_enforceable_type_alias_generics.php--pkg2/foo.php:7:7
  7 | class Box<T> { public function __construct(public T $v) {} }
    |       ^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 3 errors found

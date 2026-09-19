@@ -19,20 +19,21 @@ package_relationship.php--pkg4/d.php:3:7
  3 | class D {}
    |       ^ [2]
 
-PACKAGES.toml:22:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:26:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
+26 | [packages.pkg4]
    |           ^^^^ [3]
-23 | include_paths=["//pkg4/"]
-24 | 
+27 | include_paths=["//pkg4/"]
+28 | 
 
 1 error found

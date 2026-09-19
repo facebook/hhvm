@@ -15,7 +15,7 @@ PACKAGES.toml:3:11
 3 | [packages.pkg1]
   |           ^^^^ [2]
 4 | include_paths=["//"]
-5 | 
+5 | allow_deployed_packages_checking = true
 
 error: NastCheck[3111] Invalid `__PackageOverride` [1]
 -> This file belongs to package `pkg1` by this entry in the package config [2]
@@ -35,7 +35,7 @@ PACKAGES.toml:3:11
 3 | [packages.pkg1]
   |           ^^^^ [2]
 4 | include_paths=["//"]
-5 | 
+5 | allow_deployed_packages_checking = true
 
 error: NastCheck[3112] Redundant `__PackageOverride` [1]
 -> This file already belongs to package `pkg1` by this entry in the package config, so this override has no effect and should be removed [2]
@@ -53,7 +53,7 @@ PACKAGES.toml:3:11
 3 | [packages.pkg1]
   |           ^^^^ [2]
 4 | include_paths=["//"]
-5 | 
+5 | allow_deployed_packages_checking = true
 
 error: NastCheck[3111] Invalid `__PackageOverride` [1]
 -> This file belongs to package `pkg1` by this entry in the package config [2]
@@ -72,6 +72,6 @@ PACKAGES.toml:3:11
 3 | [packages.pkg1]
   |           ^^^^ [2]
 4 | include_paths=["//"]
-5 | 
+5 | allow_deployed_packages_checking = true
 
 4 errors found

@@ -16,7 +16,7 @@ PACKAGES.toml:3:11
  3 | [packages.pkg1]
    |           ^^^^ [2]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
 
 error: Typing[4341] The method `test` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -49,13 +49,13 @@ cross_package_with_requirepackage_attr_inheritance.php--pkg2/b.php:8:5
  9 |   public function test2(): void {
 10 | 
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [2]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `test2` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -87,6 +87,6 @@ PACKAGES.toml:3:11
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
 
 4 errors found

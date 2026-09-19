@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<58bec3ce064698dd18bb616d1f8c6982>>
+// @generated SignedSource<<df220d86cbb4c0b44dea65f20bf38b2b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -47,8 +47,8 @@ pub enum Verb {
 impl TrivialDrop for Verb {}
 arena_deserializer::impl_deserialize_in_arena!(Verb);
 
-/// The language construct that referenced a strict-isolation package and is
-/// therefore unsupported. Rendered (with styling) by the error constructor.
+/// The construct that asked whether a package is deployed. Rendered (with
+/// styling) by the error constructor.
 #[derive(
     Clone,
     Debug,
@@ -65,13 +65,11 @@ arena_deserializer::impl_deserialize_in_arena!(Verb);
     ToOcamlRep
 )]
 #[repr(C, u8)]
-pub enum StrictIsolationConstruct {
+pub enum PackageConstruct {
     #[rust_to_ocaml(name = "Package_expression")]
     PackageExpression,
     #[rust_to_ocaml(name = "Require_package_attribute")]
     RequirePackageAttribute(String),
-    #[rust_to_ocaml(name = "Package_override_attribute")]
-    PackageOverrideAttribute(String),
 }
 
 #[derive(
@@ -366,12 +364,19 @@ pub enum NastCheckError {
         soft_included: bool,
         current_package_assignment_kind: String,
     },
-    #[rust_to_ocaml(name = "Strict_isolation_package_not_observable")]
-    StrictIsolationPackageNotObservable {
+    #[rust_to_ocaml(name = "Observation_not_allowed_for_package")]
+    ObservationNotAllowedForPackage {
         pos: pos::Pos,
         pkg: String,
         def_pos: pos_or_decl::PosOrDecl,
-        construct: StrictIsolationConstruct,
+        construct: PackageConstruct,
+    },
+    #[rust_to_ocaml(name = "Override_not_allowed_for_package")]
+    OverrideNotAllowedForPackage {
+        pos: pos::Pos,
+        pkg: String,
+        def_pos: pos_or_decl::PosOrDecl,
+        attr: String,
     },
     #[rust_to_ocaml(name = "Package_override_target_not_included")]
     PackageOverrideTargetNotIncluded {

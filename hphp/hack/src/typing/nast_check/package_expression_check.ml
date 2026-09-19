@@ -51,33 +51,49 @@ let check_package_strict_inclusion
     emit_error ~soft_included:true ~def_pos
   | _ -> ()
 
-(* Emits an error and returns [true] if [required_pkg] has strict isolation
-   enabled, so the caller skips the ordinary strict-inclusion check.
-   [construct] selects the message. *)
-let error_if_strict_isolation ~pos ~pkg_name ~construct required_pkg =
+let override_not_allowed ~pos ~pkg_name ~attr p =
+  Diagnostics.add_diagnostic
+    Nast_check_error.(
+      to_user_diagnostic
+      @@ Override_not_allowed_for_package
+           {
+             pos;
+             pkg = pkg_name;
+             def_pos = Pos_or_decl.of_raw_pos (Package.get_package_pos p);
+             attr;
+           })
+
+let unsupported_construct ~pos ~pkg_name ~construct p =
+  Diagnostics.add_diagnostic
+    Nast_check_error.(
+      to_user_diagnostic
+      @@ Observation_not_allowed_for_package
+           {
+             pos;
+             pkg = pkg_name;
+             def_pos = Pos_or_decl.of_raw_pos (Package.get_package_pos p);
+             construct;
+           })
+
+(* Emits an error and returns [true] if [required_pkg] has not opted in to being
+   checked for, so the caller skips the ordinary strict-inclusion check. Keyed on
+   the checked package, so no [__PackageOverride] on the caller reaches around
+   it. [construct] selects the message. *)
+let error_if_not_checkable ~pos ~pkg_name ~construct required_pkg =
   match required_pkg with
-  | Some p when p.Package.enable_strict_isolation ->
-    Diagnostics.add_diagnostic
-      Nast_check_error.(
-        to_user_diagnostic
-        @@ Strict_isolation_package_not_observable
-             {
-               pos;
-               pkg = pkg_name;
-               def_pos = Pos_or_decl.of_raw_pos (Package.get_package_pos p);
-               construct;
-             });
+  | Some p when not p.Package.allow_deployed_packages_checking ->
+    unsupported_construct ~pos ~pkg_name ~construct p;
     true
   | _ -> false
 
 let error_if_implicit_package_override attr = function
   | Some package when package.Package.is_implicit ->
-    error_if_strict_isolation
+    override_not_allowed
       ~pos:(fst attr.ua_name)
       ~pkg_name:(Package.get_package_name package)
-      ~construct:
-        (Nast_check_error.Package_override_attribute (snd attr.ua_name))
-      (Some package)
+      ~attr:(snd attr.ua_name)
+      package;
+    true
   | _ -> false
 
 let get_path_package env pos =
@@ -101,7 +117,7 @@ let require_package_strict_inclusion env attr =
       } ->
     let required_pkg = lookup_package env required_pkg_name in
     if
-      error_if_strict_isolation
+      error_if_not_checkable
         ~pos:name_pos
         ~pkg_name:required_pkg_name
         ~construct:(Nast_check_error.Require_package_attribute name)
@@ -161,7 +177,7 @@ let require_package_strict_inclusion env attr =
 let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
   let required_pkg = lookup_package env pkg_name in
   if
-    error_if_strict_isolation
+    error_if_not_checkable
       ~pos:pkg_pos
       ~pkg_name
       ~construct:Nast_check_error.Package_expression
@@ -257,7 +273,10 @@ let package_override_check env ua =
   | _ -> ()
 
 (* Refuses [__PackageOverride] when its target has strict isolation or when the
-   file already belongs to an implicit package. *)
+   file already belongs to an implicit package. Deliberately keyed on strict
+   isolation alone: a package that merely omits
+   [allow_deployed_packages_checking] must stay joinable by attribute, since
+   that is the only way into one declaring no [include_paths]. *)
 let package_override_strict_isolation env attr =
   match attr with
   | { ua_params = (_, _, String pkg_name) :: _; ua_name = (name_pos, name) }
@@ -265,15 +284,12 @@ let package_override_strict_isolation env attr =
     if error_if_implicit_package_override attr (get_path_package env name_pos)
     then
       ()
-    else
-      let (_ : bool) =
-        error_if_strict_isolation
-          ~pos:name_pos
-          ~pkg_name
-          ~construct:(Nast_check_error.Package_override_attribute name)
-          (lookup_package env pkg_name)
-      in
-      ()
+    else (
+      match lookup_package env pkg_name with
+      | Some p when p.Package.enable_strict_isolation ->
+        override_not_allowed ~pos:name_pos ~pkg_name ~attr:name p
+      | _ -> ()
+    )
   | _ -> ()
 
 let handler =

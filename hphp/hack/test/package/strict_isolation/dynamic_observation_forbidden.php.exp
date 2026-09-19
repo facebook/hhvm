@@ -1,0 +1,76 @@
+error: NastCheck[3110] The `package` expression is not supported for package `unobservable`, which does not allow deployed-package checks [1]
+-> `unobservable` is declared here without `allow_deployed_packages_checking` [2]
+
+dynamic_observation_forbidden.php--intern/i.php:5:15
+ 3 | // reach around it.
+ 4 | function from_overridden_observer(): void {
+ 5 |   if (package unobservable) {
+   |               ^^^^^^^^^^^^ [1]
+ 6 |   }
+ 7 | }
+
+PACKAGES.toml:24:11
+22 | # Does not opt in to `allow_deployed_packages_checking`, so it may not be
+23 | # checked for -- but unlike strict isolation, it is still joinable by override.
+24 | [packages.unobservable]
+   |           ^^^^^^^^^^^^ [2]
+25 | include_paths = ["//unobservable/"]
+26 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] The `package` expression is not supported for package `unobservable`, which does not allow deployed-package checks [1]
+-> `unobservable` is declared here without `allow_deployed_packages_checking` [2]
+
+dynamic_observation_forbidden.php--shared/s.php:5:15
+ 3 | // only the observed package's own flag rejects these.
+ 4 | function from_shared(): void {
+ 5 |   if (package unobservable) {
+   |               ^^^^^^^^^^^^ [1]
+ 6 |   }
+ 7 | }
+
+PACKAGES.toml:24:11
+22 | # Does not opt in to `allow_deployed_packages_checking`, so it may not be
+23 | # checked for -- but unlike strict isolation, it is still joinable by override.
+24 | [packages.unobservable]
+   |           ^^^^^^^^^^^^ [2]
+25 | include_paths = ["//unobservable/"]
+26 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__RequirePackage` is not supported for package `unobservable`, which does not allow deployed-package checks [1]
+-> `unobservable` is declared here without `allow_deployed_packages_checking` [2]
+
+dynamic_observation_forbidden.php--shared/s.php:9:3
+ 7 | }
+ 8 | 
+ 9 | <<__RequirePackage('unobservable')>>
+   |   ^^^^^^^^^^^^^^^^ [1]
+10 | function require_from_shared(): void {}
+11 | 
+
+PACKAGES.toml:24:11
+22 | # Does not opt in to `allow_deployed_packages_checking`, so it may not be
+23 | # checked for -- but unlike strict isolation, it is still joinable by override.
+24 | [packages.unobservable]
+   |           ^^^^^^^^^^^^ [2]
+25 | include_paths = ["//unobservable/"]
+26 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `unobservable`, which does not allow deployed-package checks [1]
+-> `unobservable` is declared here without `allow_deployed_packages_checking` [2]
+
+dynamic_observation_forbidden.php--shared/s.php:12:3
+10 | function require_from_shared(): void {}
+11 | 
+12 | <<__SoftRequirePackage('unobservable')>>
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+13 | function soft_require_from_shared(): void {}
+
+PACKAGES.toml:24:11
+22 | # Does not opt in to `allow_deployed_packages_checking`, so it may not be
+23 | # checked for -- but unlike strict isolation, it is still joinable by override.
+24 | [packages.unobservable]
+   |           ^^^^^^^^^^^^ [2]
+25 | include_paths = ["//unobservable/"]
+26 | includes = ["intern", "shared"]
+
+4 errors found

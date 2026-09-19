@@ -12,12 +12,11 @@ type verb =
   | Vreq_implement
   | Vimplement
 
-(** The language construct that referenced a strict-isolation package and is
-    therefore unsupported. Rendered (with styling) by the error constructor. *)
-type strict_isolation_construct =
+(** The construct that asked whether a package is deployed. Rendered (with
+    styling) by the error constructor. *)
+type package_construct =
   | Package_expression
   | Require_package_attribute of string
-  | Package_override_attribute of string
 
 type t =
   | Repeated_record_field_name of {
@@ -224,11 +223,17 @@ type t =
       soft_included: bool;
       current_package_assignment_kind: string;
     }
-  | Strict_isolation_package_not_observable of {
+  | Observation_not_allowed_for_package of {
       pos: Pos.t;
       pkg: string;
       def_pos: Pos_or_decl.t;
-      construct: strict_isolation_construct;
+      construct: package_construct;
+    }
+  | Override_not_allowed_for_package of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      attr: string;
     }
   | Package_override_target_not_included of {
       override_pos: Pos.t;

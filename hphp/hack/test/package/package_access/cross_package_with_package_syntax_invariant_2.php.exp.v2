@@ -16,19 +16,19 @@ cross_package_with_package_syntax_invariant_2.php--pkg7/foo.php:5:10
  5 | function foo(): void {}
    |          ^^^ [2]
 
-PACKAGES.toml:32:11
+PACKAGES.toml:36:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-30 | includes = ["pkg1"]
-31 | 
-32 | [packages.pkg7]
+34 | includes = ["pkg1"]
+35 | 
+36 | [packages.pkg7]
    |           ^^^^ [3]
-33 | include_paths=["//pkg7/"]
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+37 | include_paths=["//pkg7/"]
+38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 1 error found

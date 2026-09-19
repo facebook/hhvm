@@ -21,13 +21,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:18:19
 19 |   <<__Override, __RequirePackage("pkg2_soft")>>
 20 |   public function soft(): void {}
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `soft` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -52,13 +52,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:20:19
 21 | }
 22 | 
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `err` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -121,13 +121,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:52:19
 53 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
 54 |   public function soft(): void {}
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `soft` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -152,13 +152,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:54:19
 55 | }
 56 | 
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `err` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -183,13 +183,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:69:19
 70 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
 71 |   public function soft(): void {}
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `soft` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]
@@ -214,13 +214,13 @@ cross_package_with_requirepackage_attr_inheritance_errors.php:71:19
 72 | }
 73 | 
 
-PACKAGES.toml:6:11
- 4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+PACKAGES.toml:7:11
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [4]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4341] The method `err` is not compatible with the overridden method [1]
 -> Mismatch in `__RequirePackage` attribute [2]

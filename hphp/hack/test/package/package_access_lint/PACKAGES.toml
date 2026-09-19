@@ -21,9 +21,12 @@ include_paths=[
     "//__tests__/tt_classptr_target.php",
 ]
 includes = ["pkg1"]
+allow_deployed_packages_checking = true
 
 [packages.pkg3]
 include_paths=[
     "//warning_03a.php",
 ]
 includes = ["pkg2", "pkg1"]
+allow_deployed_packages_checking = true
+

@@ -1,5 +1,5 @@
-error: NastCheck[3110] `__RequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
--> `isolated` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed [2]
+error: NastCheck[3110] `__RequirePackage` is not supported for package `isolated`, which does not allow deployed-package checks [1]
+-> `isolated` is declared here without `allow_deployed_packages_checking` [2]
 
 require_package_forbidden.php--intern/hard.php:3:3
  1 | <?hh
@@ -16,8 +16,8 @@ PACKAGES.toml:14:11
 15 | include_paths = ["//isolated/"]
 16 | includes = ["intern", "shared"]
 
-error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
--> `isolated` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed [2]
+error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which does not allow deployed-package checks [1]
+-> `isolated` is declared here without `allow_deployed_packages_checking` [2]
 
 require_package_forbidden.php--intern/soft.php:3:3
  1 | <?hh
@@ -34,8 +34,8 @@ PACKAGES.toml:14:11
 15 | include_paths = ["//isolated/"]
 16 | includes = ["intern", "shared"]
 
-error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
--> `isolated` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed [2]
+error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which does not allow deployed-package checks [1]
+-> `isolated` is declared here without `allow_deployed_packages_checking` [2]
 
 require_package_forbidden.php--intern/soft_sampled.php:4:3
  2 | // The optional integer sampling rate must not let __SoftRequirePackage bypass

@@ -19,24 +19,24 @@ cross_package_with_package_syntax_if_negation.php--pkg7/pkg7.php:2:10
  2 | function pkg7_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:32:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:36:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-30 | includes = ["pkg1"]
-31 | 
-32 | [packages.pkg7]
+34 | includes = ["pkg1"]
+35 | 
+36 | [packages.pkg7]
    |           ^^^^ [3]
-33 | include_paths=["//pkg7/"]
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+37 | include_paths=["//pkg7/"]
+38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 1 error found

@@ -291,10 +291,11 @@ module NastCheck = struct
     | RequirePackageStrictInclusion [@value 3107]
     | ClassSealedWithTrait [@value 3108]
     | PackageExpressionStrictInclusion [@value 3109]
-    | StrictIsolationPackageNotObservable [@value 3110]
+    | ObservationNotAllowedForPackage [@value 3110]
     | PackageOverrideTargetNotIncluded [@value 3111]
     | RedundantPackageOverride [@value 3112]
     | NamedParamsMemoize [@value 3113]
+    | OverrideNotAllowedForPackage [@value 3114]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

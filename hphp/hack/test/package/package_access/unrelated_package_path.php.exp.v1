@@ -18,17 +18,17 @@ unrelated_package_path.php--pkg6/bar.php:3:10
  4 | 
  5 | function zot(): void {
 
-PACKAGES.toml:28:11
-23 | include_paths=["//pkg4/"]
-24 | 
-25 | [packages.pkg5]
+PACKAGES.toml:32:11
+27 | include_paths=["//pkg4/"]
+28 | 
+29 | [packages.pkg5]
    |           ^^^^ [4]
-26 | include_paths=["//pkg5/"]
-27 | 
-28 | [packages.pkg6]
+30 | include_paths=["//pkg5/"]
+31 | 
+32 | [packages.pkg6]
    |           ^^^^ [3]
-29 | include_paths=["//pkg6/"]
-30 | includes = ["pkg1"]
+33 | include_paths=["//pkg6/"]
+34 | includes = ["pkg1"]
 
 error: Typing[4472] Cannot access function `foo` defined in package `pkg5` which may not be available [1]
 -> `foo` is defined in unrelated_package_path.php--pkg5/foo.php [2]
@@ -51,19 +51,19 @@ unrelated_package_path.php--pkg5/foo.php:3:10
  4 |   bar(); // this should be an error as pkg6 does not include pkg5
  5 | }
 
-PACKAGES.toml:25:11
-23 | include_paths=["//pkg4/"]
-24 | 
-25 | [packages.pkg5]
+PACKAGES.toml:29:11
+27 | include_paths=["//pkg4/"]
+28 | 
+29 | [packages.pkg5]
    |           ^^^^ [3]
-26 | include_paths=["//pkg5/"]
-27 | 
-28 | [packages.pkg6]
-   |           ^^^^ [4]
-29 | include_paths=["//pkg6/"]
-30 | includes = ["pkg1"]
-   |             ^^^^^^ [5]
+30 | include_paths=["//pkg5/"]
 31 | 
-32 | [packages.pkg7]
+32 | [packages.pkg6]
+   |           ^^^^ [4]
+33 | include_paths=["//pkg6/"]
+34 | includes = ["pkg1"]
+   |             ^^^^^^ [5]
+35 | 
+36 | [packages.pkg7]
 
 2 errors found

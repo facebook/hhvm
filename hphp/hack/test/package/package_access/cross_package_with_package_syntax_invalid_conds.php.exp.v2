@@ -39,25 +39,25 @@ cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php:2:10
  2 | function pkg8_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:36:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:41:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-35 | 
-36 | [packages.pkg8]
+39 | allow_deployed_packages_checking = true
+40 | 
+41 | [packages.pkg8]
    |           ^^^^ [3]
-37 | include_paths=["//pkg8/"]
-38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+42 | include_paths=["//pkg8/"]
+43 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
 -> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php [2]
@@ -80,25 +80,25 @@ cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php:2:10
  2 | function pkg8_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:36:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:41:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-35 | 
-36 | [packages.pkg8]
+39 | allow_deployed_packages_checking = true
+40 | 
+41 | [packages.pkg8]
    |           ^^^^ [3]
-37 | include_paths=["//pkg8/"]
-38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+42 | include_paths=["//pkg8/"]
+43 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
 -> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php [2]
@@ -121,25 +121,25 @@ cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php:2:10
  2 | function pkg8_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:36:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:41:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-35 | 
-36 | [packages.pkg8]
+39 | allow_deployed_packages_checking = true
+40 | 
+41 | [packages.pkg8]
    |           ^^^^ [3]
-37 | include_paths=["//pkg8/"]
-38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+42 | include_paths=["//pkg8/"]
+43 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
 -> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php [2]
@@ -162,25 +162,25 @@ cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php:2:10
  2 | function pkg8_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:36:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:41:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-35 | 
-36 | [packages.pkg8]
+39 | allow_deployed_packages_checking = true
+40 | 
+41 | [packages.pkg8]
    |           ^^^^ [3]
-37 | include_paths=["//pkg8/"]
-38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+42 | include_paths=["//pkg8/"]
+43 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
 -> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php [2]
@@ -203,24 +203,24 @@ cross_package_with_package_syntax_invalid_conds.php--pkg8/pkg8.php:2:10
  2 | function pkg8_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:36:11
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+PACKAGES.toml:41:11
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [4]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-21 | 
-22 | [packages.pkg4]
+24 | allow_deployed_packages_checking = true
+25 | 
    :
-34 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-35 | 
-36 | [packages.pkg8]
+39 | allow_deployed_packages_checking = true
+40 | 
+41 | [packages.pkg8]
    |           ^^^^ [3]
-37 | include_paths=["//pkg8/"]
-38 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+42 | include_paths=["//pkg8/"]
+43 | includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 7 errors found

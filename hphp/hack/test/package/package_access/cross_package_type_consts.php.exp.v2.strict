@@ -19,17 +19,18 @@ cross_package_type_consts.php--pkg2/foo.php:3:7
 4 | type TFoo1 = int;
 5 | newtype TFoo2 = string;
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [3]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access `TFoo1` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `TFoo1` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
@@ -51,17 +52,18 @@ cross_package_type_consts.php--pkg2/foo.php:4:6
   |      ^^^^^ [2]
 5 | newtype TFoo2 = string;
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [3]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access `TFoo2` defined in package `pkg2`, which may not be available, within a type constant [1]
 -> `TFoo2` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
@@ -81,16 +83,17 @@ cross_package_type_consts.php--pkg2/foo.php:5:9
 5 | newtype TFoo2 = string;
   |         ^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [3]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 3 errors found

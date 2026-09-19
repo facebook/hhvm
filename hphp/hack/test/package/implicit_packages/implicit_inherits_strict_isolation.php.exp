@@ -1,5 +1,5 @@
-error: NastCheck[3110] The `package` expression is not supported for package `prototypes`, which has strict isolation enabled [1]
--> `prototypes` has strict isolation enabled; the presence of a strict-isolation package cannot be dynamically observed [2]
+error: NastCheck[3110] The `package` expression is not supported for package `prototypes`, which does not allow deployed-package checks [1]
+-> `prototypes` is declared here without `allow_deployed_packages_checking` [2]
 
 implicit_inherits_strict_isolation.php--intern/i.php:6:15
  4 | // rejected for an implicit family, reported as a strict-isolation error.

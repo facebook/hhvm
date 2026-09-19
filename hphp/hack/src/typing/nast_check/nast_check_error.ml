@@ -13,12 +13,11 @@ type verb =
   | Vreq_implement
   | Vimplement
 
-(** The language construct that referenced a strict-isolation package and is
-    therefore unsupported. Rendered (with styling) by the error constructor. *)
-type strict_isolation_construct =
+(** The construct that asked whether a package is deployed. Rendered (with
+    styling) by the error constructor. *)
+type package_construct =
   | Package_expression
   | Require_package_attribute of string
-  | Package_override_attribute of string
 
 type t =
   | Repeated_record_field_name of {
@@ -225,11 +224,17 @@ type t =
       soft_included: bool;
       current_package_assignment_kind: string;
     }
-  | Strict_isolation_package_not_observable of {
+  | Observation_not_allowed_for_package of {
       pos: Pos.t;
       pkg: string;
       def_pos: Pos_or_decl.t;
-      construct: strict_isolation_construct;
+      construct: package_construct;
+    }
+  | Override_not_allowed_for_package of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      attr: string;
     }
   | Package_override_target_not_included of {
       override_pos: Pos.t;
@@ -961,32 +966,37 @@ let package_strict_inclusion
     (pos, primary_msg)
     [(Pos_or_decl.of_raw_pos current_pos, location_msg); last_reason]
 
-let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
-  let (construct, reason) =
+let observation_not_allowed_for_package ~pos ~pkg ~def_pos ~construct =
+  let construct =
     match construct with
     | Package_expression ->
-      ( "The " ^ Markdown_lite.md_codify "package" ^ " expression",
-        "the presence of a strict-isolation package cannot be dynamically observed"
-      )
-    | Require_package_attribute name ->
-      ( Markdown_lite.md_codify name,
-        "the presence of a strict-isolation package cannot be dynamically observed"
-      )
-    | Package_override_attribute name ->
-      ( Markdown_lite.md_codify name,
-        "membership in a strict-isolation package is determined by where a file lives, so it cannot be overridden by attribute"
-      )
+      "The " ^ Markdown_lite.md_codify "package" ^ " expression"
+    | Require_package_attribute name -> Markdown_lite.md_codify name
   in
   User_diagnostic.make_err
-    Error_code.(to_enum StrictIsolationPackageNotObservable)
+    Error_code.(to_enum ObservationNotAllowedForPackage)
     ( pos,
       Printf.sprintf
-        "%s is not supported for package `%s`, which has strict isolation enabled"
+        "%s is not supported for package `%s`, which does not allow deployed-package checks"
         construct
         pkg )
     [
       ( def_pos,
-        Printf.sprintf "`%s` has strict isolation enabled; %s" pkg reason );
+        Printf.sprintf
+          "`%s` is declared here without `allow_deployed_packages_checking`"
+          pkg );
+    ]
+
+let override_not_allowed_for_package ~pos ~pkg ~def_pos ~attr =
+  User_diagnostic.make_err
+    Error_code.(to_enum OverrideNotAllowedForPackage)
+    ( pos,
+      Printf.sprintf
+        "%s is not supported for package `%s`, which has strict isolation enabled"
+        (Markdown_lite.md_codify attr)
+        pkg )
+    [
+      (def_pos, Printf.sprintf "`%s` is declared here with strict isolation" pkg);
     ]
 
 let package_override_target_not_included
@@ -1161,9 +1171,10 @@ let to_user_diagnostic t =
         ~soft_included
         ~current_package_assignment_kind
         ~ctx:Ctx_package_expression
-    | Strict_isolation_package_not_observable { pos; pkg; def_pos; construct }
-      ->
-      strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct
+    | Observation_not_allowed_for_package { pos; pkg; def_pos; construct } ->
+      observation_not_allowed_for_package ~pos ~pkg ~def_pos ~construct
+    | Override_not_allowed_for_package { pos; pkg; def_pos; attr } ->
+      override_not_allowed_for_package ~pos ~pkg ~def_pos ~attr
     | Package_override_target_not_included
         { override_pos; target; path_package; path_package_pos } ->
       package_override_target_not_included

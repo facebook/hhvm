@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<451a5cc4b0f5ae0a1a103dd057225fed>>
+// @generated SignedSource<<9607c51814eb812c75996a4f5c3123f7>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -229,10 +229,11 @@ pub enum NastCheck {
     RequirePackageStrictInclusion = 3107,
     ClassSealedWithTrait = 3108,
     PackageExpressionStrictInclusion = 3109,
-    StrictIsolationPackageNotObservable = 3110,
+    ObservationNotAllowedForPackage = 3110,
     PackageOverrideTargetNotIncluded = 3111,
     RedundantPackageOverride = 3112,
     NamedParamsMemoize = 3113,
+    OverrideNotAllowedForPackage = 3114,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);

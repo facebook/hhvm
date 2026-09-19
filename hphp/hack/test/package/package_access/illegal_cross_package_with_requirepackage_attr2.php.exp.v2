@@ -22,6 +22,6 @@ PACKAGES.toml:3:11
  3 | [packages.pkg1]
    |           ^^^^ [3]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
 
 1 error found

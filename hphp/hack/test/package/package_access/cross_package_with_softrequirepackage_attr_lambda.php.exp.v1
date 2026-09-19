@@ -17,17 +17,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -48,17 +49,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -79,17 +81,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -110,17 +113,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -141,17 +145,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot reference this `__SoftRequirePackage` function [1]
 -> This function is marked with `__SoftRequirePackage("pkg2")`, which is a transition feature to help move a function to `__RequirePackage("pkg2")`. It does not allow calling into pkg2 itself, but it can only be called from functions that have access to pkg2. [2]
@@ -190,17 +195,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -221,17 +227,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
  3 | function pkg2_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
- 6 | [packages.pkg2]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
    |           ^^^^ [3]
- 7 | include_paths=[
- 8 |     "//cross_package_access_internal1_foo.php",
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot reference this `__SoftRequirePackage` function [1]
 -> This function is marked with `__SoftRequirePackage("pkg3")`, which is a transition feature to help move a function to `__RequirePackage("pkg3")`. It does not allow calling into pkg3 itself, but it can only be called from functions that have access to pkg3. [2]
@@ -276,20 +283,20 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg3/c.php:2:10
  2 | function pkg3_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:18:11
+PACKAGES.toml:21:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [3]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg3_call` defined in package `pkg3` which may not be available [1]
 -> `pkg3_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg3/c.php [2]
@@ -309,20 +316,20 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg3/c.php:2:10
  2 | function pkg3_call(): void {}
    |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:18:11
+PACKAGES.toml:21:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
- 5 | 
+ 5 | allow_deployed_packages_checking = true
    :
-16 | includes=["pkg2", "pkg1"]
-17 | 
-18 | [packages.pkg3]
+19 | allow_deployed_packages_checking = true
+20 | 
+21 | [packages.pkg3]
    |           ^^^^ [3]
-19 | include_paths=["//pkg3/"]
-20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+22 | include_paths=["//pkg3/"]
+23 | includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -343,17 +350,18 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
   3 | function pkg2_call(): void {}
     |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
   1 | [packages]
   2 | 
   3 | [packages.pkg1]
     |           ^^^^ [4]
   4 | include_paths=["//"]
-  5 | 
-  6 | [packages.pkg2]
+  5 | allow_deployed_packages_checking = true
+  6 | 
+  7 | [packages.pkg2]
     |           ^^^^ [3]
-  7 | include_paths=[
-  8 |     "//cross_package_access_internal1_foo.php",
+  8 | include_paths=[
+  9 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access function `pkg2_call` defined in package `pkg2` which may not be available [1]
 -> `pkg2_call` is defined in cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php [2]
@@ -374,16 +382,17 @@ cross_package_with_softrequirepackage_attr_lambda.php--pkg2/b.php:3:10
   3 | function pkg2_call(): void {}
     |          ^^^^^^^^^ [2]
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
   1 | [packages]
   2 | 
   3 | [packages.pkg1]
     |           ^^^^ [4]
   4 | include_paths=["//"]
-  5 | 
-  6 | [packages.pkg2]
+  5 | allow_deployed_packages_checking = true
+  6 | 
+  7 | [packages.pkg2]
     |           ^^^^ [3]
-  7 | include_paths=[
-  8 |     "//cross_package_access_internal1_foo.php",
+  8 | include_paths=[
+  9 |     "//cross_package_access_internal1_foo.php",
 
 13 errors found

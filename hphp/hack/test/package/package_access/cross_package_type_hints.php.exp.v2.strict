@@ -19,16 +19,17 @@ cross_package_type_hints.php--pkg2/foo.php:3:6
 4 | newtype NTFoo = string;
 5 | class Foo {}
 
-PACKAGES.toml:6:11
+PACKAGES.toml:7:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
-5 | 
-6 | [packages.pkg2]
+5 | allow_deployed_packages_checking = true
+6 | 
+7 | [packages.pkg2]
   |           ^^^^ [3]
-7 | include_paths=[
-8 |     "//cross_package_access_internal1_foo.php",
+8 | include_paths=[
+9 |     "//cross_package_access_internal1_foo.php",
 
 1 error found

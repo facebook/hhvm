@@ -18,3 +18,14 @@ enable_strict_isolation = true
 
 [packages.standalone]
 include_paths = ["//standalone/"]
+
+# Does not opt in to `allow_deployed_packages_checking`, so it may not be
+# checked for -- but unlike strict isolation, it is still joinable by override.
+[packages.unobservable]
+include_paths = ["//unobservable/"]
+includes = ["intern", "shared"]
+
+# Exists so a file has a package that can legally override into `unobservable`.
+[packages.host]
+include_paths = ["//host/"]
+includes = ["unobservable", "intern", "shared"]

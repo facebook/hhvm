@@ -10,6 +10,7 @@
 
 #include <folly/container/F14Map.h>
 #include <chrono>
+#include <functional>
 #include <string>
 
 namespace facebook::common::mysql_client {
@@ -23,6 +24,11 @@ using Timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 // "transparent", meaning we can .find() by std::string, std::string_view, and
 // by const char*. */
 using AttributeMap = folly::F14NodeMap<std::string, std::string>;
+
+// Builds response attributes that are expensive to produce and are only read
+// by logging. Called at log time, so queries the logger doesn't sample never
+// pay for the attributes.
+using AdditionalAttributesFn = std::function<AttributeMap()>;
 
 // For control flows in callbacks. This indicates the reason a callback was
 // fired. When a pack of rows if fetched it is used RowsFetched to

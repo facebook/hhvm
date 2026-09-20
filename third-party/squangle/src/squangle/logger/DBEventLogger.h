@@ -205,6 +205,9 @@ struct QueryLoggingData : CommonLoggingData {
   bool use_checksum;
   AttributeMap query_attributes;
   AttributeMap response_attributes;
+  // Response attributes that are expensive to build, so they are produced on
+  // demand and only when the query is actually sampled for logging.
+  common::mysql_client::AdditionalAttributesFn additional_response_attributes;
   bool was_slow;
   unsigned int warnings_count;
   // Optional custom RPC priority (for protocol-specific logging)

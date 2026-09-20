@@ -618,6 +618,15 @@ class Connection {
     return {};
   }
 
+  [[nodiscard]] AdditionalAttributesFn getAdditionalResponseAttributes() const {
+    // This function can be called with no valid connection
+    if (mysql_connection_) {
+      return mysql_connection_->getAdditionalResponseAttributes();
+    }
+
+    return nullptr;
+  }
+
   void setConnectTimeout(Millis timeout) {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->setConnectTimeout(timeout);

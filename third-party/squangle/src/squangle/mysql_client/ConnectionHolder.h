@@ -221,6 +221,11 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getResponseAttributes();
   }
 
+  [[nodiscard]] AdditionalAttributesFn getAdditionalResponseAttributes()
+      const override {
+    return internalConn_->getAdditionalResponseAttributes();
+  }
+
   void setConnectTimeout(Millis timeout) const override {
     internalConn_->setConnectTimeout(timeout);
   }

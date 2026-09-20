@@ -194,15 +194,24 @@ impl NamingTable {
 }
 
 impl NamingTable {
-    /// Returns `Option<UnsafeOcamlPtr>` where the `UnsafeOcamlPtr` is a value
-    /// of OCaml type `FileInfo.pos option`.
+    /// Returns a cached OCaml naming result.
     ///
-    /// SAFETY: This method (and all other `get_ocaml_` methods) call into the
-    /// OCaml runtime and may trigger a GC. Must be invoked from the main thread
-    /// with no concurrent interaction with the OCaml runtime. The returned
-    /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
-    /// triggered after this method returns.
+    /// The outer Rust `Option` reports whether this fast path can answer the
+    /// query. Its `UnsafeOcamlPtr` points to the complete OCaml `option`, so a
+    /// cached absence is `Some(ocaml_none)`. Rust `None` means that the fast
+    /// path was unavailable and did not invoke the OCaml runtime.
+    ///
+    /// # Safety
+    ///
+    /// Must be invoked from the main thread with no concurrent interaction
+    /// with the OCaml runtime. If this method returns `Some`, deserialization
+    /// may have triggered a GC: the caller must not reuse `name` or any other
+    /// unrooted OCaml value, and the returned pointer is valid only until the
+    /// next GC.
     pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        // SAFETY: Per this function's contract, this runs on the main OCaml
+        // thread without concurrent runtime access. `name` is used to compute
+        // the key before shared-memory deserialization can trigger GC.
         unsafe {
             self.types
                 .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
@@ -210,23 +219,38 @@ impl NamingTable {
                     file_info::NameType::Class,
                     name,
                 ))
-                // The heap has values of type Option<Pos>, and they've already been
-                // converted to an OCaml value here. Map `Some(ocaml_none)` to
-                // `None` so that the caller doesn't need to inspect the value.
-                .filter(|ptr| ptr.is_block())
         }
     }
+
+    /// Returns a cached OCaml function-position result.
+    ///
+    /// # Safety
+    ///
+    /// The requirements and return-value contract of
+    /// [`Self::get_ocaml_type_pos`] apply.
     pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        // SAFETY: Per this function's contract, this runs on the main OCaml
+        // thread without concurrent runtime access. `name` is used to compute
+        // the key before shared-memory deserialization can trigger GC.
         unsafe {
             self.funs
                 .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
                     file_info::NameType::Fun,
                     name,
                 ))
-                .filter(|ptr| ptr.is_block())
         }
     }
+
+    /// Returns a cached OCaml constant-position result.
+    ///
+    /// # Safety
+    ///
+    /// The requirements and return-value contract of
+    /// [`Self::get_ocaml_type_pos`] apply.
     pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        // SAFETY: Per this function's contract, this runs on the main OCaml
+        // thread without concurrent runtime access. `name` is used to compute
+        // the key before shared-memory deserialization can trigger GC.
         unsafe {
             if self.consts.has_local_changes() {
                 None
@@ -236,11 +260,20 @@ impl NamingTable {
                         file_info::NameType::Const,
                         name,
                     ))
-                    .filter(|ptr| ptr.is_block())
             }
         }
     }
+
+    /// Returns a cached OCaml module-position result.
+    ///
+    /// # Safety
+    ///
+    /// The requirements and return-value contract of
+    /// [`Self::get_ocaml_type_pos`] apply.
     pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        // SAFETY: Per this function's contract, this runs on the main OCaml
+        // thread without concurrent runtime access. `name` is used to compute
+        // the key before shared-memory deserialization can trigger GC.
         unsafe {
             if self.modules.has_local_changes() {
                 None
@@ -250,7 +283,6 @@ impl NamingTable {
                         file_info::NameType::Module,
                         name,
                     ))
-                    .filter(|ptr| ptr.is_block())
             }
         }
     }

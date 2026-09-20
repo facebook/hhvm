@@ -1,3 +1,0 @@
-<?hh
-
-case type OverlappingCaseType = TYPE#1 | SUBTYPE#1;

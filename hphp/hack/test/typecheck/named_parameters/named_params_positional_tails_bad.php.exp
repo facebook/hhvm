@@ -1,0 +1,36 @@
+ERROR: File "named_params_positional_tails_bad.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+  File "named_params_positional_tails_bad.php", line 5, characters 19-21:
+  Expected `int`
+  File "named_params_positional_tails_bad.php", line 6, characters 20-25:
+  But got `string`
+ERROR: File "named_params_positional_tails_bad.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+  File "named_params_positional_tails_bad.php", line 11, characters 30-32:
+  Expected `int`
+  File "named_params_positional_tails_bad.php", line 12, characters 14-16:
+  But got `num`
+ERROR: File "named_params_positional_tails_bad.php", line 19, characters 10-11:
+Invalid return type (Typing[4110])
+  File "named_params_positional_tails_bad.php", line 17, characters 22-24:
+  Expected `int`
+  File "named_params_positional_tails_bad.php", line 18, characters 31-33:
+  But got `num`
+ERROR: File "named_params_positional_tails_bad.php", line 25, characters 10-11:
+Invalid return type (Typing[4110])
+  File "named_params_positional_tails_bad.php", line 23, characters 34-36:
+  Expected `int`
+  File "named_params_positional_tails_bad.php", line 24, characters 14-16:
+  But got `num`
+ERROR: File "named_params_positional_tails_bad.php", line 31, characters 10-11:
+Invalid return type (Typing[4110])
+  File "named_params_positional_tails_bad.php", line 29, characters 13-15:
+  Expected `int`
+  File "named_params_positional_tails_bad.php", line 30, characters 35-37:
+  But got `num`
+ERROR: File "named_params_positional_tails_bad.php", line 37, characters 10-11:
+Invalid return type (Typing[4040])
+  File "named_params_positional_tails_bad.php", line 35, characters 3-34:
+  Too few positional arguments (required 2 but got 0)
+  File "named_params_positional_tails_bad.php", line 36, characters 4-51:
+  Because of this definition

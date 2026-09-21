@@ -2320,12 +2320,12 @@ end = struct
     | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
       simplify_subtype_params_with_variadic
         ~subtype_env
-        (r_super, idx_super, all_params_super)
+        (r_super, idx_super, positional_params_super)
         (r_sub, idx_sub, ty_sub)
     | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
       simplify_supertype_params_with_variadic
         ~subtype_env
-        (r_sub, idx_sub, all_params_sub)
+        (r_sub, idx_sub, positional_params_sub)
         (r_super, idx_super, ty_super)
     (* Two splat parameters are just compared directly *)
     | ( [({ fp_type = ty_sub; _ } as fn_param_sub)],
@@ -2342,7 +2342,10 @@ end = struct
     | (_, [({ fp_type = ty_super; _ } as fn_param_super)])
       when get_fp_splat fn_param_super ->
       let tuple_ty_sub =
-        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty all_params_sub
+        params_to_tuple
+          (Reason.to_pos r_sub)
+          variadic_sub_ty
+          positional_params_sub
       in
       simplify
         ~subtype_env
@@ -2363,7 +2366,7 @@ end = struct
         params_to_tuple
           (Reason.to_pos r_super)
           variadic_super_ty
-          all_params_super
+          positional_params_super
       in
       simplify
         ~subtype_env
@@ -2390,7 +2393,7 @@ end = struct
                          pos = Reason.to_pos r_sub;
                          decl_pos = Reason.to_pos r_super;
                          actual = idx_sub;
-                         expected = List.length all_params_super;
+                         expected = List.length positional_params_super;
                        })
         in
         invalid ~fail

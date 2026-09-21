@@ -1,0 +1,32 @@
+ERROR: File "unpack_optional_named.php", line 17, characters 3-16:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 4, characters 10-10:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 18, characters 3-23:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 4, characters 10-10:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 19, characters 3-23:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 4, characters 10-10:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 20, characters 3-26:
+Too few positional arguments (required 2 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 6, characters 10-17:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 21, characters 3-26:
+Too few positional arguments (required 2 but got 1) (Typing[4104])
+  File "unpack_optional_named.php", line 6, characters 10-17:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 22, characters 3-43:
+Too few positional arguments (required 2 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 6, characters 10-17:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 23, characters 3-23:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 14, characters 10-17:
+  Definition is here
+ERROR: File "unpack_optional_named.php", line 24, characters 3-29:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "unpack_optional_named.php", line 14, characters 10-17:
+  Definition is here

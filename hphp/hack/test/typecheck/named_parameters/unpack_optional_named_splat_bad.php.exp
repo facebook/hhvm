@@ -1,0 +1,18 @@
+ERROR: File "unpack_optional_named_splat_bad.php", line 8, characters 9-22:
+Invalid argument (Typing[4110])
+  File "unpack_optional_named_splat_bad.php", line 5, characters 44-48:
+  Expected `(int)`
+  File "unpack_optional_named_splat_bad.php", line 8, characters 9-22:
+  But got `(int, int, int)`
+ERROR: File "unpack_optional_named_splat_bad.php", line 9, characters 9-25:
+Invalid argument (Typing[4110])
+  File "unpack_optional_named_splat_bad.php", line 5, characters 44-48:
+  Expected `(int)`
+  File "unpack_optional_named_splat_bad.php", line 9, characters 9-25:
+  But got `(string, int)`
+ERROR: File "unpack_optional_named_splat_bad.php", line 9, characters 9-25:
+Invalid argument (Typing[4110])
+  File "unpack_optional_named_splat_bad.php", line 5, characters 45-47:
+  Expected `int`
+  File "unpack_optional_named_splat_bad.php", line 9, characters 15-21:
+  But got `string`

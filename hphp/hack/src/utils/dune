@@ -55,7 +55,7 @@
  (modules wwwroot)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
- (libraries sys_utils))
+ (libraries repo_root_ffi sys_utils))
 
 (library
  (name utils_exit)

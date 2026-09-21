@@ -53,8 +53,21 @@ let rec guess_root_with_limit start ~recursion_limit : Path.t option =
       (Path.dirname start)
       ~recursion_limit:(recursion_limit - 1)
 
-let guess_root (start : Path.t) : Path.t option =
+let guess_root_ocaml (start : Path.t) : Path.t option =
   guess_root_with_limit start ~recursion_limit:50
+
+let guess_root (start : Path.t) : Path.t option =
+  let use_rust =
+    match Sys.getenv_opt "HH_USE_RUST_REPO_ROOT" with
+    | Some "0" -> false
+    | _ -> true
+  in
+  if not (Path.file_exists start && use_rust) then
+    guess_root_ocaml start
+  else
+    match Repo_root_ffi.guess_root (Path.to_string start) with
+    | Some root -> Some (Path.make root)
+    | None -> guess_root_ocaml start
 
 let interpret_command_line_root_parameter (paths : string list) :
     (Path.t, string) result =

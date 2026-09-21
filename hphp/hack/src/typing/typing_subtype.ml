@@ -2140,8 +2140,8 @@ end = struct
       ~(subtype_env : Subtype_env.t)
       ~arg_posl
       ~for_override
-      (r_sub, idx_sub, fn_params_sub, variadic_sub_ty)
-      (r_super, idx_super, fn_params_super, variadic_super_ty)
+      (r_sub, idx_sub, all_params_sub, variadic_sub_ty)
+      (r_super, idx_super, all_params_super, variadic_super_ty)
       env =
     (* We use this for matching parameters fn_param_sub and fn_param_super
        * Below we match using two separate strategies: by name (for named params) and by position
@@ -2256,10 +2256,10 @@ end = struct
           Option.is_some (Named_params.name_of_named_param fp))
     in
     let (named_params_sub, positional_params_sub) =
-      partition_by_namedness fn_params_sub
+      partition_by_namedness all_params_sub
     in
     let (named_params_super, positional_params_super) =
-      partition_by_namedness fn_params_super
+      partition_by_namedness all_params_super
     in
     (* Handle named parameters *)
     let (env, prop) =
@@ -2320,12 +2320,12 @@ end = struct
     | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
       simplify_subtype_params_with_variadic
         ~subtype_env
-        (r_super, idx_super, fn_params_super)
+        (r_super, idx_super, all_params_super)
         (r_sub, idx_sub, ty_sub)
     | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
       simplify_supertype_params_with_variadic
         ~subtype_env
-        (r_sub, idx_sub, fn_params_sub)
+        (r_sub, idx_sub, all_params_sub)
         (r_super, idx_super, ty_super)
     (* Two splat parameters are just compared directly *)
     | ( [({ fp_type = ty_sub; _ } as fn_param_sub)],
@@ -2342,7 +2342,7 @@ end = struct
     | (_, [({ fp_type = ty_super; _ } as fn_param_super)])
       when get_fp_splat fn_param_super ->
       let tuple_ty_sub =
-        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty fn_params_sub
+        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty all_params_sub
       in
       simplify
         ~subtype_env
@@ -2363,7 +2363,7 @@ end = struct
         params_to_tuple
           (Reason.to_pos r_super)
           variadic_super_ty
-          fn_params_super
+          all_params_super
       in
       simplify
         ~subtype_env
@@ -2390,14 +2390,15 @@ end = struct
                          pos = Reason.to_pos r_sub;
                          decl_pos = Reason.to_pos r_super;
                          actual = idx_sub;
-                         expected = List.length fn_params_super;
+                         expected = List.length all_params_super;
                        })
         in
         invalid ~fail
       else
         valid
     | (_, []) -> valid
-    | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
+    | ( fn_param_sub :: positional_params_sub,
+        fn_param_super :: positional_params_super ) ->
       let (arg_pos, arg_posl) =
         match arg_posl with
         | None
@@ -2416,8 +2417,11 @@ end = struct
               ~subtype_env
               ~arg_posl
               ~for_override
-              (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
-              (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
+              (r_sub, idx_sub + 1, positional_params_sub, variadic_sub_ty)
+              ( r_super,
+                idx_super + 1,
+                positional_params_super,
+                variadic_super_ty )
 
   (* Contravariant element-type subtyping for named-variadic parameters
      between two function types. Two obligations:

@@ -20,7 +20,8 @@ supplied then they fall back to a search based on the current directory.
 This code implements that -- it ensures that either 0 or 1 root parameters
 were passed (and returns an error if there were more);
 if there were 0 parameters then it walks from CWD to find .hhconfig
-and if there was 1 then it walks from that to find .hhconfig.
+and if there was 1 then it walks from that to find .hhconfig. If that search
+fails, it also checks for .hhconfig in a www child of the initial directory.
 Then it validates that .hhconfig really is there, and returns an error if it
 wasn't.
 

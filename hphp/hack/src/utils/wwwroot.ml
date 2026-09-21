@@ -9,7 +9,9 @@
 
 open Hh_prelude
 
-(* Keep in sync with //hphp/hack/src/utils/repo_root.rs *)
+(* Keep root discovery in sync with
+ * //hphp/hack/src/utils/repo_root.rs and
+ * //hphp/hack/src/facebook/find_hh/find_hh.sh. *)
 
 (**
  * Checks if x is a www directory by looking for ".hhconfig".
@@ -66,8 +68,13 @@ let interpret_command_line_root_parameter (paths : string list) :
   let start_path = Path.make path in
   let root =
     match guess_root start_path with
-    | None -> start_path
     | Some root -> root
+    | None ->
+      let www_child = Path.concat start_path "www" in
+      if is_www_directory www_child then
+        www_child
+      else
+        start_path
   in
   let* () = validate_www_directory root in
   Ok root

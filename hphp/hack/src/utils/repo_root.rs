@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// Keep in sync with //hphp/hack/src/utils/wwwroot.ml
+// Keep root discovery in sync with
+// //hphp/hack/src/utils/wwwroot.ml and
+// //hphp/hack/src/facebook/find_hh/find_hh.sh.
 
 use std::path::Path;
 use std::path::PathBuf;
@@ -14,15 +16,31 @@ use thiserror::Error;
 pub const TRAVERSAL_LIMIT: usize = 50;
 
 /// Check the current dir and up to `TRAVERSAL_LIMIT` ancestors, returning the
-/// first one containing an hh config file.
+/// first one containing an hh config file. If that search fails, also check
+/// the starting dir's `www` child.
 pub fn guess_root_from_current_dir() -> Result<PathBuf, GuessRootError> {
     let root = std::env::current_dir().map_err(GuessRootError::CurrentDir)?;
     guess_root_from(&root)
 }
 
 /// Check the starting dir and up to `TRAVERSAL_LIMIT` ancestors, returning the
-/// first one containing an hh config file.
+/// first one containing an hh config file. If that search fails, also check
+/// the starting dir's `www` child.
 pub fn guess_root_from(start: &std::path::Path) -> Result<PathBuf, GuessRootError> {
+    match guess_root_from_ancestors(start) {
+        Ok(root) => Ok(root),
+        Err(error) => {
+            let www_child = start.join("www");
+            if is_root(&www_child) {
+                Ok(www_child)
+            } else {
+                Err(error)
+            }
+        }
+    }
+}
+
+fn guess_root_from_ancestors(start: &Path) -> Result<PathBuf, GuessRootError> {
     let mut possible_root = start;
     for _ in 0..=TRAVERSAL_LIMIT {
         if is_root(possible_root) {
@@ -82,6 +100,34 @@ mod tests {
 
         let root = guess_root_from(&current_dir).unwrap();
         assert_eq!(root, contains_hhconfig);
+    }
+
+    #[test]
+    fn guess_root_finds_www_child() {
+        let repo_parent = TempDir::with_prefix("repo_root_tests.").unwrap();
+        let fbsource = repo_parent.path().join("fbsource");
+        let www = fbsource.join("www");
+
+        create_dir_all(&www).unwrap();
+        touch(&www.join(".hhconfig"));
+
+        let root = guess_root_from(&fbsource).unwrap();
+        assert_eq!(root, www);
+    }
+
+    #[test]
+    fn guess_root_prefers_ancestor_over_www_child() {
+        let repo_parent = TempDir::with_prefix("repo_root_tests.").unwrap();
+        let outer_www = repo_parent.path().join("www");
+        let current_dir = outer_www.join("foo/bar");
+        let inner_www = current_dir.join("www");
+
+        create_dir_all(&inner_www).unwrap();
+        touch(&outer_www.join(".hhconfig"));
+        touch(&inner_www.join(".hhconfig"));
+
+        let root = guess_root_from(&current_dir).unwrap();
+        assert_eq!(root, outer_www);
     }
 
     #[test]

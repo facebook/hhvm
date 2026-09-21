@@ -825,6 +825,7 @@ received the notification:
             if entry.sent is not None and LspCommandProcessor._is_request(entry.sent)
         ]
         if previous_request_entries:
+            # pyrefly: ignore [bad-index]
             previous_request_lsp_id = previous_request_entries[-1]["id"]
         else:
             return None

@@ -219,6 +219,7 @@ def imm_to_str(imm: typing.Union[str, lldb.SBValue]) -> str:
     else:
         # pyrefly: ignore [missing-attribute]
         imm = str(imm.signed)
+    # pyrefly: ignore [bad-return]
     return imm
 
 

@@ -152,7 +152,9 @@ class LLDBTestBase(BaseFacebookTestCase, abc.ABC):
             breakpoint
         )
         self.assertTrue(
-            breakpoint.IsValid(), f"Unable to set breakpoint at {breakpoint}"
+            # pyrefly: ignore [missing-attribute]
+            breakpoint.IsValid(),
+            f"Unable to set breakpoint at {breakpoint}",
         )
         err = self.process.Continue()
         assert err.Success(), f"Unable to continue to breakpoint {breakpoint}"

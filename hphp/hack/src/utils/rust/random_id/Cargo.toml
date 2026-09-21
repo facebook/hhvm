@@ -13,4 +13,4 @@ test = false
 doctest = false
 
 [dependencies]
-rand = "0.10.2"
+rand = "0.10.3"

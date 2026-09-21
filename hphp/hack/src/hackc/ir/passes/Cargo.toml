@@ -20,6 +20,6 @@ print = { path = "../print" }
 
 [dev-dependencies]
 hash = { path = "../../../utils/hash" }
-rand = "0.10.2"
+rand = "0.10.3"
 testutils = { path = "../testutils" }
 verify = { path = "../verify" }

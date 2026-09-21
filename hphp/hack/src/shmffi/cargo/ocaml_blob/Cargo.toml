@@ -18,4 +18,4 @@ ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", b
 shmrs = { path = "../../../shmrs" }
 
 [dev-dependencies]
-rand = "0.10.2"
+rand = "0.10.3"

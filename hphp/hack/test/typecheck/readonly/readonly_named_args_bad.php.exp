@@ -1,0 +1,12 @@
+ERROR: File "readonly_named_args_bad.php", line 10, characters 27-29:
+Invalid argument (Typing[4411])
+  File "readonly_named_args_bad.php", line 10, characters 27-29:
+  This expression is readonly
+  File "readonly_named_args_bad.php", line 4, characters 38-39:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "readonly_named_args_bad.php", line 11, characters 34-36:
+Invalid argument (Typing[4411])
+  File "readonly_named_args_bad.php", line 11, characters 34-36:
+  This expression is readonly
+  File "readonly_named_args_bad.php", line 4, characters 52-53:
+  It is incompatible with this parameter, which is mutable

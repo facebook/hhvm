@@ -1,0 +1,1 @@
+Fatal error: Declaration of MissingPositionalParameter::f() must be compatible with that of PositionalContract::f() in %s on line %d

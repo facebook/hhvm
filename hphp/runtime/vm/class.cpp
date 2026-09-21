@@ -2053,31 +2053,33 @@ inline void checkRefCompat(const char* kind, const Func* self,
 
   if (!self->takesInOutParams() && !inherit->takesInOutParams()) return;
 
-  auto const max = std::max(
-    self->numNonVariadicParams(),
-    inherit->numNonVariadicParams()
-  );
+  auto const selfPositionals = self->numPositionalParams();
+  auto const inheritPositionals = inherit->numPositionalParams();
+  auto const selfNamed = self->numNamedParams();
+  auto const inheritNamed = inherit->numNamedParams();
+  auto const max = std::max(selfPositionals, inheritPositionals);
 
   for (int i = 0; i < max; ++i) {
     // Since we're looking at ref wrappers of inout functions we need to check
     // inout, but if one of the functions isn't a wrapper we do actually have
-    // a mismatch.
-    auto const smode = self->isInOut(i);
-    auto const imode = inherit->isInOut(i);
+    // a mismatch. Named parameters occupy a separate prefix and cannot be
+    // inout, so compare positions within the positional suffix.
+    auto const smode = i < selfPositionals && self->isInOut(selfNamed + i);
+    auto const imode =
+      i < inheritPositionals && inherit->isInOut(inheritNamed + i);
     if (smode != imode) {
       auto const msg = [&] {
         auto const sname = self->fullName()->data();
         auto const iname = inherit->fullName()->data();
 
         if (smode) {
-          auto const idecl =
-            i >= inherit->numNonVariadicParams() ? "" : "inout ";
+          auto const idecl = i >= inheritPositionals ? "" : "inout ";
           return fmt::format(
             "Parameter {} on function {} was declared inout but is not "
             "declared {}on {} function {}", i + 1, sname, idecl,
             kind, iname);
         } else {
-          auto const sdecl = i >= self->numNonVariadicParams() ? "" : "inout ";
+          auto const sdecl = i >= selfPositionals ? "" : "inout ";
           return fmt::format(
             "Parameter {} on function {} was not declared {}but is "
             "declared inout on {} function {}", i + 1, sname, sdecl,
@@ -2087,6 +2089,50 @@ inline void checkRefCompat(const char* kind, const Func* self,
       raise_error(msg);
     }
   }
+}
+
+bool isRequiredParam(const Func::ParamInfo& param) {
+  return !param.hasDefaultValue() && !param.isOptional();
+}
+
+bool namedParamsCompatible(const Func* implementation,
+                           const Func* declaration) {
+  auto const implementationNames = implementation->sortedNamedParamNames();
+  auto const declarationNames = declaration->sortedNamedParamNames();
+  auto const numImplementationNames = implementation->numNamedParams();
+  auto const numDeclarationNames = declaration->numNamedParams();
+
+  size_t implementationIdx = 0;
+  size_t declarationIdx = 0;
+  while (implementationIdx < numImplementationNames &&
+         declarationIdx < numDeclarationNames) {
+    auto const comparison = implementationNames[implementationIdx]
+                              ->slice()
+                              .compare(declarationNames[declarationIdx]->slice());
+    if (comparison < 0) {
+      if (isRequiredParam(implementation->params()[implementationIdx])) {
+        return false;
+      }
+      ++implementationIdx;
+    } else if (comparison > 0) {
+      return false;
+    } else {
+      if (!isRequiredParam(declaration->params()[declarationIdx]) &&
+          isRequiredParam(implementation->params()[implementationIdx])) {
+        return false;
+      }
+      ++implementationIdx;
+      ++declarationIdx;
+    }
+  }
+
+  if (declarationIdx != numDeclarationNames) return false;
+  for (; implementationIdx < numImplementationNames; ++implementationIdx) {
+    if (isRequiredParam(implementation->params()[implementationIdx])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // Check compatibility vs interface and abstract declarations
@@ -2107,37 +2153,34 @@ void checkDeclarationCompat(const PreClass* preClass,
       raiseIncompat(preClass, imeth);
     }
 
-    // Verify that func has at least as many parameters as imeth.
-    // If func is variadic, then the check isn't necessary because it can
-    // take an arbitrary number of parameters
-    if (!variadic && func->numParams() < imeth->numParams()) {
+    if (!namedParamsCompatible(func, imeth)) {
       raiseIncompat(preClass, imeth);
     }
-    // Verify that the typehints for meth's parameters are compatible with
-    // imeth's corresponding parameter typehints.
-    size_t firstOptional = 0;
-    {
-      size_t i = 0;
-      for (; i < imeth->numNonVariadicParams(); ++i) {
-        if (!iparams[i].hasDefaultValue() && !iparams[i].isOptional()) {
-          // The leftmost of imeth's contiguous trailing optional parameters
-          // must start somewhere to the right of this parameter (which may
-          // be the variadic param)
-          firstOptional = i + 1;
-        }
-      }
-      assertx(!ivariadic || iparams[iparams.size() - 1].isVariadic());
-      assertx(!ivariadic || params[params.size() - 1].isVariadic());
+
+    // Verify that func has at least as many positional parameters as imeth.
+    // If func is variadic, then the check isn't necessary because it can
+    // take an arbitrary number of positional parameters.
+    if (!variadic &&
+        func->numPositionalParams() < imeth->numPositionalParams()) {
+      raiseIncompat(preClass, imeth);
     }
 
-    // Verify that meth provides defaults, starting with the parameter that
-    // corresponds to the leftmost of imeth's contiguous trailing optional
-    // parameters and *not* including any variadic last param (variadics
-    // don't have any default values).
-    for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
-      if (!params[i].hasDefaultValue() && !params[i].isOptional()) {
-        raiseIncompat(preClass, imeth);
-      }
+    // Find the leftmost of imeth's contiguous trailing optional positional
+    // parameters. Named parameters are matched by label above, not by slot.
+    size_t firstOptional = 0;
+    for (size_t i = 0; i < imeth->numPositionalParams(); ++i) {
+      auto const param = i + imeth->numNamedParams();
+      if (isRequiredParam(iparams[param])) firstOptional = i + 1;
+    }
+    assertx(!ivariadic || iparams[iparams.size() - 1].isVariadic());
+    assertx(!ivariadic || params[params.size() - 1].isVariadic());
+
+    // Verify that func provides defaults for every positional parameter after
+    // imeth's leftmost trailing optional parameter. Variadic parameters don't
+    // have default values and are excluded by numPositionalParams().
+    for (auto i = firstOptional; i < func->numPositionalParams(); ++i) {
+      auto const param = i + func->numNamedParams();
+      if (isRequiredParam(params[param])) raiseIncompat(preClass, imeth);
     }
   }
 

@@ -1,0 +1,1 @@
+Fatal error: Parameter 1 on function f was not declared inout but is declared inout on parent function InoutBase::f in %s on line %d

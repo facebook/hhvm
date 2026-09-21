@@ -1,0 +1,1 @@
+Fatal error: Declaration of RequiredNamedParameter::f() must be compatible with that of OptionalNamedContract::f() in %s on line %d

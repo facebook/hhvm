@@ -516,7 +516,7 @@ inline PackedStringPtr const* Func::localNames() const {
   return shared()->m_localNames.accessList();
 }
 
-/* By construction, named params appear at the end of param lists and
+/* By construction, named params appear at the beginning of param lists and
  * are sorted lexicographically.
  */
 inline PackedStringPtr const* Func::sortedNamedParamNames() const {

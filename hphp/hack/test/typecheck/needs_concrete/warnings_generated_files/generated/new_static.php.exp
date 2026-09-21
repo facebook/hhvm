@@ -1,1 +1,4 @@
-No errors
+WARN: File "new_static.php", line 6, characters 14-19:
+Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Warn[12026])
+  File "new_static.php", line 4, characters 16-33:
+  Declaration is here

@@ -1,1 +1,4 @@
-No errors
+WARN: File "call_needs_concrete.php", line 8, characters 13-33:
+Dangerous call to `GeneratedCallNeedsConcrete::needs_concrete_method` (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete. (Warn[12024])
+  File "call_needs_concrete.php", line 5, characters 26-46:
+  Declaration is here

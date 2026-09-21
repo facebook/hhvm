@@ -1,1 +1,4 @@
-No errors
+WARN: File "generated_file.php", line 5, characters 13-15:
+Dangerous access of abstract member `Generated::abs`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Warn[12025])
+  File "generated_file.php", line 7, characters 35-37:
+  Declaration is here

@@ -2000,9 +2000,8 @@ let param_modes
       Typing_error_utils.add_typing_error ~env @@ Typing_error.primary err)
 
 let split_remaining_params_required_optional
-    non_variadic_or_splat_params remaining_params =
-  (* Same example as above
-   *
+    non_variadic_non_splat_params remaining_params =
+  (*
    * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
    * function g((string, float, bool) $t): void {
    *   f(3, ...$t);
@@ -2014,10 +2013,10 @@ let split_remaining_params_required_optional
   let min_arity =
     List.count
       ~f:(fun fp -> not (Typing_defs.get_fp_is_optional fp))
-      non_variadic_or_splat_params
+      non_variadic_non_splat_params
   in
   let consumed =
-    List.length non_variadic_or_splat_params - List.length remaining_params
+    List.length non_variadic_non_splat_params - List.length remaining_params
   in
   let required_remaining = Int.max (min_arity - consumed) 0 in
   let (required_params, optional_params) =
@@ -7456,7 +7455,7 @@ end = struct
              as either a positional variadic or a required named parameter.
              Unmatched named arguments will fall through to it below. *)
           let named_variadic_param = Typing_defs.ft_named_variadic_param ft in
-          let ft_for_positional =
+          let ft_without_named_variadic =
             match named_variadic_param with
             | Some _ ->
               {
@@ -7465,21 +7464,22 @@ end = struct
               }
             | None -> ft
           in
-          let (non_variadic_or_splat_params, variadic_or_splat_param) =
-            get_variadic_or_splat_param ft_for_positional
+          let (non_variadic_non_splat_params, variadic_or_splat_param) =
+            get_variadic_or_splat_param ft_without_named_variadic
           in
 
-          let non_variadic_non_splat_indexed =
-            List.mapi non_variadic_or_splat_params ~f:Tuple2.create
+          let indexed_non_variadic_non_splat_params =
+            List.mapi non_variadic_non_splat_params ~f:Tuple2.create
           in
-          (* "plain_params" are non-named, non-variadic, non-splat *)
-          let plain_params =
-            List.filter non_variadic_non_splat_indexed ~f:(fun (_, param) ->
+          let positional_non_variadic_non_splat_params =
+            List.filter
+              indexed_non_variadic_non_splat_params
+              ~f:(fun (_, param) ->
                 not (Typing_defs_flags.FunParam.named param.fp_flags))
           in
           let named_params =
             List.fold
-              non_variadic_non_splat_indexed
+              indexed_non_variadic_non_splat_params
               ~init:S_map.empty
               ~f:(fun named_params (idx, fp) ->
                 match Typing_defs.Named_params.name_of_named_param fp with
@@ -7648,45 +7648,51 @@ end = struct
           in
           let is_single_argument = List.length el = 1 in
           let get_next_positional_param_info
-              named_params_remaining plain_params_remaining =
-            match plain_params_remaining with
-            | (idx, param) :: plain_params_remaining -> begin
+              named_params_remaining
+              remaining_positional_non_variadic_non_splat_params =
+            match remaining_positional_non_variadic_non_splat_params with
+            | (idx, param) :: remaining_positional_non_variadic_non_splat_params
+              -> begin
               ( idx,
                 ( false,
                   Some param,
                   named_params_remaining,
-                  plain_params_remaining ) )
+                  remaining_positional_non_variadic_non_splat_params ) )
             end
             | [] ->
               (match variadic_or_splat_param with
               | Some (`Variadic param) ->
-                ( List.length non_variadic_or_splat_params,
+                ( List.length non_variadic_non_splat_params,
                   ( true,
                     Some param,
                     named_params_remaining,
-                    plain_params_remaining ) )
+                    remaining_positional_non_variadic_non_splat_params ) )
               | Some (`Splat _)
               | None ->
                 ( -1,
-                  (true, None, named_params_remaining, plain_params_remaining)
-                ))
+                  ( true,
+                    None,
+                    named_params_remaining,
+                    remaining_positional_non_variadic_non_splat_params ) ))
           in
           let get_next_named_param_info
-              name named_params_remaining plain_params_remaining =
+              name
+              named_params_remaining
+              remaining_positional_non_variadic_non_splat_params =
             match S_map.find_opt name named_params_remaining with
             | Some (idx, param) ->
               ( idx,
                 ( false,
                   Some param,
                   S_map.remove name named_params_remaining,
-                  plain_params_remaining ) )
+                  remaining_positional_non_variadic_non_splat_params ) )
             | None ->
               (* No matching declared name — if the callee has a named
                  variadic, use it so the argument's type is still checked
                  against the variadic's element type. *)
               (match named_variadic_param with
               | Some param ->
-                ( (List.length non_variadic_or_splat_params
+                ( (List.length non_variadic_non_splat_params
                   +
                   match variadic_or_splat_param with
                   | Some _ -> 1
@@ -7694,11 +7700,13 @@ end = struct
                   ( true,
                     Some param,
                     named_params_remaining,
-                    plain_params_remaining ) )
+                    remaining_positional_non_variadic_non_splat_params ) )
               | None ->
                 ( -1,
-                  (true, None, named_params_remaining, plain_params_remaining)
-                ))
+                  ( true,
+                    None,
+                    named_params_remaining,
+                    remaining_positional_non_variadic_non_splat_params ) ))
           in
           let ctxt = Context.{ default with attribute_check_policy } in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
@@ -7836,9 +7844,8 @@ end = struct
               (args_with_result : arg_with_result list)
               (named_params_remaining :
                 (int * Typing_defs.locl_ty Typing_defs.fun_param) S_map.t)
-              (plain_params_remaining :
+              (remaining_positional_non_variadic_non_splat_params :
                 (int * Typing_defs.locl_ty Typing_defs.fun_param) list)
-                (* plain params are non-named, non-variadic, non-splat *)
               used_dynamic_acc
               acc =
             match args_with_result with
@@ -7849,18 +7856,18 @@ end = struct
                     ( is_variadic,
                       opt_param,
                       named_params_remaining,
-                      plain_params_remaining ) ) =
+                      remaining_positional_non_variadic_non_splat_params ) ) =
                 match arg with
                 | Ainout _
                 | Anormal _ ->
                   get_next_positional_param_info
                     named_params_remaining
-                    plain_params_remaining
+                    remaining_positional_non_variadic_non_splat_params
                 | Anamed ((_, name), _) ->
                   get_next_named_param_info
                     name
                     named_params_remaining
-                    plain_params_remaining
+                    remaining_positional_non_variadic_non_splat_params
               in
               let (env, one_result, used_dynamic_info) =
                 (* If we're on the pass appropriate for this argument
@@ -7887,7 +7894,7 @@ end = struct
                 env
                 args_with_result
                 named_params_remaining
-                plain_params_remaining
+                remaining_positional_non_variadic_non_splat_params
                 (combine_dynamic_info used_dynamic_acc used_dynamic_info)
                 ((arg_idx, arg, one_result) :: acc)
             | [] ->
@@ -7895,7 +7902,11 @@ end = struct
                   (reversed_res : arg_with_result list) tel argtys =
                 match reversed_res with
                 | [] ->
-                  (env, tel, argtys, used_dynamic_acc, plain_params_remaining)
+                  ( env,
+                    tel,
+                    argtys,
+                    used_dynamic_acc,
+                    remaining_positional_non_variadic_non_splat_params )
                 (* We've still not finished, so bump pass and iterate *)
                 | (_, _, None) :: _ ->
                   check_args
@@ -7903,7 +7914,7 @@ end = struct
                     env
                     (List.rev acc)
                     named_params
-                    plain_params
+                    positional_non_variadic_non_splat_params
                     used_dynamic_acc
                     []
                 | (_, _, Some (te, ty)) :: reversed_res ->
@@ -7966,9 +7977,19 @@ end = struct
           let args_with_result =
             List.mapi el ~f:(fun idx e -> (idx, e, None))
           in
-          (* plain_params_remainingl are unused non-named non-variadic non-optional parameters *)
-          let (env, tel, argtys, used_dynamic_info1, plain_params_remaining) =
-            check_args 0 env args_with_result named_params plain_params None []
+          let ( env,
+                tel,
+                argtys,
+                used_dynamic_info1,
+                remaining_positional_non_variadic_non_splat_params ) =
+            check_args
+              0
+              env
+              args_with_result
+              named_params
+              positional_non_variadic_non_splat_params
+              None
+              []
           in
           let (env, ty_err_opt) = check_implicit_args env in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -7991,8 +8012,8 @@ end = struct
               *)
               let (consumed, required_params, optional_params) =
                 split_remaining_params_required_optional
-                  non_variadic_or_splat_params
-                  plain_params_remaining
+                  non_variadic_non_splat_params
+                  remaining_positional_non_variadic_non_splat_params
               in
               let remaining_actual_tys =
                 List.drop (List.map argtys ~f:snd) consumed
@@ -8071,31 +8092,30 @@ end = struct
                   (List.filter el ~f:(function
                       | Aast_defs.Anamed _ -> false
                       | _ -> true))
-                + List.length plain_params_remaining,
+                + List.length remaining_positional_non_variadic_non_splat_params,
                 true,
                 used_dynamic_info )
             | None
             | Some (`Variadic _) ->
               (match unpacked_element with
               | None ->
-                let named_args =
+                let positional_args =
                   List.filter el ~f:(function
                       | Aast_defs.Anamed _ -> false
                       | _ -> true)
                 in
-                (env, None, List.length named_args, false, None)
+                (env, None, List.length positional_args, false, None)
               | Some e ->
                 let (consumed, required_params, optional_params) =
                   split_remaining_params_required_optional
-                    non_variadic_or_splat_params
-                    plain_params_remaining
+                    non_variadic_non_splat_params
+                    remaining_positional_non_variadic_non_splat_params
                 in
                 let (env, te, unpacked_element_ty) =
                   expr ~expected:None ~ctxt env e
                 in
-                (* Now that we're considering an splat (Some e) we need to construct a type that
-                 * represents the remainder of the function's parameters. `plain_params_remaining` represents those
-                 * remaining positional parameters, and the variadic parameter is stored in `var_param`. For example, given
+                (* Construct a constraint for the remaining positional parameters and
+                 * `variadic_or_splat_param`, if present. For example, given
                  *
                  * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
                  * function g((string, float, bool) $t): void {
@@ -8327,7 +8347,7 @@ end = struct
           in
           (* Variadic params cannot be inout so we can stop early *)
           let env =
-            wfold_left2 inout_write_back env non_variadic_or_splat_params el
+            wfold_left2 inout_write_back env non_variadic_non_splat_params el
           in
           let ret =
             match (dynamic_func, used_dynamic_info) with

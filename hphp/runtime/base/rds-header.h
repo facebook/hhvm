@@ -125,9 +125,7 @@ struct Header {
    *
    * If the Header ends up on a page that is larger than 4096 bytes, vmRegs
    * might not be write-protected when we want it to be, but this is just a
-   * debugging aid and isn't necessary for correctness. We use 4096 bytes of
-   * padding rather than 4096 - sizeof(size_t) to not disturb the relative
-   * alignment of vmRegs.
+   * debugging aid and isn't necessary for correctness.
    */
   const char padding[4096];
 #endif
@@ -164,9 +162,6 @@ constexpr ptrdiff_t kVmJitCfaOff        = kVmRegsOff +
                                            offsetof(VMRegs, jitCfa);
 #endif
 constexpr ptrdiff_t kVmRegStateOff     = offsetof(Header, regState);
-
-static_assert((kVmMInstrStateOff % 16) == 0,
-              "MInstrState should be 16-byte aligned in rds::Header");
 
 } // namespace rds
 

@@ -39,12 +39,9 @@ struct MInstrState {
     TypedValue tvTempBase;
   };
 
-  // The JIT passes &tvBuiltinReturn::m_data to builtins returning
-  // Array/Object/String, which perform RVO in C++, thus writing valid
-  // pointers without updating m_type, preventing the GC from scanning
-  // the pointer. But conservative scanning doesn't really hurt here
-  // (given that the pointer is also passed into a C++ function), and
-  // it allows us to keep rds::Header below 128 bytes.
+  // The JIT passes &tvBuiltinReturn.m_data to builtins returning
+  // Array/Object/String. RVO may write a live pointer without updating m_type,
+  // so exact scanning could miss it. Conservatively scan this storage instead.
   TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
 
   tv_lval base;

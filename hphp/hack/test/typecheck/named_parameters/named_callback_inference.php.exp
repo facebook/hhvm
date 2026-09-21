@@ -1,18 +1,1 @@
-ERROR: File "named_callback_inference.php", line 22, characters 40-59:
-Invalid argument (Typing[4110])
-  File "named_callback_inference.php", line 22, characters 25-35:
-  Expected `nothing`
-  File "named_callback_inference.php", line 22, characters 57-58:
-  But got `int`
-ERROR: File "named_callback_inference.php", line 31, characters 7-26:
-Invalid argument (Typing[4110])
-  File "named_callback_inference.php", line 30, characters 30-40:
-  Expected `nothing`
-  File "named_callback_inference.php", line 31, characters 24-25:
-  But got `int`
-ERROR: File "named_callback_inference.php", line 45, characters 7-26:
-Invalid argument (Typing[4110])
-  File "named_callback_inference.php", line 44, characters 22-32:
-  Expected `nothing`
-  File "named_callback_inference.php", line 45, characters 24-25:
-  But got `int`
+No errors

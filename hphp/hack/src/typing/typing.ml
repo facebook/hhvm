@@ -7624,7 +7624,8 @@ end = struct
            *)
           let check_pass_and_set_tyvar_variance pass env arg opt_param =
             match arg with
-            | Aast_defs.Anormal (_, _, e) ->
+            | Aast_defs.Anormal (_, _, e)
+            | Aast_defs.Anamed (_, (_, _, e)) ->
               (match e with
               (* We first check lambdas that have fully explicit parameters *)
               | Efun { ef_fun = { f_params; _ }; _ }
@@ -7643,9 +7644,7 @@ end = struct
                   (env, pass = 2)
               (* Second we check non-lambdas *)
               | _ -> (env, pass = 1))
-            | Aast_defs.Ainout _
-            | Aast_defs.Anamed _ ->
-              (env, pass = 1)
+            | Aast_defs.Ainout _ -> (env, pass = 1)
           in
           let is_single_argument = List.length el = 1 in
           let get_next_positional_param_info

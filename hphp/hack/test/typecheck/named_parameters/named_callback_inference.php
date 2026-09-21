@@ -1,6 +1,6 @@
 <?hh
 <<file:__EnableUnstableFeatures('named_parameters')>>
-//
+
 function apply_named<TInput, TOutput>(
   named (function(TInput)[_]: TOutput) $cb,
   named TInput $x,

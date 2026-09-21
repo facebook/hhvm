@@ -76,11 +76,20 @@ arr_lval VanillaDict::addLvalImpl(K k) {
 
 /*
  * Extra space that gets prepended to shared arrays.
+ *
+ * Callers that allocate a shared array must pass the same `apc_tv' and
+ * `str_key_table' that the eventual ReleaseShared will recompute from the
+ * resulting array's own header, or the array will be freed with a base
+ * pointer and size that don't match the allocation.
  */
-ALWAYS_INLINE size_t sharedAllocExtra(const ArrayData* ad, bool apc_tv) {
+ALWAYS_INLINE size_t sharedAllocExtra(bool apc_tv, bool str_key_table) {
   auto const extra = (apc_tv ? sizeof(APCTypedValue) : 0) +
-                     (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0);
+                     (str_key_table ? sizeof(StrKeyTable) : 0);
   return (extra + 15) & ~15ull;
+}
+
+ALWAYS_INLINE size_t sharedAllocExtra(const ArrayData* ad, bool apc_tv) {
+  return sharedAllocExtra(apc_tv, ad->hasStrKeyTable());
 }
 
 //////////////////////////////////////////////////////////////////////

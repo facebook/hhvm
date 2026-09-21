@@ -44,6 +44,12 @@ static_assert(kSizeIndex2Size[kSizeIndex] >= sizeof(LoggingArray),
 static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
+// MakeShared allocates sizeof(LoggingArray), but BespokeArray::ReleaseShared
+// frees heapSize(), which is derived from kSizeIndex. If a field is ever added
+// to LoggingArray so that it no longer exactly fills its size class, this must
+// be reconciled or the two will disagree.
+static_assert(kSizeIndex2Size[kSizeIndex] == sizeof(LoggingArray),
+              "MakeShared and ReleaseShared must agree on the allocated size");
 
 constexpr LayoutIndex kLayoutIndex = {kLoggingLayoutByte << 8};
 
@@ -330,13 +336,21 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   return lad;
 }
 
+size_t LoggingArray::SharedAllocExtra(bool hasApcTv) {
+  // A LoggingArray never carries a StrKeyTable of its own: any table belongs
+  // to the wrapped array, which is a separate allocation. BespokeArray::
+  // ReleaseShared recomputes this prefix from the LoggingArray's own header,
+  // so sizing it from the wrapped array here would free an interior pointer.
+  return sharedAllocExtra(hasApcTv, false);
+}
+
 LoggingArray* LoggingArray::MakeShared(
     ArrayData* ad, LoggingProfile* profile, bool hasApcTv) {
   assertx(ad->isVanilla());
   assertx(ad->isStatic() || ad->isShared());
 
   auto const bytes = sizeof(LoggingArray);
-  auto const extra = sharedAllocExtra(ad, hasApcTv);
+  auto const extra = SharedAllocExtra(hasApcTv);
   auto const mem = static_cast<char*>(AllocShared(bytes + extra));
   auto const lad = reinterpret_cast<LoggingArray*>(mem + extra);
 
@@ -352,6 +366,11 @@ LoggingArray* LoggingArray::MakeShared(
   lad->entryTypes = EntryTypes::ForArray(ad);
   lad->keyOrder = KeyOrder::ForArray(ad);
   assertx(lad->checkInvariants());
+  // BespokeArray::ReleaseShared frees (lad - extra, heapSize() + extra),
+  // recomputing both operands from lad itself. They must agree with what we
+  // allocated here, or we hand jemalloc a bad base pointer and a bad size.
+  assertx(sharedAllocExtra(lad, lad->hasApcTv()) == extra);
+  assertx(lad->heapSize() == bytes);
   return lad;
 }
 

@@ -1,0 +1,88 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include <folly/portability/GTest.h>
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+
+namespace HPHP {
+
+namespace {
+
+/*
+ * A small static dict whose keys are all static strings gets a StrKeyTable
+ * allocated ahead of it; see the shouldCreateStrKeyTable computation in
+ * VanillaDict::CopyStatic.
+ */
+ArrayData* makeStaticDictWithStrKeyTable() {
+  DictInit init{3};
+  init.set(makeStaticString("alpha"), make_tv<KindOfInt64>(1));
+  init.set(makeStaticString("beta"), make_tv<KindOfInt64>(2));
+  init.set(makeStaticString("gamma"), make_tv<KindOfInt64>(3));
+  auto ad = init.create();
+  ArrayData::GetScalarArray(&ad);
+  return ad;
+}
+
+}
+
+/*
+ * LoggingArray::MakeShared used to size its allocation prefix with
+ * sharedAllocExtra(wrapped, hasApcTv), reserving room for the wrapped array's
+ * StrKeyTable. It never propagated kHasStrKeyTable onto the LoggingArray
+ * itself, but BespokeArray::ReleaseShared recomputes that prefix from the
+ * LoggingArray. The two disagreed by sizeof(StrKeyTable) rounded up to 16, so
+ * the array was handed to sdallocx() as an interior pointer with a size 16
+ * bytes short of the real allocation -- which is what trips jemalloc's
+ * arena_ptr_array_flush_size_check_fail.
+ *
+ * The arrays made here are intentionally leaked: releasing them requires the
+ * bespoke layout vtables, which a unit test doesn't set up.
+ */
+TEST(LoggingArray, SharedAllocGeometryMatchesRelease) {
+  auto const ad = makeStaticDictWithStrKeyTable();
+  ASSERT_TRUE(ad->isStatic());
+  ASSERT_TRUE(ad->isVanillaDict());
+  ASSERT_TRUE(ad->hasStrKeyTable());
+
+  for (auto const hasApcTv : {false, true}) {
+    // Keep this test from silently becoming a no-op: the prefix the old code
+    // computed from the wrapped array must actually differ from the correct
+    // one, or nothing below can detect the regression.
+    ASSERT_NE(sharedAllocExtra(ad, hasApcTv),
+              bespoke::LoggingArray::SharedAllocExtra(hasApcTv));
+
+    // MakeShared asserts that the prefix it allocates equals the one
+    // BespokeArray::ReleaseShared recomputes from the result. Sizing the
+    // allocation from the wrapped array trips that assert here.
+    auto const lad = bespoke::LoggingArray::MakeShared(ad, nullptr, hasApcTv);
+    ASSERT_NE(lad, nullptr);
+    EXPECT_FALSE(lad->hasStrKeyTable());
+    EXPECT_EQ(lad->hasApcTv(), hasApcTv);
+
+    // These are the two operands BespokeArray::ReleaseShared derives from lad
+    // and passes to FreeShared.
+    EXPECT_EQ(sharedAllocExtra(lad, lad->hasApcTv()),
+              bespoke::LoggingArray::SharedAllocExtra(hasApcTv));
+    EXPECT_EQ(lad->heapSize(), sizeof(bespoke::LoggingArray));
+  }
+}
+
+}

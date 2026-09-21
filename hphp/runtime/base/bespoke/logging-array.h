@@ -42,6 +42,10 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* MakeShared(
       ArrayData* ad, LoggingProfile* profile, bool hasApcTv);
 
+  // Size of the prefix MakeShared allocates ahead of a shared LoggingArray.
+  // Must equal what BespokeArray::ReleaseShared recomputes from the result.
+  static size_t SharedAllocExtra(bool hasApcTv);
+
   static void ZombieRelease(LoggingArray* lad);
 
   bool checkInvariants() const;

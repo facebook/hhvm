@@ -117,7 +117,8 @@ pub fn emit_body<'b>(
             .get_captured_vars()
             .contains(&special_idents::DOLLAR_DOLLAR.to_owned());
 
-    let params = make_params(emitter, &mut tp_names, args.ast_params, &scope, args.flags)?;
+    let ast_params = reorder_params(args.ast_params);
+    let params = make_params(emitter, &mut tp_names, &ast_params, &scope, args.flags)?;
 
     let upper_bounds = emit_generics_upper_bounds(
         args.immediate_tparams,
@@ -180,7 +181,7 @@ pub fn emit_body<'b>(
         is_generator,
         deprecation_info,
         args.pos,
-        args.ast_params,
+        &ast_params,
         args.flags,
     )?;
     Ok((
@@ -405,14 +406,7 @@ fn make_params<'a>(
     flags: Flags,
 ) -> Result<Vec<(Param, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
-    let reordered_params = reorder_params(ast_params);
-    emit_param::from_asts(
-        emitter,
-        tp_names,
-        generate_defaults,
-        scope,
-        &reordered_params[..],
-    )
+    emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
 
 pub fn make_body<'a>(

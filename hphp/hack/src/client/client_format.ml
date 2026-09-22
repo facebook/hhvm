@@ -22,7 +22,7 @@ let to_json result =
       ("internal_error", `Bool internal_error);
     ]
 
-let print_json res = print_endline (Hh_json_helpers.Out.to_string (to_json res))
+let print_json res = print_endline (Yojson.Safe.to_string (to_json res))
 
 let print_readable = function
   | Ok res -> print_string res

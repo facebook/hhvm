@@ -496,8 +496,7 @@ type cst_search_input = {
   input:
     (Yojson.Safe.t
     [@printer
-      fun fmt json ->
-        Format.pp_print_string fmt (Hh_json_helpers.Out.to_string json)]);
+      (fun fmt json -> Format.pp_print_string fmt (Yojson.Safe.to_string json))]);
   files_to_search: string list option; (* if None, search all files *)
 }
 [@@deriving show]

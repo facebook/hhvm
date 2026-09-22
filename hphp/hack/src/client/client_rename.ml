@@ -84,7 +84,7 @@ let patches_to_json_string patches =
       file_map
       []
   in
-  Hh_json_helpers.Out.to_string (`List entries)
+  Yojson.Safe.to_string (`List entries)
 
 let print_patches_json patches = print_endline (patches_to_json_string patches)
 

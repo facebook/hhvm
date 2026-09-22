@@ -133,7 +133,7 @@ let invalid_position p =
     (Failure
        (Printf.sprintf
           "Invalid position: %s"
-          (Position.yojson_of_t p |> Hh_json_helpers.Out.to_string)))
+          (Position.yojson_of_t p |> Yojson.Safe.to_string)))
 
 (* this returns 0-based offsets *)
 let get_offsets (content : string) (queries : Position.t * Position.t) :

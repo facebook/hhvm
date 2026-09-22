@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-let print_json res = print_endline (Hh_json_helpers.Out.to_string (`String res))
+let print_json res = print_endline (Yojson.Safe.to_string (`String res))
 
 let go res output_json =
   if output_json then

@@ -183,9 +183,7 @@ let combine_bento_cell_metadata_exn
     (md1 : Yojson.Safe.t option) (md2 : Yojson.Safe.t option) :
     Yojson.Safe.t option =
   let json_equal a b =
-    String.equal
-      (Hh_json_helpers.Out.to_string a)
-      (Hh_json_helpers.Out.to_string b)
+    String.equal (Yojson.Safe.to_string a) (Yojson.Safe.to_string b)
   in
   match (md1, md2) with
   | (Some md1, Some md2) when not @@ json_equal md1 md2 ->

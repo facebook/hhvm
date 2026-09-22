@@ -49,7 +49,7 @@ let to_json input =
   `List entries
 
 let print_json res =
-  print_endline (Hh_json_helpers.Out.to_string (to_json res));
+  print_endline (Yojson.Safe.to_string (to_json res));
   ()
 
 let go res find_children output_json =

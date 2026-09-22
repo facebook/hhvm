@@ -64,7 +64,7 @@ let write_file (t : t) : unit =
   match server_progress_file () with
   | None -> ()
   | Some server_progress_file ->
-    let content = yojson_of_t t |> Hh_json_helpers.Out.pretty_to_string in
+    let content = yojson_of_t t |> Yojson.Safe.pretty_to_string in
     (try Sys_utils.protected_write_exn server_progress_file content with
     | exn ->
       let e = Exception.wrap exn in

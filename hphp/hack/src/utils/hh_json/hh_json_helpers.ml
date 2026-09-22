@@ -537,17 +537,3 @@ let get_field accessor on_failure (json : Yojson.Safe.t) =
 
 let get_field_opt accessor (json : Yojson.Safe.t) =
   Access.(to_option (return json >>= accessor))
-
-(************************************************************************)
-(* JSON serialization                                                   *)
-(************************************************************************)
-
-module Out = struct
-  let to_string json = Yojson.Safe.to_string json
-
-  let pretty_to_string json = Yojson.Safe.pretty_to_string json
-
-  let to_channel oc json = Yojson.Safe.to_channel oc json
-
-  let pretty_to_channel oc json = Yojson.Safe.pretty_to_channel oc json
-end

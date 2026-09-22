@@ -72,9 +72,7 @@ let go_ctx
       Infer_error_at_pos_service.
         {
           actual_ty_string = print_ty env from_ty;
-          actual_ty_json =
-            Hh_json_helpers.Out.to_string @@ ty_to_json env from_ty;
+          actual_ty_json = Yojson.Safe.to_string @@ ty_to_json env from_ty;
           expected_ty_string = print_ty env to_ty;
-          expected_ty_json =
-            Hh_json_helpers.Out.to_string @@ ty_to_json env to_ty;
+          expected_ty_json = Yojson.Safe.to_string @@ ty_to_json env to_ty;
         }))

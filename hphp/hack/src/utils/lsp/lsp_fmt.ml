@@ -43,7 +43,7 @@ let parse_id (json : Yojson.Safe.t) : lsp_id =
       (Error.LspException
          {
            Error.code = Error.ParseError;
-           message = "not an id: " ^ Hh_json_helpers.Out.to_string json;
+           message = "not an id: " ^ Yojson.Safe.to_string json;
            data = None;
          })
 
@@ -137,7 +137,7 @@ let error_to_log_string (e : Error.t) : string =
   let data =
     Option.value_map
       e.Error.data
-      ~f:(fun d -> Hh_json_helpers.Out.pretty_to_string d)
+      ~f:(fun d -> Yojson.Safe.pretty_to_string d)
       ~default:""
   in
   Printf.sprintf

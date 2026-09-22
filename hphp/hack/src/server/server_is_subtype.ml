@@ -315,5 +315,5 @@ let check workers str env =
           in
           `Assoc [(status, value)])
     in
-    Ok (Hh_json_helpers.Out.to_string (`List json_result_list))
+    Ok (Yojson.Safe.to_string (`List json_result_list))
   | _ -> Error "Expected JSON array"

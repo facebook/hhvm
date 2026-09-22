@@ -174,17 +174,3 @@ val get_field :
 
 val get_field_opt :
   (Yojson.Safe.t * Access.keytrace -> 'a Access.m) -> Yojson.Safe.t -> 'a option
-
-(** Sorted-key JSON serialization. These functions sort object keys
-    alphabetically before serializing, producing deterministic output
-    that is stable across refactors. Use these instead of the
-    [Yojson.Safe] equivalents for all user-visible and snapshot-tested output. *)
-module Out : sig
-  val to_string : Yojson.Safe.t -> string
-
-  val pretty_to_string : Yojson.Safe.t -> string
-
-  val to_channel : out_channel -> Yojson.Safe.t -> unit
-
-  val pretty_to_channel : out_channel -> Yojson.Safe.t -> unit
-end

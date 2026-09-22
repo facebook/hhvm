@@ -267,7 +267,7 @@ let map_attempt
         "Init: %s error - %s - %s"
         key
         category
-        (Hh_json_helpers.Out.to_string data);
+        (Yojson.Safe.to_string data);
       let telemetry =
         telemetry
         |> Telemetry.object_

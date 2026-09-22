@@ -156,7 +156,7 @@ module VersionPayload = struct
         ( "terminate_monitor_on_version_mismatch",
           `Bool terminate_monitor_on_version_mismatch );
       ]
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
 
   let deserialize (s : serialized) : (t, string) result =
     let open Hh_prelude.Result.Monad_infix in
@@ -201,7 +201,7 @@ module MismatchPayload = struct
 
   let serialize ~(monitor_will_terminate : bool) : serialized =
     `Assoc [("monitor_will_terminate", `Bool monitor_will_terminate)]
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
 
   let deserialize (s : serialized) : (t, string) result =
     let open Hh_prelude.Result.Monad_infix in

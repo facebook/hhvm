@@ -67,7 +67,7 @@ let print_error_list_json
     (error_list : Diagnostics.finalized_diagnostic list)
     (recheck_stats : Telemetry.t option) =
   let res = get_error_list_json error_format error_list ~recheck_stats in
-  Hh_json_helpers.Out.to_channel oc res;
+  Yojson.Safe.to_channel oc res;
   Out_channel.flush oc
 
 let print_error_list

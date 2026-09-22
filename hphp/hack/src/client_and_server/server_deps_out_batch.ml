@@ -84,4 +84,4 @@ let go_json :
 let go (ctx : Provider_context.t) (pos_list : (string * int * int) list) :
     string list =
   let jsons = go_json ctx pos_list in
-  List.map jsons ~f:Hh_json_helpers.Out.pretty_to_string
+  List.map jsons ~f:Yojson.Safe.pretty_to_string

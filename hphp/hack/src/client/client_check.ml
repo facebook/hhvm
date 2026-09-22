@@ -33,7 +33,7 @@ let print_refs (results : Search_types.Find_refs.absolute list) ~(json : bool) :
     unit =
   if json then
     Find_refs_wire_format.HackAst.to_json results
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
     |> print_endline
   else
     Find_refs_wire_format.CliHumanReadable.print_results results
@@ -42,7 +42,7 @@ let print_find_my_tests_result result ~(json : bool) : unit =
   let module FMT = Server_command_types.Find_my_tests in
   if json then
     let result_json = FMT.yojson_of_result_data result in
-    print_endline (Hh_json_helpers.Out.pretty_to_string result_json)
+    print_endline (Yojson.Safe.pretty_to_string result_json)
   else
     List.iter result.FMT.selected_test_files ~f:(fun file ->
         print_endline file.FMT.file_path)
@@ -54,7 +54,7 @@ let output_isolation_result seeds ~output_json =
         ("seed_files", `List (List.map seeds ~f:(fun path -> `String path)));
         ("summary", `Assoc [("total_seed_files", `Int (List.length seeds))]);
       ]
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
     |> print_endline
   else
     Printf.printf
@@ -361,7 +361,7 @@ let main_internal
       Relative_path.Map.map tasts ~f:Tast.program_by_names
       |> Tast_hashes.hash_tasts_by_file
       |> Relative_path.Map.yojson_of_t Tast_hashes.yojson_of_by_names
-      |> Hh_json_helpers.Out.pretty_to_channel Stdlib.stdout;
+      |> Yojson.Safe.pretty_to_channel Stdlib.stdout;
       Printf.printf
         "\n\n\nTASTs:\n\n%s\n%!"
         (Relative_path.Map.show (Tast_with_dynamic.pp Tast.pp_program) tasts);
@@ -547,7 +547,7 @@ let main_internal
         ]
     in
     let definitions = List.map result ~f:definition_to_json in
-    Hh_json_helpers.Out.to_string (`List definitions) |> print_endline;
+    Yojson.Safe.to_string (`List definitions) |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_IDENTIFY_SYMBOL1 arg
   | Client_env.MODE_IDENTIFY_SYMBOL2 arg
@@ -888,8 +888,7 @@ let main_internal
       `Assoc [("name", `String title); ("contents", `String data)]
     in
     let%lwt (items, telemetry) = rpc args Server_command_types.RAGE in
-    Hh_json_helpers.Out.to_string (`List (List.map items ~f:make_item))
-    |> print_endline;
+    Yojson.Safe.to_string (`List (List.map items ~f:make_item)) |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_LINT_STDIN filename -> begin
     match Sys_utils.realpath filename with
@@ -916,7 +915,7 @@ let main_internal
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_STATS ->
     let%lwt (stats, telemetry) = rpc args @@ Server_command_types.STATS in
-    print_string @@ Hh_json_helpers.Out.pretty_to_string (Stats.to_json stats);
+    print_string @@ Yojson.Safe.pretty_to_string (Stats.to_json stats);
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_REMOVE_DEAD_FIXMES codes ->
     let%lwt conn = connect args in
@@ -1003,7 +1002,7 @@ let main_internal
         let source_text = Full_fidelity_source_text.from_file file in
         let syntax_tree = SyntaxTree.make source_text in
         let json = SyntaxTree.to_json syntax_tree in
-        Lwt.return (Hh_json_helpers.Out.to_string json, Telemetry.create ())
+        Lwt.return (Yojson.Safe.to_string json, Telemetry.create ())
     in
     Client_full_fidelity_parse.go results;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -1022,7 +1021,7 @@ let main_internal
     begin
       match result with
       | Ok result ->
-        print_endline (Hh_json_helpers.Out.to_string result);
+        print_endline (Yojson.Safe.to_string result);
         Lwt.return (Exit_status.No_error, telemetry)
       | Error error ->
         print_endline error;
@@ -1036,7 +1035,7 @@ let main_internal
     if args.output_json then begin
       let json_path_list = List.map responses ~f:(fun path -> `String path) in
       let output = `Assoc [("dependents", `List json_path_list)] in
-      print_endline @@ Hh_json_helpers.Out.to_string output
+      print_endline @@ Yojson.Safe.to_string output
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
@@ -1127,7 +1126,7 @@ let main_internal
     `List
       (List.map (Relative_path.Set.elements results) ~f:(fun p ->
            `String (Relative_path.to_absolute p)))
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
     |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_PACKAGE_LINT_FULL (file, candidates) ->
@@ -1139,7 +1138,7 @@ let main_internal
     `List
       (List.map (Relative_path.Set.elements results) ~f:(fun p ->
            `String (Relative_path.to_absolute p)))
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
     |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
 

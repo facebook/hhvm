@@ -63,7 +63,7 @@ let write_facts_file out_dir ?(global = false) files json_chunks =
       "glean_symbol_info_chunk_"
       ".json"
   in
-  let json_string = Hh_json_helpers.Out.to_string (`List json_chunks) in
+  let json_string = Yojson.Safe.to_string (`List json_chunks) in
   let json_length = String.length json_string in
   Out_channel.output_string channel json_string;
   Out_channel.close channel;

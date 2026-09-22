@@ -41,7 +41,7 @@ let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
           `String (Saved_state_loader.LoadError.category_of_error load_error) );
       ]
   in
-  Hh_json_helpers.Out.pretty_to_channel stdout json
+  Yojson.Safe.pretty_to_channel stdout json
 
 let get_replay_info (replay_token : string) :
     Saved_state_loader.Naming_and_dep_table_info.additional_info replay_info
@@ -96,7 +96,7 @@ let make_replay_token
     in
     let%lwt clowder_result =
       Clowder_paste.clowder_upload_and_get_handle
-        (Hh_json_helpers.Out.pretty_to_string json)
+        (Yojson.Safe.pretty_to_string json)
     in
     (match clowder_result with
     | Ok handle -> Lwt.return_some handle
@@ -235,6 +235,6 @@ let main (env : env) (local_config : Server_local_config.t) :
           );
         ]
     in
-    Hh_json_helpers.Out.pretty_to_channel stdout json;
+    Yojson.Safe.pretty_to_channel stdout json;
     Out_channel.output_char stdout '\n';
     Lwt.return Exit_status.No_error

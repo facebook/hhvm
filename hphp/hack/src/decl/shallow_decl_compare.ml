@@ -87,7 +87,7 @@ let log_changes (changes : (string * Class_diff.t) list) : unit =
   let max = 1000 in
   Hh_logger.log_lazy
   @@ lazy
-       (Hh_json_helpers.Out.pretty_to_string
+       (Yojson.Safe.pretty_to_string
           (`Assoc
             [
               ( "diffs",

@@ -126,4 +126,4 @@ let finalize ~progress ~init_id ~recheck_id tast_hashes =
          (Option.value recheck_id ~default:"None"))
   in
   Out_channel.with_file tast_hashes_file ~f:(fun out ->
-      Hh_json_helpers.Out.pretty_to_channel out tast_hashes_json)
+      Yojson.Safe.pretty_to_channel out tast_hashes_json)

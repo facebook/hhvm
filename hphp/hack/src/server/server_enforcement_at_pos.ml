@@ -542,4 +542,4 @@ let result_to_json_string
       | Some Unenforced -> [("enforcement", `String "Unenforced")]
       | None -> [("enforcement", `Null)])
   in
-  Hh_json_helpers.Out.to_string obj
+  Yojson.Safe.to_string obj

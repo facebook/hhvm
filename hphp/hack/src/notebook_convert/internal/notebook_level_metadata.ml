@@ -44,7 +44,7 @@ let of_comment (line : string) : t option =
 
 let to_comment { notebook_number; kernelspec } =
   Printf.sprintf "//@bento-notebook:%s"
-  @@ Hh_json_helpers.Out.to_string
+  @@ Yojson.Safe.to_string
        (`Assoc
          [
            ("notebook_number", `String notebook_number);

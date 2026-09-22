@@ -650,7 +650,7 @@ let type_check_core
   let max = 1000 in
   Hh_logger.log_lazy ~category:"fanout_tests"
   @@ lazy
-       (Hh_json_helpers.Out.to_string
+       (Yojson.Safe.to_string
           (`Assoc
             [
               ("tag", `String "incremental_fanout");

@@ -162,9 +162,9 @@ let handle_existing_file args filename =
     in
     let str =
       if args.pretty_print_json then
-        Hh_json_helpers.Out.pretty_to_string json
+        Yojson.Safe.pretty_to_string json
       else
-        Hh_json_helpers.Out.to_string json
+        Yojson.Safe.to_string json
     in
     Printf.printf "%s\n" str);
   (if args.full_fidelity_json then
@@ -173,14 +173,14 @@ let handle_existing_file args filename =
     in
     let str =
       if args.pretty_print_json then
-        Hh_json_helpers.Out.pretty_to_string json
+        Yojson.Safe.pretty_to_string json
       else
-        Hh_json_helpers.Out.to_string json
+        Yojson.Safe.to_string json
     in
     Printf.printf "%s\n" str);
   (if args.full_fidelity_text_json then
     let json = Full_fidelity_editable_syntax.to_json editable in
-    let str = Hh_json_helpers.Out.to_string json in
+    let str = Yojson.Safe.to_string json in
     Printf.printf "%s\n" str);
   (if args.full_fidelity_dot then
     let dot = Full_fidelity_editable_syntax.to_dot editable false in

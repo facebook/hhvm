@@ -1813,7 +1813,7 @@ let handle_mode
       |> Cst_search_service.compile_pattern ctx
       >>| Cst_search_service.search ctx entry
       >>| Cst_search_service.result_to_json ~sort_results:true
-      >>| Hh_json_helpers.Out.pretty_to_string
+      >>| Yojson.Safe.pretty_to_string
     in
     begin
       match result with
@@ -1831,7 +1831,7 @@ let handle_mode
           let result_json =
             Server_command_types.Symbol_info_service.to_json result
           in
-          print_endline (Hh_json_helpers.Out.pretty_to_string result_json)
+          print_endline (Yojson.Safe.pretty_to_string result_json)
         | None -> ())
   | Glean_index out_dir ->
     if
@@ -1998,7 +1998,7 @@ let handle_mode
     print_endline "textDocument/signatureHelp response:\n";
     result
     |> Lsp_fmt.print_signatureHelp
-    |> Hh_json_helpers.Out.pretty_to_string
+    |> Yojson.Safe.pretty_to_string
     |> print_endline
   | Dump_classish_positions ->
     let path = expect_single_file () in
@@ -2049,7 +2049,7 @@ let handle_mode
     Relative_path.Map.iter tasts ~f:(fun _fn tast ->
         let Equal = Tast_env.eq_typing_env in
         let print_json json =
-          Printf.printf "%s\n" (Hh_json_helpers.Out.pretty_to_string json)
+          Printf.printf "%s\n" (Yojson.Safe.pretty_to_string json)
         in
         let solve_def ~name env =
           let inf_env = env.Typing_env_types.inference_env in
@@ -2434,7 +2434,7 @@ let handle_mode
              ~init:S_map.empty
       in
       let json = Count_imprecise_types.json_of_results results in
-      Printf.printf "%s" (Hh_json_helpers.Out.to_string json)
+      Printf.printf "%s" (Yojson.Safe.to_string json)
   | RunSimpliHack ->
     let (errors, tasts) = compute_tasts ctx files_info files_contents in
     print_error_list error_format errors max_errors;
@@ -2466,7 +2466,7 @@ let handle_mode
       List.fold mapped ~init:Map_reduce.empty ~f:Map_reduce.reduce
     in
     let json = Map_reduce_ffi.yojson_of_t (Map_reduce.to_ffi reduced) in
-    Hh_json_helpers.Out.pretty_to_channel Stdlib.stdout json
+    Yojson.Safe.pretty_to_channel Stdlib.stdout json
 
 (*****************************************************************************)
 (* Main entry point *)

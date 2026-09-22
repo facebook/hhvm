@@ -132,7 +132,7 @@ let result_to_string result (fn, line, char) =
         | Error e -> ("error", `String e));
       ]
   in
-  Hh_json_helpers.Out.to_string obj
+  Yojson.Safe.to_string obj
 
 let remove_duplicates_except_none ~compare l =
   let rec loop l accum =

@@ -4471,7 +4471,7 @@ let debug_reason ~sub ~super =
     `Assoc
       [("Subtype", `Assoc [("sub", to_json sub); ("super", to_json super)])]
   in
-  Explanation.debug (Hh_json_helpers.Out.pretty_to_string json)
+  Explanation.debug (Yojson.Safe.pretty_to_string json)
 
 let debug_derivation ~sub ~super =
   let json =
@@ -4479,7 +4479,7 @@ let debug_derivation ~sub ~super =
       to_json
       @@ of_reason ~sub ~super ~is_derivation_suppressed:(fun _ -> false))
   in
-  Explanation.debug (Hh_json_helpers.Out.pretty_to_string json)
+  Explanation.debug (Yojson.Safe.pretty_to_string json)
 
 let rec get_top_fun_param_prj_idx r =
   match r with

@@ -148,4 +148,4 @@ let highlight_references_response_to_json l =
              ("char_end", `Int char_end);
            ]))
 
-let print_json json = Hh_json_helpers.Out.to_string json |> print_endline
+let print_json json = Yojson.Safe.to_string json |> print_endline

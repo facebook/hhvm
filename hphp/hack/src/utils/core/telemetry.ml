@@ -11,10 +11,9 @@ open Hh_prelude
 (* Make Yojson.Safe.t usable with [@@deriving show] *)
 type yojson = Yojson.Safe.t
 
-let pp_yojson fmt json =
-  Format.pp_print_string fmt (Hh_json_helpers.Out.to_string json)
+let pp_yojson fmt json = Format.pp_print_string fmt (Yojson.Safe.to_string json)
 
-let _show_yojson json = Hh_json_helpers.Out.to_string json
+let _show_yojson json = Yojson.Safe.to_string json
 
 type key_value_pair = string * yojson [@@deriving show]
 
@@ -41,9 +40,9 @@ let to_yojson (telemetry : t) : Yojson.Safe.t = `Assoc (List.rev telemetry)
 let to_string ?(pretty = false) (telemetry : t) : string =
   let json = to_yojson telemetry in
   if pretty then
-    Hh_json_helpers.Out.pretty_to_string json
+    Yojson.Safe.pretty_to_string json
   else
-    Hh_json_helpers.Out.to_string json
+    Yojson.Safe.to_string json
 
 let string_
     ?(truncate : int option) ~(key : string) ~(value : string) (telemetry : t) :

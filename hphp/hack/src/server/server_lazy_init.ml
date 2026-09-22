@@ -513,7 +513,7 @@ let log_fanout_information to_recheck_deps files_to_recheck =
   let max = 1000 in
   Hh_logger.log_lazy ~category:"fanout_tests"
   @@ lazy
-       (Hh_json_helpers.Out.to_string
+       (Yojson.Safe.to_string
           (`Assoc
             [
               ("tag", `String "saved_state_init_fanout");
@@ -747,7 +747,7 @@ let calculate_fanout_and_defer_or_do_type_check
      we no longer worry about `hh_fanout` regressing vs. `hh_server`. Deletion
      is tracked at T65464119. *)
   if Server_args.dump_fanout genv.options then (
-    Hh_json_helpers.Out.pretty_to_channel
+    Yojson.Safe.pretty_to_channel
       stdout
       (`Assoc
         [

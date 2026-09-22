@@ -123,7 +123,7 @@ let to_hack
     `Assoc
       (cell_bento_metadata_list
       @ [("id", `Int id); ("cell_type", `String cell_type)])
-    |> Hh_json_helpers.Out.to_string
+    |> Yojson.Safe.to_string
   in
   Printf.sprintf
     "//@bento-cell:%s\n%s\n%s\n"

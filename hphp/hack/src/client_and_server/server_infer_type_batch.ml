@@ -65,7 +65,7 @@ let result_to_string result (fn, range_start, range_end) =
         | Error e -> ("error", `String e));
       ]
   in
-  Hh_json_helpers.Out.to_string obj
+  Yojson.Safe.to_string obj
 
 let helper ctx acc (pos_list : pos list) =
   let empty_map = Relative_path.Map.empty in

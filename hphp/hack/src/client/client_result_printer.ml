@@ -51,8 +51,7 @@ module Make (Converter : Result_converter) :
     in
     `Assoc [result]
 
-  let print_json res =
-    print_endline (Hh_json_helpers.Out.to_string (to_json res))
+  let print_json res = print_endline (Yojson.Safe.to_string (to_json res))
 
   let print_readable = function
     | Ok result -> Printf.printf "%s" (Converter.to_string result)

@@ -71,7 +71,7 @@ let write_server_receipt_to_monitor_file
     ~(sequence_number_high_water_mark : int) : unit =
   let json =
     receipt_serialize sequence_number_high_water_mark
-    |> Hh_json_helpers.Out.pretty_to_string
+    |> Yojson.Safe.pretty_to_string
   in
   try Sys_utils.protected_write_exn server_receipt_to_monitor_file json with
   | exn ->

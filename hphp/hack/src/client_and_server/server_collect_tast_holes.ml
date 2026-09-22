@@ -14,11 +14,11 @@ let mk_result env pos ty_actual ty_expected =
       {
         actual_ty_string = Tast_env.print_ty env ty_actual;
         actual_ty_json =
-          Hh_json_helpers.Out.to_string
+          Yojson.Safe.to_string
           @@ Tast_env.ty_to_json ~show_like_ty:true env ty_actual;
         expected_ty_string = Tast_env.print_ty env ty_expected;
         expected_ty_json =
-          Hh_json_helpers.Out.to_string
+          Yojson.Safe.to_string
           @@ Tast_env.ty_to_json ~show_like_ty:true env ty_expected;
         pos;
       })

@@ -93,7 +93,7 @@ let main_deps input_files input_dirs output_file =
   List.iter input_dirs ~f:(fun s -> Printf.printf "Input dir: %s\n%!" s);
   let out_file_channel = Sys_utils.open_out_no_fail output_file in
   let json_str =
-    Hh_json_helpers.Out.pretty_to_string (json_array_of_json_strings all_files)
+    Yojson.Safe.pretty_to_string (json_array_of_json_strings all_files)
   in
   Out_channel.output_string out_file_channel json_str;
   Out_channel.output_char out_file_channel '\n';

@@ -47,7 +47,7 @@ let validate_hack_to_notebook_exn ipynb_json : unit =
     @@ Printf.sprintf
          "Internal error: converting to notebook produced ipynb json that can't be converted back into hack. Error: %s\nipynb_json:\n%s"
          err
-         (Hh_json_helpers.Out.pretty_to_string ipynb_json)
+         (Yojson.Safe.pretty_to_string ipynb_json)
 
 (**
 * Note: We're careful to distinguish user errors from internal errors
@@ -59,7 +59,7 @@ let hack_to_notebook () : Exit_status.t =
   match Hack_to_notebook.hack_to_notebook hack with
   | Ok ipynb_json ->
     let () = validate_hack_to_notebook_exn ipynb_json in
-    let ipynb_json_string = Hh_json_helpers.Out.pretty_to_string ipynb_json in
+    let ipynb_json_string = Yojson.Safe.pretty_to_string ipynb_json in
     let () = print_endline ipynb_json_string in
     Exit_status.No_error
   | Error (Notebook_convert_error.Invalid_input msg) ->

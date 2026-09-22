@@ -45,7 +45,7 @@ let get_save_state_spec_json (spec : save_state_spec_info) : string =
       ("filename", `String spec.filename);
     ]
   in
-  Hh_json_helpers.Out.pretty_to_string (`Assoc properties)
+  Yojson.Safe.pretty_to_string (`Assoc properties)
 
 let save_state_spec_json_example =
   {

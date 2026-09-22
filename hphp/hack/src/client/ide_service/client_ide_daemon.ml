@@ -1582,10 +1582,7 @@ module Test = struct
           "handle_request %s: %s %s"
           (Lsp.Error.show_code code)
           message
-          (Option.value_map
-             data
-             ~default:""
-             ~f:Hh_json_helpers.Out.pretty_to_string)
+          (Option.value_map data ~default:"" ~f:Yojson.Safe.pretty_to_string)
       in
       failwith msg
     | (_, Ok _) ->

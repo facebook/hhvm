@@ -6,7 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/Memory.h>
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
@@ -161,7 +163,12 @@ void AsyncMysqlClient::shutdownClient() {
 }
 
 AsyncMysqlClient::~AsyncMysqlClient() {
-  shutdownClient();
+  // shutdownClient() drains on a condition variable and joins the client
+  // thread, and neither std::condition_variable::wait nor std::thread::join
+  // undertakes not to throw.  Unthrottled: this runs once per client.
+  if (auto ew = folly::try_and_catch([&] { shutdownClient(); })) {
+    XLOG(ERR) << "Exception shutting down AsyncMysqlClient: " << ew.what();
+  }
   VLOG(2) << "AsyncMysqlClient finished destructor";
 }
 

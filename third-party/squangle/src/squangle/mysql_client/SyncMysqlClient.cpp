@@ -6,6 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include <folly/Singleton.h>
 #include <memory>
 
@@ -139,8 +142,22 @@ SyncConnection::~SyncConnection() {
     conn->setConnectionOptions(getConnectionOptions());
     conn->setConnectionDyingCallback(std::move(conn_dying_callback_));
     conn_dying_callback_ = nullptr;
-    auto resetOp = Connection::resetConn(std::move(conn));
-    resetOp->run().wait();
+    // run() executes the reset synchronously on this stack, unlike the async
+    // client which defers it to the event base.  That reaches
+    // pre_operation_callback_ and, through specializedRun(), the reset's
+    // completion callback -- consumer code, running inside a destructor.
+    //
+    // A failure here loses the recycle: conn_dying_callback_ has already been
+    // moved onto the clone and cleared above, so the connection is dropped
+    // rather than returned to the pool.  That is the intended outcome of a
+    // failed reset, and it is a great deal better than ending the process.
+    if (auto ew = folly::try_and_catch([&] {
+          auto resetOp = Connection::resetConn(std::move(conn));
+          resetOp->run().wait();
+        })) {
+      XLOG_EVERY_MS(ERR, 1000)
+          << "Exception resetting a connection before close: " << ew.what();
+    }
   }
 }
 

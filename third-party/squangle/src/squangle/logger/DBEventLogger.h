@@ -229,6 +229,9 @@ struct QueryLoggingData : CommonLoggingData {
   std::vector<uint64_t> per_query_rows_affected;
   std::vector<uint64_t> per_query_last_insert_id;
   std::vector<std::optional<uint64_t>> per_query_rows_matched;
+
+  // Caller-defined labels serialized into mysql_client_logs.misc_tags.
+  std::vector<std::string> misc_tags;
 };
 
 // Base class for logging events of db client apis. This should be used as an

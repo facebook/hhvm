@@ -262,6 +262,7 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
   auto op = beginQueryWithLoggingFuncs(
       std::move(conn), options.stealLoggingFuncs(), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
+  op->setMiscTags(options.stealMiscTags());
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
@@ -281,6 +282,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   auto op = beginMultiQueryWithLoggingFuncs(
       std::move(conn), options.stealLoggingFuncs(), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  op->setMiscTags(options.stealMiscTags());
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
@@ -300,6 +302,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   auto op = beginMultiQueryWithLoggingFuncs(
       std::move(conn), options.stealLoggingFuncs(), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  op->setMiscTags(options.stealMiscTags());
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
@@ -317,6 +320,7 @@ void Connection::applyQueryOptions(Op& op, Cb&& cb, QueryOptions& options) {
   }
   mergePersistentQueryAttributes(options.getAttributes());
   op.setAttributes(std::move(options.getAttributes()));
+  op.setMiscTags(options.stealMiscTags());
   checkForQueryTimeoutOverride(op, options.getQueryTimeout());
   if (cb) {
     op.setCallback(std::forward<Cb>(cb));

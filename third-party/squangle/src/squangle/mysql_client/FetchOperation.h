@@ -148,6 +148,16 @@ class FetchOperationImpl : virtual public OperationBase {
     use_checksum_ = useChecksum;
   }
 
+  void setMiscTags(std::vector<std::string> miscTags) {
+    CHECK_THROW(
+        state() == OperationState::Unstarted, db::OperationStateException);
+    misc_tags_ = std::move(miscTags);
+  }
+
+  const std::vector<std::string>& getMiscTags() const noexcept {
+    return misc_tags_;
+  }
+
   void cancel() override;
 
   uint64_t currentLastInsertId() const;
@@ -285,6 +295,9 @@ class FetchOperationImpl : virtual public OperationBase {
   std::vector<uint64_t> per_query_last_insert_id_;
   std::vector<std::optional<uint64_t>> per_query_rows_matched_;
 
+  // Caller-defined labels emitted only to mysql_client_logs.misc_tags.
+  std::vector<std::string> misc_tags_;
+
   // Snapshot the current_* values plus the current row stream's rowcount
   // into the per-query vectors. Call from CompleteQuery's success branch.
   void appendCurrentQueryStats() {
@@ -334,6 +347,11 @@ class FetchOperation : public Operation {
 
   FetchOperation& setUseChecksum(bool useChecksum) noexcept {
     impl_->setUseChecksum(useChecksum);
+    return *this;
+  }
+
+  FetchOperation& setMiscTags(std::vector<std::string> miscTags) {
+    impl_->setMiscTags(std::move(miscTags));
     return *this;
   }
 

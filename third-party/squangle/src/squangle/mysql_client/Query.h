@@ -109,6 +109,7 @@
 
 #include <mysql/server/include/mysql.h>
 
+#include <algorithm>
 #include <functional>
 #include <optional>
 #include <ranges>
@@ -934,6 +935,9 @@ struct checked_format_string {
  */
 class QueryOptions {
  public:
+  static constexpr size_t kMaxMiscTags = 16;
+  static constexpr size_t kMaxMiscTagLength = 256;
+
   const QueryAttributes& getAttributes() const {
     return attributes_;
   }
@@ -942,13 +946,46 @@ class QueryOptions {
     return attributes_;
   }
 
+  // Adds a low-cardinality label to mysql_client_logs.misc_tags. This is
+  // logging metadata only and is not sent to MySQL. Tags longer than
+  // kMaxMiscTagLength bytes are silently dropped rather than truncated. Once
+  // kMaxMiscTags unique tags have been added, further unique tags are silently
+  // dropped.
+  QueryOptions& addMiscTag(std::string tag) {
+    if (tag.size() > kMaxMiscTagLength || misc_tags_.size() >= kMaxMiscTags ||
+        std::find(misc_tags_.begin(), misc_tags_.end(), tag) !=
+            misc_tags_.end()) {
+      return *this;
+    }
+    misc_tags_.push_back(std::move(tag));
+    return *this;
+  }
+
+  QueryOptions& setMiscTags(std::vector<std::string> tags) {
+    misc_tags_.clear();
+    for (auto& tag : tags) {
+      addMiscTag(std::move(tag));
+    }
+    return *this;
+  }
+
+  const std::vector<std::string>& getMiscTags() const noexcept {
+    return misc_tags_;
+  }
+
+  std::vector<std::string> stealMiscTags() {
+    return std::move(misc_tags_);
+  }
+
   bool operator==(const QueryOptions& other) const {
-    return attributes_ == other.attributes_;
+    return attributes_ == other.attributes_ && misc_tags_ == other.misc_tags_;
   }
 
   std::size_t hashValue() const {
-    return folly::hash::commutative_hash_combine_range(
-        attributes_.begin(), attributes_.end());
+    return folly::hash::hash_combine(
+        folly::hash::commutative_hash_combine_range(
+            attributes_.begin(), attributes_.end()),
+        folly::hash::hash_range(misc_tags_.begin(), misc_tags_.end()));
   }
 
   QueryOptions& setQueryTimeout(Duration timeout) {
@@ -980,6 +1017,7 @@ class QueryOptions {
 
  protected:
   QueryAttributes attributes_;
+  std::vector<std::string> misc_tags_;
   std::optional<Duration> queryTimeoutOverride_;
   LoggingFuncsPtr loggingFuncs_;
 };

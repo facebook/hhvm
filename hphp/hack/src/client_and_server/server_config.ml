@@ -628,6 +628,8 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (int_opt Config_keys.Hhconfig.class_pointer_array_literal_keys config)
     ?tco_class_pointer_array_write_keys:
       (int_opt Config_keys.Hhconfig.class_pointer_array_write_keys config)
+    ?tco_disallow_specialized_function_refs:
+      (bool_opt Config_keys.Hhconfig.disallow_specialized_function_refs config)
     ?tco_permits_bypassing_visibility:
       (string_list_opt Config_keys.Hhconfig.permits_bypassing_visibility config
       |> Option.map ~f:(List.map ~f:Utils.add_ns))

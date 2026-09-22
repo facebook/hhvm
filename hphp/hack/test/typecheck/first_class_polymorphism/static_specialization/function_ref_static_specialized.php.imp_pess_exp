@@ -1,0 +1,58 @@
+ERROR: File "function_ref_static_specialized.php", line 52, characters 12-28:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 29, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 16, characters 26-27:
+  But got `(readonly function<T>(int $value): ~int)` because method or function was called on dynamic or like-type
+ERROR: File "function_ref_static_specialized.php", line 53, characters 12-26:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 29, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 16, characters 26-27:
+  But got `(readonly function<T>($value): ~_)` because method or function was called on dynamic or like-type
+ERROR: File "function_ref_static_specialized.php", line 54, characters 17-33:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 31, characters 27-43:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 16, characters 26-27:
+  But got `(readonly function<T>(int $value): ~int)` because method or function was called on dynamic or like-type
+ERROR: File "function_ref_static_specialized.php", line 55, characters 17-31:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 31, characters 27-43:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 16, characters 26-27:
+  But got `(readonly function<T>($value): ~_)` because method or function was called on dynamic or like-type
+ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 7, characters 17-19:
+  Expected `int`
+  File "function_ref_static_specialized.php", line 16, characters 29-29:
+  But got `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 16, characters 29-29:
+  Expected `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "function_ref_static_specialized.php", line 7, characters 30-32:
+  But got `int`
+ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
+Invalid argument (Typing[4323])
+  File "function_ref_static_specialized.php", line 16, characters 29-29:
+  `T` is a constrained type parameter
+  File "function_ref_static_specialized.php", line 16, characters 26-27:
+  This type constraint is violated
+  File "function_ref_static_specialized.php", line 7, characters 17-19:
+  Expected `int`
+  File "function_ref_static_specialized.php", line 16, characters 29-29:
+  But got `mixed` where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref_static_specialized.php", line 57, characters 12-18:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 29, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 3, characters 10-11:
+  But got `(readonly function<T>(int $value): ~int)` because method or function was called on dynamic or like-type
+ERROR: File "function_ref_static_specialized.php", line 58, characters 12-16:
+Invalid argument (Typing[4110])
+  File "function_ref_static_specialized.php", line 29, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_specialized.php", line 3, characters 10-11:
+  But got `(readonly function<T>($value): ~_)` because method or function was called on dynamic or like-type

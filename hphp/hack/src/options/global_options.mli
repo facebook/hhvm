@@ -315,6 +315,7 @@ type t = {
       (** Infer classname<T> for the key of dict[$c => 1] when $c: class<T>  *)
   tco_class_pointer_array_write_keys: int;
       (** Infer classname<T> for the index of $d[$c] = 1 when $c: class<T>  *)
+  tco_disallow_specialized_function_refs: bool;
   tco_permits_bypassing_visibility: string list;
   tco_tests_bypass_visibility_static_properties: bool;
 }
@@ -431,6 +432,7 @@ val set :
   ?class_pointer_ban_class_array_key:bool ->
   ?tco_class_pointer_array_literal_keys:int ->
   ?tco_class_pointer_array_write_keys:int ->
+  ?tco_disallow_specialized_function_refs:bool ->
   ?tco_permits_bypassing_visibility:string list ->
   ?tco_tests_bypass_visibility_static_properties:bool ->
   t ->

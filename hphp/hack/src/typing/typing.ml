@@ -9346,13 +9346,14 @@ end = struct
 
   let synth_static_method pos class_id method_name ty_args source env =
     let (env, _, tclass_id, class_ty) = Class_id.class_expr env [] class_id in
-    let (env, (method_ty, ty_args)) =
+    (* Intersection lookup can discard the localized type arguments. *)
+    let (env, (method_ty, ty_args), has_explicit_targs) =
       match ty_args with
       | [] ->
         let (env, method_ty) =
           synth_polymorphic_static_method class_id class_ty method_name env
         in
-        (env, (method_ty, []))
+        (env, (method_ty, []), false)
       | _ ->
         let (env, (method_ty, ty_args)) =
           Class_get_expr.class_get
@@ -9369,11 +9370,17 @@ end = struct
             class_id
         in
         let env = Env.set_tyvar_variance env method_ty in
-        (env, (method_ty, ty_args))
+        (env, (method_ty, ty_args), true)
     in
     let (env, method_ty) = set_function_pointer env method_ty in
     let (env, method_ty) = set_capture_only_readonly env method_ty in
-    let method_ty = make_function_ref ~contains_generics:false pos method_ty in
+    let method_ty =
+      let contains_generics =
+        Typechecker_options.disallow_specialized_function_refs env.genv.tcopt
+        && has_explicit_targs
+      in
+      make_function_ref ~contains_generics pos method_ty
+    in
     let expr =
       FunctionPointer (FP_class_const (tclass_id, method_name), ty_args, source)
     in
@@ -9424,7 +9431,13 @@ end = struct
       (* All function pointers are readonly since they don't capture any values *)
       let (env, fpty) = set_capture_only_readonly env fpty in
       let fpty =
-        make_function_ref ~contains_generics:(not (List.is_empty tal)) pos fpty
+        let contains_generics =
+          (not (List.is_empty tal))
+          || Typechecker_options.disallow_specialized_function_refs
+               env.genv.tcopt
+             && not (List.is_empty targs)
+        in
+        make_function_ref ~contains_generics pos fpty
       in
       make_result
         env

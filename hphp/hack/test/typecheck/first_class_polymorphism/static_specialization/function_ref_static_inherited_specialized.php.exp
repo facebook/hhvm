@@ -1,0 +1,18 @@
+ERROR: File "function_ref_static_inherited_specialized.php", line 32, characters 12-25:
+Invalid argument (Typing[4110])
+  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_inherited_specialized.php", line 6, characters 26-27:
+  But got `(readonly function<TMethod>(int $value): int)`
+ERROR: File "function_ref_static_inherited_specialized.php", line 33, characters 12-29:
+Invalid argument (Typing[4110])
+  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_inherited_specialized.php", line 10, characters 26-28:
+  But got `(readonly function<TMethod>(vec<mixed> $_, string $_value): Box<string>)`
+ERROR: File "function_ref_static_inherited_specialized.php", line 34, characters 12-24:
+Invalid argument (Typing[4110])
+  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_inherited_specialized.php", line 10, characters 26-28:
+  But got `(readonly function<TMethod>(vec<mixed> $_, $_value): Box<_>)`

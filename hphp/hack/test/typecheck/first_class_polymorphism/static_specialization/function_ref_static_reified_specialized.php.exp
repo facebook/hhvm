@@ -1,0 +1,12 @@
+ERROR: File "function_ref_static_reified_specialized.php", line 26, characters 12-26:
+Invalid argument (Typing[4110])
+  File "function_ref_static_reified_specialized.php", line 11, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_reified_specialized.php", line 6, characters 26-27:
+  But got `(readonly function<T>(int $value): int)`
+ERROR: File "function_ref_static_reified_specialized.php", line 27, characters 12-24:
+Invalid argument (Typing[4110])
+  File "function_ref_static_reified_specialized.php", line 11, characters 22-38:
+  Expected `HH\FunctionRef<_>`
+  File "function_ref_static_reified_specialized.php", line 6, characters 26-27:
+  But got `(readonly function<T>($value): _)`

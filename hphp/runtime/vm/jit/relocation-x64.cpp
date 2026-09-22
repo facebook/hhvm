@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
 #include "hphp/util/configs/jit.h"
@@ -298,6 +299,7 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   } else {
     always_assert(end);
   }
+  CodeWriteScope scope(start, end);
   while (start != end) {
     assertx(start < end);
     DecodedInstruction di(start);
@@ -348,6 +350,8 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
   for (auto codePtr : fixups.codePointers) {
     if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
+      CodeWriteScope scope(reinterpret_cast<TCA>(codePtr),
+                           reinterpret_cast<TCA>(codePtr) + sizeof(TCA));
       *codePtr = adjusted;
     }
   }

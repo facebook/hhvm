@@ -595,6 +595,10 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   auto& hotBlock = optView.main();
   auto& data = view.data();
 
+  CodeWriteScope mainScope(view.main());
+  CodeWriteScope coldScope(view.cold());
+  CodeWriteScope hotScope(hotBlock);
+
   auto const hot = [&]() -> CodeBlock& {
     return hotBlock.available() > 512 ? hotBlock : main;
   };

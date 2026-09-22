@@ -638,8 +638,6 @@ impl HhConfig {
                 "class_pointer_array_write_keys",
                 default.tco_class_pointer_array_write_keys,
             )?,
-            tco_poly_function_pointers: hhconfig
-                .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
             tco_permits_bypassing_visibility: hhconfig
                 .get_str_list("permits_bypassing_visibility")
                 .map(|classes| classes.map(|s| format!("\\{}", s)).collect())

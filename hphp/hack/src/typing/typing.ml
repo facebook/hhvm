@@ -980,7 +980,6 @@ let xhp_attribute_decl_ty env sid obj attr =
     TOG.obj_get
       ~obj_pos:(fst sid)
       ~is_method:false
-      ~meth_caller:false
       ~nullsafe:None
       ~coerce_from_ty:None
       ~explicit_targs:[]
@@ -3441,7 +3440,6 @@ end = struct
         TOG.obj_get
           ~obj_pos:pe
           ~is_method:true
-          ~meth_caller:false
           ~nullsafe:None
           ~coerce_from_ty:None
           ~explicit_targs:[]
@@ -3643,135 +3641,8 @@ end = struct
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         make_result env p (Aast.Id id) ty)
-    | Method_caller (class_name, method_name)
-      when Typechecker_options.tco_poly_function_pointers env.genv.tcopt ->
+    | Method_caller (class_name, method_name) ->
       Method_caller.synth_function_ref_type p (class_name, method_name) env
-    | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
-      (* meth_caller(X::class, 'foo') desugars to:
-       * $x ==> $x->foo()
-       *)
-      let class_ = Env.get_class env class_name in
-      (match class_ with
-      | Decl_entry.NotYetAvailable
-      | Decl_entry.DoesNotExist ->
-        unbound_name env pos_cname outer
-      | Decl_entry.Found class_ ->
-        (* Create a class type for the given object instantiated with unresolved
-         * types for its type parameters.
-         *)
-        let () =
-          if Ast_defs.is_c_trait (Cls.kind class_) then
-            Typing_error_utils.add_typing_error
-              ~env
-              Typing_error.(
-                primary
-                @@ Primary.Meth_caller_trait { pos; trait_name = class_name })
-        in
-        let (env, tvarl) =
-          List.map_env env (Cls.tparams class_) ~f:(fun env _ ->
-              Env.fresh_type env p)
-        in
-        let params =
-          List.map (Cls.tparams class_) ~f:(fun { tp_name = (p, n); _ } ->
-              (* TODO(T69551141) handle type arguments for Tgeneric *)
-              MakeType.generic (Reason.witness_from_decl p) n)
-        in
-        let obj_type =
-          MakeType.apply
-            (Reason.witness_from_decl (Pos_or_decl.of_raw_pos p))
-            (Positioned.of_raw_positioned pos_cname)
-            params
-        in
-        let ety_env =
-          {
-            (empty_expand_env_with_on_error
-               (Typing_error.Reasons_callback.invalid_type_hint pos))
-            with
-            substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
-          }
-        in
-        let ((env, ty_err_opt1), local_obj_ty) =
-          Phase.localize ~ety_env env obj_type
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-        let ((env, ty_err_opt2), (fty, _tal)) =
-          TOG.obj_get
-            ~obj_pos:pos
-            ~is_method:true
-            ~nullsafe:None
-            ~meth_caller:true
-            ~coerce_from_ty:None
-            ~explicit_targs:[]
-              (* The CIstatic mode causes `this` to be interpreted as the non-exact type of the
-                 receiver, rather than an exact type. For example, meth_caller(C::class, 'get') for
-                 class C {
-                   get():this { return $this; }
-                 }
-                 should not be typed as
-                   (function(C):exact C)
-                 but rather as
-                   (function(C):C)
-                 because it might be called through a subclass. Ideally, if we supported first-class
-                 generics, we'd type it as
-                   (function<Tthis as C>(Tthis):Tthis)
-              *)
-            ~class_id:CIstatic
-            ~member_id:meth_name
-            ~on_error:Typing_error.Callback.unify_error
-            env
-            local_obj_ty
-        in
-        Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
-        let (supportdyn, env, fty) = TUtils.strip_supportdyn env fty in
-        let (env, fty) = Env.expand_type env fty in
-        (match deref fty with
-        | (reason, Tfun ftype) ->
-          (* We are creating a fake closure:
-           * function(Class $x, arg_types_of(Class::meth_name))
-                 : return_type_of(Class::meth_name)
-           *)
-          let ety_env =
-            {
-              ety_env with
-              on_error =
-                Some (Env.unify_error_assert_primary_pos_in_current_decl env);
-            }
-          in
-          let (env, ty_err_opt3) =
-            Phase.check_tparams_constraints
-              ~use_pos:p
-              ~ety_env
-              env
-              (Cls.tparams class_)
-          in
-          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt3;
-          let local_obj_fp =
-            TUtils.default_fun_param
-              ~readonly:(get_ft_readonly_this ftype)
-              local_obj_ty
-          in
-          let fty =
-            { ftype with ft_params = local_obj_fp :: ftype.ft_params }
-          in
-          let ty =
-            Typing_dynamic.maybe_wrap_with_supportdyn
-              ~should_wrap:supportdyn
-              reason
-              fty
-          in
-          (* The function type itself is readonly because we don't capture any values *)
-          let (env, ty) = set_capture_only_readonly env ty in
-          let ty =
-            make_function_ref
-              ~contains_generics:(not (List.is_empty fty.ft_tparams))
-              p
-              ty
-          in
-          make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
-        | _ ->
-          (* Shouldn't happen *)
-          let (env, ty) = Env.fresh_type_error env pos in
-          make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty))
     | FunctionPointer (fp_id, targs, source) ->
       Function_pointer.synth p (fp_id, targs, source) env
     | Lplaceholder p ->
@@ -5984,7 +5855,6 @@ end = struct
            * defined on the parent class, but $this is still the child class.
            *)
           TOG.obj_get
-            ~meth_caller:false
             ~is_method:true
             ~nullsafe:None
             ~obj_pos:pos
@@ -6736,7 +6606,6 @@ end = struct
           TOG.obj_get_with_mismatches
             ~obj_pos:p1
             ~is_method:true
-            ~meth_caller:false
             ~nullsafe
             ~coerce_from_ty:None
             ~explicit_targs
@@ -9578,10 +9447,7 @@ end = struct
   let synth pos fpid_args env =
     let (_, _, source) = fpid_args in
     match source with
-    | Aast_defs.Code
-      when Typechecker_options.tco_poly_function_pointers env.genv.tcopt ->
-      synth_poly pos fpid_args env
-    | Aast_defs.Code
+    | Aast_defs.Code -> synth_poly pos fpid_args env
     | Aast_defs.Lowered ->
       (* For expression tree code generated during lowering we preserve the
          treatment of function pointers as monomorphic function types *)
@@ -13119,7 +12985,6 @@ end = struct
       TOG.obj_get
         ~obj_pos
         ~is_method:true
-        ~meth_caller:false
         ~nullsafe:None
         ~coerce_from_ty:None
         ~explicit_targs:[]
@@ -13411,7 +13276,6 @@ end = struct
             ~obj_pos:p1
             ~is_method:false
             ~nullsafe
-            ~meth_caller:false
             ~coerce_from_ty:(Some (pos2, ur, ty2))
             ~explicit_targs:[]
             ~class_id:(CIexpr e1)

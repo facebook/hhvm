@@ -130,7 +130,6 @@ let check_param : env -> Nast.fun_param -> unit =
               Typing_object_get.obj_get
                 ~obj_pos:param_pos
                 ~is_method:true
-                ~meth_caller:false
                 ~nullsafe:None
                 ~coerce_from_ty:None
                 ~explicit_targs:[]

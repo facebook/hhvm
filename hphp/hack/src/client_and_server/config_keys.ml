@@ -191,8 +191,6 @@ module Hhconfig = struct
 
   let pessimise_builtins = key "pessimise_builtins"
 
-  let poly_function_pointers = key "poly_function_pointers"
-
   let populate_dead_unsafe_cast_heap = key "populate_dead_unsafe_cast_heap"
 
   let profile_top_level_definitions = key "profile_top_level_definitions"

@@ -306,8 +306,6 @@ let tco_class_pointer_array_literal_keys t =
 let tco_class_pointer_array_write_keys t =
   t.Global_options.tco_class_pointer_array_write_keys
 
-let tco_poly_function_pointers t = t.Global_options.tco_poly_function_pointers
-
 let enable_recursive_case_types t =
   { t with Global_options.recursive_case_types = true }
 

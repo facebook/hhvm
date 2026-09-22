@@ -174,8 +174,6 @@ module Hhconfig : sig
 
   val pessimise_builtins : string
 
-  val poly_function_pointers : string
-
   val populate_dead_unsafe_cast_heap : string
 
   val profile_top_level_definitions : string

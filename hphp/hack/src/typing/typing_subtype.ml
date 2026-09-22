@@ -9935,7 +9935,6 @@ end = struct
         ~obj_pos:(fst member_id)
           (* `~obj_pos:name_pos` is a lie: `name_pos` is the rhs of `->` or `?->` *)
         ~is_method
-        ~meth_caller:false
         ~coerce_from_ty:None
         ~nullsafe:None
         ~explicit_targs

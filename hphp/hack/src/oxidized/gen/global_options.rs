@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6547b2212b12cdcf9d3cc13864eb4e85>>
+// @generated SignedSource<<6fd00cb690884a21ecfdb743da753524>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -424,7 +424,6 @@ pub struct GlobalOptions {
     pub tco_class_pointer_array_literal_keys: isize,
     /// Infer classname<T> for the index of $d[$c] = 1 when $c: class<T>
     pub tco_class_pointer_array_write_keys: isize,
-    pub tco_poly_function_pointers: bool,
     pub tco_permits_bypassing_visibility: Vec<String>,
     pub tco_tests_bypass_visibility_static_properties: bool,
 }

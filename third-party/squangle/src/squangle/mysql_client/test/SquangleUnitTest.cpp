@@ -955,6 +955,91 @@ TEST_F(QueryTest, CheckedQueryWithValueRowMatrix) {
   EXPECT_EQ(checked.renderInsecure(), legacy.renderInsecure());
 }
 
+namespace {
+// Records which QueryArgument conversion the collection path selects, so the
+// tests below can tell the moving path from the copying one. Ref-qualified the
+// same way ValueRow is, which is what makes std::vector<CountingCell> a
+// QueryArgumentCollection.
+struct CountingCell {
+  static inline int constConversions = 0;
+  static inline int rvalueConversions = 0;
+
+  std::string value;
+
+  explicit CountingCell(std::string v) : value(std::move(v)) {}
+
+  explicit operator QueryArgument() const& {
+    ++constConversions;
+    return QueryArgument(value);
+  }
+  explicit operator QueryArgument() && {
+    ++rvalueConversions;
+    return QueryArgument(std::move(value));
+  }
+
+  static void resetCounts() {
+    constConversions = 0;
+    rvalueConversions = 0;
+  }
+};
+
+std::vector<CountingCell> makeCountingCells() {
+  std::vector<CountingCell> cells;
+  cells.reserve(2);
+  cells.emplace_back("a");
+  cells.emplace_back("b");
+  CountingCell::resetCounts();
+  return cells;
+}
+} // namespace
+
+// These two use the legacy ctor because checked()'s %Ls rule requires a
+// string-like element type, which a copy-counting stand-in cannot be. Both
+// ctors forward their arguments the same way, so they exercise the same
+// QueryArgument collection constructor.
+TEST_F(QueryTest, QueryCollectionArgumentMovesFromRvalue) {
+  // An rvalue collection is owned by the query, so each element is consumed
+  // rather than duplicated.
+  auto cells = makeCountingCells();
+  auto query = Query("WHERE x IN (%Ls)", std::move(cells));
+  EXPECT_EQ(query.renderInsecure(), "WHERE x IN (\"a\", \"b\")");
+  EXPECT_EQ(CountingCell::rvalueConversions, 2);
+  EXPECT_EQ(CountingCell::constConversions, 0);
+}
+
+TEST_F(QueryTest, QueryCollectionArgumentCopiesFromLvalue) {
+  // An lvalue collection still belongs to the caller, so its elements must be
+  // copied and it has to survive the call intact.
+  auto cells = makeCountingCells();
+  auto first = Query("WHERE x IN (%Ls)", cells);
+  EXPECT_EQ(CountingCell::constConversions, 2);
+  EXPECT_EQ(CountingCell::rvalueConversions, 0);
+  EXPECT_EQ(cells[0].value, "a");
+  EXPECT_EQ(cells[1].value, "b");
+
+  auto second = Query("WHERE x IN (%Ls)", cells);
+  EXPECT_EQ(first.renderInsecure(), second.renderInsecure());
+  EXPECT_EQ(first.renderInsecure(), "WHERE x IN (\"a\", \"b\")");
+}
+
+TEST_F(QueryTest, CheckedQueryValueRowMatrixFromRvalue) {
+  // The matrix renders the same whether it is moved in or copied, and a
+  // matrix passed as an lvalue is left intact for a second use.
+  std::vector<ValueRow<"%d %s">> rows = {{1, "a"}, {2, "b"}};
+  constexpr std::string_view kExpected =
+      "INSERT INTO `t` VALUES (1, \"a\"), (2, \"b\")";
+
+  auto fromLvalue = Query::checked("INSERT INTO %T VALUES %V", "t", rows);
+  EXPECT_EQ(fromLvalue.renderInsecure(), kExpected);
+
+  auto reused = Query::checked("INSERT INTO %T VALUES %V", "t", rows);
+  EXPECT_EQ(reused.renderInsecure(), kExpected);
+
+  auto fromRvalue =
+      Query::checked("INSERT INTO %T VALUES %V", "t", std::move(rows));
+  EXPECT_EQ(fromRvalue.renderInsecure(), kExpected);
+}
+
 TEST_F(QueryTest, CheckedQueryRendersIntegers) {
   // Absolute (not parity) checks: pin %d/%u rendering. %u must render as an
   // unsigned value — a high-bit-set value must not come out negative.

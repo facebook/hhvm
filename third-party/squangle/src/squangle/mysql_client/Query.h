@@ -1429,10 +1429,14 @@ class QueryArgument {
   // std::vector<QueryArgument> (handled by the overload above), and pair-list/
   // map types. Element/iteration order is preserved, which is fine for SQL list
   // contexts (IN, etc.).
+  // Takes a forwarding reference so an rvalue collection is consumed rather
+  // than copied: an owned container hands its elements over, while an lvalue
+  // (C deduces to a reference) still binds here and is copied, since the caller
+  // keeps it.
   template <typename C>
     requires detail::QueryArgumentCollection<C>
-  /* implicit */ QueryArgument(const C& arg_list)
-      : value_(toQueryArgumentList(arg_list)) {}
+  /* implicit */ QueryArgument(C&& arg_list)
+      : value_(toQueryArgumentList(std::forward<C>(arg_list))) {}
 
   // Adopt a prebuilt pair list (column -> value) for %U/%W/%O/%A. Distinct from
   // the empty-list default ctor and the operator() builder: this takes an
@@ -1565,17 +1569,25 @@ class QueryArgument {
   // Convert any homogeneous container of QueryArgument-convertible elements
   // into the list representation a QueryArgument holds.
   template <typename Container>
-  static std::vector<QueryArgument> toQueryArgumentList(
-      const Container& container) {
+  static std::vector<QueryArgument> toQueryArgumentList(Container&& container) {
     std::vector<QueryArgument> list;
     // QueryArgumentCollection only requires std::ranges::range, so a non-sized
     // range (e.g. std::forward_list) can reach here -- only reserve when size()
     // is available.
-    if constexpr (std::ranges::sized_range<const Container&>) {
+    if constexpr (std::ranges::sized_range<std::remove_cvref_t<Container>>) {
       list.reserve(container.size());
     }
-    for (const auto& elem : container) {
-      list.emplace_back(elem);
+    for (auto&& elem : container) {
+      // Consume the elements only when the container is an rvalue, i.e. we were
+      // handed ownership. An lvalue caller keeps its container intact, so its
+      // elements must be copied. This is what lets a moved-in
+      // std::vector<ValueRow> / std::vector<std::string> hand its cells and
+      // strings over instead of duplicating them.
+      if constexpr (std::is_rvalue_reference_v<Container&&>) {
+        list.emplace_back(std::move(elem));
+      } else {
+        list.emplace_back(elem);
+      }
     }
     return list;
   }
@@ -1635,9 +1647,15 @@ class ValueRow {
     return cells_;
   }
 
-  // Render as one %V row: a list-valued QueryArgument holding the cells.
-  explicit operator QueryArgument() const {
+  // Render as one %V row: a list-valued QueryArgument holding the cells. Both
+  // overloads are ref-qualified because a ref-qualified conversion cannot be
+  // overloaded against an unqualified one. The && form is what makes a
+  // moved-in std::vector<ValueRow> hand its cells over rather than copy them.
+  explicit operator QueryArgument() const& {
     return QueryArgument(cells_);
+  }
+  explicit operator QueryArgument() && {
+    return QueryArgument(std::move(cells_));
   }
 
  private:

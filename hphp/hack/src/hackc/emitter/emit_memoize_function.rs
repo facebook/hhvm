@@ -92,7 +92,9 @@ pub(crate) fn emit_wrapper_function<'a>(
             shadows_class_tparam: false,
         })
         .collect::<Vec<_>>();
-    let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
+    // Match the impl's param layout, which emit_body reorders.
+    let ast_params = emit_body::reorder_params(&f.params);
+    let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &ast_params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
     let return_type = emit_body::emit_return_type(
@@ -122,7 +124,7 @@ pub(crate) fn emit_wrapper_function<'a>(
         &f.span,
         deprecation_info,
         &params,
-        &f.params,
+        &ast_params,
         renamed_id,
         f.fun_kind.is_fasync(),
         is_reified,
@@ -249,7 +251,7 @@ fn make_memoize_function_with_params_code<'a>(
             param_count as u32,
             vec![],
             vec![],
-            vec![],
+            emit_memoize_helpers::named_arg_names(hhas_params),
             if is_async { Some(eager_set) } else { None },
             None,
         )

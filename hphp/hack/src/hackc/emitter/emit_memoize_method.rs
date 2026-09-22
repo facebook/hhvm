@@ -168,12 +168,14 @@ fn make_memoize_wrapper_method<'a>(
         Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE,
         hhbc::is_not_keyed_by_ic_and_leak_ic(attributes.iter()),
     );
+    // Match the impl's param layout, which emit_body reorders.
+    let ast_params = emit_body::reorder_params(&method.params);
     let mut args = Args {
         info,
         method,
         scope: &scope,
         emit_deprecation_info: true,
-        params: &method.params,
+        params: &ast_params,
         ret,
         method_id: &name,
         flags: arg_flags,
@@ -361,7 +363,7 @@ fn make_memoize_method_with_params_code<'a>(
             param_count as u32,
             vec![],
             vec![],
-            vec![],
+            emit_memoize_helpers::named_arg_names(hhas_params),
             async_eager_target,
             None,
         )

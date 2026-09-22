@@ -8,11 +8,16 @@ use error::Error;
 use error::Result;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
+use hhbc::Label;
 use hhbc::Local;
+use hhbc::Param;
+use hhbc::StringId;
+use hhbc_string_utils::locals;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 use oxidized::aast::FunParam;
 use oxidized::aast::FunParamInfo;
+use oxidized::ast;
 use oxidized::pos::Pos;
 use scope::create_try_catch;
 
@@ -44,6 +49,15 @@ pub fn param_code_gets(num_params: usize) -> InstrSeq {
             .map(|i| instr::c_get_l(Local::new(i)))
             .collect(),
     )
+}
+
+/// Named params are a prefix, since `reorder_params` sorts them to the front.
+pub fn named_arg_names(params: &[(Param, Option<(Label, ast::Expr)>)]) -> Vec<StringId> {
+    params
+        .iter()
+        .take_while(|(param, _)| param.is_named)
+        .map(|(param, _)| hhbc::intern(locals::strip_dollar(param.name.as_str())))
+        .collect()
 }
 
 pub fn check_memoize_possible<Ex, En>(

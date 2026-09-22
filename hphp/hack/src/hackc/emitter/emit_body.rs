@@ -390,7 +390,7 @@ pub fn make_env<'a>(
  * 2. Relative positioning of positional parameters is preserved
  * 3. Named parameters are re-ordered to be lexicographically sorted.
  */
-fn reorder_params(ast_params: &[ast::FunParam]) -> Vec<ast::FunParam> {
+pub(crate) fn reorder_params(ast_params: &[ast::FunParam]) -> Vec<ast::FunParam> {
     let (mut named_params, positional_params): (Vec<ast::FunParam>, Vec<ast::FunParam>) =
         ast_params.iter().cloned().partition(|p| p.named.is_some());
     named_params.sort_by(|a, b| a.name.cmp(&b.name));

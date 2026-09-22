@@ -26,3 +26,9 @@ type TOverride = int;
 
 function test_override_first(): void {}
 function test_override_second(): void {}
+
+//// isolated/override_intern.php
+<?hh
+<<file: __PackageOverride('intern')>>
+
+function test_override_out_of_isolated(): void {}

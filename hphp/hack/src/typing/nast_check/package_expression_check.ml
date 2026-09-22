@@ -78,16 +78,6 @@ let error_if_not_checkable ~pos ~pkg_name ~construct required_pkg =
     true
   | _ -> false
 
-let error_if_implicit_package_override attr = function
-  | Some package when package.Package.is_implicit ->
-    override_not_allowed
-      ~pos:(fst attr.ua_name)
-      ~pkg_name:(Package.get_package_name package)
-      ~attr:(snd attr.ua_name)
-      package;
-    true
-  | _ -> false
-
 let get_path_package env pos =
   let path = Relative_path.suffix (Pos.filename pos) in
   Package_provider.get_package_for_file env.Nast_check_env.ctx ~path
@@ -262,8 +252,8 @@ let package_override_check env ua =
                    }))))
   | _ -> ()
 
-(* Refuses [__PackageOverride] when its target has strict isolation or when the
-   file already belongs to an implicit package. Deliberately keyed on strict
+(* Refuses [__PackageOverride] when either the file's path-derived package or
+   the override target has strict isolation. Deliberately keyed on strict
    isolation alone: a package that merely omits
    [allow_deployed_packages_checking] must stay joinable by attribute, since
    that is the only way into one declaring no [include_paths]. *)
@@ -271,7 +261,16 @@ let package_override_strict_isolation env attr =
   match attr with
   | { ua_params = (_, _, String pkg_name) :: _; ua_name = (name_pos, name) }
     when String.equal name SN.UserAttributes.uaPackageOverride ->
-    if error_if_implicit_package_override attr (get_path_package env name_pos)
+    if
+      match get_path_package env name_pos with
+      | Some path_package when path_package.Package.enable_strict_isolation ->
+        override_not_allowed
+          ~pos:name_pos
+          ~pkg_name:(Package.get_package_name path_package)
+          ~attr:name
+          path_package;
+        true
+      | _ -> false
     then
       ()
     else (

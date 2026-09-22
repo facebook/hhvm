@@ -2499,6 +2499,24 @@ fn expr_may_have_side_effect(e: &ast::Expr) -> bool {
     }
 }
 
+fn arg_indices_in_stack_order(args: &[ast::Argument]) -> Vec<usize> {
+    let mut positional_idxs = vec![];
+    let mut named_args_with_names = vec![];
+    for (idx, arg) in args.iter().enumerate() {
+        match arg {
+            ast::Argument::Anamed(id, _) => named_args_with_names.push((&id.1, idx)),
+            ast::Argument::Anormal(_) | ast::Argument::Ainout(..) => positional_idxs.push(idx),
+        }
+    }
+    named_args_with_names.sort_by_key(|(name, _)| *name);
+    let mut stack_pos_to_arg_pos: Vec<usize> = named_args_with_names
+        .into_iter()
+        .map(|(_, idx)| idx)
+        .collect();
+    stack_pos_to_arg_pos.extend(positional_idxs);
+    stack_pos_to_arg_pos
+}
+
 /// HHVM requires calls to have all named arguments in lexicographical order,
 /// followed by all positional arguments respecting the order they
 /// were originally passed in. However, we want to preserve the written
@@ -2550,20 +2568,11 @@ fn emit_args_with_named_reordering<'a>(
     use std::collections::HashMap;
     use std::collections::HashSet;
 
-    let mut positional_idxs = vec![];
-    let mut named_args_with_names: Vec<(String, usize)> = vec![];
     let mut expressions_with_side_effects: Vec<(usize, ast::Expr)> = vec![];
     let mut arg_positions_with_side_effects: HashSet<usize> = HashSet::new();
     for (idx, arg) in args.iter().enumerate() {
         let exp = match arg {
-            ast::Argument::Anamed(id, exp) => {
-                named_args_with_names.push((id.1.clone(), idx));
-                exp
-            }
-            ast::Argument::Anormal(exp) => {
-                positional_idxs.push(idx);
-                exp
-            }
+            ast::Argument::Anamed(_, exp) | ast::Argument::Anormal(exp) => exp,
             ast::Argument::Ainout(..) => {
                 return Err(Error::unrecoverable(
                     "inout not allowed in calls with named args",
@@ -2575,17 +2584,10 @@ fn emit_args_with_named_reordering<'a>(
             arg_positions_with_side_effects.insert(idx);
         }
     }
-    named_args_with_names.sort_by(|(aname, _), (bname, _)| aname.cmp(bname));
-    let mut stack_pos_to_arg_pos: Vec<usize> = named_args_with_names
-        .into_iter()
-        .map(|(_, idx)| idx)
-        .collect();
-    stack_pos_to_arg_pos.extend(positional_idxs);
-
     let mut arg_pos_to_local: HashMap<usize, Local> = HashMap::new();
     let mut arg_instrs = vec![];
     let mut next_side_effect_idx = 0;
-    for arg_pos in stack_pos_to_arg_pos.into_iter() {
+    for arg_pos in arg_indices_in_stack_order(args) {
         // Case 1: Already evaluated local.
         if let Some(local) = arg_pos_to_local.get(&arg_pos) {
             arg_instrs.push(instr::push_l(local.clone()));
@@ -2624,19 +2626,18 @@ fn emit_args_with_named_reordering<'a>(
 /// - "Special calls" where we expect all parameters to be passed in normally, mainly (if not
 ///   exclusively) object constructors
 ///
-/// This function abstracts over these two kinds of calls: given a list of arguments and two
-/// predicates (is this an `inout` argument, is this `readonly`) we build up an `FCallArgs` for the
+/// This function abstracts over these two kinds of calls: given a list of arguments and a
+/// predicate (is this an `inout` argument) we build up an `FCallArgs` for the
 /// given function call.
-fn get_fcall_args_common<T>(
-    args: &[T],
+fn get_fcall_args_common(
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
     context: Option<StringId>,
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-    readonly_predicate: fn(&T) -> bool,
-    is_inout_arg: fn(&T) -> bool,
+    is_inout_arg: fn(&ast::Argument) -> bool,
     named_arg_names: Vec<StringId>,
 ) -> FCallArgs {
     let mut flags = FCallArgsFlags::default();
@@ -2644,11 +2645,18 @@ fn get_fcall_args_common<T>(
     flags.set(FCallArgsFlags::LockWhileUnwinding, lock_while_unwinding);
     flags.set(FCallArgsFlags::EnforceMutableReturn, !readonly_return);
     flags.set(FCallArgsFlags::EnforceReadonlyThis, readonly_this);
-    let readonly_args = if args.iter().any(readonly_predicate) {
+    let readonly_predicate = |arg: &ast::Argument| is_readonly_expr(arg.to_expr_ref());
+    let mut readonly_args: Vec<bool> = if args.iter().any(readonly_predicate) {
         args.iter().map(readonly_predicate).collect()
     } else {
         vec![]
     };
+    if !readonly_args.is_empty() && !named_arg_names.is_empty() {
+        readonly_args = arg_indices_in_stack_order(args)
+            .into_iter()
+            .map(|idx| readonly_args[idx])
+            .collect();
+    }
     FCallArgs::new(
         flags,
         1 + args.iter().filter(|e| is_inout_arg(e)).count() as u32,
@@ -2662,7 +2670,7 @@ fn get_fcall_args_common<T>(
 }
 
 fn get_fcall_args_no_inout(
-    args: &[ast::Expr],
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
     context: Option<StringId>,
@@ -2679,7 +2687,6 @@ fn get_fcall_args_no_inout(
         lock_while_unwinding,
         readonly_return,
         readonly_this,
-        is_readonly_expr,
         |_| false,
         named_arg_names,
     )
@@ -2703,7 +2710,6 @@ fn get_fcall_args(
         lock_while_unwinding,
         readonly_return,
         readonly_this,
-        |arg: &ast::Argument| is_readonly_expr(arg.to_expr_ref()),
         |arg: &ast::Argument| arg.is_inout(),
         named_arg_names,
     )
@@ -3931,26 +3937,16 @@ fn emit_new<'a>(
                     instr_args,
                     instr_uargs,
                     emit_pos(pos),
-                    {
-                        let arg_exprs: Vec<ast::Expr> = args
-                            .into_iter()
-                            .map(|arg| match arg {
-                                ast::Argument::Anormal(expr) => expr.clone(),
-                                ast::Argument::Ainout(_, expr) => expr.clone(),
-                                ast::Argument::Anamed(_, expr) => expr.clone(),
-                            })
-                            .collect();
-                        instr::f_call_ctor(get_fcall_args_no_inout(
-                            &arg_exprs,
-                            uarg.as_ref(),
-                            None,
-                            env.call_context,
-                            true,
-                            true,  // we do not need to enforce readonly return for constructors
-                            false, // we do not need to enforce readonly this for constructors
-                            named_arg_names,
-                        ))
-                    },
+                    instr::f_call_ctor(get_fcall_args_no_inout(
+                        args,
+                        uarg.as_ref(),
+                        None,
+                        env.call_context,
+                        true,
+                        true,  // we do not need to enforce readonly return for constructors
+                        false, // we do not need to enforce readonly this for constructors
+                        named_arg_names,
+                    )),
                     instr::pop_c(),
                     instr::lock_obj(),
                 ]),

@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include <boost/polymorphic_cast.hpp>
 #include <folly/synchronization/Baton.h>
 
@@ -60,7 +63,13 @@ class ConnectPoolOperation : public ConnectOperation {
       : ConnectOperation(std::move(impl)) {}
 
   ~ConnectPoolOperation() override {
-    cancelPreOperation();
+    // cancelPreOperation() cancels the pre-operation, and cancelling an
+    // operation completes it, which runs the caller's callback (which might
+    // throw).
+    if (auto ew = folly::try_and_catch([&] { cancelPreOperation(); })) {
+      XLOG_EVERY_MS(ERR, 1000)
+          << "Exception cancelling the pre-operation: " << ew.what();
+    }
   }
 
   ConnectPoolOperation(const ConnectPoolOperation&) = delete;

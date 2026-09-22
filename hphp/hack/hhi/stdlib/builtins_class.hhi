@@ -70,8 +70,10 @@ namespace HH {
   function meth_caller_get_method(mixed $meth_caller)[]: string;
   // Hack specific existence functions
   function module_exists(string $module_name, bool $autoload = true)[]: bool;
-  function package_exists(string $name)[]: bool;
+  // `package_exists` is deliberately undeclared: deployment checks must go
+  // through `package X` or `__RequirePackage`, which the typechecker gates.
   function implicit_package_family_exists(string $family)[]: bool;
+
   // Every package/deployment declared in PACKAGES.toml, not just those in the
   // active deployment. Keys of the returned dicts are the declared names.
   function get_all_packages()[]: dict<string, shape(

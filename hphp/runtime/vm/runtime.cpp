@@ -273,13 +273,34 @@ void throwReadonlyMismatch(const Func* func, int32_t index) {
   SystemLib::throwReadonlyViolationExceptionObject(msg);
 }
 
-void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
-                           const uint8_t* readonlyArgs) {
+Optional<uint32_t> readonlyMismatch(const Func* func, uint32_t numArgs,
+                                    const uint8_t* readonlyArgs,
+                                    const ArrayData* namedArgNames) {
   assertx(numArgs == 0 || readonlyArgs != nullptr);
+  auto const numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
   uint8_t tmp = 0;
-  for (auto i = 0; i < numArgs; ++i) {
+  for (auto i = 0u; i < numArgs; ++i) {
     tmp = (i % 8) == 0 ? *(readonlyArgs++) : tmp >> 1;
-    if ((tmp & 1) && !func->isReadonly(i)) throwReadonlyMismatch(func, i);
+    if (!(tmp & 1)) continue;
+    uint32_t param;
+    if (i < numNamedArgs) {
+      param = func->lookupVarId(namedArgNames->at(i).val().pstr);
+      // Invalid names are rejected by the named-argument checks.
+      if (param >= func->numNamedParams()) continue;
+    } else {
+      param = func->numNamedParams() + i - numNamedArgs;
+    }
+    if (!func->isReadonly(param)) return i;
+  }
+  return std::nullopt;
+}
+
+void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
+                           const uint8_t* readonlyArgs,
+                           const ArrayData* namedArgNames) {
+  if (auto const mismatch =
+        readonlyMismatch(func, numArgs, readonlyArgs, namedArgNames)) {
+    throwReadonlyMismatch(func, *mismatch);
   }
 }
 

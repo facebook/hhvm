@@ -1,0 +1,6 @@
+ReadonlyViolationException: positional() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+ReadonlyViolationException: positional() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+ReadonlyViolationException: NamedArgs::__construct() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+ReadonlyViolationException: NamedArgs::__construct() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+RuntimeException: Named argument p does not match any named parameter in call to NamedArgs::__construct
+RuntimeException: Named argument missing does not match any named parameter in call to NamedArgs::__construct

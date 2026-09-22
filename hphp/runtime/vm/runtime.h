@@ -60,8 +60,12 @@ std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                      bool funcByRef);
 void checkInOutMismatch(const Func* func, uint32_t numArgs,
                         const uint8_t* inoutArgs);
+Optional<uint32_t> readonlyMismatch(const Func* func, uint32_t numArgs,
+                                    const uint8_t* readonlyArgs,
+                                    const ArrayData* namedArgNames);
 void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
-                           const uint8_t* readonlyArgs);
+                           const uint8_t* readonlyArgs,
+                           const ArrayData* namedArgNames);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();

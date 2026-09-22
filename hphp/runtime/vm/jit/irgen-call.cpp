@@ -130,12 +130,13 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
 bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
                                    const FCallArgs& fca) {
   if (fca.enforceReadonly()) {
-    for (auto i = 0; i < fca.numArgs; ++i) {
-      if (fca.isReadonly(i) && !callee->isReadonly(i)) {
-        auto const data = ParamData { i };
-        gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-        return false;
-      }
+    auto const namedArgNames = fca.hasNamedArgs()
+      ? curUnit(env)->lookupArrayId(fca.namedArgNames) : nullptr;
+    if (auto const mismatch =
+          readonlyMismatch(callee, fca.numArgs, fca.readonlyArgs, namedArgNames)) {
+      auto const data = ParamData { static_cast<int32_t>(*mismatch) };
+      gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+      return false;
     }
   }
   if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
@@ -155,7 +156,11 @@ void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
                                       const FCallArgs& fca) {
   if (fca.enforceReadonly()) {
     auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
-    gen(env, CheckReadonlyMismatch, data, callee);
+    auto const namedArgNames = fca.hasNamedArgs()
+      ? curUnit(env)->lookupArrayId(fca.namedArgNames) : nullptr;
+    auto const names = namedArgNames
+      ? cns(env, namedArgNames) : cns(env, nullptr);
+    gen(env, CheckReadonlyMismatch, data, callee, names);
   }
   if (fca.enforceMutableReturn()) {
     ifThen(

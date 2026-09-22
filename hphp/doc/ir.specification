@@ -2287,9 +2287,10 @@ ReqBindJmp and CallFuncEntry.
   These don't verify that if there are packed args they are not in a position
   that require inout. You will still need verify that when unpacking.
 
-| CheckReadonlyMismatch<numArgs, readonlyArgs>, ND, S(Func), NF
+| CheckReadonlyMismatch<numArgs, readonlyArgs>, ND, S(Func) S(Vec|Nullptr), LA
 
-  Checks whether readonly-ness of the caller matches that of callees
+  Checks whether readonly-ness of the caller matches that of callee S0.
+  S1 contains the named argument names, or nullptr for positional-only calls.
 
 | ThrowReadonlyMismatch<numArgs, readonlyArgs>, ND, S(Func), T
 

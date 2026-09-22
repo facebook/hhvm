@@ -3612,9 +3612,14 @@ template<bool dynamic, typename Ctx>
 JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
                         const Func* func, Ctx&& ctx,
                         bool logAsDynamicCall = true, bool isCtor = false) {
+  const ArrayData* nameArr = nullptr;
+  if (fca.hasNamedArgs()) {
+    nameArr = vmfp()->func()->unit()->lookupArrayId(fca.namedArgNames);
+  }
+
   if (fca.enforceInOut()) checkInOutMismatch(func, fca.numArgs, fca.inoutArgs);
   if (fca.enforceReadonly()) {
-    checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs);
+    checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs, nameArr);
   }
   if (fca.enforceMutableReturn() && (func->attrs() & AttrReadonlyReturn)) {
     throwReadonlyMismatch(func, kReadonlyReturnId);
@@ -3624,11 +3629,6 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
   }
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
-
-  const ArrayData* nameArr = nullptr;
-  if (fca.hasNamedArgs()) {
-    nameArr = vmfp()->func()->unit()->lookupArrayId(fca.namedArgNames);
-  }
 
   auto const numPositionalArgs = [&] {
     uint32_t numNamedArgs = nameArr ? nameArr->size() : 0;

@@ -220,8 +220,8 @@ pub fn emit_param_default_value_setter<'a>(
                 let instrs = if param.is_named {
                     let skip = emitter.label_gen_mut().next_regular();
                     InstrSeq::gather(vec![
-                        instr::isset_l(param_local),
-                        instr::jmp_nz(skip),
+                        instr::is_unset_l(param_local),
+                        instr::jmp_z(skip),
                         emit_expression::emit_expr(emitter, env, expr)?,
                         emit_pos::emit_pos(&ast_param.pos),
                         instr::verify_param_type(param_local),

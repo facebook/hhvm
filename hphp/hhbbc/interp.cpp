@@ -2901,7 +2901,7 @@ void in(ISS& env, const bc::IssetL& op) {
 void in(ISS& env, const bc::IsUnsetL& op) {
   effect_free(env);
   constprop(env);
-  auto const loc = locAsCell(env, op.loc1);
+  auto const loc = locRaw(env, op.loc1);
   if (loc.subtypeOf(BUninit))  return push(env, TTrue);
   if (!loc.couldBe(BUninit))   return push(env, TFalse);
   push(env, TBool);

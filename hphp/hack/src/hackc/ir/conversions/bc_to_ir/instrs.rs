@@ -979,7 +979,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IsTypeC => simple!(Hhbc::IsTypeC),
         Opcode::IsTypeL => simple!(Hhbc::IsTypeL),
         Opcode::IsTypeStructC => simple!(Hhbc::IsTypeStructC),
-        Opcode::IsUnsetL => todo!(),
+        Opcode::IsUnsetL => simple!(Hhbc::IsUnsetL),
         Opcode::IssetG => simple!(Hhbc::IssetG),
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),

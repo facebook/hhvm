@@ -802,6 +802,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::HasReifiedParent(_, _), _)
         | (Hhbc::Idx(_, _), _)
         | (Hhbc::IsLateBoundCls(_, _), _)
+        | (Hhbc::IsUnsetL(_, _), _)
         | (Hhbc::IssetG(_, _), _)
         | (Hhbc::IssetL(_, _), _)
         | (Hhbc::IssetS(_, _), _)

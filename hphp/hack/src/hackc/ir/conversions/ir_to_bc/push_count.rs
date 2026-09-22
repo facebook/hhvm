@@ -132,6 +132,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::IsTypeC(..)
             | Hhbc::IsTypeL(..)
             | Hhbc::IsTypeStructC(..)
+            | Hhbc::IsUnsetL(..)
             | Hhbc::IssetG(..)
             | Hhbc::IssetL(..)
             | Hhbc::IssetS(..)

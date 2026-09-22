@@ -496,6 +496,7 @@ pub enum Hhbc {
         TypeStructEnforceKind,
         LocId,
     ),
+    IsUnsetL(LocalId, LocId),
     IssetG(ValueId, LocId),
     IssetL(LocalId, LocId),
     IssetS([ValueId; 2], LocId),

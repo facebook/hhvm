@@ -363,8 +363,6 @@ impl<'a> State<'a> {
             Instruct::Opcode(Opcode::IncDecL(local, op)) => {
                 self.step_inc_dec_l(builder, local, op);
             }
-            Instruct::Opcode(Opcode::IsUnsetL(_local)) => todo!(),
-
             Instruct::Opcode(Opcode::PopL(local)) => {
                 self.step_pop_l(builder, local);
             }

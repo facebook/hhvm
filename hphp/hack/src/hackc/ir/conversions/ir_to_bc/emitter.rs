@@ -500,6 +500,10 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::IsTypeL(local, op)
             }
             Hhbc::IsTypeStructC(_, op, kind, _) => Opcode::IsTypeStructC(op, kind),
+            Hhbc::IsUnsetL(lid, _) => {
+                let local = self.lookup_local(lid);
+                Opcode::IsUnsetL(local)
+            }
             Hhbc::IssetG(_, _) => Opcode::IssetG,
             Hhbc::IssetL(lid, _) => {
                 let local = self.lookup_local(lid);

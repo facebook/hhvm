@@ -946,6 +946,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::IsTypeL(lid, op, _) => {
             write!(w, "is_type_l {}, {}", FmtLid(lid), FmtIsTypeOp(op))?;
         }
+        Hhbc::IsUnsetL(lid, _) => {
+            write!(w, "is_unset_l {}", FmtLid(lid))?;
+        }
         Hhbc::IssetG(vid, _) => {
             write!(w, "isset_g {}", FmtVid(func, vid, verbose))?;
         }

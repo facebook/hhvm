@@ -241,6 +241,8 @@ def _load_telemetry(
         with capture_path.open() as capture_file:
             capture = json.load(capture_file)
         for sample in capture:
+            if sample.get("normal", {}).get("event") == "PROFILE":
+                continue
             telemetry.append(
                 _project_sample(
                     sample=sample,

@@ -1017,10 +1017,10 @@ SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
-  auto isPowTwo = [](int64_t a) {
+  auto isPowTwo = [](uint64_t a) {
     return a > 0 && folly::isPowTwo<uint64_t>(a);
   };
-  auto log2 = [](int64_t a) {
+  auto log2 = [](uint64_t a) {
     assertx(a > 0);
     return folly::findLastSet<uint64_t>(a) - 1;
   };
@@ -1050,18 +1050,39 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
 
   if (!dividend->hasConstVal()) {
     // X / 2^n -> X >> n
-    if (isPowTwo(divisorVal)) {
+    if (divisorVal > 0 && isPowTwo(divisorVal)) {
       return gen(env, Shr, dividend, cns(env, log2(divisorVal)));
     }
-    // X / -2^n -> -(X >> n)
-    if (isPowTwo(-divisorVal)) {
-      return gen(env, SubInt, cns(env, 0), gen(env, Shr, dividend, cns(env, log2(-divisorVal))));
+    if (divisorVal < 0) {
+      /*
+       * X / -2^n -> -(X >> n)
+       *
+       * The magnitude is taken in unsigned because negating LLONG_MIN
+       * overflows, and since that is undefined the compiler may assume the
+       * result is positive and drop isPowTwo()'s guard, leaving log2() to
+       * assert on it.  Unsigned also lets LLONG_MIN itself fold: DivInt is
+       * only emitted where the division is exact, so the dividend is either
+       * 0 or LLONG_MIN and -(X >> 63) gives 0 or 1 as it should.
+       */
+      auto const magnitude = -static_cast<uint64_t>(divisorVal);
+      if (isPowTwo(magnitude)) {
+        return gen(env, SubInt, cns(env, 0),
+                   gen(env, Shr, dividend, cns(env, log2(magnitude))));
+      }
     }
     return nullptr;
   }
   auto const dividendVal = dividend->intVal();
 
-  assertx(dividendVal != LLONG_MIN && dividendVal % divisorVal == 0);
+  /*
+   * irgen only emits DivInt on the branch where the division came out exact.
+   * It does not, however, keep LLONG_MIN away from here: emitDiv() only
+   * diverts to DivDbl when the dividend is LLONG_MIN *and* the divisor is -1,
+   * so every other LLONG_MIN division falls through to DivInt.  That is fine,
+   * because divisorVal == -1 was handled above and the division below can no
+   * longer overflow.
+   */
+  assertx(dividendVal % divisorVal == 0);
   return cns(env, dividendVal / divisorVal);
 }
 

@@ -1,0 +1,6 @@
+-INF / itself = NAN
+INF / itself = NAN
+NAN / itself = NAN
+2.5 / itself = 1
+-1.0 / itself = 1
+1.0 / itself = 1

@@ -997,10 +997,16 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
-  // X / X -> 1.0
-  if (src1 == src2) {
-    return cns(env, 1.0);
-  }
+
+  /*
+   * There is deliberately no X / X -> 1.0 here.  That identity holds for
+   * integers, where simplifyDivInt uses it, but not for doubles: both
+   * infinities and NaN divided by themselves are NaN, and nothing in the type
+   * system can rule those out for a TDbl.  When X is a constant the fold at
+   * the end of this function already produces the right answer, so the
+   * rewrite bought nothing that is not still covered.
+   */
+
   if (!src2->hasConstVal()) return nullptr;
 
   auto const src2Val = src2->dblVal();

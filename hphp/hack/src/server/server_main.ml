@@ -577,11 +577,12 @@ let exit_if_parent_dead () =
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   exit_if_parent_dead ();
+  let is_hg_updating = Server_revision_tracker.is_hg_updating () in
   let acceptable_new_client_kind =
     let has_default_client_pending =
       Option.is_some env.nonpersistent_client_pending_command_needs_full_check
     in
-    let can_accept_clients = not @@ Server_revision_tracker.is_hg_updating () in
+    let can_accept_clients = not is_hg_updating in
     match (can_accept_clients, has_default_client_pending) with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
@@ -594,12 +595,18 @@ let serve_one_iteration genv env client_provider =
   in
   let selected_client =
     match acceptable_new_client_kind with
-    | None -> Client_provider.Not_selecting_hg_updating
+    | None -> Client_provider.Select_nothing
     | Some client_kind ->
       Client_provider.sleep_and_check
         client_provider
         ~idle_gc_slice:genv.local_config.Server_local_config.idle_gc_slice
         client_kind
+  in
+  let selected_client =
+    match (is_hg_updating, selected_client) with
+    | (true, Client_provider.Select_nothing) ->
+      Client_provider.Not_selecting_hg_updating
+    | _ -> selected_client
   in
 
   (* Server_progress: By updating status now at the start of the serve_one_iteration,

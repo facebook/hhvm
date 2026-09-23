@@ -50,6 +50,7 @@
   test_gconst_file
   test_get_dependent_classes
   test_getfundeps
+  test_hg_update_progress
   test_identify
   test_ignore_fixme_hhi
   test_infer_type

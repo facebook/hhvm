@@ -66,7 +66,7 @@ type select_outcome =
   | Select_new of handoff
   | Select_nothing
   | Select_exception of Exception.t
-  | Not_selecting_hg_updating
+  | Not_selecting_deferring of string list
 
 let provider_from_file_descriptors
     (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd) =

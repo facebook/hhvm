@@ -267,6 +267,9 @@ type t = {
       (** Selects a search provider for autocomplete and symbol search *)
   predeclare_ide: bool;
   longlived_workers: bool;
+  block_client_connections_while_deferring: bool;
+      (** Block client admission while Eden defers file changes. Hg states only
+          block when [hg_aware] is also enabled. *)
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;

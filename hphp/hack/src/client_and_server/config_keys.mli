@@ -497,6 +497,8 @@ module Hhconf : sig
 
   val prefetch_decls_threshold : string
 
+  val block_client_connections_while_deferring : string
+
   val hg_aware : string
 
   val hg_aware_parsing_restart_threshold : string

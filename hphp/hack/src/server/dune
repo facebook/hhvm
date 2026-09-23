@@ -1,4 +1,10 @@
 (library
+ (name deferral_tracker)
+ (wrapped false)
+ (modules deferral_tracker)
+ (libraries hg_states server_config server_notifier utils_core))
+
+(library
  (name server_symbol_info_service_utils)
  (wrapped false)
  (modules symbol_info_service_utils)
@@ -175,6 +181,7 @@
     custom_error_config
     decl_fold_options
     decl_parser_options
+    deferral_tracker
     direct_decl_service
     findmytests_stubs
     folly_stubs

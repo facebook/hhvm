@@ -558,6 +558,20 @@ let maybe_changes_available (t : t) : bool option =
       let (readable, _, _) = Caml_unix.select [fd] [] [] 0.0 in
       not (List.is_empty readable))
 
+let get_deferring_states (t : t) : string list =
+  match t with
+  | EdenfsFileWatcher { instance; _ } ->
+    Edenfs_watcher.get_asserted_states instance
+    |> handle_edenfs_watcher_result
+    |> List.sort ~compare:String.compare
+  | Watchman _ ->
+    (* Watchman deferral tracking is intentionally unsupported. *)
+    []
+  | IndexOnly _
+  | Dfind _
+  | MockChanges _ ->
+    []
+
 let get_repo_states_telemetry (t : t) : Telemetry.t =
   let (current_states, past_states) =
     match t with

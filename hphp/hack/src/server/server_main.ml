@@ -337,7 +337,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     | Client_provider.Select_new _ -> `Sync
     | Client_provider.Select_nothing
     | Client_provider.Select_exception _
-    | Client_provider.Not_selecting_hg_updating ->
+    | Client_provider.Not_selecting_deferring _ ->
       if Float.(start_time - env.last_notifier_check_time > 0.5) then
         `Async
       else
@@ -508,7 +508,7 @@ let idle_if_no_client env waiting_client =
   match waiting_client with
   | Client_provider.Select_nothing
   | Client_provider.Select_exception _
-  | Client_provider.Not_selecting_hg_updating ->
+  | Client_provider.Not_selecting_deferring _ ->
     let {
       RecheckLoopStats.per_batch_telemetry;
       total_changed_files_count;
@@ -577,21 +577,24 @@ let exit_if_parent_dead () =
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   exit_if_parent_dead ();
-  let is_hg_updating = Server_revision_tracker.is_hg_updating () in
+  let admission_decision =
+    Deferral_tracker.should_accept_client_connection
+      ~local_config:genv.local_config
+      genv.notifier
+  in
   let acceptable_new_client_kind =
     let has_default_client_pending =
       Option.is_some env.nonpersistent_client_pending_command_needs_full_check
     in
-    let can_accept_clients = not is_hg_updating in
-    match (can_accept_clients, has_default_client_pending) with
+    match (admission_decision, has_default_client_pending) with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
-     * can still be handled - unless we are in hg.update state, where we want to
+     * can still be handled - unless deferral blocks admission, where we want to
      * stop accepting any new clients, with the exception of forced ones. *)
-    | (true, true) -> Some `Priority
-    | (true, false) -> Some `Any
-    | (false, true) -> None
-    | (false, false) -> Some `Force_dormant_start_only
+    | (Deferral_tracker.Ok, true) -> Some `Priority
+    | (Deferral_tracker.Ok, false) -> Some `Any
+    | (Deferral_tracker.Deferred_by _, true) -> None
+    | (Deferral_tracker.Deferred_by _, false) -> Some `Force_dormant_start_only
   in
   let selected_client =
     match acceptable_new_client_kind with
@@ -603,9 +606,9 @@ let serve_one_iteration genv env client_provider =
         client_kind
   in
   let selected_client =
-    match (is_hg_updating, selected_client) with
-    | (true, Client_provider.Select_nothing) ->
-      Client_provider.Not_selecting_hg_updating
+    match (admission_decision, selected_client) with
+    | (Deferral_tracker.Deferred_by states, Client_provider.Select_nothing) ->
+      Client_provider.Not_selecting_deferring states
     | _ -> selected_client
   in
 
@@ -642,8 +645,11 @@ let serve_one_iteration genv env client_provider =
         | Full_check_done -> (Server_progress.DReady, "ready")
       in
       Server_progress.write ~include_in_logs:false ~disposition "%s" msg
-    | Client_provider.Not_selecting_hg_updating ->
-      Server_progress.write ~include_in_logs:false "hg-transaction"
+    | Client_provider.Not_selecting_deferring states ->
+      Server_progress.write
+        ~include_in_logs:false
+        "waiting for %s"
+        (String.concat ~sep:", " states)
     | Client_provider.Select_new _ ->
       Server_progress.write ~include_in_logs:false "working"
   end;
@@ -692,7 +698,7 @@ let serve_one_iteration genv env client_provider =
     match selected_client with
     | Client_provider.Select_nothing
     | Client_provider.Select_exception _
-    | Client_provider.Not_selecting_hg_updating ->
+    | Client_provider.Not_selecting_deferring _ ->
       env
     | Client_provider.Select_new { Client_provider.client; m2s_sequence_number }
       -> begin
@@ -814,70 +820,76 @@ let priority_client_interrupt_handler genv client_provider :
  fun env ->
   let t = Unix.gettimeofday () in
   Hh_logger.log "Handling message on priority socket.";
-  (* For non-persistent clients that don't synchronize file contents, users
-   * expect that a query they do immediately after saving a file will reflect
-   * this file contents. Async notifications are not always fast enough to
-   * guarantee it, so we need an additional sync query before accepting such
-   * client *)
-  let (env, updates, clock, _updates_stale, _telemetry) =
-    query_notifier genv env `Sync t
-  in
-  let n_updates = Relative_path.Set.cardinal updates in
-  if n_updates > 0 then (
+  match
+    Deferral_tracker.should_accept_client_connection
+      ~local_config:genv.local_config
+      genv.notifier
+  with
+  | Deferral_tracker.Deferred_by states ->
     Hh_logger.log
-      "Interrupted by file watcher sync query: %d files changed at watchclock %s"
-      n_updates
-      (Server_env.show_clock clock);
-    ( {
-        env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing updates;
-        clock;
-      },
-      cancel_due_to_file_changes updates clock )
-  ) else
-    let idle_gc_slice = genv.local_config.Server_local_config.idle_gc_slice in
-    let select_outcome =
-      if Server_revision_tracker.is_hg_updating () then (
-        Hh_logger.log "Won't handle client message: hg is updating.";
-        Client_provider.Not_selecting_hg_updating
-      ) else
-        Client_provider.sleep_and_check client_provider ~idle_gc_slice `Priority
-    in
-    let env =
-      match select_outcome with
-      | Client_provider.Select_nothing ->
-        (* This is possible because client might have gone away during
-         * sleep_and_check. *)
-        Hh_logger.log "Client went away.";
-        env
-      | Client_provider.Select_exception e ->
-        Hh_logger.log
-          "Exception during client FD select: %s"
-          (Exception.get_ctor_string e);
-        env
-      | Client_provider.Not_selecting_hg_updating ->
-        Hh_logger.log "hg is updating.";
-        env
-      | Client_provider.Select_new
-          { Client_provider.client; m2s_sequence_number } ->
-        Hh_logger.log
-          "Serving new client obtained from monitor handoff #%d"
-          m2s_sequence_number;
-        (match
-           Client_command_handler.handle_client_command_or_persistent_connection
-             genv
-             env
-             client
-         with
-        | Server_utils.Needs_full_recheck { reason; _ } ->
-          failwith
-            ("unexpected command needing full recheck in priority channel: "
-            ^ reason)
-        | Server_utils.Done env -> env)
-    in
-
+      "Won't handle client message: waiting for %s."
+      (String.concat ~sep:", " states);
     (env, Multi_threaded_call.Continue)
+  | Deferral_tracker.Ok ->
+    (* For non-persistent clients that don't synchronize file contents, users
+     * expect that a query they do immediately after saving a file will reflect
+     * this file contents. Async notifications are not always fast enough to
+     * guarantee it, so we need an additional sync query before accepting such
+     * client *)
+    let (env, updates, clock, _updates_stale, _telemetry) =
+      query_notifier genv env `Sync t
+    in
+    let n_updates = Relative_path.Set.cardinal updates in
+    if n_updates > 0 then (
+      Hh_logger.log
+        "Interrupted by file watcher sync query: %d files changed at watchclock %s"
+        n_updates
+        (Server_env.show_clock clock);
+      ( {
+          env with
+          disk_needs_parsing =
+            Relative_path.Set.union env.disk_needs_parsing updates;
+          clock;
+        },
+        cancel_due_to_file_changes updates clock )
+    ) else
+      let idle_gc_slice = genv.local_config.Server_local_config.idle_gc_slice in
+      let select_outcome =
+        Client_provider.sleep_and_check client_provider ~idle_gc_slice `Priority
+      in
+      let env =
+        match select_outcome with
+        | Client_provider.Select_nothing ->
+          (* This is possible because client might have gone away during
+           * sleep_and_check. *)
+          Hh_logger.log "Client went away.";
+          env
+        | Client_provider.Select_exception e ->
+          Hh_logger.log
+            "Exception during client FD select: %s"
+            (Exception.get_ctor_string e);
+          env
+        | Client_provider.Not_selecting_deferring _ -> env
+        | Client_provider.Select_new
+            { Client_provider.client; m2s_sequence_number } ->
+          Hh_logger.log
+            "Serving new client obtained from monitor handoff #%d"
+            m2s_sequence_number;
+          (match
+             Client_command_handler
+             .handle_client_command_or_persistent_connection
+               genv
+               env
+               client
+           with
+          | Server_utils.Needs_full_recheck { reason; _ } ->
+            failwith
+              ("unexpected command needing full recheck in priority channel: "
+              ^ reason)
+          | Server_utils.Done env -> env)
+      in
+
+      (env, Multi_threaded_call.Continue)
 
 let setup_interrupts env client_provider =
   {

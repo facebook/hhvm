@@ -552,6 +552,9 @@ module Hhconf = struct
 
   let prefetch_decls_threshold = hhconf_key "prefetch_decls_threshold"
 
+  let block_client_connections_while_deferring =
+    hhconf_key "block_client_connections_while_deferring"
+
   let hg_aware = hhconf_key "hg_aware"
 
   let hg_aware_parsing_restart_threshold =

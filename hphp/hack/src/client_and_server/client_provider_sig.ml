@@ -24,7 +24,7 @@ module type S = sig
     | Select_new of handoff
     | Select_nothing
     | Select_exception of Exception.t
-    | Not_selecting_hg_updating
+    | Not_selecting_deferring of string list
 
   exception Client_went_away
 

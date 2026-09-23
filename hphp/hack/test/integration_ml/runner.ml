@@ -44,7 +44,7 @@ let tests =
     ("gconst_file", run Test_gconst_file.test);
     ("get_dependent_classes", run Test_get_dependent_classes.test);
     ("getfundeps", run Test_getfundeps.test);
-    ("hg_update_progress", run Test_hg_update_progress.test);
+    ("pending_client_deferral_progress", run Test_hg_update_progress.test);
     ("identify", run Test_identify.test);
     ("ignore_fixme_hhi", run Test_ignore_fixme_hhi.test);
     ("infer_type", run Test_infer_type.test);

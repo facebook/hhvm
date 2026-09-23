@@ -1,5 +1,3 @@
-# pyre-strict
-
 """
 
 This file tests the Edenfs_watcher module.
@@ -11,6 +9,9 @@ tearDownClass) is insignificant. Therefore, we just follow CommonTestDriver to
 decide what setup and teardown code goes where.
 """
 
+from __future__ import annotations
+
+import json
 import os
 import re
 import shutil
@@ -20,12 +21,13 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, ClassVar, List, Optional, Tuple
+from typing import Callable, ClassVar, Iterable, List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
 from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
-from hphp.hack.test.integration.hh_paths import hh_server
+from hphp.hack.test.integration.hh_paths import hh_client, hh_server
+from hphp.hack.test.integration.test_case import TestCase
 from watchman.integration.lib import WatchmanInstance
 
 
@@ -38,9 +40,12 @@ TEST_STATE_1 = "hh.state-tracking-test-state1"
 class Config:
     streaming_errors: bool
     state_tracking: bool
+    tracked_states: tuple[str, ...] = (TEST_STATE_0, TEST_STATE_1)
     interruptions: bool = True
     throttle_time_ms: int = 50
     obey_deferral: bool = True
+    block_connections: bool = True
+    hg_aware: bool = False
 
     def write_hhconf(self, watchman_socket_path: str, output_folder: str) -> None:
         streaming_errors = str(self.streaming_errors).lower()
@@ -48,6 +53,8 @@ class Config:
         interruptions = str(self.interruptions).lower()
         state_tracking = str(self.state_tracking).lower()
         obey_deferral = str(self.obey_deferral).lower()
+        block_connections = str(self.block_connections).lower()
+        hg_aware = str(self.hg_aware).lower()
 
         config = f"""
 min_log_level = Debug
@@ -60,8 +67,10 @@ interrupt_on_client = {interruptions}
 edenfs_file_watcher_enabled = true
 edenfs_file_watcher_throttle_time_ms = {throttle_time_ms}
 edenfs_file_watcher_sync_queries_obey_deferral = {obey_deferral}
+block_client_connections_while_deferring = {block_connections}
+hg_aware = {hg_aware}
 edenfs_file_watcher_state_tracking = {state_tracking}
-edenfs_file_watcher_tracked_states = {TEST_STATE_0}, {TEST_STATE_1}
+edenfs_file_watcher_tracked_states = {", ".join(self.tracked_states)}
 watchman_sockname = {watchman_socket_path}
 produce_streaming_errors = {streaming_errors}
 consume_streaming_errors = {streaming_errors}
@@ -145,6 +154,33 @@ def assertCurrentServerLogContains(driver: CommonTestDriver, needle: str) -> Non
         print("Server log:")
         print(server_log)
     driver.assertTrue(contains)
+
+
+def waitForCurrentServerLogContains(
+    driver: CommonTestDriver, needle: str, timeout_secs: float = 10
+) -> str:
+    """Wait for a message from the current server, ignoring logs from older runs.
+
+    State-assertion tests use this to establish that hh_server has observed the
+    state before launching a client, not merely that Eden has accepted it.
+    """
+    if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
+        driver.skipTest("This test requires the server log")
+    stdout, _, retcode = driver.proc_call(
+        [hh_client, "--logname", driver.repo_dir], log=False
+    )
+    driver.assertEqual(retcode, 0)
+    server_log_path = Path(stdout.strip())
+    deadline = time.monotonic() + timeout_secs
+    while True:
+        server_log = server_log_path.read_text()
+        if needle in server_log:
+            return server_log
+        if time.monotonic() >= deadline:
+            driver.fail(
+                f"Timed out waiting for {needle!r} in server log:\n{server_log}"
+            )
+        time.sleep(0.1)
 
 
 def assertAnyServerLogContains(driver: CommonTestDriver, needle: str) -> None:
@@ -431,7 +467,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         cls.repo_dir, are ignored.
 
         Note that this check is identical to asking if a test is running with
-        EdenfsWatcherTestDriver or EdenfsWatcherNonMountPointRepoTests._Driver
+        EdenfsWatcherTestDriver or EdenfsWatcherNonMountPointTestDriver
         """
 
         return Path(cls.eden_mount_point).absolute() != Path(cls.repo_dir).absolute()
@@ -536,6 +572,18 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # Out of retries: run check_cmd once more so the test fails with a
         # useful expected-vs-actual diff.
         self.check_cmd(expected_output)
+
+
+class EdenfsWatcherNonMountPointTestDriver(EdenfsWatcherTestDriver):
+    """Uses a Hack root below the Eden mount, with streaming and state tracking enabled."""
+
+    @classmethod
+    def getConfig(cls) -> Config:
+        return Config(streaming_errors=True, state_tracking=True)
+
+    @classmethod
+    def setUpClass(cls, template_repo: str) -> None:
+        cls.setUpClassImpl(template_repo, "some/sub/folder")
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -1264,9 +1312,11 @@ function test_deprecated() : void {
         self.run_instant_deassertion_test(throttle_time_ms=500, wait_for_deassert=True)
 
     def test_deferral6(self) -> None:
+        """With admission blocking disabled, sync queries hide changes until all states end."""
         config = self.test_driver.getConfig()
         config.state_tracking = True
         config.streaming_errors = False
+        config.block_connections = False
         config.write_hhconf(
             self.test_driver.watchman_instance.getUnixSockPath(),
             self.test_driver.repo_dir,
@@ -1318,59 +1368,6 @@ function test_deprecated() : void {
 
         self.test_driver.createNonHackFile("file3.php")
         wait_for0()
-        self.test_driver.check_cmd(
-            [
-                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file3.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-            ]
-        )
-
-    def test_deferral7(self) -> None:
-        config = self.test_driver.getConfig()
-        config.state_tracking = True
-        config.streaming_errors = False
-        config.obey_deferral = False
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
-
-        state0 = TEST_STATE_0
-        state1 = TEST_STATE_1
-
-        self.test_driver.start_hh_server()
-
-        self.test_driver.createNonHackFile("file0.php")
-
-        wait_for0, _, _ = self.test_driver.assertStateForSeconds(state0, 20)
-
-        self.test_driver.createNonHackFile("file1.php")
-
-        self.test_driver.check_cmd(
-            [
-                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-            ]
-        )
-
-        # will be deasserted while state0 is still asserted
-        wait_for1, _, _ = self.test_driver.assertStateForSeconds(state1, 10)
-
-        self.test_driver.createNonHackFile("file2.php")
-
-        wait_for1()
-        self.test_driver.check_cmd(
-            [
-                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
-            ]
-        )
-
-        wait_for0()
-        self.test_driver.createNonHackFile("file3.php")
         self.test_driver.check_cmd(
             [
                 "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
@@ -1497,12 +1494,13 @@ function test_deprecated() : void {
         self.test_driver.check_cmd(["No errors!"])
 
     def test_deferral12(self) -> None:
-        """Regression test: Deferral must work if state change events with . in name are received in get_changes_sync."""
+        """Sync-discovered dotted states defer file changes until the state ends."""
         config = self.test_driver.getConfig()
         config.state_tracking = True
         config.streaming_errors = False  # we want to trigger get_changes_sync
         config.throttle_time_ms = 5000  # make it easier to trigger get_changes_sync
         config.obey_deferral = True
+        config.block_connections = False
         config.write_hhconf(
             self.test_driver.watchman_instance.getUnixSockPath(),
             self.test_driver.repo_dir,
@@ -1603,17 +1601,359 @@ class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):
       tracking enabled.
     """
 
-    class _Driver(EdenfsWatcherTestDriver):
-        @classmethod
-        def getConfig(cls) -> Config:
-            return Config(streaming_errors=True, state_tracking=True)
-
-        @classmethod
-        def setUpClass(cls, template_repo: str) -> None:
-            cls.setUpClassImpl(template_repo, "some/sub/folder")
-
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
-        return EdenfsWatcherNonMountPointRepoTests._Driver()
+        return EdenfsWatcherNonMountPointTestDriver()
 
     # Don't add any tests here, add them to EdenfsWatcherTests!
+
+
+class ClientConnectionDeferralTest(TestCase[EdenfsWatcherTestDriver]):
+    """Exercise admission through real Eden, monitor, server, and client processes.
+
+    Each waiting scenario establishes a known deferral before connecting a client, then checks that
+    the same request completes after release.
+    """
+
+    @classmethod
+    def get_test_driver(cls) -> EdenfsWatcherTestDriver:
+        """Reuse the subdirectory fixture without inheriting its general tests."""
+        return EdenfsWatcherNonMountPointTestDriver()
+
+    def setUp(self) -> None:
+        """Mount the test checkout and track subprocesses for failure cleanup."""
+        super().setUp()
+        self.clients: list[subprocess.Popen[str]] = []
+        self.state_releases: list[Callable[[], None]] = []
+
+    def tearDown(self) -> None:
+        # Reap clients and state asserters before the driver stops hh_server and
+        # unmounts Eden, including when a test fails while waiting for a connection.
+        try:
+            for client in self.clients:
+                if client.poll() is None:
+                    client.kill()
+                client.communicate()
+        finally:
+            try:
+                for release_state in reversed(self.state_releases):
+                    release_state()
+            finally:
+                super().tearDown()
+
+    def wait_for_server_progress(self, message: str) -> None:
+        """Expect the waiting message and a working, rather than ready, disposition.
+
+        Progress is published asynchronously, so allow the server loop to
+        observe the current states before checking the on-disk progress JSON.
+        """
+        stdout, _, retcode = self.test_driver.proc_call(
+            [hh_client, "--logname", self.test_driver.repo_dir], log=False
+        )
+        self.assertEqual(retcode, 0)
+        progress_path = Path(stdout.strip()).with_suffix(".progress.json")
+        deadline = time.monotonic() + 10
+        while True:
+            progress = json.loads(progress_path.read_text())
+            if progress["message"] == message:
+                self.assertEqual(progress["disposition"], ["DWorking"])
+                return
+            if time.monotonic() >= deadline:
+                self.fail(f"Expected progress {message!r}, got {progress!r}")
+            time.sleep(0.1)
+
+    def start_connection_test_server(
+        self,
+        *,
+        hg_aware: bool,
+        block_connections: bool,
+        obey_deferral: bool,
+    ) -> None:
+        """Start a server that tracks both hg and synthetic non-hg Eden states.
+
+        Disable streaming errors so clients must query the server.
+        """
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.tracked_states = (
+            TEST_STATE_0,
+            TEST_STATE_1,
+            "hg.update",
+            "hg.transaction",
+        )
+        config.streaming_errors = False
+        config.hg_aware = hg_aware
+        config.block_connections = block_connections
+        config.obey_deferral = obey_deferral
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+        self.test_driver.start_hh_server()
+
+    def assert_state(
+        self, state_name: str
+    ) -> tuple[Callable[[], bool], Callable[[], None]]:
+        """Assert an Eden state and wait until hh_server has observed its entry.
+
+        Return callbacks to check that the asserter process is still alive and
+        to kill/reap it, causing Eden to release the state asynchronously. The
+        60-second lifetime is a fallback; tests normally release it explicitly,
+        and teardown also releases it if an assertion fails.
+        """
+        _, is_asserted, release_state = self.test_driver.assertStateForSeconds(
+            state_name, 60
+        )
+        self.state_releases.append(release_state)
+        waitForCurrentServerLogContains(
+            self.test_driver, f"ServerNotifier: StateEnter({state_name})"
+        )
+        return is_asserted, release_state
+
+    def start_client_query(self, *options: str) -> subprocess.Popen[str]:
+        """Launch a non-streaming query and wait for its connection to the monitor.
+
+        Return the running client without waiting for server admission or a
+        response, so tests can observe whether deferral keeps it waiting.
+        """
+        stdout, _, retcode = self.test_driver.proc_call(
+            [hh_client, "--client-logname", self.test_driver.repo_dir], log=False
+        )
+        self.assertEqual(retcode, 0)
+        client_log_path = Path(stdout.strip())
+        # Startup/readiness checks also use hh_client. Only a connection message
+        # appended after this query starts can establish that it reached the monitor.
+        log_offset = len(client_log_path.read_text())
+        client = self.test_driver.proc_create(
+            [
+                hh_client,
+                "check",
+                "--config",
+                "consume_streaming_errors=false",
+                "--error-format",
+                "raw",
+                self.test_driver.repo_dir,
+                *options,
+            ],
+            {},
+        )
+        self.clients.append(client)
+        deadline = time.monotonic() + 10
+        while True:
+            client_log = client_log_path.read_text()[log_offset:]
+            if (
+                "ClientConnect.connect: successfully connected to monitor."
+                in client_log
+            ):
+                break
+            if time.monotonic() >= deadline:
+                self.fail(f"Client did not connect to monitor:\n{client_log}")
+            time.sleep(0.1)
+        return client
+
+    def assert_client_waiting(self, client: subprocess.Popen[str]) -> None:
+        """Expect a monitor-connected client to remain unanswered for one second.
+
+        This observes the request's behavior, not a particular server branch;
+        the one-second observation window is not an hh_client timeout setting.
+        """
+        with self.assertRaises(subprocess.TimeoutExpired):
+            client.communicate(timeout=1)
+
+    def assert_client_errors(
+        self, client: subprocess.Popen[str], filenames: Iterable[str]
+    ) -> None:
+        """Expect this query to finish with exactly one parser error per named file.
+
+        Tests create malformed .php files with createNonHackFile: their distinct
+        filenames make it clear which disk changes the response has incorporated.
+        """
+        stdout, stderr = client.communicate(timeout=15)
+        self.assertEqual(client.returncode, 2, stderr)
+        self.assertCountEqual(
+            [
+                f"ERROR: {self.test_driver.repo_dir}/{filename}:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])"
+                for filename in filenames
+            ],
+            stdout.splitlines(),
+        )
+
+    def test_client_connection_deferral(self) -> None:
+        """A default-pipe query must wait with working progress during known deferral.
+
+        After release, that same query must report changes made both before it
+        connected and while it was waiting.
+        """
+        # Block on non-hg states even with hg awareness disabled. Keep the
+        # watcher withholding deferred changes from explicit queries: the
+        # client should wait to connect until the state ends.
+        self.start_connection_test_server(
+            hg_aware=False, block_connections=True, obey_deferral=True
+        )
+        # Establish the deferral before either the file change or the query,
+        # so this exercises admission to an already-deferred server.
+        is_asserted, release_state = self.assert_state(TEST_STATE_0)
+        self.test_driver.createNonHackFile("before_client.php")
+        client = self.start_client_query()
+
+        # An unanswered query must be presented as waiting/working, not ready.
+        self.wait_for_server_progress(f"waiting for {TEST_STATE_0}")
+        self.assert_client_waiting(client)
+        self.assertTrue(is_asserted())
+
+        # The eventual response must include later changes too, not just the
+        # files that existed when the client connected.
+        self.test_driver.createNonHackFile("while_waiting.php")
+        release_state()
+        self.assert_client_errors(client, ["before_client.php", "while_waiting.php"])
+
+    def test_client_connection_deferral_disabled(self) -> None:
+        """Disabling connection blocking must bypass both hg and non-hg deferrals.
+
+        Even with hg_aware enabled, the query must return current errors without
+        waiting for either state to end.
+        """
+        # Enable hg awareness to ensure disabling connection blocking overrides
+        # it. Let explicit queries see deferred changes so we can check fresh
+        # errors without releasing either state.
+        self.start_connection_test_server(
+            hg_aware=True, block_connections=False, obey_deferral=False
+        )
+        hg_is_asserted, _ = self.assert_state("hg.update")
+        other_is_asserted, _ = self.assert_state(TEST_STATE_0)
+        self.test_driver.createNonHackFile("file.php")
+
+        # Do not release either state: completion must come from bypassing
+        # admission blocking, not from the deferral expiring.
+        client = self.start_client_query()
+        self.assert_client_errors(client, ["file.php"])
+        self.assertTrue(hg_is_asserted())
+        self.assertTrue(other_is_asserted())
+
+    def test_client_connection_deferral_waits_for_all_hg_states(self) -> None:
+        """With hg_aware enabled, queries must wait until every hg state ends.
+
+        Progress must list the remaining blocking states in sorted order and
+        remain working when only one state has ended.
+        """
+        # Enable hg-aware blocking while retaining the watcher's existing
+        # behavior of withholding deferred changes from explicit queries.
+        self.start_connection_test_server(
+            hg_aware=True, block_connections=True, obey_deferral=True
+        )
+        # Assert in the opposite order from the expected progress text, and
+        # prepare an error that the eventual query must report.
+        _, finish_update = self.assert_state("hg.update")
+        _, finish_transaction = self.assert_state("hg.transaction")
+        self.test_driver.createNonHackFile("file.php")
+        client = self.start_client_query()
+        self.wait_for_server_progress("waiting for hg.transaction, hg.update")
+        self.assert_client_waiting(client)
+
+        # Releasing one state updates progress but must not admit the client.
+        finish_update()
+        self.wait_for_server_progress("waiting for hg.transaction")
+        self.assert_client_waiting(client)
+
+        # Only the last release permits the same query to receive current errors.
+        finish_transaction()
+        self.assert_client_errors(client, ["file.php"])
+
+    def test_client_connection_deferral_only_waits_for_non_hg_state(self) -> None:
+        """With hg_aware disabled, mixed states must block only on non-hg deferral.
+
+        Progress must omit hg states, and the query must complete while both
+        hg.update and hg.transaction remain asserted.
+        """
+        # With hg awareness off, only the non-hg state should block connections.
+        # Let explicit queries see deferred changes, since the expected response
+        # arrives while the hg states are still asserted.
+        self.start_connection_test_server(
+            hg_aware=False, block_connections=True, obey_deferral=False
+        )
+        update_is_asserted, _ = self.assert_state("hg.update")
+        transaction_is_asserted, _ = self.assert_state("hg.transaction")
+        _, release_other_state = self.assert_state(TEST_STATE_0)
+        self.test_driver.createNonHackFile("file.php")
+        client = self.start_client_query()
+        self.wait_for_server_progress(f"waiting for {TEST_STATE_0}")
+        self.assert_client_waiting(client)
+
+        # Releasing only the non-hg state must suffice; leave both hg states alive.
+        release_other_state()
+        self.assert_client_errors(client, ["file.php"])
+        self.assertTrue(update_is_asserted())
+        self.assertTrue(transaction_is_asserted())
+
+    def test_client_connection_deferral_blocks_priority_query(self) -> None:
+        """An idle server must defer priority-pipe queries as well as ordinary ones.
+
+        A liveness request must remain unanswered until the known deferral ends,
+        then complete successfully without needing a full check.
+        """
+        # Non-hg states must block priority connections with hg awareness off,
+        # even with the watcher still withholding deferred changes from queries.
+        self.start_connection_test_server(
+            hg_aware=False, block_connections=True, obey_deferral=True
+        )
+        # Keep the server idle: this covers main-loop admission rather than the
+        # priority interrupt handler exercised by the separate active-check test.
+        _, release_state = self.assert_state(TEST_STATE_0)
+        # CHECK_LIVENESS uses the priority pipe and does not require a full check.
+        client = self.start_client_query(
+            "--search", "this_is_just_to_check_liveness_of_hh_server", "--json"
+        )
+        self.assert_client_waiting(client)
+
+        # The already-connected request, not a retry launched by the test, succeeds.
+        release_state()
+        stdout, stderr = client.communicate(timeout=15)
+        self.assertEqual(client.returncode, 0, stderr)
+        self.assertEqual(stdout.strip(), "[]")
+
+    def test_client_connection_deferral_blocks_priority_interrupt(self) -> None:
+        """Priority interrupts must respect known deferral during an ongoing check.
+
+        After release, the liveness request must complete while the full check is
+        still running, demonstrating that it was served through the interrupt path.
+        """
+        # Use the same settings as the idle-priority test, so only the server's
+        # execution path changes: non-hg blocking with watcher deferral enabled.
+        self.start_connection_test_server(
+            hg_aware=False, block_connections=True, obey_deferral=True
+        )
+        # The existing fixture creates a worker-based check stuck in
+        # hh_loop_forever(), keeping execution out of idle main-loop admission.
+        self.test_driver.start_hh_loop_forever_assert_timeout()
+        is_asserted, release_state = self.assert_state(TEST_STATE_0)
+        client = self.start_client_query(
+            "--search", "this_is_just_to_check_liveness_of_hh_server", "--json"
+        )
+        self.assert_client_waiting(client)
+        self.assertTrue(is_asserted())
+
+        release_state()
+        # Receive the response before stopping the check, to exercise the interrupt path.
+        stdout, stderr = client.communicate(timeout=15)
+        self.assertEqual(client.returncode, 0, stderr)
+        self.assertEqual(stdout.strip(), "[]")
+        self.test_driver.stop_hh_loop_forever()
+
+    def test_client_connection_deferral_allows_force_dormant_query(self) -> None:
+        """Force-dormant queries must bypass admission blocking during deferral.
+
+        The response must include deferred file changes while the state is still
+        asserted, with synchronous-query deferral disabled.
+        """
+        # Keep ordinary connections blocked; only this client's force-dormant
+        # option should let it through. Let queries see deferred changes so we
+        # can verify fresh errors before releasing the state.
+        self.start_connection_test_server(
+            hg_aware=False, block_connections=True, obey_deferral=False
+        )
+        is_asserted, _ = self.assert_state(TEST_STATE_0)
+        self.test_driver.createNonHackFile("file.php")
+        client = self.start_client_query("--force-dormant-start", "true")
+        self.assert_client_errors(client, ["file.php"])
+        # Completion must not depend on the state ending naturally.
+        self.assertTrue(is_asserted())

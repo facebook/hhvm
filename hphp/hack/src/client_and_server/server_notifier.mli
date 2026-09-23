@@ -57,5 +57,11 @@ val notification_fd : t -> Caml_unix.file_descr option
     for a subsequent call to `get_changes_{sync,async}` returning any changes. *)
 val maybe_changes_available : t -> bool option
 
+(** Returns the asserted states causing Eden to defer asynchronous file changes,
+    sorted by name. Watchman deferral tracking is unsupported; all non-Eden
+    backends return an empty list. Watcher errors are handled as in
+    [get_changes_sync]. *)
+val get_deferring_states : t -> string list
+
 (** Returns telemetry about asserted repo states *)
 val get_repo_states_telemetry : t -> Telemetry.t

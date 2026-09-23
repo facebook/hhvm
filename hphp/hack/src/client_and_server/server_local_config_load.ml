@@ -59,6 +59,7 @@ let default =
     enable_type_check_filter_files = false;
     predeclare_ide = false;
     longlived_workers = false;
+    block_client_connections_while_deferring = true;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
@@ -585,6 +586,13 @@ let load_
     bool_if_min_version
       Config_keys.Hhconf.longlived_workers
       ~default:default.longlived_workers
+      ~current_version
+      config
+  in
+  let block_client_connections_while_deferring =
+    bool_if_min_version
+      Config_keys.Hhconf.block_client_connections_while_deferring
+      ~default:default.block_client_connections_while_deferring
       ~current_version
       config
   in
@@ -1188,6 +1196,7 @@ let load_
     ide_symbolindex_search_provider;
     predeclare_ide;
     longlived_workers;
+    block_client_connections_while_deferring;
     hg_aware;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;

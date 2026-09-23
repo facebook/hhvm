@@ -107,3 +107,19 @@ class TestPackageLintFull(TestCase[PackageLintFullDriver]):
         for file_name in cases:
             with self.subTest(msg=f"{file_name}"):
                 self.test_driver.assert_json_matches(file_name)
+
+    def test_rejects_directory_input(self) -> None:
+        self.test_driver.write_load_config()
+        file_path = os.path.join(self.test_driver.repo_dir, "foo/targets.php")
+
+        for target, candidates in (
+            (self.test_driver.repo_dir, file_path),
+            (file_path, self.test_driver.repo_dir),
+        ):
+            with self.subTest(target=target, candidates=candidates):
+                stdout, stderr, retcode = self.test_driver.run_check(
+                    options=["--package-lint-full", target, candidates]
+                )
+                self.assertEqual("", stdout)
+                self.assertIn("Path is a directory, only files are allowed", stderr)
+                self.assertEqual(10, retcode)

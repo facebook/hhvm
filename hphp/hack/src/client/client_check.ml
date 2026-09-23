@@ -93,6 +93,16 @@ let expand_path file =
       exit 2
     )
 
+let expand_file_path file =
+  let path = expand_path file in
+  if Disk.is_directory path then begin
+    Utils.prerr_endlinef
+      "Path is a directory, only files are allowed: '%s'"
+      file;
+    raise Exit_status.(Exit_with Input_error)
+  end;
+  path
+
 let parse_position_string ~(split_on : string) arg =
   let tpos = Str.split (Str.regexp split_on) arg in
   try
@@ -330,7 +340,7 @@ let main_internal
       match filename with
       | "-" ->
         Server_command_types.FileContent (Sys_utils.read_stdin_to_string ())
-      | _ -> Server_command_types.FileName (expand_path filename)
+      | _ -> Server_command_types.FileName (expand_file_path filename)
     in
     let file_inputs = List.map ~f:file_input filenames in
     let error_filter =
@@ -1119,7 +1129,7 @@ let main_internal
       Printf.eprintf "%s\n" error;
       Lwt.return (Exit_status.Input_error, telemtry))
   | Client_env.MODE_PACKAGE_LINT file ->
-    let file = expand_path file in
+    let file = expand_file_path file in
     let%lwt (results, telemetry) =
       rpc args @@ Server_command_types.PACKAGE_LINT file
     in
@@ -1130,8 +1140,8 @@ let main_internal
     |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_PACKAGE_LINT_FULL (file, candidates) ->
-    let file = expand_path file in
-    let candidates = List.map candidates ~f:expand_path in
+    let file = expand_file_path file in
+    let candidates = List.map candidates ~f:expand_file_path in
     let%lwt (results, telemetry) =
       rpc args @@ Server_command_types.PACKAGE_LINT_FULL (file, candidates)
     in

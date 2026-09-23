@@ -175,6 +175,21 @@ class TestStatusSingle(common_tests.CommonTests):
                 len(file_errors) > 0, f"No errors found for typing_error_multi{i}.php"
             )
 
+    def test_status_single_rejects_directories(self) -> None:
+        file_list = os.path.join(self.test_driver.repo_dir, "single_files.txt")
+        with open(file_list, "w") as f:
+            f.write(self.test_driver.repo_dir)
+
+        for options in (
+            ["--single", self.test_driver.repo_dir],
+            ["--multi", file_list],
+        ):
+            with self.subTest(options=options):
+                stdout, stderr, retcode = self.test_driver.run_check(options=options)
+                self.assertEqual("", stdout)
+                self.assertIn("Path is a directory, only files are allowed", stderr)
+                self.assertEqual(10, retcode)
+
     def test_status_single_cached_diagnostics_disabled_by_default(self) -> None:
         self.write_cached_status_single_fixtures()
         self.test_driver.start_hh_server()

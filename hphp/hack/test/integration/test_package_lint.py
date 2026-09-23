@@ -101,3 +101,13 @@ class TestPackageLint(TestCase[PackageLintDriver]):
         for file_name in cases:
             with self.subTest(msg=f"{file_name}"):
                 self.test_driver.assert_json_matches(file_name)
+
+    def test_rejects_directory_input(self) -> None:
+        self.test_driver.write_load_config()
+
+        stdout, stderr, retcode = self.test_driver.run_check(
+            options=["--package-lint", self.test_driver.repo_dir]
+        )
+        self.assertEqual("", stdout)
+        self.assertIn("Path is a directory, only files are allowed", stderr)
+        self.assertEqual(10, retcode)

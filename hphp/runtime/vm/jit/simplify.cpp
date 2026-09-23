@@ -886,25 +886,38 @@ SSATmp* simplifyMulInt(State& env, const IRInstruction* inst) {
   // X * 2 --> X + X
   if (rhs == 2) return gen(env, AddInt, src1, src1);
 
-  auto isPowTwo = [](int64_t a) {
+  /*
+   * MulInt wraps, so these rewrites are modular arithmetic and belong in
+   * unsigned. Computing rhs +- 1 signed would overflow at the int boundaries,
+   * and because that is undefined the compiler may assume it cannot happen and
+   * drop the positivity test inside isPowTwo(), leaving log2() to assert on a
+   * value isPowTwo() claimed was fine.
+   *
+   * Unsigned also makes the boundaries themselves rewritable: 2^63 is a power
+   * of two as an unsigned value, so X * INT64_MIN, X * (INT64_MIN + 1) and
+   * X * INT64_MAX now fold like any other multiply.
+   */
+  auto const urhs = static_cast<uint64_t>(rhs);
+
+  auto isPowTwo = [](uint64_t a) {
     return a > 0 && folly::isPowTwo<uint64_t>(a);
   };
-  auto log2 = [](int64_t a) {
+  auto log2 = [](uint64_t a) {
     assertx(a > 0);
     return folly::findLastSet<uint64_t>(a) - 1;
   };
 
   // X * 2^C --> X << C
-  if (isPowTwo(rhs)) return gen(env, Shl, src1, cns(env, log2(rhs)));
+  if (isPowTwo(urhs)) return gen(env, Shl, src1, cns(env, log2(urhs)));
 
   // X * (2^C + 1) --> ((X << C) + X)
-  if (isPowTwo(rhs - 1)) {
-    auto const lhs = gen(env, Shl, src1, cns(env, log2(rhs - 1)));
+  if (isPowTwo(urhs - 1)) {
+    auto const lhs = gen(env, Shl, src1, cns(env, log2(urhs - 1)));
     return gen(env, AddInt, lhs, src1);
   }
   // X * (2^C - 1) --> ((X << C) - X)
-  if (isPowTwo(rhs + 1)) {
-    auto const lhs = gen(env, Shl, src1, cns(env, log2(rhs + 1)));
+  if (isPowTwo(urhs + 1)) {
+    auto const lhs = gen(env, Shl, src1, cns(env, log2(urhs + 1)));
     return gen(env, SubInt, lhs, src1);
   }
 

@@ -59,6 +59,8 @@ bool MultiQueryOperation::notifyQuerySuccess(bool) {
   current_query_result_->setRowsMatched(FetchOperation::currentRowsMatched());
   current_query_result_->setResponseAttributes(
       FetchOperation::currentRespAttrs());
+  current_query_result_->setAdditionalResponseAttributes(
+      FetchOperation::currentAdditionalRespAttrs());
   current_query_result_->setNoIndexUsed(FetchOperation::noIndexUsed());
   current_query_result_->setWasSlow(FetchOperation::wasSlow());
   current_query_result_->setWarningsCount(

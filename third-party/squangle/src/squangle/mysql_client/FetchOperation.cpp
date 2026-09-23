@@ -171,6 +171,11 @@ const AttributeMap& FetchOperationImpl::currentRespAttrs() const {
   return current_resp_attrs_;
 }
 
+AdditionalAttributesFn FetchOperationImpl::currentAdditionalRespAttrs() const {
+  CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
+  return conn().getAdditionalResponseAttributes();
+}
+
 unsigned int FetchOperationImpl::currentWarningsCount() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_warnings_count_;

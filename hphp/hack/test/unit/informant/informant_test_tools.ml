@@ -48,8 +48,8 @@ let set_next_watchman_state_transition move (hg_rev : Hg.Rev.t) =
   let json = `Assoc [("rev", `String (Hg.Rev.to_string hg_rev))] in
   let move =
     match move with
-    | State_leave -> Watchman.State_leave ("hg.update", Some json)
-    | State_enter -> Watchman.State_enter ("hg.update", Some json)
+    | State_leave -> Watchman.State_leave (Hg_states.update, Some json)
+    | State_enter -> Watchman.State_enter (Hg_states.update, Some json)
     | Changed_merge_base ->
       Watchman.Changed_merge_base (hg_rev, S_set.empty, "dummy_clock")
     | Commit_transition ->
@@ -60,8 +60,8 @@ let set_next_watchman_state_transition move (hg_rev : Hg.Rev.t) =
 let set_next_eden_state_transitions moves (hg_rev : Hg.Rev.t) =
   let change_of move =
     match move with
-    | State_enter -> Edenfs_watcher_types.StateEnter "hg.update"
-    | State_leave -> Edenfs_watcher_types.StateLeave "hg.update"
+    | State_enter -> Edenfs_watcher_types.StateEnter Hg_states.update
+    | State_leave -> Edenfs_watcher_types.StateLeave Hg_states.update
     | Changed_merge_base
     | Commit_transition ->
       Edenfs_watcher_types.CommitTransition

@@ -56,7 +56,7 @@ let test () =
   let tmp = Tempfile.mkdtemp ~skip_mocking:true in
   Server_files.set_tmp_FOR_TESTING_ONLY tmp;
   Server_progress.set_root (Path.make root);
-  Server_revision_tracker.Edenfs_watcher.on_state_enter "hg.update";
+  Server_revision_tracker.Edenfs_watcher.on_state_enter Hg_states.update;
   Utils.try_finally
     ~f:(fun () ->
       (* Without a pending command, the loop polls the force-dormant pipe.
@@ -76,6 +76,6 @@ let test () =
     ~finally:(fun () ->
       Server_revision_tracker.Edenfs_watcher.on_state_leave
         (Path.make root)
-        "hg.update";
+        Hg_states.update;
       Server_progress.try_delete ();
       Sys_utils.rm_dir_tree ~skip_mocking:true (Path.to_string tmp))

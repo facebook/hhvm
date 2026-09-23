@@ -37,25 +37,25 @@ let get_change_watchman
     let () = Hh_logger.log "Changed_merge_base: %s" (Hg.Rev.to_string rev) in
     Some (Changed_merge_base rev)
   | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
-    when String.equal state "hg.update" ->
+    when String.equal state Hg_states.update ->
     is_in_hg_update_state := true;
     Option.(
       json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
       Hh_logger.log "State_enter: %s" (Hg.Rev.to_string hg_rev);
       Some (State_enter hg_rev))
   | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
-    when String.equal state "hg.update" ->
+    when String.equal state Hg_states.update ->
     is_in_hg_update_state := false;
     Option.(
       json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
       Hh_logger.log "State_leave: %s" (Hg.Rev.to_string hg_rev);
       Some (State_leave hg_rev))
   | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
-    when String.equal state "hg.transaction" ->
+    when String.equal state Hg_states.transaction ->
     is_in_hg_transaction_state := true;
     None
   | Watchman.Watchman_pushed (Watchman.State_leave (state, _))
-    when String.equal state "hg.transaction" ->
+    when String.equal state Hg_states.transaction ->
     is_in_hg_transaction_state := false;
     None
   | Watchman.Watchman_pushed (Watchman.Files_changed _)
@@ -70,20 +70,20 @@ let get_change_eden
       let rev = Hg.Rev.of_string to_commit in
       Hh_logger.log "Changed_commit: %s" to_commit;
       Some (Changed_commit rev)
-    | Edenfs_watcher_types.StateEnter state when String.equal state "hg.update"
-      ->
+    | Edenfs_watcher_types.StateEnter state
+      when String.equal state Hg_states.update ->
       is_in_hg_update_state := true;
       None
-    | Edenfs_watcher_types.StateLeave state when String.equal state "hg.update"
-      ->
+    | Edenfs_watcher_types.StateLeave state
+      when String.equal state Hg_states.update ->
       is_in_hg_update_state := false;
       None
     | Edenfs_watcher_types.StateEnter state
-      when String.equal state "hg.transaction" ->
+      when String.equal state Hg_states.transaction ->
       is_in_hg_transaction_state := true;
       None
     | Edenfs_watcher_types.StateLeave state
-      when String.equal state "hg.transaction" ->
+      when String.equal state Hg_states.transaction ->
       is_in_hg_transaction_state := false;
       None
     | Edenfs_watcher_types.FileChanges _
@@ -174,7 +174,7 @@ let init_eden root =
       report_telemetry = false;
       state_tracking = true;
       sync_queries_obey_deferral = false;
-      tracked_states = ["hg.update"; "hg.transaction"];
+      tracked_states = [Hg_states.update; Hg_states.transaction];
     }
   in
   match Edenfs_watcher.init settings with

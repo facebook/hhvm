@@ -176,11 +176,8 @@ let handler_fn () =
     let event =
       { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
     in
-    match state_name with
-    | "hg.update"
-    | "hg.transaction" ->
+    if Hg_states.is_hg_state state_name then
       state.outstanding_events <- transition state.outstanding_events event
-    | _ -> ()
   in
   let on_state_leave root state_name state_metadata =
     let event =
@@ -191,7 +188,7 @@ let handler_fn () =
       }
     in
     match state_name with
-    | "hg.update" ->
+    | state_name when String.equal state_name Hg_states.update ->
       let _ =
         state.outstanding_events <- transition state.outstanding_events event
       in
@@ -206,7 +203,7 @@ let handler_fn () =
                 "ServerRevisionTracker: Ignoring merge rev %s"
                 (Hg.Rev.to_string hg_rev)
             | _ -> add_query ~hg_rev root))
-    | "hg.transaction" ->
+    | state_name when String.equal state_name Hg_states.transaction ->
       state.outstanding_events <- transition state.outstanding_events event
     | _ -> ()
   in

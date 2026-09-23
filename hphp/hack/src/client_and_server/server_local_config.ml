@@ -115,7 +115,8 @@ module EdenfsFileWatcher = struct
       sync_queries_obey_deferral = true;
       report_telemetry = false;
       state_tracking = false;
-      tracked_states = ["hg.transaction"; "hg.update"; "meerkat-build"];
+      tracked_states =
+        [Hg_states.transaction; Hg_states.update; "meerkat-build"];
     }
 
   let load ~current_version ~default config =

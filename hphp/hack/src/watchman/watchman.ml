@@ -472,13 +472,16 @@ module Watchman_actual : Watchman_sig.S = struct
       | All_changes -> (`String env.clockspec, [])
       | Defer_changes ->
         ( `String env.clockspec,
-          [("defer", J.strlist ["hg.update"; "meerkat-build"])] )
+          [("defer", J.strlist [Hg_states.update; "meerkat-build"])] )
       | Scm_aware ->
         Hh_logger.log "Making Scm_aware subscription";
         let scm = `Assoc [("mergebase-with", `String "master")] in
         let since =
           `Assoc
-            [("scm", scm); ("drop", J.strlist ["hg.update"; "meerkat-build"])]
+            [
+              ("scm", scm);
+              ("drop", J.strlist [Hg_states.update; "meerkat-build"]);
+            ]
         in
         (since, [])
     in

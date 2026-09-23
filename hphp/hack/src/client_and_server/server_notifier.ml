@@ -181,8 +181,8 @@ let init
     if state_tracking && local_config.hg_aware then begin
       if
         not
-          (List.mem tracked_states "hg.transaction" ~equal:String.equal
-          && List.mem tracked_states "hg.update" ~equal:String.equal)
+          (List.mem tracked_states Hg_states.transaction ~equal:String.equal
+          && List.mem tracked_states Hg_states.update ~equal:String.equal)
       then
         failwith
           "state_tracking and hg_aware are enabled, but not tracking hg.update and hg.transaction"

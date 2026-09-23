@@ -1,4 +1,9 @@
 (library
+ (name hg_states)
+ (wrapped false)
+ (modules hg_states))
+
+(library
  (name hg)
  (wrapped false)
  (modules hg hg_sig)

@@ -144,7 +144,7 @@
  (name server_revision_tracker)
  (wrapped false)
  (modules server_revision_tracker)
- (libraries hg server_config watchman_utils)
+ (libraries hg hg_states server_config watchman_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -340,6 +340,7 @@
  (modules server_notifier)
  (libraries
    edenfs_watcher_stubs
+   hg_states
    server_command_types
    server_files
    server_notifier_types
@@ -376,6 +377,7 @@
    heap_shared_mem
    typechecker_options
    glean_options
+   hg_states
    ai_options
    build_options
    symbol_write_options

@@ -6,6 +6,7 @@
   connection_tracker
   core_kernel
   exec_command
+  hg_states
   libancillary
   logging
   marshal_tools

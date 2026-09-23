@@ -68,7 +68,7 @@
   test_unbound_name
   test_unbound_name_2
   test_unbound_name_3)
- (libraries config_file runner_base yojson))
+ (libraries config_file hg_states runner_base yojson))
 
 (executable
  (name server_progress_tests)

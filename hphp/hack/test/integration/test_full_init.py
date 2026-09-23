@@ -80,6 +80,20 @@ class TestFreshInit(common_tests.CommonTests):
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
         return common_tests.CommonTestDriver()
 
+    def test_is_subtype_invalid_json_input(self) -> None:
+        self.test_driver.start_hh_server()
+
+        input_error_exit_code = 10
+        for invalid_json in ("", " \n\t", "{"):
+            with self.subTest(invalid_json=invalid_json):
+                stdout, stderr, retcode = self.test_driver.run_check(
+                    stdin=invalid_json,
+                    options=["--is-subtype"],
+                )
+                self.assertEqual("", stdout)
+                self.assertTrue(stderr.startswith("Invalid JSON input:"), stderr)
+                self.assertEqual(input_error_exit_code, retcode)
+
     def test_find_isolatable_clusters(self) -> None:
         files = {
             "isolation_seed.php": (

@@ -246,6 +246,8 @@ let parallel_helper workers ctx query_with_path_alist :
 let check workers str env =
   let ctx = Provider_utils.ctx_from_server_env env in
   match Yojson.Safe.from_string str with
+  | exception Yojson.Json_error message ->
+    Error (Printf.sprintf "Invalid JSON input: %s" message)
   | `List json_l ->
     let spec_pair_result_alist =
       List.mapi json_l ~f:(fun i json ->

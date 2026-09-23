@@ -477,6 +477,15 @@ static_assert(
 // Arity is unaffected by delimiter style: the comma form still rejects 2 args.
 static_assert(!std::is_constructible_v<ValueRow<"%d,%s,%f">, int, const char*>);
 
+// A %q column takes a Query and nothing else, so a cell whose value is an
+// expression keeps its own compile-time guarantees.
+static_assert(std::is_constructible_v<ValueRow<"%q %d">, Query, int>);
+static_assert(!std::is_constructible_v<ValueRow<"%q %d">, const char*, int>);
+static_assert(!std::is_constructible_v<ValueRow<"%q %d">, int, int>);
+// A matrix of %q-bearing rows is still a values matrix for %V.
+static_assert(
+    check_args_fixed<fixed_string{"%V"}, std::vector<ValueRow<"%q %d">>>());
+
 // %K — comment: string-like or optional<string-like>. Not numbers or lists.
 static_assert(check_args_fixed<fixed_string{"%K"}, const char*>());
 static_assert(check_args_fixed<fixed_string{"%K"}, std::string>());
@@ -579,6 +588,16 @@ static_assert(valid_value_row_schema<fixed_string{"%d %s %f %u"}>());
 static_assert(valid_value_row_schema<fixed_string{"%d%s"}>());
 static_assert(valid_value_row_schema<fixed_string{"%d,%s|%f"}>());
 static_assert(valid_value_row_schema<fixed_string{""}>()); // zero columns
+// %q declares a sub-Query cell, and mixes with the literal specifiers. %V
+// renders cells through appendValue's 'v' type, which splices a Query whatever
+// the declared specifier, so the schema and the renderer agree. (The
+// single-column cases live with the other %q rules below.)
+static_assert(valid_value_row_schema<fixed_string{"%q %d %s"}>());
+// %h is rejected even though it is a plain value specifier: the 'v' path has
+// no hex-encoding branch, so the cell would render as a quoted string and the
+// schema would promise something the renderer does not do.
+static_assert(!valid_value_row_schema<fixed_string{"%h"}>());
+static_assert(!valid_value_row_schema<fixed_string{"%d %h"}>());
 // %m opts out of per-column type checking, defeating the point of a schema.
 static_assert(!valid_value_row_schema<fixed_string{"%m"}>());
 static_assert(!valid_value_row_schema<fixed_string{"%d %m"}>());
@@ -638,9 +657,9 @@ static_assert(!check_args_fixed<fixed_string{"%Lq"}, Query>());
 // A type-erased list is accepted and validated per element at render time.
 static_assert(
     check_args_fixed<fixed_string{"%Lq"}, std::vector<QueryArgument>>());
-// %q is not a ValueRow cell type either.
-static_assert(!valid_value_row_schema<fixed_string{"%q"}>());
-static_assert(!valid_value_row_schema<fixed_string{"%d %q"}>());
+// %q is a valid ValueRow cell type: a column whose value is an expression.
+static_assert(valid_value_row_schema<fixed_string{"%q"}>());
+static_assert(valid_value_row_schema<fixed_string{"%d %q"}>());
 // There is no %=q.
 static_assert(!parse_ok_fixed<fixed_string{"SELECT * FROM t WHERE %C%=q"}>());
 
@@ -1038,6 +1057,23 @@ TEST_F(QueryTest, CheckedQueryValueRowMatrixFromRvalue) {
   auto fromRvalue =
       Query::checked("INSERT INTO %T VALUES %V", "t", std::move(rows));
   EXPECT_EQ(fromRvalue.renderInsecure(), kExpected);
+}
+
+TEST_F(QueryTest, CheckedQueryValueRowMatrixWithSubQueryCell) {
+  // A %q cell carries an expression rather than a literal -- here a value that
+  // is either a quoted string or SQL NULL, chosen per row at run time. The
+  // sub-query is spliced in place of the cell, and the enclosing row keeps its
+  // compile-time arity and per-column type checks.
+  std::vector<ValueRow<"%d %q">> rows;
+  rows.push_back({1, Query::checked("%s", "2026-01-01")});
+  rows.push_back({2, Query::checked("NULL")});
+
+  auto checked = Query::checked("INSERT INTO %T VALUES %V", "t", rows);
+  auto legacy = Query("INSERT INTO %T VALUES %V", "t", rows);
+  EXPECT_EQ(
+      checked.renderInsecure(),
+      "INSERT INTO `t` VALUES (1, \"2026-01-01\"), (2, NULL)");
+  EXPECT_EQ(checked.renderInsecure(), legacy.renderInsecure());
 }
 
 TEST_F(QueryTest, CheckedQueryRendersIntegers) {

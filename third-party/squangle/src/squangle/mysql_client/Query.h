@@ -796,10 +796,17 @@ consteval bool parse_ok_fixed() {
 }
 
 // True when Str is a valid ValueRow schema: plain value specifiers
-// (%s/%d/%u/%f), one per column, separated only by whitespace, commas, or
+// (%s/%d/%u/%f/%q), one per column, separated only by whitespace, commas, or
 // vertical bars. Standalone rather than inline in ValueRow so negative cases
 // are testable -- instantiating ValueRow with a bad schema trips its
 // static_assert and hard-fails the build instead of yielding false.
+//
+// %q is admitted because a cell holding a sub-Query already renders as one:
+// %V renders every cell through appendValue with the 'v' (any value) type, and
+// that path splices a Query regardless of the cell's declared specifier. %h is
+// deliberately NOT admitted for the same reason -- the 'v' path has no
+// hex-encoding branch, so an %h column would render as a quoted string and the
+// schema would be promising something the renderer does not do.
 template <detail::fixed_string Str>
 consteval bool valid_value_row_schema() {
   constexpr auto parsed = consteval_parse_checked<Str>();
@@ -815,7 +822,7 @@ consteval bool valid_value_row_schema() {
       return false;
     }
     const char c = parsed.spec_char[i];
-    if (c != 's' && c != 'd' && c != 'u' && c != 'f') {
+    if (c != 's' && c != 'd' && c != 'u' && c != 'f' && c != 'q') {
       return false;
     }
   }
@@ -1643,10 +1650,14 @@ class QueryArgument {
 //
 // The schema validates each row's shape; it does not correlate with the query's
 // actual column list (the %LC / literal "(a, b, c)" text). Fmt must use only
-// the concrete value specifiers %s/%d/%u/%f -- one per column. %m ("any value")
-// is rejected on purpose: it opts out of per-column type checking, which
-// defeats the point of a compile-time-schema'd row. Identifier, list, and pair
-// specifiers are likewise not meaningful for a value cell and are rejected.
+// the concrete value specifiers %s/%d/%u/%f/%q -- one per column. %q declares a
+// cell that is a sub-Query, for a column whose value is an expression (a
+// function call, or a value chosen between two forms at run time) rather than a
+// literal. %m ("any value") is rejected on purpose: it opts out of per-column
+// type checking, which defeats the point of a compile-time-schema'd row. %h is
+// rejected because %V's renderer would not hex-encode it (see
+// valid_value_row_schema). Identifier, list, and pair specifiers are likewise
+// not meaningful for a value cell and are rejected.
 template <detail::fixed_string Fmt>
 class ValueRow {
  public:
@@ -1667,7 +1678,7 @@ class ValueRow {
   static constexpr bool kValidSchema = detail::valid_value_row_schema<Fmt>();
   static_assert(
       kValidSchema,
-      "ValueRow schema must be concrete value specifiers (%s/%d/%u/%f) "
+      "ValueRow schema must be concrete value specifiers (%s/%d/%u/%f/%q) "
       "separated only by whitespace, commas, or vertical bars");
 
   template <typename... Args>

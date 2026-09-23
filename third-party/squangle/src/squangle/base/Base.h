@@ -25,10 +25,9 @@ using Timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 // by const char*. */
 using AttributeMap = folly::F14NodeMap<std::string, std::string>;
 
-// Builds response attributes that are expensive to produce and are only read
-// by logging. Called at log time, so queries the logger doesn't sample never
-// pay for the attributes.
-using AdditionalAttributesFn = std::function<AttributeMap()>;
+// Builds response attributes that are too expensive to produce for every query.
+// Only invoke it when the attributes will actually be consumed.
+using DeferredAttributesFn = std::function<AttributeMap()>;
 
 // For control flows in callbacks. This indicates the reason a callback was
 // fired. When a pack of rows if fetched it is used RowsFetched to

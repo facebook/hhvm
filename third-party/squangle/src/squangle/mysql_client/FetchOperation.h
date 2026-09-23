@@ -172,7 +172,7 @@ class FetchOperationImpl : virtual public OperationBase {
   static std::optional<uint64_t> parseRowsMatchedFromMysqlInfo(
       const std::optional<std::string>& mysqlInfo);
   const RespAttrs& currentRespAttrs() const;
-  AdditionalAttributesFn currentAdditionalRespAttrs() const;
+  DeferredAttributesFn currentDeferredRespAttrs() const;
   unsigned int currentWarningsCount() const;
 
   RowStream* rowStream();
@@ -377,8 +377,8 @@ class FetchOperation : public Operation {
   const RespAttrs& currentRespAttrs() const {
     return impl_->currentRespAttrs();
   }
-  AdditionalAttributesFn currentAdditionalRespAttrs() const {
-    return impl_->currentAdditionalRespAttrs();
+  DeferredAttributesFn currentDeferredRespAttrs() const {
+    return impl_->currentDeferredRespAttrs();
   }
   unsigned int currentWarningsCount() const {
     return impl_->currentWarningsCount();

@@ -618,10 +618,10 @@ class Connection {
     return {};
   }
 
-  [[nodiscard]] AdditionalAttributesFn getAdditionalResponseAttributes() const {
+  [[nodiscard]] DeferredAttributesFn getDeferredResponseAttributes() const {
     // This function can be called with no valid connection
     if (mysql_connection_) {
-      return mysql_connection_->getAdditionalResponseAttributes();
+      return mysql_connection_->getDeferredResponseAttributes();
     }
 
     return nullptr;

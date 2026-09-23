@@ -160,10 +160,8 @@ class InternalConnection {
 
   virtual AttributeMap getResponseAttributes() const = 0;
 
-  // Response attributes that are expensive to build. They are not part of
-  // getResponseAttributes() and are only materialized if the query is logged.
-  // Null when there are none.
-  [[nodiscard]] virtual AdditionalAttributesFn getAdditionalResponseAttributes()
+  // Not included in getResponseAttributes(). Null when there are none.
+  [[nodiscard]] virtual DeferredAttributesFn getDeferredResponseAttributes()
       const {
     return nullptr;
   }

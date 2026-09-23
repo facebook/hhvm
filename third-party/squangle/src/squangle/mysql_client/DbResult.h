@@ -385,16 +385,13 @@ class QueryResult {
     resp_attrs_ = std::move(resp_attrs);
   }
 
-  // Response attributes that are expensive to build and are not part of
-  // responseAttributes(). Stored unmaterialized so callers that read only
-  // responseAttributes() never pay to build them; consumers that need them
-  // (e.g. the ligen bindings) invoke the function.
-  const AdditionalAttributesFn& additionalResponseAttributes() const {
-    return additional_resp_attrs_;
+  // Not included in responseAttributes().
+  const DeferredAttributesFn& deferredResponseAttributes() const {
+    return deferred_resp_attrs_;
   }
 
-  void setAdditionalResponseAttributes(AdditionalAttributesFn resp_attrs) {
-    additional_resp_attrs_ = std::move(resp_attrs);
+  void setDeferredResponseAttributes(DeferredAttributesFn resp_attrs) {
+    deferred_resp_attrs_ = std::move(resp_attrs);
   }
 
   unsigned int warningsCount() const {
@@ -511,7 +508,7 @@ class QueryResult {
   uint64_t last_insert_id_;
   std::string recv_gtid_;
   RespAttrs resp_attrs_;
-  AdditionalAttributesFn additional_resp_attrs_;
+  DeferredAttributesFn deferred_resp_attrs_;
   unsigned int warnings_count_;
   std::optional<std::string> mysql_info_;
   std::optional<uint64_t> rows_matched_;

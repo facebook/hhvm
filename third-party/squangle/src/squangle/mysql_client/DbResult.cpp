@@ -92,7 +92,7 @@ QueryResult::QueryResult(QueryResult&& other) noexcept
       last_insert_id_(other.last_insert_id_),
       recv_gtid_(std::move(other.recv_gtid_)),
       resp_attrs_(std::move(other.resp_attrs_)),
-      additional_resp_attrs_(std::move(other.additional_resp_attrs_)),
+      deferred_resp_attrs_(std::move(other.deferred_resp_attrs_)),
       warnings_count_(other.warnings_count_),
       mysql_info_(other.mysql_info_),
       rows_matched_(other.rows_matched_),
@@ -116,7 +116,7 @@ QueryResult& QueryResult::operator=(QueryResult&& other) noexcept {
     last_insert_id_ = other.last_insert_id_;
     recv_gtid_ = std::move(other.recv_gtid_);
     resp_attrs_ = std::move(other.resp_attrs_);
-    additional_resp_attrs_ = std::move(other.additional_resp_attrs_);
+    deferred_resp_attrs_ = std::move(other.deferred_resp_attrs_);
     warnings_count_ = other.warnings_count_;
     mysql_info_ = std::move(other.mysql_info_),
     rows_matched_ = other.rows_matched_,

@@ -29,3 +29,23 @@ includes = ["intern", "shared"]
 [packages.host]
 include_paths = ["//host/"]
 includes = ["unobservable", "intern", "shared"]
+
+[packages.strict_soft_consumer]
+include_paths = ["//strict_soft_consumer/"]
+includes = ["intern", "shared"]
+soft_includes = ["isolated"]
+
+[packages.strict_hard_consumer]
+include_paths = ["//strict_hard_consumer/"]
+includes = ["isolated", "intern", "shared"]
+
+[packages.strict_deployment]
+allow_deployed_packages_checking = true
+includes = [
+  "standalone",
+  "strict_soft_consumer",
+  "strict_hard_consumer",
+  "isolated",
+  "intern",
+  "shared",
+]

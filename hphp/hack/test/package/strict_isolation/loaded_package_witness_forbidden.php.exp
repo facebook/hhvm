@@ -1,0 +1,124 @@
+error: Typing[4472] Cannot access function `strict_target` defined in package `isolated` which may not be available [1]
+-> `strict_target` is defined in loaded_package_witness_forbidden.php--isolated/target.php [2]
+-> `strict_target` belongs to package `isolated` by this entry in the package config [3]
+-> package `standalone` is available because the current file belongs to it by this entry in the package config [4]
+-> package `strict_deployment` is assumed to be deployed here [5]
+-> `strict_deployment` includes `standalone` via its definition [6]
+-> `strict_deployment` includes `strict_soft_consumer` via its definition [7]
+-> `strict_deployment` includes `strict_hard_consumer` via its definition [8]
+-> `strict_deployment` includes `isolated` via its definition [9]
+-> `strict_deployment` includes `intern` via its definition [10]
+-> `strict_deployment` includes `shared` via its definition [11]
+
+loaded_package_witness_forbidden.php--standalone/unrelated.php:5:5
+ 2 | 
+ 3 | function unrelated_caller(): void {
+ 4 |   if (package strict_deployment) {
+   |               ^^^^^^^^^^^^^^^^^ [5]
+ 5 |     strict_target(); // error: a deployment witness does not grant access
+   |     ^^^^^^^^^^^^^ [1]
+ 6 |   }
+ 7 | }
+
+loaded_package_witness_forbidden.php--isolated/target.php:3:10
+ 1 | <?hh
+ 2 | 
+ 3 | function strict_target(): void {}
+   |          ^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+17 | enable_strict_isolation = true
+18 | 
+19 | [packages.standalone]
+   |           ^^^^^^^^^^ [4]
+20 | include_paths = ["//standalone/"]
+21 | 
+   :
+43 | allow_deployed_packages_checking = true
+44 | includes = [
+45 |   "standalone",
+   |   ^^^^^^^^^^^^ [6]
+46 |   "strict_soft_consumer",
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [7]
+47 |   "strict_hard_consumer",
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [8]
+48 |   "isolated",
+   |   ^^^^^^^^^^ [9]
+49 |   "intern",
+   |   ^^^^^^^^ [10]
+50 |   "shared",
+   |   ^^^^^^^^ [11]
+51 | ]
+
+error: Typing[4473] Cannot access function `strict_target` defined in package `isolated` which may not be available [1]
+-> `strict_target` is defined in loaded_package_witness_forbidden.php--isolated/target.php [2]
+-> `strict_target` belongs to package `isolated` by this entry in the package config [3]
+-> package `strict_soft_consumer` is available because the current file belongs to it by this entry in the package config [4]
+-> package `strict_deployment` is assumed to be deployed here [5]
+-> `strict_soft_consumer` includes `intern` via its definition [6]
+-> `strict_soft_consumer` includes `shared` via its definition [7]
+-> `strict_deployment` includes `standalone` via its definition [8]
+-> `strict_deployment` includes `strict_soft_consumer` via its definition [9]
+-> `strict_deployment` includes `strict_hard_consumer` via its definition [10]
+-> `strict_deployment` includes `isolated` via its definition [11]
+-> `strict_deployment` includes `intern` via its definition [12]
+-> `strict_deployment` includes `shared` via its definition [13]
+
+loaded_package_witness_forbidden.php--strict_soft_consumer/soft.php:5:5
+ 2 | 
+ 3 | function soft_including_caller(): void {
+ 4 |   if (package strict_deployment) {
+   |               ^^^^^^^^^^^^^^^^^ [5]
+ 5 |     strict_target(); // error: a deployment witness does not upgrade a soft include
+   |     ^^^^^^^^^^^^^ [1]
+ 6 |   }
+ 7 | }
+
+loaded_package_witness_forbidden.php--isolated/target.php:3:10
+ 1 | <?hh
+ 2 | 
+ 3 | function strict_target(): void {}
+   |          ^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+   :
+31 | includes = ["unobservable", "intern", "shared"]
+32 | 
+33 | [packages.strict_soft_consumer]
+   |           ^^^^^^^^^^^^^^^^^^^^ [4]
+34 | include_paths = ["//strict_soft_consumer/"]
+35 | includes = ["intern", "shared"]
+   |             ^^^^^^^^ [6]
+   |                       ^^^^^^^^ [7]
+36 | soft_includes = ["isolated"]
+37 | 
+   :
+43 | allow_deployed_packages_checking = true
+44 | includes = [
+45 |   "standalone",
+   |   ^^^^^^^^^^^^ [8]
+46 |   "strict_soft_consumer",
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [9]
+47 |   "strict_hard_consumer",
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [10]
+48 |   "isolated",
+   |   ^^^^^^^^^^ [11]
+49 |   "intern",
+   |   ^^^^^^^^ [12]
+50 |   "shared",
+   |   ^^^^^^^^ [13]
+51 | ]
+
+2 errors found

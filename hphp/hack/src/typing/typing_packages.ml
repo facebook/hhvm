@@ -11,11 +11,15 @@ open Hh_prelude
 (* open Typing_defs *)
 module Env = Typing_env
 
+let is_package_loaded_for_access env package =
+  (not package.Package.enable_strict_isolation)
+  && Env.is_package_loaded env (Package.get_package_name package)
+
 let get_package_violation env current_pkg target_pkg =
   match (current_pkg, target_pkg) with
   | (_, None) -> None
   | (None, Some target_pkg_info) ->
-    if Env.is_package_loaded env (Package.get_package_name target_pkg_info) then
+    if is_package_loaded_for_access env target_pkg_info then
       None
     else
       Some Package.Unrelated
@@ -27,7 +31,7 @@ let get_package_violation env current_pkg target_pkg =
       | Includes ->
         None
       | (Soft_includes | Unrelated) as r ->
-        if Env.is_package_loaded env (get_package_name target_pkg_info) then
+        if is_package_loaded_for_access env target_pkg_info then
           None
         else
           Some r))

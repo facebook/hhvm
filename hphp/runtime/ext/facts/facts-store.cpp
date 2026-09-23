@@ -1263,15 +1263,14 @@ struct FactsStoreImpl final
       unitCacheSyncRepo(this, m_root, alteredPathsAndHashes, deletedPaths);
     }
 
-    // We need to update the DB if Watchman has restarted or if
-    // something's changed on the filesystem. Otherwise, there's no
-    // need to update the DB.
+    // An empty result can still advance the clock past files excluded by the
+    // Watchman query, so skip the update only when the clock is unchanged.
     //
     // Note that we intentionally still perform a no-op update if the watchman
     // clock has not been stored in the symbol map yet as queries using the
     // merge base can be more expensive than clock based queries.
     if (!isFresh && alteredPathsAndHashes.empty() && deletedPaths.empty() &&
-        !lastClock.m_clock.empty()) {
+        lastClock == newClock && !lastClock.m_clock.empty()) {
       XLOG(INFO) << "Finished: it's a no-op incremental update.";
       return {};
     }

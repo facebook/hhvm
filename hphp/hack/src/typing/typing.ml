@@ -7045,32 +7045,32 @@ end = struct
           let env =
             match (shadow_v_opt, v_ret_opt) with
             | (Some shadow_v, Some v_ret) ->
-              let arg_tys =
-                List.filter_map tel ~f:(fun arg ->
-                    match arg with
-                    | Aast_defs.Anormal (ty, _, _)
-                    | Aast_defs.Ainout (_, (ty, _, _))
-                    | Aast_defs.Anamed (_, (ty, _, _)) ->
-                      Some ty)
-              in
               let params =
-                List.map arg_tys ~f:(fun arg_ty ->
-                    Typing_defs.
-                      {
-                        fp_pos = Pos_or_decl.none;
-                        fp_name = None;
-                        fp_type = arg_ty;
-                        fp_flags =
-                          Typing_defs_flags.FunParam.make
-                            ~inout:false
-                            ~accept_disposable:false
-                            ~is_optional:false
-                            ~readonly:false
-                            ~ignore_readonly_error:false
-                            ~splat:false
-                            ~named:false;
-                        fp_def_value = None;
-                      })
+                List.filter_map tel ~f:(fun arg ->
+                    let (name_opt, arg_ty) =
+                      match arg with
+                      | Aast_defs.Anormal (ty, _, _) -> (None, ty)
+                      | Aast_defs.Ainout (_, (ty, _, _)) -> (None, ty)
+                      | Aast_defs.Anamed ((_, name), (ty, _, _)) ->
+                        (Some ("$" ^ name), ty)
+                    in
+                    Some
+                      Typing_defs.
+                        {
+                          fp_pos = Pos_or_decl.none;
+                          fp_name = name_opt;
+                          fp_type = arg_ty;
+                          fp_flags =
+                            Typing_defs_flags.FunParam.make
+                              ~inout:false
+                              ~accept_disposable:false
+                              ~is_optional:false
+                              ~readonly:false
+                              ~ignore_readonly_error:false
+                              ~splat:false
+                              ~named:(Option.is_some name_opt);
+                          fp_def_value = None;
+                        })
               in
               let ft =
                 Typing_defs.
@@ -7146,32 +7146,32 @@ end = struct
                 match shadow_v_opt with
                 | Some shadow_v ->
                   let (env, v_ret) = Env.fresh_shadow_tyvar env expr_pos in
-                  let arg_tys =
-                    List.filter_map tel ~f:(fun arg ->
-                        match arg with
-                        | Aast_defs.Anormal (ty, _, _)
-                        | Aast_defs.Ainout (_, (ty, _, _))
-                        | Aast_defs.Anamed (_, (ty, _, _)) ->
-                          Some ty)
-                  in
                   let params =
-                    List.map arg_tys ~f:(fun arg_ty ->
-                        Typing_defs.
-                          {
-                            fp_pos = Pos_or_decl.none;
-                            fp_name = None;
-                            fp_type = arg_ty;
-                            fp_flags =
-                              Typing_defs_flags.FunParam.make
-                                ~inout:false
-                                ~accept_disposable:false
-                                ~is_optional:false
-                                ~readonly:false
-                                ~ignore_readonly_error:false
-                                ~splat:false
-                                ~named:false;
-                            fp_def_value = None;
-                          })
+                    List.filter_map tel ~f:(fun arg ->
+                        let (name_opt, arg_ty) =
+                          match arg with
+                          | Aast_defs.Anormal (ty, _, _) -> (None, ty)
+                          | Aast_defs.Ainout (_, (ty, _, _)) -> (None, ty)
+                          | Aast_defs.Anamed ((_, name), (ty, _, _)) ->
+                            (Some ("$" ^ name), ty)
+                        in
+                        Some
+                          Typing_defs.
+                            {
+                              fp_pos = Pos_or_decl.none;
+                              fp_name = name_opt;
+                              fp_type = arg_ty;
+                              fp_flags =
+                                Typing_defs_flags.FunParam.make
+                                  ~inout:false
+                                  ~accept_disposable:false
+                                  ~is_optional:false
+                                  ~readonly:false
+                                  ~ignore_readonly_error:false
+                                  ~splat:false
+                                  ~named:(Option.is_some name_opt);
+                              fp_def_value = None;
+                            })
                   in
                   let ft =
                     Typing_defs.

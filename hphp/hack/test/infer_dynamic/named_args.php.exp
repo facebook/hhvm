@@ -1,0 +1,20 @@
+{
+  "function": "\\test_named_dynamic",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"named_args.php\", line 4, characters 37-38:",
+      "type": "(function(named int $n): mixed)"
+    }
+  ]
+}
+{
+  "function": "\\test_mixed_dynamic",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"named_args.php\", line 8, characters 37-38:",
+      "type": "(function(int, named string $name): mixed)"
+    }
+  ]
+}

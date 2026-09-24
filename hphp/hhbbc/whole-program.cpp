@@ -32,6 +32,7 @@
 #define SET_FRAME_METADATA(...)
 #endif
 
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -72,6 +73,7 @@ const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
+enum class LocalAnalysisMode { Constants, Full };
 enum class WorkType { Class, Func };
 
 struct WorkItem {
@@ -150,15 +152,48 @@ std::vector<Context> all_unit_contexts(const Index& index,
   );
   index.for_each_unit_func(
     u,
-    [&] (const php::Func& f) { ret.emplace_back(Context { u.filename, &f }); }
+    [&] (const php::Func& f) {
+      // Folded constant initializers are neither optimized nor emitted.
+      if (Constant::nameFromFuncName(f.name) &&
+          !index.constant_init_needed(f)) {
+        return;
+      }
+      ret.emplace_back(Context { u.filename, &f });
+    }
   );
   return ret;
 }
 
-// Return all the WorkItems we'll need to start analyzing this
-// program.
-std::vector<WorkItem> initial_work(const Index& index) {
+bool is_constant_work(const php::Func& func) {
+  if (is_86init_func(func)) return true;
+  auto const decl = func.cls ? func.cls->closureDeclFunc : func.name;
+  return decl && Constant::nameFromFuncName(decl);
+}
+
+std::vector<Context> constant_work_contexts(const Index& index) {
+  std::vector<Context> ret;
+  for (auto const& cls : index.program().classes) {
+    for (auto const& method : cls->methods) {
+      if (!is_constant_work(*method)) continue;
+      ret.emplace_back(Context { cls->unit, method.get(), cls.get() });
+    }
+  }
+  for (auto const& func : index.program().funcs) {
+    if (!is_constant_work(*func)) continue;
+    ret.emplace_back(Context { func->unit, func.get() });
+  }
+  return ret;
+}
+
+std::vector<WorkItem> initial_work(const Index& index, LocalAnalysisMode mode) {
   std::vector<WorkItem> ret;
+
+  if (mode == LocalAnalysisMode::Constants) {
+    for (auto const ctx : constant_work_contexts(index)) {
+      ret.emplace_back(WorkType::Func, ctx);
+    }
+    return ret;
+  }
 
   auto const& program = index.program();
   for (auto const& c : program.classes) {
@@ -178,6 +213,11 @@ std::vector<WorkItem> initial_work(const Index& index) {
     }
   }
   for (auto const& f : program.funcs) {
+    // Folded constant initializers have no executable work left.
+    if (Constant::nameFromFuncName(f->name) &&
+        !index.constant_init_needed(*f)) {
+      continue;
+    }
     ret.emplace_back(
       WorkType::Func,
       Context { f->unit, f.get() }
@@ -187,11 +227,12 @@ std::vector<WorkItem> initial_work(const Index& index) {
 }
 
 WorkItem work_item_for(const DependencyContext& d,
+                       LocalAnalysisMode mode,
                        const Index& index) {
   switch (d.tag()) {
     case DependencyContextType::Class: {
       auto const cls = (const php::Class*)d.ptr();
-      assertx(!is_used_trait(*cls));
+      assertx(mode == LocalAnalysisMode::Full && !is_used_trait(*cls));
       return WorkItem {
         WorkType::Class,
         Context { cls->unit, nullptr, cls }
@@ -202,7 +243,9 @@ WorkItem work_item_for(const DependencyContext& d,
       auto const cls = func->cls
         ? index.lookup_closure_context(*func->cls)
         : nullptr;
-      assertx(!cls || is_used_trait(*cls));
+      assertx(!cls ||
+              mode == LocalAnalysisMode::Constants ||
+              is_used_trait(*cls));
       return WorkItem {
         WorkType::Func,
         Context { func->unit, func, cls }
@@ -240,8 +283,13 @@ WorkItem work_item_for(const DependencyContext& d,
  * Repeat until the work list is empty.
  *
  */
-void analyze_iteratively(Index& index) {
-  trace_time tracer("analyze iteratively", index.sample());
+void analyze_iteratively(Index& index, LocalAnalysisMode mode) {
+  trace_time tracer(
+    mode == LocalAnalysisMode::Constants
+      ? "analyze constants fixed point"
+      : "analyze iteratively",
+    index.sample()
+  );
 
   // Counters, just for debug printing.
   std::atomic<uint32_t> total_funcs{0};
@@ -256,8 +304,7 @@ void analyze_iteratively(Index& index) {
   };
 
   std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
-
-  auto work = initial_work(index);
+  auto work = initial_work(index, mode);
   while (!work.empty()) {
     auto results = [&] {
       trace_time trace(
@@ -301,12 +348,23 @@ void analyze_iteratively(Index& index) {
       auto func = php::WideFunc::mut(const_cast<php::Func*>(fa.ctx.func));
       index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
-      update_bytecode(func, std::move(fa.blockUpdates));
+      auto const bytecodeUpdate =
+        update_bytecode(func, std::move(fa.blockUpdates));
 
-      index.record_public_static_mutations(
-        *func,
-        std::move(fa.publicSPropMutations)
-      );
+      if (mode == LocalAnalysisMode::Full) {
+        index.record_public_static_mutations(
+          *func,
+          std::move(fa.publicSPropMutations)
+        );
+      }
+
+      // Keep changed initializer bytecode in the constants fixed point.
+      if (mode == LocalAnalysisMode::Constants &&
+          bytecodeUpdate != UpdateBCResult::None &&
+          (bytecodeUpdate == UpdateBCResult::ChangedAnalyze ||
+           func->name == s_86cinit.get())) {
+        deps.insert(index.dependency_context(fa.ctx));
+      }
 
       if (auto const l = fa.resolvedInitializers.left()) {
         index.refine_class_constants(fa.ctx, *l, deps);
@@ -373,11 +431,22 @@ void analyze_iteratively(Index& index) {
 
     auto& deps = deps_vec[0];
 
-    index.refine_public_statics(deps);
+    if (mode == LocalAnalysisMode::Full) {
+      index.refine_public_statics(deps);
+    }
 
     work.clear();
     work.reserve(deps.size());
-    for (auto& d : deps) work.emplace_back(work_item_for(d, index));
+    for (auto& d : deps) {
+      auto item = work_item_for(d, mode, index);
+      // Keep the preliminary pass scoped to initializer work.
+      if (mode == LocalAnalysisMode::Constants &&
+          (item.type != WorkType::Func ||
+           !is_constant_work(*item.ctx.func))) {
+        continue;
+      }
+      work.emplace_back(std::move(item));
+    }
     deps.clear();
   }
 }
@@ -766,6 +835,21 @@ AnalysisScheduler analyze_impl(Index& index) {
 void analyze_constants(Index& index) {
   analyze_impl<AnalysisMode::Constants>(index);
 }
+
+// Run constants analysis locally, then prepare its results for the full pass.
+void analyze_constants_local(Index& index) {
+  trace_time tracer{"analyze constants", index.sample()};
+  tracer.ignore_client_stats();
+
+  index.use_class_dependencies(false);
+  {
+    index.set_constant_analysis(true);
+    SCOPE_EXIT { index.set_constant_analysis(false); };
+    analyze_iteratively(index, LocalAnalysisMode::Constants);
+  }
+  index.preresolve_type_structures();
+}
+
 AnalysisScheduler analyze_full(Index& index) {
   return analyze_impl<AnalysisMode::Full>(index);
 }
@@ -1555,8 +1639,8 @@ void whole_program(WholeProgramInput inputs,
       sample->setInt("hhbbc_num_funcs", index.all_funcs().size());
     }
   } else {
-    analyze_constants(index);
     index.make_local();
+    analyze_constants_local(index);
 
     assertx(check(index.program()));
 
@@ -1581,7 +1665,7 @@ void whole_program(WholeProgramInput inputs,
     };
 
     index.use_class_dependencies(true);
-    analyze_iteratively(index);
+    analyze_iteratively(index, LocalAnalysisMode::Full);
     auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
     parallel::num_threads = parallel::final_threads;
     final_pass(index, emitUnit);

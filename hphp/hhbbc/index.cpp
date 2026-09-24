@@ -6448,6 +6448,7 @@ struct Index::IndexData {
   > clsConstLookupCache;
 
   bool useClassDependencies{};
+  bool constantAnalysis{};
   DepMap dependencyMap;
 
   /*
@@ -8712,6 +8713,16 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
                                                 Index::ReturnType returnType) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
+
+  if (data.constantAnalysis) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because analyzing constants\n",
+      func_fullname(*callCtx.callee)
+    );
+    return returnType;
+  }
+
   auto const finfo = func_info(data, callCtx.callee);
 
   auto const adjustedCtx = adjust_closure_context(
@@ -20030,6 +20041,206 @@ void Index::for_each_unit_class_mutable(php::Unit& unit,
 
 //////////////////////////////////////////////////////////////////////
 
+void Index::preresolve_type_structures() {
+  trace_time tracer{"pre-resolve type-structures", m_data->sample};
+
+  assertx(m_data->program);
+  assertx(!m_data->constantAnalysis);
+
+
+  // Type-alias resolutions can be consumed while resolving type constants.
+  {
+    struct TypeAliasUpdate {
+      php::TypeAlias* typeAlias;
+      SArray resolved;
+    };
+
+    auto const typeAliasUpdates = parallel::map(
+      m_data->program->units,
+      [&] (const std::unique_ptr<php::Unit>& unit) {
+        CompactVector<TypeAliasUpdate> updates;
+        for (auto const& typeAlias : unit->typeAliases) {
+          assertx(!typeAlias->resolvedLocally);
+          if (typeAlias->resolvedTypeStructure) continue;
+          auto const resolution = resolve_type_structure(
+            IndexAdaptor{*this},
+            nullptr,
+            *typeAlias
+          );
+          assertx(!resolution.contextSensitive);
+          if (auto const ts = resolution.sarray()) {
+            updates.emplace_back(TypeAliasUpdate{typeAlias.get(), ts});
+          }
+        }
+        return updates;
+      }
+    );
+
+    parallel::for_each(
+      typeAliasUpdates,
+      [] (const CompactVector<TypeAliasUpdate>& updates) {
+        for (auto const& update : updates) {
+          assertx(update.resolved->isStatic());
+          assertx(update.resolved->isDictType());
+          assertx(!update.resolved->empty());
+          update.typeAlias->resolvedTypeStructure = update.resolved;
+        }
+      }
+    );
+  }
+
+  // Resolve type constants in their destination context, materializing
+  // inherited constants into each consuming class.
+  {
+    struct TypeConstantUpdate {
+      ClassInfo* to;
+      ClassInfo::ConstIndex from;
+      php::Const cns;
+      SArray resolved;
+      bool contextInsensitive;
+    };
+
+    auto typeConstantUpdates = parallel::map(
+      m_data->allClassInfos,
+      [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+        CompactVector<TypeConstantUpdate> updates;
+        // A used trait's type constants must be resolved in each using class.
+        if (is_used_trait(*cinfo->cls)) return updates;
+
+        for (auto const& [_, idx] : cinfo->clsConstants) {
+          auto const& cns = *idx;
+          assertx(!cns.resolvedLocally);
+
+          if (!cns.val || cns.kind != ConstModifierFlags::Kind::Type) continue;
+
+          if (idx.cls == cinfo->cls && cns.resolvedTypeStructure) continue;
+
+          auto const resolution = resolve_type_structure(
+            IndexAdaptor{*this},
+            cns,
+            *cinfo->cls
+          );
+          if (auto const ts = resolution.sarray()) {
+            updates.emplace_back(TypeConstantUpdate{
+              cinfo.get(),
+              idx,
+              cns,
+              ts,
+              !resolution.contextSensitive
+            });
+          }
+        }
+        return updates;
+      }
+    );
+
+    parallel::for_each(
+      typeConstantUpdates,
+      [] (CompactVector<TypeConstantUpdate>& updates) {
+        for (auto& update : updates) {
+          auto& cns = [&] () -> php::Const& {
+            if (update.to->cls == update.from.cls) {
+              auto const cls = const_cast<php::Class*>(update.to->cls);
+              assertx(update.from.idx < cls->constants.size());
+              return cls->constants[update.from.idx];
+            }
+
+            auto const idx = update.to->cls->constants.size();
+            auto const cls = const_cast<php::Class*>(update.to->cls);
+            cls->constants.emplace_back(std::move(update.cns));
+            update.to->clsConstants.at(cls->constants.back().name) =
+              ClassInfo::ConstIndex{cls, static_cast<uint32_t>(idx)};
+            return cls->constants.back();
+          }();
+
+          cns.resolvedTypeStructure = update.resolved;
+          cns.contextInsensitive = update.contextInsensitive;
+          cns.invariance = php::Const::Invariance::None;
+          cns.resolvedLocally = false;
+        }
+      }
+    );
+  }
+
+  struct InvarianceUpdate {
+    php::Const* cns;
+    php::Const::Invariance invariance;
+  };
+
+  // Compute invariance from the materialized class-local copies, deferring
+  // writes because the reads cross class boundaries.
+  auto const invarianceUpdates = parallel::map(
+    m_data->allClassInfos,
+    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      CompactVector<InvarianceUpdate> updates;
+      // A trait's children are its users, not its subclasses.
+      if (is_used_trait(*cinfo->cls)) return updates;
+      if (!cinfo->classGraph.hasCompleteChildren()) return updates;
+      auto const subclasses = cinfo->classGraph.children();
+
+      for (auto const& [name, idx] : cinfo->clsConstants) {
+        if (idx.cls != cinfo->cls) continue;
+        auto& cns = const_cast<php::Const&>(*idx);
+        if (cns.kind != ConstModifierFlags::Kind::Type ||
+            !cns.val ||
+            !cns.resolvedTypeStructure ||
+            cns.invariance != php::Const::Invariance::None) {
+          continue;
+        }
+
+        auto const checkClassname =
+          tvIsString(cns.resolvedTypeStructure->get(s_classname));
+        auto invariance = php::Const::Invariance::Same;
+        for (auto const subclassGraph : subclasses) {
+          auto const subclass = subclassGraph.cinfo();
+          always_assert(subclass);
+          if (subclass == cinfo.get()) continue;
+
+          auto const it = subclass->clsConstants.find(name);
+          always_assert(it != end(subclass->clsConstants));
+          if (it->second.cls != subclass->cls) {
+            invariance = php::Const::Invariance::None;
+            break;
+          }
+          auto const& subCns = *it->second;
+          if (subCns.kind != ConstModifierFlags::Kind::Type ||
+              !subCns.val ||
+              !subCns.resolvedTypeStructure) {
+            invariance = php::Const::Invariance::None;
+            break;
+          }
+          if (subCns.resolvedTypeStructure == cns.resolvedTypeStructure) {
+            continue;
+          }
+
+          if (invariance == php::Const::Invariance::Same ||
+              invariance == php::Const::Invariance::ClassnamePresent) {
+            invariance =
+              checkClassname &&
+                tvIsString(subCns.resolvedTypeStructure->get(s_classname))
+              ? php::Const::Invariance::ClassnamePresent
+              : php::Const::Invariance::Present;
+          }
+        }
+        updates.emplace_back(InvarianceUpdate{
+          &cns,
+          invariance
+        });
+      }
+      return updates;
+    }
+  );
+
+  parallel::for_each(
+    invarianceUpdates,
+    [] (const CompactVector<InvarianceUpdate>& updates) {
+      for (auto const& update : updates) {
+        update.cns->invariance = update.invariance;
+      }
+    }
+  );
+}
+
 const hphp_fast_set<const php::Func*>*
 Index::lookup_extra_methods(const php::Class* cls) const {
   if (cls->attrs & AttrNoExpandTrait) return nullptr;
@@ -20496,6 +20707,10 @@ res::Func Index::resolve_method(Context ctx,
     return resolve_ctor(thisType);
   }
 
+  if (m_data->constantAnalysis) {
+    return Func { Func::MethodName { nullptr, name } };
+  }
+
   if (isClass) {
     if (!is_specialized_cls(thisType)) return general(true, nullptr);
   } else if (!is_specialized_obj(thisType)) {
@@ -20515,6 +20730,10 @@ res::Func Index::resolve_ctor(const Type& obj) const {
   assertx(obj.subtypeOf(BObj));
 
   using Func = res::Func;
+
+  if (m_data->constantAnalysis) {
+    return Func { Func::MethodName { nullptr, s_construct.get() } };
+  }
 
   // Can't say anything useful if we don't know the object type.
   if (!is_specialized_obj(obj)) {
@@ -20615,6 +20834,9 @@ res::Func Index::resolve_ctor(const Type& obj) const {
 
 res::Func Index::resolve_func(SString name) const {
   name = normalizeNS(name);
+  if (m_data->constantAnalysis) {
+    return res::Func { res::Func::FuncName { name } };
+  }
   auto const it = m_data->funcs.find(name);
   if (it == end(m_data->funcs)) {
     return res::Func { res::Func::MissingFunc { name } };
@@ -21057,10 +21279,30 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   auto const func_name = Constant::funcNameFromName(cnsName);
   assertx(func_name && "func_name will never be nullptr");
 
-  auto rfunc = resolve_func(func_name);
+  auto const rfunc = [&] {
+    if (!m_data->constantAnalysis) return resolve_func(func_name);
+
+    auto const func = folly::get_default(m_data->funcs, func_name);
+    always_assert_flog(
+      func,
+      "Missing initializer {} for dynamic constant {}",
+      func_name,
+      cnsName
+    );
+    return resolve_func_or_method(*func);
+  }();
   assertx(rfunc.exactFunc());
 
   return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal).t;
+}
+
+bool Index::constant_init_needed(const php::Func& func) const {
+  assertx(!func.cls);
+  auto const name = Constant::nameFromFuncName(func.name);
+  assertx(name);
+  auto const it = m_data->constants.find(name);
+  return it == end(m_data->constants) ||
+    type(it->second->val) == KindOfUninit;
 }
 
 Index::ReturnType
@@ -21071,6 +21313,15 @@ Index::lookup_foldable_return_type(Context ctx,
   static __thread uint32_t interp_nesting_level;
 
   using R = ReturnType;
+
+  if (m_data->constantAnalysis) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because analyzing constants\n",
+      func_fullname(*func)
+    );
+    return R{ TInitCell, false };
+  }
 
   auto const ctxType = adjust_closure_context(
     IndexAdaptor { *this },
@@ -21725,6 +21976,11 @@ void Index::use_class_dependencies(bool f) {
   }
 }
 
+void Index::set_constant_analysis(bool enabled) {
+  assertx(m_data->constantAnalysis != enabled);
+  m_data->constantAnalysis = enabled;
+}
+
 void Index::refine_class_constants(const Context& ctx,
                                    const ResolvedConstants& resolved,
                                    DependencyContextSet& deps) {
@@ -22042,6 +22298,14 @@ void Index::record_public_static_mutations(const php::Func& func,
 void Index::update_prop_initial_values(const Context& ctx,
                                        const ResolvedPropInits& resolved,
                                        DependencyContextSet& deps) {
+  if (resolved.empty()) return;
+
+  // A class's pinit and sinit can be processed concurrently, but both mutate
+  // the same properties and validation state.
+  static std::array<std::mutex, 256> locks;
+  auto& lock = locks[pointer_hash<const php::Class>{}(ctx.cls) % locks.size()];
+  std::lock_guard<std::mutex> _{lock};
+
   auto& props = const_cast<php::Class*>(ctx.cls)->properties;
 
   auto changed = false;
@@ -22103,15 +22367,6 @@ void Index::update_prop_initial_values(const Context& ctx,
   auto const it = m_data->classInfo.find(ctx.cls->name);
   if (it == end(m_data->classInfo)) return;
   auto const cinfo = it->second;
-
-  // Both a pinit and a sinit can have resolved property values. When
-  // analyzing constants we'll process each function separately and
-  // potentially in different threads. Both will want to inspect the
-  // property Attrs and the hasBadInitialPropValues. So, if we reach
-  // here, take a lock to ensure both don't stomp on each other.
-  static std::array<std::mutex, 256> locks;
-  auto& lock = locks[pointer_hash<const php::Class>{}(ctx.cls) % locks.size()];
-  std::lock_guard<std::mutex> _{lock};
 
   auto const noBad = std::all_of(
     begin(props), end(props),

@@ -1176,6 +1176,14 @@ struct Index {
   void make_local();
 
   /*
+   * Pre-resolve type-alias and type-constant type-structures using the
+   * local Index, then calculate type-constant invariance. The program must not
+   * contain locally resolved type-structures, and the Index must have complete
+   * class hierarchy information.
+   */
+  void preresolve_type_structures();
+
+  /*
    * Access the StructuredLogEntry that the Index is using (if any).
    */
   StructuredLogEntry* sample() const;
@@ -1409,6 +1417,12 @@ struct Index {
   Type lookup_constant(Context ctx, SString cnsName) const;
 
   /*
+   * Return whether a top-level constant initializer still has a dynamic
+   * result and must be analyzed and emitted.
+   */
+  bool constant_init_needed(const php::Func&) const;
+
+  /*
    * Return true if the return value of the function might depend on arg.
    */
   bool func_depends_on_arg(const php::Func* func, size_t arg) const;
@@ -1554,6 +1568,14 @@ struct Index {
    */
   void use_class_dependencies(bool f);
   bool using_class_dependencies() const;
+
+  /*
+   * Select the conservative function-resolution behavior used while
+   * analyzing constant initializers.
+   *
+   * Must be called in single-threaded context, outside of analysis.
+   */
+  void set_constant_analysis(bool enabled);
 
   /*
    * Merge the type `val' into the known type for static property

@@ -10,29 +10,35 @@ open Hh_prelude
 open Aast
 open Typing_defs
 
-(* meth_caller does not support methods with inout parameters *)
-let check_parameters env pos (_, ftype) =
+let check_inout_parameters env pos (_, ftype) =
   match
     List.find
       ~f:(fun ft_param ->
         match get_fp_mode ft_param with
         | FPnormal -> false
-        | _ -> true)
+        | FPinout -> true)
       ftype.ft_params
   with
   | Some fparam ->
-    let convention =
-      match get_fp_mode fparam with
-      | FPinout -> "`inout`"
-      | FPnormal -> "normal"
-    in
     let Equal = Tast_env.eq_typing_env in
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(
         primary
-        @@ Primary.Invalid_meth_caller_calling_convention
-             { pos; decl_pos = fparam.fp_pos; convention })
+        @@ Primary.Invalid_meth_caller_inout_parameter
+             { pos; decl_pos = fparam.fp_pos })
+  | None -> ()
+
+let check_named_parameters env pos (_, ftype) =
+  match List.find ~f:get_fp_is_named ftype.ft_params with
+  | Some fparam ->
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Invalid_meth_caller_named_parameter
+             { pos; decl_pos = fparam.fp_pos })
   | None -> ()
 
 let check_readonly_return env pos (r, ftype) =
@@ -56,7 +62,8 @@ let handler =
         | None -> ()
         | Some ft ->
           let Equal = Tast_env.eq_typing_env in
-          check_parameters env pos ft;
+          check_inout_parameters env pos ft;
+          check_named_parameters env pos ft;
           check_readonly_return env pos ft
       end
       | _ -> ()

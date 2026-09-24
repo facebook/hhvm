@@ -729,10 +729,13 @@ module Primary : sig
         pos: Pos.t;
         reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Invalid_meth_caller_calling_convention of {
+    | Invalid_meth_caller_inout_parameter of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
-        convention: string;
+      }
+    | Invalid_meth_caller_named_parameter of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
       }
     | Invalid_meth_caller_readonly_return of {
         pos: Pos.t;

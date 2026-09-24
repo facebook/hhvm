@@ -2633,13 +2633,12 @@ end = struct
     in
     create ~code:Error_code.InoutArgumentBadType ~claim ~reasons ()
 
-  let invalid_meth_caller_calling_convention pos decl_pos convention =
+  let invalid_meth_caller_inout_parameter pos decl_pos =
     let claim =
       lazy
         ( pos,
-          "`meth_caller` does not support methods with the "
-          ^ convention
-          ^ " calling convention" )
+          "`meth_caller` does not support methods with the `inout` calling convention"
+        )
     and reasons =
       lazy
         [
@@ -2653,6 +2652,12 @@ end = struct
       ~claim
       ~reasons
       ()
+
+  let invalid_meth_caller_named_parameter pos decl_pos =
+    let claim =
+      lazy (pos, "`meth_caller` does not support methods with named parameters")
+    and reasons = lazy [(decl_pos, "This parameter is named")] in
+    create ~code:Error_code.InvalidMethCallerNamedParameter ~claim ~reasons ()
 
   let invalid_meth_caller_readonly_return pos decl_pos =
     let claim =
@@ -5260,8 +5265,10 @@ end = struct
       inout_annotation_unexpected pos decl_pos param_is_variadic qfx_pos
     | Inout_argument_bad_type { pos; reasons } ->
       inout_argument_bad_type pos reasons
-    | Invalid_meth_caller_calling_convention { pos; decl_pos; convention } ->
-      invalid_meth_caller_calling_convention pos decl_pos convention
+    | Invalid_meth_caller_inout_parameter { pos; decl_pos } ->
+      invalid_meth_caller_inout_parameter pos decl_pos
+    | Invalid_meth_caller_named_parameter { pos; decl_pos } ->
+      invalid_meth_caller_named_parameter pos decl_pos
     | Invalid_meth_caller_readonly_return { pos; decl_pos } ->
       invalid_meth_caller_readonly_return pos decl_pos
     | This_as_function_pointer_param { pos; decl_pos } ->

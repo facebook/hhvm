@@ -1,0 +1,24 @@
+ERROR: File "meth_caller_named.php", line 19, characters 3-52:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller_named.php", line 5, characters 38-39:
+  This parameter is named
+ERROR: File "meth_caller_named.php", line 20, characters 3-49:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller_named.php", line 7, characters 43-44:
+  This parameter is named
+ERROR: File "meth_caller_named.php", line 21, characters 3-52:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller_named.php", line 9, characters 38-39:
+  This parameter is named
+ERROR: File "meth_caller_named.php", line 22, characters 3-52:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller_named.php", line 11, characters 38-39:
+  This parameter is named
+ERROR: File "meth_caller_named.php", line 23, characters 3-59:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller_named.php", line 13, characters 59-60:
+  This parameter is named
+ERROR: File "meth_caller_named.php", line 23, characters 3-59:
+`meth_caller` does not support methods with the `inout` calling convention (Typing[4416])
+  File "meth_caller_named.php", line 13, characters 45-46:
+  This is why I think this method uses the `inout` calling convention

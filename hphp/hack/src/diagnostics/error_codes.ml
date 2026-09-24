@@ -826,6 +826,7 @@ module Typing = struct
     | RedeclaringPromotedProperty [@value 4524]
     | RequireDynamicObjGet [@value 4525]
     | NeedsConcreteOverride [@value 4526]
+    | InvalidMethCallerNamedParameter [@value 4527]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

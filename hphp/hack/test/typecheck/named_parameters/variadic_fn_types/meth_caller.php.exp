@@ -1,0 +1,16 @@
+ERROR: File "meth_caller.php", line 15, characters 3-60:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller.php", line 5, characters 37-39:
+  This parameter is named
+ERROR: File "meth_caller.php", line 16, characters 3-70:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller.php", line 7, characters 48-49:
+  This parameter is named
+ERROR: File "meth_caller.php", line 17, characters 3-57:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller.php", line 9, characters 42-44:
+  This parameter is named
+ERROR: File "meth_caller.php", line 18, characters 3-66:
+`meth_caller` does not support methods with named parameters (Typing[4527])
+  File "meth_caller.php", line 11, characters 57-59:
+  This parameter is named

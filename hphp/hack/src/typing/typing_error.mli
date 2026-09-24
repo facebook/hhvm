@@ -843,6 +843,26 @@ module Primary : sig
         pos: Pos.t;
         class_name: string;
       }
+    | Call_needs_concrete of {
+        pos: Pos.t;
+        class_name: string;
+        meth_name: string;
+        decl_pos: Pos_or_decl.t;
+        via: [ `Id | `Self | `Parent | `Static ];
+      }
+    | Abstract_access_via_static of {
+        pos: Pos.t;
+        class_name: string;
+        member_name: string;
+        decl_pos: Pos_or_decl.t;
+        containing_method_pos: Pos.t option;
+      }
+    | Uninstantiable_class_via_static of {
+        pos: Pos.t;
+        class_name: string;
+        decl_pos: Pos_or_decl.t;
+        containing_method_pos: Pos.t option;
+      }
     | Needs_concrete_override of {
         pos: Pos.t;
         method_pos: Pos_or_decl.t;

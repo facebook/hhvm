@@ -827,6 +827,9 @@ module Typing = struct
     | RequireDynamicObjGet [@value 4525]
     | NeedsConcreteOverride [@value 4526]
     | InvalidMethCallerNamedParameter [@value 4527]
+    | CallNeedsConcrete [@value 4528]
+    | AbstractAccessViaStatic [@value 4529]
+    | UninstantiableClassViaStatic [@value 4530]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

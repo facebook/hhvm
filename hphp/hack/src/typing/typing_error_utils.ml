@@ -3047,6 +3047,109 @@ end = struct
     in
     create ~code:Error_code.NeedsConcreteOnConstructor ~claim ()
 
+  let call_needs_concrete pos class_name meth_name decl_pos via =
+    let class_name = Render.strip_ns class_name in
+    let member = Markdown_lite.md_codify (class_name ^ "::" ^ meth_name) in
+    let claim =
+      lazy
+        ( pos,
+          match via with
+          | `Id ->
+            Printf.sprintf
+              "Dangerous call to %s (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but %s is not concrete."
+              member
+              (Markdown_lite.md_codify class_name)
+          | `Static ->
+            Printf.sprintf
+              "Dangerous call to %s (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete."
+              member
+          | (`Self | `Parent) as via ->
+            let via =
+              match via with
+              | `Self -> "`self`"
+              | `Parent -> "`parent`"
+            in
+            Printf.sprintf
+              "Dangerous call to %s (a `<<__NeedsConcrete>>` method) via %s. It requires `static` to refer to a concrete class, but %s sets `static` to a class that may not be concrete."
+              member
+              via
+              via )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.CallNeedsConcrete ~claim ~reasons ()
+
+  let abstract_access_via_static
+      pos class_name member_name decl_pos containing_method_pos =
+    let claim =
+      lazy
+        ( pos,
+          "Dangerous access of abstract member "
+          ^ Markdown_lite.md_codify
+              (Render.strip_ns class_name ^ "::" ^ member_name)
+          ^ "; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
+        )
+    and reasons = lazy [(decl_pos, "Declaration is here")]
+    and quickfixes =
+      match containing_method_pos with
+      | Some function_pos ->
+        [
+          Quickfix.make
+            ~title:
+              (Printf.sprintf
+                 "Add %s attribute"
+                 Naming_special_names.UserAttributes.uaNeedsConcrete)
+            ~edits:
+              (Quickfix.Add_function_attribute
+                 {
+                   function_pos;
+                   attribute_name =
+                     Naming_special_names.UserAttributes.uaNeedsConcrete;
+                 })
+            ~hint_styles:[];
+        ]
+      | None -> []
+    in
+    create
+      ~code:Error_code.AbstractAccessViaStatic
+      ~claim
+      ~reasons
+      ~quickfixes
+      ()
+
+  let uninstantiable_class_via_static
+      pos _class_name decl_pos containing_method_pos =
+    let claim =
+      lazy
+        ( pos,
+          "Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
+        )
+    and reasons = lazy [(decl_pos, "Declaration is here")]
+    and quickfixes =
+      match containing_method_pos with
+      | Some function_pos ->
+        [
+          Quickfix.make
+            ~title:
+              (Printf.sprintf
+                 "Add %s attribute"
+                 Naming_special_names.UserAttributes.uaNeedsConcrete)
+            ~edits:
+              (Quickfix.Add_function_attribute
+                 {
+                   function_pos;
+                   attribute_name =
+                     Naming_special_names.UserAttributes.uaNeedsConcrete;
+                 })
+            ~hint_styles:[];
+        ]
+      | None -> []
+    in
+    create
+      ~code:Error_code.UninstantiableClassViaStatic
+      ~claim
+      ~reasons
+      ~quickfixes
+      ()
+
   let needs_concrete_override
       pos method_pos parent_pos method_name_for_method_defined_outside_class =
     let method_text =
@@ -5321,6 +5424,23 @@ end = struct
       needs_concrete_on_instance_method pos class_name meth_name
     | Needs_concrete_on_constructor { pos; class_name } ->
       needs_concrete_on_constructor pos class_name
+    | Call_needs_concrete { pos; class_name; meth_name; decl_pos; via } ->
+      call_needs_concrete pos class_name meth_name decl_pos via
+    | Abstract_access_via_static
+        { pos; class_name; member_name; decl_pos; containing_method_pos } ->
+      abstract_access_via_static
+        pos
+        class_name
+        member_name
+        decl_pos
+        containing_method_pos
+    | Uninstantiable_class_via_static
+        { pos; class_name; decl_pos; containing_method_pos } ->
+      uninstantiable_class_via_static
+        pos
+        class_name
+        decl_pos
+        containing_method_pos
     | Needs_concrete_override
         {
           pos;

@@ -299,7 +299,18 @@ type t = {
   class_class_type: bool;  (** When true, C::class : class<C> *)
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
-       * Excludes hierarchy/override check, which is covered by `needs_concrete_override_check` *)
+       * This legacy option enables each fine-grained check below at warning
+       * level. Excludes hierarchy/override checks, which are covered by
+       * `needs_concrete_override_check`. *)
+  needs_concrete_body_check: int;
+      (** Configure checks that require a method body to be marked
+       * __NeedsConcrete: 0 disables, 1 warns, and 2 errors. *)
+  needs_concrete_forwarding_call_check: int;
+      (** Configure checks for calls to __NeedsConcrete methods through self,
+       * parent, or static: 0 disables, 1 warns, and 2 errors. *)
+  needs_concrete_class_call_check: int;
+      (** Configure checks for calls to __NeedsConcrete methods through a named
+       * non-concrete class: 0 disables, 1 warns, and 2 errors. *)
   needs_concrete_override_check: int;
       (** Configure override checks for __NeedsConcrete methods: 0 disables the
        * check, 1 emits a warning, and 2 emits a Hack error.
@@ -425,6 +436,9 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete:bool ->
+  ?needs_concrete_body_check:int ->
+  ?needs_concrete_forwarding_call_check:int ->
+  ?needs_concrete_class_call_check:int ->
   ?needs_concrete_override_check:int ->
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->

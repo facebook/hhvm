@@ -5,13 +5,13 @@
 abstract class C1 {
   public static abstract function abs(): void;
   public static function fooz(): void {
-    // when needs_concrete=true there's an error on the next line
+    // When the needs-concrete checks are enabled, the next line is an error.
     static::abs();
   }
 }
 
 abstract class C2 extends C1 {
-  // when needs_concrete=true there's an error on the next line
+  // When the needs-concrete checks are enabled, the next line is an error.
   // for a bad override: __NeedsConcrete cannot override non-__NeedsConcrete
   <<__NeedsConcrete, __Override>>
   public static function fooz(): void {}

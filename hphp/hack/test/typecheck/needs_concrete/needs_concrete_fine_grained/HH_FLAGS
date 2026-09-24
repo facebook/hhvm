@@ -1,1 +1,3 @@
---config needs_concrete=true
+--config needs_concrete_body_check=2
+--config needs_concrete_forwarding_call_check=2
+--config needs_concrete_class_call_check=1

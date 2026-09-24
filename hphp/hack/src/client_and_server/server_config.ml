@@ -608,6 +608,25 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt Config_keys.Hhconfig.class_sub_classname config)
     ?class_class_type:(bool_opt Config_keys.Hhconfig.class_class_type config)
     ?needs_concrete:(bool_opt Config_keys.Hhconfig.needs_concrete config)
+    ?needs_concrete_body_check:
+      (int_opt Config_keys.Hhconfig.needs_concrete_body_check config
+      |> Option.map ~f:(fun value ->
+             if value < 0 || value > 2 then
+               invalid_arg "needs_concrete_body_check must be 0, 1, or 2";
+             value))
+    ?needs_concrete_forwarding_call_check:
+      (int_opt Config_keys.Hhconfig.needs_concrete_forwarding_call_check config
+      |> Option.map ~f:(fun value ->
+             if value < 0 || value > 2 then
+               invalid_arg
+                 "needs_concrete_forwarding_call_check must be 0, 1, or 2";
+             value))
+    ?needs_concrete_class_call_check:
+      (int_opt Config_keys.Hhconfig.needs_concrete_class_call_check config
+      |> Option.map ~f:(fun value ->
+             if value < 0 || value > 2 then
+               invalid_arg "needs_concrete_class_call_check must be 0, 1, or 2";
+             value))
     ?needs_concrete_override_check:
       (int_opt Config_keys.Hhconfig.needs_concrete_override_check config
       |> Option.map ~f:(fun value ->

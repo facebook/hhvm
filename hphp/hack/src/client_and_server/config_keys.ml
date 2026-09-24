@@ -171,6 +171,13 @@ module Hhconfig = struct
 
   let needs_concrete = key "needs_concrete"
 
+  let needs_concrete_body_check = key "needs_concrete_body_check"
+
+  let needs_concrete_forwarding_call_check =
+    key "needs_concrete_forwarding_call_check"
+
+  let needs_concrete_class_call_check = key "needs_concrete_class_call_check"
+
   let needs_concrete_override_check = key "needs_concrete_override_check"
 
   let package_allow_as_expression_violations =

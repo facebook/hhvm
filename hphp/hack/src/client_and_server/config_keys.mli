@@ -158,6 +158,12 @@ module Hhconfig : sig
 
   val needs_concrete : string
 
+  val needs_concrete_body_check : string
+
+  val needs_concrete_forwarding_call_check : string
+
+  val needs_concrete_class_call_check : string
+
   val needs_concrete_override_check : string
 
   val package_allow_as_expression_violations : string

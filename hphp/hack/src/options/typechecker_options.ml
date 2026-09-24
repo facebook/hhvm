@@ -287,6 +287,19 @@ let class_class_type t = t.Global_options.class_class_type
 
 let needs_concrete t = t.Global_options.needs_concrete
 
+let needs_concrete_body_check t = t.Global_options.needs_concrete_body_check
+
+let needs_concrete_forwarding_call_check t =
+  t.Global_options.needs_concrete_forwarding_call_check
+
+let needs_concrete_class_call_check t =
+  t.Global_options.needs_concrete_class_call_check
+
+let needs_concrete_body_or_call_check_enabled t =
+  needs_concrete_body_check t > 0
+  || needs_concrete_forwarding_call_check t > 0
+  || needs_concrete_class_call_check t > 0
+
 let needs_concrete_override_check t =
   t.Global_options.needs_concrete_override_check
 

@@ -7,6 +7,79 @@
  *)
 open Hh_prelude
 
+let add_call_needs_concrete
+    env check_level pos class_name meth_name decl_pos via =
+  match check_level with
+  | 1 ->
+    Typing_warning_utils.add
+      env
+      ( pos,
+        Typing_warning.Call_needs_concrete,
+        {
+          Typing_warning.Call_needs_concrete.call_pos = pos;
+          class_name;
+          meth_name;
+          decl_pos;
+          via;
+        } )
+  | 2 ->
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Call_needs_concrete
+             { pos; class_name; meth_name; decl_pos; via })
+  | _ -> ()
+
+let add_abstract_access_via_static
+    env check_level pos class_name member_name decl_pos =
+  let containing_method_pos = Some env.Typing_env_types.genv.function_pos in
+  match check_level with
+  | 1 ->
+    Typing_warning_utils.add
+      env
+      ( pos,
+        Typing_warning.Abstract_access_via_static,
+        {
+          Typing_warning.Abstract_access_via_static.access_pos = pos;
+          class_name;
+          member_name;
+          decl_pos;
+          containing_method_pos;
+        } )
+  | 2 ->
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Abstract_access_via_static
+             { pos; class_name; member_name; decl_pos; containing_method_pos })
+  | _ -> ()
+
+let add_uninstantiable_class_via_static env check_level pos class_name decl_pos
+    =
+  let containing_method_pos = Some env.Typing_env_types.genv.function_pos in
+  match check_level with
+  | 1 ->
+    Typing_warning_utils.add
+      env
+      ( pos,
+        Typing_warning.Uninstantiable_class_via_static,
+        {
+          Typing_warning.Uninstantiable_class_via_static.usage_pos = pos;
+          class_name;
+          decl_pos;
+          containing_method_pos;
+        } )
+  | 2 ->
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Uninstantiable_class_via_static
+             { pos; class_name; decl_pos; containing_method_pos })
+  | _ -> ()
+
 let check_class_get
     (env : Typing_env_types.env)
     (class_get_pos : Pos.t)
@@ -16,103 +89,101 @@ let check_class_get
     (ce : Typing_defs.class_elt)
     (e : ('ex, 'en) Aast_defs.class_id_)
     (is_method : bool) : unit =
-  if Typechecker_options.needs_concrete env.genv.tcopt then
+  if
+    Typechecker_options.needs_concrete_body_or_call_check_enabled env.genv.tcopt
+  then
+    let body_check_level =
+      Typechecker_options.needs_concrete_body_check env.genv.tcopt
+    in
+    let forwarding_call_check_level =
+      Typechecker_options.needs_concrete_forwarding_call_check env.genv.tcopt
+    in
+    let class_call_check_level =
+      Typechecker_options.needs_concrete_class_call_check env.genv.tcopt
+    in
     let callee_is_needs_concrete_method : bool =
       is_method && Typing_defs.get_ce_readonly_prop_or_needs_concrete ce
     in
     let check_needs_concrete_call (via : [ `Static | `Self | `Parent ]) : unit =
       (* `self` and `parent` forward the referent of `static` so are just as dangerous *)
       if
-        callee_is_needs_concrete_method
+        forwarding_call_check_level > 0
+        && callee_is_needs_concrete_method
         && not (Typing_env.static_points_to_concrete_class env)
       then
-        let warning =
-          ( class_get_pos,
-            Typing_warning.Call_needs_concrete,
-            {
-              Typing_warning.Call_needs_concrete.call_pos = class_get_pos;
-              class_name = cid;
-              meth_name = mid;
-              decl_pos = def_pos;
-              via = (via :> [ `Id | `Static | `Self | `Parent ]);
-            } )
-        in
-        Typing_warning_utils.add env warning
+        add_call_needs_concrete
+          env
+          forwarding_call_check_level
+          class_get_pos
+          cid
+          mid
+          def_pos
+          (via :> [ `Id | `Static | `Self | `Parent ])
     in
-
-    begin
-      match e with
-      | CI _ when callee_is_needs_concrete_method ->
-        Typing_env.get_class env cid
-        |> Decl_entry.to_option
-        |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
-               let is_concrete : bool =
-                 let is_non_abstract : bool =
-                   not (Folded_class.abstract class_)
-                 in
-                 let is_final_non_consistent_construct =
-                   lazy
-                     (match snd @@ Typing_env.get_construct env class_ with
-                     | Typing_defs.FinalClass -> true
-                     | Typing_defs.Inconsistent
-                     | Typing_defs.ConsistentConstruct ->
-                       false)
-                 in
-                 is_non_abstract
-                 || Folded_class.final class_
-                    && Lazy.force is_final_non_consistent_construct
+    match e with
+    | CI _ when class_call_check_level > 0 && callee_is_needs_concrete_method ->
+      Typing_env.get_class env cid
+      |> Decl_entry.to_option
+      |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
+             let is_concrete : bool =
+               let is_non_abstract : bool =
+                 not (Folded_class.abstract class_)
                in
-               if not is_concrete then
-                 let warning =
-                   ( class_get_pos,
-                     Typing_warning.Call_needs_concrete,
-                     {
-                       Typing_warning.Call_needs_concrete.call_pos =
-                         class_get_pos;
-                       class_name = cid;
-                       meth_name = mid;
-                       decl_pos = def_pos;
-                       via = `Id;
-                     } )
-                 in
-                 Typing_warning_utils.add env warning)
-      | CIself -> check_needs_concrete_call `Self
-      | CIparent -> check_needs_concrete_call `Parent
-      | CIstatic ->
-        let () = check_needs_concrete_call `Static in
-        if
-          Typing_defs.get_ce_abstract ce
-          && not (Typing_env.static_points_to_concrete_class env)
-        then
-          (* We check for abstract access via `static`
-           * as part of the "needs concrete" feature, because
-           * checking for calls to `abstract` functions for
-           * `self`/`parent`/classname, etc. is already covered by other type
-           * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
-           *)
-          let warning =
-            ( class_get_pos,
-              Typing_warning.Abstract_access_via_static,
-              {
-                Typing_warning.Abstract_access_via_static.access_pos =
-                  class_get_pos;
-                class_name = cid;
-                member_name = mid;
-                decl_pos = def_pos;
-                containing_method_pos = Some env.genv.function_pos;
-              } )
-          in
-          Typing_warning_utils.add env warning
-      | CI _ -> ()
-      | CIreified _ -> ()
-      | CIexpr _ -> ()
-    end
+               let is_final_non_consistent_construct =
+                 lazy
+                   (match snd @@ Typing_env.get_construct env class_ with
+                   | Typing_defs.FinalClass -> true
+                   | Typing_defs.Inconsistent
+                   | Typing_defs.ConsistentConstruct ->
+                     false)
+               in
+               is_non_abstract
+               || Folded_class.final class_
+                  && Lazy.force is_final_non_consistent_construct
+             in
+             if not is_concrete then
+               add_call_needs_concrete
+                 env
+                 class_call_check_level
+                 class_get_pos
+                 cid
+                 mid
+                 def_pos
+                 `Id)
+    | CIself -> check_needs_concrete_call `Self
+    | CIparent -> check_needs_concrete_call `Parent
+    | CIstatic ->
+      let () = check_needs_concrete_call `Static in
+      if
+        body_check_level > 0
+        && Typing_defs.get_ce_abstract ce
+        && not (Typing_env.static_points_to_concrete_class env)
+      then
+        (* We check for abstract access via `static`
+         * as part of the "needs concrete" feature, because
+         * checking for calls to `abstract` functions for
+         * `self`/`parent`/classname, etc. is already covered by other type
+         * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
+         *)
+        add_abstract_access_via_static
+          env
+          body_check_level
+          class_get_pos
+          cid
+          mid
+          def_pos
+    | CI _ -> ()
+    | CIreified _ -> ()
+    | CIexpr _ -> ()
 
 let check_instantiation
     (env : Typing_env_types.env)
     (instantiation_pos : Pos.t)
     (cid : ('ex, 'en) Aast_defs.class_id_) : unit =
-  if Typechecker_options.needs_concrete env.genv.tcopt then
+  let check_level =
+    Typechecker_options.needs_concrete_body_check env.genv.tcopt
+  in
+  if Int.equal check_level 1 || Int.equal check_level 2 then
     match cid with
     | CIstatic when not (Typing_env.static_points_to_concrete_class env) ->
       Typing_env.get_self_class env
@@ -126,18 +197,12 @@ let check_instantiation
                Folded_class.abstract class_ && Folded_class.final class_
              in
              if not would_be_redundant then
-               let warning =
-                 ( instantiation_pos,
-                   Typing_warning.Uninstantiable_class_via_static,
-                   {
-                     Typing_warning.Uninstantiable_class_via_static.usage_pos =
-                       instantiation_pos;
-                     class_name = Folded_class.name class_;
-                     decl_pos = Folded_class.pos class_;
-                     containing_method_pos = Some env.genv.function_pos;
-                   } )
-               in
-               Typing_warning_utils.add env warning)
+               add_uninstantiable_class_via_static
+                 env
+                 check_level
+                 instantiation_pos
+                 (Folded_class.name class_)
+                 (Folded_class.pos class_))
     | CIstatic
     | CIself
     | CIparent
@@ -150,7 +215,12 @@ let check_class_def
     (env : Typing_env_types.env)
     (c : Nast.class_)
     (tc : Decl_provider.class_decl) : unit =
-  if Typechecker_options.needs_concrete env.genv.tcopt then
+  (* Attribute validity historically followed `needs_concrete`, independently
+   * of `needs_concrete_override_check`. Preserve that behavior for its three
+   * fine-grained replacements. *)
+  if
+    Typechecker_options.needs_concrete_body_or_call_check_enabled env.genv.tcopt
+  then
     (* Check for __NeedsConcrete on instance methods (non-static methods) and constructors *)
     List.iter c.c_methods ~f:(fun m ->
         if

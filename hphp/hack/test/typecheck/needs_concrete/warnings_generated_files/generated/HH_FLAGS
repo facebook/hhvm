@@ -1,2 +1,4 @@
---config needs_concrete=true
+--config needs_concrete_body_check=1
+--config needs_concrete_forwarding_call_check=1
+--config needs_concrete_class_call_check=1
 --config warnings_generated_files=[.]php$

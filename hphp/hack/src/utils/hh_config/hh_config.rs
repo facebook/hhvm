@@ -34,6 +34,12 @@ const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 /// Must match `Config_keys.Hhconfig.enable_implicit_packages` on the OCaml side.
 const ENABLE_IMPLICIT_PACKAGES_KEY: &str = "enable_implicit_packages";
 
+fn get_tristate(config: &ConfigFile, key: &str, default: isize) -> Result<isize> {
+    let value = config.get_int_or(key, default)?;
+    anyhow::ensure!((0..=2).contains(&value), "{key} must be 0, 1, or 2");
+    Ok(value)
+}
+
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
 ///
@@ -348,6 +354,8 @@ impl HhConfig {
             |flag_name| hh_conf.get_bool(flag_name).unwrap_or(Ok(false)),
         )?;
         let default = GlobalOptions::default();
+        let needs_concrete = hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?;
+        let needs_concrete_level = if needs_concrete { 1 } else { 0 };
         let opts = GlobalOptions {
             po,
             tco_saved_state: SavedState {
@@ -604,18 +612,27 @@ impl HhConfig {
             class_sub_classname: hhconfig
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
-            needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
-            needs_concrete_override_check: (|| {
-                let value = hhconfig.get_int_or(
-                    "needs_concrete_override_check",
-                    default.needs_concrete_override_check,
-                )?;
-                anyhow::ensure!(
-                    (0..=2).contains(&value),
-                    "needs_concrete_override_check must be 0, 1, or 2"
-                );
-                Ok::<_, anyhow::Error>(value)
-            })()?,
+            needs_concrete,
+            needs_concrete_body_check: get_tristate(
+                &hhconfig,
+                "needs_concrete_body_check",
+                needs_concrete_level,
+            )?,
+            needs_concrete_forwarding_call_check: get_tristate(
+                &hhconfig,
+                "needs_concrete_forwarding_call_check",
+                needs_concrete_level,
+            )?,
+            needs_concrete_class_call_check: get_tristate(
+                &hhconfig,
+                "needs_concrete_class_call_check",
+                needs_concrete_level,
+            )?,
+            needs_concrete_override_check: get_tristate(
+                &hhconfig,
+                "needs_concrete_override_check",
+                default.needs_concrete_override_check,
+            )?,
             strict_consistent_construct: hhconfig.get_bool_or(
                 "strict_consistent_construct",
                 default.strict_consistent_construct,
@@ -785,5 +802,26 @@ mod test {
             hhconf.opts.log_levels.get("pessimise").copied(),
             Some(1isize)
         );
+    }
+
+    #[test]
+    fn test_needs_concrete_legacy_fallback() {
+        let hhconf = from_slice(b"needs_concrete=true").unwrap();
+        assert!(hhconf.opts.needs_concrete);
+        assert_eq!(hhconf.opts.needs_concrete_body_check, 1);
+        assert_eq!(hhconf.opts.needs_concrete_forwarding_call_check, 1);
+        assert_eq!(hhconf.opts.needs_concrete_class_call_check, 1);
+    }
+
+    #[test]
+    fn test_needs_concrete_fine_grained() {
+        let hhconf = from_slice(
+            b"needs_concrete_body_check=0\nneeds_concrete_forwarding_call_check=1\nneeds_concrete_class_call_check=2",
+        )
+        .unwrap();
+        assert!(!hhconf.opts.needs_concrete);
+        assert_eq!(hhconf.opts.needs_concrete_body_check, 0);
+        assert_eq!(hhconf.opts.needs_concrete_forwarding_call_check, 1);
+        assert_eq!(hhconf.opts.needs_concrete_class_call_check, 2);
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a1298b096c769019755d7b5bbb650293>>
+// @generated SignedSource<<21f0662a6b0a091b79e4f6e53a323f51>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -406,8 +406,19 @@ pub struct GlobalOptions {
     /// When true, C::class : class<C>
     pub class_class_type: bool,
     /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
-    /// Excludes hierarchy/override check, which is covered by `needs_concrete_override_check`
+    /// This legacy option enables each fine-grained check below at warning
+    /// level. Excludes hierarchy/override checks, which are covered by
+    /// `needs_concrete_override_check`.
     pub needs_concrete: bool,
+    /// Configure checks that require a method body to be marked
+    /// __NeedsConcrete: 0 disables, 1 warns, and 2 errors.
+    pub needs_concrete_body_check: isize,
+    /// Configure checks for calls to __NeedsConcrete methods through self,
+    /// parent, or static: 0 disables, 1 warns, and 2 errors.
+    pub needs_concrete_forwarding_call_check: isize,
+    /// Configure checks for calls to __NeedsConcrete methods through a named
+    /// non-concrete class: 0 disables, 1 warns, and 2 errors.
+    pub needs_concrete_class_call_check: isize,
     /// Configure override checks for __NeedsConcrete methods: 0 disables the
     /// check, 1 emits a warning, and 2 emits a Hack error.
     /// https://fburl.com/hack-needs-concrete

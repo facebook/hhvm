@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e3121410a4d5ef31039f5a011f93ca47>>
+// @generated SignedSource<<0159fbb686635359983acd61c808cddb>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -596,6 +596,9 @@ pub enum Typing {
     RequireDynamicObjGet = 4525,
     NeedsConcreteOverride = 4526,
     InvalidMethCallerNamedParameter = 4527,
+    CallNeedsConcrete = 4528,
+    AbstractAccessViaStatic = 4529,
+    UninstantiableClassViaStatic = 4530,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

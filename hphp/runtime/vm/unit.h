@@ -207,6 +207,8 @@ public:
    */
   bool isSoftDeployedRepoOnly() const;
 
+  bool shouldRaiseStrictPackageDynamicClassLoadError() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // File paths.
 
@@ -586,6 +588,7 @@ private:
   bool m_interpretOnly : 1;
   bool m_extended : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error
+  bool m_raiseStrictPackageDynamicClassLoadError : 1;
 
   FuncVec m_funcs;
   PreClassPtrVec m_preClasses;

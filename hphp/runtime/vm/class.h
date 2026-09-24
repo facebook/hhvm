@@ -689,6 +689,8 @@ public:
    */
   bool isDynamicallyReferenced() const;
 
+  bool isInStrictPackage() const;
+
   /*
    * If the class is called dynamically should we sample the calls?
    */

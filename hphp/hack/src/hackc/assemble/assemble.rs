@@ -1237,6 +1237,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"sealed" => Attr::AttrSealed,
         b"splat_param" => Attr::AttrSplatParam,
         b"static" => Attr::AttrStatic,
+        b"in_strict_package" => Attr::AttrInStrictPackage,
         b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
         b"sys_initial_val" => Attr::AttrSystemInitialValue,
         b"trait" => Attr::AttrTrait,

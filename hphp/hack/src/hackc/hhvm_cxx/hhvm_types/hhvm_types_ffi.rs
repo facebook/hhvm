@@ -60,6 +60,7 @@ pub mod ffi {
         AttrHasCoeffectRules = 0x2000000,
         AttrIsFoldable = 0x4000000,
         AttrNoFCallBuiltin = 0x8000000,
+        AttrInStrictPackage = 0x8000000,
         AttrVariadicParam = 0x10000000,
         AttrProvenanceSkipFrame = 0x20000000,
         AttrEnumClass = 0x40000000,

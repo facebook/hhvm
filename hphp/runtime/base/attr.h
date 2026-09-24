@@ -187,6 +187,8 @@ namespace HPHP {
   /* Indicates that this function cannot be called with FCallBuiltin because   \
      it requires an ActRec argument. */                                        \
   ATTR(NoFCallBuiltin, 27)               /*       |          |    X    */      \
+  /* Set on classes defined in a strict package. */                            \
+  ATTR(InStrictPackage, 27)              /*    X  |          |         */      \
                                          /*       |          |         */      \
   /* Does this function have a `...' parameter? */                             \
   ATTR(VariadicParam, 28)                /*       |          |    X    */      \

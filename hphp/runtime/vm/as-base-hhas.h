@@ -68,6 +68,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrDynamicallyReferenced,    C,       "dyn_referenced");       \
   X(AttrProvenanceSkipFrame,      F,       "prov_skip_frame");      \
   X(AttrIsFoldable,               F,       "foldable");             \
+  X(AttrInStrictPackage,          C,       "in_strict_package");    \
   X(AttrNoInjection,              F,       "no_injection");         \
   X(AttrInterceptable,            F,       "interceptable");        \
   X(AttrDynamicallyCallable,      F,       "dyn_callable");         \

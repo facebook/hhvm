@@ -31,6 +31,10 @@ inline bool PreClass::isBuiltin() const {
   return m_attrs & AttrBuiltin;
 }
 
+inline bool PreClass::isInStrictPackage() const {
+  return m_attrs & AttrInStrictPackage;
+}
+
 inline bool PreClass::hasConstant(const StringData* cnsName) const {
   return m_constants.contains(cnsName);
 }

@@ -602,6 +602,11 @@ Id UnitEmitter::getEntryPointId() const {
 
 void UnitEmitter::finish() {
   calculateEntryPointId();
+  if (m_attributes.strictPackage) {
+    for (auto const pce : preclasses()) {
+      pce->setAttrs(pce->attrs() | AttrInStrictPackage);
+    }
+  }
   assertx(m_fatalUnit || (isSystemLib() == (m_extension != nullptr)));
 }
 
@@ -748,6 +753,8 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
   u->m_softDeployedRepoOnly = m_softDeployedRepoOnly;
+  u->m_raiseStrictPackageDynamicClassLoadError =
+    m_attributes.raiseDynamicClassLoadError;
   u->m_ICE = m_ICE;
   u->m_deps = m_deps;
 

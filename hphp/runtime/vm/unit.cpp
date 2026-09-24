@@ -98,6 +98,7 @@ Unit::Unit()
   : m_interpretOnly(false)
   , m_extended(false)
   , m_ICE(false)
+  , m_raiseStrictPackageDynamicClassLoadError(false)
 {
   ++s_createdUnits;
   ++s_liveUnits;

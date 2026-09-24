@@ -366,6 +366,7 @@ public:
    */
   bool isPersistent() const;
   bool isBuiltin() const;
+  bool isInStrictPackage() const;
 
   /*
    * Check whether a constant, method, or property exists on the PreClass.

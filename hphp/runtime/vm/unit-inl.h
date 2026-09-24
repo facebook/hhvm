@@ -72,6 +72,10 @@ inline bool Unit::isSoftDeployedRepoOnly() const {
   return m_softDeployedRepoOnly;
 }
 
+inline bool Unit::shouldRaiseStrictPackageDynamicClassLoadError() const {
+  return m_raiseStrictPackageDynamicClassLoadError;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // File paths.
 

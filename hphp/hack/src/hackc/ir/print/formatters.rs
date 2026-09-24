@@ -135,6 +135,12 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrSealed, "sealed"),
                 get_bit(&mut attr, Attr::AttrSplatParam, "splat_param"),
                 get_bit(&mut attr, Attr::AttrStatic, "static"),
+                flag_get_bit(
+                    is_class,
+                    &mut attr,
+                    Attr::AttrInStrictPackage,
+                    "in_strict_package",
+                ),
                 get_bit(&mut attr, Attr::AttrSystemInitialValue, "system_initial_value"),
                 get_bit(&mut attr, Attr::AttrTrait, "trait"),
                 get_bit(&mut attr, Attr::AttrVariadicParam, "variadic_param"),

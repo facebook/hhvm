@@ -303,6 +303,10 @@ inline bool Class::isDynamicallyReferenced() const {
   return attrs() & AttrDynamicallyReferenced;
 }
 
+inline bool Class::isInStrictPackage() const {
+  return attrs() & AttrInStrictPackage;
+}
+
 inline Optional<int64_t> Class::dynConstructSampleRate() const {
   auto const rate = preClass()->dynConstructSampleRate();
   if (rate < 0) return {};

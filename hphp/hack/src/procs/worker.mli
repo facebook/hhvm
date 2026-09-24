@@ -20,6 +20,17 @@ type metadata_out = {
 
 type subprocess_job_status = Subprocess_terminated of Unix.process_status
 
+module For_test : sig
+  val read_and_process_job :
+    Unix.file_descr ->
+    Unix.file_descr ->
+    [ `Success
+    | `Error of Exit_status.t
+    | `Worker_cancelled
+    | `Controller_has_died
+    ]
+end
+
 val unix_worker_main :
   ('a -> 'b) ->
   'a * Unix.file_descr option ->

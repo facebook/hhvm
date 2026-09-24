@@ -83,6 +83,61 @@ let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
         (_, Worker_controller.Worker_quit (Unix.WEXITED i)) ->
       i = 2)
 
+let test_job_marshal_exception_exits_with_2 use_clones heap_handle () =
+  let workers = make_worker ~longlived_workers:use_clones heap_handle in
+  match workers with
+  | [] ->
+    Printf.eprintf "Failed to create workers";
+    false
+  | worker :: _ ->
+    (try
+       call_and_verify_result
+         worker
+         (fun () -> raise Marshal_tools.Reading_Payload_Exception)
+         ()
+         "dummy"
+     with
+    | Worker_controller.Worker_failed
+        (_, Worker_controller.Worker_quit (Unix.WEXITED i)) ->
+      i = 2)
+
+let test_controller_channel_closure_is_controller_death () =
+  let (input_fd, controller_fd) = Unix.pipe () in
+  let output_fd = Daemon.null_fd () in
+  let controller_fd_is_open = ref true in
+  let close_no_fail fd =
+    try Unix.close fd with
+    | Unix.Unix_error (Unix.EBADF, _, _) -> ()
+  in
+  let close_controller_fd () =
+    if !controller_fd_is_open then (
+      controller_fd_is_open := false;
+      close_no_fail controller_fd
+    )
+  in
+  Utils.try_finally
+    ~f:(fun () ->
+      let preamble = Marshal_tools.make_preamble 2 in
+      let preamble_size = Bytes.length preamble in
+      let preamble_bytes_written =
+        Unix.write controller_fd preamble 0 preamble_size
+      in
+      let payload = Bytes.of_string "x" in
+      let payload_bytes_written = Unix.write controller_fd payload 0 1 in
+      close_controller_fd ();
+      let outcome =
+        Utils.try_finally
+          ~f:(fun () -> Worker.For_test.read_and_process_job input_fd output_fd)
+          ~finally:(fun () -> Measure.pop_global () |> ignore)
+      in
+      preamble_bytes_written = preamble_size
+      && payload_bytes_written = 1
+      && Poly.(outcome = `Controller_has_died))
+    ~finally:(fun () ->
+      close_no_fail input_fd;
+      close_controller_fd ();
+      close_no_fail output_fd)
+
 let test_simple_worker_spawn use_clones heap_handle () =
   let workers = make_worker ~longlived_workers:use_clones heap_handle in
   match workers with
@@ -100,8 +155,15 @@ let make_tests handle =
       "worker_uncaught_exception_exits_with_2"
       test_worker_uncaught_exception_exits_with_2
   @ make_test
+      "job_marshal_exception_exits_with_2"
+      test_job_marshal_exception_exits_with_2
+  @ make_test
       "wrapped_worker_with_custom_exit"
       test_wrapped_worker_with_custom_exit
+  @ [
+      ( "controller_channel_closure_is_controller_death",
+        test_controller_channel_closure_is_controller_death );
+    ]
 
 let () =
   Daemon.check_entry_point ();

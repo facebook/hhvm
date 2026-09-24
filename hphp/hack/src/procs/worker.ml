@@ -53,7 +53,24 @@ type job_outcome =
   | `Controller_has_died
   ]
 
-let read_and_process_job ic oc : job_outcome =
+exception Controller_channel_closed of exn
+
+(* Keep these handlers scoped to the controller's file descriptors. A worker
+   job may use Marshal_tools for unrelated IPC, and those failures must remain
+   visible as worker exceptions. *)
+let with_controller_read f =
+  try f () with
+  | ( Marshal_tools.Reading_Preamble_Exception
+    | Marshal_tools.Reading_Payload_Exception ) as exn ->
+    raise (Controller_channel_closed exn)
+
+let with_controller_write f =
+  try f () with
+  | ( Marshal_tools.Writing_Preamble_Exception
+    | Marshal_tools.Writing_Payload_Exception ) as exn ->
+    raise (Controller_channel_closed exn)
+
+let read_and_process_job_fds infd outfd : job_outcome =
   let start_user_time = ref 0. in
   let start_system_time = ref 0. in
   let start_minor_words = ref 0. in
@@ -63,8 +80,6 @@ let read_and_process_job ic oc : job_outcome =
   let start_major_collections = ref 0 in
   let start_wall_time = ref 0. in
   let start_proc_fs_status = ref None in
-  let infd = Daemon.descr_of_in_channel ic in
-  let outfd = Daemon.descr_of_out_channel oc in
   let send_result data =
     Mem_profile.stop ();
     let tm = Unix.times () in
@@ -127,10 +142,11 @@ let read_and_process_job ic oc : job_outcome =
     Worker_cancel.with_no_cancellations (fun () ->
         let len =
           Measure.time "worker_send_response" (fun () ->
-              Marshal_tools.to_fd_with_preamble
-                ~flags:[Marshal.Closures]
-                outfd
-                data)
+              with_controller_write (fun () ->
+                  Marshal_tools.to_fd_with_preamble
+                    ~flags:[Marshal.Closures]
+                    outfd
+                    data))
         in
         if len > 30 * 1024 * 1024 (* 30 MiB *) then (
           Hh_logger.log
@@ -152,7 +168,10 @@ let read_and_process_job ic oc : job_outcome =
             log_globals = Hack_event_logger.serialize_globals ();
           }
         in
-        let _ = Marshal_tools.to_fd_with_preamble outfd metadata_out in
+        let _ =
+          with_controller_write (fun () ->
+              Marshal_tools.to_fd_with_preamble outfd metadata_out)
+        in
         ())
   in
 
@@ -160,7 +179,8 @@ let read_and_process_job ic oc : job_outcome =
     Measure.push_global ();
     let request : request =
       Measure.time "worker_read_request" (fun () ->
-          Marshal_tools.from_fd_with_preamble infd)
+          with_controller_read (fun () ->
+              Marshal_tools.from_fd_with_preamble infd))
     in
     let (Request (do_process, { log_globals })) = request in
     let tm = Unix.times () in
@@ -202,6 +222,11 @@ let read_and_process_job ic oc : job_outcome =
        because it's easier. This is fine because workers do no reading other than from
        the server. *)
     `Controller_has_died
+  | Controller_channel_closed exn ->
+    Hh_logger.log
+      "Worker controller channel closed during marshaling: %s"
+      (Exception.wrap exn |> Exception.get_ctor_string);
+    `Controller_has_died
   | Unix.Unix_error (Unix.EPIPE, _, _) ->
     (* This happens in the expected abrupt shutdown path of hh_server:
        the controller process shuts down, and therefore when we finish our batch
@@ -210,10 +235,6 @@ let read_and_process_job ic oc : job_outcome =
        it's easier. This is fine because workers have no other pipes other than
        to the server. We do log to the server-log, though, which is fair since
        it was an abrupt shutdown. *)
-    (* Note: there are other manifestations of server shutdown, e.g.
-       Marshal_tools.Reading_Preamble_Exception. I'm not confident I know all
-       of them, nor can tell which ones are expected vs unexpected, so I'll
-       leave them all to the catch-all handler below. *)
     Hh_logger.log "Worker got EPIPE due to server shutdown";
     `Controller_has_died
   | Poll.Poll_exception flags as e ->
@@ -242,6 +263,15 @@ let read_and_process_job ic oc : job_outcome =
        How can we convey exit code 2? By unfortunate accident, Exit_status.Type_error
        gets turned into "2". So that's how we're going to return exit code 2. Yuck. *)
     `Error Exit_status.Type_error
+
+let read_and_process_job ic oc =
+  read_and_process_job_fds
+    (Daemon.descr_of_in_channel ic)
+    (Daemon.descr_of_out_channel oc)
+
+module For_test = struct
+  let read_and_process_job = read_and_process_job_fds
+end
 
 (*****************************************************************************
  * Entry point for spawned worker.
@@ -301,7 +331,7 @@ let dummy_closure () = ()
  * running and waiting for the next incoming job before forking a new clone.
  *
  * If the clone exits with a non-zero code, the main worker process also exits
- * with the same code. Thus, the contoller process of this worker can just
+ * with the same code. Thus, the controller process of this worker can just
  * waitpid directly on the main worker process and see correct exit codes.
  *
  * NOTE: `WSIGNALED i` and `WSTOPPED i` are all coalesced into `exit 2`

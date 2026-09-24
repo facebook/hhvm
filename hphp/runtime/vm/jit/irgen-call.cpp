@@ -1494,6 +1494,11 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitStrictPackageDynamicReference(IRGS& env, SSATmp* cls) {
+  if (Cfg::Repo::Authoritative &&
+      !Cfg::Eval::CanReportStrictDynamicReference) {
+    return;
+  }
+
   if (cls->hasConstVal()) {
     if (!cls->clsVal()->isInStrictPackage()) return;
     gen(env, CheckStrictPackageDynamicReference, cls);

@@ -142,6 +142,9 @@ struct PackageInfo {
     std::filesystem::path path,
     const std::filesystem::path& repoRoot
   ) const;
+  bool canReportStrictDynamicReference(
+    std::string_view activeDeployment
+  ) const;
 
   PackageInfo() = default;
 

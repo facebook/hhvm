@@ -662,6 +662,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether dynamic references to classes in strict packages raise a notice.
 
+- bool Eval.CanReportStrictDynamicReference = false, UNKNOWN, nobind|globaldata
+
+  Whether the active repository deployment contains a strict target package
+  whose dynamic references may need reporting. This gate does not encode the
+  caller's package.
+
 - uint32_t Eval.RaiseStrToClsConversionNoticeSampleRate = 0, UNKNOWN
 
   Whether operations like $c::foo() raise a notice when $c is a string

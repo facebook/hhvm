@@ -5163,6 +5163,7 @@ bool Class::mightCareAboutDynamicallyReferenced() const {
 }
 
 bool Class::mightBeInStrictPackage() const {
+  if (!Cfg::Eval::CanReportStrictDynamicReference) return false;
   graph().ensureCInfo();
   auto const isStrict = [] (const php::Class& cls) {
     return cls.attrs & AttrInStrictPackage;

@@ -88,5 +88,33 @@ TEST(StrictPackageTest, PreservesProjectionsThroughSerialization) {
   );
 }
 
+TEST(StrictPackageTest, ComputesDiagnosticGateForDeployments) {
+  PackageInfo packageInfo;
+  packageInfo.m_packages.emplace("loose", PackageInfo::Package{});
+  packageInfo.m_packages.emplace("strict", PackageInfo::Package{});
+  packageInfo.m_packages.at("strict").m_enable_strict_isolation = true;
+  packageInfo.m_implicitPackageFamilies.emplace(
+    "family", PackageInfo::ImplicitPackageFamily{"families/", {}, {}}
+  );
+  packageInfo.m_deployments.emplace(
+    "loose_only",
+    PackageInfo::Deployment{{"loose"}, {}}
+  );
+  packageInfo.m_deployments.emplace(
+    "strict_hard",
+    PackageInfo::Deployment{{"strict"}, {}}
+  );
+  packageInfo.m_deployments.emplace(
+    "strict_soft",
+    PackageInfo::Deployment{{}, {"family.member"}}
+  );
+
+  EXPECT_FALSE(packageInfo.canReportStrictDynamicReference("loose_only"));
+  EXPECT_FALSE(packageInfo.canReportStrictDynamicReference("missing"));
+  EXPECT_TRUE(packageInfo.canReportStrictDynamicReference("strict_hard"));
+  EXPECT_TRUE(packageInfo.canReportStrictDynamicReference("strict_soft"));
+  EXPECT_TRUE(packageInfo.canReportStrictDynamicReference({}));
+}
+
 } // namespace
 } // namespace HPHP

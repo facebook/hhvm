@@ -208,6 +208,36 @@ PackageInfo::strictDynamicReferencePolicyForPath(
   if (!package) return {};
   return resolvePackagePolicy(*package);
 }
+bool PackageInfo::canReportStrictDynamicReference(
+    std::string_view activeDeployment) const {
+  auto const isStrictPackage = [&] (const std::string& package) {
+    return resolvePackagePolicy(package).strictIsolation;
+  };
+
+  if (!activeDeployment.empty()) {
+    auto const deployment = deployments().find(std::string{activeDeployment});
+    if (deployment == deployments().end()) return false;
+    return std::any_of(
+             deployment->second.m_packages.begin(),
+             deployment->second.m_packages.end(),
+             isStrictPackage
+           ) ||
+      std::any_of(
+        deployment->second.m_soft_packages.begin(),
+        deployment->second.m_soft_packages.end(),
+        isStrictPackage
+      );
+  }
+
+  return std::any_of(
+           packages().begin(), packages().end(),
+           [&] (auto const& entry) { return isStrictPackage(entry.first); }
+         ) ||
+    std::any_of(
+      implicitPackageFamilies().begin(), implicitPackageFamilies().end(),
+      [&] (auto const& entry) { return isStrictPackage(entry.first); }
+    );
+}
 namespace {
 folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
   folly::dynamic result = folly::dynamic::array();

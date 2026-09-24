@@ -777,6 +777,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (po.inputDir.empty()) po.inputDir = '.';
   po.inputDir = FileUtil::normalizeDir(po.inputDir);
+  Cfg::Eval::CanReportStrictDynamicReference =
+    RepoOptions::forFile(po.inputDir.c_str())
+      .packageInfo()
+      .canReportStrictDynamicReference(Cfg::Eval::ActiveDeployment);
 
   for (auto const& dir : po.excludeDirs) {
     Option::PackageExcludeDirs.insert(FileUtil::normalizeDir(dir));
@@ -1244,6 +1248,9 @@ bool process(CompilerOptions &po) {
   Optional<SymbolSets> unique;
   unique.emplace();
 
+  auto const& packageInfo =
+    RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
+
   // HHBBC specific state (if we're going to run it).
   Optional<WPI> hhbbcInputs;
   Optional<CoroAsyncValue<Ref<HHBBC::Config>>> hhbbcConfig;
@@ -1268,8 +1275,6 @@ bool process(CompilerOptions &po) {
   std::vector<std::pair<std::string, DeployKind>> pathsInDeployment;
 
   if (!Cfg::Eval::ActiveDeployment.empty()) {
-    auto const& packageInfo =
-      RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
     auto const activeDeployment =
       packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
     if (activeDeployment == end(packageInfo.deployments())) {
@@ -1313,7 +1318,6 @@ bool process(CompilerOptions &po) {
   }
 
   auto const mode = buildMode();
-  auto const& packageInfo = RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
   auto deployedByPackages = [&](const StringData* filepath, const StringData* packageOverride) {
     if (isPackagesEnabled(mode) && !Cfg::Eval::ActiveDeployment.empty()) {
       if (packageOverride) {
@@ -1811,8 +1815,6 @@ bool process(CompilerOptions &po) {
   auto const finish = [&] {
     if (!Option::GenerateBinaryHHBC) return true;
     Timer _{Timer::WallTime, "finalizing repo"};
-    auto const& packageInfo =
-      RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
     if (incrementalRepo) {
       RepoFileData base{po.incrementalBaseRepo};
       repo->addFrom(

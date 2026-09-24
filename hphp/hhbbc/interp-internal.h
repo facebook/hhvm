@@ -457,6 +457,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   if (maybeDynamic &&
       context.couldBe(BCls) &&
+      Cfg::Eval::CanReportStrictDynamicReference &&
       (!is_specialized_cls(context) ||
        dcls_of(context).cls().mightBeInStrictPackage())) {
     return false;

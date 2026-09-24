@@ -591,6 +591,10 @@ void raiseMissingDynamicallyReferenced(const Class* cls) {
 }
 
 NEVER_INLINE void checkStrictPackageDynamicReference(const Class* cls) {
+  if (Cfg::Repo::Authoritative &&
+      !Cfg::Eval::CanReportStrictDynamicReference) {
+    return;
+  }
   if (!cls->isInStrictPackage()) return;
 
   if (cls->preClass()->unit()

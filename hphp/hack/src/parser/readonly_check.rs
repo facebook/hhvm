@@ -768,16 +768,12 @@ impl<'ast> VisitorMut<'ast> for Checker {
                             }
                             Rty::Mutable => {}
                         },
-                        Argument::Anormal(param) => match rty_expr(context, param) {
-                            Rty::Readonly => explicit_readonly(param),
-                            Rty::Mutable => {}
-                        },
-                        Argument::Anamed(_, param) => match rty_expr(context, param) {
-                            Rty::Readonly => {
-                                self.add_error(param.pos(), syntax_error::readonly_named_argument)
+                        Argument::Anormal(param) | Argument::Anamed(_, param) => {
+                            match rty_expr(context, param) {
+                                Rty::Readonly => explicit_readonly(param),
+                                Rty::Mutable => {}
                             }
-                            Rty::Mutable => {}
-                        },
+                        }
                     }
                 }
             }

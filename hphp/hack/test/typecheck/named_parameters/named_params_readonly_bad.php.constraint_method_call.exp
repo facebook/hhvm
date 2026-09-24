@@ -1,0 +1,26 @@
+ERROR: File "named_params_readonly_bad.php", line 13, characters 25-27:
+Invalid argument (Typing[4411])
+  File "named_params_readonly_bad.php", line 13, characters 25-27:
+  This expression is readonly
+  File "named_params_readonly_bad.php", line 5, characters 64-65:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly_bad.php", line 16, characters 21-23:
+Invalid argument (Typing[4411])
+  File "named_params_readonly_bad.php", line 16, characters 21-23:
+  This expression is readonly
+  File "named_params_readonly_bad.php", line 10, characters 50-51:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly_bad.php", line 22, characters 35-37:
+Invalid argument (Typing[4411])
+  File "named_params_readonly_bad.php", line 22, characters 35-37:
+  This expression is readonly
+  File "named_params_readonly_bad.php", line 5, characters 64-65:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly_bad.php", line 23, characters 3-33:
+Typing error (Typing[4411])
+  File "named_params_readonly_bad.php", line 23, characters 23-25:
+  Mismatched parameter readonlyness
+  File "named_params_readonly_bad.php", line 7, characters 59-60:
+  This parameter is mutable
+  File "named_params_readonly_bad.php", line 23, characters 23-25:
+  But this parameter is readonly

@@ -1,0 +1,30 @@
+ERROR: File "named_params_readonly.php", line 14, characters 25-27:
+Invalid argument (Typing[4411])
+  File "named_params_readonly.php", line 14, characters 25-27:
+  This expression is readonly
+  File "named_params_readonly.php", line 5, characters 64-65:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly.php", line 18, characters 21-23:
+Invalid argument (Typing[4411])
+  File "named_params_readonly.php", line 18, characters 21-23:
+  This expression is readonly
+  File "named_params_readonly.php", line 10, characters 50-51:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly.php", line 19, characters 21-30:
+Invalid argument (Typing[4411])
+  File "named_params_readonly.php", line 19, characters 21-30:
+  This expression is readonly
+  File "named_params_readonly.php", line 10, characters 50-51:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly.php", line 22, characters 17-19:
+Invalid argument (Typing[4411])
+  File "named_params_readonly.php", line 22, characters 17-19:
+  This expression is readonly
+  File "named_params_readonly.php", line 10, characters 50-51:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "named_params_readonly.php", line 23, characters 35-37:
+Invalid argument (Typing[4411])
+  File "named_params_readonly.php", line 23, characters 35-37:
+  This expression is readonly
+  File "named_params_readonly.php", line 5, characters 64-65:
+  It is incompatible with this parameter, which is mutable

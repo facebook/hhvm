@@ -614,16 +614,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckFunNamedArgsMismatch: {
     auto const extra = inst.extra<CheckFunNamedArgsMismatch>();
     auto const func = extra->callee;
-    auto numStackWrites = func->numNamedParams() + extra->posArgc;
-    if (numStackWrites > 0) {
-      IRSPRelOffset firstInputOffset {
-        static_cast<int32_t>(extra->lastArgOffset - extra->posArgc + 1)
-      };
-      auto stackRange =
-        AStack::range(firstInputOffset, firstInputOffset + numStackWrites);
-      return may_load_store(AHeapAny | stackRange, AHeapAny | stackRange);
-    }
-    return may_load_store(AHeapAny, AHeapAny);
+    auto const reified = func->hasReifiedGenerics() ? 1 : 0;
+    auto const last = static_cast<int32_t>(extra->lastArgOffset);
+    auto const named = static_cast<int32_t>(func->numNamedParams());
+    auto const posArgc = static_cast<int32_t>(extra->posArgc);
+    auto const stackRange = AStack::range(
+      IRSPRelOffset { last - named },
+      IRSPRelOffset { last + reified + posArgc }
+    );
+    return may_load_store(AHeapAny | stackRange, AHeapAny | stackRange);
   }
 
   case PushEmptyReifiedGenericsWithNamedArgs: {

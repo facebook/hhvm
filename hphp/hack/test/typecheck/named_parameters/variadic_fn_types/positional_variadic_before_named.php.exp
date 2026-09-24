@@ -1,0 +1,6 @@
+ERROR: File "positional_variadic_before_named.php", line 7, characters 39-39:
+Invalid argument (Typing[4110])
+  File "positional_variadic_before_named.php", line 4, characters 61-66:
+  Expected `string`
+  File "positional_variadic_before_named.php", line 7, characters 39-39:
+  But got `int`

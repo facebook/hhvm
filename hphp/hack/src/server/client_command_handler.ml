@@ -16,12 +16,21 @@ module NonPersistent : sig
     Server_env.env ->
     Client_provider.client ->
     Server_env.env Server_utils.handle_command_result
+
+  module For_test : sig
+    val handle_client_command_exception :
+      env:Server_env.env ->
+      client:Client_provider.client ->
+      Exception.t ->
+      Server_env.env
+  end
 end = struct
   let handle_client_command_exception
       ~(env : Server_env.env)
       ~(client : Client_provider.client)
       (e : Exception.t) : Server_env.env =
     match Exception.to_exn e with
+    | Typing_deps.Depgraph_unavailable _ -> Server_utils.exit_on_exception e
     | Client_provider.Client_went_away
     | Server_command_types.Read_command_timeout ->
       Hh_logger.log
@@ -53,6 +62,10 @@ end = struct
 
   (* CARE! scope of suppression should be only handle_client_command_exception *)
 
+  module For_test = struct
+    let handle_client_command_exception = handle_client_command_exception
+  end
+
   (* [command] represents a non-persistent command coming from client. If executing [command]
    * throws, we need to dispose of this client (possibly recovering updated
    * environment from Nonfatal_rpc_exception). "return" is a constructor
@@ -81,6 +94,8 @@ end = struct
     (* Similarly to persistent client commands, we wrap in handle_client_command_try a second time here. *)
     |> Server_utils.wrap ~try_:(handle_client_command_try (fun x -> x) client)
 end
+
+module For_test = NonPersistent.For_test
 
 let handle_client_command_or_persistent_connection genv env client :
     Server_env.env Server_utils.handle_command_result =

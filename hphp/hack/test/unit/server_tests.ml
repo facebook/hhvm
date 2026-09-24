@@ -34,6 +34,56 @@ let test_dmesg_parser () =
     "hh_server"
     input
 
+let test_depgraph_unavailable_exits_server () =
+  Test_client_provider.clear ();
+  Test_client_provider.mock_new_client_type Server_command_types.Non_persistent;
+  let client_provider = Client_provider.provider_for_test () in
+  let client =
+    match
+      Client_provider.sleep_and_check client_provider ~idle_gc_slice:0 `Any
+    with
+    | Client_provider.Select_new { Client_provider.client; _ } -> client
+    | _ -> failwith "Expected a test client"
+  in
+  let env =
+    Server_env_build.make_env
+      ~init_id:"test_depgraph_unavailable_exits_server"
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      Server_config.default_config
+  in
+  let pid = Unix.fork () in
+  if pid = 0 then begin
+    let e =
+      Exception.wrap
+        (Typing_deps.Depgraph_unavailable
+           (Typing_deps.Depgraph_not_found "/missing/depgraph.hhdg"))
+    in
+    ignore
+      (Client_command_handler.For_test.handle_client_command_exception
+         ~env
+         ~client
+         e
+        : Server_env.env);
+    Stdlib.exit 1
+  end;
+  let (_pid, status) = Unix.waitpid [] pid in
+  let expected_exit_code = Exit_status.(exit_code Depgraph_unavailable) in
+  let actual_exit_code =
+    match status with
+    | Unix.WEXITED code -> code
+    | Unix.WSIGNALED signal ->
+      failwith (Printf.sprintf "Child process terminated by signal %d" signal)
+    | Unix.WSTOPPED signal ->
+      failwith (Printf.sprintf "Child process stopped by signal %d" signal)
+  in
+  Asserter.Int_asserter.assert_equals
+    expected_exit_code
+    actual_exit_code
+    (Printf.sprintf
+       "Depgraph_unavailable should terminate the server with exit code %d"
+       expected_exit_code);
+  true
+
 (* In this test, we wish to establish that we enable deferring type checking
    for files that have undeclared dependencies, UNLESS we've already deferred
    those files a certain number of times. *)
@@ -318,6 +368,8 @@ let test_autocomplete_sort_text () =
 let tests =
   [
     ("test_autocomplete_sort_text", test_autocomplete_sort_text);
+    ( "test_depgraph_unavailable_exits_server",
+      test_depgraph_unavailable_exits_server );
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);
     ( "test_compute_tast_counting_local_mem",

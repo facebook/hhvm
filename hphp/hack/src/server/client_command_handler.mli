@@ -12,3 +12,11 @@ val handle_client_command_or_persistent_connection :
   Server_env.env ->
   Client_provider.client ->
   Server_env.env Server_utils.handle_command_result
+
+module For_test : sig
+  val handle_client_command_exception :
+    env:Server_env.env ->
+    client:Client_provider.client ->
+    Exception.t ->
+    Server_env.env
+end

@@ -10,6 +10,7 @@
 type env = {
   root: Path.t;
   from: string;
+  abort_on_distc_failure: bool;
   autostart: bool;
   force_dormant_start: bool;
   deadline: float option;
@@ -42,8 +43,14 @@ type conn = {
   conn_progress_callback: string option -> unit;
   conn_root: Path.t;
   conn_deadline: float option;
+  conn_abort_on_distc_failure: bool;
   from: string;
 }
+
+module For_test : sig
+  val server_exit_should_abort :
+    abort_on_distc_failure:bool -> Exit_status.t -> bool
+end
 
 (** Establishes a connection to the server: (1) connects to the monitor and exchanges
 messages, (2) has the monitor handoff the FD to the server, (3) if env.do_post_handoff_handshake

@@ -115,8 +115,10 @@ let parse_position_string ~(split_on : string) arg =
     raise Exit_status.(Exit_with Input_error)
 
 let connect
-    ?(use_priority_pipe = false) ?(do_post_handoff_handshake = true) args :
-    Client_connect.conn Lwt.t =
+    ?(use_priority_pipe = false)
+    ?(do_post_handoff_handshake = true)
+    ~(abort_on_distc_failure : bool)
+    args : Client_connect.conn Lwt.t =
   let {
     Client_env.root;
     from;
@@ -158,6 +160,7 @@ let connect
       {
         root;
         from;
+        abort_on_distc_failure;
         autostart;
         force_dormant_start;
         deadline;
@@ -186,9 +189,15 @@ let connect
  * so we need to be able to reconnect to retry. *)
 type connect_fun = unit -> Client_connect.conn Lwt.t
 
-let connect_then_close (args : Client_env.client_check_env) : unit Lwt.t =
+let connect_then_close
+    ~(abort_on_distc_failure : bool) (args : Client_env.client_check_env) :
+    unit Lwt.t =
   let%lwt Client_connect.{ channels = (_ic, oc); _ } =
-    connect args ~use_priority_pipe:true ~do_post_handoff_handshake:false
+    connect
+      ~abort_on_distc_failure
+      args
+      ~use_priority_pipe:true
+      ~do_post_handoff_handshake:false
   in
   Out_channel.close oc;
   (* The connection is derived from [Unix.open_connection]. Its docs explain:
@@ -200,38 +209,54 @@ let connect_then_close (args : Client_env.client_check_env) : unit Lwt.t =
   Lwt.return_unit
 
 let rpc_with_connection
+    ~(abort_on_distc_failure : bool)
     (args : Client_env.client_check_env)
     (command : 'a Server_command_types.t)
     (call : connect_fun -> desc:string -> 'a Server_command_types.t -> 'b Lwt.t)
     : 'b Lwt.t =
   let use_priority_pipe = Server_command_types.use_priority_pipe command in
-  let conn () = connect args ~use_priority_pipe in
+  let conn () = connect ~abort_on_distc_failure args ~use_priority_pipe in
   let%lwt result = call conn ~desc:args.desc @@ command in
   Lwt.return result
 
 let rpc_with_retry
+    ~(abort_on_distc_failure : bool)
     (args : Client_env.client_check_env)
     (command : 'a Server_command_types.Done_or_retry.t Server_command_types.t) :
     'a Lwt.t =
   let%lwt result =
-    rpc_with_connection args command Client_connect.rpc_with_retry
+    rpc_with_connection
+      ~abort_on_distc_failure
+      args
+      command
+      Client_connect.rpc_with_retry
   in
   Lwt.return result
 
 let rpc_with_retry_list
+    ~(abort_on_distc_failure : bool)
     (args : Client_env.client_check_env)
     (command :
       'a Server_command_types.Done_or_retry.t list Server_command_types.t) :
     'a list Lwt.t =
   let%lwt result =
-    rpc_with_connection args command Client_connect.rpc_with_retry_list
+    rpc_with_connection
+      ~abort_on_distc_failure
+      args
+      command
+      Client_connect.rpc_with_retry_list
   in
   Lwt.return result
 
 let rpc
+    ~(abort_on_distc_failure : bool)
     (args : Client_env.client_check_env)
     (command : 'result Server_command_types.t) : ('result * Telemetry.t) Lwt.t =
-  rpc_with_connection args command (fun conn_f ~desc command ->
+  rpc_with_connection
+    ~abort_on_distc_failure
+    args
+    command
+    (fun conn_f ~desc command ->
       let%lwt conn = conn_f () in
       let%lwt (result, telemetry) = Client_connect.rpc conn ~desc command in
       Lwt.return (result, telemetry))
@@ -270,6 +295,16 @@ let main_internal
     (local_config : Server_local_config.t)
     (partial_telemetry_ref : Telemetry.t option ref) :
     (Exit_status.t * Telemetry.t) Lwt.t =
+  let abort_on_distc_failure = local_config.abort_on_distc_failure in
+  let connect = connect ~abort_on_distc_failure in
+  let connect_then_close = connect_then_close ~abort_on_distc_failure in
+  let rpc_with_retry args command =
+    rpc_with_retry ~abort_on_distc_failure args command
+  in
+  let rpc_with_retry_list args command =
+    rpc_with_retry_list ~abort_on_distc_failure args command
+  in
+  let rpc args command = rpc ~abort_on_distc_failure args command in
   match args.mode with
   | Client_env.MODE_STATUS ->
     let prechecked = Option.value args.prechecked ~default:true in

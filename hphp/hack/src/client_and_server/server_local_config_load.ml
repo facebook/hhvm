@@ -99,6 +99,7 @@ let default =
     status_single_use_cached_diagnostics = false;
     specify_manifold_api_key = false;
     cache_remote_decls = false;
+    abort_on_distc_failure = false;
     use_compressed_dep_graph = true;
     use_distc = true;
     enable_fanout_aware_distc = false;
@@ -957,6 +958,12 @@ let load_
       ~current_version
       config
   in
+  let abort_on_distc_failure =
+    bool_
+      Config_keys.Hhconf.abort_on_distc_failure
+      ~default:default.abort_on_distc_failure
+      config
+  in
   let use_distc =
     bool_if_min_version
       Config_keys.Hhconf.use_distc
@@ -1245,6 +1252,7 @@ let load_
     status_single_use_cached_diagnostics;
     specify_manifold_api_key;
     cache_remote_decls;
+    abort_on_distc_failure;
     use_compressed_dep_graph;
     use_distc;
     enable_fanout_aware_distc;

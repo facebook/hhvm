@@ -348,6 +348,8 @@ type t = {
   specify_manifold_api_key: bool;
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
+  abort_on_distc_failure: bool;
+      (** Whether a Distc_failed server exit is treated as non-retryable. *)
   use_distc: bool;
       (** use remote type-checking (hh_distc) rather than only local type-checking *)
   enable_fanout_aware_distc: bool;

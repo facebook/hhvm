@@ -1303,6 +1303,41 @@ let test_filter_warnings_generated () : bool =
   assert_errors ~expected ~actual;
   true
 
+let test_client_connect_server_exit_should_abort () =
+  let assert_should_abort ~abort_on_distc_failure ~exit_status ~expected =
+    Bool_asserter.assert_equals
+      expected
+      (Client_connect.For_test.server_exit_should_abort
+         ~abort_on_distc_failure
+         exit_status)
+      (Exit_status.show exit_status)
+  in
+  assert_should_abort
+    ~abort_on_distc_failure:false
+    ~exit_status:Exit_status.Distc_failed
+    ~expected:false;
+  assert_should_abort
+    ~abort_on_distc_failure:true
+    ~exit_status:Exit_status.Distc_failed
+    ~expected:true;
+  assert_should_abort
+    ~abort_on_distc_failure:false
+    ~exit_status:Exit_status.Failed_to_load_should_abort
+    ~expected:true;
+  assert_should_abort
+    ~abort_on_distc_failure:false
+    ~exit_status:Exit_status.Server_non_opt_build_mode
+    ~expected:true;
+  assert_should_abort
+    ~abort_on_distc_failure:true
+    ~exit_status:Exit_status.Failed_to_load_should_retry
+    ~expected:false;
+  assert_should_abort
+    ~abort_on_distc_failure:true
+    ~exit_status:Exit_status.No_error
+    ~expected:false;
+  true
+
 let () =
   Printexc.record_backtrace true;
   Event_logger.init_fake ();
@@ -1352,6 +1387,8 @@ let () =
         (fun () -> Lwt_main.run (test_check_connect_success ())) );
       ( "test_check_connect_failure",
         (fun () -> Lwt_main.run (test_check_connect_failure ())) );
+      ( "test_client_connect_server_exit_should_abort",
+        test_client_connect_server_exit_should_abort );
       ("test_filter_warnings", test_filter_warnings);
       ("test_filter_warnings_generated", test_filter_warnings_generated);
     ]

@@ -311,6 +311,8 @@ end
 module Hhconf : sig
   (* distc *)
 
+  val abort_on_distc_failure : string
+
   val enable_fanout_aware_distc : string
 
   val hh_distc_fanout_full_init_threshold : string

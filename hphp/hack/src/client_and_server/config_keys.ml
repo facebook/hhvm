@@ -339,6 +339,8 @@ end
 module Hhconf = struct
   (* distc *)
 
+  let abort_on_distc_failure = hhconf_key "abort_on_distc_failure"
+
   let enable_fanout_aware_distc = hhconf_key "enable_fanout_aware_distc"
 
   let hh_distc_fanout_full_init_threshold =

@@ -704,7 +704,9 @@ void validateIncrementalPackageInfo(
     return left.m_includes == right.m_includes &&
       left.m_soft_includes == right.m_soft_includes &&
       left.m_include_paths == right.m_include_paths &&
-      left.m_enable_strict_isolation == right.m_enable_strict_isolation;
+      left.m_enable_strict_isolation == right.m_enable_strict_isolation &&
+      left.m_raiseDynamicClassLoadError ==
+        right.m_raiseDynamicClassLoadError;
   };
   auto const sameDeployment = [](const PackageInfo::Deployment& left,
                                  const PackageInfo::Deployment& right) {
@@ -716,7 +718,9 @@ void validateIncrementalPackageInfo(
       const PackageInfo::ImplicitPackageFamily& right) {
     return left.m_path == right.m_path &&
       left.m_includes == right.m_includes &&
-      left.m_soft_includes == right.m_soft_includes;
+      left.m_soft_includes == right.m_soft_includes &&
+      left.m_raiseDynamicClassLoadError ==
+        right.m_raiseDynamicClassLoadError;
   };
 
   if (!sameMap(

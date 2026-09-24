@@ -120,6 +120,7 @@ impl Config {
                         // the flags are irrelevant here.
                         enable_strict_isolation: false,
                         allow_deployed_packages_checking: false,
+                        raise_dynamic_class_load_error: None,
                     },
                 )
             }));
@@ -144,6 +145,7 @@ impl Config {
                         // the flags are irrelevant here.
                         enable_strict_isolation: false,
                         allow_deployed_packages_checking: false,
+                        raise_dynamic_class_load_error: None,
                     },
                 );
             };
@@ -234,6 +236,13 @@ impl Config {
             }
             if package.enable_strict_isolation && package.allow_deployed_packages_checking {
                 errors.push(Error::contradictory_observability_flags(package_name));
+            }
+            if package.raise_dynamic_class_load_error == Some(true)
+                && !package.enable_strict_isolation
+            {
+                errors.push(Error::dynamic_class_load_error_requires_strict_isolation(
+                    package_name,
+                ));
             }
             check_member_names(errors, &package.includes);
             check_member_names(errors, &package.soft_includes);
@@ -340,6 +349,7 @@ impl Config {
                     // flags are irrelevant here.
                     enable_strict_isolation: false,
                     allow_deployed_packages_checking: false,
+                    raise_dynamic_class_load_error: None,
                 },
             );
         }

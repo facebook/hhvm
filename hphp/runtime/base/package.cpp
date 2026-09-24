@@ -94,7 +94,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
                          convert(p.package.includes),
                          convert(p.package.soft_includes),
                          convert(p.package.include_paths),
-                         p.package.enable_strict_isolation
+                         p.package.enable_strict_isolation,
+                         p.package.raise_dynamic_class_load_error
                        });
     }
 
@@ -112,6 +113,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
           std::string(f.family.path),
           convert(f.family.includes),
           convert(f.family.soft_includes),
+          f.family.raise_dynamic_class_load_error,
         }
       );
     }
@@ -152,15 +154,26 @@ PackageInfo PackageInfo::defaults() {
   return {};
 }
 
-bool PackageInfo::isStrictIsolationPackage(const std::string& package) const {
+PackageInfo::ResolvedPackagePolicy PackageInfo::resolvePackagePolicy(
+    const std::string& package) const {
   auto const explicitPackage = packages().find(package);
   if (explicitPackage != packages().end()) {
-    return explicitPackage->second.m_enable_strict_isolation;
+    auto const strict = explicitPackage->second.m_enable_strict_isolation;
+    return {
+      strict,
+      strict &&
+        explicitPackage->second.m_raiseDynamicClassLoadError,
+    };
   }
 
   auto const separator = package.find('.');
   auto const family = package.substr(0, separator);
-  return implicitPackageFamilies().contains(family);
+  auto const implicitPackage = implicitPackageFamilies().find(family);
+  if (implicitPackage == implicitPackageFamilies().end()) return {};
+  return {
+    true,
+    implicitPackage->second.m_raiseDynamicClassLoadError
+  };
 }
 
 namespace {
@@ -188,6 +201,8 @@ std::string PackageInfo::mangleForCacheKey() const {
     entry["includes"] = mangleVecForCacheKey(package.m_includes);
     entry["soft_includes"] = mangleVecForCacheKey(package.m_soft_includes);
     entry["enable_strict_isolation"] = package.m_enable_strict_isolation;
+    entry["raise_dynamic_class_load_error"] =
+      package.m_raiseDynamicClassLoadError;
     packagesAndDeployments[name] = entry;
   }
 
@@ -204,6 +219,8 @@ std::string PackageInfo::mangleForCacheKey() const {
     entry["path"] = family.m_path;
     entry["includes"] = mangleVecForCacheKey(family.m_includes);
     entry["soft_includes"] = mangleVecForCacheKey(family.m_soft_includes);
+    entry["raise_dynamic_class_load_error"] =
+      family.m_raiseDynamicClassLoadError;
     families[name] = entry;
   }
   auto result = folly::dynamic::array(

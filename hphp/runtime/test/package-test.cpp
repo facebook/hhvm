@@ -40,31 +40,81 @@ include_paths = ["//alpha/", "//www/"]
 [packages.strict]
 enable_strict_isolation = true
 
+[packages.notice]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = false
+
+[packages.explicit_error]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = true
+
 [implicit_packages.prototypes]
 path = "//www/prototypes/"
 includes = ["intern"]
 soft_includes = ["soft"]
+
+[implicit_packages.notices]
+path = "//www/notices/"
+raise_dynamic_class_load_error = false
+
+[implicit_packages.explicit_errors]
+path = "//www/explicit-errors/"
+raise_dynamic_class_load_error = true
 )";
   out.close();
 
   auto const configPath = std::filesystem::path{config.native()};
   auto const enabled = PackageInfo::fromFile(configPath, true);
-  ASSERT_EQ(enabled.implicitPackageFamilies().size(), 1);
+  ASSERT_EQ(enabled.implicitPackageFamilies().size(), 3);
   auto const& family = enabled.implicitPackageFamilies().at("prototypes");
   EXPECT_EQ(family.m_path, "www/prototypes/");
   EXPECT_TRUE(family.m_includes.contains("intern"));
   EXPECT_TRUE(family.m_soft_includes.contains("soft"));
+  EXPECT_TRUE(family.m_raiseDynamicClassLoadError);
   EXPECT_FALSE(enabled.packages().contains("prototypes"));
 
   auto const disabled = PackageInfo::fromFile(configPath, false);
   EXPECT_TRUE(disabled.implicitPackageFamilies().empty());
   EXPECT_TRUE(disabled.packages().contains("intern"));
   EXPECT_TRUE(disabled.packages().contains("soft"));
-  EXPECT_TRUE(enabled.isStrictIsolationPackage("strict"));
-  EXPECT_FALSE(enabled.isStrictIsolationPackage("intern"));
-  EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes"));
-  EXPECT_TRUE(enabled.isStrictIsolationPackage("prototypes.example"));
-  EXPECT_FALSE(enabled.isStrictIsolationPackage("unknown"));
+  auto const strict = enabled.resolvePackagePolicy("strict");
+  EXPECT_TRUE(strict.strictIsolation);
+  EXPECT_TRUE(strict.raiseDynamicClassLoadError);
+
+  auto const notice = enabled.resolvePackagePolicy("notice");
+  EXPECT_TRUE(notice.strictIsolation);
+  EXPECT_FALSE(notice.raiseDynamicClassLoadError);
+
+  auto const explicitError =
+    enabled.resolvePackagePolicy("explicit_error");
+  EXPECT_TRUE(explicitError.strictIsolation);
+  EXPECT_TRUE(explicitError.raiseDynamicClassLoadError);
+
+  auto const intern = enabled.resolvePackagePolicy("intern");
+  EXPECT_FALSE(intern.strictIsolation);
+  EXPECT_FALSE(intern.raiseDynamicClassLoadError);
+
+  auto const prototypes = enabled.resolvePackagePolicy("prototypes");
+  EXPECT_TRUE(prototypes.strictIsolation);
+  EXPECT_TRUE(prototypes.raiseDynamicClassLoadError);
+
+  auto const prototypeMember =
+    enabled.resolvePackagePolicy("prototypes.example");
+  EXPECT_TRUE(prototypeMember.strictIsolation);
+  EXPECT_TRUE(prototypeMember.raiseDynamicClassLoadError);
+
+  auto const noticeMember = enabled.resolvePackagePolicy("notices.example");
+  EXPECT_TRUE(noticeMember.strictIsolation);
+  EXPECT_FALSE(noticeMember.raiseDynamicClassLoadError);
+
+  auto const explicitErrorMember =
+    enabled.resolvePackagePolicy("explicit_errors.example");
+  EXPECT_TRUE(explicitErrorMember.strictIsolation);
+  EXPECT_TRUE(explicitErrorMember.raiseDynamicClassLoadError);
+
+  auto const unknown = enabled.resolvePackagePolicy("unknown");
+  EXPECT_FALSE(unknown.strictIsolation);
+  EXPECT_FALSE(unknown.raiseDynamicClassLoadError);
 
   std::vector<std::tuple<std::string, std::string, bool>>
     packageAndImplicitFamilyPathsInLookupOrder;
@@ -80,10 +130,22 @@ soft_includes = ["soft"]
     packageAndImplicitFamilyPathsInLookupOrder,
     (std::vector<std::tuple<std::string, std::string, bool>>{
       {"www/prototypes/", "prototypes", true},
+      {"www/notices/", "notices", true},
+      {"www/explicit-errors/", "explicit_errors", true},
       {"www/", "intern", false},
       {"alpha/", "intern", false},
     })
   );
+}
+
+TEST(PackageInfoTest, NonStrictPackageCannotRaiseDynamicReferenceError) {
+  PackageInfo info;
+  auto& package = info.m_packages["example"];
+  package.m_raiseDynamicClassLoadError = true;
+
+  auto const policy = info.resolvePackagePolicy("example");
+  EXPECT_FALSE(policy.strictIsolation);
+  EXPECT_FALSE(policy.raiseDynamicClassLoadError);
 }
 
 // Checks that strict-isolation metadata contributes to the package cache key.
@@ -97,6 +159,18 @@ TEST(PackageInfoTest, StrictIsolationChangesCacheMangle) {
   EXPECT_NE(base.mangleForCacheKey(), strict.mangleForCacheKey());
 }
 
+TEST(PackageInfoTest, DynamicClassLoadErrorChangesCacheMangle) {
+  PackageInfo base;
+  base.m_packages.emplace("example", PackageInfo::Package{});
+  base.m_packages.at("example").m_enable_strict_isolation = true;
+
+  auto raises = base;
+  raises.m_packages.at("example").m_raiseDynamicClassLoadError =
+    true;
+
+  EXPECT_NE(base.mangleForCacheKey(), raises.mangleForCacheKey());
+}
+
 // Checks that the cache key includes an empty implicit package family map.
 TEST(PackageInfoTest, MangleIncludesEmptyImplicitFamilies) {
   PackageInfo info;
@@ -104,7 +178,7 @@ TEST(PackageInfoTest, MangleIncludesEmptyImplicitFamilies) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"example":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"soft_includes":[]}},{}])"
+    R"([{"example":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{}])"
   );
 }
 
@@ -119,7 +193,7 @@ TEST(PackageInfoTest, SeparatesImplicitFamiliesInCacheMangle) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"implicit_families":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","soft_includes":[]}}])"
+    R"([{"implicit_families":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","raise_dynamic_class_load_error":false,"soft_includes":[]}}])"
   );
 }
 
@@ -147,10 +221,15 @@ TEST(PackageInfoTest, EveryImplicitFamilyFieldChangesCacheMangle) {
   softIncludesChanged.m_implicitPackageFamilies.at("prototypes")
     .m_soft_includes.emplace("other-soft");
 
+  auto policyChanged = base;
+  policyChanged.m_implicitPackageFamilies.at("prototypes")
+    .m_raiseDynamicClassLoadError = true;
+
   auto const baseMangle = base.mangleForCacheKey();
   EXPECT_NE(baseMangle, pathChanged.mangleForCacheKey());
   EXPECT_NE(baseMangle, includesChanged.mangleForCacheKey());
   EXPECT_NE(baseMangle, softIncludesChanged.mangleForCacheKey());
+  EXPECT_NE(baseMangle, policyChanged.mangleForCacheKey());
 }
 
 PackageInfo implicitPackageInfo() {

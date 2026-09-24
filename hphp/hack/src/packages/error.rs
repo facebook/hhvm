@@ -81,6 +81,10 @@ pub enum Error {
         path: String,
         span: (usize, usize),
     },
+    DynamicClassLoadErrorRequiresStrictIsolation {
+        name: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -223,6 +227,14 @@ impl Error {
         }
     }
 
+    pub fn dynamic_class_load_error_requires_strict_isolation(package: &Spanned<String>) -> Self {
+        let Range { start, end } = package.span();
+        Self::DynamicClassLoadErrorRequiresStrictIsolation {
+            name: package.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateIncludePath { span, .. }
@@ -239,7 +251,8 @@ impl Error {
             | Self::PackageNameInvalid { span, .. }
             | Self::ImplicitFamilyNameInvalid { span, .. }
             | Self::ImplicitMemberNameInvalid { span, .. }
-            | Self::ImplicitMemberDoesNotExist { span, .. } => *span,
+            | Self::ImplicitMemberDoesNotExist { span, .. }
+            | Self::DynamicClassLoadErrorRequiresStrictIsolation { span, .. } => *span,
         }
     }
 
@@ -368,6 +381,13 @@ impl Display for Error {
                     f,
                     "Implicit package member {} does not exist at //{}",
                     name, path
+                )?;
+            }
+            Self::DynamicClassLoadErrorRequiresStrictIsolation { name, .. } => {
+                write!(
+                    f,
+                    "Package {} must enable strict isolation to raise dynamic class load errors",
+                    name
                 )?;
             }
         };

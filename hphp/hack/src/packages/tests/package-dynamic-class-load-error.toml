@@ -1,0 +1,28 @@
+[packages]
+
+[packages.strict]
+enable_strict_isolation = true
+
+[packages.notice]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = false
+
+[packages.explicit_error]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = true
+
+[packages.default]
+
+[packages.invalid]
+raise_dynamic_class_load_error = true
+
+[implicit_packages.prototypes]
+path = "//prototypes/"
+
+[implicit_packages.notices]
+path = "//notices/"
+raise_dynamic_class_load_error = false
+
+[implicit_packages.explicit_errors]
+path = "//explicit-errors/"
+raise_dynamic_class_load_error = true

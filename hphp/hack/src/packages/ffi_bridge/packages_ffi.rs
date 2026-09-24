@@ -32,6 +32,7 @@ mod ffi {
         soft_includes: Vec<String>,
         include_paths: Vec<String>,
         enable_strict_isolation: bool,
+        raise_dynamic_class_load_error: bool,
         is_implicit: bool,
     }
     struct DeploymentMapEntry {
@@ -50,6 +51,7 @@ mod ffi {
         path: String,
         includes: Vec<String>,
         soft_includes: Vec<String>,
+        raise_dynamic_class_load_error: bool,
     }
     extern "Rust" {
         pub fn package_info(
@@ -80,6 +82,8 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                         soft_includes: convert(package.soft_includes.as_ref()),
                         include_paths: convert(package.include_paths.as_ref()),
                         enable_strict_isolation: package.enable_strict_isolation,
+                        raise_dynamic_class_load_error: package
+                            .should_raise_dynamic_class_load_error(),
                         is_implicit: false,
                     };
                     ffi::PackageMapEntry {
@@ -115,6 +119,8 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                         path: family.path.get_ref().into(),
                         includes: convert(family.includes.as_ref()),
                         soft_includes: convert(family.soft_includes.as_ref()),
+                        raise_dynamic_class_load_error: family
+                            .should_raise_dynamic_class_load_error(),
                     },
                 })
                 .collect();
@@ -132,6 +138,8 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                                     soft_includes: convert(package.soft_includes.as_ref()),
                                     include_paths: convert(package.include_paths.as_ref()),
                                     enable_strict_isolation: package.enable_strict_isolation,
+                                    raise_dynamic_class_load_error: package
+                                        .should_raise_dynamic_class_load_error(),
                                     is_implicit: false,
                                 },
                             },
@@ -147,6 +155,8 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                                     soft_includes: convert(family.soft_includes.as_ref()),
                                     include_paths: vec![family.path.get_ref().clone()],
                                     enable_strict_isolation: true,
+                                    raise_dynamic_class_load_error: family
+                                        .should_raise_dynamic_class_load_error(),
                                     is_implicit: true,
                                 },
                             },

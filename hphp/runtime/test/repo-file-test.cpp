@@ -856,8 +856,8 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedPackageInfo) {
   );
 }
 
-// Checks that incremental builds reject changed strict-isolation metadata.
-TEST(RepoFileTest, IncrementalBuildRejectsChangedStrictIsolation) {
+// Checks that incremental builds reject changed explicit package policy.
+TEST(RepoFileTest, IncrementalBuildRejectsChangedPackagePolicy) {
   folly::test::TemporaryDirectory temp{"repo-file-incremental-package-info"};
   auto const oldUseHHBBC = std::exchange(Cfg::Eval::UseHHBBC, false);
   auto const oldEnableDecl = std::exchange(Cfg::Eval::EnableDecl, false);
@@ -869,24 +869,35 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedStrictIsolation) {
 
   PackageInfo basePackageInfo;
   basePackageInfo.m_packages.emplace("example", PackageInfo::Package{});
+  basePackageInfo.m_packages.at("example").m_enable_strict_isolation = true;
   {
     RepoFileBuilder builder{basePath.string(), true};
     finishRepo(builder, {}, 1, &basePackageInfo);
   }
 
-  auto changedPackageInfo = basePackageInfo;
-  changedPackageInfo.m_packages.at("example").m_enable_strict_isolation = true;
-  EXPECT_THAT(
-    ([&] {
-      RepoFileData base{basePath.string()};
-      RepoFileBuilder builder{
-        (temp.path() / "incremental.hhbc").string(), true
-      };
-      finishRepo(builder, {}, 2, &changedPackageInfo, &base);
-    }),
-    ThrowsMessage<std::runtime_error>(
-      HasSubstr("base PackageInfo does not match the current build"))
-  );
+  auto const expectRejected = [&](const std::string& suffix, auto mutate) {
+    auto changedPackageInfo = basePackageInfo;
+    mutate(changedPackageInfo.m_packages.at("example"));
+    EXPECT_THAT(
+      ([&] {
+        RepoFileData base{basePath.string()};
+        RepoFileBuilder builder{
+          (temp.path() / ("incremental-" + suffix + ".hhbc")).string(),
+          true
+        };
+        finishRepo(builder, {}, 2, &changedPackageInfo, &base);
+      }),
+      ThrowsMessage<std::runtime_error>(
+        HasSubstr("base PackageInfo does not match the current build"))
+    );
+  };
+
+  expectRejected("strict-isolation", [](auto& package) {
+    package.m_enable_strict_isolation = false;
+  });
+  expectRejected("cross-package-dynamic-reference", [](auto& package) {
+    package.m_raiseDynamicClassLoadError = true;
+  });
 }
 
 // Checks that incremental builds reject changes to implicit family metadata.
@@ -935,6 +946,9 @@ TEST(RepoFileTest, IncrementalBuildRejectsChangedImplicitPackageFamily) {
   expectRejected("soft-includes", [](auto& family) {
     family.m_soft_includes.emplace("other-soft");
   });
+  expectRejected("cross-package-dynamic-reference", [](auto& family) {
+    family.m_raiseDynamicClassLoadError = true;
+  });
 }
 
 // Checks that repo serialization round-trips every implicit family field.
@@ -948,12 +962,15 @@ TEST(RepoFileTest, RoundTripsImplicitPackageFamilies) {
 [packages]
 [packages.intern]
 include_paths = ["//www/"]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = true
 [packages.soft]
 
 [implicit_packages.prototypes]
 path = "//www/prototypes/"
 includes = ["intern"]
 soft_includes = ["soft"]
+raise_dynamic_class_load_error = true
   )";
   out.close();
   auto const packageInfo = PackageInfo::fromFile(
@@ -974,6 +991,10 @@ soft_includes = ["soft"]
   EXPECT_EQ(roundTrippedFamily.m_path, "www/prototypes/");
   EXPECT_TRUE(roundTrippedFamily.m_includes.contains("intern"));
   EXPECT_TRUE(roundTrippedFamily.m_soft_includes.contains("soft"));
+  EXPECT_TRUE(roundTrippedFamily.m_raiseDynamicClassLoadError);
+  EXPECT_TRUE(
+    roundTripped.packages().at("intern").m_raiseDynamicClassLoadError
+  );
   auto const& paths = roundTripped.packageAndImplicitFamilyPathsInLookupOrder();
   ASSERT_EQ(paths.size(), 2);
   auto const& packagePath = paths.front();
@@ -1006,6 +1027,7 @@ TEST(RepoFileTest, IncrementalBuildAcceptsEquivalentPackageInfo) {
   package.m_include_paths.emplace("zeta/path");
   package.m_include_paths.emplace("alpha/path");
   package.m_enable_strict_isolation = true;
+  package.m_raiseDynamicClassLoadError = true;
   packageInfo.m_packages.emplace("example", std::move(package));
 
   PackageInfo::Deployment deployment;
@@ -1021,6 +1043,7 @@ TEST(RepoFileTest, IncrementalBuildAcceptsEquivalentPackageInfo) {
   family.m_includes.emplace("alpha");
   family.m_soft_includes.emplace("soft-zeta");
   family.m_soft_includes.emplace("soft-alpha");
+  family.m_raiseDynamicClassLoadError = true;
   packageInfo.m_implicitPackageFamilies.emplace(
     "prototypes",
     std::move(family)

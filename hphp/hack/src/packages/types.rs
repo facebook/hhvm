@@ -33,6 +33,7 @@ pub struct Package {
     /// Opt-in (see the OCaml `Package.t`); absent means not checkable.
     #[serde(default)]
     pub allow_deployed_packages_checking: bool,
+    pub raise_dynamic_class_load_error: Option<bool>,
 }
 
 /// A single `[implicit_packages.<family>]` stanza. It declares a *family* of
@@ -48,6 +49,7 @@ pub struct ImplicitPackage {
     pub path: Spanned<String>,
     pub includes: Option<NameSet>,
     pub soft_includes: Option<NameSet>,
+    pub raise_dynamic_class_load_error: Option<bool>,
     /// `include_paths` is NOT a valid field on an implicit_packages entry (the
     /// include paths are derived from `path`). We accept it during
     /// deserialization only so we can emit a precise error if a user specifies
@@ -77,6 +79,18 @@ impl Deref for NameSet {
 impl DerefMut for NameSet {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+impl Package {
+    pub fn should_raise_dynamic_class_load_error(&self) -> bool {
+        self.enable_strict_isolation && self.raise_dynamic_class_load_error.unwrap_or(true)
+    }
+}
+
+impl ImplicitPackage {
+    pub fn should_raise_dynamic_class_load_error(&self) -> bool {
+        self.raise_dynamic_class_load_error.unwrap_or(true)
     }
 }
 impl FromIterator<Spanned<String>> for NameSet {

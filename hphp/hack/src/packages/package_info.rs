@@ -353,6 +353,38 @@ mod test {
     }
 
     #[test]
+    fn test_dynamic_class_load_error_policy() {
+        let test_path = SRCDIR
+            .as_path()
+            .join("tests/package-dynamic-class-load-error.toml");
+        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+
+        assert!(info.packages()["strict"].should_raise_dynamic_class_load_error());
+        assert!(
+            info.packages()["strict"]
+                .raise_dynamic_class_load_error
+                .is_none()
+        );
+        assert!(!info.packages()["notice"].should_raise_dynamic_class_load_error());
+        assert!(info.packages()["explicit_error"].should_raise_dynamic_class_load_error());
+        assert!(!info.packages()["default"].should_raise_dynamic_class_load_error());
+        assert!(info.implicit_packages()["prototypes"].should_raise_dynamic_class_load_error());
+        assert!(
+            info.implicit_packages()["prototypes"]
+                .raise_dynamic_class_load_error
+                .is_none()
+        );
+        assert!(!info.implicit_packages()["notices"].should_raise_dynamic_class_load_error());
+        assert!(
+            info.implicit_packages()["explicit_errors"].should_raise_dynamic_class_load_error()
+        );
+        assert_eq!(
+            info.errors().iter().map(Error::msg).collect::<Vec<_>>(),
+            vec!["Package invalid must enable strict isolation to raise dynamic class load errors"]
+        );
+    }
+
+    #[test]
     fn test_config_errors1() {
         let test_path = SRCDIR.as_path().join("tests/package-3.toml");
         let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();

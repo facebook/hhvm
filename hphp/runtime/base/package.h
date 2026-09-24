@@ -44,17 +44,24 @@ enum class DeployKind {
 };
 
 struct PackageInfo {
+  struct ResolvedPackagePolicy {
+    bool strictIsolation{false};
+    bool raiseDynamicClassLoadError{false};
+  };
+
   struct Package {
     hphp_vector_string_set m_includes;
     hphp_vector_string_set m_soft_includes;
     hphp_vector_string_set m_include_paths;
     bool m_enable_strict_isolation{false};
+    bool m_raiseDynamicClassLoadError{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_includes, stdltstr{})
         (m_soft_includes, stdltstr{})
         (m_include_paths, stdltstr{})
         (m_enable_strict_isolation)
+        (m_raiseDynamicClassLoadError)
         ;
     }
   };
@@ -86,11 +93,13 @@ struct PackageInfo {
     std::string m_path;
     PackageSet m_includes;
     PackageSet m_soft_includes;
+    bool m_raiseDynamicClassLoadError{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_path)
         (m_includes, stdltstr{})
         (m_soft_includes, stdltstr{})
+        (m_raiseDynamicClassLoadError)
         ;
     }
   };
@@ -126,7 +135,9 @@ struct PackageInfo {
   packageAndImplicitFamilyPathsInLookupOrder() const {
     return m_packageAndImplicitFamilyPathsInLookupOrder;
   }
-  bool isStrictIsolationPackage(const std::string& package) const;
+  ResolvedPackagePolicy resolvePackagePolicy(
+    const std::string& package
+  ) const;
 
   PackageInfo() = default;
 

@@ -282,6 +282,7 @@ template <typename SerDe> void Unit::serde(SerDe& sd) {
     (moduleName)
     (extName)
     (packageInfo)
+    (attributes)
     (softDeployed)
     ;
 }

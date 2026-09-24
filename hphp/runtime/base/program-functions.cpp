@@ -1971,9 +1971,13 @@ static int execute_program_impl(int argc, char** argv) {
     std::stringstream contents;
     contents << fs.rdbuf();
 
+    auto const& defaults = RepoOptions::defaults();
+    auto const attributes = UnitEmitterAttributes::defaults();
     auto const str = contents.str();
     auto const sha1 = SHA1{
-      mangleUnitSha1(string_sha1(str), file, RepoOptions::defaults().flags())
+      mangleUnitSha1(
+        string_sha1(str), file, defaults.flags(), attributes
+      )
     };
 
     if (!registrationComplete) {
@@ -1991,12 +1995,12 @@ static int execute_program_impl(int argc, char** argv) {
       Cfg::Eval::VerifyOnly = true;
     }
 
-    auto const& defaults = RepoOptions::defaults();
     LazyUnitContentsLoader loader{
       sha1,
       str,
       defaults.flags(),
-      defaults.dir()
+      defaults.dir(),
+      attributes
     };
     auto compiled =
       compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr);
@@ -2204,10 +2208,14 @@ static int execute_program_impl(int argc, char** argv) {
       contents << fs.rdbuf();
 
       auto const repoOptions = RepoOptions::forFile(file.c_str());
+      auto const attributes = UnitEmitterAttributes::forAbsolutePath(
+        file, repoOptions
+      );
 
       auto const str = contents.str();
-      auto const sha1 =
-        SHA1{mangleUnitSha1(string_sha1(str), file, repoOptions.flags())};
+      auto const sha1 = SHA1{mangleUnitSha1(
+        string_sha1(str), file, repoOptions.flags(), attributes
+      )};
 
       // Disable any cache hooks because they're generally not useful
       // if we're just going to lint (and they might be expensive).
@@ -2217,7 +2225,8 @@ static int execute_program_impl(int argc, char** argv) {
         sha1,
         str,
         repoOptions.flags(),
-        repoOptions.dir()
+        repoOptions.dir(),
+        attributes
       };
       auto const unit =
         compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr);

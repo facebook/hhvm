@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit-emitter-attributes.h"
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
@@ -776,6 +777,7 @@ struct Unit {
   LSString moduleName{nullptr};
   LSString extName{nullptr};
   PackageInfo packageInfo;
+  UnitEmitterAttributes attributes;
   bool softDeployed{false};
 
   template <typename SerDe> void serde(SerDe& sd);

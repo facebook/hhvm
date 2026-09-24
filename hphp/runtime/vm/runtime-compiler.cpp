@@ -107,7 +107,8 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       filename,
       loader.sha1(),
       extension,
-      RepoOptions::forFile(filename).packageInfo()
+      RepoOptions::forFile(filename).packageInfo(),
+      loader.unitEmitterAttributes()
     );
   }
 
@@ -206,10 +207,15 @@ Unit* compile_string(folly::StringPiece s,
   MemoryManager::SuppressOOM so{*tl_heap};
 
   auto const name = fname ? fname : "";
+  auto const attributes = isSystemLib || !fname
+    ? UnitEmitterAttributes::defaults()
+    : UnitEmitterAttributes::forAbsolutePath(name, options);
   auto const sha1 = SHA1{mangleUnitSha1(
-    string_sha1(s), name, options.flags()
+    string_sha1(s), name, options.flags(), attributes
   )};
-  LazyUnitContentsLoader loader{sha1, s, options.flags(), options.dir()};
+  LazyUnitContentsLoader loader{
+    sha1, s, options.flags(), options.dir(), attributes
+  };
   return parse(
     loader,
     codeSource,
@@ -255,16 +261,19 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
     const char* s, size_t sz, const char* fname,
     const Extension* extension) {
   auto const& defaults = RepoOptions::defaultsForSystemlib();
+  auto const attributes = UnitEmitterAttributes::defaults();
   auto const sha1 = SHA1{mangleUnitSha1(
     string_sha1(folly::StringPiece{s, sz}),
     fname,
-    defaults.flags()
+    defaults.flags(),
+    attributes
   )};
   LazyUnitContentsLoader loader{
     sha1,
     {s, sz},
     defaults.flags(),
-    defaults.dir()
+    defaults.dir(),
+    attributes
   };
   // We provide the empty autoload map here: there are no symbols that are going
   // to be provided outside of systemlib itself. The created decl provider will

@@ -403,6 +403,7 @@ function mangle_unit_sha1(
   string $sha1 = '',
   string $ext = '.php',
   ?string $repo = null,
+  ?string $source_path = null,
 ): ?string;
 
 function unit_schema(?string $repo = null): string {

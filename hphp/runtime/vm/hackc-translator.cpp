@@ -1552,9 +1552,12 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const SHA1& bcSha1,
   const Extension* extension,
   bool swallowErrors,
-  const PackageInfo& packageInfo
+  const PackageInfo& packageInfo,
+  UnitEmitterAttributes attributes
 ) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, packageInfo);
+  auto ue = std::make_unique<UnitEmitter>(
+    sha1, bcSha1, packageInfo, attributes
+  );
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
   ue->m_extension = extension;

@@ -623,7 +623,12 @@ void Unit::finalMerge() {
     );
 
     for (auto& [path, sha] : m_deps) {
-      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto const attributes = UnitEmitterAttributes::forRepoRelativePath(
+        path, options.flags()
+      );
+      auto hash = SHA1{
+        mangleUnitSha1(sha.toString(), path, options.flags(), attributes)
+      };
       auto fpath = makeStaticString(dir / path);
       g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
     }
@@ -689,7 +694,12 @@ void Unit::merge() {
     );
 
     for (auto& [path, sha] : m_deps) {
-      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto const attributes = UnitEmitterAttributes::forRepoRelativePath(
+        path, options.flags()
+      );
+      auto hash = SHA1{
+        mangleUnitSha1(sha.toString(), path, options.flags(), attributes)
+      };
       auto fpath = makeStaticString(dir / path);
       g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
     }
@@ -769,7 +779,12 @@ void Unit::logDeclInfo() const {
 
   std::vector<std::tuple<std::string, std::string, SHA1>> deps;
   for (auto const& [path, sha] : m_deps) {
-    auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+    auto const attributes = UnitEmitterAttributes::forRepoRelativePath(
+      path, options.flags()
+    );
+    auto hash = SHA1{
+      mangleUnitSha1(sha.toString(), path, options.flags(), attributes)
+    };
     deps.emplace_back(path, dir / path, std::move(hash));
   }
 

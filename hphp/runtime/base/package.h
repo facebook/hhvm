@@ -138,6 +138,10 @@ struct PackageInfo {
   ResolvedPackagePolicy resolvePackagePolicy(
     const std::string& package
   ) const;
+  ResolvedPackagePolicy strictDynamicReferencePolicyForPath(
+    std::filesystem::path path,
+    const std::filesystem::path& repoRoot
+  ) const;
 
   PackageInfo() = default;
 

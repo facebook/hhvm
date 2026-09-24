@@ -1293,7 +1293,8 @@ std::unique_ptr<UnitEmitter> emit_unit(IIndex& index, php::Unit& unit) {
 
   auto ue = std::make_unique<UnitEmitter>(SHA1{},
                                           SHA1{},
-                                          unit.packageInfo);
+                                          unit.packageInfo,
+                                          unit.attributes);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_sn = 0; // Will be set before writing to repo
   ue->m_filepath = unit.filename;

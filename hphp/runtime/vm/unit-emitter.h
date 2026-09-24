@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter-attributes.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map.h"
@@ -69,7 +70,13 @@ struct UnitEmitter {
 
   explicit UnitEmitter(const SHA1& sha1,
                        const SHA1& bcSha1,
-                       const PackageInfo&);
+                       const PackageInfo&,
+                       UnitEmitterAttributes);
+  static std::unique_ptr<UnitEmitter> makeForSerde(
+    const SHA1& sha1,
+    const SHA1& bcSha1,
+    const PackageInfo&
+  );
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
@@ -277,6 +284,7 @@ public:
   bool m_softDeployedRepoOnly{false}; // is it part of a soft package?
   bool m_ICE{false}; // internal compiler error
   bool m_fatalUnit{false}; // parse/runtime error
+  UnitEmitterAttributes m_attributes;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
 

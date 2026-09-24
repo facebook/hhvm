@@ -3281,6 +3281,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const SHA1& sha1,
   const Extension* extension,
   const PackageInfo& packageInfo,
+  UnitEmitterAttributes attributes,
   bool swallowErrors
 ) {
   tracing::Block _{
@@ -3293,7 +3294,9 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(code)};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, packageInfo);
+  auto ue = std::make_unique<UnitEmitter>(
+    sha1, bcSha1, packageInfo, attributes
+  );
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
   ue->m_extension = extension;

@@ -105,7 +105,7 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
       const StringData* filepath;
       sd(sha1);
       sd(filepath);
-      auto ue = std::make_unique<UnitEmitter>(
+      auto ue = UnitEmitter::makeForSerde(
         sha1, SHA1{}, RepoOptions::defaults().packageInfo()
       );
       ue->m_extension = nullptr;

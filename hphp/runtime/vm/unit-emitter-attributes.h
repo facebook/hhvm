@@ -16,28 +16,37 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
-#include "hphp/hack/src/hackc/hhbc-unit.h"
-#include "hphp/runtime/vm/native-func-table.h"
-#include "hphp/runtime/vm/unit-emitter.h"
+#include <filesystem>
+#include <string>
+
+#include "hphp/util/blob-encoder.h"
 
 namespace HPHP {
 
-enum class CodeSource;
+struct RepoOptions;
+struct RepoOptionsFlags;
 
-inline const hackc::hhbc::Unit* hackCUnitRaw(const rust::Box<hackc::UnitWrapper>& unit) {
-  return (const hackc::hhbc::Unit*)(&(*unit));
-}
+struct UnitEmitterAttributes {
+  bool strictPackage : 1 {false};
+  bool raiseDynamicClassLoadError : 1 {false};
 
-std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
-  const hackc::hhbc::Unit& unit,
-  const char* filename,
-	const SHA1& sha1,
-  const SHA1& bcSha1,
-  const Extension* extension,
-  bool swallowErrors,
-  const PackageInfo&,
-  UnitEmitterAttributes
-);
+  static UnitEmitterAttributes defaults();
+  static UnitEmitterAttributes forAbsolutePath(
+    const std::filesystem::path&,
+    const RepoOptions&
+  );
+  static UnitEmitterAttributes forRepoRelativePath(
+    const std::filesystem::path&,
+    const RepoOptionsFlags&
+  );
+  std::string mangle() const;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    SERDE_BITFIELD(strictPackage, sd);
+    SERDE_BITFIELD(raiseDynamicClassLoadError, sd);
+  }
+};
+
+static_assert(sizeof(UnitEmitterAttributes) == 1);
 
 }

@@ -693,7 +693,8 @@ Index make_index() {
     "ignore.php",
     SHA1("1234543212345432123454321234543212345432"),
     nullptr,
-    RepoOptions::defaults().packageInfo()
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults()
   )};
   always_assert(!ue->m_fatalUnit);
 

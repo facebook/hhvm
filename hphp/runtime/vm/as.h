@@ -53,6 +53,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const SHA1&,
   const Extension*,
   const PackageInfo&,
+  UnitEmitterAttributes,
   bool swallowErrors = true
 );
 

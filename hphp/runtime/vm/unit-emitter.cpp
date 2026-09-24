@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -63,14 +64,65 @@ TRACE_SET_MOD(hhbc)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+UnitEmitterAttributes UnitEmitterAttributes::defaults() {
+  return {};
+}
+
+UnitEmitterAttributes UnitEmitterAttributes::forAbsolutePath(
+    const std::filesystem::path& path,
+    const RepoOptions& options) {
+  assertx(path.is_absolute());
+  auto const policy = options.packageInfo().strictDynamicReferencePolicyForPath(
+    path, options.dir()
+  );
+  return {
+    policy.strictIsolation,
+    policy.raiseDynamicClassLoadError,
+  };
+}
+
+UnitEmitterAttributes UnitEmitterAttributes::forRepoRelativePath(
+    const std::filesystem::path& path,
+    const RepoOptionsFlags& options) {
+  assertx(path.is_relative());
+  auto const policy = options.packageInfo().strictDynamicReferencePolicyForPath(
+    path, {}
+  );
+  return {
+    policy.strictIsolation,
+    policy.raiseDynamicClassLoadError,
+  };
+}
+
+std::string UnitEmitterAttributes::mangle() const {
+  return {
+    strictPackage ? '1' : '0',
+    '|',
+    raiseDynamicClassLoadError ? '1' : '0'
+  };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 UnitEmitter::UnitEmitter(const SHA1& sha1,
                          const SHA1& bcSha1,
-                         const PackageInfo& packageInfo)
-  : m_packageInfo(packageInfo)
+                         const PackageInfo& packageInfo,
+                         UnitEmitterAttributes attributes)
+  : m_attributes(attributes)
+  , m_packageInfo(packageInfo)
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
   , m_nextFuncSn(0)
 {}
+
+std::unique_ptr<UnitEmitter> UnitEmitter::makeForSerde(
+    const SHA1& sha1,
+    const SHA1& bcSha1,
+    const PackageInfo& packageInfo) {
+  return std::make_unique<UnitEmitter>(
+    sha1, bcSha1, packageInfo, UnitEmitterAttributes::defaults()
+  );
+}
 
 UnitEmitter::~UnitEmitter() {
   for (auto& pce : m_pceVec) delete pce;
@@ -857,6 +909,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         (m_fileAttributes)
         (m_moduleName)
         (m_packageInfo)
+        (m_attributes)
         (m_symbol_refs)
         (m_bcSha1)
         (m_fatalUnit)
@@ -1111,8 +1164,12 @@ template void UnitEmitter::serde<>(BlobEncoder&, bool);
 std::unique_ptr<UnitEmitter>
 createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
                 std::string err, Location::Range loc) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{},
-                                          RepoOptions::defaults().packageInfo());
+  auto ue = std::make_unique<UnitEmitter>(
+    sha1,
+    SHA1{},
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults()
+  );
   ue->m_filepath = filename;
 
   ue->m_fatalUnit = true;

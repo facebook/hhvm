@@ -20,6 +20,7 @@
 #include <cstdint>
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/vm/unit-emitter-attributes.h"
 
 #include "hphp/runtime/ext/facts/path-and-hash.h"
 #include "hphp/util/sha1.h"
@@ -96,7 +97,8 @@ Unit* lookupSyslibUnit(StringData* path);
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
-                           const RepoOptionsFlags&);
+                           const RepoOptionsFlags&,
+                           const UnitEmitterAttributes&);
 
 Optional<SHA1> getHashForFile(const std::string& path,
                               const std::filesystem::path& root);
@@ -247,8 +249,7 @@ Unit* compileEvalString(const StringData* code,
 struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(const char* path,
                          Stream::Wrapper* wrapper,
-                         const RepoOptionsFlags& options,
-                         std::filesystem::path repoRoot,
+                         const RepoOptions& options,
                          size_t fileLength,
                          bool forceEager);
 
@@ -258,7 +259,8 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(SHA1 sha,
                          folly::StringPiece contents,
                          const RepoOptionsFlags& options,
-                         std::filesystem::path repoRoot);
+                         std::filesystem::path repoRoot,
+                         UnitEmitterAttributes);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
   LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
@@ -267,6 +269,9 @@ struct LazyUnitContentsLoader {
 
   const SHA1& sha1() const { return m_hash; }
   const RepoOptionsFlags& options() const { return m_options; }
+  const UnitEmitterAttributes& unitEmitterAttributes() const {
+    return m_unitEmitterAttributes;
+  }
   size_t fileLength() const { return m_file_length; }
 
   const std::filesystem::path& repoRoot() const { return m_repo; }
@@ -299,6 +304,7 @@ private:
   const char* m_path;
   Stream::Wrapper* m_wrapper;
   const RepoOptionsFlags& m_options;
+  UnitEmitterAttributes m_unitEmitterAttributes;
 
   SHA1 m_hash;
   SHA1 m_file_hash;

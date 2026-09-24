@@ -155,10 +155,11 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
                                                     const Extension* extension,
                                                     bool& internal_error,
                                                     CompileAbortMode mode,
-                                                    const PackageInfo& packageInfo) {
+                                                    const PackageInfo& packageInfo,
+                                                    UnitEmitterAttributes attributes) {
   try {
     return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1,
-                                    extension, false, packageInfo);
+                                    extension, false, packageInfo, attributes);
   } catch (const FatalErrorException&) {
     throw;
   } catch (const TranslationFatal& ex) {
@@ -182,6 +183,7 @@ CompilerResult hackc_compile(
   bool forDebuggerEval,
   bool& internal_error,
   const RepoOptionsFlags& options,
+  UnitEmitterAttributes attributes,
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 ) {
@@ -228,7 +230,7 @@ CompilerResult hackc_compile(
 
     auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
       *unit, filename, sha1, bcSha1, extension,
-      internal_error, mode, options.packageInfo()
+      internal_error, mode, options.packageInfo(), attributes
     );
     return hackCResult;
   } catch (const std::exception& ex) {
@@ -408,12 +410,13 @@ std::unique_ptr<UnitEmitter> compile_unit(
   bool isSystemLib,
   bool forDebuggerEval,
   const RepoOptionsFlags& options,
+  UnitEmitterAttributes attributes,
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 ) {
   bool ice = false;
   auto res = hackc_compile(code, codeSource, filename, sha1, extension, isSystemLib,
-      forDebuggerEval, ice, options, mode, provider);
+      forDebuggerEval, ice, options, attributes, mode, provider);
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
       ue->finish();
@@ -454,6 +457,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                                   m_isSystemLib,
                                   m_forDebuggerEval,
                                   m_loader.options(),
+                                  m_loader.unitEmitterAttributes(),
                                   mode,
                                   provider);
   if (unitEmitter && provider) unitEmitter->m_deps = provider->getFlatDeps();

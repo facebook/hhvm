@@ -161,7 +161,7 @@ std::unique_ptr<UnitEmitter> SBCCReader::lookup(
       bounds->size);
 
     static const auto& pkgInfo = RepoOptions::defaults().packageInfo();
-    auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, pkgInfo);
+    auto ue = UnitEmitter::makeForSerde(sha1, SHA1{}, pkgInfo);
     ue->m_filepath = makeStaticString(filename);
     ue->serde(blob.decoder, false);
     ue->finish();

@@ -209,10 +209,15 @@ void compileWorker(
     // 2. Per-file RepoOptions (critical for hash compatibility).
     auto const& repoOptions = RepoOptions::forFile(entry.absPath.c_str());
     auto const& repoFlags = repoOptions.flags();
+    auto const attributes = UnitEmitterAttributes::forAbsolutePath(
+      entry.absPath, repoOptions
+    );
 
     // 3. Compute mangled SHA1 (runtime-compatible key).
     auto fileSha1 = string_sha1(folly::StringPiece(contents));
-    auto mangled = mangleUnitSha1(fileSha1, entry.relativePath, repoFlags);
+    auto mangled = mangleUnitSha1(
+      fileSha1, entry.relativePath, repoFlags, attributes
+    );
     SHA1 sha1{mangled};
 
     // 4. Compile source to UnitEmitter.
@@ -227,6 +232,7 @@ void compileWorker(
           false,     // isSystemLib
           false,     // forDebuggerEval
           repoFlags,
+          attributes,
           CompileAbortMode::OnlyICE,
           nullptr    // decl provider
       );

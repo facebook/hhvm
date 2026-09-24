@@ -731,8 +731,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
     LazyUnitContentsLoader loader{
       path->data(),
       wrapper,
-      options.flags(),
-      options.dir(),
+      options,
       (size_t)statInfo.st_size,
       !tryLazy
     };
@@ -1513,7 +1512,8 @@ char mangleExtension(const folly::StringPiece fileName) {
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
-                           const RepoOptionsFlags& opts) {
+                           const RepoOptionsFlags& opts,
+                           const UnitEmitterAttributes& attributes) {
   return string_sha1(
     folly::to<std::string>(
       fileSha1, '|',
@@ -1523,6 +1523,8 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
 #undef C
       CoeffectsConfig::mangle(),
       opts.cacheKeySha1().toString(),
+      '|', attributes.mangle(),
+      '|',
       mangleExtension(fileName)
     )
   );
@@ -2568,18 +2570,19 @@ void shutdownUnitPrefetcher() {
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
                                                Stream::Wrapper* wrapper,
-                                               const RepoOptionsFlags& options,
-                                               std::filesystem::path repoRoot,
+                                               const RepoOptions& options,
                                                size_t fileLength,
                                                bool forceEager)
   : m_path{path}
   , m_wrapper{wrapper}
-  , m_options{options}
+  , m_options{options.flags()}
   , m_file_length{fileLength}
-  , m_repo{std::move(repoRoot)}
+  , m_repo{options.dir()}
   , m_loaded{false}
 {
   assertx(m_path);
+  m_unitEmitterAttributes =
+    UnitEmitterAttributes::forAbsolutePath(m_path, options);
 
   auto const file_hash_str = [&] {
     // If there's no emitter cache hook, we're always going to have to
@@ -2595,17 +2598,20 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
   m_hash = SHA1{mangleUnitSha1(
     file_hash_str,
     m_path,
-    m_options
+    m_options,
+    m_unitEmitterAttributes
   )};
 }
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
                                                folly::StringPiece contents,
                                                const RepoOptionsFlags& options,
-                                               std::filesystem::path repoRoot)
+                                               std::filesystem::path repoRoot,
+                                               UnitEmitterAttributes attributes)
   : m_path{nullptr}
   , m_wrapper{nullptr}
   , m_options{options}
+  , m_unitEmitterAttributes{attributes}
   , m_hash{sha}
   , m_file_length{contents.size()}
   , m_repo{std::move(repoRoot)}

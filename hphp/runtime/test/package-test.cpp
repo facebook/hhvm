@@ -15,12 +15,19 @@
 */
 
 #include "hphp/runtime/base/package.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+
+#include "hphp/util/blob-encoder.h"
 
 #include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <tuple>
 
 namespace HPHP {
@@ -260,6 +267,99 @@ TEST(PackageInfoTest, RejectsUnknownImplicitPackageNamesToPathPrefixes) {
        }) {
     EXPECT_FALSE(info.implicitPackageNameToPathPrefix(name).has_value()) << name;
   }
+}
+
+TEST(UnitEmitterAttributesTest, ResolvesPhysicalAndRepoRelativePaths) {
+  folly::test::TemporaryDirectory temp{"unit-emitter-attributes"};
+  auto const root = std::filesystem::path{temp.path().native()};
+  std::filesystem::create_directories(root / "strict");
+  std::filesystem::create_directories(root / "notice");
+  std::filesystem::create_directories(root / "loose");
+
+  std::ofstream config{root / ".hhvmconfig.hdf"};
+  config << "Autoload {\n}\n";
+  config.close();
+  std::ofstream packages{root / "PACKAGES.toml"};
+  packages << R"(
+[packages]
+[packages.strict]
+include_paths = ["//strict/"]
+enable_strict_isolation = true
+
+[packages.notice]
+include_paths = ["//notice/"]
+enable_strict_isolation = true
+raise_dynamic_class_load_error = false
+
+[packages.loose]
+include_paths = ["//loose/"]
+)";
+  packages.close();
+
+  auto const& options = RepoOptions::forFile((root / "strict/C.php").c_str());
+  auto const strict = UnitEmitterAttributes::forAbsolutePath(
+    root / "loose/../strict/C.php", options
+  );
+  EXPECT_TRUE(strict.strictPackage);
+  EXPECT_TRUE(strict.raiseDynamicClassLoadError);
+
+#ifndef NDEBUG
+  EXPECT_DEATH(
+    UnitEmitterAttributes::forAbsolutePath("strict/C.php", options), ""
+  );
+#endif
+
+  auto const notice = UnitEmitterAttributes::forRepoRelativePath(
+    "notice/C.php", options.flags()
+  );
+  EXPECT_TRUE(notice.strictPackage);
+  EXPECT_FALSE(notice.raiseDynamicClassLoadError);
+
+  auto const loose = UnitEmitterAttributes::forAbsolutePath(
+    root / "strict/../loose/C.php", options
+  );
+  EXPECT_FALSE(loose.strictPackage);
+  EXPECT_FALSE(loose.raiseDynamicClassLoadError);
+}
+
+TEST(UnitEmitterAttributesTest, ParticipatesInUnitCacheKey) {
+  auto const& options = RepoOptions::defaults().flags();
+  auto const defaults = UnitEmitterAttributes::defaults();
+  auto const strict = UnitEmitterAttributes{true, false};
+  auto const enforced = UnitEmitterAttributes{true, true};
+
+  auto const base = mangleUnitSha1("source", "file.php", options, defaults);
+  EXPECT_NE(base, mangleUnitSha1("source", "file.php", options, strict));
+  EXPECT_NE(
+    mangleUnitSha1("source", "file.php", options, strict),
+    mangleUnitSha1("source", "file.php", options, enforced)
+  );
+}
+
+TEST(UnitEmitterAttributesTest, PreservedByUnitEmitterSerialization) {
+  auto unit = std::make_unique<UnitEmitter>(
+    SHA1{1},
+    SHA1{2},
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes{true, true}
+  );
+  unit->m_filepath = makeStaticString("strict/C.php");
+  unit->finish();
+
+  UnitEmitterSerdeWrapper encoded{std::move(unit)};
+  BlobEncoder encoder;
+  encoded.serde(encoder);
+
+  UnitEmitterSerdeWrapper decoded;
+  BlobDecoder decoder{encoder.data(), encoder.size()};
+  decoded.serde(decoder);
+  decoder.assertDone();
+
+  ASSERT_NE(decoded.m_ue, nullptr);
+  EXPECT_TRUE(decoded.m_ue->m_attributes.strictPackage);
+  EXPECT_TRUE(
+    decoded.m_ue->m_attributes.raiseDynamicClassLoadError
+  );
 }
 
 } // namespace

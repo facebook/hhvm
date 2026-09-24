@@ -154,6 +154,27 @@ PackageInfo PackageInfo::defaults() {
   return {};
 }
 
+namespace {
+
+std::optional<std::filesystem::path> repoRelativePath(
+    std::filesystem::path path,
+    const std::filesystem::path& repoRoot) {
+  path = path.lexically_normal();
+  if (path.is_absolute()) {
+    assertx(!repoRoot.empty());
+    auto const root = std::filesystem::absolute(repoRoot).lexically_normal();
+    path = path.lexically_relative(root);
+  }
+
+  if (path.empty() || path.is_absolute() || path == ".") {
+    return std::nullopt;
+  }
+  if (*path.begin() == "..") return std::nullopt;
+  return path;
+}
+
+} // namespace
+
 PackageInfo::ResolvedPackagePolicy PackageInfo::resolvePackagePolicy(
     const std::string& package) const {
   auto const explicitPackage = packages().find(package);
@@ -176,6 +197,17 @@ PackageInfo::ResolvedPackagePolicy PackageInfo::resolvePackagePolicy(
   };
 }
 
+PackageInfo::ResolvedPackagePolicy
+PackageInfo::strictDynamicReferencePolicyForPath(
+    std::filesystem::path path,
+    const std::filesystem::path& repoRoot) const {
+  if (packageAndImplicitFamilyPathsInLookupOrder().empty()) return {};
+  auto const relative = repoRelativePath(std::move(path), repoRoot);
+  if (!relative) return {};
+  auto const package = pathToPackageName(relative->generic_string());
+  if (!package) return {};
+  return resolvePackagePolicy(*package);
+}
 namespace {
 folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
   folly::dynamic result = folly::dynamic::array();

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cstdint>
+#include <filesystem>
 #include <utility>
 #include <vector>
 #include "hphp/runtime/ext/hh/ext_hh.h"
@@ -1659,7 +1660,7 @@ bool HHVM_FUNCTION(is_cli_server_mode) {
 }
 
 OptString HHVM_FUNCTION(mangle_unit_sha1, const OptString& sha1, const OptString& ext,
-                        const Variant& repo) {
+                        const Variant& repo, const Variant& sourcePath) {
   auto const& ro = [&] () -> const RepoOptions& {
     if (!repo.isNull()) {
       auto rpath = realpathLibc(repo.toString().data());
@@ -1670,7 +1671,17 @@ OptString HHVM_FUNCTION(mangle_unit_sha1, const OptString& sha1, const OptString
     return RepoOptions::defaults();
   }();
 
-  return mangleUnitSha1(sha1.slice(), ext.slice(), ro.flags());
+  auto const attributes = [&] {
+    if (sourcePath.isNull()) return UnitEmitterAttributes::defaults();
+    auto const path = std::filesystem::path{sourcePath.toString().data()};
+    if (!path.is_absolute()) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "source_path must be absolute"
+      );
+    }
+    return UnitEmitterAttributes::forAbsolutePath(path, ro);
+  }();
+  return mangleUnitSha1(sha1.slice(), ext.slice(), ro.flags(), attributes);
 }
 
 bool HHVM_FUNCTION(legacy_is_truthy, const Variant& v) {

@@ -188,6 +188,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   bool isSystemLib,
   bool forDebuggerEval,
   const RepoOptionsFlags& options,
+  UnitEmitterAttributes,
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 );

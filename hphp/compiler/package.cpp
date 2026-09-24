@@ -249,6 +249,7 @@ createSymlinkWrapper(const std::string& fileName,
     SHA1{string_sha1(content)},
     nullptr,
     origUE->m_packageInfo,
+    origUE->m_attributes,
     false
   );
 }
@@ -369,6 +370,9 @@ Package::parseRun(const std::string& content,
   }
   auto const& meta = s_fileMetas[s_fileMetasIdx++];
   auto const& fileName = meta.m_filename;
+  auto const attributes = UnitEmitterAttributes::forRepoRelativePath(
+    fileName, repoOptions
+  );
 
   try {
     if (Cfg::Eval::AllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
@@ -377,7 +381,8 @@ Package::parseRun(const std::string& content,
         fileName.c_str(),
         SHA1{string_sha1(content)},
         nullptr,
-        repoOptions.packageInfo()
+        repoOptions.packageInfo(),
+        attributes
       );
       if (meta.m_targetPath) {
         ue = createSymlinkWrapper(
@@ -394,7 +399,9 @@ Package::parseRun(const std::string& content,
     }
 
     SHA1 mangled_sha1{
-      mangleUnitSha1(string_sha1(content), fileName, repoOptions)
+      mangleUnitSha1(
+        string_sha1(content), fileName, repoOptions, attributes
+      )
     };
     auto const mode =
       Cfg::Eval::AbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
@@ -413,6 +420,7 @@ Package::parseRun(const std::string& content,
         /* isSystemLib */ false,
         /* forDebuggerEval */ false,
         repoOptions,
+        attributes,
         mode,
         Cfg::Eval::EnableDecl ? &provider : nullptr
       );

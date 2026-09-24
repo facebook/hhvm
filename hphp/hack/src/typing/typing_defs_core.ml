@@ -1256,7 +1256,13 @@ and ft_param_compare :
   chain_compare
     (ty_compare ~normalize_lists param1.fp_type param2.fp_type)
     (fun _ ->
-      Typing_defs_flags.FunParam.compare param1.fp_flags param2.fp_flags)
+      chain_compare
+        (Typing_defs_flags.FunParam.compare param1.fp_flags param2.fp_flags)
+        (fun _ ->
+          if Typing_defs_flags.FunParam.named param1.fp_flags then
+            Option.compare String.compare param1.fp_name param2.fp_name
+          else
+            0))
 
 and ft_params_compare :
     type a.

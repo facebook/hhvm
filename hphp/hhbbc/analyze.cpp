@@ -110,20 +110,38 @@ Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
 
+  /*
+   * TODO(named_params) the known-args vector is indexed positionally: argument
+   * i is taken to be parameter i.  A call that leaves out an optional named
+   * argument shifts everything after it, so the types land on the wrong
+   * parameters, and verifying one against a hint it cannot satisfy yields
+   * Bottom.  A Bottom local is not merely imprecise: it reaches the rest of
+   * the analysis and trips Type::checkInvariants once something builds a vec
+   * out of it.
+   *
+   * Matching the arguments up needs argNames, and it is not as simple as
+   * splitting the vector: hackc reorders a function's parameters so the named
+   * ones come first, lexicographically, so there is no contiguous positional
+   * region to keep.  Until that is threaded through, fall back to the
+   * unknown-args treatment for a callee with named parameters.  That costs
+   * precision when inlining such a call and is always sound.
+   */
+  auto const positionalArgs =
+    (knownArgs && !ctx.func->hasNamedParams) ? knownArgs : nullptr;
+
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
-    // TODO(named_params) we need to extend the known-args case to account
-    // for passed named arg names.
-    if (knownArgs) {
-      if (locId < knownArgs->args.size()) {
+    if (positionalArgs) {
+      if (locId < positionalArgs->args.size()) {
         if (ctx.func->params[locId].isVariadic) {
-          std::vector<Type> pack(knownArgs->args.begin() + locId,
-                                 knownArgs->args.end());
+          std::vector<Type> pack(positionalArgs->args.begin() + locId,
+                                 positionalArgs->args.end());
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = vec(std::move(pack));
         } else {
           auto [ty, _, effectFree] =
-            verify_param_type(index, ctx, locId, unctx(knownArgs->args[locId]));
+            verify_param_type(index, ctx, locId,
+                              unctx(positionalArgs->args[locId]));
 
           if (ty.subtypeOf(BBottom)) {
             ret.unreachable = true;

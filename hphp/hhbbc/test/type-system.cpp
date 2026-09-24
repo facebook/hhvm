@@ -748,12 +748,6 @@ Index make_index() {
       closures.emplace_back(clo->name);
     }
 
-    auto const has86init = std::any_of(
-      begin(c->methods),
-      end(c->methods),
-      [] (auto const& m) { return is_86init_func(*m); }
-    );
-
     auto bytecode = std::make_unique<php::ClassBytecode>();
     for (auto& meth : c->methods) {
       bytecode->methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
@@ -769,8 +763,7 @@ Index make_index() {
         std::move(deps),
         closureDeclFunc,
         std::move(closures),
-        unit,
-        has86init
+        unit
       }
     );
     indexInput.classBC.emplace_back(

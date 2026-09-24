@@ -1065,7 +1065,6 @@ struct Index {
       LSString closureFunc;
       std::vector<SString> closures;
       LSString unit;
-      bool has86init;
       // If this class is an enum, the type-mapping representing it's
       // base type.
       Optional<TypeMapping> typeMapping;
@@ -1194,17 +1193,6 @@ struct Index {
   TicketExecutor& executor() const;
   extern_worker::Client& client() const;
   const CoroAsyncValue<extern_worker::Ref<Config>>& configRef() const;
-
-  /*
-   * The names of all classes which has a 86*init function.
-   */
-  const TSStringSet& classes_with_86inits() const;
-
-  /*
-   * The names of all top-level functions which are initializers for
-   * "dynamic" constants.
-   */
-  const FSStringSet& constant_init_funcs() const;
 
   /*
    * The names of all units which have type-aliases defined within
@@ -2106,7 +2094,6 @@ private:
 
 // What kind of analysis is being done?
 enum class AnalysisMode {
-  Constants,
   Full,
   Final
 };
@@ -2604,19 +2591,10 @@ struct AnalysisScheduler {
 
   using Mode = AnalysisMode;
 
-  // Register a class or function with the given name to be
-  // tracked. If a class or function isn't tracked, it won't be
-  // eligible for scheduling (though it still might be pulled in as a
-  // dependency).
-  void registerClass(SString, AnalysisMode);
-  void registerFunc(SString, AnalysisMode);
-  void registerUnit(SString, AnalysisMode);
-
   void reserveForRegistration(size_t classes, size_t funcs, size_t units);
   void registerAllBulk(const TSStringSet& classes,
                        const FSStringSet& funcs,
-                       const SStringSet& units,
-                       AnalysisMode);
+                       const SStringSet& units);
 
   void enableAll();
 
@@ -2890,8 +2868,6 @@ struct AnalysisIndex {
 
   void freeze();
   bool frozen() const;
-
-  Mode mode() const;
 
   bool tracking_public_sprops() const;
 

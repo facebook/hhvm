@@ -512,15 +512,10 @@ void final_pass(Index& index, F emitUnit) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Extern-worker job to run analysis
+// Extern-worker job to run full analysis
 
-template <AnalysisMode Mode>
 struct AnalyzeJob {
-  static std::string name() {
-    return (Mode == AnalysisMode::Constants)
-      ? "hhbbc-analyze-constants"
-      : "hhbbc-analyze";
-  }
+  static std::string name() { return "hhbbc-analyze"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, true);
     AnalysisIndex::start();
@@ -541,7 +536,7 @@ struct AnalyzeJob {
       std::move(reportBundles.vals),
       std::move(noReportBundles.vals),
       std::move(meta),
-      Mode
+      AnalysisMode::Full
     };
 
     // Keep processing work until we reach a fixed-point (nothing new
@@ -593,7 +588,7 @@ private:
   static ClassAnalysis analyze(const php::Class& c,
                                const AnalysisIndex& index) {
     assertx(!is_closure(c));
-    return (Mode == AnalysisMode::Constants || is_used_trait(c))
+    return is_used_trait(c)
       ? analyze_class_separate(index, Context { c.unit, nullptr, &c })
       : analyze_class(AnalysisIndexAdaptor { index },
                       Context { c.unit, nullptr, &c });
@@ -650,57 +645,32 @@ private:
   }
 };
 
-Job<AnalyzeJob<AnalysisMode::Constants>> s_analyzeConstantsJob;
-Job<AnalyzeJob<AnalysisMode::Full>> s_analyzeJob;
+Job<AnalyzeJob> s_analyzeJob;
 
 constexpr size_t kMaxBucketWeight =
   1UL*1024UL*1024UL*1024UL + 512UL*1024UL*1024UL;
 
-template <AnalysisMode Mode>
-AnalysisScheduler analyze_impl(Index& index) {
-  static_assert(Mode != AnalysisMode::Final);
-
-  trace_time tracer{
-    (Mode == AnalysisMode::Constants) ? "analyze constants" : "analyze",
-    index.sample()
-  };
+AnalysisScheduler analyze_full(Index& index) {
+  trace_time tracer{"analyze", index.sample()};
 
   using namespace folly::gen;
 
-  // We'll only process classes with 86*init functions or top-level
-  // 86cinits.
+  // Register every program entity for distributed full analysis.
   AnalysisScheduler scheduler{index};
   {
-    trace_time trace2{
-      (Mode == AnalysisMode::Constants)
-        ? "analyze constants init"
-        : "analyze init"
-    };
+    trace_time trace2{"analyze init"};
     trace2.ignore_client_stats();
 
-    if constexpr (Mode == AnalysisMode::Constants) {
-      for (auto const cls : index.classes_with_86inits()) {
-        scheduler.registerClass(cls, Mode);
-      }
-      for (auto const func : index.constant_init_funcs()) {
-        scheduler.registerFunc(func, Mode);
-      }
-      for (auto const unit : index.units_with_type_aliases()) {
-        scheduler.registerUnit(unit, Mode);
-      }
-    } else {
-      scheduler.reserveForRegistration(
-        index.all_classes_to_analyze().size(),
-        index.all_funcs().size(),
-        index.all_units().size()
-      );
-      scheduler.registerAllBulk(
-        index.all_classes_to_analyze(),
-        index.all_funcs(),
-        index.all_units(),
-        Mode
-      );
-    }
+    scheduler.reserveForRegistration(
+      index.all_classes_to_analyze().size(),
+      index.all_funcs().size(),
+      index.all_units().size()
+    );
+    scheduler.registerAllBulk(
+      index.all_classes_to_analyze(),
+      index.all_funcs(),
+      index.all_units()
+    );
   }
 
   auto const run = [&] (AnalysisInput input, size_t round) -> coro::Task<void> {
@@ -709,9 +679,7 @@ AnalysisScheduler analyze_impl(Index& index) {
     if (input.empty()) co_return;
 
     auto metadata = make_exec_metadata(
-      (Mode == AnalysisMode::Constants)
-        ? "analyze-constants"
-        : "analyze",
+      "analyze",
       round,
       input.key()->toCppString()
     );
@@ -727,21 +695,12 @@ AnalysisScheduler analyze_impl(Index& index) {
 
     // Run the job
     auto outputs = co_await [&, config = &config] {
-      if constexpr (Mode == AnalysisMode::Constants) {
-        return index.client().exec(
-          s_analyzeConstantsJob,
-          std::move(*config),
-          singleton_vec(std::move(inputRefs)),
-          std::move(metadata)
-        );
-      } else {
-        return index.client().exec(
-          s_analyzeJob,
-          std::move(*config),
-          singleton_vec(std::move(inputRefs)),
-          std::move(metadata)
-        );
-      }
+      return index.client().exec(
+        s_analyzeJob,
+        std::move(*config),
+        singleton_vec(std::move(inputRefs)),
+        std::move(metadata)
+      );
     }();
 
     always_assert(outputs.size() == 1);
@@ -765,37 +724,28 @@ AnalysisScheduler analyze_impl(Index& index) {
   size_t round{0};
   while (auto const workItems = scheduler.workItems()) {
     trace_time trace{
-      (Mode == AnalysisMode::Constants)
-        ? "analyze constants round"
-        : "analyze round",
+      "analyze round",
       fmt::format("round {} -- {} work items", round, workItems)
     };
     // Get the work buckets from the scheduler.
     auto work = [&] {
-      trace_time trace2{
-        (Mode == AnalysisMode::Constants)
-          ? "analyze constants schedule"
-          : "analyze schedule",
-        fmt::format("round {}", round)
-      };
+      trace_time trace2{"analyze schedule", fmt::format("round {}", round)};
       trace2.ignore_client_stats();
       // TODO: Investigate enabling trace scheduling for later rounds
       // (few work items) to converge faster and eliminate tail rounds.
       // Initial attempt with depth=10 caused scheduler explosion on
       // highly-connected nodes.
-      return scheduler.schedule(Mode, 0, 0, kMaxBucketWeight);
+      return scheduler.schedule(AnalysisMode::Full, 0, 0, kMaxBucketWeight);
     }();
     // Work shouldn't be empty because we add non-zero work items this
     // round.
     assertx(!work.empty());
 
     {
-      // Process the work buckets in individual analyze constants
-      // jobs. These will record their results as each one finishes.
+      // Process the work buckets in individual analysis jobs. These record
+      // their results as each one finishes.
       trace_time trace2{
-        (Mode == AnalysisMode::Constants)
-          ? "analyze constants run"
-          : "analyze run",
+        "analyze run",
         fmt::format("round {} -- {} jobs", round, work.size())
       };
       trace2.ignore_client_stats();
@@ -817,12 +767,7 @@ AnalysisScheduler analyze_impl(Index& index) {
       // All the jobs recorded their results in the scheduler. Now let
       // the scheduler know that all jobs are done, so it can
       // determine what needs to be run in the next round.
-      trace_time trace2{
-        (Mode == AnalysisMode::Constants)
-          ? "analyze constants deps"
-          : "analyze deps",
-        fmt::format("round {}", round)
-      };
+      trace_time trace2{"analyze deps", fmt::format("round {}", round)};
       trace2.ignore_client_stats();
       scheduler.recordingDone();
       ++round;
@@ -832,12 +777,9 @@ AnalysisScheduler analyze_impl(Index& index) {
   return scheduler;
 }
 
+// Run preliminary constants analysis, then prepare its results for the full
+// pass.
 void analyze_constants(Index& index) {
-  analyze_impl<AnalysisMode::Constants>(index);
-}
-
-// Run constants analysis locally, then prepare its results for the full pass.
-void analyze_constants_local(Index& index) {
   trace_time tracer{"analyze constants", index.sample()};
   tracer.ignore_client_stats();
 
@@ -848,10 +790,6 @@ void analyze_constants_local(Index& index) {
     analyze_iteratively(index, LocalAnalysisMode::Constants);
   }
   index.preresolve_type_structures();
-}
-
-AnalysisScheduler analyze_full(Index& index) {
-  return analyze_impl<AnalysisMode::Full>(index);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1155,7 +1093,6 @@ struct WholeProgramInput::Key::Impl {
     LSString unit;
     std::vector<SString> closures;
     std::vector<SString> dependencies;
-    bool has86init;
     Optional<TypeMapping> typeMapping;
     UnresolvedTypes unresolvedTypes;
     template <typename SerDe> void serde(SerDe& sd) {
@@ -1164,7 +1101,6 @@ struct WholeProgramInput::Key::Impl {
         (unit)
         (closures)
         (dependencies)
-        (has86init)
         (typeMapping)
         (unresolvedTypes, string_data_lt_type{})
         ;
@@ -1362,15 +1298,12 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   auto const onCls = [&] (std::unique_ptr<php::Class>& c,
                           php::ClassBytecode& bc,
                           KeyI::UnresolvedTypes& types,
-                          std::vector<SString>& deps,
-                          bool& has86init) {
+                          std::vector<SString>& deps) {
     assertx(IMPLIES(is_closure(*c), c->methods.size() == 1));
 
     for (auto& m : c->methods) {
       addFuncTypes(types, *m, c.get());
       bc.methodBCs.emplace_back(m->name, std::move(m->rawBlocks));
-      assertx(IMPLIES(is_closure(*c), !is_86init_func(*m)));
-      has86init |= is_86init_func(*m);
     }
     for (auto const& p : c->properties) {
       addType(types, p.typeConstraints.range(), c.get());
@@ -1390,16 +1323,15 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     assertx(IMPLIES(is_closure(*c), !c->closureContextCls));
     assertx(IMPLIES(is_closure(*c), declFunc));
 
-    auto has86init = false;
     php::ClassBytecode bc{name};
     KeyI::UnresolvedTypes types;
     std::vector<SString> deps;
     std::vector<SString> closures;
 
-    onCls(c, bc, types, deps, has86init);
+    onCls(c, bc, types, deps);
     for (auto& clo : c->closures) {
       assertx(is_closure(*clo));
-      onCls(clo, bc, types, deps, has86init);
+      onCls(clo, bc, types, deps);
       closures.emplace_back(clo->name);
     }
 
@@ -1434,7 +1366,6 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
         unit,
         std::move(closures),
         std::move(deps),
-        has86init,
         std::move(typeMapping),
         std::move(types)
       },
@@ -1531,7 +1462,6 @@ Index::Input make_index_input(WholeProgramInput input) {
               p.first.m_impl->cls.context,
               std::move(p.first.m_impl->cls.closures),
               p.first.m_impl->cls.unit,
-              p.first.m_impl->cls.has86init,
               std::move(p.first.m_impl->cls.typeMapping),
               std::vector<SString>{
                 begin(p.first.m_impl->cls.unresolvedTypes),
@@ -1640,7 +1570,7 @@ void whole_program(WholeProgramInput inputs,
     }
   } else {
     index.make_local();
-    analyze_constants_local(index);
+    analyze_constants(index);
 
     assertx(check(index.program()));
 

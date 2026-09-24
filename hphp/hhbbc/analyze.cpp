@@ -1050,34 +1050,28 @@ ClassAnalysis analyze_class_separate(const AnalysisIndex& index,
     resolve_type_constants(adaptor, ctx, analysis);
   }
 
-  if (index.mode() != AnalysisMode::Constants) {
-    auto const associatedClosures = [&] {
-      CompactVector<const php::Class*> out;
-      out.reserve(ctx.cls->closures.size());
-      for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
-      return out;
-    }();
+  auto const associatedClosures = [&] {
+    CompactVector<const php::Class*> out;
+    out.reserve(ctx.cls->closures.size());
+    for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
+    return out;
+  }();
 
-    for (auto const c : associatedClosures) {
-      auto const f = c->methods[0].get();
-      auto const UNUSED bump =
-        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
-      auto const wf = php::WideFunc::cns(f);
-      analysis.closures.emplace_back(
-        analyze_func(
-          adaptor,
-          AnalysisContext { ctx.unit, wf, ctx.cls },
-          CollectionOpts{}
-        )
-      );
-    }
+  for (auto const c : associatedClosures) {
+    auto const f = c->methods[0].get();
+    auto const UNUSED bump =
+      trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    auto const wf = php::WideFunc::cns(f);
+    analysis.closures.emplace_back(
+      analyze_func(
+        adaptor,
+        AnalysisContext { ctx.unit, wf, ctx.cls },
+        CollectionOpts{}
+      )
+    );
   }
 
   for (auto const& m : ctx.cls->methods) {
-    if (index.mode() == AnalysisMode::Constants &&
-        !is_86init_func(*m)) {
-      continue;
-    }
     auto const UNUSED bump =
       trace_bump(*m, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const wf = php::WideFunc::cns(m.get());

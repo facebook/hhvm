@@ -6303,10 +6303,6 @@ struct Index::IndexData {
   FSStringToOneT<SString> funcToBundle;
   SStringToOneT<SString> unitToBundle;
 
-  // All the classes that have a 86*init function.
-  TSStringSet classesWith86Inits;
-  // All the 86cinit functions for "dynamic" top-level constants.
-  FSStringSet constantInitFuncs;
   // All the units that have type-aliases within them.
   SStringSet unitsWithTypeAliases;
   // All classes which should be analyzed (all classes except closures
@@ -8857,15 +8853,6 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
 
   auto const& func = *callCtx.callee;
 
-  if (data.mode == AnalysisMode::Constants) {
-    ITRACE_MOD(
-      Trace::hhbbc, 4,
-      "Skipping inline interp of {} because analyzing constants\n",
-      func_fullname(func)
-    );
-    return returnType;
-  }
-
   auto const& finfo = func_info(data, func);
   auto const& caller = first_func_context(data);
 
@@ -10012,9 +9999,6 @@ struct FlattenJob {
     std::vector<Parents> parents;
     // Classes which are interfaces.
     TSStringSet interfaces;
-    // Classes which have 86init functions. A class can gain a 86init
-    // from flattening even if it didn't have it before.
-    TSStringSet with86init;
     // The types used by the type-constraints of input classes and
     // functions.
     std::vector<TSStringSet> classTypeUses;
@@ -10048,7 +10032,6 @@ struct FlattenJob {
         (newClosures)
         (parents)
         (interfaces, string_data_lt_type{})
-        (with86init, string_data_lt_type{})
         (classTypeUses, string_data_lt_type{})
         (funcTypeUses, string_data_lt_type{})
         (interfaceConflicts)
@@ -10403,24 +10386,6 @@ struct FlattenJob {
         continue;
       }
       auto& cinfo = cinfoIt->second;
-
-      // Check if this class has a 86*init function (it might have
-      // already or might have gained one from trait flattening).
-      auto const has86init =
-        std::any_of(
-          begin(cls->methods), end(cls->methods),
-          [] (auto const& m) { return is_86init_func(*m); }
-        ) ||
-        std::any_of(
-          begin(cinfo->clsConstants), end(cinfo->clsConstants),
-          [] (auto const& cns) {
-            return cns.second.kind == ConstModifierFlags::Kind::Type;
-          }
-        );
-      if (has86init) {
-        assertx(!is_closure(*cls));
-        outMeta.with86init.emplace(name);
-      }
 
       index.m_ctx = cls.get();
       SCOPE_EXIT { index.m_ctx = nullptr; };
@@ -13329,7 +13294,6 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     TSStringSet flattenedInto;
     FlattenJob::OutputMeta::NewPredeps newPredeps;
     bool isInterface{false};
-    bool has86init{false};
     CompactVector<SString> parents;
   };
   struct FuncUpdate {
@@ -13505,8 +13469,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(clsMeta.extraMethods[outputIdx]),
           std::move(clsMeta.flattenedInto[outputIdx]),
           std::move(clsMeta.newClassPredeps[outputIdx]),
-          (bool)clsMeta.interfaces.contains(name),
-          (bool)clsMeta.with86init.contains(name)
+          (bool)clsMeta.interfaces.contains(name)
         }
       );
 
@@ -13675,17 +13638,6 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         }
         for (auto& [unit, deletions] : meta.unitDeletions) {
           initTypesMeta.fixups[unit].removeFunc = std::move(deletions);
-        }
-      },
-      [&] {
-        // A class which didn't have an 86*init function previously
-        // can gain one due to trait flattening. Update that here.
-        for (auto const& updates : allUpdates) {
-          for (auto const& update : updates) {
-            auto u = std::get_if<ClassUpdate>(&update);
-            if (!u || !u->has86init) continue;
-            index.classesWith86Inits.emplace(u->name);
-          }
         }
       },
       [&] {
@@ -18703,7 +18655,6 @@ IndexFlattenMetadata make_remote(IndexData& index,
     meta.idx = flattenMeta.allCls.size();
     flattenMeta.allCls.emplace_back(cls.name);
 
-    if (cls.has86init) index.classesWith86Inits.emplace(cls.name);
     if (!meta.isClosure) index.allClassesToAnalyze.emplace(cls.name);
 
     if (cls.typeMapping) {
@@ -18770,9 +18721,6 @@ IndexFlattenMetadata make_remote(IndexData& index,
     );
 
     index.funcToUnit.emplace(func.name, func.unit);
-    if (Constant::nameFromFuncName(func.name)) {
-      index.constantInitFuncs.emplace(func.name);
-    }
     index.allFuncs.emplace(func.name);
 
     auto& meta = flattenMeta.func[func.name];
@@ -19515,11 +19463,9 @@ void make_local(IndexData& index) {
   // These aren't needed below so we can free them immediately.
   decltype(index.funcToClosures){}.swap(index.funcToClosures);
   decltype(index.classToClosures){}.swap(index.classToClosures);
-  decltype(index.classesWith86Inits){}.swap(index.classesWith86Inits);
   decltype(index.classToUnit){}.swap(index.classToUnit);
   decltype(index.funcToUnit){}.swap(index.funcToUnit);
   decltype(index.constantToUnit){}.swap(index.constantToUnit);
-  decltype(index.constantInitFuncs){}.swap(index.constantInitFuncs);
   decltype(index.unitsWithTypeAliases){}.swap(index.unitsWithTypeAliases);
   decltype(index.closureToFunc){}.swap(index.closureToFunc);
   decltype(index.closureToClass){}.swap(index.closureToClass);
@@ -19946,14 +19892,6 @@ const CoroAsyncValue<Ref<Config>>& Index::configRef() const {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-const TSStringSet& Index::classes_with_86inits() const {
-  return m_data->classesWith86Inits;
-}
-
-const FSStringSet& Index::constant_init_funcs() const {
-  return m_data->constantInitFuncs;
-}
 
 const SStringSet& Index::units_with_type_aliases() const {
   return m_data->unitsWithTypeAliases;
@@ -23220,16 +23158,11 @@ void AnalysisScheduler::reserveForRegistration(size_t classes,
   unitNames.reserve(units);
 }
 
-// Register all classes, funcs, and units in bulk. Equivalent to
-// calling registerClass/registerFunc/registerUnit individually, but
-// splits the work into a serial phase (state creation, closure
-// registration, trace linking) and a parallel phase (predep
-// computation) for better performance at scale.
+// Register all classes, funcs, and units for full analysis. Split structural
+// setup from parallel predependency computation for better performance.
 void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
                                         const FSStringSet& funcs,
-                                        const SStringSet& units,
-                                        AnalysisMode mode) {
-  assertx(mode != AnalysisMode::Final);
+                                        const SStringSet& units) {
   auto const& i = *index.m_data;
 
   // Phase 1 (serial): Create all state entries, register closures,
@@ -23264,7 +23197,6 @@ void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
 
     if (auto const cns = Constant::nameFromFuncName(func)) {
       always_assert(cnsChanged.try_emplace(cns).second);
-      registerUnit(i.funcToUnit.at(func), mode);
     }
 
     auto const bundle = i.funcToBundle.at(func);
@@ -23305,11 +23237,9 @@ void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
           addPredeps(name, *p, deps);
         }
       }
-      if (mode == AnalysisMode::Full) {
-        if (auto const p = folly::get_ptr(i.unitPredeps,
-                                          i.classToUnit.at(name))) {
-          addPredeps(name, *p, deps);
-        }
+      if (auto const p = folly::get_ptr(i.unitPredeps,
+                                        i.classToUnit.at(name))) {
+        addPredeps(name, *p, deps);
       }
     }
   );
@@ -23322,11 +23252,9 @@ void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
                                         i.funcToUnit.at(name))) {
         addPredeps(name, *p, deps);
       }
-      if (mode == AnalysisMode::Full) {
-        if (auto const p = folly::get_ptr(i.unitPredeps,
-                                          i.funcToUnit.at(name))) {
-          addPredeps(name, *p, deps);
-        }
+      if (auto const p = folly::get_ptr(i.unitPredeps,
+                                        i.funcToUnit.at(name))) {
+        addPredeps(name, *p, deps);
       }
     }
   );
@@ -23338,147 +23266,11 @@ void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
       if (auto const p = folly::get_ptr(i.unitCInitPredeps, name)) {
         addPredeps(name, *p, deps);
       }
-      if (mode == AnalysisMode::Full) {
-        if (auto const p = folly::get_ptr(i.unitPredeps, name)) {
-          addPredeps(name, *p, deps);
-        }
+      if (auto const p = folly::get_ptr(i.unitPredeps, name)) {
+        addPredeps(name, *p, deps);
       }
     }
   );
-}
-
-void AnalysisScheduler::registerClass(SString name, AnalysisMode mode) {
-  assertx(mode != AnalysisMode::Final);
-
-  // Closures are only scheduled as part of the class or func they're
-  // declared in.
-  if (is_closure_name(name)) return;
-
-  auto const UNUSED bump = bump_for_class(*index.m_data, name);
-  FTRACE(5, "AnalysisScheduler: registering class {}\n", name);
-
-  auto const [cState, emplaced1] = classState.try_emplace(name, name);
-  if (!emplaced1) return;
-
-  ++totalWorkItems;
-
-  auto const& i = *index.m_data;
-  auto const bundle = i.classToBundle.at(name);
-
-  auto const [tState, emplaced2] = traceState.try_emplace(bundle, bundle);
-  if (emplaced2) traceNames.emplace_back(bundle);
-  tState->second.depStates.emplace_back(&cState->second.depState);
-
-  classNames.emplace_back(name);
-  namesSorted = false;
-
-  if (auto const p = folly::get_ptr(i.unitCInitPredeps,
-                                    i.classToUnit.at(name))) {
-    addPredeps(name, *p, cState->second.depState.deps);
-  }
-  for (auto const base : folly::get_default(i.classToCnsBases, name)) {
-    auto const unit = i.classToUnit.at(base);
-    if (auto const p = folly::get_ptr(i.unitCInitPredeps, unit)) {
-      addPredeps(name, *p, cState->second.depState.deps);
-    }
-  }
-
-  if (mode == AnalysisMode::Full) {
-    if (auto const p = folly::get_ptr(i.unitPredeps, i.classToUnit.at(name))) {
-      addPredeps(name, *p, cState->second.depState.deps);
-    }
-  }
-
-  auto const& closures = folly::get_default(i.classToClosures, name);
-  for (auto const clo : closures) {
-    FTRACE(
-      5, "AnalysisScheduler: registering closure {} associated with class {}\n",
-      clo, name
-    );
-    always_assert(classState.try_emplace(clo, clo).second);
-  }
-}
-
-void AnalysisScheduler::registerFunc(SString name, AnalysisMode mode) {
-  assertx(mode != AnalysisMode::Final);
-
-  auto const UNUSED bump = bump_for_func(*index.m_data, name);
-  FTRACE(5, "AnalysisScheduler: registering func {}\n", name);
-
-  auto const [fState, emplaced1] = funcState.try_emplace(name, name);
-  if (!emplaced1) return;
-
-  ++totalWorkItems;
-
-  funcNames.emplace_back(name);
-  namesSorted = false;
-
-  auto const& i = *index.m_data;
-
-  auto const& closures = folly::get_default(i.funcToClosures, name);
-  for (auto const clo : closures) {
-    FTRACE(
-      5, "AnalysisScheduler: registering closure {} associated with func {}\n",
-      clo, name
-    );
-    always_assert(classState.try_emplace(clo, clo).second);
-  }
-
-  // If this func is a 86cinit, then register the associated constant
-  // as well.
-  if (auto const cns = Constant::nameFromFuncName(name)) {
-    FTRACE(5, "AnalysisScheduler: registering constant {}\n", cns);
-    always_assert(cnsChanged.try_emplace(cns).second);
-    // Modifying a global constant func implies the unit will be
-    // changed too, so the unit must be registered as well.
-    registerUnit(i.funcToUnit.at(name), mode);
-  }
-
-  if (auto const p = folly::get_ptr(i.unitCInitPredeps,
-                                    i.funcToUnit.at(name))) {
-    addPredeps(name, *p, fState->second.depState.deps);
-  }
-  if (mode == AnalysisMode::Full) {
-    if (auto const p = folly::get_ptr(i.unitPredeps, i.funcToUnit.at(name))) {
-      addPredeps(name, *p, fState->second.depState.deps);
-    }
-  }
-
-  auto const bundle = i.funcToBundle.at(name);
-  auto const [tState, emplaced2] = traceState.try_emplace(bundle, bundle);
-  if (emplaced2) traceNames.emplace_back(bundle);
-  tState->second.depStates.emplace_back(&fState->second.depState);
-}
-
-void AnalysisScheduler::registerUnit(SString name, AnalysisMode mode) {
-  assertx(mode != AnalysisMode::Final);
-  auto const UNUSED bump = bump_for_unit(*index.m_data, name);
-  FTRACE(5, "AnalysisScheduler: registering unit {}\n", name);
-
-  auto const [uState, emplaced1] = unitState.try_emplace(name, name);
-  if (!emplaced1) return;
-
-  if (index.units_with_type_aliases().contains(name)) {
-    ++totalWorkItems;
-  }
-
-  auto const& i = *index.m_data;
-  if (auto const p = folly::get_ptr(i.unitCInitPredeps, name)) {
-    addPredeps(name, *p, uState->second.depState.deps);
-  }
-  if (mode == AnalysisMode::Full) {
-    if (auto const p = folly::get_ptr(i.unitPredeps, name)) {
-      addPredeps(name, *p, uState->second.depState.deps);
-    }
-  }
-
-  auto const bundle = i.unitToBundle.at(name);
-  auto const [tState, emplaced2] = traceState.try_emplace(bundle, bundle);
-  if (emplaced2) traceNames.emplace_back(bundle);
-  tState->second.depStates.emplace_back(&uState->second.depState);
-
-  unitNames.emplace_back(name);
-  namesSorted = false;
 }
 
 void AnalysisScheduler::sortNames() {
@@ -23891,7 +23683,6 @@ void AnalysisScheduler::removeFuncs() {
     always_assert(!index.m_data->funcRefs.contains(name));
     index.m_data->funcToClosures.erase(name);
     if (auto const cns = Constant::nameFromFuncName(name)) {
-      always_assert(index.m_data->constantInitFuncs.erase(name));
       always_assert(index.m_data->allFuncs.erase(name));
       always_assert(cnsChanged.erase(cns));
       index.m_data->constantToUnit.at(cns).second = false;
@@ -27177,8 +26968,6 @@ void AnalysisIndex::freeze() {
 
 bool AnalysisIndex::frozen() const { return m_data->frozen; }
 
-AnalysisMode AnalysisIndex::mode() const { return m_data->mode; }
-
 std::vector<php::Unit*> AnalysisIndex::units_to_emit() const {
   assertx(m_data->mode == Mode::Final);
 
@@ -27362,9 +27151,6 @@ AnalysisIndex::lookup_func_closure_invokes(const php::Func& f) const {
 
 res::Func AnalysisIndex::resolve_func(SString n) const {
   n = normalizeNS(n);
-  if (m_data->mode == Mode::Constants) {
-    return res::Func { res::Func::FuncName { n } };
-  }
   m_data->deps->add(AnalysisDeps::Func { n });
   if (auto const finfo = folly::get_default(m_data->finfos, n)) {
     return res::Func { res::Func::Fun2 { finfo } };
@@ -28338,7 +28124,7 @@ Type AnalysisIndex::lookup_public_prop(const Type& obj,
 }
 
 Slot AnalysisIndex::lookup_iface_vtable_slot(const php::Class& c) const {
-  assertx(mode() == Mode::Final);
+  assertx(m_data->mode == Mode::Final);
   return folly::get_default(m_data->ifaceSlotMap, c.name, kInvalidSlot);
 }
 
@@ -28461,15 +28247,6 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
   using R = Index::ReturnType;
 
   auto const& func = *calleeCtx.callee;
-
-  if (m_data->mode == Mode::Constants) {
-    ITRACE_MOD(
-      Trace::hhbbc, 4,
-      "Skipping inline interp of {} because analyzing constants\n",
-      func_fullname(func)
-    );
-    return R{ TInitCell, false };
-  }
 
   auto const ctxType =
     adjust_closure_context(AnalysisIndexAdaptor { *this }, calleeCtx);
@@ -29170,8 +28947,6 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
     return resolve_ctor(thisType);
   }
 
-  if (m_data->mode == Mode::Constants) return general(nullptr, true);
-
   if (isClass) {
     if (!is_specialized_cls(thisType)) return general(nullptr, true);
   } else if (!is_specialized_obj(thisType)) {
@@ -29206,10 +28981,6 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
   assertx(obj.subtypeOf(BObj));
 
   using Func = res::Func;
-
-  if (m_data->mode == Mode::Constants) {
-    return Func { Func::MethodName { nullptr, s_construct.get() } };
-  }
 
   // Can't say anything useful if we don't know the object type.
   if (!is_specialized_obj(obj)) {
@@ -30232,22 +30003,8 @@ AnalysisIndex::Output AnalysisIndex::finish() {
   meta.removedFuncs = strip_unneeded_constant_inits(*m_data);
 
   auto const moveNewAuxs = [&] (AuxClassGraphs& auxs) {
-    if (m_data->mode != Mode::Constants) {
-      auxs.noChildren = std::move(auxs.newNoChildren);
-      auxs.withChildren = std::move(auxs.newWithChildren);
-    } else {
-      // When analyzing constants, we may not be processing all of the
-      // class' methods, so it's not safe to drop the previous
-      // noChildren and withChildren sets.
-      auxs.noChildren.insert(
-        begin(auxs.newNoChildren),
-        end(auxs.newNoChildren)
-      );
-      auxs.withChildren.insert(
-        begin(auxs.newWithChildren),
-        end(auxs.newWithChildren)
-      );
-    }
+    auxs.noChildren = std::move(auxs.newNoChildren);
+    auxs.withChildren = std::move(auxs.newWithChildren);
   };
 
   TSStringSet keepClasses;

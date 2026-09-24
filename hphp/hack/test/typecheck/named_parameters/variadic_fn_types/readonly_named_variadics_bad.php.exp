@@ -4,17 +4,23 @@ Invalid argument (Typing[4411])
   This expression is readonly
   File "readonly_named_variadics_bad.php", line 5, characters 43-45:
   It is incompatible with this parameter, which is mutable
+ERROR: File "readonly_named_variadics_bad.php", line 16, characters 40-42:
+Invalid argument (Typing[4411])
+  File "readonly_named_variadics_bad.php", line 16, characters 40-42:
+  This expression is readonly
+  File "readonly_named_variadics_bad.php", line 5, characters 43-45:
+  It is incompatible with this parameter, which is mutable
 ERROR: File "readonly_named_variadics_bad.php", line 18, characters 39-41:
 Invalid argument (Typing[4411])
   File "readonly_named_variadics_bad.php", line 18, characters 39-41:
   This expression is readonly
-  File "readonly_named_variadics_bad.php", line 12, characters 57-59:
+  File "readonly_named_variadics_bad.php", line 12, characters 32-42:
   It is incompatible with this parameter, which is mutable
 ERROR: File "readonly_named_variadics_bad.php", line 19, characters 25-27:
 Invalid argument (Typing[4411])
   File "readonly_named_variadics_bad.php", line 19, characters 25-27:
   This expression is readonly
-  File "readonly_named_variadics_bad.php", line 12, characters 57-59:
+  File "readonly_named_variadics_bad.php", line 12, characters 32-42:
   It is incompatible with this parameter, which is mutable
 ERROR: File "readonly_named_variadics_bad.php", line 21, characters 41-43:
 Invalid argument (Typing[4411])
@@ -28,3 +34,11 @@ Invalid argument (Typing[4411])
   This expression is readonly
   File "readonly_named_variadics_bad.php", line 9, characters 66-68:
   It is incompatible with this parameter, which is mutable
+ERROR: File "readonly_named_variadics_bad.php", line 30, characters 45-47:
+Invalid argument (Typing[4411])
+  File "readonly_named_variadics_bad.php", line 30, characters 45-47:
+  This expression is readonly
+  File "readonly_named_variadics_bad.php", line 26, characters 72-74:
+  It is incompatible with this parameter, which is mutable
+ERROR: File "readonly_named_variadics_bad.php", line 32, characters 7-23:
+Duplicate named argument: head (Typing[4501])

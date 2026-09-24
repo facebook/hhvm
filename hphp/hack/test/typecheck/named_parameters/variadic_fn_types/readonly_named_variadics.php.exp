@@ -1,6 +1,1 @@
-ERROR: File "readonly_named_variadics.php", line 9, characters 31-33:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics.php", line 9, characters 31-33:
-  This expression is readonly
-  File "readonly_named_variadics.php", line 4, characters 59-61:
-  It is incompatible with this parameter, which is mutable
+No errors

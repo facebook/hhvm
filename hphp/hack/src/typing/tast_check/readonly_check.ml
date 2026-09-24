@@ -577,30 +577,59 @@ let call
   let check_args env caller_ty args unpacked_arg =
     match get_fty env caller_ty with
     | Some fty ->
-      let rec check args params =
-        match (args, params) with
-        (* Remaining args should be checked against variadic *)
-        | (x1 :: args1, [x2]) when get_ft_variadic fty ->
-          check_arg env x2 x1;
-          check args1 [x2]
-        | (x1 :: args1, x2 :: params2) ->
-          check_arg env x2 x1;
-          check args1 params2
-        | ([], _) ->
-          (* If args are empty, it's either a type error already or a default arg that's not filled in
-             either way, no need to check readonlyness *)
-          ()
-        | (_x1 :: _args1, []) ->
-          (* Too many args and no variadic: there was a type error somewhere*)
-          ()
+      let named_variadic_param = Typing_defs.ft_named_variadic_param fty in
+      let params =
+        match named_variadic_param with
+        | Some _ -> List.drop_last_exn fty.ft_params
+        | None -> fty.ft_params
       in
-      let unpacked_rty =
-        unpacked_arg
-        |> Option.map ~f:(fun e -> Aast_defs.Anormal e)
-        |> Option.to_list
+      let (positional_params, named_params) =
+        List.fold_right
+          params
+          ~init:([], S_map.empty)
+          ~f:(fun fp (positional, named) ->
+            match Typing_defs.Named_params.name_of_named_param fp with
+            | Some name -> (positional, S_map.add name fp named)
+            | None -> (fp :: positional, named))
       in
-      let args = args @ unpacked_rty in
-      check args fty.ft_params
+      let check_arg_and_remaining_positional_params
+          (positional_remaining : locl_fun_params) (arg : Tast.argument) :
+          locl_fun_params =
+        match arg with
+        | Aast_defs.Anamed ((_, name), _) ->
+          let param =
+            match S_map.find_opt name named_params with
+            | Some _ as param -> param
+            | None -> named_variadic_param
+          in
+          Option.iter param ~f:(fun param -> check_arg env param arg);
+          positional_remaining
+        | Aast_defs.Anormal _
+        | Aast_defs.Ainout _ ->
+          (match positional_remaining with
+          | [param] when get_ft_variadic fty ->
+            check_arg env param arg;
+            positional_remaining
+          | param :: remaining ->
+            check_arg env param arg;
+            remaining
+          | [] ->
+            (* Too many positional arguments: already reported during typing. *)
+            [])
+      in
+      let positional_remaining =
+        List.fold
+          args
+          ~init:positional_params
+          ~f:check_arg_and_remaining_positional_params
+      in
+      Option.iter unpacked_arg ~f:(fun arg ->
+          let (_ : locl_fun_params) =
+            check_arg_and_remaining_positional_params
+              positional_remaining
+              (Aast_defs.Anormal arg)
+          in
+          ())
     | None -> ()
   in
   check_readonly_closure caller_ty caller_rty;

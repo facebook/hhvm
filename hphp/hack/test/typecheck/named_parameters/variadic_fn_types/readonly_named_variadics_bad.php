@@ -1,6 +1,6 @@
 <?hh
 <<file: __EnableUnstableFeatures('named_parameters')>>
-
+//
 class NamedTail {
   public function __construct(named string...) {}
 }
@@ -20,4 +20,14 @@ function test_readonly_named_variadics_bad(readonly string $ro): void {
 
   new MixedTails(first = "ok", second = $ro, "a");
   new MixedTails("a", first = "ok", second = $ro);
+}
+
+class ReadonlyNamedHead {
+  public function __construct(named readonly string $head, named string...) {}
+}
+
+function test_readonly_declared_named_param_bad(readonly string $ro): void {
+  new ReadonlyNamedHead(head = $ro, extra = $ro);
+  // Repeating a declared name must not bind it to the mutable variadic.
+  new ReadonlyNamedHead(head = $ro, head = $ro);
 }

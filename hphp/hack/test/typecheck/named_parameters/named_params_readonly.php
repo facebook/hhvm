@@ -23,3 +23,4 @@ function test(readonly int $ro): void {
   $target = new Target(m = 2, r = $ro);
   $target->method(m = 2, r = $ro);
 }
+//

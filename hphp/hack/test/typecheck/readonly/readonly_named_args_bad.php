@@ -1,6 +1,6 @@
 <?hh
 <<file: __EnableUnstableFeatures('named_parameters')>>
-
+//
 function readonly_mutable_target(int $m, named int $n): void {}
 
 function test_readonly_named_binding_bad(): void {

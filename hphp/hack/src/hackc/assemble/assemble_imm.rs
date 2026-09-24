@@ -31,6 +31,7 @@ assemble_imm_for_enum!(
         ClassGetCMode::Normal,
         ClassGetCMode::ExplicitConversion,
         ClassGetCMode::UnsafeBackdoor,
+        ClassGetCMode::StrictIsolationBackdoor,
     ]
 );
 

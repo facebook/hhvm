@@ -2553,6 +2553,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
         return;
       case ClassGetCMode::ExplicitConversion:
       case ClassGetCMode::UnsafeBackdoor:
+      case ClassGetCMode::StrictIsolationBackdoor:
         unreachable(env);
         push(env, TBottom);
         return;
@@ -2570,6 +2571,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
               rcls->mightCareAboutDynamicallyReferenced() ||
               rcls->mightBeInStrictPackage();
           case ClassGetCMode::UnsafeBackdoor:
+          case ClassGetCMode::StrictIsolationBackdoor:
             return rcls->mightCareAboutDynamicallyReferenced();
         }
       }();

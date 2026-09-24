@@ -1,0 +1,5 @@
+[packages]
+
+[packages.strict]
+include_paths = ["//strict/"]
+enable_strict_isolation = true

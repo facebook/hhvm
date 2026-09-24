@@ -1085,6 +1085,9 @@ end
 module SpecialFunctions = struct
   let classname_to_class = "\\HH\\classname_to_class"
 
+  let classname_to_class_strict_isolation_backdoor =
+    "\\HH\\classname_to_class_strict_isolation_backdoor"
+
   let exit = PseudoFunctions.exit
 
   let get_class_from_type = "\\HH\\ReifiedGenerics\\get_class_from_type"
@@ -1105,6 +1108,7 @@ module SpecialFunctions = struct
     HashSet.of_list
       [
         classname_to_class;
+        classname_to_class_strict_isolation_backdoor;
         exit;
         get_class_from_type;
         global_get;

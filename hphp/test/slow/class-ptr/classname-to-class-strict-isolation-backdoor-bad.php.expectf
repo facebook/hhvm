@@ -1,0 +1,1 @@
+Fatal error: classname_to_class_strict_isolation_backdoor() expects exactly 1 positional parameter, 2 given in %s/class-ptr/classname-to-class-strict-isolation-backdoor-bad.php on line 5

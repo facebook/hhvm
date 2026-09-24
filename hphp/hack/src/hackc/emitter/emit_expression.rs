@@ -2955,6 +2955,19 @@ fn emit_special_function<'a>(
                 ),
             )),
         },
+        ("HH\\classname_to_class_strict_isolation_backdoor", _) => match *args {
+            [ref cname] if uarg.is_none() => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
+                instr::class_get_c(ClassGetCMode::StrictIsolationBackdoor),
+            ]))),
+            _ => Err(Error::fatal_runtime(
+                pos,
+                format!(
+                    "classname_to_class_strict_isolation_backdoor() expects exactly 1 positional parameter, {} given",
+                    nargs
+                ),
+            )),
+        },
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,

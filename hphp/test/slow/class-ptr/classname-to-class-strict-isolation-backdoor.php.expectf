@@ -1,0 +1,4 @@
+allowed
+
+Notice: Class Missing was loaded from a string, but it is missing the __DynamicallyReferenced attribute in %s/class-ptr/classname-to-class-strict-isolation-backdoor.php on line %d
+missing

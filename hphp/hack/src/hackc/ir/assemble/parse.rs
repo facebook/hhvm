@@ -283,6 +283,7 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
             "normal" => ClassGetCMode::Normal,
             "explicit_conversion" => ClassGetCMode::ExplicitConversion,
             "unsafe_backdoor" => ClassGetCMode::UnsafeBackdoor,
+            "strict_isolation_backdoor" => ClassGetCMode::StrictIsolationBackdoor,
             _ => return None,
         })
     })

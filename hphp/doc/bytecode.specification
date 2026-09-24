@@ -1357,6 +1357,12 @@ ClassGetC <mode>                   [C]  ->  [C:Class]
   <<__DynamicallyReferenced>> check and strict-package policy. Not valid in
   repo mode and asserts in HHBBC.
 
+  StrictIsolationBackdoor mode:
+  This is an explicit str-to-class conversion through
+  HH\classname_to_class_strict_isolation_backdoor(). It has the same input,
+  output, and failure behavior as ExplicitConversion mode, including the
+  <<__DynamicallyReferenced>> check, but bypasses strict-package isolation.
+
 ClassGetTS                         [C:Dict]  ->  [C:Class]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid

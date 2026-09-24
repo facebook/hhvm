@@ -1,0 +1,13 @@
+ordinary
+error: Class StrictBackdoor\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+strict-isolation-backdoor
+called target
+ok
+strict-isolation-backdoor-missing
+notice: Class StrictBackdoor\Missing was loaded from a string, but it is missing the __DynamicallyReferenced attribute
+called missing
+ok
+strict-isolation-backdoor-soft
+notice: Class StrictBackdoor\Soft was loaded from a string, but it is marked soft __DynamicallyReferenced (sampled at rate 1 in 1)
+called soft
+ok

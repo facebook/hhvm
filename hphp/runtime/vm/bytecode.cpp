@@ -2350,6 +2350,10 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
       case ClassGetCMode::UnsafeBackdoor:
         assertx(!Cfg::Repo::Authoritative);
         return classnameToClass(cell, {});
+      case ClassGetCMode::StrictIsolationBackdoor:
+        return classnameToClass(cell, {
+          .dynamicallyReferenced = true,
+        });
     }
   }();
   vmStack().popC();

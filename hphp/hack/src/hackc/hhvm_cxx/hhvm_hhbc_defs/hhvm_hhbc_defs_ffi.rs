@@ -96,6 +96,7 @@ pub mod ffi {
         Normal,
         ExplicitConversion,
         UnsafeBackdoor,
+        StrictIsolationBackdoor,
     }
 
     #[repr(u8)]

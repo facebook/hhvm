@@ -81,7 +81,9 @@ enum class SpecialClsRef : uint8_t {
   MODE(ExplicitConversion) /* Result of HH\classname_to_class() */  \
   /* Undocumented, unsafe flavor of HH\classname_to_class() for     \
      sandboxes that skips <<__DynamicallyReferenced>> check */      \
-  MODE(UnsafeBackdoor)
+  MODE(UnsafeBackdoor)                                              \
+  /* Result of HH\classname_to_class_strict_isolation_backdoor() */ \
+  MODE(StrictIsolationBackdoor)
 
 enum class ClassGetCMode : uint8_t {
 #define MODE(op) op,

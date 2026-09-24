@@ -44,6 +44,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         return;
       case ClassGetCMode::ExplicitConversion:
       case ClassGetCMode::UnsafeBackdoor:
+      case ClassGetCMode::StrictIsolationBackdoor:
         interpOne(env);
         return;
     }
@@ -66,6 +67,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         return LdClsFallback::Fatal;
       case ClassGetCMode::ExplicitConversion:
       case ClassGetCMode::UnsafeBackdoor:
+      case ClassGetCMode::StrictIsolationBackdoor:
         // HH\classname_to_class throws a catchable InvalidArgumentException
         // instead of raising a fatal error
         if (name->isA(TStr)) {
@@ -80,6 +82,27 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   if (name->isA(TStr)) {
     emitModuleBoundaryCheck(env, cls, false);
 
+    auto const emitMissingDynamicallyReferenced = [&] {
+      if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate <= 0) return;
+      if (cls->hasConstVal()) {
+        if (!cls->clsVal()->isDynamicallyReferenced()) {
+          gen(env, RaiseMissingDynamicallyReferenced, cls);
+        }
+        return;
+      }
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          auto const data = AttrData { AttrDynamicallyReferenced };
+          gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, cls));
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, RaiseMissingDynamicallyReferenced, cls);
+        }
+      );
+    };
+
     switch (mode) {
       case ClassGetCMode::Normal:
         if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
@@ -91,27 +114,13 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         emitStrictPackageDynamicReference(env, cls);
         break;
       case ClassGetCMode::ExplicitConversion:
-        if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate > 0) {
-          if (cls->hasConstVal() &&
-              !cls->clsVal()->isDynamicallyReferenced()) {
-            gen(env, RaiseMissingDynamicallyReferenced, cls);
-          } else {
-            ifThen(
-              env,
-              [&] (Block* taken) {
-                auto const data = AttrData { AttrDynamicallyReferenced };
-                gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, cls));
-              },
-              [&] {
-                hint(env, Block::Hint::Unlikely);
-                gen(env, RaiseMissingDynamicallyReferenced, cls);
-              }
-            );
-          }
-        }
+        emitMissingDynamicallyReferenced();
         emitStrictPackageDynamicReference(env, cls);
         break;
       case ClassGetCMode::UnsafeBackdoor:
+        break;
+      case ClassGetCMode::StrictIsolationBackdoor:
+        emitMissingDynamicallyReferenced();
         break;
     }
   }

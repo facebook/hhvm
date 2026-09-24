@@ -262,6 +262,7 @@ impl Display for FmtClassGetCMode {
             ClassGetCMode::Normal => "normal",
             ClassGetCMode::ExplicitConversion => "explicit_conversion",
             ClassGetCMode::UnsafeBackdoor => "unsafe_backdoor",
+            ClassGetCMode::StrictIsolationBackdoor => "strict_isolation_backdoor",
             _ => panic!("bad ClassGetCMode value"),
         };
         f.write_str(s)

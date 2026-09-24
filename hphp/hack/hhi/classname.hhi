@@ -50,6 +50,14 @@ namespace HH {
   function classname_to_class<T>(readonly class_or_classname<T> $cn)[]: class<T>;
 
   /**
+   * Creates a runtime KindOfClass (class pointer) while bypassing strict
+   * package isolation. The target must still be <<__DynamicallyReferenced>>.
+   */
+  function classname_to_class_strict_isolation_backdoor<T>(
+    readonly class_or_classname<T> $cn,
+  )[]: class<T>;
+
+  /**
    * Creates a runtime string from input class pointer $c. Migration function
    * to eliminate implicit coercions to strings e.g. `$mydict[$c]`
    */

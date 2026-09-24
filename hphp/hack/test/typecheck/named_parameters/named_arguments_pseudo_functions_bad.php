@@ -15,3 +15,4 @@ function test_named_exit(): void {
   // Error: exit does not accept named arguments
   exit(status = 0);
 }
+//

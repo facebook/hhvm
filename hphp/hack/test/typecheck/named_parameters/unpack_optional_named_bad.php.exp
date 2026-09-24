@@ -1,19 +1,13 @@
-ERROR: File "unpack_optional_named_bad.php", line 9, characters 3-16:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "unpack_optional_named_bad.php", line 4, characters 10-10:
-  Definition is here
-ERROR: File "unpack_optional_named_bad.php", line 10, characters 3-22:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
+ERROR: File "unpack_optional_named_bad.php", line 9, characters 8-15:
+Invalid argument (Typing[4104])
+  File "unpack_optional_named_bad.php", line 9, characters 8-15:
+  Too few positional arguments (required 2 but got 1)
   File "unpack_optional_named_bad.php", line 4, characters 10-10:
   Definition is here
 ERROR: File "unpack_optional_named_bad.php", line 10, characters 8-21:
 Invalid argument (Typing[4105])
   File "unpack_optional_named_bad.php", line 10, characters 8-21:
-  Too many positional arguments (expected 2 but got 4)
-  File "unpack_optional_named_bad.php", line 4, characters 10-10:
-  Definition is here
-ERROR: File "unpack_optional_named_bad.php", line 11, characters 3-25:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
+  Too many positional arguments (expected 2 but got 3)
   File "unpack_optional_named_bad.php", line 4, characters 10-10:
   Definition is here
 ERROR: File "unpack_optional_named_bad.php", line 11, characters 8-24:
@@ -22,10 +16,6 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "unpack_optional_named_bad.php", line 11, characters 14-20:
   But got `string`
-ERROR: File "unpack_optional_named_bad.php", line 12, characters 3-32:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "unpack_optional_named_bad.php", line 4, characters 10-10:
-  Definition is here
 ERROR: File "unpack_optional_named_bad.php", line 12, characters 25-31:
 Invalid argument (Typing[4110])
   File "unpack_optional_named_bad.php", line 4, characters 34-36:
@@ -34,9 +24,5 @@ Invalid argument (Typing[4110])
   But got `string`
 ERROR: File "unpack_optional_named_bad.php", line 13, characters 3-29:
 Missing required named argument: n (Typing[4499])
-  File "unpack_optional_named_bad.php", line 6, characters 10-23:
-  Definition is here
-ERROR: File "unpack_optional_named_bad.php", line 13, characters 3-29:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "unpack_optional_named_bad.php", line 6, characters 10-23:
   Definition is here

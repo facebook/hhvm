@@ -23,3 +23,4 @@ function test(): void {
   variadic(...tuple(0));
   variadic(...tuple(0, 1, 2));
 }
+//

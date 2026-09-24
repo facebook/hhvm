@@ -1999,27 +1999,33 @@ let param_modes
       Typing_error_utils.add_typing_error ~env @@ Typing_error.primary err)
 
 let split_remaining_params_required_optional
-    non_variadic_non_splat_params remaining_params =
-  (*
-   * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
-   * function g((string, float, bool) $t): void {
-   *   f(3, ...$t);
-   * }
-   *
-   * `remaining_params` will contain [string, float] and there has been 1 parameter consumed. The min_arity
-   * of this function is 2, so there is 1 required parameter remaining and 1 optional parameter.
-   *)
+    ~positional_params ~remaining_positional_params =
+  (* Both lists exclude variadic and type-splat parameters.
+     remaining_positional_params is a suffix of positional_params, whose required
+     parameters precede optional ones. *)
+  (* For example:
+     function f(
+       int $i, named int $n = 0, string $j, float $k = 3.14, mixed ...$m,
+     ): void {}
+     function g((string, float, bool) $t): void {
+       f(3, ...$t);
+     }
+
+     positional_params contains [i, j, k] and remaining_positional_params contains
+     [j, k]. min_arity is 2 and consumed is 1, so j is required and k is optional.
+     The named parameter n contributes to neither count; the variadic parameter m
+     handles the remaining bool separately. *)
   let min_arity =
     List.count
-      ~f:(fun fp -> not (Typing_defs.get_fp_is_optional fp))
-      non_variadic_non_splat_params
+      ~f:(fun (_, fp) -> not (Typing_defs.get_fp_is_optional fp))
+      positional_params
   in
   let consumed =
-    List.length non_variadic_non_splat_params - List.length remaining_params
+    List.length positional_params - List.length remaining_positional_params
   in
   let required_remaining = Int.max (min_arity - consumed) 0 in
   let (required_params, optional_params) =
-    List.split_n remaining_params required_remaining
+    List.split_n remaining_positional_params required_remaining
   in
   (consumed, required_params, optional_params)
 
@@ -7881,32 +7887,40 @@ end = struct
               *)
               let (consumed, required_params, optional_params) =
                 split_remaining_params_required_optional
-                  non_variadic_non_splat_params
-                  remaining_positional_non_variadic_non_splat_params
+                  ~positional_params:positional_non_variadic_non_splat_params
+                  ~remaining_positional_params:
+                    remaining_positional_non_variadic_non_splat_params
               in
-              let remaining_actual_tys =
-                List.drop (List.map argtys ~f:snd) consumed
+              let positional_argtys_with_pos =
+                (* zip_exn is safe because check_args guarantees el and argtys are same length *)
+                List.filter_map (List.zip_exn el argtys) ~f:(function
+                    | (Anamed _, _) -> None
+                    | ((Anormal _ | Ainout _), argty) -> Some argty)
+              in
+              let remaining_positional_argtys_with_pos =
+                List.drop positional_argtys_with_pos consumed
+              in
+              let remaining_positional_argtys =
+                List.map remaining_positional_argtys_with_pos ~f:snd
               in
               let (env, actual_ty, opt_te, remaining_pos) =
                 match unpacked_element with
                 | None ->
                   (* Compute a span for the remaining args *)
-                  let remaining_args = List.drop args_with_result consumed in
                   let remaining_pos =
                     match
-                      (List.hd remaining_args, List.last remaining_args)
+                      ( List.hd remaining_positional_argtys_with_pos,
+                        List.last remaining_positional_argtys_with_pos )
                     with
-                    | (Some (_, arg1, _), Some (_, arg2, _)) ->
-                      Pos.btw
-                        (Aast_utils.get_argument_pos arg1)
-                        (Aast_utils.get_argument_pos arg2)
+                    | (Some (pos1, _), Some (pos2, _)) ->
+                      Pos.btw pos1 pos2
                       (* We have no more arguments so just use position of function id *)
                     | _ -> id_pos
                   in
                   ( env,
                     MakeType.tuple
                       (Reason.witness remaining_pos)
-                      remaining_actual_tys,
+                      remaining_positional_argtys,
                     None,
                     remaining_pos )
                 | Some e ->
@@ -7919,7 +7933,7 @@ end = struct
                       ( Reason.witness splat_pos,
                         Ttuple
                           {
-                            t_required = remaining_actual_tys;
+                            t_required = remaining_positional_argtys;
                             t_optional = [];
                             t_extra = Tsplat unpacked_element_ty;
                           } ),
@@ -7957,10 +7971,7 @@ end = struct
               in
               ( env,
                 opt_te,
-                List.length
-                  (List.filter el ~f:(function
-                      | Aast_defs.Anamed _ -> false
-                      | _ -> true))
+                List.length positional_argtys_with_pos
                 + List.length remaining_positional_non_variadic_non_splat_params,
                 true,
                 used_dynamic_info )
@@ -7977,8 +7988,9 @@ end = struct
               | Some e ->
                 let (consumed, required_params, optional_params) =
                   split_remaining_params_required_optional
-                    non_variadic_non_splat_params
-                    remaining_positional_non_variadic_non_splat_params
+                    ~positional_params:positional_non_variadic_non_splat_params
+                    ~remaining_positional_params:
+                      remaining_positional_non_variadic_non_splat_params
                 in
                 let (env, te, unpacked_element_ty) =
                   expr ~expected:None ~ctxt env e

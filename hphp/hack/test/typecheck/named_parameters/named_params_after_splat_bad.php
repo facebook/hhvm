@@ -1,8 +1,6 @@
 <?hh
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
-// TODO: Features that need to be implemented for named parameters
-
 function take_many(named int $n, int $x1, int $x2, int $x3): void {}
 
 function test_splat_before_named(): void {
@@ -20,3 +18,4 @@ function test_splat_before_named(): void {
   // Error: too many arguments
   take_many(...$ints4, n=1);
 }
+//

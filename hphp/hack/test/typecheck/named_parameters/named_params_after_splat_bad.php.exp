@@ -1,0 +1,12 @@
+ERROR: File "named_params_after_splat_bad.php", line 17, characters 19-24:
+Invalid argument (Typing[4105])
+  File "named_params_after_splat_bad.php", line 17, characters 19-24:
+  Too many positional arguments (expected 3 but got 4)
+  File "named_params_after_splat_bad.php", line 4, characters 10-18:
+  Definition is here
+ERROR: File "named_params_after_splat_bad.php", line 19, characters 16-21:
+Invalid argument (Typing[4105])
+  File "named_params_after_splat_bad.php", line 19, characters 16-21:
+  Too many positional arguments (expected 3 but got 4)
+  File "named_params_after_splat_bad.php", line 4, characters 10-18:
+  Definition is here

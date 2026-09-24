@@ -12,3 +12,4 @@ function test(): void {
   f(...tuple(0, 0), n = 'wrong');
   required_named(...tuple(0));
 }
+//

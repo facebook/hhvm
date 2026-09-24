@@ -16,3 +16,4 @@ function test(): void {
   optional_named(0, ...tuple(1));
   variadic(0, ...tuple(1, 2));
 }
+//

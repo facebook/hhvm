@@ -27,3 +27,4 @@ function test_splat_with_named(): void {
   $too_many = tuple(1, 2, 3, 4, 5);
   take(n=1, ...$too_many);
 }
+//

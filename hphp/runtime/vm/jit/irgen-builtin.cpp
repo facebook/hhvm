@@ -745,6 +745,9 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
         StrToClassData { StrToClassKind::TypeStructure },
         clsNameTmp);
   }
+  if (clsNameTmp->isA(TStr)) {
+    emitStrictPackageDynamicReference(env, clsTmp);
+  }
 
   if (!getName) {
     return cond(

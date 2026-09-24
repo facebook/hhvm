@@ -1941,6 +1941,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseWarning:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case CheckStrictPackageDynamicReference:
   case RaiseMissingDynamicallyReferenced:
   case RaiseStrToClassNotice:
   case CheckClsMethFunc:

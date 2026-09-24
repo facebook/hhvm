@@ -37,6 +37,10 @@ function native_apis_main(): void {
       "method",
     );
   });
+  native_attempt("dynamic:constant-string", () ==> {
+    $class = "StrictNotice\\Target";
+    HH\dynamic_class_meth($class, "method");
+  });
   native_attempt("dynamic:enforced", () ==> {
     HH\dynamic_class_meth(
       native_dynamic_name(nameof StrictEnforced\Target),
@@ -80,6 +84,9 @@ function native_apis_main(): void {
 
   native_attempt("type-structure:notice", () ==> {
     HH\type_structure(native_dynamic_name(nameof StrictNotice\Target), "T");
+  });
+  native_attempt("type-structure:constant-string", () ==> {
+    HH\type_structure("StrictNotice\\Target", "T");
   });
   native_attempt("type-structure-no-throw:notice", () ==> {
     HH\type_structure_no_throw(

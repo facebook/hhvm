@@ -1,6 +1,9 @@
 dynamic:notice
 notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 ok
+dynamic:constant-string
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
 dynamic:enforced
 error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 dynamic:allowed
@@ -19,6 +22,9 @@ ok
 dynamic:unknown
 error: Unable to find class MissingClass
 type-structure:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+type-structure:constant-string
 notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 ok
 type-structure-no-throw:notice

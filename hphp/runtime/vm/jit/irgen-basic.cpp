@@ -88,6 +88,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
               StrToClassData { StrToClassKind::Expression },
               name);
         }
+        emitStrictPackageDynamicReference(env, cls);
         break;
       case ClassGetCMode::ExplicitConversion:
         if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate > 0) {
@@ -108,6 +109,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
             );
           }
         }
+        emitStrictPackageDynamicReference(env, cls);
         break;
       case ClassGetCMode::UnsafeBackdoor:
         break;

@@ -1493,6 +1493,26 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
   }
 }
 
+void emitStrictPackageDynamicReference(IRGS& env, SSATmp* cls) {
+  if (cls->hasConstVal()) {
+    if (!cls->clsVal()->isInStrictPackage()) return;
+    gen(env, CheckStrictPackageDynamicReference, cls);
+    return;
+  }
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const data = AttrData { AttrInStrictPackage };
+      gen(env, JmpNZero, taken, gen(env, ClassHasAttr, data, cls));
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, CheckStrictPackageDynamicReference, cls);
+    }
+  );
+}
+
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const lookup = lookupKnownFuncMaybe(env, funcName);
   auto const fast = [&]() {
@@ -2308,6 +2328,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
             StrToClassData { StrToClassKind::StaticMethod },
             name);
       }
+      emitStrictPackageDynamicReference(env, ret);
     }
     decRef(env, name);
     return ret;

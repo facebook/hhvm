@@ -211,6 +211,18 @@ void cgRaiseForbiddenDynConstruct(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+void cgCheckStrictPackageDynamicReference(IRLS& env,
+                                          const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(checkStrictPackageDynamicReference),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0)
+  );
+}
+
 void cgRaiseMissingDynamicallyReferenced(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(
     vmain(env),

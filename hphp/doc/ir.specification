@@ -2314,6 +2314,12 @@ ReqBindJmp and CallFuncEntry.
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
+| CheckStrictPackageDynamicReference, ND, S(Cls), NF
+
+  Apply strict-package dynamic-reference policy to the provided class. This may
+  raise an exception or a sampled notice for any class in a strict package,
+  regardless of its `<<__DynamicallyReferenced>>` attribute.
+
 | RaiseMissingDynamicallyReferenced, ND, S(Cls), NF
 
   Raise a notice that the provided class (result of classname_to_class) is

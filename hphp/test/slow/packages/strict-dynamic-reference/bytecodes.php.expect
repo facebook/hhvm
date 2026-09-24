@@ -1,6 +1,9 @@
 notice:new
 notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 ok
+notice:new-constant-string
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
 notice:constant
 notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 ok
@@ -15,6 +18,9 @@ notice: Class StrictNotice\Soft was loaded from a string, but classes in strict 
 ok
 notice:allowed-method
 notice: Class StrictNotice\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:method-constant-string
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
 ok
 notice:classname
 notice: Class StrictNotice\Target was loaded from a string, but it is missing the __DynamicallyReferenced attribute

@@ -1,4 +1,3 @@
 -vEval.PackagesTomlFileName="PACKAGES.toml"
--vEval.Jit=0
 -vEval.StrictPackageDynamicReferenceNoticeSampleRate=1
 -vEval.DynamicallyReferencedNoticeSampleRate=1

@@ -61,6 +61,8 @@ void emitModuleBoundaryCheckKnown(IRGS&, const Class* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Func* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Class::Prop* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Class::SProp* symbol);
+
+void emitStrictPackageDynamicReference(IRGS&, SSATmp* cls);
 //////////////////////////////////////////////////////////////////////
 
 

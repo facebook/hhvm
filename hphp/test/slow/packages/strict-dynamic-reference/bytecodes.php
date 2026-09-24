@@ -30,6 +30,10 @@ function bytecodes_main(): void {
     $class = dynamic_name(nameof StrictNotice\Target);
     new $class();
   });
+  attempt("notice:new-constant-string", () ==> {
+    $class = "StrictNotice\\Target";
+    new $class();
+  });
   attempt("notice:constant", () ==> {
     $class = dynamic_name(nameof StrictNotice\Target);
     $_ = $class::VALUE;
@@ -48,6 +52,10 @@ function bytecodes_main(): void {
   });
   attempt("notice:allowed-method", () ==> {
     $class = dynamic_name(nameof StrictNotice\Allowed);
+    $class::method();
+  });
+  attempt("notice:method-constant-string", () ==> {
+    $class = "StrictNotice\\Target";
     $class::method();
   });
   attempt("notice:classname", () ==> {

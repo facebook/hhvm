@@ -545,6 +545,7 @@ bool canDCE(const IRInstruction& inst) {
   case ThrowArrayKeyException:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case CheckStrictPackageDynamicReference:
   case RaiseMissingDynamicallyReferenced:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamTypeViolation:

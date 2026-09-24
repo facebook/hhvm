@@ -455,6 +455,13 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
+  if (maybeDynamic &&
+      context.couldBe(BCls) &&
+      (!is_specialized_cls(context) ||
+       dcls_of(context).cls().mightBeInStrictPackage())) {
+    return false;
+  }
+
   if (func->userAttributes.count(s___NEVER_INLINE.get())) {
     return false;
   }

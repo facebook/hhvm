@@ -173,7 +173,13 @@ impl Coeffects {
             // named params, sorted lexicographically by name, precede positional
             // params whose relative order is preserved. Mirror that ordering here
             // so the index matches the emitted parameter layout.
-            let mut reordered: Vec<&a::FunParam<Ex, En>> = params.as_ref().iter().collect();
+            // emit_param omits the nameless variadic (name "..."), so exclude it
+            // here as well (see emit_param::from_ast).
+            let mut reordered: Vec<&a::FunParam<Ex, En>> = params
+                .as_ref()
+                .iter()
+                .filter(|p| !(matches!(p.info, a::FunParamInfo::ParamVariadic) && p.name == "..."))
+                .collect();
             reordered.sort_by(|a, b| match (a.named.is_some(), b.named.is_some()) {
                 (true, true) => a.name.cmp(&b.name),
                 (true, false) => std::cmp::Ordering::Less,

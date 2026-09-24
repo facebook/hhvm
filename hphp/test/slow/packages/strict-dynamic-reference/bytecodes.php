@@ -15,7 +15,7 @@ function attempt(string $label, (function(): void) $operation): void {
 }
 
 <<__EntryPoint>>
-function main(): void {
+function bytecodes_main(): void {
   require_once __DIR__."/notice/Targets.inc.php";
   require_once __DIR__."/enforced/Targets.inc.php";
   require_once __DIR__."/loose/Target.inc.php";

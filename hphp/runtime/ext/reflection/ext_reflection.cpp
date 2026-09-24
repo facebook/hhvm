@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/server/source-root-info.h"
 
@@ -680,6 +681,7 @@ Array implTypeStructure(TypedValue cls_or_obj,
         auto const c = Class::load(n);
         if (c) {
           raise_str_to_class_notice(n, jit::StrToClassKind::TypeStructure);
+          checkStrictPackageDynamicReference(c);
         } else {
           raise_error("Class undefined: %s", n->data());
         }

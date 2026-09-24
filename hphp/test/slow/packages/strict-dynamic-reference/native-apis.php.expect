@@ -1,0 +1,52 @@
+dynamic:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+dynamic:enforced
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+dynamic:allowed
+error: Class StrictEnforced\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+dynamic:soft
+error: Class StrictEnforced\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+dynamic:implicit
+notice: Class ImplicitMember\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+dynamic:loose
+ok
+dynamic:lazy-class
+ok
+dynamic:class
+ok
+dynamic:unknown
+error: Unable to find class MissingClass
+type-structure:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+type-structure-no-throw:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+type-structure-classname:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+type-structure-class:notice
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+type-structure:enforced
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure-no-throw:enforced
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure-classname:enforced
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure-class:enforced
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure:soft
+error: Class StrictEnforced\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure:allowed
+error: Class StrictEnforced\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+type-structure:lazy-class
+ok
+type-structure:class
+ok
+type-structure:object
+ok
+type-structure:alias
+ok

@@ -1,0 +1,2 @@
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok

@@ -920,6 +920,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
         auto const cls = Class::load(n);
         if (cls) {
           raise_str_to_class_notice(n, jit::StrToClassKind::DynamicClassMeth);
+          checkStrictPackageDynamicReference(cls);
         } else {
           SystemLib::throwInvalidArgumentExceptionObject(
             fmt::format("Unable to find class {}", n->data())

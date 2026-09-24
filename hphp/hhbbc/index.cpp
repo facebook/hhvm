@@ -5162,6 +5162,20 @@ bool Class::mightCareAboutDynamicallyReferenced() const {
   }
 }
 
+bool Class::mightBeInStrictPackage() const {
+  graph().ensureCInfo();
+  auto const isStrict = [] (const php::Class& cls) {
+    return cls.attrs & AttrInStrictPackage;
+  };
+  if (auto const ci = cinfo()) {
+    return isStrict(*ci->cls);
+  } else if (auto const ci = cinfo2()) {
+    return !ci->cls || isStrict(*ci->cls);
+  } else {
+    return true;
+  }
+}
+
 bool Class::couldHaveConstProp() const {
   graph().ensureCInfo();
   if (auto const ci = cinfo()) {

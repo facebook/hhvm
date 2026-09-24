@@ -2566,6 +2566,9 @@ void in(ISS& env, const bc::ClassGetC& op) {
           case ClassGetCMode::Normal:
             return true;
           case ClassGetCMode::ExplicitConversion:
+            return
+              rcls->mightCareAboutDynamicallyReferenced() ||
+              rcls->mightBeInStrictPackage();
           case ClassGetCMode::UnsafeBackdoor:
             return rcls->mightCareAboutDynamicallyReferenced();
         }

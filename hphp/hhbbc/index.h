@@ -651,6 +651,11 @@ struct Class {
   bool mightCareAboutDynamicallyReferenced() const;
 
   /*
+   * Returns whether this resolved class might belong to a strict package.
+   */
+  bool mightBeInStrictPackage() const;
+
+  /*
    * Whether this class (or clases derived from it) could have const props.
    */
   bool couldHaveConstProp() const;

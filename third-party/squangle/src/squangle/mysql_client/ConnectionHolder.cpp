@@ -6,6 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
 
@@ -45,17 +48,40 @@ void ConnectionHolder::updateConnectionKey(
 }
 
 ConnectionHolder::~ConnectionHolder() {
-  if (internalConn_) {
-    if (auto func = internalConn_->getCloseFunction()) {
-      if (!client_.runInThread([func = std::move(func)]() { func(); })) {
-        LOG(DFATAL)
-            << "Connection couldn't be closed: error in folly::EventBase";
-      }
-    }
-
-    onClose();
+  // Destructors are noexcept, and onClose() reaches
+  // DBCounterBase::incrClosedConnections, which is pure virtual and therefore
+  // supplied by whoever embeds this library.  This runs on every connection
+  // teardown, including the cancel and timeout paths, so a throwing stats
+  // implementation would end the process exactly when the network is already
+  // misbehaving.
+  if (auto ew = folly::try_and_catch([&] { closeInternalConnection(); })) {
+    XLOG_EVERY_MS(ERR, 1000)
+        << "Exception while closing a connection: " << ew.what();
   }
-  client_.activeConnectionRemoved(key_);
+
+  // Guarded separately rather than sharing the block above: this is the pool's
+  // active-connection accounting, so skipping it leaves the key inflated for
+  // the life of the process and eats into the pool limit.  The close path is
+  // the likeliest thing to throw, which is exactly when this still has to run.
+  if (auto ew = folly::try_and_catch(
+          [&] { client_.activeConnectionRemoved(key_); })) {
+    XLOG_EVERY_MS(ERR, 1000)
+        << "Exception removing an active connection: " << ew.what();
+  }
+}
+
+void ConnectionHolder::closeInternalConnection() {
+  if (!internalConn_) {
+    return;
+  }
+
+  if (auto func = internalConn_->getCloseFunction()) {
+    if (!client_.runInThread([func = std::move(func)]() { func(); })) {
+      LOG(DFATAL) << "Connection couldn't be closed: error in folly::EventBase";
+    }
+  }
+
+  onClose();
 }
 
 void ConnectionHolder::onClose() {

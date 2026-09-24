@@ -6,8 +6,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/Connection.h"
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include "squangle/mysql_client/ChangeUserOperation.h"
+#include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/MultiQueryStreamHandler.h"
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
@@ -102,8 +105,14 @@ void Connection::initialize(bool initMysql) {
 
 Connection::~Connection() {
   if (mysql_connection_ && conn_dying_callback_) {
-    // Recycle connection, if not needed the client will throw it away
-    conn_dying_callback_(std::move(mysql_connection_));
+    // Recycle connection, if not needed the client will throw it away.
+    // Guarded because this is a destructor and the callback is installed by the
+    // pool or by the caller, so its contents are not this class's to trust.
+    if (auto ew = folly::try_and_catch(
+            [&] { conn_dying_callback_(std::move(mysql_connection_)); })) {
+      XLOG_EVERY_MS(ERR, 1000)
+          << "Exception in the connection dying callback: " << ew.what();
+    }
   }
 }
 

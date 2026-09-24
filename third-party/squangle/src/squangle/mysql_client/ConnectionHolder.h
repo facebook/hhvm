@@ -299,6 +299,8 @@ class ConnectionHolder : public InternalConnection {
   // Used to update the connection key when updating to a pooled connection
   void updateConnectionKey(std::shared_ptr<const ConnectionKey> new_key);
 
+  void closeInternalConnection();
+
   void onClose();
 
   template <typename Client>

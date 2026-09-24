@@ -1,0 +1,56 @@
+notice:new
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:constant
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:property
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:method
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:soft-method
+notice: Class StrictNotice\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:allowed-method
+notice: Class StrictNotice\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:classname
+notice: Class StrictNotice\Target was loaded from a string, but it is missing the __DynamicallyReferenced attribute
+notice: Class StrictNotice\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:allowed-classname
+notice: Class StrictNotice\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+notice:soft-classname
+notice: Class StrictNotice\Soft was loaded from a string, but it is marked soft __DynamicallyReferenced (sampled at rate 1 in 1)
+notice: Class StrictNotice\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+enforced:new
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:constant
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:property
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:method
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:classname
+notice: Class StrictEnforced\Target was loaded from a string, but it is missing the __DynamicallyReferenced attribute
+error: Class StrictEnforced\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:allowed
+error: Class StrictEnforced\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:allowed-classname
+error: Class StrictEnforced\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:same-package-classname
+error: Class StrictEnforced\Allowed was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:soft-method
+error: Class StrictEnforced\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+enforced:soft-classname
+notice: Class StrictEnforced\Soft was loaded from a string, but it is marked soft __DynamicallyReferenced (sampled at rate 1 in 1)
+error: Class StrictEnforced\Soft was loaded from a string, but classes in strict packages cannot be dynamically referenced
+implicit:method
+notice: Class ImplicitMember\Target was loaded from a string, but classes in strict packages cannot be dynamically referenced
+ok
+loose:method
+ok

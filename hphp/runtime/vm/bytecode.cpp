@@ -956,8 +956,14 @@ void checkModuleBoundaryViolation(const Class& cls) {
 
 } // namespace
 
-static inline Class* classnameToClass(TypedValue* input,
-                                      bool checkDynamicallyReferenced) {
+struct ClassnameToClassChecks {
+  bool dynamicallyReferenced{false};
+  bool inStrictPackage{false};
+};
+
+static inline Class* classnameToClass(
+    TypedValue* input,
+    ClassnameToClassChecks checks) {
   auto const explicitFail = [&](const char* k, const char* n) {
     std::string msg;
     string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION, k, n);
@@ -967,9 +973,11 @@ static inline Class* classnameToClass(TypedValue* input,
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
-      if (checkDynamicallyReferenced && !class_->isDynamicallyReferenced()) {
+      if (checks.dynamicallyReferenced &&
+          !class_->isDynamicallyReferenced()) {
         raiseMissingDynamicallyReferenced(class_);
       }
+      if (checks.inStrictPackage) checkStrictPackageDynamicReference(class_);
       return class_;
     }
     explicitFail("string", name->data());
@@ -995,6 +1003,7 @@ static inline Class* lookupClsRef(TypedValue* input, jit::StrToClassKind kind) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
       raise_str_to_class_notice(name, kind);
+      checkStrictPackageDynamicReference(class_);
       return class_;
     }
     raise_error(Strings::UNKNOWN_CLASS, name->data());
@@ -2334,10 +2343,13 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
       case ClassGetCMode::Normal:
         return lookupClsRef(cell, jit::StrToClassKind::Expression);
       case ClassGetCMode::ExplicitConversion:
-        return classnameToClass(cell, true);
+        return classnameToClass(cell, {
+          .dynamicallyReferenced = true,
+          .inStrictPackage = true,
+        });
       case ClassGetCMode::UnsafeBackdoor:
         assertx(!Cfg::Repo::Authoritative);
-        return classnameToClass(cell, false);
+        return classnameToClass(cell, {});
     }
   }();
   vmStack().popC();

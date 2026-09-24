@@ -152,6 +152,9 @@ constexpr char MISSING_DYNAMICALLY_REFERENCED[] =
 constexpr char SOFT_MISSING_DYNAMICALLY_REFERENCED[] =
   "Class %s was loaded from a string, but it is marked soft "
   "__DynamicallyReferenced (sampled at rate 1 in %ld)";
+constexpr char STRICT_PACKAGE_DYNAMIC_REFERENCE[] =
+  "Class %s was loaded from a string, but classes in strict packages "
+  "cannot be dynamically referenced";
 constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
   "Failed to load class from %s %s for classname_to_class.";
 constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =

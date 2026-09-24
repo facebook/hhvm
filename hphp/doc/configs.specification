@@ -658,6 +658,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Whether classname_to_class raises notice if <<__DynamicallyReferenced>>
   is missing on a class definition.
 
+- uint32_t Eval.StrictPackageDynamicReferenceNoticeSampleRate = 0, UNKNOWN
+
+  Whether dynamic references to classes in strict packages raise a notice.
+
 - uint32_t Eval.RaiseStrToClsConversionNoticeSampleRate = 0, UNKNOWN
 
   Whether operations like $c::foo() raise a notice when $c is a string

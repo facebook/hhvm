@@ -1347,12 +1347,15 @@ ClassGetC <mode>                   [C]  ->  [C:Class]
   Checks if $1 is a string, class, or lazy class; objects are not admitted and
   classes pointers are pushed unchanged. When $1 is a string, we check whether
   the target class has the <<__DynamicallyReferenced>> attribute and raise a
-  sampled notice otherwise. If the target class fails to load, we throw a
-  catchable InvalidArgumentException.
+  sampled notice otherwise. A string target in a strict package is always
+  subject to that package's dynamic-reference policy, regardless of the
+  attribute. If the target class fails to load, we throw a catchable
+  InvalidArgumentException.
 
   UnsafeBackdoor mode:
-  Same as the last mode but skips the <<__DynamicallyReferenced>> check. Not
-  valid in repo mode and asserts in HHBBC.
+  Same class-loading behavior as the last mode but skips both the
+  <<__DynamicallyReferenced>> check and strict-package policy. Not valid in
+  repo mode and asserts in HHBBC.
 
 ClassGetTS                         [C:Dict]  ->  [C:Class]
 

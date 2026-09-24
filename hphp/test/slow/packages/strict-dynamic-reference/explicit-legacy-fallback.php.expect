@@ -1,0 +1,2 @@
+notice: Class StrictNotice\Target was loaded from a string, but it is missing the __DynamicallyReferenced attribute
+ok

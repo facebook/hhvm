@@ -113,6 +113,7 @@ void raiseModulePropertyViolation(const Class* cls,
  * resolved Class* at runtime to determine the sample rate for the notice.
  */
 void raiseMissingDynamicallyReferenced(const Class* cls);
+void checkStrictPackageDynamicReference(const Class* cls);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

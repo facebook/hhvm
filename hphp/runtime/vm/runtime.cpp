@@ -590,6 +590,32 @@ void raiseMissingDynamicallyReferenced(const Class* cls) {
   }
 }
 
+NEVER_INLINE void checkStrictPackageDynamicReference(const Class* cls) {
+  if (!cls->isInStrictPackage()) return;
+
+  if (cls->preClass()->unit()
+        ->shouldRaiseStrictPackageDynamicClassLoadError()) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::STRICT_PACKAGE_DYNAMIC_REFERENCE,
+      cls->name()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  }
+
+  if (Cfg::Eval::StrictPackageDynamicReferenceNoticeSampleRate > 0 &&
+      folly::Random::oneIn(
+        Cfg::Eval::StrictPackageDynamicReferenceNoticeSampleRate,
+        threadLocalRng64()
+      )) {
+    raise_notice(
+      Strings::STRICT_PACKAGE_DYNAMIC_REFERENCE,
+      cls->name()->data()
+    );
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -1,1 +1,12 @@
-No errors
+ERROR: File "positional_variadic_before_named_bad.php", line 7, characters 40-41:
+Invalid argument (Typing[4110])
+  File "positional_variadic_before_named_bad.php", line 4, characters 61-66:
+  Expected `string`
+  File "positional_variadic_before_named_bad.php", line 7, characters 40-41:
+  But got `int`
+ERROR: File "positional_variadic_before_named_bad.php", line 8, characters 39-45:
+Invalid argument (Typing[4110])
+  File "positional_variadic_before_named_bad.php", line 4, characters 50-52:
+  Expected `int` (variadic argument)
+  File "positional_variadic_before_named_bad.php", line 8, characters 39-45:
+  But got `string`

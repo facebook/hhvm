@@ -1890,8 +1890,14 @@ let get_variadic_or_splat_param ft :
   match List.last ft.ft_params with
   | Some fp when get_fp_splat fp ->
     (List.drop_last_exn ft.ft_params, Some (`Splat fp))
-  | Some fp when get_ft_variadic ft ->
-    (List.drop_last_exn ft.ft_params, Some (`Variadic fp))
+  | _ when get_ft_variadic ft ->
+    let (named, positional) =
+      List.partition_tf ft.ft_params ~f:Typing_defs_core.get_fp_is_named
+    in
+    (match List.last positional with
+    | Some variadic ->
+      (List.drop_last_exn positional @ named, Some (`Variadic variadic))
+    | None -> (ft.ft_params, None))
   | _ -> (ft.ft_params, None)
 
 let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =

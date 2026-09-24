@@ -7,3 +7,4 @@ function test(): void {
   positional_variadic_before_named(1, 2, s = "ok");
   positional_variadic_before_named(s = "ok");
 }
+//

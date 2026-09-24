@@ -596,18 +596,21 @@ let process_one_workitem
     end
   in
 
-  Hack_event_logger.ProfileTypeCheck.process_workitem
-    ~batch_info
-    ~workitem_index:(ProcessFilesTally.count tally)
-    ~file:(Option.map file ~f:(fun file -> file.path))
-    ~file_was_already_deferred:
-      (Option.map file ~f:(fun file -> file.was_already_deferred))
-    ~decl
-    ~error_code:(Diagnostics.choose_code_opt file_diagnostics)
-    ~workitem_ends_under_cap
-    ~workitem_start_stats:stats
-    ~workitem_end_stats
-    ~workitem_end_second_stats;
+  (match fn with
+  | Declare _ -> ()
+  | Check _ ->
+    Hack_event_logger.ProfileTypeCheck.process_workitem
+      ~batch_info
+      ~workitem_index:(ProcessFilesTally.count tally)
+      ~file:(Option.map file ~f:(fun file -> file.path))
+      ~file_was_already_deferred:
+        (Option.map file ~f:(fun file -> file.was_already_deferred))
+      ~decl
+      ~error_code:(Diagnostics.choose_code_opt file_diagnostics)
+      ~workitem_ends_under_cap
+      ~workitem_start_stats:stats
+      ~workitem_end_stats
+      ~workitem_end_second_stats);
 
   ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
     { diagnostics; map_reduce_data; tally; stats = final_stats } )

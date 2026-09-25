@@ -47,7 +47,6 @@ FLAGS: List[str] = [
     "is_systemlib=true",
     "--config",
     "enable_no_auto_dynamic=true",
-    # TODO(T118594542)
     "--allowed-fixme-codes-strict",
     ",".join(map(str, FIXME_CODES)),
     "--allowed-decl-fixme-codes",

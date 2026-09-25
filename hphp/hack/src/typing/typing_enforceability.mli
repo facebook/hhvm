@@ -12,7 +12,10 @@ val is_enforceable :
   Typing_defs.decl_ty ->
   bool
 
+(** When [top_enforced] is true, erased container type arguments are treated
+    as enforced if they are top types for their positions. *)
 val get_enforcement :
+  ?top_enforced:bool ->
   this_class:Folded_class.t option ->
   Typing_env_types.env ->
   Typing_defs.decl_ty ->

@@ -62,7 +62,10 @@ module ShallowContextAccess : functor (CA : ShallowProvider) ->
      and type t = CA.t
 
 module Enforce : functor (ContextAccess : ContextAccess) -> sig
+  (** When [top_enforced] is true, erased container type arguments are treated
+      as enforced if they are top types for their positions. e.g. dict<arraykey, mixed> *)
   val get_enforcement :
+    top_enforced:bool ->
     return_from_async:bool ->
     this_class:ContextAccess.class_t option ->
     ContextAccess.t ->

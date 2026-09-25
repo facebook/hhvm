@@ -115,12 +115,26 @@ end
 
 module Enforce (ContextAccess : ContextAccess) : sig
   val get_enforcement :
+    top_enforced:bool ->
     return_from_async:bool ->
     this_class:ContextAccess.class_t option ->
     ContextAccess.t ->
     Typing_defs.decl_ty ->
     enf
 end = struct
+  let rec is_mixed ty =
+    match get_node ty with
+    | Tapply ((_, name), [ty])
+      when String.equal name Naming_special_names.Classes.cSupportDyn ->
+      is_mixed ty
+    | Tmixed -> true
+    | _ -> false
+
+  let is_arraykey ty =
+    match get_node ty with
+    | Tprim Tarraykey -> true
+    | _ -> false
+
   let add_to_visited visited cd ty =
     let name = ContextAccess.get_name cd in
     VisitedSet.add (name, ty) visited
@@ -172,8 +186,11 @@ end = struct
   let unenforced pr = Unenforced (None, pr)
 
   let get_enforcement
-      ~return_from_async ~this_class (ctx : ContextAccess.t) (ty : decl_ty) :
-      enf =
+      ~top_enforced
+      ~return_from_async
+      ~this_class
+      (ctx : ContextAccess.t)
+      (ty : decl_ty) : enf =
     let tcopt = ContextAccess.get_tcopt ctx in
     let tc_enforced =
       Typechecker_options.(
@@ -199,6 +216,25 @@ end = struct
           else
             unenforced Reason.PRthis
       end
+      | Tapply ((_, name), [ty1; ty2])
+        when top_enforced
+             && String.equal name Naming_special_names.Collections.cDict
+             && is_arraykey ty1
+             && is_mixed ty2 ->
+        Enforced ty
+      | Tvec_or_dict (ty1, ty2)
+        when top_enforced && is_arraykey ty1 && is_mixed ty2 ->
+        Enforced ty
+      | Tapply ((_, name), [ty1])
+        when top_enforced
+             && String.equal name Naming_special_names.Collections.cKeyset
+             && is_arraykey ty1 ->
+        Enforced ty
+      | Tapply ((_, name), [ty1])
+        when top_enforced
+             && String.equal name Naming_special_names.Collections.cVec
+             && is_mixed ty1 ->
+        Enforced ty
       (* Look through supportdyn, just as we look through ~ *)
       | Tapply ((_, name), [ty])
         when String.equal name Naming_special_names.Classes.cSupportDyn ->
@@ -531,7 +567,14 @@ module Pessimize (Provider : ShallowProvider) = struct
       p
       ty =
     if implicit_sdt_for_class ctx this_class && not no_auto_likes then
-      match E.get_enforcement ~return_from_async:false ~this_class ctx ty with
+      match
+        E.get_enforcement
+          ~top_enforced:true
+          ~return_from_async:false
+          ~this_class
+          ctx
+          ty
+      with
       | Enforced _ ->
         if is_xhp_attr then
           make_like_type
@@ -613,13 +656,23 @@ module Pessimize (Provider : ShallowProvider) = struct
           match fun_kind with
           | Function ->
             (match
-               E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+               E.get_enforcement
+                 ~top_enforced:true
+                 ~return_from_async
+                 ~this_class
+                 ctx
+                 ret_ty
              with
             | Enforced _ -> true
             | _ -> false)
           | Concrete_method when cannot_override ->
             (match
-               E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+               E.get_enforcement
+                 ~top_enforced:true
+                 ~return_from_async
+                 ~this_class
+                 ctx
+                 ret_ty
              with
             | Enforced _ -> true
             | _ -> false)
@@ -644,7 +697,12 @@ module Pessimize (Provider : ShallowProvider) = struct
         | Abstract_method ->
           let reason =
             match
-              E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+              E.get_enforcement
+                ~top_enforced:false
+                ~return_from_async
+                ~this_class
+                ctx
+                ret_ty
             with
             | Enforced _ ->
               Reason.pessimised_return (get_pos ret_ty) Reason.PRabstract
@@ -666,7 +724,12 @@ module Pessimize (Provider : ShallowProvider) = struct
             mk (get_reason ty, Tfun ft)
           else (
             match
-              E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+              E.get_enforcement
+                ~top_enforced:cannot_override
+                ~return_from_async
+                ~this_class
+                ctx
+                ret_ty
             with
             | Enforced _ -> mk (get_reason ty, Tfun ft)
             | Unenforced (enf_ty_opt, pr) ->

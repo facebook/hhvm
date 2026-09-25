@@ -1041,10 +1041,12 @@ let maybe_poison_ancestors
     in
     match
       ( Typing_enforceability.get_enforcement
+          ~top_enforced:true
           ~this_class:(Some parent_class)
           env
           parent_return_ty,
         Typing_enforceability.get_enforcement
+          ~top_enforced:true
           ~this_class:(Some declared_class)
           env
           declared_return_ty )

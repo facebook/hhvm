@@ -10724,6 +10724,7 @@ end = struct
           | None -> Unenforced
           | Some ty ->
             Typing_enforceability.get_enforcement
+              ~top_enforced:true
               ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
               env
               ty
@@ -10844,6 +10845,7 @@ end = struct
           | None -> Unenforced
           | Some ty ->
             Typing_enforceability.get_enforcement
+              ~top_enforced:true
               ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
               env
               ty
@@ -10900,6 +10902,7 @@ end = struct
           let decl_ty = Decl_hint.hint env.decl_env h in
           (match
              Typing_enforceability.get_enforcement
+               ~top_enforced:true
                ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
                env
                decl_ty

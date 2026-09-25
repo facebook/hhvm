@@ -48,14 +48,17 @@ end
 
 module E = Decl_enforceability.Enforce (FoldedContextAccess)
 
-let get_enforcement ~this_class (env : env) (ty : decl_ty) :
+let get_enforcement
+    ?(top_enforced = false) ~this_class (env : env) (ty : decl_ty) :
     Typing_defs.enforcement =
-  match E.get_enforcement ~return_from_async:false ~this_class env ty with
+  match
+    E.get_enforcement ~top_enforced ~return_from_async:false ~this_class env ty
+  with
   | Decl_enforceability.Unenforced _ -> Unenforced
   | Decl_enforceability.Enforced _ -> Enforced
 
 let is_enforceable ~this_class (env : env) (ty : decl_ty) =
-  match get_enforcement ~this_class env ty with
+  match get_enforcement ~top_enforced:true ~this_class env ty with
   | Enforced -> true
   | Unenforced -> false
 
@@ -63,7 +66,7 @@ let get_enforced ~this_class env ~explicitly_untrusted ty =
   if explicitly_untrusted then
     Unenforced
   else
-    get_enforcement ~this_class env ty
+    get_enforcement ~top_enforced:true ~this_class env ty
 
 let compute_enforced_ty
     ~this_class env ?(explicitly_untrusted = false) (ty : decl_ty) =

@@ -242,7 +242,11 @@ let enforcement_at_pos
         let Equal = Tast_env.eq_typing_env in
         let this_class = Tast_env.get_self_class env |> Decl_entry.to_option in
         let enforcement =
-          Typing_enforceability.get_enforcement ~this_class env decl_ty
+          Typing_enforceability.get_enforcement
+            ~top_enforced:true
+            ~this_class
+            env
+            decl_ty
         in
         let open Enforcement_at_pos_service in
         match enforcement with
@@ -353,6 +357,7 @@ let enforcement_at_pos
                 else
                   let bound_enforcement =
                     Typing_enforceability.get_enforcement
+                      ~top_enforced:true
                       ~this_class
                       env
                       bound_ty

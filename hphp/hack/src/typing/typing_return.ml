@@ -192,7 +192,13 @@ let make_return_type
          * Never pessimise void.
          *)
         let add_like_reason =
-          match Typing_enforceability.get_enforcement ~this_class env dty with
+          match
+            Typing_enforceability.get_enforcement
+              ~top_enforced:true
+              ~this_class
+              env
+              dty
+          with
           | Enforced -> Some (Reason.enforced_type pos)
           | Unenforced ->
             if Env.get_no_auto_likes env then
@@ -217,7 +223,11 @@ let make_return_type
         (env, ty)
       ) else
         let et_enforced =
-          Typing_enforceability.get_enforcement ~this_class env dty
+          Typing_enforceability.get_enforcement
+            ~top_enforced:true
+            ~this_class
+            env
+            dty
         in
         let et_enforced =
           match et_enforced with

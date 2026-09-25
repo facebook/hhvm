@@ -218,7 +218,7 @@ pub enum Pos {
 pub struct Id {
     pub pos: Pos,
     pub name: String,
-    pub decl_hash: Option<Int64>,
+    pub decl_hash: Option<decl_hash::DeclHash>,
 }
 
 #[derive(

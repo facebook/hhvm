@@ -10,6 +10,10 @@ pub use file_info::*;
 
 pub mod prim_defs;
 
+pub mod decl_hash {
+    pub type DeclHash = ocamlrep_caml_builtins::Int64;
+}
+
 mod s_set {
     pub type SSet = std::collections::BTreeSet<String>;
 }

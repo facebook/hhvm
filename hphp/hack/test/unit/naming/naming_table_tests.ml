@@ -643,7 +643,7 @@ let test_context_changes_typedefs () =
       ())
 
 (** Fresh and incremental saves report every missing declaration hash, omit those
-symbols from storage and the checksum, and still accept an explicit zero hash. *)
+symbols from storage and the checksum, and preserve hashes produced by the parser. *)
 let test_save_decl_hashes () =
   Tempfile.with_real_tempdir (fun root ->
       Relative_path.set_path_prefix Relative_path.Root root;
@@ -651,16 +651,19 @@ let test_save_decl_hashes () =
       let make_id name decl_hash =
         File_info.{ pos = File (Fun, path); name; decl_hash }
       in
-      let valid = make_id "\\zero" (Some Int64.zero) in
+      let parsed =
+        Direct_decl_parser.parse_and_hash_decls
+          (Decl_parser_options.from_parser_options Parser_options.default)
+          false
+          path
+          "<?hh function valid(): void {}"
+        |> Direct_decl_parser.decls_to_fileinfo path
+      in
+      let valid = List.hd_exn parsed.File_info.ids.File_info.funs in
       let missing_before = make_id "\\missing_before" None in
       let missing_after = make_id "\\missing_after" None in
       let file_info funs =
-        File_info.
-          {
-            empty_t with
-            position_free_decl_hash = Some Int64.zero;
-            ids = { empty_ids with funs };
-          }
+        File_info.{ parsed with ids = { empty_ids with funs } }
       in
       let db_name name = Path.concat root name |> Path.to_string in
       let save name funs =
@@ -712,11 +715,12 @@ let test_save_decl_hashes () =
                 |> Option.map ~f:fst)
                 "A symbol without a declaration hash should not be stored");
           Asserter.String_asserter.assert_option_equals
-            (Some "0")
+            (Option.map valid.File_info.decl_hash ~f:(fun hash ->
+                 File_info.Decl_hash.to_int64 hash |> Int64.to_string))
             (Typing_deps.Dep.Fun valid.File_info.name
             |> Typing_deps.Dep.make
             |> Naming_sqlite.get_decl_hash_by_64bit_dep db_path)
-            "An explicit zero declaration hash should be preserved");
+            "The declaration hash produced by the parser should be preserved");
       Naming_sqlite.free_db_cache ();
       true)
 

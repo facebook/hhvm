@@ -20,7 +20,7 @@ type parsed_file_with_hashes = {
   pfh_mode: File_info.mode option;
   pfh_hash: File_info.pfh_hash;
       (** position insensitive hash of all decls in the file *)
-  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+  pfh_decls: (string * Shallow_decl_defs.decl * File_info.Decl_hash.t) list;
       (** (name, decl, position-sensitive hash of this decl) *)
 }
 

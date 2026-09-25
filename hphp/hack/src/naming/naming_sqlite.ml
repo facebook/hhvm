@@ -62,13 +62,14 @@ type local_changes = {
 
 type symbol_and_decl_hash = {
   symbol: Int64.t;  (** the HASH column of NAMING_SYMBOLS *)
-  decl_hash: Int64.t;  (** the DECL_HASH column of NAMING_SYMBOLS *)
+  decl_hash: File_info.Decl_hash.t;
+      (** the DECL_HASH column of NAMING_SYMBOLS *)
 }
 
 external checksum_addremove :
   Int64.t ->
   symbol:Int64.t ->
-  decl_hash:Int64.t ->
+  decl_hash:File_info.Decl_hash.t ->
   path:Relative_path.t ->
   Int64.t = "checksum_addremove_ffi"
 
@@ -539,7 +540,11 @@ module SymbolTable = struct
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
+    Sqlite3.bind
+      insert_stmt
+      3
+      (Sqlite3.Data.INT (File_info.Decl_hash.to_int64 decl_hash))
+    |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
@@ -580,7 +585,9 @@ module SymbolTable = struct
     Sqlite3.bind stmt 1 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     fold_sqlite stmt ~init:[] ~f:(fun iter_stmt acc ->
         let symbol = column_int64 iter_stmt 0 in
-        let decl_hash = column_int64 iter_stmt 1 in
+        let decl_hash =
+          column_int64 iter_stmt 1 |> File_info.Decl_hash.from_naming_table
+        in
         { symbol; decl_hash } :: acc)
 end
 

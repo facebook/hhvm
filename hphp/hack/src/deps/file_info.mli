@@ -89,14 +89,28 @@ type pos =
   | File of name_type * Relative_path.t
 [@@deriving eq, show]
 
+module Decl_hash : sig
+  (** The OCaml equivalent of Rust's [hh24_types::DeclHash]. Values originate
+  from calling [hh_hash::hash] on an [oxidized::shallow_decl_defs::Decl] in Rust
+  and enter OCaml through the FFI or by loading a previously stored hash. *)
+  type t [@@deriving eq, show]
+
+  (** The only escape hatch for creating these values in OCaml. Only for
+  reading declaration hashes from the [DECL_HASH] column of the
+  [NAMING_SYMBOLS] table. *)
+  val from_naming_table : Int64.t -> t
+
+  val to_int64 : t -> Int64.t
+end
+
 type id = {
   pos: pos;
   name: string;
-  decl_hash: Int64.t option;
+  decl_hash: Decl_hash.t option;
 }
 [@@deriving eq, show]
 
-val pos_full : Pos.t * string * Int64.t option -> id
+val pos_full : Pos.t * string * Decl_hash.t option -> id
 
 val get_pos_filename : pos -> Relative_path.t
 

@@ -106,13 +106,27 @@ type pos =
   | File of name_type * Relative_path.t
 [@@deriving eq, show]
 
+module Decl_hash : sig
+  type t [@@deriving eq, show]
+
+  val from_naming_table : Int64.t -> t
+
+  val to_int64 : t -> Int64.t
+end = struct
+  type t = Int64.t [@@deriving eq, show]
+
+  let from_naming_table (hash : Int64.t) : t = hash
+
+  let to_int64 (hash : t) : Int64.t = hash
+end
+
 (** An id contains a pos, name and a optional decl hash. The decl hash is None
  * only in the case when we didn't compute it for performance reasons
  *)
 type id = {
   pos: pos;
   name: string;
-  decl_hash: Int64.t option;
+  decl_hash: Decl_hash.t option;
 }
 [@@deriving eq, show]
 
@@ -327,7 +341,8 @@ let ids_to_string (ids : ids) : string =
            kind
            (List.map l ~f:(fun id -> id.name) |> String.concat ~sep:",")
            (List.map l ~f:(fun id ->
-                Int64.to_string (Option.value id.decl_hash ~default:Int64.zero))
+                Option.value_map id.decl_hash ~default:"0" ~f:(fun hash ->
+                    Decl_hash.to_int64 hash |> Int64.to_string))
            |> String.concat ~sep:","))
   |> String.concat ~sep:";"
 

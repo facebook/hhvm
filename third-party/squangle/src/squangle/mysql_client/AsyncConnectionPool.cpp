@@ -6,6 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/synchronization/Baton.h>
@@ -46,7 +49,12 @@ AsyncConnectionPool::~AsyncConnectionPool() {
   VLOG(2) << "Connection pool dying";
 
   if (!shutdown_data_.rlock()->finished_shutdown) {
-    shutdown();
+    // shutdown() cancels every operation still queued, and cancelling one
+    // completes it, which runs the caller's connect callback.  This is a
+    // destructor, so that would end the process rather than the pool.
+    if (auto ew = folly::try_and_catch([&] { shutdown(); })) {
+      XLOG(ERR) << "Exception shutting down the connection pool: " << ew.what();
+    }
   }
 
   VLOG(2) << "Connection pool shutdown completed";

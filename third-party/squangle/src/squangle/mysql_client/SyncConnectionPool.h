@@ -46,13 +46,7 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
             std::move(mysql_client),
             std::move(pool_options)) {}
 
-  ~SyncConnectionPool() override {
-    VLOG(2) << "Connection pool dying";
-
-    shutdown();
-
-    VLOG(2) << "Connection pool shutdown completed";
-  }
+  ~SyncConnectionPool() override;
 
   SyncConnectionPool(const SyncConnectionPool&) = delete;
   SyncConnectionPool& operator=(const SyncConnectionPool&) = delete;

@@ -6,11 +6,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include "squangle/mysql_client/SyncConnectionPool.h"
 
 using namespace std::chrono_literals;
 
 namespace facebook::common::mysql_client {
+
+SyncConnectionPool::~SyncConnectionPool() {
+  VLOG(2) << "Connection pool dying";
+
+  // As in the async pool: shutdown() cancels queued operations, and cancelling
+  // one runs the caller's connect callback.
+  if (auto ew = folly::try_and_catch([&] { shutdown(); })) {
+    XLOG(ERR) << "Exception shutting down the connection pool: " << ew.what();
+  }
+
+  VLOG(2) << "Connection pool shutdown completed";
+}
 
 std::shared_ptr<SyncConnectionPool> SyncConnectionPool::makePool(
     std::shared_ptr<SyncMysqlClient> mysql_client,

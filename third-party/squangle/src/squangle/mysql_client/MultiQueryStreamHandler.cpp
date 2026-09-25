@@ -6,6 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
+
 #include <folly/coro/BlockingWait.h>
 
 #include "squangle/mysql_client/Connection.h"
@@ -28,8 +31,15 @@ StreamedQueryResult::StreamedQueryResult(
 
 StreamedQueryResult::~StreamedQueryResult() {
   if (!final_data_) {
-    // Consume any left over data
-    drain();
+    // Consume any left over data.  Guarded here rather than in drain(), which
+    // numAffectedRows() and its neighbours also call and which should keep
+    // reporting failure to them: draining reads the remaining rows off the wire
+    // through drainCurrentResult(), a pure virtual the handler supplies, and
+    // this is a destructor.
+    if (auto ew = folly::try_and_catch([&] { drain(); })) {
+      XLOG_EVERY_MS(ERR, 1000)
+          << "Exception draining an abandoned streamed result: " << ew.what();
+    }
   }
 }
 

@@ -823,7 +823,11 @@ def files_with_ext(files: List[str], ext: str) -> List[str]:
 
 
 def list_test_files(
-    root: str, disabled_ext: str, test_ext: str, include_directories: bool
+    root: str,
+    disabled_ext: str,
+    test_ext: str,
+    include_directories: bool,
+    allow_missing: bool = False,
 ) -> List[str]:
     if os.path.isfile(root):
         if root.endswith(test_ext):
@@ -844,12 +848,18 @@ def list_test_files(
                         disabled_ext,
                         test_ext,
                         include_directories,
+                        # Concurrent test runs write output through temporary
+                        # files in this directory. Such a file can disappear
+                        # between os.listdir() above and this recursive call.
+                        allow_missing=True,
                     )
                 )
         return result
     elif os.path.islink(root):
         # Some editors create broken symlinks as part of their locking scheme,
         # so ignore those.
+        return []
+    elif allow_missing and not os.path.lexists(root):
         return []
     else:
         raise Exception("Could not find test file or directory at %s" % root)

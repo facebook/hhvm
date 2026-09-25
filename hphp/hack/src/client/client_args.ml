@@ -325,10 +325,9 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let set_log_to_file x = log_to_file := Some x in
   let add_multi f =
     let files =
-      (try Sys_utils.read_file f with
+      (try In_channel.read_all f with
       | Sys_error message ->
         raise (Arg.Bad ("could not read --multi file: " ^ message)))
-      |> Bytes.to_string
       |> String.strip
       |> String.split ~on:'\n'
     in

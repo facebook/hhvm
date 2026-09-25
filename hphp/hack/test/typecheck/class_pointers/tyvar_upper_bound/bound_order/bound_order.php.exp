@@ -1,0 +1,12 @@
+ERROR: File "bound_order.php", line 24, characters 3-8:
+It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
+  File "bound_order.php", line 22, characters 38-45:
+  Definition is here
+ERROR: File "bound_order.php", line 29, characters 3-8:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "bound_order.php", line 10, characters 15-22:
+  Definition is here
+ERROR: File "bound_order.php", line 34, characters 3-8:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "bound_order.php", line 14, characters 32-39:
+  Definition is here

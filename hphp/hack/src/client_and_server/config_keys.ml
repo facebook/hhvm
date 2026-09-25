@@ -95,6 +95,10 @@ module Hhconfig = struct
 
   let class_pointer_array_write_keys = key "class_pointer_array_write_keys"
 
+  let class_pointer_tyvar_lower_bound = key "class_pointer_tyvar_lower_bound"
+
+  let class_pointer_tyvar_upper_bound = key "class_pointer_tyvar_upper_bound"
+
   let class_pointer_ban_class_array_key =
     key "class_pointer_ban_class_array_key"
 

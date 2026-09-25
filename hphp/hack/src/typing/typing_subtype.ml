@@ -11554,11 +11554,94 @@ end = struct
     in
     (env, prop)
 
+  let rec is_stringish_upper_bound ~level env ty =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tclass ((_, name), _, [])
+      when level >= 1 && String.equal name SN.Classes.cString ->
+      (env, true)
+    | Tprim Nast.Tarraykey when level >= 2 -> (env, true)
+    | Tclass ((_, name), _, [])
+      when level >= 3
+           && (String.equal name SN.Classes.cStringish
+              || String.equal name SN.Classes.cXHPChild) ->
+      (env, true)
+    | Toption ty when level >= 4 -> is_stringish_upper_bound ~level env ty
+    | Tunion tyl when level >= 5 ->
+      List.fold tyl ~init:(env, false) ~f:(fun (env, found) ty ->
+          if found then
+            (env, true)
+          else
+            is_stringish_upper_bound ~level env ty)
+    | _ -> (env, false)
+
+  let maybe_widen_class_pointer_bound env var ty_sub =
+    let level =
+      Typechecker_options.tco_class_pointer_tyvar_lower_bound
+        (Env.get_tcopt env)
+    in
+    if level < 1 then
+      (env, ty_sub)
+    else
+      let (env, widen) =
+        ITySet.fold
+          (fun upper_bound (env, found) ->
+            if found then
+              (env, true)
+            else
+              match upper_bound with
+              | LoclType ty -> is_stringish_upper_bound ~level env ty
+              | ConstraintType _ -> (env, false))
+          (Env.get_tyvar_upper_bounds env var)
+          (env, false)
+      in
+      if widen then
+        Typing_class_pointers.coerce_to_name ~level:1 env ty_sub
+      else
+        (env, ty_sub)
+
+  let rec maybe_widen_lower_bounds_for_stringish
+      ~is_dynamic_aware
+      (env, prop)
+      (r_sup, var)
+      ty_super
+      (on_error : Typing_error.Reasons_callback.t option) =
+    let level =
+      Typechecker_options.tco_class_pointer_tyvar_upper_bound
+        (Env.get_tcopt env)
+    in
+    if level < 1 then
+      (env, prop)
+    else
+      let (env, widen) = is_stringish_upper_bound ~level env ty_super in
+      if not widen then
+        (env, prop)
+      else
+        ITySet.fold
+          (fun lower_bound (env, prop) ->
+            match lower_bound with
+            | LoclType ty ->
+              let (env, widened_ty) =
+                Typing_class_pointers.coerce_to_name ~level:1 env ty
+              in
+              if Typing_defs.equal_locl_ty ty widened_ty then
+                (env, prop)
+              else
+                add_tyvar_lower_bound_and_close
+                  ~is_dynamic_aware
+                  (env, prop)
+                  (r_sup, var)
+                  widened_ty
+                  on_error
+            | ConstraintType _ -> (env, prop))
+          (Env.get_tyvar_lower_bounds env var)
+          (env, prop)
+
   (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
      * so if we already have tyl <: var, then check that for each ty_sub
      * in tyl we have ty_sub <: ty.
   *)
-  let add_tyvar_upper_bound_and_close
+  and add_tyvar_upper_bound_and_close
       ~is_dynamic_aware
       (env, prop)
       (r_sub, var)
@@ -11574,6 +11657,14 @@ end = struct
     if ITySet.mem (LoclType ty_super) upper_bounds_before then
       valid env
     else
+      let (env, prop) =
+        maybe_widen_lower_bounds_for_stringish
+          ~is_dynamic_aware
+          (env, prop)
+          (r_sub, var)
+          ty_super
+          on_error
+      in
       let env =
         Env.add_tyvar_upper_bound_and_update_variances
           ~intersect:(Subtype_simplify.try_intersect_i ~ignore_tyvars:true env)
@@ -11653,12 +11744,13 @@ end = struct
    * (so if var <: ty1,...,tyn then assert ty <: tyi for each tyi), using
    * simplify_subtype to produce a subtype proposition.
    *)
-  let add_tyvar_lower_bound_and_close
+  and add_tyvar_lower_bound_and_close
       ~is_dynamic_aware
       (env, prop)
       (r_sup, var)
       ty_sub
       (on_error : Typing_error.Reasons_callback.t option) =
+    let (env, ty_sub) = maybe_widen_class_pointer_bound env var ty_sub in
     let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
     (* If the type is already in the lower bounds of the type variable, then we
        already know that this subtype assertion is valid. *)

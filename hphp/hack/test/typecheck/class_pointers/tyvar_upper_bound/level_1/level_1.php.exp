@@ -1,0 +1,8 @@
+ERROR: File "level_1.php", line 29, characters 3-9:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_1.php", line 9, characters 36-43:
+  Definition is here
+ERROR: File "level_1.php", line 33, characters 3-11:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_1.php", line 17, characters 38-45:
+  Definition is here

@@ -319,6 +319,12 @@ let tco_class_pointer_array_literal_keys t =
 let tco_class_pointer_array_write_keys t =
   t.Global_options.tco_class_pointer_array_write_keys
 
+let tco_class_pointer_tyvar_lower_bound t =
+  t.Global_options.tco_class_pointer_tyvar_lower_bound
+
+let tco_class_pointer_tyvar_upper_bound t =
+  t.Global_options.tco_class_pointer_tyvar_upper_bound
+
 let disallow_specialized_function_refs t =
   t.Global_options.tco_disallow_specialized_function_refs
 

@@ -1,0 +1,36 @@
+File "transitivity.php", line 24, characters 3-56:
+  (class<TransitivityC>, class<TransitivityC>)
+File "transitivity.php", line 25, characters 3-56:
+  (classname<TransitivityC>, classname<TransitivityC>)
+ERROR: File "transitivity.php", line 24, characters 11-21:
+A `where` type constraint is violated here (Typing[4323])
+  File "transitivity.php", line 7, characters 10-20:
+  This is the method with `where` type constraints
+  File "transitivity.php", line 7, characters 22-22:
+  `T` is a constrained type parameter
+  File "transitivity.php", line 7, characters 30-49:
+  This type constraint is violated
+  File "transitivity.php", line 9, characters 33-52:
+  Expected `class<TransitivityC>`
+  File "transitivity.php", line 7, characters 30-49:
+  But got `string`
+  File "transitivity.php", line 7, characters 30-49:
+    by the definition of `classname`
+  File "transitivity.php", line 7, characters 30-49:
+    by the definition of `typename`
+ERROR: File "transitivity.php", line 25, characters 11-21:
+A `where` type constraint is violated here (Typing[4323])
+  File "transitivity.php", line 13, characters 10-20:
+  This is the method with `where` type constraints
+  File "transitivity.php", line 13, characters 22-22:
+  `T` is a constrained type parameter
+  File "transitivity.php", line 13, characters 30-49:
+  This type constraint is violated
+  File "transitivity.php", line 15, characters 46-65:
+  Expected `class<TransitivityC>`
+  File "transitivity.php", line 13, characters 30-49:
+  But got `string`
+  File "transitivity.php", line 13, characters 30-49:
+    by the definition of `classname`
+  File "transitivity.php", line 13, characters 30-49:
+    by the definition of `typename`

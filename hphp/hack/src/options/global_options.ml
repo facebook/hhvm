@@ -211,6 +211,8 @@ type t = {
   class_pointer_ban_class_array_key: bool;
   tco_class_pointer_array_literal_keys: int;
   tco_class_pointer_array_write_keys: int;
+  tco_class_pointer_tyvar_lower_bound: int;
+  tco_class_pointer_tyvar_upper_bound: int;
   tco_disallow_specialized_function_refs: bool;
   tco_permits_bypassing_visibility: string list;
   tco_tests_bypass_visibility_static_properties: bool;
@@ -333,6 +335,8 @@ let default =
     class_pointer_ban_class_array_key = false;
     tco_class_pointer_array_literal_keys = 0;
     tco_class_pointer_array_write_keys = 0;
+    tco_class_pointer_tyvar_lower_bound = 0;
+    tco_class_pointer_tyvar_upper_bound = 0;
     tco_disallow_specialized_function_refs = false;
     tco_permits_bypassing_visibility = [];
     tco_tests_bypass_visibility_static_properties = false;
@@ -452,6 +456,8 @@ let set
     ?class_pointer_ban_class_array_key
     ?tco_class_pointer_array_literal_keys
     ?tco_class_pointer_array_write_keys
+    ?tco_class_pointer_tyvar_lower_bound
+    ?tco_class_pointer_tyvar_upper_bound
     ?tco_disallow_specialized_function_refs
     ?tco_permits_bypassing_visibility
     ?tco_tests_bypass_visibility_static_properties
@@ -790,6 +796,14 @@ let set
       setting
         tco_class_pointer_array_write_keys
         options.tco_class_pointer_array_write_keys;
+    tco_class_pointer_tyvar_lower_bound =
+      setting
+        tco_class_pointer_tyvar_lower_bound
+        options.tco_class_pointer_tyvar_lower_bound;
+    tco_class_pointer_tyvar_upper_bound =
+      setting
+        tco_class_pointer_tyvar_upper_bound
+        options.tco_class_pointer_tyvar_upper_bound;
     tco_disallow_specialized_function_refs =
       setting
         tco_disallow_specialized_function_refs

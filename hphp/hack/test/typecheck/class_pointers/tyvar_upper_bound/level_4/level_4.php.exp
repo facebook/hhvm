@@ -1,0 +1,16 @@
+ERROR: File "level_4.php", line 43, characters 3-18:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_4.php", line 9, characters 45-52:
+  Definition is here
+ERROR: File "level_4.php", line 45, characters 3-20:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_4.php", line 13, characters 47-54:
+  Definition is here
+ERROR: File "level_4.php", line 47, characters 3-21:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_4.php", line 19, characters 48-55:
+  Definition is here
+ERROR: File "level_4.php", line 49, characters 3-21:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_4.php", line 25, characters 48-55:
+  Definition is here

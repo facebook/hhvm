@@ -655,6 +655,14 @@ impl HhConfig {
                 "class_pointer_array_write_keys",
                 default.tco_class_pointer_array_write_keys,
             )?,
+            tco_class_pointer_tyvar_lower_bound: hhconfig.get_int_or(
+                "class_pointer_tyvar_lower_bound",
+                default.tco_class_pointer_tyvar_lower_bound,
+            )?,
+            tco_class_pointer_tyvar_upper_bound: hhconfig.get_int_or(
+                "class_pointer_tyvar_upper_bound",
+                default.tco_class_pointer_tyvar_upper_bound,
+            )?,
             tco_disallow_specialized_function_refs: hhconfig.get_bool_or(
                 "disallow_specialized_function_refs",
                 default.tco_disallow_specialized_function_refs,

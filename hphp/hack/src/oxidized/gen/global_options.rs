@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<21f0662a6b0a091b79e4f6e53a323f51>>
+// @generated SignedSource<<6f6655372a8860cd318152d1e87befe1>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -435,6 +435,10 @@ pub struct GlobalOptions {
     pub tco_class_pointer_array_literal_keys: isize,
     /// Infer classname<T> for the index of $d[$c] = 1 when $c: class<T>
     pub tco_class_pointer_array_write_keys: isize,
+    /// widen class<T> lower bounds for string-ish type variables
+    pub tco_class_pointer_tyvar_lower_bound: isize,
+    /// added string-ish constraints promout existing class<T> bounds
+    pub tco_class_pointer_tyvar_upper_bound: isize,
     pub tco_disallow_specialized_function_refs: bool,
     pub tco_permits_bypassing_visibility: Vec<String>,
     pub tco_tests_bypass_visibility_static_properties: bool,

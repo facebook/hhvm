@@ -1,0 +1,28 @@
+ERROR: File "tyvar_lower_bound.php", line 39, characters 3-9:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 33, characters 31-38:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 41, characters 3-20:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 37, characters 15-26:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 45, characters 3-11:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 33, characters 31-38:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 47, characters 3-16:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 33, characters 31-38:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 56, characters 3-8:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 54, characters 26-45:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 61, characters 3-9:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 59, characters 33-44:
+  Definition is here
+ERROR: File "tyvar_lower_bound.php", line 66, characters 3-9:
+It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
+  File "tyvar_lower_bound.php", line 64, characters 29-36:
+  Definition is here

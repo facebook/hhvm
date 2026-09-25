@@ -90,6 +90,10 @@ module Hhconfig : sig
 
   val class_pointer_array_write_keys : string
 
+  val class_pointer_tyvar_lower_bound : string
+
+  val class_pointer_tyvar_upper_bound : string
+
   val class_pointer_ban_class_array_key : string
 
   val class_pointer_ban_classname_static_meth : string

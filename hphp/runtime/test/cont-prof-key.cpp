@@ -71,6 +71,7 @@ TestUnit makeTestUnit() {
     SHA1{"1111111111111111111111111111111111111111"},
     nullptr,
     RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
     false
   );
   if (!emitter || emitter->m_fatalUnit) return nullptr;

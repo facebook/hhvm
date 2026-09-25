@@ -496,9 +496,13 @@ pub enum ParseDepGraphEdgeError {
 pub struct FileDeclsHash(u64);
 u64_hash_wrapper_impls! { FileDeclsHash }
 
-/// The position-insensitive hash of a decl (the type signature of a toplevel
-/// declaration), as it appears in the naming table. Used in the NAMING_FUNS,
-/// NAMING_CONSTS, and NAMING_TYPES tables (in the near future).
+/// The position-sensitive hash of a decl (the type signature of a toplevel
+/// declaration), as it appears in the naming table. Stored in the `DECL_HASH`
+/// column of the `NAMING_SYMBOLS` and `NAMING_SYMBOLS_OVERFLOW` tables.
+///
+/// Invariant: Each value of this type originates from calling `hh_hash::hash` on a
+/// value of type `oxidized::shallow_decl_defs::Decl` (but may be subsequently
+/// deserialized, loaded from the naming table, etc).
 #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]

@@ -28,8 +28,14 @@ namespace HPHP {
 struct VirtualFileSystemWriter {
 
   explicit VirtualFileSystemWriter(const std::string&);
+  VirtualFileSystemWriter(
+    const std::string&,
+    const std::string& basePath,
+    const std::vector<std::string>& changedPaths
+  );
   ~VirtualFileSystemWriter();
 
+  bool contains(const std::string& path) const;
   bool addFile(const std::string& relPath, const std::string& realPath);
   bool addFileWithoutContent(const std::string& relPath);
 

@@ -20,6 +20,8 @@
 #include <filesystem>
 #include <memory>
 #include <set>
+#include <stdexcept>
+#include <string_view>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <utility>
@@ -135,6 +137,80 @@ void Package::addSourceFile(const std::string& fileName) {
   m_filesToParse.emplace(std::move(canonFileName), true);
 }
 
+namespace {
+
+std::string_view normalizedDirectory(std::string_view path) {
+  while (!path.empty() && FileUtil::isDirSeparator(path.front())) {
+    path.remove_prefix(1);
+  }
+  while (!path.empty() && FileUtil::isDirSeparator(path.back())) {
+    path.remove_suffix(1);
+  }
+  return path;
+}
+
+bool isPHPSource(std::string_view path) {
+  return path.ends_with(".php") ||
+    path.ends_with(".hack") ||
+    path.ends_with(".hackpartial") ||
+    path.ends_with(".hh");
+}
+
+bool isIgnoredScannedPath(std::string_view path) {
+  for (size_t start = 0;;) {
+    auto const end = path.find('/', start);
+    auto const component = path.substr(start, end - start);
+    if (component.empty() || component.front() == '.') return true;
+    if (end == std::string_view::npos) {
+      return component == "tags" ||
+        component.ends_with('~') ||
+        component.ends_with('#');
+    }
+    start = end + 1;
+  }
+}
+
+bool isScannedStaticFile(
+    std::string_view path,
+    const std::set<std::string>& directories,
+    const hphp_fast_string_set* excludedDirectories = nullptr) {
+  if (isPHPSource(path)) return false;
+
+  for (auto const& directory : directories) {
+    auto const normalized = normalizedDirectory(directory);
+    std::string_view relative;
+    if (normalized.empty()) {
+      relative = path;
+    } else if (path.starts_with(normalized) &&
+               path.size() > normalized.size() &&
+               FileUtil::isDirSeparator(path[normalized.size()])) {
+      relative = path.substr(normalized.size() + 1);
+    } else {
+      continue;
+    }
+    if (isIgnoredScannedPath(relative)) continue;
+
+    if (excludedDirectories) {
+      auto const minimumPrefix = normalized.empty() ? 0 : normalized.size() + 1;
+      auto excluded = false;
+      for (auto slash = path.find('/'); slash != std::string_view::npos;
+           slash = path.find('/', slash + 1)) {
+        if (slash + 1 >= minimumPrefix &&
+            excludedDirectories->contains(
+              std::string{path.substr(0, slash + 1)})) {
+          excluded = true;
+          break;
+        }
+      }
+      if (excluded) continue;
+    }
+    return true;
+  }
+  return false;
+}
+
+}
+
 void Package::writeStaticFilesToVirtualFileSystem(const std::string& path) {
   assertx(!m_vfsWriter);
   m_vfsWriter = std::make_unique<VirtualFileSystemWriter>(path);
@@ -203,6 +279,59 @@ void Package::finishVirtualFileSystem() {
   }
   writer.finish();
   m_vfsWriter.reset();
+}
+
+void Package::writeIncrementalVirtualFileSystem(
+    const std::string& path,
+    const std::string& basePath,
+    const std::vector<std::string>& changedPaths) {
+  VirtualFileSystemWriter writer{path, basePath, changedPaths};
+
+  auto const addCurrentFile = [&](const std::string& relativePath,
+                                  const std::string& fullPath) {
+    if (writer.contains(relativePath)) return;
+
+    if (!std::filesystem::is_regular_file(fullPath)) return;
+    if (!writer.addFile(relativePath, fullPath)) {
+      throw std::runtime_error(fmt::format(
+        "Unable to read {} while building an incremental file cache",
+        fullPath
+      ));
+    }
+    Logger::Verbose("saving %s", fullPath.c_str());
+  };
+
+  auto const isConfiguredStatic = [&](const std::string& path,
+                                      const std::string& fullPath) {
+    if (m_extraStaticFiles.contains(path)) return true;
+    if (isScannedStaticFile(path, m_staticDirectories)) return true;
+    if (!isScannedStaticFile(
+          path, m_directories, &Option::PackageExcludeStaticDirs)) {
+      return false;
+    }
+    return !Option::PackageExcludeStaticFiles.contains(path) &&
+      !Option::IsFileExcluded(
+        fullPath,
+        Option::PackageExcludeStaticPatterns
+      );
+  };
+
+  for (auto const& path : changedPaths) {
+    auto const fullPath = m_root + path;
+    if (isConfiguredStatic(path, fullPath)) {
+      addCurrentFile(path, fullPath);
+    }
+  }
+
+  for (auto const& [path, fullPath] : m_discoveredStaticFiles) {
+    if (fullPath.empty()) {
+      writer.addFileWithoutContent(path);
+    } else {
+      addCurrentFile(path, fullPath);
+    }
+  }
+
+  writer.finish();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

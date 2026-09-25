@@ -68,6 +68,7 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <future>
 
 #include <folly/portability/SysStat.h>
 #include <fmt/core.h>
@@ -96,7 +97,9 @@ struct CompilerOptions {
   std::string inputList;
   bool buildIncrementalBase{false};
   std::string incrementalBaseRepo;
+  std::string incrementalBaseFileCache;
   std::string incrementalInvalidatedList;
+  std::string incrementalFileCacheInvalidatedList;
   std::vector<std::string> dirs;
   std::vector<std::string> excludeDirs;
   std::vector<std::string> excludeFiles;
@@ -517,9 +520,16 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "include RepoFile metadata required by --incremental-base-repo")
     ("incremental-base-repo", value<std::string>(&po.incrementalBaseRepo),
      "merge explicit inputs with this base repo; requires --input-list")
+    ("incremental-base-file-cache",
+     value<std::string>(&po.incrementalBaseFileCache),
+     "reuse unchanged files from this file cache; requires --file-cache, "
+     "--incremental-base-repo, and --input-list")
     ("incremental-invalidated-list",
      value<std::string>(&po.incrementalInvalidatedList),
      "file containing base repo paths to replace or remove")
+    ("incremental-file-cache-invalidated-list",
+     value<std::string>(&po.incrementalFileCacheInvalidatedList),
+     "file containing changed file-cache paths to add, replace, or remove")
     ("dir", value<std::vector<std::string>>(&po.dirs)->composing(),
      "directories containing all input files")
     ("exclude-dir",
@@ -651,8 +661,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   po.buildIncrementalBase = vm.contains("build-incremental-base");
   auto const hasIncrementalRepo = vm.contains("incremental-base-repo");
+  auto const hasIncrementalFileCache =
+    vm.contains("incremental-base-file-cache");
   auto const hasRepoInvalidatedList =
     vm.contains("incremental-invalidated-list");
+  auto const hasFileCacheInvalidatedList =
+    vm.contains("incremental-file-cache-invalidated-list");
   if (hasIncrementalRepo != hasRepoInvalidatedList) {
     Logger::Error(
       "Error in command line: incremental-base-repo and "
@@ -661,8 +675,35 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     std::cout << desc << "\n";
     return -1;
   }
+  if (hasIncrementalFileCache != hasFileCacheInvalidatedList) {
+    Logger::Error(
+      "Error in command line: incremental-base-file-cache and "
+      "incremental-file-cache-invalidated-list must be specified together."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
+  if (hasIncrementalFileCache && !hasIncrementalRepo) {
+    Logger::Error(
+      "Error in command line: incremental-base-file-cache requires "
+      "incremental-base-repo."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
+  if (hasIncrementalFileCache && !po.staticPatterns.empty()) {
+    Logger::Error(
+      "Error in command line: incremental-base-file-cache does not support "
+      "static-pattern."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
   if ((hasIncrementalRepo && po.incrementalBaseRepo.empty()) ||
-      (hasRepoInvalidatedList && po.incrementalInvalidatedList.empty())) {
+      (hasIncrementalFileCache && po.incrementalBaseFileCache.empty()) ||
+      (hasRepoInvalidatedList && po.incrementalInvalidatedList.empty()) ||
+      (hasFileCacheInvalidatedList &&
+       po.incrementalFileCacheInvalidatedList.empty())) {
     Logger::Error(
       "Error in command line: incremental paths cannot be empty."
     );
@@ -673,6 +714,14 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
       (!vm.contains("input-list") || po.inputList.empty())) {
     Logger::Error(
       "Error in command line: incremental bases require a non-empty input-list."
+    );
+    std::cout << desc << "\n";
+    return -1;
+  }
+  if (hasIncrementalFileCache && po.filecache.empty()) {
+    Logger::Error(
+      "Error in command line: incremental-base-file-cache requires "
+      "file-cache."
     );
     std::cout << desc << "\n";
     return -1;
@@ -1140,6 +1189,7 @@ bool process(CompilerOptions &po) {
   SystemLib::keepRegisteredUnitEmitters(false);
 
   auto const incrementalRepo = !po.incrementalBaseRepo.empty();
+  auto const incrementalFileCache = !po.incrementalBaseFileCache.empty();
   auto const enableUnitEmitterReuse =
     incrementalRepo || po.buildIncrementalBase;
   if (enableUnitEmitterReuse &&
@@ -1190,13 +1240,11 @@ bool process(CompilerOptions &po) {
   }
   unlink(outputFile.c_str());
 
-  auto const readInvalidatedPaths = [](const std::string& listPath,
-                                       std::vector<std::string>& paths) {
+  auto const readPaths = [](const std::string& listPath,
+                            std::vector<std::string>& paths) {
     std::ifstream input{listPath};
     if (!input) {
-      Logger::FError(
-        "Unable to read incremental invalidation list {}", listPath
-      );
+      Logger::FError("Unable to read path list {}", listPath);
       return false;
     }
 
@@ -1205,9 +1253,7 @@ bool process(CompilerOptions &po) {
       if (!path.empty()) paths.push_back(std::move(path));
     }
     if (input.bad()) {
-      Logger::FError(
-        "Error reading incremental invalidation list {}", listPath
-      );
+      Logger::FError("Error reading path list {}", listPath);
       return false;
     }
     return true;
@@ -1215,9 +1261,28 @@ bool process(CompilerOptions &po) {
 
   std::vector<std::string> repoInvalidatedPaths;
   if (incrementalRepo &&
-      !readInvalidatedPaths(
-        po.incrementalInvalidatedList, repoInvalidatedPaths)) {
+      !readPaths(po.incrementalInvalidatedList, repoInvalidatedPaths)) {
     return false;
+  }
+  std::vector<std::string> fileCacheInvalidatedPaths;
+  if (incrementalFileCache) {
+    if (!readPaths(
+          po.incrementalFileCacheInvalidatedList,
+          fileCacheInvalidatedPaths)) {
+      return false;
+    }
+    std::vector<std::string> inputPaths;
+    if (!readPaths(po.inputList, inputPaths)) return false;
+    for (auto& path : inputPaths) {
+      if (FileUtil::isDirSeparator(path.back())) {
+        Logger::FError(
+          "Directory input {} is not supported with incremental file-cache reuse",
+          path
+        );
+        return false;
+      }
+      fileCacheInvalidatedPaths.push_back(std::move(path));
+    }
   }
 
   auto executor = std::make_unique<TicketExecutor>(
@@ -1724,7 +1789,9 @@ bool process(CompilerOptions &po) {
     Timer emitTimer(Timer::WallTime, "emit");
     if (!addInputsToPackage(*package, po)) return false;
 
-    if (!po.filecache.empty() && !po.forceFileCacheSerial) {
+    if (!incrementalFileCache &&
+        !po.filecache.empty() &&
+        !po.forceFileCacheSerial) {
       staticFileCache = std::thread{
         [&] {
           Timer _{Timer::WallTime, "saving static files to file cache..."};
@@ -1757,9 +1824,15 @@ bool process(CompilerOptions &po) {
   // appending the discovered files below.
   if (staticFileCache.joinable()) staticFileCache.join();
 
-  std::thread fileCache{
+  if (incrementalFileCache) {
+    for (auto const& dir : po.dirs) package->addDirectory(dir);
+  }
+
+  auto fileCache = std::async(
+    std::launch::async,
     [&, package = std::move(package), parsedFiles = std::move(parsedFiles),
-      index = std::move(index)] () mutable {
+     index = std::move(index),
+     invalidated = std::move(fileCacheInvalidatedPaths)] () mutable {
       {
         Timer t{Timer::WallTime, "dropping unused files"};
         parsedFiles.reset();
@@ -1772,17 +1845,25 @@ bool process(CompilerOptions &po) {
       if (po.filecache.empty()) return;
       Timer _{Timer::WallTime, "saving file cache..."};
       HphpSessionAndThread session{Treadmill::SessionKind::CompilerEmit};
-      if (po.forceFileCacheSerial) {
-        package->writeStaticFilesToVirtualFileSystem(po.filecache);
+      if (incrementalFileCache) {
+        package->writeIncrementalVirtualFileSystem(
+          po.filecache,
+          po.incrementalBaseFileCache,
+          invalidated
+        );
+      } else {
+        if (po.forceFileCacheSerial) {
+          package->writeStaticFilesToVirtualFileSystem(po.filecache);
+        }
+        package->finishVirtualFileSystem();
       }
-      package->finishVirtualFileSystem();
       struct stat sb;
       stat(po.filecache.c_str(), &sb);
       Logger::Info("%" PRId64" MB %s saved",
                    (int64_t)sb.st_size/(1024*1024), po.filecache.c_str());
     }
-  };
-  SCOPE_EXIT { fileCache.join(); };
+  );
+  auto const joinFileCache = [&] { fileCache.get(); };
 
   std::thread asyncDispose;
   SCOPE_EXIT { if (asyncDispose.joinable()) asyncDispose.join(); };
@@ -1826,7 +1907,9 @@ bool process(CompilerOptions &po) {
   if (!Cfg::Eval::UseHHBBC) {
     logSample();
     dispose(std::move(executor), std::move(client));
-    return finish();
+    auto const result = finish();
+    joinFileCache();
+    return result;
   }
 
   // We don't need these anymore, and since they can consume a lot of
@@ -1869,6 +1952,7 @@ bool process(CompilerOptions &po) {
   finish();
   sample.setInt("hhbbc_micros", timer.getMicroSeconds());
   logSample();
+  joinFileCache();
   return true;
 }
 

@@ -18,9 +18,11 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/blob-writer.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/trace.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <folly/FileUtil.h>
@@ -76,6 +78,19 @@ enum class Indexes {
   PATH_TO_ENTRY,
 };
 
+using VFSReader = Blob::Reader<Chunks, Indexes>;
+
+bool containsPathOrAncestor(
+    const hphp_fast_string_set& paths,
+    std::string path) {
+  for (;;) {
+    if (paths.contains(path)) return true;
+    auto const slash = path.rfind('/');
+    if (slash == std::string::npos) return false;
+    path.resize(slash);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -93,7 +108,72 @@ VirtualFileSystemWriter::VirtualFileSystemWriter(const std::string& path)
   m_data->header(path, kMagic, kCurrentVersion);
 }
 
+VirtualFileSystemWriter::VirtualFileSystemWriter(
+    const std::string& path,
+    const std::string& basePath,
+    const std::vector<std::string>& changedPaths)
+  : m_data{std::make_unique<Data>()} {
+  hphp_fast_string_set invalidated;
+  invalidated.reserve(changedPaths.size());
+  for (auto const& changedPath : changedPaths) {
+    invalidated.emplace(changedPath);
+  }
+
+  VFSReader base;
+  base.init(basePath, kMagic, kCurrentVersion, Blob::ReadMode::MMap);
+  base.check(Chunks::FILES, kFileSizeLimit);
+  base.check(Chunks::DIRECTORIES, kDirectorySizeLimit);
+  base.check(Indexes::PATH_TO_ENTRY, kIndexSizeLimit, kIndexDataSizeLimit);
+
+  auto const index =
+    base.hashMapIndex<Blob::CaseSensitiveCompare>(Indexes::PATH_TO_ENTRY);
+  auto entries = base.fd.readBlob(index.dataBounds.offset, index.dataBounds.size);
+  m_data->files.reserve(index.size);
+  while (entries.decoder.remaining() > 0) {
+    std::string entryPath;
+    VirtualFileSystem::Entry entry;
+    entries.decoder(entryPath)(entry);
+    if (entry.isDirectory() || containsPathOrAncestor(invalidated, entryPath)) {
+      continue;
+    }
+    m_data->files.emplace(std::move(entryPath), std::move(entry));
+  }
+
+  m_data->header(path, kMagic, kCurrentVersion);
+
+  std::vector<VirtualFileSystem::Entry*> retained;
+  retained.reserve(m_data->files.size());
+  for (auto& pair : m_data->files) {
+    auto& entry = pair.second;
+    if (entry.isRegularFile() && entry.location.size > 0) {
+      retained.push_back(&entry);
+    }
+  }
+  std::sort(retained.begin(), retained.end(), [](auto left, auto right) {
+    return left->location.offset < right->location.offset;
+  });
+
+  constexpr size_t kBufferSize = 1 << 20;
+  std::vector<char> buffer(kBufferSize);
+  auto const filesOffset = base.offsets.get(Chunks::FILES);
+  for (auto const entry : retained) {
+    auto const inputOffset = entry->location.offset;
+    auto const outputOffset = m_data->sizes.get(Chunks::FILES);
+    for (size_t copied = 0; copied < entry->location.size;) {
+      auto const size = std::min(buffer.size(), entry->location.size - copied);
+      base.fd.pread(buffer.data(), size, filesOffset + inputOffset + copied);
+      m_data->write(Chunks::FILES, buffer.data(), size);
+      copied += size;
+    }
+    entry->location.offset = outputOffset;
+  }
+}
+
 VirtualFileSystemWriter::~VirtualFileSystemWriter() {}
+
+bool VirtualFileSystemWriter::contains(const std::string& path) const {
+  return m_data->files.contains(path);
+}
 
 bool VirtualFileSystemWriter::addFile(const std::string& relPath,
                                       const std::string& realPath) {

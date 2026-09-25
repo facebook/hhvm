@@ -141,6 +141,10 @@ struct Package {
   // after emit() has completed and after writeStaticFilesToVirtualFileSystem()
   // has been joined; the two share a writer which is not thread-safe.
   void finishVirtualFileSystem();
+  void writeIncrementalVirtualFileSystem(
+      const std::string& path,
+      const std::string& basePath,
+      const std::vector<std::string>& changedPaths);
 
   // Configuration for index & parse workers. This should contain any runtime
   // options which can affect HackC (or the interface to it).

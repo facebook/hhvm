@@ -340,4 +340,74 @@ TEST_F(TestVirtualFileSystem, listDirectory) {
   }
 }
 
+TEST_F(TestVirtualFileSystem, incremental) {
+  auto const dir = makeTempDir();
+  auto const basePath = dir + "base.hvfs";
+  auto const outputPath = dir + "output.hvfs";
+
+  {
+    auto writer = VirtualFileSystemWriter(basePath);
+    EXPECT_TRUE(writer.addFile("keep.dat", makeTempFile(kFooContent)));
+    EXPECT_TRUE(writer.addFile("changed.dat", makeTempFile(kFooContent)));
+    EXPECT_TRUE(writer.addFile("deleted.dat", makeTempFile(kFooContent)));
+    EXPECT_TRUE(writer.addFile("tree/old.dat", makeTempFile(kFooContent)));
+    writer.finish();
+  }
+
+  {
+    auto writer = VirtualFileSystemWriter(
+      outputPath,
+      basePath,
+      std::vector<std::string>{"changed.dat", "deleted.dat", "tree"}
+    );
+    EXPECT_TRUE(writer.contains("keep.dat"));
+    EXPECT_TRUE(writer.addFile("changed.dat", makeTempFile(kBarContent)));
+    EXPECT_TRUE(writer.addFile("tree/new.dat", makeTempFile(kBarContent)));
+    writer.finish();
+  }
+
+  EXPECT_EQ(unlink(basePath.c_str()), 0);
+  auto output = VirtualFileSystem(outputPath, "/var/www/");
+  expect_same_content(output.content("keep.dat"), kFooContent);
+  expect_same_content(output.content("changed.dat"), kBarContent);
+  expect_same_content(output.content("tree/new.dat"), kBarContent);
+  EXPECT_FALSE(output.exists("deleted.dat"));
+  EXPECT_FALSE(output.exists("tree/old.dat"));
+  expect_eq_ignore_order(
+    output.listDirectory(""),
+    std::vector<std::string>{"keep.dat", "changed.dat", "tree"}
+  );
+}
+
+TEST_F(TestVirtualFileSystem, incrementalHandlesFileDirectoryTransitions) {
+  auto const dir = makeTempDir();
+  auto const basePath = dir + "base.hvfs";
+  auto const outputPath = dir + "output.hvfs";
+
+  {
+    auto writer = VirtualFileSystemWriter(basePath);
+    EXPECT_TRUE(writer.addFile("to-directory", makeTempFile(kFooContent)));
+    EXPECT_TRUE(writer.addFile("to-file/old.dat", makeTempFile(kFooContent)));
+    writer.finish();
+  }
+
+  {
+    auto writer = VirtualFileSystemWriter(
+      outputPath,
+      basePath,
+      std::vector<std::string>{"to-directory", "to-file"}
+    );
+    EXPECT_TRUE(writer.addFile(
+      "to-directory/new.dat", makeTempFile(kBarContent)));
+    EXPECT_TRUE(writer.addFileWithoutContent("to-file"));
+    writer.finish();
+  }
+
+  auto output = VirtualFileSystem(outputPath, "/var/www/");
+  EXPECT_TRUE(output.dirExists("to-directory"));
+  EXPECT_TRUE(output.fileExists("to-file"));
+  EXPECT_FALSE(output.exists("to-file/old.dat"));
+  expect_same_content(output.content("to-directory/new.dat"), kBarContent);
+}
+
 }

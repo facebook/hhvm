@@ -668,7 +668,6 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   let insert ~name_kind ~dep_ctor (symbols_inserted, errors, checksum) file_info
       =
     let { File_info.pos = _; name; decl_hash } = file_info in
-    let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64
     in
@@ -679,22 +678,30 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
       |> Typing_deps.Dep.make
       |> Typing_deps.Dep.to_int64
     in
-    let checksum : Int64.t =
-      checksum_addremove checksum ~symbol:hash ~decl_hash ~path:relative_path
-    in
-    match
-      SymbolTable.insert
-        db
-        stmt_cache
-        ~name
-        ~name_kind
-        ~hash
-        ~canon_hash
-        ~file_info_id
-        ~decl_hash
-    with
-    | Ok () -> (symbols_inserted + 1, errors, checksum)
-    | Error error -> (symbols_inserted, error :: errors, checksum)
+    match decl_hash with
+    | None ->
+      let origin_exception =
+        Exception.wrap (Failure "Missing declaration hash")
+      in
+      let error = { canon_hash; hash; name_kind; name; origin_exception } in
+      (symbols_inserted, error :: errors, checksum)
+    | Some decl_hash ->
+      let checksum : Int64.t =
+        checksum_addremove checksum ~symbol:hash ~decl_hash ~path:relative_path
+      in
+      (match
+         SymbolTable.insert
+           db
+           stmt_cache
+           ~name
+           ~name_kind
+           ~hash
+           ~canon_hash
+           ~file_info_id
+           ~decl_hash
+       with
+      | Ok () -> (symbols_inserted + 1, errors, checksum)
+      | Error error -> (symbols_inserted, error :: errors, checksum))
   in
   let results = (0, [], checksum) in
   let results =

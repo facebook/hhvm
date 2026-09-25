@@ -642,6 +642,84 @@ let test_context_changes_typedefs () =
         "Old typedef in context should NOT be accessible by non-canon name \\BaZ";
       ())
 
+(** Fresh and incremental saves report every missing declaration hash, omit those
+symbols from storage and the checksum, and still accept an explicit zero hash. *)
+let test_save_decl_hashes () =
+  Tempfile.with_real_tempdir (fun root ->
+      Relative_path.set_path_prefix Relative_path.Root root;
+      let path = Relative_path.from_root ~suffix:"hashes.php" in
+      let make_id name decl_hash =
+        File_info.{ pos = File (Fun, path); name; decl_hash }
+      in
+      let valid = make_id "\\zero" (Some Int64.zero) in
+      let missing_before = make_id "\\missing_before" None in
+      let missing_after = make_id "\\missing_after" None in
+      let file_info funs =
+        File_info.
+          {
+            empty_t with
+            position_free_decl_hash = Some Int64.zero;
+            ids = { empty_ids with funs };
+          }
+      in
+      let db_name name = Path.concat root name |> Path.to_string in
+      let save name funs =
+        Naming_sqlite.save_file_infos
+          (db_name name)
+          (Relative_path.Map.singleton path (file_info funs))
+          ~base_content_version:"test"
+      in
+      (* The valid-only database supplies the expected checksum and the baseline
+         whose symbol is replaced by the incremental save. *)
+      let baseline = save "baseline.sqlite" [valid] in
+      let funs = [missing_before; valid; missing_after] in
+      let full = save "full.sqlite" funs in
+      let incremental =
+        Naming_sqlite.copy_and_update
+          ~existing_db:(Naming_sqlite.Db_path (db_name "baseline.sqlite"))
+          ~new_db:(Naming_sqlite.Db_path (db_name "incremental.sqlite"))
+          Naming_sqlite.
+            {
+              file_deltas =
+                Relative_path.Map.singleton path (Modified (file_info funs));
+              base_content_version = "test";
+            }
+      in
+      List.iter
+        [("full.sqlite", full); ("incremental.sqlite", incremental)]
+        ~f:(fun (filename, result) ->
+          Asserter.String_asserter.assert_list_equals
+            ["\\missing_after"; "\\missing_before"]
+            (List.map result.Naming_sqlite.errors ~f:(fun error ->
+                 error.Naming_sqlite.name)
+            |> List.sort ~compare:String.compare)
+            "Each missing declaration hash should produce an insertion error";
+          Asserter.Int_asserter.assert_equals
+            1
+            result.Naming_sqlite.symbols_added
+            "Only the symbol with a declaration hash should be inserted";
+          Asserter.String_asserter.assert_equals
+            (Int64.to_string baseline.Naming_sqlite.checksum)
+            (Int64.to_string result.Naming_sqlite.checksum)
+            "Rejected symbols should not contribute to the checksum";
+          let db_path = Naming_sqlite.Db_path (db_name filename) in
+          List.iter [missing_before; missing_after] ~f:(fun id ->
+              Asserter.Relative_path_asserter.assert_option_equals
+                None
+                (Typing_deps.Dep.Fun id.File_info.name
+                |> Typing_deps.Dep.make
+                |> Naming_sqlite.get_path_by_64bit_dep db_path
+                |> Option.map ~f:fst)
+                "A symbol without a declaration hash should not be stored");
+          Asserter.String_asserter.assert_option_equals
+            (Some "0")
+            (Typing_deps.Dep.Fun valid.File_info.name
+            |> Typing_deps.Dep.make
+            |> Naming_sqlite.get_decl_hash_by_64bit_dep db_path)
+            "An explicit zero declaration hash should be preserved");
+      Naming_sqlite.free_db_cache ();
+      true)
+
 let test_naming_table_hash () =
   List.iter [0; -1; 1; 200; -200; Int.max_value; Int.min_value] ~f:(fun i ->
       let dep = Typing_deps.Dep.of_debug_string (string_of_int i) in
@@ -868,6 +946,7 @@ let () =
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
       ("test_context_changes_modules", test_context_changes_modules);
+      ("test_save_decl_hashes", test_save_decl_hashes);
       ("test_naming_table_hash", test_naming_table_hash);
       ( "test_naming_table_query_by_dep_hash",
         test_naming_table_query_by_dep_hash );

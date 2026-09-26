@@ -1,0 +1,4 @@
+ERROR: File "parent_instance_explicit_reified_targs_bad.php", line 11, characters 12-41:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+  File "parent_instance_explicit_reified_targs_bad.php", line 4, characters 37-37:
+  Definition is here

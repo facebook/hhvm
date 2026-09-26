@@ -17,25 +17,50 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
+#include <utility>
 #include <vector>
 
-#include <folly/Range.h>
-
 #include "hphp/runtime/vm/jit/cont-prof-key.h"
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
 
 namespace HPHP::jit {
 
-std::optional<std::vector<uint8_t>>
-serializeContProfFuncKey(const ContProfFuncKey&);
+struct ContProfRecordHeader {
+  ContProfFuncKey funcKey{};
+  uint64_t capturedAtMs{0};
 
-std::optional<ContProfFuncKey> deserializeContProfFuncKey(folly::ByteRange);
+  bool operator==(const ContProfRecordHeader&) const = default;
+};
 
-std::optional<std::vector<uint8_t>>
-serializeContProfProfileRecord(const ContProfProfileRecord&);
+enum class ContProfStartKind : uint8_t {
+  FuncEntry = 1,
+  NamedParamsFuncEntry = 2,
+};
 
-std::optional<ContProfProfileRecord>
-deserializeContProfProfileRecord(folly::ByteRange);
+struct ContProfProfileTranslation {
+  ContProfStartKind startKind{ContProfStartKind::FuncEntry};
+  uint32_t numEntryArgs{0};
+  uint32_t regionLength{0};
+  uint64_t executionCount{0};
+
+  auto startKey() const {
+    return std::pair{startKind, numEntryArgs};
+  }
+
+  bool operator==(const ContProfProfileTranslation&) const = default;
+};
+
+/* The initial format is intentionally entry-only. */
+struct ContProfProfileRecord {
+  ContProfRecordHeader header{};
+  std::vector<ContProfProfileTranslation> translations;
+
+  uint64_t functionExecutions() const;
+  bool hasCanonicalTranslationOrder() const;
+
+  bool operator==(const ContProfProfileRecord&) const = default;
+};
+
+/* Validate the record's structural and canonical-ordering invariants. */
+bool isValidContProfProfileRecord(const ContProfProfileRecord&);
 
 }

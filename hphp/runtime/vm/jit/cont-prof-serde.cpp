@@ -31,6 +31,16 @@ namespace HPHP::jit {
 
 namespace {
 
+using EncodedStartKind = uint8_t;
+using EncodedEntryArgs = uint32_t;
+using EncodedRegionLength = uint32_t;
+using EncodedExecutionCount = uint64_t;
+
+constexpr size_t kEncodedProfileTranslationSize =
+  sizeof(EncodedStartKind) +
+  sizeof(EncodedEntryArgs) +
+  sizeof(EncodedRegionLength) +
+  sizeof(EncodedExecutionCount);
 using EncodedSHA1 = std::array<uint32_t, SHA1::kQNumWords>;
 static_assert(sizeof(EncodedSHA1) == SHA1::kStrLen / 2);
 
@@ -129,7 +139,8 @@ private:
 
 }
 
-std::optional<std::vector<uint8_t>> serializeContProfFuncKey(const ContProfFuncKey& key) {
+std::optional<std::vector<uint8_t>>
+serializeContProfFuncKey(const ContProfFuncKey& key) {
   if (!isValidContProfFuncKey(key)) return std::nullopt;
 
   auto const encodedBytecodeUnitHash = encodeSHA1(key.bytecodeUnitHash);
@@ -179,6 +190,95 @@ deserializeContProfFuncKey(folly::ByteRange encoded) {
   if (!isValidContProfFuncKey(key)) return std::nullopt;
 
   return key;
+}
+
+std::optional<std::vector<uint8_t>>
+serializeContProfProfileRecord(const ContProfProfileRecord& record) {
+  if (!isValidContProfProfileRecord(record)) return std::nullopt;
+
+  auto const funcKey = serializeContProfFuncKey(record.header.funcKey);
+  if (!funcKey) return std::nullopt;
+
+  Writer writer;
+  writer.writeValue(funcKey->size());
+  writer.writeBytes(funcKey->data(), funcKey->size());
+  writer.writeValue(record.header.capturedAtMs);
+  writer.writeValue(record.translations.size());
+
+  for (auto const& translation : record.translations) {
+    writer.writeValue(static_cast<EncodedStartKind>(translation.startKind));
+    writer.writeValue(translation.numEntryArgs);
+    writer.writeValue(translation.regionLength);
+    writer.writeValue(translation.executionCount);
+  }
+
+  return std::move(writer).takeBytes();
+}
+
+std::optional<ContProfProfileRecord>
+deserializeContProfProfileRecord(folly::ByteRange encoded) {
+  Reader reader{encoded};
+
+  size_t funcKeySize{};
+  if (!reader.readValue(funcKeySize) || funcKeySize == 0 ||
+      funcKeySize > reader.remaining()) {
+    return std::nullopt;
+  }
+
+  std::vector<uint8_t> funcKeyBytes(funcKeySize);
+  if (!reader.readBytes(funcKeyBytes.data(), funcKeyBytes.size())) {
+    return std::nullopt;
+  }
+
+  auto funcKey = deserializeContProfFuncKey(
+    folly::ByteRange{funcKeyBytes.data(), funcKeyBytes.size()}
+  );
+  if (!funcKey) return std::nullopt;
+
+  ContProfProfileRecord record{};
+  record.header.funcKey = std::move(*funcKey);
+
+  size_t translationCount{};
+  if (!reader.readValue(record.header.capturedAtMs) ||
+      !reader.readValue(translationCount) || translationCount == 0 ||
+      translationCount > reader.remaining() / kEncodedProfileTranslationSize) {
+    return std::nullopt;
+  }
+
+  record.translations.reserve(translationCount);
+
+  for (size_t i = 0; i < translationCount; ++i) {
+    ContProfProfileTranslation translation{};
+    EncodedStartKind startKind{};
+
+    if (!reader.readValue(startKind) ||
+        !reader.readValue(translation.numEntryArgs) ||
+        !reader.readValue(translation.regionLength) ||
+        !reader.readValue(translation.executionCount)) {
+      return std::nullopt;
+    }
+
+    switch (startKind) {
+      case static_cast<EncodedStartKind>(ContProfStartKind::FuncEntry):
+        translation.startKind = ContProfStartKind::FuncEntry;
+        break;
+      case static_cast<EncodedStartKind>(
+          ContProfStartKind::NamedParamsFuncEntry):
+        translation.startKind =
+          ContProfStartKind::NamedParamsFuncEntry;
+        break;
+      default:
+        return std::nullopt;
+    }
+
+    record.translations.push_back(translation);
+  }
+
+  if (reader.remaining() != 0 || !isValidContProfProfileRecord(record)) {
+    return std::nullopt;
+  }
+
+  return record;
 }
 
 }

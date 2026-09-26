@@ -297,21 +297,27 @@ let enforcement_at_pos
         match decl_ft_opt with
         | None -> acc
         | Some ft ->
-          let res = self#match_arg_to_param env ft.Typing_defs.ft_params args in
+          let res = self#match_arg_to_param env ft args in
           self#plus res acc
 
-      method private match_arg_to_param env params args =
-        match (params, args) with
-        | (param :: params_rest, arg :: args_rest) ->
+      method private match_arg_to_param env ft args =
+        let (preceding_args, args_at_cursor) =
+          List.split_while args ~f:(fun arg ->
+              let (_, pos, _) = Aast_utils.arg_to_expr arg in
+              not (self#cursor_inside pos))
+        in
+        match args_at_cursor with
+        | [] -> None
+        | arg :: _ ->
+          let param =
+            List.nth ft.Typing_defs.ft_params (List.length preceding_args)
+          in
           let (_, arg_pos, _) = Aast_utils.arg_to_expr arg in
-          if self#cursor_inside arg_pos then
-            self#compute_enforcement_result
-              env
-              arg_pos
-              param.Typing_defs.fp_type
-          else
-            self#match_arg_to_param env params_rest args_rest
-        | _ -> None
+          Option.bind param ~f:(fun param ->
+              self#compute_enforcement_result
+                env
+                arg_pos
+                param.Typing_defs.fp_type)
 
       (* --- Return statements and type parameter tracking --- *)
       val mutable current_is_async : bool = false
@@ -463,9 +469,7 @@ let enforcement_at_pos
           (match ft_opt with
           | None -> acc
           | Some ft ->
-            let res =
-              self#match_arg_to_param env ft.Typing_defs.ft_params args
-            in
+            let res = self#match_arg_to_param env ft args in
             self#plus res acc)
         (* --- Property assignment RHS ---
            $this->prop: enclosing class is syntactically determined.

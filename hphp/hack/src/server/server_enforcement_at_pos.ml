@@ -309,8 +309,45 @@ let enforcement_at_pos
         match args_at_cursor with
         | [] -> None
         | arg :: _ ->
+          let params = Typing_defs.ft_params_without_named_variadic ft in
           let param =
-            List.nth ft.Typing_defs.ft_params (List.length preceding_args)
+            match Typing_defs.Named_params.name_of_arg arg with
+            | Some name ->
+              let used_names =
+                List.filter_map
+                  preceding_args
+                  ~f:Typing_defs.Named_params.name_of_arg
+              in
+              let named_params =
+                List.filter_map params ~f:(fun param ->
+                    Option.map
+                      (Typing_defs.Named_params.name_of_named_param param)
+                      ~f:(fun name -> (name, param)))
+              in
+              let named_param =
+                if List.mem used_names name ~equal:String.equal then
+                  None
+                else
+                  List.Assoc.find named_params name ~equal:String.equal
+              in
+              Option.first_some
+                named_param
+                (Typing_defs.ft_named_variadic_param ft)
+            | None ->
+              let index =
+                List.count preceding_args ~f:(fun arg ->
+                    Option.is_none (Typing_defs.Named_params.name_of_arg arg))
+              in
+              let positional_params =
+                List.filter params ~f:(fun param ->
+                    not (Typing_defs.get_fp_is_named param))
+              in
+              (match List.nth positional_params index with
+              | Some _ as param -> param
+              | None ->
+                Option.filter (List.last positional_params) ~f:(fun param ->
+                    Typing_defs.get_ft_variadic ft
+                    && not (Typing_defs.get_fp_splat param)))
           in
           let (_, arg_pos, _) = Aast_utils.arg_to_expr arg in
           Option.bind param ~f:(fun param ->

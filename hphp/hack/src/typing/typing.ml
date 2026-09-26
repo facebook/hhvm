@@ -5871,7 +5871,7 @@ end = struct
             ~nullsafe:None
             ~obj_pos:pos
             ~coerce_from_ty:None
-            ~explicit_targs:[]
+            ~explicit_targs
             ~class_id:e1_
             ~member_id:m
             ~on_error:Typing_error.Callback.unify_error

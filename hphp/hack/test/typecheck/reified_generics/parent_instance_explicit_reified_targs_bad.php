@@ -1,5 +1,7 @@
 <?hh
 
+//
+
 class ReifiedParent {
   public function passThrough<reify T>(T $value): T {
     return $value;

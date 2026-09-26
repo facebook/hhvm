@@ -53,6 +53,9 @@ struct ContProfFuncKey {
   std::strong_ordering operator<=>(const ContProfFuncKey&) const = default;
 };
 
+/*
+ * Validate the key's structural invariants without resolving it.
+ */
 bool isValidContProfFuncKey(const ContProfFuncKey&);
 
 /*

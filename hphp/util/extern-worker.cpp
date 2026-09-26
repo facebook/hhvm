@@ -36,6 +36,7 @@
 
 #include <filesystem>
 #include <mutex>
+#include <stack>
 
 namespace fs = std::filesystem;
 

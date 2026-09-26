@@ -213,6 +213,62 @@ module For_test : sig
       t
   end
 
+  module Dependency : sig
+    (** How evaluating a bound reaches another spread element. *)
+    type kind =
+      | Direct_upper
+      | Indirect_upper
+      | Nested_upper
+      | Nested_lower
+
+    type t
+
+    val source : t -> Splat_elem.t
+
+    val target : t -> Splat_elem.t
+
+    val kind : t -> kind
+
+    val position : t -> Pos_or_decl.t
+  end
+
+  module Cycle_info : sig
+    type t
+
+    val members : t -> Splat_elem.Set.t
+
+    val dependencies : t -> Dependency.t list
+  end
+
+  module Component : sig
+    (** One strongly connected component. Only direct reciprocal type-parameter
+        constraints prove equality; every other cyclic component is unsupported. *)
+    type t =
+      | Acyclic of Splat_elem.t
+      | Proven_equal of Cycle_info.t
+      | Unsupported_cycle of Cycle_info.t
+
+    val members : t -> Splat_elem.Set.t
+  end
+
+  module Analysis : sig
+    type t
+
+    (** Strongly connected components in dependency order. *)
+    val components : t -> Component.t list
+
+    val dependencies : t -> Dependency.t list
+
+    (** Tarjan visits each reachable node and classified edge exactly once. *)
+    val node_visits : t -> int
+
+    val edge_visits : t -> int
+  end
+
+  (** Analyze reachable dependencies without changing the corner traversal. *)
+  val analyze_dependencies :
+    env -> Splat_elem.Set.t -> Typing_reason.t -> Analysis.t
+
   (** Everything reachable by following bounds from the given elements. *)
   val closure : env -> Splat_elem.Set.t -> Typing_reason.t -> Splat_elem.Set.t
 

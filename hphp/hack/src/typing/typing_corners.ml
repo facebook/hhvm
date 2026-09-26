@@ -690,9 +690,78 @@ end = struct
     (env, lower, upper)
 end
 
-(* -- Dependency graph over type parameters --------------------------------- *)
+(* -- Dependency graph over spread elements -------------------------------- *)
 
 module Dependency_graph = struct
+  module Dependency = struct
+    type kind =
+      | Direct_upper
+      | Indirect_upper
+      | Nested_upper
+      | Nested_lower
+
+    type t = {
+      source: Splat_elem.t;
+      target: Splat_elem.t;
+      kind: kind;
+      position: Pos_or_decl.t;
+    }
+
+    let make ~source ~target ~kind =
+      { source; target; kind; position = get_pos target }
+
+    let source dependency = dependency.source
+
+    let target dependency = dependency.target
+
+    let kind dependency = dependency.kind
+
+    let position dependency = dependency.position
+  end
+
+  module Cycle_info = struct
+    type t = {
+      members: Splat_elem.Set.t;
+      dependencies: Dependency.t list;
+    }
+
+    let make ~members ~dependencies = { members; dependencies }
+
+    let members info = info.members
+
+    let dependencies info = info.dependencies
+  end
+
+  module Component = struct
+    type t =
+      | Acyclic of Splat_elem.t
+      | Proven_equal of Cycle_info.t
+      | Unsupported_cycle of Cycle_info.t
+
+    let members = function
+      | Acyclic member -> Splat_elem.Set.singleton member
+      | Proven_equal info
+      | Unsupported_cycle info ->
+        Cycle_info.members info
+  end
+
+  module Analysis = struct
+    type t = {
+      components: Component.t list;
+      dependencies: Dependency.t list;
+      node_visits: int;
+      edge_visits: int;
+    }
+
+    let components analysis = analysis.components
+
+    let dependencies analysis = analysis.dependencies
+
+    let node_visits analysis = analysis.node_visits
+
+    let edge_visits analysis = analysis.edge_visits
+  end
+
   let type_params_in_upper_bound cache env name r =
     let (env, bound_ty) = Bounds.combined_upper_bound cache env name r in
     let (env, bound_ty) = Typing_env.expand_type env bound_ty in
@@ -768,6 +837,204 @@ module Dependency_graph = struct
         aux (delta @ rest) (Splat_elem.Set.add next acc)
     in
     aux (Splat_elem.Set.elements names) Splat_elem.Set.empty
+
+  let upper_bounds cache env source r =
+    (* Combining upper bounds into an intersection would erase which generic
+       references were direct constraints, which is needed to prove equality. *)
+    match get_node source with
+    | Tgeneric name ->
+      let bounds = Typing_env.get_upper_bounds env name in
+      if Typing_set.is_empty bounds then
+        (env, [])
+      else
+        (env, Typing_set.elements bounds)
+    | Tnewtype _ ->
+      let (env, bound) = Bounds.combined_upper_bound cache env source r in
+      (env, [bound])
+    | _ -> (env, [])
+
+  let classified_upper_dependencies cache env source r =
+    let rec indirect_dependencies env ty =
+      let (env, ty) = Bounds.strip_supportdyn env ty in
+      match get_node ty with
+      | Tgeneric _ -> (env, [(ty, Dependency.Indirect_upper)])
+      | Tnewtype (name, _, _)
+        when not (String.equal name Naming_special_names.Classes.cSupportDyn) ->
+        (env, [(ty, Dependency.Indirect_upper)])
+      | Tshape shape_ty ->
+        let (env, _err, normalized) =
+          Typing_shape_normalize.Row.normalize ~on_error:None r shape_ty env
+        in
+        Typing_shape_normalize.Row.fold_normalized
+          normalized
+          ~row:(fun row ->
+            ( env,
+              List.map (Row.spread_elements row) ~f:(fun target ->
+                  (target, Dependency.Nested_upper)) ))
+          ~union:(indirect_dependencies_of_tys env)
+          ~intersection:(indirect_dependencies_of_tys env)
+      | Tunion tys
+      | Tintersection tys ->
+        indirect_dependencies_of_tys env tys
+      | _ -> (env, [])
+    and indirect_dependencies_of_tys env tys =
+      let (env, dependencies) =
+        List.fold_map tys ~init:env ~f:indirect_dependencies
+      in
+      (env, List.concat dependencies)
+    in
+    let dependencies_of_bound env bound =
+      let (env, bound) = Typing_env.expand_type env bound in
+      match get_node bound with
+      | Tgeneric _ -> (env, [(bound, Dependency.Direct_upper)])
+      | Tnewtype (name, _, _)
+        when not (String.equal name Naming_special_names.Classes.cSupportDyn) ->
+        (env, [(bound, Dependency.Direct_upper)])
+      | _ ->
+        let (env, bound) = Bounds.strip_supportdyn env bound in
+        let (env, supers) = Bounds.concrete_supertypes cache env bound in
+        indirect_dependencies_of_tys env supers
+    in
+    let (env, bounds) = upper_bounds cache env source r in
+    let (_env, dependencies) =
+      List.fold_map bounds ~init:env ~f:dependencies_of_bound
+    in
+    List.concat dependencies
+
+  let dependencies_from cache env source r =
+    let upper = classified_upper_dependencies cache env source r in
+    let lower =
+      List.map (type_params_in_lower_bound cache env source r) ~f:(fun target ->
+          (target, Dependency.Nested_lower))
+    in
+    List.map (upper @ lower) ~f:(fun (target, kind) ->
+        Dependency.make ~source ~target ~kind)
+
+  let analyze cache env roots r =
+    let next_index = ref 0 in
+    let indices = ref Splat_elem.Map.empty in
+    let lowlinks = ref Splat_elem.Map.empty in
+    let stack = ref [] in
+    let on_stack = ref Splat_elem.Set.empty in
+    let components = ref [] in
+    let dependencies = ref [] in
+    let node_visits = ref 0 in
+    let edge_visits = ref 0 in
+    let find map key = Option.value_exn (Splat_elem.Map.find_opt key !map) in
+    let rec visit source =
+      let index = !next_index in
+      Int.incr next_index;
+      Int.incr node_visits;
+      indices := Splat_elem.Map.add source index !indices;
+      lowlinks := Splat_elem.Map.add source index !lowlinks;
+      stack := source :: !stack;
+      on_stack := Splat_elem.Set.add source !on_stack;
+      let outgoing = dependencies_from cache env source r in
+      dependencies := List.rev_append outgoing !dependencies;
+      List.iter outgoing ~f:(fun dependency ->
+          Int.incr edge_visits;
+          let target = Dependency.target dependency in
+          if not (Splat_elem.Map.mem target !indices) then begin
+            visit target;
+            lowlinks :=
+              Splat_elem.Map.add
+                source
+                (Int.min (find lowlinks source) (find lowlinks target))
+                !lowlinks
+          end else if Splat_elem.Set.mem target !on_stack then
+            lowlinks :=
+              Splat_elem.Map.add
+                source
+                (Int.min (find lowlinks source) (find indices target))
+                !lowlinks);
+      if Int.equal (find lowlinks source) (find indices source) then begin
+        let rec pop members =
+          match !stack with
+          | [] -> failwith "empty stack while completing an SCC"
+          | member :: rest ->
+            stack := rest;
+            on_stack := Splat_elem.Set.remove member !on_stack;
+            let members = Splat_elem.Set.add member members in
+            if Int.equal (Splat_elem.compare member source) 0 then
+              members
+            else
+              pop members
+        in
+        components := pop Splat_elem.Set.empty :: !components
+      end
+    in
+    Splat_elem.Set.iter
+      (fun root -> if not (Splat_elem.Map.mem root !indices) then visit root)
+      roots;
+    (* Tarjan pops dependencies before their dependents; the accumulator
+       reverses that order. *)
+    let components = List.rev !components in
+    let dependencies = List.rev !dependencies in
+    let component_by_member =
+      List.foldi
+        components
+        ~init:Splat_elem.Map.empty
+        ~f:(fun index acc members ->
+          Splat_elem.Set.fold
+            (fun member acc -> Splat_elem.Map.add member index acc)
+            members
+            acc)
+    in
+    let internal_dependencies = Stdlib.Array.make (List.length components) [] in
+    List.iter dependencies ~f:(fun dependency ->
+        let source_component =
+          Splat_elem.Map.find (Dependency.source dependency) component_by_member
+        in
+        let target_component =
+          Splat_elem.Map.find (Dependency.target dependency) component_by_member
+        in
+        if Int.equal source_component target_component then
+          internal_dependencies.(source_component) <-
+            dependency :: internal_dependencies.(source_component));
+    let components =
+      List.mapi components ~f:(fun index members ->
+          let dependencies = List.rev internal_dependencies.(index) in
+          let is_self_dependency dependency =
+            Int.equal
+              (Splat_elem.compare
+                 (Dependency.source dependency)
+                 (Dependency.target dependency))
+              0
+          in
+          if
+            Int.equal (Splat_elem.Set.cardinal members) 1
+            && not (List.exists dependencies ~f:is_self_dependency)
+          then
+            Component.Acyclic (Splat_elem.Set.choose members)
+          else
+            let info = Cycle_info.make ~members ~dependencies in
+            let is_ty_param ty =
+              match get_node ty with
+              | Tgeneric _ -> true
+              | _ -> false
+            in
+            (* Strong connectivity through direct upper constraints proves
+               mutual subtyping. Other paths merely prove dependency. *)
+            if
+              Splat_elem.Set.for_all is_ty_param members
+              && List.for_all dependencies ~f:(fun dependency ->
+                     match Dependency.kind dependency with
+                     | Dependency.Direct_upper -> true
+                     | Dependency.Indirect_upper
+                     | Dependency.Nested_upper
+                     | Dependency.Nested_lower ->
+                       false)
+            then
+              Component.Proven_equal info
+            else
+              Component.Unsupported_cycle info)
+    in
+    {
+      Analysis.components;
+      dependencies;
+      node_visits = !node_visits;
+      edge_visits = !edge_visits;
+    }
 
   (* Topological sort of type parameters. A type parameter that appears in
      another's bound is assigned first; a cycle just skips the offending edge. *)
@@ -1210,6 +1477,13 @@ module For_test = struct
     | Lower_bottom
 
   module Masking = Masking
+  module Dependency = Dependency_graph.Dependency
+  module Cycle_info = Dependency_graph.Cycle_info
+  module Component = Dependency_graph.Component
+  module Analysis = Dependency_graph.Analysis
+
+  let analyze_dependencies env roots r =
+    Dependency_graph.analyze (Cache.create ()) env roots r
 
   let closure env names r =
     let cache = Cache.create () in

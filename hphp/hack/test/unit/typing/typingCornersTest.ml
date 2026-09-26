@@ -1223,6 +1223,188 @@ let a_cycle_still_orders_every_parameter_the_same_way _ =
            first
            again))
 
+let component_names component =
+  Typing_corners.Component.members component
+  |> Typing_corners.Splat_elem.Set.elements
+  |> names
+
+let sccs_preserve_partitions_and_dependency_order _ =
+  let a = tgeneric "A"
+  and b = tgeneric "B"
+  and c = tgeneric "C"
+  and equal_1 = tgeneric "Equal1"
+  and equal_2 = tgeneric "Equal2" in
+  let env = Env.add_upper_bound (dummy_env ()) "A" (splat [b]) in
+  let env = Env.add_upper_bound env "B" (splat [c]) in
+  let env = Env.add_upper_bound env "C" (splat [b]) in
+  let env = Env.add_upper_bound env "Equal1" open_shape in
+  let env = Env.add_upper_bound env "Equal1" equal_2 in
+  let env = Env.add_upper_bound env "Equal2" open_shape in
+  let env = Env.add_upper_bound env "Equal2" equal_1 in
+  let roots = Typing_corners.Splat_elem.Set.of_list [a; equal_1] in
+  let analysis = Typing_corners.analyze_dependencies env roots r in
+  let components = Typing_corners.Analysis.components analysis in
+  let partitions =
+    List.map components ~f:(fun component -> show (component_names component))
+    |> List.sort ~compare:String.compare
+  in
+  assert_equal
+    ~printer:(String.concat ~sep:";")
+    ["A"; "B,C"; "Equal1,Equal2"]
+    partitions;
+  let component_with name =
+    Option.value_exn
+      (List.find components ~f:(fun component ->
+           List.mem (component_names component) name ~equal:String.equal))
+  in
+  (match component_with "A" with
+  | Typing_corners.Component.Acyclic _ -> ()
+  | Typing_corners.Component.Proven_equal _
+  | Typing_corners.Component.Unsupported_cycle _ ->
+    assert_failure "A should form an acyclic component");
+  (match component_with "B" with
+  | Typing_corners.Component.Unsupported_cycle _ -> ()
+  | Typing_corners.Component.Acyclic _
+  | Typing_corners.Component.Proven_equal _ ->
+    assert_failure "a nested-spread cycle must not be classified as equality");
+  (match component_with "Equal1" with
+  | Typing_corners.Component.Proven_equal _ -> ()
+  | Typing_corners.Component.Acyclic _
+  | Typing_corners.Component.Unsupported_cycle _ ->
+    assert_failure "reciprocal direct bounds should prove equality");
+  let component_index member =
+    match
+      List.findi components ~f:(fun _ component ->
+          Typing_corners.Splat_elem.Set.mem
+            member
+            (Typing_corners.Component.members component))
+    with
+    | Some (index, _) -> index
+    | None -> assert_failure "dependency analysis omitted a reachable member"
+  in
+  List.iter
+    (Typing_corners.Analysis.dependencies analysis)
+    ~f:(fun dependency ->
+      let source = Typing_corners.Dependency.source dependency in
+      let target = Typing_corners.Dependency.target dependency in
+      let source_component = component_index source in
+      let target_component = component_index target in
+      if not (Int.equal source_component target_component) then
+        assert_bool
+          (Printf.sprintf
+             "%s's component occurs before the component it depends on (%s)"
+             (param_name source)
+             (param_name target))
+          (target_component < source_component))
+
+let dependencies_retain_their_kind_and_position _ =
+  let dependency_pos =
+    Pos.make_from_lnum_bol_offset
+      ~pos_file:(Relative_path.from_root ~suffix:"dependency.php")
+      ~pos_start:(3, 8, 10)
+      ~pos_end:(3, 8, 16)
+  in
+  let target = mk (Reason.witness dependency_pos, Tgeneric "Target") in
+  let env = Env.add_upper_bound (dummy_env ()) "Direct" target in
+  let env = Env.add_upper_bound env "NestedUpper" (splat [target]) in
+  let env = Env.add_lower_bound env "NestedLower" (splat [target]) in
+  let roots =
+    Typing_corners.Splat_elem.Set.of_list
+      [tgeneric "Direct"; tgeneric "NestedUpper"; tgeneric "NestedLower"]
+  in
+  let dependencies =
+    Typing_corners.analyze_dependencies env roots r
+    |> Typing_corners.Analysis.dependencies
+  in
+  let dependency_from source =
+    Option.value_exn
+      (List.find dependencies ~f:(fun dependency ->
+           String.equal
+             source
+             (param_name (Typing_corners.Dependency.source dependency))))
+  in
+  let check source expected_kind =
+    let dependency = dependency_from source in
+    assert_equal expected_kind (Typing_corners.Dependency.kind dependency);
+    assert_equal
+      (Pos_or_decl.of_raw_pos dependency_pos)
+      (Typing_corners.Dependency.position dependency)
+  in
+  check "Direct" Typing_corners.Dependency.Direct_upper;
+  check "NestedUpper" Typing_corners.Dependency.Nested_upper;
+  check "NestedLower" Typing_corners.Dependency.Nested_lower
+
+let classified_dependencies_match_existing_dependencies _ =
+  List.iter placements ~f:(fun place ->
+      List.iter [Upper_bound_on_t2; Lower_bound_on_t1] ~f:(fun written_as ->
+          let env =
+            set_up_bounds (dummy_env ()) written_as ~place:place.build
+          in
+          let roots =
+            Typing_corners.Splat_elem.Set.of_list [tgeneric "T1"; tgeneric "T2"]
+          in
+          let analysis = Typing_corners.analyze_dependencies env roots r in
+          let dependencies = Typing_corners.Analysis.dependencies analysis in
+          let reached = Typing_corners.closure env roots r in
+          Typing_corners.Splat_elem.Set.iter
+            (fun source ->
+              let expected =
+                Typing_corners.type_params_in_bounds env source r
+                |> Typing_corners.Splat_elem.Set.of_list
+              in
+              let actual =
+                List.filter_map dependencies ~f:(fun dependency ->
+                    if
+                      Int.equal
+                        (Typing_corners.Splat_elem.compare
+                           source
+                           (Typing_corners.Dependency.source dependency))
+                        0
+                    then
+                      Some (Typing_corners.Dependency.target dependency)
+                    else
+                      None)
+                |> Typing_corners.Splat_elem.Set.of_list
+              in
+              assert_bool
+                (Printf.sprintf
+                   "classified dependencies differ for %s in %s written as %s"
+                   (param_name source)
+                   place.descr
+                   (describe_written_as written_as))
+                (Typing_corners.Splat_elem.Set.equal expected actual))
+            reached))
+
+let scc_analysis_visits_each_node_and_edge_once _ =
+  let count = 18 in
+  let params =
+    List.map (List.range 0 count) ~f:(fun index ->
+        tgeneric (Printf.sprintf "Dense%02d" index))
+  in
+  let same left right =
+    Int.equal (Typing_corners.Splat_elem.compare left right) 0
+  in
+  let env =
+    List.fold params ~init:(dummy_env ()) ~f:(fun env source ->
+        let dependencies =
+          List.filter params ~f:(fun target -> not (same source target))
+        in
+        Env.add_upper_bound env (param_name source) (splat dependencies))
+  in
+  let roots = Typing_corners.Splat_elem.Set.singleton (List.hd_exn params) in
+  let analysis = Typing_corners.analyze_dependencies env roots r in
+  assert_equal count (Typing_corners.Analysis.node_visits analysis);
+  assert_equal
+    (count * (count - 1))
+    (Typing_corners.Analysis.edge_visits analysis);
+  match Typing_corners.Analysis.components analysis with
+  | [Typing_corners.Component.Unsupported_cycle info] ->
+    assert_equal
+      count
+      (Typing_corners.Splat_elem.Set.cardinal
+         (Typing_corners.Cycle_info.members info))
+  | _ -> assert_failure "the dense graph should form one unsupported SCC"
+
 (* == No label a check must cover is left out =================================
  *
  * The checks above all concern one label at a time, and the code they exercise
@@ -1574,6 +1756,14 @@ let () =
          >:: independent_roots_keep_the_assignment_frontier_narrow;
          "a_cycle_still_orders_every_parameter_the_same_way"
          >:: a_cycle_still_orders_every_parameter_the_same_way;
+         "sccs_preserve_partitions_and_dependency_order"
+         >:: sccs_preserve_partitions_and_dependency_order;
+         "dependencies_retain_their_kind_and_position"
+         >:: dependencies_retain_their_kind_and_position;
+         "classified_dependencies_match_existing_dependencies"
+         >:: classified_dependencies_match_existing_dependencies;
+         "scc_analysis_visits_each_node_and_edge_once"
+         >:: scc_analysis_visits_each_node_and_edge_once;
          "every_label_that_matters_is_covered"
          >:: every_label_that_matters_is_covered;
          "nominal_newtype_keys_ignore_stored_bounds"

@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/static-literals.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/zend-functions.h"
 
@@ -140,6 +141,11 @@ StringData* StringData::MakePersistentAt(folly::StringPiece sl, MemBlock range) 
   StringData* sd = reinterpret_cast<StringData*>(
     reinterpret_cast<uintptr_t>(range.ptr) + extra
   );
+  // is_static_string() answers purely from the address, so the allocator
+  // AllocatePersistent() picked has to agree with it: low_malloc() puts true
+  // statics below kMidArenaMaxAddr, AllocShared() puts uncounted strings in
+  // the high arena above it.
+  always_assert(is_static_string(sd) == trueStatic);
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   auto const count = trueStatic ? StaticValue : SharedValue;

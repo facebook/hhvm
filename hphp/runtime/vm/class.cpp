@@ -47,6 +47,7 @@
 
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
@@ -344,6 +345,9 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
   );
+  // ActRec::hasClass() and Closure::hasClass() decide that m_thisUnsafe holds a
+  // Class* rather than an ObjectData* purely from the address being low.
+  always_assert(is_low_mem(classPtr));
   try {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);

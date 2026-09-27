@@ -91,6 +91,11 @@ void SparseHeap::flush() {
 
 HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   auto finish = [&](void* p) {
+    // is_static_string() and ActRec::hasThis()/hasClass() tell request-heap
+    // pointers apart from low-memory ones by address alone. Unlike the low
+    // arena, the arenas backing slabs can fall back to ordinary mmap, so
+    // nothing structurally keeps them above kMidArenaMaxAddr.
+    always_assert(!is_low_mem(p));
     // expand m_slab_range to include this new slab
     if (!m_slab_range.size) {
       m_slab_range = {p, kSlabSize};
@@ -152,6 +157,7 @@ void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
   }
   MemoryManager::g_threadAllocated += cap;
 #endif
+  always_assert(!is_low_mem(n));
   m_bigs.insert(n, cap);
   stats.mm_udebt -= cap;
   stats.malloc_cap += cap;

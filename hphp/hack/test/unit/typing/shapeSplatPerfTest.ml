@@ -101,9 +101,8 @@ let flat_open n =
   List.init n ~f:(fun i ->
       shape_ty (simple ~unknown:tmixed [(Printf.sprintf "f%d" i, field tint)]))
 
-(* As [flat_open], but every field is OPTIONAL. An incoming open row widens the
-   accumulator's optional fields, so unlike [flat_open] the walk does real work:
-   a [Typing_union.union] per accumulated field per element. *)
+(* As [flat_open], but every field is optional. Each open row semantically
+   widens all earlier optional fields, exercising deferred widening. *)
 let flat_open_optional n =
   List.init n ~f:(fun i ->
       shape_ty
@@ -263,8 +262,6 @@ let bench_with ~sizes ~samples run name build =
 let bench ?(sizes = sizes) name build =
   bench_with ~sizes ~samples:timing_samples run_merge name build
 
-let report_bench name build = bench_with ~sizes ~samples:1 run_merge name build
-
 (* Perf assertions are inherently noisy, so the threshold is deliberately slack:
    it is here to catch a return to quadratic scaling, not to police constant
    factors. A scenario that is genuinely linear fits near 1.0 and stays well
@@ -277,27 +274,23 @@ let assert_subquadratic name exponent =
        exponent)
     (Float.is_finite exponent && Float.(exponent < 1.5))
 
-let perf_same_field _ =
+let assert_scaling name build =
   assert_subquadratic
-    "flat_same_field"
-    (bench "flat_same_field" flat_same_field)
+    name
+    (bench ~sizes:[1024; 2048; 4096; 8192; 16384] name build)
 
-let perf_generics _ =
-  assert_subquadratic "flat_generics" (bench "flat_generics" flat_generics)
+let perf_same_field _ = assert_scaling "flat_same_field" flat_same_field
 
-let perf_wide_pair _ =
-  assert_subquadratic "wide_pair" (bench "wide_pair" wide_pair)
+let perf_generics _ = assert_scaling "flat_generics" flat_generics
 
-(* This benchmark remains report-only until its scaling assertion uses the
-   larger input sizes introduced later in the optimization stack. *)
-let report_disjoint_fields _ =
-  let (_ : float) = report_bench "flat_disjoint" flat_disjoint in
-  ()
+let perf_wide_pair _ = assert_scaling "wide_pair" wide_pair
 
-let perf_open _ =
-  assert_subquadratic
-    "flat_open"
-    (bench ~sizes:[256; 512; 1024; 2048; 4096] "flat_open" flat_open)
+let perf_disjoint_fields _ = assert_scaling "flat_disjoint" flat_disjoint
+
+let perf_open _ = assert_scaling "flat_open" flat_open
+
+let perf_open_optional _ =
+  assert_scaling "flat_open_optional" flat_open_optional
 
 let perf_closed_then_one_open _ =
   assert_subquadratic
@@ -310,34 +303,17 @@ let perf_left_nested _ =
 let perf_right_nested _ =
   assert_subquadratic "right_nested" (bench "right_nested" right_nested)
 
-(* Every incoming open row widens every accumulated optional field, so avoiding
-   quadratic work requires deferring those unions rather than indexing keys. *)
-let report_flat_open_optional _ =
-  let (_ : float) = report_bench "flat_open_optional" flat_open_optional in
-  ()
-
 let () =
-  let asserted_tests =
-    [
-      "wide_pair" >:: perf_wide_pair;
-      "flat_same_field" >:: perf_same_field;
-      "flat_generics" >:: perf_generics;
-      "flat_open" >:: perf_open;
-      "closed_then_one_open" >:: perf_closed_then_one_open;
-      "left_nested" >:: perf_left_nested;
-      "right_nested" >:: perf_right_nested;
-    ]
-  in
-  (* Report-only quadratic cases are useful when running the benchmark directly,
-     but should not add several seconds to the unit-test target. *)
-  let tests =
-    match Sys.getenv_opt "UNITTEST" with
-    | Some "1" -> asserted_tests
-    | _ ->
-      asserted_tests
-      @ [
-          "flat_disjoint" >:: report_disjoint_fields;
-          "flat_open_optional" >:: report_flat_open_optional;
-        ]
-  in
-  "shapeSplatPerfTest" >::: tests |> run_test_tt_main
+  "shapeSplatPerfTest"
+  >::: [
+         "wide_pair" >:: perf_wide_pair;
+         "flat_same_field" >:: perf_same_field;
+         "flat_generics" >:: perf_generics;
+         "flat_disjoint" >:: perf_disjoint_fields;
+         "flat_open" >:: perf_open;
+         "flat_open_optional" >:: perf_open_optional;
+         "closed_then_one_open" >:: perf_closed_then_one_open;
+         "left_nested" >:: perf_left_nested;
+         "right_nested" >:: perf_right_nested;
+       ]
+  |> run_test_tt_main

@@ -48,6 +48,12 @@ let tbool = MakeType.bool r
 
 let tfloat = MakeType.float r
 
+let tnull = MakeType.null r
+
+let tresource = MakeType.resource r
+
+let tnum = MakeType.num r
+
 let tnothing = MakeType.nothing r
 
 let tmixed = MakeType.mixed r
@@ -816,6 +822,38 @@ let dynamic_on_left_field_wins _ =
   assert_bool "unknown should be dynamic" (is_dynamic s.s_unknown_value);
   assert_prim "a" Aast.Tint (get_field s "a")
 
+let rec has_primitive prim ty =
+  match get_node ty with
+  | Tprim actual -> Aast.equal_tprim prim actual
+  | Toption ty -> Aast.equal_tprim prim Aast.Tnull || has_primitive prim ty
+  | Tunion tys -> List.exists tys ~f:(has_primitive prim)
+  | _ -> false
+
+let deferred_widening_skips_explicit_rows _ =
+  let shapes =
+    [
+      simple ~unknown:tnum [("a", field ~optional:true tnull)];
+      simple ~unknown:tresource [];
+      simple ~unknown:tfloat [("a", field ~optional:true tbool)];
+    ]
+  in
+  let result =
+    Norm.merge ~on_error:None (List.map shapes ~f:shape_ty) dummy_env
+  in
+  let actual = full_shape "deferred_widening" result in
+  match get_field actual "a" with
+  | Some field ->
+    assert_bool "a should remain optional" field.sft_optional;
+    List.iter [Aast.Tnull; Aast.Tresource; Aast.Tbool] ~f:(fun prim ->
+        assert_bool
+          ("a should include " ^ Nast.show_tprim prim)
+          (has_primitive prim field.sft_ty));
+    List.iter [Aast.Tnum; Aast.Tfloat] ~f:(fun prim ->
+        assert_bool
+          ("a should exclude " ^ Nast.show_tprim prim)
+          (not (has_primitive prim field.sft_ty)))
+  | None -> assert_failure "deferred widening should preserve field a"
+
 let () =
   "shapeSplatMergeTest"
   >::: [
@@ -848,6 +886,8 @@ let () =
          >:: malformed_operands_before_intersection_are_processed_once;
          "dynamic_on_right_unions" >:: dynamic_on_right_unions;
          "dynamic_on_left_field_wins" >:: dynamic_on_left_field_wins;
+         "deferred_widening_skips_explicit_rows"
+         >:: deferred_widening_skips_explicit_rows;
          "prop_rightmost_wins" >:: prop_rightmost_wins;
          "prop_keys_union" >:: prop_keys_union;
          "prop_bottom_absorbs" >:: prop_bottom_absorbs;

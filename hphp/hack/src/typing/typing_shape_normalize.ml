@@ -92,6 +92,99 @@ let merge_field_descs
 
 (* -- Optimized accumulator, keeping required and optional fields separate --- *)
 module Shape_acc = struct
+  (* Open-row bounds are stored newest-first in binary-sized chunks. A field's
+     depth identifies its pending prefix, which has at most logarithmic chunks. *)
+  module Widenings = struct
+    type chunk =
+      | Leaf of locl_phase ty
+      | Node of {
+          size: int;
+          union: locl_phase ty;
+          newer: chunk;
+          older: chunk;
+        }
+
+    type t = {
+      depth: int;
+      chunks: chunk list;
+    }
+
+    let chunk_size = function
+      | Leaf _ -> 1
+      | Node { size; _ } -> size
+
+    let chunk_union = function
+      | Leaf ty -> ty
+      | Node { union; _ } -> union
+
+    let empty = { depth = 0; chunks = [] }
+
+    let singleton ty = { depth = 1; chunks = [Leaf ty] }
+
+    let depth widenings = widenings.depth
+
+    let add env ty widenings =
+      let rec carry env newer = function
+        | older :: chunks when Int.equal (chunk_size newer) (chunk_size older)
+          ->
+          let (env, union) =
+            Typing_union.union env (chunk_union newer) (chunk_union older)
+          in
+          let newer =
+            Node
+              {
+                size = chunk_size newer + chunk_size older;
+                union;
+                newer;
+                older;
+              }
+          in
+          carry env newer chunks
+        | chunks -> (env, newer :: chunks)
+      in
+      let (env, chunks) = carry env (Leaf ty) widenings.chunks in
+      (env, { depth = widenings.depth + 1; chunks })
+
+    let rec chunk_prefix count chunk =
+      if Int.equal count (chunk_size chunk) then
+        [chunk_union chunk]
+      else
+        match chunk with
+        | Leaf _ -> failwith "invalid widening prefix"
+        | Node { newer; older; _ } ->
+          let newer_size = chunk_size newer in
+          if count <= newer_size then
+            chunk_prefix count newer
+          else
+            chunk_union newer :: chunk_prefix (count - newer_size) older
+
+    let rec prefix count = function
+      | _ when Int.equal count 0 -> []
+      | [] -> failwith "invalid widening depth"
+      | chunk :: chunks ->
+        let size = chunk_size chunk in
+        if count < size then
+          chunk_prefix count chunk
+        else
+          chunk_union chunk :: prefix (count - size) chunks
+
+    let rec apply env unions ty =
+      match unions with
+      | [] -> (env, ty)
+      | union :: unions ->
+        let (env, ty) = apply env unions ty in
+        Typing_union.union env union ty
+
+    let apply_since env widenings ~since ty =
+      let count = widenings.depth - since in
+      apply env (prefix count widenings.chunks) ty
+  end
+
+  type optional_field = {
+    field: locl_phase shape_field_type;
+    widened_at: int;
+  }
+
   type t = {
     origin: type_origin;
     unknown_value: locl_phase ty;
@@ -99,15 +192,28 @@ module Shape_acc = struct
        requiredness. An absent field from an open left row can only change
        optional fields. *)
     required_fields: locl_phase shape_field_type TShapeMap.t;
-    optional_fields: locl_phase shape_field_type TShapeMap.t;
+    optional_fields: optional_field TShapeMap.t;
+    widenings: Widenings.t;
   }
 
+  let row_is_closed unknown_value =
+    match get_node unknown_value with
+    | Tunion [] -> true
+    | _ -> false
+
   let of_simple shape =
+    let widenings =
+      if row_is_closed shape.s_unknown_value then
+        Widenings.empty
+      else
+        Widenings.singleton shape.s_unknown_value
+    in
+    let widened_at = Widenings.depth widenings in
     let (required_fields, optional_fields) =
       TShapeMap.fold
         (fun key field (required, optional) ->
           if field.sft_optional then
-            (required, TShapeMap.add key field optional)
+            (required, TShapeMap.add key { field; widened_at } optional)
           else
             (TShapeMap.add key field required, optional))
         shape.s_fields
@@ -118,20 +224,8 @@ module Shape_acc = struct
       unknown_value = shape.s_unknown_value;
       required_fields;
       optional_fields;
+      widenings;
     }
-
-  let to_simple acc =
-    let s_fields =
-      if TShapeMap.is_empty acc.required_fields then
-        acc.optional_fields
-      else
-        TShapeMap.union
-          ~combine:(fun _ _ _ ->
-            failwith "Shape_acc: field is both required and optional")
-          acc.required_fields
-          acc.optional_fields
-    in
-    { s_origin = acc.origin; s_unknown_value = acc.unknown_value; s_fields }
 
   let map_fields_env f env fields =
     let env_ref = ref env in
@@ -145,50 +239,78 @@ module Shape_acc = struct
     in
     (!env_ref, fields)
 
+  let materialize_optional env widenings optional =
+    let (env, sft_ty) =
+      Widenings.apply_since
+        env
+        widenings
+        ~since:optional.widened_at
+        optional.field.sft_ty
+    in
+    (env, { optional.field with sft_ty })
+
+  let to_simple env acc =
+    let (env, optional_fields) =
+      map_fields_env
+        (fun env _ optional -> materialize_optional env acc.widenings optional)
+        env
+        acc.optional_fields
+    in
+    let s_fields =
+      if TShapeMap.is_empty acc.required_fields then
+        optional_fields
+      else
+        TShapeMap.union
+          ~combine:(fun _ _ _ ->
+            failwith "Shape_acc: field is both required and optional")
+          acc.required_fields
+          optional_fields
+    in
+    ( env,
+      { s_origin = acc.origin; s_unknown_value = acc.unknown_value; s_fields }
+    )
+
   let merge_shape
       ~(shape_left : locl_phase shape_type_simple)
       ~(shape_right : t)
       (env : Typing_env_types.env) : Typing_env_types.env * t =
-    let left_row_closed =
-      match get_node shape_left.s_unknown_value with
-      | Tunion [] -> true
-      | _ -> false
-    in
-    let (env, optional_fields) =
+    let left_row_closed = row_is_closed shape_left.s_unknown_value in
+    let widened_at =
+      Widenings.depth shape_right.widenings
+      +
       if left_row_closed then
-        (env, shape_right.optional_fields)
+        0
       else
-        map_fields_env
-          (fun env key fd_right ->
-            if TShapeMap.mem key shape_left.s_fields then
-              (env, fd_right)
-            else
-              let fd_left =
-                { sft_optional = true; sft_ty = shape_left.s_unknown_value }
-              in
-              merge_field_descs ~fd_left ~fd_right env)
-          env
-          shape_right.optional_fields
+        1
     in
     let (env, required_fields, optional_fields) =
       TShapeMap.fold
         (fun key fd_left (env, required, optional) ->
-          let fd_right =
+          let (env, fd_right) =
             match TShapeMap.find_opt key shape_right.required_fields with
-            | Some fd -> fd
+            | Some fd -> (env, fd)
             | None ->
               (match TShapeMap.find_opt key shape_right.optional_fields with
-              | Some fd -> fd
+              | Some fd -> materialize_optional env shape_right.widenings fd
               | None ->
-                { sft_optional = true; sft_ty = shape_right.unknown_value })
+                ( env,
+                  { sft_optional = true; sft_ty = shape_right.unknown_value } ))
           in
           let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
           if fd.sft_optional then
-            (env, TShapeMap.remove key required, TShapeMap.add key fd optional)
+            ( env,
+              TShapeMap.remove key required,
+              TShapeMap.add key { field = fd; widened_at } optional )
           else
             (env, TShapeMap.add key fd required, TShapeMap.remove key optional))
         shape_left.s_fields
-        (env, shape_right.required_fields, optional_fields)
+        (env, shape_right.required_fields, shape_right.optional_fields)
+    in
+    let (env, widenings) =
+      if left_row_closed then
+        (env, shape_right.widenings)
+      else
+        Widenings.add env shape_left.s_unknown_value shape_right.widenings
     in
     let (env, unknown_value) =
       Typing_union.union
@@ -202,6 +324,7 @@ module Shape_acc = struct
         unknown_value;
         required_fields;
         optional_fields;
+        widenings;
       } )
 end
 
@@ -211,25 +334,28 @@ type merge_elem =
   | Bottom of Typing_reason.t
 
 (** Turn the merge accumulator (once the element list is exhausted) into a
-    [merge_result]. Pure; no [env]. *)
-let finalize (merge_elem : merge_elem) (elems : locl_phase ty list) (sd : bool)
-    : merge_result =
+    [merge_result]. *)
+let finalize
+    (env : Typing_env_types.env)
+    (merge_elem : merge_elem)
+    (elems : locl_phase ty list)
+    (sd : bool) : Typing_env_types.env * merge_result =
   match (merge_elem, elems) with
   | (Bottom reason, _) ->
     (* The whole type is [nothing]. *)
-    Full (Typing_make_type.nothing reason, false)
+    (env, Full (Typing_make_type.nothing reason, false))
   | (Merging (reason, shape_acc), []) ->
-    let shape = Shape_acc.to_simple shape_acc in
-    Full (mk (reason, Tshape (Shape_simple shape)), sd)
+    let (env, shape) = Shape_acc.to_simple env shape_acc in
+    (env, Full (mk (reason, Tshape (Shape_simple shape)), sd))
   | (Merging (reason, shape_acc), _) ->
-    let shape = Shape_acc.to_simple shape_acc in
+    let (env, shape) = Shape_acc.to_simple env shape_acc in
     let elem = mk (reason, Tshape (Shape_simple shape)) in
-    Partial (elem :: elems, sd)
+    (env, Partial (elem :: elems, sd))
   | (Empty, []) ->
     (* Everything cancelled to the unit element: the empty closed shape. The
        caller supplies the reason with which to build [shape()]. *)
-    Empty_shape sd
-  | (Empty, _) -> Partial (elems, sd)
+    (env, Empty_shape sd)
+  | (Empty, _) -> (env, Partial (elems, sd))
 
 (** Finalise one distributed branch to a single type, built with the member's
     [reason]. supportdyn is applied per-branch here, so distributed results
@@ -318,7 +444,9 @@ let merge
   in
   let rec loop rev_elems (merge_elem, elems, errs, sd, env) =
     match rev_elems with
-    | [] -> (env, errs, finalize merge_elem elems sd)
+    | [] ->
+      let (env, result) = finalize env merge_elem elems sd in
+      (env, errs, result)
     | (path, ty) :: rev_elems ->
       (* Under sound dynamic a non-enforceable splat operand (e.g. an open
          shape, whose unknown fields are [mixed]) is localized wrapped in
@@ -388,8 +516,8 @@ let merge
          inside, localization has already expanded it to its definition. *)
       | ( (_, (Tgeneric _ | Tnewtype _ | Tvar _)),
           Merging (shape_reason, shape_acc) ) ->
+        let (env, shape) = Shape_acc.to_simple env shape_acc in
         let elems =
-          let shape = Shape_acc.to_simple shape_acc in
           let elem = mk (shape_reason, Tshape (Shape_simple shape)) in
           ty :: elem :: elems
         in
@@ -448,8 +576,8 @@ let merge
       (* -- Error conditions ------------------------------------------------ *)
       | ((reason, _), Merging (shape_reason, shape_acc)) ->
         let (env, elem_err) = error_tyvar path reason env in
+        let (env, shape) = Shape_acc.to_simple env shape_acc in
         let elems =
-          let shape = Shape_acc.to_simple shape_acc in
           let elem_shape = mk (shape_reason, Tshape (Shape_simple shape)) in
           elem_err :: elem_shape :: elems
         in

@@ -336,18 +336,10 @@ let bench_with ~sizes ~samples run name build =
 let bench ?(sizes = sizes) name build =
   bench_with ~sizes ~samples:timing_samples run_merge name build
 
-let bench_concrete_supertypes name build =
+let bench_concrete_supertypes ?(sizes = sizes) name build =
   bench_with
     ~sizes
     ~samples:timing_samples
-    run_concrete_supertypes_success
-    ("concrete_supertypes_" ^ name)
-    build
-
-let report_concrete_supertypes name build =
-  bench_with
-    ~sizes
-    ~samples:1
     run_concrete_supertypes_success
     ("concrete_supertypes_" ^ name)
     build
@@ -406,11 +398,13 @@ let perf_concrete_supertypes_nested _ =
     "concrete_supertypes_nested"
     (bench_concrete_supertypes "nested" concrete_supertypes_nested)
 
-let report_concrete_supertypes_generic_chain _ =
-  let (_ : float) =
-    report_concrete_supertypes "generic_chain" concrete_supertypes_generic_chain
-  in
-  ()
+let perf_concrete_supertypes_generic_chain _ =
+  assert_subquadratic
+    "concrete_supertypes_generic_chain"
+    (bench_concrete_supertypes
+       ~sizes:scaling_sizes
+       "generic_chain"
+       concrete_supertypes_generic_chain)
 
 let perf_concrete_supertypes_wide_generic_bounds _ =
   assert_subquadratic
@@ -447,34 +441,75 @@ let shared_generic_bound_dag_shape _ =
     (1 lsl depth)
     (Option.value_map result ~default:0 ~f:List.length)
 
+let concrete_supertypes_cache_does_not_cache_cycles _ =
+  let env = Env.add_upper_bound dummy_env "T0" (generic 1) in
+  let env = Env.add_upper_bound env "T0" (closed_field 0) in
+  let env = Env.add_upper_bound env "T1" (generic 0) in
+  let env = Env.add_upper_bound env "T1" (closed_field 1) in
+  let cache = Typing_utils.Concrete_supertypes_cache.create () in
+  let (env, t0_supertypes) =
+    Typing_utils.get_concrete_supertypes
+      ~cache
+      ~abstract_enum:false
+      env
+      (generic 0)
+  in
+  let (_env, t1_supertypes) =
+    Typing_utils.get_concrete_supertypes
+      ~cache
+      ~abstract_enum:false
+      env
+      (generic 1)
+  in
+  assert_equal ~printer:Int.to_string 2 (List.length t0_supertypes);
+  assert_equal ~printer:Int.to_string 2 (List.length t1_supertypes)
+
+let concrete_supertypes_cache_is_environment_local _ =
+  let cache = Typing_utils.Concrete_supertypes_cache.create () in
+  let env = Env.add_upper_bound dummy_env "T0" (closed_field 0) in
+  let (_env, initial_supertypes) =
+    Typing_utils.get_concrete_supertypes
+      ~cache
+      ~abstract_enum:false
+      env
+      (generic 0)
+  in
+  let env = Env.add_upper_bound env "T0" (closed_field 1) in
+  let (_env, extended_supertypes) =
+    Typing_utils.get_concrete_supertypes
+      ~cache
+      ~abstract_enum:false
+      env
+      (generic 0)
+  in
+  assert_equal ~printer:Int.to_string 1 (List.length initial_supertypes);
+  assert_equal ~printer:Int.to_string 2 (List.length extended_supertypes)
+
 let () =
-  let asserted_tests =
-    [
-      "concrete_supertypes_nested" >:: perf_concrete_supertypes_nested;
-      "concrete_supertypes_wide_generic_bounds"
-      >:: perf_concrete_supertypes_wide_generic_bounds;
-      "concrete_supertypes_failure_before_generic_chain"
-      >:: perf_concrete_supertypes_failure_before_generic_chain;
-      "shared_generic_bound_dag_non_shape"
-      >:: shared_generic_bound_dag_non_shape;
-      "shared_generic_bound_dag_shape" >:: shared_generic_bound_dag_shape;
-      "wide_pair" >:: perf_wide_pair;
-      "flat_same_field" >:: perf_same_field;
-      "flat_generics" >:: perf_generics;
-      "flat_disjoint" >:: perf_disjoint_fields;
-      "flat_open" >:: perf_open;
-      "flat_open_optional" >:: perf_open_optional;
-      "closed_then_one_open" >:: perf_closed_then_one_open;
-      "left_nested" >:: perf_left_nested;
-      "right_nested" >:: perf_right_nested;
-    ]
-  in
-  let tests =
-    match Sys.getenv_opt "UNITTEST" with
-    | Some "1" -> asserted_tests
-    | _ ->
-      ("concrete_supertypes_generic_chain"
-      >:: report_concrete_supertypes_generic_chain)
-      :: asserted_tests
-  in
-  "shapeSplatPerfTest" >::: tests |> run_test_tt_main
+  "shapeSplatPerfTest"
+  >::: [
+         "concrete_supertypes_nested" >:: perf_concrete_supertypes_nested;
+         "concrete_supertypes_generic_chain"
+         >:: perf_concrete_supertypes_generic_chain;
+         "concrete_supertypes_wide_generic_bounds"
+         >:: perf_concrete_supertypes_wide_generic_bounds;
+         "concrete_supertypes_failure_before_generic_chain"
+         >:: perf_concrete_supertypes_failure_before_generic_chain;
+         "shared_generic_bound_dag_non_shape"
+         >:: shared_generic_bound_dag_non_shape;
+         "shared_generic_bound_dag_shape" >:: shared_generic_bound_dag_shape;
+         "concrete_supertypes_cache_does_not_cache_cycles"
+         >:: concrete_supertypes_cache_does_not_cache_cycles;
+         "concrete_supertypes_cache_is_environment_local"
+         >:: concrete_supertypes_cache_is_environment_local;
+         "wide_pair" >:: perf_wide_pair;
+         "flat_same_field" >:: perf_same_field;
+         "flat_generics" >:: perf_generics;
+         "flat_disjoint" >:: perf_disjoint_fields;
+         "flat_open" >:: perf_open;
+         "flat_open_optional" >:: perf_open_optional;
+         "closed_then_one_open" >:: perf_closed_then_one_open;
+         "left_nested" >:: perf_left_nested;
+         "right_nested" >:: perf_right_nested;
+       ]
+  |> run_test_tt_main

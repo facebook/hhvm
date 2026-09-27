@@ -369,7 +369,14 @@ val wrap_union_inter_ty_in_var :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+module Concrete_supertypes_cache : sig
+  type t
+
+  val create : unit -> t
+end
+
 val get_concrete_supertypes :
+  ?cache:Concrete_supertypes_cache.t ->
   ?expand_supportdyn:bool ->
   ?include_case_types:bool ->
   abstract_enum:bool ->

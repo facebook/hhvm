@@ -490,57 +490,126 @@ let get_newtype_super env r name tyargs =
  * (For example, function foo<Tu as Tv, Tv as Tu>(...))
  * Also breaks apart intersections.
  *****************************************************************************)
+module Concrete_supertypes_cache = struct
+  type entry = {
+    input_env: env;
+    expand_supportdyn: bool;
+    include_case_types: bool;
+    abstract_enum: bool;
+    supertypes: TySet.t;
+  }
+
+  type t = entry list S_map.t ref
+
+  let create () = ref S_map.empty
+
+  let find
+      cache
+      ~expand_supportdyn
+      ~include_case_types
+      ~abstract_enum
+      ~input_env
+      name =
+    S_map.find_opt name !cache
+    |> Option.bind ~f:(fun entries ->
+           List.find entries ~f:(fun entry ->
+               phys_equal input_env entry.input_env
+               && Bool.equal expand_supportdyn entry.expand_supportdyn
+               && Bool.equal include_case_types entry.include_case_types
+               && Bool.equal abstract_enum entry.abstract_enum))
+
+  let add cache name entry =
+    let entries = Option.value (S_map.find_opt name !cache) ~default:[] in
+    cache := S_map.add name (entry :: entries) !cache
+end
+
 let get_concrete_supertypes
+    ?cache
     ?(expand_supportdyn = true)
     ?(include_case_types = false)
     ~abstract_enum
     env
     ty =
-  let rec iter seen env acc tyl =
-    match tyl with
-    | [] -> (env, acc)
-    | ty :: tyl ->
-      let (env, ty) = Env.expand_type env ty in
-      (match get_node ty with
-      | Tnewtype (cid, _, _)
-        when (not expand_supportdyn) && String.equal cid SN.Classes.cSupportDyn
-        ->
-        iter seen env (TySet.add ty acc) tyl
-      | Tnewtype (cid, tyargs, _) ->
-        let (env, as_ty) = get_newtype_super env (get_reason ty) cid tyargs in
-        let (env, as_ty) = Env.expand_type env as_ty in
-        (* Enums with arraykey upper bound are treated as "abstract" *)
-        if abstract_enum && is_prim Aast.Tarraykey as_ty && Env.is_enum env cid
-        then
-          iter seen env acc tyl
-        else if String.equal cid SN.Classes.cFunctionRef then
-          iter seen env acc (as_ty :: tyl)
-        (* Don't expand enums or newtype; just return the type itself *)
-        else begin
-          let acc = TySet.add as_ty acc in
-          let acc =
-            if include_case_types then
-              TySet.add ty acc
-            else
-              acc
-          in
-          iter seen env acc tyl
-        end
-      | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
-      | Tgeneric n ->
-        if S_set.mem n seen then
-          iter seen env acc tyl
-        else
-          iter
-            (S_set.add n seen)
-            env
-            acc
-            (TySet.elements (Env.get_upper_bounds env n) @ tyl)
-      | Tintersection tyl' -> iter seen env acc (tyl' @ tyl)
-      | _ -> iter seen env (TySet.add ty acc) tyl)
+  let cache =
+    Option.value cache ~default:(Concrete_supertypes_cache.create ())
   in
-  let (env, resl) = iter S_set.empty env TySet.empty [ty] in
-  (env, TySet.elements resl)
+  let rec collect seen env ty =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tnewtype (cid, _, _)
+      when (not expand_supportdyn) && String.equal cid SN.Classes.cSupportDyn ->
+      (env, TySet.singleton ty, false)
+    | Tnewtype (cid, tyargs, _) ->
+      let (env, as_ty) = get_newtype_super env (get_reason ty) cid tyargs in
+      let (env, as_ty) = Env.expand_type env as_ty in
+      if abstract_enum && is_prim Aast.Tarraykey as_ty && Env.is_enum env cid
+      then
+        (env, TySet.empty, false)
+      else if String.equal cid SN.Classes.cFunctionRef then
+        collect seen env as_ty
+      else
+        let supertypes = TySet.singleton as_ty in
+        let supertypes =
+          if include_case_types then
+            TySet.add ty supertypes
+          else
+            supertypes
+        in
+        (env, supertypes, false)
+    | Tdependent (_, ty) -> (env, TySet.singleton ty, false)
+    | Tgeneric name ->
+      if S_set.mem name seen then
+        (env, TySet.empty, true)
+      else begin
+        let input_env = env in
+        match
+          Concrete_supertypes_cache.find
+            cache
+            ~expand_supportdyn
+            ~include_case_types
+            ~abstract_enum
+            ~input_env
+            name
+        with
+        | Some { Concrete_supertypes_cache.supertypes; _ } ->
+          (env, supertypes, false)
+        | None ->
+          let (output_env, supertypes, encountered_cycle) =
+            collect_list
+              (S_set.add name seen)
+              env
+              (TySet.elements (Env.get_upper_bounds env name))
+          in
+          if (not encountered_cycle) && phys_equal output_env input_env then
+            Concrete_supertypes_cache.add
+              cache
+              name
+              {
+                Concrete_supertypes_cache.input_env;
+                expand_supportdyn;
+                include_case_types;
+                abstract_enum;
+                supertypes;
+              };
+          (output_env, supertypes, encountered_cycle)
+      end
+    | Tintersection tys -> collect_list seen env tys
+    | _ -> (env, TySet.singleton ty, false)
+  and collect_list seen env tys =
+    let rec iter env acc encountered_cycle = function
+      | [] -> (env, acc, encountered_cycle)
+      | ty :: tys ->
+        let (env, supertypes, ty_encountered_cycle) = collect seen env ty in
+        iter
+          env
+          (TySet.union acc supertypes)
+          (encountered_cycle || ty_encountered_cycle)
+          tys
+    in
+    iter env TySet.empty false tys
+  in
+  let (env, supertypes, _encountered_cycle) = collect S_set.empty env ty in
+  (env, TySet.elements supertypes)
 
 (** The dual of [get_concrete_supertypes] *)
 let get_concrete_subtypes env ty =
@@ -574,6 +643,7 @@ let get_concrete_subtypes env ty =
   (env, TySet.elements resl)
 
 let get_shape_splat_concrete_supertypes env ty =
+  let concrete_supertypes_cache = Concrete_supertypes_cache.create () in
   let intersect_supertypes env reason tys =
     let rec pair env acc = function
       | ty1 :: ty2 :: tys ->
@@ -605,7 +675,11 @@ let get_shape_splat_concrete_supertypes env ty =
       | Some result -> (env, memo, result)
       | None ->
         let (env, supers) =
-          get_concrete_supertypes ~abstract_enum:false env ty
+          get_concrete_supertypes
+            ~cache:concrete_supertypes_cache
+            ~abstract_enum:false
+            env
+            ty
         in
         let (env, memo, result) =
           match supers with

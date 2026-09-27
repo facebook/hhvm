@@ -289,8 +289,13 @@ let get_label_receiver_ty env ty =
 
 let intersect_with_nonnull = Typing_intersection.intersect_with_nonnull
 
-let get_concrete_supertypes =
-  Typing_utils.get_concrete_supertypes ~include_case_types:false
+let get_concrete_supertypes ?expand_supportdyn ~abstract_enum env ty =
+  Typing_utils.get_concrete_supertypes
+    ?expand_supportdyn
+    ~include_case_types:false
+    ~abstract_enum
+    env
+    ty
 
 let is_visible = Typing_visibility.is_visible
 

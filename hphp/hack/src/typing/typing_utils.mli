@@ -285,6 +285,27 @@ val make_union :
   Typing_reason.t option ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+type normalize_shape_type_result =
+  | Normalized_shape of Typing_defs.locl_phase Typing_defs.shape_type
+  | Normalized_bottom
+  | Normalized_distributed
+
+type normalize_shape_type =
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  Typing_defs.locl_phase Typing_defs.shape_type ->
+  Typing_env_types.env * normalize_shape_type_result
+
+(** Normalize a shape type (rightmost-wins merge of its splat elements).
+    [Normalized_distributed] means union or intersection distribution did not
+    produce a single shape, so callers must handle the input conservatively.
+    Implemented in [Typing_shape_normalize] and exposed here via a ref to break
+    the module cycle ([Typing_shape_normalize] depends transitively on
+    [Typing_refinement]). *)
+val normalize_shape_type_ref : normalize_shape_type ref
+
+val normalize_shape_type : normalize_shape_type
+
 type union_list =
   Typing_env_types.env ->
   ?approx_cancel_neg:bool ->
@@ -363,6 +384,15 @@ val get_concrete_subtypes :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_set.elt list
+
+(** Over-approximate a shape splat as a flattened list of concrete shape elements
+    (each a [Shape_simple] or [nothing]) by resolving each splat-position type
+    parameter to its concrete shape supertypes, transitively. Returns [None] if
+    some element cannot be reduced to a shape. *)
+val get_shape_splat_concrete_supertypes :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty list option
 
 val simplify_unions :
   Typing_env_types.env ->

@@ -172,6 +172,19 @@ let (union_list_ref : union_list ref) = ref (not_implemented "union_list")
 
 let union_list x = !union_list_ref x
 
+type normalize_shape_type_result =
+  | Normalized_shape of locl_phase shape_type
+  | Normalized_bottom
+  | Normalized_distributed
+
+type normalize_shape_type =
+  env -> Reason.t -> locl_phase shape_type -> env * normalize_shape_type_result
+
+let (normalize_shape_type_ref : normalize_shape_type ref) =
+  ref (not_implemented "normalize_shape_type")
+
+let normalize_shape_type env = !normalize_shape_type_ref env
+
 type fold_union =
   env -> ?approx_cancel_neg:bool -> Reason.t -> locl_ty list -> env * locl_ty
 
@@ -559,6 +572,73 @@ let get_concrete_subtypes env ty =
   in
   let (env, resl) = iter S_set.empty env TySet.empty [ty] in
   (env, TySet.elements resl)
+
+let get_shape_splat_concrete_supertypes env ty =
+  let intersect_supertypes env reason tys =
+    let rec pair env acc = function
+      | ty1 :: ty2 :: tys ->
+        let (env, ty) = intersect_list env reason [ty1; ty2] in
+        pair env (ty :: acc) tys
+      | [ty] -> (env, List.rev (ty :: acc))
+      | [] -> (env, List.rev acc)
+    in
+    let rec reduce env = function
+      | [] -> intersect_list env reason []
+      | [ty] -> (env, ty)
+      | tys ->
+        let (env, tys) = pair env [] tys in
+        reduce env tys
+    in
+    reduce env tys
+  in
+  let rec resolve visited memo env ty =
+    let (env, ty) = Env.expand_type env ty in
+    resolve_expanded visited memo env ty
+  and resolve_expanded visited memo env ty =
+    match get_node ty with
+    | Tshape (Shape_simple _) -> (env, memo, Some [ty])
+    | Tshape (Shape_splat { ss_elems }) ->
+      resolve_elems visited memo env ss_elems
+    | Tgeneric name when S_set.mem name visited -> (env, memo, None)
+    | Tgeneric name ->
+      (match S_map.find_opt name memo with
+      | Some result -> (env, memo, result)
+      | None ->
+        let (env, supers) =
+          get_concrete_supertypes ~abstract_enum:false env ty
+        in
+        let (env, memo, result) =
+          match supers with
+          | [] -> (env, memo, None)
+          | supers ->
+            let (env, combined) =
+              intersect_supertypes env (get_reason ty) supers
+            in
+            resolve (S_set.add name visited) memo env combined
+        in
+        (env, S_map.add name result memo, result))
+    | _ when is_nothing env ty -> (env, memo, Some [ty])
+    | _ -> (env, memo, None)
+  and resolve_elems visited memo env tys =
+    let rec loop env memo acc = function
+      | [] -> (env, memo, Some (List.rev acc))
+      | [] :: pending -> loop env memo acc pending
+      | (ty :: tys) :: pending ->
+        let (env, ty) = Env.expand_type env ty in
+        (match get_node ty with
+        | Tshape (Shape_splat { ss_elems }) ->
+          loop env memo acc (ss_elems :: tys :: pending)
+        | _ ->
+          let (env, memo, result) = resolve_expanded visited memo env ty in
+          (match result with
+          | None -> (env, memo, None)
+          | Some resolved ->
+            loop env memo (List.rev_append resolved acc) (tys :: pending)))
+    in
+    loop env memo [] [tys]
+  in
+  let (env, _memo, result) = resolve S_set.empty S_map.empty env ty in
+  (env, result)
 
 (** Run a function on an intersection represented by a list of types.
     We stay liberal with errors:

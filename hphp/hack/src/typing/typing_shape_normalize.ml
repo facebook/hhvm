@@ -1065,3 +1065,23 @@ let set_rightmost_field
     | [] -> append ()
   in
   splat ~on_error:None ~reason elems env
+
+(* Expose [normalize_shape_type] to [Typing_refinement] via a ref, breaking the
+   module cycle (this module depends transitively on [Typing_refinement]).
+   Errors are dropped ([~on_error:None]) since refinement is not the place to
+   report shape well-formedness. *)
+let () =
+  Typing_utils.normalize_shape_type_ref :=
+    fun env reason shape_ty ->
+      let (env, _err, res) =
+        normalize_shape_type ~on_error:None reason shape_ty env
+      in
+      let result =
+        match res with
+        | Normalized_shape shape -> Typing_utils.Normalized_shape shape
+        | Normalized_bottom -> Typing_utils.Normalized_bottom
+        | Normalized_union _
+        | Normalized_intersection _ ->
+          Typing_utils.Normalized_distributed
+      in
+      (env, result)

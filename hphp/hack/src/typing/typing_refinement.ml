@@ -833,128 +833,45 @@ and split_ty_by_shape
     (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
   | (_, Tshape (Shape_simple { s_origin = _; s_unknown_value; s_fields })) ->
-    let has_class_const_field map =
-      TShapeMap.exists
-        (fun field _val ->
-          match field with
-          | TSFclass_const _ -> true
-          | TSFregex_group _
-          | TSFlit_str _ ->
-            false)
-        map
+    split_shape_fields
+      env
+      ty
+      ~s_fields
+      ~s_unknown_value
+      ~sp_allows_unknown_fields
+      ~sp_fields
+      ~predicate
+  | (r, Tshape (Shape_splat _)) ->
+    (* Split a splat scrutinee by over-approximating it as a single simple shape.
+       [get_shape_splat_concrete_supertypes] resolves each splat-position type
+       parameter to its concrete shape bound(s), transitively *)
+    let (env, resolved) =
+      Typing_utils.get_shape_splat_concrete_supertypes env ty
     in
-    if has_class_const_field s_fields || has_class_const_field sp_fields then
-      (* class const field names are unsound, so fall back to SPAN *)
+    (match resolved with
+    | None ->
+      (* We could not over-approximate the scrutinee as a concrete shape, so we
+         conclude nothing about the predicate *)
       (env, TyPartition.mk_span ~env ~predicate ty)
-    else
-      (* RIGHT if: ty has a required field that is not in the predicate and predicate is closed *)
-      let has_extra_required_field =
-        (not sp_allows_unknown_fields)
-        && TShapeMap.exists
-             (fun key { sft_optional; _ } ->
-               (not sft_optional) && not (TShapeMap.mem key sp_fields))
-             s_fields
+    | Some ss_elems ->
+      let (env, normalized) =
+        Typing_utils.normalize_shape_type env r (Shape_splat { ss_elems })
       in
-      if has_extra_required_field then
-        (env, TyPartition.mk_right ~env ~predicate ty)
-      else
-        (* Does the predicate require a field not in the type? *)
-        let missing_required_field =
-          TShapeMap.exists
-            (fun key { sfp_optional; _ } ->
-              (not sfp_optional) && not (TShapeMap.mem key s_fields))
-            sp_fields
-        in
-
-        if missing_required_field && Typing_defs.is_nothing s_unknown_value then
-          (* Missing a required field and the type is closed -> RIGHT *)
-          (env, TyPartition.mk_right ~env ~predicate ty)
-        else
-          (* Split each field that exists in both ty and predicate *)
-          let (env, field_splits) =
-            TShapeMap.fold_env
-              env
-              (fun env key ty_field splits_acc ->
-                match TShapeMap.find_opt key sp_fields with
-                | Some pred_field ->
-                  (* Split this field's type by the predicate field's predicate *)
-                  let (env, field_split) =
-                    split_ty
-                      ~other_intersected_tys:[]
-                      ~expansions:S_set.empty
-                      env
-                      ty_field.sft_ty
-                      ~predicate:pred_field.sfp_predicate
-                  in
-                  (env, (key, ty_field, pred_field, field_split) :: splits_acc)
-                | None ->
-                  (* Field only in ty, not in predicate. Checked above *)
-                  (env, splits_acc))
-              s_fields
-              []
-          in
-
-          (* Check if any field is fully incompatible (fully right) *)
-          let has_incompatible_field =
-            List.exists
-              field_splits
-              ~f:(fun (_, ty_field, _, (field_partition, _, _)) ->
-                let field_left = TyPartition.left field_partition in
-                let field_span = TyPartition.span field_partition in
-                let is_fully_right =
-                  List.is_empty field_left && List.is_empty field_span
-                in
-                (* Required field in ty that's fully incompatible *)
-                (not ty_field.sft_optional) && is_fully_right)
-          in
-
-          if has_incompatible_field then
-            (env, TyPartition.mk_right ~env ~predicate ty)
-          else if
-            TShapeMap.exists
-              (fun key _ -> not (TShapeMap.mem key s_fields))
-              sp_fields
-            && not (Typing_defs.is_nothing s_unknown_value)
-          then
-            (* predicate specifies a field not in the type and the type is open *)
-            (env, TyPartition.mk_span ~env ~predicate ty)
-          else
-            (* Check if all fields are fully left *)
-            let all_fields_fully_left =
-              List.for_all
-                field_splits
-                ~f:(fun (_, _, _, (field_partition, _, _)) ->
-                  let field_span = TyPartition.span field_partition in
-                  let field_right = TyPartition.right field_partition in
-                  List.is_empty field_span && List.is_empty field_right)
-            in
-
-            (* For left, the predicate must be open or the type must be closed *)
-            let openness_satisfies_left =
-              sp_allows_unknown_fields || Typing_defs.is_nothing s_unknown_value
-            in
-
-            (* For left, for every shared field: predicate's must be optional or the ty's must be required *)
-            let optionality_satisfied_left =
-              TShapeMap.for_all
-                (fun key { sfp_optional; _ } ->
-                  sfp_optional
-                  ||
-                  match TShapeMap.find_opt key s_fields with
-                  | Some { sft_optional; _ } -> not sft_optional
-                  | None -> true)
-                sp_fields
-            in
-
-            if
-              optionality_satisfied_left
-              && all_fields_fully_left
-              && openness_satisfies_left
-            then
-              (env, TyPartition.mk_left ~env ~predicate ty)
-            else
-              (* Cannot conclude fully left or fully right, fall back to span *)
-              (env, TyPartition.mk_span ~env ~predicate ty)
+      (match normalized with
+      | Typing_utils.Normalized_shape
+          (Shape_simple { s_fields; s_unknown_value; _ }) ->
+        split_shape_fields
+          env
+          ty
+          ~s_fields
+          ~s_unknown_value
+          ~sp_allows_unknown_fields
+          ~sp_fields
+          ~predicate
+      | Typing_utils.Normalized_shape (Shape_splat _)
+      | Typing_utils.Normalized_distributed ->
+        (env, TyPartition.mk_span ~env ~predicate ty)
+      | Typing_utils.Normalized_bottom -> (env, TyPartition.mk_bottom)))
   | _ ->
     (* Shapes are dicts at runtime, thus if the type's data type is disjoint from a dict
        we can conclude the type must be in the right partition. Otherwise we do not
@@ -968,6 +885,137 @@ and split_ty_by_shape
       (env, TyPartition.mk_right ~env ~predicate ty)
     else
       (env, TyPartition.mk_span ~env ~predicate ty)
+
+and split_shape_fields
+    (env : env)
+    (ty : locl_ty)
+    ~(s_fields : locl_phase shape_field_type TShapeMap.t)
+    ~(s_unknown_value : locl_ty)
+    ~(sp_allows_unknown_fields : bool)
+    ~(sp_fields : shape_field_predicate TShapeMap.t)
+    ~(predicate : type_predicate) : env * TyPartition.t =
+  let has_class_const_field map =
+    TShapeMap.exists
+      (fun field _val ->
+        match field with
+        | TSFclass_const _ -> true
+        | TSFregex_group _
+        | TSFlit_str _ ->
+          false)
+      map
+  in
+  if has_class_const_field s_fields || has_class_const_field sp_fields then
+    (* class const field names are unsound, so fall back to SPAN *)
+    (env, TyPartition.mk_span ~env ~predicate ty)
+  else
+    (* RIGHT if: ty has a required field that is not in the predicate and predicate is closed *)
+    let has_extra_required_field =
+      (not sp_allows_unknown_fields)
+      && TShapeMap.exists
+           (fun key { sft_optional; _ } ->
+             (not sft_optional) && not (TShapeMap.mem key sp_fields))
+           s_fields
+    in
+    if has_extra_required_field then
+      (env, TyPartition.mk_right ~env ~predicate ty)
+    else
+      (* Does the predicate require a field not in the type? *)
+      let missing_required_field =
+        TShapeMap.exists
+          (fun key { sfp_optional; _ } ->
+            (not sfp_optional) && not (TShapeMap.mem key s_fields))
+          sp_fields
+      in
+
+      if missing_required_field && Typing_defs.is_nothing s_unknown_value then
+        (* Missing a required field and the type is closed -> RIGHT *)
+        (env, TyPartition.mk_right ~env ~predicate ty)
+      else
+        (* Split each field that exists in both ty and predicate *)
+        let (env, field_splits) =
+          TShapeMap.fold_env
+            env
+            (fun env key ty_field splits_acc ->
+              match TShapeMap.find_opt key sp_fields with
+              | Some pred_field ->
+                (* Split this field's type by the predicate field's predicate *)
+                let (env, field_split) =
+                  split_ty
+                    ~other_intersected_tys:[]
+                    ~expansions:S_set.empty
+                    env
+                    ty_field.sft_ty
+                    ~predicate:pred_field.sfp_predicate
+                in
+                (env, (key, ty_field, pred_field, field_split) :: splits_acc)
+              | None ->
+                (* Field only in ty, not in predicate. Checked above *)
+                (env, splits_acc))
+            s_fields
+            []
+        in
+
+        (* Check if any field is fully incompatible (fully right) *)
+        let has_incompatible_field =
+          List.exists
+            field_splits
+            ~f:(fun (_, ty_field, _, (field_partition, _, _)) ->
+              let field_left = TyPartition.left field_partition in
+              let field_span = TyPartition.span field_partition in
+              let is_fully_right =
+                List.is_empty field_left && List.is_empty field_span
+              in
+              (* Required field in ty that's fully incompatible *)
+              (not ty_field.sft_optional) && is_fully_right)
+        in
+
+        if has_incompatible_field then
+          (env, TyPartition.mk_right ~env ~predicate ty)
+        else if
+          TShapeMap.exists
+            (fun key _ -> not (TShapeMap.mem key s_fields))
+            sp_fields
+          && not (Typing_defs.is_nothing s_unknown_value)
+        then
+          (* predicate specifies a field not in the type and the type is open *)
+          (env, TyPartition.mk_span ~env ~predicate ty)
+        else
+          (* Check if all fields are fully left *)
+          let all_fields_fully_left =
+            List.for_all
+              field_splits
+              ~f:(fun (_, _, _, (field_partition, _, _)) ->
+                let field_span = TyPartition.span field_partition in
+                let field_right = TyPartition.right field_partition in
+                List.is_empty field_span && List.is_empty field_right)
+          in
+
+          (* For left, the predicate must be open or the type must be closed *)
+          let openness_satisfies_left =
+            sp_allows_unknown_fields || Typing_defs.is_nothing s_unknown_value
+          in
+
+          (* For left, for every shared field: predicate's must be optional or the ty's must be required *)
+          let optionality_satisfied_left =
+            TShapeMap.for_all
+              (fun key { sfp_optional; _ } ->
+                sfp_optional
+                ||
+                match TShapeMap.find_opt key s_fields with
+                | Some { sft_optional; _ } -> not sft_optional
+                | None -> true)
+              sp_fields
+          in
+
+          if
+            optionality_satisfied_left
+            && all_fields_fully_left
+            && openness_satisfies_left
+          then
+            (env, TyPartition.mk_left ~env ~predicate ty)
+          else
+            (* Cannot conclude fully left or fully right, fall back to span *)
+            (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty_by_tag
     ~(ty_datatype : DataType.t)

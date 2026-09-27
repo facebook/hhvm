@@ -1,0 +1,2 @@
+WARN: File "scrutinee_splat_tparam_int.php", line 7, characters 7-15:
+This `is` check is always `false`. The expression on the left has type `shape(...T, ...shape('a' => int))` which shares no values with `int`. (Warn[12010])

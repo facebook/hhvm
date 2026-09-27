@@ -1,0 +1,2 @@
+WARN: File "scrutinee_splat_tparam_nonnull.php", line 7, characters 7-19:
+This `is` check is always `true`. The expression on the left has type `shape(...T, ...shape('a' => int))` which is a subtype of `nonnull`. (Warn[12009])

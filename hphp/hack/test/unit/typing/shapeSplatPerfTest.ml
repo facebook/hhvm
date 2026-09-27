@@ -77,6 +77,9 @@ let splat elems = mk (r, Tshape (Shape_splat { ss_elems = elems }))
 
 let closed_field i = shape_ty (simple [(Printf.sprintf "f%d" i, field tint)])
 
+let open_field i =
+  shape_ty (simple ~unknown:tmixed [(Printf.sprintf "f%d" i, field tint)])
+
 let generic i = mk (r, Tgeneric (Printf.sprintf "T%d" i))
 
 (* -- Inputs ---------------------------------------------------------------- *)
@@ -144,6 +147,61 @@ let wide_pair n =
   in
   [shape_ty (simple (fields "l")); shape_ty (simple (fields "r"))]
 
+(* A nested splat whose flattened result has [n + 1] concrete shapes. This
+   isolates repeated copying while flattening nested successful resolutions. *)
+let concrete_supertypes_nested n =
+  match left_nested n with
+  | [ty] -> (dummy_env, ty)
+  | _ -> failwith "left_nested must produce one root type"
+
+(* [T0, ..., T{n-1}], where each [Ti] is bounded by [T{i+1}] and [Tn] is
+   bounded by a concrete shape. Resolving every listed generic independently
+   exposes repeated traversal of overlapping bound-chain suffixes. *)
+let concrete_supertypes_generic_chain n =
+  let name i = Printf.sprintf "T%d" i in
+  let env = Env.add_upper_bound dummy_env (name n) (closed_field n) in
+  let rec add_bounds env i =
+    if i < 0 then
+      env
+    else
+      add_bounds (Env.add_upper_bound env (name i) (generic (i + 1))) (i - 1)
+  in
+  let env = add_bounds env (n - 1) in
+  (env, splat (List.init n ~f:generic))
+
+(* A single generic with [n] compatible concrete upper bounds. Resolving the
+   generic collects all bounds and intersects them before recursing on the
+   result, exposing any repeated copying while building the intersection. *)
+let concrete_supertypes_wide_generic_bounds n =
+  let env =
+    List.fold (List.init n ~f:open_field) ~init:dummy_env ~f:(fun env bound ->
+        Env.add_upper_bound env "T0" bound)
+  in
+  (env, splat [generic 0])
+
+(* The first element is enough to make resolution fail. The generic-chain
+   suffix checks whether [resolve_elems] nevertheless resolves every remaining
+   element after the result is already known to be [None]. *)
+let concrete_supertypes_failure_before_generic_chain n =
+  let (env, ty) = concrete_supertypes_generic_chain n in
+  match get_node ty with
+  | Tshape (Shape_splat { ss_elems }) -> (env, splat (tint :: ss_elems))
+  | _ -> failwith "generic chain must produce a shape splat"
+
+let shared_generic_bound_dag_input ~leaf depth =
+  let name i = Printf.sprintf "T%d" i in
+  let env = Env.add_upper_bound dummy_env (name depth) leaf in
+  let rec add_bounds env i =
+    if i < 0 then
+      env
+    else
+      let next = generic (i + 1) in
+      let env = Env.add_upper_bound env (name i) (splat [next; next]) in
+      add_bounds env (i - 1)
+  in
+  let env = add_bounds env (depth - 1) in
+  (env, splat [generic 0])
+
 (* -- Harness --------------------------------------------------------------- *)
 
 let sizes = [64; 128; 256; 512; 1024]
@@ -151,6 +209,22 @@ let sizes = [64; 128; 256; 512; 1024]
 let run_merge elems =
   let (_env, _err, result) = Norm.merge ~on_error:None elems dummy_env in
   ignore (Sys.opaque_identity result)
+
+let run_concrete_supertypes_success (env, ty) =
+  let (_env, result) =
+    Typing_utils.get_shape_splat_concrete_supertypes env ty
+  in
+  match result with
+  | None -> assert_failure "expected concrete shape supertypes"
+  | Some tys -> ignore (Sys.opaque_identity tys)
+
+let run_concrete_supertypes_failure (env, ty) =
+  let (_env, result) =
+    Typing_utils.get_shape_splat_concrete_supertypes env ty
+  in
+  match result with
+  | None -> ()
+  | Some _ -> assert_failure "expected concrete shape resolution to fail"
 
 let min_sample_seconds = 0.02
 
@@ -262,6 +336,30 @@ let bench_with ~sizes ~samples run name build =
 let bench ?(sizes = sizes) name build =
   bench_with ~sizes ~samples:timing_samples run_merge name build
 
+let bench_concrete_supertypes name build =
+  bench_with
+    ~sizes
+    ~samples:timing_samples
+    run_concrete_supertypes_success
+    ("concrete_supertypes_" ^ name)
+    build
+
+let report_concrete_supertypes name build =
+  bench_with
+    ~sizes
+    ~samples:1
+    run_concrete_supertypes_success
+    ("concrete_supertypes_" ^ name)
+    build
+
+let bench_concrete_supertypes_failure name build =
+  bench_with
+    ~sizes
+    ~samples:timing_samples
+    run_concrete_supertypes_failure
+    ("concrete_supertypes_" ^ name)
+    build
+
 (* Perf assertions are inherently noisy, so the threshold is deliberately slack:
    it is here to catch a return to quadratic scaling, not to police constant
    factors. A scenario that is genuinely linear fits near 1.0 and stays well
@@ -274,10 +372,10 @@ let assert_subquadratic name exponent =
        exponent)
     (Float.is_finite exponent && Float.(exponent < 1.5))
 
+let scaling_sizes = [1024; 2048; 4096; 8192; 16384]
+
 let assert_scaling name build =
-  assert_subquadratic
-    name
-    (bench ~sizes:[1024; 2048; 4096; 8192; 16384] name build)
+  assert_subquadratic name (bench ~sizes:scaling_sizes name build)
 
 let perf_same_field _ = assert_scaling "flat_same_field" flat_same_field
 
@@ -303,17 +401,80 @@ let perf_left_nested _ =
 let perf_right_nested _ =
   assert_subquadratic "right_nested" (bench "right_nested" right_nested)
 
+let perf_concrete_supertypes_nested _ =
+  assert_subquadratic
+    "concrete_supertypes_nested"
+    (bench_concrete_supertypes "nested" concrete_supertypes_nested)
+
+let report_concrete_supertypes_generic_chain _ =
+  let (_ : float) =
+    report_concrete_supertypes "generic_chain" concrete_supertypes_generic_chain
+  in
+  ()
+
+let perf_concrete_supertypes_wide_generic_bounds _ =
+  assert_subquadratic
+    "concrete_supertypes_wide_generic_bounds"
+    (bench_concrete_supertypes
+       "wide_generic_bounds"
+       concrete_supertypes_wide_generic_bounds)
+
+let perf_concrete_supertypes_failure_before_generic_chain _ =
+  assert_subquadratic
+    "concrete_supertypes_failure_before_generic_chain"
+    (bench_concrete_supertypes_failure
+       "failure_before_generic_chain"
+       concrete_supertypes_failure_before_generic_chain)
+
+let shared_generic_bound_dag_non_shape _ =
+  let depth = 24 in
+  let (env, ty) = shared_generic_bound_dag_input ~leaf:tint depth in
+  let (_env, result) =
+    Typing_utils.get_shape_splat_concrete_supertypes env ty
+  in
+  assert_equal None result
+
+let shared_generic_bound_dag_shape _ =
+  let depth = 16 in
+  let (env, ty) =
+    shared_generic_bound_dag_input ~leaf:(closed_field depth) depth
+  in
+  let (_env, result) =
+    Typing_utils.get_shape_splat_concrete_supertypes env ty
+  in
+  assert_equal
+    ~printer:Int.to_string
+    (1 lsl depth)
+    (Option.value_map result ~default:0 ~f:List.length)
+
 let () =
-  "shapeSplatPerfTest"
-  >::: [
-         "wide_pair" >:: perf_wide_pair;
-         "flat_same_field" >:: perf_same_field;
-         "flat_generics" >:: perf_generics;
-         "flat_disjoint" >:: perf_disjoint_fields;
-         "flat_open" >:: perf_open;
-         "flat_open_optional" >:: perf_open_optional;
-         "closed_then_one_open" >:: perf_closed_then_one_open;
-         "left_nested" >:: perf_left_nested;
-         "right_nested" >:: perf_right_nested;
-       ]
-  |> run_test_tt_main
+  let asserted_tests =
+    [
+      "concrete_supertypes_nested" >:: perf_concrete_supertypes_nested;
+      "concrete_supertypes_wide_generic_bounds"
+      >:: perf_concrete_supertypes_wide_generic_bounds;
+      "concrete_supertypes_failure_before_generic_chain"
+      >:: perf_concrete_supertypes_failure_before_generic_chain;
+      "shared_generic_bound_dag_non_shape"
+      >:: shared_generic_bound_dag_non_shape;
+      "shared_generic_bound_dag_shape" >:: shared_generic_bound_dag_shape;
+      "wide_pair" >:: perf_wide_pair;
+      "flat_same_field" >:: perf_same_field;
+      "flat_generics" >:: perf_generics;
+      "flat_disjoint" >:: perf_disjoint_fields;
+      "flat_open" >:: perf_open;
+      "flat_open_optional" >:: perf_open_optional;
+      "closed_then_one_open" >:: perf_closed_then_one_open;
+      "left_nested" >:: perf_left_nested;
+      "right_nested" >:: perf_right_nested;
+    ]
+  in
+  let tests =
+    match Sys.getenv_opt "UNITTEST" with
+    | Some "1" -> asserted_tests
+    | _ ->
+      ("concrete_supertypes_generic_chain"
+      >:: report_concrete_supertypes_generic_chain)
+      :: asserted_tests
+  in
+  "shapeSplatPerfTest" >::: tests |> run_test_tt_main

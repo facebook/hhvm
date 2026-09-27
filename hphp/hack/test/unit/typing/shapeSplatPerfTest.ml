@@ -289,33 +289,31 @@ let perf_generics _ =
 let perf_wide_pair _ =
   assert_subquadratic "wide_pair" (bench "wide_pair" wide_pair)
 
-(* These merge paths are currently quadratic, so their benchmarks are
-   intentionally report-only. *)
+(* This benchmark remains report-only until its scaling assertion uses the
+   larger input sizes introduced later in the optimization stack. *)
 let report_disjoint_fields _ =
   let (_ : float) = report_bench "flat_disjoint" flat_disjoint in
   ()
 
-let report_left_nested _ =
-  let (_ : float) = report_bench "left_nested" left_nested in
-  ()
-
-let report_right_nested _ =
-  let (_ : float) = report_bench "right_nested" right_nested in
-  ()
-
-(* Measured but not asserted on. [merge_shapes_simple] can skip the accumulated
-   fields entirely when the incoming element's row is closed, but an open row
-   may widen the accumulator's optional fields, so it has to walk them. Every
-   element here is open, so the walk happens on every step and the scenario is
-   still asymptotically quadratic — with a far smaller constant, since the walk
-   neither unions nor allocates unless a field actually changes. Making it
-   linear needs an index of the accumulator's optional keys threaded through the
-   merge loop; not worth the sync hazard until a real splat has enough open
-   elements to care. *)
-let report_open_rows_walk_the_accumulator _ =
+(* Measured but not asserted on: open rows still walk the accumulated fields;
+   optional fields additionally need to be widened. *)
+let report_flat_open _ =
   let (_ : float) = report_bench "flat_open" flat_open in
+  ()
+
+let perf_closed_then_one_open _ =
+  assert_subquadratic
+    "closed_then_one_open"
+    (bench "closed_then_one_open" closed_then_one_open)
+
+let perf_left_nested _ =
+  assert_subquadratic "left_nested" (bench "left_nested" left_nested)
+
+let perf_right_nested _ =
+  assert_subquadratic "right_nested" (bench "right_nested" right_nested)
+
+let report_flat_open_optional _ =
   let (_ : float) = report_bench "flat_open_optional" flat_open_optional in
-  let (_ : float) = report_bench "closed_then_one_open" closed_then_one_open in
   ()
 
 let () =
@@ -324,6 +322,9 @@ let () =
       "wide_pair" >:: perf_wide_pair;
       "flat_same_field" >:: perf_same_field;
       "flat_generics" >:: perf_generics;
+      "closed_then_one_open" >:: perf_closed_then_one_open;
+      "left_nested" >:: perf_left_nested;
+      "right_nested" >:: perf_right_nested;
     ]
   in
   (* Report-only quadratic cases are useful when running the benchmark directly,
@@ -335,10 +336,8 @@ let () =
       asserted_tests
       @ [
           "flat_disjoint" >:: report_disjoint_fields;
-          "left_nested" >:: report_left_nested;
-          "right_nested" >:: report_right_nested;
-          "open_rows_walk_the_accumulator"
-          >:: report_open_rows_walk_the_accumulator;
+          "flat_open" >:: report_flat_open;
+          "flat_open_optional" >:: report_flat_open_optional;
         ]
   in
   "shapeSplatPerfTest" >::: tests |> run_test_tt_main

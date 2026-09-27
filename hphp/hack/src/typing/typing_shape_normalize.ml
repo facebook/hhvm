@@ -107,32 +107,40 @@ let merge_shapes_simple
     ~(shape_right : locl_phase shape_type_simple)
     (env : Typing_env_types.env) :
     Typing_env_types.env * locl_phase shape_type_simple =
-  (* The merged shape will contain all _keys_ *)
-  let keys =
-    let keys_left =
-      TShapeMap.fold
-        (fun k _ acc -> TShapeSet.add k acc)
-        shape_left.s_fields
-        TShapeSet.empty
-    in
-    TShapeMap.fold
-      (fun k _ acc -> TShapeSet.add k acc)
-      shape_right.s_fields
-      keys_left
+  let left_row_closed =
+    match get_node shape_left.s_unknown_value with
+    | Tunion [] -> true
+    | _ -> false
   in
   let (env, s_fields) =
-    TShapeSet.fold
-      (fun key (env, acc) ->
-        let fd_left =
-          proj_field shape_left.s_fields shape_left.s_unknown_value key
-        in
+    if left_row_closed then
+      (env, shape_right.s_fields)
+    else
+      TShapeMap.fold
+        (fun key fd_right (env, acc) ->
+          if
+            fd_right.sft_optional && not (TShapeMap.mem key shape_left.s_fields)
+          then
+            let fd_left =
+              { sft_optional = true; sft_ty = shape_left.s_unknown_value }
+            in
+            let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
+            (env, TShapeMap.add key fd acc)
+          else
+            (env, acc))
+        shape_right.s_fields
+        (env, shape_right.s_fields)
+  in
+  let (env, s_fields) =
+    TShapeMap.fold
+      (fun key fd_left (env, acc) ->
         let fd_right =
           proj_field shape_right.s_fields shape_right.s_unknown_value key
         in
         let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
         (env, TShapeMap.add key fd acc))
-      keys
-      (env, TShapeMap.empty)
+      shape_left.s_fields
+      (env, s_fields)
   in
   let (env, s_unknown_value) =
     Typing_union.union
@@ -294,6 +302,25 @@ let merge
         let merge_elem = Merging (reason, shape) in
         let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
+      (* Keep both [Tshape] cases before [splat_is_nothing]: otherwise nested
+         splats are re-traversed at every depth and simple shapes are needlessly
+         cached. Canonical [nothing] still falls through to the bottom check. *)
+      (* -- Flatten nested splats ------------------------------------------- *)
+      (* Any bottom element exposed by flattening is still handled by the loop. *)
+      | ((_, Tshape (Shape_splat { ss_elems })), (Empty | Merging _)) ->
+        let sd = sd || sd_elem in
+        let rev_elems =
+          List.rev (List.mapi (fun index ty -> (index :: path, ty)) ss_elems)
+          @ rev_elems
+        in
+        loop rev_elems (merge_elem, elems, errs, sd, env)
+      (* -- Merge simple shapes --------------------------------------------- *)
+      | ((_, Tshape (Shape_simple shape_left)), Merging (reason, shape_right))
+        ->
+        let (env, shape) = merge_shapes_simple ~shape_left ~shape_right env in
+        let merge_elem = Merging (reason, shape) in
+        let sd = sd || sd_elem in
+        loop rev_elems (merge_elem, elems, errs, sd, env)
       (* -- Merge with bottom as the left element --------------------------- *)
       | ((reason, _), (Empty | Merging _))
         when splat_is_nothing nothing_cache env ty ->
@@ -303,13 +330,6 @@ let merge
            known required fields with type [nothing] to bottom but we HAVE to
            here since we have no other representation *)
         let merge_elem = Bottom reason in
-        loop rev_elems (merge_elem, elems, errs, sd, env)
-      (* -- Merge simple shapes --------------------------------------------- *)
-      | ((_, Tshape (Shape_simple shape_left)), Merging (reason, shape_right))
-        ->
-        let (env, shape) = merge_shapes_simple ~shape_left ~shape_right env in
-        let merge_elem = Merging (reason, shape) in
-        let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       (* -- Accumulate opaque elements -------------------------------------- *)
       (* Type variables, type parameters, and newtypes. A newtype is opaque
@@ -352,18 +372,6 @@ let merge
         in
         let merge_elem = Merging (reason, shape) in
         let sd = sd || sd_elem in
-        loop rev_elems (merge_elem, elems, errs, sd, env)
-      (* -- Flatten nested splats ------------------------------------------- *)
-      (* Splice the inner splat's elements in place and KEEP the current merge
-         accumulator, so simple shapes adjacent across the nested-splat boundary
-         still merge into one element (canonical form). Flushing the accumulator
-         here would leave them as separate un-merged elements. *)
-      | ((_, Tshape (Shape_splat { ss_elems })), (Empty | Merging _)) ->
-        let sd = sd || sd_elem in
-        let rev_elems =
-          List.rev (List.mapi (fun index ty -> (index :: path, ty)) ss_elems)
-          @ rev_elems
-        in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       (* -- Distribute a union operand -------------------------------------- *)
       (* [shape(...A, ...(m1 | ... | mk), ...B)] distributes to

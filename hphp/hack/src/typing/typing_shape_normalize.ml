@@ -90,75 +90,113 @@ let merge_field_descs
     let (env, sft_ty) = Typing_union.union env fd_left.sft_ty fd_right.sft_ty in
     (env, { sft_optional = true; sft_ty })
 
-let proj_field
-    (fields : locl_phase shape_field_type TShapeMap.t)
-    (unknown : locl_phase ty)
-    (key : TShapeField.t) : locl_phase shape_field_type =
-  match TShapeMap.find_opt key fields with
-  | Some fd -> fd
-  | None -> { sft_optional = true; sft_ty = unknown }
+(* -- Optimized accumulator, keeping required and optional fields separate --- *)
+module Shape_acc = struct
+  type t = {
+    origin: type_origin;
+    unknown_value: locl_phase ty;
+    (* The maps have disjoint keys and their values agree with the map's
+       requiredness. An absent field from an open left row can only change
+       optional fields. *)
+    required_fields: locl_phase shape_field_type TShapeMap.t;
+    optional_fields: locl_phase shape_field_type TShapeMap.t;
+  }
 
-(** Simple shapes are shapes which contain now splats, only fields. Under
-    right-most wins semantics, we right-merge each pair of fields. Any field
-    which is not present in one of the shapes can equivalently be considered
-    to be an optional fields with the type given by the unknown field upper bound *)
-let merge_shapes_simple
-    ~(shape_left : locl_phase shape_type_simple)
-    ~(shape_right : locl_phase shape_type_simple)
-    (env : Typing_env_types.env) :
-    Typing_env_types.env * locl_phase shape_type_simple =
-  let left_row_closed =
-    match get_node shape_left.s_unknown_value with
-    | Tunion [] -> true
-    | _ -> false
-  in
-  let (env, s_fields) =
-    if left_row_closed then
-      (env, shape_right.s_fields)
-    else
+  let of_simple shape =
+    let (required_fields, optional_fields) =
       TShapeMap.fold
-        (fun key fd_right (env, acc) ->
-          if
-            fd_right.sft_optional && not (TShapeMap.mem key shape_left.s_fields)
-          then
-            let fd_left =
-              { sft_optional = true; sft_ty = shape_left.s_unknown_value }
-            in
-            let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
-            (env, TShapeMap.add key fd acc)
+        (fun key field (required, optional) ->
+          if field.sft_optional then
+            (required, TShapeMap.add key field optional)
           else
-            (env, acc))
-        shape_right.s_fields
-        (env, shape_right.s_fields)
-  in
-  let (env, s_fields) =
-    TShapeMap.fold
-      (fun key fd_left (env, acc) ->
-        let fd_right =
-          proj_field shape_right.s_fields shape_right.s_unknown_value key
-        in
-        let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
-        (env, TShapeMap.add key fd acc))
-      shape_left.s_fields
-      (env, s_fields)
-  in
-  let (env, s_unknown_value) =
-    Typing_union.union
-      env
-      shape_left.s_unknown_value
-      shape_right.s_unknown_value
-  in
-  ( env,
+            (TShapeMap.add key field required, optional))
+        shape.s_fields
+        (TShapeMap.empty, TShapeMap.empty)
+    in
     {
-      (* TODO[mjt] can this be improved? *)
-      s_origin = Missing_origin;
-      s_unknown_value;
-      s_fields;
-    } )
+      origin = shape.s_origin;
+      unknown_value = shape.s_unknown_value;
+      required_fields;
+      optional_fields;
+    }
+
+  let to_simple acc =
+    let s_fields =
+      if TShapeMap.is_empty acc.required_fields then
+        acc.optional_fields
+      else
+        TShapeMap.union
+          ~combine:(fun _ _ _ ->
+            failwith "Shape_acc: field is both required and optional")
+          acc.required_fields
+          acc.optional_fields
+    in
+    { s_origin = acc.origin; s_unknown_value = acc.unknown_value; s_fields }
+
+  let merge_shape
+      ~(shape_left : locl_phase shape_type_simple)
+      ~(shape_right : t)
+      (env : Typing_env_types.env) : Typing_env_types.env * t =
+    let left_row_closed =
+      match get_node shape_left.s_unknown_value with
+      | Tunion [] -> true
+      | _ -> false
+    in
+    let (env, optional_fields) =
+      if left_row_closed then
+        (env, shape_right.optional_fields)
+      else
+        TShapeMap.fold
+          (fun key fd_right (env, optional) ->
+            if TShapeMap.mem key shape_left.s_fields then
+              (env, optional)
+            else
+              let fd_left =
+                { sft_optional = true; sft_ty = shape_left.s_unknown_value }
+              in
+              let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
+              (env, TShapeMap.add key fd optional))
+          shape_right.optional_fields
+          (env, shape_right.optional_fields)
+    in
+    let (env, required_fields, optional_fields) =
+      TShapeMap.fold
+        (fun key fd_left (env, required, optional) ->
+          let fd_right =
+            match TShapeMap.find_opt key shape_right.required_fields with
+            | Some fd -> fd
+            | None ->
+              (match TShapeMap.find_opt key shape_right.optional_fields with
+              | Some fd -> fd
+              | None ->
+                { sft_optional = true; sft_ty = shape_right.unknown_value })
+          in
+          let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
+          if fd.sft_optional then
+            (env, TShapeMap.remove key required, TShapeMap.add key fd optional)
+          else
+            (env, TShapeMap.add key fd required, TShapeMap.remove key optional))
+        shape_left.s_fields
+        (env, shape_right.required_fields, optional_fields)
+    in
+    let (env, unknown_value) =
+      Typing_union.union
+        env
+        shape_left.s_unknown_value
+        shape_right.unknown_value
+    in
+    ( env,
+      {
+        origin = Missing_origin;
+        unknown_value;
+        required_fields;
+        optional_fields;
+      } )
+end
 
 type merge_elem =
   | Empty
-  | Merging of Typing_reason.t * locl_phase shape_type_simple
+  | Merging of Typing_reason.t * Shape_acc.t
   | Bottom of Typing_reason.t
 
 (** Turn the merge accumulator (once the element list is exhausted) into a
@@ -169,10 +207,12 @@ let finalize (merge_elem : merge_elem) (elems : locl_phase ty list) (sd : bool)
   | (Bottom reason, _) ->
     (* The whole type is [nothing]. *)
     Full (Typing_make_type.nothing reason, false)
-  | (Merging (reason, shape_simple), []) ->
-    Full (mk (reason, Tshape (Shape_simple shape_simple)), sd)
-  | (Merging (reason, shape_simple), _) ->
-    let elem = mk (reason, Tshape (Shape_simple shape_simple)) in
+  | (Merging (reason, shape_acc), []) ->
+    let shape = Shape_acc.to_simple shape_acc in
+    Full (mk (reason, Tshape (Shape_simple shape)), sd)
+  | (Merging (reason, shape_acc), _) ->
+    let shape = Shape_acc.to_simple shape_acc in
+    let elem = mk (reason, Tshape (Shape_simple shape)) in
     Partial (elem :: elems, sd)
   | (Empty, []) ->
     (* Everything cancelled to the unit element: the empty closed shape. The
@@ -299,7 +339,7 @@ let merge
       (* -- Start accumulating ---------------------------------------------- *)
       | ((reason, Tshape (Shape_simple shape)), Empty) ->
         (* Start accumulating the merged shape *)
-        let merge_elem = Merging (reason, shape) in
+        let merge_elem = Merging (reason, Shape_acc.of_simple shape) in
         let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       (* Keep both [Tshape] cases before [splat_is_nothing]: otherwise nested
@@ -317,7 +357,7 @@ let merge
       (* -- Merge simple shapes --------------------------------------------- *)
       | ((_, Tshape (Shape_simple shape_left)), Merging (reason, shape_right))
         ->
-        let (env, shape) = merge_shapes_simple ~shape_left ~shape_right env in
+        let (env, shape) = Shape_acc.merge_shape ~shape_left ~shape_right env in
         let merge_elem = Merging (reason, shape) in
         let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
@@ -335,9 +375,10 @@ let merge
       (* Type variables, type parameters, and newtypes. A newtype is opaque
          outside its defining file and behaves exactly like a rigid parameter;
          inside, localization has already expanded it to its definition. *)
-      | ((_, (Tgeneric _ | Tnewtype _ | Tvar _)), Merging (shape_reason, shape))
-        ->
+      | ( (_, (Tgeneric _ | Tnewtype _ | Tvar _)),
+          Merging (shape_reason, shape_acc) ) ->
         let elems =
+          let shape = Shape_acc.to_simple shape_acc in
           let elem = mk (shape_reason, Tshape (Shape_simple shape)) in
           ty :: elem :: elems
         in
@@ -358,7 +399,7 @@ let merge
             s_fields = TShapeMap.empty;
           }
         in
-        let (env, shape) = merge_shapes_simple ~shape_left ~shape_right env in
+        let (env, shape) = Shape_acc.merge_shape ~shape_left ~shape_right env in
         let merge_elem = Merging (reason, shape) in
         let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
@@ -370,7 +411,7 @@ let merge
             s_fields = TShapeMap.empty;
           }
         in
-        let merge_elem = Merging (reason, shape) in
+        let merge_elem = Merging (reason, Shape_acc.of_simple shape) in
         let sd = sd || sd_elem in
         loop rev_elems (merge_elem, elems, errs, sd, env)
       (* -- Distribute a union operand -------------------------------------- *)
@@ -394,9 +435,10 @@ let merge
           members
           ~make_result:intersection_result
       (* -- Error conditions ------------------------------------------------ *)
-      | ((reason, _), Merging (shape_reason, shape)) ->
+      | ((reason, _), Merging (shape_reason, shape_acc)) ->
         let (env, elem_err) = error_tyvar path reason env in
         let elems =
+          let shape = Shape_acc.to_simple shape_acc in
           let elem_shape = mk (shape_reason, Tshape (Shape_simple shape)) in
           elem_err :: elem_shape :: elems
         in

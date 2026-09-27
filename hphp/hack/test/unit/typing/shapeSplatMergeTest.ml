@@ -71,6 +71,25 @@ let simple ?(unknown = tnothing) kvs =
 
 let shape_ty s = mk (r, Tshape (Shape_simple s))
 
+let merge_simple_shapes shape_left shape_right =
+  let (_, err, result) =
+    Norm.merge
+      ~on_error:None
+      [shape_ty shape_left; shape_ty shape_right]
+      dummy_env
+  in
+  assert_equal None err;
+  match result with
+  | Norm.Full (ty, _) ->
+    (match get_node ty with
+    | Tshape (Shape_simple shape) -> shape
+    | _ -> assert_failure "expected a simple shape")
+  | Norm.Empty_shape _ -> simple []
+  | Norm.Partial _ -> assert_failure "expected a fully merged shape"
+  | Norm.Union _
+  | Norm.Intersection _ ->
+    assert_failure "expected a simple shape, not a distributed result"
+
 let get_field s name = TShapeMap.find_opt (key name) s.s_fields
 
 let is_nothing ty =
@@ -109,11 +128,10 @@ let assert_prim name expected fd_opt =
 
 (* shape('x' => int) + shape('y' => string) -> both required, closed. *)
 let disjoint_closed _ =
-  let (_, merged) =
-    Norm.merge_shapes_simple
-      ~shape_left:(simple [("x", field tint)])
-      ~shape_right:(simple [("y", field tbool)])
-      dummy_env
+  let merged =
+    merge_simple_shapes
+      (simple [("x", field tint)])
+      (simple [("y", field tbool)])
   in
   assert_required "x" (get_field merged "x");
   assert_required "y" (get_field merged "y");
@@ -123,11 +141,10 @@ let disjoint_closed _ =
 
 (* Rightmost wins: shape('a' => int) + shape('a' => string) -> a: string. *)
 let rightmost_wins _ =
-  let (_, merged) =
-    Norm.merge_shapes_simple
-      ~shape_left:(simple [("a", field tint)])
-      ~shape_right:(simple [("a", field tbool)])
-      dummy_env
+  let merged =
+    merge_simple_shapes
+      (simple [("a", field tint)])
+      (simple [("a", field tbool)])
   in
   assert_required "a" (get_field merged "a");
   assert_prim "a" Aast.Tbool (get_field merged "a")
@@ -201,22 +218,18 @@ let normalize_shape_type_preserves_distributed_union _ =
 
 (* Required left, optional right -> required (union of types). *)
 let required_optional_union _ =
-  let (_, merged) =
-    Norm.merge_shapes_simple
-      ~shape_left:(simple [("a", field tint)])
-      ~shape_right:(simple [("a", field ~optional:true tbool)])
-      dummy_env
+  let merged =
+    merge_simple_shapes
+      (simple [("a", field tint)])
+      (simple [("a", field ~optional:true tbool)])
   in
   assert_required "a" (get_field merged "a")
 
 (* A field only on the left, open shape on the right -> unioned with the right's
    unknown (mixed) and absorbed; result is open. *)
 let open_right_absorbs _ =
-  let (_, merged) =
-    Norm.merge_shapes_simple
-      ~shape_left:(simple [("a", field tint)])
-      ~shape_right:(simple ~unknown:tmixed [])
-      dummy_env
+  let merged =
+    merge_simple_shapes (simple [("a", field tint)]) (simple ~unknown:tmixed [])
   in
   assert_required "a" (get_field merged "a");
   assert_bool "result should be open" (not (is_nothing merged.s_unknown_value))
@@ -680,9 +693,7 @@ let full_shape label = function
 let prop_rightmost_wins _ =
   List.iter pair_shapes ~f:(fun sl ->
       List.iter pair_shapes ~f:(fun sr ->
-          let (_, merged) =
-            Norm.merge_shapes_simple ~shape_left:sl ~shape_right:sr dummy_env
-          in
+          let merged = merge_simple_shapes sl sr in
           List.iter field_names ~f:(fun k ->
               match get_field sr k with
               | Some fd_r when not fd_r.sft_optional ->
@@ -701,9 +712,7 @@ let prop_rightmost_wins _ =
 let prop_keys_union _ =
   List.iter pair_shapes ~f:(fun sl ->
       List.iter pair_shapes ~f:(fun sr ->
-          let (_, merged) =
-            Norm.merge_shapes_simple ~shape_left:sl ~shape_right:sr dummy_env
-          in
+          let merged = merge_simple_shapes sl sr in
           List.iter field_names ~f:(fun k ->
               let in_l = Option.is_some (get_field sl k) in
               let in_r = Option.is_some (get_field sr k) in

@@ -22,12 +22,6 @@ val merge_field_descs :
   Typing_env_types.env ->
   Typing_env_types.env * locl_phase shape_field_type
 
-val merge_shapes_simple :
-  shape_left:locl_phase shape_type_simple ->
-  shape_right:locl_phase shape_type_simple ->
-  Typing_env_types.env ->
-  Typing_env_types.env * locl_phase shape_type_simple
-
 val merge :
   on_error:Typing_error.Reasons_callback.t option ->
   locl_phase ty list ->

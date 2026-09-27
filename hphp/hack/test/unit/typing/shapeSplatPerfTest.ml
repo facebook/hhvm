@@ -15,8 +15,7 @@
  * the largest sizes, with each time taken as the median of repeated samples.
  * The scenarios are chosen to isolate the two independent costs in a merge:
  *
- *   - the shape accumulator (merge_shapes_simple), exercised by the closed
- *     disjoint-field scenarios;
+ *   - the shape accumulator, exercised by the closed disjoint-field scenarios;
  *   - the disjointness accumulator (add_disjointness_operand), exercised by the
  *     generic / open / repeated-field scenarios, where nothing is merged into
  *     the shape accumulator at all.
@@ -138,8 +137,7 @@ let right_nested n =
   in
   build 0 (shape_ty (simple []))
 
-(* Two shapes of [n] fields each, merged once. A single call to
-   [merge_shapes_simple] over [n] keys: the linear-in-n baseline that the
+(* Two shapes of [n] fields each, merged once: the linear-in-n baseline that the
    scenarios above should not be able to beat asymptotically. *)
 let wide_pair n =
   let fields prefix =
@@ -221,7 +219,7 @@ let fit_exponent measurements =
 
 (* Time [build n |> run] across [sizes] and return the exponent fitted over the
    largest [fitted_size_count] measurements. *)
-let bench_with ~samples run name build =
+let bench_with ~sizes ~samples run name build =
   Printf.printf "\n%s\n" name;
   Printf.printf
     "%8s %12s %14s %14s %10s\n"
@@ -262,9 +260,10 @@ let bench_with ~samples run name build =
     exponent;
   exponent
 
-let bench name build = bench_with ~samples:timing_samples run_merge name build
+let bench ?(sizes = sizes) name build =
+  bench_with ~sizes ~samples:timing_samples run_merge name build
 
-let report_bench name build = bench_with ~samples:1 run_merge name build
+let report_bench name build = bench_with ~sizes ~samples:1 run_merge name build
 
 (* Perf assertions are inherently noisy, so the threshold is deliberately slack:
    it is here to catch a return to quadratic scaling, not to police constant
@@ -295,11 +294,10 @@ let report_disjoint_fields _ =
   let (_ : float) = report_bench "flat_disjoint" flat_disjoint in
   ()
 
-(* Measured but not asserted on: open rows still walk the accumulated fields;
-   optional fields additionally need to be widened. *)
-let report_flat_open _ =
-  let (_ : float) = report_bench "flat_open" flat_open in
-  ()
+let perf_open _ =
+  assert_subquadratic
+    "flat_open"
+    (bench ~sizes:[256; 512; 1024; 2048; 4096] "flat_open" flat_open)
 
 let perf_closed_then_one_open _ =
   assert_subquadratic
@@ -312,6 +310,8 @@ let perf_left_nested _ =
 let perf_right_nested _ =
   assert_subquadratic "right_nested" (bench "right_nested" right_nested)
 
+(* Every incoming open row widens every accumulated optional field, so avoiding
+   quadratic work requires deferring those unions rather than indexing keys. *)
 let report_flat_open_optional _ =
   let (_ : float) = report_bench "flat_open_optional" flat_open_optional in
   ()
@@ -322,6 +322,7 @@ let () =
       "wide_pair" >:: perf_wide_pair;
       "flat_same_field" >:: perf_same_field;
       "flat_generics" >:: perf_generics;
+      "flat_open" >:: perf_open;
       "closed_then_one_open" >:: perf_closed_then_one_open;
       "left_nested" >:: perf_left_nested;
       "right_nested" >:: perf_right_nested;
@@ -336,7 +337,6 @@ let () =
       asserted_tests
       @ [
           "flat_disjoint" >:: report_disjoint_fields;
-          "flat_open" >:: report_flat_open;
           "flat_open_optional" >:: report_flat_open_optional;
         ]
   in

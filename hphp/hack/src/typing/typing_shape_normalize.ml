@@ -133,6 +133,18 @@ module Shape_acc = struct
     in
     { s_origin = acc.origin; s_unknown_value = acc.unknown_value; s_fields }
 
+  let map_fields_env f env fields =
+    let env_ref = ref env in
+    let fields =
+      TShapeMap.mapi
+        (fun key field ->
+          let (env, field) = f !env_ref key field in
+          env_ref := env;
+          field)
+        fields
+    in
+    (!env_ref, fields)
+
   let merge_shape
       ~(shape_left : locl_phase shape_type_simple)
       ~(shape_right : t)
@@ -146,18 +158,17 @@ module Shape_acc = struct
       if left_row_closed then
         (env, shape_right.optional_fields)
       else
-        TShapeMap.fold
-          (fun key fd_right (env, optional) ->
+        map_fields_env
+          (fun env key fd_right ->
             if TShapeMap.mem key shape_left.s_fields then
-              (env, optional)
+              (env, fd_right)
             else
               let fd_left =
                 { sft_optional = true; sft_ty = shape_left.s_unknown_value }
               in
-              let (env, fd) = merge_field_descs ~fd_left ~fd_right env in
-              (env, TShapeMap.add key fd optional))
+              merge_field_descs ~fd_left ~fd_right env)
+          env
           shape_right.optional_fields
-          (env, shape_right.optional_fields)
     in
     let (env, required_fields, optional_fields) =
       TShapeMap.fold

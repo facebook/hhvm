@@ -193,6 +193,17 @@ void timezone_init();
 void pcre_init();
 void pcre_reinit();
 
+// Overrides the weak definition in hphp/util/alloc.cpp, which cannot reach
+// Logger from below it in the dependency graph. Outside server mode there is
+// no error log yet, so leave those on stderr.
+void alloc_warn(const std::string& msg) {
+  if (Cfg::Server::Mode) {
+    Logger::Warning(msg);
+  } else {
+    fprintf(stderr, "%s\n", msg.c_str());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

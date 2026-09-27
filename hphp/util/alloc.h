@@ -19,6 +19,7 @@
 
 #include <array>
 #include <atomic>
+#include <string>
 
 #include <stdint.h>
 
@@ -64,6 +65,14 @@ struct OutOfMemoryException : Exception {
  * mapped by the binary loader.
  */
 uintptr_t tc_start_address();
+
+/*
+ * Report a problem with the process's address-space layout.  This runs while
+ * the arenas are being set up, which is below Logger in the dependency graph
+ * (hphp/util:logger depends on hphp/util:alloc), so the default writes to
+ * stderr and hphp/runtime overrides it to log a warning in server mode.
+ */
+void alloc_warn(const std::string& msg);
 
 #ifdef USE_JEMALLOC
 

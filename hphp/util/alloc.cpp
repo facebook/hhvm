@@ -26,6 +26,7 @@
 #include <sanitizer/asan_interface.h>
 #endif
 
+#include <folly/Format.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 
@@ -369,6 +370,23 @@ void setup_static_literals_arena() {
   }
 }
 
+HHVM_ATTRIBUTE_WEAK void alloc_warn(const std::string& msg) {
+  fprintf(stderr, "%s\n", msg.c_str());
+}
+
+// The arena reservations below pass their base to mmap() as a hint instead of
+// MAP_FIXED, so the kernel silently relocates them when something else already
+// occupies the range. Where they land is load-bearing (is_low_mem() classifies
+// pointers by numeric address), so say so rather than continuing quietly.
+static void check_arena_base(const char* what,
+                             uintptr_t desired, uintptr_t actual) {
+  if (actual == desired) return;
+  alloc_warn(
+    folly::sformat("{}: reserved {:#x}, requested {:#x}; "
+                   "another mapping already occupies that range",
+                   what, actual, desired));
+}
+
 void setup_auto_arenas(PageSpec s) {
   size_t size = size1g * s.n1GPages + size2m * s.n2MPages;
   if (size == 0) return;
@@ -378,6 +396,7 @@ void setup_auto_arenas(PageSpec s) {
                   MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
                   -1, 0);
   auto base = reinterpret_cast<uintptr_t>(ret);
+  check_arena_base("arena 0 huge page range", kArena0Base, base);
   if (auto r = base % size1g) {         // align to 1G boundary
     base = base + size1g - r;
   }
@@ -531,6 +550,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
       throw std::runtime_error{"mmap() failed to reserve address range"};
     }
     auto base = reinterpret_cast<uintptr_t>(ret);
+    check_arena_base("request heap local arena", desiredBase, base);
     if (base % size1g) {                // adjust to start at 1GB boundary
       auto const newBase = (base + size1g - 1) & ~(size1g - 1);
       munmap(reinterpret_cast<void*>(base), newBase - base);

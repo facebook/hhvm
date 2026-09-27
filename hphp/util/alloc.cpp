@@ -395,6 +395,16 @@ void setup_auto_arenas(PageSpec s) {
                   size + size1g, PROT_NONE,
                   MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
                   -1, 0);
+  if (ret == MAP_FAILED) {
+    // Rounding MAP_FAILED up to the next 1GB boundary wraps to 0, which then
+    // satisfies every assertion below and hands arena 0 the low address space
+    // -- the binary, the TC and the low arena, all of which is_low_mem() calls
+    // static. Huge pages for arena 0 are an optimization, so skip them.
+    alloc_warn(
+      folly::sformat("arena 0 huge page range: mmap failed with error {}; "
+                     "continuing without huge pages for arena 0", errno));
+    return;
+  }
   auto base = reinterpret_cast<uintptr_t>(ret);
   check_arena_base("arena 0 huge page range", kArena0Base, base);
   if (auto r = base % size1g) {         // align to 1G boundary

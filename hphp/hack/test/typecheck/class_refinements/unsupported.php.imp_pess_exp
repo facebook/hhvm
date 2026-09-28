@@ -1,7 +1,15 @@
+WARN: File "unsupported.php", line 27, characters 12-36:
+Returning a value of type `dynamic` through a non-fully-enforced return type `T0` (Warn[12044])
+  File "unsupported.php", line 26, characters 6-7:
+  This return type is not fully enforced at runtime
 WARN: File "unsupported.php", line 27, characters 32-34:
 Method invoked on a value of type `dynamic` (Warn[12038])
   File "", line 0, characters 0-0:
   This expression has type `dynamic`
+WARN: File "unsupported.php", line 33, characters 12-36:
+Returning a value of type `dynamic` through a non-fully-enforced return type `T0` (Warn[12044])
+  File "unsupported.php", line 32, characters 6-7:
+  This return type is not fully enforced at runtime
 WARN: File "unsupported.php", line 33, characters 32-34:
 Method invoked on a value of type `dynamic` (Warn[12038])
   File "", line 0, characters 0-0:

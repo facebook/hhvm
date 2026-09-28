@@ -218,7 +218,10 @@ end = struct
       end
       | Tapply ((_, name), [ty1; ty2])
         when top_enforced
-             && String.equal name Naming_special_names.Collections.cDict
+             && (String.equal name Naming_special_names.Collections.cDict
+                || String.equal
+                     name
+                     Naming_special_names.Collections.cKeyedContainer)
              && is_arraykey ty1
              && is_mixed ty2 ->
         Enforced ty
@@ -232,7 +235,12 @@ end = struct
         Enforced ty
       | Tapply ((_, name), [ty1])
         when top_enforced
-             && String.equal name Naming_special_names.Collections.cVec
+             && (String.equal name Naming_special_names.Collections.cVec
+                || String.equal
+                     name
+                     Naming_special_names.Collections.cTraversable
+                || String.equal name Naming_special_names.Collections.cContainer
+                )
              && is_mixed ty1 ->
         Enforced ty
       (* Look through supportdyn, just as we look through ~ *)

@@ -961,6 +961,26 @@ module Dynamic_call_warning = struct
   let quickfixes _ = []
 end
 
+module Dynamic_return = struct
+  type t = Typing_warning.Dynamic_return.t
+
+  let code = Codes.DynamicReturn
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Dynamic_return.return_type; _ } =
+    Printf.sprintf
+      "Returning a value of type `dynamic` through a non-fully-enforced return type %s"
+      (Markdown_lite.md_codify return_type)
+
+  let reasons { Typing_warning.Dynamic_return.return_type_pos; _ } =
+    [(return_type_pos, "This return type is not fully enforced at runtime")]
+
+  let quickfixes _ = []
+end
+
 module Consistent_construct_abstract_final = struct
   type t = Typing_warning.Consistent_construct_abstract_final.t
 
@@ -1088,6 +1108,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Consistent_construct_abstract_final ->
     (module Consistent_construct_abstract_final)
   | Typing_warning.Dynamic_call -> (module Dynamic_call_warning)
+  | Typing_warning.Dynamic_return -> (module Dynamic_return)
   | Typing_warning.Sealed_not_override -> (module Sealed_not_override)
   | Typing_warning.Redundant_require_this_as ->
     (module Redundant_require_this_as)
@@ -1137,6 +1158,7 @@ let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
   | Typing_warning.Redundant_nullsafe_operation -> true
   | Typing_warning.Set_or_keyset_array_get -> true
   | Typing_warning.Dynamic_call -> true
+  | Typing_warning.Dynamic_return -> true
   | Typing_warning.Tany_found -> true
 
 let code_is_enabled tcopt code =

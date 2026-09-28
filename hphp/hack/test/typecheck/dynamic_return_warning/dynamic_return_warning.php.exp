@@ -1,0 +1,24 @@
+WARN: File "dynamic_return_warning.php", line 5, characters 10-15:
+Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
+  File "dynamic_return_warning.php", line 4, characters 49-56:
+  This return type is not fully enforced at runtime
+WARN: File "dynamic_return_warning.php", line 29, characters 10-15:
+Returning a value of type `dynamic` through a non-fully-enforced return type `T` (Warn[12044])
+  File "dynamic_return_warning.php", line 28, characters 71-71:
+  This return type is not fully enforced at runtime
+WARN: File "dynamic_return_warning.php", line 39, characters 10-15:
+Returning a value of type `dynamic` through a non-fully-enforced return type `PartiallyEnforcedEnum` (Warn[12044])
+  File "dynamic_return_warning.php", line 38, characters 4-24:
+  This return type is not fully enforced at runtime
+WARN: File "dynamic_return_warning.php", line 63, characters 10-15:
+Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
+  File "dynamic_return_warning.php", line 62, characters 14-21:
+  This return type is not fully enforced at runtime
+WARN: File "dynamic_return_warning.php", line 80, characters 12-17:
+Returning a value of type `dynamic` through a non-fully-enforced return type `dict<string, int>` (Warn[12044])
+  File "dynamic_return_warning.php", line 79, characters 6-22:
+  This return type is not fully enforced at runtime
+WARN: File "dynamic_return_warning.php", line 85, characters 41-46:
+Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
+  File "dynamic_return_warning.php", line 85, characters 28-35:
+  This return type is not fully enforced at runtime

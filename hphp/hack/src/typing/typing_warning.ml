@@ -282,6 +282,13 @@ module Dynamic_call = struct
   }
 end
 
+module Dynamic_return = struct
+  type t = {
+    return_type: string;
+    return_type_pos: Pos_or_decl.t;
+  }
+end
+
 module Sealed_not_override = struct
   type t = {
     method_name: string;
@@ -327,6 +334,7 @@ type (_, _) kind =
   | Consistent_construct_abstract_final
       : (Consistent_construct_abstract_final.t, warn) kind
   | Dynamic_call : (Dynamic_call.t, warn) kind
+  | Dynamic_return : (Dynamic_return.t, warn) kind
   | Sealed_not_override : (Sealed_not_override.t, warn) kind
   | Redundant_require_this_as : (Redundant_require_this_as.t, warn) kind
 

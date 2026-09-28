@@ -1,3 +1,7 @@
+WARN: File "wrap_classname.bad.php", line 11, characters 10-28:
+Returning a value of type `dynamic` through a non-fully-enforced return type `~vec<int>` (Warn[12044])
+  File "wrap_classname.bad.php", line 10, characters 22-30:
+  This return type is not fully enforced at runtime
 ERROR: File "wrap_classname.bad.php", line 6, characters 48-50:
 Method  `__construct` in class `Wrap` is not dynamically callable. (Typing[4426])
   File "wrap_classname.bad.php", line 6, characters 48-50:

@@ -1,2 +1,6 @@
+WARN: File "nullsafe-bug.php", line 9, characters 10-39:
+Returning a value of type `dynamic` through a non-fully-enforced return type `?Awaitable<?IFoo>` (Warn[12044])
+  File "nullsafe-bug.php", line 8, characters 32-48:
+  This return type is not fully enforced at runtime
 ERROR: File "nullsafe-bug.php", line 8, characters 25-28:
 Was expecting a type hint (Typing[4032])

@@ -45,6 +45,7 @@ let warning_checks =
     (module Set_or_keyset_array_get);
     (module Tany_check);
     (module Dynamic_call_check);
+    (module Dynamic_return_check);
   ]
 
 let visitor ctx =

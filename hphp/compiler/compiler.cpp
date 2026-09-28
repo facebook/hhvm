@@ -1238,6 +1238,16 @@ bool process(CompilerOptions &po) {
       return false;
     }
   }
+  if (incrementalFileCache &&
+      (aliasesBase(po.filecache, po.incrementalBaseFileCache) ||
+       aliasesBase(po.filecache + ".part", po.incrementalBaseFileCache))) {
+    Logger::FError(
+      "Incremental file-cache output {} aliases its base {}",
+      po.filecache,
+      po.incrementalBaseFileCache
+    );
+    return false;
+  }
   unlink(outputFile.c_str());
 
   auto const readPaths = [](const std::string& listPath,
@@ -1259,6 +1269,22 @@ bool process(CompilerOptions &po) {
     return true;
   };
 
+  auto const validFileCachePath = [](std::string_view path) {
+    if (path.empty() || FileUtil::isDirSeparator(path.front()) ||
+        FileUtil::isDirSeparator(path.back())) {
+      return false;
+    }
+    for (size_t start = 0;;) {
+      auto const end = path.find('/', start);
+      auto const component = path.substr(start, end - start);
+      if (component.empty() || component == "." || component == "..") {
+        return false;
+      }
+      if (end == std::string_view::npos) return true;
+      start = end + 1;
+    }
+  };
+
   std::vector<std::string> repoInvalidatedPaths;
   if (incrementalRepo &&
       !readPaths(po.incrementalInvalidatedList, repoInvalidatedPaths)) {
@@ -1271,6 +1297,15 @@ bool process(CompilerOptions &po) {
           fileCacheInvalidatedPaths)) {
       return false;
     }
+    for (auto const& path : fileCacheInvalidatedPaths) {
+      if (!validFileCachePath(path)) {
+        Logger::FError("Invalid file-cache path in {}: {}",
+                       po.incrementalFileCacheInvalidatedList,
+                       path);
+        return false;
+      }
+    }
+
     std::vector<std::string> inputPaths;
     if (!readPaths(po.inputList, inputPaths)) return false;
     for (auto& path : inputPaths) {
@@ -1279,6 +1314,10 @@ bool process(CompilerOptions &po) {
           "Directory input {} is not supported with incremental file-cache reuse",
           path
         );
+        return false;
+      }
+      if (!validFileCachePath(path)) {
+        Logger::FError("Invalid file-cache path in {}: {}", po.inputList, path);
         return false;
       }
       fileCacheInvalidatedPaths.push_back(std::move(path));

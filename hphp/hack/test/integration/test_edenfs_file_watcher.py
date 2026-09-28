@@ -239,6 +239,43 @@ def assertServerNotifierChangesNo(driver: CommonTestDriver) -> None:
     driver.assertTrue(matches is None)
 
 
+class EdenfsWatcherInitDiagnosisTestDriver(CommonTestDriver):
+    """Uses ordinary directories and allows dfind fallback after Eden init fails."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        Path(self.repo_dir, "hh.conf").write_text(
+            "edenfs_file_watcher_enabled = true\n"
+        )
+
+
+class EdenfsWatcherInitDiagnosisTests(TestCase[EdenfsWatcherInitDiagnosisTestDriver]):
+    @classmethod
+    def get_test_driver(cls) -> EdenfsWatcherInitDiagnosisTestDriver:
+        return EdenfsWatcherInitDiagnosisTestDriver()
+
+    def test_non_eden_sapling_repo_is_non_eden(self) -> None:
+        """A valid Sapling checkout without .eden gets the non-Eden classification."""
+        driver = self.test_driver
+        _, stderr, exit_code = driver.proc_call(["hg", "init", driver.repo_dir])
+        self.assertEqual(exit_code, 0, stderr)
+        commit_id, stderr, exit_code = driver.proc_call(
+            ["hg", "--cwd", driver.repo_dir, "whereami"]
+        )
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertFalse(os.path.lexists(Path(driver.repo_dir, ".eden")))
+
+        driver.start_hh_server()
+        driver.check_cmd(["No errors!"])
+        server_log = driver.get_all_logs(driver.repo_dir).current_server_log
+        self.assertIn(f"Sapling commit {commit_id.strip()} verified", server_log)
+        self.assertIn(
+            "Failed to initialize EdenFS watcher, "
+            f"www repo {driver.repo_dir} is not on Eden",
+            server_log,
+        )
+
+
 class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     """Driver compatible with CommonTestDriver, but creating an Eden-backed repo.
 

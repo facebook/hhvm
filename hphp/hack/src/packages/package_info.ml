@@ -91,6 +91,25 @@ let get_package (info : t) (pkg : string) : Package.t option =
 let package_exists (info : t) (pkg : string) : bool =
   Option.is_some (get_package info pkg)
 
+let add_package (info : t) (pkg : Package.t) : t =
+  let name = Package.get_package_name pkg in
+  (* Replacing a configured package would drop it from resolution for as long as
+     the caller holds this [t], which is never what adding one is meant to do. *)
+  if S_map.mem name info.existing_packages then
+    failwith (Printf.sprintf "package %s is already configured" name);
+  let pkg_entries =
+    List.map pkg.Package.include_paths ~f:(fun (_, path) -> (path, pkg))
+  in
+  {
+    existing_packages = S_map.add name pkg info.existing_packages;
+    (* Order is precedence: [get_package_for_file] returns the first entry whose
+       include path prefixes the path, and looks no further. So [pkg] goes at
+       the head — a configured package whose include path is a directory would
+       otherwise match first for a path [pkg] names, and [pkg] would never be
+       reached. *)
+    include_path_to_package_map = pkg_entries @ info.include_path_to_package_map;
+  }
+
 (** The get_package_for_file returns the package a file path belongs to;
   * it ignores PackageOverride annotations. 
   *)

@@ -1,0 +1,10 @@
+ERROR: File "non_denotable_field_unions.php", line 18, characters 6-8:
+Shape splat produces fields with non-denotable types (Typing[4419])
+  File "non_denotable_field_unions.php", line 5, characters 3-10:
+  Shape field `nested` has non-denotable type `vec<(bool | string)>`
+  File "non_denotable_field_unions.php", line 7, characters 4-22:
+  Shape field `optional_optional` has non-denotable type `(bool | float)`
+  File "non_denotable_field_unions.php", line 6, characters 3-21:
+  Shape field `required_optional` has non-denotable type `(bool | string)`
+  File "non_denotable_field_unions.php", line 8, characters 3-13:
+  Shape field `three_way` has non-denotable type `(bool | float | string)`

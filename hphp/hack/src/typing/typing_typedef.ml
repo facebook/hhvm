@@ -260,6 +260,126 @@ let check_where_clauses_with_recursive_mentions env t_name where_constraints =
   in
   List.iter ~f:report pairs
 
+(** Whether [ty] contains a union requiring union/intersection type hints.
+    This is intentionally narrower than [Typing_defs.is_denotable]: localized
+    source hints such as [~T] and open [shape(...)] contain internal
+    representations that are not themselves denotable. *)
+let rec contains_non_denotable_union env ty =
+  let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
+  match Typing_defs.get_node ty with
+  | Tunion tys -> begin
+    (* Localized like types are unions containing dynamic. Check the type below
+       the like rather than rejecting the representation of the like itself. *)
+    match Typing_dynamic_utils.try_strip_dynamic_from_union env tys with
+    | Some (_, []) -> false
+    | Some (_, [ty]) -> contains_non_denotable_union env ty
+    | Some (_, tys) ->
+      let ty = Typing_make_type.union (Typing_defs.get_reason ty) tys in
+      not (Typing_defs.is_denotable ty)
+    | None -> not (Typing_defs.is_denotable ty)
+  end
+  | Tclass (_, _, tys)
+  | Tintersection tys ->
+    List.exists tys ~f:(contains_non_denotable_union env)
+  | Ttuple { t_required; t_optional; t_extra } ->
+    List.exists t_required ~f:(contains_non_denotable_union env)
+    || List.exists t_optional ~f:(contains_non_denotable_union env)
+    || begin
+         match t_extra with
+         | Tsplat ty
+         | Tvariadic ty ->
+           contains_non_denotable_union env ty
+       end
+  | Tvec_or_dict (tk, tv) ->
+    contains_non_denotable_union env tk || contains_non_denotable_union env tv
+  | Taccess (ty, _) -> contains_non_denotable_union env ty
+  | Tshape (Shape_simple { s_unknown_value; s_fields; _ }) ->
+    contains_non_denotable_union env s_unknown_value
+    || Typing_defs.TShapeMap.exists
+         (fun _ field ->
+           contains_non_denotable_union env field.Typing_defs.sft_ty)
+         s_fields
+  | Tshape (Shape_splat { ss_elems }) ->
+    List.exists ss_elems ~f:(contains_non_denotable_union env)
+  | Tfun { ft_params; ft_ret; _ } ->
+    contains_non_denotable_union env ft_ret
+    || List.exists ft_params ~f:(fun param ->
+           contains_non_denotable_union env param.Typing_defs.fp_type)
+  | Toption ty
+  | Tclass_ptr ty ->
+    contains_non_denotable_union env ty
+  | Tnonnull
+  | Tdynamic _
+  | Tprim _
+  | Tnewtype _
+  | Tgeneric _
+  | Tneg _
+  | Tany _
+  | Tvar _
+  | Tdependent _
+  | Tlabel _ ->
+    false
+
+(** Reject non-denotable union field types produced by a shape splat. *)
+let check_shape_splat_field_denotability
+    (env : Typing_env_types.env) (t_pos : Pos.t) hint (ty : Typing_defs.locl_ty)
+    =
+  let tcopt = Env.get_tcopt env in
+  let union_intersection_type_hints_enabled =
+    tcopt.Global_options.po.Parser_options.union_intersection_type_hints
+    || Typechecker_options.is_unstable_feature_enabled
+         tcopt
+         "union_intersection_type_hints"
+  in
+  let hint_has_shape_splat =
+    match hint with
+    | (_, Hshape { nsi_field_map; _ }) ->
+      List.exists nsi_field_map ~f:(function
+          | SE_splat _ -> true
+          | SE_field _ -> false)
+    | _ -> false
+  in
+  if (not union_intersection_type_hints_enabled) && hint_has_shape_splat then
+    (* Shape normalization can only produce simple shapes, shape splats, union
+       intersection, a single type param / newtype or any of those wrapped in
+       supportdyn so the traversal is limited to those cases *)
+    let rec collect env ty acc =
+      let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
+      match Typing_defs.get_node ty with
+      | Tshape (Shape_simple { s_fields; _ }) ->
+        Typing_defs.TShapeMap.fold
+          (fun field field_ty acc ->
+            let sft_ty = field_ty.Typing_defs.sft_ty in
+            if contains_non_denotable_union env sft_ty then
+              Typing_error.Primary.Shape_splat.
+                {
+                  label = Typing_defs.TShapeField.name field;
+                  pos = Typing_defs.TShapeField.pos field;
+                  ty = sft_ty;
+                }
+              :: acc
+            else
+              acc)
+          s_fields
+          acc
+      | Tshape (Shape_splat { ss_elems = tys })
+      | Tunion tys
+      | Tintersection tys ->
+        List.fold tys ~init:acc ~f:(fun acc ty -> collect env ty acc)
+      | _ -> acc
+    in
+    match collect env ty [] with
+    | [] -> ()
+    | fields_rev ->
+      let fields = List.rev fields_rev in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Shape_splat
+               (Primary.Shape_splat.Non_denotable_shape_splat_fields
+                  { pos = t_pos; fields }))
+
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let {
@@ -338,6 +458,7 @@ let typedef_def ctx typedef =
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       localize_ty_err_opt;
+    check_shape_splat_field_denotability env (fst t_name) hint ty;
     let env_for_variant =
       match constraints_opt with
       | None -> env

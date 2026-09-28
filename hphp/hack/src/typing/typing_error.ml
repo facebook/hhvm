@@ -505,6 +505,22 @@ module Primary = struct
     [@@deriving show]
   end
 
+  module Shape_splat = struct
+    type non_denotable_field = {
+      label: string;
+      pos: Pos_or_decl.t;
+      ty: Typing_defs_core.locl_ty;
+    }
+    [@@deriving show]
+
+    type t =
+      | Non_denotable_shape_splat_fields of {
+          pos: Pos.t;
+          fields: non_denotable_field list;
+        }
+    [@@deriving show]
+  end
+
   type implements_info = {
     pos: Pos_or_decl.t;
     instantiation: string list;
@@ -573,6 +589,7 @@ module Primary = struct
         what: string;
       }
     | Invalid_type_hint of Pos.t
+    | Shape_splat of Shape_splat.t
     | Gated_by_feature_flag of {
         pos: Pos.t;
         name: string;

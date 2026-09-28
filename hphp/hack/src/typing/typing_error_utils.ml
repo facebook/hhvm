@@ -331,7 +331,7 @@ module Eval_primary : sig
     quickfixes: Pos.t Quickfix.t list;
   }
 
-  val to_error : Typing_error.Primary.t -> env:'a -> t
+  val to_error : Typing_error.Primary.t -> env:Typing_env_types.env -> t
 end = struct
   type t = {
     code: Error_code.t;
@@ -1856,6 +1856,38 @@ end = struct
         rerun_prompt pos prompt_digest expected_digest
       | Evaluation_error { pos; stack_trace } ->
         evaluation_error pos stack_trace
+  end
+
+  module Eval_shape_splat = struct
+    let non_denotable_shape_splat_fields env pos fields =
+      let claim =
+        lazy (pos, "Shape splat produces fields with non-denotable types")
+      in
+      let reasons =
+        lazy
+          (List.map
+             fields
+             ~f:(fun
+                  ({ label; pos; ty } :
+                    Typing_error.Primary.Shape_splat.non_denotable_field)
+                ->
+               let ty =
+                 Typing_print.full_strip_ns ~hide_internals:true env ty
+                 |> Markdown_lite.md_codify
+               in
+               ( pos,
+                 Printf.sprintf
+                   "Shape field `%s` has non-denotable type %s"
+                   label
+                   ty )))
+      in
+      create ~code:Error_code.InvalidTypeHint ~claim ~reasons ()
+
+    let to_error t ~env =
+      let open Typing_error.Primary.Shape_splat in
+      match t with
+      | Non_denotable_shape_splat_fields { pos; fields } ->
+        non_denotable_shape_splat_fields env pos fields
   end
 
   let unify_error pos msg_opt reasons_opt =
@@ -5218,6 +5250,7 @@ end = struct
     | Explain_constraint pos -> explain_constraint pos
     | Rigid_tvar_escape { pos; what } -> rigid_tvar_escape pos what
     | Invalid_type_hint pos -> invalid_type_hint pos
+    | Shape_splat err -> Eval_shape_splat.to_error err ~env
     | Gated_by_feature_flag { pos; name; feature } ->
       let claim =
         lazy

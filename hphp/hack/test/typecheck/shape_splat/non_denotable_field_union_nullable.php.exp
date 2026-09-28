@@ -1,0 +1,4 @@
+ERROR: File "non_denotable_field_union_nullable.php", line 7, characters 6-8:
+Shape splat produces fields with non-denotable types (Typing[4419])
+  File "non_denotable_field_union_nullable.php", line 4, characters 19-25:
+  Shape field `field` has non-denotable type `?(bool | string)`

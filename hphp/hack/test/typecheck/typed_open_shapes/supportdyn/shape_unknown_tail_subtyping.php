@@ -28,3 +28,14 @@ function supportdyn_good(supportdyn<shape(int...)> $ints): void {
 function plain_good(shape(int...) $ints): void {
   takes_supportdyn_int_tail($ints);
 }
+
+function takes_union_tail_shape(shape((string | bool)...) $_): void {}
+function takes_union_tail_tuple(((string | bool)...) $_): void {}
+
+function supportdyn_union_tail_consistency(
+  supportdyn<shape((string | bool)...)> $shape,
+  supportdyn<((string | bool)...)> $tuple,
+): void {
+  takes_union_tail_shape($shape);
+  takes_union_tail_tuple($tuple);
+}

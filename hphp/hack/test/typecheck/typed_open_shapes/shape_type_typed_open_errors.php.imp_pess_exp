@@ -12,19 +12,19 @@ Invalid argument (Typing[4110])
   But got `string`
 ERROR: File "shape_type_typed_open_errors.php", line 28, characters 10-35:
 Invalid return type (Typing[4110])
-  File "shape_type_typed_open_errors.php", line 27, characters 57-62:
-  Expected `string`
+  File "shape_type_typed_open_errors.php", line 27, characters 39-66:
+  Expected `string` because the field `b` may be set to any type in this shape
   File "shape_type_typed_open_errors.php", line 28, characters 33-34:
   But got `int`
 ERROR: File "shape_type_typed_open_errors.php", line 36, characters 3-32:
 hh_expect_equivalent type mismatch (Typing[4452])
   File "shape_type_typed_open_errors.php", line 36, characters 25-27:
   Expected `int`
-  File "shape_type_typed_open_errors.php", line 34, characters 46-51:
-  But got `string`
+  File "shape_type_typed_open_errors.php", line 34, characters 28-55:
+  But got `string` because the field `unknown_field` may be set to any type in this shape
 ERROR: File "shape_type_typed_open_errors.php", line 36, characters 30-31:
 Invalid argument (Typing[4110])
   File "shape_type_typed_open_errors.php", line 36, characters 25-27:
   Expected `int`
-  File "shape_type_typed_open_errors.php", line 34, characters 46-51:
-  But got `string`
+  File "shape_type_typed_open_errors.php", line 34, characters 28-55:
+  But got `string` because the field `unknown_field` may be set to any type in this shape

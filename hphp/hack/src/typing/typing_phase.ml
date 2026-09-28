@@ -320,8 +320,8 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     end
     | _ -> lty
   in
-  let push_supportdyn_into_shape lty =
-    let (is_supportdyn, _env, stripped_lty) = TUtils.strip_supportdyn env lty in
+  let push_supportdyn_into_shape env lty =
+    let (is_supportdyn, env, stripped_lty) = TUtils.strip_supportdyn env lty in
     match deref stripped_lty with
     | ( r,
         Tshape
@@ -329,18 +329,20 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
             { s_origin = origin; s_unknown_value = ty; s_fields = shape_fields })
       )
       when is_supportdyn ->
-      MakeType.supportdyn
-        r
-        (mk
-           ( r,
-             Tshape
-               (Shape_simple
-                  {
-                    s_origin = origin;
-                    s_unknown_value = MakeType.supportdyn r ty;
-                    s_fields = shape_fields;
-                  }) ))
-    | _ -> lty
+      let (env, ty) = TUtils.make_supportdyn r env ty in
+      ( env,
+        MakeType.supportdyn
+          r
+          (mk
+             ( r,
+               Tshape
+                 (Shape_simple
+                    {
+                      s_origin = origin;
+                      s_unknown_value = ty;
+                      s_fields = shape_fields;
+                    }) )) )
+    | _ -> (env, lty)
   in
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
@@ -487,7 +489,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       ((env, None, []), ty)
   end
   | Tapply (((_p, cid) as cls), argl) ->
-    let (env_err, lty) =
+    let ((env, ty_err_opt, cycles), lty) =
       match Env.get_class_or_typedef env cid with
       | Decl_entry.Found (Env.ClassResult class_info) ->
         localize_class_instantiation ~ety_env env r cls argl (Some class_info)
@@ -535,14 +537,14 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       | Decl_entry.NotYetAvailable ->
         localize_class_instantiation ~ety_env env r cls argl None
     in
-    let lty =
+    let (env, lty) =
       (* If we have supportdyn<t> then push supportdyn into open shape fields *)
       if String.equal cid SN.Classes.cSupportDyn then
-        push_supportdyn_into_shape lty
+        push_supportdyn_into_shape env lty
       else
-        lty
+        (env, lty)
     in
-    (env_err, lty)
+    ((env, ty_err_opt, cycles), lty)
   | Ttuple { t_required; t_optional; t_extra } ->
     let ety_env_targ = { ety_env with under_type_constructor = true } in
     let ((env, ty_err_opt1, cycles1), t_required) =

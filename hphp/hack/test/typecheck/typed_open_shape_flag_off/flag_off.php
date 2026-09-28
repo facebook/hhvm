@@ -1,6 +1,6 @@
 <?hh
 
-// Without `--typed-open-shapes`, typed open shapes (with an explicit
+// With `typed_open_shapes=false`, typed open shapes (with an explicit
 // unknown-fields hint) must be rejected during naming, before typechecking
 // runs. Plain `...` and `mixed...` remain allowed.
 

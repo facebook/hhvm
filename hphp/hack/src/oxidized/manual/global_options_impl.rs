@@ -100,7 +100,7 @@ impl Default for GlobalOptions {
             tco_pessimise_builtins: false,
             tco_enable_no_auto_dynamic: false,
             tco_skip_check_under_dynamic: false,
-            tco_typed_open_shapes: false,
+            tco_typed_open_shapes: true,
             tco_named_variadic_type: false,
             tco_variadic_named_parameters: false,
             tco_global_access_check_enabled: false,

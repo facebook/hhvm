@@ -357,12 +357,15 @@ impl Key for hh24_types::ToplevelCanonSymbolHash {
 }
 
 unsafe extern "C" {
-    fn hh_log_level() -> ocamlrep::Value<'static>;
+    fn hh_log_level() -> usize;
 }
 
 fn shm_log_level() -> isize {
     // SAFETY: We rely on sharedmem having been initialized here.
-    unsafe { hh_log_level() }.as_int().unwrap()
+    // `hh_log_level` returns an OCaml int (an immediate, not a pointer).
+    unsafe { ocamlrep::Value::from_bits(hh_log_level()) }
+        .as_int()
+        .unwrap()
 }
 
 /// A `datastore::Store` which writes its values to sharedmem (via the `shmffi`
@@ -423,7 +426,7 @@ where
     unsafe fn get_ocaml_by_hash(&self, hash: u64) -> Option<UnsafeOcamlPtr> {
         unsafe {
             unsafe extern "C" {
-                fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
+                fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
             }
             let bytes_opt = shmffi::with(|segment| {
                 segment.table.read(&hash).get().map(|heap_value| {
@@ -432,7 +435,14 @@ where
                         .into_owned()
                 })
             });
-            let v = bytes_opt.map(|bytes| caml_input_value_from_block(bytes.as_ptr(), bytes.len()));
+            let v = bytes_opt.map(|bytes| {
+                let value = caml_input_value_from_block(bytes.as_ptr(), bytes.len());
+                // SAFETY: `caml_input_value_from_block` returns a fresh OCaml
+                // value (never null--it raises on failure). The value is
+                // unrooted, which our caller accounts for (see this method's
+                // `# Safety` docs): no GC may run while the wrapper exists.
+                UnsafeOcamlPtr::new(value)
+            });
             self.log_shmem_hit_rate(v.is_some());
             v
         }

@@ -12,7 +12,7 @@ path = "../repo_root.rs"
 
 [dependencies]
 hh_config = { path = "../hh_config/cargo" }
-thiserror = "2.0.20"
+thiserror = "2.0.21"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

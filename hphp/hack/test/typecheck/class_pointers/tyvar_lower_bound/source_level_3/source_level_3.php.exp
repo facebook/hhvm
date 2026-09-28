@@ -1,0 +1,4 @@
+ERROR: File "source_level_3.php", line 17, characters 3-9:
+It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
+  File "source_level_3.php", line 15, characters 23-34:
+  Definition is here

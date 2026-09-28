@@ -11607,7 +11607,11 @@ end = struct
           (env, false)
       in
       if widen then
-        Typing_class_pointers.coerce_to_name ~level:1 env ty_sub
+        let level =
+          Typechecker_options.tco_class_pointer_tyvar_lower_bound_source_level
+            (Env.get_tcopt env)
+        in
+        Typing_class_pointers.coerce_to_name ~level env ty_sub
       else
         (env, ty_sub)
 
@@ -11632,8 +11636,13 @@ end = struct
           (fun lower_bound (env, prop) ->
             match lower_bound with
             | LoclType ty ->
+              let level =
+                Typechecker_options
+                .tco_class_pointer_tyvar_upper_bound_source_level
+                  (Env.get_tcopt env)
+              in
               let (env, widened_ty) =
-                Typing_class_pointers.coerce_to_name ~level:1 env ty
+                Typing_class_pointers.coerce_to_name ~level env ty
               in
               if Typing_defs.equal_locl_ty ty widened_ty then
                 (env, prop)

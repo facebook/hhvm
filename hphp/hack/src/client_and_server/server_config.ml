@@ -649,8 +649,16 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (int_opt Config_keys.Hhconfig.class_pointer_array_write_keys config)
     ?tco_class_pointer_tyvar_lower_bound:
       (int_opt Config_keys.Hhconfig.class_pointer_tyvar_lower_bound config)
+    ?tco_class_pointer_tyvar_lower_bound_source_level:
+      (int_opt
+         Config_keys.Hhconfig.class_pointer_tyvar_lower_bound_source_level
+         config)
     ?tco_class_pointer_tyvar_upper_bound:
       (int_opt Config_keys.Hhconfig.class_pointer_tyvar_upper_bound config)
+    ?tco_class_pointer_tyvar_upper_bound_source_level:
+      (int_opt
+         Config_keys.Hhconfig.class_pointer_tyvar_upper_bound_source_level
+         config)
     ?tco_disallow_specialized_function_refs:
       (bool_opt Config_keys.Hhconfig.disallow_specialized_function_refs config)
     ?tco_permits_bypassing_visibility:

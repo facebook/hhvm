@@ -1,0 +1,4 @@
+ERROR: File "source_level_3.php", line 17, characters 3-9:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "source_level_3.php", line 11, characters 33-44:
+  Definition is here

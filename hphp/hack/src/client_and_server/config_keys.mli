@@ -92,7 +92,11 @@ module Hhconfig : sig
 
   val class_pointer_tyvar_lower_bound : string
 
+  val class_pointer_tyvar_lower_bound_source_level : string
+
   val class_pointer_tyvar_upper_bound : string
+
+  val class_pointer_tyvar_upper_bound_source_level : string
 
   val class_pointer_ban_class_array_key : string
 

@@ -661,9 +661,17 @@ impl HhConfig {
                 "class_pointer_tyvar_lower_bound",
                 default.tco_class_pointer_tyvar_lower_bound,
             )?,
+            tco_class_pointer_tyvar_lower_bound_source_level: hhconfig.get_int_or(
+                "class_pointer_tyvar_lower_bound_source_level",
+                default.tco_class_pointer_tyvar_lower_bound_source_level,
+            )?,
             tco_class_pointer_tyvar_upper_bound: hhconfig.get_int_or(
                 "class_pointer_tyvar_upper_bound",
                 default.tco_class_pointer_tyvar_upper_bound,
+            )?,
+            tco_class_pointer_tyvar_upper_bound_source_level: hhconfig.get_int_or(
+                "class_pointer_tyvar_upper_bound_source_level",
+                default.tco_class_pointer_tyvar_upper_bound_source_level,
             )?,
             tco_disallow_specialized_function_refs: hhconfig.get_bool_or(
                 "disallow_specialized_function_refs",

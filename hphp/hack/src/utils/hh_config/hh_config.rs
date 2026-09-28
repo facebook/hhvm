@@ -74,6 +74,7 @@ pub struct HhConfig {
     pub distc_min_cpu_units: i64,
     pub distc_decl_buckets: i64,
     pub distc_enable_p2p: bool,
+    pub distc_upload_only_changed_files: bool,
 }
 
 impl Default for HhConfig {
@@ -99,6 +100,7 @@ impl Default for HhConfig {
             distc_min_cpu_units: 0,
             distc_decl_buckets: 0,
             distc_enable_p2p: false,
+            distc_upload_only_changed_files: false,
         }
     }
 }
@@ -741,6 +743,9 @@ impl HhConfig {
                 "distc_enable_p2p" => {
                     c.distc_enable_p2p = parse_json(&value)?;
                 }
+                "distc_upload_only_changed_files" => {
+                    c.distc_upload_only_changed_files = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -752,6 +757,7 @@ impl HhConfig {
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_enable_p2p": self.distc_enable_p2p,
+            "distc_upload_only_changed_files": self.distc_upload_only_changed_files,
         });
         experiments.to_string()
     }

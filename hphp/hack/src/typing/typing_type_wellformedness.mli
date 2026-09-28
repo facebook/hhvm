@@ -26,6 +26,15 @@ val class_ : Typing_env_types.env -> Nast.class_ -> Typing_error.t list
 
 val typedef : Typing_env_types.env -> Nast.typedef -> Typing_error.t list
 
+(** Check a localized shape-splat hint for fields whose normalized types cannot
+    be written as Hack type hints. *)
+val shape_splat_field_denotability_errors :
+  Typing_env_types.env ->
+  Pos.t ->
+  Nast.hint ->
+  Typing_defs.locl_ty ->
+  Typing_error.t list
+
 val global_constant : Typing_env_types.env -> Nast.gconst -> Typing_error.t list
 
 (** Check type wellformedness of any hint appearing in this

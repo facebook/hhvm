@@ -194,6 +194,232 @@ let check_tuple_splat_hint env p h =
   in
   Option.to_list err
 
+let union_intersection_type_hints_enabled env =
+  let tcopt = Env.get_tcopt env in
+  tcopt.Global_options.po.Parser_options.union_intersection_type_hints
+  || Typechecker_options.is_unstable_feature_enabled
+       tcopt
+       "union_intersection_type_hints"
+
+(** Whether [ty] contains a union requiring union/intersection type hints.
+    This is intentionally narrower than [Typing_defs.is_denotable]: localized
+    source hints such as [~T] and open [shape(...)] contain internal
+    representations that are not themselves denotable. *)
+let rec contains_non_denotable_union env ty =
+  let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
+  match Typing_defs.get_node ty with
+  | Tunion tys -> begin
+    (* Localized like types are unions containing dynamic. Check the type below
+       the like rather than rejecting the representation of the like itself. *)
+    match Typing_dynamic_utils.try_strip_dynamic_from_union env tys with
+    | Some (_, []) -> false
+    | Some (_, [ty]) -> contains_non_denotable_union env ty
+    | Some (_, tys) ->
+      let ty = Typing_make_type.union (Typing_defs.get_reason ty) tys in
+      not (Typing_defs.is_denotable ty)
+    | None -> not (Typing_defs.is_denotable ty)
+  end
+  | Tclass (_, _, tys)
+  | Tintersection tys ->
+    List.exists tys ~f:(contains_non_denotable_union env)
+  | Ttuple { t_required; t_optional; t_extra } ->
+    List.exists t_required ~f:(contains_non_denotable_union env)
+    || List.exists t_optional ~f:(contains_non_denotable_union env)
+    || begin
+         match t_extra with
+         | Tsplat ty
+         | Tvariadic ty ->
+           contains_non_denotable_union env ty
+       end
+  | Tvec_or_dict (tk, tv) ->
+    contains_non_denotable_union env tk || contains_non_denotable_union env tv
+  | Taccess (ty, _) -> contains_non_denotable_union env ty
+  | Tshape (Shape_simple { s_unknown_value; s_fields; _ }) ->
+    contains_non_denotable_union env s_unknown_value
+    || Typing_defs.TShapeMap.exists
+         (fun _ field ->
+           contains_non_denotable_union env field.Typing_defs.sft_ty)
+         s_fields
+  | Tshape (Shape_splat { ss_elems }) ->
+    List.exists ss_elems ~f:(contains_non_denotable_union env)
+  | Tfun { ft_params; ft_ret; _ } ->
+    contains_non_denotable_union env ft_ret
+    || List.exists ft_params ~f:(fun param ->
+           contains_non_denotable_union env param.Typing_defs.fp_type)
+  | Toption ty
+  | Tclass_ptr ty ->
+    contains_non_denotable_union env ty
+  | Tnonnull
+  | Tdynamic _
+  | Tprim _
+  | Tnewtype _
+  | Tgeneric _
+  | Tneg _
+  | Tany _
+  | Tvar _
+  | Tdependent _
+  | Tlabel _ ->
+    false
+
+(** Reject non-denotable union field types produced by a shape splat. *)
+let shape_splat_field_denotability_errors
+    (env : Typing_env_types.env)
+    (claim_pos : Pos.t)
+    hint
+    (ty : Typing_defs.locl_ty) =
+  let hint_has_shape_splat =
+    match hint with
+    | (_, Hshape { nsi_field_map; _ }) ->
+      List.exists nsi_field_map ~f:(function
+          | SE_splat _ -> true
+          | SE_field _ -> false)
+    | _ -> false
+  in
+  if (not (union_intersection_type_hints_enabled env)) && hint_has_shape_splat
+  then
+    (* Shape normalization can only produce simple shapes, shape splats, union
+       intersection, a single type param / newtype or any of those wrapped in
+       supportdyn so the traversal is limited to those cases *)
+    let rec collect env ty acc =
+      let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
+      match Typing_defs.get_node ty with
+      | Tshape (Shape_simple { s_fields; _ }) ->
+        Typing_defs.TShapeMap.fold
+          (fun field field_ty acc ->
+            let sft_ty = field_ty.Typing_defs.sft_ty in
+            if contains_non_denotable_union env sft_ty then
+              Typing_error.Primary.Shape_splat.
+                {
+                  label = Typing_defs.TShapeField.name field;
+                  pos = Typing_defs.TShapeField.pos field;
+                  ty = sft_ty;
+                }
+              :: acc
+            else
+              acc)
+          s_fields
+          acc
+      | Tshape (Shape_splat { ss_elems = tys })
+      | Tunion tys
+      | Tintersection tys ->
+        List.fold tys ~init:acc ~f:(fun acc ty -> collect env ty acc)
+      | _ -> acc
+    in
+    match collect env ty [] with
+    | [] -> []
+    | fields_rev ->
+      let fields = List.rev fields_rev in
+      [
+        Typing_error.(
+          primary
+          @@ Primary.Shape_splat
+               (Primary.Shape_splat.Non_denotable_shape_splat_fields
+                  { pos = claim_pos; fields }));
+      ]
+  else
+    []
+
+(** Check every shape splat in a callable type hint. Nested function hints are
+    traversed completely because both their parameter and return types can
+    construct non-denotable unions. *)
+let rec callable_hint_shape_splat_field_denotability_errors
+    env ((pos, hint_) as hint : hint) =
+  let check_hint = callable_hint_shape_splat_field_denotability_errors in
+  let check_hints env = List.concat_map ~f:(check_hint env) in
+  match hint_ with
+  | Hshape { nsi_field_map; _ }
+    when List.exists nsi_field_map ~f:(function
+             | SE_splat _ -> true
+             | SE_field _ -> false) ->
+    (* Check the normalized outer shape rather than its nested splats: a later
+       field or splat can overwrite a non-denotable field from an inner shape. *)
+    let ((tenv, _), ty) =
+      Phase.localize_hint_no_subst env.tenv ~ignore_errors:true hint
+    in
+    shape_splat_field_denotability_errors tenv pos hint ty
+  | Hshape { nsi_field_map; nsi_unknown_fields_type; _ } ->
+    List.concat_map nsi_field_map ~f:(function
+        | SE_field { sfi_hint; _ }
+        | SE_splat sfi_hint
+        -> check_hint env sfi_hint)
+    @ Option.value_map nsi_unknown_fields_type ~default:[] ~f:(check_hint env)
+  | Hfun
+      {
+        hf_tparams;
+        hf_param_tys;
+        hf_variadic_ty;
+        hf_named_variadic_ty;
+        hf_return_ty;
+        _;
+      } ->
+    let tparams = List.map hf_tparams ~f:Aast_defs.tparam_of_hint_tparam in
+    let (tenv, _) =
+      Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+        env.tenv
+        ~ignore_errors:true
+        tparams
+        []
+    in
+    let env = { env with tenv } in
+    check_hints env hf_param_tys
+    @ Option.value_map hf_variadic_ty ~default:[] ~f:(check_hint env)
+    @ Option.value_map hf_named_variadic_ty ~default:[] ~f:(check_hint env)
+    @ check_hint env hf_return_ty
+  | Htuple { tup_required; tup_extra } ->
+    check_hints env tup_required
+    @ begin
+        match tup_extra with
+        | Hextra { tup_optional; tup_variadic } ->
+          check_hints env tup_optional
+          @ Option.value_map tup_variadic ~default:[] ~f:(check_hint env)
+        | Hsplat hint -> check_hint env hint
+      end
+  | Hrefinement (root, refinements) ->
+    let refinement_errors =
+      List.concat_map refinements ~f:(function
+          | Rctx (_, CRexact hint)
+          | Rtype (_, TRexact hint) ->
+            check_hint env hint
+          | Rctx (_, CRloose { cr_lower; cr_upper }) ->
+            Option.value_map cr_lower ~default:[] ~f:(check_hint env)
+            @ Option.value_map cr_upper ~default:[] ~f:(check_hint env)
+          | Rtype (_, TRloose { tr_lower; tr_upper }) ->
+            check_hints env tr_lower @ check_hints env tr_upper)
+    in
+    check_hint env root @ refinement_errors
+  | Hvec_or_dict (key, value) ->
+    Option.value_map key ~default:[] ~f:(check_hint env) @ check_hint env value
+  | Happly (_, hints)
+  | Hunion hints
+  | Hintersection hints ->
+    check_hints env hints
+  | Haccess (root, _) -> check_hint env root
+  | Hclass_ptr (_, hint)
+  | Hoption hint
+  | Hsoft hint
+  | Hlike hint ->
+    check_hint env hint
+  | Hmixed
+  | Hwildcard
+  | Hnonnull
+  | Hprim _
+  | Hthis
+  | Habstr _
+  | Hdynamic
+  | Hnothing
+  | Hfun_context _
+  | Hvar _ ->
+    []
+
+let callable_type_hint_shape_splat_field_denotability_errors env type_hint =
+  if union_intersection_type_hints_enabled env.tenv then
+    []
+  else
+    Option.value_map
+      (hint_of_type_hint type_hint)
+      ~default:[]
+      ~f:(callable_hint_shape_splat_field_denotability_errors env)
+
 let rec context_hint ?(in_signature = true) env (p, h) =
   Typing_type_integrity.check_context_hint_integrity
     ~in_signature
@@ -455,6 +681,9 @@ let fun_param env param =
       true
   in
   type_hint ~is_enforceable env param.param_type_hint
+  @ callable_type_hint_shape_splat_field_denotability_errors
+      env
+      param.param_type_hint
 
 let fun_params env = List.concat_map ~f:(fun_param env)
 
@@ -549,7 +778,12 @@ let fun_ tenv f =
     @ check_splat_is_tuple env f.f_params
   in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) errs;
-  type_hint ~is_enforceable:true env f.f_ret @ fun_params env f.f_params
+  let denotability_errors =
+    callable_type_hint_shape_splat_field_denotability_errors env f.f_ret
+  in
+  type_hint ~is_enforceable:true env f.f_ret
+  @ fun_params env f.f_params
+  @ denotability_errors
 
 let fun_def tenv fd =
   (* Add type parameters to typing environment and localize the bounds
@@ -671,6 +905,7 @@ let method_ env m =
   @ tparams env m.m_tparams
   @ where_constrs env m.m_where_constraints
   @ type_hint ~is_enforceable:true env m.m_ret
+  @ callable_type_hint_shape_splat_field_denotability_errors env m.m_ret
 
 let methods env = List.concat_map ~f:(method_ env)
 

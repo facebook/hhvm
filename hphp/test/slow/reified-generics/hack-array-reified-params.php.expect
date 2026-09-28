@@ -1,0 +1,84 @@
+vec<int> <- vec[1,2]
+  ok
+vec<string> <- vec[1,2]
+  ok
+dict<string,int> <- dict
+  ok
+dict<string,string> <- dict
+  ok
+keyset<int> <- keyset
+  ok
+keyset<string> <- keyset
+  ok
+varray<string> <- vec[1,2]
+  ok
+darray<string,string> <- darray
+  ok
+vec_or_dict<string> <- vec[1,2]
+  ok
+varray_or_darray<string> <- varray
+  ok
+AnyArray<string,string> <- dict
+  ok
+?vec<string> <- null
+  ok
+?vec<string> <- vec[1,2]
+  ok
+vec<string> <- new W<int>
+  EXN: Argument 1 passed to p_vec() must be an instance of HH\vec, W<int> given
+vec<string> <- new Plain
+  EXN: Argument 1 passed to p_vec() must be an instance of HH\vec, Plain given
+vec<string> <- dict
+  EXN: Argument 1 passed to p_vec() must be an instance of HH\vec, HH\dict given
+vec<string> <- 1
+  EXN: Argument 1 passed to p_vec() must be an instance of HH\vec, int given
+vec<string> <- null
+  EXN: Argument 1 passed to p_vec() must be an instance of HH\vec, null given
+?vec<string> <- new W<int>
+  EXN: Argument 1 to p_nullable_vec() must be of type ?HH\vec, W<int> given
+return vec<string> <- new W<int>
+  EXN: Value returned from function r_vec() must be of type HH\vec, W<int> given
+vec<W<int>> <- vec[new W<int>]
+  ok
+vec<W<int>> <- vec[new W<string>]
+  ok
+@vec<string> <- vec[1,2]
+  ok
+@vec<string> <- new R<int>
+  WARN: Argument 1 to p_soft_vec() must be of type @HH\vec, R<int> given
+  ok
+@vec<string> <- new Plain
+  WARN: Argument 1 to p_soft_vec() must be of type @HH\vec, Plain given
+  ok
+@vec<string> <- dict
+  WARN: Argument 1 to p_soft_vec() must be of type @HH\vec, HH\dict given
+  ok
+@vec<string> <- 1
+  WARN: Argument 1 to p_soft_vec() must be of type @HH\vec, int given
+  ok
+return vec<int> <- vec[1,2]
+  ok
+return vec<string> <- vec[1,2]
+  ok
+return Awaitable<vec<string>> <- vec[1,2]
+  ok
+T=int <- 1
+  ok
+T=string <- 1
+  EXN: Argument 1 passed to p_bare() must be an instance of string, int given
+W<int> <- new W<int>
+  ok
+W<string> <- new W<int>
+  EXN: Argument 1 passed to p_w() must be an instance of W<string>, W<int> given
+W<vec<int>> <- new W<vec<int>>
+  ok
+W<vec<string>> <- new W<vec<int>>
+  EXN: Argument 1 passed to p_w_vec() must be an instance of W<HH\vec<string>>, W<HH\vec<int>> given
+W<?vec<int>> <- new W<?vec<int>>
+  ok
+W<?vec<string>> <- new W<?vec<int>>
+  ok
+return W<vec<int>> <- new W<vec<int>>
+  ok
+return W<vec<string>> <- new W<vec<int>>
+  EXN: Value returned from function r_w_vec() must be of type W<HH\vec<string>>, W<HH\vec<int>> given

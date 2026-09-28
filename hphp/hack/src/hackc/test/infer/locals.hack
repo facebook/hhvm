@@ -45,90 +45,85 @@ function params_and_locals(int $a) : void {
 // CHECK: define $root.locals_for_iter($this: *void, $d: .notnull *HackDict) : *void {
 // CHECK: local $k: *void, $v: *void, iter0: *void, $0: *void
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
-// CHECK: // .column 1
-// CHECK:   n1: *HackMixed = load &$d
-// CHECK: // .column 1
-// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK: // .column 12
-// CHECK:   n3: *HackMixed = load &$d
+// CHECK:   n0: *HackMixed = load &$d
 // CHECK: // .column 12
-// CHECK:   n4 = $builtins.hhbc_iter_base(n3)
+// CHECK:   n1 = $builtins.hhbc_iter_base(n0)
 // CHECK: // .column 12
-// CHECK:   store &$0 <- n4: *HackMixed
+// CHECK:   store &$0 <- n1: *HackMixed
 // CHECK: // .column 12
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK: // .column 12
-// CHECK:   n5: *HackMixed = load &$0
+// CHECK:   n2: *HackMixed = load &$0
 // CHECK: // .column 12
-// CHECK:   n6 = $builtins.hhbc_iter_init(&iter0, n5)
+// CHECK:   n3 = $builtins.hhbc_iter_init(&iter0, n2)
 // CHECK: // .column 12
 // CHECK:   jmp b2, b7
 // CHECK:   .handlers b9
 // CHECK: #b2:
 // CHECK: // .column 12
-// CHECK:   prune $builtins.hack_is_true(n6)
+// CHECK:   prune $builtins.hack_is_true(n3)
 // CHECK: // .column 12
 // CHECK:   jmp b3
 // CHECK: #b3:
+// CHECK: // .column 12
+// CHECK:   n4: *HackMixed = load &iter0
+// CHECK: // .column 12
+// CHECK:   n5: *HackMixed = load &$0
+// CHECK: // .column 12
+// CHECK:   n6 = $builtins.hhbc_iter_get_value(n4, n5)
+// CHECK: // .column 12
+// CHECK:   store &$v <- n6: *HackMixed
 // CHECK: // .column 12
 // CHECK:   n7: *HackMixed = load &iter0
 // CHECK: // .column 12
 // CHECK:   n8: *HackMixed = load &$0
 // CHECK: // .column 12
-// CHECK:   n9 = $builtins.hhbc_iter_get_value(n7, n8)
+// CHECK:   n9 = $builtins.hhbc_iter_get_key(n7, n8)
 // CHECK: // .column 12
-// CHECK:   store &$v <- n9: *HackMixed
-// CHECK: // .column 12
-// CHECK:   n10: *HackMixed = load &iter0
-// CHECK: // .column 12
-// CHECK:   n11: *HackMixed = load &$0
-// CHECK: // .column 12
-// CHECK:   n12 = $builtins.hhbc_iter_get_key(n10, n11)
-// CHECK: // .column 12
-// CHECK:   store &$k <- n12: *HackMixed
+// CHECK:   store &$k <- n9: *HackMixed
 // CHECK: // .column 3
-// CHECK:   n13: *HackMixed = load &$0
+// CHECK:   n10: *HackMixed = load &$0
 // CHECK: // .column 3
-// CHECK:   n14: *HackMixed = load &iter0
+// CHECK:   n11: *HackMixed = load &iter0
 // CHECK: // .column 3
-// CHECK:   n15 = $builtins.hhbc_iter_next(n14, n13)
+// CHECK:   n12 = $builtins.hhbc_iter_next(n11, n10)
 // CHECK: // .column 3
 // CHECK:   jmp b5, b6
 // CHECK:   .handlers b4
-// CHECK: #b4(n16: *HackMixed):
+// CHECK: #b4(n13: *HackMixed):
 // CHECK: // .column 3
-// CHECK:   n17: *HackMixed = load &iter0
+// CHECK:   n14: *HackMixed = load &iter0
 // CHECK: // .column 3
-// CHECK:   n18 = $builtins.hhbc_iter_free(n17)
+// CHECK:   n15 = $builtins.hhbc_iter_free(n14)
 // CHECK: // .column 3
-// CHECK:   throw n16
+// CHECK:   throw n13
 // CHECK:   .handlers b9
 // CHECK: #b5:
 // CHECK: // .column 3
-// CHECK:   prune $builtins.hack_is_true(n15)
+// CHECK:   prune $builtins.hack_is_true(n12)
 // CHECK: // .column 3
 // CHECK:   jmp b8
 // CHECK: #b6:
 // CHECK: // .column 3
-// CHECK:   prune ! $builtins.hack_is_true(n15)
+// CHECK:   prune ! $builtins.hack_is_true(n12)
 // CHECK: // .column 3
 // CHECK:   jmp b3
 // CHECK: #b7:
 // CHECK: // .column 12
-// CHECK:   prune ! $builtins.hack_is_true(n6)
+// CHECK:   prune ! $builtins.hack_is_true(n3)
 // CHECK: // .column 12
 // CHECK:   jmp b8
 // CHECK: #b8:
 // CHECK: // .column 3
 // CHECK:   jmp b10
 // CHECK:   .handlers b9
-// CHECK: #b9(n19: *HackMixed):
+// CHECK: #b9(n16: *HackMixed):
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 3
-// CHECK:   throw n19
+// CHECK:   throw n16
 // CHECK: #b10:
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed

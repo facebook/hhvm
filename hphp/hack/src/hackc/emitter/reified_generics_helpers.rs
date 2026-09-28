@@ -20,6 +20,20 @@ use oxidized::pos::Pos;
 
 use crate::emit_expression::emit_reified_arg;
 
+fn is_hack_array(id: &str) -> bool {
+    const HACK_ARRAYS: &[&str] = &[
+        sn::collections::VEC,
+        sn::collections::DICT,
+        sn::collections::KEYSET,
+        sn::collections::ANY_ARRAY,
+        sn::typehints::HH_VARRAY,
+        sn::typehints::HH_DARRAY,
+        sn::typehints::HH_VARRAY_OR_DARRAY,
+        sn::typehints::HH_VEC_OR_DICT,
+    ];
+    HACK_ARRAYS.contains(&id)
+}
+
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
     /// There is a reified generic
@@ -85,6 +99,14 @@ pub(crate) fn is_reified_tparam<'a>(env: &'a Env<'a>, name: &str) -> bool {
 }
 
 pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> ReificationLevel {
+    has_reified_type_constraint_impl(env, h, true)
+}
+
+fn has_reified_type_constraint_impl<'a>(
+    env: &Env<'a>,
+    h: &aast::Hint,
+    top_level: bool,
+) -> ReificationLevel {
     use aast::Hint_;
     fn is_all_erased<'a>(
         env: &'a Env<'_>,
@@ -103,16 +125,22 @@ pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> 
         Hint_::Happly(Id(_, id), hs) => {
             if is_reified_tparam(env, id) {
                 ReificationLevel::Definitely
-            } else if hs.is_empty() || is_all_erased(env, hs.iter()) {
+            } else if hs.is_empty()
+                || (top_level && is_hack_array(id))
+                || is_all_erased(env, hs.iter())
+            {
                 ReificationLevel::Not
             } else {
                 hs.iter().rev().fold(ReificationLevel::Maybe, |v, h| {
-                    ReificationLevel::combine(&v, &has_reified_type_constraint(env, h))
+                    ReificationLevel::combine(
+                        &v,
+                        &has_reified_type_constraint_impl(env, h, false),
+                    )
                 })
             }
         }
         Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::Hoption(h) => {
-            has_reified_type_constraint(env, h)
+            has_reified_type_constraint_impl(env, h, top_level)
         }
         Hint_::HclassPtr(_, _) // TODO(T199611023) track reified when enforcing inner
         | Hint_::Hprim(_)

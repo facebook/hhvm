@@ -30,16 +30,11 @@ class C {
 // TEST-CHECK-BAL: define $root.test2
 // CHECK: define $root.test2($this: *void, $dict: .notnull *HackDict, $idx: .notnull *HackInt) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(9))))
-// CHECK: // .column 1
-// CHECK:   n1: *HackMixed = load &$dict
-// CHECK: // .column 1
-// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK: // .column 9
-// CHECK:   n3: *HackMixed = load &$idx
-// CHECK:   n4: *HackMixed = load &$dict
-// CHECK:   n5 = $builtins.hack_array_cow_unset(n4, n3)
-// CHECK:   store &$dict <- n5: *HackMixed
+// CHECK:   n0: *HackMixed = load &$idx
+// CHECK:   n1: *HackMixed = load &$dict
+// CHECK:   n2 = $builtins.hack_array_cow_unset(n1, n0)
+// CHECK:   store &$dict <- n2: *HackMixed
 // CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }

@@ -1023,6 +1023,10 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES_BATCH x)),
         " (mode) return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files",
         Arg_non_user_facing );
+      ( "--validate-isolation",
+        Arg.String (fun f -> set_mode (MODE_VALIDATE_ISOLATION f)),
+        " (mode) <file> check whether the repo-relative paths listed in <file> could be a strict-isolation package; rebuilds decls in shared heaps, so use a server given over to this and restart it afterwards",
+        Arg_non_user_facing );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true)),
         " (mode) turn on verbose server log",

@@ -1090,6 +1090,26 @@ let main_internal
     in
     output_isolation_result seeds ~output_json:args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
+  | Client_env.MODE_VALIDATE_ISOLATION list_file ->
+    (* Read here rather than on the server: the list file is a path on the
+       caller's machine, and the server only ever sees repo-relative paths. *)
+    let files =
+      match Sys_utils.cat_or_failed list_file with
+      | None ->
+        Printf.eprintf "Could not read %s\n" list_file;
+        raise Exit_status.(Exit_with Input_error)
+      | Some contents ->
+        String.split_lines contents
+        |> List.filter_map ~f:(fun line ->
+               match String.strip line with
+               | "" -> None
+               | path -> Some path)
+    in
+    let%lwt (result, telemetry) =
+      rpc args (Server_command_types.VALIDATE_ISOLATION files)
+    in
+    Client_isolation_validate.output result ~output_json:args.output_json;
+    Lwt.return (Client_isolation_validate.status result, telemetry)
   | Client_env.MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) =
       rpc args @@ Server_command_types.VERBOSE verbose

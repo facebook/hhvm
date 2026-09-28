@@ -108,6 +108,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   --is-subtype                             (mode) take a JSON list of subtype queries via stdin
   --tast-holes                             (mode) return all TAST Holes in a given file
   --tast-holes-batch                       (mode) return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files
+  --validate-isolation                     (mode) <file> check whether the repo-relative paths listed in <file> could be a strict-isolation package; rebuilds decls in shared heaps, so use a server given over to this and restart it afterwards
   --verbose-on                             (mode) turn on verbose server log
   --verbose-off                            (mode) turn off verbose server log
   --version                                (mode) show version and exit

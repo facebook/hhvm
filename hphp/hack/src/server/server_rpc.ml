@@ -482,6 +482,11 @@ let handle :
       Server_isolation.go genv env |> List.map ~f:Relative_path.suffix
     in
     (env, seeds)
+  | Server_command_types.VALIDATE_ISOLATION filenames ->
+    let files =
+      List.map filenames ~f:(fun suffix -> Relative_path.from_root ~suffix)
+    in
+    (env, Server_isolation_validate.go genv env ~files)
   | Server_command_types.VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

@@ -150,6 +150,49 @@ module Package_lint = struct
   type fast_result = Relative_path.Set.t
 end
 
+module Isolation_validation = struct
+  (** A package boundary the candidate would violate, of which there are two
+      kinds. A file outside it references in — the case the candidate exists to
+      rule out. Or the candidate reaches into its own excluded path: strict
+      isolation switches off the exemption that normally lets a package use its
+      own [__tests__], so [referrer] is then inside the candidate too.
+
+      The second is the common one in practice, and the reason this is not
+      described as an inbound reference. *)
+  type violation = {
+    referrer: string;
+    line: int;
+    message: string;
+  }
+  [@@deriving show]
+
+  type result = {
+    refused: string option;
+        (** Why the command declined to run at all, if it did. The server it was
+            asked of is not one this can run on — decl repackaging switched off,
+            or a backend that keeps its own copy of the package configuration.
+            Reported rather than raised: the caller learns what to change, and
+            the server it asked stays up. Everything below is empty when this is
+            set. *)
+    isolatable: bool;
+        (** No package boundary was violated among the files checked, and the
+            candidate was one this command could construct in full. *)
+    files_checked: int;
+        (** How many files were typechecked against the synthesized package.
+            The verdict is only as good as this number. *)
+    violations: violation list;
+    unknown_files: string list;
+        (** Candidate paths the naming table does not know, so nothing was
+            checked on their behalf. *)
+    overridden_files: string list;
+        (** Candidate paths that name a package of their own with
+            [<<file: __PackageOverride(...)>>]. An override beats include-path
+            matching, so the synthesized package never claims the file and the
+            candidate asked about is not the one that could be checked. *)
+  }
+  [@@deriving show]
+end
+
 module Find_my_tests = struct
   open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 

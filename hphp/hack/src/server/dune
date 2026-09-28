@@ -174,7 +174,8 @@
     server_main
     server_rpc
     server_isolation
-    server_isolation_decls)
+    server_isolation_decls
+    server_isolation_validate)
   (libraries
     ast
     ci_util
@@ -184,6 +185,7 @@
     decl_parser_options
     deferral_tracker
     direct_decl_service
+    error_codes
     findmytests_stubs
     folly_stubs
     hh_server_provider_backend_stubs

@@ -437,6 +437,8 @@ module Hhconf : sig
 
   val rust_provider_backend : string
 
+  val isolation_allow_decl_repackaging : string
+
   (* saved state *)
 
   val load_state_natively_dirty_files_timeout : string

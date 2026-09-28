@@ -482,6 +482,9 @@ module Hhconf = struct
 
   let rust_provider_backend = hhconf_key "rust_provider_backend"
 
+  let isolation_allow_decl_repackaging =
+    hhconf_key "isolation_allow_decl_repackaging"
+
   (* saved state *)
 
   let load_state_natively_dirty_files_timeout =

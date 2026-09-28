@@ -173,7 +173,8 @@
     server_lazy_init
     server_main
     server_rpc
-    server_isolation)
+    server_isolation
+    server_isolation_decls)
   (libraries
     ast
     ci_util

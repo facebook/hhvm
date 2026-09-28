@@ -319,6 +319,11 @@ type t = {
       (** Use Provider_backend.Rust_provider_backend as the global provider
        * backend, servicing File_provider, Naming_provider, and Decl_provider
        * using the hackrs implementation. *)
+  isolation_allow_decl_repackaging: bool;
+      (** Allow --validate-isolation to rebuild decls under a synthesized
+       * package. While it runs, the candidate's symbols are absent from the
+       * shared heaps or carry a package no repository declares, so only set
+       * this on a server dedicated to the analysis. *)
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;

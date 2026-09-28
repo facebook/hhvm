@@ -82,6 +82,7 @@ let default =
     produce_streaming_errors = true;
     consume_streaming_errors = false;
     rust_provider_backend = true;
+    isolation_allow_decl_repackaging = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
     ide_symbolindex_search_provider = "LocalIndex";
@@ -935,6 +936,13 @@ let load_
       ~current_version
       config
   in
+  let isolation_allow_decl_repackaging =
+    bool_if_min_version
+      Config_keys.Hhconf.isolation_allow_decl_repackaging
+      ~default:default.isolation_allow_decl_repackaging
+      ~current_version
+      config
+  in
   let rust_provider_backend =
     if rust_provider_backend && not shm_use_sharded_hashtbl then (
       Hh_logger.warn
@@ -1226,6 +1234,7 @@ let load_
     produce_streaming_errors;
     consume_streaming_errors;
     rust_provider_backend;
+    isolation_allow_decl_repackaging;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_quiet;

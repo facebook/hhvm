@@ -128,9 +128,7 @@ struct Bump1GMapper : public BumpSinglePageMapper {
   explicit Bump1GMapper(Args&&... args)
     : BumpSinglePageMapper(std::forward<Args>(args)...) {}
 
-  virtual size_t pagesize() const override {
-    return 1ull << 30;
-  }
+  virtual size_t pagesize() const override;
   virtual void* addPage(void* addr, int node) override;
 };
 

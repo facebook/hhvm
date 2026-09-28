@@ -90,6 +90,10 @@ void* Bump1GMapper::addPage(void* addr, int node) {
   return mmap_1g(addr, node, /* map_fixed */ true);
 }
 
+size_t Bump1GMapper::pagesize() const {
+  return huge1g_page_size();
+}
+
 
 size_t BumpTHPMapper::pagesize() const {
   return THPPageSize();

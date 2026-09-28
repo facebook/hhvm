@@ -764,7 +764,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
 #if USE_JEMALLOC
       std::string msg =
-        fmt::format("{} 1G huge pages active\n", num_1g_pages());
+        fmt::format(
+          "{} {} huge pages active\n",
+          num_1g_pages(),
+          huge1g_page_size() == size1g ? "1G" : "512M"
+        );
       if (auto a = alloc::lowArena()) {
         msg += a->reportStats();
       }

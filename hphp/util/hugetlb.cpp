@@ -52,16 +52,32 @@
 #define MAP_HUGE_1GB (30 << 26)
 #endif
 
+#ifndef MAP_HUGE_512MB
+#define MAP_HUGE_512MB (29 << 26)
+#endif
+
 namespace HPHP {
 
 constexpr size_t maxErrorMsgLen = 512;
 static char s_errorMsg[maxErrorMsgLen];
 
 static unsigned s_num1GPages;
-constexpr unsigned kMaxNum1GPages = 64;
+constexpr unsigned kMaxNum1GBudget = 64;
+constexpr unsigned kMaxNum1GPages =
+  kMaxNum1GBudget * (size1g / size512m);
 static void* s_1GPages[kMaxNum1GPages];
 
 static unsigned s_num2MPages;
+
+size_t huge1g_page_size() {
+#if defined(__linux__) && defined(__aarch64__)
+  static auto const pageSize =
+    sysconf(_SC_PAGESIZE) == (1ul << 16) ? size512m : size1g;
+  return pageSize;
+#else
+  return size1g;
+#endif
+}
 
 // Record error message based on errno, with an optional message.
 static void record_err_msg(const char* msg = nullptr) {
@@ -95,7 +111,7 @@ static void record_err_msg(const char* msg = nullptr) {
 
 HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
   unsigned nr_huge = 0, free_huge = 0;
-  if (pagesize != size2m && pagesize != size1g) { // only 2M and 1G supported
+  if (pagesize != size2m && pagesize != huge1g_page_size()) {
     return HugePageInfo{0, 0};
   }
 #ifdef __linux__
@@ -135,15 +151,14 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     // We support at most 32 NUMA node, so at most two bytes.
     if (node >= 10) *p++ = '0' + node / 10;
     *p++ = '0' + node % 10;
-    if (pagesize == size2m) {
-      memcpy(p, "/hugepages/hugepages-2048kB/", 28);
-      assert(strlen("/hugepages/hugepages-2048kB/") == 28);
-      p += 28;
-    } else {
-      memcpy(p, "/hugepages/hugepages-1048576kB/", 31);
-      assert(strlen("/hugepages/hugepages-1048576kB/") == 31);
-      p += 31;
-    }
+    auto const hugepageDir = pagesize == size2m
+      ? "/hugepages/hugepages-2048kB/"
+      : pagesize == size512m
+        ? "/hugepages/hugepages-524288kB/"
+        : "/hugepages/hugepages-1048576kB/";
+    auto const hugepageDirLen = strlen(hugepageDir);
+    memcpy(p, hugepageDir, hugepageDirLen);
+    p += hugepageDirLen;
 
     memcpy(p, "nr_hugepages", 13);
     assert(strlen("nr_hugepages") == 12); // extra \0 byte
@@ -168,8 +183,11 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     nr_huge += info.nr_hugepages;
     free_huge += info.free_hugepages;
   }
-  char* overcommit_path = nullptr;
-  if (pagesize == size1g) {
+  const char* overcommit_path = nullptr;
+  if (pagesize == size512m) {
+    overcommit_path =
+    "/sys/kernel/mm/hugepages/hugepages-524288kB/nr_overcommit_hugepages";
+  } else if (pagesize == size1g) {
     overcommit_path =
     "/sys/kernel/mm/hugepages/hugepages-1048576kB/nr_overcommit_hugepages";
   } else if (pagesize == size2m) {
@@ -186,7 +204,7 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
 }
 
 HugePageInfo get_huge1g_info(int node /* = -1 */) {
-  return read_hugepage_info(size1g, node);
+  return read_hugepage_info(huge1g_page_size(), node);
 }
 
 HugePageInfo get_huge2m_info(int node /* = -1 */) {
@@ -231,11 +249,16 @@ NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
 }
 
 inline void* mmap_1g_impl(void* addr, bool map_fixed) {
-  int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
+  auto const pageSize = huge1g_page_size();
+  auto const mapHuge1g =
+    pageSize == size512m ? MAP_HUGE_512MB : MAP_HUGE_1GB;
+  int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | mapHuge1g |
     (map_fixed ? MAP_FIXED : 0);
-  void* ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
+  void* ret = mmap(addr, pageSize, PROT_READ | PROT_WRITE, flags, -1, 0);
   if (ret == MAP_FAILED) {
-    record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
+    record_err_msg(pageSize == size512m
+                     ? "mmap() with MAP_HUGE_512MB failed: "
+                     : "mmap() with MAP_HUGE_1GB failed: ");
     return nullptr;
   }
 
@@ -243,18 +266,18 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
   if (addr != nullptr && ret != addr) {
     snprintf(s_errorMsg, maxErrorMsgLen,
              "mmap() for huge page returned %p, desired %p", ret, addr);
-    munmap(ret, size1g);
+    munmap(ret, pageSize);
     return nullptr;
   }
 
   // Fault the page in.  This guarantees availability of memory, and avoids
   // SIGBUS when the huge page isn't really available.  In many cases
-  // RLIMIT_MEMLOCK isn't big enough for us to lock 1G.  Fortunately that
-  // is unnecessary here; a byte should work equally well.
+  // RLIMIT_MEMLOCK isn't big enough for us to lock the whole page. Fortunately
+  // that is unnecessary here; a byte should work equally well.
   if (mlock(ret, 1)) {
     snprintf(s_errorMsg, maxErrorMsgLen, "mlock() failed for %p: ", ret);
     record_err_msg();
-    munmap(ret, size1g);
+    munmap(ret, pageSize);
     return nullptr;
   }
 
@@ -354,7 +377,9 @@ int remap_interleaved_2m_pages(void* addr, size_t pages) {
 
 void* mmap_1g(void* addr, int node, bool map_fixed) {
 #ifdef __linux__
-  if (s_num1GPages >= kMaxNum1GPages) return nullptr;
+  auto const maxPages =
+    kMaxNum1GBudget * (size1g / huge1g_page_size());
+  if (s_num1GPages >= maxPages) return nullptr;
   if (get_huge1g_info(node).free_hugepages <= 0) {
     if (numa_num_nodes > 1) return nullptr;
     // We allow allocation from overcommit if there is only one node.
@@ -389,11 +414,13 @@ unsigned num_2m_pages() {
 
 int mprotect_1g_pages(int prot) {
 #ifdef __linux__
+  if (s_num1GPages == 0) return 0;
+  auto const pageSize = huge1g_page_size();
   for (unsigned i = 0; i < s_num1GPages; ++i) {
     void* p = s_1GPages[i];
     assert(p != nullptr &&
-           (reinterpret_cast<uintptr_t>(p) & (size1g - 1)) == 0);
-    if (auto ret = mprotect(p, size1g, prot)) {
+           (reinterpret_cast<uintptr_t>(p) & (pageSize - 1)) == 0);
+    if (auto ret = mprotect(p, pageSize, prot)) {
       // mprotect() failed for this page, callers should check errno if they
       // care.
       return ret;

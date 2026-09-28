@@ -203,8 +203,13 @@ RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
   RangeMapper** ptail = &head;
   if (n1GPages) {
     if (get_huge1g_info().nr_hugepages) {
-      RangeMapper::append(ptail,
-                          new Bump1GMapper(range, n1GPages, numaMask, nextNode));
+      // Existing settings express a GiB budget. ARM64's 64K-page kernels back
+      // each GiB with two 512M hugetlb pages.
+      auto const numHugePages = n1GPages * (size1g / huge1g_page_size());
+      RangeMapper::append(
+        ptail,
+        new Bump1GMapper(range, numHugePages, numaMask, nextNode)
+      );
     }
 #ifdef __aarch64__
     else {

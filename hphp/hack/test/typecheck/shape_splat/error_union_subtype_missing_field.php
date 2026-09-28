@@ -12,7 +12,7 @@
 function sink_open(shape('x' => int, ...) $_): void {}
 
 function missing_field<T1 as shape('x' => int), T2 as shape(...)>(
-  shape(...(shape(...T1) | shape(...T2))) $s,
+  shape(...(T1 | T2), ...shape()) $s,
 ): void {
   sink_open($s);
 }

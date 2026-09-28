@@ -6,8 +6,8 @@
 
 function f<T1 as shape(...), T2 as shape(...)>(
   shape(...T1, 'a' => int, ...T2) $x,
-  shape(...T1) $_t1,
-  shape(...T2) $_t2,
+  T1 $_t1,
+  T2 $_t2,
 ): void {
   if ($x is shape('a' => string, ...)) {
     hh_expect_equivalent<(

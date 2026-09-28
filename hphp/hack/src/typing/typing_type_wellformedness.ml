@@ -199,10 +199,12 @@ let rec context_hint ?(in_signature = true) env (p, h) =
     ~in_signature
     env.tenv
     (p, h);
-  hint_ ~in_signature env p h
+  hint_ ~in_signature ~report_redundant_shape_splat:true env p h
 
-and hint_ ~in_signature env p h_ =
-  let hint env (p, h) = hint_ ~in_signature env p h in
+and hint_ ~in_signature ~report_redundant_shape_splat env p h_ =
+  let hint env (p, h) =
+    hint_ ~in_signature ~report_redundant_shape_splat env p h
+  in
   let hint_opt env = Option.value_map ~f:(hint env) ~default:[] in
   let hints env xs = List.concat_map xs ~f:(hint env) in
   match h_ with
@@ -299,8 +301,7 @@ and hint_ ~in_signature env p h_ =
           | Rtype (_, TRloose { tr_lower = hl; tr_upper = hr }) -> hl @ hr @ rl)
     in
     hints env (hr :: refinement_hints)
-  | Hshape
-      { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type }
     ->
     let fields =
       List.filter_map nsi_field_map ~f:(function
@@ -338,6 +339,12 @@ and hint_ ~in_signature env p h_ =
         (List.map ~f:get_name fields)
     in
     let env = { env with tenv } in
+    let redundant_splat =
+      match (nsi_allows_unknown_fields, nsi_field_map) with
+      | (false, [SE_splat ((operand_pos, operand_) : hint)]) ->
+        Some (operand_pos, operand_)
+      | _ -> None
+    in
     let rec_errors =
       (* Recursively well-formedness-check both field hints and the operand of
          each splat, so an ill-formed hint inside a splat (undefined class,
@@ -346,8 +353,18 @@ and hint_ ~in_signature env p h_ =
          gated above via [splat_feature_errors]. *)
       List.concat_map nsi_field_map ~f:(function
           | SE_field { sfi_hint; _ } -> hint env sfi_hint
-          | SE_splat h ->
-            let errs = hint env h in
+          | SE_splat ((operand_pos, operand_) as h) ->
+            let errs =
+              if Option.is_some redundant_splat then
+                hint_
+                  ~in_signature
+                  ~report_redundant_shape_splat:false
+                  env
+                  operand_pos
+                  operand_
+              else
+                hint env h
+            in
             let err_opt = check_shape_splat_hint env p h in
             Option.value_map err_opt ~default:errs ~f:(fun err -> err :: errs))
     in
@@ -356,7 +373,29 @@ and hint_ ~in_signature env p h_ =
       | Some h -> hint env h
       | None -> []
     in
-    errors @ rec_errors @ unknown_fields_errors @ splat_feature_errors
+    let redundant_splat_errors =
+      match (report_redundant_shape_splat, redundant_splat) with
+      | (true, Some (operand_pos, operand_)) ->
+        [
+          Typing_error.(
+            wellformedness
+            @@ Primary.Wellformedness.Redundant_shape_splat
+                 {
+                   pos = p;
+                   operand_pos;
+                   is_dynamic =
+                     (match operand_ with
+                     | Hdynamic -> true
+                     | _ -> false);
+                 });
+        ]
+      | _ -> []
+    in
+    errors
+    @ rec_errors
+    @ unknown_fields_errors
+    @ splat_feature_errors
+    @ redundant_splat_errors
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
     []
@@ -380,7 +419,7 @@ let hint
     ~should_check_package_boundary
     env.tenv
     (p, h);
-  hint_ ~in_signature env p h
+  hint_ ~in_signature ~report_redundant_shape_splat:true env p h
 
 let hint_opt ?in_signature ?should_check_package_boundary env =
   Option.value_map
@@ -637,7 +676,8 @@ let methods env = List.concat_map ~f:(method_ env)
 
 let method_opt env = Option.value_map ~default:[] ~f:(method_ env)
 
-let hint_no_kind_check env (p, h) = hint_ ~in_signature:true env p h
+let hint_no_kind_check env (p, h) =
+  hint_ ~in_signature:true ~report_redundant_shape_splat:true env p h
 
 let class_ tenv c =
   let env =

@@ -1,0 +1,11 @@
+Remove the redundant shape splat
+Replace with `shape(dynamic...)`
+
+<?hh
+<<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+
+type Row = shape('x' => int);
+
+function generic(Row $row): void {}
+
+function dynamic(shape(dynamic...) $row): void {}

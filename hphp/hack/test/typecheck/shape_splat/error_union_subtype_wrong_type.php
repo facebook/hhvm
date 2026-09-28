@@ -12,7 +12,7 @@
 function sink_x_string(shape('x' => string, ...) $_): void {}
 
 function wrong_type<T1 as shape('x' => int), T2 as shape('x' => int)>(
-  shape(...(shape(...T1) | shape(...T2))) $s,
+  shape(...(T1 | T2), ...shape()) $s,
 ): void {
   sink_x_string($s);
 }

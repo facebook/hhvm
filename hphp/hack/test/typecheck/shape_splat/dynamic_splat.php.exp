@@ -6,4 +6,5 @@ File "dynamic_splat.php", line 19, characters 3-13:
   shape('x' => ~int, dynamic...)
 File "dynamic_splat.php", line 26, characters 3-13:
   shape('x' => ~int, 'y' => ~string, dynamic...)
-No errors
+ERROR: File "dynamic_splat.php", line 7, characters 20-36:
+A shape containing only one splat is redundant. Use `shape(dynamic...)` instead. (Typing[4531])

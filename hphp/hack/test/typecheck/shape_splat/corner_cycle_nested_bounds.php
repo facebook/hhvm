@@ -4,8 +4,8 @@
 // REJECT. The cyclic bounds permit T1 and T2 to both be
 // shape('x' => int), so T1's optional x is not always a string.
 function cyclic_nested_bounds<
-  T1 as shape(...T2),
-  T2 as shape(...T1),
+  T1 as T2,
+  T2 as T1 as shape(...),
 >(
   shape(...T1, 'q' => int) $value,
 ): shape(?'x' => string, 'q' => int) {

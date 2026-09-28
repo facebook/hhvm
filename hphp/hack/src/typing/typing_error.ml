@@ -325,6 +325,11 @@ module Primary = struct
         }
       | Tuple_syntax of Pos.t
       | Invalid_class_refinement of { pos: Pos.t }
+      | Redundant_shape_splat of {
+          pos: Pos.t;
+          operand_pos: Pos.t;
+          is_dynamic: bool;
+        }
     [@@deriving show]
   end
 

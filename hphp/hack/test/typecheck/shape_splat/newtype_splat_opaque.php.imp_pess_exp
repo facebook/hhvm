@@ -4,25 +4,25 @@ This shape doesn't have a field `secret` (Typing[4108])
   The shape is defined here
 ERROR: File "newtype_splat_opaque.php--file2.php", line 26, characters 33-39:
 Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 26, characters 24-40:
+  File "newtype_splat_opaque.php--file2.php", line 26, characters 24-52:
   Expected `shape(...)`
   File "newtype_splat_opaque.php--file2.php", line 26, characters 33-39:
   But got `mixed`
   File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
     by the definition of `NTPlain`
-ERROR: File "newtype_splat_opaque.php--file2.php", line 35, characters 57-57:
+ERROR: File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
 Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 35, characters 48-58:
+  File "newtype_splat_opaque.php--file2.php", line 38, characters 3-25:
   Expected `shape(...)`
-  File "newtype_splat_opaque.php--file2.php", line 35, characters 57-57:
+  File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
   But got `T`
-ERROR: File "newtype_splat_opaque.php--file2.php", line 35, characters 57-57:
+ERROR: File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
 Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 35, characters 48-58:
+  File "newtype_splat_opaque.php--file2.php", line 38, characters 3-25:
   Expected `shape(...)`
-  File "newtype_splat_opaque.php--file2.php", line 35, characters 57-57:
+  File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
   But got `mixed`
-  File "newtype_splat_opaque.php--file2.php", line 35, characters 39-45:
+  File "newtype_splat_opaque.php--file2.php", line 37, characters 39-45:
     by the definition of `T`
   File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
     by the definition of `NTPlain`

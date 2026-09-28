@@ -10,7 +10,7 @@ function sink_open(shape('x' => int, ...) $_): void {}
 // Both branches guarantee 'x' => int, so the distributed union is a subtype of
 // the open super ((a|b) <: c iff a<:c and b<:c). ACCEPT (no error).
 function accept_both<T1 as shape('x' => int), T2 as shape('x' => int)>(
-  shape(...(shape(...T1) | shape(...T2))) $s,
+  shape(...(T1 | T2), ...shape()) $s,
 ): void {
   sink_open($s);
 }

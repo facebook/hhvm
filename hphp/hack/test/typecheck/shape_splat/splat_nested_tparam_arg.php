@@ -7,7 +7,7 @@
 // `T`. Compare splat_tparam_no_shape_bound.php, where `...T` is bare.
 type Box<T> = shape('inner' => T);
 
-function f<T>(shape(...Box<T>) $s): T {
+function f<T>(shape(...Box<T>, ...shape()) $s): T {
   return $s['inner'];
 }
 

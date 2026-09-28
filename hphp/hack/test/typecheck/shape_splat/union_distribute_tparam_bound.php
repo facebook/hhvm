@@ -36,8 +36,8 @@ function with_int<T as (shape('a' => int) | int)>(shape(...T, 'x' => int) $s): v
 function read_through_union_redundant_splat<
   T1 as shape('a' => int),
   T2 as shape('a' => string),
-  T as (shape(...T1) | shape(...T2)),
->(shape(...T) $s): void {
+  T as (T1 | T2),
+>(T $s): void {
   hh_show($s);
   hh_show($s['a']);
 }

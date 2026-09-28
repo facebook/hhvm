@@ -6,8 +6,8 @@
 
 interface I {
   public function two<TA as shape(...), TB as shape(...)>(
-    shape(...TA) $a,
-    shape(...TB) $b,
+    TA $a,
+    TB $b,
   ): shape(...TA, ...TB);
 }
 

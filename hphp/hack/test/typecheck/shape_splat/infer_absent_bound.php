@@ -10,7 +10,7 @@
 // the spread var's `name` field must read as Absent, not merely Optional, or it
 // fails `Optional <: Absent` against the bound.
 function needs_absent_name<T as shape(?'name' => nothing, ...)>(
-  shape(...T) $s,
+  T $s,
 ): void {}
 
 function test(): void {

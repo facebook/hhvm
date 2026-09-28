@@ -6,7 +6,7 @@
 // `g`'s parameter type and is not included in `T2`.
 
 interface I {
-  public function f<T1 as shape(...)>(shape(...T1) $s): shape(...T1);
+  public function f<T1 as shape(...)>(T1 $s): T1;
   public function g<T2 as shape(...)>(shape(...T2, ?'x' => int) $s): T2;
 }
 

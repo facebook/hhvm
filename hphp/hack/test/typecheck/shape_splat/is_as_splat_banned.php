@@ -15,6 +15,6 @@ function concrete(mixed $m): void {
 }
 
 function typaram<T as shape(...)>(mixed $m): void {
-  if ($m is shape(...T)) {}
-  $m as shape(...T);
+  if ($m is shape(...T, ...shape())) {}
+  $m as shape(...T, ...shape());
 }

@@ -9,7 +9,7 @@
 // See infer_masked_required_nothing_bad.php for the unsound open-bound variant.
 function producer<T as shape(absent 'x', ...)>(
   shape(...T, 'x' => int) $s,
-): shape(...T) {
+): T {
   Shapes::removeKey(inout $s, 'x');
   return $s;
 }

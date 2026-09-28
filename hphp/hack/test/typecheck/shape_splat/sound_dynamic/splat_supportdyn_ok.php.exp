@@ -1,1 +1,2 @@
-No errors
+ERROR: File "splat_supportdyn_ok.php", line 18, characters 14-52:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

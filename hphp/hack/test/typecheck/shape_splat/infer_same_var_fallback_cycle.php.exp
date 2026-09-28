@@ -1,1 +1,2 @@
-No errors
+ERROR: File "infer_same_var_fallback_cycle.php", line 23, characters 35-45:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

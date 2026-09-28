@@ -7,7 +7,7 @@
 
 // A trailing concrete field is merged into each distributed branch.
 function trailing<T1 as shape(...), T2 as shape(...)>(
-  shape(...(shape(...T1) | shape(...T2)), 'c' => int) $s,
+  shape(...(T1 | T2), 'c' => int) $s,
 ): void {
   hh_show($s);
 }

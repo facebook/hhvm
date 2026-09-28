@@ -830,6 +830,7 @@ module Typing = struct
     | CallNeedsConcrete [@value 4528]
     | AbstractAccessViaStatic [@value 4529]
     | UninstantiableClassViaStatic [@value 4530]
+    | RedundantShapeSplat [@value 4531]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

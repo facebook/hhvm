@@ -1,1 +1,4 @@
-No errors
+ERROR: File "bare_param_against_splat_good_open_identity.php", line 6, characters 46-56:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "bare_param_against_splat_good_open_identity.php", line 10, characters 39-49:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

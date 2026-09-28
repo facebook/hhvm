@@ -7,7 +7,7 @@
 
 // A three-member union distributes to three branches.
 function three<T1 as shape(...), T2 as shape(...), T3 as shape(...)>(
-  shape(...(shape(...T1) | shape(...T2) | shape(...T3))) $s,
+  shape(...(T1 | T2 | T3), ...shape()) $s,
 ): void {
   hh_show($s);
 }

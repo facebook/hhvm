@@ -4,7 +4,7 @@ ERROR: File "infer_masked_required_nothing_bad.php", line 11, characters 10-11:
 Invalid return type (Typing[4523])
   File "infer_masked_required_nothing_bad.php", line 10, characters 3-34:
   The field `x` here is not compatible with every instantiation of `T`
-  File "infer_masked_required_nothing_bad.php", line 9, characters 74-74:
+  File "infer_masked_required_nothing_bad.php", line 9, characters 65-65:
   `T` may provide `x` with a type of its own
   File "infer_masked_required_nothing_bad.php", line 11, characters 3-12:
   Expected `nothing`

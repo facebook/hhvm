@@ -2,13 +2,13 @@ ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, charac
 Invalid return type (Typing[4110])
   File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
   Expected `shape('a' => int, 'b' => bool, ...)`
-  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 12-13:
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 3-4:
   But got `T1 where T1 as shape('a' => int, ...), T1 as shape('b' => bool, ...), T1 as T2`
 ERROR: File "bound_multi_combine_bad_indirect_upper_bounds.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "bound_multi_combine_bad_indirect_upper_bounds.php", line 8, characters 4-38:
   Expected `shape('a' => int, 'b' => bool, ...)`
-  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 12-13:
+  File "bound_multi_combine_bad_indirect_upper_bounds.php", line 7, characters 3-4:
   But got `T2 where T2 super T1, T2 as shape('a' => int, ...), T2 as shape('b' => bool, ...)`
   File "bound_multi_combine_bad_indirect_upper_bounds.php", line 6, characters 26-27:
     by the definition of `T1`

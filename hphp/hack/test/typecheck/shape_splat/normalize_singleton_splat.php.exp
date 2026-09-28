@@ -1,3 +1,7 @@
+ERROR: File "normalize_singleton_splat.php", line 6, characters 41-51:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "normalize_singleton_splat.php", line 21, characters 36-46:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
 ERROR: File "normalize_singleton_splat.php", line 22, characters 10-11:
 Invalid return type (Typing[4057])
   File "normalize_singleton_splat.php", line 21, characters 45-45:
@@ -10,6 +14,8 @@ Invalid return type (Typing[4057])
   The field `b` is missing
   File "normalize_singleton_splat.php", line 25, characters 52-54:
   The field `b` is required here
+ERROR: File "normalize_singleton_splat.php", line 32, characters 3-13:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
 ERROR: File "normalize_singleton_splat.php", line 34, characters 10-11:
 Invalid return type (Typing[4057])
   File "normalize_singleton_splat.php", line 32, characters 12-12:

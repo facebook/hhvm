@@ -2,7 +2,7 @@ ERROR: File "bound_multi_combine_bad_singleton_upper_bounds.php", line 10, chara
 Invalid return type (Typing[4110])
   File "bound_multi_combine_bad_singleton_upper_bounds.php", line 8, characters 4-38:
   Expected `shape('a' => int, 'b' => bool, ...)`
-  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 7, characters 12-12:
+  File "bound_multi_combine_bad_singleton_upper_bounds.php", line 7, characters 3-3:
   But got `T where T as shape('a' => int, ...), T as shape('b' => bool, ...)`
 ERROR: File "bound_multi_combine_bad_singleton_upper_bounds.php", line 10, characters 10-11:
 Invalid return type (Typing[4163])

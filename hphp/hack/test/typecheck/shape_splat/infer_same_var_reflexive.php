@@ -3,7 +3,7 @@
 
 interface ShapeSplatReflexivePrefixer<TPrefix as shape()> {
   public function prepend<TSuffix as shape(...)>(
-    shape(...TSuffix) $suffix,
+    TSuffix $suffix,
   ): shape(...TPrefix, ...TSuffix);
 }
 
@@ -12,8 +12,8 @@ interface ShapeSplatReflexiveBox<+T> {
 }
 
 function accept_shape_splat_identity<T as shape()>(
-  shape(...T) $_witness,
-  (function(ShapeSplatReflexiveBox<shape(...T)>): shape(...T)) $_identity,
+  T $_witness,
+  (function(ShapeSplatReflexiveBox<T>): T) $_identity,
 ): void {}
 
 function test_shape_splat_reflexive<TPrefix as shape()>(

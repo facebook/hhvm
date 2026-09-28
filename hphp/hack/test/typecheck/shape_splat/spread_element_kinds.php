@@ -15,7 +15,7 @@ abstract class C {
   // -- Type constant as the spread element ---------------------------------
 
   // ACCEPT: the bound guarantees 'a'.
-  public function tconst_read(shape(...this::TRow) $s): void {
+  public function tconst_read(shape(...this::TRow, ...shape()) $s): void {
     hh_expect<int>($s['a']);
   }
 
@@ -28,7 +28,7 @@ abstract class C {
 
   // REJECT: the bound says 'a' is an int, and this asks for a string.
   public function tconst_field(
-    shape(...this::TRow) $s,
+    shape(...this::TRow, ...shape()) $s,
   ): shape(...this::TRow, 'a' => string) {
     return $s;
   }
@@ -36,7 +36,9 @@ abstract class C {
   // A type parameter bounded BY the type constant, so one spread element's
   // bound mentions another kind of spread element.
   // ACCEPT: T is below the type constant's row.
-  public function tconst_bounds_param<T as shape(...this::TRow)>(
+  public function tconst_bounds_param<
+    T as shape(...this::TRow, ...shape()),
+  >(
     shape(...T, 'q' => int) $s,
   ): shape(...T, 'q' => int) {
     return $s;
@@ -46,7 +48,7 @@ abstract class C {
 // -- Newtype as the spread element -----------------------------------------
 
 // ACCEPT: the newtype's bound guarantees 'a'.
-function newtype_read(shape(...Row) $s): void {
+function newtype_read(shape(...Row, ...shape()) $s): void {
   hh_expect<int>($s['a']);
 }
 
@@ -56,14 +58,16 @@ function newtype_same(shape(...Row, 'q' => int) $s): shape(...Row, 'q' => int) {
 }
 
 // REJECT: the bound says 'a' is an int, and this asks for a string.
-function newtype_field(shape(...Row) $s): shape(...Row, 'a' => string) {
+function newtype_field(
+  shape(...Row, ...shape()) $s,
+): shape(...Row, 'a' => string) {
   return $s;
 }
 
 // A type parameter bounded by the newtype, so a parameter's bound mentions a
 // newtype spread element.
 // ACCEPT: T is below the newtype's row.
-function newtype_bounds_param<T as shape(...Row)>(
+function newtype_bounds_param<T as shape(...Row, ...shape())>(
   shape(...T, 'q' => int) $s,
 ): shape(...T, 'q' => int) {
   return $s;

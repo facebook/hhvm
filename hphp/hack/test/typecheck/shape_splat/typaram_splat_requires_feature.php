@@ -8,10 +8,10 @@
 
 type C = shape('a' => int);
 
-function ok(): shape(...C) {
+function ok(): shape(...C, ...shape()) {
   throw new Exception();
 }
 
-function bad<<<__Explicit>> T as shape('a' => int)>(): shape(...T) {
+function bad<<<__Explicit>> T as shape('a' => int)>(): shape(...T, ...shape()) {
   throw new Exception();
 }

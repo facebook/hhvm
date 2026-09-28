@@ -6,7 +6,7 @@
 // second `...nothing` after the accumulator is already bottom must not
 // spuriously report "only shapes can be unpacked".
 
-function single(shape(...nothing) $s): void {
+function single(shape(...nothing, ...shape()) $s): void {
   hh_expect<nothing>($s);
 }
 

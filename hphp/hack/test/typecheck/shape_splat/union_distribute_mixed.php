@@ -8,7 +8,7 @@
 // A union of a splat-shape and a simple shape distributes; the simple branch
 // fully merges while the splat branch stays residual.
 function mixed<T1 as shape(...)>(
-  shape(...(shape(...T1) | shape('b' => int)), 'c' => int) $s,
+  shape(...(T1 | shape('b' => int)), 'c' => int) $s,
 ): void {
   hh_show($s);
 }

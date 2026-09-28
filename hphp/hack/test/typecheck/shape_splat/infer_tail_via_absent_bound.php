@@ -4,7 +4,7 @@
 // The `absent 'b'` bound lets `prefixed` infer the remaining row after `b` is
 // removed from the shape produced by `grow`.
 interface I {
-  public function grow<T as shape(...)>(shape(...T) $s): shape(...T, 'a' => int);
+  public function grow<T as shape(...)>(T $s): shape(...T, 'a' => int);
   public function prefixed<T as shape(absent 'b', ...)>(
     shape(...T, 'b' => bool) $s,
   ): T;

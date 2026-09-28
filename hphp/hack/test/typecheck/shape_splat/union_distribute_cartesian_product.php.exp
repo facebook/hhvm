@@ -1,4 +1,15 @@
 File "union_distribute_cartesian_product.php", line 24, characters 3-13:
   (shape(...T1, ...T3, ...T5) | shape(...T1, ...T3, ...T6) | shape(...T1, ...T4, ...T5) | shape(...T1, ...T4, ...T6) | shape(...T2, ...T3, ...T5) | shape(...T2, ...T3, ...T6) | shape(...T2, ...T4, ...T5) | shape(...T2, ...T4, ...T6))
    where T1 as shape(...), T2 as shape(...), T3 as shape(...), T4 as shape(...), T5 as shape(...), T6 as shape(...)
-No errors
+ERROR: File "union_distribute_cartesian_product.php", line 19, characters 9-20:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "union_distribute_cartesian_product.php", line 19, characters 24-35:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "union_distribute_cartesian_product.php", line 20, characters 9-20:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "union_distribute_cartesian_product.php", line 20, characters 24-35:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "union_distribute_cartesian_product.php", line 21, characters 9-20:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+ERROR: File "union_distribute_cartesian_product.php", line 21, characters 24-35:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

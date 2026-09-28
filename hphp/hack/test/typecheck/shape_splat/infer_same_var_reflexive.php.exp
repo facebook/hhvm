@@ -1,1 +1,2 @@
-No errors
+ERROR: File "infer_same_var_reflexive.php", line 22, characters 39-49:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

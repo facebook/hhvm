@@ -4,7 +4,7 @@
 // A generic shape alias can be spread and its parameterised fields flow through.
 type Box<T> = shape('inner' => T, 'tag' => string);
 
-function unwrap<T>(shape('blah' => bool, ...Box<T>) $s): T {
+function unwrap<T>(shape('blah' => bool, ...Box<T>, ...shape()) $s): T {
   return $s['inner'];
 }
 

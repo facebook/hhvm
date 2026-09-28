@@ -8,7 +8,7 @@
 // Union distribution composes with a `dynamic` operand: each branch carries the
 // open `dynamic` row.
 function with_dynamic<T1 as shape(...), T2 as shape(...)>(
-  shape(...(shape(...T1) | shape(...T2)), ...dynamic) $s,
+  shape(...(T1 | T2), ...dynamic) $s,
 ): void {
   hh_show($s);
 }

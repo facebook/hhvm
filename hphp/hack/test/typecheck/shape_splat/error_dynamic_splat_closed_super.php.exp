@@ -2,7 +2,7 @@ ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
 Invalid argument (Typing[4110])
   File "error_dynamic_splat_closed_super.php", line 11, characters 22-38:
   Expected `shape('x' => int)`
-  File "error_dynamic_splat_closed_super.php", line 13, characters 66-66:
+  File "error_dynamic_splat_closed_super.php", line 13, characters 57-57:
   But got `T as shape('x' => int, dynamic...)`
 ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
 Invalid argument (Typing[4138])

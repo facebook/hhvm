@@ -1,6 +1,6 @@
 ERROR: File "corner_bottom_super_only.php", line 8, characters 10-11:
 Invalid return type (Typing[4110])
-  File "corner_bottom_super_only.php", line 7, characters 13-13:
+  File "corner_bottom_super_only.php", line 7, characters 4-4:
   Expected `T`
   File "corner_bottom_super_only.php", line 6, characters 3-19:
   But got `shape('a' => int)`

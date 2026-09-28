@@ -1282,6 +1282,38 @@ end = struct
       let claim = lazy (pos, "Invalid class refinement") in
       create ~code:Error_code.InvalidClassRefinement ~claim ()
 
+    let redundant_shape_splat pos operand_pos is_dynamic =
+      let (suggestion, quickfix) =
+        if is_dynamic then
+          ( "Use `shape(dynamic...)` instead.",
+            Quickfix.make_eager_default_hint_style
+              ~title:"Replace with `shape(dynamic...)`"
+              ~new_text:"shape(dynamic...)"
+              pos )
+        else
+          let edits =
+            Quickfix.Eager
+              [
+                ("", Pos.btw_nocheck pos (Pos.shrink_to_start operand_pos));
+                ("", Pos.btw_nocheck (Pos.shrink_to_end operand_pos) pos);
+              ]
+          in
+          ( "Use the splatted type directly.",
+            Quickfix.make
+              ~title:"Remove the redundant shape splat"
+              ~edits
+              ~hint_styles:[] )
+      in
+      let claim =
+        lazy
+          (pos, "A shape containing only one splat is redundant. " ^ suggestion)
+      in
+      create
+        ~code:Error_code.RedundantShapeSplat
+        ~claim
+        ~quickfixes:[quickfix]
+        ()
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.Wellformedness in
       match t with
@@ -1296,6 +1328,8 @@ end = struct
         non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
       | Invalid_class_refinement { pos } -> invalid_class_refinement pos
+      | Redundant_shape_splat { pos; operand_pos; is_dynamic } ->
+        redundant_shape_splat pos operand_pos is_dynamic
   end
 
   module Eval_modules = struct

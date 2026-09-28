@@ -4,7 +4,7 @@
 // A concrete shape cannot satisfy every possible instantiation of `T`.
 function only_super<<<__Explicit>> T as shape('a' => int, ...)>(
   shape('a' => int) $s,
-): shape(...T) {
+): T {
   return $s;
 }
 

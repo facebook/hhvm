@@ -2,8 +2,8 @@
 <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters')>>
 
 function preserve_optional<T as shape(...)>(
-  shape(...T) $s,
-): shape(...T) {
+  T $s,
+): T {
   return $s;
 }
 

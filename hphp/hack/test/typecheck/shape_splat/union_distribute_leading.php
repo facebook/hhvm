@@ -7,7 +7,7 @@
 
 // A leading concrete field appears in each distributed branch.
 function leading<T1 as shape(...), T2 as shape(...)>(
-  shape('c' => int, ...(shape(...T1) | shape(...T2))) $s,
+  shape('c' => int, ...(T1 | T2)) $s,
 ): void {
   hh_show($s);
 }

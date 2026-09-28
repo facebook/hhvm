@@ -14,6 +14,6 @@ function sink_closed(shape('x' => int) $_): void {}
 function closed_super<
   T1 as shape('x' => int, ...),
   T2 as shape('x' => int, ...),
->(shape(...(shape(...T1) | shape(...T2))) $s): void {
+>(shape(...(T1 | T2), ...shape()) $s): void {
   sink_closed($s);
 }

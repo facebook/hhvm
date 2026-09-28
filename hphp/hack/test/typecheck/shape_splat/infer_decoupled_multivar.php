@@ -6,12 +6,12 @@
 
 interface I {
   public function two<TA as shape(...), TB as shape(...)>(
-    shape(...TA) $a,
-    shape(...TB) $b,
+    TA $a,
+    TB $b,
   ): shape(...TA, ...TB);
 }
 
-function want_open<T as shape(...)>(shape(...T) $s): void {}
+function want_open<T as shape(...)>(T $s): void {}
 
 function want_k<T as shape(...)>(shape(...T, 'k' => int) $s): void {}
 

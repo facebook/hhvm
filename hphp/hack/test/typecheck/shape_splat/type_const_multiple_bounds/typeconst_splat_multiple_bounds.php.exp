@@ -1,30 +1,30 @@
-ERROR: File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+ERROR: File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
 Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 26-48:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 26-60:
   Expected `shape(...)`
   File "typeconst_splat_multiple_bounds.php", line 33, characters 34-34:
   But got `I`
-ERROR: File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+ERROR: File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
 Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 26-48:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 26-60:
   Expected `shape(...)`
   File "typeconst_splat_multiple_bounds.php", line 33, characters 39-39:
   But got `J`
-ERROR: File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+ERROR: File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
 Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 26-48:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 26-60:
   Expected `shape(...)`
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
   But got `(I & J)`
-ERROR: File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+ERROR: File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
 Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 26-48:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 26-60:
   Expected `shape(...)`
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
   But got `A::TIfaces`
-ERROR: File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+ERROR: File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
 Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 26-48:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 26-60:
   Expected `shape(...)`
-  File "typeconst_splat_multiple_bounds.php", line 53, characters 35-47:
+  File "typeconst_splat_multiple_bounds.php", line 57, characters 35-47:
   But got `this::TIfaces`

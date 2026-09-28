@@ -11,11 +11,11 @@ newtype NTBound as shape('a' => int, ...) = shape('a' => int, 'secret' => bool);
 newtype NTPlain = shape('a' => int);
 
 // Transparent here, so both expand to their definitions and merge away.
-function inside_bound(shape(...NTBound) $s): void {
+function inside_bound(shape(...NTBound, ...shape()) $s): void {
   hh_expect_equivalent<shape('a' => int, 'secret' => bool)>($s);
 }
 
-function inside_plain(shape(...NTPlain) $s): void {
+function inside_plain(shape(...NTPlain, ...shape()) $s): void {
   hh_expect_equivalent<shape('a' => int)>($s);
 }
 
@@ -25,7 +25,7 @@ function inside_plain(shape(...NTPlain) $s): void {
 
 // Opaque here: the element survives normalization rather than being expanded,
 // and a splat of it alone is just the newtype.
-function outside_bound(shape(...NTBound) $s): void {
+function outside_bound(shape(...NTBound, ...shape()) $s): void {
   hh_expect_equivalent<NTBound>($s);
 }
 
@@ -45,13 +45,17 @@ function read_secret(shape(...NTBound, 'x' => int) $s): void {
 }
 
 // REJECT: no `as` clause, so the bound is `mixed`, which cannot be spread.
-function outside_plain(shape(...NTPlain) $s): void {}
+function outside_plain(shape(...NTPlain, ...shape()) $s): void {}
 
 // A type parameter bounded BY a newtype is spreadable exactly when the newtype
 // is, so the bound is followed transitively.
-function tparam_bounded_by_newtype<T as NTBound>(shape(...T) $s): void {
+function tparam_bounded_by_newtype<T as NTBound>(
+  shape(...T, ...shape()) $s,
+): void {
   hh_expect<int>($s['a']);
 }
 
 // REJECT: transitively, `NTPlain`'s bound is `mixed`.
-function tparam_bounded_by_plain<T as NTPlain>(shape(...T) $s): void {}
+function tparam_bounded_by_plain<T as NTPlain>(
+  shape(...T, ...shape()) $s,
+): void {}

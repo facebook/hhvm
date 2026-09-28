@@ -6,7 +6,7 @@
 // argument). Removing `x` inside would leave the returned `shape(...T)` claiming
 // an `x` that is gone at runtime, so `removeKey` is correctly rejected.
 // See infer_masked_required_nothing.php for the sound variant.
-function producer<T as shape(...)>(shape(...T, 'x' => int) $s): shape(...T) {
+function producer<T as shape(...)>(shape(...T, 'x' => int) $s): T {
   Shapes::removeKey(inout $s, 'x');
   return $s;
 }

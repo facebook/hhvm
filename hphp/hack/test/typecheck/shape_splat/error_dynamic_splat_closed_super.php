@@ -10,6 +10,6 @@
 
 function sink_closed(shape('x' => int) $_): void {}
 
-function dyn_closed<T as shape(...dynamic, 'x' => int)>(shape(...T) $s): void {
+function dyn_closed<T as shape(...dynamic, 'x' => int)>(T $s): void {
   sink_closed($s);
 }

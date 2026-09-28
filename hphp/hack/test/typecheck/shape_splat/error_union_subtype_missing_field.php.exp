@@ -2,7 +2,7 @@ ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
 Invalid argument (Typing[4110])
   File "error_union_subtype_missing_field.php", line 12, characters 20-41:
   Expected `shape('x' => int, ...)`
-  File "error_union_subtype_missing_field.php", line 15, characters 37-38:
+  File "error_union_subtype_missing_field.php", line 15, characters 18-19:
   But got `T2 as shape(...)`
 ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
 Invalid argument (Typing[4163])

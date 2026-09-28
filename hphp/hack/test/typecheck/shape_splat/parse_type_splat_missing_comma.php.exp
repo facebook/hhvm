@@ -6,3 +6,5 @@ ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 27-28:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 30-34:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 12-21:
+A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])

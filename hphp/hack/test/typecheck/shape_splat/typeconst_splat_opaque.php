@@ -21,7 +21,7 @@ abstract class A {
   const type TSBothPlain = shape(...this::TSAs, ...this::TSPlain);
 
   // Opaque, so it stays a residual element.
-  public function bounded(shape(...this::TSAs) $s): void {
+  public function bounded(shape(...this::TSAs, ...shape()) $s): void {
     hh_expect_equivalent<this::TSAs>($s);
   }
 
@@ -37,19 +37,21 @@ abstract class A {
   }
 
   // REJECT: no `as` clause, so this is `mixed`. `B` instantiates it as `int`.
-  public function unbounded(shape(...this::TSPlain) $s): void {}
+  public function unbounded(shape(...this::TSPlain, ...shape()) $s): void {}
 
   // Concrete: expands.
-  public function concrete(shape(...this::TSEq) $s): void {
+  public function concrete(shape(...this::TSEq, ...shape()) $s): void {
     hh_expect_equivalent<shape('a' => int)>($s);
   }
 
   // A type constant that is itself built from splatted type constants.
-  public function both(shape(...this::TSBoth) $s): void {
+  public function both(shape(...this::TSBoth, ...shape()) $s): void {
     hh_expect_equivalent<shape(...this::TSAs, ...this::TSOther)>($s);
   }
 
-  public function both_plain(shape(...this::TSBothPlain) $s): void {
+  public function both_plain(
+    shape(...this::TSBothPlain, ...shape()) $s,
+  ): void {
     hh_expect_equivalent<shape(...this::TSAs, ...this::TSPlain)>($s);
   }
 }

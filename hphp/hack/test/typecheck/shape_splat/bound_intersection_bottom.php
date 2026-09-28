@@ -7,6 +7,6 @@
 function bottom_upper_intersection<T as shape(...)>(
   shape(...T, 'q' => int) $value,
 ): shape('x' => string, 'q' => int, ...)
-  where T as shape(...nothing), T as shape('x' => int, ...) {
+  where T as nothing, T as shape('x' => int, ...) {
   return $value;
 }

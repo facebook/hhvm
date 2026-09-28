@@ -6,14 +6,14 @@
 
 // A bare `dynamic` bound is spreadable: it is the open row
 // `shape(_ => dynamic)`.
-function bare_dynamic_bound<T as dynamic>(shape(...T) $s): void {
+function bare_dynamic_bound<T as dynamic>(shape(...T, ...shape()) $s): void {
   hh_expect_equivalent<T>($s);
 }
 
 // A shape bound whose splat contains `dynamic` normalizes to an open row whose
 // unknown fields are `dynamic`, merged with the bound's known fields.
 function dynamic_unknown_bound<T as shape(...dynamic, 'x' => int)>(
-  shape(...T) $s,
+  shape(...T, ...shape()) $s,
 ): void {
   hh_expect_equivalent<T>($s);
   hh_expect<int>($s['x']);

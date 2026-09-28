@@ -1,0 +1,12 @@
+ERROR: File "representable_as_result_generic_incompatible.php", line 17, characters 21-26:
+Invalid argument (Typing[4110])
+  File "representable_as_result_generic_incompatible.php", line 9, characters 36-41:
+  Expected `string`
+  File "representable_as_result_generic_incompatible.php", line 16, characters 32-54:
+  But got `arraykey`
+ERROR: File "representable_as_result_generic_incompatible.php", line 18, characters 20-25:
+Invalid argument (Typing[4110])
+  File "representable_as_result_generic_incompatible.php", line 13, characters 46-48:
+  Expected `int`
+  File "representable_as_result_generic_incompatible.php", line 16, characters 20-29:
+  But got `mixed`

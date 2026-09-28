@@ -1,0 +1,8 @@
+ERROR: File "error_splat_representable_as.php", line 12, characters 8-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "error_splat_representable_as.php", line 11, characters 3-86:
+  Expected `shape(...)`
+  File "error_splat_representable_as.php", line 12, characters 8-53:
+  But got `mixed`
+  File "representable_as.hhi", line 7, characters 11-25:
+    by the definition of `HH\Runtime\RepresentableAs` arising from an implicit `as ?nonnull` constraint on this type

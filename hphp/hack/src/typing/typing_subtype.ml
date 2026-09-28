@@ -5708,7 +5708,8 @@ end = struct
     | ( (r_sub, Tshape (Shape_splat _ as shape_sub)),
         (r_super, Tnewtype (n, _, _)) )
       when (* [supportdyn] is itself a [Tnewtype] and has its own handling. *)
-           not (String.equal n SN.Classes.cSupportDyn) ->
+           (not (String.equal n SN.Classes.cSupportDyn))
+           && not (String.equal n SN.Classes.cRepresentableAs) ->
       simplify_subtype_shape_splat
         ~subtype_env
         ~env
@@ -6882,6 +6883,16 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:
                 { super_like; super_supportdyn = false; ty_super = lty_inner }
+      | (r_sub, Tshape (Shape_splat { ss_elems })) ->
+        let (env, ty_sub) =
+          Typing_corners.resolve_for_read env r_sub ss_elems
+        in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
       | (r_sub, Tshape (Shape_simple { s_fields; s_unknown_value; _ })) ->
         (* shape('a' => T1, 'b' => T2, ...) <: RepresentableAs<U>
            when dict<key, V1 | V2 | ... | Vn> <: U

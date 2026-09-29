@@ -28,7 +28,6 @@ from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
 from hphp.hack.test.integration.hh_paths import hh_client, hh_server
 from hphp.hack.test.integration.test_case import TestCase
-from watchman.integration.lib import WatchmanInstance
 
 
 # Test states used in deferral tests.
@@ -47,7 +46,7 @@ class Config:
     block_connections: bool = True
     hg_aware: bool = False
 
-    def write_hhconf(self, watchman_socket_path: str, output_folder: str) -> None:
+    def write_hhconf(self, output_folder: str) -> None:
         streaming_errors = str(self.streaming_errors).lower()
         throttle_time_ms = str(self.throttle_time_ms)
         interruptions = str(self.interruptions).lower()
@@ -58,10 +57,7 @@ class Config:
 
         config = f"""
 min_log_level = Debug
-use_watchman = true
-watchman_debug_logging = false
-watchman_subscribe_v2 = true
-watchman_sync_directory = .hg
+use_watchman = false
 interrupt_on_file_changes = {interruptions}
 interrupt_on_client = {interruptions}
 edenfs_file_watcher_enabled = true
@@ -71,7 +67,6 @@ block_client_connections_while_deferring = {block_connections}
 hg_aware = {hg_aware}
 edenfs_file_watcher_state_tracking = {state_tracking}
 edenfs_file_watcher_tracked_states = {", ".join(self.tracked_states)}
-watchman_sockname = {watchman_socket_path}
 produce_streaming_errors = {streaming_errors}
 consume_streaming_errors = {streaming_errors}
 """
@@ -118,19 +113,6 @@ def createEdenInstance(eden_base_dir: str) -> EdenFS:
     """
 
     instance = EdenFS(Path(eden_base_dir))
-    instance.start()
-    return instance
-
-
-def createWatchmanInstance() -> WatchmanInstance.Instance:
-    """Creates a Watchman instance, and starts it.
-
-    The instance is independent from the one powering for example
-    ~/fbsource, and stores all of its state and metadata in a temp dir
-    that it manages.
-    """
-
-    instance = WatchmanInstance.Instance()
     instance.start()
     return instance
 
@@ -204,7 +186,7 @@ def assertMonitorLogContains(driver: CommonTestDriver, needle: str) -> None:
 def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
     """Checks that an Edenfs_watcher instance was initialized
 
-    Given that we may fall back to using Watchman if Edenfs_watcher
+    Given that we may fall back to using dfind if Edenfs_watcher
     initialization fails, this prevents tests from passing even though the
     EdenFS watcher wasn't actually used.
     """
@@ -292,7 +274,6 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     eden_mount_point: ClassVar[str]
 
     eden_instance: ClassVar[EdenFS]
-    watchman_instance: ClassVar[WatchmanInstance.Instance]
 
     # This is a commit in the testing repo at which point we only added the .hhconfig and hh.conf files
     clean_slate_commit: ClassVar[str]
@@ -315,9 +296,6 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         eden_base_dir = os.path.join(cls.base_tmp_dir, "eden_base")
         os.mkdir(eden_base_dir)
         cls.eden_instance = createEdenInstance(eden_base_dir)
-
-        cls.watchman_instance = createWatchmanInstance()
-        watchman_socket_path = cls.watchman_instance.getUnixSockPath()
 
         cls.hg_repo_root = os.path.join(cls.base_tmp_dir, "hg_repo")
 
@@ -347,7 +325,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # The hh.conf file can go wherever, as long as HH_LOCALCONF_PATH points to
         # it. Some other tests expect it to be inside the folder cls.repo_dir.
         # So let's put it in the place that after mounting will end up at cls.repo_dir
-        cls.getConfig().write_hhconf(watchman_socket_path, template_repo_destination)
+        cls.getConfig().write_hhconf(template_repo_destination)
 
         # CommonTestDriver.setUpClass already did this, but we changed the value of repo_dir
         cls.test_env["HH_LOCALCONF_PATH"] = cls.repo_dir
@@ -408,7 +386,6 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         print("running EdenfsWatcherDriver.tearDownClass")
 
         cls.eden_instance.cleanup()
-        cls.watchman_instance.stop()
         super(EdenfsWatcherTestDriver, cls).tearDownClass()
 
     def setUp(self) -> None:
@@ -653,10 +630,8 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         assertServerNotifierChangesYes(self.test_driver)
 
     def test_interrupt(self) -> None:
-        # Unlike the other users of CommonTests, we set up our own Watchman instance. We
-        # don't want to mess up the root detectiong by placing an empty .watchmanconfig
-        # in cls.repo_dir. Thus, this test is like CommonTests.test_interrupt, but does
-        # not to create a .watchmanconfig file.
+        # Duplicate the test body instead of calling CommonTests.test_interrupt
+        # because the superclass method enables Watchman, which we want disabled.
 
         # We cannot run this test with streaming errors enabled:
         # If a type-check is running, no files have changed since the start of the type-check,
@@ -666,10 +641,7 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         config = self.test_driver.getConfig()
         config.streaming_errors = False
         config.interruptions = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         self.test_driver.start_hh_server()
         self.test_driver.start_hh_loop_forever_assert_timeout()
@@ -691,10 +663,7 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         # background worker will wait after the first change, and get_changes_sync has
         # to process the second change itself.
         config.throttle_time_ms = 1000
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         self.test_driver.start_hh_server()
 
@@ -772,10 +741,7 @@ class EdenfsWatcherTests(common_tests.CommonTests):
     def change_files_and_check(self, config: Config) -> None:
         "Not a test itself. Changes files and checks that the changes are picked up immediately."
 
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         # We run a few iterations, varying the amount of time between the two
         # changes we make and when we call hh afterwards.
@@ -1267,10 +1233,7 @@ function test_deprecated() : void {
         config = self.test_driver.getConfig()
         config.state_tracking = True
         config.streaming_errors = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         # These are two states that the server listens for
         state0 = TEST_STATE_0
@@ -1314,10 +1277,7 @@ function test_deprecated() : void {
         config = self.test_driver.getConfig()
         config.state_tracking = True
         config.throttle_time_ms = throttle_time_ms
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
         state = TEST_STATE_0
 
         self.test_driver.start_hh_server()
@@ -1354,10 +1314,7 @@ function test_deprecated() : void {
         config.state_tracking = True
         config.streaming_errors = False
         config.block_connections = False
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         state0 = TEST_STATE_0
         state1 = TEST_STATE_1
@@ -1418,10 +1375,7 @@ function test_deprecated() : void {
         config = self.test_driver.getConfig()
         config.state_tracking = True
         config.streaming_errors = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         state = TEST_STATE_0
         _, is_asserted, _ = self.test_driver.assertStateForSeconds(state, 20)
@@ -1443,10 +1397,7 @@ function test_deprecated() : void {
     def test_deferral9(self) -> None:
         config = self.test_driver.getConfig()
         config.state_tracking = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         self.test_driver.start_hh_server()
 
@@ -1472,10 +1423,7 @@ function test_deprecated() : void {
         """Test asserting application crashing while hh is running"""
         config = self.test_driver.getConfig()
         config.state_tracking = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         self.test_driver.start_hh_server()
         self.test_driver.check_cmd(["No errors!"])
@@ -1509,10 +1457,7 @@ function test_deprecated() : void {
         """Regression test for when an application asserting a state crashed before starting the server."""
         config = self.test_driver.getConfig()
         config.state_tracking = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         # Assert state for a long duration (we'll kill it before it finishes)
         _, _, kill_asserter = self.test_driver.assertStateForSeconds(TEST_STATE_0, 60)
@@ -1538,10 +1483,7 @@ function test_deprecated() : void {
         config.throttle_time_ms = 5000  # make it easier to trigger get_changes_sync
         config.obey_deferral = True
         config.block_connections = False
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         # We need a test state with . in the name
         self.assertIn(".", TEST_STATE_0)
@@ -1589,10 +1531,7 @@ function test_deprecated() : void {
         """
         config = self.test_driver.getConfig()
         config.state_tracking = True
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
 
         # We cannot exactly time when hh_server initializes Edenfs_watcher during server startup.
         # Instead, we run a background thread that continuously asserts and deasserts a test state
@@ -1722,10 +1661,7 @@ class ClientConnectionDeferralTest(TestCase[EdenfsWatcherTestDriver]):
         config.hg_aware = hg_aware
         config.block_connections = block_connections
         config.obey_deferral = obey_deferral
-        config.write_hhconf(
-            self.test_driver.watchman_instance.getUnixSockPath(),
-            self.test_driver.repo_dir,
-        )
+        config.write_hhconf(self.test_driver.repo_dir)
         self.test_driver.start_hh_server()
 
     def assert_state(

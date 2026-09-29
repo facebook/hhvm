@@ -1496,84 +1496,91 @@ module Inference = struct
         normalize env (List.rev rev))
 end
 
-(* -- API ------------------------------------------------------------------- *)
+(* Reading is a separate consumer of analysis and planning. It chooses every
+   element's upper field rather than enumerating corners. *)
+module Read_resolution = struct
+  let resolve env r elems : env * locl_ty =
+    let cache = Cache.create () in
+    (* Project a single row to a resolved simple shape (generics -> upper bound). *)
+    let project env row =
+      let labels =
+        None
+        :: List.map
+             (TShapeSet.elements
+                (Analysis.Labels.subrow_label_set
+                   cache.Cache.bounds
+                   cache.Cache.analysis
+                   env
+                   ~sub:row
+                   ~super:row
+                   r))
+             ~f:Option.some
+      in
+      let (env, known, unknown) =
+        List.fold_left
+          labels
+          ~init:(env, TShapeMap.empty, Typing_make_type.nothing r)
+          ~f:(fun (env, known, unknown) label ->
+            let live = Splat_elem.Set.of_list (Row.live_spreads row label) in
+            let plan = Plan.make cache env live r in
+            (* Assign each type param its upper bound, in topo order so a param's
+               bound is projected under the upper corners it depends on. *)
+            let (env, assignment) =
+              List.fold_left
+                (Plan.elements plan)
+                ~init:(env, Splat_elem.Map.empty)
+                ~f:(fun (env, a) key ->
+                  let (env, _lower, upper) =
+                    Field_bounds.field_bounds
+                      cache.Cache.bounds
+                      env
+                      key
+                      label
+                      a
+                      r
+                  in
+                  (env, Splat_elem.Map.add key upper a))
+            in
+            let (env, fd) = Row.proj env row label assignment in
+            match label with
+            | Some lbl -> (env, TShapeMap.add lbl fd known, unknown)
+            | None -> (env, known, fd.sft_ty))
+      in
+      ( env,
+        mk
+          ( r,
+            Tshape
+              (Shape_simple
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = unknown;
+                   s_fields = known;
+                 }) ) )
+    in
+    let (env, _err, normalized) =
+      let shape_ty = Shape_splat { ss_elems = elems } and on_error = None in
+      Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
+    in
+    Typing_shape_normalize.Row.fold_normalized
+      normalized
+      ~row:(fun row ->
+        if Typing_shape_normalize.Row.is_bottom row then
+          (env, Typing_shape_normalize.Row.to_ty ~reason:r row)
+        else
+          project env row)
+      ~union:(fun _ ->
+        Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
+      ~intersection:(fun _ ->
+        Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
+end
 
-(* Resolve a splat to a single simple shape for field reads; takes every live
-   type parameter to its upper bound in topological order then read each label off
-   the projected row. Reuses the corner machinery ([closure]/[topo]/[field_bounds]/
-   [proj]) so mutually-referencing bounds (e.g. [T2 as shape(...T1)]) resolve in
-   order. *)
-let resolve_for_read env r elems : env * locl_ty =
-  let cache = Cache.create () in
-  (* Project a single row to a resolved simple shape (generics -> upper bound). *)
-  let project env row =
-    let labels =
-      None
-      :: List.map
-           (TShapeSet.elements
-              (Analysis.Labels.subrow_label_set
-                 cache.Cache.bounds
-                 cache.Cache.analysis
-                 env
-                 ~sub:row
-                 ~super:row
-                 r))
-           ~f:Option.some
-    in
-    let (env, known, unknown) =
-      List.fold_left
-        labels
-        ~init:(env, TShapeMap.empty, Typing_make_type.nothing r)
-        ~f:(fun (env, known, unknown) label ->
-          let live = Splat_elem.Set.of_list (Row.live_spreads row label) in
-          let plan = Plan.make cache env live r in
-          (* Assign each type param its upper bound, in topo order so a param's
-             bound is projected under the upper corners it depends on. *)
-          let (env, assignment) =
-            List.fold_left
-              (Plan.elements plan)
-              ~init:(env, Splat_elem.Map.empty)
-              ~f:(fun (env, a) key ->
-                let (env, _lower, upper) =
-                  Field_bounds.field_bounds cache.Cache.bounds env key label a r
-                in
-                (env, Splat_elem.Map.add key upper a))
-          in
-          let (env, fd) = Row.proj env row label assignment in
-          match label with
-          | Some lbl -> (env, TShapeMap.add lbl fd known, unknown)
-          | None -> (env, known, fd.sft_ty))
-    in
-    ( env,
-      mk
-        ( r,
-          Tshape
-            (Shape_simple
-               {
-                 s_origin = Missing_origin;
-                 s_unknown_value = unknown;
-                 s_fields = known;
-               }) ) )
-  in
-  let (env, _err, normalized) =
-    let shape_ty = Shape_splat { ss_elems = elems } and on_error = None in
-    Typing_shape_normalize.Row.normalize ~on_error r shape_ty env
-  in
-  Typing_shape_normalize.Row.fold_normalized
-    normalized
-    ~row:(fun row ->
-      if Typing_shape_normalize.Row.is_bottom row then
-        (env, Typing_shape_normalize.Row.to_ty ~reason:r row)
-      else
-        project env row)
-    ~union:(fun _ ->
-      Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
-    ~intersection:(fun _ ->
-      Typing_shape_normalize.Row.normalized_to_ty env ~reason:r normalized)
+(* -- API ------------------------------------------------------------------- *)
 
 let proj = Row.proj
 
 let row_live_spread_at = Row.live_spreads
+
+let resolve_for_read = Read_resolution.resolve
 
 let subrow_label_set cache env ~sub ~super r =
   Analysis.Labels.subrow_label_set

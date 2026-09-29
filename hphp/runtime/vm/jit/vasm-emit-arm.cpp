@@ -1417,6 +1417,12 @@ void Vgen::emit(const unwind& i) {
  *   C is cleared (FIXME)
  */
 void Vgen::emit(const imul& i) {
+  auto const needV = i.fl && flagRequired(i.fl, StatusFlags::V);
+
+  // Do the multiplication for the upper 64 bits of a 128 bit result. This has
+  // to happen before the Mul below, because i.d may be allocated to the same
+  // register as i.s0 or i.s1, and the Mul would then clobber the operand.
+  if (needV) a->smulh(rAsm, X(i.s0), X(i.s1));
 
   // Do the multiplication
   a->Mul(X(i.d), X(i.s0), X(i.s1));
@@ -1428,15 +1434,14 @@ void Vgen::emit(const imul& i) {
 
     checkSF(i, StatusFlags::NotC);
 
-    if (flagRequired(i.fl, StatusFlags::V)) {
+    if (needV) {
       vixl::Label checkSign;
       vixl::Label Overflow;
 
-      // Do the multiplication for the upper 64 bits of a 128 bit result.
+      // rAsm holds the upper 64 bits, computed above.
       // If the result is not all zeroes or all ones, then we have overflow.
       // If the result is all zeroes or all ones, and the sign is the same,
       // for both hi and low, then there is no overflow.
-      a->smulh(rAsm, X(i.s0), X(i.s1));
 
       // If hi is all 0's or 1's, then check the sign, else overflow
       // (fallthrough).

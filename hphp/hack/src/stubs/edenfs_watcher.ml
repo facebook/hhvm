@@ -37,10 +37,13 @@ module Mocking = struct
     asserted_states := states
 end
 
-let init (_settings : Edenfs_watcher_types.settings) =
+let init ~destroy_on_exit:(_ : bool) (_settings : Edenfs_watcher_types.settings)
+    =
   require_test_stubbing ();
   let (read_fd, _write_fd) = Unix.pipe () in
   Ok ({ notification_fd = read_fd }, "")
+
+let destroy (_instance : instance) : (unit, edenfs_watcher_error) result = Ok ()
 
 let get_changes_sync (_instance : instance) :
     (changes list * clock * Telemetry.t option, edenfs_watcher_error) result =

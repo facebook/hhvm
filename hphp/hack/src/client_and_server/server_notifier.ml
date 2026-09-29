@@ -200,7 +200,7 @@ let init
         tracked_states;
       }
     in
-    match Edenfs_watcher.init init_settings with
+    match Edenfs_watcher.init ~destroy_on_exit:true init_settings with
     | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
       Hh_logger.log
         "Failed to initialize EdenFS watcher, failed with message:\n%s"

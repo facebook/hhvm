@@ -177,7 +177,7 @@ let init_eden root =
       tracked_states = [Hg_states.update; Hg_states.transaction];
     }
   in
-  match Edenfs_watcher.init settings with
+  match Edenfs_watcher.init ~destroy_on_exit:true settings with
   | Ok (instance, _clock) -> Some (Eden { instance; pending = Queue.create () })
   | Error e ->
     Hh_logger.log

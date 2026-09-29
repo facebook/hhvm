@@ -886,8 +886,16 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
   auto useMap = true;
   auto bad = false;
   auto effectful = false;
+  /*
+   * Read from the bottom of the stack upwards, so the elements are seen in
+   * the order they were written rather than reversed.  That order is what
+   * decides where a repeated element ends up: a keyset keeps it where it
+   * first appeared, and emplace_back leaves the existing entry alone, so the
+   * two agree.
+   */
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto [key, promotion] = promote_classlike_to_key(popC(env));
+    auto [key, promotion] =
+      promote_classlike_to_key(topC(env, op.arg1 - i - 1));
 
     auto const keyValid = key.subtypeOf(BArrKey);
     if (!keyValid) key = intersection_of(std::move(key), TArrKey);
@@ -899,7 +907,7 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
 
     if (useMap) {
       if (auto const v = tv(key)) {
-        map.emplace_front(*v, MapElem::KeyFromType(key, key));
+        map.emplace_back(*v, MapElem::KeyFromType(key, key));
       } else {
         useMap = false;
       }
@@ -908,6 +916,7 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
     ty |= std::move(key);
     effectful |= !keyValid || (promotion == Promotion::YesMightThrow);
   }
+  discard(env, op.arg1);
 
   if (!effectful) {
     effect_free(env);

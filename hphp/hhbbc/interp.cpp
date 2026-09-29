@@ -3520,7 +3520,11 @@ Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   if (auto const prev = last_op(env, 1)) {
     if (prev->op == Op::CGetL2 &&
         prev->CGetL2.nloc1.id == op.loc1 &&
-        last_op(env)->op == Op::Concat && can_rewind(env)) {
+        last_op(env)->op == Op::Concat && can_rewind(env) &&
+        // Concat converts its left operand to string first, ConcatEqual its
+        // right, so the two only agree when converting the local cannot
+        // throw. A double left operand throws InvalidOperationException.
+        peekLocRaw(env, op.loc1).subtypeOf(BArrKey)) {
       rewind(env, 2);
       reduce(env, bc::SetOpL { op.loc1, SetOpOp::ConcatEqual });
       return std::nullopt;

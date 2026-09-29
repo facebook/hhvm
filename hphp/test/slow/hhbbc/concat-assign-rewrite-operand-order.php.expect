@@ -1,0 +1,5 @@
+dbl: InvalidOperationException
+vec: InvalidOperationException
+dict: InvalidOperationException
+func: InvalidOperationException
+str: ab

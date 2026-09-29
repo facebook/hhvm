@@ -279,13 +279,6 @@ let report_variadic_memoize (variadic_param : Nast.fun_param option) : unit =
       Nast_check_error.(to_user_diagnostic @@ Variadic_memoize p.param_pos)
   | None -> ()
 
-let report_named_memoize (params : Nast.fun_param list) : unit =
-  match List.find_opt (fun fp -> Option.is_some fp.param_named) params with
-  | Some p ->
-    Diagnostics.add_diagnostic
-      Nast_check_error.(to_user_diagnostic @@ Named_params_memoize p.param_pos)
-  | None -> ()
-
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -313,11 +306,9 @@ let handler =
         | None -> ()
       end;
 
-      (* Ban variadic and named arguments on memoized functions. *)
-      if has_attribute SN.UserAttributes.uaMemoize f.f_user_attributes then begin
+      (* Ban variadic arguments on memoized functions. *)
+      if has_attribute SN.UserAttributes.uaMemoize f.f_user_attributes then
         report_variadic_memoize variadic_param;
-        report_named_memoize f.f_params
-      end;
       check_attribute_arity
         f.f_user_attributes
         SN.UserAttributes.uaPolicied
@@ -393,14 +384,12 @@ let handler =
       check_no_sealed_on_private_methods m;
       check_no_sealed_on_interface_methods env m;
       List.iter check_soft_internal_on_param m.m_params;
-      (* Ban variadic and named arguments on memoized methods. *)
+      (* Ban variadic arguments on memoized methods. *)
       if
         has_attribute SN.UserAttributes.uaMemoize m.m_user_attributes
         || has_attribute SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
-      then begin
-        report_variadic_memoize variadic_param;
-        report_named_memoize m.m_params
-      end
+      then
+        report_variadic_memoize variadic_param
 
     method! at_class_ env c =
       check_no_auto_dynamic env c.c_user_attributes;

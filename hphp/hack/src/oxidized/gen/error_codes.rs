@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a8cd4ba86f76f3d94242e76e3c05700d>>
+// @generated SignedSource<<8fefc0b8c59c8088190d58cb1906808e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -232,7 +232,6 @@ pub enum NastCheck {
     ObservationNotAllowedForPackage = 3110,
     PackageOverrideTargetNotIncluded = 3111,
     RedundantPackageOverride = 3112,
-    NamedParamsMemoize = 3113,
     OverrideNotAllowedForPackage = 3114,
 }
 impl TrivialDrop for NastCheck {}

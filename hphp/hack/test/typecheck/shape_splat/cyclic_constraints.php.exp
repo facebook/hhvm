@@ -1,0 +1,12 @@
+ERROR: File "cyclic_constraints.php", line 21, characters 10-15:
+Invalid return type (Typing[4110])
+  File "cyclic_constraints.php", line 14, characters 40-98:
+  Expected `nothing`
+  File "cyclic_constraints.php", line 13, characters 13-22:
+  But got `mixed`
+ERROR: File "cyclic_constraints.php", line 21, characters 10-15:
+Invalid return type (Typing[4110])
+  File "cyclic_constraints.php", line 16, characters 11-16:
+  Expected `string`
+  File "cyclic_constraints.php", line 13, characters 13-22:
+  But got `mixed`

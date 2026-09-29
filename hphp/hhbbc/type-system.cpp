@@ -6194,13 +6194,9 @@ Type assert_emptiness(Type t) {
   if (t.couldBe(BStr)) {
     if (is_specialized_string(t)) {
       stripVal(make_tv<KindOfPersistentString>(t.m_data.sval), BStr);
-    } else {
-      auto const empty =
-        t.subtypeAmong(BSStr, BStr) ? sempty() :
-        t.subtypeAmong(BCStr, BStr) ? sempty_counted() :
-        sempty_nonstatic();
-      t = union_of(remove_string(std::move(t)), empty);
     }
+    // We can't do what we do for int or double and say that the value is a
+    // specific value. Because both "" and "0" are false.
   }
 
   if (t.couldBe(BDbl)) {

@@ -1,0 +1,6 @@
+write(0): 0 x
+len(0): 1
+write(): OutOfBoundsException
+len(): 0
+write(x): x
+len(x): -1

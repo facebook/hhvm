@@ -1460,8 +1460,14 @@ inline void SetNewElemBespoke(tv_lval base, TypedValue* value) {
   assertx(tvIsPlausible(*base));
   auto const oldArr = base.val().parr;
   auto const result = BespokeArray::AppendMove(oldArr, *value);
-  arraySetUpdateBase(result, base);
-  assertx(tvIsPlausible(*base));
+  // An append to a dict whose next integer key has overflowed raises a
+  // warning and stores nothing, handing back the array untouched -- which may
+  // be shared, or static.  Nothing changed, so the base keeps what it had;
+  // the same is true of a keyset append below.
+  if (oldArr != result) {
+    arraySetUpdateBase(result, base);
+    assertx(tvIsPlausible(*base));
+  }
 }
 
 /**
@@ -1483,7 +1489,11 @@ inline void SetNewElemDict(tv_lval base, TypedValue* value) {
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
   auto a2 = VanillaDict::AppendMove(a, *value);
-  arraySetUpdateBase(a2, base);
+  // An append to a dict whose next integer key has overflowed raises a
+  // warning and stores nothing, handing back the array untouched -- which may
+  // be shared, or static.  Nothing changed, so the base keeps what it had;
+  // the same is true of a keyset append below.
+  if (a2 != a) arraySetUpdateBase(a2, base);
 }
 
 /**

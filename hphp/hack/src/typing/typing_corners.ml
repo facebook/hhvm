@@ -18,9 +18,6 @@ open Hh_prelude
 open Typing_defs
 open Typing_env_types
 
-let element_tys elements =
-  List.map elements ~f:Typing_shape_normalize.Row.Element.ty
-
 (* The key identifying a spread element. Two occurrences of the same parameter
    are the same key, so it is compared by type rather than by name: [NT<int>] and
    [NT<string>] are different elements. *)
@@ -205,6 +202,9 @@ end
 (* -- Projection ------------------------------------------------------------ *)
 
 module Row : sig
+  (** Extract the types carried by normalized splat elements. *)
+  val element_tys : Typing_shape_normalize.Row.Element.t list -> locl_ty list
+
   (** Project a normalized splat row at a label under an [Assignment.t] of
       all type parameters contributing to the type. *)
   val proj :
@@ -225,6 +225,9 @@ module Row : sig
   (** Type parameters and newtypes in spread position in the normalized row. *)
   val spread_elements : Typing_shape_normalize.Row.t -> locl_ty list
 end = struct
+  let element_tys elements =
+    List.map elements ~f:Typing_shape_normalize.Row.Element.ty
+
   let proj_simple
       ~(s_fields : locl_phase shape_field_type TShapeMap.t)
       ~(s_unknown_value : locl_ty)
@@ -1295,7 +1298,7 @@ module Search = struct
         ~bottom:(fun () -> Unknown)
         ~simple:(fun _ -> Unknown)
         ~elements:(fun elements ->
-          of_splat cache env (element_tys elements) label key assignment r)
+          of_splat cache env (Row.element_tys elements) label key assignment r)
 
     (* let of_row env row label key assignment r =
        of_row_cached (Cache.create ()) env row label key assignment r *)
@@ -1425,7 +1428,7 @@ module Spread_var = struct
       ~bottom:(fun () -> [])
       ~simple:(fun _ -> [])
       ~elements:(fun elements ->
-        List.filter_map (element_tys elements) ~f:(fun ty ->
+        List.filter_map (Row.element_tys elements) ~f:(fun ty ->
             match get_node ty with
             | Tvar v -> Some v
             | _ -> None))
@@ -1439,7 +1442,7 @@ module Spread_var = struct
       ~bottom:(fun () -> None)
       ~simple:(fun _ -> None)
       ~elements:(fun elements ->
-        let ss_elems = element_tys elements in
+        let ss_elems = Row.element_tys elements in
         let rec loop elems left =
           match elems with
           | [] -> None
@@ -1478,7 +1481,7 @@ module Spread_var = struct
       ~simple:(fun _ ->
         normalize env [Typing_shape_normalize.Row.to_ty ~reason:r row])
       ~elements:(fun elements ->
-        let ss_elems = element_tys elements in
+        let ss_elems = Row.element_tys elements in
         let (env, rev) =
           List.fold_left ss_elems ~init:(env, []) ~f:(fun (env, acc) ty ->
               match get_node ty with

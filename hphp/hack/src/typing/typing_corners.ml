@@ -1420,9 +1420,10 @@ module Search = struct
     aux env ty_params_topo Splat_elem.Map.empty
 end
 
-module Spread_var = struct
+(* Inference-specific row surgery is not part of corner search. *)
+module Inference = struct
   (* Spread type-variable ids at spread position, in source order *)
-  let ids (row : Typing_shape_normalize.Row.t) : Tvid.t list =
+  let spread_tyvar_ids (row : Typing_shape_normalize.Row.t) : Tvid.t list =
     Typing_shape_normalize.Row.fold
       row
       ~bottom:(fun () -> [])
@@ -1435,7 +1436,7 @@ module Spread_var = struct
 
   (* Split a splat's elements around the first occurrence of spread var [v]
      returning the elements before and after. *)
-  let partition (row : Typing_shape_normalize.Row.t) (v : Tvid.t) :
+  let partition_at_tyvar (row : Typing_shape_normalize.Row.t) (v : Tvid.t) :
       (locl_ty list * locl_ty list) option =
     Typing_shape_normalize.Row.fold
       row
@@ -1462,7 +1463,7 @@ module Spread_var = struct
      lone element, a solution can itself be a splat, and a solution can land
      next to another simple shape, so the rewritten row is re-normalized
      before it goes back to the corner. *)
-  let solve env r (row : Typing_shape_normalize.Row.t) :
+  let solve_spread_vars env r (row : Typing_shape_normalize.Row.t) :
       env * Typing_shape_normalize.Row.normalized =
     let normalize env ss_elems =
       let (env, _err, normalized) =
@@ -1598,11 +1599,11 @@ let check_subrow_corners = Search.check_subrow_corners
 
 let corner_assignments = Search.assignments
 
-let spread_tyvar_ids = Spread_var.ids
+let spread_tyvar_ids = Inference.spread_tyvar_ids
 
-let partition_at_tyvar = Spread_var.partition
+let partition_at_tyvar = Inference.partition_at_tyvar
 
-let solve_spread_vars = Spread_var.solve
+let solve_spread_vars = Inference.solve_spread_vars
 
 module For_test = struct
   type upper_bound_view =

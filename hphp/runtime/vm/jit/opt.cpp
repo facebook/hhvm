@@ -262,11 +262,6 @@ void optimize(IRUnit& unit, TransKind kind) {
     }
   };
 
-  if (Cfg::HHIR::PredictionOpts) {
-    rqtrace::EventGuard trace{"OPT_PRED"};
-    doPass(unit, optimizePredictions, DCE::None);
-  }
-
   if (Cfg::HHIR::Simplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);

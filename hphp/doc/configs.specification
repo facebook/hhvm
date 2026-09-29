@@ -1981,7 +1981,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool HHIR.GenerateAsserts = false, UNKNOWN
 - bool HHIR.DeadCodeElim = true, UNKNOWN
 - bool HHIR.GlobalValueNumbering = true, UNKNOWN
-- bool HHIR.PredictionOpts = true, UNKNOWN
 - bool HHIR.OptimizeCheckTypes = true, UNKNOWN
 - bool HHIR.MemoryOpts = true, UNKNOWN
 - uint32_t HHIR.LoadElimMaxIters = 10, UNKNOWN

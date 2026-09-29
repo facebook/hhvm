@@ -28,7 +28,6 @@
   TIMER_NAME(optimize_dce)                      \
   TIMER_NAME(optimize_cleancfg)                 \
   TIMER_NAME(optimize_lowerBespokes)            \
-  TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
   TIMER_NAME(optimize_refineTmps)               \

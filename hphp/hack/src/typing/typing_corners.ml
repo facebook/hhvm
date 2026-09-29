@@ -751,9 +751,8 @@ end = struct
     (env, lower, upper)
 end
 
-(* -- Dependency graph over spread elements -------------------------------- *)
-
-module Dependency_graph = struct
+(* -- Dependency analysis --------------------------------------------------- *)
+module Analysis = struct
   module Dependency = struct
     type kind =
       | Direct_upper
@@ -806,22 +805,20 @@ module Dependency_graph = struct
         Cycle_info.members info
   end
 
-  module Analysis = struct
-    type t = {
-      components: Component.t list;
-      dependencies: Dependency.t list;
-      node_visits: int;
-      edge_visits: int;
-    }
+  type t = {
+    components: Component.t list;
+    dependencies: Dependency.t list;
+    node_visits: int;
+    edge_visits: int;
+  }
 
-    let components analysis = analysis.components
+  let components analysis = analysis.components
 
-    let dependencies analysis = analysis.dependencies
+  let dependencies analysis = analysis.dependencies
 
-    let node_visits analysis = analysis.node_visits
+  let node_visits analysis = analysis.node_visits
 
-    let edge_visits analysis = analysis.edge_visits
-  end
+  let edge_visits analysis = analysis.edge_visits
 
   let type_params_in_upper_bound cache env name r =
     let (env, bound_ty) = Bound_lookup.combined_upper_bound cache env name r in
@@ -1090,7 +1087,7 @@ module Dependency_graph = struct
               Component.Unsupported_cycle info)
     in
     {
-      Analysis.components;
+      components;
       dependencies;
       node_visits = !node_visits;
       edge_visits = !edge_visits;
@@ -1162,9 +1159,7 @@ end = struct
     | Field_bounds.Lower.Bottom -> TShapeSet.empty
 
   let bound_label_set cache env names r =
-    let all =
-      Dependency_graph.closure cache env (Splat_elem.Set.of_list names) r
-    in
+    let all = Analysis.closure cache env (Splat_elem.Set.of_list names) r in
     Splat_elem.Set.fold
       (fun name acc ->
         let up = bound_labels_upper cache env name r
@@ -1294,7 +1289,7 @@ module Corner_search = struct
     let live_sub = Splat_elem.Set.of_list (Row.live_spreads sub label)
     and live_super = Splat_elem.Set.of_list (Row.live_spreads super label) in
     let all_live = Splat_elem.Set.union live_sub live_super in
-    let ty_params_topo = Dependency_graph.topo cache env all_live r in
+    let ty_params_topo = Analysis.topo cache env all_live r in
     let depended_on =
       List.fold_left
         ty_params_topo
@@ -1303,7 +1298,7 @@ module Corner_search = struct
           Splat_elem.Set.union
             acc
             (Splat_elem.Set.of_list
-               (Dependency_graph.type_params_in_bounds cache env key r)))
+               (Analysis.type_params_in_bounds cache env key r)))
     in
     let rec loop keys assignment env =
       match keys with
@@ -1461,7 +1456,7 @@ let resolve_for_read env r elems : env * locl_ty =
         ~init:(env, TShapeMap.empty, Typing_make_type.nothing r)
         ~f:(fun (env, known, unknown) label ->
           let live = Splat_elem.Set.of_list (Row.live_spreads row label) in
-          let ty_params_topo = Dependency_graph.topo cache env live r in
+          let ty_params_topo = Analysis.topo cache env live r in
           (* Assign each type param its upper bound, in topo order so a param's
              bound is projected under the upper corners it depends on. *)
           let (env, assignment) =
@@ -1514,7 +1509,7 @@ let subrow_label_set = Labels.subrow_label_set
 
 let subrow_labels = Labels.subrow_labels
 
-let topo = Dependency_graph.topo
+let topo = Analysis.topo
 
 let check_subrow_corners = Corner_search.check_subrow_corners
 
@@ -1537,17 +1532,17 @@ module For_test = struct
     | Lower_bottom
 
   module Masking = Masking
-  module Dependency = Dependency_graph.Dependency
-  module Cycle_info = Dependency_graph.Cycle_info
-  module Component = Dependency_graph.Component
-  module Analysis = Dependency_graph.Analysis
+  module Dependency = Analysis.Dependency
+  module Cycle_info = Analysis.Cycle_info
+  module Component = Analysis.Component
+  module Analysis = Analysis
 
   let analyze_dependencies env roots r =
-    Dependency_graph.analyze (Cache.create ()) env roots r
+    Analysis.analyze (Cache.create ()) env roots r
 
   let closure env names r =
     let cache = Cache.create () in
-    Dependency_graph.closure cache env names r
+    Analysis.closure cache env names r
 
   let bound_shape_upper env ty assignment r =
     let cache = Cache.create () in
@@ -1573,15 +1568,15 @@ module For_test = struct
 
   let type_params_in_upper_bound env splat_elem r =
     let cache = Cache.create () in
-    Dependency_graph.type_params_in_upper_bound cache env splat_elem r
+    Analysis.type_params_in_upper_bound cache env splat_elem r
 
   let type_params_in_lower_bound =
     let cache = Cache.create () in
-    Dependency_graph.type_params_in_lower_bound cache
+    Analysis.type_params_in_lower_bound cache
 
   let type_params_in_bounds =
     let cache = Cache.create () in
-    Dependency_graph.type_params_in_bounds cache
+    Analysis.type_params_in_bounds cache
 
   let corners_for
       env ~depended_on ~live_sub ~live_super ~sub ~super label key assignment r

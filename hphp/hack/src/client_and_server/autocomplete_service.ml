@@ -846,15 +846,17 @@ let fresh_expand_env
   let substs = Decl_subst.make_locl tparams tyvars in
   (env, { Typing_defs.empty_expand_env with substs })
 
-(** Does Hack function [f] accept [arg_ty] as its first argument? *)
+(** Does [f] accept [arg_ty] as its first positional argument? *)
 let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
     : bool =
   (* Functions that support dynamic will be wrapped by supportdyn<_> *)
   let ty = strip_supportdyn_decl f.fe_type in
   match Typing_defs.get_node ty with
   | Tfun ft ->
-    let params = ft.ft_params in
-    (match List.hd params with
+    let first_positional_param =
+      List.find ft.ft_params ~f:(Fn.non Typing_defs_core.get_fp_is_named)
+    in
+    (match first_positional_param with
     | Some first_param ->
       let (env, ety_env) = fresh_expand_env env ft.ft_tparams in
       let (env, first_param) =

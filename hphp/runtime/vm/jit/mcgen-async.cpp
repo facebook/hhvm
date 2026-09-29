@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
@@ -414,6 +415,9 @@ struct AsyncTranslationWorker
     assertx(!profData()->optimized(ctx.funcId));
 
     profData()->setOptimized(ctx.funcId);
+
+    if (contProfActive()) captureContProfProfile(*profData(), *func);
+
     optimizeFunc(func);
   }
 

@@ -2367,6 +2367,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Allocate each data block to be at least the total TC size * Jit.DataBlockSizeRatio
 
+- bool Jit.ContProfCaptureEnabled = false, jtwarren
+
+  Capture profile records when functions are optimized.
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

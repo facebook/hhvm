@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-view.h"
+#include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -476,12 +477,15 @@ void checkFreeProfData() {
   // However, we keep the data around indefinitely in a few special modes:
   // * Eval.EnableReusableTC
   // * TC dumping enabled (Eval.DumpTC/DumpIR/etc.)
+  // * Continuous profiling active
   //
   // Finally, when the RetranslateAll mode is enabled, the ProfData is discarded
   // via a different mechanism, after all the optimized translations are
   // generated.
+
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
+      !contProfActive() &&
       (tcIsFull() ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&

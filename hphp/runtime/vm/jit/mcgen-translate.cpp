@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
+#include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -776,6 +777,8 @@ bool retranslateOpt(FuncId funcId) {
 
   if (profData()->optimized(funcId)) return true;
   profData()->setOptimized(funcId);
+
+  if (contProfActive()) captureContProfProfile(*profData(), *func);
 
   tracing::Block _b{"retranslate-opt", [&] { return traceProps(func); }};
   tracing::Pause _p;

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/cont-prof-capture.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -25,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -190,6 +192,38 @@ TEST_F(ContProfCaptureTest, SkipsUnusableTranslations) {
   };
   EXPECT_EQ(9, record->functionExecutions());
   EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, CaptureContProfProfileStoresFirstRecordOnly) {
+  auto const before = snapshotContProfProfileRecords();
+
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  EXPECT_TRUE(captureContProfProfile(profData, *func()));
+
+  addProfileTranslation(profData, main, 1, 11);
+  EXPECT_FALSE(captureContProfProfile(profData, *func()));
+
+  auto const records = snapshotContProfProfileRecords();
+  ASSERT_EQ(before.size() + 1, records.size());
+
+  auto const expectedKey = makeContProfFuncKey(*func());
+  ASSERT_TRUE(expectedKey);
+
+  auto const stored = std::find_if(
+      records.begin(), records.end(), [&](auto const &record) {
+        return record.header.funcKey == *expectedKey;
+      });
+  ASSERT_NE(records.end(), stored);
+
+  std::vector<ContProfProfileTranslation> const expected{
+      {ContProfStartKind::FuncEntry, 0, 2, 7},
+  };
+  EXPECT_EQ(7, stored->functionExecutions());
+  EXPECT_EQ(expected, stored->translations);
 }
 
 }

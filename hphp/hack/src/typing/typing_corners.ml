@@ -1106,27 +1106,6 @@ module Analysis = struct
       edge_visits = !edge_visits;
     }
 
-  (* Topological sort of type parameters. A type parameter that appears in
-     another's bound is assigned first; a cycle just skips the offending edge. *)
-  let topo bounds_cache analysis_cache env roots r =
-    let equal a b = Int.equal (Splat_elem.compare a b) 0 in
-    let rec visit key order stack =
-      if List.mem order key ~equal || List.mem stack key ~equal then
-        order
-      else
-        let order =
-          List.fold_left
-            (type_params_in_bounds bounds_cache analysis_cache env key r)
-            ~init:order
-            ~f:(fun order dep -> visit dep order (key :: stack))
-        in
-        if List.mem order key ~equal then
-          order
-        else
-          order @ [key]
-    in
-    Splat_elem.Set.fold (fun key acc -> visit key acc []) roots []
-
   (* Label discovery is another part of analysis: it determines the finite set
      of per-label problems that corner search must cover. *)
   module Labels = struct
@@ -1211,6 +1190,58 @@ module Cache = struct
       bounds = Bound_lookup.Cache.create ();
       analysis = Analysis.Cache.create ();
     }
+end
+
+(* -- Planning -------------------------------------------------------------- *)
+module Plan = struct
+  type t = {
+    elements: Splat_elem.t list;
+    depended_on: Splat_elem.Set.t;
+  }
+
+  let elements plan = plan.elements
+
+  let depended_on plan = plan.depended_on
+
+  let make cache env roots r =
+    let equal left right = Int.equal (Splat_elem.compare left right) 0 in
+    let rec visit element order stack =
+      if List.mem order element ~equal || List.mem stack element ~equal then
+        order
+      else
+        let order =
+          List.fold_left
+            (Analysis.type_params_in_bounds
+               cache.Cache.bounds
+               cache.Cache.analysis
+               env
+               element
+               r)
+            ~init:order
+            ~f:(fun order dependency ->
+              visit dependency order (element :: stack))
+        in
+        if List.mem order element ~equal then
+          order
+        else
+          order @ [element]
+    in
+    let elements =
+      Splat_elem.Set.fold (fun element order -> visit element order []) roots []
+    in
+    let depended_on =
+      List.fold_left elements ~init:Splat_elem.Set.empty ~f:(fun acc element ->
+          Splat_elem.Set.union
+            acc
+            (Splat_elem.Set.of_list
+               (Analysis.type_params_in_bounds
+                  cache.Cache.bounds
+                  cache.Cache.analysis
+                  env
+                  element
+                  r)))
+    in
+    { elements; depended_on }
 end
 
 (* -- Masking --------------------------------------------------------------- *)
@@ -1322,24 +1353,9 @@ module Corner_search = struct
     let live_sub = Splat_elem.Set.of_list (Row.live_spreads sub label)
     and live_super = Splat_elem.Set.of_list (Row.live_spreads super label) in
     let all_live = Splat_elem.Set.union live_sub live_super in
-    let ty_params_topo =
-      Analysis.topo cache.Cache.bounds cache.Cache.analysis env all_live r
-    in
-    let depended_on =
-      List.fold_left
-        ty_params_topo
-        ~init:Splat_elem.Set.empty
-        ~f:(fun acc key ->
-          Splat_elem.Set.union
-            acc
-            (Splat_elem.Set.of_list
-               (Analysis.type_params_in_bounds
-                  cache.Cache.bounds
-                  cache.Cache.analysis
-                  env
-                  key
-                  r)))
-    in
+    let plan = Plan.make cache env all_live r in
+    let elements = Plan.elements plan in
+    let depended_on = Plan.depended_on plan in
     let rec loop keys assignment env =
       match keys with
       | key :: rest ->
@@ -1368,7 +1384,7 @@ module Corner_search = struct
         let (env, super) = Row.proj env super label assignment in
         f env ~sub ~super
     in
-    loop ty_params_topo Splat_elem.Map.empty env
+    loop elements Splat_elem.Map.empty env
 
   let assignments
       cache env (ty_params_topo : locl_ty list) (label : TShapeField.t option) r
@@ -1508,14 +1524,12 @@ let resolve_for_read env r elems : env * locl_ty =
         ~init:(env, TShapeMap.empty, Typing_make_type.nothing r)
         ~f:(fun (env, known, unknown) label ->
           let live = Splat_elem.Set.of_list (Row.live_spreads row label) in
-          let ty_params_topo =
-            Analysis.topo cache.Cache.bounds cache.Cache.analysis env live r
-          in
+          let plan = Plan.make cache env live r in
           (* Assign each type param its upper bound, in topo order so a param's
              bound is projected under the upper corners it depends on. *)
           let (env, assignment) =
             List.fold_left
-              ty_params_topo
+              (Plan.elements plan)
               ~init:(env, Splat_elem.Map.empty)
               ~f:(fun (env, a) key ->
                 let (env, _lower, upper) =
@@ -1577,8 +1591,7 @@ let subrow_labels cache env ~sub ~super r =
     ~super
     r
 
-let topo cache env roots r =
-  Analysis.topo cache.Cache.bounds cache.Cache.analysis env roots r
+let topo cache env roots r = Plan.make cache env roots r |> Plan.elements
 
 let check_subrow_corners = Corner_search.check_subrow_corners
 

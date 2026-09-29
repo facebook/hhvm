@@ -1689,6 +1689,46 @@ let cyclic_bound_projection_with_no_assignment_is_absent _ =
     "an unassigned cyclic spread's projected type is nothing"
     (Typing_defs.is_nothing upper.sft_ty)
 
+let distributed_upper_intersection_exposes_all_rows _ =
+  let key = tgeneric "T" in
+  let members =
+    [tgeneric "U"; simple_shape [("x", MakeType.int r)] ~open_:true]
+  in
+  let intersection = splat [mk (r, Tintersection members)] in
+  let env = Env.add_upper_bound (dummy_env ()) "T" intersection in
+  match
+    Typing_corners.bound_shape_upper
+      env
+      key
+      Typing_corners.Splat_elem.Map.empty
+      r
+  with
+  | (_, Typing_corners.Upper_shapes rows) -> assert_equal 2 (List.length rows)
+  | (_, Typing_corners.Upper_bottom)
+  | (_, Typing_corners.Upper_unconstrained) ->
+    assert_failure "an upper-bound intersection must expose both rows"
+
+let distributed_intersection_rows_survive_outer_bound_expansion _ =
+  let key = tgeneric "T" in
+  let members =
+    [tgeneric "U"; simple_shape [("x", MakeType.int r)] ~open_:true]
+  in
+  let other = simple_shape [("y", MakeType.bool r)] ~open_:true in
+  let distributed_intersection = splat [mk (r, Tintersection members)] in
+  let upper_bound = mk (r, Tintersection [distributed_intersection; other]) in
+  let upper_env = Env.add_upper_bound (dummy_env ()) "T" upper_bound in
+  match
+    Typing_corners.bound_shape_upper
+      upper_env
+      key
+      Typing_corners.Splat_elem.Map.empty
+      r
+  with
+  | (_, Typing_corners.Upper_shapes rows) -> assert_equal 3 (List.length rows)
+  | (_, Typing_corners.Upper_bottom)
+  | (_, Typing_corners.Upper_unconstrained) ->
+    assert_failure "outer upper-bound expansion dropped distributed rows"
+
 let bottom_upper_view_beside_shape_is_discarded _ =
   let key = tgeneric "T" in
   let upper =
@@ -1774,6 +1814,10 @@ let () =
          >:: cache_does_not_reuse_results_from_another_env;
          "cyclic_bound_projection_with_no_assignment_is_absent"
          >:: cyclic_bound_projection_with_no_assignment_is_absent;
+         "distributed_upper_intersection_exposes_all_rows"
+         >:: distributed_upper_intersection_exposes_all_rows;
+         "distributed_intersection_rows_survive_outer_bound_expansion"
+         >:: distributed_intersection_rows_survive_outer_bound_expansion;
          "bottom_upper_view_beside_shape_is_discarded"
          >:: bottom_upper_view_beside_shape_is_discarded;
          "supportdyn_exact_open_bound_projects_exactly"

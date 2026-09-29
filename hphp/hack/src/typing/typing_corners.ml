@@ -536,20 +536,48 @@ end = struct
       | Bottom
   end
 
-  (* Reading a row that is already known to be a shape, in each direction's own
-     answer type. *)
-  let normalized_upper env r shape_ty =
+  let intersect_upper_views views =
+    if
+      List.exists views ~f:(function
+          | Upper.Bottom -> true
+          | Upper.Shapes _
+          | Upper.Unconstrained ->
+            false)
+    then
+      Upper.Bottom
+    else
+      match
+        List.concat_map views ~f:(function
+            | Upper.Shapes rows -> rows
+            | Upper.Bottom
+            | Upper.Unconstrained ->
+              [])
+      with
+      | [] -> Upper.Unconstrained
+      | rows -> Upper.Shapes rows
+
+  (* Read a normalized shape in each direction's own answer type. *)
+  let rec normalized_upper env r shape_ty =
     let (env, _err, normalized) =
       Typing_shape_normalize.Row.normalize r shape_ty env ~on_error:None
     in
-    match Typing_shape_normalize.Row.as_row normalized with
-    | Some row when Typing_shape_normalize.Row.is_bottom row ->
-      (env, Upper.Bottom)
-    | Some row -> (env, Upper.Shapes [row])
-    | None ->
-      (* A distributed result is not one row. Ordinary subtyping retains its
-         connective; bound projection falls back conservatively. *)
-      (env, Upper.Unconstrained)
+    Typing_shape_normalize.Row.fold_normalized
+      normalized
+      ~row:(fun row ->
+        if Typing_shape_normalize.Row.is_bottom row then
+          (env, Upper.Bottom)
+        else
+          (env, Upper.Shapes [row]))
+      ~union:(fun _ -> (env, Upper.Unconstrained))
+      ~intersection:(fun tys ->
+        let (env, views) =
+          List.fold_map tys ~init:env ~f:(fun env ty ->
+              normalized_upper
+                env
+                (get_reason ty)
+                (Shape_splat { ss_elems = [ty] }))
+        in
+        (env, intersect_upper_views views))
 
   let normalized_lower env r shape_ty =
     let (env, _err, normalized) =
@@ -597,13 +625,13 @@ end = struct
       (match shapes with
       | [] -> (env, Upper.Unconstrained)
       | _ ->
-        let (env, normalized) =
+        let (env, row_groups) =
           List.fold_map shapes ~init:env ~f:(fun env shape_ty ->
               match normalized_upper env r shape_ty with
-              | (env, Upper.Shapes [row]) -> (env, Some row)
+              | (env, Upper.Shapes rows) -> (env, Some rows)
               | (env, _) -> (env, None))
         in
-        (match List.filter_opt normalized with
+        (match List.concat (List.filter_opt row_groups) with
         | [] -> (env, Upper.Bottom)
         | shapes -> (env, Upper.Shapes shapes)))
 

@@ -556,6 +556,15 @@ end = struct
       | [] -> Upper.Unconstrained
       | rows -> Upper.Shapes rows
 
+  let union_lower_views views =
+    match
+      List.concat_map views ~f:(function
+          | Lower.Shapes rows -> rows
+          | Lower.Bottom -> [])
+    with
+    | [] -> Lower.Bottom
+    | rows -> Lower.Shapes rows
+
   (* Read a normalized shape in each direction's own answer type. *)
   let rec normalized_upper env r shape_ty =
     let (env, _err, normalized) =
@@ -579,15 +588,27 @@ end = struct
         in
         (env, intersect_upper_views views))
 
-  let normalized_lower env r shape_ty =
+  let rec normalized_lower env r shape_ty =
     let (env, _err, normalized) =
       Typing_shape_normalize.Row.normalize r shape_ty env ~on_error:None
     in
-    match Typing_shape_normalize.Row.as_row normalized with
-    | Some row when Typing_shape_normalize.Row.is_bottom row ->
-      (env, Lower.Bottom)
-    | Some row -> (env, Lower.Shapes [row])
-    | None -> (env, Lower.Bottom)
+    Typing_shape_normalize.Row.fold_normalized
+      normalized
+      ~row:(fun row ->
+        if Typing_shape_normalize.Row.is_bottom row then
+          (env, Lower.Bottom)
+        else
+          (env, Lower.Shapes [row]))
+      ~union:(fun tys ->
+        let (env, views) =
+          List.fold_map tys ~init:env ~f:(fun env ty ->
+              normalized_lower
+                env
+                (get_reason ty)
+                (Shape_splat { ss_elems = [ty] }))
+        in
+        (env, union_lower_views views))
+      ~intersection:(fun _ -> (env, Lower.Bottom))
 
   (* Spreading [dynamic] is an open row whose unknown fields are [dynamic]
      ([shape(_ => dynamic)]), matching [Typing_shape_normalize]. *)
@@ -669,13 +690,13 @@ end = struct
       (match shapes with
       | [] -> (env, Lower.Bottom)
       | _ ->
-        let (env, normalized) =
+        let (env, row_groups) =
           List.fold_map shapes ~init:env ~f:(fun env shape_ty ->
               match normalized_lower env r shape_ty with
-              | (env, Lower.Shapes [row]) -> (env, Some row)
+              | (env, Lower.Shapes rows) -> (env, Some rows)
               | (env, _) -> (env, None))
         in
-        (match List.filter_opt normalized with
+        (match List.concat (List.filter_opt row_groups) with
         | [] -> (env, Lower.Bottom)
         | shapes -> (env, Lower.Shapes shapes)))
 

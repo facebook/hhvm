@@ -1729,6 +1729,44 @@ let distributed_intersection_rows_survive_outer_bound_expansion _ =
   | (_, Typing_corners.Upper_unconstrained) ->
     assert_failure "outer upper-bound expansion dropped distributed rows"
 
+let distributed_lower_union_exposes_all_rows _ =
+  let key = tgeneric "T" in
+  let members =
+    [tgeneric "U"; simple_shape [("x", MakeType.int r)] ~open_:true]
+  in
+  let union = splat [mk (r, Tunion members)] in
+  let env = Env.add_lower_bound (dummy_env ()) "T" union in
+  match
+    Typing_corners.bound_shape_lower
+      env
+      key
+      Typing_corners.Splat_elem.Map.empty
+      r
+  with
+  | (_, Typing_corners.Lower_shapes rows) -> assert_equal 2 (List.length rows)
+  | (_, Typing_corners.Lower_bottom) ->
+    assert_failure "a lower-bound union must expose both rows"
+
+let distributed_union_rows_survive_outer_bound_expansion _ =
+  let key = tgeneric "T" in
+  let members =
+    [tgeneric "U"; simple_shape [("x", MakeType.int r)] ~open_:true]
+  in
+  let other = simple_shape [("y", MakeType.bool r)] ~open_:true in
+  let distributed_union = splat [mk (r, Tunion members)] in
+  let lower_bound = mk (r, Tunion [distributed_union; other]) in
+  let lower_env = Env.add_lower_bound (dummy_env ()) "T" lower_bound in
+  match
+    Typing_corners.bound_shape_lower
+      lower_env
+      key
+      Typing_corners.Splat_elem.Map.empty
+      r
+  with
+  | (_, Typing_corners.Lower_shapes rows) -> assert_equal 3 (List.length rows)
+  | (_, Typing_corners.Lower_bottom) ->
+    assert_failure "outer lower-bound expansion dropped distributed rows"
+
 let bottom_upper_view_beside_shape_is_discarded _ =
   let key = tgeneric "T" in
   let upper =
@@ -1818,6 +1856,10 @@ let () =
          >:: distributed_upper_intersection_exposes_all_rows;
          "distributed_intersection_rows_survive_outer_bound_expansion"
          >:: distributed_intersection_rows_survive_outer_bound_expansion;
+         "distributed_lower_union_exposes_all_rows"
+         >:: distributed_lower_union_exposes_all_rows;
+         "distributed_union_rows_survive_outer_bound_expansion"
+         >:: distributed_union_rows_survive_outer_bound_expansion;
          "bottom_upper_view_beside_shape_is_discarded"
          >:: bottom_upper_view_beside_shape_is_discarded;
          "supportdyn_exact_open_bound_projects_exactly"

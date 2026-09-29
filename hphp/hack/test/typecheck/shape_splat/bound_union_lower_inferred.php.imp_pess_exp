@@ -1,0 +1,4 @@
+File "bound_union_lower_inferred.php--use.php", line 22, characters 3-18:
+  ~(function(shape(...Wrapped<(shape('a' => int) | T)>, ...shape(?'q' => bool))): ~void)
+   where T as shape(...)
+No errors

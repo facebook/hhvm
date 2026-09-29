@@ -61,6 +61,11 @@ class WatchmanXplatStatsSink : public facebook::eden::XplatLoggerStatsSink {
   void backoffWait() override {
     getWatchmanStats()->increment(&TelemetryStats::xplatBackoffWaits);
   }
+  void messagesDroppedWriteFailures(uint64_t count) override {
+    getWatchmanStats()->increment(
+        &TelemetryStats::xplatMessagesDroppedWriteFailures,
+        static_cast<double>(count));
+  }
 };
 
 /// Builds the delivery-core tunables from watchman config. Defaults match the

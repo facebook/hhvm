@@ -14,18 +14,17 @@ from __future__ import annotations
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, ClassVar, Iterable, List, Optional, Tuple
+from typing import Callable, Iterable, List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
-from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.eden_test_driver import EdenTestDriver
 from hphp.hack.test.integration.hh_paths import hh_client, hh_server
 from hphp.hack.test.integration.test_case import TestCase
 
@@ -92,37 +91,6 @@ SERVER_NOTIFIER_RE = r"ServerNotifier\.get_changes_(sync|async) got (\d+) change
 DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND: bool = (
     os.environ.get("DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND") is not None
 )
-
-
-def runAndCheckSetupCommand(args: List[str]) -> str:
-    # Not using CommonTestDriver.proc_call here, because it relies on some
-    # global state seems to be used for commands denoting the actual test.
-    proc = subprocess.run(args, capture_output=True, text=True)
-    if proc.returncode != 0:
-        print("Failed setup command stdout", proc.stdout)
-        print("Failed setup command stderr", proc.stderr)
-        proc.check_returncode()
-    return proc.stdout
-
-
-def createEdenInstance(eden_base_dir: str) -> EdenFS:
-    """Creates an EdenFS instance, and starts it.
-
-    The instance is independent from the one powering for example
-    ~/fbsource, and stores all of its state and metadata in eden_base_dir.
-    """
-
-    instance = EdenFS(Path(eden_base_dir))
-    instance.start()
-    return instance
-
-
-def mountEden(eden_instance: EdenFS, hg_repo: str, eden_mount_point: str) -> None:
-    eden_instance.clone(hg_repo, eden_mount_point)
-
-
-def unmountEden(eden_instance: EdenFS, eden_mount_point: str) -> None:
-    eden_instance.remove(eden_mount_point)
 
 
 def assertCurrentServerLogContains(driver: CommonTestDriver, needle: str) -> None:
@@ -258,141 +226,18 @@ class EdenfsWatcherInitDiagnosisTests(TestCase[EdenfsWatcherInitDiagnosisTestDri
         )
 
 
-class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
-    """Driver compatible with CommonTestDriver, but creating an Eden-backed repo.
-
-    Concretely, this means that all the helpers in CommonTestDriver must
-    still work. All we need to do is making sure that the repo pointed at by
-    the path in `repo_dir` gets initialized in a different way, by mounting an hg
-    commit using Eden.
-    """
-
-    # This is the root of the hg repo that we will create
-    hg_repo_root: ClassVar[str]
-
-    # This is where we will mount hg_repo_root to. cls.repo_dir will be the same or a subfolder of this.
-    eden_mount_point: ClassVar[str]
-
-    eden_instance: ClassVar[EdenFS]
-
-    # This is a commit in the testing repo at which point we only added the .hhconfig and hh.conf files
-    clean_slate_commit: ClassVar[str]
-
+class EdenfsWatcherTestDriver(EdenTestDriver):
     @classmethod
     def getConfig(cls) -> Config:
         return Config(streaming_errors=False, state_tracking=False)
 
     @classmethod
-    def setUpClassImpl(
-        cls, template_repo: str, repo_subdirectory_path: Optional[str]
-    ) -> None:
-        print("running EdenfsWatcherTestDriver.setUpClassImpl")
-
-        # We need to call CommonTestDriver.setUpClass, but make the class
-        # variable changes visible to our cls object
-        super(EdenfsWatcherTestDriver, cls).setUpClass(template_repo)
-
-        # This is where the Eden testing instance will put all of its state and files
-        eden_base_dir = os.path.join(cls.base_tmp_dir, "eden_base")
-        os.mkdir(eden_base_dir)
-        cls.eden_instance = createEdenInstance(eden_base_dir)
-
-        cls.hg_repo_root = os.path.join(cls.base_tmp_dir, "hg_repo")
-
-        # We will mount the hg repo here ...
-        cls.eden_mount_point = os.path.join(cls.base_tmp_dir, "repo")
-
-        # Subfolder inside hg_repo where we actually put testing files:
-        template_repo_destination = (
-            os.path.join(cls.hg_repo_root, repo_subdirectory_path)
-            if repo_subdirectory_path
-            else cls.hg_repo_root
-        )
-
-        # This is the main folder testing folder, which we point hh at. Note that we
-        # keep the name `repo_dir` in order to be consistent with how CommonTestDriver
-        # uses the term. However, this is not necessarily the same as the root of the
-        # repository! If repo_subdirectory_path is set, then the "repo" we test on is a
-        # subfolder of the Eden mount point.
-        cls.repo_dir = (
-            os.path.join(cls.eden_mount_point, repo_subdirectory_path)
-            if repo_subdirectory_path
-            else cls.eden_mount_point
-        )
-
-        shutil.copytree(template_repo, template_repo_destination)
-
+    def prepare_initial_commit(cls, output_folder: str) -> list[str]:
         # The hh.conf file can go wherever, as long as HH_LOCALCONF_PATH points to
         # it. Some other tests expect it to be inside the folder cls.repo_dir.
         # So let's put it in the place that after mounting will end up at cls.repo_dir
-        cls.getConfig().write_hhconf(template_repo_destination)
-
-        # CommonTestDriver.setUpClass already did this, but we changed the value of repo_dir
-        cls.test_env["HH_LOCALCONF_PATH"] = cls.repo_dir
-
-        runAndCheckSetupCommand(["hg", "init", cls.hg_repo_root])
-        runAndCheckSetupCommand(
-            [
-                "hg",
-                "add",
-                "-R",
-                cls.hg_repo_root,
-                os.path.join(template_repo_destination, ".hhconfig"),
-                os.path.join(template_repo_destination, "hh.conf"),
-            ]
-        )
-        # Create the clean slate commit for those tests that don't want the full template repo
-        runAndCheckSetupCommand(
-            [
-                "hg",
-                "commit",
-                "--message",
-                "clean slate commit",
-                "-R",
-                cls.hg_repo_root,
-            ]
-        )
-
-        cls.clean_slate_commit = runAndCheckSetupCommand(
-            [
-                "hg",
-                "whereami",
-                "-R",
-                cls.hg_repo_root,
-            ]
-        )
-
-        # Commit everything else. This is the commit that all tests start on.
-        runAndCheckSetupCommand(
-            [
-                "hg",
-                "commit",
-                "--addremove",
-                "--message",
-                "test repo finished",
-                "-R",
-                cls.hg_repo_root,
-            ]
-        )
-
-    @classmethod
-    def setUpClass(cls, template_repo: str) -> None:
-        # This driver creates a test setup where we run hh on the Eden mount point
-        # directly.
-        cls.setUpClassImpl(template_repo, None)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        print("running EdenfsWatcherDriver.tearDownClass")
-
-        cls.eden_instance.cleanup()
-        super(EdenfsWatcherTestDriver, cls).tearDownClass()
-
-    def setUp(self) -> None:
-        print("running EdenfsWatcherDriver.setUp")
-
-        # For hygiene, we (re-)mount our Eden repo for each individual test
-        mountEden(self.eden_instance, self.hg_repo_root, self.eden_mount_point)
+        cls.getConfig().write_hhconf(output_folder)
+        return super().prepare_initial_commit(output_folder) + ["hh.conf"]
 
     def tearDown(self) -> None:
         print("running EdenfsWatcherDriver.tearDown")
@@ -414,7 +259,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         # Note that we must stop the server before unmounting the Eden repo that it works on.
         # 3 retries is the value used in CommonTestDriver.tearDown
         self.stop_hh_server(retries=3)
-        unmountEden(self.eden_instance, self.eden_mount_point)
+        super().tearDown()
 
     def start_hh_server(
         self,
@@ -439,35 +284,6 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
             super().start_hh_server(
                 changed_files, saved_state_path, args, wait_for_server
             )
-
-    def commitAllChanges(
-        self, message: str = "test commit", allow_empty: bool = True
-    ) -> str:
-        (_, _, retcode) = self.proc_call(["hg", "add", "-R", self.eden_mount_point])
-        self.assertEqual(retcode, 0)
-        (_, _, retcode) = self.proc_call(
-            ["hg", "commit", "--addremove", "-m", message, "-R", self.eden_mount_point]
-        )
-        if allow_empty:
-            # hg commit --help states that 1 is the exit code used when nothing changed
-            self.assertTrue(retcode == 0 or retcode == 1)
-        else:
-            self.assertEqual(retcode, 0)
-
-        # Get the revision hash of the commit we just created
-        (stdout, _, retcode) = self.proc_call(
-            ["hg", "whereami", "-R", self.eden_mount_point]
-        )
-        self.assertEqual(retcode, 0)
-        rev_hash = stdout.strip()
-        return rev_hash
-
-    def gotoRev(self, rev: str, merge: bool = False) -> None:
-        args = ["hg", "goto", rev, "-R", self.eden_mount_point]
-        if merge:
-            args.append("--merge")
-        (_, _, retcode) = self.proc_call(args)
-        self.assertEqual(retcode, 0)
 
     @classmethod
     def isMountPointIgnored(cls) -> bool:

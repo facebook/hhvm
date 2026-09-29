@@ -1244,68 +1244,66 @@ module Plan = struct
     { elements; depended_on }
 end
 
-(* -- Masking --------------------------------------------------------------- *)
-
-module Masking = struct
-  (* Describes how a type parameter influences leftward labels when projecting
-     at that label under rightmost-wins semantics. *)
-  type t =
-    | Masked
-    | Unmasked
-    | Unknown
-
-  (* Whether a type parameter to the right of [key] in [row] masks it at
-     [label]: a rightward generic masks iff its own upper bound is [Req] there;
-     [Req] lower but [Opt] upper is [Unknown] (pessimistic). *)
-  let of_splat cache env ss_elems label key assignment r =
-    let rec aux rev_elems acc =
-      match rev_elems with
-      | [] -> Unknown
-      | ty :: rest ->
-        (match get_node ty with
-        | Tgeneric _
-        | Tnewtype _
-          when Int.equal (Splat_elem.compare ty key) 0 ->
-          acc
-        | Tgeneric _
-        | Tnewtype _ ->
-          let (_env, lower, upper) =
-            Field_bounds.field_bounds
-              cache.Cache.bounds
-              env
-              ty
-              label
-              assignment
-              r
-          in
-          if Field.is_required upper then
-            Masked
-          else if Field.is_required lower then
-            aux rest Unknown
-          else
-            aux rest acc
-        | _ -> aux rest acc)
-    in
-    aux (List.rev ss_elems) Unmasked
-
-  let of_row
-      cache env (row : Typing_shape_normalize.Row.t) label key assignment r =
-    Typing_shape_normalize.Row.fold
-      row
-      ~bottom:(fun () -> Unknown)
-      ~simple:(fun _ -> Unknown)
-      ~elements:(fun elements ->
-        of_splat cache env (element_tys elements) label key assignment r)
-
-  (* let of_row env row label key assignment r =
-     of_row_cached (Cache.create ()) env row label key assignment r *)
-end
-
 (* -- Corner search --------------------------------------------------------- *)
+module Search = struct
+  module Masking = struct
+    (* Describes how a type parameter influences leftward labels when projecting
+       at that label under rightmost-wins semantics. *)
+    type t =
+      | Masked
+      | Unmasked
+      | Unknown
 
-(* Enumerate corner assignments in dependency order. Bound resolution is cached
-   within one shape-splat operation, but every assignment path is traversed. *)
-module Corner_search = struct
+    (* Whether a type parameter to the right of [key] in [row] masks it at
+       [label]: a rightward generic masks iff its own upper bound is [Req] there;
+       [Req] lower but [Opt] upper is [Unknown] (pessimistic). *)
+    let of_splat cache env ss_elems label key assignment r =
+      let rec aux rev_elems acc =
+        match rev_elems with
+        | [] -> Unknown
+        | ty :: rest ->
+          (match get_node ty with
+          | Tgeneric _
+          | Tnewtype _
+            when Int.equal (Splat_elem.compare ty key) 0 ->
+            acc
+          | Tgeneric _
+          | Tnewtype _ ->
+            let (_env, lower, upper) =
+              Field_bounds.field_bounds
+                cache.Cache.bounds
+                env
+                ty
+                label
+                assignment
+                r
+            in
+            if Field.is_required upper then
+              Masked
+            else if Field.is_required lower then
+              aux rest Unknown
+            else
+              aux rest acc
+          | _ -> aux rest acc)
+      in
+      aux (List.rev ss_elems) Unmasked
+
+    let of_row
+        cache env (row : Typing_shape_normalize.Row.t) label key assignment r =
+      Typing_shape_normalize.Row.fold
+        row
+        ~bottom:(fun () -> Unknown)
+        ~simple:(fun _ -> Unknown)
+        ~elements:(fun elements ->
+          of_splat cache env (element_tys elements) label key assignment r)
+
+    (* let of_row env row label key assignment r =
+       of_row_cached (Cache.create ()) env row label key assignment r *)
+  end
+
+  (* Enumerate corner assignments in dependency order. Bound resolution is
+     cached within one shape-splat operation, but every assignment path is
+     traversed. *)
   let corners_for
       cache
       env
@@ -1593,9 +1591,9 @@ let subrow_labels cache env ~sub ~super r =
 
 let topo cache env roots r = Plan.make cache env roots r |> Plan.elements
 
-let check_subrow_corners = Corner_search.check_subrow_corners
+let check_subrow_corners = Search.check_subrow_corners
 
-let corner_assignments = Corner_search.assignments
+let corner_assignments = Search.assignments
 
 let spread_tyvar_ids = Spread_var.ids
 
@@ -1613,7 +1611,7 @@ module For_test = struct
     | Lower_shapes of Typing_shape_normalize.Row.t list
     | Lower_bottom
 
-  module Masking = Masking
+  module Masking = Search.Masking
   module Dependency = Analysis.Dependency
   module Cycle_info = Analysis.Cycle_info
   module Component = Analysis.Component
@@ -1671,7 +1669,7 @@ module For_test = struct
       env ~depended_on ~live_sub ~live_super ~sub ~super label key assignment r
       =
     let cache = Cache.create () in
-    Corner_search.corners_for
+    Search.corners_for
       cache
       env
       ~depended_on

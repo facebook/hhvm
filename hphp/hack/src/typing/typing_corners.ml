@@ -1113,77 +1113,61 @@ module Analysis = struct
           order @ [key]
     in
     Splat_elem.Set.fold (fun key acc -> visit key acc []) roots []
-end
 
-module Labels : sig
-  val subrow_label_set :
-    Cache.t ->
-    env ->
-    sub:Typing_shape_normalize.Row.t ->
-    super:Typing_shape_normalize.Row.t ->
-    Typing_reason.t ->
-    TShapeSet.t
+  (* Label discovery is another part of analysis: it determines the finite set
+     of per-label problems that corner search must cover. *)
+  module Labels = struct
+    let bound_labels_upper cache env name r =
+      let (env, view) =
+        Field_bounds.bound_shape_upper cache env name Splat_elem.Map.empty r
+      in
+      ignore env;
+      match view with
+      | Field_bounds.Upper.Shapes shapes ->
+        List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
+            TShapeSet.union acc (Row.label_set shape_ty))
+      | Field_bounds.Upper.Bottom
+      | Field_bounds.Upper.Unconstrained ->
+        TShapeSet.empty
 
-  (** The full label list a splat subrow must check: [None] (the unknown tail)
-      and every label appearing inline and in the bounds of opaque elements. *)
-  val subrow_labels :
-    Cache.t ->
-    env ->
-    sub:Typing_shape_normalize.Row.t ->
-    super:Typing_shape_normalize.Row.t ->
-    Typing_reason.t ->
-    TShapeField.t option list
-end = struct
-  let bound_labels_upper cache env name r =
-    let (env, view) =
-      Field_bounds.bound_shape_upper cache env name Splat_elem.Map.empty r
-    in
-    ignore env;
-    match view with
-    | Field_bounds.Upper.Shapes shapes ->
-      List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
-          TShapeSet.union acc (Row.label_set shape_ty))
-    | Field_bounds.Upper.Bottom
-    | Field_bounds.Upper.Unconstrained ->
-      TShapeSet.empty
+    let bound_labels_lower cache env name r =
+      let (env, view) =
+        Field_bounds.bound_shape_lower cache env name Splat_elem.Map.empty r
+      in
+      ignore env;
+      match view with
+      | Field_bounds.Lower.Shapes shapes ->
+        List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
+            TShapeSet.union acc (Row.label_set shape_ty))
+      | Field_bounds.Lower.Bottom -> TShapeSet.empty
 
-  let bound_labels_lower cache env name r =
-    let (env, view) =
-      Field_bounds.bound_shape_lower cache env name Splat_elem.Map.empty r
-    in
-    ignore env;
-    match view with
-    | Field_bounds.Lower.Shapes shapes ->
-      List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
-          TShapeSet.union acc (Row.label_set shape_ty))
-    | Field_bounds.Lower.Bottom -> TShapeSet.empty
+    let bound_label_set cache env names r =
+      let all = closure cache env (Splat_elem.Set.of_list names) r in
+      Splat_elem.Set.fold
+        (fun name acc ->
+          let up = bound_labels_upper cache env name r
+          and lo = bound_labels_lower cache env name r in
+          TShapeSet.union acc (TShapeSet.union up lo))
+        all
+        TShapeSet.empty
 
-  let bound_label_set cache env names r =
-    let all = Analysis.closure cache env (Splat_elem.Set.of_list names) r in
-    Splat_elem.Set.fold
-      (fun name acc ->
-        let up = bound_labels_upper cache env name r
-        and lo = bound_labels_lower cache env name r in
-        TShapeSet.union acc (TShapeSet.union up lo))
-      all
-      TShapeSet.empty
+    let subrow_label_set
+        cache
+        env
+        ~(sub : Typing_shape_normalize.Row.t)
+        ~(super : Typing_shape_normalize.Row.t)
+        r =
+      let params = Row.spread_elements sub @ Row.spread_elements super in
+      TShapeSet.union
+        (TShapeSet.union (Row.label_set sub) (Row.label_set super))
+        (bound_label_set cache env params r)
 
-  let subrow_label_set
-      cache
-      env
-      ~(sub : Typing_shape_normalize.Row.t)
-      ~(super : Typing_shape_normalize.Row.t)
-      r =
-    let params = Row.spread_elements sub @ Row.spread_elements super in
-    TShapeSet.union
-      (TShapeSet.union (Row.label_set sub) (Row.label_set super))
-      (bound_label_set cache env params r)
-
-  let subrow_labels cache env ~sub ~super r : TShapeField.t option list =
-    None
-    :: List.map
-         (TShapeSet.elements (subrow_label_set cache env ~sub ~super r))
-         ~f:Option.some
+    let subrow_labels cache env ~sub ~super r : TShapeField.t option list =
+      None
+      :: List.map
+           (TShapeSet.elements (subrow_label_set cache env ~sub ~super r))
+           ~f:Option.some
+  end
 end
 
 (* -- Masking --------------------------------------------------------------- *)
@@ -1447,7 +1431,7 @@ let resolve_for_read env r elems : env * locl_ty =
       None
       :: List.map
            (TShapeSet.elements
-              (Labels.subrow_label_set cache env ~sub:row ~super:row r))
+              (Analysis.Labels.subrow_label_set cache env ~sub:row ~super:row r))
            ~f:Option.some
     in
     let (env, known, unknown) =
@@ -1505,9 +1489,9 @@ let proj = Row.proj
 
 let row_live_spread_at = Row.live_spreads
 
-let subrow_label_set = Labels.subrow_label_set
+let subrow_label_set = Analysis.Labels.subrow_label_set
 
-let subrow_labels = Labels.subrow_labels
+let subrow_labels = Analysis.Labels.subrow_labels
 
 let topo = Analysis.topo
 

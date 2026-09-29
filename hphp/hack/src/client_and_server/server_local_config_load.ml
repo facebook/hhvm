@@ -107,6 +107,8 @@ let default =
     hh_distc_fanout_threshold = 250_000;
     hh_distc_fanout_full_init_threshold = 250_000;
     hh_distc_exponential_backoff_num_retries = 10;
+    ide_file_watcher_enabled = false;
+    ide_file_watcher_max_changed_files = 1000;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
@@ -1011,6 +1013,19 @@ let load_
       ~default:default.hh_distc_exponential_backoff_num_retries
       config
   in
+  let ide_file_watcher_enabled =
+    bool_if_min_version
+      Config_keys.Hhconf.ide_file_watcher_enabled
+      ~default:default.ide_file_watcher_enabled
+      ~current_version
+      config
+  in
+  let ide_file_watcher_max_changed_files =
+    int_
+      Config_keys.Hhconf.ide_file_watcher_max_changed_files
+      ~default:default.ide_file_watcher_max_changed_files
+      config
+  in
   let ide_load_naming_table_on_disk =
     bool_if_min_version
       Config_keys.Hhconf.ide_load_naming_table_on_disk
@@ -1268,6 +1283,8 @@ let load_
     hh_distc_fanout_threshold;
     hh_distc_fanout_full_init_threshold;
     hh_distc_exponential_backoff_num_retries;
+    ide_file_watcher_enabled;
+    ide_file_watcher_max_changed_files;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
     dump_tast_hashes;

@@ -7,6 +7,7 @@ import json
 import os
 import pprint
 import subprocess
+import time
 import urllib
 import uuid
 from typing import (
@@ -28,7 +29,7 @@ from hphp.hack.test.integration.jsonrpc_stream import (
     JsonRpcStreamReader,
     JsonRpcStreamWriter,
 )
-from hphp.hack.test.integration.utils import Json
+from hphp.hack.test.integration.utils import fixup_hhi_json, Json
 
 
 class TranscriptEntry(NamedTuple):
@@ -52,10 +53,12 @@ class LspCommandProcessor:
         self,
         # pyre-fixme[24]: Generic type `subprocess.Popen` expects 1 type parameter.
         proc: subprocess.Popen,
+        env: Mapping[str, str],
         reader: JsonRpcStreamReader,
         writer: JsonRpcStreamWriter,
     ) -> None:
         self.proc = proc
+        self.env = dict(env)
         self.reader = reader
         self.writer = writer
 
@@ -86,7 +89,7 @@ class LspCommandProcessor:
         try:
             reader = JsonRpcStreamReader(stdout)
             writer = JsonRpcStreamWriter(stdin)
-            yield cls(proc, reader, writer)
+            yield cls(proc, env, reader, writer)
         finally:
             stdin.close()
             stdout.close()
@@ -144,11 +147,52 @@ class LspCommandProcessor:
                 transcript = self._wait_for_initialized(transcript)
             elif command["method"] == "$test/writeToDisk":
                 self._write_to_disk(command)
+            elif command["method"] == "$test/switchCommit":
+                self._switch_commit(command)
+            elif command["method"] == "$test/requestUntil":
+                transcript = self._request_until(transcript, command)
             else:
                 self.writer.write(command)
                 transcript = self._scribe(transcript, sent=command, received=None)
 
         return transcript
+
+    def _request_until(self, transcript: Transcript, command: Json) -> Transcript:
+        assert isinstance(command, dict)
+        params = command["params"]
+        assert isinstance(params, dict)
+        request = params["request"]
+        assert isinstance(request, dict)
+        timeout_seconds = params["timeout_seconds"]
+        assert isinstance(timeout_seconds, (int, float)) and timeout_seconds > 0
+        deadline = time.monotonic() + timeout_seconds
+        transcript_id = self._client_request_id(request["id"])
+        expected_result = fixup_hhi_json(params["result"])
+
+        while True:
+            # Reuse the ID only after receiving its previous response. Keep the
+            # last attempt for the spec's usual result/diff verification.
+            transcript = dict(transcript)
+            transcript.pop(transcript_id, None)
+            transcript = self._send_commands(transcript, [request])
+            transcript = self._wait_for_response(
+                transcript, request["id"], deadline=deadline
+            )
+            response = transcript[transcript_id].received
+            assert isinstance(response, dict)
+            assert "error" not in response, f"Request failed: {request}: {response}"
+            assert "result" in response, f"Missing result: {request}: {response}"
+            if (
+                fixup_hhi_json(response["result"]) == expected_result
+                and response.get("powered_by") == params["powered_by"]
+            ):
+                return transcript
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return transcript
+            time.sleep(min(0.1, remaining))
+            if time.monotonic() >= deadline:
+                return transcript
 
     def _wait_for_initialized(self, transcript: Transcript) -> Transcript:
         dummy_command = {
@@ -209,13 +253,24 @@ class LspCommandProcessor:
         return self._wait_for_response(transcript, shutdown_command["id"])
 
     def _wait_for_response(
-        self, transcript: Transcript, request_id: Json
+        self,
+        transcript: Transcript,
+        request_id: Json,
+        *,
+        deadline: Optional[float] = None,
     ) -> Transcript:
         transcript_id = self._client_request_id(request_id)
         request = transcript[transcript_id].sent
 
         while transcript[transcript_id].received is None:
-            message = self._try_read_logged(timeout_seconds=120.0)
+            timeout_seconds = (
+                120.0 if deadline is None else max(0, deadline - time.monotonic())
+            )
+            message = (
+                self._try_read_logged(timeout_seconds=timeout_seconds)
+                if timeout_seconds > 0
+                else None
+            )
             assert message is not None, (
                 f"Timed out while waiting for the response to request {transcript_id}. "
                 + f"Here is the request: {request}. "
@@ -345,6 +400,26 @@ Transcript of all the messages we saw:
         processed_transcript_ids = set(processed_transcript_ids)
         processed_transcript_ids.add(transcript_id)
         return (transcript, processed_transcript_ids)
+
+    def _switch_commit(self, command: Json) -> None:
+        assert isinstance(command, dict)
+        params = command["params"]
+        assert isinstance(params, dict)
+        repo_dir = params["repo_dir"]
+        commit = params["commit"]
+        assert isinstance(repo_dir, str)
+        assert isinstance(commit, str)
+        result = subprocess.run(
+            ["hg", "goto", "--rev", commit, "-R", repo_dir],
+            env=self.env,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, (
+            f"Commit switch failed ({command.get('comment')}): {repo_dir} -> {commit}\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
 
     def _write_to_disk(self, command: Json) -> None:
         # pyrefly: ignore [bad-index, unsupported-operation]

@@ -428,6 +428,11 @@ module Hhconf = struct
 
   let go_to_implementation = hhconf_key "go_to_implementation"
 
+  let ide_file_watcher_enabled = hhconf_key "ide_file_watcher_enabled"
+
+  let ide_file_watcher_max_changed_files =
+    hhconf_key "ide_file_watcher_max_changed_files"
+
   let ide_load_naming_table_on_disk = hhconf_key "ide_load_naming_table_on_disk"
 
   let ide_naming_table_update_threshold =

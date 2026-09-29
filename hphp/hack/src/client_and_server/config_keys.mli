@@ -387,6 +387,10 @@ module Hhconf : sig
 
   val go_to_implementation : string
 
+  val ide_file_watcher_enabled : string
+
+  val ide_file_watcher_max_changed_files : string
+
   val ide_load_naming_table_on_disk : string
 
   val ide_naming_table_update_threshold : string

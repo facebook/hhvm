@@ -364,6 +364,10 @@ type t = {
   hh_distc_fanout_full_init_threshold: int;
       (** fanout threshold above which full-init hh_distc is triggered *)
   hh_distc_exponential_backoff_num_retries: int;
+  ide_file_watcher_enabled: bool;
+      (** Enable the IDE daemon's built-in watcher in addition to LSP file-change notifications. *)
+  ide_file_watcher_max_changed_files: int;
+      (** Maximum number of relevant paths in a commit transition to process incrementally. *)
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
   ide_naming_table_update_threshold: int;

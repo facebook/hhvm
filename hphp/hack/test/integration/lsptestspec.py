@@ -125,11 +125,22 @@ class LspTestSpec:
         params: Json,
         *,
         result: Json,
+        retry_timeout: Optional[float] = None,
         wait_id: Optional[str] = None,
         comment: Optional[str] = None,
         powered_by: Optional[str] = None,
     ) -> "LspTestSpec":
-        """Add a request to this test's messages."""
+        """Add a request to this test's messages.
+
+        For a read-only request, retry_timeout optionally allows retrying until
+        result and powered_by match, within that many seconds. Protocol errors
+        fail immediately. This cannot be combined with a deferred wait_id.
+        """
+        if retry_timeout is not None:
+            if retry_timeout <= 0:
+                raise ValueError("retry_timeout must be positive")
+            if wait_id is not None:
+                raise ValueError("retry_timeout cannot be combined with wait_id")
         traceback = inspect.stack()
         assert traceback is not None, "Failed to get traceback info"
 
@@ -145,6 +156,7 @@ class LspTestSpec:
                 method=method,
                 params=params,
                 result=result,
+                retry_timeout=retry_timeout,
                 wait_id=wait_id,
                 comment=comment,
                 powered_by=powered_by,
@@ -152,6 +164,20 @@ class LspTestSpec:
             )
         )
         return self._update(messages=messages)
+
+    def switch_commit(
+        self, *, repo_dir: str, commit: str, comment: Optional[str] = None
+    ) -> "LspTestSpec":
+        """Switch a Sapling checkout to a commit without sending an LSP message.
+
+        Wait for the checkout to finish, but not for the IDE to process any
+        resulting file-watcher events.
+        """
+        return self.notification(
+            method="$test/switchCommit",
+            params={"repo_dir": repo_dir, "commit": commit},
+            comment=comment,
+        )
 
     def debug(self) -> "LspTestSpec":
         """Issue a `telemetry/rage` request for debugging.
@@ -317,7 +343,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
     ) -> Tuple[Sequence[Json], "_LspIdMap"]:
         """Transforms this test spec into something the LSP command processor
         can interpret."""
-        json_commands = []
+        json_commands: list[Json] = []
         lsp_id_map = {}
         current_id = 0
         for message in self._messages:
@@ -325,18 +351,34 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             lsp_id_map[message] = current_id
 
             if isinstance(message, _RequestSpec):
-                json_commands.append(
-                    {
-                        "jsonrpc": "2.0",
-                        "comment": message.comment,
-                        "id": current_id,
-                        "method": message.method,
-                        "params": interpolate_variables(
-                            message.params, variables=variables
-                        ),
-                    }
-                )
+                command = {
+                    "jsonrpc": "2.0",
+                    "comment": message.comment,
+                    "id": current_id,
+                    "method": message.method,
+                    "params": interpolate_variables(
+                        message.params, variables=variables
+                    ),
+                }
 
+                if message.retry_timeout is not None:
+                    json_commands.append(
+                        {
+                            "jsonrpc": "2.0",
+                            "method": "$test/requestUntil",
+                            "params": {
+                                "request": command,
+                                "result": interpolate_variables(
+                                    message.result, variables
+                                ),
+                                "powered_by": message.powered_by,
+                                "timeout_seconds": message.retry_timeout,
+                            },
+                        }
+                    )
+                    continue
+
+                json_commands.append(command)
                 if message.wait_id is None:
                     # Assume that if no wait ID was explicitly passed, we want
                     # to wait on the response before sending the next message.
@@ -468,7 +510,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 yield error_description
             elif isinstance(message, _NotificationSpec):
                 # Nothing needs to be done here, since we sent the notification
-                # and don't expect a response.
+                # or ran the local command and don't expect a response.
                 pass
             elif isinstance(
                 message,
@@ -651,6 +693,9 @@ This was the associated request:
         method={method!r},
         params={params!r},
         result={result!r},"""
+        if request.retry_timeout is not None:
+            request_snippet += f"""
+        retry_timeout={request.retry_timeout!r},"""
         if request.wait_id is not None:
             request_snippet += f"""
         wait_id={request.wait_id!r},"""
@@ -934,6 +979,7 @@ class _RequestSpec:
         "method",
         "params",
         "result",
+        "retry_timeout",
         "wait_id",
         "comment",
         "powered_by",
@@ -946,6 +992,7 @@ class _RequestSpec:
         method: str,
         params: Json,
         result: Json,
+        retry_timeout: Optional[float],
         wait_id: Optional[str],
         comment: Optional[str],
         powered_by: Optional[str],
@@ -954,6 +1001,7 @@ class _RequestSpec:
         self.method = method
         self.params = params
         self.result = result
+        self.retry_timeout = retry_timeout
         self.wait_id = wait_id
         self.comment = comment
         self.powered_by = powered_by

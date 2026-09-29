@@ -3,15 +3,18 @@
  (wrapped false)
  (modules
   client_ide_daemon
+  client_ide_eden_watcher
   client_ide_incremental
   client_ide_init
   client_ide_service)
  (libraries
   client_ide_message
   client_ide_utils
+  edenfs_watcher_stubs
   folly_stubs
   lwt
   ide_highlight_refs
+  ignore
   lsp
   package_info
   rust_batch_index_ffi

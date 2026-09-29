@@ -37,6 +37,7 @@ type message =
   | ClientRequest : 'a Client_ide_message.tracked_t -> message
       (** ClientRequest came from Client_ide_service over stdin;
       it expects a response. *)
+  | Commit_transition_changes : Relative_path.Set.t -> message
   | GotNamingTable :
       (Client_ide_init.init_result, Client_ide_message.rich_error) result
       -> message
@@ -113,8 +114,8 @@ The key algorithms which read from these data-structures are:
 The invariants for forward and reverse naming tables:
 1. These tables only ever reflect truth about disk files; they are unaffected
    by open_file entries.
-2. They are updated in response to DidChangeWatchedFileEvents.
-   Because watchman and VSCode send those events asynchronously,
+2. They are updated in response to watched-file events and optional commit transitions.
+   Because these events arrive asynchronously,
    we might for instance find ourselves being asked to compute a TAST
    by reading the naming-table and fetching a shallow-decl from a file
    that doesn't even exist on disk any more (even though we don't yet know it).
@@ -279,9 +280,17 @@ let remove_hhi (state : state) : unit =
       let e = Exception.wrap exn in
       Client_ide_utils.log_bug "remove_hhi" ~e ~telemetry:true)
 
+type batch_trigger =
+  | Initialization
+  | Lsp_file_changes
+  | Commit_transition
+  | Test_index
+[@@deriving show { with_path = false }]
+
 (** Helper called to process a batch of file changes.
   Updates the naming table, and invalidates the decl and tast caches for the changes. *)
 let batch_update_naming_table_and_invalidate_caches
+    ~(trigger : batch_trigger)
     ~(ctx : Provider_context.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : Search_utils.si_env)
@@ -302,6 +311,7 @@ let batch_update_naming_table_and_invalidate_caches
       ~local_memory
       ~changes
       ~entries:(Relative_path.Map.map open_files ~f:(fun { entry; _ } -> entry))
+    |> Telemetry.string_ ~key:"trigger" ~value:(show_batch_trigger trigger)
   in
   Hack_event_logger.ProfileTypeCheck.invalidate
     ~count:(List.length changes)
@@ -318,6 +328,30 @@ let make_empty_ctx (common : common_state) : Provider_context.t =
     ~tcopt:(Server_config.typechecker_options common.config)
     ~backend:(Provider_backend.Local_memory common.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+
+let process_changed_files
+    ~trigger (state : state) (changes : Relative_path.Set.t) : state =
+  match state with
+  | During_init dstate ->
+    let changed_files_to_process =
+      Relative_path.Set.union dstate.changed_files_to_process changes
+    in
+    During_init { dstate with changed_files_to_process }
+  | Initialized ({ icommon; naming_table; sienv; iopen_files; _ } as istate) ->
+    let (naming_table, sienv) =
+      batch_update_naming_table_and_invalidate_caches
+        ~trigger
+        ~ctx:(make_empty_ctx icommon)
+        ~naming_table
+        ~sienv
+        ~local_memory:icommon.local_memory
+        ~open_files:iopen_files
+        changes
+    in
+    Initialized { istate with naming_table; sienv }
+  | Pending_init
+  | Failed_init _ ->
+    state
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (common : common_state) (entry : Provider_context.entry)
@@ -433,6 +467,7 @@ let initialize2
     in
     let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
+        ~trigger:Initialization
         ~ctx:(make_empty_ctx dstate.dcommon)
         ~naming_table
         ~sienv
@@ -679,6 +714,7 @@ let handle_request
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
     (state, Ok ())
   | (_, Shutdown ()) ->
+    Lwt_message_queue.close message_queue;
     remove_hhi state;
     (state, Ok ())
   (***********************************************************)
@@ -689,6 +725,20 @@ let handle_request
        and we must send no message until we've sent this response. *)
     try
       let dstate = initialize1 param in
+      (* Establish the watcher clock before saved-state catch-up so changes
+         during naming-table loading are covered by the subscription. *)
+      if
+        dstate.dcommon.local_config.Server_local_config.ide_file_watcher_enabled
+      then
+        Client_ide_eden_watcher.start
+          ~root:param.Initialize_from_saved_state.root
+          ~max_changed_files:
+            dstate.dcommon.local_config
+              .Server_local_config.ide_file_watcher_max_changed_files
+          ~on_changes:(fun changes ->
+            Lwt_message_queue.push
+              message_queue
+              (Commit_transition_changes changes));
       (* We're going to kick off the asynchronous part of initializing now.
          Once it's done, it will appear as a GotNamingTable message on the queue. *)
       Lwt.async (fun () ->
@@ -724,30 +774,8 @@ let handle_request
   (***********************************************************)
   (************************* CAN HANDLE DURING INIT **********)
   (***********************************************************)
-  | (During_init dstate, Did_change_watched_files changes) ->
-    (* While init is happening, we accumulate changes in [changed_files_to_process].
-       Once naming-table has been loaded, then [initialize2] will process+discharge all these
-       accumulated changes. *)
-    let changed_files_to_process =
-      Relative_path.Set.union dstate.changed_files_to_process changes
-    in
-    (During_init { dstate with changed_files_to_process }, Ok ())
-  | ( Initialized
-        ({ icommon; naming_table; sienv; iopen_files; error_filter = _ } as
-        istate),
-      Did_change_watched_files changes ) ->
-    let (naming_table, sienv) =
-      batch_update_naming_table_and_invalidate_caches
-        ~ctx:(make_empty_ctx icommon)
-        ~naming_table
-        ~sienv
-        ~local_memory:icommon.local_memory
-        ~open_files:iopen_files
-        changes
-    in
-    let istate = { istate with naming_table; sienv } in
-    (Initialized istate, Ok ())
-    (* didClose *)
+  | ((During_init _ | Initialized _), Did_change_watched_files changes) ->
+    (process_changed_files ~trigger:Lsp_file_changes state changes, Ok ())
   | (During_init dstate, Did_close file_path) ->
     let path = path_to_relative_path file_path in
     ( During_init
@@ -1293,6 +1321,7 @@ let handle_one_message_exn
     ~key:"handle"
     (match message with
     | None -> "none"
+    | Some (Commit_transition_changes _) -> "commit_transition"
     | Some (GotNamingTable (Ok _)) -> "got_naming_table_ok"
     | Some (GotNamingTable (Error _)) -> "got_naming_table_err"
     | Some (ClientRequest message) ->
@@ -1300,6 +1329,9 @@ let handle_one_message_exn
   match (state, message) with
   | (_, None) ->
     Lwt.return_none (* exit loop if message_queue has been closed *)
+  | (_, Some (Commit_transition_changes changes)) ->
+    Lwt.return_some
+      (process_changed_files ~trigger:Commit_transition state changes)
   | (During_init dstate, Some (GotNamingTable naming_table_result)) ->
     let%lwt state =
       initialize2 out_fd dstate naming_table_result ~error_filter
@@ -1418,7 +1450,7 @@ let serve
              (Exception.get_ctor_string e)
              is_write_error);
         Client_ide_utils.log_bug "handle_one_message" ~e ~telemetry:true;
-        if is_write_error then exit 1;
+        if is_write_error then Stdlib.exit 1;
         (* if out_fd is down then there's no use continuing. *)
         dbg_set_activity ~key:"handle" "exn continue";
         Lwt.return_some state
@@ -1560,6 +1592,7 @@ module Test = struct
       |> String.concat ~sep:" ");
     let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
+        ~trigger:Test_index
         ~ctx:(make_empty_ctx istate.icommon)
         ~naming_table:istate.naming_table
         ~sienv:istate.sienv

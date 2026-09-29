@@ -850,6 +850,80 @@ end = struct
     ty_super: locl_ty;
   }
 
+  type shape_splat_failure =
+    | Unsupported_cycle of Typing_corners.Cycle_info.t
+    | Missing_assignment of Typing_corners.Missing_assignment.t
+
+  type 'a shape_splat_result = (env * 'a, env * shape_splat_failure) result
+
+  let project_shape_splat env row label assignment =
+    let (env, result) = Typing_corners.proj env row label assignment in
+    match result with
+    | Ok field -> Ok (env, field)
+    | Error missing -> Error (env, Missing_assignment missing)
+
+  let shape_splat_assignments cache env live label r =
+    let (env, result) =
+      Typing_corners.corner_assignments cache env live label r
+    in
+    match result with
+    | Ok (Typing_corners.Computed assignments) -> Ok (env, Some assignments)
+    | Ok Typing_corners.Empty -> Ok (env, None)
+    | Ok (Typing_corners.Unsupported_cycle info) ->
+      Error (env, Unsupported_cycle info)
+    | Error missing -> Error (env, Missing_assignment missing)
+
+  let shape_splat_conj (env, left) right =
+    let open Hh_prelude.Result.Let_syntax in
+    let* (env_after, right) = right env in
+    let (env, prop) = (env, left) &&& fun _ -> (env_after, right) in
+    return (env, prop)
+
+  let shape_splat_failure subtype_env env ~position ~message ~ty_sub ~ty_super =
+    let subtype_env =
+      Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
+          Typing_error.Reasons_callback.prepend_reason
+            on_error
+            ~reason:(lazy (position, message)))
+    in
+    let fail = Subtype_env.fail subtype_env ~ty_sub ~ty_super in
+    invalid ~fail env
+
+  let unsupported_cycle_position fallback info =
+    match Typing_corners.Cycle_info.dependencies info with
+    | dependency :: _ -> Typing_corners.Dependency.position dependency
+    | [] ->
+      (match
+         Typing_corners.Splat_elem.Set.choose_opt
+           (Typing_corners.Cycle_info.members info)
+       with
+      | Some member -> get_pos member
+      | None -> fallback)
+
+  let report_shape_splat_failure subtype_env ~r ~sub ~super env failure =
+    let ty_sub = LoclType (Typing_shape_normalize.Row.to_ty ~reason:r sub)
+    and ty_super =
+      LoclType (Typing_shape_normalize.Row.to_ty ~reason:r super)
+    in
+    match failure with
+    | Unsupported_cycle info ->
+      shape_splat_failure
+        subtype_env
+        env
+        ~position:(unsupported_cycle_position (Reason.to_pos r) info)
+        ~message:
+          "Cyclic shape-splat bounds are not supported by this subtyping check"
+        ~ty_sub
+        ~ty_super
+    | Missing_assignment missing ->
+      shape_splat_failure
+        subtype_env
+        env
+        ~position:(Typing_corners.Missing_assignment.position missing)
+        ~message:"Shape-splat dependency analysis failed before projection"
+        ~ty_sub
+        ~ty_super
+
   module Log = struct
     let level subtype_env ~ty_sub ~ty_super =
       let level = subtype_env.Subtype_env.log_level in
@@ -3340,16 +3414,37 @@ end = struct
         ~super
     in
     (* Check subfields at all corner assignments *)
-    Typing_corners.check_subrow_corners
-      cache
-      env
-      ~sub
-      ~super
-      label
-      r
-      ~init:valid
-      ~conj:( &&& )
-      ~f
+    let (env, result) =
+      Typing_corners.check_subrow_corners
+        cache
+        env
+        ~sub
+        ~super
+        label
+        r
+        ~init:valid
+        ~conj:( &&& )
+        ~f
+    in
+    match result with
+    | Ok (Typing_corners.Computed prop) -> (env, prop)
+    | Ok Typing_corners.Empty -> valid env
+    | Ok (Typing_corners.Unsupported_cycle info) ->
+      report_shape_splat_failure
+        subtype_env
+        ~r
+        ~sub
+        ~super
+        env
+        (Unsupported_cycle info)
+    | Error missing ->
+      report_shape_splat_failure
+        subtype_env
+        ~r
+        ~sub
+        ~super
+        env
+        (Missing_assignment missing)
 
   and subrow_subfield
       ~subtype_env
@@ -3470,18 +3565,29 @@ end = struct
               (not (Typing_shape_normalize.Row.is_bottom super_pre))
               && not (Typing_shape_normalize.Row.is_bottom super_post)
             then
-              subrow_infer_super_part
-                ~subtype_env
-                ~env
-                ~cache
-                ~this_ty
-                ~super_like
-                ~r
-                ~spread_var_ty:(mk (r, Tvar v))
-                ~sub
-                ~super_pre
-                ~super_post
-                ~super
+              match
+                subrow_infer_super_part
+                  ~subtype_env
+                  ~env
+                  ~cache
+                  ~this_ty
+                  ~super_like
+                  ~r
+                  ~spread_var_ty:(mk (r, Tvar v))
+                  ~sub
+                  ~super_pre
+                  ~super_post
+                  ~super
+              with
+              | Ok (env, prop) -> (env, prop)
+              | Error (env, failure) ->
+                report_shape_splat_failure
+                  subtype_env
+                  ~r
+                  ~sub
+                  ~super
+                  env
+                  failure
             else
               valid env
           | (None, _)
@@ -3508,12 +3614,13 @@ end = struct
       ~(super_post : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t) =
     let labels = Typing_corners.subrow_labels cache env ~sub ~super r in
-    let (env, known, unknown, props) =
-      List.fold_left
+    let open Hh_prelude.Result.Let_syntax in
+    let* (env, known, unknown, props) =
+      List.fold_result
         labels
         ~init:(env, TShapeMap.empty, MakeType.nothing r, [])
         ~f:(fun (env, known, unknown, props) label ->
-          let (env, field, prop) =
+          let* (env, (field, prop)) =
             subrow_infer_super_part_at
               ~subtype_env
               ~env
@@ -3532,7 +3639,7 @@ end = struct
             | Some lbl -> (TShapeMap.add lbl field known, unknown)
             | None -> (known, field.sft_ty)
           in
-          (env, known, unknown, prop :: props))
+          return (env, known, unknown, prop :: props))
     in
     let bound =
       Typing_shape_normalize.Row.of_simple
@@ -3551,7 +3658,7 @@ end = struct
         ~rhs:{ super_supportdyn = false; super_like; ty_super = spread_var_ty }
         env
     in
-    (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
+    return (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
 
   (* Infer [label]'s field in the spread variable's lower-bound shape and generate
      the constraints needed at that label for every corner assignment. Where the
@@ -3572,142 +3679,182 @@ end = struct
       ~(super_post : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t)
       label =
+    let absent = { sft_optional = true; sft_ty = MakeType.nothing r } in
     let live_names =
       let open Typing_corners in
       Splat_elem.Set.union
         (Splat_elem.Set.of_list (row_live_spread_at sub label))
         (Splat_elem.Set.of_list (row_live_spread_at super label))
     in
-    let ty_params_topo = Typing_corners.topo cache env live_names r in
-    let (env, assignments) =
-      Typing_corners.corner_assignments cache env ty_params_topo label r
+    let open Hh_prelude.Result.Let_syntax in
+    let* (env, assignments) =
+      shape_splat_assignments cache env live_names label r
     in
-    let (env, info) =
-      List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
-          let (env, fd_post) = Typing_corners.proj env super_post label a in
-          let (env, fd_sub) = Typing_corners.proj env sub label a in
-          (env, (Typing_corners.Field.is_required fd_post, fd_sub, a) :: acc))
-    in
-    let info = List.rev info in
-    let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
-    match live with
-    | [] ->
-      (* the spread tyvar is overwritten by [super_post] everywhere: it
-         contributes nothing to the lower bound at this label. The field is absent,
-         optional-[nothing], not required-[nothing], which would make the
-         inferred row uninhabited. *)
-      let (env, prop) =
-        List.fold_left info ~init:(valid env) ~f:(fun acc (_, fd_sub, a) ->
-            acc &&& fun env ->
-            let (env, fd_super) = Typing_corners.proj env super_post label a in
-            subrow_subfield
-              ~subtype_env
-              ~env
-              ~this_ty
-              ~super_like
-              ~r
-              ~tail_blame:None
-              ~blame:None
-              label
-              ~sub:fd_sub
-              ~super:fd_super)
+    match assignments with
+    | None -> return (env, (absent, TL.valid))
+    | Some assignments ->
+      let* (env, info) =
+        List.fold_result
+          assignments
+          ~init:(env, [])
+          ~f:(fun (env, acc) assignment ->
+            let* (env, fd_post) =
+              project_shape_splat env super_post label assignment
+            in
+            let* (env, fd_sub) = project_shape_splat env sub label assignment in
+            return
+              ( env,
+                (Typing_corners.Field.is_required fd_post, fd_sub, assignment)
+                :: acc ))
       in
-      (env, { sft_optional = true; sft_ty = MakeType.nothing r }, prop)
-    | _ ->
-      let is_opt =
-        List.exists live ~f:(fun (_, fd_sub, _) ->
-            Typing_corners.Field.is_optional fd_sub)
-      in
-      (* A field which contributes `nothing` must not appear as required since
-         this means the shape is uninhabited *)
-      let (env, contributes_nothing) =
-        List.fold_left
-          live
-          ~init:(env, true)
-          ~f:(fun (env, discharged) (_, fd_sub, a) ->
-            if not discharged then
-              (env, false)
-            else if Typing_corners.Field.is_absent fd_sub env then
-              (* [nothing] fits under anything; no need to probe *)
-              (env, true)
-            else
-              let (env, fd_post) = Typing_corners.proj env super_post label a in
-              let (env, base) =
-                if is_opt then
-                  let (env, fd_pre) =
-                    Typing_corners.proj env super_pre label a
+      let info = List.rev info in
+      let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
+      (match live with
+      | [] ->
+        (* the spread tyvar is overwritten by [super_post] everywhere: it
+           contributes nothing to the lower bound at this label. The field is absent,
+           optional-[nothing], not required-[nothing], which would make the
+           inferred row uninhabited. *)
+        let* (env, prop) =
+          List.fold_result
+            info
+            ~init:(env, TL.valid)
+            ~f:(fun acc (_, fd_sub, assignment) ->
+              shape_splat_conj acc (fun env ->
+                  let* (env, fd_super) =
+                    project_shape_splat env super_post label assignment
                   in
-                  Typing_union.union env fd_pre.sft_ty fd_post.sft_ty
-                else
-                  (env, fd_post.sft_ty)
-              in
-              let (_env, p) =
-                simplify_
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
-                  ~rhs:{ super_supportdyn = false; super_like; ty_super = base }
-                  env
-              in
-              (env, TL.is_valid p))
-      in
-      let (env, flex) = Env.fresh_type env Pos.none in
-      let (env, prop) =
-        List.fold_left info ~init:(valid env) ~f:(fun acc (masked, fd_sub, a) ->
-            acc &&& fun env ->
-            if masked then
-              let (env, fd_super) =
-                Typing_corners.proj env super_post label a
-              in
-              subrow_subfield
-                ~subtype_env
-                ~env
-                ~this_ty
-                ~super_like
-                ~r
-                ~tail_blame:None
-                ~blame:None
-                label
-                ~sub:fd_sub
-                ~super:fd_super
-            else
-              let (env, fd_pre) = Typing_corners.proj env super_pre label a in
-              if
-                Typing_corners.Field.is_optional fd_sub
-                && Typing_corners.Field.is_required fd_pre
-              then
-                (* Opt </:_req Req *)
-                invalid ~fail:None env
+                  let (env, prop) =
+                    subrow_subfield
+                      ~subtype_env
+                      ~env
+                      ~this_ty
+                      ~super_like
+                      ~r
+                      ~tail_blame:None
+                      ~blame:None
+                      label
+                      ~sub:fd_sub
+                      ~super:fd_super
+                  in
+                  return (env, prop)))
+        in
+        return (env, (absent, prop))
+      | _ ->
+        let is_opt =
+          List.exists live ~f:(fun (_, fd_sub, _) ->
+              Typing_corners.Field.is_optional fd_sub)
+        in
+        (* A field which contributes `nothing` must not appear as required since
+           this means the shape is uninhabited *)
+        let* (env, contributes_nothing) =
+          List.fold_result
+            live
+            ~init:(env, true)
+            ~f:(fun (env, discharged) (_, fd_sub, assignment) ->
+              if not discharged then
+                return (env, false)
+              else if Typing_corners.Field.is_absent fd_sub env then
+                (* [nothing] fits under anything; no need to probe *)
+                return (env, true)
               else
-                let (env, fd_post) =
-                  Typing_corners.proj env super_post label a
+                let* (env, fd_post) =
+                  project_shape_splat env super_post label assignment
                 in
-                let (env, ty) = Typing_union.union env flex fd_post.sft_ty in
-                let (env, super_base) =
+                let* (env, base) =
                   if is_opt then
-                    Typing_union.union env fd_pre.sft_ty ty
+                    let* (env, fd_pre) =
+                      project_shape_splat env super_pre label assignment
+                    in
+                    let (env, base) =
+                      Typing_union.union env fd_pre.sft_ty fd_post.sft_ty
+                    in
+                    return (env, base)
                   else
-                    (env, ty)
+                    return (env, fd_post.sft_ty)
                 in
-                simplify_
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
-                  ~rhs:
-                    {
-                      super_supportdyn = false;
-                      super_like;
-                      ty_super = super_base;
-                    }
-                  env)
-      in
-      let field =
-        if contributes_nothing then
-          { sft_optional = true; sft_ty = MakeType.nothing r }
-        else
-          { sft_optional = is_opt; sft_ty = flex }
-      in
-      (env, field, prop)
+                let (_env, p) =
+                  simplify_
+                    ~subtype_env
+                    ~this_ty
+                    ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
+                    ~rhs:
+                      { super_supportdyn = false; super_like; ty_super = base }
+                    env
+                in
+                return (env, TL.is_valid p))
+        in
+        let (env, flex) = Env.fresh_type env Pos.none in
+        let* (env, prop) =
+          List.fold_result
+            info
+            ~init:(env, TL.valid)
+            ~f:(fun acc (masked, fd_sub, assignment) ->
+              shape_splat_conj acc (fun env ->
+                  if masked then
+                    let* (env, fd_super) =
+                      project_shape_splat env super_post label assignment
+                    in
+                    let (env, prop) =
+                      subrow_subfield
+                        ~subtype_env
+                        ~env
+                        ~this_ty
+                        ~super_like
+                        ~r
+                        ~tail_blame:None
+                        ~blame:None
+                        label
+                        ~sub:fd_sub
+                        ~super:fd_super
+                    in
+                    return (env, prop)
+                  else
+                    let* (env, fd_pre) =
+                      project_shape_splat env super_pre label assignment
+                    in
+                    if
+                      Typing_corners.Field.is_optional fd_sub
+                      && Typing_corners.Field.is_required fd_pre
+                    then
+                      (* Opt </:_req Req *)
+                      let (env, prop) = invalid ~fail:None env in
+                      return (env, prop)
+                    else
+                      let* (env, fd_post) =
+                        project_shape_splat env super_post label assignment
+                      in
+                      let (env, ty) =
+                        Typing_union.union env flex fd_post.sft_ty
+                      in
+                      let (env, super_base) =
+                        if is_opt then
+                          Typing_union.union env fd_pre.sft_ty ty
+                        else
+                          (env, ty)
+                      in
+                      let (env, prop) =
+                        simplify_
+                          ~subtype_env
+                          ~this_ty
+                          ~lhs:{ sub_supportdyn = None; ty_sub = fd_sub.sft_ty }
+                          ~rhs:
+                            {
+                              super_supportdyn = false;
+                              super_like;
+                              ty_super = super_base;
+                            }
+                          env
+                      in
+                      return (env, prop)))
+        in
+        let field =
+          if contributes_nothing then
+            { sft_optional = true; sft_ty = MakeType.nothing r }
+          else
+            { sft_optional = is_opt; sft_ty = flex }
+        in
+        return (env, (field, prop)))
 
   (* Infer upper bounds for the sub row's spread inference variables. The super
      row has no unsolved spread variables, so its projected fields determine what
@@ -3748,18 +3895,29 @@ end = struct
               (not (Typing_shape_normalize.Row.is_bottom sub_pre))
               && not (Typing_shape_normalize.Row.is_bottom sub_post)
             then
-              subrow_infer_sub_part
-                ~subtype_env
-                ~env
-                ~cache
-                ~this_ty
-                ~super_like
-                ~r
-                ~spread_var_ty:(mk (r, Tvar v))
-                ~sub_pre
-                ~sub_post
-                ~sub
-                ~super
+              match
+                subrow_infer_sub_part
+                  ~subtype_env
+                  ~env
+                  ~cache
+                  ~this_ty
+                  ~super_like
+                  ~r
+                  ~spread_var_ty:(mk (r, Tvar v))
+                  ~sub_pre
+                  ~sub_post
+                  ~sub
+                  ~super
+              with
+              | Ok (env, prop) -> (env, prop)
+              | Error (env, failure) ->
+                report_shape_splat_failure
+                  subtype_env
+                  ~r
+                  ~sub
+                  ~super
+                  env
+                  failure
             else
               valid env
           | (None, _)
@@ -3787,12 +3945,13 @@ end = struct
       ~(sub : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t) =
     let labels = Typing_corners.subrow_labels cache env ~sub ~super r in
-    let (env, known, unknown, props) =
-      List.fold_left
+    let open Hh_prelude.Result.Let_syntax in
+    let* (env, known, unknown, props) =
+      List.fold_result
         labels
         ~init:(env, TShapeMap.empty, MakeType.mixed r, [])
         ~f:(fun (env, known, unknown, props) label ->
-          let (env, field, prop) =
+          let* (env, (field, prop)) =
             subrow_infer_sub_part_at
               ~subtype_env
               ~env
@@ -3811,7 +3970,7 @@ end = struct
             | Some lbl -> (TShapeMap.add lbl field known, unknown)
             | None -> (known, field.sft_ty)
           in
-          (env, known, unknown, prop :: props))
+          return (env, known, unknown, prop :: props))
     in
     let bound =
       Typing_shape_normalize.Row.of_simple
@@ -3831,7 +3990,7 @@ end = struct
         ~rhs:{ super_supportdyn = false; super_like; ty_super = bound_ty }
         env
     in
-    (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
+    return (env, List.fold_left props ~init:prop_resid ~f:TL.conj)
 
   (* Infer [label]'s field in the spread variable's upper-bound shape and generate
      constraints for every corner assignment. If [sub_post] masks the variable,
@@ -3851,126 +4010,171 @@ end = struct
       ~(sub : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t)
       label =
+    let top = { sft_optional = true; sft_ty = MakeType.mixed r } in
     let live_names =
       let open Typing_corners in
       Splat_elem.Set.union
         (Splat_elem.Set.of_list (row_live_spread_at sub label))
         (Splat_elem.Set.of_list (row_live_spread_at super label))
     in
-    let ty_params_topo = Typing_corners.topo cache env live_names r in
-    let (env, assignments) =
-      Typing_corners.corner_assignments cache env ty_params_topo label r
+    let open Hh_prelude.Result.Let_syntax in
+    let* (env, assignments) =
+      shape_splat_assignments cache env live_names label r
     in
-    let (env, info) =
-      List.fold_left assignments ~init:(env, []) ~f:(fun (env, acc) a ->
-          let (env, fd_post) = Typing_corners.proj env sub_post label a in
-          let (env, fd_super) = Typing_corners.proj env super label a in
-          (env, (Typing_corners.Field.is_required fd_post, fd_super, a) :: acc))
-    in
-    let info = List.rev info in
-    let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
-    match live with
-    | [] ->
-      (* the spread var is overwritten by [sub_post] everywhere: its upper bound
-         is the top field *)
-      let (env, prop) =
-        List.fold_left info ~init:(valid env) ~f:(fun acc (_, fd_super, a) ->
-            acc &&& fun env ->
-            let (env, fd_sub) = Typing_corners.proj env sub_post label a in
-            subrow_subfield
-              ~subtype_env
-              ~env
-              ~this_ty
-              ~super_like
-              ~r
-              ~tail_blame:None
-              ~blame:None
-              label
-              ~sub:fd_sub
-              ~super:fd_super)
+    match assignments with
+    | None -> return (env, (top, TL.valid))
+    | Some assignments ->
+      let* (env, info) =
+        List.fold_result
+          assignments
+          ~init:(env, [])
+          ~f:(fun (env, acc) assignment ->
+            let* (env, fd_post) =
+              project_shape_splat env sub_post label assignment
+            in
+            let* (env, fd_super) =
+              project_shape_splat env super label assignment
+            in
+            return
+              ( env,
+                (Typing_corners.Field.is_required fd_post, fd_super, assignment)
+                :: acc ))
       in
-      (env, { sft_optional = true; sft_ty = MakeType.mixed r }, prop)
-    | _ ->
-      (* The spread var must be [Req] iff, at some live assignment, the field is [Req]
-         in super and [Opt] in [sub_pre], or [sub_pre]'s type does not fit super (so the
-         var must mask [sub_pre]). At the [None] unknown label the contribution is
-         opt-only. *)
-      let is_req =
-        match label with
-        | None -> false
-        | Some _ ->
-          List.exists live ~f:(fun (_, fd_super, a) ->
-              let (env_probe, fd_pre) =
-                Typing_corners.proj env sub_pre label a
-              in
-              Typing_corners.Field.is_required fd_super
-              && Typing_corners.Field.is_optional fd_pre
-              ||
-              let (_env, p) =
-                simplify_
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn = None; ty_sub = fd_pre.sft_ty }
-                  ~rhs:
-                    {
-                      super_supportdyn = false;
-                      super_like;
-                      ty_super = fd_super.sft_ty;
-                    }
-                  env_probe
-              in
-              TL.is_unsat p)
-      in
-      (* Decompose the field obligation instead of introducing a fresh tyvar:
-         [(fixed | tyvar) <: super] iff both [fixed <: super] and
-         [tyvar<: super]. *)
-      let upper_ty =
-        MakeType.intersection
-          r
-          (List.map live ~f:(fun (_, fd_super, _) ->
-               Sd.liken ~super_like env fd_super.sft_ty))
-      in
-      let (env, prop) =
-        List.fold_left
-          info
-          ~init:(valid env)
-          ~f:(fun acc (masked, fd_super, a) ->
-            acc &&& fun env ->
-            if masked then
-              let (env, fd_sub) = Typing_corners.proj env sub_post label a in
-              subrow_subfield
-                ~subtype_env
-                ~env
-                ~this_ty
-                ~super_like
-                ~r
-                ~tail_blame:None
-                ~blame:None
-                label
-                ~sub:fd_sub
-                ~super:fd_super
-            else
-              let (env, fd_post) = Typing_corners.proj env sub_post label a in
-              let (env, sub_base) =
-                if is_req then
-                  (env, fd_post.sft_ty)
+      let info = List.rev info in
+      let live = List.filter info ~f:(fun (masked, _, _) -> not masked) in
+      (match live with
+      | [] ->
+        (* the spread var is overwritten by [sub_post] everywhere: its upper bound
+           is the top field *)
+        let* (env, prop) =
+          List.fold_result
+            info
+            ~init:(env, TL.valid)
+            ~f:(fun acc (_, fd_super, assignment) ->
+              shape_splat_conj acc (fun env ->
+                  let* (env, fd_sub) =
+                    project_shape_splat env sub_post label assignment
+                  in
+                  let (env, prop) =
+                    subrow_subfield
+                      ~subtype_env
+                      ~env
+                      ~this_ty
+                      ~super_like
+                      ~r
+                      ~tail_blame:None
+                      ~blame:None
+                      label
+                      ~sub:fd_sub
+                      ~super:fd_super
+                  in
+                  return (env, prop)))
+        in
+        return (env, (top, prop))
+      | _ ->
+        (* The spread var must be [Req] iff, at some live assignment, the field is [Req]
+           in super and [Opt] in [sub_pre], or [sub_pre]'s type does not fit super (so the
+           var must mask [sub_pre]). At the [None] unknown label the contribution is
+           opt-only. *)
+        let* (env, is_req) =
+          match label with
+          | None -> return (env, false)
+          | Some _ ->
+            let rec is_required = function
+              | [] -> return (env, false)
+              | (_, fd_super, assignment) :: rest ->
+                let* (env_probe, fd_pre) =
+                  project_shape_splat env sub_pre label assignment
+                in
+                let required =
+                  Typing_corners.Field.is_required fd_super
+                  && Typing_corners.Field.is_optional fd_pre
+                  ||
+                  let (_env, prop) =
+                    simplify_
+                      ~subtype_env
+                      ~this_ty
+                      ~lhs:{ sub_supportdyn = None; ty_sub = fd_pre.sft_ty }
+                      ~rhs:
+                        {
+                          super_supportdyn = false;
+                          super_like;
+                          ty_super = fd_super.sft_ty;
+                        }
+                      env_probe
+                  in
+                  TL.is_unsat prop
+                in
+                if required then
+                  return (env, true)
                 else
-                  let (env, fd_pre) = Typing_corners.proj env sub_pre label a in
-                  (env, MakeType.union r [fd_pre.sft_ty; fd_post.sft_ty])
-              in
-              simplify_
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn = None; ty_sub = sub_base }
-                ~rhs:
-                  {
-                    super_supportdyn = false;
-                    super_like;
-                    ty_super = fd_super.sft_ty;
-                  }
-                env)
-      in
-      (env, { sft_optional = not is_req; sft_ty = upper_ty }, prop)
+                  is_required rest
+            in
+            is_required live
+        in
+        (* Decompose the field obligation instead of introducing a fresh tyvar:
+           [(fixed | tyvar) <: super] iff both [fixed <: super] and
+           [tyvar<: super]. *)
+        let upper_ty =
+          MakeType.intersection
+            r
+            (List.map live ~f:(fun (_, fd_super, _) ->
+                 Sd.liken ~super_like env fd_super.sft_ty))
+        in
+        let* (env, prop) =
+          List.fold_result
+            info
+            ~init:(env, TL.valid)
+            ~f:(fun acc (masked, fd_super, assignment) ->
+              shape_splat_conj acc (fun env ->
+                  if masked then
+                    let* (env, fd_sub) =
+                      project_shape_splat env sub_post label assignment
+                    in
+                    let (env, prop) =
+                      subrow_subfield
+                        ~subtype_env
+                        ~env
+                        ~this_ty
+                        ~super_like
+                        ~r
+                        ~tail_blame:None
+                        ~blame:None
+                        label
+                        ~sub:fd_sub
+                        ~super:fd_super
+                    in
+                    return (env, prop)
+                  else
+                    let* (env, fd_post) =
+                      project_shape_splat env sub_post label assignment
+                    in
+                    let* (env, sub_base) =
+                      if is_req then
+                        return (env, fd_post.sft_ty)
+                      else
+                        let* (env, fd_pre) =
+                          project_shape_splat env sub_pre label assignment
+                        in
+                        return
+                          (env, MakeType.union r [fd_pre.sft_ty; fd_post.sft_ty])
+                    in
+                    let (env, prop) =
+                      simplify_
+                        ~subtype_env
+                        ~this_ty
+                        ~lhs:{ sub_supportdyn = None; ty_sub = sub_base }
+                        ~rhs:
+                          {
+                            super_supportdyn = false;
+                            super_like;
+                            ty_super = fd_super.sft_ty;
+                          }
+                        env
+                    in
+                    return (env, prop)))
+        in
+        return (env, ({ sft_optional = not is_req; sft_ty = upper_ty }, prop)))
 
   (* Both sub- and super rows have a single type variable. Dispatch on whether
      it's the type variable in both positions *)
@@ -3998,8 +4202,8 @@ end = struct
           ~super
           sub_spread_var
       with
-      | Some (env, prop) -> (env, prop)
-      | None ->
+      | Ok (env, Some prop) -> (env, prop)
+      | Ok (env, None) ->
         subrow_infer_couple_mid
           ~subtype_env
           ~env
@@ -4011,6 +4215,8 @@ end = struct
           ~sub_spread_var
           ~super
           ~super_spread_var
+      | Error (env, failure) ->
+        report_shape_splat_failure subtype_env ~r ~sub ~super env failure
     else
       subrow_infer_couple_mid
         ~subtype_env
@@ -4038,7 +4244,12 @@ end = struct
       ~r
       ~(sub : Typing_shape_normalize.Row.t)
       ~(super : Typing_shape_normalize.Row.t)
-      (v : Tvid.t) : (env * TL.subtype_prop) option =
+      (v : Tvid.t) : TL.subtype_prop option shape_splat_result =
+    (* This is a speculative fast path. On [None], discard any environment
+       changes made while probing and retry the general algorithm from the
+       original environment. *)
+    let initial_env = env in
+    let open Hh_prelude.Result.Let_syntax in
     (* An empty element list is the empty CLOSED shape (the merge identity), NOT the
        bottom row that [normalize_row] would collapse it to. *)
     let to_shape env elems =
@@ -4079,13 +4290,13 @@ end = struct
       when List.is_empty super_pre_e ->
       (* Normalize sequentially to thread [env] and stop at a bottom segment. *)
       (match to_shape env sub_pre_e with
-      | None -> None
+      | None -> return (initial_env, None)
       | Some (env, sub_pre) ->
         (match to_shape env sub_post_e with
-        | None -> None
+        | None -> return (initial_env, None)
         | Some (env, sub_post) ->
           (match to_shape env super_post_e with
-          | None -> None
+          | None -> return (initial_env, None)
           | Some (env, super_post) ->
             let labels =
               None
@@ -4099,8 +4310,98 @@ end = struct
               | Some lbl -> (TShapeMap.add lbl fd known, unknown)
               | None -> (known, fd.sft_ty)
             in
-            let (env, lo_known, lo_unknown, hi_known, hi_unknown, props) =
-              List.fold_left
+            let bounds_at_label env label =
+              let live_names =
+                let open Typing_corners in
+                Splat_elem.Set.union
+                  (Splat_elem.Set.of_list (row_live_spread_at sub label))
+                  (Splat_elem.Set.of_list (row_live_spread_at super label))
+              in
+              let* (env, assignments) =
+                shape_splat_assignments cache env live_names label r
+              in
+              let top_field =
+                { sft_optional = true; sft_ty = MakeType.mixed r }
+              in
+              match assignments with
+              | None -> return (env, (bottom_field, top_field, []))
+              | Some assignments ->
+                let* (env, lower, upper, label_props) =
+                  List.fold_result
+                    assignments
+                    ~init:(env, bottom_field, top_field, [])
+                    ~f:(fun (env, lower, upper, label_props) assignment ->
+                      let* (env, a) =
+                        project_shape_splat env sub_pre label assignment
+                      in
+                      let* (env, b) =
+                        project_shape_splat env sub_post label assignment
+                      in
+                      let* (env, d) =
+                        project_shape_splat env super_post label assignment
+                      in
+                      if Typing_corners.Field.is_required d then
+                        if Typing_corners.Field.is_required b then
+                          (* Both sides are masked: LHS=b and RHS=d. *)
+                          let (env, prop) =
+                            subrow_subfield
+                              ~subtype_env
+                              ~env
+                              ~this_ty
+                              ~super_like
+                              ~r
+                              ~tail_blame:None
+                              ~blame:None
+                              label
+                              ~sub:b
+                              ~super:d
+                          in
+                          return (env, lower, upper, prop :: label_props)
+                        else
+                          (* The super masks the shared var. Its upper bound
+                             masks [sub_pre], while [sub_post]'s optional type
+                             must independently fit under [d]. *)
+                          let (env, upper) =
+                            Typing_corners.Field.meet env ~left:upper ~right:d
+                          in
+                          let (env, prop) =
+                            simplify_
+                              ~subtype_env
+                              ~this_ty
+                              ~lhs:{ sub_supportdyn = None; ty_sub = b.sft_ty }
+                              ~rhs:
+                                {
+                                  super_supportdyn = false;
+                                  super_like;
+                                  ty_super = d.sft_ty;
+                                }
+                              env
+                          in
+                          return (env, lower, upper, prop :: label_props)
+                      else if Typing_corners.Field.is_required b then
+                        (* The sub masks the shared var, which must cover [b]. *)
+                        let (env, lower) =
+                          Typing_corners.Field.join env ~left:lower ~right:b
+                        in
+                        return (env, lower, upper, label_props)
+                      else
+                        (* Neither side masks it, so it must absorb the sub-side
+                           fixed field. *)
+                        let (env, merged) =
+                          Typing_corners.Field.merge env ~left:a ~right:b
+                        in
+                        let (env, lower) =
+                          Typing_corners.Field.join
+                            env
+                            ~left:lower
+                            ~right:merged
+                        in
+                        return (env, lower, upper, label_props))
+                in
+                return (env, (lower, upper, label_props))
+            in
+            let* (env, lo_known, lo_unknown, hi_known, hi_unknown, props) =
+              List.fold_result
                 labels
                 ~init:
                   ( env,
@@ -4112,98 +4413,8 @@ end = struct
                 ~f:
                   (fun (env, lo_known, lo_unknown, hi_known, hi_unknown, props)
                        label ->
-                  let live_names =
-                    let open Typing_corners in
-                    Splat_elem.Set.union
-                      (Splat_elem.Set.of_list (row_live_spread_at sub label))
-                      (Splat_elem.Set.of_list (row_live_spread_at super label))
-                  in
-                  let ty_params_topo =
-                    Typing_corners.topo cache env live_names r
-                  in
-                  let (env, assignments) =
-                    Typing_corners.corner_assignments
-                      cache
-                      env
-                      ty_params_topo
-                      label
-                      r
-                  in
-                  let top_field =
-                    { sft_optional = true; sft_ty = MakeType.mixed r }
-                  in
-                  let (env, lower, upper, label_props) =
-                    List.fold_left
-                      assignments
-                      ~init:(env, bottom_field, top_field, [])
-                      ~f:(fun (env, lower, upper, label_props) assignment ->
-                        let (env, a) =
-                          Typing_corners.proj env sub_pre label assignment
-                        in
-                        let (env, b) =
-                          Typing_corners.proj env sub_post label assignment
-                        in
-                        let (env, d) =
-                          Typing_corners.proj env super_post label assignment
-                        in
-                        if Typing_corners.Field.is_required d then
-                          if Typing_corners.Field.is_required b then
-                            (* Both sides are masked: LHS=b and RHS=d. *)
-                            let (env, p) =
-                              subrow_subfield
-                                ~subtype_env
-                                ~env
-                                ~this_ty
-                                ~super_like
-                                ~r
-                                ~tail_blame:None
-                                ~blame:None
-                                label
-                                ~sub:b
-                                ~super:d
-                            in
-                            (env, lower, upper, p :: label_props)
-                          else
-                            (* The super masks the shared var. Its upper bound
-                               masks [sub_pre], while [sub_post]'s optional type
-                               must independently fit under [d]. *)
-                            let (env, upper) =
-                              Typing_corners.Field.meet env ~left:upper ~right:d
-                            in
-                            let (env, p) =
-                              simplify_
-                                ~subtype_env
-                                ~this_ty
-                                ~lhs:
-                                  { sub_supportdyn = None; ty_sub = b.sft_ty }
-                                ~rhs:
-                                  {
-                                    super_supportdyn = false;
-                                    super_like;
-                                    ty_super = d.sft_ty;
-                                  }
-                                env
-                            in
-                            (env, lower, upper, p :: label_props)
-                        else if Typing_corners.Field.is_required b then
-                          (* The sub masks the shared var, which must cover [b]. *)
-                          let (env, lower) =
-                            Typing_corners.Field.join env ~left:lower ~right:b
-                          in
-                          (env, lower, upper, label_props)
-                        else
-                          (* Neither side masks it, so it must absorb the
-                             sub-side fixed field. *)
-                          let (env, merged) =
-                            Typing_corners.Field.merge env ~left:a ~right:b
-                          in
-                          let (env, lower) =
-                            Typing_corners.Field.join
-                              env
-                              ~left:lower
-                              ~right:merged
-                          in
-                          (env, lower, upper, label_props))
+                  let* (env, (lower, upper, label_props)) =
+                    bounds_at_label env label
                   in
                   let (lo_known, lo_unknown) =
                     add_field lo_known lo_unknown label lower
@@ -4211,12 +4422,13 @@ end = struct
                   let (hi_known, hi_unknown) =
                     add_field hi_known hi_unknown label upper
                   in
-                  ( env,
-                    lo_known,
-                    lo_unknown,
-                    hi_known,
-                    hi_unknown,
-                    List.rev_append label_props props ))
+                  return
+                    ( env,
+                      lo_known,
+                      lo_unknown,
+                      hi_known,
+                      hi_unknown,
+                      List.rev_append label_props props ))
             in
             let lo =
               Typing_shape_normalize.Row.of_simple
@@ -4255,13 +4467,14 @@ end = struct
                 ~rhs:{ super_supportdyn = false; super_like; ty_super = hi_ty }
                 env
             in
-            Some
+            return
               ( env,
-                List.fold_left
-                  (prop_lo :: prop_hi :: props)
-                  ~init:TL.valid
-                  ~f:TL.conj ))))
-    | _ -> None
+                Some
+                  (List.fold_left
+                     (prop_lo :: prop_hi :: props)
+                     ~init:TL.valid
+                     ~f:TL.conj) ))))
+    | _ -> return (initial_env, None)
 
   (* Couple spread variables through a fresh simple row [mid], reducing the
      original check to [sub <: mid <: super]. Its known fields are required
@@ -6884,15 +7097,25 @@ end = struct
               ~rhs:
                 { super_like; super_supportdyn = false; ty_super = lty_inner }
       | (r_sub, Tshape (Shape_splat { ss_elems })) ->
-        let (env, ty_sub) =
+        let (env, result) =
           Typing_corners.resolve_for_read env r_sub ss_elems
         in
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super }
-          env
+        (match result with
+        | Error missing ->
+          shape_splat_failure
+            subtype_env
+            env
+            ~position:(Typing_corners.Missing_assignment.position missing)
+            ~message:"Shape-splat dependency analysis failed before projection"
+            ~ty_sub:(LoclType ty_sub)
+            ~ty_super:(LoclType ty_super)
+        | Ok ty_sub ->
+          simplify
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
+            env)
       | (r_sub, Tshape (Shape_simple { s_fields; s_unknown_value; _ })) ->
         (* shape('a' => T1, 'b' => T2, ...) <: RepresentableAs<U>
            when dict<key, V1 | V2 | ... | Vn> <: U
@@ -8748,16 +8971,38 @@ end = struct
          (expand tvars, recurse nested splats, resolve generics via bounds). A
          distributed union operand yields a union type here: re-dispatch so the
          [Tunion] arm above reads each member (a single shape). *)
-      let (env, read_ty) = Typing_corners.resolve_for_read env r_sub ss_elems in
-      (match get_node read_ty with
-      | Tshape (Shape_simple ts) -> do_shape r_sub ts
-      | _ ->
-        simplify_
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = read_ty }
-          ~rhs
-          env)
+      let (env, result) = Typing_corners.resolve_for_read env r_sub ss_elems in
+      (match result with
+      | Error missing ->
+        let subtype_env =
+          Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
+              Typing_error.Reasons_callback.prepend_reason
+                on_error
+                ~reason:
+                  (lazy
+                    ( Typing_corners.Missing_assignment.position missing,
+                      "Shape-splat dependency analysis failed before projection"
+                    )))
+        in
+        let fail =
+          Subtype_env.fail
+            subtype_env
+            ~ty_sub:(LoclType ty_sub)
+            ~ty_super:
+              (ConstraintType
+                 (mk_constraint_type (reason_super, Tcan_index can_index)))
+        in
+        invalid ~fail env
+      | Ok read_ty ->
+        (match get_node read_ty with
+        | Tshape (Shape_simple ts) -> do_shape r_sub ts
+        | _ ->
+          simplify_
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = read_ty }
+            ~rhs
+            env))
     | (r_sub, Tgeneric _generic_nm) ->
       let get_transitive_upper_bounds env ty =
         let rec iter seen env acc tyl =

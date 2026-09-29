@@ -66,6 +66,16 @@ let param_name ty =
   | Tnewtype (n, _, _) -> n
   | _ -> "?"
 
+let expect_ok = function
+  | Ok value -> value
+  | Error _ -> assert_failure "unexpected missing corner assignment"
+
+let expect_computed = function
+  | Typing_corners.Computed value -> value
+  | Typing_corners.Empty -> assert_failure "unexpected empty corner computation"
+  | Typing_corners.Unsupported_cycle _ ->
+    assert_failure "unexpected unsupported corner cycle"
+
 let names tys = List.map tys ~f:param_name |> List.sort ~compare:String.compare
 
 let show names = String.concat ~sep:"," names
@@ -245,9 +255,8 @@ let describe_written_as = function
  * the right order relies on the recorded dependencies, so anything a bound can
  * contribute must be recorded.
  *
- * When the lookup fails the code treats the field as absent, which claims more
- * than it knows: a shape that might have a required field is not the same as one
- * known to lack it. So a missing type parameter record causes unsoundness.
+ * A missing assignment is an analysis failure: treating it as absent would
+ * claim more than is known. Complete dependency records prevent that failure.
  *
  * The check gives every parameter a value beforehand, because the bound is only
  * turned into a shape for parameters that already have one. *)
@@ -672,9 +681,11 @@ let projected_pairs env sub super label assignments =
     ~init:Projected_pair.Set.empty
     ~f:(fun pairs assignment ->
       let (env, sub_field) = Typing_corners.proj env sub label assignment in
+      let sub_field = expect_ok sub_field in
       let (_env, super_field) =
         Typing_corners.proj env super label assignment
       in
+      let super_field = expect_ok super_field in
       Projected_pair.Set.add (sub_field, super_field) pairs)
 
 let params prefix count =
@@ -684,11 +695,11 @@ let params prefix count =
 let assignment_frontier_for_rows env sub super params =
   let live = Typing_corners.Splat_elem.Set.of_list params in
   let cache = Typing_corners.Cache.create () in
-  let order = Typing_corners.topo cache env live r in
   let label = Some (TSFlit_str (Pos_or_decl.none, "x")) in
   let (_env, assignments) =
-    Typing_corners.corner_assignments cache env order label r
+    Typing_corners.corner_assignments cache env live label r
   in
+  let assignments = assignments |> expect_ok |> expect_computed in
   (sub, super, label, assignments)
 
 let assignment_frontier env sub_params super_params =
@@ -794,16 +805,19 @@ let neighbours =
 (* What the other parameter may already have been given. The empty case is the
    first one; the rest exercise a corner worked out UNDER another parameter's
    value, which is the configuration two separate bugs turned on. *)
+let other_fields =
+  [
+    { sft_optional = true; sft_ty = MakeType.nothing r };
+    { sft_optional = false; sft_ty = MakeType.nothing r };
+    { sft_optional = false; sft_ty = MakeType.int r };
+    { sft_optional = true; sft_ty = MakeType.int r };
+    { sft_optional = true; sft_ty = MakeType.mixed r };
+  ]
+
 let assignments_for_other =
   Typing_corners.Splat_elem.Map.empty
-  :: List.map
-       [
-         { sft_optional = false; sft_ty = MakeType.nothing r };
-         { sft_optional = false; sft_ty = MakeType.int r };
-         { sft_optional = true; sft_ty = MakeType.int r };
-         { sft_optional = true; sft_ty = MakeType.mixed r };
-       ]
-       ~f:(fun fd -> Typing_corners.Splat_elem.Map.singleton other fd)
+  :: List.map other_fields ~f:(fun fd ->
+         Typing_corners.Splat_elem.Map.singleton other fd)
 
 (* Every row over one label, from a fixed set of field types. This is the whole
    universe the pruning check runs over: every field state a label can be in,
@@ -907,9 +921,10 @@ let a_parameter_to_the_right_definitely_has_the_field
         match get_node ty with
         | Tgeneric _
         | Tnewtype _ ->
-          let (_env, _lower, upper) =
+          let (_env, bounds) =
             Typing_corners.field_bounds env ty label assignment r
           in
+          let (_lower, upper) = expect_ok bounds in
           not upper.sft_optional
         | _ -> false)
 
@@ -969,6 +984,7 @@ let a_field_is_hidden_exactly_when_something_hides_it _ =
                       key
                       assignment
                       r
+                    |> expect_ok
                   with
                   | Typing_corners.Masking.Masked ->
                     assert_bool
@@ -1016,12 +1032,24 @@ let field_holds env ~sub ~super =
   && Typing_subtype.is_sub_type env sub.sft_ty super.sft_ty
 
 let obligation_holds_at env ~sub_row ~super_row ~label ~key ~given corner =
-  let assignment = Typing_corners.Splat_elem.Map.add key corner given in
-  let (env, sub_field) = Typing_corners.proj env sub_row label assignment in
-  let (_env, super_field) =
-    Typing_corners.proj env super_row label assignment
+  let assignments =
+    if Typing_corners.Splat_elem.Map.mem other given then
+      [given]
+    else
+      List.map other_fields ~f:(fun fd ->
+          Typing_corners.Splat_elem.Map.singleton other fd)
   in
-  field_holds env ~sub:sub_field ~super:super_field
+  List.for_all assignments ~f:(fun assignment ->
+      let assignment =
+        Typing_corners.Splat_elem.Map.add key corner assignment
+      in
+      let (env, sub_field) = Typing_corners.proj env sub_row label assignment in
+      let sub_field = expect_ok sub_field in
+      let (_env, super_field) =
+        Typing_corners.proj env super_row label assignment
+      in
+      let super_field = expect_ok super_field in
+      field_holds env ~sub:sub_field ~super:super_field)
 
 let checking_fewer_corners_accepts_no_more _ =
   let key = tgeneric "T1" in
@@ -1096,9 +1124,10 @@ let checking_fewer_corners_accepts_no_more _ =
                             Typing_corners.Splat_elem.Set.mem key live_sub
                             || Typing_corners.Splat_elem.Set.mem key live_super
                           then begin
-                            let (env, lower, upper) =
+                            let (env, bounds) =
                               Typing_corners.field_bounds env key label given r
                             in
+                            let (lower, upper) = expect_ok bounds in
                             let all_corners =
                               match
                                 Typing_corners.Field.Corners.of_bounds
@@ -1121,6 +1150,7 @@ let checking_fewer_corners_accepts_no_more _ =
                                 given
                                 r
                             in
+                            let shortcut = expect_ok shortcut in
                             let shortcut_corners =
                               match shortcut with
                               | Typing_corners.Field.Corners.Values cs -> cs
@@ -1633,6 +1663,7 @@ let cached_nested_bounds_cover_every_corner _ =
                       sub.sft_ty
                       super.sft_ty) ))
       in
+      let valid = valid |> expect_ok |> expect_computed in
       assert_bool "identical rows must agree at every cached corner" valid)
 
 let cache_does_not_reuse_results_from_another_env _ =
@@ -1669,12 +1700,12 @@ let cache_does_not_reuse_results_from_another_env _ =
     "the first environment's cached label must not leak into the second"
     (not (contains second "first"))
 
-let cyclic_bound_projection_with_no_assignment_is_absent _ =
+let cyclic_bound_projection_requires_an_assignment _ =
   let t1 = tgeneric "T1" and t2 = tgeneric "T2" in
   let env = Env.add_upper_bound (dummy_env ()) "T1" (splat [t2]) in
   let env = Env.add_upper_bound env "T2" (splat [t1]) in
   let label = Some (TSFlit_str (Pos_or_decl.none, "x")) in
-  let (_env, _lower, upper) =
+  let (_env, bounds) =
     Typing_corners.field_bounds
       env
       t1
@@ -1682,12 +1713,137 @@ let cyclic_bound_projection_with_no_assignment_is_absent _ =
       Typing_corners.Splat_elem.Map.empty
       r
   in
+  match bounds with
+  | Error missing ->
+    assert_equal
+      0
+      (Typing_corners.Splat_elem.compare
+         t2
+         (Typing_corners.Missing_assignment.element missing))
+  | Ok _ -> assert_failure "an unassigned cyclic spread must not project"
+
+let unsupported_cycle_is_reported_before_projection _ =
+  let t1 = tgeneric "T1" and t2 = tgeneric "T2" in
+  let env = Env.add_upper_bound (dummy_env ()) "T1" (splat [t2]) in
+  let env = Env.add_upper_bound env "T2" (splat [t1]) in
+  let (env, row) = normalize_row env (Shape_splat { ss_elems = [t1] }) in
+  let projections = ref 0 in
+  let (_env, result) =
+    Typing_corners.check_subrow_corners
+      (Typing_corners.Cache.create ())
+      env
+      ~sub:row
+      ~super:row
+      (Some (TSFlit_str (Pos_or_decl.none, "x")))
+      r
+      ~init:(fun env -> (env, true))
+      ~conj:(fun (env, left) next ->
+        let (env, right) = next env in
+        (env, left && right))
+      ~f:(fun env ~sub:_ ~super:_ ->
+        Int.incr projections;
+        (env, true))
+  in
+  (match expect_ok result with
+  | Typing_corners.Unsupported_cycle info ->
+    assert_equal
+      2
+      (Typing_corners.Splat_elem.Set.cardinal
+         (Typing_corners.Cycle_info.members info))
+  | Typing_corners.Computed _ ->
+    assert_failure "an unsupported cycle must not produce a proposition"
+  | Typing_corners.Empty ->
+    assert_failure "an unsupported cycle must not be treated as uninhabited");
+  assert_equal 0 !projections
+
+let unsupported_cycle_is_not_an_empty_assignment_set _ =
+  let t1 = tgeneric "T1" and t2 = tgeneric "T2" in
+  let env = Env.add_upper_bound (dummy_env ()) "T1" (splat [t2]) in
+  let env = Env.add_upper_bound env "T2" (splat [t1]) in
+  let roots = Typing_corners.Splat_elem.Set.singleton t1 in
+  let (_env, result) =
+    Typing_corners.corner_assignments
+      (Typing_corners.Cache.create ())
+      env
+      roots
+      (Some (TSFlit_str (Pos_or_decl.none, "x")))
+      r
+  in
+  match expect_ok result with
+  | Typing_corners.Unsupported_cycle _ -> ()
+  | Typing_corners.Computed _ ->
+    assert_failure "an unsupported cycle must not produce assignments"
+  | Typing_corners.Empty ->
+    assert_failure "an unsupported cycle must not be treated as uninhabited"
+
+let inconsistent_exact_bounds_are_empty _ =
+  let key = tgeneric "T" in
+  let lower = simple_shape [] ~open_:false in
+  let upper = simple_shape [("x", MakeType.int r)] ~open_:false in
+  let env = Env.add_lower_bound (dummy_env ()) "T" lower in
+  let env = Env.add_upper_bound env "T" upper in
+  let (_env, result) =
+    Typing_corners.corner_assignments
+      (Typing_corners.Cache.create ())
+      env
+      (Typing_corners.Splat_elem.Set.singleton key)
+      (Some (TSFlit_str (Pos_or_decl.none, "x")))
+      r
+  in
+  match expect_ok result with
+  | Typing_corners.Empty -> ()
+  | Typing_corners.Computed _ ->
+    assert_failure "inconsistent exact bounds must have no assignments"
+  | Typing_corners.Unsupported_cycle _ ->
+    assert_failure "acyclic inconsistent bounds are not a cycle"
+
+let proven_equal_parameters_share_each_assignment _ =
+  let t1 = tgeneric "T1" and t2 = tgeneric "T2" in
+  let env = Env.add_upper_bound (dummy_env ()) "T1" t2 in
+  let env = Env.add_upper_bound env "T1" open_shape in
+  let env = Env.add_upper_bound env "T2" t1 in
+  let env = Env.add_upper_bound env "T2" open_shape in
+  let (_env, result) =
+    Typing_corners.corner_assignments
+      (Typing_corners.Cache.create ())
+      env
+      (Typing_corners.Splat_elem.Set.singleton t1)
+      (Some (TSFlit_str (Pos_or_decl.none, "x")))
+      r
+  in
+  let assignments = result |> expect_ok |> expect_computed in
   assert_bool
-    "an unassigned cyclic spread projects as absent"
-    upper.sft_optional;
-  assert_bool
-    "an unassigned cyclic spread's projected type is nothing"
-    (Typing_defs.is_nothing upper.sft_ty)
+    "equal parameters should have at least one corner"
+    (not (List.is_empty assignments));
+  List.iter assignments ~f:(fun assignment ->
+      let left = Typing_corners.Splat_elem.Map.find t1 assignment in
+      let right = Typing_corners.Splat_elem.Map.find t2 assignment in
+      assert_equal left.sft_optional right.sft_optional;
+      assert_equal
+        0
+        (compare_locl_ty ?normalize_lists:None left.sft_ty right.sft_ty))
+
+let unsupported_cycles_widen_reads_and_preserve_right_masking _ =
+  let t1 = tgeneric "T1" and t2 = tgeneric "T2" in
+  let env = Env.add_upper_bound (dummy_env ()) "T1" (splat [t2]) in
+  let env = Env.add_upper_bound env "T2" (splat [t1]) in
+  let explicit = simple_shape [("x", MakeType.int r)] ~open_:false in
+  let (env, result) = Typing_corners.resolve_for_read env r [t1; explicit] in
+  match get_node (expect_ok result) with
+  | Tshape (Shape_simple { s_fields; s_unknown_value; _ }) ->
+    let x =
+      Option.value_exn
+        (TShapeMap.find_opt (TSFlit_str (Pos_or_decl.none, "x")) s_fields)
+    in
+    assert_bool "the explicit right field stays required" (not x.sft_optional);
+    assert_bool
+      "the explicit right field keeps its type"
+      (Typing_subtype.is_sub_type env x.sft_ty (MakeType.int r)
+      && Typing_subtype.is_sub_type env (MakeType.int r) x.sft_ty);
+    assert_bool
+      "the cyclic unknown tail is widened to mixed"
+      (Typing_utils.is_mixed env s_unknown_value)
+  | _ -> assert_failure "read resolution must produce a simple shape"
 
 let distributed_upper_intersection_exposes_all_rows _ =
   let key = tgeneric "T" in
@@ -1800,7 +1956,7 @@ let supportdyn_exact_open_bound_projects_exactly _ =
   let bound = MakeType.supportdyn r open_shape in
   let env = Env.add_lower_bound (dummy_env ()) "T" bound in
   let env = Env.add_upper_bound env "T" bound in
-  let (env, lower, upper) =
+  let (env, bounds) =
     Typing_corners.field_bounds
       env
       key
@@ -1808,6 +1964,7 @@ let supportdyn_exact_open_bound_projects_exactly _ =
       Typing_corners.Splat_elem.Map.empty
       r
   in
+  let (lower, upper) = expect_ok bounds in
   assert_bool "the lower open-tail field should be optional" lower.sft_optional;
   assert_bool "the upper open-tail field should be optional" upper.sft_optional;
   assert_bool
@@ -1850,8 +2007,18 @@ let () =
          >:: cached_nested_bounds_cover_every_corner;
          "cache_does_not_reuse_results_from_another_env"
          >:: cache_does_not_reuse_results_from_another_env;
-         "cyclic_bound_projection_with_no_assignment_is_absent"
-         >:: cyclic_bound_projection_with_no_assignment_is_absent;
+         "cyclic_bound_projection_requires_an_assignment"
+         >:: cyclic_bound_projection_requires_an_assignment;
+         "unsupported_cycle_is_reported_before_projection"
+         >:: unsupported_cycle_is_reported_before_projection;
+         "unsupported_cycle_is_not_an_empty_assignment_set"
+         >:: unsupported_cycle_is_not_an_empty_assignment_set;
+         "inconsistent_exact_bounds_are_empty"
+         >:: inconsistent_exact_bounds_are_empty;
+         "proven_equal_parameters_share_each_assignment"
+         >:: proven_equal_parameters_share_each_assignment;
+         "unsupported_cycles_widen_reads_and_preserve_right_masking"
+         >:: unsupported_cycles_widen_reads_and_preserve_right_masking;
          "distributed_upper_intersection_exposes_all_rows"
          >:: distributed_upper_intersection_exposes_all_rows;
          "distributed_intersection_rows_survive_outer_bound_expansion"

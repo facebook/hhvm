@@ -18,10 +18,10 @@ module Splat_elem : sig
   val compare : t -> t -> int
 
   (** Maps keyed by spread element. *)
-  module Map : Stdlib.Map.S with type key = t
+  module Map : Stdlib.Map.S with type key := t
 
   (** Sets of spread elements. *)
-  module Set : Stdlib.Set.S with type elt = t
+  module Set : Stdlib.Set.S with type elt := t
 end
 
 (** Per-label corner assignments for spread elements. *)
@@ -29,6 +29,47 @@ module Assignment : sig
   (** What each spread element's field has been fixed to, at one label. *)
   type t = locl_phase shape_field_type Splat_elem.Map.t
 end
+
+(** A spread element was projected without an assigned field. *)
+module Missing_assignment : sig
+  type t
+
+  val element : t -> Splat_elem.t
+
+  val position : t -> Pos_or_decl.t
+end
+
+module Dependency : sig
+  (** How evaluating a bound reaches another spread element. *)
+  type kind =
+    | Direct_upper
+    | Indirect_upper
+    | Nested_upper
+    | Nested_lower
+
+  type t
+
+  val source : t -> Splat_elem.t
+
+  val target : t -> Splat_elem.t
+
+  val kind : t -> kind
+
+  val position : t -> Pos_or_decl.t
+end
+
+module Cycle_info : sig
+  type t
+
+  val members : t -> Splat_elem.Set.t
+
+  val dependencies : t -> Dependency.t list
+end
+
+type 'a computation =
+  | Computed of 'a
+  | Empty
+  | Unsupported_cycle of Cycle_info.t
 
 (** Memoized bound and dependency information for one splat operation. *)
 module Cache : sig
@@ -89,11 +130,16 @@ val proj :
   Typing_shape_normalize.Row.t ->
   TShapeField.t option ->
   Assignment.t ->
-  env * locl_phase shape_field_type
+  env * (locl_phase shape_field_type, Missing_assignment.t) result
 
-(** Resolve a row to a single simple shape for reading a field, taking every
-    live parameter to its upper bound. *)
-val resolve_for_read : env -> Typing_reason.t -> locl_ty list -> env * locl_ty
+(** Resolve a row to a simple shape for reads. Unsupported cyclic components
+    widen to optional [mixed]; normal row projection still applies rightward
+    masking. *)
+val resolve_for_read :
+  env ->
+  Typing_reason.t ->
+  locl_ty list ->
+  env * (locl_ty, Missing_assignment.t) result
 
 (** Type parameter/newtype spreads that can affect [row] at [label], excluding
     those masked by a required field to their right; [None] selects the tail i.e.
@@ -146,16 +192,16 @@ val check_subrow_corners :
     sub:locl_phase shape_field_type ->
     super:locl_phase shape_field_type ->
     env * 'a) ->
-  env * 'a
+  env * ('a computation, Missing_assignment.t) result
 
 (** Every corner co-assignment of the given spread elements. *)
 val corner_assignments :
   Cache.t ->
   env ->
-  locl_ty list ->
+  Splat_elem.Set.t ->
   TShapeField.t option ->
   Typing_reason.t ->
-  env * Assignment.t list
+  env * (Assignment.t list computation, Missing_assignment.t) result
 
 (* == Spread type variables ================================================= *)
 
@@ -210,35 +256,11 @@ module For_test : sig
       locl_ty ->
       Assignment.t ->
       Typing_reason.t ->
-      t
+      (t, Missing_assignment.t) result
   end
 
-  module Dependency : sig
-    (** How evaluating a bound reaches another spread element. *)
-    type kind =
-      | Direct_upper
-      | Indirect_upper
-      | Nested_upper
-      | Nested_lower
-
-    type t
-
-    val source : t -> Splat_elem.t
-
-    val target : t -> Splat_elem.t
-
-    val kind : t -> kind
-
-    val position : t -> Pos_or_decl.t
-  end
-
-  module Cycle_info : sig
-    type t
-
-    val members : t -> Splat_elem.Set.t
-
-    val dependencies : t -> Dependency.t list
-  end
+  module Dependency = Dependency
+  module Cycle_info = Cycle_info
 
   module Component : sig
     (** One strongly connected component. Only direct reciprocal type-parameter
@@ -285,7 +307,7 @@ module For_test : sig
     locl_ty ->
     Assignment.t ->
     Typing_reason.t ->
-    env * Field.Corners.t
+    env * (Field.Corners.t, Missing_assignment.t) result
 
   (** Interpret a spread element's upper bound as normalized shape rows. *)
   val bound_shape_upper :
@@ -302,7 +324,10 @@ module For_test : sig
     TShapeField.t option ->
     Assignment.t ->
     Typing_reason.t ->
-    env * locl_phase shape_field_type * locl_phase shape_field_type
+    env
+    * ( locl_phase shape_field_type * locl_phase shape_field_type,
+        Missing_assignment.t )
+      result
 
   (** Spread elements mentioned by the given element's upper bound. *)
   val type_params_in_upper_bound :

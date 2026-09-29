@@ -10,3 +10,11 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "cyclic_constraints.php", line 13, characters 13-22:
   But got `mixed`
+ERROR: File "cyclic_constraints.php", line 40, characters 10-15:
+Invalid return type (Typing[4110])
+  File "cyclic_constraints.php", line 38, characters 21-26:
+  Cyclic shape-splat bounds are not supported by this subtyping check
+  File "cyclic_constraints.php", line 40, characters 3-16:
+  Expected `shape('anchor' => int, 'q' => int, ?'x' => string)`
+  File "cyclic_constraints.php", line 32, characters 3-29:
+  But got `shape(...TLeft, ...shape('q' => int)) where TLeft as shape(...TRight, ...shape('anchor' => int))`

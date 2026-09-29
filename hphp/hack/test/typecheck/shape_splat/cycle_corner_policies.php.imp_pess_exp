@@ -1,0 +1,70 @@
+ERROR: File "cycle_corner_policies.php", line 25, characters 15-20:
+Invalid argument (Typing[4110])
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  Cyclic shape-splat bounds are not supported by this subtyping check
+  File "cycle_corner_policies.php", line 21, characters 3-41:
+  Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
+  File "cycle_corner_policies.php", line 21, characters 3-41:
+  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
+ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
+Some type arguments violate their constraints (Typing[4323])
+  File "cycle_corner_policies.php", line 14, characters 10-15:
+  Expected `dynamic`
+  File "cycle_corner_policies.php", line 26, characters 10-11:
+  Type `T1` is not a subtype of `dynamic` under dynamic-aware subtyping
+ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
+Some type arguments violate their constraints (Typing[4323])
+  File "cycle_corner_policies.php", line 14, characters 17-17:
+  `T` is a constrained type parameter
+  File "cycle_corner_policies.php", line 14, characters 22-31:
+  This type constraint is violated
+  File "cycle_corner_policies.php", line 14, characters 22-31:
+  Expected `shape(...)`
+  File "cycle_corner_policies.php", line 26, characters 10-11:
+  But got `T1 as shape(...T2, ...shape(?'left' => int))`
+ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
+Some type arguments violate their constraints (Typing[4323])
+  File "cycle_corner_policies.php", line 24, characters 18-19:
+  Cyclic shape-splat bounds are not supported by this subtyping check
+  File "cycle_corner_policies.php", line 14, characters 17-17:
+  `T` is a constrained type parameter
+  File "cycle_corner_policies.php", line 14, characters 22-31:
+  This type constraint is violated
+  File "cycle_corner_policies.php", line 26, characters 10-11:
+  Expected `shape(...)`
+  File "cycle_corner_policies.php", line 23, characters 9-36:
+    by the definition of `T1`
+  File "cycle_corner_policies.php", line 26, characters 10-11:
+  But got `shape(...T2, ...shape(?'left' => int)) where T2 as shape(...T1, ...shape(?'right' => int))`
+  File "cycle_corner_policies.php", line 23, characters 9-36:
+    by the definition of `T1`
+ERROR: File "cycle_corner_policies.php", line 26, characters 14-24:
+Invalid argument (Typing[4110])
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  Cyclic shape-splat bounds are not supported by this subtyping check
+  File "cycle_corner_policies.php", line 10, characters 4-49:
+  Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))`
+  File "cycle_corner_policies.php", line 10, characters 4-49:
+  But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
+ERROR: File "cycle_corner_policies.php", line 28, characters 3-45:
+hh_expect_equivalent type mismatch (Typing[4110])
+  File "cycle_corner_policies.php", line 28, characters 24-28:
+  Expected `dynamic`
+  File "cycle_corner_policies.php", line 21, characters 3-41:
+  Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
+ERROR: File "cycle_corner_policies.php", line 28, characters 31-44:
+Invalid argument (Typing[4110])
+  File "cycle_corner_policies.php", line 28, characters 24-28:
+  Expected `dynamic`
+  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
+    via this generic `T`
+  File "cycle_corner_policies.php", line 21, characters 3-41:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
+ERROR: File "cycle_corner_policies.php", line 29, characters 10-15:
+Invalid return type (Typing[4110])
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  Cyclic shape-splat bounds are not supported by this subtyping check
+  File "cycle_corner_policies.php", line 29, characters 3-16:
+  Expected `shape('x' => int, ?'y' => string)`
+  File "cycle_corner_policies.php", line 21, characters 3-41:
+  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`

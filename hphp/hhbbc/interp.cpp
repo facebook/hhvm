@@ -1811,8 +1811,9 @@ void in(ISS& env, const bc::CastInt&) {
   if (t.subtypeOf(BInt)) return reduce(env);
   constprop(env);
   popC(env);
-  // Objects can raise a warning about converting to int.
-  if (!t.couldBe(BObj)) nothrow(env);
+  // Objects can raise a warning about converting to int, class-likes can
+  // raise a notice, and funcs, cls-meths and enum class labels throw.
+  if (t.subtypeOf(BPrim | BStr | BArrLike | BRes)) nothrow(env);
   if (auto const v = tv(t)) {
     auto cell = eval_cell([&] {
       return make_tv<KindOfInt64>(tvToInt(*v));

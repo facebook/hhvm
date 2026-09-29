@@ -1,0 +1,8 @@
+func: InvalidOperationException
+rfunc: InvalidOperationException
+clsmeth: InvalidOperationException
+rclsmeth: InvalidOperationException
+label: InvalidOperationException
+object: TypecastException
+string: no exception
+vec: no exception

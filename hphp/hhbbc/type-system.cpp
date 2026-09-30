@@ -5917,7 +5917,10 @@ Type loosen_to_datatype(Type t) {
   return loosen_staticness(
     loosen_emptiness(
       loosen_likeness(
-        Type { t.bits(), t.m_legacyMark }
+        // The legacy mark is not part of a value's DataType -- a marked vec
+        // and an unmarked one are both KindOfVec -- so a type loosened to its
+        // DataType must not carry one.
+        Type { t.bits(), project(LegacyMark::Unknown, t.bits()) }
       )
     )
   );

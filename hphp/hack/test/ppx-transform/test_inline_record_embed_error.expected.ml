@@ -72,13 +72,7 @@ end = struct
       let _ = combine
     end
 
-    let rec (traverse :
-              t ->
-              ctx:'ctx ->
-              top_down:'ctx Pass.t ->
-              bottom_up:'ctx Pass.t ->
-              t) =
-     fun t ~ctx ~top_down ~bottom_up ->
+    let rec traverse t ~ctx ~top_down ~bottom_up =
       match t with
       | Inline_record ({ b; _ } as inline_record) ->
         [%ocaml.error
@@ -90,9 +84,7 @@ end = struct
             Some (transform other_elem_inner ~ctx ~top_down ~bottom_up)
           | _ -> None)
 
-    and (transform :
-          t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t) =
-     fun elem ~ctx ~top_down ~bottom_up ->
+    and transform elem ~ctx ~top_down ~bottom_up =
       match top_down.Pass.on_ty_t with
       | Some td ->
         (match td elem ~ctx with

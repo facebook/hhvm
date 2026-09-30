@@ -567,6 +567,12 @@ module Decl = struct
       name
     | Unsupported Unsupported.{ ident; _ } -> Ident.to_string ident
 
+  (* OCaml requires explicit universal quantifiers on `let rec` bindings in
+     two cases: (1) polymorphic recursion — a recursive occurrence uses
+     different type arguments than the declaration, so the monomorphic
+     recursion variable that OCaml infers by default would be wrong; and
+     (2) GADTs — pattern matching introduces rigid type variables that
+     can only unify with a polymorphically-typed callee. *)
   let is_nonregular_in_core_ty tyname tyvars ty =
     let rec aux { ptyp_desc; _ } =
       match ptyp_desc with
@@ -1045,11 +1051,36 @@ end = struct
       Option.to_list @@ alias_transform_field_opt alias ~decls
     | Decl.Unsupported unsupported -> [Unsupported unsupported]
 
+  (* OCaml cannot generalize polymorphic recursion in a `let rec ... and ...`
+     group unless every binding has an explicit quantifier. We prefer to
+     omit them for regular types: explicit quantifiers force OCaml to
+     instantiate the type scheme at every recursive call, whereas
+     monomorphic recursion variables are unified once for the whole group. *)
+  let needs_explicit_quantifiers flds =
+    List.exists
+      (function
+        | Field { type_info = Locally_abstract; _ }
+        | Field { type_info = Regular false; _ } ->
+          true
+        | _ -> false)
+      flds
+
+  let force_quantifiers flds =
+    if needs_explicit_quantifiers flds then
+      List.map
+        (function
+          | Field ({ type_info = Regular true; _ } as def) ->
+            Field { def with type_info = Regular false }
+          | fld -> fld)
+        flds
+    else
+      flds
+
   let fields Analyse.{ decls; _ } =
     List.filter_map (fun decls ->
         match List.concat_map (decl_fields ~decls) decls with
         | [] -> None
-        | xs -> Some xs)
+        | xs -> Some (force_quantifiers xs))
     @@ Graph.stratify decls
 end
 
@@ -1420,18 +1451,19 @@ module Gen_fn = struct
     let fn_pat = ppat_var ~loc (Located.mk ~loc fn_name) in
     let (pat, expr) =
       match type_info with
-      | Transform_field.Regular _ ->
+      | Transform_field.Regular regular ->
         let expr =
           [%expr
             (fun [%p elem_pat] ~ctx ~top_down ~bottom_up -> [%e body_expr])]
         and pat =
-          (* Always generate explicit quantifiers; required for non-regular
-             types and harmless for regular ones *)
-          ppat_constraint
-            ~loc
+          if regular then
             fn_pat
-            (ptyp_poly ~loc (List.map (Located.mk ~loc) tyvars)
-            @@ gen_fun_ty ty ~loc)
+          else
+            ppat_constraint
+              ~loc
+              fn_pat
+              (ptyp_poly ~loc (List.map (Located.mk ~loc) tyvars)
+              @@ gen_fun_ty ty ~loc)
         in
         (pat, expr)
       | Transform_field.Locally_abstract ->

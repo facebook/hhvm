@@ -92,6 +92,25 @@ end = struct
   and 'a two = MaybeOne of 'a option one [@@deriving transform]
 end
 
+(** A mutually recursive group mixing a GADT with a regular type: [gadt] needs
+    locally abstract types while [plain] on its own would need no quantifier.
+    Since the two share a [let rec ... and ...] group, [plain] must be
+    quantified too, otherwise the rigid variable introduced by [gadt]'s match
+    cannot unify with [plain]'s monomorphic recursion variable. *)
+module Mixed_gadt_regular_mutual : sig
+  type 'a gadt =
+    | Lit : bool -> bool gadt
+    | Wrap : 'a plain -> 'a gadt
+
+  and 'a plain = Plain of 'a gadt option [@@deriving transform]
+end = struct
+  type 'a gadt =
+    | Lit : bool -> bool gadt
+    | Wrap : 'a plain -> 'a gadt
+
+  and 'a plain = Plain of 'a gadt option [@@deriving transform]
+end
+
 module Nonregular_concrete : sig
   type 'a t =
     | Leaf

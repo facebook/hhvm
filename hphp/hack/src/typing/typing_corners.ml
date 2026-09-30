@@ -1532,121 +1532,56 @@ module Plan : sig
     | One of locl_ty
     | Equal of Cycle_info.t
 
-  val group_members : group -> Splat_elem.Set.t
-
-  type traversal =
-    | Elements of locl_ty list
-    | Groups of group list
-
   type t
 
-  val traversal : t -> traversal
+  val groups : t -> group list
 
   val depended_on : t -> Splat_elem.Set.t
 
   val order : Cache.t -> env -> Splat_elem.Set.t -> Reason.t -> locl_ty list
 
-  val of_analysis :
-    Cache.t ->
-    env ->
-    Splat_elem.Set.t ->
-    Reason.t ->
-    Analysis.t ->
-    (t, Cycle_info.t) result
+  val of_analysis : Analysis.t -> (t, Cycle_info.t) result
 end = struct
   type group =
     | One of Splat_elem.t
     | Equal of Analysis.Cycle_info.t
 
-  type traversal =
-    | Elements of Splat_elem.t list
-    | Groups of group list
-
   type t = {
-    traversal: traversal;
+    groups: group list;
     depended_on: Splat_elem.Set.t;
   }
 
-  let traversal plan = plan.traversal
+  let groups plan = plan.groups
 
   let depended_on plan = plan.depended_on
 
-  let group_members = function
-    | One member -> Splat_elem.Set.singleton member
-    | Equal info -> Analysis.Cycle_info.members info
-
+  (* Compatibility view for tests and callers which still request a flat
+     topological order. Search consumes the component plan below. *)
   let order cache env roots r =
-    let equal left right = Int.equal (Splat_elem.compare left right) 0 in
-    let rec visit element order stack =
-      if List.mem order element ~equal || List.mem stack element ~equal then
-        order
-      else
-        let order =
-          List.fold_left
-            (Analysis.type_params_in_bounds
-               cache.Cache.bounds
-               cache.Cache.analysis
-               env
-               element
-               r)
-            ~init:order
-            ~f:(fun order dependency ->
-              visit dependency order (element :: stack))
-        in
-        if List.mem order element ~equal then
-          order
-        else
-          order @ [element]
-    in
-    Splat_elem.Set.fold (fun element order -> visit element order []) roots []
+    Analysis.analyze cache.Cache.bounds cache.Cache.analysis env roots r
+    |> Analysis.components
+    |> List.concat_map ~f:(fun component ->
+           Analysis.Component.members component |> Splat_elem.Set.elements)
 
-  let of_analysis cache env roots r analysis =
-    let groups =
-      List.fold_result
-        (Analysis.components analysis)
-        ~init:[]
-        ~f:(fun groups component ->
-          match component with
-          | Analysis.Component.Acyclic element -> Ok (One element :: groups)
-          | Analysis.Component.Proven_equal info -> Ok (Equal info :: groups)
-          | Analysis.Component.Unsupported_cycle info -> Error info)
-      |> Result.map ~f:List.rev
+  (* Compile dependency analysis into the only representation consumed by
+     search: dependency-ordered singleton or proven-equality groups. *)
+  let of_analysis analysis =
+    let depended_on =
+      List.fold_left
+        (Analysis.dependencies analysis)
+        ~init:Splat_elem.Set.empty
+        ~f:(fun acc dependency ->
+          Splat_elem.Set.add (Analysis.Dependency.target dependency) acc)
     in
-    match groups with
-    | Error info -> Error info
-    | Ok groups ->
-      let all_acyclic =
-        List.for_all groups ~f:(function
-            | One _ -> true
-            | Equal _ -> false)
-      in
-      if all_acyclic then
-        let elements = order cache env roots r in
-        let depended_on =
-          List.fold_left
-            elements
-            ~init:Splat_elem.Set.empty
-            ~f:(fun acc element ->
-              Splat_elem.Set.union
-                acc
-                (Splat_elem.Set.of_list
-                   (Analysis.type_params_in_bounds
-                      cache.Cache.bounds
-                      cache.Cache.analysis
-                      env
-                      element
-                      r)))
-        in
-        Ok { traversal = Elements elements; depended_on }
-      else
-        let depended_on =
-          List.fold_left
-            (Analysis.dependencies analysis)
-            ~init:Splat_elem.Set.empty
-            ~f:(fun acc dependency ->
-              Splat_elem.Set.add (Analysis.Dependency.target dependency) acc)
-        in
-        Ok { traversal = Groups groups; depended_on }
+    List.fold_result
+      (Analysis.components analysis)
+      ~init:[]
+      ~f:(fun groups component ->
+        match component with
+        | Analysis.Component.Acyclic element -> Ok (One element :: groups)
+        | Analysis.Component.Proven_equal info -> Ok (Equal info :: groups)
+        | Analysis.Component.Unsupported_cycle info -> Error info)
+    |> Result.map ~f:(fun groups -> { groups = List.rev groups; depended_on })
 end
 
 (* -- Corner search --------------------------------------------------------- *)
@@ -1811,7 +1746,21 @@ end = struct
       else
         (env, Ok (Field.Corners.of_bounds ~lower ~upper))
 
-  let corners_for_component
+  let bounds_for_group cache env ~preferred_members label assignment r =
+    function
+    | Plan.One key ->
+      Field_bounds.field_bounds cache.Cache.bounds env key label assignment r
+    | Plan.Equal info ->
+      Field_bounds.field_bounds_for_equality
+        cache.Cache.bounds
+        env
+        ~preferred_members
+        (Cycle_info.members info)
+        label
+        assignment
+        r
+
+  let corners_for_group
       cache
       env
       ~depended_on
@@ -1819,11 +1768,12 @@ end = struct
       ~live_super
       ~sub
       ~super
+      ~preferred_members
       label
-      component
+      group
       assignment
       r =
-    match component with
+    match group with
     | Plan.One key ->
       corners_for
         cache
@@ -1837,26 +1787,49 @@ end = struct
         key
         assignment
         r
-    | Plan.Equal info ->
+    | Plan.Equal _ as group ->
       let (env, bounds) =
-        Field_bounds.field_bounds_for_equality
-          cache.Cache.bounds
-          env
-          ~preferred_members:(Splat_elem.Set.union live_sub live_super)
-          (Cycle_info.members info)
-          label
-          assignment
-          r
+        bounds_for_group cache env ~preferred_members label assignment r group
       in
       (match bounds with
       | Error missing -> (env, Error missing)
       | Ok (lower, upper) -> (env, Ok (Field.Corners.of_bounds ~lower ~upper)))
 
-  let assign component field assignment =
-    Splat_elem.Set.fold
-      (fun member assignment -> Splat_elem.Map.add member field assignment)
-      (Plan.group_members component)
-      assignment
+  let assign_group group field assignment =
+    match group with
+    | Plan.One member -> Splat_elem.Map.add member field assignment
+    | Plan.Equal info ->
+      Splat_elem.Set.fold
+        (fun member assignment -> Splat_elem.Map.add member field assignment)
+        (Cycle_info.members info)
+        assignment
+
+  (* Traverse one dependency-ordered plan. [corners] chooses the candidates for
+     a group; [leaf], [empty], and [combine] interpret the same traversal for
+     ground checking or for collecting inference assignments. *)
+  let rec fold_plan groups assignment env ~corners ~leaf ~empty ~combine =
+    match groups with
+    | [] -> leaf assignment env
+    | group :: rest ->
+      let (env, result) = corners env group assignment in
+      (match result with
+      | Error missing -> (env, Error missing)
+      | Ok Field.Corners.Inverted -> empty env
+      | Ok (Field.Corners.Values []) ->
+        failwith "Field.Corners.Values must be nonempty"
+      | Ok (Field.Corners.Values (first :: fields)) ->
+        let branch field env =
+          fold_plan
+            rest
+            (assign_group group field assignment)
+            env
+            ~corners
+            ~leaf
+            ~empty
+            ~combine
+        in
+        List.fold_left fields ~init:(branch first env) ~f:(fun acc field ->
+            combine acc (branch field)))
 
   let check_subrow_corners
       cache
@@ -1874,9 +1847,10 @@ end = struct
     let analysis =
       Analysis.analyze cache.Cache.bounds cache.Cache.analysis env all_live r
     in
-    match Plan.of_analysis cache env all_live r analysis with
+    match Plan.of_analysis analysis with
     | Error info -> (env, Ok (Unsupported_cycle info))
     | Ok plan ->
+      let preferred_members = Splat_elem.Set.union live_sub live_super in
       let empty env =
         let (env, value) = init env in
         (env, Ok (value, false))
@@ -1907,73 +1881,30 @@ end = struct
             let (env, value) = f env ~sub ~super in
             (env, Ok (value, true)))
       in
-      let rec loop_acyclic depended_on keys assignment env =
-        match keys with
-        | key :: rest ->
-          let (env, corners) =
-            corners_for
-              cache
-              env
-              ~depended_on
-              ~live_sub
-              ~live_super
-              ~sub
-              ~super
-              label
-              key
-              assignment
-              r
-          in
-          (match corners with
-          | Error missing -> (env, Error missing)
-          | Ok Field.Corners.Inverted -> empty env
-          | Ok (Field.Corners.Values fields) ->
-            List.fold_left fields ~init:(empty env) ~f:(fun acc field ->
-                combine acc (fun env ->
-                    loop_acyclic
-                      depended_on
-                      rest
-                      (Splat_elem.Map.add key field assignment)
-                      env)))
-        | [] -> finish assignment env
+      let corners env group assignment =
+        corners_for_group
+          cache
+          env
+          ~depended_on:(Plan.depended_on plan)
+          ~live_sub
+          ~live_super
+          ~sub
+          ~super
+          ~preferred_members
+          label
+          group
+          assignment
+          r
       in
-      let rec loop_components depended_on components assignment env =
-        match components with
-        | component :: rest ->
-          let (env, corners) =
-            corners_for_component
-              cache
-              env
-              ~depended_on
-              ~live_sub
-              ~live_super
-              ~sub
-              ~super
-              label
-              component
-              assignment
-              r
-          in
-          (match corners with
-          | Error missing -> (env, Error missing)
-          | Ok Field.Corners.Inverted -> empty env
-          | Ok (Field.Corners.Values fields) ->
-            List.fold_left fields ~init:(empty env) ~f:(fun acc field ->
-                combine acc (fun env ->
-                    loop_components
-                      depended_on
-                      rest
-                      (assign component field assignment)
-                      env)))
-        | [] -> finish assignment env
-      in
-      let depended_on = Plan.depended_on plan in
       let (env, result) =
-        match Plan.traversal plan with
-        | Plan.Elements elements ->
-          loop_acyclic depended_on elements Splat_elem.Map.empty env
-        | Plan.Groups groups ->
-          loop_components depended_on groups Splat_elem.Map.empty env
+        fold_plan
+          (Plan.groups plan)
+          Splat_elem.Map.empty
+          env
+          ~corners
+          ~leaf:finish
+          ~empty
+          ~combine
       in
       (match result with
       | Error missing -> (env, Error missing)
@@ -1981,96 +1912,56 @@ end = struct
       | Ok (_value, false) -> (env, Ok Empty))
 
   let assignments cache env roots (label : TShapeField.t option) r =
-    let rec aux env keys (assignment : Assignment.t) =
-      match keys with
-      | [] -> (env, Ok [assignment])
-      | key :: rest ->
-        let (env, bounds) =
-          Field_bounds.field_bounds
-            cache.Cache.bounds
-            env
-            key
-            label
-            assignment
-            r
-        in
-        (match bounds with
-        | Error missing -> (env, Error missing)
-        | Ok (lower, upper) ->
-          (match Field.Corners.of_bounds ~lower ~upper with
-          | Field.Corners.Inverted -> (env, Ok [])
-          | Field.Corners.Values fields ->
-            let rec expand env rev_chunks = function
-              | [] -> (env, Ok (List.concat (List.rev rev_chunks)))
-              | field :: fields ->
-                let (env, result) =
-                  aux env rest (Splat_elem.Map.add key field assignment)
-                in
-                (match result with
-                | Error missing -> (env, Error missing)
-                | Ok assignments ->
-                  expand env (assignments :: rev_chunks) fields)
-            in
-            expand env [] fields))
-    in
-    let rec aux_components env components (assignment : Assignment.t) =
-      match components with
-      | [] -> (env, Ok [assignment])
-      | component :: rest ->
-        let (env, bounds) =
-          match component with
-          | Plan.One key ->
-            Field_bounds.field_bounds
-              cache.Cache.bounds
-              env
-              key
-              label
-              assignment
-              r
-          | Plan.Equal info ->
-            Field_bounds.field_bounds_for_equality
-              cache.Cache.bounds
-              env
-              ~preferred_members:roots
-              (Cycle_info.members info)
-              label
-              assignment
-              r
-        in
-        (match bounds with
-        | Error missing -> (env, Error missing)
-        | Ok (lower, upper) ->
-          (match Field.Corners.of_bounds ~lower ~upper with
-          | Field.Corners.Inverted -> (env, Ok [])
-          | Field.Corners.Values fields ->
-            let rec expand env rev_chunks = function
-              | [] -> (env, Ok (List.concat (List.rev rev_chunks)))
-              | field :: fields ->
-                let (env, result) =
-                  aux_components env rest (assign component field assignment)
-                in
-                (match result with
-                | Error missing -> (env, Error missing)
-                | Ok assignments ->
-                  expand env (assignments :: rev_chunks) fields)
-            in
-            expand env [] fields))
-    in
     let analysis =
       Analysis.analyze cache.Cache.bounds cache.Cache.analysis env roots r
     in
-    match Plan.of_analysis cache env roots r analysis with
+    match Plan.of_analysis analysis with
     | Error info -> (env, Ok (Unsupported_cycle info))
     | Ok plan ->
+      let corners env group assignment =
+        let (env, bounds) =
+          bounds_for_group
+            cache
+            env
+            ~preferred_members:roots
+            label
+            assignment
+            r
+            group
+        in
+        match bounds with
+        | Error missing -> (env, Error missing)
+        | Ok (lower, upper) -> (env, Ok (Field.Corners.of_bounds ~lower ~upper))
+      in
+      (* Difference lists make collection linear in the number of generated
+         assignments; only the Cartesian corner search remains exponential. *)
+      let empty env = (env, Ok Fn.id) in
+      let combine (env, result) next =
+        match result with
+        | Error missing -> (env, Error missing)
+        | Ok left ->
+          let (env, result) = next env in
+          (match result with
+          | Error missing -> (env, Error missing)
+          | Ok right -> (env, Ok (fun tail -> left (right tail))))
+      in
+      let leaf assignment env = (env, Ok (fun tail -> assignment :: tail)) in
       let (env, result) =
-        match Plan.traversal plan with
-        | Plan.Elements elements -> aux env elements Splat_elem.Map.empty
-        | Plan.Groups groups -> aux_components env groups Splat_elem.Map.empty
+        fold_plan
+          (Plan.groups plan)
+          Splat_elem.Map.empty
+          env
+          ~corners
+          ~leaf
+          ~empty
+          ~combine
       in
       (match result with
       | Error missing -> (env, Error missing)
-      | Ok [] -> (env, Ok Empty)
-      | Ok assignments -> (env, Ok (Computed assignments)))
+      | Ok build_assignments ->
+        (match build_assignments [] with
+        | [] -> (env, Ok Empty)
+        | assignments -> (env, Ok (Computed assignments))))
 end
 
 (* -- Inference helpers ----------------------------------------------------- *)

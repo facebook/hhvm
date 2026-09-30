@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "hphp/runtime/vm/jit/cont-prof-record.h"
@@ -31,15 +32,12 @@ namespace HPHP::jit {
 struct ProfData;
 
 /*
- * Whether cprof is active for this process.
- */
-bool contProfActive();
-
-/*
  * Snapshot and retain the first valid profile record for `func`.
  * Returns true iff a new record was inserted.
  */
 bool captureContProfProfile(const ProfData&, const Func&);
+
+size_t numContProfProfileRecords();
 
 /*
  * Return a point-in-time copy of the captured records, sorted by function key.

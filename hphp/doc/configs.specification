@@ -2370,6 +2370,15 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Capture profile records when functions are optimized.
 
+- std::string Jit.ContProfCheckpointDirectory = "", jtwarren
+
+  Directory where continuous-profile checkpoints are written. It must already
+  exist.
+
+- uint32_t Jit.ContProfCheckpointIntervalSeconds = 60, jtwarren
+
+  Seconds between checkpoint writes. Zero disables capture.
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

@@ -20,8 +20,12 @@
 #include <utility>
 #include <vector>
 
+#include <folly/ScopeGuard.h>
 #include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
+
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP::jit {
 namespace {
@@ -135,6 +139,37 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   };
   ASSERT_TRUE(writeContProfCheckpointFile(path, replacement));
   EXPECT_EQ(replacement, readContProfCheckpointFile(path));
+}
+
+TEST(ContProfCheckpoint, StaysInactiveWhenWriterCannotStart) {
+  folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-activation"};
+
+  auto const oldServerMode = std::exchange(Cfg::Server::Mode, false);
+  auto const oldCaptureEnabled =
+    std::exchange(Cfg::Jit::ContProfCaptureEnabled, true);
+  auto const oldInterval = std::exchange(
+    Cfg::Jit::ContProfCheckpointIntervalSeconds,
+    uint32_t{60}
+  );
+  auto const oldDirectory = std::exchange(
+    Cfg::Jit::ContProfCheckpointDirectory,
+    temp.path().native()
+  );
+  SCOPE_EXIT {
+    stopContProfCheckpointWriter();
+    Cfg::Server::Mode = oldServerMode;
+    Cfg::Jit::ContProfCaptureEnabled = oldCaptureEnabled;
+    Cfg::Jit::ContProfCheckpointIntervalSeconds = oldInterval;
+    Cfg::Jit::ContProfCheckpointDirectory = oldDirectory;
+  };
+
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+
+  Cfg::Server::Mode = true;
+  Cfg::Jit::ContProfCheckpointDirectory = temp.path().native() + "/missing";
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
 }
 
 }

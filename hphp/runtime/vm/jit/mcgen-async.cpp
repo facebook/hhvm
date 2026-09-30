@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
 #include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"

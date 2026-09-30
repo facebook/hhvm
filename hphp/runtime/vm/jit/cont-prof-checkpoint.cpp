@@ -16,18 +16,34 @@
 
 #include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
 
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <exception>
+#include <mutex>
 #include <string>
+#include <sys/stat.h>
+#include <thread>
 #include <type_traits>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
+#include <folly/system/ThreadName.h>
 
+#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/cont-prof-serde.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP::jit {
 
@@ -232,6 +248,202 @@ readContProfCheckpointFile(const std::string& path) {
   return deserializeContProfCheckpoint(
     folly::ByteRange{encoded.data(), encoded.size()}
   );
+}
+
+namespace {
+
+std::string makeContProfCheckpointPath() {
+  auto const& directory = Cfg::Jit::ContProfCheckpointDirectory;
+  if (directory.empty()) return {};
+
+  struct stat info{};
+  if (::stat(directory.c_str(), &info) != 0 || !S_ISDIR(info.st_mode)) {
+    Logger::Warning(
+      "Invalid cont-prof checkpoint directory: %s",
+      directory.c_str()
+    );
+    return {};
+  }
+
+  auto const now =
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+
+  auto const separator = directory.back() == '/' ? "" : "/";
+
+  return fmt::format(
+    "{}{}cont-prof-{}-{}.cprof",
+    directory,
+    separator,
+    static_cast<int64_t>(::getpid()),
+    now
+  );
+}
+
+bool contProfCaptureEligible() {
+  return
+    Cfg::Server::Mode &&
+    Cfg::Jit::ContProfCaptureEnabled &&
+    Cfg::Jit::ContProfCheckpointIntervalSeconds != 0 &&
+    !ProfData::wasDeserialized();
+}
+
+struct ContProfCheckpointWriter {
+  bool running() const {
+    return m_state.load(std::memory_order_acquire) == State::Running;
+  }
+
+  void start() {
+    if (!contProfCaptureEligible() || m_thread.joinable()) return;
+
+    m_path = makeContProfCheckpointPath();
+    if (m_path.empty()) return;
+
+    m_state.store(State::Starting, std::memory_order_release);
+    try {
+      m_thread = std::thread{[this] { run(); }};
+    } catch (const std::exception& exception) {
+      m_state.store(State::Stopped, std::memory_order_release);
+      Logger::Warning(
+        "Failed to start cont-prof checkpoint writer: %s",
+        exception.what()
+      );
+      m_path.clear();
+      return;
+    }
+
+    auto expected = State::Starting;
+    m_state.compare_exchange_strong(
+      expected,
+      State::Running,
+      std::memory_order_acq_rel,
+      std::memory_order_acquire
+    );
+  }
+
+  void stop() {
+    if (!m_thread.joinable()) return;
+
+    m_state.store(State::Stopped, std::memory_order_release);
+
+    {
+      std::lock_guard<std::mutex> lock{m_shutdownMutex};
+      m_stopping = true;
+    }
+
+    // Wake the writer instead of waiting out the checkpoint interval.
+    m_shutdownCondition.notify_one();
+    m_thread.join();
+  }
+
+private:
+  enum class State : uint8_t {
+    Stopped,
+    Starting,
+    Running,
+  };
+
+  void writeCheckpoint() noexcept {
+    try {
+      // Records are immutable, so an unchanged count is sufficient here.
+      if (numContProfProfileRecords() == m_lastWrittenRecordCount) return;
+
+      auto const records = snapshotContProfProfileRecords();
+
+      if (!writeContProfCheckpointFile(m_path, records)) {
+        Logger::Warning(
+          "Failed to write cont-prof checkpoint: %s",
+          m_path.c_str()
+        );
+        return;
+      }
+
+      m_lastWrittenRecordCount = records.size();
+    } catch (const std::exception& exception) {
+      Logger::Warning(
+        "Failed to build cont-prof checkpoint: %s",
+        exception.what()
+      );
+    } catch (...) {
+      Logger::Warning("Failed to build cont-prof checkpoint");
+    }
+  }
+
+  void run() noexcept {
+    try {
+      folly::setThreadName("cont-prof");
+
+      auto const interval = std::chrono::seconds{
+        Cfg::Jit::ContProfCheckpointIntervalSeconds
+      };
+
+      std::unique_lock<std::mutex> lock{m_shutdownMutex};
+
+      while (!m_shutdownCondition.wait_for(
+        lock,
+        interval,
+        [this] { return m_stopping; }
+      )) {
+        lock.unlock();
+        writeCheckpoint();
+        lock.lock();
+      }
+
+      lock.unlock();
+      writeCheckpoint();
+    } catch (const std::exception& exception) {
+      Logger::Warning(
+        "Cont-prof checkpoint writer stopped unexpectedly: %s",
+        exception.what()
+      );
+    } catch (...) {
+      Logger::Warning("Cont-prof checkpoint writer stopped unexpectedly");
+    }
+
+    m_state.store(State::Stopped, std::memory_order_release);
+  }
+
+  std::string m_path;
+  std::thread m_thread;
+  std::mutex m_shutdownMutex;
+  std::condition_variable m_shutdownCondition;
+  std::atomic<State> m_state{State::Stopped};
+  size_t m_lastWrittenRecordCount{0};
+  bool m_stopping{false};
+};
+
+ContProfCheckpointWriter& contProfCheckpointWriter() {
+  static auto const writer = new ContProfCheckpointWriter;
+  return *writer;
+}
+
+}
+
+bool contProfActive() {
+  return
+    contProfCaptureEligible() &&
+    contProfCheckpointWriter().running();
+}
+
+void startContProfCheckpointWriter() { contProfCheckpointWriter().start(); }
+
+void stopContProfCheckpointWriter() { contProfCheckpointWriter().stop(); }
+
+namespace {
+
+InitFiniNode s_contProfCheckpointInit{
+  startContProfCheckpointWriter,
+  InitFiniNode::When::ProcessInit,
+  "cont-prof checkpoint writer"
+};
+
+InitFiniNode s_contProfCheckpointFini{
+  stopContProfCheckpointWriter,
+  InitFiniNode::When::ProcessExit,
+  "cont-prof checkpoint writer"
+};
+
 }
 
 }

@@ -27,6 +27,13 @@
 
 namespace HPHP::jit {
 
+/* Whether the process-wide checkpoint writer is accepting profile data. */
+bool contProfActive();
+
+/* Start and stop the process-wide checkpoint writer. */
+void startContProfCheckpointWriter();
+void stopContProfCheckpointWriter();
+
 /* Encode key-ordered records into a checkpoint blob. */
 std::optional<std::vector<uint8_t>> serializeContProfCheckpoint(
   const std::vector<ContProfProfileRecord>& records);

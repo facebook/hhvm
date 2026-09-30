@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
+#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
 #include "hphp/runtime/vm/jit/cont-prof-controller.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"

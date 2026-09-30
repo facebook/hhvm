@@ -23,8 +23,6 @@
 #include <folly/Synchronized.h>
 
 #include "hphp/runtime/vm/jit/cont-prof-capture.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit {
 
@@ -33,10 +31,6 @@ namespace {
 using RecordMap = std::map<ContProfFuncKey, ContProfProfileRecord>;
 folly::Synchronized<RecordMap> s_records;
 
-}
-
-bool contProfActive() {
-  return Cfg::Jit::ContProfCaptureEnabled && !ProfData::wasDeserialized();
 }
 
 bool captureContProfProfile(const ProfData& profData, const Func& func) {
@@ -48,6 +42,11 @@ bool captureContProfProfile(const ProfData& profData, const Func& func) {
     record->header.funcKey,
     std::move(*record)
   ).second;
+}
+
+size_t numContProfProfileRecords() {
+  auto records = s_records.rlock();
+  return records->size();
 }
 
 std::vector<ContProfProfileRecord> snapshotContProfProfileRecords() {

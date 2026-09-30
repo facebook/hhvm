@@ -1737,12 +1737,9 @@ void RuntimeOption::Load(
 #ifdef HHVM_FACEBOOK
   // Account for ThreadController auto-tuning headroom
   if (ServerThreadTuneAdjustmentPct > 0) {
-    const int adjusted = static_cast<int>(
-        std::ceil(Cfg::Server::QueueCount *
-                  (1.0 + ServerThreadTuneAdjustmentPct / 100.0)));
-    if (Cfg::Server::QueueCount < adjusted) {
-      Cfg::Server::QueueCount = adjusted;
-    }
+    Cfg::Server::QueueCount = static_cast<int>(
+      std::ceil(Cfg::Server::ThreadCount *
+        (1.0 + ServerThreadTuneAdjustmentPct / 100.0)));
   }
 #endif
 

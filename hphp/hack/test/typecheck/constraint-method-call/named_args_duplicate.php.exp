@@ -1,0 +1,2 @@
+ERROR: File "named_args_duplicate.php", line 16, characters 7-27:
+Duplicate named argument: n (Typing[4501])

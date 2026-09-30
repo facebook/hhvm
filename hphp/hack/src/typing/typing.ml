@@ -6504,6 +6504,38 @@ end = struct
            that the receiver has a method that is a subtype of it. Since function parameters
            are contravariant, this will check that the arguments are subtypes of the
            parameters *)
+        let duplicate_arg_names =
+          let (_, dupes) =
+            List.fold el ~init:(S_set.empty, []) ~f:(fun (acc, dupes) arg ->
+                match Typing_defs.Named_params.name_of_arg arg with
+                | Some name ->
+                  let old_acc = acc in
+                  let acc = S_set.add name acc in
+                  let dupes =
+                    if phys_equal old_acc acc then
+                      (* `S_set.add pre_existing_key` preserves physical equality
+                       * https://ocaml.org/manual/5.3/api/Set.S.html *)
+                      name :: dupes
+                    else
+                      dupes
+                  in
+                  (acc, dupes)
+                | None -> (acc, dupes))
+          in
+          dupes
+        in
+        let () =
+          if not (List.is_empty duplicate_arg_names) then
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary
+                @@ Primary.Duplicate_named_args
+                     {
+                       duplicate_names = duplicate_arg_names;
+                       pos = Pos.btw pos_id p;
+                     })
+        in
         let expr_with_edt env e =
           let (env, tast, ty) =
             expr ~expected:None ~ctxt:Context.default env e

@@ -428,16 +428,48 @@ end = struct
   let build_ctx ~ctx ~name ~pos params args =
     let eval = Expr.eval ctx in
     let ctx = Context.push_stack_frame ~ctx name pos in
-    let rec go args params ctx =
-      match (args, params) with
-      | (Aast.Anormal arg :: args, Aast.{ param_name; _ } :: params) ->
-        go args params
-        @@ Context.store ~ctx (Local_id.make_unscoped param_name) (eval arg)
-      (* TODO(named_params): Better handling needed here or delete simplihack *)
-      | (Aast.Anamed (_, _) :: _, _) -> ctx
-      | _ -> ctx
+    let named_params =
+      List.fold
+        params
+        ~init:S_map.empty
+        ~f:(fun named_params Aast.{ param_name; param_info; param_named; _ } ->
+          match (param_named, param_info) with
+          | (Some _, Aast.Param_variadic) -> named_params
+          | (Some _, _) ->
+            S_map.add
+              (String.chop_prefix_if_exists ~prefix:"$" param_name)
+              param_name
+              named_params
+          | (None, _) -> named_params)
     in
-    go args params ctx
+    let positional_params =
+      List.filter params ~f:(fun Aast.{ param_named; _ } ->
+          Option.is_none param_named)
+    in
+    let rec go args positional_params ctx =
+      match args with
+      | [] -> ctx
+      | Aast.Anormal arg :: args
+      | Aast.Ainout (_, arg) :: args -> begin
+        match positional_params with
+        | Aast.{ param_name; _ } :: rest ->
+          go args rest
+          @@ Context.store ~ctx (Local_id.make_unscoped param_name) (eval arg)
+        | [] ->
+          let _ = eval arg in
+          go args [] ctx
+      end
+      | Aast.Anamed ((_, name), arg) :: args -> begin
+        match S_map.find_opt name named_params with
+        | Some param_name ->
+          go args positional_params
+          @@ Context.store ~ctx (Local_id.make_unscoped param_name) (eval arg)
+        | None ->
+          let _ = eval arg in
+          go args positional_params ctx
+      end
+    in
+    go args positional_params ctx
 
   let invoke ctx ~name ~pos (params, body) args =
     let ctx = build_ctx ~ctx ~name ~pos params args in

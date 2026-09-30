@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/roar.h"
 
 typedef struct ROARFunctionCallSite_ {
@@ -242,6 +243,10 @@ void CGMeta::process_literals() {
 
 void CGMeta::processNativeCalls() {
   if (use_roar && !nativeCalls.empty()) {
+    always_assert_flog(
+      !Cfg::Eval::EnableReusableTC,
+      "native calls must not be registered with ROAR when the TC is reusable"
+    );
     std::vector<ROARFunctionCallSite> callSites;
     callSites.reserve(nativeCalls.size());
     for (auto const& nc : nativeCalls) {

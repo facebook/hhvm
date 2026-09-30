@@ -748,7 +748,10 @@ void Vgen<X64Asm>::emit(const calls& i) {
   (void)addr;
   // When using ROAR, track the native call so we can register them with ROAR
   // after the code is relocated into its final place in the code cache.
-  if (use_roar) {
+  //
+  // ROAR patches a registered site for the life of the process, but a reusable
+  // TC frees translations and hands their memory to new code.
+  if (use_roar && !Cfg::Eval::EnableReusableTC) {
     env.meta.nativeCalls[addr] = i.target;
   }
   if (i.watch) {

@@ -141,7 +141,8 @@ SSATmp* profiledGlobalAccess(IRGS& env, SSATmp* name,
         // side-exit.
         auto const type = predictedTypeForGlobal(name->strVal());
         if (type < TCell) {
-          gen(env, CheckTypeMem, type, makeExitSlow(env), lval);
+          gen(env, CheckType, type, makeExitSlow(env),
+              gen(env, LdMem, TCell, lval));
           // Recalculate the RDS addr. This may seem wasteful, but
           // LdRDSAddr can be compiled away in most cases, and it lets
           // us provide a more refined type for pointer analysis.

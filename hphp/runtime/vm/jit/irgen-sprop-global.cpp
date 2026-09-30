@@ -99,7 +99,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
       ifElse(
           env,
           [&] (Block* taken) {
-            gen(env, CheckTypeMem, TObj, taken, addr);
+            gen(env, CheckType, TObj, taken, gen(env, LdMem, TCell, addr));
           },
           [&] {
             gen(env, ThrowMustBeValueTypeException, data, cns(env, name));

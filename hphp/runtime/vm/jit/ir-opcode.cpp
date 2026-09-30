@@ -578,7 +578,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckSurpriseFlags:
   case CheckSurpriseFlagsEnter:
   case CheckType:
-  case CheckTypeMem:
   case CheckVecBounds:
   case ChrInt:
   case ClassHasAttr:

@@ -474,67 +474,6 @@ SSATmp* IRBuilder::preOptimizeStMemMeta(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
-  auto const ptr = inst->src(0);
-  assertx(ptr->isA(TMem));
-
-  auto const oldType = m_state.typeOfPointee(ptr);
-  if (auto const prevValue = m_state.valueOfPointee(ptr)) {
-    auto const v = [&] {
-      assertx(oldType <= prevValue->type());
-      if (oldType < prevValue->type()) {
-        return gen(AssertType, oldType, prevValue);
-      }
-      return prevValue;
-    }();
-    gen(CheckType, inst->typeParam(), inst->taken(), v);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  if (!oldType.maybe(inst->typeParam()) ||
-      inst->next() == inst->taken() ||
-      (inst->next() && inst->next()->isUnreachable())) {
-    gen(Jmp, inst->taken());
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  auto const newType = oldType.refine(inst->typeParam());
-  if (oldType <= newType) {
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  // Try to convert the memory type check to a type check directly on
-  // local/stack.
-  auto const acls = canonicalize(pointee(ptr));
-  if (acls.isSingleLocation()) {
-    if (auto const l = acls.is_local()) {
-      gen(
-        CheckLoc,
-        LocalId { l->ids.singleValue() },
-        inst->typeParam(),
-        inst->taken()
-      );
-      inst->convertToNop();
-    } else if (auto const s = acls.is_stack()) {
-      if (m_state.validStackOffset(s->low)) {
-        gen(
-          CheckStk,
-          IRSPRelOffsetData { s->low },
-          inst->typeParam(),
-          inst->taken(),
-          m_state.sp()
-        );
-        inst->convertToNop();
-      }
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeIsTypeMem(IRInstruction* inst) {
   assertx(inst->is(IsTypeMem, IsNTypeMem));
   auto const ptr = inst->src(0);
@@ -696,7 +635,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdFrameThis)
   X(StMem)
   X(StMemMeta)
-  X(CheckTypeMem)
   X(IsTypeMem)
   X(IsNTypeMem)
   X(StMROProp)

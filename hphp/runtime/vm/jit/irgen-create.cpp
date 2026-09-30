@@ -90,11 +90,10 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   auto const trace = cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckTypeMem, TInt, taken, sprop);
+      return gen(env, CheckType, TInt, taken, gen(env, LdMem, TCell, sprop));
     },
-    [&] {
-      // sprop is an integer, load it
-      auto const opts = gen(env, LdMem, TInt, sprop);
+    [&] (SSATmp* opts) {
+      // sprop is an integer, use it
       return gen(env, DebugBacktrace, opts);
     },
     [&] {

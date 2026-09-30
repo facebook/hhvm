@@ -38,7 +38,6 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
   // Only look at some conditional branches with no side effects.
   if (!term.is(JmpZero,
                JmpNZero,
-               CheckTypeMem,
                CheckLoc,
                CheckStk,
                CheckMBase,
@@ -166,7 +165,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
 
   // Is this block the head of a suitable diamond?
 
-  if (!term.is(JmpZero, JmpNZero, CheckType, CheckTypeMem)) return false;
+  if (!term.is(JmpZero, JmpNZero, CheckType)) return false;
 
   auto const next = block->next();
   auto const taken = block->taken();
@@ -188,7 +187,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
   assertx(join->begin()->numDsts() == nextJmp->numSrcs());
 
   std::vector<SSATmp*> newSrcs{nextJmp->numSrcs()};
-  if (term.is(CheckType, CheckTypeMem)) {
+  if (term.is(CheckType)) {
     // We cannot turn CheckTypes into Selects, but in the special case
     // where one branch forwards a true, and one branch forwards a
     // false, we can turn it into the equivalent IsType instruction.
@@ -199,13 +198,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
     }
     if (nextJmp->src(0)->boolVal() == takenJmp->src(0)->boolVal()) return false;
 
-    auto const op = [&] {
-      if (term.is(CheckType)) {
-        return nextJmp->src(0)->boolVal() ? IsType : IsNType;
-      }
-      assertx(term.is(CheckTypeMem));
-      return nextJmp->src(0)->boolVal() ? IsTypeMem : IsNTypeMem;
-    }();
+    auto const op = nextJmp->src(0)->boolVal() ? IsType : IsNType;
     auto const check =
       unit.gen(op, term.bcctx(), term.typeParam(), term.src(0));
     block->insert(block->backIter(), check);

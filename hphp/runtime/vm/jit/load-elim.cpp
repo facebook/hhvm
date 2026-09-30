@@ -531,7 +531,6 @@ Flags handle_general_effects(Local& env,
 
   auto const flags = [&] () -> Optional<Flags> {
     switch (inst.op()) {
-      case CheckTypeMem:
       case CheckLoc:
       case CheckStk:
       case CheckMBase:
@@ -1146,7 +1145,6 @@ bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags,
   };
 
   switch (inst.op()) {
-  case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
@@ -1366,7 +1364,6 @@ void optimize_edges(Global& env, Block* blk) {
     };
 
     switch (inst.op()) {
-      case CheckTypeMem:
       case CheckLoc:
       case CheckStk:
       case CheckMBase:
@@ -1538,7 +1535,6 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
   };
 
   switch (inst.op()) {
-    case CheckTypeMem:
     case CheckLoc:
     case CheckStk:
     case CheckMBase:

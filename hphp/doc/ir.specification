@@ -189,10 +189,6 @@ Instruction set
 
   Assert that the type of S0 is T, copying it to D.
 
-| CheckTypeMem<T>, ND, S(Mem), B
-
-  If the value pointed to by S0 is not type T, branch to the block B.
-
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
@@ -206,7 +202,7 @@ Instruction set
 | CheckMBase<T>, ND, S(Lval), B
 
   Check that the value pointed to by the member base register S0 has type T; if
-  not, branch to block B.  This is functionally the same as CheckTypeMem.
+  not, branch to block B.
 
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 

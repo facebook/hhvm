@@ -1030,7 +1030,9 @@ module Analysis : sig
   end
 
   module Cache : sig
-    type t = { dependencies: locl_ty list Env_memo.entry Splat_elem.Map.t ref }
+    type t = {
+      dependencies: Dependency.t list Env_memo.entry Splat_elem.Map.t ref;
+    }
 
     val create : unit -> t
   end
@@ -1071,10 +1073,20 @@ module Analysis : sig
     locl_ty list
 
   val type_params_in_upper_bound :
-    Bound_lookup.Cache.t -> env -> locl_ty -> Reason.t -> locl_ty list
+    Bound_lookup.Cache.t ->
+    Cache.t ->
+    env ->
+    locl_ty ->
+    Reason.t ->
+    locl_ty list
 
   val type_params_in_lower_bound :
-    Bound_lookup.Cache.t -> env -> locl_ty -> Reason.t -> locl_ty list
+    Bound_lookup.Cache.t ->
+    Cache.t ->
+    env ->
+    locl_ty ->
+    Reason.t ->
+    locl_ty list
 
   val components : t -> Component.t list
 
@@ -1089,7 +1101,7 @@ module Analysis : sig
     Splat_elem.Set.t
 
   val analyze :
-    Bound_lookup.Cache.t -> 'a -> env -> Splat_elem.Set.t -> Reason.t -> t
+    Bound_lookup.Cache.t -> Cache.t -> env -> Splat_elem.Set.t -> Reason.t -> t
 
   (* -- For test only -- *)
   val node_visits : t -> int
@@ -1149,7 +1161,9 @@ end = struct
   end
 
   module Cache = struct
-    type t = { dependencies: locl_ty list Env_memo.entry Splat_elem.Map.t ref }
+    type t = {
+      dependencies: Dependency.t list Env_memo.entry Splat_elem.Map.t ref;
+    }
 
     let create () = { dependencies = ref Splat_elem.Map.empty }
   end
@@ -1168,91 +1182,6 @@ end = struct
   let node_visits analysis = analysis.node_visits
 
   let edge_visits analysis = analysis.edge_visits
-
-  let type_params_in_upper_bound bounds_cache env name r =
-    let (env, bound_ty) =
-      Bound_lookup.combined_upper_bound bounds_cache env name r
-    in
-    let (env, bound_ty) = Typing_env.expand_type env bound_ty in
-    let (env, bound_ty) = Bound_lookup.strip_supportdyn env bound_ty in
-    let rec spread_elements_of_ty env ty =
-      let (env, ty) = Bound_lookup.strip_supportdyn env ty in
-      match get_node ty with
-      | Tgeneric _ -> (env, [ty])
-      | Tnewtype (n, _, _)
-        when not (String.equal n Naming_special_names.Classes.cSupportDyn) ->
-        (env, [ty])
-      | Tshape shape_ty ->
-        let (env, _err, normalized) =
-          Typing_shape_normalize.Row.normalize ~on_error:None r shape_ty env
-        in
-        Typing_shape_normalize.Row.fold_normalized
-          normalized
-          ~row:(fun row -> (env, Row.spread_elements row))
-          ~union:(spread_elements_of_tys env)
-          ~intersection:(spread_elements_of_tys env)
-      | Tunion tys
-      | Tintersection tys ->
-        spread_elements_of_tys env tys
-      | _ -> (env, [])
-    and spread_elements_of_tys env tys =
-      let (env, elements) =
-        List.fold_map tys ~init:env ~f:spread_elements_of_ty
-      in
-      (env, List.concat elements)
-    in
-    match get_node bound_ty with
-    (* A bound that IS a parameter: the upper view projects [shape(...T)]. *)
-    | Tgeneric _ -> [bound_ty]
-    | Tnewtype (n, _, _)
-      when not (String.equal n Naming_special_names.Classes.cSupportDyn) ->
-      [bound_ty]
-    | _ ->
-      (* Every shape the bound can resolve to, not only the one the view happens
-            to pick. An intersection offers several, and a parameter spread into one
-            that is not picked would otherwise never be found, leaving it unordered.
-         Reporting one that turns out not to be read only adds an ordering
-         constraint that was not needed. *)
-      let (env, supers) =
-        Bound_lookup.concrete_supertypes bounds_cache env bound_ty
-      in
-      let (_env, elements) = spread_elements_of_tys env supers in
-      elements
-
-  let type_params_in_lower_bound bounds_cache env name r =
-    let (env, view) =
-      Field_bounds.bound_shape_lower
-        bounds_cache
-        env
-        name
-        Splat_elem.Map.empty
-        r
-    in
-    ignore env;
-    match view with
-    | Field_bounds.Lower.Shapes shapes ->
-      List.concat_map shapes ~f:Row.spread_elements
-    | Field_bounds.Lower.Bottom -> []
-
-  let type_params_in_bounds bounds_cache cache env key r =
-    Env_memo.memoize_value cache.Cache.dependencies env key (fun () ->
-        let up = type_params_in_upper_bound bounds_cache env key r in
-        let lo = type_params_in_lower_bound bounds_cache env key r in
-        Splat_elem.Set.elements
-          (Splat_elem.Set.union
-             (Splat_elem.Set.of_list up)
-             (Splat_elem.Set.of_list lo)))
-
-  let closure bounds_cache cache env names r =
-    let rec aux worklist acc =
-      match worklist with
-      | [] -> acc
-      | next :: rest when Splat_elem.Set.mem next acc -> aux rest acc
-      | next :: rest ->
-        let delta = type_params_in_bounds bounds_cache cache env next r in
-        aux (delta @ rest) (Splat_elem.Set.add next acc)
-    in
-    aux (Splat_elem.Set.elements names) Splat_elem.Set.empty
 
   let classified_upper_dependencies bounds_cache env source r =
     let rec indirect_dependencies env ty =
@@ -1304,17 +1233,72 @@ end = struct
     in
     List.concat dependencies
 
-  let dependencies_from bounds_cache env source r =
-    let upper = classified_upper_dependencies bounds_cache env source r in
-    let lower =
-      List.map
-        (type_params_in_lower_bound bounds_cache env source r)
-        ~f:(fun target -> (target, Dependency.Nested_lower))
+  let classified_lower_dependencies bounds_cache env source r =
+    let (env, view) =
+      Field_bounds.bound_shape_lower
+        bounds_cache
+        env
+        source
+        Splat_elem.Map.empty
+        r
     in
-    List.map (upper @ lower) ~f:(fun (target, kind) ->
-        Dependency.make ~source ~target ~kind)
+    ignore env;
+    match view with
+    | Field_bounds.Lower.Shapes shapes ->
+      List.concat_map shapes ~f:Row.spread_elements
+      |> List.map ~f:(fun target -> (target, Dependency.Nested_lower))
+    | Field_bounds.Lower.Bottom -> []
 
-  let analyze bounds_cache _analysis_cache env roots r =
+  (* This classified edge list is the sole dependency representation. Closure,
+     compatibility queries, SCC analysis, and evaluation order all derive from
+     it, so they cannot silently disagree about a reachable element. *)
+  let dependencies_from bounds_cache cache env source r =
+    Env_memo.memoize_value cache.Cache.dependencies env source (fun () ->
+        let upper = classified_upper_dependencies bounds_cache env source r in
+        let lower = classified_lower_dependencies bounds_cache env source r in
+        List.map (upper @ lower) ~f:(fun (target, kind) ->
+            Dependency.make ~source ~target ~kind))
+
+  let targets dependencies ~f =
+    List.fold_left dependencies ~init:Splat_elem.Set.empty ~f:(fun acc edge ->
+        if f (Dependency.kind edge) then
+          Splat_elem.Set.add (Dependency.target edge) acc
+        else
+          acc)
+    |> Splat_elem.Set.elements
+
+  let type_params_in_upper_bound bounds_cache cache env source r =
+    targets (dependencies_from bounds_cache cache env source r) ~f:(function
+        | Dependency.Direct_upper
+        | Dependency.Indirect_upper
+        | Dependency.Nested_upper ->
+          true
+        | Dependency.Nested_lower -> false)
+
+  let type_params_in_lower_bound bounds_cache cache env source r =
+    targets (dependencies_from bounds_cache cache env source r) ~f:(function
+        | Dependency.Nested_lower -> true
+        | Dependency.Direct_upper
+        | Dependency.Indirect_upper
+        | Dependency.Nested_upper ->
+          false)
+
+  let type_params_in_bounds bounds_cache cache env source r =
+    targets (dependencies_from bounds_cache cache env source r) ~f:(fun _ ->
+        true)
+
+  let closure bounds_cache cache env names r =
+    let rec aux worklist acc =
+      match worklist with
+      | [] -> acc
+      | next :: rest when Splat_elem.Set.mem next acc -> aux rest acc
+      | next :: rest ->
+        let delta = type_params_in_bounds bounds_cache cache env next r in
+        aux (delta @ rest) (Splat_elem.Set.add next acc)
+    in
+    aux (Splat_elem.Set.elements names) Splat_elem.Set.empty
+
+  let analyze bounds_cache analysis_cache env roots r =
     let next_index = ref 0 in
     let indices = ref Splat_elem.Map.empty in
     let lowlinks = ref Splat_elem.Map.empty in
@@ -1333,7 +1317,9 @@ end = struct
       lowlinks := Splat_elem.Map.add source index !lowlinks;
       stack := source :: !stack;
       on_stack := Splat_elem.Set.add source !on_stack;
-      let outgoing = dependencies_from bounds_cache env source r in
+      let outgoing =
+        dependencies_from bounds_cache analysis_cache env source r
+      in
       dependencies := List.rev_append outgoing !dependencies;
       List.iter outgoing ~f:(fun dependency ->
           Int.incr edge_visits;
@@ -2410,11 +2396,21 @@ module For_test = struct
 
   let type_params_in_upper_bound env splat_elem r =
     let cache = Cache.create () in
-    Analysis.type_params_in_upper_bound cache.Cache.bounds env splat_elem r
+    Analysis.type_params_in_upper_bound
+      cache.Cache.bounds
+      cache.Cache.analysis
+      env
+      splat_elem
+      r
 
   let type_params_in_lower_bound env splat_elem r =
     let cache = Cache.create () in
-    Analysis.type_params_in_lower_bound cache.Cache.bounds env splat_elem r
+    Analysis.type_params_in_lower_bound
+      cache.Cache.bounds
+      cache.Cache.analysis
+      env
+      splat_elem
+      r
 
   let type_params_in_bounds env splat_elem r =
     let cache = Cache.create () in

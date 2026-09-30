@@ -212,20 +212,33 @@ end = struct
       | Values of field list
       | Inverted
 
-    (* An inverted bound pair is uninhabited and contributes no obligations. *)
+    (* The generated fields can only be duplicates when the lower and upper
+       types are equal. Compare them at most once: [equal_locl_ty] may traverse
+       large types, and this function runs at internal nodes of the
+       corner traversal. Structural equality is nevertheless intentional;
+       retaining separately allocated but equal bounds would multiply the
+       number of branches explored afterwards.
+
+       An inverted bound pair is uninhabited and contributes no obligations. *)
     let of_bounds ~(lower : field) ~(upper : field) =
       match (lower.sft_optional, upper.sft_optional) with
       | (false, true) ->
-        Values
-          [
-            lower;
-            upper;
-            { lower with sft_optional = true };
-            { upper with sft_optional = false };
-          ]
+        if Typing_defs.equal_locl_ty lower.sft_ty upper.sft_ty then
+          Values [lower; upper]
+        else
+          Values
+            [
+              lower;
+              upper;
+              { lower with sft_optional = true };
+              { upper with sft_optional = false };
+            ]
       | (false, false)
       | (true, true) ->
-        Values [lower; upper]
+        if Typing_defs.equal_locl_ty lower.sft_ty upper.sft_ty then
+          Values [lower]
+        else
+          Values [lower; upper]
       | (true, false) -> Inverted
   end
 end

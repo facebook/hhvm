@@ -606,7 +606,7 @@ void ifThenElseRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc,
   assertx(ty <= TCell);
 
   if (!ty.maybe(TCounted)) {
-    elseBlock(vtaken);
+    elseBlock(v);
     return;
   }
 
@@ -629,7 +629,7 @@ void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
   auto const refcountedTypeImpl = [&](Vout& v) {
     auto const sf = emitCmpRefCount(v, OneReference, base);
     ifThenElse(
-      vmain(env), vcold(env), CC_NE, sf,
+      v, vcold(env), CC_NE, sf,
       [&](Vout& v) {
         ifThenElse(v,v, CC_NL, sf,
             [&](Vout& v) {

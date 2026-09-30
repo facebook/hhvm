@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/arch.h"
+
 TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
@@ -87,6 +89,14 @@ bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   case Vinstr::contenter:
   case Vinstr::inlinesideexit:
     return true;
+  case Vinstr::divint:
+  case Vinstr::srem:
+    // Neither declares a flag result, but fuseBranches runs once before
+    // lowerForX64, so it sees them before they are lowered. On x64 both
+    // lower to idiv (vasm-emit-x64.cpp), which leaves the flags undefined,
+    // so a setcc's flags must not be extended across one. arm64 divides
+    // with sdiv, which leaves the flags alone, so only x64 needs this.
+    return arch::any<arch::X64>();
   default:
     break;
   }

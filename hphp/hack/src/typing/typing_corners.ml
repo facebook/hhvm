@@ -572,6 +572,15 @@ module Field_bounds : sig
         Missing_assignment.t )
       result
 
+  val upper_field_bound :
+    Bound_lookup.Cache.t ->
+    env ->
+    Splat_elem.t ->
+    TShapeField.t option ->
+    Assignment.t ->
+    Typing_reason.t ->
+    env * (locl_phase shape_field_type, Missing_assignment.t) result
+
   val field_bounds_for_equality :
     Bound_lookup.Cache.t ->
     env ->
@@ -584,6 +593,16 @@ module Field_bounds : sig
     * ( locl_phase shape_field_type * locl_phase shape_field_type,
         Missing_assignment.t )
       result
+
+  val upper_field_bound_for_equality :
+    Bound_lookup.Cache.t ->
+    env ->
+    preferred_members:Splat_elem.Set.t ->
+    Splat_elem.Set.t ->
+    TShapeField.t option ->
+    Assignment.t ->
+    Typing_reason.t ->
+    env * (locl_phase shape_field_type, Missing_assignment.t) result
 end = struct
   let shape_types env tys =
     let (env, shapes) =
@@ -838,6 +857,8 @@ end = struct
     let (env, view) = bound_shape_upper cache env name assignment r in
     proj_upper_view env view label assignment r
 
+  let upper_field_bound = proj_upper_bound
+
   let proj_lower_bound cache env name label assignment r =
     let (env, view) = bound_shape_lower cache env name assignment r in
     proj_lower_view env view label assignment r
@@ -852,8 +873,18 @@ end = struct
       | Error missing -> (env, Error missing)
       | Ok upper -> (env, Ok (lower, upper)))
 
-  let field_bounds_for_equality
-      cache env ~preferred_members members label assignment r =
+  let fold_equality_bounds
+      cache
+      env
+      ~preferred_members
+      members
+      label
+      assignment
+      r
+      ~get_bounds
+      ~project
+      ~combine
+      ~(init : Field.t) =
     let is_direct_member env bound =
       let (env, bound) = Typing_env.expand_type env bound in
       let is_member =
@@ -863,62 +894,95 @@ end = struct
       in
       (env, bound, is_member)
     in
-    let fold_bounds env members ~get_bounds ~project ~combine ~(init : Field.t)
-        =
-      let rec fold_one_member env acc = function
-        | [] -> (env, Ok acc)
-        | member :: rest ->
-          let (env, bounds) = get_bounds cache env member r in
-          let rec fold_one_bound env acc = function
-            | [] -> fold_one_member env acc rest
-            | bound :: bounds ->
-              let (env, bound, is_member) = is_direct_member env bound in
-              if is_member then
-                fold_one_bound env acc bounds
-              else
-                let (env, result) = project env bound label assignment r in
-                (match result with
-                | Error missing -> (env, Error missing)
-                | Ok field ->
-                  let (env, acc) = combine ~left:acc ~right:field env in
-                  fold_one_bound env acc bounds)
-          in
-          fold_one_bound env acc bounds
-      in
-      let preferred = Splat_elem.Set.inter members preferred_members in
-      let remaining = Splat_elem.Set.diff members preferred in
-      fold_one_member
-        env
-        init
-        (Splat_elem.Set.elements preferred @ Splat_elem.Set.elements remaining)
+    let rec fold_one_member env acc = function
+      | [] -> (env, Ok acc)
+      | member :: rest ->
+        let (env, bounds) = get_bounds cache env member r in
+        let rec fold_one_bound env acc = function
+          | [] -> fold_one_member env acc rest
+          | bound :: bounds ->
+            let (env, bound, is_member) = is_direct_member env bound in
+            if is_member then
+              fold_one_bound env acc bounds
+            else
+              let (env, result) = project env bound label assignment r in
+              (match result with
+              | Error missing -> (env, Error missing)
+              | Ok field ->
+                let (env, acc) = combine ~left:acc ~right:field env in
+                fold_one_bound env acc bounds)
+        in
+        fold_one_bound env acc bounds
     in
-    let project_lower env bound label assignment r =
+    let preferred = Splat_elem.Set.inter members preferred_members in
+    let remaining = Splat_elem.Set.diff members preferred in
+    fold_one_member
+      env
+      init
+      (Splat_elem.Set.elements preferred @ Splat_elem.Set.elements remaining)
+
+  let lower_field_bound_for_equality
+      cache env ~preferred_members members label assignment r =
+    let project env bound label assignment r =
       let (env, view) = bound_shape_lower_of_ty cache env bound assignment r in
       proj_lower_view env view label assignment r
-    and project_upper env bound label assignment r =
+    in
+    fold_equality_bounds
+      cache
+      env
+      ~preferred_members
+      members
+      label
+      assignment
+      r
+      ~get_bounds:Bound_lookup.lower_bounds
+      ~project
+      ~combine:Field.join
+      ~init:{ sft_optional = false; sft_ty = Typing_make_type.nothing r }
+
+  let upper_field_bound_for_equality
+      cache env ~preferred_members members label assignment r =
+    let project env bound label assignment r =
       let (env, view) = bound_shape_upper_of_ty cache env bound assignment r in
       proj_upper_view env view label assignment r
     in
+    fold_equality_bounds
+      cache
+      env
+      ~preferred_members
+      members
+      label
+      assignment
+      r
+      ~get_bounds:Bound_lookup.upper_bounds
+      ~project
+      ~combine:Field.meet
+      ~init:{ sft_optional = true; sft_ty = Typing_make_type.mixed r }
+
+  let field_bounds_for_equality
+      cache env ~preferred_members members label assignment r =
     let (env, lower) =
-      fold_bounds
+      lower_field_bound_for_equality
+        cache
         env
+        ~preferred_members
         members
-        ~get_bounds:Bound_lookup.lower_bounds
-        ~project:project_lower
-        ~combine:Field.join
-        ~init:{ sft_optional = false; sft_ty = Typing_make_type.nothing r }
+        label
+        assignment
+        r
     in
     match lower with
     | Error missing -> (env, Error missing)
     | Ok lower ->
       let (env, upper) =
-        fold_bounds
+        upper_field_bound_for_equality
+          cache
           env
+          ~preferred_members
           members
-          ~get_bounds:Bound_lookup.upper_bounds
-          ~project:project_upper
-          ~combine:Field.meet
-          ~init:{ sft_optional = true; sft_ty = Typing_make_type.mixed r }
+          label
+          assignment
+          r
       in
       (match upper with
       | Error missing -> (env, Error missing)
@@ -2134,8 +2198,8 @@ end = struct
     in
     let upper_for_component env ~preferred_members assignment label = function
       | Component.Acyclic key ->
-        let (env, bounds) =
-          Field_bounds.field_bounds
+        let (env, upper) =
+          Field_bounds.upper_field_bound
             cache.Cache.bounds
             env
             key
@@ -2143,14 +2207,13 @@ end = struct
             assignment
             r
         in
-        (match bounds with
+        (match upper with
         | Error missing -> (env, Error missing)
-        | Ok (_lower, upper) ->
-          (env, Ok (Splat_elem.Map.add key upper assignment)))
+        | Ok upper -> (env, Ok (Splat_elem.Map.add key upper assignment)))
       | Component.Proven_equal info ->
         let members = Cycle_info.members info in
-        let (env, bounds) =
-          Field_bounds.field_bounds_for_equality
+        let (env, upper) =
+          Field_bounds.upper_field_bound_for_equality
             cache.Cache.bounds
             env
             ~preferred_members
@@ -2159,9 +2222,9 @@ end = struct
             assignment
             r
         in
-        (match bounds with
+        (match upper with
         | Error missing -> (env, Error missing)
-        | Ok (_lower, upper) -> (env, Ok (assign_field assignment members upper)))
+        | Ok upper -> (env, Ok (assign_field assignment members upper)))
       | Component.Unsupported_cycle _ -> (env, Ok assignment)
     in
     let assignment_for_read env row label =
@@ -2169,60 +2232,29 @@ end = struct
       let analysis =
         Analysis.analyze cache.Cache.bounds cache.Cache.analysis env live r
       in
-      if
-        List.for_all (Analysis.components analysis) ~f:(function
-            | Analysis.Component.Acyclic _ -> true
-            | Analysis.Component.Proven_equal _
-            | Analysis.Component.Unsupported_cycle _ ->
-              false)
-      then
-        let rec assign env assignment = function
-          | [] -> (env, Ok assignment)
-          | key :: rest ->
-            let (env, result) =
-              upper_for_component
-                env
-                ~preferred_members:live
-                assignment
-                label
-                (Component.Acyclic key)
-            in
-            (match result with
-            | Error missing -> (env, Error missing)
-            | Ok assignment -> assign env assignment rest)
-        in
-        assign env Splat_elem.Map.empty (Plan.order cache env live r)
-      else
-        let top = { sft_optional = true; sft_ty = Typing_make_type.mixed r } in
-        let assignment =
-          List.fold_left
-            (Analysis.components analysis)
-            ~init:Splat_elem.Map.empty
-            ~f:(fun assignment component ->
-              match component with
-              | Component.Unsupported_cycle info ->
-                assign_field assignment (Cycle_info.members info) top
-              | Component.Acyclic _
-              | Component.Proven_equal _ ->
-                assignment)
-        in
-        let rec assign env assignment = function
-          | [] -> (env, Ok assignment)
-          | Component.Unsupported_cycle _ :: rest -> assign env assignment rest
-          | component :: rest ->
-            let (env, result) =
-              upper_for_component
-                env
-                ~preferred_members:live
-                assignment
-                label
-                component
-            in
-            (match result with
-            | Error missing -> (env, Error missing)
-            | Ok assignment -> assign env assignment rest)
-        in
-        assign env assignment (Analysis.components analysis)
+      let top = { sft_optional = true; sft_ty = Typing_make_type.mixed r } in
+      let rec assign env assignment = function
+        | [] -> (env, Ok assignment)
+        | Component.Unsupported_cycle info :: rest ->
+          let assignment =
+            assign_field assignment (Cycle_info.members info) top
+          in
+          assign env assignment rest
+        | ((Component.Acyclic _ | Component.Proven_equal _) as component)
+          :: rest ->
+          let (env, result) =
+            upper_for_component
+              env
+              ~preferred_members:live
+              assignment
+              label
+              component
+          in
+          (match result with
+          | Error missing -> (env, Error missing)
+          | Ok assignment -> assign env assignment rest)
+      in
+      assign env Splat_elem.Map.empty (Analysis.components analysis)
     in
     (* Project a single row to a resolved simple shape (generics -> upper bound). *)
     let project env row =

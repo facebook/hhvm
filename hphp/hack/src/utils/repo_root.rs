@@ -27,6 +27,9 @@ pub fn guess_root_from_current_dir() -> Result<PathBuf, GuessRootError> {
 /// first one containing an hh config file. If that search fails, also check
 /// the starting dir's `www` child.
 pub fn guess_root_from(start: &std::path::Path) -> Result<PathBuf, GuessRootError> {
+    if !start.exists() {
+        return Err(GuessRootError::StartNotFound(start.to_owned()));
+    }
     match guess_root_from_ancestors(start) {
         Ok(root) => Ok(root),
         Err(error) => {
@@ -62,6 +65,8 @@ pub fn is_root(possible_root: &Path) -> bool {
 pub enum GuessRootError {
     #[error("unable to get the current directory: {0}")]
     CurrentDir(#[source] std::io::Error),
+    #[error("starting path does not exist: {0:?}")]
+    StartNotFound(PathBuf),
     #[error("unable to find the root before traversal limit of {0}")]
     TraversalLimitReached(usize),
     #[error("no parent or parent couldn't be found")]
@@ -138,6 +143,16 @@ mod tests {
 
         let root = guess_root_from(&current_dir);
         assert!(matches!(root, Err(GuessRootError::ParentNotFound)));
+    }
+
+    #[test]
+    fn guess_root_rejects_nonexistent_start() {
+        let repo_root = TempDir::with_prefix("repo_root_tests.").unwrap();
+        touch(&repo_root.path().join(".hhconfig"));
+        let nonexistent = repo_root.path().join("missing");
+
+        let root = guess_root_from(&nonexistent);
+        assert!(matches!(root, Err(GuessRootError::StartNotFound(path)) if path == nonexistent));
     }
 
     #[test]

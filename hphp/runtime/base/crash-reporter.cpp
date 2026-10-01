@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
@@ -42,6 +43,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
+#include "hphp/util/thread-local.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -470,6 +472,53 @@ void install_crash_reporter() {
   }
   CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
 }
+
+// RAII wrapper for an alternate signal stack of a HHVM worker thread.
+struct SigAltStack {
+  SigAltStack() {
+    // Do nothing if we somehow already have a signal handler stack
+    {
+      stack_t ss{};
+      sigaltstack(nullptr, &ss);
+      if (!(ss.ss_flags & SS_DISABLE)) {
+        return;
+      }
+    }
+    // 128KiB stack space should be plenty.
+    // See `kSmallSigAltStackSize` in folly/src/folly/debugging/symbolizer/SignalHandler.cpp.
+    long minSigStackSize = std::max(0l, long(MINSIGSTKSZ));
+    m_size = std::max(size_t(minSigStackSize), size_t(128*1024));
+    void* stack = mmap(nullptr, m_size, PROT_READ | PROT_WRITE, 
+      MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (stack != MAP_FAILED) {
+      m_stack = stack;
+
+      stack_t ss{};
+      ss.ss_sp = m_stack;
+      ss.ss_size = m_size;
+      ss.ss_flags = 0;
+      sigaltstack(&ss, nullptr);
+    }
+  }
+
+  ~SigAltStack() {
+    if (m_stack) {
+      stack_t ss{};
+      ss.ss_flags = SS_DISABLE;
+      sigaltstack(&ss, nullptr);
+      munmap(m_stack, m_size);
+    }
+  }
+  
+private:
+  void* m_stack = nullptr;
+  std::size_t m_size = 0;
+};
+
+THREAD_LOCAL_NO_CHECK(SigAltStack, s_sigAltStack);
+InitFiniNode t_altStack([]() {
+  s_sigAltStack.getCheck();
+}, InitFiniNode::When::ThreadInit);
 
 //////////////////////////////////////////////////////////////////////
 

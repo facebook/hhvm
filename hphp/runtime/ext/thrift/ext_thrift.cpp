@@ -164,7 +164,8 @@ Object HHVM_METHOD(TClientBufferedStream, genNext) {
   }
 
   if (!data->queue_.empty()) {
-    event->finish(data->clientQueueToVec());
+    auto bufferAndError = data->clientQueueToVec();
+    event->finish(std::move(bufferAndError), !data->streamBridge_);
     guard.dismiss();
     return Object{event->getWaitHandle()};
   }
@@ -177,7 +178,8 @@ Object HHVM_METHOD(TClientBufferedStream, genNext) {
         : stream(stream), event(event) {}
     void consume() override {
       stream->queue_ = stream->streamBridge_->getMessages();
-      event->finish(stream->clientQueueToVec());
+      auto bufferAndError = stream->clientQueueToVec();
+      event->finish(std::move(bufferAndError), !stream->streamBridge_);
       delete this;
     }
     void canceled() override {

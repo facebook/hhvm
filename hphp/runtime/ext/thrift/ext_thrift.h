@@ -262,8 +262,10 @@ struct TClientStreamError {
   }
 
   std::unique_ptr<folly::IOBuf> errorMsg_;
-  bool isEncoded_;
+  bool isEncoded_ = false;
 };
+
+Object HHVM_METHOD(TClientBufferedStream, genNext);
 
 struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
   TClientBufferedStream() = default;
@@ -317,9 +319,14 @@ struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
               error = TClientStreamError::create(payload.exception());
               return true;
             }
-            if (payload->payload) {
-              payloadDataSize_ += payload->payload->computeChainDataLength();
+            const size_t payloadSize = payload->payload
+                ? payload->payload->computeChainDataLength()
+                : 0;
+            if (payloadSize) {
+              payloadDataSize_ += payloadSize;
               bufferVec.push_back(std::move(payload->payload));
+            }
+            if (payloadSize || payload->isOrderedHeader) {
               --outstanding_;
             }
             return false;
@@ -469,9 +476,11 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
   Thrift2StreamEvent() {}
 
   void finish(
-      thrift::TClientBufferedStream::BufferAndErrorPair bufferAndError) {
+      thrift::TClientBufferedStream::BufferAndErrorPair bufferAndError,
+      bool streamEnded) {
     buffer_ = std::move(bufferAndError.first);
     error_ = std::move(bufferAndError.second);
+    streamEnded_ = streamEnded;
     markAsFinished();
   }
 
@@ -506,7 +515,8 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
     }
 
     Array bufferVec;
-    if (buffer_.empty()) {
+    // Header-only batches can be empty while the stream is still open.
+    if (buffer_.empty() && streamEnded_) {
       bufferVec = null_array;
     } else {
       VecInit resArr(buffer_.size());
@@ -522,6 +532,7 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
 
  private:
   std::vector<std::unique_ptr<folly::IOBuf>> buffer_;
+  bool streamEnded_ = false;
 
   // any error while processing queue, this should be returned as error message
   // along with the buffer and should be sequenced after any received payloads

@@ -1,0 +1,6 @@
+ERROR: File "disjoint_attr_nested_same_newtype.php--usage.php", line 17, characters 6-14:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_nested_same_newtype.php--usage.php", line 17, characters 64-66:
+  Shape field `b` is defined here
+  File "disjoint_attr_nested_same_newtype.php--usage.php", line 17, characters 27-61:
+  Shape field `b` may also be provided by newtype `Wrapper`

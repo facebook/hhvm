@@ -1,0 +1,6 @@
+ERROR: File "disjoint_attr_bad_generic_field.php", line 5, characters 9-11:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_generic_field.php", line 5, characters 44-47:
+  Shape field `id` is defined here
+  File "disjoint_attr_bad_generic_field.php", line 5, characters 41-41:
+  Shape field `id` may also be provided by type parameter `T`

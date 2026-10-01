@@ -1,0 +1,8 @@
+ERROR: File "disjoint_attr_bad_union_with_intersection.php", line 7, characters 9-11:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_union_with_intersection.php", line 8, characters 45-47:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_union_with_intersection.php", line 8, characters 14-15:
+  Shape field `x` may also be provided by type parameter `TA`
+  File "disjoint_attr_bad_union_with_intersection.php", line 8, characters 19-20:
+  Shape field `x` may also be provided by type parameter `TB`

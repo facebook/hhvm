@@ -1,0 +1,18 @@
+ERROR: File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 11, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 11, characters 25-27:
+  Shape field `a` is defined here
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 11, characters 21-22:
+  Shape field `a` may also be provided by newtype `N0`
+ERROR: File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 14, characters 9-27:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 14, characters 52-54:
+  Shape field `a` is defined here
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 14, characters 49-49:
+  Shape field `a` may also be provided by type parameter `T`
+ERROR: File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 17, characters 6-16:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 17, characters 29-30:
+  newtype `N0` may provide shape fields here
+  File "disjoint_attr_repeated_newtype_bounds.php--usage.php", line 17, characters 36-37:
+  newtype `N0` may provide shape fields here

@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_bad_top_level_option_intersection.php", line 9, characters 6-14:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_top_level_option_intersection.php", line 4, characters 19-21:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_top_level_option_intersection.php", line 9, characters 34-36:
+  Shape field `x` is also defined here
+ERROR: File "disjoint_attr_bad_top_level_option_intersection.php", line 18, characters 6-20:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_top_level_option_intersection.php", line 4, characters 19-21:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_top_level_option_intersection.php", line 19, characters 19-21:
+  Shape field `x` is also defined here

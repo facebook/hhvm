@@ -263,6 +263,8 @@ pub mod user_attributes {
 
     pub const EXPLICIT: &str = "__Explicit";
 
+    pub const DISJOINT_SHAPE_SPLAT: &str = "__DisjointShapeSplat";
+
     pub const NON_DISJOINT: &str = "__NonDisjoint";
 
     pub const OVERLAPPING: &str = "__Overlapping";

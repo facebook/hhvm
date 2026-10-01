@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_bad_multiple_fields.php", line 9, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_multiple_fields.php", line 4, characters 16-18:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_multiple_fields.php", line 5, characters 16-18:
+  Shape field `x` is also defined here
+  File "disjoint_attr_bad_multiple_fields.php", line 6, characters 16-18:
+  Shape field `x` is also defined here
+  File "disjoint_attr_bad_multiple_fields.php", line 4, characters 28-30:
+  Shape field `y` is defined here
+  File "disjoint_attr_bad_multiple_fields.php", line 5, characters 31-33:
+  Shape field `y` is also defined here

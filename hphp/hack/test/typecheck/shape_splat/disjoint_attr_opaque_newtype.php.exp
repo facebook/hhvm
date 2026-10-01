@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 6-14:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 41-43:
+  Shape field `a` is defined here
+  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 27-38:
+  Shape field `a` may also be provided by newtype `OpaqueFields`
+ERROR: File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 9-21:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 56-58:
+  Shape field `a` is defined here
+  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 53-53:
+  Shape field `a` may also be provided by type parameter `T`

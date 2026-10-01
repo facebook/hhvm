@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_union.php", line 7, characters 9-11:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_union.php", line 10, characters 25-27:
+  Shape field `x` is defined here
+  File "disjoint_attr_union.php", line 10, characters 15-16:
+  Shape field `x` may also be provided by type parameter `TA`
+ERROR: File "disjoint_attr_union.php", line 14, characters 9-25:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_union.php", line 15, characters 37-39:
+  Shape field `x` is defined here
+  File "disjoint_attr_union.php", line 15, characters 19-21:
+  Shape field `x` may also be defined here

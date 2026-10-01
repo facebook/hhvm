@@ -311,6 +311,8 @@ module UserAttributes = struct
 
   let uaNoDisjointUnion = "__NoDisjointUnion"
 
+  let uaDisjointShapeSplat = "__DisjointShapeSplat"
+
   let uaNonDisjoint = "__NonDisjoint"
 
   let uaOverlapping = "__Overlapping"
@@ -718,6 +720,13 @@ module UserAttributes = struct
               doc =
                 "Requires this type parameter to NOT have a union type where the types in the union are disjoint from each other, e.g., `(int | string)`."
                 ^ " This prevents Hack from inferring completely unrelated types.";
+            } );
+          ( uaDisjointShapeSplat,
+            {
+              contexts = [typealias];
+              autocomplete = false;
+              doc =
+                "Requires the fields of this type alias's shape splats to be disjoint.";
             } );
           ( uaNonDisjoint,
             {

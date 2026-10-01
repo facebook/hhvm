@@ -260,6 +260,56 @@ let check_where_clauses_with_recursive_mentions env t_name where_constraints =
   in
   List.iter ~f:report pairs
 
+let rec strip_supportdyn_hint ((_, hint_) as hint) =
+  match hint_ with
+  | Happly ((_, name), [inner]) when String.equal name SN.Classes.cSupportDyn ->
+    strip_supportdyn_hint inner
+  | _ -> hint
+
+(** Report non-disjoint shape splats on a typedef carrying the
+    [<<__DisjointShapeSplat>>] attribute. The decision procedure is
+    [Typing_shape_disjointness]. *)
+let rec check_shape_splat_disjointness
+    (env : Typing_env_types.env) (t_pos : Pos.t) hint =
+  let open Typing_defs in
+  let hint = strip_supportdyn_hint hint in
+  match hint with
+  | (_, (Hunion hints | Hintersection hints)) ->
+    List.iter hints ~f:(check_shape_splat_disjointness env t_pos)
+  | (_, (Hoption inner | Hlike inner)) ->
+    check_shape_splat_disjointness env t_pos inner
+  | (_, Hshape { nsi_field_map; _ })
+    when List.exists nsi_field_map ~f:(function
+             | SE_splat _ -> true
+             | SE_field _ -> false) ->
+    let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
+    begin
+      match get_node decl_ty with
+      | Tshape (Shape_splat { ss_elems }) ->
+        let ety_env = { empty_expand_env with under_type_constructor = true } in
+        let (env, rev_elems) =
+          List.fold_left ss_elems ~init:(env, []) ~f:(fun (env, acc) elem ->
+              let ((env, _err), elem) = Phase.localize ~ety_env env elem in
+              (env, elem :: acc))
+        in
+        let violations =
+          Typing_shape_disjointness.violations (List.rev rev_elems) env
+        in
+        if not (List.is_empty violations) then
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Shape_splat
+                   (Primary.Shape_splat.Disjoint_shape_splat_violation
+                      { pos = t_pos; violations }))
+      | _ -> ()
+    end;
+    List.iter nsi_field_map ~f:(function
+        | SE_splat inner -> check_shape_splat_disjointness env t_pos inner
+        | SE_field _ -> ())
+  | _ -> ()
+
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let {
@@ -359,6 +409,12 @@ let typedef_def ctx typedef =
         in
         env
     in
+    if
+      Naming_attributes.mem
+        SN.UserAttributes.uaDisjointShapeSplat
+        t_user_attributes
+    then
+      check_shape_splat_disjointness env_for_variant (fst t_name) hint;
     let (env_for_variant, t_as_constraint_err_opt) =
       Constraints.check env_for_variant t_as_constraint As t_name ty
     in

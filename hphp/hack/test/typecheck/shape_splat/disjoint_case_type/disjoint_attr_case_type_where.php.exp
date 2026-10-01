@@ -1,0 +1,6 @@
+ERROR: File "disjoint_attr_case_type_where.php", line 10, characters 11-13:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_case_type_where.php", line 11, characters 17-19:
+  Shape field `x` is defined here
+  File "disjoint_attr_case_type_where.php", line 11, characters 14-14:
+  Shape field `x` may also be provided by type parameter `T`

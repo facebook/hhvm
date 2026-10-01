@@ -280,6 +280,8 @@ pub mod user_attributes {
     pub static uaNewable: LazyLock<TypeName> = lazy!(sn::user_attributes::NEWABLE);
     pub static uaEnforceable: LazyLock<TypeName> = lazy!(sn::user_attributes::ENFORCEABLE);
     pub static uaExplicit: LazyLock<TypeName> = lazy!(sn::user_attributes::EXPLICIT);
+    pub static uaDisjointShapeSplat: LazyLock<TypeName> =
+        lazy!(sn::user_attributes::DISJOINT_SHAPE_SPLAT);
     pub static uaNonDisjoint: LazyLock<TypeName> = lazy!(sn::user_attributes::NON_DISJOINT);
     pub static uaSoft: LazyLock<TypeName> = lazy!(sn::user_attributes::SOFT);
     pub static uaWarn: LazyLock<TypeName> = lazy!(sn::user_attributes::WARN);
@@ -344,6 +346,7 @@ pub mod user_attributes {
             *uaNewable,
             *uaEnforceable,
             *uaExplicit,
+            *uaDisjointShapeSplat,
             *uaNonDisjoint,
             *uaOverlapping,
             *uaSoft,

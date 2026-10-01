@@ -1,0 +1,6 @@
+ERROR: File "disjoint_attr_bad_open_open.php", line 5, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_open_open.php", line 5, characters 21-30:
+  an open shape may provide shape fields here
+  File "disjoint_attr_bad_open_open.php", line 5, characters 36-45:
+  an open shape may provide shape fields here

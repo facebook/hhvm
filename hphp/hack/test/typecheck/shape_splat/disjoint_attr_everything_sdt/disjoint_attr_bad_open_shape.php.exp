@@ -1,0 +1,18 @@
+ERROR: File "disjoint_attr_bad_open_shape.php", line 7, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_open_shape.php", line 7, characters 27-30:
+  Shape field `id` is defined here
+  File "disjoint_attr_bad_open_shape.php", line 7, characters 41-44:
+  Shape field `id` is also defined here
+ERROR: File "disjoint_attr_bad_open_shape.php", line 12, characters 6-24:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_open_shape.php", line 13, characters 29-39:
+  Shape field `nested_id` is defined here
+  File "disjoint_attr_bad_open_shape.php", line 13, characters 50-60:
+  Shape field `nested_id` is also defined here
+ERROR: File "disjoint_attr_bad_open_shape.php", line 18, characters 6-13:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_open_shape.php", line 20, characters 20-29:
+  Shape field `union_id` is defined here
+  File "disjoint_attr_bad_open_shape.php", line 20, characters 40-49:
+  Shape field `union_id` is also defined here

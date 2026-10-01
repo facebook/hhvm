@@ -470,6 +470,31 @@ module Primary : sig
   end
 
   module Shape_splat : sig
+    type overlap_source_origin =
+      | Shape_field of string
+      | Description of string
+    [@@deriving show]
+
+    type overlap_source = {
+      pos: Pos_or_decl.t;
+      origin: overlap_source_origin;
+    }
+    [@@deriving show]
+
+    (** All the ways in which two shape splat elements can be non-disjoint *)
+    type disjointness_violation =
+      | Overlapping_field of {
+          label: string;
+          positions: Pos_or_decl.t list;
+        }
+      | Possible_overlapping_field of {
+          label: string;
+          positions: Pos_or_decl.t list;
+          sources: overlap_source list;
+        }
+      | Unresolved_sources of { sources: overlap_source list }
+    [@@deriving show]
+
     type non_denotable_field = {
       label: string;
       pos: Pos_or_decl.t;
@@ -478,6 +503,10 @@ module Primary : sig
     [@@deriving show]
 
     type t =
+      | Disjoint_shape_splat_violation of {
+          pos: Pos.t;
+          violations: disjointness_violation list;
+        }
       | Non_denotable_shape_splat_fields of {
           pos: Pos.t;
           fields: non_denotable_field list;

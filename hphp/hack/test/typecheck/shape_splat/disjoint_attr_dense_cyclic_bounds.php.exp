@@ -1,0 +1,30 @@
+ERROR: File "disjoint_attr_dense_cyclic_bounds.php", line 8, characters 9-18:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 18-20:
+  Shape field `x` is defined here
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+  Shape field `x` may also be provided by type parameter `T0`
+ERROR: File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+Some type arguments violate their constraints (Typing[4323])
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 5-29:
+  Expected `shape(...)`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+  But got `T0 = T1`
+ERROR: File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+Some type arguments violate their constraints (Typing[4323])
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 5-29:
+  Expected `shape(...)`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+  But got `T0 = T1`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 9, characters 18-19:
+    by the definition of `T0`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 10, characters 18-19:
+    by the definition of `T1`
+ERROR: File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+Some type arguments violate their constraints (Typing[4323])
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 5-29:
+  Expected `shape(...)`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 11, characters 14-15:
+  But got `T1 = T0`
+  File "disjoint_attr_dense_cyclic_bounds.php", line 9, characters 18-19:
+    by the definition of `T0`

@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_bad_nested.php", line 8, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_nested.php", line 4, characters 16-23:
+  Shape field `nested` is defined here
+  File "disjoint_attr_bad_nested.php", line 8, characters 24-31:
+  Shape field `nested` is also defined here
+ERROR: File "disjoint_attr_bad_nested.php", line 13, characters 6-16:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_nested.php", line 15, characters 23-32:
+  Shape field `internal` is defined here
+  File "disjoint_attr_bad_nested.php", line 15, characters 43-52:
+  Shape field `internal` is also defined here

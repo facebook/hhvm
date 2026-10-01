@@ -1,0 +1,12 @@
+ERROR: File "disjoint_attr_bad_generic_top_bounds.php", line 5, characters 9-19:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_generic_top_bounds.php", line 8, characters 17-19:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_generic_top_bounds.php", line 8, characters 14-14:
+  Shape field `x` may also be provided by type parameter `T`
+ERROR: File "disjoint_attr_bad_generic_top_bounds.php", line 13, characters 9-18:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_generic_top_bounds.php", line 14, characters 15-17:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_generic_top_bounds.php", line 14, characters 12-12:
+  Shape field `x` may also be provided by type parameter `T`

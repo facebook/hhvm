@@ -1,0 +1,18 @@
+ERROR: File "disjoint_attr_bad_concrete.php", line 8, characters 6-8:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_concrete.php", line 4, characters 16-18:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_concrete.php", line 5, characters 16-18:
+  Shape field `x` is also defined here
+ERROR: File "disjoint_attr_bad_concrete.php", line 11, characters 6-24:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_concrete.php", line 12, characters 41-43:
+  Shape field `x` is defined here
+  File "disjoint_attr_bad_concrete.php", line 12, characters 19-21:
+  Shape field `x` may also be defined here
+ERROR: File "disjoint_attr_bad_concrete.php", line 15, characters 6-24:
+Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
+  File "disjoint_attr_bad_concrete.php", line 16, characters 19-21:
+  Shape field `x` may be present here
+  File "disjoint_attr_bad_concrete.php", line 16, characters 42-44:
+  Shape field `x` may be present here

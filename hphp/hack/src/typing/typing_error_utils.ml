@@ -1893,6 +1893,59 @@ end = struct
   end
 
   module Eval_shape_splat = struct
+    let field_reasons label positions =
+      List.mapi positions ~f:(fun index pos ->
+          ( pos,
+            Printf.sprintf
+              "Shape field `%s` is %s here"
+              label
+              (if Int.equal index 0 then
+                "defined"
+              else
+                "also defined") ))
+
+    let source_reason label { Typing_error.Primary.Shape_splat.pos; origin } =
+      let open Typing_error.Primary.Shape_splat in
+      let message =
+        match origin with
+        | Shape_field _ ->
+          Printf.sprintf "Shape field `%s` may also be defined here" label
+        | Description description ->
+          Printf.sprintf
+            "Shape field `%s` may also be provided by %s"
+            label
+            description
+      in
+      (pos, message)
+
+    let violation_reasons =
+      let open Typing_error.Primary.Shape_splat in
+      function
+      | Overlapping_field { label; positions } -> field_reasons label positions
+      | Possible_overlapping_field { label; positions; sources } ->
+        field_reasons label positions
+        @ List.map sources ~f:(source_reason label)
+      | Unresolved_sources { sources } ->
+        List.map sources ~f:(fun source ->
+            let message =
+              match source.origin with
+              | Shape_field label ->
+                Printf.sprintf "Shape field `%s` may be present here" label
+              | Description description ->
+                Printf.sprintf "%s may provide shape fields here" description
+            in
+            (source.pos, message))
+
+    let disjoint_shape_splat_violation pos violations =
+      let claim =
+        lazy
+          ( pos,
+            "Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes"
+          )
+      in
+      let reasons = lazy (List.concat_map violations ~f:violation_reasons) in
+      create ~code:Error_code.InvalidTypeHint ~claim ~reasons ()
+
     let non_denotable_shape_splat_fields env pos fields =
       let claim =
         lazy (pos, "Shape splat produces fields with non-denotable types")
@@ -1920,6 +1973,8 @@ end = struct
     let to_error t ~env =
       let open Typing_error.Primary.Shape_splat in
       match t with
+      | Disjoint_shape_splat_violation { pos; violations } ->
+        disjoint_shape_splat_violation pos violations
       | Non_denotable_shape_splat_fields { pos; fields } ->
         non_denotable_shape_splat_fields env pos fields
   end

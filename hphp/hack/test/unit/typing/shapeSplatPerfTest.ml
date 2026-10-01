@@ -6,7 +6,8 @@
  *
  *)
 
-(* Scaling benchmarks for the shape-splat merge (Typing_shape_normalize.merge).
+(* Scaling benchmarks for the shape-splat merge (Typing_shape_normalize.merge)
+ * and disjointness diagnostics (Typing_shape_disjointness.violations).
  *
  * Each scenario builds a splat of [n] elements and times the operation. Each
  * row reports the local exponent
@@ -33,6 +34,7 @@ module Env = Typing_env
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 module Norm = Typing_shape_normalize
+module Disjointness = Typing_shape_disjointness
 
 let dummy_env =
   let () = Typing_subtype.set_fun_refs () in
@@ -210,6 +212,10 @@ let run_merge elems =
   let (_env, _err, result) = Norm.merge ~on_error:None elems dummy_env in
   ignore (Sys.opaque_identity result)
 
+let run_disjointness elems =
+  let violations = Disjointness.violations elems dummy_env in
+  ignore (Sys.opaque_identity violations)
+
 let run_concrete_supertypes_success (env, ty) =
   let (_env, result) =
     Typing_utils.get_shape_splat_concrete_supertypes env ty
@@ -336,6 +342,14 @@ let bench_with ~sizes ~samples run name build =
 let bench ?(sizes = sizes) name build =
   bench_with ~sizes ~samples:timing_samples run_merge name build
 
+let bench_disjointness name build =
+  bench_with
+    ~sizes
+    ~samples:timing_samples
+    run_disjointness
+    ("disjointness_" ^ name)
+    build
+
 let bench_concrete_supertypes ?(sizes = sizes) name build =
   bench_with
     ~sizes
@@ -376,6 +390,21 @@ let perf_generics _ = assert_scaling "flat_generics" flat_generics
 let perf_wide_pair _ = assert_scaling "wide_pair" wide_pair
 
 let perf_disjoint_fields _ = assert_scaling "flat_disjoint" flat_disjoint
+
+let perf_disjointness_disjoint_fields _ =
+  assert_subquadratic
+    "disjointness_flat_disjoint"
+    (bench_disjointness "flat_disjoint" flat_disjoint)
+
+let perf_disjointness_same_field _ =
+  assert_subquadratic
+    "disjointness_flat_same_field"
+    (bench_disjointness "flat_same_field" flat_same_field)
+
+let perf_disjointness_generics _ =
+  assert_subquadratic
+    "disjointness_flat_generics"
+    (bench_disjointness "flat_generics" flat_generics)
 
 let perf_open _ = assert_scaling "flat_open" flat_open
 
@@ -506,6 +535,9 @@ let () =
          "flat_same_field" >:: perf_same_field;
          "flat_generics" >:: perf_generics;
          "flat_disjoint" >:: perf_disjoint_fields;
+         "disjointness_flat_disjoint" >:: perf_disjointness_disjoint_fields;
+         "disjointness_flat_same_field" >:: perf_disjointness_same_field;
+         "disjointness_flat_generics" >:: perf_disjointness_generics;
          "flat_open" >:: perf_open;
          "flat_open_optional" >:: perf_open_optional;
          "closed_then_one_open" >:: perf_closed_then_one_open;

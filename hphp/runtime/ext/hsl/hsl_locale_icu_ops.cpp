@@ -614,7 +614,7 @@ OptString HSLLocaleICUOps::trim(const OptString& str, const OptString& what, Tri
   return trim_impl(
     str,
     [what_set](UChar32 ch) {
-      return what_set.find(ch) != what_set.end();
+      return what_set.contains(ch);
     },
     sides
   );

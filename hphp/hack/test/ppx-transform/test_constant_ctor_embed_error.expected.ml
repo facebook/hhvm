@@ -67,12 +67,17 @@ end = struct
     end
 
     let rec traverse t ~ctx ~top_down ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
       | Other other_elem ->
         Other
           (match other_elem with
           | Some other_elem_inner ->
-            Some (transform other_elem_inner ~ctx ~top_down ~bottom_up)
+            Some (self other_elem_inner ~ctx ~top_down ~bottom_up)
           | _ -> None)
       | t -> t
 

@@ -71,20 +71,25 @@ end = struct
     end
 
     let rec traverse t ~ctx ~top_down ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
       | Plus (plus_elem_0, plus_elem_1) ->
         Plus
-          ( transform plus_elem_0 ~ctx ~top_down ~bottom_up,
-            transform plus_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self plus_elem_0 ~ctx ~top_down ~bottom_up,
+            self plus_elem_1 ~ctx ~top_down ~bottom_up )
       | Leq (leq_elem_0, leq_elem_1) ->
         Leq
-          ( transform leq_elem_0 ~ctx ~top_down ~bottom_up,
-            transform leq_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self leq_elem_0 ~ctx ~top_down ~bottom_up,
+            self leq_elem_1 ~ctx ~top_down ~bottom_up )
       | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
         Cond
-          ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+          ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+            self cond_elem_1 ~ctx ~top_down ~bottom_up,
+            self cond_elem_2 ~ctx ~top_down ~bottom_up )
       | t -> t
 
     and transform elem ~ctx ~top_down ~bottom_up =
@@ -202,20 +207,25 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a t =
       fun (type a) (t : a t) ~ctx ~top_down ~bottom_up : a t ->
+       let self =
+         match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+         | (None, None) -> traverse
+         | _ -> transform
+       in
        match t with
        | Plus (plus_elem_0, plus_elem_1) ->
          Plus
-           ( transform plus_elem_0 ~ctx ~top_down ~bottom_up,
-             transform plus_elem_1 ~ctx ~top_down ~bottom_up )
+           ( self plus_elem_0 ~ctx ~top_down ~bottom_up,
+             self plus_elem_1 ~ctx ~top_down ~bottom_up )
        | Leq (leq_elem_0, leq_elem_1) ->
          Leq
-           ( transform leq_elem_0 ~ctx ~top_down ~bottom_up,
-             transform leq_elem_1 ~ctx ~top_down ~bottom_up )
+           ( self leq_elem_0 ~ctx ~top_down ~bottom_up,
+             self leq_elem_1 ~ctx ~top_down ~bottom_up )
        | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
          Cond
-           ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-             transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-             transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+           ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+             self cond_elem_1 ~ctx ~top_down ~bottom_up,
+             self cond_elem_2 ~ctx ~top_down ~bottom_up )
        | t -> t
 
     and transform :
@@ -407,13 +417,17 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a term =
      fun term ~ctx ~top_down ~bottom_up ->
+      let self =
+        match (top_down.Pass.on_ty_term, bottom_up.Pass.on_ty_term) with
+        | (None, None) -> traverse_ty_term
+        | _ -> transform_ty_term
+      in
       match term with
       | App (app_elem_0, app_elem_1) ->
         App
-          ( transform_ty_term app_elem_0 ~ctx ~top_down ~bottom_up,
-            transform_ty_term app_elem_1 ~ctx ~top_down ~bottom_up )
-      | Abs abs_elem ->
-        Abs (transform_ty_term abs_elem ~ctx ~top_down ~bottom_up)
+          ( self app_elem_0 ~ctx ~top_down ~bottom_up,
+            self app_elem_1 ~ctx ~top_down ~bottom_up )
+      | Abs abs_elem -> Abs (self abs_elem ~ctx ~top_down ~bottom_up)
       | term -> term
 
     and transform_ty_term :
@@ -1167,8 +1181,13 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a t =
      fun t ~ctx ~top_down ~bottom_up ->
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
-      | Node node_elem -> Node (transform node_elem ~ctx ~top_down ~bottom_up)
+      | Node node_elem -> Node (self node_elem ~ctx ~top_down ~bottom_up)
       | t -> t
 
     and transform :
@@ -1593,6 +1612,11 @@ module Composed = struct
       end
 
       let rec traverse t ~ctx ~top_down ~bottom_up =
+        let self =
+          match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+          | (None, None) -> traverse
+          | _ -> transform
+        in
         match t with
         | Bin (bin_elem_0, bin_elem_1, bin_elem_2) ->
           Bin
@@ -1612,8 +1636,8 @@ module Composed = struct
                   ~top_down:(BinOp.Pass.identity ())
                   ~bottom_up
               | _ -> bin_elem_0),
-              transform bin_elem_1 ~ctx ~top_down ~bottom_up,
-              transform bin_elem_2 ~ctx ~top_down ~bottom_up )
+              self bin_elem_1 ~ctx ~top_down ~bottom_up,
+              self bin_elem_2 ~ctx ~top_down ~bottom_up )
         | Rel (rel_elem_0, rel_elem_1, rel_elem_2) ->
           Rel
             ( (match (top_down.Pass.on_RelOp, bottom_up.Pass.on_RelOp) with
@@ -1632,8 +1656,8 @@ module Composed = struct
                   ~top_down:(RelOp.Pass.identity ())
                   ~bottom_up
               | _ -> rel_elem_0),
-              transform rel_elem_1 ~ctx ~top_down ~bottom_up,
-              transform rel_elem_2 ~ctx ~top_down ~bottom_up )
+              self rel_elem_1 ~ctx ~top_down ~bottom_up,
+              self rel_elem_2 ~ctx ~top_down ~bottom_up )
         | Conn (conn_elem_0, conn_elem_1, conn_elem_2) ->
           Conn
             ( (match (top_down.Pass.on_ConnOp, bottom_up.Pass.on_ConnOp) with
@@ -1652,13 +1676,13 @@ module Composed = struct
                   ~top_down:(ConnOp.Pass.identity ())
                   ~bottom_up
               | _ -> conn_elem_0),
-              transform conn_elem_1 ~ctx ~top_down ~bottom_up,
-              transform conn_elem_2 ~ctx ~top_down ~bottom_up )
+              self conn_elem_1 ~ctx ~top_down ~bottom_up,
+              self conn_elem_2 ~ctx ~top_down ~bottom_up )
         | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
           Cond
-            ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-              transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-              transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+            ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+              self cond_elem_1 ~ctx ~top_down ~bottom_up,
+              self cond_elem_2 ~ctx ~top_down ~bottom_up )
         | t -> t
 
       and transform elem ~ctx ~top_down ~bottom_up =
@@ -1801,6 +1825,11 @@ module Composed = struct
                 bottom_up:'ctx Pass.t ->
                 'a t =
         fun (type a) (t : a t) ~ctx ~top_down ~bottom_up : a t ->
+         let self =
+           match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+           | (None, None) -> traverse
+           | _ -> transform
+         in
          match t with
          | Bin (bin_elem_0, bin_elem_1, bin_elem_2) ->
            Bin
@@ -1820,8 +1849,8 @@ module Composed = struct
                    ~top_down:(BinOp.Pass.identity ())
                    ~bottom_up
                | _ -> bin_elem_0),
-               transform bin_elem_1 ~ctx ~top_down ~bottom_up,
-               transform bin_elem_2 ~ctx ~top_down ~bottom_up )
+               self bin_elem_1 ~ctx ~top_down ~bottom_up,
+               self bin_elem_2 ~ctx ~top_down ~bottom_up )
          | Rel (rel_elem_0, rel_elem_1, rel_elem_2) ->
            Rel
              ( (match (top_down.Pass.on_RelOp, bottom_up.Pass.on_RelOp) with
@@ -1840,8 +1869,8 @@ module Composed = struct
                    ~top_down:(RelOp.Pass.identity ())
                    ~bottom_up
                | _ -> rel_elem_0),
-               transform rel_elem_1 ~ctx ~top_down ~bottom_up,
-               transform rel_elem_2 ~ctx ~top_down ~bottom_up )
+               self rel_elem_1 ~ctx ~top_down ~bottom_up,
+               self rel_elem_2 ~ctx ~top_down ~bottom_up )
          | Conn (conn_elem_0, conn_elem_1, conn_elem_2) ->
            Conn
              ( (match (top_down.Pass.on_ConnOp, bottom_up.Pass.on_ConnOp) with
@@ -1860,13 +1889,13 @@ module Composed = struct
                    ~top_down:(ConnOp.Pass.identity ())
                    ~bottom_up
                | _ -> conn_elem_0),
-               transform conn_elem_1 ~ctx ~top_down ~bottom_up,
-               transform conn_elem_2 ~ctx ~top_down ~bottom_up )
+               self conn_elem_1 ~ctx ~top_down ~bottom_up,
+               self conn_elem_2 ~ctx ~top_down ~bottom_up )
          | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
            Cond
-             ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-               transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-               transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+             ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+               self cond_elem_1 ~ctx ~top_down ~bottom_up,
+               self cond_elem_2 ~ctx ~top_down ~bottom_up )
          | t -> t
 
       and transform :
@@ -1996,32 +2025,34 @@ end = struct
         ~ctx
         ~top_down
         ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       {
         t with
         ref =
           (let ref_deref = !ref in
-           ref := transform ref_deref ~ctx ~top_down ~bottom_up;
+           ref := self ref_deref ~ctx ~top_down ~bottom_up;
            ref);
         opt =
           (match opt with
-          | Some opt_inner ->
-            Some (transform opt_inner ~ctx ~top_down ~bottom_up)
+          | Some opt_inner -> Some (self opt_inner ~ctx ~top_down ~bottom_up)
           | _ -> None);
         res =
           (match res with
-          | Ok res_ok -> Ok (transform res_ok ~ctx ~top_down ~bottom_up)
-          | Error res_err -> Error (transform res_err ~ctx ~top_down ~bottom_up));
+          | Ok res_ok -> Ok (self res_ok ~ctx ~top_down ~bottom_up)
+          | Error res_err -> Error (self res_err ~ctx ~top_down ~bottom_up));
         list =
-          Stdlib.List.map
-            (fun list -> transform list ~ctx ~top_down ~bottom_up)
-            list;
+          Stdlib.List.map (fun list -> self list ~ctx ~top_down ~bottom_up) list;
         array =
           Stdlib.Array.map
-            (fun array -> transform array ~ctx ~top_down ~bottom_up)
+            (fun array -> self array ~ctx ~top_down ~bottom_up)
             array;
         lazy_ =
           (let lazy__force = Lazy.force lazy_ in
-           lazy (transform lazy__force ~ctx ~top_down ~bottom_up));
+           lazy (self lazy__force ~ctx ~top_down ~bottom_up));
         nested =
           (let nested_force = Lazy.force nested in
            lazy
@@ -2038,7 +2069,7 @@ end = struct
                                match nested_force_inner_ok with
                                | Some nested_force_inner_ok_inner ->
                                  Some
-                                   (transform
+                                   (self
                                       nested_force_inner_ok_inner
                                       ~ctx
                                       ~top_down
@@ -2052,7 +2083,7 @@ end = struct
                             Some
                               (Stdlib.Array.map
                                  (fun nested_force_inner_err_inner ->
-                                   transform
+                                   self
                                      nested_force_inner_err_inner
                                      ~ctx
                                      ~top_down
@@ -3279,20 +3310,25 @@ end = struct
     end
 
     let rec traverse t ~ctx ~top_down ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
       | Plus (plus_elem_0, plus_elem_1) ->
         Plus
-          ( transform plus_elem_0 ~ctx ~top_down ~bottom_up,
-            transform plus_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self plus_elem_0 ~ctx ~top_down ~bottom_up,
+            self plus_elem_1 ~ctx ~top_down ~bottom_up )
       | Leq (leq_elem_0, leq_elem_1) ->
         Leq
-          ( transform leq_elem_0 ~ctx ~top_down ~bottom_up,
-            transform leq_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self leq_elem_0 ~ctx ~top_down ~bottom_up,
+            self leq_elem_1 ~ctx ~top_down ~bottom_up )
       | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
         Cond
-          ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+          ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+            self cond_elem_1 ~ctx ~top_down ~bottom_up,
+            self cond_elem_2 ~ctx ~top_down ~bottom_up )
       | t -> t
 
     and transform elem ~ctx ~top_down ~bottom_up =
@@ -3386,20 +3422,25 @@ end = struct
     end
 
     let rec traverse t ~ctx ~top_down ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
       | Plus (plus_elem_0, plus_elem_1) ->
         Plus
-          ( transform plus_elem_0 ~ctx ~top_down ~bottom_up,
-            transform plus_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self plus_elem_0 ~ctx ~top_down ~bottom_up,
+            self plus_elem_1 ~ctx ~top_down ~bottom_up )
       | Leq (leq_elem_0, leq_elem_1) ->
         Leq
-          ( transform leq_elem_0 ~ctx ~top_down ~bottom_up,
-            transform leq_elem_1 ~ctx ~top_down ~bottom_up )
+          ( self leq_elem_0 ~ctx ~top_down ~bottom_up,
+            self leq_elem_1 ~ctx ~top_down ~bottom_up )
       | Cond (cond_elem_0, cond_elem_1, cond_elem_2) ->
         Cond
-          ( transform cond_elem_0 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_1 ~ctx ~top_down ~bottom_up,
-            transform cond_elem_2 ~ctx ~top_down ~bottom_up )
+          ( self cond_elem_0 ~ctx ~top_down ~bottom_up,
+            self cond_elem_1 ~ctx ~top_down ~bottom_up,
+            self cond_elem_2 ~ctx ~top_down ~bottom_up )
       | t -> t
 
     and transform elem ~ctx ~top_down ~bottom_up =
@@ -4265,12 +4306,17 @@ module Polymorphic = struct
       end
 
       let rec traverse t ~ctx ~top_down ~bottom_up =
+        let self =
+          match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+          | (None, None) -> traverse
+          | _ -> transform
+        in
         match t with
         | Self self_elem ->
           Self
             (match self_elem with
             | Some self_elem_inner ->
-              Some (transform self_elem_inner ~ctx ~top_down ~bottom_up)
+              Some (self self_elem_inner ~ctx ~top_down ~bottom_up)
             | _ -> None)
 
       and transform elem ~ctx ~top_down ~bottom_up =
@@ -4750,9 +4796,13 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a t =
       fun (type a) (t : a t) ~ctx ~top_down ~bottom_up : a t ->
+       let self =
+         match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+         | (None, None) -> traverse
+         | _ -> transform
+       in
        match t with
-       | Other other_elem ->
-         Other (transform other_elem ~ctx ~top_down ~bottom_up)
+       | Other other_elem -> Other (self other_elem ~ctx ~top_down ~bottom_up)
 
     and transform :
           'a.
@@ -4964,9 +5014,14 @@ end = struct
     end
 
     let rec traverse t ~ctx ~top_down ~bottom_up =
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
       match t with
       | Cons (cons_elem_0, cons_elem_1) ->
-        Cons (cons_elem_0, transform cons_elem_1 ~ctx ~top_down ~bottom_up)
+        Cons (cons_elem_0, self cons_elem_1 ~ctx ~top_down ~bottom_up)
       | t -> t
 
     and transform elem ~ctx ~top_down ~bottom_up =
@@ -5153,9 +5208,12 @@ end = struct
     end
 
     let rec traverse { map } ~ctx ~top_down ~bottom_up =
-      {
-        map = SMap.map (fun map -> transform map ~ctx ~top_down ~bottom_up) map;
-      }
+      let self =
+        match (top_down.Pass.on_ty_t, bottom_up.Pass.on_ty_t) with
+        | (None, None) -> traverse
+        | _ -> transform
+      in
+      { map = SMap.map (fun map -> self map ~ctx ~top_down ~bottom_up) map }
 
     and transform elem ~ctx ~top_down ~bottom_up =
       match top_down.Pass.on_ty_t with

@@ -7,6 +7,5 @@
 
 (** Find the nearest directory containing [.hhconfig], starting at the given
     directory and searching its ancestors up to Rust's traversal limit.
-    This is a best-effort lookup: all discovery failures return [None], so callers
-    can fall back to another resolver without distinguishing failure reasons. *)
+    This is a best-effort lookup: all discovery failures return [None]. *)
 external guess_root : string -> string option = "hh_guess_repo_root"

@@ -12,9 +12,7 @@ val is_www_directory : Path.t -> bool
 (** Print a diagnostic to stderr and exit 1 if [path] is not a www directory. *)
 val assert_www_directory : Path.t -> unit
 
-(** Traverse parent directories until a directory containing [.hhconfig] is found.
-Use the Rust implementation unless [HH_USE_RUST_REPO_ROOT=0].
-Fall back to OCaml when Rust cannot find a root. *)
+(** Traverse parent directories until a directory containing [.hhconfig] is found. *)
 val guess_root : Path.t -> Path.t option
 
 (** Our command-line tools generally take a "root" parameter, and if none is

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 // Keep root discovery in sync with
-// //hphp/hack/src/utils/wwwroot.ml and
 // //hphp/hack/src/facebook/find_hh/find_hh.sh.
 
 use std::path::Path;

@@ -464,6 +464,17 @@ inline bool speculativeUnitPrefetchingEnabled() {
 }
 
 
+/*
+ * Ceiling on the worker count that ThreadTune may scale up to from a given
+ * baseline, per Server.ThreadTune.AdjustmentPct.
+ *
+ * Two callers must agree on this: ThreadController, which never recommends
+ * more than this, and HttpServer, which sizes the dispatcher's queue ceiling
+ * from it. If the latter came out lower, setMaxThreadCount() would clamp and
+ * tuning would silently top out early.
+ */
+size_t serverThreadTuneMaxThreadCount(size_t baselineThreadCount);
+
 inline StringToIntMap coeffectEnforcementLevelsDefaults() {
 #ifdef HHVM_FACEBOOK
   return {{"zoned", 2}};

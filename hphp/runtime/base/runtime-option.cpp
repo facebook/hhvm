@@ -73,6 +73,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -779,6 +780,23 @@ double RuntimeOption::ServerThreadTuneStepPct = 5;
 double RuntimeOption::ServerThreadTuneCPUThreshold = 95.0;
 double RuntimeOption::ServerThreadTuneThreadUtilizationThreshold = 90.0;
 #endif
+
+size_t serverThreadTuneMaxThreadCount(size_t baselineThreadCount) {
+#ifdef HHVM_FACEBOOK
+  const size_t adjustmentFactor =
+      baselineThreadCount * RuntimeOption::ServerThreadTuneAdjustmentPct / 100;
+
+  // Should never happen, but protect against integer overflow
+  if (baselineThreadCount >
+      std::numeric_limits<size_t>::max() - adjustmentFactor) {
+    return std::numeric_limits<size_t>::max();
+  }
+
+  return baselineThreadCount + adjustmentFactor;
+#else
+  return baselineThreadCount;
+#endif
+}
 
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
@@ -1734,14 +1752,6 @@ void RuntimeOption::Load(
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
 
-#ifdef HHVM_FACEBOOK
-  // Account for ThreadController auto-tuning headroom
-  if (ServerThreadTuneAdjustmentPct > 0) {
-    Cfg::Server::QueueCount = static_cast<int>(
-      std::ceil(Cfg::Server::ThreadCount *
-        (1.0 + ServerThreadTuneAdjustmentPct / 100.0)));
-  }
-#endif
 
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 

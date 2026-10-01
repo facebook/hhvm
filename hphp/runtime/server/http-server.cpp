@@ -157,13 +157,20 @@ HttpServer::HttpServer() {
       std::min(startingThreadCount,
                Cfg::Server::WarmupThrottleThreadCount);
   }
+  // The queue count is the ceiling setMaxThreadCount() clamps to, so it has to
+  // be the largest worker count anything can later ask for, not the count we
+  // boot with. ThreadTune and `hhvmctl set-server-thread-count` both raise
+  // threads above Server.ThreadCount at runtime; sizing the queue from the same
+  // baseline is what leaves them room to do it.
+  const int maxQueueCount =
+    static_cast<int>(serverThreadTuneMaxThreadCount(Cfg::Server::ThreadCount));
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
       (Cfg::Server::Type);
   const std::string address = Cfg::Server::FileSocket.empty()
     ? Cfg::Server::IP : Cfg::Server::FileSocket;
   ServerOptions options(address, Cfg::Server::Port,
     Cfg::Server::ThreadCount, startingThreadCount,
-    Cfg::Server::QueueCount);
+    maxQueueCount);
   options.m_useFileSocket = !Cfg::Server::FileSocket.empty();
   options.m_serverFD = Cfg::Server::PortFd;
   options.m_sslFD = Cfg::Server::SSLPortFd;
@@ -198,7 +205,7 @@ HttpServer::HttpServer() {
         (Cfg::Server::SecondaryType);
       ServerOptions secondaryServerOptions(Cfg::Server::IP, Cfg::Server::SecondaryPort,
         Cfg::Server::ThreadCount, startingThreadCount,
-        Cfg::Server::QueueCount);
+        maxQueueCount);
       secondaryServerOptions.m_useFileSocket = false;
       secondaryServerOptions.m_serverFD = Cfg::Server::PortFd;
       secondaryServerOptions.m_sslFD = Cfg::Server::SSLPortFd;

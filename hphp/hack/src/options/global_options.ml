@@ -207,7 +207,6 @@ type t = {
   needs_concrete_override_check: int;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
-  class_pointer_ban_classname_static_meth: int;
   class_pointer_ban_class_array_key: bool;
   tco_class_pointer_array_literal_keys: int;
   tco_class_pointer_array_write_keys: int;
@@ -333,7 +332,6 @@ let default =
     needs_concrete_override_check = 0;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
-    class_pointer_ban_classname_static_meth = 0;
     class_pointer_ban_class_array_key = false;
     tco_class_pointer_array_literal_keys = 0;
     tco_class_pointer_array_write_keys = 0;
@@ -456,7 +454,6 @@ let set
     ?needs_concrete_override_check
     ?strict_consistent_construct
     ?allow_class_string_cast
-    ?class_pointer_ban_classname_static_meth
     ?class_pointer_ban_class_array_key
     ?tco_class_pointer_array_literal_keys
     ?tco_class_pointer_array_write_keys
@@ -786,10 +783,6 @@ let set
       setting strict_consistent_construct options.strict_consistent_construct;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
-    class_pointer_ban_classname_static_meth =
-      setting
-        class_pointer_ban_classname_static_meth
-        options.class_pointer_ban_classname_static_meth;
     class_pointer_ban_class_array_key =
       setting
         class_pointer_ban_class_array_key

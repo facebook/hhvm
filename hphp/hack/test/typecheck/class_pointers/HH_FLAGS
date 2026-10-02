@@ -1,3 +1,2 @@
 --config 'allow_class_string_cast=false'
---config 'class_pointer_ban_classname_static_meth=2'
 --config 'class_pointer_ban_class_array_key=true'

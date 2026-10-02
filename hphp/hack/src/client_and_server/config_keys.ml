@@ -108,9 +108,6 @@ module Hhconfig = struct
   let class_pointer_ban_class_array_key =
     key "class_pointer_ban_class_array_key"
 
-  let class_pointer_ban_classname_static_meth =
-    key "class_pointer_ban_classname_static_meth"
-
   let class_sub_classname = key "class_sub_classname"
 
   let code_agnostic_fixme = key "code_agnostic_fixme"

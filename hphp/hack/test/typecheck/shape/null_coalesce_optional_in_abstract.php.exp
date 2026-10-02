@@ -1,1 +1,4 @@
-No errors
+ERROR: File "null_coalesce_optional_in_abstract.php", line 24, characters 13-18:
+It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
+  File "null_coalesce_optional_in_abstract.php", line 21, characters 13-26:
+  Definition is here

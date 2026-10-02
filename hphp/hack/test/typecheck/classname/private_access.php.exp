@@ -1,3 +1,7 @@
+ERROR: File "private_access.php", line 7, characters 5-6:
+It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
+  File "private_access.php", line 6, characters 28-41:
+  Definition is here
 ERROR: File "private_access.php", line 7, characters 9-9:
 Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
   File "private_access.php", line 4, characters 27-27:

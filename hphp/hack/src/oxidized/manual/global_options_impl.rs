@@ -156,7 +156,6 @@ impl Default for GlobalOptions {
             needs_concrete_override_check: 0,
             strict_consistent_construct: false,
             allow_class_string_cast: true,
-            class_pointer_ban_classname_static_meth: 0,
             class_pointer_ban_class_array_key: false,
             tco_class_pointer_array_literal_keys: 0,
             tco_class_pointer_array_write_keys: 0,

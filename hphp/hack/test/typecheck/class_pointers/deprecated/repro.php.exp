@@ -1,1 +1,4 @@
-No errors
+ERROR: File "repro.php", line 23, characters 3-5:
+It is no longer allowed to use a `classname<I<int>>` in this position. Please use a `class<I<int>>` instead. (Typing[4482])
+  File "repro.php", line 22, characters 15-31:
+  Definition is here

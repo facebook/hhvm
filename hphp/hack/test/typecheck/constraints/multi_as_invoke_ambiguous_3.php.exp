@@ -1,1 +1,4 @@
-No errors
+ERROR: File "multi_as_invoke_ambiguous_3.php", line 15, characters 15-16:
+It is no longer allowed to use a `classname<Tg>` in this position. Please use a `class<Tg>` instead. (Typing[4482])
+  File "multi_as_invoke_ambiguous_3.php", line 14, characters 30-42:
+  Definition is here

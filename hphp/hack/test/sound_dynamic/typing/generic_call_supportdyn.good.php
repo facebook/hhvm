@@ -25,6 +25,7 @@ trait TR
   public function whereTitle(
   ): void {
     $spec_class = static::SPEC_CLASS;
-    $spec_class::title();
+    $ptr = HH\classname_to_class($spec_class);
+    $ptr::title();
   }
 }

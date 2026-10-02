@@ -318,8 +318,6 @@ type t = {
   strict_consistent_construct: bool;
       (** When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
-  class_pointer_ban_classname_static_meth: int;
-      (** Error on $c::foo() when $c: classname<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
   tco_class_pointer_array_literal_keys: int;
@@ -450,7 +448,6 @@ val set :
   ?needs_concrete_override_check:int ->
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
-  ?class_pointer_ban_classname_static_meth:int ->
   ?class_pointer_ban_class_array_key:bool ->
   ?tco_class_pointer_array_literal_keys:int ->
   ?tco_class_pointer_array_write_keys:int ->

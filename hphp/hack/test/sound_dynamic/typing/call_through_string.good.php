@@ -13,8 +13,8 @@ interface Get {
 
 <<__SupportDynamicType>>
 class D implements Get {
-  public function get():(~classname<C> & string) {
-    return C::class;
+  public function get():(~class<C> & string) {
+    return HH\classname_to_class(C::class);
   }
 }
 

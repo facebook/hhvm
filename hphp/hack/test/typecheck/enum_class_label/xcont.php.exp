@@ -2,3 +2,11 @@ WARN: File "xcont.php", line 59, characters 12-38:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<this::TE>` which is a subtype of `nonnull`. (Warn[12011])
 WARN: File "xcont.php", line 67, characters 12-38:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<this::TE>` which is a subtype of `nonnull`. (Warn[12011])
+ERROR: File "xcont.php", line 60, characters 12-15:
+It is no longer allowed to use a `classname<this::TE>` in this position. Please use a `class<this::TE>` instead. (Typing[4482])
+  File "typestructure.hhi", line 64, characters 21-32:
+  Definition is here
+ERROR: File "xcont.php", line 68, characters 12-15:
+It is no longer allowed to use a `classname<this::TE>` in this position. Please use a `class<this::TE>` instead. (Typing[4482])
+  File "typestructure.hhi", line 64, characters 21-32:
+  Definition is here

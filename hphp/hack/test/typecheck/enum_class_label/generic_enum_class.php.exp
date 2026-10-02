@@ -1,3 +1,7 @@
+ERROR: File "generic_enum_class.php", line 24, characters 12-15:
+It is no longer allowed to use a `classname<HH\GenericEnumClass<Tclass, mixed>>` in this position. Please use a `class<HH\GenericEnumClass<Tclass, mixed>>` instead. (Typing[4482])
+  File "generic_enum_class.php", line 17, characters 13-57:
+  Definition is here
 ERROR: File "generic_enum_class.php", line 37, characters 18-21:
 Invalid argument (Typing[4110])
   File "generic_enum_class.php", line 37, characters 18-21:

@@ -292,21 +292,16 @@ function fcall_meth_caller(C $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.fcall_cls_method
-// CHECK: define $root.fcall_cls_method($this: *void, $a: *HH::classname) : *void {
+// CHECK: define $root.fcall_cls_method($this: *void, $a: *HH::class) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("HH\\classname"))
-// CHECK: // .column 1
-// CHECK:   n1: *HackMixed = load &$a
-// CHECK: // .column 1
-// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK: // .column 3
-// CHECK:   n3: *HackMixed = load &$a
+// CHECK:   n0: *HackMixed = load &$a
 // CHECK: // .column 3
-// CHECK:   n4 = n3.?.static_fcall_self()
+// CHECK:   n1 = n0.?.static_fcall_self()
 // CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
-function fcall_cls_method(classname<D> $a): void {
+function fcall_cls_method(class<D> $a): void {
   $a::static_fcall_self();
 }
 

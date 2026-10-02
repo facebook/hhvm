@@ -1,3 +1,6 @@
+Errors:
+  [12:5-7] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead.
+  [7:18-30] Definition is here
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

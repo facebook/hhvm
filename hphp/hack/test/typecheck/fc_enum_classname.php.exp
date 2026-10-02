@@ -2,3 +2,7 @@ ERROR: File "fc_enum_classname.php", line 10, characters 9-18:
 Using `Foo::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Foo` (Typing[4482])
 ERROR: File "fc_enum_classname.php", line 11, characters 9-18:
 Using `Bar::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Bar` (Typing[4482])
+ERROR: File "fc_enum_classname.php", line 16, characters 3-6:
+It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
+  File "fc_enum_classname.php", line 9, characters 9-22:
+  Definition is here

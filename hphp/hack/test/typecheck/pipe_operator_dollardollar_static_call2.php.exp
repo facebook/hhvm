@@ -1,1 +1,4 @@
-No errors
+ERROR: File "pipe_operator_dollardollar_static_call2.php", line 17, characters 36-37:
+It is no longer allowed to use a `classname<Bar>` in this position. Please use a `class<Bar>` instead. (Typing[4482])
+  File "pipe_operator_dollardollar_static_call2.php", line 11, characters 44-57:
+  Definition is here

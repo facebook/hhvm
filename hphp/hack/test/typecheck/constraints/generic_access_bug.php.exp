@@ -1,2 +1,6 @@
 ERROR: File "generic_access_bug.php", line 15, characters 52-53:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "generic_access_bug.php", line 17, characters 12-17:
+It is no longer allowed to use a `classname<TU>` in this position. Please use a `class<TU>` instead. (Typing[4482])
+  File "generic_access_bug.php", line 12, characters 30-42:
+  Definition is here

@@ -8,10 +8,12 @@ function f(): classname<C> { return C::class; }
 
 function like_classname_c(): void {
   $c = f();
-  $c::m();
+  $ptr = HH\classname_to_class($c);
+  $ptr::m();
 }
 
 function classname_c(): void {
   $c = C::class;
-  $c::m();
+  $ptr = HH\classname_to_class($c);
+  $ptr::m();
 }

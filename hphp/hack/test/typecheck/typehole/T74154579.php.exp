@@ -1,1 +1,4 @@
-No errors
+ERROR: File "T74154579.php", line 13, characters 3-5:
+It is no longer allowed to use a `classname<MyClass>` in this position. Please use a `class<MyClass>` instead. (Typing[4482])
+  File "T74154579.php", line 12, characters 26-43:
+  Definition is here

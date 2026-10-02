@@ -1,1 +1,4 @@
-No errors
+ERROR: File "abstract_typeconst_bound.php", line 12, characters 14-29:
+It is no longer allowed to use a `classname<this::TB>` in this position. Please use a `class<this::TB>` instead. (Typing[4482])
+  File "typestructure.hhi", line 64, characters 21-32:
+  Definition is here

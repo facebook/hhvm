@@ -1,9 +1,9 @@
 {
   "type_counter": {
     "class_const_receiver.php": {
-      "num_like_types": 8,
+      "num_like_types": 19,
       "num_captured_like_types": 0,
-      "num_non_like_types": 14,
+      "num_non_like_types": 13,
       "num_mixed": 0,
       "num_supportdyn_of_mixed": 0,
       "num_dynamic": 0,

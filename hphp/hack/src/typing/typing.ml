@@ -5842,14 +5842,7 @@ end = struct
      *)
     let dispatch_class_const ?transform_fty env ((_, pos, e1_) as e1) m =
       let (env, _tal, tcid, ty1) =
-        Class_id.class_expr
-          ~require_class_ptr:
-            (Class_id.classname_error
-               env
-               Typechecker_options.class_pointer_ban_classname_static_meth)
-          env
-          []
-          e1
+        Class_id.class_expr ~require_class_ptr:Class_id.Error env [] e1
       in
       let this_ty = MakeType.this (Reason.witness fpos) in
       (* In static context, you can only call parent::foo() on static methods.
@@ -11901,9 +11894,6 @@ end = struct
 end
 
 and Class_id : sig
-  val classname_error :
-    env -> (Global_options.t -> int) -> Class_id.classname_expr_error
-
   type classname_expr_error =
     | Pass
     | Warning
@@ -11999,12 +11989,6 @@ end = struct
     | Pass
     | Warning
     | Error
-
-  let classname_error env flag =
-    match flag (Env.get_tcopt env) with
-    | 2 -> Class_id.Error
-    | 1 -> Class_id.Warning
-    | _ -> Class_id.Pass
 
   let class_expr
       ?(check_targs_integrity = false)

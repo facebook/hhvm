@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<075d1a26eef78305792db4421bbfc5ab>>
+// @generated SignedSource<<a2aa39a801c4e45f4d573d615cbd7689>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -427,8 +427,6 @@ pub struct GlobalOptions {
     pub strict_consistent_construct: bool,
     /// Admits (string)$c when $c: class<T>
     pub allow_class_string_cast: bool,
-    /// Error on $c::foo() when $c: classname<T>
-    pub class_pointer_ban_classname_static_meth: isize,
     /// Error on dict[$c => 1] when $c: class<T>
     pub class_pointer_ban_class_array_key: bool,
     /// Infer classname<T> for the key of dict[$c => 1] when $c: class<T>

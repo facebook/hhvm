@@ -1,1 +1,4 @@
-No errors
+ERROR: File "tparam_class_method_ambiguous.php", line 17, characters 12-13:
+It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. (Typing[4482])
+  File "tparam_class_method_ambiguous.php", line 16, characters 28-39:
+  Definition is here

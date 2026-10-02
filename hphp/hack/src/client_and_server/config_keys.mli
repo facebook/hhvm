@@ -142,8 +142,6 @@ module Hhconfig : sig
 
   val like_casts : string
 
-  val local_coeffects : string
-
   val locl_cache_capacity : string
 
   val locl_cache_node_threshold : string

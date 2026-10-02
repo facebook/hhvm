@@ -155,8 +155,6 @@ module Hhconfig = struct
 
   let like_casts = key "like_casts"
 
-  let local_coeffects = key "local_coeffects"
-
   let locl_cache_capacity = key "locl_cache_capacity"
 
   let locl_cache_node_threshold = key "locl_cache_node_threshold"

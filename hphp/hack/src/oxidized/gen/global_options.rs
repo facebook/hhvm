@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cca139f39a7b9d8423720fcdfb0c5dad>>
+// @generated SignedSource<<b872b8807e509a450f0b48198874ae4d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -235,8 +235,6 @@ pub struct GlobalOptions {
     /// Skip checks implemented with TAST visitors.
     /// Set to true only for debugging purposes!
     pub tco_skip_tast_checks: bool,
-    /// Enables checking of coeffects for local operations (not calls)
-    pub tco_coeffects_local: bool,
     /// Internal (for tests-only): whether any type can appear in a context list
     /// or only types defined in the appropriate Context namespace
     pub tco_strict_contexts: bool,

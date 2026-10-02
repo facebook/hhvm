@@ -14,12 +14,7 @@ module Env = Typing_env
 module SN = Naming_special_names
 
 let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
-  (* gate the check behavior on coeffects TC option *)
-  let tcopt = Env.get_tcopt env in
-  let should_skip_check =
-    (not @@ Typechecker_options.local_coeffects tcopt)
-    || Tast.is_under_dynamic_assumptions env.checked
-  in
+  let should_skip_check = Tast.is_under_dynamic_assumptions env.checked in
   if not should_skip_check then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in

@@ -125,7 +125,6 @@ type t = {
   tco_silence_errors_under_dynamic: bool;
   tco_reject_promoted_property_redeclaration: bool;
   tco_skip_tast_checks: bool;
-  tco_coeffects_local: bool;
   tco_strict_contexts: bool;
   tco_like_casts: bool;
   tco_disallow_unresolved_type_variables: bool;
@@ -241,7 +240,6 @@ let default =
     tco_silence_errors_under_dynamic = false;
     tco_reject_promoted_property_redeclaration = false;
     tco_skip_tast_checks = false;
-    tco_coeffects_local = true;
     tco_strict_contexts = true;
     tco_like_casts = false;
     tco_disallow_unresolved_type_variables = false;
@@ -356,7 +354,6 @@ let set
     ?tco_silence_errors_under_dynamic
     ?tco_reject_promoted_property_redeclaration
     ?tco_skip_tast_checks
-    ?tco_coeffects_local
     ?tco_strict_contexts
     ?tco_like_casts
     ?tco_disallow_unresolved_type_variables
@@ -524,8 +521,6 @@ let set
         options.tco_reject_promoted_property_redeclaration;
     tco_skip_tast_checks =
       setting tco_skip_tast_checks options.tco_skip_tast_checks;
-    tco_coeffects_local =
-      setting tco_coeffects_local options.tco_coeffects_local;
     tco_strict_contexts =
       setting tco_strict_contexts options.tco_strict_contexts;
     tco_like_casts = setting tco_like_casts options.tco_like_casts;

@@ -138,8 +138,6 @@ type t = {
   tco_skip_tast_checks: bool;
       (** Skip checks implemented with TAST visitors.
         Set to true only for debugging purposes! *)
-  tco_coeffects_local: bool;
-      (** Enables checking of coeffects for local operations (not calls) *)
   tco_strict_contexts: bool;
       (** Internal (for tests-only): whether any type can appear in a context list
          or only types defined in the appropriate Context namespace *)
@@ -345,7 +343,6 @@ val set :
   ?tco_silence_errors_under_dynamic:bool ->
   ?tco_reject_promoted_property_redeclaration:bool ->
   ?tco_skip_tast_checks:bool ->
-  ?tco_coeffects_local:bool ->
   ?tco_strict_contexts:bool ->
   ?tco_like_casts:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->

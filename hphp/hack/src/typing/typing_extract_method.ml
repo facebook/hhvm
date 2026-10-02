@@ -1894,34 +1894,33 @@ let drop_unused_generics fun_ty ~names =
       ~init:names
       ~f:(fun names (ty1, _, ty2) -> ty_generics (ty_generics names ty1) ty2)
   in
-  (* Now add in any generics which are mentioned in constraints in those
-     generics; repeat until we have discovered all transitively used generics *)
-  let rec aux (acc, delta) =
-    let acc = S_set.union delta acc in
-    let delta =
-      List.fold_left
-        ~init:S_set.empty
-        ft_tparams
-        ~f:(fun acc { tp_name = (_, name); tp_constraints; _ } ->
-          if S_set.mem name delta then
-            let generics =
-              List.fold_left tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
-                  ty_generics acc ty)
-            in
-            (* If the generic has an upper or lower bound which mentions the
-               generic we would end up in an infinite loop *)
-            let generics = S_set.remove name generics in
-            S_set.union acc generics
-          else
-            acc)
-    in
-    let delta = S_set.diff delta acc in
-    if S_set.is_empty delta then
-      acc
-    else
-      aux (acc, delta)
+  let dependencies =
+    S_map.of_list
+      (List.map ft_tparams ~f:(fun { tp_name = (_, name); tp_constraints; _ } ->
+           let dependencies =
+             List.fold_left
+               tp_constraints
+               ~init:S_set.empty
+               ~f:(fun dependencies (_, ty) -> ty_generics dependencies ty)
+           in
+           (name, S_set.remove name dependencies)))
   in
-  let names = aux (S_set.empty, names) in
+  let rec close used pending =
+    match pending with
+    | [] -> used
+    | name :: pending when S_set.mem name used -> close used pending
+    | name :: pending ->
+      let used = S_set.add name used in
+      let pending =
+        Option.value_map
+          (S_map.find_opt name dependencies)
+          ~default:pending
+          ~f:(fun dependencies ->
+            List.rev_append (S_set.elements dependencies) pending)
+      in
+      close used pending
+  in
+  let names = close S_set.empty (S_set.elements names) in
   let ft_tparams =
     List.filter ft_tparams ~f:(fun { tp_name = (_, name); _ } ->
         S_set.mem name names)

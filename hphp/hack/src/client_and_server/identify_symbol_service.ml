@@ -432,10 +432,8 @@ let visitor =
   let in_class_ptr = ref false in
   let in_attribute = ref false in
   let in_require_package_intern = ref false in
-  let in_typedef = ref false in
   let in_newtype = ref false in
   let in_is_expression = ref false in
-  let in_as_expression = ref false in
 
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -598,12 +596,6 @@ let visitor =
             not (Typechecker_options.package_allow_classconst_violations tcopt)
           else if !in_newtype || !in_is_expression then
             false
-          else if !in_typedef then
-            true
-          else if !in_as_expression then
-            let tcopt = Tast_env.get_tcopt env in
-            not
-              (Typechecker_options.package_allow_as_expression_violations tcopt)
           else
             true
         in
@@ -639,11 +631,7 @@ let visitor =
 
     method! on_As env as_ =
       let acc = self#on_expr env as_.Aast.expr in
-      let old_in_as_expression = !in_as_expression in
-      in_as_expression := true;
-      let result = self#plus acc (self#on_hint env as_.Aast.hint) in
-      in_as_expression := old_in_as_expression;
-      result
+      self#plus acc (self#on_hint env as_.Aast.hint)
 
     method! on_Call
         env
@@ -822,12 +810,6 @@ let visitor =
             false
           else if !in_newtype || !in_is_expression then
             false
-          else if !in_typedef then
-            true
-          else if !in_as_expression then
-            let tcopt = Tast_env.get_tcopt env in
-            not
-              (Typechecker_options.package_allow_as_expression_violations tcopt)
           else
             true
         in
@@ -982,12 +964,9 @@ let visitor =
           true
         | _ -> false
       in
-      let old_in_typedef = !in_typedef in
       let old_in_newtype = !in_newtype in
-      in_typedef := true;
       in_newtype := is_newtype;
       let result = self#plus acc (super#on_typedef env typedef) in
-      in_typedef := old_in_typedef;
       in_newtype := old_in_newtype;
       result
 

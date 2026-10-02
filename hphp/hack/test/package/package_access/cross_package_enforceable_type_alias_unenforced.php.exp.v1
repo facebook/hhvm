@@ -1,1 +1,34 @@
-No errors
+error: Typing[4472] Cannot access asserted type `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_unenforced.php--pkg2/foo.php [2]
+-> `TShape` belongs to package `pkg2` by this entry in the package config [3]
+-> package `pkg1` is available because the current file belongs to it by this entry in the package config [4]
+
+cross_package_enforceable_type_alias_unenforced.php--bar.php:13:14
+11 | // Params are `mixed` so the as/?as assertions aren't redundant (Warn[12011]).
+12 | function non_enforceable_local(mixed $a, mixed $b): void {
+13 |   $y = $a as TShape;
+   |              ^^^^^^ [1]
+14 |   $z = $b ?as TShape;
+15 | }
+
+cross_package_enforceable_type_alias_unenforced.php--pkg2/foo.php:3:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 4 | type TInt = int;
+
+PACKAGES.toml:7:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | allow_deployed_packages_checking = true
+ 6 | 
+ 7 | [packages.pkg2]
+   |           ^^^^ [3]
+ 8 | include_paths=[
+ 9 |     "//cross_package_access_internal1_foo.php",
+
+1 error found

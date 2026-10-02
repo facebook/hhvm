@@ -191,7 +191,6 @@ type t = {
   tco_package_exclude_patterns: string list;
   tco_package_allow_classconst_violations: bool;
   tco_package_allow_all_tconst_violations: bool;
-  tco_package_allow_as_expression_violations: bool;
   tco_package_allow_enforceable_enum_violations: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
@@ -311,7 +310,6 @@ let default =
       [{|.*/__tests__/.*|}; {|.*/flib/intern/makehaste/.*|}];
     tco_package_allow_classconst_violations = true;
     tco_package_allow_all_tconst_violations = true;
-    tco_package_allow_as_expression_violations = true;
     tco_package_allow_enforceable_enum_violations = true;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
@@ -428,7 +426,6 @@ let set
     ?tco_package_exclude_patterns
     ?tco_package_allow_classconst_violations
     ?tco_package_allow_all_tconst_violations
-    ?tco_package_allow_as_expression_violations
     ?tco_package_allow_enforceable_enum_violations
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
@@ -721,10 +718,6 @@ let set
       setting
         tco_package_allow_all_tconst_violations
         options.tco_package_allow_all_tconst_violations;
-    tco_package_allow_as_expression_violations =
-      setting
-        tco_package_allow_as_expression_violations
-        options.tco_package_allow_as_expression_violations;
     tco_package_allow_enforceable_enum_violations =
       setting
         tco_package_allow_enforceable_enum_violations

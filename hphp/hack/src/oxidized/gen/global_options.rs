@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6b2f8292ab97a68f3d725faf5ebd121>>
+// @generated SignedSource<<dea07d763fa044e703905ebea698475f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -379,9 +379,6 @@ pub struct GlobalOptions {
     /// Option for package support to bypass package boundary violation errors on definitions of
     /// all type constants to unblock V1 of intern-prod separation.
     pub tco_package_allow_all_tconst_violations: bool,
-    /// Option for package support to bypass package boundary violation errors on types used
-    /// in as/?as expressions
-    pub tco_package_allow_as_expression_violations: bool,
     /// Scopes the class-like carve-out to genuine classes and interfaces.
     /// Default [true] preserves the carve-out's current behavior: when it is
     /// on it also suppresses errors for enums, which are enforced by their

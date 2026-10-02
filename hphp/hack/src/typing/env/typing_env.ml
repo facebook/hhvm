@@ -742,9 +742,6 @@ module M = struct
   let package_allow_all_tconst_violations env =
     Typechecker_options.package_allow_all_tconst_violations @@ get_tcopt env
 
-  let package_allow_as_expression_violations env =
-    Typechecker_options.package_allow_as_expression_violations @@ get_tcopt env
-
   let package_allow_enforceable_enum_violations env =
     Typechecker_options.package_allow_enforceable_enum_violations
     @@ get_tcopt env

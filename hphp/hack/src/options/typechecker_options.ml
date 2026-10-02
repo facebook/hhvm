@@ -270,9 +270,6 @@ let package_allow_classconst_violations t =
 let package_allow_all_tconst_violations t =
   t.Global_options.tco_package_allow_all_tconst_violations
 
-let package_allow_as_expression_violations t =
-  t.Global_options.tco_package_allow_as_expression_violations
-
 let package_allow_enforceable_enum_violations t =
   t.Global_options.tco_package_allow_enforceable_enum_violations
 

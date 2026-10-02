@@ -588,10 +588,6 @@ impl HhConfig {
                 "package_allow_all_tconst_violations",
                 default.tco_package_allow_all_tconst_violations,
             )?,
-            tco_package_allow_as_expression_violations: hhconfig.get_bool_or(
-                "package_allow_as_expression_violations",
-                default.tco_package_allow_as_expression_violations,
-            )?,
             tco_package_allow_enforceable_enum_violations: hhconfig.get_bool_or(
                 "package_allow_enforceable_enum_violations",
                 default.tco_package_allow_enforceable_enum_violations,

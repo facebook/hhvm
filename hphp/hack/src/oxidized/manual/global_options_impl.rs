@@ -153,7 +153,6 @@ impl Default for GlobalOptions {
             needs_concrete_body_check: 0,
             needs_concrete_forwarding_call_check: 0,
             needs_concrete_class_call_check: 0,
-            needs_concrete_override_check: 0,
             strict_consistent_construct: false,
             allow_class_string_cast: true,
             class_pointer_ban_class_array_key: false,

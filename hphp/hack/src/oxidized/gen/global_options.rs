@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<61b9829442cee6a17346f0899d7ede18>>
+// @generated SignedSource<<b6b2f8292ab97a68f3d725faf5ebd121>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -407,8 +407,7 @@ pub struct GlobalOptions {
     pub class_class_type: bool,
     /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
     /// This legacy option enables each fine-grained check below at warning
-    /// level. Excludes hierarchy/override checks, which are covered by
-    /// `needs_concrete_override_check`.
+    /// level. Excludes hierarchy/override checks, which are always enabled.
     pub needs_concrete: bool,
     /// Configure checks that require a method body to be marked
     /// __NeedsConcrete: 0 disables, 1 warns, and 2 errors.
@@ -419,10 +418,6 @@ pub struct GlobalOptions {
     /// Configure checks for calls to __NeedsConcrete methods through a named
     /// non-concrete class: 0 disables, 1 warns, and 2 errors.
     pub needs_concrete_class_call_check: isize,
-    /// Configure override checks for __NeedsConcrete methods: 0 disables the
-    /// check, 1 emits a warning, and 2 emits a Hack error.
-    /// https://fburl.com/hack-needs-concrete
-    pub needs_concrete_override_check: isize,
     /// When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes
     pub strict_consistent_construct: bool,
     /// Admits (string)$c when $c: class<T>

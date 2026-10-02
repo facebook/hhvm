@@ -10,7 +10,7 @@
  * munged to be conducive to codemodding-away warnings.
  *)
 type t = {
-  warning_code: Error_codes.Warning.t;
+  warning_code: int;
   pos: Pos.t;
       (* The position corresponding to the code that
          needs to change.

@@ -177,8 +177,6 @@ module Hhconfig = struct
 
   let needs_concrete_class_call_check = key "needs_concrete_class_call_check"
 
-  let needs_concrete_override_check = key "needs_concrete_override_check"
-
   let package_allow_as_expression_violations =
     key "package_allow_as_expression_violations"
 

@@ -137,11 +137,12 @@ let rewrite_syntax
   let warning_in_containing_pos containing_pos =
     (* suboptimal O(n) search but probably doesn't matter *)
     List.find warnings ~f:(fun { pos; warning_code } ->
+        (* Codes accepted by Codemod_sa_warning.parse_raw_warning_json. *)
         match warning_code with
-        | Error_codes.Warning.CallNeedsConcrete
-        | Error_codes.Warning.AbstractAccessViaStatic
-        | Error_codes.Warning.UninstantiableClassViaStatic
-        | Error_codes.Warning.NeedsConcreteOverride ->
+        | 12024
+        | 12025
+        | 12026
+        | 4526 ->
           Pos.contains containing_pos pos
         | _ -> false)
   in
@@ -164,20 +165,12 @@ let rewrite_syntax
             ~attribute:needs_concrete_attribute_node
         in
         if has_needs_concrete_attribute methodish_attribute then begin
-          let warning_code =
-            match error.warning_code with
-            | Error_codes.Warning.CallNeedsConcrete -> 12024
-            | Error_codes.Warning.AbstractAccessViaStatic -> 12025
-            | Error_codes.Warning.UninstantiableClassViaStatic -> 12026
-            | Error_codes.Warning.NeedsConcreteOverride -> 12027
-            | _ -> failwith "unexpected Safe Abstract warning"
-          in
           incr edits;
           Printf.printf
             "SAFE_ABSTRACT_ADD\t%s\t%s\t%d\n%!"
             (Relative_path.suffix path)
             (_sp error.pos)
-            warning_code;
+            error.warning_code;
           Rewriter.Replace
             {
               node with

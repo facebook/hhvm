@@ -130,7 +130,7 @@ class StreamingJsonTest(unittest.TestCase):
         for code in (12026.5, 1e100, -1e100):
             invalid_diagnostics.append({"message": [{**message, "code": code}]})
         invalid_diagnostics.append(
-            {"message": [{**message, "code": 12027}, {"descr": None}]}
+            {"message": [{**message, "code": 4526}, {"descr": None}]}
         )
         for invalid in invalid_diagnostics:
             with self.subTest(diagnostic=invalid):
@@ -213,6 +213,8 @@ class StreamingJsonTest(unittest.TestCase):
     def test_deduplicates_and_rewrites_override_target(self) -> None:
         base = self.root / "Base.php"
         child = self.root / "Child.php"
+        # Override violations are typing errors (4526).
+        code = 4526
         base.write_text(
             "<?hh\n\nclass Base {\n"
             "  public static function make(): this {\n"
@@ -221,8 +223,8 @@ class StreamingJsonTest(unittest.TestCase):
             encoding="utf-8",
         )
         child.write_text("<?hh\n", encoding="utf-8")
-        primary = self.message(child, 12027, "Override is missing an attribute")
-        target = self.message(base, 12027, "Previously defined here")
+        primary = self.message(child, code, "Override is missing an attribute")
+        target = self.message(base, code, "Previously defined here")
 
         diagnostic = {"message": [primary, target]}
         result = self.run_codemod({"errors": [diagnostic, diagnostic], "passed": True})
@@ -262,9 +264,9 @@ class StreamingJsonTest(unittest.TestCase):
 
     def test_rejects_ambiguous_override_target(self) -> None:
         primary = self.message(
-            self.root / "Child.php", 12027, "Override is missing an attribute"
+            self.root / "Child.php", 4526, "Override is missing an attribute"
         )
-        target = self.message(self.root / "Base.php", 12027, "Previously defined here")
+        target = self.message(self.root / "Base.php", 4526, "Previously defined here")
 
         result = self.run_codemod(
             {"errors": [{"message": [primary, target, target]}], "passed": True}
@@ -275,7 +277,7 @@ class StreamingJsonTest(unittest.TestCase):
 
     def test_rejects_missing_override_target(self) -> None:
         primary = self.message(
-            self.root / "Child.php", 12027, "Override is missing an attribute"
+            self.root / "Child.php", 4526, "Override is missing an attribute"
         )
 
         result = self.run_codemod({"errors": [{"message": [primary]}], "passed": True})

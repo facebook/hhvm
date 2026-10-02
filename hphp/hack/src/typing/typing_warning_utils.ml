@@ -700,45 +700,6 @@ module Uninstantiable_class_via_static = struct
     | None -> []
 end
 
-module Needs_concrete_override = struct
-  type t = Typing_warning.Needs_concrete_override.t
-
-  let code = Codes.NeedsConcreteOverride
-
-  let codes = [code]
-
-  let code _ = code
-
-  let claim
-      {
-        Typing_warning.Needs_concrete_override
-        .method_name_for_method_defined_outside_class;
-        _;
-      } =
-    let method_text =
-      match method_name_for_method_defined_outside_class with
-      | Some method_name -> Printf.sprintf "Method `%s`" method_name
-      | None -> "This method"
-    in
-    method_text
-    ^ " is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class)"
-
-  let reasons
-      {
-        Typing_warning.Needs_concrete_override.pos;
-        parent_pos;
-        method_name_for_method_defined_outside_class = _;
-      } =
-    [
-      ( pos,
-        "It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method"
-      );
-      (parent_pos, "Previously defined here");
-    ]
-
-  let quickfixes _ = []
-end
-
 module Expect_bool_for_condition = struct
   type t = Typing_warning.Expect_bool_for_condition.t
 
@@ -1096,7 +1057,6 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Abstract_access_via_static)
   | Typing_warning.Uninstantiable_class_via_static ->
     (module Uninstantiable_class_via_static)
-  | Typing_warning.Needs_concrete_override -> (module Needs_concrete_override)
   | Typing_warning.Expect_bool_for_condition ->
     (module Expect_bool_for_condition)
   | Typing_warning.Redundant_nullsafe_operation ->
@@ -1138,7 +1098,6 @@ let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
   | Typing_warning.Call_needs_concrete -> false
   | Typing_warning.Abstract_access_via_static -> false
   | Typing_warning.Uninstantiable_class_via_static -> false
-  | Typing_warning.Needs_concrete_override -> false
   | Typing_warning.Unbound_name_warning -> false
   | Typing_warning.Sealed_not_subtype -> false
   | Typing_warning.Sealed_not_override -> false

@@ -1,6 +1,7 @@
 <?hh
 
-// There should be no errors when needs_concrete=false
+// Body and call checks are off when needs_concrete=false,
+// but the override check always applies.
 
 abstract class C1 {
   public static abstract function abs(): void;

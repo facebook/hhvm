@@ -300,9 +300,6 @@ let needs_concrete_body_or_call_check_enabled t =
   || needs_concrete_forwarding_call_check t > 0
   || needs_concrete_class_call_check t > 0
 
-let needs_concrete_override_check t =
-  t.Global_options.needs_concrete_override_check
-
 let strict_consistent_construct t = t.Global_options.strict_consistent_construct
 
 let allow_class_string_cast t = t.Global_options.allow_class_string_cast

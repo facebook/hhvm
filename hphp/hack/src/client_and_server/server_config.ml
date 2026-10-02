@@ -627,12 +627,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
              if value < 0 || value > 2 then
                invalid_arg "needs_concrete_class_call_check must be 0, 1, or 2";
              value))
-    ?needs_concrete_override_check:
-      (int_opt Config_keys.Hhconfig.needs_concrete_override_check config
-      |> Option.map ~f:(fun value ->
-             if value < 0 || value > 2 then
-               invalid_arg "needs_concrete_override_check must be 0, 1, or 2";
-             value))
     ?strict_consistent_construct:
       (bool_opt Config_keys.Hhconfig.strict_consistent_construct config)
     ?allow_class_string_cast:

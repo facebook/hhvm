@@ -300,8 +300,7 @@ type t = {
   needs_concrete: bool;
       (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
        * This legacy option enables each fine-grained check below at warning
-       * level. Excludes hierarchy/override checks, which are covered by
-       * `needs_concrete_override_check`. *)
+       * level. Excludes hierarchy/override checks, which are always enabled. *)
   needs_concrete_body_check: int;
       (** Configure checks that require a method body to be marked
        * __NeedsConcrete: 0 disables, 1 warns, and 2 errors. *)
@@ -311,10 +310,6 @@ type t = {
   needs_concrete_class_call_check: int;
       (** Configure checks for calls to __NeedsConcrete methods through a named
        * non-concrete class: 0 disables, 1 warns, and 2 errors. *)
-  needs_concrete_override_check: int;
-      (** Configure override checks for __NeedsConcrete methods: 0 disables the
-       * check, 1 emits a warning, and 2 emits a Hack error.
-       * https://fburl.com/hack-needs-concrete *)
   strict_consistent_construct: bool;
       (** When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
@@ -437,7 +432,6 @@ val set :
   ?needs_concrete_body_check:int ->
   ?needs_concrete_forwarding_call_check:int ->
   ?needs_concrete_class_call_check:int ->
-  ?needs_concrete_override_check:int ->
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_class_array_key:bool ->

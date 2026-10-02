@@ -861,7 +861,7 @@ module Warning = struct
     | CallNeedsConcrete [@value 12024]
     | AbstractAccessViaStatic [@value 12025]
     | UninstantiableClassViaStatic [@value 12026]
-    | NeedsConcreteOverride [@value 12027]
+    (* | NeedsConcreteOverrideDEPRECATED [@value 12027] *)
     | ExpectBoolForCondition [@value 12028]
     | RedundantNullsafeMemberSelect [@value 12029]
     | NullsafeMemberSelectOnNull [@value 12030]

@@ -216,7 +216,7 @@ let check_class_def
     (c : Nast.class_)
     (tc : Decl_provider.class_decl) : unit =
   (* Attribute validity historically followed `needs_concrete`, independently
-   * of `needs_concrete_override_check`. Preserve that behavior for its three
+   * of the override check. Preserve that behavior for its three
    * fine-grained replacements. *)
   if
     Typechecker_options.needs_concrete_body_or_call_check_enabled env.genv.tcopt

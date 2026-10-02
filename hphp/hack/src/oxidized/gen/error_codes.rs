@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8fefc0b8c59c8088190d58cb1906808e>>
+// @generated SignedSource<<7c33a1c2aa10a04efb784574a4891236>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -644,7 +644,6 @@ pub enum Warning {
     CallNeedsConcrete = 12024,
     AbstractAccessViaStatic = 12025,
     UninstantiableClassViaStatic = 12026,
-    NeedsConcreteOverride = 12027,
     ExpectBoolForCondition = 12028,
     RedundantNullsafeMemberSelect = 12029,
     NullsafeMemberSelectOnNull = 12030,

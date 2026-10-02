@@ -8,7 +8,7 @@
 open Hh_prelude
 
 type t = {
-  warning_code: Error_codes.Warning.t;
+  warning_code: int;
   pos: Pos.t;
 }
 
@@ -21,7 +21,7 @@ type parse_result = {
 }
 
 type raw_warning = {
-  warning_code: Error_codes.Warning.t;
+  warning_code: int;
   line: int;
   start: int;
   end_: int;
@@ -68,6 +68,8 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
   in
   let* raw_error_code = field "code" extract_int first_message in
   let* descr = field "descr" extract_string first_message in
+  (* Override violations are typing errors; the rest are warnings. The
+     validated code is carried through as an integer. *)
   let codemoddable warning_code message =
     let* path = field "path" extract_string message in
     let root = Relative_path.path_of_prefix Relative_path.Root in
@@ -83,23 +85,26 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
     let* end_ = field "end" extract_int message in
     Ok (Codemoddable (path, { warning_code; line; start; end_ }))
   in
-  match Error_codes.Warning.of_enum raw_error_code with
-  | None -> Ok Unrelated
-  | Some Error_codes.Warning.CallNeedsConcrete ->
+  match
+    ( Error_codes.Warning.of_enum raw_error_code,
+      Error_codes.Typing.of_enum raw_error_code )
+  with
+  | (Some Error_codes.Warning.CallNeedsConcrete, _) ->
     if
       List.exists ["self"; "parent"; "static"] ~f:(fun receiver ->
           String.is_substring
             descr
             ~substring:(Printf.sprintf " via `%s`." receiver))
     then
-      codemoddable Error_codes.Warning.CallNeedsConcrete first_message
+      codemoddable raw_error_code first_message
     else
       Ok Uncodemoddable
-  | Some
-      (( Error_codes.Warning.AbstractAccessViaStatic
-       | Error_codes.Warning.UninstantiableClassViaStatic ) as warning_code) ->
-    codemoddable warning_code first_message
-  | Some Error_codes.Warning.NeedsConcreteOverride ->
+  | ( Some
+        ( Error_codes.Warning.AbstractAccessViaStatic
+        | Error_codes.Warning.UninstantiableClassViaStatic ),
+      _ ) ->
+    codemoddable raw_error_code first_message
+  | (_, Some Error_codes.Typing.NeedsConcreteOverride) ->
     let rec find_targets targets = function
       | [] -> Ok targets
       | message :: rest ->
@@ -115,15 +120,14 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
     let* targets = find_targets [] messages in
     begin
       match targets with
-      | [target] ->
-        codemoddable Error_codes.Warning.NeedsConcreteOverride target
+      | [target] -> codemoddable raw_error_code target
       | _ ->
         Error
           (Printf.sprintf
              "expected exactly one override target, got %d"
              (List.length targets))
     end
-  | Some _ -> Ok Unrelated
+  | _ -> Ok Unrelated
 
 let warning_of_raw
     (path : Relative_path.t)

@@ -204,7 +204,6 @@ type t = {
   needs_concrete_body_check: int;
   needs_concrete_forwarding_call_check: int;
   needs_concrete_class_call_check: int;
-  needs_concrete_override_check: int;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_class_array_key: bool;
@@ -325,7 +324,6 @@ let default =
     needs_concrete_body_check = 0;
     needs_concrete_forwarding_call_check = 0;
     needs_concrete_class_call_check = 0;
-    needs_concrete_override_check = 0;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
     class_pointer_ban_class_array_key = false;
@@ -443,7 +441,6 @@ let set
     ?needs_concrete_body_check
     ?needs_concrete_forwarding_call_check
     ?needs_concrete_class_call_check
-    ?needs_concrete_override_check
     ?strict_consistent_construct
     ?allow_class_string_cast
     ?class_pointer_ban_class_array_key
@@ -763,10 +760,6 @@ let set
       needs_concrete_fallback
         needs_concrete_class_call_check
         options.needs_concrete_class_call_check;
-    needs_concrete_override_check =
-      setting
-        needs_concrete_override_check
-        options.needs_concrete_override_check;
     strict_consistent_construct =
       setting strict_consistent_construct options.strict_consistent_construct;
     allow_class_string_cast =

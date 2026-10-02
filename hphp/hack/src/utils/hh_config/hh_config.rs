@@ -630,11 +630,6 @@ impl HhConfig {
                 "needs_concrete_class_call_check",
                 needs_concrete_level,
             )?,
-            needs_concrete_override_check: get_tristate(
-                &hhconfig,
-                "needs_concrete_override_check",
-                default.needs_concrete_override_check,
-            )?,
             strict_consistent_construct: hhconfig.get_bool_or(
                 "strict_consistent_construct",
                 default.strict_consistent_construct,

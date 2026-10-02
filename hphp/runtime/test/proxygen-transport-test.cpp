@@ -176,6 +176,30 @@ TEST_F(ProxygenTransportTest, basic) {
   sendResponse("12345");
 }
 
+TEST_F(ProxygenTransportTest, error_response_does_not_preempt_committed_response) {
+  // Response committed but only queued: the transaction is untouched, so
+  // canSendHeaders() is still true. This is the production core's state; an
+  // ingress timeout here used to abort on CHECK(!m_sendStarted).
+  m_transport->sendImpl("12345", 5, 200, false, true);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
+
+  HTTPException ex(HTTPException::Direction::INGRESS,
+      folly::to<std::string>("ingress timeout, requestId=test"));
+  ex.setProxygenError(proxygen::kErrorTimeout);
+  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
+  EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(true));
+  // No sendHeaders/sendEOM/sendAbort/onRequestError expectations on purpose:
+  // these are StrictMocks, so replacing or aborting the response fails here.
+  m_transport->onError(ex);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
+
+  // The committed response still flushes, unchanged.
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(200)));
+  EXPECT_CALL(m_txn, sendBody(_));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_worker.deliverMessages();
+}
+
 TEST_F(ProxygenTransportBasicTest, unsupported_method) {
   auto req = getRequest(HTTPMethod::UNSUB);
   EXPECT_CALL(m_server, onRequestError(_));

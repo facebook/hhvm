@@ -537,7 +537,10 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   response.setStatusMessage(HTTPMessage::getDefaultReason(code));
   response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
 
-  CHECK(!m_sendStarted);
+  // The response may already be committed but only queued; don't replace it.
+  if (m_sendStarted) {
+    return;
+  }
   m_sendStarted = true;
   m_sendEnded = true;
   m_headerSent = true;

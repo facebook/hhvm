@@ -1311,69 +1311,71 @@ end = struct
 
   (** Add a number of type constant access [paths] to the analysis [t] *)
   and add_paths t paths env =
-    match paths with
-    | [] -> t
-    | This path :: paths -> begin
-      let (this_trie, tys, t) = add_path t.this_trie [] ([], path) t env in
-      let paths = List.concat (paths :: List.map tys ~f:paths_of_ty) in
-      let t = { t with this_trie } in
-      add_paths t paths env
-    end
-    | Class (this_ty, class_name, path) :: paths
-      when String.equal class_name Naming_special_names.Classes.cSelf ->
-      let paths = Class (this_ty, t.this_name, path) :: paths in
-      add_paths t paths env
-    | Class (this_ty, class_name, path) :: paths -> begin
-      let folded_class_opt =
-        Decl_entry.to_option (Typing_env.get_class env class_name)
-      in
-      match folded_class_opt with
-      | None -> add_paths t paths env
-      | Some folded_class -> begin
-        (* Stash the current notion of this so we can restore after analysing
-           the path rooted in a different class *)
-        let { this_name; this_trie; this_folded_class; _ } = t in
-        (* Find the exist trie for this class if it exists *)
-        let class_trie =
-          Option.value ~default:Trie.empty (find_trie_for t class_name)
-        in
-        (* Add the path with the class as [this] *)
-        let (class_trie, tys, t) =
-          let t =
-            {
-              t with
-              this_trie = class_trie;
-              this_name = class_name;
-              this_folded_class = folded_class;
-            }
-          in
-          add_path class_trie [] ([], path) t env
-        in
-        (* Add the paths ensuring that we replace occurrences of this with class type *)
-        let paths =
-          let new_paths =
-            List.map tys ~f:(fun ty ->
-                paths_of_ty (replace_this_with ty ~replacement:this_ty))
-          in
-          List.concat (paths :: new_paths)
-        in
-        (* Move the trie for the current class in to the map *)
-        let tries =
-          S_map.update
+    let pending = Queue.create () in
+    Queue.enqueue_all pending paths;
+    let rec aux t =
+      match Queue.dequeue pending with
+      | None -> t
+      | Some (This path) ->
+        let (this_trie, tys, t) = add_path t.this_trie [] ([], path) t env in
+        List.iter tys ~f:(fun ty -> Queue.enqueue_all pending (paths_of_ty ty));
+        let t = { t with this_trie } in
+        aux t
+      | Some (Class (this_ty, class_name, path)) ->
+        let class_name =
+          if String.equal class_name Naming_special_names.Classes.cSelf then
+            t.this_name
+          else
             class_name
-            (function
-              | None -> Some (this_ty, class_trie)
-              | Some (this_ty, existing_trie) ->
-                Option.map
-                  ~f:(fun trie -> (this_ty, trie))
-                  (Trie.merge existing_trie class_trie))
-            t.tries
         in
-        (* Restore the previous notion of [this] *)
-        let t = { this_name; this_trie; this_folded_class; tries } in
-        add_paths t paths env
-      end
-    end
+        let folded_class_opt =
+          Decl_entry.to_option (Typing_env.get_class env class_name)
+        in
+        (match folded_class_opt with
+        | None -> aux t
+        | Some folded_class -> begin
+          (* Stash the current notion of this so we can restore after analysing
+             the path rooted in a different class *)
+          let { this_name; this_trie; this_folded_class; _ } = t in
+          (* Find the exist trie for this class if it exists *)
+          let class_trie =
+            Option.value ~default:Trie.empty (find_trie_for t class_name)
+          in
+          (* Add the path with the class as [this] *)
+          let (class_trie, tys, t) =
+            let t =
+              {
+                t with
+                this_trie = class_trie;
+                this_name = class_name;
+                this_folded_class = folded_class;
+              }
+            in
+            add_path class_trie [] ([], path) t env
+          in
+          (* Add the paths ensuring that we replace occurrences of this with class type *)
+          List.iter tys ~f:(fun ty ->
+              Queue.enqueue_all
+                pending
+                (paths_of_ty (replace_this_with ty ~replacement:this_ty)));
+          (* Move the trie for the current class in to the map *)
+          let tries =
+            S_map.update
+              class_name
+              (function
+                | None -> Some (this_ty, class_trie)
+                | Some (this_ty, existing_trie) ->
+                  Option.map
+                    ~f:(fun trie -> (this_ty, trie))
+                    (Trie.merge existing_trie class_trie))
+              t.tries
+          in
+          (* Restore the previous notion of [this] *)
+          let t = { this_name; this_trie; this_folded_class; tries } in
+          aux t
+        end)
+    in
+    aux t
 
   (* -- API ----------------------------------------------------------------- *)
 

@@ -282,8 +282,6 @@ let enable_class_pointer_hint t =
 
 let class_class_type t = t.Global_options.class_class_type
 
-let needs_concrete t = t.Global_options.needs_concrete
-
 let needs_concrete_body_check t = t.Global_options.needs_concrete_body_check
 
 let needs_concrete_forwarding_call_check t =

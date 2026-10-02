@@ -6,8 +6,8 @@
  *
  *)
 
-(** Data we get from running `hh --json --config needs_concrete=true`,
- * munged to be conducive to codemodding-away warnings.
+(** Data we get from running `hh --json` with the needs_concrete_*_check
+ * options enabled, munged to be conducive to codemodding-away warnings.
  *)
 type t = {
   warning_code: int;

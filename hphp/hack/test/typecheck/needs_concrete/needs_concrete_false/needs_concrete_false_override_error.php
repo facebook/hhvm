@@ -1,7 +1,7 @@
 <?hh
 
-// Body and call checks are off when needs_concrete=false,
-// but the override check always applies.
+// Body and call checks are off when the needs_concrete_*_check
+// options are 0, but the override check always applies.
 
 abstract class C1 {
   public static abstract function abs(): void;

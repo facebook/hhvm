@@ -199,7 +199,6 @@ type t = {
   tco_enabled_unstable_features: S_set.t;
   class_sub_classname: bool;
   class_class_type: bool;
-  needs_concrete: bool;
   needs_concrete_body_check: int;
   needs_concrete_forwarding_call_check: int;
   needs_concrete_class_call_check: int;
@@ -318,7 +317,6 @@ let default =
     tco_enabled_unstable_features = S_set.empty;
     class_sub_classname = true;
     class_class_type = true;
-    needs_concrete = false;
     needs_concrete_body_check = 0;
     needs_concrete_forwarding_call_check = 0;
     needs_concrete_class_call_check = 0;
@@ -434,7 +432,6 @@ let set
     ?tco_enabled_unstable_features
     ?class_sub_classname
     ?class_class_type
-    ?needs_concrete
     ?needs_concrete_body_check
     ?needs_concrete_forwarding_call_check
     ?needs_concrete_class_call_check
@@ -456,15 +453,6 @@ let set
     match setting with
     | None -> option
     | Some _ -> setting
-  in
-  let needs_concrete_fallback fine_grained_value current_value =
-    match fine_grained_value with
-    | Some value -> value
-    | None ->
-      (match needs_concrete with
-      | Some true -> 1
-      | Some false -> 0
-      | None -> current_value)
   in
   {
     po = setting po options.po;
@@ -740,17 +728,14 @@ let set
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
-    needs_concrete = setting needs_concrete options.needs_concrete;
     needs_concrete_body_check =
-      needs_concrete_fallback
-        needs_concrete_body_check
-        options.needs_concrete_body_check;
+      setting needs_concrete_body_check options.needs_concrete_body_check;
     needs_concrete_forwarding_call_check =
-      needs_concrete_fallback
+      setting
         needs_concrete_forwarding_call_check
         options.needs_concrete_forwarding_call_check;
     needs_concrete_class_call_check =
-      needs_concrete_fallback
+      setting
         needs_concrete_class_call_check
         options.needs_concrete_class_call_check;
     strict_consistent_construct =

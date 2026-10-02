@@ -603,7 +603,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
     ?class_sub_classname:
       (bool_opt Config_keys.Hhconfig.class_sub_classname config)
     ?class_class_type:(bool_opt Config_keys.Hhconfig.class_class_type config)
-    ?needs_concrete:(bool_opt Config_keys.Hhconfig.needs_concrete config)
     ?needs_concrete_body_check:
       (int_opt Config_keys.Hhconfig.needs_concrete_body_check config
       |> Option.map ~f:(fun value ->

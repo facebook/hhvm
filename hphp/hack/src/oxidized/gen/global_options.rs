@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dea07d763fa044e703905ebea698475f>>
+// @generated SignedSource<<24093a01f017b1b8a90ffe2b0c57daac>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -402,10 +402,6 @@ pub struct GlobalOptions {
     pub class_sub_classname: bool,
     /// When true, C::class : class<C>
     pub class_class_type: bool,
-    /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
-    /// This legacy option enables each fine-grained check below at warning
-    /// level. Excludes hierarchy/override checks, which are always enabled.
-    pub needs_concrete: bool,
     /// Configure checks that require a method body to be marked
     /// __NeedsConcrete: 0 disables, 1 warns, and 2 errors.
     pub needs_concrete_body_check: isize,

@@ -205,7 +205,7 @@ let run_hh_check
       10;
   let hh_cmd =
     Printf.sprintf
-      "%s --cmd worker=%s check --root %s --json --show-warnings --config needs_concrete=true --config warnings_generated_files= > %s"
+      "%s --cmd worker=%s check --root %s --json --show-warnings --config needs_concrete_body_check=1 --config needs_concrete_forwarding_call_check=1 --config needs_concrete_class_call_check=1 --config warnings_generated_files= > %s"
       (Filename.quote args.hh_distc)
       (Filename.quote args.worker)
       (Filename.quote root)

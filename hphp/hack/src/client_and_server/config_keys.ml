@@ -168,8 +168,6 @@ module Hhconfig = struct
   let meth_caller_only_public_visibility =
     key "meth_caller_only_public_visibility"
 
-  let needs_concrete = key "needs_concrete"
-
   let needs_concrete_body_check = key "needs_concrete_body_check"
 
   let needs_concrete_forwarding_call_check =

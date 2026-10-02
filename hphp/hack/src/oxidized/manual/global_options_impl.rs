@@ -148,7 +148,6 @@ impl Default for GlobalOptions {
             tco_enabled_unstable_features: Default::default(),
             class_sub_classname: true,
             class_class_type: true,
-            needs_concrete: false,
             needs_concrete_body_check: 0,
             needs_concrete_forwarding_call_check: 0,
             needs_concrete_class_call_check: 0,

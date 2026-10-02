@@ -1632,6 +1632,16 @@ end = struct
       | Trefinement (inner_decl_ty, _) -> root_class_name_opt inner_decl_ty
       | _ -> None
 
+    let add_refinements children ~pred ~path ~subst ~init =
+      S_map.fold
+        (fun const_name _ rfmts ->
+          if pred const_name then
+            add_refinement rfmts const_name ~path ~subst
+          else
+            rfmts)
+        children
+        init
+
     let rec refine_ty env decl_ty subst path children =
       if S_map.is_empty children then
         decl_ty
@@ -1639,23 +1649,14 @@ end = struct
         let open Typing_defs_core in
         match deref decl_ty with
         | (reason, Tapply ((_, class_name), _)) ->
-          let abstr_consts = S_map.keys children in
           let pred = should_refine env class_name in
           let cr_consts =
-            List.fold_left
-              abstr_consts
-              ~init:S_map.empty
-              ~f:(fun rfmts const_name ->
-                if pred const_name then
-                  add_refinement rfmts const_name ~path ~subst
-                else
-                  rfmts)
+            add_refinements children ~pred ~path ~subst ~init:S_map.empty
           in
           let class_refinements = Typing_defs_core.{ cr_consts } in
           let ty_ = Typing_defs_core.Trefinement (decl_ty, class_refinements) in
           mk (reason, ty_)
         | (reason, Trefinement (inner_decl_ty, { cr_consts })) ->
-          let abstr_consts = S_map.keys children in
           let pred =
             Option.value_map
               (root_class_name_opt inner_decl_ty)
@@ -1663,14 +1664,7 @@ end = struct
               ~f:(should_refine env)
           in
           let cr_consts =
-            List.fold_left
-              abstr_consts
-              ~init:cr_consts
-              ~f:(fun rfmts const_name ->
-                if pred const_name then
-                  add_refinement rfmts const_name ~path ~subst
-                else
-                  rfmts)
+            add_refinements children ~pred ~path ~subst ~init:cr_consts
           in
           let class_refinements = Typing_defs_core.{ cr_consts } in
           mk

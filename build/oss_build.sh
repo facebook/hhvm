@@ -130,7 +130,6 @@ MAGIC_ENUM_DOWNLOAD_URL="https://github.com/Neargye/magic_enum/releases/download
 MAGIC_ENUM_DOWNLOAD_ARCHIVE="magic_enum-${MAGIC_ENUM_VERSION}.tar.gz"
 MAGIC_ENUM_DOWNLOAD_SHA256="c047bc7ca0b76752168140e7ae9a4a30d72bf6530c196fdfbf5105a39d40cc46"
 RELEASE_TRAIN_DEPENDENCIES=(
-  "fatal|facebook/fatal|30d1593816e8a336ee6de0798674fc29d110b960|d8392728ca7c19072b212b11419dee060b14a0daf483b03f40290dfba9287684"
   "folly|facebook/folly|ff98381ea68687a95c6185326db933aa6124d4c5|b614255dd844dba1a694fff7b80b4ca1f28fa69cf7d1dff30ebdb1ea2c7a4c33"
   "fizz|facebookincubator/fizz|545cd6d4546fb1ace279a6253a32f3806fb9436f|630e468d03101be8e24c108db434192bac1a7b3ca8dad5e3681404b322444917"
   "wangle|facebook/wangle|63199ba851bdba623ba5a503f5b23391e23a53cb|efcb920aca68e731f2fa470d1fed66ddd33c73bca53bfb5c3c996fe9af804872"
@@ -866,7 +865,7 @@ prepare_getdeps_manifest_override() {
   local override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/$name"
 
   if [ ! -f "$base_manifest" ]; then
-    echo "ERROR: getdeps manifest not found: $base_manifest"
+    echo "ERROR: getdeps manifest not found: $base_manifest" >&2
     exit 1
   fi
 
@@ -963,7 +962,7 @@ prepare_getdeps_download_manifest_override() {
   local override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/$name"
 
   if [ ! -f "$base_manifest" ]; then
-    echo "ERROR: getdeps manifest not found: $base_manifest"
+    echo "ERROR: getdeps manifest not found: $base_manifest" >&2
     exit 1
   fi
 
@@ -1273,21 +1272,6 @@ find_public_fbcode_builder_cmake() {
   return 1
 }
 
-find_fatal_install_prefix() {
-  local prefix
-
-  prefix="$(find_getdeps_prefix fatal || true)"
-  [ -n "$prefix" ] || return 1
-
-  if [ -f "$prefix/fatal/portability.h" ] || \
-     [ -f "$prefix/include/fatal/portability.h" ]; then
-    printf '%s\n' "$prefix"
-    return 0
-  fi
-
-  return 1
-}
-
 require_install_prefix() {
   local name="$1" prefix="$2"
 
@@ -1494,7 +1478,6 @@ prepare_getdeps_gnu_mirror_overrides
 prepare_getdeps_runner_root
 MCROUTER_INSTALL="$(find_mcrouter_install_prefix || true)"
 BOOST_INSTALL="$(find_boost_install_prefix || true)"
-FATAL_INSTALL="$(find_fatal_install_prefix || true)"
 BLAKE3_INSTALL="$(find_getdeps_prefix blake3 || true)"
 FBTHRIFT_INSTALL="$(find_getdeps_prefix fbthrift || true)"
 FOLLY_INSTALL="$(find_getdeps_prefix folly || true)"
@@ -1507,7 +1490,7 @@ GETDEPS_CMAKE_DEFINES="$(printf \
   "$LIBURING_PREFIX")"
 if [ -n "$FBTHRIFT_INSTALL" ] && [ -n "$FOLLY_INSTALL" ] && [ -n "$PROXYGEN_INSTALL" ] && \
    [ -n "$MCROUTER_INSTALL" ] && [ -n "$BOOST_INSTALL" ] && \
-   [ -n "$FATAL_INSTALL" ] && [ -n "$BLAKE3_INSTALL" ] && \
+   [ -n "$BLAKE3_INSTALL" ] && \
    [ "$FORCE_REBUILD" = false ]; then
   echo ">>> Phase 3: Meta deps already built. Skipping. (use --rebuild to force)"
 else
@@ -1515,7 +1498,7 @@ else
   echo "    Using $CMAKE_COMPILER_DESCRIPTION"
 
   # Keep the main Meta C++ stack on one coherent public weekly release train.
-  for dep in boost blake3 fatal folly fizz wangle mvfst fbthrift proxygen ragel mcrouter; do
+  for dep in boost blake3 folly fizz wangle mvfst fbthrift proxygen ragel mcrouter; do
     label="$dep"
     extra_args=()
     dep_cmake_defines="$GETDEPS_CMAKE_DEFINES"
@@ -1575,10 +1558,8 @@ PY
     fi
   done
 
-  FATAL_INSTALL="$(find_fatal_install_prefix || true)"
   BLAKE3_INSTALL="$(find_getdeps_prefix blake3 || true)"
   MCROUTER_INSTALL="$(find_mcrouter_install_prefix || true)"
-  require_install_prefix fatal "$FATAL_INSTALL"
   require_install_prefix blake3 "$BLAKE3_INSTALL"
   require_install_prefix mcrouter "$MCROUTER_INSTALL"
 

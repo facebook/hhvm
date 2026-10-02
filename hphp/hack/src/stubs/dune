@@ -67,32 +67,55 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
- ; this stub file is used by both buck2 and dune
+(library
+ (name state_loader_stubs)
+ (wrapped false)
+ (modules saved_state_loader state_loader_futures state_loader_lwt)
+ (libraries
+  hg
+  server_env
+  typechecker_options)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
 (rule
- (target remote_old_decls_ffi.ml)
+ (target remote_old_decls_ffi.fb.ml)
  (action
-  (copy# ../facebook/remote_old_decls/stubs/remote_old_decls_ffi.ml remote_old_decls_ffi.ml)))
+  (copy# ../facebook/remote_old_decls/stubs/remote_old_decls_ffi.ml
+        remote_old_decls_ffi.fb.ml)))
 
 (library
   (name remote_old_decls_ffi)
   (wrapped false)
   (modules
     remote_old_decls_ffi)
-  (libraries logging)
+  (libraries
+    logging
+    (select
+      remote_old_decls_ffi.ml
+      from
+      (facebook -> remote_old_decls_ffi.fb.ml)
+      (-> remote_old_decls_ffi.stubs.ml)))
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 
-; this stub file is used by both buck2 and dune
 (rule
- (target hh_distc_ffi.ml)
+ (target hh_distc_ffi.fb.ml)
  (action
-  (copy# ../facebook/hh_distc/check_ffi/stubs/hh_distc_ffi.ml hh_distc_ffi.ml)))
+  (copy# ../facebook/hh_distc/check_ffi/stubs/hh_distc_ffi.ml
+        hh_distc_ffi.fb.ml)))
 
 (library
   (name hh_distc_ffi)
   (wrapped false)
   (modules
     hh_distc_ffi)
+  (libraries
+    (select
+      hh_distc_ffi.ml
+      from
+      (facebook -> hh_distc_ffi.fb.ml)
+      (-> hh_distc_ffi.stubs.ml)))
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 
@@ -166,6 +189,21 @@
  (modules folly)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name redeclarations)
+ (wrapped false)
+ (modules declarations_rewriter))
+
+(library
+ (name linttool)
+ (wrapped false)
+ (modules linttool))
+
+ (library
+ (name sandcastle_stubs)
+ (wrapped false)
+ (modules sandcastle))
 
 (library
  (name startup_initializer_stubs)

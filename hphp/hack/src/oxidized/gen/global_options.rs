@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f4c7da501e4d78ad607c93a70ba3d792>>
+// @generated SignedSource<<61b9829442cee6a17346f0899d7ede18>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -429,12 +429,8 @@ pub struct GlobalOptions {
     pub allow_class_string_cast: bool,
     /// Error on dict[$c => 1] when $c: class<T>
     pub class_pointer_ban_class_array_key: bool,
-    /// widen class<T> lower bounds for string-ish type variables
-    pub tco_class_pointer_tyvar_lower_bound: isize,
     /// source-type shapes widened for new class<T> lower bounds
     pub tco_class_pointer_tyvar_lower_bound_source_level: isize,
-    /// added string-ish constraints promout existing class<T> bounds
-    pub tco_class_pointer_tyvar_upper_bound: isize,
     /// source-type shapes widened for existing class<T> lower bounds
     pub tco_class_pointer_tyvar_upper_bound_source_level: isize,
     pub tco_disallow_specialized_function_refs: bool,

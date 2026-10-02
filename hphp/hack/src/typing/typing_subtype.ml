@@ -11810,55 +11810,46 @@ end = struct
     in
     (env, prop)
 
-  let rec is_stringish_upper_bound ~level env ty =
+  let rec is_stringish_upper_bound env ty =
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
-    | Tclass ((_, name), _, [])
-      when level >= 1 && String.equal name SN.Classes.cString ->
+    | Tclass ((_, name), _, []) when String.equal name SN.Classes.cString ->
       (env, true)
-    | Tprim Nast.Tarraykey when level >= 2 -> (env, true)
+    | Tprim Nast.Tarraykey -> (env, true)
     | Tclass ((_, name), _, [])
-      when level >= 3
-           && (String.equal name SN.Classes.cStringish
-              || String.equal name SN.Classes.cXHPChild) ->
+      when String.equal name SN.Classes.cStringish
+           || String.equal name SN.Classes.cXHPChild ->
       (env, true)
-    | Toption ty when level >= 4 -> is_stringish_upper_bound ~level env ty
-    | Tunion tyl when level >= 5 ->
+    | Toption ty -> is_stringish_upper_bound env ty
+    | Tunion tyl ->
       List.fold tyl ~init:(env, false) ~f:(fun (env, found) ty ->
           if found then
             (env, true)
           else
-            is_stringish_upper_bound ~level env ty)
+            is_stringish_upper_bound env ty)
     | _ -> (env, false)
 
   let maybe_widen_class_pointer_bound env var ty_sub =
-    let level =
-      Typechecker_options.tco_class_pointer_tyvar_lower_bound
-        (Env.get_tcopt env)
+    let (env, widen) =
+      ITySet.fold
+        (fun upper_bound (env, found) ->
+          if found then
+            (env, true)
+          else
+            match upper_bound with
+            | LoclType ty -> is_stringish_upper_bound env ty
+            | ConstraintType _ -> (env, false))
+        (Env.get_tyvar_upper_bounds env var)
+        (env, false)
     in
-    if level < 1 then
-      (env, ty_sub)
-    else
-      let (env, widen) =
-        ITySet.fold
-          (fun upper_bound (env, found) ->
-            if found then
-              (env, true)
-            else
-              match upper_bound with
-              | LoclType ty -> is_stringish_upper_bound ~level env ty
-              | ConstraintType _ -> (env, false))
-          (Env.get_tyvar_upper_bounds env var)
-          (env, false)
+    if widen then
+      let level =
+        Typechecker_options.tco_class_pointer_tyvar_lower_bound_source_level
+          (Env.get_tcopt env)
       in
-      if widen then
-        let level =
-          Typechecker_options.tco_class_pointer_tyvar_lower_bound_source_level
-            (Env.get_tcopt env)
-        in
-        Typing_class_pointers.coerce_to_name ~level env ty_sub
-      else
-        (env, ty_sub)
+      Typing_class_pointers.coerce_to_name ~level env ty_sub
+    else
+      (env, ty_sub)
 
   let rec maybe_widen_lower_bounds_for_stringish
       ~is_dynamic_aware
@@ -11866,41 +11857,34 @@ end = struct
       (r_sup, var)
       ty_super
       (on_error : Typing_error.Reasons_callback.t option) =
-    let level =
-      Typechecker_options.tco_class_pointer_tyvar_upper_bound
-        (Env.get_tcopt env)
-    in
-    if level < 1 then
+    let (env, widen) = is_stringish_upper_bound env ty_super in
+    if not widen then
       (env, prop)
     else
-      let (env, widen) = is_stringish_upper_bound ~level env ty_super in
-      if not widen then
-        (env, prop)
-      else
-        ITySet.fold
-          (fun lower_bound (env, prop) ->
-            match lower_bound with
-            | LoclType ty ->
-              let level =
-                Typechecker_options
-                .tco_class_pointer_tyvar_upper_bound_source_level
-                  (Env.get_tcopt env)
-              in
-              let (env, widened_ty) =
-                Typing_class_pointers.coerce_to_name ~level env ty
-              in
-              if Typing_defs.equal_locl_ty ty widened_ty then
+      ITySet.fold
+        (fun lower_bound (env, prop) ->
+          match lower_bound with
+          | LoclType ty ->
+            let level =
+              Typechecker_options
+              .tco_class_pointer_tyvar_upper_bound_source_level
+                (Env.get_tcopt env)
+            in
+            let (env, widened_ty) =
+              Typing_class_pointers.coerce_to_name ~level env ty
+            in
+            if Typing_defs.equal_locl_ty ty widened_ty then
+              (env, prop)
+            else
+              add_tyvar_lower_bound_and_close
+                ~is_dynamic_aware
                 (env, prop)
-              else
-                add_tyvar_lower_bound_and_close
-                  ~is_dynamic_aware
-                  (env, prop)
-                  (r_sup, var)
-                  widened_ty
-                  on_error
-            | ConstraintType _ -> (env, prop))
-          (Env.get_tyvar_lower_bounds env var)
-          (env, prop)
+                (r_sup, var)
+                widened_ty
+                on_error
+          | ConstraintType _ -> (env, prop))
+        (Env.get_tyvar_lower_bounds env var)
+        (env, prop)
 
   (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
      * so if we already have tyl <: var, then check that for each ty_sub

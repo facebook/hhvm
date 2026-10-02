@@ -16,5 +16,5 @@ It is no longer allowed to use a `classname<C>` in this position. Please use a `
   Definition is here
 ERROR: File "level_5.php", line 45, characters 3-16:
 It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 31, characters 31-38:
+  File "level_5.php", line 25, characters 35-42:
   Definition is here

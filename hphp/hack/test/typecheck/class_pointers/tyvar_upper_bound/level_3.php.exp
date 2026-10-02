@@ -10,3 +10,7 @@ ERROR: File "level_3.php", line 37, characters 3-12:
 It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
   File "level_3.php", line 17, characters 39-46:
   Definition is here
+ERROR: File "level_3.php", line 39, characters 3-18:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "level_3.php", line 21, characters 45-52:
+  Definition is here

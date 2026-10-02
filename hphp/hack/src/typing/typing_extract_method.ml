@@ -686,17 +686,16 @@ end = struct
       | (Undefined, s)
       | (s, Undefined) ->
         Some s
-      | (Defined t1, Defined t2) ->
-        Option.map ~f:(fun t -> Defined t) (merge t1 t2)
+      | (Defined t1, Defined t2) -> Some (Defined (merge t1 t2))
 
-    and merge t1 t2 : t option =
+    and merge t1 t2 =
       let children =
         S_map.union
           ~combine:(fun _key s1 s2 -> merge_help s1 s2)
           t1.children
           t2.children
       in
-      Some { t1 with children }
+      { t1 with children }
 
     let rec transform { base; children } ~f =
       let base = transform_base base ~f
@@ -1376,9 +1375,7 @@ end = struct
                 (function
                   | None -> Some (this_ty, class_trie)
                   | Some (this_ty, existing_trie) ->
-                    Option.map
-                      ~f:(fun trie -> (this_ty, trie))
-                      (Trie.merge existing_trie class_trie))
+                    Some (this_ty, Trie.merge existing_trie class_trie))
                 class_state.analysis.tries
             in
             { class_state.analysis with tries }

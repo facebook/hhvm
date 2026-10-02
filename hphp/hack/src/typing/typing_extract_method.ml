@@ -1633,12 +1633,13 @@ end = struct
       | _ -> None
 
     let rec refine_ty env decl_ty subst path children =
-      let open Typing_defs_core in
-      match deref decl_ty with
-      | (reason, Tapply ((_, class_name), _)) -> begin
-        match S_map.keys children with
-        | [] -> decl_ty
-        | abstr_consts ->
+      if S_map.is_empty children then
+        decl_ty
+      else
+        let open Typing_defs_core in
+        match deref decl_ty with
+        | (reason, Tapply ((_, class_name), _)) ->
+          let abstr_consts = S_map.keys children in
           let pred = should_refine env class_name in
           let cr_consts =
             List.fold_left
@@ -1653,12 +1654,8 @@ end = struct
           let class_refinements = Typing_defs_core.{ cr_consts } in
           let ty_ = Typing_defs_core.Trefinement (decl_ty, class_refinements) in
           mk (reason, ty_)
-      end
-      | (reason, Typing_defs_core.Trefinement (inner_decl_ty, { cr_consts })) ->
-      begin
-        match S_map.keys children with
-        | [] -> decl_ty
-        | abstr_consts ->
+        | (reason, Trefinement (inner_decl_ty, { cr_consts })) ->
+          let abstr_consts = S_map.keys children in
           let pred =
             Option.value_map
               (root_class_name_opt inner_decl_ty)
@@ -1679,18 +1676,17 @@ end = struct
           mk
             ( reason,
               Typing_defs_core.Trefinement (inner_decl_ty, class_refinements) )
-      end
-      | (reason, Tunion tys) ->
-        let tys =
-          List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
-        in
-        mk (reason, Tunion tys)
-      | (reason, Tintersection tys) ->
-        let tys =
-          List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
-        in
-        mk (reason, Tintersection tys)
-      | _ -> decl_ty
+        | (reason, Tunion tys) ->
+          let tys =
+            List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
+          in
+          mk (reason, Tunion tys)
+        | (reason, Tintersection tys) ->
+          let tys =
+            List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
+          in
+          mk (reason, Tintersection tys)
+        | _ -> decl_ty
 
     let update acc ~key ~typeconst ~pos ~children ~path =
       match typeconst with

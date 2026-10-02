@@ -14,52 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-controller.h"
+#pragma once
 
-#include <map>
-#include <utility>
+#include <cstdint>
+#include <optional>
 #include <vector>
 
-#include <folly/Synchronized.h>
+#include <folly/Range.h>
 
-#include "hphp/runtime/vm/jit/cont-prof-capture.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
+#include "hphp/runtime/vm/jit/cprof-record.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
-namespace {
+std::optional<std::vector<uint8_t>>
+serializeContProfFuncKey(const ContProfFuncKey&);
 
-using RecordMap = std::map<ContProfFuncKey, ContProfProfileRecord>;
-folly::Synchronized<RecordMap> s_records;
+std::optional<ContProfFuncKey> deserializeContProfFuncKey(folly::ByteRange);
 
-}
+std::optional<std::vector<uint8_t>>
+serializeContProfProfileRecord(const ContProfProfileRecord&);
 
-bool captureContProfProfile(const ProfData& profData, const Func& func) {
-  auto record = snapshotContProfProfileRecord(profData, func);
-  if (!record) return false;
-
-  auto records = s_records.wlock();
-  return records->try_emplace(
-    record->header.funcKey,
-    std::move(*record)
-  ).second;
-}
-
-size_t numContProfProfileRecords() {
-  auto records = s_records.rlock();
-  return records->size();
-}
-
-std::vector<ContProfProfileRecord> snapshotContProfProfileRecords() {
-  auto records = s_records.rlock();
-
-  std::vector<ContProfProfileRecord> result;
-  result.reserve(records->size());
-
-  for (auto const& [_, record] : *records) {
-    result.push_back(record);
-  }
-
-  return result;
-}
+std::optional<ContProfProfileRecord>
+deserializeContProfProfileRecord(folly::ByteRange);
 
 }

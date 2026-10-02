@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 
 #include <atomic>
 #include <chrono>
@@ -38,14 +38,14 @@
 #include <folly/system/ThreadName.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/vm/jit/cont-prof-controller.h"
-#include "hphp/runtime/vm/jit/cont-prof-serde.h"
+#include "hphp/runtime/vm/jit/cprof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 namespace {
 

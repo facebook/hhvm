@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-key.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 
 #include <memory>
 #include <string>
@@ -33,7 +33,7 @@
 #include "hphp/util/configs/server.h"
 #include "hphp/util/sha1.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 namespace {
 
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-key-test.php";

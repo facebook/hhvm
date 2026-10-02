@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-reader.h"
+#include "hphp/runtime/vm/jit/cprof-reader.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -28,10 +28,10 @@
 #include <vector>
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 namespace {
 

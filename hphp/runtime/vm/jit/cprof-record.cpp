@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
+#include "hphp/runtime/vm/jit/cprof-record.h"
 
 #include <cstddef>
 #include <limits>
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 uint64_t ContProfProfileRecord::functionExecutions() const {
   uint64_t result{};

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-capture.h"
+#include "hphp/runtime/vm/jit/cprof-capture.h"
 
 #include <algorithm>
 #include <chrono>
@@ -28,7 +28,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 TRACE_SET_MOD(cprof)
 

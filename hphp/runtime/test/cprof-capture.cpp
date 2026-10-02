@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-capture.h"
+#include "hphp/runtime/vm/jit/cprof-capture.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/cont-prof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -35,7 +35,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/sha1.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 namespace {
 
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-capture-test.php";

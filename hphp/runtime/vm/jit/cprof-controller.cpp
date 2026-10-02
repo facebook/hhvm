@@ -14,47 +14,52 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 
-#include <cstddef>
-#include <optional>
-#include <string>
+#include <map>
+#include <utility>
 #include <vector>
 
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
-#include "hphp/runtime/vm/srckey.h"
+#include <folly/Synchronized.h>
 
-namespace HPHP {
+#include "hphp/runtime/vm/jit/cprof-capture.h"
 
-struct Func;
+namespace HPHP::jit::cprof {
+
+namespace {
+
+using RecordMap = std::map<ContProfFuncKey, ContProfProfileRecord>;
+folly::Synchronized<RecordMap> s_records;
 
 }
 
-namespace HPHP::jit {
+bool captureContProfProfile(const ProfData& profData, const Func& func) {
+  auto record = snapshotContProfProfileRecord(profData, func);
+  if (!record) return false;
 
-struct ContProfCheckpointReadResult {
-  size_t filesRead{};
-  size_t recordsDecoded{};
-  std::vector<ContProfProfileRecord> records;
-};
+  auto records = s_records.wlock();
+  return records->try_emplace(
+    record->header.funcKey,
+    std::move(*record)
+  ).second;
+}
 
-/*
- * Read the newest checkpoints and retain the best record for each function
- * key. Unreadable or malformed files are skipped.
- */
-std::optional<ContProfCheckpointReadResult>
-readContProfCheckpointDirectory(const std::string& directory);
+size_t numContProfProfileRecords() {
+  auto records = s_records.rlock();
+  return records->size();
+}
 
-/* Reconstruct the runtime start encoded by `translation` for `func`. */
-std::optional<SrcKey> contProfTranslationSrcKey(
-  const ContProfProfileTranslation& translation,
-  const Func& func
-);
+std::vector<ContProfProfileRecord> snapshotContProfProfileRecords() {
+  auto records = s_records.rlock();
 
-/* Whether the record still matches the func in the current build. */
-bool isContProfProfileRecordCompatible(
-  const ContProfProfileRecord&,
-  const Func&
-);
+  std::vector<ContProfProfileRecord> result;
+  result.reserve(records->size());
+
+  for (auto const& [_, record] : *records) {
+    result.push_back(record);
+  }
+
+  return result;
+}
 
 }

@@ -23,9 +23,9 @@
 
 #include <folly/Range.h>
 
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
+#include "hphp/runtime/vm/jit/cprof-record.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 /* Whether the process-wide checkpoint writer is accepting profile data. */
 bool contProfActive();

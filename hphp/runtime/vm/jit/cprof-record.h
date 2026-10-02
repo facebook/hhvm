@@ -20,9 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "hphp/runtime/vm/jit/cont-prof-key.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 struct ContProfRecordHeader {
   ContProfFuncKey funcKey{};

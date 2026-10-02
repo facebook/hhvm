@@ -29,7 +29,7 @@ struct Unit;
 
 }
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 /*
  * A restart-stable identity for a Hack function.

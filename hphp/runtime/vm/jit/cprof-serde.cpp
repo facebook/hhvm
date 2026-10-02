@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-serde.h"
+#include "hphp/runtime/vm/jit/cprof-serde.h"
 
 #include <array>
 #include <cstddef>
@@ -27,7 +27,7 @@
 
 #include "hphp/util/build-info.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 namespace {
 

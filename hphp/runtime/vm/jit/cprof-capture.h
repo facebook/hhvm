@@ -16,32 +16,28 @@
 
 #pragma once
 
-#include <cstddef>
-#include <vector>
+#include <optional>
 
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
+#include "hphp/runtime/vm/jit/cprof-record.h"
 
 namespace HPHP {
-
 struct Func;
-
 }
 
 namespace HPHP::jit {
 
 struct ProfData;
 
-/*
- * Snapshot and retain the first valid profile record for `func`.
- * Returns true iff a new record was inserted.
- */
-bool captureContProfProfile(const ProfData&, const Func&);
+}
 
-size_t numContProfProfileRecords();
+namespace HPHP::jit::cprof {
 
 /*
- * Return a point-in-time copy of the captured records, sorted by function key.
+ * Snapshot the representable, positive-count entry translations for `func`,
+ * retaining one preferred translation per entry. Returns nullopt if no valid
+ * portable record can be produced.
  */
-std::vector<ContProfProfileRecord> snapshotContProfProfileRecords();
+std::optional<ContProfProfileRecord>
+  snapshotContProfProfileRecord(const ProfData&, const Func&);
 
 }

@@ -16,26 +16,45 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cstddef>
 #include <optional>
+#include <string>
 #include <vector>
 
-#include <folly/Range.h>
+#include "hphp/runtime/vm/jit/cprof-record.h"
+#include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/cont-prof-key.h"
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
+namespace HPHP {
 
-namespace HPHP::jit {
+struct Func;
 
-std::optional<std::vector<uint8_t>>
-serializeContProfFuncKey(const ContProfFuncKey&);
+}
 
-std::optional<ContProfFuncKey> deserializeContProfFuncKey(folly::ByteRange);
+namespace HPHP::jit::cprof {
 
-std::optional<std::vector<uint8_t>>
-serializeContProfProfileRecord(const ContProfProfileRecord&);
+struct ContProfCheckpointReadResult {
+  size_t filesRead{};
+  size_t recordsDecoded{};
+  std::vector<ContProfProfileRecord> records;
+};
 
-std::optional<ContProfProfileRecord>
-deserializeContProfProfileRecord(folly::ByteRange);
+/*
+ * Read the newest checkpoints and retain the best record for each function
+ * key. Unreadable or malformed files are skipped.
+ */
+std::optional<ContProfCheckpointReadResult>
+readContProfCheckpointDirectory(const std::string& directory);
+
+/* Reconstruct the runtime start encoded by `translation` for `func`. */
+std::optional<SrcKey> contProfTranslationSrcKey(
+  const ContProfProfileTranslation& translation,
+  const Func& func
+);
+
+/* Whether the record still matches the func in the current build. */
+bool isContProfProfileRecordCompatible(
+  const ContProfProfileRecord&,
+  const Func&
+);
 
 }

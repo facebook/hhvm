@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-key.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 
 #include <filesystem>
 
@@ -30,7 +30,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/server.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 
 namespace {
 

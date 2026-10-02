@@ -15,8 +15,8 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
-#include "hphp/runtime/vm/jit/cont-prof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
@@ -417,7 +417,9 @@ struct AsyncTranslationWorker
 
     profData()->setOptimized(ctx.funcId);
 
-    if (contProfActive()) captureContProfProfile(*profData(), *func);
+    if (cprof::contProfActive()) {
+      cprof::captureContProfProfile(*profData(), *func);
+    }
 
     optimizeFunc(func);
   }

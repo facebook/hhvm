@@ -28,7 +28,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-view.h"
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -485,7 +485,7 @@ void checkFreeProfData() {
 
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
-      !contProfActive() &&
+      !cprof::contProfActive() &&
       (tcIsFull() ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-serde.h"
+#include "hphp/runtime/vm/jit/cprof-serde.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -25,10 +25,10 @@
 
 #include <gtest/gtest.h>
 
-#include "hphp/runtime/vm/jit/cont-prof-record.h"
+#include "hphp/runtime/vm/jit/cprof-record.h"
 #include "hphp/util/sha1.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 namespace {
 
 ContProfFuncKey exampleKey() {

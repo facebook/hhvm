@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-reader.h"
+#include "hphp/runtime/vm/jit/cprof-reader.h"
 
 #include <cstdint>
 #include <filesystem>
@@ -31,12 +31,12 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/sha1.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 namespace {
 
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-reader-test.php";

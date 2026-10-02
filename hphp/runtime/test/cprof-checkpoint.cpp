@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/cont-prof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 
 #include <string>
 #include <utility>
@@ -27,7 +27,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 
-namespace HPHP::jit {
+namespace HPHP::jit::cprof {
 namespace {
 
 ContProfProfileRecord makeRecord(

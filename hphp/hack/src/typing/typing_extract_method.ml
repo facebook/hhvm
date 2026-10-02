@@ -546,15 +546,21 @@ module Typeconst_analysis : sig
     [@@warning "-32"]
 
   module Subst : sig
+    module Path : sig
+      type t = string list
+
+      module Map : Stdlib.Map.S with type key = t
+    end
+
     type t = {
       this_name: string;
       this_ty: Typing_defs_core.decl_phase Typing_defs_core.ty;
       tparams:
         Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.tparam
         list;
-      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t;
+      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty Path.Map.t;
       class_subst:
-        Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t S_map.t;
+        Typing_defs_core.decl_phase Typing_defs_core.ty Path.Map.t S_map.t;
     }
 
     val apply :
@@ -1441,22 +1447,31 @@ end = struct
   let this_constants { this_trie; _ } = Trie.constants this_trie
 
   module Subst = struct
+    module Path = struct
+      module Minimal = struct
+        type t = string list [@@deriving ord]
+      end
+
+      include Minimal
+      module Map = Stdlib.Map.Make (Minimal)
+    end
+
     type t = {
       this_name: string;
       this_ty: Typing_defs_core.decl_phase Typing_defs_core.ty;
       tparams:
         Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.tparam
         list;
-      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t;
+      this_subst: Typing_defs_core.decl_phase Typing_defs_core.ty Path.Map.t;
       class_subst:
-        Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t S_map.t;
+        Typing_defs_core.decl_phase Typing_defs_core.ty Path.Map.t S_map.t;
     }
 
     module Projection = struct
       module Minimal = struct
         type t =
-          | This of string list
-          | Class of string * string list
+          | This of Path.t
+          | Class of string * Path.t
         [@@deriving ord]
       end
 
@@ -1474,7 +1489,6 @@ end = struct
           (* Try and find a substitution for this type *)
           let (root_ty, path) = access_path root_ty [ty_const] in
           let path = List.map ~f:snd path in
-          let key = String.concat ~sep:"::" path in
           let projection_opt =
             match get_node root_ty with
             | Tthis -> Some (Projection.This path)
@@ -1497,17 +1511,17 @@ end = struct
                 let subst_ty_opt =
                   match projection with
                   | Projection.This _ ->
-                    let ty_opt = S_map.find_opt key this_subst in
+                    let ty_opt = Path.Map.find_opt path this_subst in
                     if Option.is_some ty_opt then
                       ty_opt
                     else
                       let subst_opt = S_map.find_opt this_name class_subst in
                       Option.bind subst_opt ~f:(fun subst ->
-                          S_map.find_opt key subst)
+                          Path.Map.find_opt path subst)
                   | Projection.Class (class_name, _) ->
                     let subst_opt = S_map.find_opt class_name class_subst in
                     Option.bind subst_opt ~f:(fun subst ->
-                        S_map.find_opt key subst)
+                        Path.Map.find_opt path subst)
                 in
                 (* If there is no substitution, stop; if there is record that we've
                    seen the source key before and restart the rewrite *)
@@ -1549,8 +1563,8 @@ end = struct
           match base with
           | Typeconst { typeconst = Typing_defs.(TCConcrete { tc_type }); _ } ->
             let (subst, env, generics) = acc in
-            let key = String.concat ~sep:"::" (List.rev rev_path) in
-            (S_map.add key tc_type subst, env, generics)
+            let path = List.rev rev_path in
+            (Path.Map.add path tc_type subst, env, generics)
           | Typeconst
               {
                 typeconst =
@@ -1569,10 +1583,10 @@ end = struct
               Typing_env.fresh_param_name env const_name
             in
             let subst =
-              let key = String.concat ~sep:"::" (List.rev rev_path) in
+              let path = List.rev rev_path in
               let reason = Typing_reason.witness_from_decl pos in
               let ty = Typing_defs_core.(mk (reason, Tgeneric generic_name)) in
-              S_map.add key ty subst
+              Path.Map.add path ty subst
             in
             let generics =
               S_map.add generic_name { pos; upper_bound; lower_bound } generics
@@ -1588,7 +1602,7 @@ end = struct
           children
           acc
       in
-      aux trie ("", []) (S_map.empty, env, generics)
+      aux trie ("", []) (Path.Map.empty, env, generics)
 
     let class_subst { tries; _ } env generics =
       S_map.fold
@@ -1601,8 +1615,8 @@ end = struct
     (* -- Build substitution for abstract type constants -------------------- *)
 
     let add_refinement rfmts const_name ~path ~subst =
-      let key = String.concat ~sep:"::" (List.rev (const_name :: path)) in
-      let ty_opt = S_map.find_opt key subst in
+      let full_path = List.rev (const_name :: path) in
+      let ty_opt = Path.Map.find_opt full_path subst in
       Option.value_map ty_opt ~default:rfmts ~f:(fun ty ->
           S_map.add
             const_name
@@ -1686,19 +1700,16 @@ end = struct
       match typeconst with
       | Typing_defs.(TCConcrete { tc_type }) ->
         let (subst, env, generics) = acc in
-        let subst =
-          S_map.add (String.concat (List.rev path) ~sep:"::") tc_type subst
-        in
+        let subst = Path.Map.add (List.rev path) tc_type subst in
         (subst, env, generics)
       | Typing_defs.(TCAbstract { atc_as_constraint; atc_super_constraint; _ })
         ->
         let (subst, env, generics) = acc in
         let (env, generic_name) = Typing_env.fresh_param_name env key in
         let subst =
-          let key = String.concat (List.rev path) ~sep:"::" in
           let reason = Typing_reason.witness_from_decl pos in
           let ty = Typing_defs_core.(mk (reason, Tgeneric generic_name)) in
-          S_map.add key ty subst
+          Path.Map.add (List.rev path) ty subst
         in
         let upper_bound =
           Option.map atc_as_constraint ~f:(fun ty ->
@@ -1730,7 +1741,7 @@ end = struct
           children
           init
       in
-      let init = (S_map.empty, env, generics) in
+      let init = (Path.Map.empty, env, generics) in
       match base with
       | Trie.Root -> aux children ~path:[] ~init
       | _ -> init
@@ -1744,7 +1755,7 @@ end = struct
         let add_exact_refinements ~init =
           List.fold_left
             ~f:(fun rfmts name ->
-              match S_map.find_opt name this_subst with
+              match Path.Map.find_opt [name] this_subst with
               | Some ty ->
                 S_map.add
                   name

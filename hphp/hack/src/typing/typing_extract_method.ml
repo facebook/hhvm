@@ -806,6 +806,17 @@ end = struct
       tries = S_map.empty;
     }
 
+  type root = {
+    root_name: string;
+    root_folded_class: Folded_class.t;
+    root_trie: Trie.t;
+  }
+
+  type state = {
+    root: root;
+    analysis: t;
+  }
+
   let show { this_name; this_trie; tries; _ } env =
     let this = (Format.sprintf "this (%s)" this_name, this_trie)
     and others =
@@ -817,9 +828,9 @@ end = struct
     in
     String.concat lines ~sep:"\n\n"
 
-  let find_trie_for { this_name; this_trie; tries; _ } class_name =
-    if String.equal class_name this_name then
-      Some this_trie
+  let find_trie_for { root; analysis = { tries; _ } } class_name =
+    if String.equal class_name root.root_name then
+      Some root.root_trie
     else
       Option.map ~f:snd (S_map.find_opt class_name tries)
   (* -- Helpers ------------------------------------------------------------- *)
@@ -1003,12 +1014,12 @@ end = struct
       when projecting from [base]. If the constant already appeared in some
       other path we can use the information stored in [children] otherwise
       we have to look it up from the decl *)
-  let rec find_type_const trie tys const prefix analysis env =
+  let rec find_type_const trie tys const prefix state env =
     let Trie.{ children; base } = trie and (const_pos, const_name) = const in
     match S_map.find_opt const_name children with
     (* Happy path - we've already seen the constant as part of some other path
        so reuse the result *)
-    | Some status -> (status, tys, analysis)
+    | Some status -> (status, tys, state)
     (* We haven't already seen this constant within this path we need to find the
        definition within the current type we are projecting from *)
     | None -> begin
@@ -1018,7 +1029,7 @@ end = struct
            corresponding to that root directly - since we are at the root
            we don't need to rewrite `this` to make absolute *)
         let typeconst_opt =
-          Typing_env.get_typeconst env analysis.this_folded_class const_name
+          Typing_env.get_typeconst env state.root.root_folded_class const_name
         in
         let (status, tys) =
           Option.value_map
@@ -1032,33 +1043,33 @@ end = struct
               and tys = accumulate_tys typeconst tys in
               (status, tys))
         in
-        (status, tys, analysis)
+        (status, tys, state)
       | Trie.Typeconst { typeconst; _ } -> begin
         (* If the root is a type constant we first need to get the type we're
            accessing through:
            - for a 'concrete' type constant this is the definition;
            - for an 'abstract' type constant it is declared bounds *)
         let ty_access = type_for_access typeconst in
-        access_typeconsts ty_access tys const prefix analysis env
+        access_typeconsts ty_access tys const prefix state env
       end
     end
 
-  and access_typeconsts ty_access tys const prefix analysis env =
+  and access_typeconsts ty_access tys const prefix state env =
     match ty_access with
     | Constant ty ->
       (* Concrete type constant *)
-      access_typeconst ty tys const prefix analysis env
+      access_typeconst ty tys const prefix state env
     | Upper_bound ty ->
       (* Abstract type constant with an [as] bound only *)
-      access_typeconst ty tys const prefix analysis env
+      access_typeconst ty tys const prefix state env
     | Lower_bound _ ->
       (* Abstract type constant with a [super] bound only; this is undefined
          since a type constant in a lower bound doesn't require that a concrete
          definition has such a constant *)
-      (Undefined, tys, analysis)
+      (Undefined, tys, state)
     | No_type ->
       (* Abstract type constant with no declared bounds *)
-      (Undefined, tys, analysis)
+      (Undefined, tys, state)
     | Upper_and_lower_bounds { upper; lower } ->
       (* Abstract type constant with both [as] and [super] bounds;
          by transitivity if we have LB <: TC <: UB we must have LB <: UB
@@ -1067,11 +1078,11 @@ end = struct
          had instead declared the unsatisfiable bounds on a generic so we
          don't generate an error
       *)
-      let (status1, tys, analysis) =
-        access_typeconst upper tys const prefix analysis env
+      let (status1, tys, state) =
+        access_typeconst upper tys const prefix state env
       in
-      let (status2, tys, analysis) =
-        access_typeconst lower tys const prefix analysis env
+      let (status2, tys, state) =
+        access_typeconst lower tys const prefix state env
       in
       let status =
         match (status1, status2) with
@@ -1100,7 +1111,7 @@ end = struct
               Defined trie)
       in
 
-      (status, tys, analysis)
+      (status, tys, state)
 
   (** Access [const_name] through [base_ty] and modify occurences of `this` in the
       typeconstant definition so they are absolute with respect to [folded_class]
@@ -1108,7 +1119,7 @@ end = struct
       This returns a `(typeconst option, path) result` since it may be the case
       that [base_ty] is a path which we haven't yet added to the analysis
   *)
-  and access_typeconst base_ty tys const prefix analysis env =
+  and access_typeconst base_ty tys const prefix state env =
     let open Typing_defs_core in
     let (const_pos, const_name) = const in
     match get_node base_ty with
@@ -1116,7 +1127,7 @@ end = struct
       (* For this use the [folded_class] corresponding to the absolute root
          class for the analysis *)
       let typeconst_opt =
-        Typing_env.get_typeconst env analysis.this_folded_class const_name
+        Typing_env.get_typeconst env state.root.root_folded_class const_name
       in
       let (status, tys) =
         Option.value_map
@@ -1135,7 +1146,7 @@ end = struct
             and tys = accumulate_tys typeconst tys in
             (status, tys))
       in
-      (status, tys, analysis)
+      (status, tys, state)
     | Tapply ((_, class_name), _) ->
       let folded_class_opt =
         Decl_entry.to_option (Typing_env.get_class env class_name)
@@ -1160,7 +1171,7 @@ end = struct
             and tys = accumulate_tys typeconst tys in
             (status, tys))
       in
-      (status, tys, analysis)
+      (status, tys, state)
     | Trefinement (base_ty, { cr_consts }) -> begin
       (* If there is a refinement check if it contains the contant we want;
          if not, search in the root type *)
@@ -1174,34 +1185,34 @@ end = struct
            to another type constant we will need to add them to the
            analysis *)
         let tys = accumulate_tys typeconst tys in
-        (status, tys, analysis)
-      | None -> access_typeconst base_ty tys const prefix analysis env
+        (status, tys, state)
+      | None -> access_typeconst base_ty tys const prefix state env
     end
     | Taccess (root_ty, ty_const) -> begin
       (* We're accessing a type constant through a type constant access path;
          ensure the path has been added then access the type constant through
          its definition or upper bound *)
       let (ty, path) = access_path root_ty [ty_const] in
-      let (analysis, status_opt) =
+      let (state, status_opt) =
         match get_node ty with
         | Tthis ->
           let paths = [This path] in
-          let analysis = add_paths analysis paths env in
-          let status_opt = Trie.find_path analysis.this_trie path in
-          (analysis, status_opt)
+          let state = add_paths state paths env in
+          let status_opt = Trie.find_path state.root.root_trie path in
+          (state, status_opt)
         | Tapply ((_, class_name), _) ->
           let paths = [Class (ty, class_name, path)] in
-          let analysis = add_paths analysis paths env in
+          let state = add_paths state paths env in
           let status_opt =
             Option.bind
               ~f:(fun trie -> Trie.find_path trie path)
-              (find_trie_for analysis class_name)
+              (find_trie_for state class_name)
           in
-          (analysis, status_opt)
+          (state, status_opt)
         | _ ->
           (* Here we assume the root must either be [Tapply] or [Tthis] -
              the other possibility, [Trefinement], is disallowed *)
-          (analysis, None)
+          (state, None)
       in
       let base_ty_opt =
         Option.bind status_opt ~f:(fun status ->
@@ -1217,22 +1228,21 @@ end = struct
       in
       Option.value_map
         base_ty_opt
-        ~default:(Trie.Undefined, tys, analysis)
-        ~f:(fun base_ty ->
-          access_typeconsts base_ty tys const prefix analysis env)
+        ~default:(Trie.Undefined, tys, state)
+        ~f:(fun base_ty -> access_typeconsts base_ty tys const prefix state env)
     end
     | Tintersection tys ->
       (* For intersections, we require the type constant to be defined on at least
          one of its elements; if it is defined on multiple we will refine each element
          to ensure they agree *)
-      let (trie_opt, tys, analysis) =
+      let (trie_opt, tys, state) =
         List.fold_left
           tys
-          ~init:(None, tys, analysis)
-          ~f:(fun (acc, tys, analysis) ty ->
-            match access_typeconst ty tys const prefix analysis env with
-            | (Undefined, _, _) -> (acc, tys, analysis)
-            | (Defined trie2, tys, analysis) ->
+          ~init:(None, tys, state)
+          ~f:(fun (acc, tys, state) ty ->
+            match access_typeconst ty tys const prefix state env with
+            | (Undefined, _, _) -> (acc, tys, state)
+            | (Defined trie2, tys, state) ->
               let reason =
                 let (const_pos, _const_name) = const in
                 Typing_reason.witness_from_decl const_pos
@@ -1242,37 +1252,37 @@ end = struct
                 | None -> Some trie2
                 | Some trie1 -> meet_trie_opt trie1 trie2 reason
               in
-              (acc, tys, analysis))
+              (acc, tys, state))
       in
       let status =
         Option.value_map trie_opt ~default:Trie.Undefined ~f:(fun trie ->
             Defined trie)
       in
-      (status, tys, analysis)
+      (status, tys, state)
     | Tunion tys ->
       (* For unions, we require the refinement to be present on all elements. If
          it is missing on one the result is undefined *)
-      let (trie_opt_res, tys, analysis) =
+      let (trie_opt_res, tys, state) =
         List.fold_left
           tys
-          ~init:(Ok None, tys, analysis)
-          ~f:(fun (acc, tys, analysis) ty ->
+          ~init:(Ok None, tys, state)
+          ~f:(fun (acc, tys, state) ty ->
             match acc with
-            | Error _ -> (acc, tys, analysis)
+            | Error _ -> (acc, tys, state)
             | Ok acc ->
-              (match access_typeconst ty tys const prefix analysis env with
-              | (Undefined, _, _) -> (Error (), tys, analysis)
-              | (Defined trie2, tys, analysis) ->
+              (match access_typeconst ty tys const prefix state env with
+              | (Undefined, _, _) -> (Error (), tys, state)
+              | (Defined trie2, tys, state) ->
                 let reason =
                   let (const_pos, _const_name) = const in
                   Typing_reason.witness_from_decl const_pos
                 in
                 (match acc with
-                | None -> (Ok (Some trie2), tys, analysis)
+                | None -> (Ok (Some trie2), tys, state)
                 | Some trie1 ->
                   (match meet_trie_opt trie1 trie2 reason with
-                  | Some trie -> (Ok (Some trie), tys, analysis)
-                  | _ -> (Error (), tys, analysis)))))
+                  | Some trie -> (Ok (Some trie), tys, state)
+                  | _ -> (Error (), tys, state)))))
       in
       let status =
         match trie_opt_res with
@@ -1281,50 +1291,53 @@ end = struct
           Option.value_map trie_opt ~default:Trie.Undefined ~f:(fun trie ->
               Defined trie)
       in
-      (status, tys, analysis)
+      (status, tys, state)
     (* We can't access type constants through any other type so return [Undefined] *)
-    | _ -> (Trie.Undefined, tys, analysis)
+    | _ -> (Trie.Undefined, tys, state)
 
-  and add_path trie tys (prefix, path) analysis env =
+  and add_path trie tys (prefix, path) state env =
     match path with
     | [] ->
       (* End of the type constant access path; return the updated trie and
          the types appearing in the definitions or bounds of type constants
          discovered *)
-      (trie, tys, analysis)
+      (trie, tys, state)
     | ((_, const_name) as const) :: path -> begin
       (* Find the type constant [const_name] *)
-      match find_type_const trie tys const prefix analysis env with
-      | (Trie.Undefined, tys, analysis) ->
+      match find_type_const trie tys const prefix state env with
+      | (Trie.Undefined, tys, state) ->
         (* If it was undefined we have an error so we can't add the rest of the
            path *)
         let trie = Trie.update trie const_name Trie.Undefined in
-        (trie, tys, analysis)
-      | (Trie.Defined child, tys, analysis) ->
+        (trie, tys, state)
+      | (Trie.Defined child, tys, state) ->
         (* We found the constant so continue adding the remainder of the path *)
-        let (child, tys, analysis) =
-          add_path child tys (const :: prefix, path) analysis env
+        let (child, tys, state) =
+          add_path child tys (const :: prefix, path) state env
         in
         (* Update the trie with the subtrie for [child] *)
-        (Trie.update trie const_name (Trie.Defined child), tys, analysis)
+        (Trie.update trie const_name (Trie.Defined child), tys, state)
     end
 
-  (** Add a number of type constant access [paths] to the analysis [t] *)
-  and add_paths t paths env =
+  (** Add a number of type constant access [paths] while resolving from
+      [state.root] *)
+  and add_paths state paths env =
     let pending = Queue.create () in
     Queue.enqueue_all pending paths;
-    let rec aux t =
+    let rec aux state =
       match Queue.dequeue pending with
-      | None -> t
+      | None -> state
       | Some (This path) ->
-        let (this_trie, tys, t) = add_path t.this_trie [] ([], path) t env in
+        let (root_trie, tys, state) =
+          add_path state.root.root_trie [] ([], path) state env
+        in
         List.iter tys ~f:(fun ty -> Queue.enqueue_all pending (paths_of_ty ty));
-        let t = { t with this_trie } in
-        aux t
+        let root = { state.root with root_trie } in
+        aux { state with root }
       | Some (Class (this_ty, class_name, path)) ->
         let class_name =
           if String.equal class_name Naming_special_names.Classes.cSelf then
-            t.this_name
+            state.root.root_name
           else
             class_name
         in
@@ -1332,26 +1345,23 @@ end = struct
           Decl_entry.to_option (Typing_env.get_class env class_name)
         in
         (match folded_class_opt with
-        | None -> aux t
+        | None -> aux state
         | Some folded_class -> begin
-          (* Stash the current notion of this so we can restore after analysing
-             the path rooted in a different class *)
-          let { this_name; this_trie; this_folded_class; _ } = t in
-          (* Find the exist trie for this class if it exists *)
+          (* Find the existing trie for this class if it exists *)
           let class_trie =
-            Option.value ~default:Trie.empty (find_trie_for t class_name)
+            Option.value ~default:Trie.empty (find_trie_for state class_name)
           in
           (* Add the path with the class as [this] *)
-          let (class_trie, tys, t) =
-            let t =
-              {
-                t with
-                this_trie = class_trie;
-                this_name = class_name;
-                this_folded_class = folded_class;
-              }
-            in
-            add_path class_trie [] ([], path) t env
+          let class_root =
+            {
+              root_name = class_name;
+              root_folded_class = folded_class;
+              root_trie = class_trie;
+            }
+          in
+          let class_state = { root = class_root; analysis = state.analysis } in
+          let (class_trie, tys, class_state) =
+            add_path class_trie [] ([], path) class_state env
           in
           (* Add the paths ensuring that we replace occurrences of this with class type *)
           List.iter tys ~f:(fun ty ->
@@ -1359,29 +1369,38 @@ end = struct
                 pending
                 (paths_of_ty (replace_this_with ty ~replacement:this_ty)));
           (* Move the trie for the current class in to the map *)
-          let tries =
-            S_map.update
-              class_name
-              (function
-                | None -> Some (this_ty, class_trie)
-                | Some (this_ty, existing_trie) ->
-                  Option.map
-                    ~f:(fun trie -> (this_ty, trie))
-                    (Trie.merge existing_trie class_trie))
-              t.tries
+          let analysis =
+            let tries =
+              S_map.update
+                class_name
+                (function
+                  | None -> Some (this_ty, class_trie)
+                  | Some (this_ty, existing_trie) ->
+                    Option.map
+                      ~f:(fun trie -> (this_ty, trie))
+                      (Trie.merge existing_trie class_trie))
+                class_state.analysis.tries
+            in
+            { class_state.analysis with tries }
           in
-          (* Restore the previous notion of [this] *)
-          let t = { this_name; this_trie; this_folded_class; tries } in
-          aux t
+          aux { state with analysis }
         end)
     in
-    aux t
+    aux state
 
   (* -- API ----------------------------------------------------------------- *)
 
   let add_type t ty env =
     let paths = paths_of_ty ty in
-    let t = add_paths t paths env in
+    let root =
+      {
+        root_name = t.this_name;
+        root_folded_class = t.this_folded_class;
+        root_trie = t.this_trie;
+      }
+    in
+    let { root; analysis } = add_paths { root; analysis = t } paths env in
+    let t = { analysis with this_trie = root.root_trie } in
     let { this_name; this_trie; tries; _ } = t in
     (* For analysis of classes other than this we need to subsitute occurrences
        of [this] at the root of typeconst accesses for the class type *)

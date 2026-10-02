@@ -278,7 +278,6 @@ let parse_options () =
   let skip_tast_checks = ref false in
   let skip_check_under_dynamic = ref false in
   let out_extension = ref ".out" in
-  let call_coeffects = ref true in
   let local_coeffects = ref true in
   let strict_contexts = ref true in
 
@@ -361,9 +360,6 @@ let parse_options () =
             auto_namespace_map :=
               Some (Server_config.convert_auto_namespace_to_map m)),
         " Alias namespaces" );
-      ( "--no-call-coeffects",
-        Arg.Unit (fun () -> call_coeffects := false),
-        " Turns off call coeffects" );
       ( "--no-local-coeffects",
         Arg.Unit (fun () -> local_coeffects := false),
         " Turns off local coeffects" );
@@ -899,7 +895,6 @@ let parse_options () =
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_strict_contexts:!strict_contexts
-      ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:false
       ~log_levels:!log_levels

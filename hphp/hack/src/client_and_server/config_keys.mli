@@ -82,8 +82,6 @@ module Hhconfig : sig
 
   val allowed_fixme_codes_strict : string
 
-  val call_coeffects : string
-
   val class_class_type : string
 
   val class_pointer_tyvar_lower_bound_source_level : string

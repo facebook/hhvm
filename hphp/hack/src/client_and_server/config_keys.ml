@@ -87,8 +87,6 @@ module Hhconfig = struct
 
   let allowed_fixme_codes_strict = key "allowed_fixme_codes_strict"
 
-  let call_coeffects = key "call_coeffects"
-
   let class_class_type = key "class_class_type"
 
   let class_pointer_tyvar_lower_bound_source_level =

@@ -419,7 +419,6 @@ impl HhConfig {
                 default.tco_reject_promoted_property_redeclaration,
             )?,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
-            tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,
             tco_strict_contexts: default.tco_strict_contexts,
             tco_like_casts: hhconfig.get_bool_or("like_casts", default.tco_like_casts)?,

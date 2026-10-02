@@ -1017,7 +1017,7 @@ let stash_conts_for_closure
   let with_ty_for_lid ((_, name) as lid) = (Env.get_local env name, lid) in
 
   let captured =
-    if is_anon && TCO.any_coeffects (Env.get_tcopt env) then
+    if is_anon then
       Typing_coeffects.(
         with_ty_for_lid (Pos.none, local_capability_id)
         :: with_ty_for_lid (Pos.none, capability_id)
@@ -7828,33 +7828,27 @@ end = struct
             let capability =
               Typing_coeffects.get_type ft.ft_implicit_params.capability
             in
-            let should_skip_check =
-              not (TCO.call_coeffects (Env.get_tcopt env))
+            let env_capability =
+              (Env.get_local_check_defined
+                 env
+                 (expr_pos, Typing_coeffects.capability_id))
+                .Typing_local_types.ty
             in
-            if should_skip_check then
-              (env, None)
-            else
-              let env_capability =
-                (Env.get_local_check_defined
-                   env
-                   (expr_pos, Typing_coeffects.capability_id))
-                  .Typing_local_types.ty
-              in
-              let base_error =
-                Typing_error.Primary.(
-                  Coeffect
-                    (Coeffect.Call_coeffect
-                       {
-                         pos = id_pos;
-                         available_incl_unsafe =
-                           Typing_coeffects.pretty env env_capability;
-                         available_pos = Typing_defs.get_pos env_capability;
-                         required_pos = Typing_defs.get_pos capability;
-                         required = Typing_coeffects.pretty env capability;
-                       }))
-              in
-              Type.sub_type expr_pos Reason.URnone env env_capability capability
-              @@ Typing_error.Callback.always base_error
+            let base_error =
+              Typing_error.Primary.(
+                Coeffect
+                  (Coeffect.Call_coeffect
+                     {
+                       pos = id_pos;
+                       available_incl_unsafe =
+                         Typing_coeffects.pretty env env_capability;
+                       available_pos = Typing_defs.get_pos env_capability;
+                       required_pos = Typing_defs.get_pos capability;
+                       required = Typing_coeffects.pretty env capability;
+                     }))
+            in
+            Type.sub_type expr_pos Reason.URnone env env_capability capability
+            @@ Typing_error.Callback.always base_error
           in
           let should_forget_fakes =
             (* If the function doesn't have write priveleges to properties, fake

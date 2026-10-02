@@ -1673,50 +1673,45 @@ end = struct
 
   and simplify_subtype_implicit_params
       ~subtype_env { capability = sub_cap } { capability = super_cap } env =
-    if Typechecker_options.any_coeffects (Env.get_tcopt env) then
-      let expected = Typing_coeffects.get_type sub_cap in
-      let got = Typing_coeffects.get_type super_cap in
-      let reasons =
-        Typing_error.Secondary.Coeffect_subtyping
-          {
-            pos = get_pos got;
-            cap = Typing_coeffects.pretty env got;
-            pos_expected = get_pos expected;
-            cap_expected = Typing_coeffects.pretty env expected;
-          }
-      in
-      let subtype_env =
-        Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
-            let err = Typing_error.apply_reasons ~on_error reasons in
-            Typing_error.(Reasons_callback.always err))
-      in
-      match (sub_cap, super_cap) with
-      | (CapTy sub, CapTy super) ->
-        simplify
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn = None; ty_sub = sub }
-          ~rhs:
-            { super_like = false; super_supportdyn = false; ty_super = super }
-          env
-      | (CapTy sub, CapDefaults _p) ->
-        simplify
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn = None; ty_sub = sub }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super = got }
-          env
-      | (CapDefaults _p, CapTy super) ->
-        simplify
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn = None; ty_sub = expected }
-          ~rhs:
-            { super_like = false; super_supportdyn = false; ty_super = super }
-          env
-      | (CapDefaults _p1, CapDefaults _p2) -> valid env
-    else
-      valid env
+    let expected = Typing_coeffects.get_type sub_cap in
+    let got = Typing_coeffects.get_type super_cap in
+    let reasons =
+      Typing_error.Secondary.Coeffect_subtyping
+        {
+          pos = get_pos got;
+          cap = Typing_coeffects.pretty env got;
+          pos_expected = get_pos expected;
+          cap_expected = Typing_coeffects.pretty env expected;
+        }
+    in
+    let subtype_env =
+      Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
+          let err = Typing_error.apply_reasons ~on_error reasons in
+          Typing_error.(Reasons_callback.always err))
+    in
+    match (sub_cap, super_cap) with
+    | (CapTy sub, CapTy super) ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = super }
+        env
+    | (CapTy sub, CapDefaults _p) ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = got }
+        env
+    | (CapDefaults _p, CapTy super) ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = expected }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = super }
+        env
+    | (CapDefaults _p1, CapDefaults _p2) -> valid env
 
   and simplify_supertype_params_with_variadic
       ~subtype_env

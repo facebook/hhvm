@@ -86,11 +86,7 @@ let set_skip_hierarchy_checks t =
 
 let skip_tast_checks t = t.Global_options.tco_skip_tast_checks
 
-let call_coeffects t = t.Global_options.tco_coeffects
-
 let local_coeffects t = t.Global_options.tco_coeffects_local
-
-let any_coeffects t = call_coeffects t || local_coeffects t
 
 let strict_contexts t = t.Global_options.tco_strict_contexts
 

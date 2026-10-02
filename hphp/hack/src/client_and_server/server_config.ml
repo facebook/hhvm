@@ -445,7 +445,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (prepare_iset config Config_keys.Hhconfig.allowed_fixme_codes_strict)
     ?tco_legacy_experimental_features:(config_experimental_tc_features config)
     ?tco_migration_flags:(config_tc_migration_flags config)
-    ?tco_coeffects:(bool_opt Config_keys.Hhconfig.call_coeffects config)
     ?tco_coeffects_local:(bool_opt Config_keys.Hhconfig.local_coeffects config)
     ?tco_like_casts:(bool_opt Config_keys.Hhconfig.like_casts config)
     ?tco_disallow_unresolved_type_variables:

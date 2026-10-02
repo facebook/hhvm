@@ -71,7 +71,6 @@ impl Default for GlobalOptions {
             tco_silence_errors_under_dynamic: false,
             tco_reject_promoted_property_redeclaration: false,
             tco_skip_tast_checks: false,
-            tco_coeffects: true,
             tco_coeffects_local: true,
             tco_strict_contexts: true,
             tco_like_casts: false,

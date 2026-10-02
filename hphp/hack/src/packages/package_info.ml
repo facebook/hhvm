@@ -129,25 +129,3 @@ let get_package_for_file (info : t) ~(path : string) : Package.t option =
     | Some (dir, _) when not (String.is_empty dir) ->
       Some (synthesize_member p dir)
     | _ -> None)
-
-(** The get_package_with_override function returns the package a file belongs
-  * taking into account __PackageOverride annotations.  This function scans the
-  * content of the file and is __very inefficient__.  It should be used ONLY
-  * from services that cannot access decls, notably the Glean indexer and the
-  * redundant PackageOverride linter.
-  *)
-let regex_package_override =
-  Str.regexp "__PackageOverride([\"']\\([^\"']+\\)[\"'])"
-
-let extract_package_override text =
-  try
-    let _ = Str.search_forward regex_package_override text 0 in
-    Some (Str.matched_group 1 text)
-  with
-  | _ -> None
-
-let get_package_with_override_for_file_no_env
-    (info : t) ~(path : string) ~(content : string) : Package.t option * bool =
-  match extract_package_override content with
-  | Some package_override -> (get_package info package_override, true)
-  | None -> (get_package_for_file info ~path, false)

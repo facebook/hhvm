@@ -46,7 +46,18 @@
 (library
  (name package_provider)
  (modules package_provider)
- (libraries package_info parser_options provider_context utils_multifile)
+ (libraries
+  annotated_ast
+  decl_parser_options
+  direct_decl_parser
+  naming_special_names
+  package_info
+  parser_options
+  provider_context
+  relative_path
+  shallow_decl_defs
+  typing_defs
+  utils_multifile)
  (preprocess
   (pps ppx_deriving.std)))
 

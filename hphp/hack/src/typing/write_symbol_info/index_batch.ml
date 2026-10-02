@@ -7,8 +7,8 @@
  *)
 
 (** Indexing a Hack file consists in three distinct passes
-  1. Indexing source text (regex matching for extracting gencode info from comments
-     and package information)
+  1. Indexing source text (regex matching for extracting gencode info from
+     comments; package information from the file attributes)
   2. Indexing declarations, done in [index_decls]
   3. Indexing xrefs and filecalls, done in [index_refs] *)
 

@@ -15,11 +15,15 @@
 (** The package [path] belongs to, ignoring any [__PackageOverride] annotation. *)
 val get_package_for_file : Provider_context.t -> path:string -> Package.t option
 
-(** The package [path] belongs to, honoring an [__PackageOverride] annotation in
-  [content]. The returned flag says whether an override was applied.
+(** The package [path] belongs to, honoring the
+  [<<file: __PackageOverride(...)>>] attribute in [content]. The returned flag
+  says whether an override was applied. The override is read from the decls of
+  [content], as the typechecker reads it: a mention in a comment or string
+  literal is not one, and a file that defines nothing resolves by its path.
+  It never raises: content that fails to parse resolves by its path.
 
-  DO NOT USE from the typechecker: it scans [content] and is very inefficient.
-  For services that cannot access decls (the Glean indexer, the
-  redundant-[__PackageOverride] linter). *)
+  DO NOT USE from the typechecker: it parses [content]. For services that
+  cannot access decls (the Glean indexer, the redundant-[__PackageOverride]
+  linter). *)
 val get_package_with_override_for_file_no_env :
   Provider_context.t -> path:string -> content:string -> Package.t option * bool

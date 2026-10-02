@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "squangle/mysql_client/FetchOperation.h"
 
 namespace facebook::common::mysql_client {
@@ -52,6 +54,11 @@ class MultiQueryStreamOperation : public FetchOperation {
     return queries_.getQueries();
   }
 
+  // Read only during the QueryEnded callback.
+  bool hasMoreResults() const {
+    return more_results_;
+  }
+
   void setCallback(StreamCallback cb) {
     stream_callback_ = std::move(cb);
   }
@@ -77,6 +84,7 @@ class MultiQueryStreamOperation : public FetchOperation {
   void invokeCallback(StreamState state);
 
   StreamCallback stream_callback_;
+  std::atomic<bool> more_results_{false};
 };
 
 } // namespace facebook::common::mysql_client

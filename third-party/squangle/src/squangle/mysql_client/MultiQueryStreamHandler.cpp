@@ -45,33 +45,28 @@ StreamedQueryResult::~StreamedQueryResult() {
 
 uint64_t StreamedQueryResult::numAffectedRows() {
   drain();
-  checkFinalData();
-  return final_data_->num_affected_rows;
+  return checkFinalData().num_affected_rows;
 }
 
 uint64_t StreamedQueryResult::lastInsertId() {
   drain();
-  checkFinalData();
-  return final_data_->last_insert_id;
+  return checkFinalData().last_insert_id;
 }
 
 const std::string& StreamedQueryResult::recvGtid() {
   drain();
-  checkFinalData();
-  return final_data_->recv_gtid;
+  return checkFinalData().recv_gtid;
 }
 
 using RespAttrs = AttributeMap;
 const RespAttrs& StreamedQueryResult::responseAttributes() {
   drain();
-  checkFinalData();
-  return final_data_->resp_attrs;
+  return checkFinalData().resp_attrs;
 }
 
 unsigned int StreamedQueryResult::warningsCount() {
   drain();
-  checkFinalData();
-  return final_data_->warnings_count;
+  return checkFinalData().warnings_count;
 }
 
 StreamedQueryResult::Iterator StreamedQueryResult::begin() {
@@ -125,19 +120,18 @@ StreamedQueryResult::co_nextRow() {
   co_return co_await handler_->co_fetchOneRow(*this);
 }
 
-void StreamedQueryResult::checkFinalData() const {
+const StreamedQueryResult::FinalData& StreamedQueryResult::checkFinalData()
+    const {
   if (exception_) {
-    throw *exception_;
+    exception_->throw_exception();
   }
 
-  if (!final_data_) {
-    throw std::runtime_error(
-        "Accessing status variables before query has completed successfully");
-  }
+  // Throws a std::logic_error if final_data_ hasn't been set
+  return final_data_.value();
 }
 
 void StreamedQueryResult::setFinalData(FinalData final_data) {
-  final_data_.emplace(std::move(final_data));
+  final_data_.try_emplace(std::move(final_data));
 }
 
 folly::coro::Task<void> StreamedQueryResult::co_drain() {
@@ -189,12 +183,25 @@ std::unique_ptr<Connection> MultiQueryStreamHandler::releaseConnection() {
   return operation_->releaseConnection();
 }
 
+const QueryException& MultiQueryStreamHandler::asQueryException() const {
+  static const QueryException kNoException(
+      0, OperationResult::Succeeded, 0, "", nullptr, 0us);
+  if (exception_) {
+    if (const auto* ex = exception_->get_exception<QueryException>()) {
+      return *ex;
+    }
+    LOG(DFATAL) << "Stream failure is not a QueryException";
+  }
+
+  return kNoException;
+}
+
 unsigned int MultiQueryStreamHandler::mysql_errno() const {
-  return operation_->mysql_errno();
+  return asQueryException().mysql_errno();
 }
 
 const std::string& MultiQueryStreamHandler::mysql_error() const {
-  return operation_->mysql_error();
+  return asQueryException().mysql_error();
 }
 
 Connection& MultiQueryStreamHandler::connection() const {
@@ -228,8 +235,8 @@ void MultiQueryStreamHandler::clearResultHandler(StreamedQueryResult& result) {
 
 void MultiQueryStreamHandler::setResultException(
     StreamedQueryResult& result,
-    std::unique_ptr<QueryException> ex) {
-  result.exception_ = std::move(ex);
+    folly::exception_wrapper ex) {
+  result.exception_.try_emplace(std::move(ex));
 }
 
 void MultiQueryStreamHandler::setResultFinalData(
@@ -253,8 +260,8 @@ AsyncPipeUsingGenerator<EphemeralRow>& MultiQueryStreamHandler::resultRowPipe(
   return result.pipe_;
 }
 
-std::unique_ptr<QueryException>& MultiQueryStreamHandler::resultException(
-    StreamedQueryResult& result) {
+const folly::DelayedInit<folly::exception_wrapper>&
+MultiQueryStreamHandler::resultException(StreamedQueryResult& result) {
   return result.exception_;
 }
 
@@ -377,6 +384,9 @@ AsyncMultiQueryStreamHandler::co_nextQuery() {
     // Drain anything that might be left in the existing result
     drainResult(*current_user_result_);
     current_user_result_.reset();
+    if (operation_->isPaused()) {
+      operation_->resume();
+    }
   }
 
   if (!pipe_.isReaderClosed()) {
@@ -386,10 +396,6 @@ AsyncMultiQueryStreamHandler::co_nextQuery() {
     }
   }
 
-  // Check exception_ only after the pipe read above has returned.
-  // finalizeFailure() writes exception_ before closing the pipe, so the
-  // pipe close → pipe read provides the happens-before ordering that
-  // makes reading exception_ safe here.
   if (exception_) {
     co_yield folly::coro::co_error(*exception_);
   }
@@ -441,7 +447,7 @@ AsyncMultiQueryStreamHandler::co_fetchOneRow(StreamedQueryResult& result) {
         co_return std::move(*itemTry);
       } catch (const QueryException& ex) {
         resume_cb_.reset();
-        setResultException(result, std::make_unique<QueryException>(ex));
+        setResultException(result, folly::exception_wrapper(ex));
       }
 
       if (resultException(result)) {
@@ -489,13 +495,14 @@ void AsyncMultiQueryStreamHandler::finalizeSuccess() {
 }
 
 void AsyncMultiQueryStreamHandler::finalizeFailure(FetchOperation& op) {
-  exception_ = std::make_unique<QueryException>(
-      op.numCurrentQuery(),
-      op.result(),
-      op.mysql_errno(),
-      op.mysql_error(),
-      op.connection()->getKey(),
-      op.opElapsed());
+  exception_.try_emplace(
+      folly::make_exception_wrapper<QueryException>(
+          op.numCurrentQuery(),
+          op.result(),
+          op.mysql_errno(),
+          op.mysql_error(),
+          op.connection()->getKey(),
+          op.opElapsed()));
 
   if (current_backend_result_) {
     setResultFinalData(
@@ -534,6 +541,9 @@ void AsyncMultiQueryStreamHandler::streamCallback(
     }
 
     case StreamState::QueryEnded:
+      if (operation_->hasMoreResults()) {
+        op.pauseForConsumer();
+      }
       finalizeQuery(op);
       break;
 
@@ -616,7 +626,7 @@ std::optional<EphemeralRow> SyncMultiQueryStreamHandler::fetchOneRow(
       if (current_backend_result_) {
         clearResultHandler(result);
       }
-      throw *exception_;
+      exception_->throw_exception();
     }
 
     // Wait for the next callback to signal us
@@ -667,13 +677,14 @@ void SyncMultiQueryStreamHandler::streamCallback(
       break;
 
     case StreamState::Failure:
-      exception_ = std::make_unique<QueryException>(
-          op.numCurrentQuery(),
-          op.result(),
-          op.mysql_errno(),
-          op.mysql_error(),
-          op.connection()->getKey(),
-          op.opElapsed());
+      exception_.try_emplace(
+          folly::make_exception_wrapper<QueryException>(
+              op.numCurrentQuery(),
+              op.result(),
+              op.mysql_errno(),
+              op.mysql_error(),
+              op.connection()->getKey(),
+              op.opElapsed()));
       sync_state_.store(SyncState::Failure, std::memory_order_release);
       data_ready_baton_.post();
       break;
@@ -696,14 +707,14 @@ SyncMultiQueryStreamHandler::syncNextQuery() {
   // If we've already seen a terminal state, don't wait for more callbacks
   if (sync_done_) {
     if (exception_) {
-      throw *exception_;
+      exception_->throw_exception();
     }
     return nullptr;
   }
 
   if (exception_) {
     sync_done_ = true;
-    throw *exception_;
+    exception_->throw_exception();
   }
 
   while (true) {
@@ -725,7 +736,7 @@ SyncMultiQueryStreamHandler::syncNextQuery() {
 
     if (state == SyncState::Failure) {
       sync_done_ = true;
-      throw *exception_;
+      exception_->throw_exception();
     }
 
     // RowsReady or QueryEnded can appear here if the previous result's

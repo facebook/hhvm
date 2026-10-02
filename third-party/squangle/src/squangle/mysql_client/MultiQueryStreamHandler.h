@@ -8,8 +8,10 @@
 
 #pragma once
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/coro/Task.h>
 #include <folly/synchronization/Baton.h>
+#include <folly/synchronization/DelayedInit.h>
 
 #include "squangle/mysql_client/AsyncPipeUsingGenerator.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
@@ -113,7 +115,7 @@ class StreamedQueryResult {
           warnings_count{warnings_count} {}
   };
 
-  void checkFinalData() const;
+  const FinalData& checkFinalData() const;
 
   void setFinalData(FinalData final_data);
 
@@ -122,9 +124,9 @@ class StreamedQueryResult {
 
   AsyncPipeUsingGenerator<EphemeralRow> pipe_;
 
-  std::optional<FinalData> final_data_;
+  folly::DelayedInit<FinalData> final_data_;
   std::shared_ptr<RowFields> row_fields_;
-  std::unique_ptr<QueryException> exception_;
+  folly::DelayedInit<folly::exception_wrapper> exception_;
 
   // Back-pointer to the owning handler.  StreamedQueryResult delegates
   // row-level operations (nextRow, drain) to virtual methods on the
@@ -183,6 +185,8 @@ class MultiQueryStreamHandler {
 
   Connection& connection() const;
 
+  const QueryException& asQueryException() const;
+
   // Start the operation.
   void start();
 
@@ -211,7 +215,7 @@ class MultiQueryStreamHandler {
   void clearResultHandler(StreamedQueryResult& result);
   void setResultException(
       StreamedQueryResult& result,
-      std::unique_ptr<QueryException> ex);
+      folly::exception_wrapper ex);
   void setResultFinalData(
       StreamedQueryResult& result,
       int64_t num_affected_rows,
@@ -221,11 +225,12 @@ class MultiQueryStreamHandler {
       unsigned int warnings_count);
   AsyncPipeUsingGenerator<EphemeralRow>& resultRowPipe(
       StreamedQueryResult& result);
-  std::unique_ptr<QueryException>& resultException(StreamedQueryResult& result);
+  const folly::DelayedInit<folly::exception_wrapper>& resultException(
+      StreamedQueryResult& result);
 
   // Common members
   std::shared_ptr<MultiQueryStreamOperation> operation_;
-  std::unique_ptr<QueryException> exception_;
+  folly::DelayedInit<folly::exception_wrapper> exception_;
 
   std::shared_ptr<StreamedQueryResult> current_user_result_;
   std::shared_ptr<StreamedQueryResult> current_backend_result_;

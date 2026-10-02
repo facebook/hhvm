@@ -43,11 +43,12 @@ void MultiQueryStreamOperation::notifyRowsReady() {
   invokeCallback(StreamState::RowsReady);
 }
 
-bool MultiQueryStreamOperation::notifyQuerySuccess(bool) {
+bool MultiQueryStreamOperation::notifyQuerySuccess(bool more_results) {
   // Query Boundary, only for streaming to allow the user to read from the
   // connection.
   // This will allow pause in the end of the query. End of operations don't
   // allow.
+  more_results_ = more_results;
   invokeCallback(StreamState::QueryEnded);
   return true;
 }

@@ -639,8 +639,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt Config_keys.Hhconfig.allow_class_string_cast config)
     ?class_pointer_ban_class_array_key:
       (bool_opt Config_keys.Hhconfig.class_pointer_ban_class_array_key config)
-    ?tco_class_pointer_array_write_keys:
-      (int_opt Config_keys.Hhconfig.class_pointer_array_write_keys config)
     ?tco_class_pointer_tyvar_lower_bound:
       (int_opt Config_keys.Hhconfig.class_pointer_tyvar_lower_bound config)
     ?tco_class_pointer_tyvar_lower_bound_source_level:

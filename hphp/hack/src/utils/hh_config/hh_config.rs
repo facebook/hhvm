@@ -645,10 +645,6 @@ impl HhConfig {
                 "class_pointer_ban_class_array_key",
                 default.class_pointer_ban_class_array_key,
             )?,
-            tco_class_pointer_array_write_keys: hhconfig.get_int_or(
-                "class_pointer_array_write_keys",
-                default.tco_class_pointer_array_write_keys,
-            )?,
             tco_class_pointer_tyvar_lower_bound: hhconfig.get_int_or(
                 "class_pointer_tyvar_lower_bound",
                 default.tco_class_pointer_tyvar_lower_bound,

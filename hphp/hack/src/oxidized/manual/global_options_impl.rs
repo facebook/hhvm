@@ -157,7 +157,6 @@ impl Default for GlobalOptions {
             strict_consistent_construct: false,
             allow_class_string_cast: true,
             class_pointer_ban_class_array_key: false,
-            tco_class_pointer_array_write_keys: 0,
             tco_class_pointer_tyvar_lower_bound: 0,
             tco_class_pointer_tyvar_lower_bound_source_level: 0,
             tco_class_pointer_tyvar_upper_bound: 0,

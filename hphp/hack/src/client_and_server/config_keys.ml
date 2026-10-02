@@ -91,8 +91,6 @@ module Hhconfig = struct
 
   let class_class_type = key "class_class_type"
 
-  let class_pointer_array_write_keys = key "class_pointer_array_write_keys"
-
   let class_pointer_tyvar_lower_bound = key "class_pointer_tyvar_lower_bound"
 
   let class_pointer_tyvar_lower_bound_source_level =

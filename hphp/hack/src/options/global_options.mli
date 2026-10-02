@@ -320,8 +320,6 @@ type t = {
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
-  tco_class_pointer_array_write_keys: int;
-      (** Infer classname<T> for the index of $d[$c] = 1 when $c: class<T>  *)
   tco_class_pointer_tyvar_lower_bound: int;
       (** widen class<T> lower bounds for string-ish type variables *)
   tco_class_pointer_tyvar_lower_bound_source_level: int;
@@ -447,7 +445,6 @@ val set :
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_class_array_key:bool ->
-  ?tco_class_pointer_array_write_keys:int ->
   ?tco_class_pointer_tyvar_lower_bound:int ->
   ?tco_class_pointer_tyvar_lower_bound_source_level:int ->
   ?tco_class_pointer_tyvar_upper_bound:int ->

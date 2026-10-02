@@ -208,7 +208,6 @@ type t = {
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_class_array_key: bool;
-  tco_class_pointer_array_write_keys: int;
   tco_class_pointer_tyvar_lower_bound: int;
   tco_class_pointer_tyvar_lower_bound_source_level: int;
   tco_class_pointer_tyvar_upper_bound: int;
@@ -332,7 +331,6 @@ let default =
     strict_consistent_construct = false;
     allow_class_string_cast = true;
     class_pointer_ban_class_array_key = false;
-    tco_class_pointer_array_write_keys = 0;
     tco_class_pointer_tyvar_lower_bound = 0;
     tco_class_pointer_tyvar_lower_bound_source_level = 0;
     tco_class_pointer_tyvar_upper_bound = 0;
@@ -453,7 +451,6 @@ let set
     ?strict_consistent_construct
     ?allow_class_string_cast
     ?class_pointer_ban_class_array_key
-    ?tco_class_pointer_array_write_keys
     ?tco_class_pointer_tyvar_lower_bound
     ?tco_class_pointer_tyvar_lower_bound_source_level
     ?tco_class_pointer_tyvar_upper_bound
@@ -784,10 +781,6 @@ let set
       setting
         class_pointer_ban_class_array_key
         options.class_pointer_ban_class_array_key;
-    tco_class_pointer_array_write_keys =
-      setting
-        tco_class_pointer_array_write_keys
-        options.tco_class_pointer_array_write_keys;
     tco_class_pointer_tyvar_lower_bound =
       setting
         tco_class_pointer_tyvar_lower_bound

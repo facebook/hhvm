@@ -207,12 +207,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
 
 let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   let coerce_set_value env ty =
-    Typing_class_pointers.coerce_to_name
-      ~level:
-        (Typechecker_options.tco_class_pointer_array_write_keys
-           (Env.get_tcopt env))
-      env
-      ty
+    Typing_class_pointers.coerce_to_name ~level:3 env ty
   in
   let ((env, ty_err1), ty1) =
     Typing_solver.expand_type_and_narrow

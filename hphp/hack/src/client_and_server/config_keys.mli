@@ -86,8 +86,6 @@ module Hhconfig : sig
 
   val class_class_type : string
 
-  val class_pointer_array_write_keys : string
-
   val class_pointer_tyvar_lower_bound : string
 
   val class_pointer_tyvar_lower_bound_source_level : string

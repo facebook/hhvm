@@ -310,9 +310,6 @@ let allow_class_string_cast t = t.Global_options.allow_class_string_cast
 let class_pointer_ban_class_array_key t =
   t.Global_options.class_pointer_ban_class_array_key
 
-let tco_class_pointer_array_write_keys t =
-  t.Global_options.tco_class_pointer_array_write_keys
-
 let tco_class_pointer_tyvar_lower_bound t =
   t.Global_options.tco_class_pointer_tyvar_lower_bound
 

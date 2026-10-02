@@ -13450,14 +13450,7 @@ end = struct
         let (env, te, ty) =
           Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
         in
-        let (env, ty) =
-          Typing_class_pointers.coerce_to_name
-            ~level:
-              (Typechecker_options.tco_class_pointer_array_write_keys
-                 env.genv.tcopt)
-            env
-            ty
-        in
+        let (env, ty) = Typing_class_pointers.coerce_to_name ~level:3 env ty in
         let parent_lenv = env.lenv in
         let (env, te1, ty1) =
           Expr.update_array_type

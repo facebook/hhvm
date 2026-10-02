@@ -1,12 +1,12 @@
-ERROR: File "array_write_key.php", line 18, characters 5-8:
+ERROR: File "array_write_key_union.php", line 18, characters 5-8:
 It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key.php", line 13, characters 22-29:
+  File "array_write_key_union.php", line 13, characters 22-29:
   Definition is here
-ERROR: File "array_write_key.php", line 31, characters 5-10:
+ERROR: File "array_write_key_union.php", line 31, characters 5-10:
 It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key.php", line 23, characters 3-10:
+  File "array_write_key_union.php", line 23, characters 3-10:
   Definition is here
-ERROR: File "array_write_key.php", line 44, characters 5-10:
+ERROR: File "array_write_key_union.php", line 44, characters 5-10:
 It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key.php", line 36, characters 3-10:
+  File "array_write_key_union.php", line 36, characters 3-10:
   Definition is here

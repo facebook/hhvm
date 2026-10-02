@@ -1436,6 +1436,18 @@ end = struct
         Typing_defs_core.decl_phase Typing_defs_core.ty S_map.t S_map.t;
     }
 
+    module Projection = struct
+      module Minimal = struct
+        type t =
+          | This of string list
+          | Class of string * string list
+        [@@deriving ord]
+      end
+
+      include Minimal
+      module Set = Stdlib.Set.Make (Minimal)
+    end
+
     (* -- Application ------------------------------------------------------- *)
     let apply { this_name; this_ty; this_subst; class_subst; _ } ty =
       let on_ty ty ~ctx =
@@ -1443,43 +1455,52 @@ end = struct
         match get_node ty with
         | Tthis -> (ctx, `Stop this_ty)
         | Taccess (root_ty, ty_const) -> begin
-          (* Try and find a substibution for this type *)
+          (* Try and find a substitution for this type *)
           let (root_ty, path) = access_path root_ty [ty_const] in
-          let key = String.concat ~sep:"::" (List.map ~f:snd path) in
-          if S_set.mem key ctx then
-            (* If we have made this subsitution before doing so again will
-               cause us to never terminate so we bail; in practice the
-               type constant cycle check should already have caught this
-               TODO(mjt) add error *)
-            (ctx, `Stop ty)
-          else
-            (* Try and find a substitution *)
-            let subst_ty_opt =
-              match get_node root_ty with
-              | Tthis ->
-                let ty_opt = S_map.find_opt key this_subst in
-                if Option.is_some ty_opt then
-                  ty_opt
-                else
-                  let subst_opt = S_map.find_opt this_name class_subst in
-                  Option.bind subst_opt ~f:(fun subst ->
-                      let key =
-                        String.concat ~sep:"::" (List.map ~f:snd path)
-                      in
-                      S_map.find_opt key subst)
-              | Tapply ((_, class_name), _) ->
-                let subst_opt = S_map.find_opt class_name class_subst in
-                Option.bind subst_opt ~f:(fun subst -> S_map.find_opt key subst)
-              | _ -> None
-            in
-            (* If there is no subsitution, stop; if there is record that we've
-               seen the source key before and restart the rewrite *)
-            Option.value_map
-              subst_ty_opt
-              ~default:(ctx, `Stop ty)
-              ~f:(fun ty ->
-                let ctx = S_set.add key ctx in
-                (ctx, `Restart ty))
+          let path = List.map ~f:snd path in
+          let key = String.concat ~sep:"::" path in
+          let projection_opt =
+            match get_node root_ty with
+            | Tthis -> Some (Projection.This path)
+            | Tapply ((_, class_name), _) ->
+              Some (Projection.Class (class_name, path))
+            | _ -> None
+          in
+          Option.value_map
+            projection_opt
+            ~default:(ctx, `Stop ty)
+            ~f:(fun projection ->
+              if Projection.Set.mem projection ctx then
+                (* If we have made this substitution before doing so again will
+                   cause us to never terminate so we bail; in practice the
+                   type constant cycle check should already have caught this
+                   TODO(mjt) add error *)
+                (ctx, `Stop ty)
+              else
+                (* Try and find a substitution *)
+                let subst_ty_opt =
+                  match projection with
+                  | Projection.This _ ->
+                    let ty_opt = S_map.find_opt key this_subst in
+                    if Option.is_some ty_opt then
+                      ty_opt
+                    else
+                      let subst_opt = S_map.find_opt this_name class_subst in
+                      Option.bind subst_opt ~f:(fun subst ->
+                          S_map.find_opt key subst)
+                  | Projection.Class (class_name, _) ->
+                    let subst_opt = S_map.find_opt class_name class_subst in
+                    Option.bind subst_opt ~f:(fun subst ->
+                        S_map.find_opt key subst)
+                in
+                (* If there is no substitution, stop; if there is record that we've
+                   seen the source key before and restart the rewrite *)
+                Option.value_map
+                  subst_ty_opt
+                  ~default:(ctx, `Stop ty)
+                  ~f:(fun ty ->
+                    let ctx = Projection.Set.add projection ctx in
+                    (ctx, `Restart ty)))
         end
         | _ -> (ctx, `Continue ty)
       and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
@@ -1487,7 +1508,7 @@ end = struct
         ty
         ~on_ty
         ~on_rc_bound
-        ~ctx:S_set.empty
+        ~ctx:Projection.Set.empty
 
     let apply_fun_ty t fun_ty =
       let open Typing_defs_core in

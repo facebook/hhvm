@@ -1,0 +1,6 @@
+ERROR: File "static_meth_resolve_aliases.php", line 84, characters 3-99:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "static_meth_resolve_aliases.php", line 79, characters 44-47:
+  Expected `void`
+  File "static_meth_resolve_aliases.php", line 85, characters 58-61:
+  But got `dynamic`

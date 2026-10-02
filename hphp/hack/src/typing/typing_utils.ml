@@ -425,7 +425,16 @@ let get_newtype_sub_opt env name tyargs =
     (env, None)
 
 let get_newtype_super env r name tyargs =
-  if Env.is_enum env name then
+  (* Special case for supportdyn<T>: use the localized arg directly
+     to avoid supportdynamic.hhi leaking into reasons. This applies even when
+     the typedef is unbound: under everything_sdt the unbound fallthrough
+     below returns supportdyn<mixed>, which does not reduce supportdyn itself
+     and sends subtyping into an infinite loop. *)
+  if String.equal name SN.Classes.cSupportDyn then
+    match tyargs with
+    | [ty] -> (env, ty)
+    | _ -> (env, Typing_make_type.mixed r)
+  else if Env.is_enum env name then
     match Env.get_enum_constraint env name with
     | Decl_entry.Found (Some ty) ->
       let ((env, _err), ty) = localize ~ety_env:empty_expand_env env ty in
@@ -442,33 +451,26 @@ let get_newtype_super env r name tyargs =
   else begin
     match Env.get_typedef env name with
     | Decl_entry.Found td
-      when (not (Typing_reason.Predicates.is_opaque_type_from_module r))
-           || String.equal name SN.Classes.cSupportDyn ->
-      (* Special case for supportdyn<T>: use the localized arg directly
-         to avoid supportdynamic.hhi leaking into reasons *)
-      if String.equal name SN.Classes.cSupportDyn then
-        (env, List.hd_exn tyargs)
-      else begin
-        let decl_cstr =
-          match td.td_as_constraint with
-          | None ->
-            MakeType.mixed (Reason.implicit_upper_bound (td.td_pos, "?nonnull"))
-          | Some cstr -> cstr
-        in
-        let substs = Decl_subst.make_locl td.td_tparams tyargs in
-        let ety_env = { empty_expand_env with substs } in
-        let ((env, _err), bound) = localize ~ety_env env decl_cstr in
-        ( env,
-          (* It's not helpful to report the trivial bound for FunctionRef. Also,
-           * preserve the reason for opaque types created during localization *)
-          if
-            String.equal name Naming_special_names.Classes.cFunctionRef
-            || Typing_reason.Predicates.is_opaque_type_from_module r
-          then
-            with_reason bound r
-          else
-            bound )
-      end
+      when not (Typing_reason.Predicates.is_opaque_type_from_module r) ->
+      let decl_cstr =
+        match td.td_as_constraint with
+        | None ->
+          MakeType.mixed (Reason.implicit_upper_bound (td.td_pos, "?nonnull"))
+        | Some cstr -> cstr
+      in
+      let substs = Decl_subst.make_locl td.td_tparams tyargs in
+      let ety_env = { empty_expand_env with substs } in
+      let ((env, _err), bound) = localize ~ety_env env decl_cstr in
+      ( env,
+        (* It's not helpful to report the trivial bound for FunctionRef. Also,
+         * preserve the reason for opaque types created during localization *)
+        if
+          String.equal name Naming_special_names.Classes.cFunctionRef
+          || Typing_reason.Predicates.is_opaque_type_from_module r
+        then
+          with_reason bound r
+        else
+          bound )
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable
     | _ ->

@@ -5568,14 +5568,7 @@ end = struct
       ((_, pos, _) as x) =
     let (env, (te, ty)) = array_value ~expected env x in
     (* A class pointer in a key position is used for its name. *)
-    let (env, ty) =
-      Typing_class_pointers.coerce_to_name
-        ~level:
-          (Typechecker_options.tco_class_pointer_array_literal_keys
-             env.genv.tcopt)
-        env
-        ty
-    in
+    let (env, ty) = Typing_class_pointers.coerce_to_name ~level:3 env ty in
     let (ty_arraykey, reason) =
       if is_set then
         ( MakeType.arraykey (Reason.idx_set_element pos),

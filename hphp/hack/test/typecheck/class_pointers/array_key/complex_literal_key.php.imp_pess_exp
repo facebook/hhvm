@@ -1,5 +1,5 @@
 File "complex_literal_key.php--main.php", line 23, characters 3-13:
-  dict<(class<A> | classname<B>), int>
+  dict<classname<(A | B)>, int>
 File "complex_literal_key.php--main.php", line 30, characters 3-13:
   dict<string, int>
 ERROR: File "complex_literal_key.php--main.php", line 8, characters 5-6:
@@ -9,4 +9,16 @@ It is no longer allowed to use a `classname<A>` in this position. Please use a `
 ERROR: File "complex_literal_key.php--main.php", line 16, characters 5-6:
 It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
   File "complex_literal_key.php--main.php", line 12, characters 34-41:
+  Definition is here
+ERROR: File "complex_literal_key.php--main.php", line 36, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "complex_literal_key.php--main.php", line 33, characters 39-39:
+  Definition is here
+ERROR: File "complex_literal_key.php--main.php", line 46, characters 7-8:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "complex_literal_key.php--main.php", line 43, characters 29-32:
+  Definition is here
+ERROR: File "complex_literal_key.php--main.php", line 54, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+  File "complex_literal_key.php--main.php", line 51, characters 25-34:
   Definition is here

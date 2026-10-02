@@ -11,6 +11,7 @@ class B {
 }
 
 newtype OpaqueClsA as class<A> = class<A>;
+newtype OpaqueArraykey as arraykey = string;
 
 ////main.php
 <?hh
@@ -41,6 +42,7 @@ function union_with_string(class<A> $a, string $s, bool $cond): void {
 
 function generic_bound<T as class<A>>(T $c): void {
   $d = dict[$c => 1];
+  hh_show($d);
 }
 
 abstract class HasTypeConstant {
@@ -48,9 +50,21 @@ abstract class HasTypeConstant {
 
   public function key(this::TCls $c): void {
     $d = dict[$c => 1];
+    hh_show($d);
   }
 }
 
 function opaque_newtype(OpaqueClsA $c): void {
   $d = dict[$c => 1];
+  hh_show($d);
+}
+
+function generic_arraykey<T as arraykey>(T $key): void {
+  $d = dict[$key => 1];
+  hh_show($d);
+}
+
+function opaque_arraykey(OpaqueArraykey $key): void {
+  $d = dict[$key => 1];
+  hh_show($d);
 }

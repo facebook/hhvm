@@ -745,6 +745,134 @@ void expectPureLoadSunkToMid(const PureLoadSinkLinearContext& ctx) {
     << stripWhitespace(show(ctx.unit));
 }
 
+void testSinkDefsPureLoadSinksWithPhysicalBase() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const exit = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout ve(unit, exit);
+
+    auto const cand = Vreg64{v.makeReg()};
+    auto const out = Vreg64{ve.makeReg()};
+
+    v.setOrigin(loadOrigin);
+    v << load{rvmfp()[0], cand};
+    v.setOrigin(nullptr);
+    v << jmp{exit};
+
+    ve << copy{cand, out};
+    ve << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    EXPECT_FALSE(findLoadDef(unit.blocks[unit.entry], cand).has_value())
+      << stripWhitespace(show(unit));
+    auto const exitLoad = expectOnlyLoadDefInBlock(unit, exit, cand);
+    ASSERT_TRUE(exitLoad.has_value()) << stripWhitespace(show(unit));
+    ASSERT_TRUE(findUse(unit, unit.blocks[exit], cand, *exitLoad + 1).has_value())
+      << stripWhitespace(show(unit));
+  }
+}
+
+void testSinkDefsPureLoadStopsBeforeExplicitPhysicalClobber() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const mid = unit.makeBlock(AreaIndex::Main, 1);
+    auto const exit = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vm(unit, mid);
+    Vout ve(unit, exit);
+
+    auto const cand = Vreg64{v.makeReg()};
+    auto const out = Vreg64{ve.makeReg()};
+
+    v.setOrigin(loadOrigin);
+    v << load{rvmfp()[0], cand};
+    v.setOrigin(nullptr);
+    v << jmp{mid};
+
+    vm << copy{rvmsp(), rvmfp()};
+    vm << jmp{exit};
+
+    ve << copy{cand, out};
+    ve << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    EXPECT_FALSE(findLoadDef(unit.blocks[unit.entry], cand).has_value())
+      << stripWhitespace(show(unit));
+    auto const midLoad = expectOnlyLoadDefInBlock(unit, mid, cand);
+    ASSERT_TRUE(midLoad.has_value()) << stripWhitespace(show(unit));
+    ASSERT_LT(*midLoad + 1, unit.blocks[mid].code.size());
+    EXPECT_EQ(unit.blocks[mid].code[*midLoad + 1].op, Vinstr::copy);
+    EXPECT_FALSE(findLoadDef(unit.blocks[exit], cand).has_value())
+      << stripWhitespace(show(unit));
+  }
+}
+
+void testSinkDefsPureLoadStopsBeforeImplicitPhysicalClobber() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const mid = unit.makeBlock(AreaIndex::Main, 1);
+    auto const exit = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vm(unit, mid);
+    Vout ve(unit, exit);
+
+    auto const cand = Vreg64{v.makeReg()};
+    auto const out = Vreg64{ve.makeReg()};
+
+    v.setOrigin(loadOrigin);
+    v << load{rarg(0)[0], cand};
+    v.setOrigin(nullptr);
+    v << jmp{mid};
+
+    vm << call{TCA(sinkDefsTestHelper), RegSet{}};
+    vm << jmp{exit};
+
+    ve << copy{cand, out};
+    ve << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    EXPECT_FALSE(findLoadDef(unit.blocks[unit.entry], cand).has_value())
+      << stripWhitespace(show(unit));
+    auto const midLoad = expectOnlyLoadDefInBlock(unit, mid, cand);
+    ASSERT_TRUE(midLoad.has_value()) << stripWhitespace(show(unit));
+    ASSERT_LT(*midLoad + 1, unit.blocks[mid].code.size());
+    EXPECT_EQ(unit.blocks[mid].code[*midLoad + 1].op, Vinstr::call);
+    EXPECT_FALSE(findLoadDef(unit.blocks[exit], cand).has_value())
+      << stripWhitespace(show(unit));
+  }
+}
+
 void testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin() {
   testSinkDefsLocalPureLoadLinear(
     0,
@@ -1082,6 +1210,9 @@ TEST(Vasm, Simplifier) {
   testSinkDefsKeepsDefsOutOfHotterBlocks();
   testSinkDefsFallsBackToLegalDominator();
   testSinkDefsMovesDefsWithDeadSF();
+  testSinkDefsPureLoadSinksWithPhysicalBase();
+  testSinkDefsPureLoadStopsBeforeExplicitPhysicalClobber();
+  testSinkDefsPureLoadStopsBeforeImplicitPhysicalClobber();
   testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin();
   testSinkDefsPureLoadSinksAfterUserMoves();
   testSinkDefsPureLoadStopsBeforeClobberingStore();

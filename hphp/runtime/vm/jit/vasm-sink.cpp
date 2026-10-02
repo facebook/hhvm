@@ -53,6 +53,7 @@ struct SinkMove {
 struct SinkDefInfo {
   Vreg def;
   AliasClass loadSrc{AEmpty};
+  RegSet physUses;
   bool isPureLoad{false};
 };
 
@@ -82,7 +83,7 @@ bool isSinkableDef(const Vunit& unit,
   if (inst.op == Vinstr::ssaalias) return false;
 
   auto defs = size_t{0};
-  auto touchesPhys = false;
+  auto definesPhys = false;
   auto touchesFlags = false;
   auto const noteUse = [&] (Vreg r, Width w) {
     if (!r.isValid()) return;
@@ -90,7 +91,7 @@ bool isSinkableDef(const Vunit& unit,
       touchesFlags = true;
       return;
     }
-    if (r.isPhys()) touchesPhys = true;
+    if (r.isPhys()) info.physUses |= r.physReg();
   };
   auto const noteDef = [&] (Vreg r, Width w) {
     if (!r.isValid()) return;
@@ -107,7 +108,7 @@ bool isSinkableDef(const Vunit& unit,
       }
       return;
     }
-    if (r.isPhys()) touchesPhys = true;
+    if (r.isPhys()) definesPhys = true;
   };
 
   visitUses(unit, inst, noteUse);
@@ -120,13 +121,12 @@ bool isSinkableDef(const Vunit& unit,
 
   RegSet implicitUses, implicitAcross, implicitDefs;
   getEffects(abi, inst, implicitUses, implicitAcross, implicitDefs);
-  if (!implicitUses.empty() || !implicitAcross.empty() || !implicitDefs.empty()) {
-    touchesPhys = true;
-  }
+  info.physUses |= implicitUses | implicitAcross;
+  if (!implicitDefs.empty()) definesPhys = true;
 
   return
     !touchesFlags &&
-    !touchesPhys &&
+    !definesPhys &&
     defs == 1 &&
     info.def.isValid() &&
     !info.def.isPhys() &&
@@ -139,6 +139,21 @@ bool isSinkableDef(const Vunit& unit,
  */
 bool loadClobberedBy(const Vinstr& barrier, const AliasClass& loadSrc) {
   return mem_writes_for_inst(barrier).maybe(loadSrc);
+}
+
+bool physRegsClobberedBy(const Vunit& unit,
+                         const Abi& abi,
+                         const Vinstr& barrier,
+                         const RegSet& physUses) {
+  auto clobbered = false;
+  visitDefs(unit, barrier, [&] (Vreg r) {
+    if (r.isPhys() && physUses.contains(r.physReg())) clobbered = true;
+  });
+  if (clobbered) return true;
+
+  RegSet implicitUses, implicitAcross, implicitDefs;
+  getEffects(abi, barrier, implicitUses, implicitAcross, implicitDefs);
+  return !(implicitDefs & physUses).empty();
 }
 
 size_t blockInsertIndex(const Vblock& block) {
@@ -159,19 +174,25 @@ bool targetIsHotter(const Vblock& src, const Vblock& target) {
   return target.area_idx < src.area_idx || target.weight > src.weight;
 }
 
-bool pathClobbersLoad(const Vunit& unit,
-                      const SinkAnalysis& analysis,
-                      Vlabel src,
-                      size_t srcIdx,
-                      Vlabel target,
-                      const AliasClass& loadSrc,
-                      boost::dynamic_bitset<>& seen,
-                      jit::vector<Vlabel>& worklist) {
+template<class ClobberedBy>
+bool pathHasClobber(const Vunit& unit,
+                    const SinkAnalysis& analysis,
+                    Vlabel src,
+                    size_t srcIdx,
+                    Vlabel target,
+                    ClobberedBy clobberedBy,
+                    boost::dynamic_bitset<>& seen,
+                    jit::vector<Vlabel>& worklist) {
   assertx(src != target);
 
   auto const& srcCode = unit.blocks[src].code;
   for (auto i = srcIdx + 1; i < srcCode.size(); ++i) {
-    if (loadClobberedBy(srcCode[i], loadSrc)) return true;
+    if (clobberedBy(srcCode[i])) return true;
+  }
+
+  auto const& targetBlock = unit.blocks[target];
+  for (auto i = size_t{0}; i < blockInsertIndex(targetBlock); ++i) {
+    if (clobberedBy(targetBlock.code[i])) return true;
   }
 
   seen.reset();
@@ -197,7 +218,7 @@ bool pathClobbersLoad(const Vunit& unit,
     worklist.pop_back();
 
     for (auto const& inst : unit.blocks[b].code) {
-      if (loadClobberedBy(inst, loadSrc)) return true;
+      if (clobberedBy(inst)) return true;
     }
 
     for (auto const pred : analysis.preds[b]) {
@@ -209,6 +230,7 @@ bool pathClobbersLoad(const Vunit& unit,
 }
 
 bool canSinkToTarget(const Vunit& unit,
+                     const Abi& abi,
                      const SinkAnalysis& analysis,
                      Vlabel src,
                      size_t srcIdx,
@@ -217,14 +239,19 @@ bool canSinkToTarget(const Vunit& unit,
                      boost::dynamic_bitset<>& seen,
                      jit::vector<Vlabel>& worklist) {
   if (targetIsHotter(unit.blocks[src], unit.blocks[target])) return false;
-  if (info.isPureLoad &&
-      pathClobbersLoad(
+  if ((info.isPureLoad || !info.physUses.empty()) &&
+      pathHasClobber(
         unit,
         analysis,
         src,
         srcIdx,
         target,
-        info.loadSrc,
+        [&] (const Vinstr& barrier) {
+          return
+            (info.isPureLoad && loadClobberedBy(barrier, info.loadSrc)) ||
+            (!info.physUses.empty() &&
+             physRegsClobberedBy(unit, abi, barrier, info.physUses));
+        },
         seen,
         worklist
       )) {
@@ -235,6 +262,7 @@ bool canSinkToTarget(const Vunit& unit,
 }
 
 Vlabel findSinkTarget(const Vunit& unit,
+                      const Abi& abi,
                       const SinkAnalysis& analysis,
                       Vlabel src,
                       size_t srcIdx,
@@ -254,6 +282,7 @@ Vlabel findSinkTarget(const Vunit& unit,
   while (target != src) {
     if (canSinkToTarget(
           unit,
+          abi,
           analysis,
           src,
           srcIdx,
@@ -333,6 +362,7 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
       }
       target = findSinkTarget(
         unit,
+        abi,
         analysis,
         b,
         idx,

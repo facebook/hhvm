@@ -534,7 +534,8 @@ end = struct
 end
 
 (* -- Exact field-bound evaluation -------------------------------------------
-   Normalize shape bounds and project them under the curren assignment.
+   Once dependencies have been planned, normalize shape bounds and project
+   them under the current assignment.
    -------------------------------------------------------------------------- *)
 module Field_bounds : sig
   module Upper : sig
@@ -1043,9 +1044,7 @@ module Analysis : sig
   end
 
   module Cache : sig
-    type t = {
-      dependencies: Dependency.t list Env_memo.entry Splat_elem.Map.t ref;
-    }
+    type t
 
     val create : unit -> t
   end
@@ -1173,12 +1172,19 @@ end = struct
         Cycle_info.members info
   end
 
+  module Bound_summary = struct
+    type t = {
+      dependencies: Dependency.t list;
+      labels: TShapeSet.t;
+    }
+  end
+
   module Cache = struct
     type t = {
-      dependencies: Dependency.t list Env_memo.entry Splat_elem.Map.t ref;
+      bound_summaries: Bound_summary.t Env_memo.entry Splat_elem.Map.t ref;
     }
 
-    let create () = { dependencies = ref Splat_elem.Map.empty }
+    let create () = { bound_summaries = ref Splat_elem.Map.empty }
   end
 
   type t = {
@@ -1196,81 +1202,140 @@ end = struct
 
   let edge_visits analysis = analysis.edge_visits
 
-  let classified_upper_dependencies bounds_cache env source r =
-    let rec indirect_dependencies env ty =
-      let (env, ty) = Bound_lookup.strip_supportdyn env ty in
-      match get_node ty with
-      | Tgeneric _ -> (env, [(ty, Dependency.Indirect_upper)])
-      | Tnewtype (name, _, _)
-        when not (String.equal name Naming_special_names.Classes.cSupportDyn) ->
-        (env, [(ty, Dependency.Indirect_upper)])
-      | Tshape shape_ty ->
-        let (env, _err, normalized) =
-          Typing_shape_normalize.Row.normalize ~on_error:None r shape_ty env
-        in
-        Typing_shape_normalize.Row.fold_normalized
-          normalized
-          ~row:(fun row ->
-            ( env,
-              List.map (Row.spread_elements row) ~f:(fun target ->
-                  (target, Dependency.Nested_upper)) ))
-          ~union:(indirect_dependencies_of_tys env)
-          ~intersection:(indirect_dependencies_of_tys env)
-      | Tunion tys
-      | Tintersection tys ->
-        indirect_dependencies_of_tys env tys
-      | _ -> (env, [])
-    and indirect_dependencies_of_tys env tys =
-      let (env, dependencies) =
-        List.fold_map tys ~init:env ~f:indirect_dependencies
+  (* Planning must not normalize a recursive bound. Shape normalization asks
+     whether opaque operands are [nothing], which calls subtyping and can
+     re-enter this decision procedure once for every expansion path. Instead,
+     collect the assignment-independent facts needed by planning directly from
+     localized type syntax: spread dependencies and explicit labels. *)
+  type scan = {
+    rev_dependencies: Dependency.t list;
+    labels: TShapeSet.t;
+  }
+
+  let empty_scan = { rev_dependencies = []; labels = TShapeSet.empty }
+
+  let add_dependency ~source ~target ~kind scan =
+    {
+      scan with
+      rev_dependencies =
+        Dependency.make ~source ~target ~kind :: scan.rev_dependencies;
+    }
+
+  let add_labels fields scan =
+    {
+      scan with
+      labels =
+        TShapeMap.fold
+          (fun label _ labels -> TShapeSet.add label labels)
+          fields
+          scan.labels;
+    }
+
+  let rec scan_shape ~source ~kind env scan = function
+    | Shape_simple { s_fields; _ } -> (env, add_labels s_fields scan)
+    | Shape_splat { ss_elems } ->
+      scan_nested_tys ~source ~kind env scan ss_elems
+
+  and scan_nested_ty ~source ~kind env scan ty =
+    let (env, ty) = Typing_env.expand_type env ty in
+    let (env, ty) = Bound_lookup.strip_supportdyn env ty in
+    match get_node ty with
+    | Tgeneric _
+    | Tnewtype _ ->
+      (env, add_dependency ~source ~target:ty ~kind scan)
+    | Tshape shape_ty -> scan_shape ~source ~kind env scan shape_ty
+    | Tunion tys
+    | Tintersection tys ->
+      scan_nested_tys ~source ~kind env scan tys
+    | _ -> (env, scan)
+
+  and scan_nested_tys ~source ~kind env scan tys =
+    List.fold_left tys ~init:(env, scan) ~f:(fun (env, scan) ty ->
+        scan_nested_ty ~source ~kind env scan ty)
+
+  let rec scan_indirect_upper_ty ~source env scan ty =
+    let (env, ty) = Typing_env.expand_type env ty in
+    let (env, ty) = Bound_lookup.strip_supportdyn env ty in
+    match get_node ty with
+    | Tgeneric _
+    | Tnewtype _ ->
+      ( env,
+        add_dependency ~source ~target:ty ~kind:Dependency.Indirect_upper scan
+      )
+    | Tshape shape_ty ->
+      scan_shape ~source ~kind:Dependency.Nested_upper env scan shape_ty
+    | Tunion tys
+    | Tintersection tys ->
+      List.fold_left tys ~init:(env, scan) ~f:(fun (env, scan) ty ->
+          scan_indirect_upper_ty ~source env scan ty)
+    | _ -> (env, scan)
+
+  let scan_upper_bound bounds_cache env source scan bound =
+    let (env, bound) = Typing_env.expand_type env bound in
+    match get_node bound with
+    | Tgeneric _ ->
+      ( env,
+        add_dependency ~source ~target:bound ~kind:Dependency.Direct_upper scan
+      )
+    | Tnewtype (name, _, _)
+      when not (String.equal name Naming_special_names.Classes.cSupportDyn) ->
+      ( env,
+        add_dependency ~source ~target:bound ~kind:Dependency.Direct_upper scan
+      )
+    | _ ->
+      let (env, bound) = Bound_lookup.strip_supportdyn env bound in
+      let (env, supers) =
+        Bound_lookup.concrete_supertypes bounds_cache env bound
       in
-      (env, List.concat dependencies)
-    in
-    let dependencies_of_bound env bound =
-      let (env, bound) = Typing_env.expand_type env bound in
-      match get_node bound with
-      | Tgeneric _ -> (env, [(bound, Dependency.Direct_upper)])
-      | Tnewtype (name, _, _)
-        when not (String.equal name Naming_special_names.Classes.cSupportDyn) ->
-        (env, [(bound, Dependency.Direct_upper)])
-      | _ ->
-        let (env, bound) = Bound_lookup.strip_supportdyn env bound in
-        let (env, supers) =
-          Bound_lookup.concrete_supertypes bounds_cache env bound
+      List.fold_left supers ~init:(env, scan) ~f:(fun (env, scan) super ->
+          scan_indirect_upper_ty ~source env scan super)
+
+  let scan_lower_bound bounds_cache env source scan bound =
+    let (env, bound) = Typing_env.expand_type env bound in
+    let (env, bound) = Bound_lookup.strip_supportdyn env bound in
+    let (env, subs) = Bound_lookup.concrete_subtypes bounds_cache env bound in
+    List.fold_left subs ~init:(env, scan) ~f:(fun (env, scan) sub ->
+        let (env, sub) = Bound_lookup.strip_supportdyn env sub in
+        match get_node sub with
+        | Tshape shape_ty ->
+          scan_shape ~source ~kind:Dependency.Nested_lower env scan shape_ty
+        | _ -> (env, scan))
+
+  let summary_from bounds_cache cache env source r =
+    Env_memo.memoize_value cache.Cache.bound_summaries env source (fun () ->
+        let (env, upper_bounds) =
+          Bound_lookup.upper_bounds bounds_cache env source r
         in
-        indirect_dependencies_of_tys env supers
-    in
-    let (env, bounds) = Bound_lookup.upper_bounds bounds_cache env source r in
-    let (_env, dependencies) =
-      List.fold_map bounds ~init:env ~f:dependencies_of_bound
-    in
-    List.concat dependencies
+        let (env, scan) =
+          List.fold_left
+            upper_bounds
+            ~init:(env, empty_scan)
+            ~f:(fun (env, scan) bound ->
+              scan_upper_bound bounds_cache env source scan bound)
+        in
+        let (env, lower_bounds) =
+          Bound_lookup.lower_bounds bounds_cache env source r
+        in
+        let (_env, scan) =
+          List.fold_left
+            lower_bounds
+            ~init:(env, scan)
+            ~f:(fun (env, scan) bound ->
+              scan_lower_bound bounds_cache env source scan bound)
+        in
+        Bound_summary.
+          {
+            dependencies = List.rev scan.rev_dependencies;
+            labels = scan.labels;
+          })
 
-  let classified_lower_dependencies bounds_cache env source r =
-    let (env, view) =
-      Field_bounds.bound_shape_lower
-        bounds_cache
-        env
-        source
-        Splat_elem.Map.empty
-        r
-    in
-    ignore env;
-    match view with
-    | Field_bounds.Lower.Shapes shapes ->
-      List.concat_map shapes ~f:Row.spread_elements
-      |> List.map ~f:(fun target -> (target, Dependency.Nested_lower))
-    | Field_bounds.Lower.Bottom -> []
-
-  (* This classified edge list is the sole dependency representation. Closure,
-     compatibility queries, SCC analysis, and evaluation order all derive from
-     it, so they cannot silently disagree about a reachable element. *)
+  (* The cached structural summary is the sole dependency representation.
+     Graph discovery therefore cannot recursively invoke corner checking. *)
   let dependencies_from bounds_cache cache env source r =
-    Env_memo.memoize_value cache.Cache.dependencies env source (fun () ->
-        let upper = classified_upper_dependencies bounds_cache env source r in
-        let lower = classified_lower_dependencies bounds_cache env source r in
-        List.map (upper @ lower) ~f:(fun (target, kind) ->
-            Dependency.make ~source ~target ~kind))
+    (summary_from bounds_cache cache env source r).Bound_summary.dependencies
+
+  let labels_from bounds_cache cache env source r =
+    (summary_from bounds_cache cache env source r).Bound_summary.labels
 
   let targets dependencies ~f =
     List.fold_left dependencies ~init:Splat_elem.Set.empty ~f:(fun acc edge ->
@@ -1440,49 +1505,15 @@ end = struct
     }
 
   module Labels = struct
-    let bound_labels_upper bounds_cache env name r =
-      let (env, view) =
-        Field_bounds.bound_shape_upper
-          bounds_cache
-          env
-          name
-          Splat_elem.Map.empty
-          r
-      in
-      ignore env;
-      match view with
-      | Field_bounds.Upper.Shapes shapes ->
-        List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
-            TShapeSet.union acc (Row.label_set shape_ty))
-      | Field_bounds.Upper.Bottom
-      | Field_bounds.Upper.Unconstrained ->
-        TShapeSet.empty
-
-    let bound_labels_lower bounds_cache env name r =
-      let (env, view) =
-        Field_bounds.bound_shape_lower
-          bounds_cache
-          env
-          name
-          Splat_elem.Map.empty
-          r
-      in
-      ignore env;
-      match view with
-      | Field_bounds.Lower.Shapes shapes ->
-        List.fold shapes ~init:TShapeSet.empty ~f:(fun acc shape_ty ->
-            TShapeSet.union acc (Row.label_set shape_ty))
-      | Field_bounds.Lower.Bottom -> TShapeSet.empty
-
     let bound_label_set bounds_cache analysis_cache env names r =
       let all =
         closure bounds_cache analysis_cache env (Splat_elem.Set.of_list names) r
       in
       Splat_elem.Set.fold
         (fun name acc ->
-          let up = bound_labels_upper bounds_cache env name r
-          and lo = bound_labels_lower bounds_cache env name r in
-          TShapeSet.union acc (TShapeSet.union up lo))
+          TShapeSet.union
+            acc
+            (labels_from bounds_cache analysis_cache env name r))
         all
         TShapeSet.empty
 
@@ -1549,6 +1580,7 @@ module Plan : sig
 
   val groups : t -> group list
 
+  (** Parameters whose assigned field can affect another group's bounds. *)
   val depended_on : t -> Splat_elem.Set.t
 
   val order : Cache.t -> env -> Splat_elem.Set.t -> Reason.t -> locl_ty list
@@ -1561,6 +1593,8 @@ end = struct
 
   type t = {
     groups: group list;
+    (* Search cannot prune these parameters' corners using only their visible
+       positions in the surface rows: another group's bounds depend on them. *)
     depended_on: Splat_elem.Set.t;
   }
 
@@ -1641,7 +1675,8 @@ module Search : sig
 
   (** Whether rightward spreads prevent an element from affecting a label. *)
   module Masking : sig
-    (** Definite masking, definite visibility, or a bounds-dependent result. *)
+    (** Definitely overwritten, still potentially relevant, or
+        bounds-dependent. *)
     type t =
       | Masked
       | Unmasked
@@ -1667,9 +1702,10 @@ end = struct
       | Unmasked
       | Unknown
 
-    (* Whether a type parameter to the right of [key] in [row] masks it at
-       [label]: a rightward generic masks iff its own upper bound is [Req] there;
-       [Req] lower but [Opt] upper is [Unknown] (pessimistic). *)
+    (* In [shape(...key, ...other)], [other] definitely masks [key] at [label]
+       when its upper field is required. If both field bounds are optional,
+       [key] remains potentially relevant. Required lower and optional upper
+       bounds make the answer [Unknown]. *)
     let of_splat cache env ss_elems label key assignment r =
       let rec aux rev_elems acc =
         match rev_elems with
@@ -1737,6 +1773,8 @@ end = struct
     match bounds with
     | Error missing -> (env, Error missing)
     | Ok (lower, upper) ->
+      (* A free parameter affects no other parameter's bounds, so its visible
+         row position alone can determine the extremal corner to check. *)
       let is_free = not (Splat_elem.Set.mem key depended_on)
       and in_sub = Splat_elem.Set.mem key live_sub
       and in_super = Splat_elem.Set.mem key live_super in

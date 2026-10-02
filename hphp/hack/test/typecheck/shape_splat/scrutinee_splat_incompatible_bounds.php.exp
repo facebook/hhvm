@@ -1,2 +1,1 @@
-WARN: File "scrutinee_splat_incompatible_bounds.php", line 11, characters 7-30:
-This `is` check is always `true`. The expression on the left has type `shape(...T, ...shape('c' => bool))` which is a subtype of `shape('c' => bool)`. (Warn[12009])
+No errors

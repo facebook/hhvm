@@ -1741,39 +1741,28 @@ end = struct
         this_ty
       else
         let open Typing_defs_core in
+        let add_exact_refinements ~init =
+          List.fold_left
+            ~f:(fun rfmts name ->
+              match S_map.find_opt name this_subst with
+              | Some ty ->
+                S_map.add
+                  name
+                  { rc_bound = TRexact ty; rc_is_ctx = false }
+                  rfmts
+              | None -> rfmts)
+            ~init
+            type_constants
+        in
         match deref this_ty with
         | (reason, Tapply _) ->
-          let cr_consts =
-            List.fold_left
-              ~f:(fun rfmts name ->
-                match S_map.find_opt name this_subst with
-                | Some ty ->
-                  S_map.add
-                    name
-                    { rc_bound = TRexact ty; rc_is_ctx = false }
-                    rfmts
-                | _ -> rfmts)
-              ~init:S_map.empty
-              type_constants
-          in
+          let cr_consts = add_exact_refinements ~init:S_map.empty in
           let class_refinement = Typing_defs.{ cr_consts } in
           mk (reason, Trefinement (this_ty, class_refinement))
         | ( reason,
             Typing_defs_core.Trefinement (this_ty, Typing_defs.{ cr_consts }) )
           ->
-          let cr_consts =
-            List.fold_left
-              ~f:(fun rfmts name ->
-                match S_map.find_opt name this_subst with
-                | Some ty ->
-                  S_map.add
-                    name
-                    { rc_bound = TRexact ty; rc_is_ctx = false }
-                    rfmts
-                | _ -> rfmts)
-              ~init:cr_consts
-              type_constants
-          in
+          let cr_consts = add_exact_refinements ~init:cr_consts in
           let class_refinement = Typing_defs.{ cr_consts } in
           mk (reason, Trefinement (this_ty, class_refinement))
         | _ -> this_ty

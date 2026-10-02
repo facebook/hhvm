@@ -63,3 +63,25 @@ function testThisStuff(): void {
   $fptr = BaseCometRouteMapper::genResponse<>;
   expect($fptr);
 }
+
+abstract class SameNameInner {
+  abstract const type U as arraykey;
+}
+
+abstract class SameNameSource {
+  abstract const type Outer as SameNameInner;
+  const type T = this::Outer::U;
+}
+
+abstract class SameNameTarget {
+  const type T = SameNameSource::T;
+
+  public static function take(this::T $_): void {}
+}
+
+function testSameNameAcrossRoots(): void {
+  $fptr = SameNameTarget::take<>;
+  hh_expect_equivalent<
+    HH\FunctionRef<(readonly function<T as arraykey>(T): void)>,
+  >($fptr);
+}

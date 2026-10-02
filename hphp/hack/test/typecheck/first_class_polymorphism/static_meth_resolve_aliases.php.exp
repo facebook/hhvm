@@ -1,1 +1,40 @@
-No errors
+ERROR: File "static_meth_resolve_aliases.php", line 84, characters 3-99:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "static_meth_resolve_aliases.php", line 77, characters 18-34:
+  Expected `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 73, characters 18-31:
+    resulting from expanding the type constant `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "static_meth_resolve_aliases.php", line 84, characters 3-99:
+hh_expect_equivalent type mismatch (Typing[4323])
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  `T` is a constrained type parameter
+  File "static_meth_resolve_aliases.php", line 85, characters 44-51:
+  This type constraint is violated
+  File "static_meth_resolve_aliases.php", line 77, characters 18-34:
+  Expected `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 73, characters 18-31:
+    resulting from expanding the type constant `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  But got `arraykey` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "static_meth_resolve_aliases.php", line 86, characters 5-9:
+Invalid argument (Typing[4110])
+  File "static_meth_resolve_aliases.php", line 77, characters 18-34:
+  Expected `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 73, characters 18-31:
+    resulting from expanding the type constant `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "static_meth_resolve_aliases.php", line 86, characters 5-9:
+Invalid argument (Typing[4323])
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  `T` is a constrained type parameter
+  File "static_meth_resolve_aliases.php", line 85, characters 44-51:
+  This type constraint is violated
+  File "static_meth_resolve_aliases.php", line 77, characters 18-34:
+  Expected `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 73, characters 18-31:
+    resulting from expanding the type constant `SameNameSource::Outer::U`
+  File "static_meth_resolve_aliases.php", line 85, characters 39-39:
+  But got `arraykey` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function

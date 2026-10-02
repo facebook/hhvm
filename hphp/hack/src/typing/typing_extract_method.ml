@@ -1746,16 +1746,6 @@ end = struct
       | _ -> init
 
     (* -- Build all substitutions from the analysis --------------------------- *)
-    let mk_tparam pos name tp_constraints =
-      Typing_defs_core.
-        {
-          tp_variance = Ast_defs.Invariant;
-          tp_name = (pos, name);
-          tp_constraints;
-          tp_reified = Ast_defs.Erased;
-          tp_user_attributes = [];
-        }
-
     let refine_this this_ty this_subst type_constants =
       if List.is_empty type_constants then
         this_ty

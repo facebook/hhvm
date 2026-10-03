@@ -9,13 +9,16 @@
 
 #include <memory>
 
+#include <fb303/ServiceData.h>
+#include <fb303/ThreadCachedServiceData.h>
+
 namespace watchman {
 
 void WatchmanStats::flush() {
-  // This method is only really useful while testing to ensure that the service
-  // data singleton instance has the latest stats. Since all our stats are now
-  // quantile stat based, flushing the quantile stat map is sufficient for that
-  // use case.
+  // Counters accumulate in thread-local cells that the ThreadCachedServiceData
+  // publish thread drains periodically; durations are quantile stats that are
+  // aggregated on read. A reader that needs this instant's values calls this.
+  facebook::fb303::ThreadCachedServiceData::get()->publishStats();
   facebook::fb303::ServiceData::get()->getQuantileStatMap()->flushAll();
 }
 

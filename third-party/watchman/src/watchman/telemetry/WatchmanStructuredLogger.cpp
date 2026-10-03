@@ -42,7 +42,7 @@ class WatchmanXplatStatsSink : public facebook::eden::XplatLoggerStatsSink {
   }
   void messagesWritten(uint64_t count) override {
     getWatchmanStats()->increment(
-        &TelemetryStats::xplatMessagesWritten, static_cast<double>(count));
+        &TelemetryStats::xplatMessagesWritten, static_cast<int64_t>(count));
   }
   void messageDroppedQueueFull() override {
     getWatchmanStats()->increment(
@@ -64,7 +64,7 @@ class WatchmanXplatStatsSink : public facebook::eden::XplatLoggerStatsSink {
   void messagesDroppedWriteFailures(uint64_t count) override {
     getWatchmanStats()->increment(
         &TelemetryStats::xplatMessagesDroppedWriteFailures,
-        static_cast<double>(count));
+        static_cast<int64_t>(count));
   }
 };
 

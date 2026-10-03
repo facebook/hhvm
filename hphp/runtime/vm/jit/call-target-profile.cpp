@@ -34,10 +34,10 @@ const size_t CallTargetProfile::kMaxEntries;
 
 void CallTargetProfile::init() {
   if (m_init) return;
-  m_init = true;
   for (size_t i = 0; i < kMaxEntries; i++) {
     m_entries[i] = Entry{};
   }
+  m_init = true;
 }
 
 void CallTargetProfile::report(const Func* func) {
@@ -72,6 +72,7 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
     for (size_t i = 0; i < kMaxEntries; i++) {
       auto const& entry = profile.m_entries[i];
       if (entry.funcId.isInvalid()) break;
+      if (entry.funcId.toInt() == 0) continue;
       allEntries[nEntries++] = entry;
     }
   }
@@ -82,6 +83,7 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
     for (size_t o = 0; o < kMaxEntries; o++) {
       auto const& otherEntry = other.m_entries[o];
       if (otherEntry.funcId.isInvalid()) break;
+      if (otherEntry.funcId.toInt() == 0) continue;
       size_t p = 0;
       for (; p < kMaxEntries; p++) {
         auto& entry = allEntries[p];

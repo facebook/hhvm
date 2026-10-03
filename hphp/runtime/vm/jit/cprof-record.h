@@ -34,26 +34,36 @@ struct ContProfRecordHeader {
 enum class ContProfStartKind : uint8_t {
   FuncEntry = 1,
   NamedParamsFuncEntry = 2,
+  // A single-block ResumeMode::None region with an empty initial stack.
+  Bytecode = 3,
 };
 
 struct ContProfProfileTranslation {
   ContProfStartKind startKind{ContProfStartKind::FuncEntry};
-  uint32_t numEntryArgs{0};
+  // Shared payload, like SrcKey: bytecode offset or FuncEntry argument count.
+  // NamedParamsFuncEntry uses zero; use accessors for kind-specific reads.
+  uint32_t offsetOrNumEntryArgs{0};
+  // Instruction count, including the synthetic function entry when present.
   uint32_t regionLength{0};
   uint64_t executionCount{0};
 
+  // Valid only for Bytecode starts.
+  uint32_t offset() const;
+  // Valid only for FuncEntry starts, not NamedParamsFuncEntry.
+  uint32_t numEntryArgs() const;
+
   auto startKey() const {
-    return std::pair{startKind, numEntryArgs};
+    return std::pair{startKind, offsetOrNumEntryArgs};
   }
 
   bool operator==(const ContProfProfileTranslation&) const = default;
 };
 
-/* The initial format is intentionally entry-only. */
 struct ContProfProfileRecord {
   ContProfRecordHeader header{};
   std::vector<ContProfProfileTranslation> translations;
 
+  // Sum entry counts only; mid-function counts can include loop iterations.
   uint64_t functionExecutions() const;
   bool hasCanonicalTranslationOrder() const;
 

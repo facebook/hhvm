@@ -232,5 +232,36 @@ TEST(ContProfReader, RejectsEntriesWhichDoNotExist) {
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func));
 }
 
+TEST(ContProfReader, RejectsUnsupportedBytecodeStarts) {
+  auto const unit = makeTestUnit();
+  ASSERT_NE(nullptr, unit);
+  ASSERT_EQ(1, unit->funcs().size());
+
+  auto const func = unit->funcs()[0];
+  auto const key = makeContProfFuncKey(*func);
+  ASSERT_TRUE(key);
+
+  ContProfProfileRecord record{};
+  record.header.funcKey = *key;
+  record.header.capturedAtMs = 100;
+  record.translations = {
+    {
+      ContProfStartKind::FuncEntry,
+      0,
+      3,
+      7,
+    },
+    {
+      ContProfStartKind::Bytecode,
+      1,
+      1,
+      11,
+    },
+  };
+
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func));
+}
+
 }
 }

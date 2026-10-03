@@ -19,11 +19,25 @@
 #include <cstddef>
 #include <limits>
 
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/assertions.h"
+
 namespace HPHP::jit::cprof {
+
+uint32_t ContProfProfileTranslation::offset() const {
+  assertx(startKind == ContProfStartKind::Bytecode);
+  return offsetOrNumEntryArgs;
+}
+
+uint32_t ContProfProfileTranslation::numEntryArgs() const {
+  assertx(startKind == ContProfStartKind::FuncEntry);
+  return offsetOrNumEntryArgs;
+}
 
 uint64_t ContProfProfileRecord::functionExecutions() const {
   uint64_t result{};
   for (auto const& translation : translations) {
+    if (translation.startKind == ContProfStartKind::Bytecode) continue;
     result += translation.executionCount;
   }
   return result;
@@ -45,17 +59,23 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
     return false;
   }
 
-  uint64_t totalExecutions = 0;
+  uint64_t entryExecutions{};
 
-  for (size_t i = 0; i < record.translations.size(); ++i) {
-    auto const& translation = record.translations[i];
-
+  for (auto const& translation : record.translations) {
     switch (translation.startKind) {
       case ContProfStartKind::FuncEntry:
         break;
+
       case ContProfStartKind::NamedParamsFuncEntry:
-        if (translation.numEntryArgs != 0) return false;
+        if (translation.offsetOrNumEntryArgs != 0) return false;
         break;
+
+      case ContProfStartKind::Bytecode:
+        if (translation.offset() == 0 || translation.offset() >= kInvalidOffset) {
+          return false;
+        }
+        break;
+
       default:
         return false;
     }
@@ -64,15 +84,16 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
       return false;
     }
 
-    if (translation.executionCount >
-        std::numeric_limits<uint64_t>::max() - totalExecutions) {
-      return false;
+    if (translation.startKind != ContProfStartKind::Bytecode) {
+      if (translation.executionCount >
+          std::numeric_limits<uint64_t>::max() - entryExecutions) {
+        return false;
+      }
+      entryExecutions += translation.executionCount;
     }
-
-    totalExecutions += translation.executionCount;
   }
 
-  return true;
+  return entryExecutions != 0;
 }
 
 }

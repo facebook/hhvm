@@ -97,7 +97,7 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
     if (start.funcEntry()) {
       if (start.numEntryArgs() > func.numPositionalParams()) continue;
       translation.startKind = ContProfStartKind::FuncEntry;
-      translation.numEntryArgs = start.numEntryArgs();
+      translation.offsetOrNumEntryArgs = start.numEntryArgs();
     } else if (start.namedParamsFuncEntry()) {
       if (start.numEntryArgs() != func.numPositionalParams()) continue;
       translation.startKind = ContProfStartKind::NamedParamsFuncEntry;

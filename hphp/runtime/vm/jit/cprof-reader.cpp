@@ -135,13 +135,13 @@ std::optional<SrcKey> contProfTranslationSrcKey(
 ) {
   switch (translation.startKind) {
     case ContProfStartKind::FuncEntry: {
-      if (translation.numEntryArgs > func.numPositionalParams()) {
+      if (translation.numEntryArgs() > func.numPositionalParams()) {
         return std::nullopt;
       }
 
       return SrcKey{
         &func,
-        translation.numEntryArgs,
+        translation.numEntryArgs(),
         false,
         SrcKey::FuncEntryTag{},
       };
@@ -159,6 +159,9 @@ std::optional<SrcKey> contProfTranslationSrcKey(
         SrcKey::FuncEntryTag{},
       };
     }
+
+    case ContProfStartKind::Bytecode:
+      return std::nullopt;
   }
 
   return std::nullopt;

@@ -32,13 +32,13 @@ namespace HPHP::jit::cprof {
 namespace {
 
 using EncodedStartKind = uint8_t;
-using EncodedEntryArgs = uint32_t;
+using EncodedStartValue = uint32_t;
 using EncodedRegionLength = uint32_t;
 using EncodedExecutionCount = uint64_t;
 
 constexpr size_t kEncodedProfileTranslationSize =
   sizeof(EncodedStartKind) +
-  sizeof(EncodedEntryArgs) +
+  sizeof(EncodedStartValue) +
   sizeof(EncodedRegionLength) +
   sizeof(EncodedExecutionCount);
 using EncodedSHA1 = std::array<uint32_t, SHA1::kQNumWords>;
@@ -207,7 +207,7 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
 
   for (auto const& translation : record.translations) {
     writer.writeValue(static_cast<EncodedStartKind>(translation.startKind));
-    writer.writeValue(translation.numEntryArgs);
+    writer.writeValue(translation.offsetOrNumEntryArgs);
     writer.writeValue(translation.regionLength);
     writer.writeValue(translation.executionCount);
   }
@@ -252,24 +252,13 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
     EncodedStartKind startKind{};
 
     if (!reader.readValue(startKind) ||
-        !reader.readValue(translation.numEntryArgs) ||
+        !reader.readValue(translation.offsetOrNumEntryArgs) ||
         !reader.readValue(translation.regionLength) ||
         !reader.readValue(translation.executionCount)) {
       return std::nullopt;
     }
 
-    switch (startKind) {
-      case static_cast<EncodedStartKind>(ContProfStartKind::FuncEntry):
-        translation.startKind = ContProfStartKind::FuncEntry;
-        break;
-      case static_cast<EncodedStartKind>(
-          ContProfStartKind::NamedParamsFuncEntry):
-        translation.startKind =
-          ContProfStartKind::NamedParamsFuncEntry;
-        break;
-      default:
-        return std::nullopt;
-    }
+    translation.startKind = static_cast<ContProfStartKind>(startKind);
 
     record.translations.push_back(translation);
   }

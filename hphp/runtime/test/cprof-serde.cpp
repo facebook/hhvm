@@ -31,6 +31,9 @@
 namespace HPHP::jit::cprof {
 namespace {
 
+constexpr auto kInvalidBytecodeOffset =
+  static_cast<uint32_t>(std::numeric_limits<int32_t>::max());
+
 ContProfFuncKey exampleKey() {
   ContProfFuncKey key{};
   key.resolutionUnitPath = "src/example.php";
@@ -57,6 +60,17 @@ ContProfRecordHeader exampleRecordHeader() {
   return header;
 }
 
+ContProfProfileTranslation exampleBytecodeTranslation(
+  uint32_t bytecodeOffset = 4
+) {
+  return {
+    ContProfStartKind::Bytecode,
+    bytecodeOffset,
+    3,
+    13,
+  };
+}
+
 ContProfProfileRecord exampleProfileRecord() {
   ContProfProfileRecord record{};
   record.header = exampleRecordHeader();
@@ -79,6 +93,7 @@ ContProfProfileRecord exampleProfileRecord() {
       1,
       11,
     },
+    exampleBytecodeTranslation(),
   };
   return record;
 }
@@ -136,6 +151,43 @@ TEST(ContProfSerde, ProfileRecordRoundTrip) {
   ASSERT_TRUE(deserialized);
   EXPECT_EQ(expected, *deserialized);
   EXPECT_EQ((uint64_t{1} << 40) + 7 + 11, deserialized->functionExecutions());
+  EXPECT_EQ(1, deserialized->translations[1].numEntryArgs());
+  EXPECT_EQ(4, deserialized->translations[3].offset());
+}
+
+TEST(ContProfSerde, ProfileTranslationWireFormat) {
+  auto const record = exampleProfileRecord();
+  auto const funcKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(funcKey);
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  // Translations encode as kind/start/length/count, without padding.
+  std::vector<uint8_t> expected;
+  auto const append = [&](auto value) {
+    auto const offset = expected.size();
+    expected.resize(offset + sizeof(value));
+    std::memcpy(expected.data() + offset, &value, sizeof(value));
+  };
+  auto const appendTranslation = [&](uint8_t kind, uint32_t start,
+                                    uint32_t length, uint64_t count) {
+    append(kind);
+    append(start);
+    append(length);
+    append(count);
+  };
+  appendTranslation(1, 0, 2, uint64_t{1} << 40);
+  appendTranslation(1, 1, 3, 7);
+  appendTranslation(2, 0, 1, 11);
+  appendTranslation(3, 4, 3, 13);
+
+  auto const translationsOffset = sizeof(size_t) + funcKey->size() +
+    sizeof(uint64_t) + sizeof(size_t);
+  ASSERT_EQ(translationsOffset + expected.size(), serialized->size());
+  std::vector<uint8_t> const actual{
+    serialized->begin() + translationsOffset, serialized->end()
+  };
+  EXPECT_EQ(expected, actual);
 }
 
 TEST(ContProfSerde, RejectsInvalidProfileRecord) {
@@ -148,8 +200,7 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
-  record.translations[0].startKind =
-    static_cast<ContProfStartKind>(0xff);
+  record.translations[0].startKind = static_cast<ContProfStartKind>(0xff);
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
@@ -161,7 +212,30 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
-  record.translations.back().numEntryArgs = 1;
+  record.translations[2].offsetOrNumEntryArgs = 1;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.back().offsetOrNumEntryArgs = 0;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.back().offsetOrNumEntryArgs = kInvalidBytecodeOffset - 1;
+  EXPECT_TRUE(serializeContProfProfileRecord(record));
+
+  record.translations.back().offsetOrNumEntryArgs = kInvalidBytecodeOffset;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations = {exampleBytecodeTranslation()};
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.push_back(record.translations.back());
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.push_back(exampleBytecodeTranslation(3));
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   // Three individually valid counts overflow uint64_t to int64Max - 2.
@@ -242,6 +316,69 @@ TEST(ContProfSerde, RejectsMalformedProfileRecord) {
     folly::ByteRange{
       invalidTranslationCount.data(),
       invalidTranslationCount.size()
+    }
+  ));
+}
+
+TEST(ContProfSerde, RejectsMalformedTranslationStart) {
+  ContProfProfileRecord record{};
+  record.header = exampleRecordHeader();
+  record.translations = {
+    {ContProfStartKind::FuncEntry, 0, 1, 1},
+    exampleBytecodeTranslation(),
+  };
+
+  auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(encodedFuncKey);
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  constexpr size_t encodedFuncKeyLengthSize = sizeof(size_t);
+  constexpr size_t capturedAtMsSize = sizeof(uint64_t);
+  constexpr size_t translationCountSize = sizeof(size_t);
+  constexpr size_t startKindSize = sizeof(uint8_t);
+  constexpr size_t startSize = sizeof(uint32_t);
+  constexpr size_t regionLengthSize = sizeof(uint32_t);
+  constexpr size_t executionCountSize = sizeof(uint64_t);
+  constexpr size_t encodedTranslationSize =
+    startKindSize +
+    startSize +
+    regionLengthSize +
+    executionCountSize;
+
+  auto const firstTranslation = encodedFuncKeyLengthSize +
+    encodedFuncKey->size() +
+    capturedAtMsSize +
+    translationCountSize;
+  auto const bytecodeTranslation = firstTranslation + encodedTranslationSize;
+  auto const bytecodeOffsetPosition = bytecodeTranslation + startKindSize;
+
+  ASSERT_LE(bytecodeOffsetPosition + sizeof(uint32_t), serialized->size());
+
+  auto unknownStartKind = *serialized;
+  unknownStartKind[bytecodeTranslation] = 0xff;
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{unknownStartKind.data(), unknownStartKind.size()}
+  ));
+
+  auto invalidNamedEntry = *serialized;
+  invalidNamedEntry[bytecodeTranslation] =
+    static_cast<uint8_t>(ContProfStartKind::NamedParamsFuncEntry);
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidNamedEntry.data(), invalidNamedEntry.size()}
+  ));
+
+  auto invalidBytecodeOffset = *serialized;
+  std::memcpy(
+    invalidBytecodeOffset.data() + bytecodeOffsetPosition,
+    &kInvalidBytecodeOffset,
+    sizeof(kInvalidBytecodeOffset)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{
+      invalidBytecodeOffset.data(),
+      invalidBytecodeOffset.size(),
     }
   ));
 }

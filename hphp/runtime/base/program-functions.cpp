@@ -68,6 +68,7 @@
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/jit/cprof-consume.h"
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -2824,6 +2825,11 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
   BootStats::mark("extra_process_init");
 
   StaticContentCache::load();
+
+  if (!initForWorkerProcess && jit::cprof::contProfStartupActive()) {
+    InitFiniNode::ProcessInitConcurrentWaitForEnd();
+    jit::cprof::consumeContProfAtStartup();
+  }
 
   if (Cfg::Repo::Authoritative &&
       !Cfg::Jit::SerdesFile.empty()) {

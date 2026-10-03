@@ -2366,12 +2366,18 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::string Jit.ContProfCheckpointDirectory = "", jtwarren
 
-  Directory where continuous-profile checkpoints are written. It must already
-  exist.
+  Directory where continuous-profile checkpoints are written and read. It must
+  already exist.
 
 - uint32_t Jit.ContProfCheckpointIntervalSeconds = 60, jtwarren
 
   Seconds between checkpoint writes. Zero disables capture.
+
+- uint32_t Jit.ContProfStartupMaxFunctions = 0, jtwarren
+
+  Maximum number of compatible functions prepared for optimization during
+  startup. This does not limit checkpoint reading or unit loading. Zero disables
+  startup replay.
 
 # Mail
 

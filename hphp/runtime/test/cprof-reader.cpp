@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
@@ -45,6 +46,28 @@ constexpr auto kHhas = R"HHAS(
 .function N cont_prof_reader_test_962aeb3f() {
   Null
   RetC None
+}
+)HHAS";
+
+constexpr auto kBytecodeUnitPath =
+  "hphp/runtime/test/cont-prof-reader-bytecode-test.php";
+
+constexpr auto kBytecodeHhas = R"HHAS(
+.function N cont_prof_reader_bytecode_test_61f82d9a(named N $x = DV) {
+main:
+  Int 42
+  PopC
+  True
+  JmpZ done
+  Null
+  PopC
+done:
+  Null
+  RetC None
+DV:
+  Null
+  PopL $x
+  Enter main
 }
 )HHAS";
 
@@ -84,6 +107,45 @@ std::unique_ptr<Unit> makeTestUnit() {
   );
   if (!emitter || emitter->m_fatalUnit) return nullptr;
   return emitter->create();
+}
+
+std::unique_ptr<Unit> makeBytecodeTestUnit() {
+  auto const emitter = assemble_string(
+    kBytecodeHhas,
+    kBytecodeUnitPath,
+    SHA1{"4444444444444444444444444444444444444444"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  if (!emitter || emitter->m_fatalUnit) return nullptr;
+  return emitter->create();
+}
+
+ContProfProfileRecord makeBytecodeRecord(
+  const ContProfFuncKey& key,
+  Offset offset,
+  uint32_t regionLength
+) {
+  ContProfProfileRecord record{};
+  record.header.funcKey = key;
+  record.header.capturedAtMs = 100;
+  record.translations = {
+    {
+      ContProfStartKind::FuncEntry,
+      0,
+      1,
+      7,
+    },
+    {
+      ContProfStartKind::Bytecode,
+      static_cast<uint32_t>(offset),
+      regionLength,
+      11,
+    },
+  };
+  return record;
 }
 
 bool writeTextFile(const std::string& path, const std::string& contents) {
@@ -232,35 +294,85 @@ TEST(ContProfReader, RejectsEntriesWhichDoNotExist) {
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func));
 }
 
-TEST(ContProfReader, RejectsUnsupportedBytecodeStarts) {
-  auto const unit = makeTestUnit();
-  ASSERT_NE(nullptr, unit);
-  ASSERT_EQ(1, unit->funcs().size());
+struct ContProfReaderBytecodeTest : testing::Test {
+  static void SetUpTestSuite() {
+    s_unit = makeBytecodeTestUnit();
+    ASSERT_NE(nullptr, s_unit);
+    ASSERT_EQ(1, s_unit->funcs().size());
 
-  auto const func = unit->funcs()[0];
-  auto const key = makeContProfFuncKey(*func);
+    s_func = s_unit->funcs()[0];
+
+    auto const intLength = instrLen(s_func->at(0));
+    ASSERT_GT(intLength, 1);
+    s_popOffset = intLength;
+    s_trueOffset = s_popOffset + instrLen(s_func->at(s_popOffset));
+    s_jmpOffset = s_trueOffset + instrLen(s_func->at(s_trueOffset));
+    ASSERT_EQ(Op::JmpZ, peek_op(s_func->at(s_jmpOffset)));
+
+    s_namedEntry = s_func->getNamedParamsFuncEntry();
+    ASSERT_TRUE(s_func->hasOptionalNamedParameters());
+    ASSERT_GT(s_namedEntry, 0);
+    ASSERT_TRUE(s_func->isDVEntry(s_namedEntry));
+  }
+
+  static void TearDownTestSuite() {
+    s_func = nullptr;
+    s_unit.reset();
+  }
+
+  static Func* func() { return s_func; }
+
+  static Offset popOffset() { return s_popOffset; }
+
+  static Offset jmpOffset() { return s_jmpOffset; }
+
+  static Offset trueOffset() { return s_trueOffset; }
+
+  static Offset namedEntry() { return s_namedEntry; }
+
+private:
+  static inline std::unique_ptr<Unit> s_unit;
+  static inline Func* s_func{nullptr};
+  static inline Offset s_popOffset{0};
+  static inline Offset s_trueOffset{0};
+  static inline Offset s_jmpOffset{0};
+  static inline Offset s_namedEntry{0};
+};
+
+TEST_F(ContProfReaderBytecodeTest, AcceptsValidBytecodeBlock) {
+  auto const key = makeContProfFuncKey(*func());
   ASSERT_TRUE(key);
 
-  ContProfProfileRecord record{};
-  record.header.funcKey = *key;
-  record.header.capturedAtMs = 100;
-  record.translations = {
-    {
-      ContProfStartKind::FuncEntry,
-      0,
-      3,
-      7,
-    },
-    {
-      ContProfStartKind::Bytecode,
-      1,
-      1,
-      11,
-    },
-  };
-
+  auto const record = makeBytecodeRecord(*key, trueOffset(), 1);
   ASSERT_TRUE(isValidContProfProfileRecord(record));
-  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, RejectsNonemptyStack) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto const record = makeBytecodeRecord(*key, popOffset(), 1);
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, RejectsOffsetInsideImmediate) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto const record = makeBytecodeRecord(*key, 1, 1);
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, RejectsEntryCollision) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto const record = makeBytecodeRecord(*key, namedEntry(), 1);
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
 }
 
 }

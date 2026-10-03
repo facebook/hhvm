@@ -34,19 +34,22 @@ TRACE_SET_MOD(cprof)
 
 namespace {
 
-struct EntryCandidate {
+struct TranslationCandidate {
   TransID transId{kInvalidTransID};
   ContProfProfileTranslation translation;
 };
 
-auto entryKey(const EntryCandidate& candidate) {
+auto startKey(const TranslationCandidate& candidate) {
   return candidate.translation.startKey();
 }
 
-// Group candidates by entry, with the winner first, for one-pass dedup below.
-bool candidateLess(const EntryCandidate& lhs, const EntryCandidate& rhs) {
-  auto const leftKey = entryKey(lhs);
-  auto const rightKey = entryKey(rhs);
+// Group candidates by start, with the winner first, for one-pass dedup below.
+bool candidateLess(
+  const TranslationCandidate& lhs,
+  const TranslationCandidate& rhs
+) {
+  auto const leftKey = startKey(lhs);
+  auto const rightKey = startKey(rhs);
   if (leftKey != rightKey) return leftKey < rightKey;
 
   auto const& left = lhs.translation;
@@ -66,43 +69,56 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
   auto funcKey = makeContProfFuncKey(func);
   if (!funcKey) return std::nullopt;
 
-  std::vector<EntryCandidate> candidates;
+  std::vector<TranslationCandidate> candidates;
 
   for (auto const transId : profData.funcProfTransIDs(func.getFuncId())) {
     auto const record = profData.transRec(transId);
     auto const start = record->srcKey();
-    if (!start.anyFuncEntry()) continue;
+    if (start.prologue() || start.resumeMode() != ResumeMode::None) continue;
 
     auto const region = record->region();
-    if (!region || region->blocks().size() != 1 || region->start() != start) {
+    if (!region || region->blocks().size() != 1) {
       TRACE(2, "cont-prof: %s trans %d has an unexpected region\n",
             func.fullName()->data(), transId);
       continue;
     }
 
     auto const block = region->entry();
-    if (!block || block->start() != start ||
+    if (block->start() != start ||
         block->initialSpOffset() != SBInvOffset{0} ||
         block->length() <= 0) {
-      TRACE(2, "cont-prof: %s trans %d has an unexpected entry block\n",
+      TRACE(2, "cont-prof: %s trans %d has an unexpected block\n",
             func.fullName()->data(), transId);
       continue;
     }
 
-    EntryCandidate candidate{};
+    TranslationCandidate candidate{};
     candidate.transId = transId;
     auto& translation = candidate.translation;
     translation.regionLength = static_cast<uint32_t>(block->length());
 
     if (start.funcEntry()) {
       if (start.numEntryArgs() > func.numPositionalParams()) continue;
+
       translation.startKind = ContProfStartKind::FuncEntry;
       translation.offsetOrNumEntryArgs = start.numEntryArgs();
     } else if (start.namedParamsFuncEntry()) {
-      if (start.numEntryArgs() != func.numPositionalParams()) continue;
+      if (!func.hasOptionalNamedParameters() ||
+          start.numEntryArgs() != func.numPositionalParams()) {
+        continue;
+      }
+
       translation.startKind = ContProfStartKind::NamedParamsFuncEntry;
     } else {
-      continue;
+      auto const offset = start.offset();
+
+      if (!func.contains(offset) || func.isEntry(offset) ||
+          !block->typePreConditions().empty()) {
+        continue;
+      }
+
+      translation.startKind = ContProfStartKind::Bytecode;
+      translation.offsetOrNumEntryArgs = static_cast<uint32_t>(offset);
     }
 
     auto const count = profData.transCounter(transId);
@@ -120,7 +136,7 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
   ContProfProfileRecord result{};
   result.header.funcKey = std::move(*funcKey);
 
-  // V0 retains one translation per entry. Keep the preferred candidate.
+  // Retain one translation per start. Keep the preferred candidate.
   for (size_t i = 0; i < candidates.size();) {
     auto const& selected = candidates[i];
     auto const& translation = selected.translation;
@@ -129,9 +145,10 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
 
     auto next = i + 1;
     while (next < candidates.size() &&
-           entryKey(selected) == entryKey(candidates[next])) {
+           startKey(selected) == startKey(candidates[next])) {
       ++next;
     }
+
     i = next;
   }
 

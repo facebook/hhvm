@@ -124,7 +124,7 @@ ContProfStartupCandidate prepareCandidate(
   result.func = &func;
   result.translations.reserve(record.translations.size());
 
-  // Rebuild each retained entry translation as a one-block profiling region.
+  // Rebuild each retained translation as a one-block profiling region.
   for (auto const& translation : record.translations) {
     auto const start = contProfTranslationSrcKey(translation, func);
     assertx(start);
@@ -173,7 +173,8 @@ bool optimizeCandidate(
   auto const counterDefault = profData.counterDefault();
   if (counterDefault < 0) return false;
 
-  // Create every SrcRec before mutating ProfData.
+  // Create every SrcRec before mutating ProfData. Replay supports only
+  // empty-stack starts, which capture and compatibility checks enforce.
   for (auto const& translation : candidate.translations) {
     if (!tc::createSrcRec(translation.start, SBInvOffset{0})) {
       return false;

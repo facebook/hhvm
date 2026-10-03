@@ -33,8 +33,8 @@ struct ProfData;
 namespace HPHP::jit::cprof {
 
 /*
- * Snapshot the representable, positive-count entry translations for `func`,
- * retaining one preferred translation per entry. Returns nullopt if no valid
+ * Snapshot the representable, positive-count translations for `func`,
+ * retaining one preferred translation per start. Returns nullopt if no valid
  * portable record can be produced.
  */
 std::optional<ContProfProfileRecord>

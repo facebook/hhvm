@@ -29,6 +29,7 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP::jit::cprof {
@@ -160,8 +161,15 @@ std::optional<SrcKey> contProfTranslationSrcKey(
       };
     }
 
-    case ContProfStartKind::Bytecode:
-      return std::nullopt;
+    case ContProfStartKind::Bytecode: {
+      auto const offset = static_cast<Offset>(translation.offset());
+
+      if (!func.contains(offset) || func.isEntry(offset)) {
+        return std::nullopt;
+      }
+
+      return SrcKey{&func, offset, ResumeMode::None};
+    }
   }
 
   return std::nullopt;
@@ -219,7 +227,14 @@ bool isContProfProfileRecordCompatible(
   if (!currentKey || *currentKey != record.header.funcKey) return false;
 
   for (auto const& translation : record.translations) {
-    if (!contProfTranslationSrcKey(translation, func)) return false;
+    auto const start = contProfTranslationSrcKey(translation, func);
+    if (!start) return false;
+
+    if (!start->anyFuncEntry()) {
+      // Replay supports only empty-stack starts.
+      auto const stackOffset = mcgen::offsetAtLocation(*start);
+      if (!stackOffset || *stackOffset != SBInvOffset{0}) return false;
+    }
   }
 
   return true;

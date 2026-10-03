@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -26,6 +27,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -41,9 +43,16 @@ namespace {
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-capture-test.php";
 
 constexpr auto kHhas = R"HHAS(
-.function N cont_prof_capture_test_81d926f4() {
+.function N cont_prof_capture_test_81d926f4(named N $x = DV) {
+main:
+  Null
+  PopC
   Null
   RetC None
+DV:
+  Null
+  PopL $x
+  Enter main
 }
 )HHAS";
 
@@ -82,10 +91,14 @@ void addProfileTranslation(
   SrcKey start,
   int regionLength,
   int64_t executionCount,
-  SBInvOffset spOffset = SBInvOffset{0}
+  SBInvOffset spOffset = SBInvOffset{0},
+  GuardedLocations preconditions = {}
 ) {
   auto region = std::make_shared<RegionDesc>();
-  region->addBlock(start, regionLength, spOffset);
+  auto const block = region->addBlock(start, regionLength, spOffset);
+  for (auto const& precondition : preconditions) {
+    block->addPreCondition(precondition);
+  }
 
   auto const transId = profData.allocTransID();
   profData.addTransProfile(transId, region, PostConditions{}, 0);
@@ -103,6 +116,13 @@ struct ContProfCaptureTest : testing::Test {
     ASSERT_EQ(1, s_unit->funcs().size());
 
     s_func = s_unit->funcs()[0];
+    s_midOffset = instrLen(s_func->at(0));
+    ASSERT_GT(s_midOffset, 0);
+    ASSERT_TRUE(s_func->contains(s_midOffset));
+    ASSERT_FALSE(s_func->isEntry(s_midOffset));
+    s_emptyMidOffset = s_midOffset + instrLen(s_func->at(s_midOffset));
+    ASSERT_TRUE(s_func->contains(s_emptyMidOffset));
+    ASSERT_FALSE(s_func->isEntry(s_emptyMidOffset));
     s_unit->merge();
   }
 
@@ -113,22 +133,40 @@ struct ContProfCaptureTest : testing::Test {
 
   static Func* func() { return s_func; }
 
+  static SrcKey mid() { return SrcKey{func(), s_midOffset, ResumeMode::None}; }
+
+  static SrcKey emptyMid() {
+    return SrcKey{func(), s_emptyMidOffset, ResumeMode::None};
+  }
+
 private:
   static inline TestUnit s_unit;
   static inline Func* s_func{nullptr};
+  static inline Offset s_midOffset{0};
+  static inline Offset s_emptyMidOffset{0};
 };
 
-TEST_F(ContProfCaptureTest, CapturesNonzeroEntries) {
+void expectEntryOnlyRecord(
+  const std::optional<ContProfProfileRecord>& record
+) {
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfProfileTranslation> const expected{
+    {ContProfStartKind::FuncEntry, 0, 2, 7},
+  };
+  EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, CapturesNonzeroTranslations) {
   ProfData profData;
   profData.resetCounters(100);
 
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   auto const named = SrcKey{func(), 0, true, SrcKey::FuncEntryTag{}};
-  auto const mid = SrcKey{func(), 0, ResumeMode::None};
 
   addProfileTranslation(profData, named, 1, 11);
   addProfileTranslation(profData, main, 2, 7);
-  addProfileTranslation(profData, mid, 1, 13);
+  addProfileTranslation(profData, emptyMid(), 1, 13);
   addProfileTranslation(profData, main, 3, 0);
 
   auto const record = snapshotContProfProfileRecord(profData, *func());
@@ -140,6 +178,12 @@ TEST_F(ContProfCaptureTest, CapturesNonzeroEntries) {
   std::vector<ContProfProfileTranslation> const expected{
     {ContProfStartKind::FuncEntry, 0, 2, 7},
     {ContProfStartKind::NamedParamsFuncEntry, 0, 1, 11},
+    {
+      ContProfStartKind::Bytecode,
+      static_cast<uint32_t>(emptyMid().offset()),
+      1,
+      13,
+    },
   };
   EXPECT_EQ(*expectedKey, record->header.funcKey);
   EXPECT_GT(record->header.capturedAtMs, 0);
@@ -164,6 +208,79 @@ TEST_F(ContProfCaptureTest, SelectsBestDuplicate) {
   };
   EXPECT_EQ(7, record->functionExecutions());
   EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, SelectsBestBytecodeDuplicate) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(profData, emptyMid(), 3, 5);
+  addProfileTranslation(profData, emptyMid(), 2, 7);
+  addProfileTranslation(profData, emptyMid(), 1, 7);
+
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfProfileTranslation> const expected{
+    {ContProfStartKind::FuncEntry, 0, 2, 7},
+    {
+      ContProfStartKind::Bytecode,
+      static_cast<uint32_t>(emptyMid().offset()),
+      1,
+      7,
+    },
+  };
+  EXPECT_EQ(7, record->functionExecutions());
+  EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, RequiresEntryTranslation) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  addProfileTranslation(profData, emptyMid(), 1, 7);
+
+  EXPECT_FALSE(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonzeroStackOffset) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(profData, mid(), 1, 5, SBInvOffset{1});
+  addProfileTranslation(profData, mid(), 1, 11, SBInvOffset{-1});
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, SkipsBytecodeWithPreconditions) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    5,
+    SBInvOffset{0},
+    {{Location::Stack{SBInvOffset{0}}, TObj, DataTypeSpecific}}
+  );
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    {{Location::MBase{0}, TObj, DataTypeSpecific}}
+  );
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
 }
 
 TEST_F(ContProfCaptureTest, SkipsInvalidEntryRegion) {

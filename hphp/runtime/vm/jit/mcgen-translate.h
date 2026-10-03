@@ -17,7 +17,9 @@
 #pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/util/trace.h"
 
@@ -67,6 +69,9 @@ int64_t liveSecondsElapsed();
  * they're inlined into).
  */
 CompactVector<Trace::BumpRelease> unbumpFunctions();
+
+/* Return the VM stack offset at a bytecode SrcKey, or none if unreachable. */
+Optional<SBInvOffset> offsetAtLocation(SrcKey sk);
 
 /*
  * Optimizes func. The caller is responsible for ensuring that the function can

@@ -28,8 +28,10 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
@@ -44,6 +46,8 @@ namespace {
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-consume-test.php";
 constexpr auto kHhas = R"HHAS(
 .function N cont_prof_consume_alpha_52d9c47b() {
+  Null
+  PopC
   Null
   RetC None
 }
@@ -120,6 +124,40 @@ TEST_F(ContProfConsumeTest, StaleHotterRecordDoesNotConsumeSlot) {
   EXPECT_EQ(m_alphaFunc, candidate.func);
   ASSERT_EQ(1, candidate.translations.size());
   EXPECT_EQ(7, candidate.translations.front().executionCount);
+}
+
+TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
+  auto const popOffset = instrLen(m_alphaFunc->at(0));
+  auto const midOffset = popOffset + instrLen(m_alphaFunc->at(popOffset));
+  auto const midStart = SrcKey{m_alphaFunc, midOffset, ResumeMode::None};
+  m_alpha.translations.push_back({
+    ContProfStartKind::Bytecode,
+    static_cast<uint32_t>(midOffset),
+    2,
+    11,
+  });
+
+  auto const prepared = prepareContProfStartupCandidates(
+    {m_alpha}, m_units, 1
+  );
+
+  ASSERT_EQ(1, prepared.candidates.size());
+  auto const& candidate = prepared.candidates.front();
+  EXPECT_EQ(m_alphaFunc, candidate.func);
+  ASSERT_EQ(2, candidate.translations.size());
+  EXPECT_TRUE(candidate.translations[0].start.funcEntry());
+  EXPECT_EQ(7, candidate.translations[0].executionCount);
+
+  auto const& translation = candidate.translations[1];
+  EXPECT_EQ(midStart, translation.start);
+  EXPECT_FALSE(translation.start.anyFuncEntry());
+  EXPECT_EQ(11, translation.executionCount);
+  ASSERT_NE(nullptr, translation.region);
+  ASSERT_EQ(1, translation.region->blocks().size());
+  EXPECT_EQ(midStart, translation.region->start());
+  auto const block = translation.region->entry();
+  EXPECT_EQ(2, block->length());
+  EXPECT_EQ(SBInvOffset{0}, block->initialSpOffset());
 }
 
 TEST_F(ContProfConsumeTest, IncompatibleEntryDoesNotConsumeSlot) {

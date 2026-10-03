@@ -95,6 +95,13 @@ ContProfProfileRecord exampleProfileRecord() {
     },
     exampleBytecodeTranslation(),
   };
+  record.translations[0].localTypeGuards = {
+    {0, KindOfInt64},
+    {2, KindOfString},
+  };
+  record.translations.back().localTypeGuards = {
+    {1, KindOfObject},
+  };
   return record;
 }
 
@@ -162,7 +169,7 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   auto const serialized = serializeContProfProfileRecord(record);
   ASSERT_TRUE(serialized);
 
-  // Translations encode as kind/start/length/count, without padding.
+  // Translations encode kind/start/length/count followed by local type guards.
   std::vector<uint8_t> expected;
   auto const append = [&](auto value) {
     auto const offset = expected.size();
@@ -177,9 +184,19 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
     append(count);
   };
   appendTranslation(1, 0, 2, uint64_t{1} << 40);
+  append(size_t{2});
+  append(uint32_t{0});
+  append(static_cast<uint8_t>(KindOfInt64));
+  append(uint32_t{2});
+  append(static_cast<uint8_t>(KindOfString));
   appendTranslation(1, 1, 3, 7);
+  append(size_t{0});
   appendTranslation(2, 0, 1, 11);
+  append(size_t{0});
   appendTranslation(3, 4, 3, 13);
+  append(size_t{1});
+  append(uint32_t{1});
+  append(static_cast<uint8_t>(KindOfObject));
 
   auto const translationsOffset = sizeof(size_t) + funcKey->size() +
     sizeof(uint64_t) + sizeof(size_t);
@@ -236,6 +253,22 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
 
   record = exampleProfileRecord();
   record.translations.push_back(exampleBytecodeTranslation(3));
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localTypeGuards[0].type = kInvalidDataType;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localTypeGuards[1].localId =
+    record.translations[0].localTypeGuards[0].localId;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  std::swap(
+    record.translations[0].localTypeGuards[0],
+    record.translations[0].localTypeGuards[1]
+  );
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   // Three individually valid counts overflow uint64_t to int64Max - 2.
@@ -320,6 +353,54 @@ TEST(ContProfSerde, RejectsMalformedProfileRecord) {
   ));
 }
 
+TEST(ContProfSerde, RejectsMalformedLocalTypeGuards) {
+  auto const record = exampleProfileRecord();
+  auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(encodedFuncKey);
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  constexpr size_t encodedFuncKeyLengthSize = sizeof(size_t);
+  constexpr size_t capturedAtMsSize = sizeof(uint64_t);
+  constexpr size_t translationCountSize = sizeof(size_t);
+  constexpr size_t guardCountOffset =
+    sizeof(uint8_t) +
+    sizeof(uint32_t) +
+    sizeof(uint32_t) +
+    sizeof(uint64_t);
+
+  auto const firstTranslation = encodedFuncKeyLengthSize +
+    encodedFuncKey->size() +
+    capturedAtMsSize +
+    translationCountSize;
+  auto const guardCountPosition =
+    firstTranslation + guardCountOffset;
+  auto const firstGuardTypePosition =
+    guardCountPosition +
+    sizeof(size_t) +
+    sizeof(uint32_t);
+
+  ASSERT_LT(firstGuardTypePosition, serialized->size());
+
+  auto invalidType = *serialized;
+  invalidType[firstGuardTypePosition] = 0;
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidType.data(), invalidType.size()}
+  ));
+
+  auto invalidCount = *serialized;
+  auto const tooManyGuards = std::numeric_limits<size_t>::max();
+  std::memcpy(
+    invalidCount.data() + guardCountPosition,
+    &tooManyGuards,
+    sizeof(tooManyGuards)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidCount.data(), invalidCount.size()}
+  ));
+}
+
 TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   ContProfProfileRecord record{};
   record.header = exampleRecordHeader();
@@ -341,11 +422,13 @@ TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   constexpr size_t startSize = sizeof(uint32_t);
   constexpr size_t regionLengthSize = sizeof(uint32_t);
   constexpr size_t executionCountSize = sizeof(uint64_t);
+  constexpr size_t localTypeGuardCountSize = sizeof(size_t);
   constexpr size_t encodedTranslationSize =
     startKindSize +
     startSize +
     regionLengthSize +
-    executionCountSize;
+    executionCountSize +
+    localTypeGuardCountSize;
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +

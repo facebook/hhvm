@@ -84,6 +84,15 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
       return false;
     }
 
+    auto const& guards = translation.localTypeGuards;
+    for (size_t i = 0; i < guards.size(); ++i) {
+      auto const& guard = guards[i];
+      if (!isRealType(guard.type)) return false;
+      if (i != 0 && guards[i - 1].localId >= guard.localId) {
+        return false;
+      }
+    }
+
     if (translation.startKind != ContProfStartKind::Bytecode) {
       if (translation.executionCount >
           std::numeric_limits<uint64_t>::max() - entryExecutions) {

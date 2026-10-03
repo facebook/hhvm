@@ -45,7 +45,8 @@ namespace {
 
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-consume-test.php";
 constexpr auto kHhas = R"HHAS(
-.function N cont_prof_consume_alpha_52d9c47b() {
+.function N cont_prof_consume_alpha_52d9c47b(N $x) {
+  .declvars $local;
   Null
   PopC
   Null
@@ -95,7 +96,7 @@ struct ContProfConsumeTest : testing::Test {
     ASSERT_TRUE(alphaKey);
     ASSERT_TRUE(betaKey);
     m_alpha.header = {*alphaKey, 1};
-    m_alpha.translations = {{ContProfStartKind::FuncEntry, 0, 2, 7}};
+    m_alpha.translations = {{ContProfStartKind::FuncEntry, 1, 2, 7}};
     m_beta.header = {*betaKey, 1};
     m_beta.translations = {{ContProfStartKind::FuncEntry, 0, 2, 13}};
     m_units.emplace(alphaKey->resolutionUnitPath, m_unit.get());
@@ -130,11 +131,13 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   auto const popOffset = instrLen(m_alphaFunc->at(0));
   auto const midOffset = popOffset + instrLen(m_alphaFunc->at(popOffset));
   auto const midStart = SrcKey{m_alphaFunc, midOffset, ResumeMode::None};
+  m_alpha.translations.front().localTypeGuards = {{0, KindOfInt64}};
   m_alpha.translations.push_back({
     ContProfStartKind::Bytecode,
     static_cast<uint32_t>(midOffset),
     2,
     11,
+    {{1, KindOfString}},
   });
 
   auto const prepared = prepareContProfStartupCandidates(
@@ -145,8 +148,16 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   auto const& candidate = prepared.candidates.front();
   EXPECT_EQ(m_alphaFunc, candidate.func);
   ASSERT_EQ(2, candidate.translations.size());
-  EXPECT_TRUE(candidate.translations[0].start.funcEntry());
-  EXPECT_EQ(7, candidate.translations[0].executionCount);
+
+  auto const& entry = candidate.translations[0];
+  EXPECT_TRUE(entry.start.funcEntry());
+  EXPECT_EQ(7, entry.executionCount);
+  ASSERT_NE(nullptr, entry.region);
+  ASSERT_EQ(1, entry.region->blocks().size());
+  GuardedLocations const expectedEntryGuards{
+    {Location::Local{0}, TInt, DataTypeSpecific},
+  };
+  EXPECT_EQ(expectedEntryGuards, entry.region->entry()->typePreConditions());
 
   auto const& translation = candidate.translations[1];
   EXPECT_EQ(midStart, translation.start);
@@ -158,6 +169,10 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   auto const block = translation.region->entry();
   EXPECT_EQ(2, block->length());
   EXPECT_EQ(SBInvOffset{0}, block->initialSpOffset());
+  GuardedLocations const expectedBytecodeGuards{
+    {Location::Local{1}, TStr, DataTypeSpecific},
+  };
+  EXPECT_EQ(expectedBytecodeGuards, block->typePreConditions());
 }
 
 TEST_F(ContProfConsumeTest, IncompatibleEntryDoesNotConsumeSlot) {

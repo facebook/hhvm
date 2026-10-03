@@ -235,6 +235,24 @@ bool isContProfProfileRecordCompatible(
       auto const stackOffset = mcgen::offsetAtLocation(*start);
       if (!stackOffset || *stackOffset != SBInvOffset{0}) return false;
     }
+
+    auto const& guards = translation.localTypeGuards;
+
+    if (!guards.empty() && start->funcEntry()) {
+      auto const numEntryArgs = start->numEntryArgs();
+      if (numEntryArgs < func.numRequiredPositionalParams() ||
+          start->trivialDVFuncEntry()) {
+        return false;
+      }
+    }
+
+    auto const localLimit = start->anyFuncEntry()
+      ? func.numFuncEntryInputs()
+      : static_cast<uint32_t>(func.numLocals());
+
+    for (auto const& guard : guards) {
+      if (guard.localId >= localLimit) return false;
+    }
   }
 
   return true;

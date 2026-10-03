@@ -35,12 +35,20 @@ using EncodedStartKind = uint8_t;
 using EncodedStartValue = uint32_t;
 using EncodedRegionLength = uint32_t;
 using EncodedExecutionCount = uint64_t;
+using EncodedGuardCount = size_t;
+using EncodedLocalId = uint32_t;
+using EncodedDataType = uint8_t;
 
-constexpr size_t kEncodedProfileTranslationSize =
+constexpr size_t kEncodedLocalTypeGuardSize =
+  sizeof(EncodedLocalId) +
+  sizeof(EncodedDataType);
+
+constexpr size_t kMinEncodedProfileTranslationSize =
   sizeof(EncodedStartKind) +
   sizeof(EncodedStartValue) +
   sizeof(EncodedRegionLength) +
-  sizeof(EncodedExecutionCount);
+  sizeof(EncodedExecutionCount) +
+  sizeof(EncodedGuardCount);
 using EncodedSHA1 = std::array<uint32_t, SHA1::kQNumWords>;
 static_assert(sizeof(EncodedSHA1) == SHA1::kStrLen / 2);
 
@@ -210,6 +218,12 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
     writer.writeValue(translation.offsetOrNumEntryArgs);
     writer.writeValue(translation.regionLength);
     writer.writeValue(translation.executionCount);
+    writer.writeValue(translation.localTypeGuards.size());
+
+    for (auto const& guard : translation.localTypeGuards) {
+      writer.writeValue(guard.localId);
+      writer.writeValue(static_cast<EncodedDataType>(guard.type));
+    }
   }
 
   return std::move(writer).takeBytes();
@@ -241,7 +255,8 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
   size_t translationCount{};
   if (!reader.readValue(record.header.capturedAtMs) ||
       !reader.readValue(translationCount) || translationCount == 0 ||
-      translationCount > reader.remaining() / kEncodedProfileTranslationSize) {
+      translationCount >
+          reader.remaining() / kMinEncodedProfileTranslationSize) {
     return std::nullopt;
   }
 
@@ -250,17 +265,34 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
   for (size_t i = 0; i < translationCount; ++i) {
     ContProfProfileTranslation translation{};
     EncodedStartKind startKind{};
+    EncodedGuardCount guardCount{};
 
     if (!reader.readValue(startKind) ||
         !reader.readValue(translation.offsetOrNumEntryArgs) ||
         !reader.readValue(translation.regionLength) ||
-        !reader.readValue(translation.executionCount)) {
+        !reader.readValue(translation.executionCount) ||
+        !reader.readValue(guardCount) ||
+        guardCount > reader.remaining() / kEncodedLocalTypeGuardSize) {
       return std::nullopt;
     }
 
     translation.startKind = static_cast<ContProfStartKind>(startKind);
 
-    record.translations.push_back(translation);
+    translation.localTypeGuards.reserve(guardCount);
+    for (size_t j = 0; j < guardCount; ++j) {
+      EncodedLocalId localId{};
+      EncodedDataType encodedType{};
+
+      if (!reader.readValue(localId) || !reader.readValue(encodedType)) {
+        return std::nullopt;
+      }
+
+      translation.localTypeGuards.push_back({
+        localId, static_cast<DataType>(encodedType)
+      });
+    }
+
+    record.translations.push_back(std::move(translation));
   }
 
   if (reader.remaining() != 0 || !isValidContProfProfileRecord(record)) {

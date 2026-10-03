@@ -54,6 +54,7 @@ constexpr auto kBytecodeUnitPath =
 
 constexpr auto kBytecodeHhas = R"HHAS(
 .function N cont_prof_reader_bytecode_test_61f82d9a(named N $x = DV) {
+  .declvars $local;
 main:
   Int 42
   PopC
@@ -371,6 +372,44 @@ TEST_F(ContProfReaderBytecodeTest, RejectsEntryCollision) {
   ASSERT_TRUE(key);
 
   auto const record = makeBytecodeRecord(*key, namedEntry(), 1);
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, ValidatesLocalTypeGuardBounds) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto record = makeBytecodeRecord(*key, trueOffset(), 1);
+  auto const entryLimit = func()->numFuncEntryInputs();
+  auto const bytecodeLimit = static_cast<uint32_t>(func()->numLocals());
+  ASSERT_GT(entryLimit, 0);
+  ASSERT_LT(entryLimit, bytecodeLimit);
+
+  record.translations.front().localTypeGuards = {
+    {0, KindOfNull},
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.front().localTypeGuards.clear();
+  record.translations.back().localTypeGuards = {
+    {entryLimit, KindOfInt64},
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().localTypeGuards.clear();
+  record.translations.front().localTypeGuards = {
+    {entryLimit, KindOfInt64},
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.front().localTypeGuards.clear();
+  record.translations.back().localTypeGuards = {
+    {bytecodeLimit, KindOfInt64},
+  };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
 }

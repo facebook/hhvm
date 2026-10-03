@@ -44,6 +44,7 @@ constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-capture-test.php";
 
 constexpr auto kHhas = R"HHAS(
 .function N cont_prof_capture_test_81d926f4(named N $x = DV) {
+  .declvars $y;
 main:
   Null
   PopC
@@ -53,6 +54,12 @@ DV:
   Null
   PopL $x
   Enter main
+}
+
+.function N cont_prof_capture_required_test_81d926f4(N $x) {
+main:
+  Null
+  RetC None
 }
 )HHAS";
 
@@ -113,9 +120,13 @@ struct ContProfCaptureTest : testing::Test {
   static void SetUpTestSuite() {
     s_unit = makeTestUnit();
     ASSERT_NE(nullptr, s_unit);
-    ASSERT_EQ(1, s_unit->funcs().size());
+    ASSERT_EQ(2, s_unit->funcs().size());
 
     s_func = s_unit->funcs()[0];
+    s_requiredFunc = s_unit->funcs()[1];
+    ASSERT_EQ(2, s_func->numLocals());
+    ASSERT_EQ(1, s_func->numFuncEntryInputs());
+    ASSERT_EQ(1, s_requiredFunc->numRequiredPositionalParams());
     s_midOffset = instrLen(s_func->at(0));
     ASSERT_GT(s_midOffset, 0);
     ASSERT_TRUE(s_func->contains(s_midOffset));
@@ -128,10 +139,12 @@ struct ContProfCaptureTest : testing::Test {
 
   static void TearDownTestSuite() {
     s_func = nullptr;
+    s_requiredFunc = nullptr;
     s_unit.reset();
   }
 
   static Func* func() { return s_func; }
+  static Func* requiredFunc() { return s_requiredFunc; }
 
   static SrcKey mid() { return SrcKey{func(), s_midOffset, ResumeMode::None}; }
 
@@ -142,6 +155,7 @@ struct ContProfCaptureTest : testing::Test {
 private:
   static inline TestUnit s_unit;
   static inline Func* s_func{nullptr};
+  static inline Func* s_requiredFunc{nullptr};
   static inline Offset s_midOffset{0};
   static inline Offset s_emptyMidOffset{0};
 };
@@ -257,7 +271,7 @@ TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonzeroStackOffset) {
   expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
 }
 
-TEST_F(ContProfCaptureTest, SkipsBytecodeWithPreconditions) {
+TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonLocalTypeGuards) {
   ProfData profData;
   profData.resetCounters(100);
 
@@ -309,6 +323,232 @@ TEST_F(ContProfCaptureTest, SkipsUnusableTranslations) {
   };
   EXPECT_EQ(9, record->functionExecutions());
   EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, CapturesCanonicalLocalTypeGuards) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{1}, TStaticStr, DataTypeSpecific},
+    {
+      Location::Local{0},
+      Type::cns(int64_t{42}),
+      DataTypeSpecific,
+    },
+    {Location::Local{0}, TInt, DataTypeSpecific},
+    {Location::Local{1}, TCell, DataTypeGeneric},
+  };
+
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfProfileTranslation> const expected{
+    {ContProfStartKind::FuncEntry, 0, 2, 7},
+    {
+      ContProfStartKind::Bytecode,
+      static_cast<uint32_t>(emptyMid().offset()),
+      1,
+      11,
+      {
+        {0, KindOfInt64},
+        {1, KindOfPersistentString},
+      },
+    },
+  };
+  EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, SkipsNonPrimitiveLocalTypeGuard) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{0}, TInt | TStr, DataTypeGeneric},
+  };
+
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, KeepsEntryWithNonPrimitiveLocalTypeGuard) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{0}, TInt | TStr, DataTypeGeneric},
+  };
+
+  addProfileTranslation(
+    profData,
+    main,
+    2,
+    7,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, CapturesEntryLocalTypeGuard) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const entry = SrcKey{
+    func(),
+    func()->numPositionalParams(),
+    false,
+    SrcKey::FuncEntryTag{},
+  };
+  GuardedLocations const preconditions{
+    {Location::Local{0}, TInt, DataTypeSpecific},
+  };
+
+  addProfileTranslation(
+    profData,
+    entry,
+    2,
+    7,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfProfileTranslation> const expected{
+    {
+      ContProfStartKind::FuncEntry,
+      func()->numPositionalParams(),
+      2,
+      7,
+      {{0, KindOfInt64}},
+    },
+  };
+  EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, SkipsEntryGuardOutsideEntryInputs) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{func()->numFuncEntryInputs()}, TInt, DataTypeSpecific},
+  };
+
+  addProfileTranslation(
+    profData,
+    main,
+    2,
+    7,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  EXPECT_FALSE(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, SkipsGuardedEntryBelowRequiredArguments) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const entry = SrcKey{requiredFunc(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{0}, TInt, DataTypeSpecific},
+  };
+
+  addProfileTranslation(profData, entry, 1, 5);
+  addProfileTranslation(
+    profData,
+    entry,
+    1,
+    7,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  auto const record = snapshotContProfProfileRecord(profData, *requiredFunc());
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfProfileTranslation> const expected{
+    {ContProfStartKind::FuncEntry, 0, 1, 5},
+  };
+  EXPECT_EQ(expected, record->translations);
+}
+
+TEST_F(ContProfCaptureTest, SkipsConflictingLocalTypeGuards) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {Location::Local{0}, TInt, DataTypeSpecific},
+    {Location::Local{0}, TStr, DataTypeSpecific},
+  };
+
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, SkipsOutOfRangeLocalTypeGuard) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  GuardedLocations const preconditions{
+    {
+      Location::Local{
+        static_cast<uint32_t>(func()->numLocals())
+      },
+      TInt,
+      DataTypeSpecific,
+    },
+  };
+
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    preconditions
+  );
+
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
 }
 
 TEST_F(ContProfCaptureTest, CaptureContProfProfileStoresFirstRecordOnly) {

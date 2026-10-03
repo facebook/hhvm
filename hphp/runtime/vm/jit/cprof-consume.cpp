@@ -130,11 +130,19 @@ ContProfStartupCandidate prepareCandidate(
     assertx(start);
 
     auto region = std::make_shared<RegionDesc>();
-    region->addBlock(
+    auto const block = region->addBlock(
       *start,
       static_cast<int>(translation.regionLength),
       SBInvOffset{0}
     );
+    for (auto const& guard : translation.localTypeGuards) {
+      block->addPreCondition(RegionDesc::GuardedLocation{
+        Location::Local{guard.localId},
+        Type{guard.type},
+        DataTypeSpecific,
+      });
+    }
+
     // Explicit empty means no predecessors; null infers from the live SrcDB.
     region->incoming(RegionDesc::BlockIdSet{});
 

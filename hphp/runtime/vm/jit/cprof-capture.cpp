@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -33,6 +34,54 @@ namespace HPHP::jit::cprof {
 TRACE_SET_MOD(cprof)
 
 namespace {
+
+/*
+ * Snapshot the block's local type preconditions. Entry starts may omit
+ * unrepresentable preconditions; bytecode starts reject them.
+ */
+std::optional<std::vector<ContProfLocalTypeGuard>>
+snapshotLocalTypeGuards(const RegionDesc::Block& block, const Func& func) {
+  auto const isEntry = block.start().anyFuncEntry();
+  auto const localLimit = isEntry
+    ? func.numFuncEntryInputs()
+    : static_cast<uint32_t>(func.numLocals());
+
+  std::vector<ContProfLocalTypeGuard> result;
+  result.reserve(block.typePreConditions().size());
+
+  for (auto const& precondition : block.typePreConditions()) {
+    auto const& location = precondition.location;
+    if (location.tag() != LTag::Local) {
+      if (!isEntry) return std::nullopt;
+      continue;
+    }
+
+    auto const localId = location.localId();
+    if (localId >= localLimit) return std::nullopt;
+
+    auto const type = precondition.type;
+    if (type == TBottom || !(type <= TCell)) return std::nullopt;
+    if (!type.isKnownDataType()) {
+      if (!isEntry && type != TCell) return std::nullopt;
+      continue;
+    }
+
+    // Replay keeps the DataType, not constants or specializations.
+    result.push_back({localId, type.toDataType()});
+  }
+
+  std::sort(result.begin(), result.end());
+
+  for (size_t i = 1; i < result.size(); ++i) {
+    if (result[i - 1].localId == result[i].localId &&
+        result[i - 1].type != result[i].type) {
+      return std::nullopt;
+    }
+  }
+
+  result.erase(std::unique(result.begin(), result.end()), result.end());
+  return result;
+}
 
 struct TranslationCandidate {
   TransID transId{kInvalidTransID};
@@ -58,8 +107,8 @@ bool candidateLess(
   if (left.executionCount != right.executionCount) {
     return left.executionCount > right.executionCount;
   }
-  return std::pair{left.regionLength, lhs.transId} <
-    std::pair{right.regionLength, rhs.transId};
+  return std::tie(left.regionLength, left.localTypeGuards, lhs.transId) <
+    std::tie(right.regionLength, right.localTypeGuards, rhs.transId);
 }
 
 }
@@ -112,21 +161,31 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
     } else {
       auto const offset = start.offset();
 
-      if (!func.contains(offset) || func.isEntry(offset) ||
-          !block->typePreConditions().empty()) {
-        continue;
-      }
+      if (!func.contains(offset) || func.isEntry(offset)) continue;
 
       translation.startKind = ContProfStartKind::Bytecode;
       translation.offsetOrNumEntryArgs = static_cast<uint32_t>(offset);
     }
+
+    auto localTypeGuards = snapshotLocalTypeGuards(*block, func);
+    if (!localTypeGuards) continue;
+
+    if (!localTypeGuards->empty() && start.funcEntry()) {
+      auto const numEntryArgs = start.numEntryArgs();
+      if (numEntryArgs < func.numRequiredPositionalParams() ||
+          start.trivialDVFuncEntry()) {
+        continue;
+      }
+    }
+
+    translation.localTypeGuards = std::move(*localTypeGuards);
 
     auto const count = profData.transCounter(transId);
     assertx(count >= 0);
     if (count == 0) continue;
     translation.executionCount = static_cast<uint64_t>(count);
 
-    candidates.push_back(candidate);
+    candidates.push_back(std::move(candidate));
   }
 
   if (candidates.empty()) return std::nullopt;

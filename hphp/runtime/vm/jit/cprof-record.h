@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <compare>
 #include <cstdint>
 #include <utility>
 #include <vector>
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 
 namespace HPHP::jit::cprof {
@@ -38,6 +40,14 @@ enum class ContProfStartKind : uint8_t {
   Bytecode = 3,
 };
 
+struct ContProfLocalTypeGuard {
+  uint32_t localId{0};
+  DataType type{kInvalidDataType};
+
+  std::strong_ordering operator<=>(const ContProfLocalTypeGuard&) const
+    = default;
+};
+
 struct ContProfProfileTranslation {
   ContProfStartKind startKind{ContProfStartKind::FuncEntry};
   // Shared payload, like SrcKey: bytecode offset or FuncEntry argument count.
@@ -46,6 +56,8 @@ struct ContProfProfileTranslation {
   // Instruction count, including the synthetic function entry when present.
   uint32_t regionLength{0};
   uint64_t executionCount{0};
+  // Sorted by local ID, with at most one guard per local.
+  std::vector<ContProfLocalTypeGuard> localTypeGuards;
 
   // Valid only for Bytecode starts.
   uint32_t offset() const;

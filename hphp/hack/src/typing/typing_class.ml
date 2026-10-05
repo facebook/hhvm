@@ -2284,6 +2284,9 @@ let make_class_member_standalone_check_env ctx class_ =
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
   Env.get_class env name |> Decl_entry.to_option >>| fun cls ->
+  let env =
+    Env.set_support_dynamic_type env (Cls.get_support_dynamic_type cls)
+  in
   let env = check_class_type_parameters_add_constraints env class_ cls in
   let env = restore_pos env in
   (env, { env; cls; class_ })

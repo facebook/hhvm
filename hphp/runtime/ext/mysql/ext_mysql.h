@@ -39,8 +39,6 @@ struct mysqlExtension final : Extension {
   static int ReadTimeout;
   static int WaitTimeout;
   static int SlowQueryThreshold;
-  static int MaxRetryOpenOnFail;
-  static int MaxRetryQueryOnFail;
   static std::string Socket;
   static bool TypedResults;
 

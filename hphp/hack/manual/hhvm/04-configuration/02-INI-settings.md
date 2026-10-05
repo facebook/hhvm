@@ -837,8 +837,6 @@ These setting control the behavior of the HHVM MySQL extension.
 | `hhvm.mysql.connect_timeout` | `int` | `1000` | How long, in milliseconds, before a connection times out.
 | `hhvm.mysql.wait_timeout` | `int` | `-1` | If positive, how long, in milliseconds, before a wait timeout.
 | `hhvm.mysql.kill_on_timeout` | `bool` | `false` | If enabled, when a query takes long time to execute on server, client has a chance to kill it to avoid extra server cost.
-| `hhvm.mysql.max_retry_open_on_fail` | `int` | `1` | How many times to retry opening a connection if the first time failed.
-| `hhvm.mysql.max_retry_query_on_fail` | `int` | `1` | How many times to retry a query if the first time failed.
 | `hhvm.mysql.socket` | `string` | `''` | Default location to look for `mysql.sock`.
 
 ## Advanced Settings

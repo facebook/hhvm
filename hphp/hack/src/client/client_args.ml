@@ -514,7 +514,24 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
         " (mode) finds references of the provided class name",
         Arg_user_facing );
       ( "--find-isolatable-clusters",
-        Arg.Unit (fun () -> set_mode MODE_FIND_ISOLATABLE_CLUSTERS),
+        Arg.Unit
+          (fun () ->
+            (* The options are carried by the mode so the server receives them
+               in one place. Every flag that sets them arrives in a later
+               diff; until then the defaults are what a run uses. *)
+            set_mode
+              (MODE_FIND_ISOLATABLE_CLUSTERS
+                 Server_isolation_types.
+                   {
+                     no_growth = false;
+                     output_file = None;
+                     seed_framework = None;
+                     seed_list = None;
+                     max_dependents = 600;
+                     max_cluster_size = None;
+                     max_seeds = None;
+                     seed_offset = 0;
+                   })),
         " (mode) find clusters of files that can be isolated from the codebase",
         Arg_non_user_facing );
       ( "--find-refs",

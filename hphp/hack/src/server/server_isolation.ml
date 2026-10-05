@@ -156,14 +156,40 @@ module Seeds = struct
       let seeds = scan ctx deps_mode naming_table in
       Hh_logger.log "[isolation] seed scan: found %d seeds" (List.length seeds);
       seeds
+
+  let window all_seeds ~seed_offset ~max_seeds =
+    let seeds = List.drop all_seeds seed_offset in
+    match max_seeds with
+    | None -> seeds
+    | Some n -> List.take seeds n
+
+  let log_window ~total_seeds ~seed_offset ~max_seeds ~available =
+    if seed_offset > 0 || Option.is_some max_seeds then
+      Hh_logger.log
+        "[isolation] seed window: %d seeds from offset %d (of %d)"
+        total_seeds
+        seed_offset
+        available
 end
 
-let go (_genv : Server_env.genv) (env : Server_env.env) : Relative_path.t list =
+let go
+    (options : Server_isolation_types.options)
+    (_genv : Server_env.genv)
+    (env : Server_env.env) : Relative_path.t list =
+  let Server_isolation_types.
+        { seed_framework; seed_list; max_seeds; seed_offset; _ } =
+    options
+  in
   let ctx = Provider_utils.ctx_from_server_env env in
   let deps_mode = Provider_context.get_deps_mode ctx in
-  Seeds.select
-    ctx
-    deps_mode
-    env.Server_env.naming_table
-    ~seed_framework:None
-    ~seed_list:None
+  let naming_table = env.Server_env.naming_table in
+  let all_seeds =
+    Seeds.select ctx deps_mode naming_table ~seed_framework ~seed_list
+  in
+  let seeds = Seeds.window all_seeds ~seed_offset ~max_seeds in
+  Seeds.log_window
+    ~total_seeds:(List.length seeds)
+    ~seed_offset
+    ~max_seeds
+    ~available:(List.length all_seeds);
+  seeds

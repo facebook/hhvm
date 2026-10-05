@@ -477,9 +477,9 @@ let handle :
   | Server_command_types.FILE_DEPENDENTS filenames ->
     let files = Server_file_dependents.go genv env filenames in
     (env, files)
-  | Server_command_types.FIND_ISOLATABLE_CLUSTERS ->
+  | Server_command_types.FIND_ISOLATABLE_CLUSTERS options ->
     let seeds =
-      Server_isolation.go genv env |> List.map ~f:Relative_path.suffix
+      Server_isolation.go options genv env |> List.map ~f:Relative_path.suffix
     in
     (env, seeds)
   | Server_command_types.VALIDATE_ISOLATION filenames ->

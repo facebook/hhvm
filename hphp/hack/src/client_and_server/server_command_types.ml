@@ -632,7 +632,7 @@ type _ t =
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
-  | FIND_ISOLATABLE_CLUSTERS : string list t
+  | FIND_ISOLATABLE_CLUSTERS : Server_isolation_types.options -> string list t
   | VALIDATE_ISOLATION : string list -> Isolation_validation.result t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
@@ -734,7 +734,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FUN_DEPS_BATCH _ -> false
   | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true
-  | FIND_ISOLATABLE_CLUSTERS -> true
+  | FIND_ISOLATABLE_CLUSTERS _ -> true
   (* Reads the dependency graph to decide which files could reference the
      candidate, and the graph is only guaranteed current after a full check. *)
   | VALIDATE_ISOLATION _ -> true

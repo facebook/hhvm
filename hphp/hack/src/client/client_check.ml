@@ -1084,9 +1084,9 @@ let main_internal
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS ->
+  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS options ->
     let%lwt (seeds, telemetry) =
-      rpc args Server_command_types.FIND_ISOLATABLE_CLUSTERS
+      rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
     in
     output_isolation_result seeds ~output_json:args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)

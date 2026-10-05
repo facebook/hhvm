@@ -95,7 +95,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path,
                          convert(p.package.soft_includes),
                          convert(p.package.include_paths),
                          p.package.enable_strict_isolation,
-                         p.package.raise_dynamic_class_load_error
+                         p.package.raise_dynamic_class_load_error,
+                         p.package.allow_deployed_packages_checking
                        });
     }
 
@@ -179,11 +180,14 @@ PackageInfo::ResolvedPackagePolicy PackageInfo::resolvePackagePolicy(
     const std::string& package) const {
   auto const explicitPackage = packages().find(package);
   if (explicitPackage != packages().end()) {
-    auto const strict = explicitPackage->second.m_enable_strict_isolation;
+    auto const& p = explicitPackage->second;
+    auto const strict = p.m_enable_strict_isolation;
     return {
-      strict,
-      strict &&
-        explicitPackage->second.m_raiseDynamicClassLoadError,
+      .strictIsolation = strict,
+      .raiseDynamicClassLoadError = strict && p.m_raiseDynamicClassLoadError,
+      // Strict wins: HHVM only logs the parser's contradictory-flags error.
+      .allowDeployedPackagesChecking =
+        !strict && p.m_allow_deployed_packages_checking,
     };
   }
 
@@ -192,8 +196,10 @@ PackageInfo::ResolvedPackagePolicy PackageInfo::resolvePackagePolicy(
   auto const implicitPackage = implicitPackageFamilies().find(family);
   if (implicitPackage == implicitPackageFamilies().end()) return {};
   return {
-    true,
-    implicitPackage->second.m_raiseDynamicClassLoadError
+    .strictIsolation = true,
+    .raiseDynamicClassLoadError =
+      implicitPackage->second.m_raiseDynamicClassLoadError,
+    .allowDeployedPackagesChecking = false,
   };
 }
 
@@ -265,6 +271,8 @@ std::string PackageInfo::mangleForCacheKey() const {
     entry["enable_strict_isolation"] = package.m_enable_strict_isolation;
     entry["raise_dynamic_class_load_error"] =
       package.m_raiseDynamicClassLoadError;
+    entry["allow_deployed_packages_checking"] =
+      package.m_allow_deployed_packages_checking;
     packagesAndDeployments[name] = entry;
   }
 

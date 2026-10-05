@@ -130,6 +130,7 @@ Here:
 
 **Rules:**
 - Without it, the `package` expression and both `Require` attributes are rejected for this package
+- HHVM enforces the same rule: checking for the package at runtime throws `InvalidOperationException`, so `__SoftRequirePackage` throws rather than logs
 - The rule applies to the package being checked, not the package of the file doing the checking, so `__PackageOverride` on the caller does not bypass it
 - It does not restrict `__PackageOverride` into this package
 

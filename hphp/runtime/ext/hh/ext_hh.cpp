@@ -1641,6 +1641,13 @@ Array HHVM_FUNCTION(get_all_deployments) {
 bool HHVM_FUNCTION(package_exists, StringArg name) {
   assertx(name.get());
   auto const& packageInfo = g_context->getPackageInfo();
+  if (!packageInfo.resolvePackagePolicy(name.get()->toCppString())
+         .allowDeployedPackagesChecking) {
+    SystemLib::throwInvalidOperationExceptionObject(fmt::format(
+      "Package {} does not allow deployed-package checks",
+      name.get()->data()
+    ));
+  }
   return packageInfo.implPackageExists(name.get());
 }
 

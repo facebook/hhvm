@@ -148,7 +148,8 @@ if (package foo) {
 
 - Returns `true` if package is in the active deployment
 - If the active deployment is *unset*, returns `true` for all existent packages
-- Const-folded in repo-authoritative mode for zero runtime cost
+- Throws `InvalidOperationException` for a package that does not allow deployed-package checks, including any implicit package
+- Otherwise const-folded in repo-authoritative mode for zero runtime cost
 
 The underlying builtin is intentionally unlisted, so `package` and the
 attributes below are the only ways to ask whether a package is deployed.

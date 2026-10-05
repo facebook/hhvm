@@ -27,6 +27,10 @@ function metadata_main(): void {
 
   echo "legacy\n";
   var_dump(HH\package_exists('explicit'));
-  var_dump(HH\package_exists('alpha'));
+  try {
+    HH\package_exists('alpha');
+  } catch (InvalidOperationException $e) {
+    echo $e->getMessage()."\n";
+  }
   var_dump(\array_key_exists('alpha', HH\get_all_packages()));
 }

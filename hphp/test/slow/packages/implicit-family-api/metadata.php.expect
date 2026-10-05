@@ -11,5 +11,5 @@ soft: path=families/soft/; includes=; soft_includes=
 zeta: path=families/zeta/; includes=; soft_includes=
 legacy
 bool(true)
-bool(false)
+Package alpha does not allow deployed-package checks
 bool(false)

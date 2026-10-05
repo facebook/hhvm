@@ -2,10 +2,12 @@
 
 [packages.prod]
 include_paths=["//fake_flib/", "//basic-3.php", "//doesnotexists/"]
+allow_deployed_packages_checking=true
 
 [packages.intern]
 include_paths=["//fake_flib/intern/"]
 includes=["prod"]
+allow_deployed_packages_checking=true
 
 [deployments]
 

@@ -388,6 +388,7 @@ function get_all_deployments()[]: dict<string, shape(
 
 /*
  * Returns whether a package named $name exist in the current deployment.
+ * Throws InvalidOperationException if $name disallows deployed-package checks.
  */
 <<__Native>>
 function package_exists(string $name)[]: bool;

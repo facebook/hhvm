@@ -1,0 +1,6 @@
+bool(true)
+bool(false)
+package_exists: Package closed does not allow deployed-package checks
+package: Package closed does not allow deployed-package checks
+__RequirePackage: Package closed does not allow deployed-package checks
+__SoftRequirePackage: Package closed does not allow deployed-package checks

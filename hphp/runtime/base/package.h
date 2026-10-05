@@ -47,6 +47,8 @@ struct PackageInfo {
   struct ResolvedPackagePolicy {
     bool strictIsolation{false};
     bool raiseDynamicClassLoadError{false};
+    // An undeclared name stays checkable so a typo reports absent.
+    bool allowDeployedPackagesChecking{true};
   };
 
   struct Package {
@@ -55,6 +57,7 @@ struct PackageInfo {
     hphp_vector_string_set m_include_paths;
     bool m_enable_strict_isolation{false};
     bool m_raiseDynamicClassLoadError{false};
+    bool m_allow_deployed_packages_checking{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_includes, stdltstr{})
@@ -62,6 +65,7 @@ struct PackageInfo {
         (m_include_paths, stdltstr{})
         (m_enable_strict_isolation)
         (m_raiseDynamicClassLoadError)
+        (m_allow_deployed_packages_checking)
         ;
     }
   };

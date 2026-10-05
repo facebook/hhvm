@@ -1,0 +1,14 @@
+[packages]
+
+[packages.open]
+include_paths=["//"]
+allow_deployed_packages_checking=true
+
+# Declared but never opted in: checking for it is an error, not a false.
+[packages.closed]
+include_paths=["//closed/"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["open", "closed"]

@@ -4,10 +4,13 @@
 include_paths = [ "//basic.php", "//basic-soft.php", "//interface.php", "//noactivedeployement.php", "//abstract.php", "//soft.php", "//soft_sampled.php", "//soft_unsampled.php"]
 
 [packages.bar]
+allow_deployed_packages_checking=true
 
 [packages.softbar]
+allow_deployed_packages_checking=true
 
 [packages.bat]
+allow_deployed_packages_checking=true
 
 [deployments]
 

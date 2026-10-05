@@ -251,6 +251,12 @@ TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
   auto const packageName = v->m_data.pstr;
   auto const unit = env.index.lookup_func_unit(*env.ctx.func);
   if (!unit) return NoReduced{};
+  // The runtime throws for these, so the call stays and nothing after it runs.
+  if (!unit->packageInfo.resolvePackagePolicy(packageName->toCppString())
+         .allowDeployedPackagesChecking) {
+    unreachable(env);
+    return TBottom;
+  }
   constprop(env);
   return unit->packageInfo.implPackageExists(packageName)
     ? TTrue : TFalse;

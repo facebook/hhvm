@@ -33,6 +33,35 @@
 namespace HPHP {
 namespace {
 
+// Checks which names may be asked about at runtime.
+TEST(PackageInfoTest, AllowsDeployedPackagesChecking) {
+  PackageInfo info;
+  info.m_packages.emplace("opted_in", PackageInfo::Package{});
+  info.m_packages.at("opted_in").m_allow_deployed_packages_checking = true;
+  info.m_packages.emplace("closed", PackageInfo::Package{});
+  info.m_packages.emplace("contradictory", PackageInfo::Package{});
+  info.m_packages.at("contradictory").m_enable_strict_isolation = true;
+  info.m_packages.at("contradictory").m_allow_deployed_packages_checking = true;
+  info.m_implicitPackageFamilies.emplace(
+    "prototypes",
+    PackageInfo::ImplicitPackageFamily{"families/", {}, {}}
+  );
+
+  auto const allows = [&] (const char* name) {
+    return info.resolvePackagePolicy(name).allowDeployedPackagesChecking;
+  };
+  EXPECT_TRUE(allows("opted_in"));
+  EXPECT_FALSE(allows("closed"));
+  // Strict isolation wins over an opt-in the config parser rejected.
+  EXPECT_FALSE(allows("contradictory"));
+  // Implicit packages are strict-isolation, so neither the family nor a
+  // member of it may be checked for.
+  EXPECT_FALSE(allows("prototypes"));
+  EXPECT_FALSE(allows("prototypes.example"));
+  // An undeclared name stays checkable so a typo reports absent.
+  EXPECT_TRUE(allows("neverdeclared"));
+}
+
 // Checks that config loading gates implicit families and reports strict status.
 TEST(PackageInfoTest, LoadsImplicitPackageFamiliesOnlyWhenEnabled) {
   folly::test::TemporaryDirectory temp{"package-info"};
@@ -185,7 +214,7 @@ TEST(PackageInfoTest, MangleIncludesEmptyImplicitFamilies) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"example":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{}])"
+    R"([{"example":{"allow_deployed_packages_checking":false,"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{}])"
   );
 }
 
@@ -200,7 +229,7 @@ TEST(PackageInfoTest, SeparatesImplicitFamiliesInCacheMangle) {
 
   EXPECT_EQ(
     info.mangleForCacheKey(),
-    R"([{"implicit_families":{"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","raise_dynamic_class_load_error":false,"soft_includes":[]}}])"
+    R"([{"implicit_families":{"allow_deployed_packages_checking":false,"enable_strict_isolation":false,"include_paths":[],"includes":[],"raise_dynamic_class_load_error":false,"soft_includes":[]}},{"prototypes":{"includes":[],"path":"families/","raise_dynamic_class_load_error":false,"soft_includes":[]}}])"
   );
 }
 

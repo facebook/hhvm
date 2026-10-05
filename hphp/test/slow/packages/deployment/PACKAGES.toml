@@ -2,15 +2,18 @@
 
 [packages.softprod]
 include_paths=["//softprod/"]
+allow_deployed_packages_checking=true
 
 [packages.prod]
 include_paths=["//prod/", "//"]
 soft_includes=["softprod"]
+allow_deployed_packages_checking=true
 
 [packages.intern]
 include_paths=["//prod/intern/"]
 includes=["prod"]
 soft_includes=["softprod"]
+allow_deployed_packages_checking=true
 
 [deployments]
 

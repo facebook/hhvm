@@ -8,6 +8,7 @@ include_paths = ["//optional/"]
 
 [packages.explicit]
 include_paths = ["//explicit/"]
+allow_deployed_packages_checking = true
 
 [implicit_packages]
 

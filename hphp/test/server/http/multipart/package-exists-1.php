@@ -5,6 +5,7 @@
 
 [packages.foo]
 include_paths = ["//main.php"]
+allow_deployed_packages_checking=true
 
 [packages.default]
 include_paths = ["//"]

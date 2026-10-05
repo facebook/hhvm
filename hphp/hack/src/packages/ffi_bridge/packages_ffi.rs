@@ -34,6 +34,7 @@ mod ffi {
         enable_strict_isolation: bool,
         raise_dynamic_class_load_error: bool,
         is_implicit: bool,
+        allow_deployed_packages_checking: bool,
     }
     struct DeploymentMapEntry {
         name: String,
@@ -85,6 +86,7 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                         raise_dynamic_class_load_error: package
                             .should_raise_dynamic_class_load_error(),
                         is_implicit: false,
+                        allow_deployed_packages_checking: package.allow_deployed_packages_checking,
                     };
                     ffi::PackageMapEntry {
                         name: name.get_ref().to_string(),
@@ -141,6 +143,8 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                                     raise_dynamic_class_load_error: package
                                         .should_raise_dynamic_class_load_error(),
                                     is_implicit: false,
+                                    allow_deployed_packages_checking: package
+                                        .allow_deployed_packages_checking,
                                 },
                             },
                         }
@@ -158,6 +162,7 @@ pub fn package_info(packages_toml: &CxxString, enable_implicit_packages: bool) -
                                     raise_dynamic_class_load_error: family
                                         .should_raise_dynamic_class_load_error(),
                                     is_implicit: true,
+                                    allow_deployed_packages_checking: false,
                                 },
                             },
                         }

@@ -38,17 +38,31 @@ using EncodedExecutionCount = uint64_t;
 using EncodedGuardCount = size_t;
 using EncodedLocalId = uint32_t;
 using EncodedDataType = uint8_t;
+using EncodedIncomingCount = size_t;
+using EncodedIncomingIndex = uint32_t;
+using EncodedPostConditionCount = size_t;
+using EncodedPostConditionLocalId = uint32_t;
+using EncodedPostConditionChanged = uint8_t;
+using EncodedPostConditionType = uint8_t;
 
+constexpr size_t kEncodedIncomingIndexSize = sizeof(EncodedIncomingIndex);
 constexpr size_t kEncodedLocalTypeGuardSize =
   sizeof(EncodedLocalId) +
   sizeof(EncodedDataType);
+
+constexpr size_t kEncodedLocalPostConditionSize =
+  sizeof(EncodedPostConditionLocalId) +
+  sizeof(EncodedPostConditionChanged) +
+  sizeof(EncodedPostConditionType);
 
 constexpr size_t kMinEncodedProfileTranslationSize =
   sizeof(EncodedStartKind) +
   sizeof(EncodedStartValue) +
   sizeof(EncodedRegionLength) +
   sizeof(EncodedExecutionCount) +
-  sizeof(EncodedGuardCount);
+  sizeof(EncodedGuardCount) +
+  sizeof(EncodedIncomingCount) +
+  sizeof(EncodedPostConditionCount);
 using EncodedSHA1 = std::array<uint32_t, SHA1::kQNumWords>;
 static_assert(sizeof(EncodedSHA1) == SHA1::kStrLen / 2);
 
@@ -224,6 +238,20 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
       writer.writeValue(guard.localId);
       writer.writeValue(static_cast<EncodedDataType>(guard.type));
     }
+
+    writer.writeValue(translation.incoming.size());
+
+    for (auto const predecessor : translation.incoming) {
+      writer.writeValue(predecessor);
+    }
+
+    writer.writeValue(translation.localPostConditions.size());
+
+    for (auto const& post : translation.localPostConditions) {
+      writer.writeValue(post.localId);
+      writer.writeByte(post.changed ? 1 : 0);
+      writer.writeByte(static_cast<EncodedPostConditionType>(post.type));
+    }
   }
 
   return std::move(writer).takeBytes();
@@ -266,6 +294,8 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
     ContProfProfileTranslation translation{};
     EncodedStartKind startKind{};
     EncodedGuardCount guardCount{};
+    EncodedIncomingCount incomingCount{};
+    EncodedPostConditionCount postConditionCount{};
 
     if (!reader.readValue(startKind) ||
         !reader.readValue(translation.offsetOrNumEntryArgs) ||
@@ -289,6 +319,43 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
 
       translation.localTypeGuards.push_back({
         localId, static_cast<DataType>(encodedType)
+      });
+    }
+
+    if (!reader.readValue(incomingCount) ||
+        incomingCount > reader.remaining() / kEncodedIncomingIndexSize) {
+      return std::nullopt;
+    }
+
+    translation.incoming.reserve(incomingCount);
+    for (size_t j = 0; j < incomingCount; ++j) {
+      EncodedIncomingIndex predecessor{};
+      if (!reader.readValue(predecessor)) {
+        return std::nullopt;
+      }
+
+      translation.incoming.push_back(predecessor);
+    }
+
+    if (!reader.readValue(postConditionCount) ||
+        postConditionCount >
+            reader.remaining() / kEncodedLocalPostConditionSize) {
+      return std::nullopt;
+    }
+
+    translation.localPostConditions.reserve(postConditionCount);
+    for (size_t j = 0; j < postConditionCount; ++j) {
+      EncodedPostConditionLocalId localId{};
+      EncodedPostConditionChanged changed{};
+      EncodedPostConditionType encodedType{};
+
+      if (!reader.readValue(localId) || !reader.readByte(changed) ||
+          changed > 1 || !reader.readByte(encodedType)) {
+        return std::nullopt;
+      }
+
+      translation.localPostConditions.push_back({
+        localId, changed != 0, static_cast<DataType>(encodedType)
       });
     }
 

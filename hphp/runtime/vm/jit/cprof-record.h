@@ -48,6 +48,17 @@ struct ContProfLocalTypeGuard {
     = default;
 };
 
+struct ContProfLocalPostCondition {
+  uint32_t localId{0};
+  // Whether the local may have been overwritten, rather than just refined.
+  bool changed{false};
+  // kInvalidDataType means a changed local's type is unknown (TCell on replay).
+  DataType type{kInvalidDataType};
+
+  std::strong_ordering operator<=>(const ContProfLocalPostCondition&) const
+    = default;
+};
+
 struct ContProfProfileTranslation {
   ContProfStartKind startKind{ContProfStartKind::FuncEntry};
   // Shared payload, like SrcKey: bytecode offset or FuncEntry argument count.
@@ -58,6 +69,9 @@ struct ContProfProfileTranslation {
   uint64_t executionCount{0};
   // Sorted by local ID, with at most one guard per local.
   std::vector<ContProfLocalTypeGuard> localTypeGuards;
+  // Sorted, unique predecessor indices into this record's translations.
+  std::vector<uint32_t> incoming;
+  std::vector<ContProfLocalPostCondition> localPostConditions;
 
   // Valid only for Bytecode starts.
   uint32_t offset() const;

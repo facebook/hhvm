@@ -92,7 +92,34 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
         return false;
       }
     }
+    auto const& incoming = translation.incoming;
+    if (translation.startKind != ContProfStartKind::Bytecode &&
+        !incoming.empty()) {
+      return false;
+    }
 
+    for (size_t i = 0; i < incoming.size(); ++i) {
+      auto const predecessor = incoming[i];
+
+      if (predecessor >= record.translations.size()) return false;
+
+      if (i != 0 && incoming[i - 1] >= predecessor) {
+        return false;
+      }
+    }
+
+    auto const& posts = translation.localPostConditions;
+    for (size_t i = 0; i < posts.size(); ++i) {
+      auto const& post = posts[i];
+
+      if (post.type != kInvalidDataType && !isRealType(post.type)) return false;
+
+      if (!post.changed && post.type == kInvalidDataType) return false;
+
+      if (i != 0 && posts[i - 1].localId >= post.localId) {
+        return false;
+      }
+    }
     if (translation.startKind != ContProfStartKind::Bytecode) {
       if (translation.executionCount >
           std::numeric_limits<uint64_t>::max() - entryExecutions) {

@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <folly/ScopeGuard.h>
 #include <gtest/gtest.h>
@@ -131,13 +132,21 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   auto const popOffset = instrLen(m_alphaFunc->at(0));
   auto const midOffset = popOffset + instrLen(m_alphaFunc->at(popOffset));
   auto const midStart = SrcKey{m_alphaFunc, midOffset, ResumeMode::None};
+  // Include the synthetic entry, Null, and PopC to reach midStart.
+  m_alpha.translations.front().regionLength = 3;
   m_alpha.translations.front().localTypeGuards = {{0, KindOfInt64}};
+  m_alpha.translations.front().localPostConditions = {
+    {0, true, KindOfInt64},
+    {1, false, KindOfString},
+  };
   m_alpha.translations.push_back({
     ContProfStartKind::Bytecode,
     static_cast<uint32_t>(midOffset),
     2,
     11,
     {{1, KindOfString}},
+    {0},
+    {{0, true, kInvalidDataType}},
   });
 
   auto const prepared = prepareContProfStartupCandidates(
@@ -158,6 +167,15 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
     {Location::Local{0}, TInt, DataTypeSpecific},
   };
   EXPECT_EQ(expectedEntryGuards, entry.region->entry()->typePreConditions());
+  EXPECT_TRUE(entry.incoming.empty());
+  TypedLocations const expectedChanged{
+    {Location::Local{0}, TInt},
+  };
+  TypedLocations const expectedRefined{
+    {Location::Local{1}, TStr},
+  };
+  EXPECT_EQ(expectedChanged, entry.postConditions.changed);
+  EXPECT_EQ(expectedRefined, entry.postConditions.refined);
 
   auto const& translation = candidate.translations[1];
   EXPECT_EQ(midStart, translation.start);
@@ -173,6 +191,13 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
     {Location::Local{1}, TStr, DataTypeSpecific},
   };
   EXPECT_EQ(expectedBytecodeGuards, block->typePreConditions());
+  std::vector<uint32_t> const expectedIncoming{0};
+  EXPECT_EQ(expectedIncoming, translation.incoming);
+  TypedLocations const expectedUnknownChanged{
+    {Location::Local{0}, TCell},
+  };
+  EXPECT_EQ(expectedUnknownChanged, translation.postConditions.changed);
+  EXPECT_TRUE(translation.postConditions.refined.empty());
 }
 
 TEST_F(ContProfConsumeTest, IncompatibleEntryDoesNotConsumeSlot) {

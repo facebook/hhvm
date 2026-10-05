@@ -99,9 +99,15 @@ ContProfProfileRecord exampleProfileRecord() {
     {0, KindOfInt64},
     {2, KindOfString},
   };
+  record.translations[0].localPostConditions = {
+    {0, true, kInvalidDataType},
+    {1, true, KindOfInt64},
+    {2, false, KindOfString},
+  };
   record.translations.back().localTypeGuards = {
     {1, KindOfObject},
   };
+  record.translations.back().incoming = {0, 1, 3};
   return record;
 }
 
@@ -169,7 +175,7 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   auto const serialized = serializeContProfProfileRecord(record);
   ASSERT_TRUE(serialized);
 
-  // Translations encode kind/start/length/count followed by local type guards.
+  // Check field widths and order, including nonempty optional data.
   std::vector<uint8_t> expected;
   auto const append = [&](auto value) {
     auto const offset = expected.size();
@@ -184,19 +190,39 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
     append(count);
   };
   appendTranslation(1, 0, 2, uint64_t{1} << 40);
-  append(size_t{2});
+  append(size_t{2}); // local type guards
   append(uint32_t{0});
   append(static_cast<uint8_t>(KindOfInt64));
   append(uint32_t{2});
   append(static_cast<uint8_t>(KindOfString));
+  append(size_t{0}); // incoming translations
+  append(size_t{3}); // local postconditions
+  append(uint32_t{0});
+  append(uint8_t{1});
+  append(static_cast<uint8_t>(kInvalidDataType));
+  append(uint32_t{1});
+  append(uint8_t{1});
+  append(static_cast<uint8_t>(KindOfInt64));
+  append(uint32_t{2});
+  append(uint8_t{0});
+  append(static_cast<uint8_t>(KindOfString));
   appendTranslation(1, 1, 3, 7);
-  append(size_t{0});
+  append(size_t{0}); // local type guards
+  append(size_t{0}); // incoming translations
+  append(size_t{0}); // local postconditions
   appendTranslation(2, 0, 1, 11);
-  append(size_t{0});
+  append(size_t{0}); // local type guards
+  append(size_t{0}); // incoming translations
+  append(size_t{0}); // local postconditions
   appendTranslation(3, 4, 3, 13);
-  append(size_t{1});
+  append(size_t{1}); // local type guards
   append(uint32_t{1});
   append(static_cast<uint8_t>(KindOfObject));
+  append(size_t{3}); // incoming translations
+  append(uint32_t{0});
+  append(uint32_t{1});
+  append(uint32_t{3});
+  append(size_t{0}); // local postconditions
 
   auto const translationsOffset = sizeof(size_t) + funcKey->size() +
     sizeof(uint64_t) + sizeof(size_t);
@@ -241,6 +267,44 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   EXPECT_TRUE(serializeContProfProfileRecord(record));
 
   record.translations.back().offsetOrNumEntryArgs = kInvalidBytecodeOffset;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.back().incoming = {
+    static_cast<uint32_t>(record.translations.size()),
+  };
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.back().incoming = {0, 0};
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.back().incoming = {1, 0};
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations.front().incoming = {0};
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localPostConditions[0].changed = false;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localPostConditions[1].type = static_cast<DataType>(0);
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localPostConditions[1].localId =
+    record.translations[0].localPostConditions[0].localId;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  std::swap(
+    record.translations[0].localPostConditions[0],
+    record.translations[0].localPostConditions[1]
+  );
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
@@ -401,6 +465,116 @@ TEST(ContProfSerde, RejectsMalformedLocalTypeGuards) {
   ));
 }
 
+TEST(ContProfSerde, RejectsMalformedIncomingTopology) {
+  auto const record = exampleProfileRecord();
+  auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(encodedFuncKey);
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  constexpr size_t encodedFuncKeyLengthSize = sizeof(size_t);
+  constexpr size_t capturedAtMsSize = sizeof(uint64_t);
+  constexpr size_t translationCountSize = sizeof(size_t);
+  constexpr size_t guardCountOffset =
+    sizeof(uint8_t) +
+    sizeof(uint32_t) +
+    sizeof(uint32_t) +
+    sizeof(uint64_t);
+  constexpr size_t encodedGuardSize =
+    sizeof(uint32_t) + sizeof(uint8_t);
+
+  auto const firstTranslation = encodedFuncKeyLengthSize +
+    encodedFuncKey->size() +
+    capturedAtMsSize +
+    translationCountSize;
+  auto const incomingCountPosition =
+    firstTranslation +
+    guardCountOffset +
+    sizeof(size_t) +
+    record.translations.front().localTypeGuards.size() *
+      encodedGuardSize;
+
+  ASSERT_LE(
+    incomingCountPosition + sizeof(size_t),
+    serialized->size()
+  );
+
+  auto invalidCount = *serialized;
+  auto const tooManyIncoming = std::numeric_limits<size_t>::max();
+  std::memcpy(
+    invalidCount.data() + incomingCountPosition,
+    &tooManyIncoming,
+    sizeof(tooManyIncoming)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidCount.data(), invalidCount.size()}
+  ));
+}
+
+TEST(ContProfSerde, RejectsMalformedLocalPostConditions) {
+  auto const record = exampleProfileRecord();
+  auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(encodedFuncKey);
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  constexpr size_t encodedFuncKeyLengthSize = sizeof(size_t);
+  constexpr size_t capturedAtMsSize = sizeof(uint64_t);
+  constexpr size_t translationCountSize = sizeof(size_t);
+  constexpr size_t guardCountOffset =
+    sizeof(uint8_t) +
+    sizeof(uint32_t) +
+    sizeof(uint32_t) +
+    sizeof(uint64_t);
+  constexpr size_t encodedGuardSize =
+    sizeof(uint32_t) + sizeof(uint8_t);
+
+  auto const firstTranslation = encodedFuncKeyLengthSize +
+    encodedFuncKey->size() +
+    capturedAtMsSize +
+    translationCountSize;
+  auto const incomingCountPosition =
+    firstTranslation +
+    guardCountOffset +
+    sizeof(size_t) +
+    record.translations.front().localTypeGuards.size() *
+      encodedGuardSize;
+  auto const postCountPosition =
+    incomingCountPosition +
+    sizeof(size_t) +
+    record.translations.front().incoming.size() * sizeof(uint32_t);
+  auto const firstPost = postCountPosition + sizeof(size_t);
+  auto const firstChanged = firstPost + sizeof(uint32_t);
+  auto const firstType = firstChanged + sizeof(uint8_t);
+
+  ASSERT_LT(firstType, serialized->size());
+
+  auto invalidCount = *serialized;
+  auto const tooManyPosts = std::numeric_limits<size_t>::max();
+  std::memcpy(
+    invalidCount.data() + postCountPosition,
+    &tooManyPosts,
+    sizeof(tooManyPosts)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidCount.data(), invalidCount.size()}
+  ));
+
+  auto invalidChanged = *serialized;
+  invalidChanged[firstChanged] = 2;
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidChanged.data(), invalidChanged.size()}
+  ));
+
+  auto invalidType = *serialized;
+  invalidType[firstType] = 0;
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidType.data(), invalidType.size()}
+  ));
+}
+
 TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   ContProfProfileRecord record{};
   record.header = exampleRecordHeader();
@@ -423,12 +597,16 @@ TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   constexpr size_t regionLengthSize = sizeof(uint32_t);
   constexpr size_t executionCountSize = sizeof(uint64_t);
   constexpr size_t localTypeGuardCountSize = sizeof(size_t);
+  constexpr size_t incomingCountSize = sizeof(size_t);
+  constexpr size_t localPostConditionCountSize = sizeof(size_t);
   constexpr size_t encodedTranslationSize =
     startKindSize +
     startSize +
     regionLengthSize +
     executionCountSize +
-    localTypeGuardCountSize;
+    localTypeGuardCountSize +
+    incomingCountSize +
+    localPostConditionCountSize;
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +

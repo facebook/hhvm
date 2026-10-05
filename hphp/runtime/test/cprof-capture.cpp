@@ -44,7 +44,7 @@ constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-capture-test.php";
 
 constexpr auto kHhas = R"HHAS(
 .function N cont_prof_capture_test_81d926f4(named N $x = DV) {
-  .declvars $y;
+  .declvars $y $z;
 main:
   Null
   PopC
@@ -93,13 +93,15 @@ TestUnit makeTestUnit() {
   return TestUnit{emitter->create().release()};
 }
 
-void addProfileTranslation(
+TransID addProfileTranslation(
   ProfData& profData,
   SrcKey start,
   int regionLength,
   int64_t executionCount,
   SBInvOffset spOffset = SBInvOffset{0},
-  GuardedLocations preconditions = {}
+  GuardedLocations preconditions = {},
+  RegionDesc::BlockIdSet incoming = {},
+  PostConditions postConditions = {}
 ) {
   auto region = std::make_shared<RegionDesc>();
   auto const block = region->addBlock(start, regionLength, spOffset);
@@ -108,12 +110,14 @@ void addProfileTranslation(
   }
 
   auto const transId = profData.allocTransID();
-  profData.addTransProfile(transId, region, PostConditions{}, 0);
+  region->incoming(std::move(incoming));
+  profData.addTransProfile(transId, region, postConditions, 0);
 
   always_assert(executionCount >= 0);
   always_assert(executionCount <= profData.counterDefault());
   *profData.transCounterAddr(transId) =
     profData.counterDefault() - executionCount;
+  return transId;
 }
 
 struct ContProfCaptureTest : testing::Test {
@@ -124,7 +128,7 @@ struct ContProfCaptureTest : testing::Test {
 
     s_func = s_unit->funcs()[0];
     s_requiredFunc = s_unit->funcs()[1];
-    ASSERT_EQ(2, s_func->numLocals());
+    ASSERT_EQ(3, s_func->numLocals());
     ASSERT_EQ(1, s_func->numFuncEntryInputs());
     ASSERT_EQ(1, s_requiredFunc->numRequiredPositionalParams());
     s_midOffset = instrLen(s_func->at(0));
@@ -171,6 +175,33 @@ void expectEntryOnlyRecord(
   EXPECT_EQ(expected, record->translations);
 }
 
+TEST_F(ContProfCaptureTest, PreservesIncomingAcrossProfileRenumbering) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const transId = profData.allocTransID();
+  auto const laterTransId = profData.allocTransID();
+  auto region = std::make_shared<RegionDesc>();
+  auto const oldId = region->addBlock(emptyMid(), 1, SBInvOffset{0})->id();
+  region->incoming({transId, laterTransId});
+
+  profData.addTransProfile(transId, region, PostConditions{}, 0);
+
+  auto const record = profData.transRec(transId);
+  ASSERT_NE(nullptr, record);
+  auto const& published = *record->region();
+  ASSERT_EQ(1, published.blocks().size());
+  EXPECT_EQ(transId, published.entry()->id());
+  EXPECT_TRUE(published.hasBlock(transId));
+  EXPECT_FALSE(published.hasBlock(oldId));
+  EXPECT_FALSE(published.hasBlock(laterTransId));
+  RegionDesc::BlockIdSet const expectedIncoming{transId, laterTransId};
+  ASSERT_NE(nullptr, published.incoming());
+  EXPECT_EQ(expectedIncoming, *published.incoming());
+  EXPECT_TRUE(published.preds(transId).empty());
+  EXPECT_TRUE(published.succs(transId).empty());
+}
+
 TEST_F(ContProfCaptureTest, CapturesNonzeroTranslations) {
   ProfData profData;
   profData.resetCounters(100);
@@ -179,8 +210,16 @@ TEST_F(ContProfCaptureTest, CapturesNonzeroTranslations) {
   auto const named = SrcKey{func(), 0, true, SrcKey::FuncEntryTag{}};
 
   addProfileTranslation(profData, named, 1, 11);
-  addProfileTranslation(profData, main, 2, 7);
-  addProfileTranslation(profData, emptyMid(), 1, 13);
+  auto const mainTransId = addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    13,
+    SBInvOffset{0},
+    {},
+    {mainTransId}
+  );
   addProfileTranslation(profData, main, 3, 0);
 
   auto const record = snapshotContProfProfileRecord(profData, *func());
@@ -197,6 +236,8 @@ TEST_F(ContProfCaptureTest, CapturesNonzeroTranslations) {
       static_cast<uint32_t>(emptyMid().offset()),
       1,
       13,
+      {},
+      {0},
     },
   };
   EXPECT_EQ(*expectedKey, record->header.funcKey);
@@ -549,6 +590,44 @@ TEST_F(ContProfCaptureTest, SkipsOutOfRangeLocalTypeGuard) {
   );
 
   expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+}
+
+TEST_F(ContProfCaptureTest, CapturesLocalPostConditions) {
+  ProfData profData;
+  profData.resetCounters(100);
+
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  PostConditions postConditions{};
+  postConditions.changed = {
+    {Location::Local{0}, TInt},
+    {Location::Local{1}, TInt | TStr},
+  };
+  postConditions.refined = {
+    {Location::Local{2}, TStaticStr},
+  };
+
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    11,
+    SBInvOffset{0},
+    {},
+    {},
+    postConditions
+  );
+
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+
+  std::vector<ContProfLocalPostCondition> const expected{
+    {0, true, KindOfInt64},
+    {1, true, kInvalidDataType},
+    {2, false, KindOfPersistentString},
+  };
+  ASSERT_EQ(2, record->translations.size());
+  EXPECT_EQ(expected, record->translations.back().localPostConditions);
 }
 
 TEST_F(ContProfCaptureTest, CaptureContProfProfileStoresFirstRecordOnly) {

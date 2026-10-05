@@ -226,6 +226,10 @@ bool isContProfProfileRecordCompatible(
   auto const currentKey = makeContProfFuncKey(func);
   if (!currentKey || *currentKey != record.header.funcKey) return false;
 
+  std::vector<SrcKey> starts;
+  std::vector<SrcKey> lasts;
+  starts.reserve(record.translations.size());
+  lasts.reserve(record.translations.size());
   for (auto const& translation : record.translations) {
     auto const start = contProfTranslationSrcKey(translation, func);
     if (!start) return false;
@@ -235,6 +239,14 @@ bool isContProfProfileRecordCompatible(
       auto const stackOffset = mcgen::offsetAtLocation(*start);
       if (!stackOffset || *stackOffset != SBInvOffset{0}) return false;
     }
+
+    auto last = *start;
+    for (uint32_t i = 1; i < translation.regionLength; ++i) {
+      last.advance(&func);
+    }
+
+    starts.push_back(*start);
+    lasts.push_back(last);
 
     auto const& guards = translation.localTypeGuards;
 
@@ -252,6 +264,23 @@ bool isContProfProfileRecordCompatible(
 
     for (auto const& guard : guards) {
       if (guard.localId >= localLimit) return false;
+    }
+
+    for (auto const& post : translation.localPostConditions) {
+      if (post.localId >= func.numLocals()) return false;
+    }
+  }
+
+  for (size_t i = 0; i < record.translations.size(); ++i) {
+    for (auto const predecessor : record.translations[i].incoming) {
+      auto const last = lasts[predecessor];
+
+      if (last.funcEntry() &&
+          last.numEntryArgs() < func.numRequiredPositionalParams()) {
+        return false;
+      }
+
+      if (!last.succSrcKeys().contains(starts[i])) return false;
     }
   }
 

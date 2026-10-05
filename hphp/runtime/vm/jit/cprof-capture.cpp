@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <map>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -26,7 +27,9 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::cprof {
@@ -83,8 +86,63 @@ snapshotLocalTypeGuards(const RegionDesc::Block& block, const Func& func) {
   return result;
 }
 
+std::optional<std::vector<ContProfLocalPostCondition>>
+snapshotLocalPostConditions(
+  const PostConditions& postConditions,
+  const Func& func
+) {
+  struct State {
+    bool changed;
+    Type type;
+  };
+
+  std::map<uint32_t, State> states;
+
+  auto const merge = [&](const TypedLocations& locations, bool changed) {
+    for (auto const& condition : locations) {
+      auto const& location = condition.location;
+      if (location.tag() != LTag::Local) continue;
+
+      auto const localId = location.localId();
+      if (localId >= static_cast<uint32_t>(func.numLocals())) return false;
+
+      auto const type = condition.type;
+      if (type == TBottom || !(type <= TCell)) return false;
+
+      auto [it, inserted] = states.emplace(localId, State{changed, type});
+
+      if (!inserted) {
+        it->second.changed = it->second.changed || changed;
+        it->second.type |= type;
+      }
+    }
+
+    return true;
+  };
+
+  if (!merge(postConditions.refined, false) ||
+      !merge(postConditions.changed, true)) {
+    return std::nullopt;
+  }
+
+  std::vector<ContProfLocalPostCondition> result;
+  result.reserve(states.size());
+
+  for (auto const& [localId, state] : states) {
+    if (state.type.isKnownDataType()) {
+      result.push_back({localId, state.changed, state.type.toDataType()});
+    } else if (state.changed) {
+      // Preserve the write so replay clears any previously known type.
+      result.push_back({localId, true, kInvalidDataType});
+    }
+  }
+
+  return result;
+}
+
 struct TranslationCandidate {
   TransID transId{kInvalidTransID};
+  RegionDescPtr region;
   ContProfProfileTranslation translation;
 };
 
@@ -107,8 +165,19 @@ bool candidateLess(
   if (left.executionCount != right.executionCount) {
     return left.executionCount > right.executionCount;
   }
-  return std::tie(left.regionLength, left.localTypeGuards, lhs.transId) <
-    std::tie(right.regionLength, right.localTypeGuards, rhs.transId);
+  auto const leftTieBreakers = std::tie(
+    left.regionLength,
+    left.localTypeGuards,
+    left.localPostConditions,
+    lhs.transId
+  );
+  auto const rightTieBreakers = std::tie(
+    right.regionLength,
+    right.localTypeGuards,
+    right.localPostConditions,
+    rhs.transId
+  );
+  return leftTieBreakers < rightTieBreakers;
 }
 
 }
@@ -143,6 +212,7 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
 
     TranslationCandidate candidate{};
     candidate.transId = transId;
+    candidate.region = region;
     auto& translation = candidate.translation;
     translation.regionLength = static_cast<uint32_t>(block->length());
 
@@ -180,6 +250,12 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
 
     translation.localTypeGuards = std::move(*localTypeGuards);
 
+    auto localPostConditions =
+      snapshotLocalPostConditions(block->postConds(), func);
+    if (!localPostConditions) continue;
+
+    translation.localPostConditions = std::move(*localPostConditions);
+
     auto const count = profData.transCounter(transId);
     assertx(count >= 0);
     if (count == 0) continue;
@@ -195,11 +271,15 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
   ContProfProfileRecord result{};
   result.header.funcKey = std::move(*funcKey);
 
+  std::vector<const TranslationCandidate*> selectedCandidates;
+  selectedCandidates.reserve(candidates.size());
+
   // Retain one translation per start. Keep the preferred candidate.
   for (size_t i = 0; i < candidates.size();) {
     auto const& selected = candidates[i];
     auto const& translation = selected.translation;
 
+    selectedCandidates.push_back(&selected);
     result.translations.push_back(translation);
 
     auto next = i + 1;
@@ -211,6 +291,31 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
     i = next;
   }
 
+  hphp_fast_map<TransID, uint32_t> localIndices;
+  localIndices.reserve(selectedCandidates.size());
+  for (size_t i = 0; i < selectedCandidates.size(); ++i) {
+    localIndices.emplace(
+      selectedCandidates[i]->transId,
+      static_cast<uint32_t>(i)
+    );
+  }
+
+  for (size_t i = 0; i < selectedCandidates.size(); ++i) {
+    auto const candidate = selectedCandidates[i];
+    if (candidate->translation.startKind != ContProfStartKind::Bytecode) {
+      continue;
+    }
+
+    auto const predecessors = findPredTrans(*candidate->region, &profData);
+    auto& incoming = result.translations[i].incoming;
+
+    for (auto const predecessor : predecessors) {
+      auto const local = localIndices.find(predecessor);
+      if (local != localIndices.end()) incoming.push_back(local->second);
+    }
+
+    std::sort(incoming.begin(), incoming.end());
+  }
   auto const capturedAtMs =
     std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()

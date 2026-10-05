@@ -23,15 +23,12 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
 struct Func;
 struct Unit;
-}
-
-namespace HPHP::jit {
-struct RegionDesc;
 }
 
 namespace HPHP::jit::cprof {
@@ -41,8 +38,10 @@ struct ContProfProfileRecord;
 struct ContProfStartupCandidate {
   struct Translation {
     SrcKey start;
-    std::shared_ptr<RegionDesc> region;
+    std::shared_ptr<RegionDesc> region{};
     int64_t executionCount{0};
+    std::vector<uint32_t> incoming;
+    PostConditions postConditions{};
   };
 
   Func* func{nullptr};

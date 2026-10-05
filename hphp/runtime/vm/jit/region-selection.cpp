@@ -351,7 +351,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   }
 
   // Fix successor sets for the predecessors.
-  for (auto predId : m_data[newId].preds) {
+  for (auto predId : preds(newId)) {
     BlockIdSet& predSuccs = m_data[predId].succs;
     assertx(predSuccs.contains(oldId));
     predSuccs.erase(oldId);

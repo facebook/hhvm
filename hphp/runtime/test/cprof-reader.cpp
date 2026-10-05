@@ -309,6 +309,8 @@ struct ContProfReaderBytecodeTest : testing::Test {
     s_trueOffset = s_popOffset + instrLen(s_func->at(s_popOffset));
     s_jmpOffset = s_trueOffset + instrLen(s_func->at(s_trueOffset));
     ASSERT_EQ(Op::JmpZ, peek_op(s_func->at(s_jmpOffset)));
+    s_fallthroughOffset = s_jmpOffset + instrLen(s_func->at(s_jmpOffset));
+    ASSERT_EQ(Op::Null, peek_op(s_func->at(s_fallthroughOffset)));
 
     s_namedEntry = s_func->getNamedParamsFuncEntry();
     ASSERT_TRUE(s_func->hasOptionalNamedParameters());
@@ -329,6 +331,8 @@ struct ContProfReaderBytecodeTest : testing::Test {
 
   static Offset trueOffset() { return s_trueOffset; }
 
+  static Offset fallthroughOffset() { return s_fallthroughOffset; }
+
   static Offset namedEntry() { return s_namedEntry; }
 
 private:
@@ -337,6 +341,7 @@ private:
   static inline Offset s_popOffset{0};
   static inline Offset s_trueOffset{0};
   static inline Offset s_jmpOffset{0};
+  static inline Offset s_fallthroughOffset{0};
   static inline Offset s_namedEntry{0};
 };
 
@@ -409,6 +414,50 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesLocalTypeGuardBounds) {
   record.translations.front().localTypeGuards.clear();
   record.translations.back().localTypeGuards = {
     {bytecodeLimit, KindOfInt64},
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, ValidatesIncomingTopology) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto record = makeBytecodeRecord(*key, trueOffset(), 2);
+  record.translations.push_back({
+    ContProfStartKind::Bytecode,
+    static_cast<uint32_t>(fallthroughOffset()),
+    1,
+    9,
+    {},
+    {1},
+  });
+
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().incoming = {0};
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, ValidatesLocalPostConditionBounds) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto record = makeBytecodeRecord(*key, trueOffset(), 1);
+  auto const entryLimit = func()->numFuncEntryInputs();
+  auto const localLimit = static_cast<uint32_t>(func()->numLocals());
+  ASSERT_LT(entryLimit, localLimit);
+
+  record.translations.front().localPostConditions = {
+    {entryLimit, true, kInvalidDataType},
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.front().localPostConditions = {
+    {localLimit, false, KindOfInt64},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));

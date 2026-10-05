@@ -143,17 +143,72 @@ ContProfStartupCandidate prepareCandidate(
       });
     }
 
-    // Explicit empty means no predecessors; null infers from the live SrcDB.
-    region->incoming(RegionDesc::BlockIdSet{});
+    PostConditions postConditions{};
+
+    for (auto const& post : translation.localPostConditions) {
+      auto const type = post.type == kInvalidDataType
+        ? TCell
+        : Type{post.type};
+
+      auto const location = RegionDesc::TypedLocation{
+        Location::Local{post.localId},
+        type,
+      };
+
+      if (post.changed) {
+        postConditions.changed.push_back(location);
+      } else {
+        postConditions.refined.push_back(location);
+      }
+    }
 
     result.translations.push_back({
       *start,
       std::move(region),
       static_cast<int64_t>(translation.executionCount),
+      translation.incoming,
+      std::move(postConditions),
     });
   }
 
   return result;
+}
+
+void installCandidateProfileData(
+  ProfData& profData,
+  const ContProfStartupCandidate& candidate,
+  int64_t counterDefault
+) {
+  auto const numTranslations = candidate.translations.size();
+
+  std::vector<TransID> transIds;
+  transIds.reserve(numTranslations);
+  for (size_t i = 0; i < numTranslations; ++i) {
+    transIds.push_back(profData.allocTransID());
+  }
+
+  for (size_t i = 0; i < numTranslations; ++i) {
+    auto const& translation = candidate.translations[i];
+
+    // Predecessor indices are record-local and were bounds-checked against
+    // record.translations.size() during validation.
+    RegionDesc::BlockIdSet incoming;
+    incoming.reserve(translation.incoming.size());
+    for (auto const predecessor : translation.incoming) {
+      incoming.insert(transIds.at(predecessor));
+    }
+
+    *profData.transCounterAddr(transIds[i]) =
+      counterDefault - translation.executionCount;
+
+    translation.region->incoming(std::move(incoming));
+    profData.addTransProfile(
+      transIds[i],
+      translation.region,
+      translation.postConditions,
+      0
+    );
+  }
 }
 
 bool optimizeCandidate(
@@ -190,21 +245,7 @@ bool optimizeCandidate(
   }
 
   installing = true;
-
-  // Install synthetic counters and regions using fresh TransIDs.
-  for (auto const& translation : candidate.translations) {
-    auto const transId = profData.allocTransID();
-
-    *profData.transCounterAddr(transId) =
-      counterDefault - translation.executionCount;
-
-    profData.addTransProfile(
-      transId,
-      translation.region,
-      PostConditions{},
-      0
-    );
-  }
+  installCandidateProfileData(profData, candidate, counterDefault);
 
   profData.setProfiling(func);
   profData.setOptimized(funcId);

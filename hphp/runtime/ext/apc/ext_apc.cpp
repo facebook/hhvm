@@ -99,8 +99,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(SerializePrefix, ini, config, "Server.APC.SerializePrefix");
   Config::Bind(HotSize, ini, config, "Server.APC.HotSize", 30000);
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
-  Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
-  Config::Bind(HotMapAllocLow, ini, config, "Server.APC.HotMapAllocLow", false);
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill", true);
   Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
   if (!UseUncounted && ShareUncounted) ShareUncounted = false;
@@ -140,8 +138,6 @@ int apcExtension::HotSize = 30000;
 double apcExtension::HotLoadFactor = 0.5;
 std::vector<std::string> apcExtension::HotPrefix;
 std::vector<std::string> apcExtension::SerializePrefix;
-bool apcExtension::HotKeyAllocLow = false;
-bool apcExtension::HotMapAllocLow = false;
 bool apcExtension::UseUncounted = true;
 bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;

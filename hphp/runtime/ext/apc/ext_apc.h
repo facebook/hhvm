@@ -40,8 +40,6 @@ struct apcExtension final : Extension {
   static std::vector<std::string> SerializePrefix;
   static int HotSize;
   static double HotLoadFactor;
-  static bool HotKeyAllocLow;
-  static bool HotMapAllocLow;
   static bool UseUncounted;
   static bool ShareUncounted;
   static bool Stat;

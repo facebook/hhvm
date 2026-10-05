@@ -155,11 +155,12 @@ class TestFreshInit(common_tests.CommonTests):
             self.fail(f"Unexpected command header: {lines[0]}")
         seed_count = int(header_match.group(1))
         self.assertGreater(seed_count, 0)
-        # No mode fills the answer in yet, so the run finds nothing around its
-        # seeds and must say so rather than claiming anything was grown.
-        self.assertEqual(
-            "Found 0 isolatable without growing, covering 0 files (largest: 0).",
+        # Nothing grows yet, so the second line must say so rather than report
+        # grown clusters.
+        self.assertRegex(
             lines[1],
+            r"Found \d+ isolatable without growing, covering \d+ files "
+            r"\(largest: \d+\)\.",
         )
 
         json_output, _ = self.test_driver.check_cmd(
@@ -173,10 +174,35 @@ class TestFreshInit(common_tests.CommonTests):
         except json.JSONDecodeError as exn:
             self.fail(f"Expected a lone JSON document, got {json_output!r} ({exn})")
         summary = json_result["summary"]
+        # Across the two invocations: nothing changed between them.
         self.assertEqual(seed_count, summary["total_seeds"])
-        self.assertEqual([], json_result["clusters"])
-        self.assertEqual(0, summary["total_clusters"])
+        # Nothing grew, so no set may claim otherwise, and none can be
+        # truncated: a closure stops where it stops, and no cap refused it.
         self.assertFalse(summary["grown"])
+        self.assertEqual(0, summary["total_truncated"])
+
+        clusters = json_result["clusters"]
+        self.assertEqual(len(clusters), summary["total_clusters"])
+        for cluster in clusters:
+            self.assertFalse(cluster["grown"])
+            self.assertFalse(cluster["truncated"])
+            self.assertEqual(len(cluster["files"]), cluster["size"])
+            # A closure holds at least the file it was taken around.
+            self.assertGreaterEqual(cluster["size"], 1)
+
+        reported = {os.path.basename(f) for c in clusters for f in c["files"]}
+        # Nothing references these four, so each is its own closure and each
+        # must be reported. Restricted to fixture files because the template
+        # repo contributes seeds of its own that this test does not control.
+        self.assertEqual(
+            {
+                "isolation_seed.php",
+                "isolation_function_caller.php",
+                "isolation_static_caller.php",
+                "isolation_inherited_caller.php",
+            },
+            reported & set(files),
+        )
 
         # Check that the count *responds* to a dependency edge. Give
         # isolation_seed.php an external referrer by editing a file that already

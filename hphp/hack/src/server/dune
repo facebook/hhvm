@@ -176,6 +176,7 @@
     server_isolation
     server_isolation_decls
     server_isolation_inbound
+    server_isolation_memory
     server_isolation_outbound
     server_isolation_validate)
   (libraries

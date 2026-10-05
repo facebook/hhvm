@@ -1186,37 +1186,161 @@ fn emit_shape<'a>(
     fl: &[ast::ShapeExprField],
 ) -> Result<InstrSeq> {
     let pos = &expr.1;
-    // TODO(hrust): avoid clone
-    let fl = fl
+    // A shape with no splat elements is just a dict literal keyed by the field
+    // names: reuse the dict emission path (constant folding / NewStructDict /
+    // NewDictArray).
+    if !fl
         .iter()
-        .map(|field| {
-            let (f, e) = match field {
-                ast::ShapeExprField::SFField(f, e) => (f, e),
-                ast::ShapeExprField::SFSplat(_) => {
-                    return Err(Error::unrecoverable(
-                        "shape splats should be rejected during lowering",
-                    ));
+        .any(|f| matches!(f, ast::ShapeExprField::SFSplat(_)))
+    {
+        // TODO(hrust): avoid clone
+        let fl = fl
+            .iter()
+            .filter_map(|f| match f {
+                ast::ShapeExprField::SFField(name, e) => Some((name, e)),
+                ast::ShapeExprField::SFSplat(_) => None,
+            })
+            .map(|(f, e)| {
+                Ok(aast::Field(
+                    ast::Expr(
+                        (),
+                        pos.clone(),
+                        extract_shape_field_name_pstring(env, pos, f)?,
+                    ),
+                    e.clone(),
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        return emit_expr(
+            emitter,
+            env,
+            &ast::Expr(
+                (),
+                pos.clone(),
+                ast::Expr_::KeyValCollection(Box::new((
+                    (pos.clone(), ast::KvcKind::Dict),
+                    None,
+                    fl,
+                ))),
+            ),
+        );
+    }
+    // A shape containing splats is built at runtime as a rightmost-wins dict
+    // merge: seed an accumulator dict, then fold each element into it in source
+    // order so that a later duplicate key overwrites an earlier one. Splat
+    // operands are copied in key-by-key with an iterator loop.
+    emit_shape_with_splats(emitter, env, pos, fl)
+}
+
+fn emit_shape_with_splats<'a>(
+    e: &mut Emitter,
+    env: &Env<'a>,
+    pos: &Pos,
+    fl: &[ast::ShapeExprField],
+) -> Result<InstrSeq> {
+    scope::with_unnamed_local(e, |e, acc_local| {
+        let before = InstrSeq::gather(vec![instr::new_dict_array(0), instr::pop_l(acc_local)]);
+        let inner = fl
+            .iter()
+            .map(|field| match field {
+                ast::ShapeExprField::SFField(name, value) => {
+                    let key = ast::Expr(
+                        (),
+                        pos.clone(),
+                        extract_shape_field_name_pstring(env, pos, name)?,
+                    );
+                    Ok(InstrSeq::gather(vec![
+                        instr::push_l(acc_local),
+                        emit_expr(e, env, &key)?,
+                        emit_expr(e, env, value)?,
+                        instr::add_elem_c(),
+                        instr::pop_l(acc_local),
+                    ]))
                 }
+                ast::ShapeExprField::SFSplat(operand) => {
+                    emit_shape_splat_merge(e, env, pos, acc_local, operand)
+                }
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let after = instr::push_l(acc_local);
+        Ok((before, InstrSeq::gather(inner), after))
+    })
+}
+
+/// Copy every key/value of `operand` (a shape, i.e. a dict at runtime) into the
+/// accumulator held in `acc_local`, later keys overwriting earlier ones.
+fn emit_shape_splat_merge<'a>(
+    e: &mut Emitter,
+    env: &Env<'a>,
+    pos: &Pos,
+    acc_local: Local,
+    operand: &ast::Expr,
+) -> Result<InstrSeq> {
+    let base = InstrSeq::gather(vec![
+        emit_expr(e, env, operand)?,
+        emit_pos(pos),
+        emit_shape_splat_dict_check(e, pos)?,
+    ]);
+    let loop_ = scope::with_unnamed_local(e, |e, base_local| {
+        let before = instr::pop_l(base_local);
+        let inner = scope::with_unnamed_locals_and_iterators(e, |e| {
+            let iter_id = e.iterator_mut().gen_iter();
+            let iter_args = IterArgs {
+                iter_id,
+                flags: IterArgsFlags::WithKeys,
             };
-            Ok(aast::Field(
-                ast::Expr(
-                    (),
-                    pos.clone(),
-                    extract_shape_field_name_pstring(env, pos, f)?,
-                ),
-                e.clone(),
-            ))
-        })
-        .collect::<Result<Vec<_>>>()?;
-    emit_expr(
-        emitter,
-        env,
-        &ast::Expr(
-            (),
-            pos.clone(),
-            ast::Expr_::KeyValCollection(Box::new(((pos.clone(), ast::KvcKind::Dict), None, fl))),
-        ),
-    )
+            let val_id = e.local_gen_mut().get_unnamed();
+            let key_id = e.local_gen_mut().get_unnamed();
+            let loop_end = e.label_gen_mut().next_regular();
+            let loop_next = e.label_gen_mut().next_regular();
+            let iter_init = instr::iter_init(iter_args.clone(), base_local, loop_end);
+            let iterate = InstrSeq::gather(vec![
+                instr::label(loop_next),
+                instr::iter_get_value(iter_args.clone(), base_local),
+                instr::pop_l(val_id),
+                instr::iter_get_key(iter_args.clone(), base_local),
+                instr::pop_l(key_id),
+                instr::push_l(acc_local),
+                instr::c_get_l(key_id),
+                instr::c_get_l(val_id),
+                instr::add_elem_c(),
+                instr::pop_l(acc_local),
+                instr::iter_next(iter_args, base_local, loop_next),
+            ]);
+            let iter_done = InstrSeq::gather(vec![
+                instr::unset_l(val_id),
+                instr::unset_l(key_id),
+                instr::label(loop_end),
+            ]);
+            Ok((iter_init, iterate, iter_done))
+        })?;
+        let after = instr::unset_l(base_local);
+        Ok((before, inner, after))
+    })?;
+    Ok(InstrSeq::gather(vec![base, loop_]))
+}
+
+fn emit_shape_splat_dict_check(e: &mut Emitter, pos: &Pos) -> Result<InstrSeq> {
+    let done = e.label_gen_mut().next_regular();
+    let hint = ast::Hint::new(
+        pos.clone(),
+        ast::Hint_::mk_happly(ast::Id(pos.clone(), collections::DICT.into()), vec![]),
+    );
+
+    Ok(InstrSeq::gather(vec![
+        instr::dup(),
+        instr::is_type_c(IsTypeOp::Dict),
+        instr::jmp_nz(done),
+        get_type_structure_for_hint(
+            e,
+            &[],
+            &IndexSet::new(),
+            TypeRefinementInHint::Disallowed,
+            &hint,
+        )?,
+        instr::throw_as_type_struct_exception(AsTypeStructExceptionKind::Typehint),
+        instr::label(done),
+    ]))
 }
 
 fn emit_vec_collection<'a>(

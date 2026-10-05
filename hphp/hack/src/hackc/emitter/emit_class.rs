@@ -92,9 +92,6 @@ fn make_86method(
     coeffects: Coeffects,
     instrs: InstrSeq,
 ) -> Result<Method> {
-    // TODO: move this. We just know that there are no iterators in 86methods
-    emitter.iterator_mut().reset();
-
     let mut attrs = Attr::AttrNone;
     attrs.add(Attr::AttrNoInjection);
     attrs.set(Attr::AttrAbstract, is_abstract);
@@ -636,6 +633,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a ast::Class_) -> Resu
         )?)
     }
     emitter.label_gen_mut().reset();
+    emitter.iterator_mut().reset();
     let mut properties =
         from_class_elt_classvars(emitter, ast_class, is_const, &tparams, is_closure)?;
     let mut constants = from_class_elt_constants(emitter, &env, ast_class)?;
@@ -736,6 +734,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a ast::Class_) -> Resu
     };
 
     let should_emit_reified_init = !(emitter.systemlib() || is_closure || is_interface || is_trait);
+    emitter.iterator_mut().reset();
     let reified_init_method = if should_emit_reified_init {
         emit_reified_init_method(emitter, &env, ast_class)?
     } else {

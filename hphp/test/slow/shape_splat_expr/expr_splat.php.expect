@@ -1,0 +1,93 @@
+only_splat: dict(2) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  string(5) "hello"
+}
+two_splats: dict(3) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  bool(true)
+  ["z"]=>
+  float(3.14)
+}
+three_splats: dict(3) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  bool(true)
+  ["z"]=>
+  string(5) "world"
+}
+interleaved: dict(4) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  bool(true)
+  ["z"]=>
+  float(3.14)
+  ["w"]=>
+  int(7)
+}
+trailing_field_wins: dict(2) {
+  ["y"]=>
+  bool(false)
+  ["z"]=>
+  float(3.14)
+}
+leading_field_overridden: dict(1) {
+  ["z"]=>
+  string(5) "world"
+}
+adjacent_with_empty: dict(3) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  string(5) "hello"
+  ["z"]=>
+  string(5) "world"
+}
+empty_operand: dict(1) {
+  ["only"]=>
+  int(1)
+}
+all_empty: dict(0) {
+}
+nested_value: dict(2) {
+  ["inner"]=>
+  dict(1) {
+    ["a"]=>
+    int(1)
+  }
+  ["outer"]=>
+  int(2)
+}
+call_operand: dict(3) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  bool(true)
+  ["z"]=>
+  float(3.14)
+}
+inline_splat: dict(3) {
+  ["x"]=>
+  int(999)
+  ["y"]=>
+  string(5) "hello"
+  ["q"]=>
+  string(3) "new"
+}
+property_initializer: dict(2) {
+  ["x"]=>
+  int(1)
+  ["y"]=>
+  string(8) "property"
+}
+last_value_released: bool(true)
+dynamic_dict: bool(true)
+dynamic_int: bool(false)
+dynamic_vec: bool(false)
+dynamic_keyset: bool(false)
+dynamic_object: bool(false)

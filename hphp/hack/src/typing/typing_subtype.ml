@@ -2528,23 +2528,23 @@ end = struct
                 positional_params_super,
                 variadic_super_ty )
 
-  (* Contravariant element-type subtyping for named-variadic parameters
-     between two function types. Two obligations:
+  (* Named-variadic subtyping between two function types. In each case, check
+     both contravariant element types and parameter attributes. Three cases:
 
      1. If the actual (sub) function has a named-variadic and the expected
-        (super) function declares required named parameters that the sub
-        does not declare by name, the sub's variadic absorbs them — but
-        the super's declared param type must be a subtype of the sub's
-        variadic element type (contravariance).
+        (super) function declares named parameters that the sub does not
+        declare by name, the sub's variadic absorbs them — but the super's
+        declared param type must be a subtype of the sub's variadic element
+        type (contravariance).
 
-     2. If both sides have a named-variadic, their element types must
-        subtype contravariantly (super's element <: sub's element).
-
-     3. If the expected function has a named-variadic and the actual function
+     2. If the expected function has a named-variadic and the actual function
         has an optional named parameter not declared by the expected function,
         the expected variadic's element type must be a subtype of that explicit
         parameter's type. The explicit parameter shadows the actual function's
         variadic for that name.
+
+     3. If both sides have a named-variadic, their element types must
+        subtype contravariantly (super's element <: sub's element).
 
      The "missing named-variadic on sub" and "extra required name on sub"
      cases are handled in [simplify_subtype_funs_attributes] via
@@ -2581,20 +2581,30 @@ end = struct
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
         env
     in
-    (* Each super-declared named param not matched by name in sub is
-       absorbed by sub's variadic (if sub has one). Check element-type
-       compatibility for each such absorption. *)
+    let simplify_parameter_attributes ~fn_param_sub ~fn_param_super env =
+      env
+      |> simplify_param_readonly ~subtype_env ~fn_param_sub ~fn_param_super
+      &&& simplify_param_accept_disposable
+            ~subtype_env
+            ~fn_param_sub
+            ~fn_param_super
+    in
+    (* Each unmatched named parameter is absorbed by the subtype's variadic. *)
     let (env, prop) =
       match sub_var with
       | None -> valid env
-      | Some { fp_type = ty_sub_var; _ } ->
+      | Some ({ fp_type = ty_sub_var; _ } as sub_var_fp) ->
         List.fold
           (Typing_defs.ft_params_without_named_variadic ft_super)
           ~init:(valid env)
           ~f:(fun (env, prop) super_fp ->
             match Typing_defs.Named_params.name_of_named_param super_fp with
             | Some name when not (S_set.mem name sub_named_names) ->
-              (env, prop) &&& contra super_fp.fp_type ty_sub_var
+              (env, prop)
+              &&& simplify_parameter_attributes
+                    ~fn_param_sub:sub_var_fp
+                    ~fn_param_super:super_fp
+              &&& contra super_fp.fp_type ty_sub_var
             | _ -> (env, prop))
     in
     (* An explicit optional parameter in the sub shadows its named variadic.
@@ -2602,7 +2612,7 @@ end = struct
        the explicit parameter's type instead of the sub's variadic type. *)
     let (env, prop) =
       match (sub_var, super_var) with
-      | (Some _, Some { fp_type = ty_super_var; _ }) ->
+      | (Some _, Some ({ fp_type = ty_super_var; _ } as super_var_fp)) ->
         List.fold
           (Typing_defs.ft_params_without_named_variadic ft_sub)
           ~init:(env, prop)
@@ -2611,15 +2621,25 @@ end = struct
             | Some name
               when Typing_defs_core.get_fp_is_optional sub_fp
                    && not (S_set.mem name super_named_names) ->
-              (env, prop) &&& contra ty_super_var sub_fp.fp_type
+              (env, prop)
+              &&& simplify_parameter_attributes
+                    ~fn_param_sub:sub_fp
+                    ~fn_param_super:super_var_fp
+              &&& contra ty_super_var sub_fp.fp_type
             | _ -> (env, prop))
       | _ -> (env, prop)
     in
     (env, prop)
     &&&
     match (sub_var, super_var) with
-    | (Some { fp_type = ty_sub_var; _ }, Some { fp_type = ty_super_var; _ }) ->
-      contra ty_super_var ty_sub_var
+    | ( Some ({ fp_type = ty_sub_var; _ } as sub_var_fp),
+        Some ({ fp_type = ty_super_var; _ } as super_var_fp) ) ->
+      fun env ->
+        simplify_parameter_attributes
+          ~fn_param_sub:sub_var_fp
+          ~fn_param_super:super_var_fp
+          env
+        &&& contra ty_super_var ty_sub_var
     | _ -> (fun env -> valid env)
 
   and simplify_funs

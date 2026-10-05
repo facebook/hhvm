@@ -48,3 +48,5 @@ interface IDispo {
 class ImplDispo implements IDispo {
   public function m(named mixed...): void {}
 }
+
+//

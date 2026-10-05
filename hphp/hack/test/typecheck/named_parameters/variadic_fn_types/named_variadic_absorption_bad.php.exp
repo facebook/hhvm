@@ -1,1 +1,48 @@
-No errors
+ERROR: File "named_variadic_absorption_bad.php", line 16, characters 10-11:
+Invalid return type (Typing[4411])
+  File "named_variadic_absorption_bad.php", line 15, characters 29-29:
+  Mismatched parameter readonlyness
+  File "named_variadic_absorption_bad.php", line 14, characters 19-19:
+  This parameter is mutable
+  File "named_variadic_absorption_bad.php", line 15, characters 29-29:
+  But this parameter is readonly
+ERROR: File "named_variadic_absorption_bad.php", line 25, characters 19-19:
+The method `m` is not compatible with the overridden method (Typing[4341])
+  File "named_variadic_absorption_bad.php", line 25, characters 19-19:
+  Method `m` has type `(function(named C...): void)` in `ImplReadonly`
+  File "named_variadic_absorption_bad.php", line 21, characters 19-19:
+  But it has type `(function(named readonly C $x): void)` in parent `IReadonly`
+  File "named_variadic_absorption_bad.php", line 25, characters 19-19:
+  Type `(function(named C...): void)` is not a subtype of `(function(named readonly C $x): void)`
+  File "named_variadic_absorption_bad.php", line 21, characters 38-39:
+  Mismatched parameter readonlyness
+  File "named_variadic_absorption_bad.php", line 25, characters 29-31:
+  This parameter is mutable
+  File "named_variadic_absorption_bad.php", line 21, characters 38-39:
+  But this parameter is readonly
+ERROR: File "named_variadic_absorption_bad.php", line 35, characters 19-19:
+The method `m` is not compatible with the overridden method (Typing[4341])
+  File "named_variadic_absorption_bad.php", line 35, characters 19-19:
+  Method `m` has type `(function(named ?C...): void)` in `ImplOptionalReadonly`
+  File "named_variadic_absorption_bad.php", line 31, characters 19-19:
+  But it has type `(function(optional named readonly ?C $x): void)` in parent `IOptionalReadonly`
+  File "named_variadic_absorption_bad.php", line 35, characters 19-19:
+  Type `(function(named ?C...): void)` is not a subtype of `(function(optional named readonly ?C $x): void)`
+  File "named_variadic_absorption_bad.php", line 31, characters 39-40:
+  Mismatched parameter readonlyness
+  File "named_variadic_absorption_bad.php", line 35, characters 29-31:
+  This parameter is mutable
+  File "named_variadic_absorption_bad.php", line 31, characters 39-40:
+  But this parameter is readonly
+ERROR: File "named_variadic_absorption_bad.php", line 49, characters 19-19:
+The method `m` is not compatible with the overridden method (Typing[4341])
+  File "named_variadic_absorption_bad.php", line 49, characters 19-19:
+  Method `m` has type `(function(named mixed...): void)` in `ImplDispo`
+  File "named_variadic_absorption_bad.php", line 45, characters 19-19:
+  But it has type `(function(<<__AcceptDisposable>> named D $x): void)` in parent `IDispo`
+  File "named_variadic_absorption_bad.php", line 49, characters 19-19:
+  Type `(function(named mixed...): void)` is not a subtype of `(function(<<__AcceptDisposable>> named D $x): void)`
+  File "named_variadic_absorption_bad.php", line 45, characters 52-53:
+  This parameter is marked `<<__AcceptDisposable>>`
+  File "named_variadic_absorption_bad.php", line 49, characters 32-34:
+  This parameter is not marked `<<__AcceptDisposable>>`

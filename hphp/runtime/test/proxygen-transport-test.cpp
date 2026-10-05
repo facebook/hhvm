@@ -7,10 +7,16 @@
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 
+#include <string_view>
+
+namespace {
+// Not in the common header list, so addressed by name.
+constexpr std::string_view kExpect{"Expect"};
+} // namespace
+
 using namespace testing;
 using proxygen::HTTPCodec;
 using proxygen::HTTPException;
-using proxygen::HTTP_HEADER_EXPECT;
 using proxygen::HTTP_HEADER_CONTENT_LENGTH;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
@@ -241,7 +247,7 @@ TEST_F(ProxygenTransportBasicTest, invalid_expect) {
   auto req = getRequest(HTTPMethod::POST);
   auto length = folly::to<std::string>(Cfg::Server::MaxPostSize);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
-  req->getHeaders().add(HTTP_HEADER_EXPECT, "105-stop");
+  req->getHeaders().add(kExpect, "105-stop");
   EXPECT_CALL(m_server, onRequestError(_));
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
   EXPECT_CALL(m_txn, sendEOM());
@@ -252,7 +258,7 @@ TEST_F(ProxygenTransportBasicTest, valid_expect) {
   auto req = getRequest(HTTPMethod::POST);
   auto length = folly::to<std::string>(Cfg::Server::MaxPostSize);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
-  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  req->getHeaders().add(kExpect, "100-continue");
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(100)));
   m_transport->onHeadersComplete(std::move(req));
 }
@@ -261,7 +267,7 @@ TEST_F(ProxygenTransportBasicTest, valid_expect_overlarge_length) {
   auto req = getRequest(HTTPMethod::POST);
   auto length = folly::to<std::string>(Cfg::Server::MaxPostSize + 1);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
-  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  req->getHeaders().add(kExpect, "100-continue");
   EXPECT_CALL(m_server, onRequestError(_));
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
   EXPECT_CALL(m_txn, sendEOM());

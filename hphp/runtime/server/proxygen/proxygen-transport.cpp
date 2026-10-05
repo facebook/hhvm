@@ -28,13 +28,19 @@
 #include <memory>
 #include <set>
 
+#include <string_view>
+
+namespace {
+// Not in the common header list, so addressed by name.
+constexpr std::string_view kExpect{"Expect"};
+} // namespace
+
 using proxygen::HTTPException;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
 using proxygen::HTTPTransaction;
 using proxygen::HTTP_HEADER_CONNECTION;
 using proxygen::HTTP_HEADER_CONTENT_LENGTH;
-using proxygen::HTTP_HEADER_EXPECT;
 using proxygen::HTTP_HEADER_HOST;
 using proxygen::HTTP_HEADER_TRANSFER_ENCODING;
 using std::shared_ptr;
@@ -96,7 +102,7 @@ bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
   // Note also that whether the client expects a 100 determines the error code:
   // if they expect a 100 and we fail the request for any reason besides an
   // invalid request, we need to return a 417 (Expectation Failed).
-  auto expectation = headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
+  auto expectation = headers.getSingleOrEmpty(kExpect);
   bool expects_100 = false;
   if (!expectation.empty() && !k100Continue.equals(expectation, folly::AsciiCaseInsensitive())) {
     sendErrorResponse(417);

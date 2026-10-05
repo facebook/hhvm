@@ -7,7 +7,14 @@
  *)
 
 open Hh_prelude
+module Growth = Server_isolation_growth
 module Memory = Server_isolation_memory
+
+(* Read top to bottom: where a run starts ([Seeds]) and where its clusters go
+   ([Sink]); the [run] record both modes thread through; then the two modes,
+   each seed's closure first and clusters grown around them second; and last
+   [make_run], [result], [query] and [go], which choose a mode and assemble the
+   answer. *)
 
 (** Which files a run starts growing from. A whole-repository scan finds the
     files nothing references; a seed list or an entry-point family names them
@@ -256,10 +263,17 @@ open Sink
     can keep. *)
 type run = {
   ctx: Provider_context.t;
+  workers: Multi_worker.worker list option;
   deps_mode: Typing_deps_mode.t;
   naming_table: Naming_table.t;
   sink: Sink.t;
   max_dependents: int;
+  max_cluster_size: int option;
+  overlapping_clusters: int ref;
+      (** Clusters dropped because an earlier cluster in the same batch already
+          claimed one of their files. Counted here rather than in growth: growth
+          reports each cluster it grew, and whether two of them overlap is only
+          knowable once they are collected. *)
   truncated_clusters: int ref;
       (** Clusters the cap refused a candidate they would otherwise have taken.
           They stopped short of closing, so they are prefixes of packages rather
@@ -387,15 +401,173 @@ let closure_sizes r seeds ~total_seeds =
   log_closure_report ~total_seeds ~sizes;
   sizes
 
-let make_run options _genv env sink =
-  let Server_isolation_types.{ max_dependents; _ } = options in
+let log_growth_progress ~grown ~total_seeds ~since =
+  let Growth.Stats.
+        {
+          index_seconds;
+          absorb_seconds;
+          candidates_tested;
+          absorbed_by_closure;
+          _;
+        } =
+    Growth.stats ()
+  in
+  Hh_logger.log
+    "[isolation] growth: %d/%d seeds | index %.1fs (%d files) | absorb %.1fs (%d candidates, %d by closure) | closures %d computed %d served %d refused | heap %.1fGiB | rss %.1fGiB | total %.1fs"
+    grown
+    total_seeds
+    index_seconds
+    (Server_isolation_outbound.files_indexed ())
+    absorb_seconds
+    candidates_tested
+    absorbed_by_closure
+    (Server_isolation_inbound.closures_computed ())
+    (Server_isolation_inbound.closures_served ())
+    (Server_isolation_inbound.refusals_held ())
+    (Memory.heap_gib ())
+    (Memory.rss_gib ())
+    (Unix.gettimeofday () -. since)
+
+(** Logged as well as returned, since a long run outlives its client. *)
+let log_growth_result r ~sizes =
+  let Growth.Stats.{ absorbed_by_subset; absorbed_by_closure; _ } =
+    Growth.stats ()
+  in
+  Hh_logger.log
+    "[isolation] result: %d clusters (%d truncated) | %d files | median %d | largest %d | subset %d closure %d | dropped %d | sizes %s"
+    (List.length sizes)
+    !(r.truncated_clusters)
+    (List.fold sizes ~init:0 ~f:( + ))
+    (median sizes)
+    (List.fold sizes ~init:0 ~f:Int.max)
+    absorbed_by_subset
+    absorbed_by_closure
+    !(r.overlapping_clusters)
+    (histogram sizes ~bucket:Fn.id ~label:(Printf.sprintf "%d:%d"))
+
+(** One grown cluster against what the clusters before it took. Clusters in one
+    batch share a [claimed] snapshot, so two can take the same file. Trimming
+    the overlap out of one would leave it with an inbound edge from the file it
+    lost, so the later cluster is dropped whole. *)
+let collect_cluster
+    r
+    (clusters, visited, claimed)
+    Growth.{ seed = _; files = cluster; truncated } =
+  if not (Relative_path.Set.is_empty (Relative_path.Set.inter cluster claimed))
+  then begin
+    (* [visited] is left alone. A dropped cluster was never reported, so its
+       files are in no package, and marking them would retire seeds that no
+       output accounts for — a later batch tests against a larger [claimed] and
+       may grow one of them into a cluster that does not overlap. *)
+    incr r.overlapping_clusters;
+    (clusters, visited, claimed)
+  end else begin
+    let visited = Relative_path.Set.union visited cluster in
+    let files = Relative_path.Set.elements cluster in
+    let claimed = Relative_path.Set.union claimed cluster in
+    if truncated then incr r.truncated_clusters;
+    r.sink.emit
+      Server_isolation_types.
+        {
+          files = List.map files ~f:Relative_path.suffix;
+          common_directory = Sink.common_directory files;
+          truncated;
+        };
+    (List.length files :: clusters, visited, claimed)
+  end
+
+(** One batch grown and collected, then everything the next batch will not ask
+    for again released. *)
+let grow_one_batch
+    r
+    ~max_dependents
+    ~total_seeds
+    ~since
+    ~grown
+    (clusters, visited, claimed)
+    batch =
+  (* A seed already absorbed by an earlier cluster is not its own cluster, but it
+     still counts towards progress: the denominator is every seed, not just the
+     ones that needed growing. *)
+  grown := !grown + List.length batch;
+  let batch =
+    List.filter batch ~f:(fun seed -> not (Relative_path.Set.mem visited seed))
+  in
+  let grown_batch =
+    Growth.grow_batch
+      r.ctx
+      r.workers
+      r.deps_mode
+      r.naming_table
+      ~claimed
+      ~max_cluster_size:r.max_cluster_size
+      ~max_dependents
+      batch
+  in
+  log_growth_progress ~grown:!grown ~total_seeds ~since;
+  (* This batch's clusters are at a fixed point, so nothing will ask for their
+     outbound edges again, and an accepted closure is cheap to recompute if a
+     later batch does. Refusals survive: they cost a full walk and the files that
+     earn them recur everywhere. *)
+  Server_isolation_outbound.release_cache ();
+  Server_isolation_inbound.release_closures ();
+  Growth.release_caches ();
+  List.fold
+    grown_batch
+    ~init:(clusters, visited, claimed)
+    ~f:(collect_cluster r)
+
+(** Seeds are advanced in batches so each round's frontiers pool into one
+    parallel index call. Larger batches fill the worker pool better; they also
+    hold more clusters in memory at once. A few thousand keeps both in hand. *)
+let grow_seeds r seeds ~total_seeds ~since =
+  (* A closure larger than the whole cluster can never be absorbed, and the walk
+     is where growth spends its time. Clamped once per run, not per candidate:
+     the memo is keyed by path, so a varying bound would poison it. Growth only —
+     under [no_growth] the bound is the measurement. *)
+  let max_dependents =
+    match r.max_cluster_size with
+    | Some cap -> min r.max_dependents cap
+    | None -> r.max_dependents
+  in
+  Hh_logger.log
+    "[isolation] cluster growth: starting over %d seeds (closure bound %d)"
+    total_seeds
+    max_dependents;
+  (* Seeds grown in lockstep. The batch is what pools candidates into one
+     parallel indexing call — a single cluster's frontier would leave the worker
+     pool idle — and every cluster in it is live at once, so this is peak memory
+     against worker occupancy. Not measured: the family-sized runs used windows
+     of 400 seeds, which makes a window one batch. *)
+  let batch_size = 2000 in
+  let grown = ref 0 in
+  (* [visited] stops a seed being grown twice; [claimed] is every file in a
+     cluster already reported. *)
+  let (clusters, _visited, _claimed) =
+    List.fold
+      (List.chunks_of seeds ~length:batch_size)
+      ~init:([], Relative_path.Set.empty, Relative_path.Set.empty)
+      ~f:(grow_one_batch r ~max_dependents ~total_seeds ~since ~grown)
+  in
+  let _t = Hh_logger.log_duration "[isolation] cluster growth" since in
+  let sizes = List.rev clusters in
+  log_growth_result r ~sizes;
+  sizes
+
+let make_run options genv env sink =
+  let Server_isolation_types.{ max_dependents; max_cluster_size; _ } =
+    options
+  in
   let ctx = Provider_utils.ctx_from_server_env env in
   {
     ctx;
+    workers = genv.Server_env.workers;
     deps_mode = Provider_context.get_deps_mode ctx;
     naming_table = env.Server_env.naming_table;
     sink;
     max_dependents;
+    max_cluster_size;
+    overlapping_clusters = ref 0;
     truncated_clusters = ref 0;
   }
 
@@ -418,9 +590,12 @@ let result r ~grown ~total_seeds ~sizes ~clusters =
     with the caches already clear and the sink already open. *)
 let query r options =
   let Server_isolation_types.
-        { seed_framework; seed_list; max_seeds; seed_offset; _ } =
+        { no_growth; seed_framework; seed_list; max_seeds; seed_offset; _ } =
     options
   in
+  (* Accumulates across a run; a second query in the same server would otherwise
+     report the first one's totals. *)
+  Growth.reset_stats ();
   let t_start = Unix.gettimeofday () in
   let all_seeds =
     Seeds.select r.ctx r.deps_mode r.naming_table ~seed_framework ~seed_list
@@ -433,18 +608,27 @@ let query r options =
     ~seed_offset
     ~max_seeds
     ~available:(List.length all_seeds);
-  let (_ : float) = t in
-  let sizes = closure_sizes r seeds ~total_seeds in
-  result r ~grown:false ~total_seeds ~sizes ~clusters:(r.sink.collected ())
+  let sizes =
+    if no_growth then
+      closure_sizes r seeds ~total_seeds
+    else
+      grow_seeds r seeds ~total_seeds ~since:t
+  in
+  result
+    r
+    ~grown:(not no_growth)
+    ~total_seeds
+    ~sizes
+    ~clusters:(r.sink.collected ())
 
 let go
     (options : Server_isolation_types.options)
     (genv : Server_env.genv)
     (env : Server_env.env) : Server_isolation_types.result =
-  let Server_isolation_types.{ output_file; _ } = options in
+  let Server_isolation_types.{ no_growth; output_file; _ } = options in
   let sink =
     match output_file with
-    | Some path -> Sink.to_file ~grown:false path
+    | Some path -> Sink.to_file ~grown:(not no_growth) path
     | None -> Sink.in_memory ()
   in
   (* Non-evictable shared heaps that outlive the query: cleared on the way in so
@@ -452,7 +636,8 @@ let go
      leaves nothing resident. *)
   let reset_caches () =
     Server_isolation_outbound.reset ();
-    Server_isolation_inbound.reset ()
+    Server_isolation_inbound.reset ();
+    Growth.release_caches ()
   in
   (* Closed on the way out only — [reset_caches] also runs at the start, and
      closing there would leave every cluster written to a closed channel. *)

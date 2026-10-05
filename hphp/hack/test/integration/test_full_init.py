@@ -137,9 +137,71 @@ class TestFreshInit(common_tests.CommonTests):
                 "  $child->inherited();\n"
                 "}\n"
             ),
+            # isolation_closure_shared is referenced from two seeds, so neither
+            # can absorb it under the subset rule: when either is tested, the
+            # other is still outside. Its transitive dependents are just those
+            # two, well under the bound, so the closure rule takes all three
+            # together into whichever seed is grown first.
+            "isolation_closure_shared.php": (
+                "<?hh\nfunction isolation_closure_shared(): void {}\n"
+            ),
+            "isolation_closure_a.php": (
+                "<?hh\n"
+                "function isolation_closure_a(): void {\n"
+                "  isolation_closure_shared();\n"
+                "}\n"
+            ),
+            "isolation_closure_b.php": (
+                "<?hh\n"
+                "function isolation_closure_b(): void {\n"
+                "  isolation_closure_shared();\n"
+                "}\n"
+            ),
+            # A file is absorbed whole, so a closure reaching it through one of
+            # its symbols takes the rest of them too. The walk runs over
+            # symbols, so the dependents of the symbol it did not arrive at are
+            # left outside a cluster that holds what they reference, which is
+            # the one thing a cluster may not have.
+            #
+            # isolation_multi_symbols.php is reachable from the shared function
+            # through isolation_multi_fn, and only through it. Its constant is
+            # read from nowhere else in the cluster, so a closure that stops at
+            # the symbols it walked leaves that reader out.
+            "isolation_multi_shared.php": (
+                "<?hh\nfunction isolation_multi_shared(): void {}\n"
+            ),
+            "isolation_multi_other.php": (
+                "<?hh\n"
+                "function isolation_multi_other(): void {\n"
+                "  isolation_multi_shared();\n"
+                "}\n"
+            ),
+            "isolation_multi_symbols.php": (
+                "<?hh\n"
+                "const int ISOLATION_MULTI_CONST = 1;\n"
+                "function isolation_multi_fn(): void {\n"
+                "  isolation_multi_shared();\n"
+                "}\n"
+            ),
+            # Reads the constant and nothing else, so no symbol the walk visits
+            # leads here. On an excluded path so that it cannot be a seed:
+            # growth reaches it through the file above or not at all.
+            "__tests__/isolation_multi_const_test.php": (
+                "<?hh\n"
+                "function isolation_multi_const_test(): int {\n"
+                "  return ISOLATION_MULTI_CONST;\n"
+                "}\n"
+            ),
+            # Nothing references this and it references nothing, so it would
+            # be a seed on every count except that it sits on an excluded path.
+            "__tests__/isolation_excluded_test.php": (
+                "<?hh\nfunction isolation_excluded_test(): void {}\n"
+            ),
         }
         for filename, contents in files.items():
-            with open(os.path.join(self.test_driver.repo_dir, filename), "w") as f:
+            path = os.path.join(self.test_driver.repo_dir, filename)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
                 f.write(contents)
 
         self.test_driver.start_hh_server(
@@ -149,23 +211,40 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None, options=["--find-isolatable-clusters"]
         )
         lines = output.splitlines()
+
         self.assertEqual(2, len(lines))
         header_match = re.fullmatch(r"Started from (\d+) files\.", lines[0])
         if header_match is None:
             self.fail(f"Unexpected command header: {lines[0]}")
+        if (
+            re.fullmatch(
+                r"Grew \d+ clusters covering \d+ files \(largest: \d+\)\.", lines[1]
+            )
+            is None
+        ):
+            self.fail(f"Unexpected cluster summary: {lines[1]}")
+
         seed_count = int(header_match.group(1))
         self.assertGreater(seed_count, 0)
-        # Nothing grows yet, so the second line must say so rather than report
-        # grown clusters.
-        self.assertRegex(
-            lines[1],
-            r"Found \d+ isolatable without growing, covering \d+ files "
-            r"\(largest: \d+\)\.",
-        )
 
+        # Fifteen of the sixteen fixture files form six clusters; the sixteenth
+        # is on an excluded path and is reached by nothing.
+        # Most are grown from a
+        # seed by absorbing files whose only dependents are already inside, so
+        # this exercises the subset rule and, for the inheritance case, that
+        # growth continues past the first round: the caller absorbs
+        # IsolationChild, which then makes IsolationBase absorbable.
+        #
+        # The closure cluster exercises the other rule, and is the only case
+        # that does. isolation_closure_shared is rejected by the subset rule
+        # whichever seed tests it, so without the closure rule this fixture
+        # reports two singleton clusters instead of one cluster of three.
         json_output, _ = self.test_driver.check_cmd(
             expected_output=None,
-            options=["--find-isolatable-clusters", "--json"],
+            options=[
+                "--find-isolatable-clusters",
+                "--json",
+            ],
         )
         # This mode emits one JSON document and nothing else. Failing here with
         # the actual output beats an opaque decode error if a stray line appears.
@@ -174,42 +253,85 @@ class TestFreshInit(common_tests.CommonTests):
         except json.JSONDecodeError as exn:
             self.fail(f"Expected a lone JSON document, got {json_output!r} ({exn})")
         summary = json_result["summary"]
-        # Across the two invocations: nothing changed between them.
         self.assertEqual(seed_count, summary["total_seeds"])
-        # Nothing grew, so no set may claim otherwise, and none can be
-        # truncated: a closure stops where it stops, and no cap refused it.
-        self.assertFalse(summary["grown"])
-        self.assertEqual(0, summary["total_truncated"])
 
-        clusters = json_result["clusters"]
-        self.assertEqual(len(clusters), summary["total_clusters"])
-        for cluster in clusters:
-            self.assertFalse(cluster["grown"])
-            self.assertFalse(cluster["truncated"])
+        fixture_names = {os.path.basename(name) for name in files}
+        fixture_clusters = []
+        for cluster in json_result["clusters"]:
+            names = {os.path.basename(path) for path in cluster["files"]}
+            overlap = names & fixture_names
+            if not overlap:
+                continue
+            # A fixture cluster must not have absorbed anything outside the
+            # fixture; nothing in it references the template repo.
+            self.assertEqual(names, overlap)
             self.assertEqual(len(cluster["files"]), cluster["size"])
-            # A closure holds at least the file it was taken around.
-            self.assertGreaterEqual(cluster["size"], 1)
+            fixture_clusters.append(frozenset(overlap))
 
-        reported = {os.path.basename(f) for c in clusters for f in c["files"]}
-        # Nothing references these four, so each is its own closure and each
-        # must be reported. Restricted to fixture files because the template
-        # repo contributes seeds of its own that this test does not control.
-        self.assertEqual(
-            {
-                "isolation_seed.php",
-                "isolation_function_caller.php",
-                "isolation_static_caller.php",
-                "isolation_inherited_caller.php",
-            },
-            reported & set(files),
+        # A file on an excluded path is not a seed, so it heads no cluster. It
+        # is still free to be absorbed *into* one: under strict isolation a test
+        # left outside the package holding the code it exercises would stop
+        # typechecking, which is why isolation_multi_const_test.php is expected
+        # inside a cluster below. This one references nothing and so is reached
+        # by nothing, leaving it absent rather than absorbed.
+        for cluster in json_result["clusters"]:
+            for path in cluster["files"]:
+                self.assertNotIn("isolation_excluded_test.php", path)
+
+        self.assertCountEqual(
+            [
+                frozenset(
+                    {
+                        "isolation_function_caller.php",
+                        "isolation_function_target.php",
+                    }
+                ),
+                frozenset(
+                    {"isolation_static_caller.php", "isolation_static_target.php"}
+                ),
+                frozenset(
+                    {
+                        "isolation_inherited_caller.php",
+                        "isolation_child.php",
+                        "isolation_base.php",
+                    }
+                ),
+                frozenset(
+                    {
+                        "isolation_closure_a.php",
+                        "isolation_closure_shared.php",
+                        "isolation_closure_b.php",
+                    }
+                ),
+                # The constant's reader is in here only because the closure is
+                # taken to a fixpoint over the files it resolves. Stop at the
+                # symbols the walk visited and this cluster comes back as the
+                # three files above it, with the reader outside referencing the
+                # constant inside.
+                frozenset(
+                    {
+                        "isolation_multi_other.php",
+                        "isolation_multi_shared.php",
+                        "isolation_multi_symbols.php",
+                        "isolation_multi_const_test.php",
+                    }
+                ),
+                frozenset({"isolation_seed.php"}),
+            ],
+            fixture_clusters,
         )
 
-        # Check that the count *responds* to a dependency edge. Give
+        # isolation_seed.php calls only itself, so it is still a seed: a
+        # self-reference is not an external dependent. It absorbs nothing and is
+        # reported as a cluster of one, which is why it is expected above.
+
+        # Check that the seed count *responds* to a dependency edge. Give
         # isolation_seed.php an external referrer by editing a file that already
         # exists: no file is added, so exactly one file changes classification
         # and the seed count must drop by exactly one. If reverse dependencies
         # were invisible, every file would be a seed both times and the count
-        # would not move.
+        # would not move. The drop also pins the self-reference case above: the
+        # file counted as a seed until a *different* file referenced it.
         with open(
             os.path.join(self.test_driver.repo_dir, "isolation_function_caller.php"),
             "w",
@@ -226,6 +348,7 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None, options=["--find-isolatable-clusters"]
         )
         lines = output.splitlines()
+        self.assertEqual(2, len(lines))
         header_match = re.fullmatch(r"Started from (\d+) files\.", lines[0])
         if header_match is None:
             self.fail(f"Unexpected command header: {lines[0]}")

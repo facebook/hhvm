@@ -1414,7 +1414,10 @@ let class_const_def ~in_enum_class c cls env cc =
     | CCAbstract None -> ((env, None), CCAbstract None, hint_ty)
   in
   let (env, user_attributes) =
-    if Ast_defs.is_c_class c.Aast.c_kind || Ast_defs.is_c_trait c.Aast.c_kind
+    if
+      Ast_defs.is_c_class c.Aast.c_kind
+      || Ast_defs.is_c_trait c.Aast.c_kind
+      || Ast_defs.is_c_interface c.Aast.c_kind
     then
       Typing.attributes_check_def
         env

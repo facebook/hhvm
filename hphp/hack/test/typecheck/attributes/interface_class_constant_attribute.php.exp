@@ -1,0 +1,6 @@
+ERROR: File "interface_class_constant_attribute.php", line 11, characters 23-31:
+Invalid argument (Typing[4110])
+  File "interface_class_constant_attribute.php", line 4, characters 31-33:
+  Expected `int`
+  File "interface_class_constant_attribute.php", line 11, characters 23-31:
+  But got `string`

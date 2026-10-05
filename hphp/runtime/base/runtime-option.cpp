@@ -770,21 +770,12 @@ std::string RuntimeOption::Fb303ServerIP;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
 bool RuntimeOption::Fb303ServerExposeSensitiveMethods = false;
-
-bool RuntimeOption::ServerThreadTuneEnabled = true;
-bool RuntimeOption::ServerThreadTuneDebug = false;
-bool RuntimeOption::ServerThreadTuneSkipWarmup = false;
-double RuntimeOption::ServerThreadTuneAdjustmentPct = 0;
-double RuntimeOption::ServerThreadTuneAdjustmentDownPct = 0;
-double RuntimeOption::ServerThreadTuneStepPct = 5;
-double RuntimeOption::ServerThreadTuneCPUThreshold = 95.0;
-double RuntimeOption::ServerThreadTuneThreadUtilizationThreshold = 90.0;
 #endif
 
 size_t serverThreadTuneMaxThreadCount(size_t baselineThreadCount) {
 #ifdef HHVM_FACEBOOK
   const size_t adjustmentFactor =
-      baselineThreadCount * RuntimeOption::ServerThreadTuneAdjustmentPct / 100;
+      baselineThreadCount * Cfg::Server::ThreadTuneAdjustmentPct / 100;
 
   // Should never happen, but protect against integer overflow
   if (baselineThreadCount >
@@ -1600,22 +1591,6 @@ void RuntimeOption::Load(
     Config::Bind(Fb303ServerExposeSensitiveMethods, ini, config,
                  "Fb303Server.ExposeSensitiveMethods", Fb303ServerExposeSensitiveMethods);
 
-    Config::Bind(ServerThreadTuneEnabled, ini, config,
-                 "Server.ThreadTune.Enabled", ServerThreadTuneEnabled);
-    Config::Bind(ServerThreadTuneDebug, ini, config,
-                 "Server.ThreadTune.Debug", ServerThreadTuneDebug);
-    Config::Bind(ServerThreadTuneSkipWarmup, ini, config,
-                 "Server.ThreadTune.SkipWarmup", ServerThreadTuneSkipWarmup);
-    Config::Bind(ServerThreadTuneAdjustmentPct, ini, config,
-                 "Server.ThreadTune.AdjustmentPct", ServerThreadTuneAdjustmentPct);
-    Config::Bind(ServerThreadTuneAdjustmentDownPct, ini, config,
-                 "Server.ThreadTune.AdjustmentDownPct", ServerThreadTuneAdjustmentDownPct);
-    Config::Bind(ServerThreadTuneStepPct, ini, config,
-                 "Server.ThreadTune.StepPct", ServerThreadTuneStepPct);
-    Config::Bind(ServerThreadTuneCPUThreshold, ini, config,
-                 "Server.ThreadTune.CPUThreshold", ServerThreadTuneCPUThreshold);
-    Config::Bind(ServerThreadTuneThreadUtilizationThreshold, ini, config,
-                 "Server.ThreadTune.ThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
   }
 #endif
 

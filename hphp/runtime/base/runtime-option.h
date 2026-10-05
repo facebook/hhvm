@@ -415,28 +415,6 @@ public:
   static int Fb303ServerWorkerThreads;
   static int Fb303ServerPoolThreads;
   static bool Fb303ServerExposeSensitiveMethods;
-
-  // Experimental thread tuning options, allows threads to be adjusted by
-  // thread controller (host stats monitor). `ThreadTuneDebug` is meant to allow
-  // additional debugging metrics/logs to be exported. `ThreadTuneSkipWarmup`
-  // will skip the warmup period (jit maturity = 100). Maximum adjustment is
-  // defined by the `ThreadTuneAdjustmentPct` of the configured thread count,
-  // and the step size is defined by `ThreadTuneStepPct`. Thread tuning is
-  // turned off when `ThreadTuneEnabled` is set to false or
-  // `ThreadTuneAdjustmentPct` is set to 0 (default).
-  static bool ServerThreadTuneEnabled;
-  static bool ServerThreadTuneDebug;
-  static bool ServerThreadTuneSkipWarmup;
-  static double ServerThreadTuneAdjustmentPct;
-  static double ServerThreadTuneAdjustmentDownPct;
-  static double ServerThreadTuneStepPct;
-  // CPU high threshold is used for determining when to adjust threads. If the
-  // host CPU is > this threshold no adjustments will be made.
-  static double ServerThreadTuneCPUThreshold;
-  // Thread utilization threshold is used for determining when to adjust threads,
-  // threads will be increased if other criteria match and the current thread
-  // utilization is above this threshold.
-  static double ServerThreadTuneThreadUtilizationThreshold;
 #endif
 
   static bool funcIsRenamable(const StringData* name);

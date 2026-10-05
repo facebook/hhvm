@@ -286,6 +286,45 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   under heavy load sheds stale requests by prioritizing newest arrivals.
 
 - int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
+
+- bool Server.ThreadTune.Enabled = true, UNKNOWN, staticdefault(true)
+
+  Experimental thread tuning options, allowing the thread count to be adjusted
+  at runtime by the thread controller (host stats monitor). Tuning is off when
+  Enabled is false or when AdjustmentPct is 0, which is the default. The
+  non-zero defaults in this group carry staticdefault so the statics hold them
+  before the config loader runs, matching the previous RuntimeOption
+  initializers.
+
+- bool Server.ThreadTune.Debug = false, UNKNOWN
+
+  Export additional debugging metrics and logs from the thread controller.
+
+- bool Server.ThreadTune.SkipWarmup = false, UNKNOWN
+
+  Skip the warmup period, which otherwise waits for jit maturity to reach 100.
+
+- double Server.ThreadTune.AdjustmentPct = 0, UNKNOWN
+
+  Maximum adjustment up, as a percentage of the configured thread count.
+
+- double Server.ThreadTune.AdjustmentDownPct = 0, UNKNOWN
+
+  Maximum adjustment down, as a percentage of the configured thread count.
+
+- double Server.ThreadTune.StepPct = 5, UNKNOWN, staticdefault(5)
+
+  Step size when adding or removing threads.
+
+- double Server.ThreadTune.CPUThreshold = 95.0, UNKNOWN, staticdefault(95.0)
+
+  No adjustments are made while host CPU is above this threshold.
+
+- double Server.ThreadTune.ThreadUtilizationThreshold = 90.0, UNKNOWN, staticdefault(90.0)
+
+  Threads are only increased when, other criteria having matched, current
+  thread utilization is above this threshold.
+
 - std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
 - std::string Server.FontPath = "", UNKNOWN
 - std::string Server.SourceRoot, UNKNOWN

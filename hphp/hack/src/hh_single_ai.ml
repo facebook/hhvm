@@ -120,6 +120,8 @@ let parse_options () =
       ~tco_saved_state:Global_options.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:I_set.empty)
+      ~tco_skip_hierarchy_checks:true
+      ~tco_skip_check_under_dynamic:true
       Global_options.default
   in
   Diagnostics.allowed_fixme_codes_strict :=

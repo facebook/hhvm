@@ -1,0 +1,2 @@
+ERROR: File "expr_splat_requires_feature.php", line 8, characters 14-18:
+Cannot use unstable feature: `shape_splat_expression` (Parsing[1002])

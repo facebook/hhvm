@@ -1,0 +1,6 @@
+ERROR: File "poly_absent_bound.php", line 22, characters 12-13:
+Invalid argument (Typing[4057])
+  File "poly_absent_bound.php", line 5, characters 24-53:
+  The field `name` is missing
+  File "poly_absent_bound.php", line 21, characters 26-31:
+  The field `name` is required here

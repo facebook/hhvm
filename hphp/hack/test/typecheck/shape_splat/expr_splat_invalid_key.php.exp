@@ -1,0 +1,8 @@
+ERROR: File "expr_splat_invalid_key.php", line 11, characters 27-33:
+No class constant `NO_SUCH` in `C` (Typing[4090])
+  File "expr_splat_invalid_key.php", line 6, characters 7-7:
+  Declaration of `C` is here
+ERROR: File "expr_splat_invalid_key.php", line 15, characters 17-23:
+No class constant `NO_SUCH` in `C` (Typing[4090])
+  File "expr_splat_invalid_key.php", line 6, characters 7-7:
+  Declaration of `C` is here

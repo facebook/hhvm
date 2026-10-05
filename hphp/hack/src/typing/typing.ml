@@ -4876,57 +4876,248 @@ end = struct
         in
         (env, (k, et, ty))
       in
-      let fields =
-        List.filter_map fdm ~f:(function
-            | SF_field (k, e) -> Some (k, e)
-            | SF_splat _ -> None)
+      let has_splats =
+        List.exists fdm ~f:(function
+            | SF_splat _ -> true
+            | SF_field _ -> false)
       in
-      let (env, tfdm) =
-        match
-          Env_help.expand_expected_opt
-            ~strip_supportdyn:true
-            ~pessimisable_builtin:false
+      if has_splats then begin
+        (* Expression-level splat: shape(...$a, ...$b, 'x' => 1)
+           Build a Shape_splat from element types without performing any merge.
+           Each splat expr contributes its type as an element.
+           Consecutive literal fields are grouped into a Shape_simple element.
+           Normalization/subtyping handles the rest. *)
+        let r = Reason.shape_literal p in
+        (* Resolve the expected shape once so fields that cannot be overwritten
+           by a later splat keep bidirectional inference (lambda parameters,
+           `[]`, `vec[]`, ...), mirroring the non-splat branch below. *)
+        let (env, expected_field_info) =
+          match
+            Env_help.expand_expected_opt
+              ~strip_supportdyn:true
+              ~pessimisable_builtin:false
+              env
+              expected
+          with
+          | (env, Some (epos, eur, _, expected_ty, Tshape expected_shape, _)) ->
+            let (env, expected_ty_result) =
+              match expected_shape with
+              | Shape_simple _ -> (env, Ok expected_ty)
+              | Shape_splat { ss_elems } ->
+                Typing_corners.resolve_for_read
+                  env
+                  (get_reason expected_ty)
+                  ss_elems
+            in
+            (match expected_ty_result with
+            | Ok expected_ty ->
+              (match get_node expected_ty with
+              | Tshape (Shape_simple { s_fields = expected_fdm; _ }) ->
+                (env, Some (epos, eur, expected_fdm))
+              | _ -> (env, None))
+            | Error _ ->
+              (* The final shape check remains authoritative when contextual
+                 projection fails. *)
+              (env, None))
+          | (env, _) -> (env, None)
+        in
+        let (_, fdm_with_splat_to_right) =
+          List.fold_right
+            fdm
+            ~init:(false, [])
+            ~f:(fun elem (has_splat_to_right, acc) ->
+              let acc = (elem, has_splat_to_right) :: acc in
+              let has_splat_to_right =
+                match elem with
+                | SF_splat _ -> true
+                | SF_field _ -> has_splat_to_right
+              in
+              (has_splat_to_right, acc))
+        in
+        (* Fold over the elements and accumulate contiguous fields which are then
+           lifted into a simple shape element when a non-field is reached *)
+        let (env, typed_elems_rev, type_elems_rev, pending_fields) =
+          List.fold_left
+            fdm_with_splat_to_right
+            ~init:(env, [], [], TShapeMap.empty)
+            ~f:(fun (env, tast_acc, ty_acc, pending) (elem, has_splat_to_right)
+               ->
+              match elem with
+              | SF_field (k, e) ->
+                let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
+                let expected =
+                  if has_splat_to_right then
+                    None
+                  else
+                    match expected_field_info with
+                    | Some (epos, eur, expected_fdm) ->
+                      (match TShapeMap.find_opt tk expected_fdm with
+                      | Some sft -> Some (ExpectedTy.make epos eur sft.sft_ty)
+                      | None -> None)
+                    | None -> None
+                in
+                let (env, (_, te, ty)) = expr_helper ?expected env (k, e) in
+                let pending =
+                  TShapeMap.add tk { sft_optional = false; sft_ty = ty } pending
+                in
+                (env, Aast.SF_field (k, te) :: tast_acc, ty_acc, pending)
+              | SF_splat e ->
+                let (env, te, ty) =
+                  expr
+                    ~expected:None
+                    ~ctxt:
+                      Context.
+                        {
+                          default with
+                          attribute_check_policy = ctxt.attribute_check_policy;
+                          accept_using_var = false;
+                          check_defined = ctxt.check_defined;
+                        }
+                    env
+                    e
+                in
+                let env = might_throw ~join_pos:p env in
+                (* Flush pending fields as a Shape_simple element *)
+                let ty_acc =
+                  if TShapeMap.is_empty pending then
+                    ty_acc
+                  else
+                    let simple =
+                      mk
+                        ( r,
+                          Tshape
+                            (Shape_simple
+                               {
+                                 s_origin = Missing_origin;
+                                 s_unknown_value = MakeType.nothing r;
+                                 s_fields = pending;
+                               }) )
+                    in
+                    simple :: ty_acc
+                in
+                let env =
+                  let (_, env, stripped) =
+                    Typing_utils.strip_supportdyn env ty
+                  in
+                  let (_, e_pos, _) = e in
+                  let reason = Reason.witness e_pos in
+                  let spreadable_ty =
+                    MakeType.locl_like reason (MakeType.top_shape reason)
+                  in
+                  let error =
+                    Typing_error.apply_reasons
+                      ~on_error:
+                        (Typing_error.Reasons_callback.invalid_type_hint e_pos)
+                      (Typing_error.Secondary.Splat_not_a_shape
+                         (Pos_or_decl.of_raw_pos e_pos))
+                  in
+                  let (env, error_opt) =
+                    SubType.sub_type_or_fail
+                      env
+                      stripped
+                      spreadable_ty
+                      (Some error)
+                  in
+                  Option.iter
+                    error_opt
+                    ~f:(Typing_error_utils.add_typing_error ~env);
+                  env
+                in
+                (* Preserve the inferred operand type; row normalization owns
+                   recursive splat flattening. *)
+                let ty_acc = ty :: ty_acc in
+                (env, Aast.SF_splat te :: tast_acc, ty_acc, TShapeMap.empty))
+        in
+        (* Flush any trailing pending fields *)
+        let type_elems =
+          let elems = List.rev type_elems_rev in
+          if TShapeMap.is_empty pending_fields then
+            elems
+          else
+            let trailing =
+              mk
+                ( r,
+                  Tshape
+                    (Shape_simple
+                       {
+                         s_origin = Missing_origin;
+                         s_unknown_value = MakeType.nothing r;
+                         s_fields = pending_fields;
+                       }) )
+            in
+            elems @ [trailing]
+        in
+        let (env, _, result_ty) =
+          Typing_shape_normalize.splat ~on_error:None ~reason:r type_elems env
+        in
+        (* Validate the literal field keys, which the fold above skipped. The
+           non-splat branch below does the same; without this, key errors (e.g.
+           a class-const key naming a missing constant) go unreported once a
+           splat is present. *)
+        let (env, key_errors) =
+          Typing_shapes.check_shape_keys_validity
             env
-            expected
-        with
-        | ( env,
-            Some
-              ( pos,
-                ur,
-                _,
-                _,
-                Tshape (Shape_simple { s_fields = expected_fdm; _ }),
-                _ ) ) ->
-          List.map_env
-            env
-            ~f:(fun env ((k, _) as ke) ->
+            (List.filter_map fdm ~f:(function
+                | SF_field (k, _) -> Some k
+                | SF_splat _ -> None))
+        in
+        List.iter key_errors ~f:(Typing_error_utils.add_typing_error ~env);
+        make_result env p (Aast.Shape (List.rev typed_elems_rev)) result_ty
+      end else begin
+        let fields =
+          List.filter_map fdm ~f:(function
+              | SF_field (k, e) -> Some (k, e)
+              | SF_splat _ -> None)
+        in
+        let (env, tfdm) =
+          match
+            Env_help.expand_expected_opt
+              ~strip_supportdyn:true
+              ~pessimisable_builtin:false
+              env
+              expected
+          with
+          | ( env,
+              Some
+                ( pos,
+                  ur,
+                  _,
+                  _,
+                  Tshape (Shape_simple { s_fields = expected_fdm; _ }),
+                  _ ) ) ->
+            List.map_env
+              env
+              ~f:(fun env ((k, _) as ke) ->
+                let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
+                match TShapeMap.find_opt tk expected_fdm with
+                | None -> expr_helper env ke
+                | Some sft ->
+                  expr_helper
+                    ~expected:(ExpectedTy.make pos ur sft.sft_ty)
+                    env
+                    ke)
+              fields
+          | _ -> List.map_env env ~f:expr_helper fields
+        in
+        let fdm =
+          List.fold_left
+            ~f:(fun acc (k, _, ty) ->
               let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
-              match TShapeMap.find_opt tk expected_fdm with
-              | None -> expr_helper env ke
-              | Some sft ->
-                expr_helper ~expected:(ExpectedTy.make pos ur sft.sft_ty) env ke)
-            fields
-        | _ -> List.map_env env ~f:expr_helper fields
-      in
-      let fdm =
-        List.fold_left
-          ~f:(fun acc (k, _, ty) ->
-            let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
-            TShapeMap.add tk { sft_optional = false; sft_ty = ty } acc)
-          ~init:TShapeMap.empty
-          tfdm
-      in
-      let (env, errors) =
-        Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst3)
-      in
-      List.iter errors ~f:(Typing_error_utils.add_typing_error ~env);
-      (* Fields are fully known, because this shape is constructed
-       * using shape keyword and we know exactly what fields are set. *)
-      make_result
-        env
-        p
-        (Aast.Shape (List.map ~f:(fun (k, te, _) -> Aast.SF_field (k, te)) tfdm))
-        (MakeType.closed_shape (Reason.shape_literal p) fdm)
+              TShapeMap.add tk { sft_optional = false; sft_ty = ty } acc)
+            ~init:TShapeMap.empty
+            tfdm
+        in
+        let (env, errors) =
+          Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst3)
+        in
+        List.iter errors ~f:(Typing_error_utils.add_typing_error ~env);
+        make_result
+          env
+          p
+          (Aast.Shape
+             (List.map ~f:(fun (k, te, _) -> Aast.SF_field (k, te)) tfdm))
+          (MakeType.closed_shape (Reason.shape_literal p) fdm)
+      end
     | ET_Splice splice ->
       let (env, te, ty, _) = check_et_splice env p splice in
       (env, te, ty)

@@ -1,0 +1,28 @@
+File "expr_splat_non_shape_operand.php", line 14, characters 3-13:
+  shape(..._, ...shape('x' => int))
+File "expr_splat_non_shape_operand.php", line 19, characters 3-13:
+  shape(..._, ...shape('x' => int))
+ERROR: File "expr_splat_non_shape_operand.php", line 13, characters 17-18:
+Invalid type hint (Typing[4419])
+  File "expr_splat_non_shape_operand.php", line 13, characters 17-18:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "expr_splat_non_shape_operand.php", line 18, characters 17-20:
+Invalid type hint (Typing[4419])
+  File "expr_splat_non_shape_operand.php", line 18, characters 17-20:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "expr_splat_non_shape_operand.php", line 20, characters 21-23:
+This shape doesn't have a field `a` (Typing[4108])
+  File "expr_splat_non_shape_operand.php", line 18, characters 8-31:
+  The shape is defined here
+ERROR: File "expr_splat_non_shape_operand.php", line 24, characters 17-22:
+Invalid type hint (Typing[4419])
+  File "expr_splat_non_shape_operand.php", line 24, characters 17-22:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "expr_splat_non_shape_operand.php", line 28, characters 17-22:
+Invalid type hint (Typing[4419])
+  File "expr_splat_non_shape_operand.php", line 28, characters 17-22:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "expr_splat_non_shape_operand.php", line 32, characters 17-22:
+Invalid type hint (Typing[4419])
+  File "expr_splat_non_shape_operand.php", line 32, characters 17-22:
+  Only shapes can be unpacked with `...` inside a shape type

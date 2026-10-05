@@ -1291,11 +1291,22 @@ module Full = struct
         ")"
     | Tshape (Shape_simple s) -> tshape ~fuel k to_doc env s is_open_mixed
     | Tshape (Shape_splat { ss_elems }) ->
-      (* Expand tvars and try to normalize *)
-      let expanded =
-        List.map ss_elems ~f:(fun ty ->
-            snd (Typing_inference_env.expand_type env.inference_env ty))
+      (* A type variable can resolve to another splat after the row was first
+         normalized. The ordinary printer recursion is bottom-up, so its child
+         types have already become documents by the time the parent could merge
+         them. Expand and flatten the types first, for display only. *)
+      let rec expand_splat_elem seen ty =
+        match get_node ty with
+        | Tvar v when not (Tvid.Set.mem v seen) ->
+          let ty =
+            snd (Typing_inference_env.expand_type env.inference_env ty)
+          in
+          expand_splat_elem (Tvid.Set.add v seen) ty
+        | Tshape (Shape_splat { ss_elems }) ->
+          List.concat_map ss_elems ~f:(expand_splat_elem seen)
+        | _ -> [ty]
       in
+      let expanded = List.concat_map ss_elems ~f:(expand_splat_elem st) in
       let all_simple =
         List.for_all expanded ~f:(fun ty ->
             match get_node ty with

@@ -1,0 +1,4 @@
+ERROR: File "attribute_shape_splat_access.php--use.php", line 4, characters 16-63:
+Error while evaluating this SimpliHack expression (Typing[4495])
+  File "attribute_shape_splat_access.php--use.php", line 4, characters 16-63:
+  Unsupported expression

@@ -1,0 +1,4 @@
+ERROR: File "test_shape_splat.php", line 16, characters 20-44:
+[test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is definitely read. (Other[11004])
+ERROR: File "test_shape_splat.php", line 17, characters 20-24:
+[test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is possibly written via function call. (Other[11003])

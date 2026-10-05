@@ -1,0 +1,4 @@
+ERROR: File "expr_splat_error_non_shape.php", line 5, characters 17-18:
+Invalid type hint (Typing[4419])
+  File "expr_splat_error_non_shape.php", line 5, characters 17-18:
+  Only shapes can be unpacked with `...` inside a shape type

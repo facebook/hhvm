@@ -392,6 +392,42 @@ let residual_tyvar _ =
   | Norm.Intersection _ ->
     assert_failure "expected residual list for a free type variable"
 
+let printer_flattens_splat_from_solved_tyvar _ =
+  let (env, tv) =
+    Env.fresh_type_reason dummy_env Pos.none (fun _ -> Reason.none)
+  in
+  let nested =
+    mk
+      ( r,
+        Tshape
+          (Shape_splat
+             {
+               ss_elems =
+                 [
+                   shape_ty (simple [("x", field tint)]);
+                   shape_ty (simple [("y", field tbool)]);
+                 ];
+             }) )
+  in
+  let (env, err) =
+    match get_node tv with
+    | Tvar v -> Typing_solver.bind env v nested
+    | _ -> assert_failure "fresh_type_reason should return a type variable"
+  in
+  assert_equal None err;
+  let outer =
+    mk
+      ( r,
+        Tshape
+          (Shape_splat
+             { ss_elems = [tv; shape_ty (simple [("z", field tfloat)])] }) )
+  in
+  assert_equal
+    ~printer:Fn.id
+    ~msg:"printing should renormalize a solved splat variable"
+    "shape('x' => int, 'y' => bool, 'z' => float)"
+    (Typing_print.full_strip_ns ~hide_internals:true env outer)
+
 let normalized_row_is_aligned _ =
   let parameter = mk (r, Tgeneric "T") in
   let (env, type_variable) =
@@ -877,6 +913,8 @@ let () =
          "empty_intersection_is_not_a_shape"
          >:: empty_intersection_is_not_a_shape;
          "residual_tyvar" >:: residual_tyvar;
+         "printer_flattens_splat_from_solved_tyvar"
+         >:: printer_flattens_splat_from_solved_tyvar;
          "normalized_row_is_aligned" >:: normalized_row_is_aligned;
          "repeated_generic_bottom_query_is_memoized"
          >:: repeated_generic_bottom_query_is_memoized;

@@ -1,0 +1,2 @@
+ERROR: File "expr_splat_duplicate_field.php", line 8, characters 31-33:
+Field name already bound (Naming[2015])

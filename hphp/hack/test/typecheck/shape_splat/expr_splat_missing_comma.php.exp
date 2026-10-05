@@ -1,0 +1,6 @@
+ERROR: File "expr_splat_missing_comma.php", line 5, characters 28-28:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "expr_splat_missing_comma.php", line 5, characters 32-33:
+Unbound name: `=>` (a global constant) (Naming[2049])
+ERROR: File "expr_splat_missing_comma.php", line 5, characters 32-33:
+Unbound global constant (Typing) (Typing[4106])

@@ -9,6 +9,11 @@
 open Typing_defs
 open Typing_env_types
 
+(** Corner checking for normalized shape-splat rows without inference
+    variables. At each label, live opaque spread elements are assigned
+    extremal fields from their declared intervals. Dependencies are discovered
+    structurally, ordered, and only then evaluated under those assignments. *)
+
 (** The key identifying a spread element *)
 module Splat_elem : sig
   (** A localized generic or newtype used as a spread element key. *)
@@ -26,7 +31,8 @@ end
 
 (** Per-label corner assignments for spread elements. *)
 module Assignment : sig
-  (** What each spread element's field has been fixed to, at one label. *)
+  (** What each spread element's field has been fixed to at one label. This is
+      not a substitution for the element's complete type. *)
   type t = locl_phase shape_field_type Splat_elem.Map.t
 end
 
@@ -40,12 +46,16 @@ module Missing_assignment : sig
 end
 
 module Dependency : sig
-  (** How evaluating a bound reaches another spread element. *)
+  (** Why source's field-bound evaluation can require target. *)
   type kind =
     | Direct_upper
+        (** A whole upper constraint [source <: target]. Cycles containing only
+        these edges between type parameters prove mutual subtyping. *)
     | Indirect_upper
-    | Nested_upper
-    | Nested_lower
+        (** Target was found through a compound upper bound. This proves
+        dependency, but not whole-type equality. *)
+    | Nested_upper  (** A shape in source's upper bounds spreads target. *)
+    | Nested_lower  (** A shape in source's lower bounds spreads target. *)
 
   type t
 
@@ -71,9 +81,10 @@ module Cycle_info : sig
 end
 
 type 'a computation =
-  | Computed of 'a
-  | Empty
+  | Computed of 'a  (** At least one complete assignment was evaluated. *)
+  | Empty  (** Every branch had an uninhabited field interval. *)
   | Unsupported_cycle of Cycle_info.t
+      (** The cycle facts needed by the caller's error construction. *)
 
 (** Memoized bound and dependency information for one splat operation. *)
 module Cache : sig
@@ -84,7 +95,9 @@ module Cache : sig
   val create : unit -> t
 end
 
-(** Shape-field predicates and row-algebra operations. *)
+(** Shape-field predicates and row-algebra operations. Fields use the product
+    order of presence and value-type subtyping; required is below optional in
+    the presence order. *)
 module Field : sig
   (** A required or optional localized shape field. *)
   type t = locl_phase shape_field_type
@@ -146,14 +159,16 @@ val resolve_for_read :
   env * (locl_ty, Missing_assignment.t) result
 
 (** Type parameter/newtype spreads that can affect [row] at [label], excluding
-    those masked by a required field to their right; [None] selects the tail i.e.
-    the upper bound for all unknown fields. *)
+    those masked by a required field to their right. [None] selects the tail,
+    i.e. the upper bound for all unknown fields. *)
 val row_live_spread_at :
   Typing_shape_normalize.Row.t -> TShapeField.t option -> locl_ty list
 
 (* == Labels a comparison must cover ======================================== *)
 
-(** Concrete labels contributed by either row or by bounds of their spreads. *)
+(** Concrete labels contributed by either row or by transitively reachable
+    spread bounds. Discovery starts from every spread written in the rows;
+    per-label liveness is calculated only after this complete set is known. *)
 val subrow_label_set :
   Cache.t ->
   env ->
@@ -173,15 +188,18 @@ val subrow_labels :
 
 (* == Ordering the parameters =============================================== *)
 
-(** The order in which the given roots and everything reachable from them
-    should be given values: each after those its bounds mention. Bounds can be
-    cyclic, as [where T1 = T2] makes them, and then one dependency is dropped;
-    the result is still total and does not vary between runs. *)
+(** A deterministic flat view of the dependency-first components reachable
+    from the given starting elements. Members of a cyclic component are
+    contiguous; this list does not express whether analysis proved equality or
+    found an unsupported cycle. Corner search consumes the richer internal
+    plan instead. *)
 val topo : Cache.t -> env -> Splat_elem.Set.t -> Typing_reason.t -> locl_ty list
 
 (* == Corners =============================================================== *)
 
-(** Check every corner assignment of the live spread elements. *)
+(** Check every retained corner assignment of the live spread elements. Sound
+    dominance and masking rules may omit corners that cannot be harder than a
+    retained one. *)
 val check_subrow_corners :
   Cache.t ->
   env ->
@@ -267,8 +285,9 @@ module For_test : sig
   module Cycle_info = Cycle_info
 
   module Component : sig
-    (** One strongly connected component. Only direct reciprocal type-parameter
-        constraints prove equality; every other cyclic component is unsupported. *)
+    (** One strongly connected component. Only direct reciprocal
+        type-parameter constraints prove equality; every other cyclic
+        component is unsupported. *)
     type t =
       | Acyclic of Splat_elem.t
       | Proven_equal of Cycle_info.t

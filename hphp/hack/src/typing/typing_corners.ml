@@ -6,21 +6,49 @@
  *
  *)
 
-(* == Ground corner subrow procedure =========================================
-   Type parameters in spread position are not collapsed to a single bound;
-   instead each type parameter that is 'live' at a given label (i.e. can
-   influence its type) is enumerated over the <=4 extremal 'corners' of its
-   field interval [lower, upper] at each label, and the per-field subtyping
-   obligation is checked at every corner co-assignment.
-   ========================================================================== *)
+(* == Shape-splat corner checking ========================================== *
+ *
+ * A ground check here means that the normalized rows contain no inference
+ * variables. Type parameters and opaque newtypes may remain in spread
+ * position, so their fields are known only through bounds.
+ *
+ * At one label, each such spread element has an interval of possible fields.
+ * A field is the product of a presence and a value type, so the interval has
+ * at most four endpoint combinations, called corners. An [Assignment.t]
+ * chooses one corner field for each relevant element at this label; it is not
+ * a substitution for the element's whole type.
+ *
+ * The logical execution order is:
+ *
+ * 1. Project normalized rows and find the spread elements live at one label.
+ * 2. Structurally summarize dependencies and labels in their bounds.
+ * 3. Analyze that finite graph, classify cycles, and order its components.
+ * 4. Compile the result into an executable [Plan.t].
+ * 5. Evaluate exact field bounds after prerequisite groups are assigned.
+ * 6. Enumerate the retained corners and project both rows under each complete
+ *    assignment.
+ *
+ * The separation between steps 2 and 5 is a performance invariant. Shape
+ * normalization can invoke subtyping, which can re-enter this procedure.
+ * Dependency discovery must therefore remain a structural traversal: it must
+ * not normalize bounds, project rows, perform subtyping, or enumerate corners.
+ * This lets graph traversal visit each reachable node and edge once rather
+ * than recurse once for every dependency path.
+ *
+ * The remaining Cartesian search can still be exponential when assignments
+ * are observably different. Search removes choices only where structural
+ * equality, row position, or dependency information proves them redundant.
+ * Missing assignments and unsupported cycles leave this module as structured
+ * data; callers decide how and when to render an error.
+ * ========================================================================== *)
 
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
 
-(* The key identifying a spread element. Two occurrences of the same parameter
-   are the same key, so it is compared by type rather than by name: [NT<int>] and
-   [NT<string>] are different elements. *)
+(* The key identifying a spread element. Two occurrences of the same
+   parameter are the same key, so it is compared by type rather than by name:
+   [NT<int>] and [NT<string>] are different elements. *)
 module Splat_elem : sig
   type t = locl_ty
 
@@ -57,7 +85,8 @@ end = struct
   module Set = Stdlib.Set.Make (Minimal)
 end
 
-(* A single assignment of all type parameters to a ground shape field type *)
+(* One per-label choice of a corner field for each relevant spread element.
+   This is not a substitution for the element's complete type. *)
 module Assignment : sig
   type t = locl_phase shape_field_type Splat_elem.Map.t
 end = struct
@@ -134,6 +163,13 @@ end = struct
       value
 end
 
+(* Fields use the product order
+
+     (p1, t1) <=field (p2, t2)
+
+   exactly when [p1] is at least as present as [p2] and [t1 <: t2]. Required is
+   below optional in the presence order. Consequently field meet and join act
+   component-wise: upper constraints meet, while lower possibilities join. *)
 module Field : sig
   (** A required or optional localized shape field. *)
   type t = locl_phase shape_field_type
@@ -249,7 +285,8 @@ module Row : sig
   val element_tys : Typing_shape_normalize.Row.Element.t list -> locl_ty list
 
   (** Project a normalized splat row at a label under an [Assignment.t] of
-      all type parameters contributing to the type. *)
+      all spread elements contributing to that label. [None] denotes the
+      unknown tail: every label not named explicitly. *)
   val proj :
     env ->
     Typing_shape_normalize.Row.t ->
@@ -257,8 +294,8 @@ module Row : sig
     Assignment.t ->
     env * (locl_phase shape_field_type, Missing_assignment.t) result
 
-  (** Type parameters to the right of any required field at [label]: only these
-      can contribute to the merged field. *)
+  (** Spread elements whose assigned field can change the projection at
+      [label]. A concrete required field masks every element to its left. *)
   val live_spreads :
     Typing_shape_normalize.Row.t -> TShapeField.t option -> locl_ty list
 
@@ -298,8 +335,8 @@ end = struct
       (env, Ok { sft_optional = false; sft_ty = Typing_make_type.nothing r })
     | _ -> (env, Ok { sft_optional = true; sft_ty = Typing_make_type.nothing r })
 
-  (* Right-to-left rightmost-wins fold over splat elements, short-circuiting once
-     the accumulated field is required. *)
+  (* Right-to-left rightmost-wins fold over splat elements, short-circuiting
+     once the accumulated field is required. *)
   let rec proj_splat_help
       env rev_left label assignment (fd_right : locl_phase shape_field_type) =
     if not fd_right.sft_optional then
@@ -318,8 +355,8 @@ end = struct
   let proj_splat env (ss_elems : locl_ty list) label assignment =
     match List.rev ss_elems with
     | [] ->
-      (* An empty splat is the identity, i.e. the empty closed shape. Every label
-         projects to absent (Opt nothing) *)
+      (* An empty splat is the identity, i.e. the empty closed shape. Every
+         label projects to absent (Opt nothing). *)
       ( env,
         Ok
           {
@@ -362,7 +399,8 @@ end = struct
         | Tnewtype _ ->
           aux left (ty :: acc)
         | _ when Typing_defs.is_nothing ty ->
-          (* bottom row: forces [Req bottom]; everything to its left is masked *)
+          (* A bottom row forces [Req bottom], masking everything to its
+             left. *)
           acc
         | Tshape (Shape_simple { s_fields; s_unknown_value; _ }) ->
           let fd = proj_simple ~s_fields ~s_unknown_value label in
@@ -381,7 +419,7 @@ end = struct
       ~simple:(fun _ -> [])
       ~elements:(fun elements -> live_spreads_at (element_tys elements) label)
 
-  (* -- Labels ---------------------------------------------------------------- *)
+  (* -- Labels -------------------------------------------------------------- *)
 
   (* Inline labels a row contributes, looking through inline shape spreads.
      Opaque splat elements contribute none. *)
@@ -533,18 +571,35 @@ end = struct
     (env, ty)
 end
 
-(* -- Exact field-bound evaluation -------------------------------------------
-   Once dependencies have been planned, normalize shape bounds and project
-   them under the current assignment.
-   -------------------------------------------------------------------------- *)
+(* -- Exact field-bound evaluation ---------------------------------------- *
+ *
+ * This is the first stage allowed to normalize bounds. By the time it runs,
+ * dependency analysis has produced an order in which every parameter needed
+ * by a projected bound already has a field in [Assignment.t]. A missing
+ * assignment therefore exposes a broken planning invariant.
+ *
+ * If declarations establish [L <: T <: U], T's field lies between the
+ * projected fields of L and U. Multiple lower possibilities are joined,
+ * because T must admit each of them. Multiple upper constraints are met,
+ * because T must satisfy all of them. For example:
+ *
+ *   required int join required string = required (int | string)
+ *   required mixed meet optional mixed = required mixed
+ *
+ * The view constructors distinguish facts that project to similar fields:
+ * [Lower.Bottom] means that no shape lower bound supplied positive
+ * information; [Upper.Bottom] means the parameter is uninhabited; and
+ * [Upper.Unconstrained] means no upper bound restricted shape fields.
+ * ------------------------------------------------------------------------- *)
 module Field_bounds : sig
   module Upper : sig
     type t =
       | Shapes of Typing_shape_normalize.Row.t list
-          (** All the rows the bound resolves to. The element is below every one of
-          them, so its field is below each of their fields: combine by meet. A
-          bound can resolve to several, an intersection being the obvious case,
-          and keeping only one silently drops what the others say. *)
+          (** All the rows the bound resolves to. The element is below every
+              one of them, so its field is below each of their fields: combine
+              by meet. A bound can resolve to several, an intersection being
+              the obvious case, and keeping only one silently drops what the
+              others say. *)
       | Bottom
           (** The bottom row: every field present, at the uninhabited type. *)
       | Unconstrained  (** Not a shape, so it rules nothing out. *)
@@ -561,9 +616,10 @@ module Field_bounds : sig
   module Lower : sig
     type t =
       | Shapes of Typing_shape_normalize.Row.t list
-          (** Likewise, but the element is ABOVE every one of them, so combine by
-          join. *)
+          (** Likewise, but the element is above every one of them, so combine
+              by join. *)
       | Bottom
+          (** No usable shape lower bound supplied positive information. *)
   end
 
   val bound_shape_lower :
@@ -618,6 +674,8 @@ module Field_bounds : sig
     Typing_reason.t ->
     env * (locl_phase shape_field_type, Missing_assignment.t) result
 end = struct
+  (* -- Bound views and normalization ------------------------------------- *)
+
   let shape_types env tys =
     let (env, shapes) =
       List.fold_map tys ~init:env ~f:(fun env ty ->
@@ -631,10 +689,11 @@ end = struct
   module Upper = struct
     type t =
       | Shapes of Typing_shape_normalize.Row.t list
-          (** All the rows the bound resolves to. The element is below every one of
-          them, so its field is below each of their fields: combine by meet. A
-          bound can resolve to several, an intersection being the obvious case,
-          and keeping only one silently drops what the others say. *)
+          (** All the rows the bound resolves to. The element is below every
+              one of them, so its field is below each of their fields: combine
+              by meet. A bound can resolve to several, an intersection being
+              the obvious case, and keeping only one silently drops what the
+              others say. *)
       | Bottom
           (** The bottom row: every field present, at the uninhabited type. *)
       | Unconstrained  (** Not a shape, so it rules nothing out. *)
@@ -643,9 +702,10 @@ end = struct
   module Lower = struct
     type t =
       | Shapes of Typing_shape_normalize.Row.t list
-          (** Likewise, but the element is ABOVE every one of them, so combine by
-          join. *)
+          (** Likewise, but the element is above every one of them, so combine
+              by join. *)
       | Bottom
+          (** No usable shape lower bound supplied positive information. *)
   end
 
   let intersect_upper_views views =
@@ -783,12 +843,13 @@ end = struct
        whatever that one turned out to be, so use it.
 
        Unlike the upper case this creates no ordering requirement, and
-       [type_params_in_lower_bound] deliberately reports no dependency for it. An
-       edge here would make the relation symmetric and turn a single constraint
-       into a cycle. Taking the value only when it happens to be there keeps the
-       coupling without the edge, which is what [where T1 = T2] needs: the two
-       parameters constrain each other in both directions, and with only the upper
-       half enforced one could be given a value below the other. *)
+       [type_params_in_lower_bound] deliberately reports no dependency for it.
+       An edge here would make the relation symmetric and turn a single
+       constraint into a cycle. Taking the value only when it happens to be
+       there keeps the coupling without the edge, which is what
+       [where T1 = T2] needs: the two parameters constrain each other in both
+       directions, and with only the upper half enforced one could be given a
+       value below the other. *)
     | Tgeneric _
     | Tnewtype _
       when Splat_elem.Map.mem bound_ty assignment
@@ -817,6 +878,8 @@ end = struct
   let bound_shape_lower cache env name assignment r =
     let (env, bound_ty) = Bound_lookup.combined_lower_bound cache env name r in
     bound_shape_lower_of_ty cache env bound_ty assignment r
+
+  (* -- Projecting one field interval ------------------------------------- *)
 
   let project_shapes env shapes label assignment ~empty ~combine =
     let rec project_rest env acc = function
@@ -886,6 +949,8 @@ end = struct
       (match upper with
       | Error missing -> (env, Error missing)
       | Ok upper -> (env, Ok (lower, upper)))
+
+  (* -- Bounds for a proven-equal component ------------------------------- *)
 
   let fold_equality_bounds
       cache
@@ -1003,15 +1068,26 @@ end = struct
       | Ok upper -> (env, Ok (lower, upper)))
 end
 
-(* -- Dependency analysis --------------------------------------------------- *)
+(* -- Structural dependency analysis ------------------------------------- *
+ *
+ * An edge [source -> target] means that calculating source's field bounds can
+ * require target's chosen field, so target must be assigned first. Analysis
+ * reads only cached structural summaries, then traverses each reachable node
+ * and edge once. Dependency kinds retain enough evidence to distinguish a
+ * direct mutual-subtyping cycle from a recursive field computation.
+ * ------------------------------------------------------------------------- *)
 module Analysis : sig
   module Dependency : sig
-    (** How evaluating a bound reaches another spread element. *)
+    (** Why source's field-bound evaluation can require target. *)
     type kind =
       | Direct_upper
+          (** A whole upper constraint [source <: target]. Cycles containing only
+          these edges between type parameters prove mutual subtyping. *)
       | Indirect_upper
-      | Nested_upper
-      | Nested_lower
+          (** Target was found through a compound upper bound. This proves
+          dependency, but not whole-type equality. *)
+      | Nested_upper  (** A shape in source's upper bounds spreads target. *)
+      | Nested_lower  (** A shape in source's lower bounds spreads target. *)
 
     type t
 
@@ -1035,8 +1111,9 @@ module Analysis : sig
   end
 
   module Component : sig
-    (** One strongly connected component. Only direct reciprocal type-parameter
-           constraints prove equality; every other cyclic component is unsupported. *)
+    (** One strongly connected component. Only direct reciprocal
+        type-parameter constraints prove equality; every other cyclic
+        component is unsupported. *)
     type t =
       | Acyclic of Splat_elem.t
       | Proven_equal of Cycle_info.t
@@ -1205,6 +1282,10 @@ end = struct
   end
 
   module Bound_summary = struct
+    (* Assignment-independent facts about one element's bounds. Constructing a
+       summary may expand types and inspect constructors, but must never
+       normalize a shape, project a row, perform subtyping, evaluate exact
+       field bounds, or enumerate corners. *)
     type t = {
       dependencies: Dependency.t list;
       labels: TShapeSet.t;
@@ -1234,11 +1315,12 @@ end = struct
 
   let edge_visits analysis = analysis.edge_visits
 
-  (* Planning must not normalize a recursive bound. Shape normalization asks
-     whether opaque operands are [nothing], which calls subtyping and can
-     re-enter this decision procedure once for every expansion path. Instead,
-     collect the assignment-independent facts needed by planning directly from
-     localized type syntax: spread dependencies and explicit labels. *)
+  (* -- Structural bound summaries --------------------------------------- *)
+
+  (* Shape normalization may ask whether an opaque operand is [nothing]. That
+     invokes subtyping and can re-enter corner checking once for every
+     dependency path. Collect only dependencies and explicit labels directly
+     from localized type syntax. *)
   type scan = {
     rev_dependencies: Dependency.t list;
     labels: TShapeSet.t;
@@ -1397,6 +1479,11 @@ end = struct
     targets (dependencies_from bounds_cache cache env source r) ~f:(fun _ ->
         true)
 
+  (* -- Reachability and SCC classification ------------------------------- *)
+
+  (* [roots] are caller-supplied starting elements, normally the elements live
+     in either surface row at one label. They are not graph nodes with no
+     incoming edge. *)
   let closure bounds_cache cache env names r =
     let rec aux worklist acc =
       match worklist with
@@ -1408,6 +1495,9 @@ end = struct
     in
     aux (Splat_elem.Set.elements names) Splat_elem.Set.empty
 
+  (* Tarjan's traversal returns dependency-first strongly connected
+     components. Since summaries cannot invoke corner checking, its work is
+     linear in the reachable nodes and dependency edges. *)
   let analyze bounds_cache analysis_cache env roots r =
     let next_index = ref 0 in
     let indices = ref Splat_elem.Map.empty in
@@ -1536,6 +1626,13 @@ end = struct
       edge_visits = !edge_visits;
     }
 
+  (* -- Label discovery ---------------------------------------------------- *)
+
+  (* Label discovery cannot begin with per-label liveness: the labels must be
+     known before liveness can be calculated. Start from every spread element
+     written in either surface row, follow its dependency closure, and collect
+     labels from all reachable summaries. Search later computes a smaller live
+     root set separately for each discovered label. *)
   module Labels = struct
     let bound_label_set bounds_cache analysis_cache env names r =
       let all =
@@ -1577,6 +1674,10 @@ module Dependency = Analysis.Dependency
 module Cycle_info = Analysis.Cycle_info
 module Component = Analysis.Component
 
+(** The outcome of traversing a corner plan. [Empty] means that every branch
+    encountered an uninhabited field interval, so there is no checking
+    obligation. [Unsupported_cycle] preserves facts for the caller's error
+    construction rather than rendering a message here. *)
 type 'a computation =
   | Computed of 'a
   | Empty
@@ -1602,7 +1703,14 @@ end = struct
     }
 end
 
-(* -- Planning -------------------------------------------------------------- *)
+(* -- Compiling an executable plan ---------------------------------------- *
+ *
+ * Analysis describes every reachable component, including unsupported
+ * cycles. A plan either rejects such a cycle or turns the analysis into
+ * dependency-ordered singleton and proven-equality groups. Every dependency
+ * between distinct groups points to an earlier group, and each element occurs
+ * in exactly one group.
+ * ------------------------------------------------------------------------- *)
 module Plan : sig
   type group =
     | One of locl_ty
@@ -1663,7 +1771,18 @@ end = struct
     |> Result.map ~f:(fun groups -> { groups = List.rev groups; depended_on })
 end
 
-(* -- Corner search --------------------------------------------------------- *)
+(* -- Corner search ------------------------------------------------------- *
+ *
+ * Search evaluates groups in plan order. Bounds for the current group may
+ * read fields assigned to earlier groups, so its available corners are
+ * calculated separately inside each partial-assignment branch.
+ *
+ * This Cartesian product is intentionally exponential when its leaves are
+ * observably different. It is distinct from the accidental exponential
+ * dependency discovery prevented by structural summaries. The pruning below
+ * selects one extremum only when row position and dependency information make
+ * it dominate every omitted corner.
+ * ------------------------------------------------------------------------- *)
 module Search : sig
   val corners_for :
     Cache.t ->
@@ -1726,9 +1845,13 @@ module Search : sig
       (t, Missing_assignment.t) result
   end
 end = struct
+  (* -- Dynamic masking and corner pruning -------------------------------- *)
+
   module Masking = struct
-    (* Describes how a type parameter influences leftward labels when projecting
-       at that label under rightmost-wins semantics. *)
+    (* Whether rightward spread elements definitely overwrite [key], leave it
+       potentially relevant at every allowed corner, or vary across their own
+       corners. [Unmasked] does not mean visible in every value; it means that
+       [key] cannot be discarded. *)
     type t =
       | Masked
       | Unmasked
@@ -1785,8 +1908,9 @@ end = struct
        of_row_cached (Cache.create ()) env row label key assignment r *)
   end
 
-  (* Enumerate corner assignments in dependency order. Bound resolution is cached
-     within one shape-splat operation, but every assignment path is traversed. *)
+  (* Enumerate corner assignments in dependency order. Bound resolution is
+     cached within one shape-splat operation, but every retained assignment
+     path is traversed. *)
   let corners_for
       cache
       env
@@ -1823,6 +1947,11 @@ end = struct
           (env, Error missing)
         | (Ok Masking.Masked, _) -> (env, Ok (Field.Corners.Values [lower]))
         | (_, Ok Masking.Masked) -> (env, Ok (Field.Corners.Values [upper]))
+        (* Both occurrences use the same assignment. If the supertype
+           occurrence remains relevant and the lower field is optional, that
+           lower choice exposes every unshared subtype contribution. Raising
+           the field adds the same shared contribution to both projections, so
+           it cannot create a harder case. *)
         | (_, Ok Masking.Unmasked) when Field.is_optional lower ->
           (env, Ok (Field.Corners.Values [lower]))
         | (Ok _, Ok _) -> (env, Ok (Field.Corners.of_bounds ~lower ~upper))
@@ -1886,6 +2015,8 @@ end = struct
         (fun member assignment -> Splat_elem.Map.add member field assignment)
         (Cycle_info.members info)
         assignment
+
+  (* -- Traversing the Cartesian product ---------------------------------- *)
 
   (* Traverse one dependency-ordered plan. [corners] chooses the candidates for
      a group; [leaf], [empty], and [combine] interpret the same traversal for
@@ -1993,6 +2124,8 @@ end = struct
       | Error missing -> (env, Error missing)
       | Ok (value, true) -> (env, Ok (Computed value))
       | Ok (_value, false) -> (env, Ok Empty))
+
+  (* -- Materializing assignments for inference and tests ---------------- *)
 
   let assignments cache env roots (label : TShapeField.t option) r =
     let analysis =
@@ -2138,8 +2271,8 @@ end
 
 (* -- Resolve a splat to a simple shape for reads ---------------------------
    Unsupported cyclic components are assigned [Opt mixed]; projecting the
-   original row afterward preserves precision from concrete fields that mask them
-   on the right.
+   original row afterward preserves precision from concrete fields that mask
+   them on the right.
    -------------------------------------------------------------------------- *)
 module Read_resolution : sig
   val resolve :
@@ -2216,7 +2349,8 @@ end = struct
       in
       assign env Splat_elem.Map.empty (Analysis.components analysis)
     in
-    (* Project a single row to a resolved simple shape (generics -> upper bound). *)
+    (* Project one row to a resolved simple shape, replacing generics with
+       their upper bounds. *)
     let project env row =
       let labels =
         None

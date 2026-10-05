@@ -47,19 +47,63 @@ let print_find_my_tests_result result ~(json : bool) : unit =
     List.iter result.FMT.selected_test_files ~f:(fun file ->
         print_endline file.FMT.file_path)
 
-let output_isolation_result seeds ~output_json =
+let output_isolation_result
+    (result : Server_isolation_types.result) ~output_json =
+  let open Server_isolation_types in
   if output_json then
     `Assoc
       [
-        ("seed_files", `List (List.map seeds ~f:(fun path -> `String path)));
-        ("summary", `Assoc [("total_seed_files", `Int (List.length seeds))]);
+        ( "clusters",
+          `List
+            (List.map result.clusters ~f:(fun cluster ->
+                 `Assoc
+                   [
+                     ( "files",
+                       `List (List.map cluster.files ~f:(fun f -> `String f)) );
+                     ("size", `Int (List.length cluster.files));
+                     ("common_directory", `String cluster.common_directory);
+                     ("grown", `Bool result.grown);
+                     ("truncated", `Bool cluster.truncated);
+                   ])) );
+        ( "summary",
+          `Assoc
+            [
+              ("grown", `Bool result.grown);
+              ("total_seeds", `Int result.total_seeds);
+              ("total_isolatable_files", `Int result.total_isolatable_files);
+              ("total_clusters", `Int result.total_clusters);
+              ("total_truncated", `Int result.total_truncated);
+              ("largest_cluster", `Int result.largest_cluster);
+            ] );
       ]
     |> Yojson.Safe.to_string
     |> print_endline
-  else
-    Printf.printf
-      "Found %d seed files (zero inbound references).\n"
-      (List.length seeds)
+  else begin
+    Printf.printf "Started from %d files.\n" result.total_seeds;
+    (* Both modes report sets of files called clusters, and they mean different
+       things, so the line a person reads has to say which. *)
+    if result.grown then begin
+      Printf.printf
+        "Grew %d clusters covering %d files (largest: %d).\n"
+        result.total_clusters
+        result.total_isolatable_files
+        result.largest_cluster;
+      (* A truncated cluster stopped at the cap with more to take, so something
+         outside it still references in. Saying how many kept that from being
+         read as a count of finished packages. Read off the summary rather than
+         counted here, so that it survives a run that streamed its clusters to a
+         file and sent back none of them. *)
+      if result.total_truncated > 0 then
+        Printf.printf
+          "%d of them stopped at the size cap and are not complete.\n"
+          result.total_truncated
+    end else
+      Printf.printf
+        "Found %d isolatable without growing, covering %d files (largest: %d).\n"
+        result.total_clusters
+        result.total_isolatable_files
+        result.largest_cluster
+  end
 
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
@@ -330,7 +374,7 @@ let main_internal
        We don't do streaming errors under [not prechecked]. That's because the
        [go_streaming] contract is to report on a typecheck that reflects all *file*
        changes up until now; it has no guarantee that the typecheck will reflects our
-       preceding call to ServerCommandTypes.NO_PRECHECKED_FILES. *)
+       preceding call to Server_command_types.NO_PRECHECKED_FILES. *)
     let use_streaming =
       local_config.Server_local_config.consume_streaming_errors
       && (not args.output_json)
@@ -1085,10 +1129,10 @@ let main_internal
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS options ->
-    let%lwt (seeds, telemetry) =
+    let%lwt (result, telemetry) =
       rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
     in
-    output_isolation_result seeds ~output_json:args.output_json;
+    output_isolation_result result ~output_json:args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_VALIDATE_ISOLATION list_file ->
     (* Read here rather than on the server: the list file is a path on the

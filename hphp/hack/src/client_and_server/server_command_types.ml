@@ -632,7 +632,9 @@ type _ t =
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
-  | FIND_ISOLATABLE_CLUSTERS : Server_isolation_types.options -> string list t
+  | FIND_ISOLATABLE_CLUSTERS :
+      Server_isolation_types.options
+      -> Server_isolation_types.result t
   | VALIDATE_ISOLATION : string list -> Isolation_validation.result t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t

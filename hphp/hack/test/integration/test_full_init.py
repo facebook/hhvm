@@ -149,16 +149,18 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None, options=["--find-isolatable-clusters"]
         )
         lines = output.splitlines()
-
-        self.assertEqual(1, len(lines))
-        header_match = re.fullmatch(
-            r"Found (\d+) seed files \(zero inbound references\)\.", lines[0]
-        )
+        self.assertEqual(2, len(lines))
+        header_match = re.fullmatch(r"Started from (\d+) files\.", lines[0])
         if header_match is None:
             self.fail(f"Unexpected command header: {lines[0]}")
-
         seed_count = int(header_match.group(1))
         self.assertGreater(seed_count, 0)
+        # No mode fills the answer in yet, so the run finds nothing around its
+        # seeds and must say so rather than claiming anything was grown.
+        self.assertEqual(
+            "Found 0 isolatable without growing, covering 0 files (largest: 0).",
+            lines[1],
+        )
 
         json_output, _ = self.test_driver.check_cmd(
             expected_output=None,
@@ -170,30 +172,11 @@ class TestFreshInit(common_tests.CommonTests):
             json_result = json.loads(json_output)
         except json.JSONDecodeError as exn:
             self.fail(f"Expected a lone JSON document, got {json_output!r} ({exn})")
-        seed_paths = json_result["seed_files"]
-        # Within one payload: the summary must describe the list it summarises.
-        self.assertEqual(len(seed_paths), json_result["summary"]["total_seed_files"])
-        # Across the two invocations: nothing changed between them, so the
-        # count-only output must agree with the JSON.
-        self.assertEqual(seed_count, len(seed_paths))
-        # ServerIsolation.go returns paths sorted by Relative_path.compare and
-        # deduplicated (see serverIsolation.mli); assert that contract.
-        self.assertEqual(sorted(seed_paths), seed_paths)
-        self.assertEqual(len(seed_paths), len(set(seed_paths)))
-        seed_basenames = {os.path.basename(path) for path in seed_paths}
-        # All eight fixture files are accounted for: these four are seeds and
-        # the other four are not, so misclassifying any of them fails here. The
-        # comparison is restricted to fixture files because the template repo
-        # contributes seeds of its own that this test does not control.
-        self.assertEqual(
-            {
-                "isolation_seed.php",
-                "isolation_function_caller.php",
-                "isolation_static_caller.php",
-                "isolation_inherited_caller.php",
-            },
-            seed_basenames & set(files),
-        )
+        summary = json_result["summary"]
+        self.assertEqual(seed_count, summary["total_seeds"])
+        self.assertEqual([], json_result["clusters"])
+        self.assertEqual(0, summary["total_clusters"])
+        self.assertFalse(summary["grown"])
 
         # Check that the count *responds* to a dependency edge. Give
         # isolation_seed.php an external referrer by editing a file that already
@@ -217,10 +200,7 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None, options=["--find-isolatable-clusters"]
         )
         lines = output.splitlines()
-        self.assertEqual(1, len(lines))
-        header_match = re.fullmatch(
-            r"Found (\d+) seed files \(zero inbound references\)\.", lines[0]
-        )
+        header_match = re.fullmatch(r"Started from (\d+) files\.", lines[0])
         if header_match is None:
             self.fail(f"Unexpected command header: {lines[0]}")
 

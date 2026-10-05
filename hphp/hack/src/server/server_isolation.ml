@@ -172,24 +172,75 @@ module Seeds = struct
         available
 end
 
-let go
-    (options : Server_isolation_types.options)
-    (_genv : Server_env.genv)
-    (env : Server_env.env) : Relative_path.t list =
+(** What a query threads through: the providers it reads and the tally a mode
+    keeps as it goes. A mode is what fills the answer in; until one exists a
+    run reports its seeds and nothing more. *)
+type run = {
+  ctx: Provider_context.t;
+  deps_mode: Typing_deps_mode.t;
+  naming_table: Naming_table.t;
+  truncated_clusters: int ref;
+      (** Sets a mode stopped short of closing, so they are prefixes of
+          packages rather than packages. Counted so a run says how much of its
+          output is in that state. *)
+}
+
+let make_run _options _genv env =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  {
+    ctx;
+    deps_mode = Provider_context.get_deps_mode ctx;
+    naming_table = env.Server_env.naming_table;
+    truncated_clusters = ref 0;
+  }
+
+(** Each mode reports the sizes of the sets it found, and differs in nothing
+    else the caller sees, so the result is assembled here rather than at the
+    end of each branch. *)
+let result r ~grown ~total_seeds ~sizes ~clusters =
+  Server_isolation_types.
+    {
+      clusters;
+      grown;
+      total_seeds;
+      total_isolatable_files = List.fold sizes ~init:0 ~f:( + );
+      total_clusters = List.length sizes;
+      total_truncated = !(r.truncated_clusters);
+      largest_cluster = List.fold sizes ~init:0 ~f:Int.max;
+    }
+
+(** Choose the seeds, then say what was found around them. *)
+let query r options =
   let Server_isolation_types.
         { seed_framework; seed_list; max_seeds; seed_offset; _ } =
     options
   in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  let naming_table = env.Server_env.naming_table in
+  let t_start = Unix.gettimeofday () in
   let all_seeds =
-    Seeds.select ctx deps_mode naming_table ~seed_framework ~seed_list
+    Seeds.select r.ctx r.deps_mode r.naming_table ~seed_framework ~seed_list
   in
+  let (_ : float) = Hh_logger.log_duration "[isolation] seed scan" t_start in
   let seeds = Seeds.window all_seeds ~seed_offset ~max_seeds in
+  let total_seeds = List.length seeds in
   Seeds.log_window
-    ~total_seeds:(List.length seeds)
+    ~total_seeds
     ~seed_offset
     ~max_seeds
     ~available:(List.length all_seeds);
-  seeds
+  result r ~grown:false ~total_seeds ~sizes:[] ~clusters:[]
+
+let go
+    (options : Server_isolation_types.options)
+    (genv : Server_env.genv)
+    (env : Server_env.env) : Server_isolation_types.result =
+  (* Non-evictable shared heaps that outlive the query: cleared on the way in
+     so a run cannot reuse results from before an edit, and on the way out so
+     it leaves nothing resident. *)
+  let reset_caches () =
+    Server_isolation_outbound.reset ();
+    Server_isolation_inbound.reset ()
+  in
+  Utils.try_finally ~finally:reset_caches ~f:(fun () ->
+      let r = make_run options genv env in
+      reset_caches ();
+      query r options)

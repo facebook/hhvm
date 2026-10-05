@@ -478,10 +478,8 @@ let handle :
     let files = Server_file_dependents.go genv env filenames in
     (env, files)
   | Server_command_types.FIND_ISOLATABLE_CLUSTERS options ->
-    let seeds =
-      Server_isolation.go options genv env |> List.map ~f:Relative_path.suffix
-    in
-    (env, seeds)
+    let result = Server_isolation.go options genv env in
+    (env, result)
   | Server_command_types.VALIDATE_ISOLATION filenames ->
     let files =
       List.map filenames ~f:(fun suffix -> Relative_path.from_root ~suffix)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<45fe3096570df9c415e06d1827542ec3>>
+// @generated SignedSource<<95705b232b75357da2c40de0ebc42405>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -42,6 +42,7 @@ pub type FunctionPtrId = aast_defs::FunctionPtrId<Ex, En>;
 pub type ExpressionTree = aast_defs::ExpressionTree<Ex, En>;
 pub type As_ = aast_defs::As_<Ex, En>;
 pub type EtSplice = aast_defs::EtSplice<Ex, En>;
+pub type ShapeExprField = aast_defs::ShapeExprField<Ex, En>;
 pub type Expr_ = aast_defs::Expr_<Ex, En>;
 pub type Binop = aast_defs::Binop<Ex, En>;
 pub type Case = aast_defs::Case<Ex, En>;

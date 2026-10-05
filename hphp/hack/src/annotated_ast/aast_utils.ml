@@ -73,11 +73,13 @@ let rec can_be_captured = function
     can_be_captured exp
 
 let find_shape_field name fields =
-  List.find
-    ~f:(fun (field_name, _e) ->
-      match field_name with
-      | SFlit_str (_, n) -> String.equal name n
-      | _ -> false)
+  List.find_map
+    ~f:(function
+      | SF_field (field_name, e) ->
+        (match field_name with
+        | SFlit_str (_, n) when String.equal name n -> Some (field_name, e)
+        | _ -> None)
+      | SF_splat _ -> None)
     fields
 
 let get_return_from_fun e =
@@ -195,7 +197,10 @@ let rec is_const_expr (_, _, expr_) =
   | String2 exprs
   | Tuple exprs ->
     List.for_all exprs ~f:is_const_expr
-  | Shape shapes -> List.for_all ~f:(fun (_, e) -> is_const_expr e) shapes
+  | Shape shapes ->
+    List.for_all shapes ~f:(function
+        | SF_field (_, e) -> is_const_expr e
+        | SF_splat e -> is_const_expr e)
   | KeyValCollection (_, _, exprs) ->
     List.for_all ~f:(fun (e1, e2) -> is_const_expr e1 && is_const_expr e2) exprs
   | Invalid e -> Option.fold ~none:true ~some:is_const_expr e

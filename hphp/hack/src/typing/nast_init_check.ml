@@ -658,7 +658,10 @@ and expr_ env acc p e =
     List.fold_left
       ~f:
         begin
-          (fun acc (_, v) -> expr acc v)
+          fun acc field ->
+            match field with
+            | SF_field (_, v) -> expr acc v
+            | SF_splat v -> expr acc v
         end
       ~init:acc
       fdm

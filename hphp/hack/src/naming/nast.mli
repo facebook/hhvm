@@ -365,7 +365,7 @@ module Visitor_DEPRECATED : sig
 
       method on_return : 'a -> expr option -> 'a
 
-      method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
+      method on_shape : 'a -> (unit, unit) Aast.shape_expr_field list -> 'a
 
       method on_stmt : 'a -> stmt -> 'a
 

@@ -178,12 +178,21 @@ let visitor ~(cursor : Pos.t) =
                    Pos.merge (pos_of_expr e1) (pos_of_expr e2))
             |> find_in_positions
           | Aast_defs.Shape fields ->
-            fields
-            |> List.map ~f:(fun (field_name, expr) ->
-                   Pos.merge
-                     (pos_of_shape_field_name field_name)
-                     (pos_of_expr expr))
-            |> find_in_positions
+            if
+              List.exists fields ~f:(function
+                  | Aast_defs.SF_splat _ -> true
+                  | Aast_defs.SF_field _ -> false)
+            then
+              None
+            else
+              List.filter_map fields ~f:(function
+                  | Aast_defs.SF_field (field_name, expr) ->
+                    Some
+                      (Pos.merge
+                         (pos_of_shape_field_name field_name)
+                         (pos_of_expr expr))
+                  | Aast_defs.SF_splat _ -> None)
+              |> find_in_positions
           | _ -> None)
   end
 

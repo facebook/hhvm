@@ -56,24 +56,30 @@
                                                      [(Anormal
                                                          ((), [4:14-32],
                                                           (Shape
-                                                             [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__"))));
-                                                               ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))); (
-                                                               (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4")));
-                                                               ((SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13")));
-                                                               ((SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
+                                                             [(SF_field ((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__")))));
+                                                               (SF_field ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))));
+                                                               (SF_field ((SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))));
+                                                               (SF_field ((SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))));
+                                                               (SF_field ((SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31"))))])));
                                                        (Anormal
                                                           ((), [4:3-13],
                                                            (Shape
-                                                              [((SFlit_str ([4:3-13], "splices")),
-                                                                ((), [4:3-13],
-                                                                 (KeyValCollection (([4:3-13], Dict), None, [(((), [4:25-31], (String "$0splice0")), ((), [4:25-31], (Lvar ([4:25-31], $0splice0))))]))));
-                                                                ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
-                                                                ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
-                                                                ((SFlit_str ([4:3-13], "variables")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
-                                                                ((SFlit_str ([4:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
-                                                                ((SFlit_str ([4:3-13], "type")),
-                                                                 ((), [4:14-32],
-                                                                  (Efun
+                                                              [(SF_field ((
+                                                                  SFlit_str ([4:3-13], "splices")),
+                                                                  ((), [4:3-13],
+                                                                   (KeyValCollection ((
+                                                                    [4:3-13], Dict), None, 
+                                                                    [(((), [4:25-31], (String "$0splice0")), ((), [4:25-31], (Lvar ([4:25-31], $0splice0))))])))
+                                                                  ));
+                                                                (SF_field ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [])))));
+                                                                (SF_field ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [])))));
+                                                                (SF_field ((SFlit_str ([4:3-13], "variables")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [])))));
+                                                                (SF_field ((SFlit_str ([4:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null)));
+                                                                (SF_field ((
+                                                                   SFlit_str ([4:3-13], "type")),
+                                                                   ((), [4:14-32],
+                                                                    (
+                                                                    Efun
                                                                     { ef_fun =
                                                                     { f_span = [4:14-32]; 
                                                                     f_readonly_this = None; 
@@ -150,7 +156,8 @@
                                                                     f_doc_comment = None }; 
                                                                     ef_use = [((), ([4:3-13], $0splice0))]; 
                                                                     ef_closure_class_name = None; 
-                                                                    ef_is_expr_tree_virtual_expr = false })))
+                                                                    ef_is_expr_tree_virtual_expr = false }))
+                                                                   ))
                                                                 ])));
                                                        (Anormal
                                                           ((), [4:14-32],
@@ -193,11 +200,11 @@
                                                                     [(Anormal
                                                                     ((), [4:14-32],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4")));
-                                                                    ((SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4")));
-                                                                    ((SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13")));
-                                                                    ((SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
+                                                                    [(SF_field ((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__")))));
+                                                                    (SF_field ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))));
+                                                                    (SF_field ((SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31"))))])));
                                                                     (Anormal
                                                                     ((), [4:14-20],
                                                                     (Call
@@ -209,11 +216,11 @@
                                                                     [(Anormal
                                                                     ((), [4:14-20],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:14-20], "path")), ((), [4:14-20], (Id ([4:14-20], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:14-20], "start_line")), ((), [4:14-20], (Int "4")));
-                                                                    ((SFlit_str ([4:14-20], "end_line")), ((), [4:14-20], (Int "4")));
-                                                                    ((SFlit_str ([4:14-20], "start_column")), ((), [4:14-20], (Int "13")));
-                                                                    ((SFlit_str ([4:14-20], "end_column")), ((), [4:14-20], (Int "19")))])));
+                                                                    [(SF_field ((SFlit_str ([4:14-20], "path")), ((), [4:14-20], (Id ([4:14-20], "\\__FILE__")))));
+                                                                    (SF_field ((SFlit_str ([4:14-20], "start_line")), ((), [4:14-20], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-20], "end_line")), ((), [4:14-20], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-20], "start_column")), ((), [4:14-20], (Int "13"))));
+                                                                    (SF_field ((SFlit_str ([4:14-20], "end_column")), ((), [4:14-20], (Int "19"))))])));
                                                                     (Anormal
                                                                     ((), [4:14-15],
                                                                     (Call
@@ -225,11 +232,11 @@
                                                                     [(Anormal
                                                                     ((), [4:14-15],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:14-15], "path")), ((), [4:14-15], (Id ([4:14-15], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:14-15], "start_line")), ((), [4:14-15], (Int "4")));
-                                                                    ((SFlit_str ([4:14-15], "end_line")), ((), [4:14-15], (Int "4")));
-                                                                    ((SFlit_str ([4:14-15], "start_column")), ((), [4:14-15], (Int "13")));
-                                                                    ((SFlit_str ([4:14-15], "end_column")), ((), [4:14-15], (Int "14")))]))); (
+                                                                    [(SF_field ((SFlit_str ([4:14-15], "path")), ((), [4:14-15], (Id ([4:14-15], "\\__FILE__")))));
+                                                                    (SF_field ((SFlit_str ([4:14-15], "start_line")), ((), [4:14-15], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-15], "end_line")), ((), [4:14-15], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:14-15], "start_column")), ((), [4:14-15], (Int "13"))));
+                                                                    (SF_field ((SFlit_str ([4:14-15], "end_column")), ((), [4:14-15], (Int "14"))))]))); (
                                                                     Anormal ((), [4:14-15], (Int "4")))]; 
                                                                     unpacked_arg = None }))); (
                                                                     Anormal ((), [4:14-20], (String "__plus")));
@@ -244,11 +251,11 @@
                                                                     [(Anormal
                                                                     ((), [4:18-20],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:18-20], "path")), ((), [4:18-20], (Id ([4:18-20], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:18-20], "start_line")), ((), [4:18-20], (Int "4")));
-                                                                    ((SFlit_str ([4:18-20], "end_line")), ((), [4:18-20], (Int "4")));
-                                                                    ((SFlit_str ([4:18-20], "start_column")), ((), [4:18-20], (Int "17")));
-                                                                    ((SFlit_str ([4:18-20], "end_column")), ((), [4:18-20], (Int "19")))]))); (
+                                                                    [(SF_field ((SFlit_str ([4:18-20], "path")), ((), [4:18-20], (Id ([4:18-20], "\\__FILE__")))));
+                                                                    (SF_field ((SFlit_str ([4:18-20], "start_line")), ((), [4:18-20], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:18-20], "end_line")), ((), [4:18-20], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:18-20], "start_column")), ((), [4:18-20], (Int "17"))));
+                                                                    (SF_field ((SFlit_str ([4:18-20], "end_column")), ((), [4:18-20], (Int "19"))))]))); (
                                                                     Anormal ((), [4:18-20], (Int "10")))]; 
                                                                     unpacked_arg = None })))]; 
                                                                     unpacked_arg = None }))); (
@@ -264,12 +271,12 @@
                                                                     [(Anormal
                                                                     ((), [4:23-32],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:23-32], "path")), ((), [4:23-32], (Id ([4:23-32], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:23-32], "start_line")), ((), [4:23-32], (Int "4")));
-                                                                    ((SFlit_str ([4:23-32], "end_line")), ((), [4:23-32], (Int "4")));
-                                                                    ((SFlit_str ([4:23-32], "start_column")), ((), [4:23-32], (Int "22")));
-                                                                    ((SFlit_str ([4:23-32], "end_column")), ((), [4:23-32], (Int "31")))]))); (
-                                                                    Anormal ((), [4:25-31], (String "$0splice0"))); (
+                                                                    [(SF_field ((SFlit_str ([4:23-32], "path")), ((), [4:23-32], (Id ([4:23-32], "\\__FILE__")))));
+                                                                    (SF_field ((SFlit_str ([4:23-32], "start_line")), ((), [4:23-32], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:23-32], "end_line")), ((), [4:23-32], (Int "4"))));
+                                                                    (SF_field ((SFlit_str ([4:23-32], "start_column")), ((), [4:23-32], (Int "22"))));
+                                                                    (SF_field ((SFlit_str ([4:23-32], "end_column")), ((), [4:23-32], (Int "31"))))])));
+                                                                    (Anormal ((), [4:25-31], (String "$0splice0"))); (
                                                                     Anormal ((), [4:25-31], (Lvar ([4:25-31], $0splice0))))]; 
                                                                     unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })))))]

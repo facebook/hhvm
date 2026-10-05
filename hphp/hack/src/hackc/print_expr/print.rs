@@ -385,7 +385,45 @@ fn print_expr(
                 ),
             }
         }
-        Expr_::Shape(fl) => print_expr_darray(ctx, w, env, print_shape_field_name, fl),
+        Expr_::Shape(fl) => {
+            if fl
+                .iter()
+                .any(|f| matches!(f, ast::ShapeExprField::SFSplat(_)))
+            {
+                // A shape with splats has no darray form (there is no key slot
+                // for a `...operand` element), so render it faithfully in
+                // `shape(...)` syntax rather than dropping the splats.
+                w.write_all(b"shape(")?;
+                for (i, f) in fl.iter().enumerate() {
+                    if i > 0 {
+                        w.write_all(b", ")?;
+                    }
+                    match f {
+                        ast::ShapeExprField::SFField(name, expr) => {
+                            print_shape_field_name(ctx, w, env, name)?;
+                            w.write_all(b" => ")?;
+                            print_expr(ctx, w, env, expr)?;
+                        }
+                        ast::ShapeExprField::SFSplat(expr) => {
+                            w.write_all(b"...")?;
+                            print_expr(ctx, w, env, expr)?;
+                        }
+                    }
+                }
+                w.write_all(b")")
+            } else {
+                let fields: Vec<_> = fl
+                    .iter()
+                    .filter_map(|f| match f {
+                        ast::ShapeExprField::SFField(name, expr) => {
+                            Some((name.clone(), expr.clone()))
+                        }
+                        ast::ShapeExprField::SFSplat(_) => None,
+                    })
+                    .collect();
+                print_expr_darray(ctx, w, env, print_shape_field_name, &fields)
+            }
+        }
         Expr_::Binop(x) => {
             let ast::Binop { bop, lhs, rhs } = &**x;
             print_expr(ctx, w, env, lhs)?;
@@ -838,10 +876,17 @@ fn print_xml(
             _ => return Err(syntax_error().into()),
         }
     };
+    let attrs: Vec<_> = attrs
+        .iter()
+        .filter_map(|f| match f {
+            ast::ShapeExprField::SFField(name, expr) => Some((name.clone(), expr.clone())),
+            ast::ShapeExprField::SFSplat(_) => None,
+        })
+        .collect();
     write!(w, "new {}", mangle(id.into()))?;
     write::paren(w, |w| {
         write::wrap_by_(w, "darray[", "]", |w| {
-            write::concat_by(w, ", ", attrs, |w, attr| print_xhp_attr(ctx, w, env, attr))
+            write::concat_by(w, ", ", &attrs, |w, attr| print_xhp_attr(ctx, w, env, attr))
         })?;
         w.write_all(b", ")?;
         print_expr_varray(ctx, w, env, children)?;

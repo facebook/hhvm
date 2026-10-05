@@ -20,6 +20,7 @@ use nast::LocalId;
 use nast::LoopCond;
 use nast::LoopIter;
 use nast::Pos;
+use nast::ShapeExprField;
 use nast::Stmt;
 use nast::Stmt_;
 use nast::XhpAttribute;
@@ -185,7 +186,10 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             .fold(NoAwait, combine_con),
         Expr_::Shape(fields) => fields
             .iter()
-            .map(|(_, expr)| check_await_usage(expr))
+            .map(|f| match f {
+                ShapeExprField::SFField(_, expr) => check_await_usage(expr),
+                ShapeExprField::SFSplat(expr) => check_await_usage(expr),
+            })
             .fold(NoAwait, combine_con),
         Expr_::Call(box nast::CallExpr {
             func,
@@ -426,8 +430,15 @@ fn extract_subexprs(expr: &mut nast::Expr) -> Vec<&mut nast::Expr> {
 
         Expr_::Shape(fields) => {
             let mut subexp = vec![];
-            for (_, expr) in fields.iter_mut() {
-                subexp.append(&mut extract_subexprs(expr));
+            for f in fields.iter_mut() {
+                match f {
+                    ShapeExprField::SFField(_, expr) => {
+                        subexp.append(&mut extract_subexprs(expr));
+                    }
+                    ShapeExprField::SFSplat(expr) => {
+                        subexp.append(&mut extract_subexprs(expr));
+                    }
+                }
             }
             subexp
         }
@@ -527,8 +538,15 @@ impl LiftAwait {
             }
 
             Expr_::Shape(fields) => {
-                for (_, expr) in fields.iter_mut() {
-                    self.extract_lval_keys(expr, seq, tmps);
+                for f in fields.iter_mut() {
+                    match f {
+                        ShapeExprField::SFField(_, expr) => {
+                            self.extract_lval_keys(expr, seq, tmps);
+                        }
+                        ShapeExprField::SFSplat(expr) => {
+                            self.extract_lval_keys(expr, seq, tmps);
+                        }
+                    }
                 }
             }
 
@@ -1085,8 +1103,11 @@ impl LiftAwait {
             }
             Expr_::Shape(fields) => {
                 let mut exprs = vec![];
-                for (_, expr) in fields.iter_mut() {
-                    exprs.push(expr)
+                for f in fields.iter_mut() {
+                    match f {
+                        ShapeExprField::SFField(_, expr) => exprs.push(expr),
+                        ShapeExprField::SFSplat(expr) => exprs.push(expr),
+                    }
                 }
                 self.concurrentise(pos, exprs, con, seq, tmps)
             }

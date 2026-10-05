@@ -5,6 +5,7 @@
 
 use nast::Class_;
 use nast::Expr_;
+use nast::ShapeExprField;
 use nast::ShapeFieldInfo;
 use nast::ShapeFieldName;
 
@@ -29,9 +30,12 @@ impl Pass for ElabShapeFieldNamePass {
 
     fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
-            Expr_::Shape(fields) => fields
-                .iter_mut()
-                .for_each(|(nm, _)| canonical_shape_name(env, nm, self.current_class.as_deref())),
+            Expr_::Shape(fields) => fields.iter_mut().for_each(|f| match f {
+                ShapeExprField::SFField(nm, _) => {
+                    canonical_shape_name(env, nm, self.current_class.as_deref())
+                }
+                ShapeExprField::SFSplat(_) => {}
+            }),
             _ => (),
         }
         Continue(())
@@ -89,7 +93,7 @@ mod tests {
         let mut pass = ElabShapeFieldNamePass {
             current_class: Some(Rc::new(class_name.to_string())),
         };
-        let mut elem = Expr_::Shape(vec![(
+        let mut elem = Expr_::Shape(vec![ShapeExprField::SFField(
             ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),
@@ -104,7 +108,9 @@ mod tests {
         assert!(if let Expr_::Shape(mut fields) = elem {
             let field_opt = fields.pop();
             match field_opt {
-                Some((ShapeFieldName::SFclassConst(id, _), _)) => id.name() == class_name,
+                Some(ShapeExprField::SFField(ShapeFieldName::SFclassConst(id, _), _)) => {
+                    id.name() == class_name
+                }
                 _ => false,
             }
         } else {
@@ -146,7 +152,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabShapeFieldNamePass::default();
-        let mut elem = Expr_::Shape(vec![(
+        let mut elem = Expr_::Shape(vec![ShapeExprField::SFField(
             ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),
@@ -164,7 +170,9 @@ mod tests {
         assert!(if let Expr_::Shape(mut fields) = elem {
             let field_opt = fields.pop();
             match field_opt {
-                Some((ShapeFieldName::SFclassConst(id, _), _)) => id.name() == sn::classes::UNKNOWN,
+                Some(ShapeExprField::SFField(ShapeFieldName::SFclassConst(id, _), _)) => {
+                    id.name() == sn::classes::UNKNOWN
+                }
                 _ => false,
             }
         } else {

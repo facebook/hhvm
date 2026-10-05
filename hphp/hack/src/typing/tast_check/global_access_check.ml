@@ -698,7 +698,14 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
         else
           DataSourceSet.singleton Unknown
       | _ -> DataSourceSet.singleton Unknown))
-  | Shape tpl -> get_data_srcs_of_pair_expr_list tpl
+  | Shape tpl ->
+    let exprs =
+      List.map tpl ~f:(function
+          | Aast.SF_field (_, e)
+          | Aast.SF_splat e
+          -> e)
+    in
+    get_data_srcs_of_expr_list exprs
   | ValCollection (_, _, el) -> get_data_srcs_of_expr_list el
   | KeyValCollection (_, _, fl) -> get_data_srcs_of_pair_expr_list fl
   | Null -> DataSourceSet.singleton NullOrEmpty

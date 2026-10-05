@@ -346,9 +346,10 @@ mod inout_locals {
             ast::Expr_::List(exprs) | ast::Expr_::Tuple(exprs) => {
                 exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr))
             }
-            ast::Expr_::Shape(exprs) => exprs
-                .iter()
-                .for_each(|(_field_name, expr)| collect_lvars_hs(ctx, expr)),
+            ast::Expr_::Shape(exprs) => exprs.iter().for_each(|f| match f {
+                ast::ShapeExprField::SFField(_field_name, expr) => collect_lvars_hs(ctx, expr),
+                ast::ShapeExprField::SFSplat(expr) => collect_lvars_hs(ctx, expr),
+            }),
             _ => {}
         }
     }
@@ -1182,13 +1183,21 @@ fn emit_shape<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
-    fl: &[(ast_defs::ShapeFieldName, ast::Expr)],
+    fl: &[ast::ShapeExprField],
 ) -> Result<InstrSeq> {
     let pos = &expr.1;
     // TODO(hrust): avoid clone
     let fl = fl
         .iter()
-        .map(|(f, e)| {
+        .map(|field| {
+            let (f, e) = match field {
+                ast::ShapeExprField::SFField(f, e) => (f, e),
+                ast::ShapeExprField::SFSplat(_) => {
+                    return Err(Error::unrecoverable(
+                        "shape splats should be rejected during lowering",
+                    ));
+                }
+            };
             Ok(aast::Field(
                 ast::Expr(
                     (),
@@ -6187,7 +6196,10 @@ impl<'a> VecDictIndex<'a> {
                 .collect(),
             ast::Expr_::Shape(fields) => fields
                 .iter()
-                .map(|(sf, e)| (VecDictIndex::D(sf), e))
+                .filter_map(|f| match f {
+                    ast::ShapeExprField::SFField(sf, e) => Some((VecDictIndex::D(sf), e)),
+                    ast::ShapeExprField::SFSplat(_) => None,
+                })
                 .collect(),
             _ => vec![],
         }

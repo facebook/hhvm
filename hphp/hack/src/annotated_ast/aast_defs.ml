@@ -444,6 +444,10 @@ and ('ex, 'en) et_splice = {
   spliced_expr: ('ex, 'en) expr;
 }
 
+and ('ex, 'en) shape_expr_field =
+  | SF_field of (Ast_defs.shape_field_name[@transform.opaque]) * ('ex, 'en) expr
+  | SF_splat of ('ex, 'en) expr
+
 and ('ex, 'en) expr_ =
   | Null
       (** Null literal.
@@ -457,11 +461,11 @@ and ('ex, 'en) expr_ =
       (** Boolean literal.
        *
        *     false *)
-  | Shape of
-      ((Ast_defs.shape_field_name[@transform.opaque]) * ('ex, 'en) expr) list
+  | Shape of ('ex, 'en) shape_expr_field list
       (** Shape literal.
        *
-       *     shape('x' => 1, 'y' => 2)*)
+       *     shape('x' => 1, 'y' => 2)
+       *     shape(...$defaults, 'x' => 1)*)
   | ValCollection of
       ((pos * vc_kind)[@transform.opaque])
       * 'ex targ option

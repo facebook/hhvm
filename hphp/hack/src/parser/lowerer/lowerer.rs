@@ -2905,7 +2905,8 @@ fn p_shape_expr<'a>(
             );
         }
         Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
-            map_shape_expression_field(n, e, p_expr)
+            let (name, expr) = map_shape_expression_field(n, e, p_expr)?;
+            Ok(ast::ShapeExprField::SFField(name, expr))
         })?))
     }
 }

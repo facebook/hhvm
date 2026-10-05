@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<272c622e028963077f68542ad6ad76d5>>
+// @generated SignedSource<<738a96151179da1f94d6a823f426e42c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2179,6 +2179,28 @@ impl<P: Params> NodeMut<P> for ShapeElement {
         match self {
             ShapeElement::SEField(a0) => a0.accept(c, v),
             ShapeElement::SESplat(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for ShapeExprField<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_shape_expr_field(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ShapeExprField::SFField(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
+            ShapeExprField::SFSplat(a0) => a0.accept(c, v),
         }
     }
 }

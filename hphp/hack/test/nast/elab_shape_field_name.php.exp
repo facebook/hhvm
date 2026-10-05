@@ -17,7 +17,8 @@ Errors:
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([6:19-36], "self_inside_class"); m_tparams = []; m_where_constraints = []; 
          m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
-         m_body = { fb_ast = [([7:5-35], (Return (Some ((), [7:12-34], (Shape [((SFclass_const (([7:18-22], "\\WithConstantName"), ([7:24-28], "FLD1"))), ((), [7:32-33], (Int "1")))])))))] };
+         m_body =
+         { fb_ast = [([7:5-35], (Return (Some ((), [7:12-34], (Shape [(SF_field ((SFclass_const (([7:18-22], "\\WithConstantName"), ([7:24-28], "FLD1"))), ((), [7:32-33], (Int "1"))))])))))] };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
          m_ret =
          ((),

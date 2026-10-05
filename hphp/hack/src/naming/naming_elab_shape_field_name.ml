@@ -62,13 +62,16 @@ let on_expr_ on_error expr_ ~ctx =
     | Aast.Shape fdl ->
       let (fdl, err_opts) =
         List.unzip
-        @@ List.map fdl ~f:(fun (nm, v) ->
-               let (nm, err_opt) =
-                 match canonical_shape_name (Env.current_class ctx) nm with
-                 | Ok nm -> (nm, None)
-                 | Error (nm, err) -> (nm, Some err)
-               in
-               ((nm, v), err_opt))
+        @@ List.map fdl ~f:(fun field ->
+               match field with
+               | Aast.SF_field (nm, v) ->
+                 let (nm, err_opt) =
+                   match canonical_shape_name (Env.current_class ctx) nm with
+                   | Ok nm -> (nm, None)
+                   | Error (nm, err) -> (nm, Some err)
+                 in
+                 (Aast.SF_field (nm, v), err_opt)
+               | Aast.SF_splat _ -> (field, None))
       in
       let err =
         List.fold_right err_opts ~init:[] ~f:(fun err_opt acc ->

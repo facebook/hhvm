@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9587ec2b80a936fc13a59bf75457df75>>
+// @generated SignedSource<<b756363a05cfb7d7d6c1fab3db3600b7>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1046,6 +1046,62 @@ impl<Ex, En> FunctionPtrId<Ex, En> {
         }
     }
 }
+impl<Ex, En> ShapeExprField<Ex, En> {
+    pub fn mk_sffield(p0: ast_defs::ShapeFieldName, p1: Expr<Ex, En>) -> Self {
+        ShapeExprField::SFField(p0, p1)
+    }
+    pub fn mk_sfsplat(p0: Expr<Ex, En>) -> Self {
+        ShapeExprField::SFSplat(p0)
+    }
+    pub fn is_sffield(&self) -> bool {
+        match self {
+            ShapeExprField::SFField(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_sfsplat(&self) -> bool {
+        match self {
+            ShapeExprField::SFSplat(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_sffield(&self) -> Option<(&ast_defs::ShapeFieldName, &Expr<Ex, En>)> {
+        match self {
+            ShapeExprField::SFField(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_sfsplat(&self) -> Option<&Expr<Ex, En>> {
+        match self {
+            ShapeExprField::SFSplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sffield_mut(&mut self) -> Option<(&mut ast_defs::ShapeFieldName, &mut Expr<Ex, En>)> {
+        match self {
+            ShapeExprField::SFField(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_sfsplat_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
+        match self {
+            ShapeExprField::SFSplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sffield_into(self) -> Option<(ast_defs::ShapeFieldName, Expr<Ex, En>)> {
+        match self {
+            ShapeExprField::SFField(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_sfsplat_into(self) -> Option<Expr<Ex, En>> {
+        match self {
+            ShapeExprField::SFSplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
 impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_null() -> Self {
         Expr_::Null
@@ -1056,7 +1112,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_false() -> Self {
         Expr_::False
     }
-    pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>) -> Self {
+    pub fn mk_shape(p0: Vec<ShapeExprField<Ex, En>>) -> Self {
         Expr_::Shape(p0)
     }
     pub fn mk_val_collection(
@@ -1578,7 +1634,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
-    pub fn as_shape(&self) -> Option<&Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
+    pub fn as_shape(&self) -> Option<&Vec<ShapeExprField<Ex, En>>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,
@@ -1919,7 +1975,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_shape_mut(&mut self) -> Option<&mut Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
+    pub fn as_shape_mut(&mut self) -> Option<&mut Vec<ShapeExprField<Ex, En>>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,
@@ -2299,7 +2355,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_shape_into(self) -> Option<Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
+    pub fn as_shape_into(self) -> Option<Vec<ShapeExprField<Ex, En>>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,

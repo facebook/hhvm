@@ -1377,21 +1377,23 @@ let autocomplete_shape_literal_in_call
       match arg with
       | (_, pos, Aast.Shape kvs) ->
         (* We're passing a shape literal as this function argument. *)
-        List.iter kvs ~f:(fun (name, _val) ->
-            match shape_field_autocomplete_prefix name with
-            | Some prefix ->
-              (* This shape key is being autocompleted. *)
-              let (_, ty_) = Typing_defs_core.deref expected_ty.fp_type in
-              (match ty_ with
-              | Tshape (Shape_simple { s_fields = fields; _ }) ->
-                (* This parameter is known to be a concrete shape type. *)
-                let keys = shape_string_keys fields in
-                let matching_keys =
-                  List.filter keys ~f:(String.is_prefix ~prefix)
-                in
-                List.iter matching_keys ~f:(add_shape_key_result pos)
+        List.iter kvs ~f:(function
+            | Aast.SF_field (name, _val) ->
+              (match shape_field_autocomplete_prefix name with
+              | Some prefix ->
+                (* This shape key is being autocompleted. *)
+                let (_, ty_) = Typing_defs_core.deref expected_ty.fp_type in
+                (match ty_ with
+                | Tshape (Shape_simple { s_fields = fields; _ }) ->
+                  (* This parameter is known to be a concrete shape type. *)
+                  let keys = shape_string_keys fields in
+                  let matching_keys =
+                    List.filter keys ~f:(String.is_prefix ~prefix)
+                  in
+                  List.iter matching_keys ~f:(add_shape_key_result pos)
+                | _ -> ())
               | _ -> ())
-            | _ -> ())
+            | Aast.SF_splat _ -> ())
       | _ -> ())
     (zip_truncate args ft.ft_params)
 

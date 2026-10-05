@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9251aef23bf4136b839c6ab11544f3de>>
+// @generated SignedSource<<9f093ac34e40a024b72f272be00aaf7e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -926,6 +926,29 @@ pub struct EtSplice<Ex, En> {
 )]
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
+pub enum ShapeExprField<Ex, En> {
+    #[rust_to_ocaml(name = "SF_field")]
+    SFField(ast_defs::ShapeFieldName, Expr<Ex, En>),
+    #[rust_to_ocaml(name = "SF_splat")]
+    SFSplat(Expr<Ex, En>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
 pub enum Expr_<Ex, En> {
     /// Null literal.
     ///
@@ -942,7 +965,8 @@ pub enum Expr_<Ex, En> {
     /// Shape literal.
     ///
     ///     shape('x' => 1, 'y' => 2)
-    Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>),
+    ///     shape(...$defaults, 'x' => 1)
+    Shape(Vec<ShapeExprField<Ex, En>>),
     /// Collection literal for indexable structures.
     ///
     ///     Vector {1, 2}

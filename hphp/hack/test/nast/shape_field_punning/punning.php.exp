@@ -24,7 +24,10 @@
              (Expr
                 ((), [7:3-25],
                  (Assign (((), [7:3-5], (Lvar ([7:3-5], $s))), None,
-                    ((), [7:8-25], (Shape [((SFlit_str ([7:14-18], "foo")), ((), [7:14-18], (Lvar ([7:14-18], $foo)))); ((SFlit_str ([7:20-24], "bar")), ((), [7:20-24], (Lvar ([7:20-24], $bar))))]))
+                    ((), [7:8-25],
+                     (Shape
+                        [(SF_field ((SFlit_str ([7:14-18], "foo")), ((), [7:14-18], (Lvar ([7:14-18], $foo))))); (
+                          SF_field ((SFlit_str ([7:20-24], "bar")), ((), [7:20-24], (Lvar ([7:20-24], $bar)))))]))
                     )))))
             ]
           };
@@ -57,7 +60,10 @@
               (Expr
                  ((), [12:3-37],
                   (Assign (((), [12:3-5], (Lvar ([12:3-5], $s))), None,
-                     ((), [12:8-37], (Shape [((SFlit_str ([12:14-21], "field1")), ((), [12:14-21], (Lvar ([12:14-21], $field1)))); ((SFlit_str ([12:23-30], "other")), ((), [12:34-36], (Int "42")))]))
+                     ((), [12:8-37],
+                      (Shape
+                         [(SF_field ((SFlit_str ([12:14-21], "field1")), ((), [12:14-21], (Lvar ([12:14-21], $field1))))); (
+                           SF_field ((SFlit_str ([12:23-30], "other")), ((), [12:34-36], (Int "42"))))]))
                      )))))
              ]
            };
@@ -91,7 +97,9 @@
               (Expr
                  ((), [18:3-22],
                   (Assign (((), [18:3-5], (Lvar ([18:3-5], $s))), None,
-                     ((), [18:8-22], (Shape [((SFlit_str ([18:14-16], "x")), ((), [18:14-16], (Lvar ([18:14-16], $x)))); ((SFlit_str ([18:18-20], "y")), ((), [18:18-20], (Lvar ([18:18-20], $y))))]))
+                     ((), [18:8-22],
+                      (Shape
+                         [(SF_field ((SFlit_str ([18:14-16], "x")), ((), [18:14-16], (Lvar ([18:14-16], $x))))); (SF_field ((SFlit_str ([18:18-20], "y")), ((), [18:18-20], (Lvar ([18:18-20], $y)))))]))
                      )))))
              ]
            };
@@ -123,7 +131,8 @@
              ([23:3-27],
               (Expr
                  ((), [23:3-26],
-                  (Assign (((), [23:3-5], (Lvar ([23:3-5], $s))), None, ((), [23:8-26], (Shape [((SFlit_str ([23:14-25], "only_field")), ((), [23:14-25], (Lvar ([23:14-25], $only_field))))])))))))
+                  (Assign (((), [23:3-5], (Lvar ([23:3-5], $s))), None,
+                     ((), [23:8-26], (Shape [(SF_field ((SFlit_str ([23:14-25], "only_field")), ((), [23:14-25], (Lvar ([23:14-25], $only_field)))))])))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-27], "__SupportDynamicType"); ua_params = [] }]; 
@@ -160,10 +169,10 @@
                   (Assign (((), [31:3-5], (Lvar ([31:3-5], $s))), None,
                      ((), [31:8-67],
                       (Shape
-                         [((SFlit_str ([31:14-24], "int_field")), ((), [31:14-24], (Lvar ([31:14-24], $int_field))));
-                           ((SFlit_str ([31:26-39], "string_field")), ((), [31:26-39], (Lvar ([31:26-39], $string_field))));
-                           ((SFlit_str ([31:41-52], "bool_field")), ((), [31:41-52], (Lvar ([31:41-52], $bool_field))));
-                           ((SFlit_str ([31:54-66], "float_field")), ((), [31:54-66], (Lvar ([31:54-66], $float_field))))]))
+                         [(SF_field ((SFlit_str ([31:14-24], "int_field")), ((), [31:14-24], (Lvar ([31:14-24], $int_field)))));
+                           (SF_field ((SFlit_str ([31:26-39], "string_field")), ((), [31:26-39], (Lvar ([31:26-39], $string_field)))));
+                           (SF_field ((SFlit_str ([31:41-52], "bool_field")), ((), [31:41-52], (Lvar ([31:41-52], $bool_field)))));
+                           (SF_field ((SFlit_str ([31:54-66], "float_field")), ((), [31:54-66], (Lvar ([31:54-66], $float_field)))))]))
                      )))))
              ]
            };
@@ -197,7 +206,9 @@
                  ((), [36:3-39],
                   (Assign (((), [36:3-5], (Lvar ([36:3-5], $s))), None,
                      ((), [36:8-39],
-                      (Shape [((SFlit_str ([36:14-24], "explicit")), ((), [36:28-29], (Int "1"))); ((SFlit_str ([36:31-38], "punned")), ((), [36:31-38], (Lvar ([36:31-38], $punned))))]))
+                      (Shape
+                         [(SF_field ((SFlit_str ([36:14-24], "explicit")), ((), [36:28-29], (Int "1"))));
+                           (SF_field ((SFlit_str ([36:31-38], "punned")), ((), [36:31-38], (Lvar ([36:31-38], $punned)))))]))
                      )))))
              ]
            };
@@ -232,9 +243,9 @@
                   (Assign (((), [41:3-5], (Lvar ([41:3-5], $s))), None,
                      ((), [41:8-49],
                       (Shape
-                         [((SFlit_str ([41:14-21], "first")), ((), [41:25-26], (Int "1"))); (
-                           (SFlit_str ([41:28-35], "middle")), ((), [41:28-35], (Lvar ([41:28-35], $middle)))); (
-                           (SFlit_str ([41:37-43], "last")), ((), [41:47-48], (Int "3")))]))
+                         [(SF_field ((SFlit_str ([41:14-21], "first")), ((), [41:25-26], (Int "1")))); (
+                           SF_field ((SFlit_str ([41:28-35], "middle")), ((), [41:28-35], (Lvar ([41:28-35], $middle))))); (
+                           SF_field ((SFlit_str ([41:37-43], "last")), ((), [41:47-48], (Int "3"))))]))
                      )))))
              ]
            };

@@ -5,6 +5,7 @@
 
 use nast::Expr;
 use nast::Expr_;
+use nast::ShapeExprField;
 use nast::ShapeFieldName;
 
 use crate::prelude::*;
@@ -21,12 +22,14 @@ impl Pass for ValidateShapeNamePass {
     }
 }
 
-fn error_if_duplicate_names(flds: &[(ShapeFieldName, Expr)], env: &Env) {
+fn error_if_duplicate_names(flds: &[ShapeExprField], env: &Env) {
     let mut seen = hash::HashSet::<&ShapeFieldName>::default();
-    for (name, _) in flds {
-        if seen.contains(name) {
-            env.emit_error(NamingError::FieldNameAlreadyBound(name.get_pos().clone()));
+    for f in flds {
+        if let ShapeExprField::SFField(name, _) = f {
+            if seen.contains(name) {
+                env.emit_error(NamingError::FieldNameAlreadyBound(name.get_pos().clone()));
+            }
+            seen.insert(name);
         }
-        seen.insert(name);
     }
 }

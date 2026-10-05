@@ -27,6 +27,7 @@ use nast::Expr_;
 use nast::Lid;
 use nast::LocalId;
 use nast::Pos;
+use nast::ShapeExprField;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
@@ -67,9 +68,10 @@ impl Visitor {
             Expr_::List(lv) | Expr_::Tuple(lv) => {
                 lv.iter().for_each(|e| self.add_local_defs_from_lvalue(e))
             }
-            Expr_::Shape(lv) => lv
-                .iter()
-                .for_each(|(_, e)| self.add_local_defs_from_lvalue(e)),
+            Expr_::Shape(lv) => lv.iter().for_each(|f| match f {
+                ShapeExprField::SFField(_, e) => self.add_local_defs_from_lvalue(e),
+                ShapeExprField::SFSplat(_) => {}
+            }),
             Expr_::Lvar(box lid) => self.add_local_def(lid.clone()),
             _ => {}
         }

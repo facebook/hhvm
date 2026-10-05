@@ -22,6 +22,8 @@ use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
 use oxidized::ast::Hint_;
 use oxidized::ast::LocalId;
+use oxidized::ast::ShapeExprField;
+use oxidized::ast::ShapeFieldName;
 use oxidized::ast::Sid;
 use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
@@ -728,7 +730,7 @@ fn shape_literal(pos: &Pos, fields: Vec<(&str, Expr)>) -> Expr {
         .map(|(name, value)| {
             let bs = BString::from(name);
             let field_name = ShapeFieldName::SFlitStr((pos.clone(), bs));
-            (field_name, value)
+            ShapeExprField::SFField(field_name, value)
         })
         .collect();
     Expr::new((), pos.clone(), Expr_::Shape(shape_fields))
@@ -1746,30 +1748,45 @@ impl RewriteState {
             Shape(fields) => {
                 let mut virtual_shape_fields = vec![];
                 let mut desugar_shape_fields = vec![];
-                for (shape_key, shape_value) in fields {
-                    if let ShapeFieldName::SFlitStr((shape_key_pos, shape_key_name)) = &shape_key {
-                        let value_expr = self.rewrite_expr(shape_value, visitor_name);
-                        // we virtualize using the original Hack shape key expression...
-                        virtual_shape_fields.push((shape_key.clone(), value_expr.virtual_expr));
-                        desugar_shape_fields.push(Expr::new(
-                            (),
-                            shape_key_pos.clone(),
-                            Expr_::Tuple(vec![
-                                // ...however, we desuger the key into a string expression, to keep the key desugaring
-                                // generic and more akin to other collections.
-                                mk_visit_string(
-                                    shape_key_pos,
-                                    Expr_::String(shape_key_name.clone()),
-                                ),
-                                value_expr.desugar_expr,
-                            ]),
-                        ));
-                    } else {
-                        self.errors.push((
-                            pos.clone(),
-                            "Expression trees only support string literal shape field names."
-                                .into(),
-                        ));
+                for field in fields {
+                    match field {
+                        ShapeExprField::SFField(shape_key, shape_value) => {
+                            if let ShapeFieldName::SFlitStr((shape_key_pos, shape_key_name)) =
+                                &shape_key
+                            {
+                                let value_expr = self.rewrite_expr(shape_value, visitor_name);
+                                // we virtualize using the original Hack shape key expression...
+                                virtual_shape_fields.push(ShapeExprField::SFField(
+                                    shape_key.clone(),
+                                    value_expr.virtual_expr,
+                                ));
+                                desugar_shape_fields.push(Expr::new(
+                                    (),
+                                    shape_key_pos.clone(),
+                                    Expr_::Tuple(vec![
+                                        // ...however, we desuger the key into a string expression, to keep the key desugaring
+                                        // generic and more akin to other collections.
+                                        mk_visit_string(
+                                            shape_key_pos,
+                                            Expr_::String(shape_key_name.clone()),
+                                        ),
+                                        value_expr.desugar_expr,
+                                    ]),
+                                ));
+                            } else {
+                                self.errors.push((
+                                    pos.clone(),
+                                    "Expression trees only support string literal shape field names."
+                                        .into(),
+                                ));
+                            }
+                        }
+                        ShapeExprField::SFSplat(_) => {
+                            self.errors.push((
+                                pos.clone(),
+                                "Splat is not supported in expression tree shapes.".into(),
+                            ));
+                        }
                     }
                 }
                 let virtual_expr = static_meth_call(

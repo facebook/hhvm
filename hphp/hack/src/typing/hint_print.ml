@@ -317,11 +317,15 @@ let rec pp_expr ppf (_, _, expr_) = pp_expr_ ppf expr_
 
 and pp_expr_ ppf = function
   | Aast.Shape flds ->
+    let pp_shape_expr_field ppf = function
+      | Aast.SF_field (name, expr) ->
+        Fmt.(pair ~sep:fat_arrow pp_shape_field_name pp_expr) ppf (name, expr)
+      | Aast.SF_splat expr -> Fmt.(prefix (const string "...") pp_expr) ppf expr
+    in
     Fmt.(
       prefix (const string "shape")
       @@ parens
-      @@ list ~sep:comma
-      @@ pair ~sep:fat_arrow pp_shape_field_name pp_expr)
+      @@ list ~sep:comma pp_shape_expr_field)
       ppf
       flds
   | Aast.ValCollection ((_, kind), targ_opt, exprs) ->

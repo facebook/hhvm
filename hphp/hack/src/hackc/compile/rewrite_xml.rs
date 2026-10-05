@@ -64,13 +64,15 @@ fn rewrite_xml_(
                 match attr {
                     XhpAttribute::XhpSimple(xhp_simple) => {
                         let (pos, name) = xhp_simple.name;
-                        attrs.push((
+                        attrs.push(ast::ShapeExprField::SFField(
                             ShapeFieldName::SFlitStr((pos, name.into())),
                             xhp_simple.expr,
                         ));
                     }
                     XhpAttribute::XhpSpread(expr) => {
-                        attrs.push((
+                        // XHP spread is encoded as a synthetic literal key
+                        // '...$N', not a real shape splat element.
+                        attrs.push(ast::ShapeExprField::SFField(
                             ShapeFieldName::SFlitStr((
                                 expr.1.clone(),
                                 format!("...${}", spread_id).into(),

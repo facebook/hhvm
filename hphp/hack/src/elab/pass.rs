@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<916388fea3b5865e5dde6df82a30bd60>>
+// @generated SignedSource<<e3de1e3013c8a2ae33e9f595db3318f8>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -396,6 +396,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut EtSplice<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_expr_field_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeExprField<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_expr_field_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeExprField<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -2100,6 +2116,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_et_splice_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_expr_field_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeExprField<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_shape_expr_field_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_expr_field_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeExprField<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_shape_expr_field_bottom_up(env, elem)?;
         }
         Continue(())
     }

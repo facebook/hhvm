@@ -4876,6 +4876,11 @@ end = struct
         in
         (env, (k, et, ty))
       in
+      let fields =
+        List.filter_map fdm ~f:(function
+            | SF_field (k, e) -> Some (k, e)
+            | SF_splat _ -> None)
+      in
       let (env, tfdm) =
         match
           Env_help.expand_expected_opt
@@ -4900,8 +4905,8 @@ end = struct
               | None -> expr_helper env ke
               | Some sft ->
                 expr_helper ~expected:(ExpectedTy.make pos ur sft.sft_ty) env ke)
-            fdm
-        | _ -> List.map_env env ~f:expr_helper fdm
+            fields
+        | _ -> List.map_env env ~f:expr_helper fields
       in
       let fdm =
         List.fold_left
@@ -4920,7 +4925,7 @@ end = struct
       make_result
         env
         p
-        (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
+        (Aast.Shape (List.map ~f:(fun (k, te, _) -> Aast.SF_field (k, te)) tfdm))
         (MakeType.closed_shape (Reason.shape_literal p) fdm)
     | ET_Splice splice ->
       let (env, te, ty, _) = check_et_splice env p splice in

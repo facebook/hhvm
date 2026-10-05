@@ -114,7 +114,11 @@ and check_await_usage expr =
     | String2 args
     | ValCollection (_, _, args) ->
       List.fold_right args ~init:NoAwait ~f:await_fold
-    | Shape fields -> List.fold_right fields ~init:NoAwait ~f:await_fold_tuple
+    | Shape fields ->
+      List.fold_right fields ~init:NoAwait ~f:(fun field acc ->
+          match field with
+          | SF_field (_, e) -> combine_con (check_await_usage e) acc
+          | SF_splat e -> combine_con (check_await_usage e) acc)
     | Call { func; targs = _; args; unpacked_arg } ->
       let arg_exprs =
         List.map ~f:(fun arg -> ((), Aast_utils.arg_to_expr arg)) args

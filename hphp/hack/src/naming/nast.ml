@@ -498,7 +498,7 @@ module Visitor_DEPRECATED = struct
 
       method on_as_expr : 'a -> (unit, unit) as_expr -> 'a
 
-      method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
+      method on_shape : 'a -> (unit, unit) shape_expr_field list -> 'a
 
       method on_valCollection :
         'a -> pos * vc_kind -> targ option -> expr list -> 'a
@@ -911,9 +911,10 @@ module Visitor_DEPRECATED = struct
         List.fold_left
           ~f:
             begin
-              fun acc (_, e) ->
-                let acc = this#on_expr acc e in
-                acc
+              fun acc field ->
+                match field with
+                | SF_field (_, e) -> this#on_expr acc e
+                | SF_splat e -> this#on_expr acc e
             end
           ~init:acc
           sm

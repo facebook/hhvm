@@ -214,11 +214,18 @@ fn keyset_value_afield_to_typed_value(
 fn shape_to_typed_value(
     emitter: &Emitter,
     scope: &Scope<'_>,
-    fields: &[(ast::ShapeFieldName, ast::Expr)],
+    fields: &[ast::ShapeExprField],
 ) -> Result<TypedValue, Error> {
     let a = fields
         .iter()
-        .map(|(sf, expr)| {
+        .map(|f| {
+            // A shape splat cannot be folded to a constant dict: its operand is
+            // an arbitrary runtime value and the merge is rightmost-wins, so the
+            // whole shape must be constructed at runtime (see emit_shape).
+            let (sf, expr) = match f {
+                ast::ShapeExprField::SFField(sf, expr) => (sf, expr),
+                ast::ShapeExprField::SFSplat(_) => return Err(Error::NotLiteral),
+            };
             let key = match sf {
                 ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::intern_string(&id.1),
                 ast_defs::ShapeFieldName::SFclassname(class_id) => nameof_to_typed_value(

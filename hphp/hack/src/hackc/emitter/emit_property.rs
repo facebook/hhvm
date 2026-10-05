@@ -234,7 +234,7 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
             .iter()
             .any(|f| expr_requires_deep_init_(&f.0) || expr_requires_deep_init_(&f.1)),
         Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,
-        Expr_::Shape(sfs) => sfs.iter().any(shape_field_requires_deep_init),
+        Expr_::Shape(sfs) => sfs.iter().any(shape_expr_field_requires_deep_init),
         Expr_::ClassConst(e) if (!force_class_init) => match e.0.as_ciexpr() {
             Some(ci_expr) => match (ci_expr.2).as_id() {
                 Some(ast_defs::Id(_, s)) => {
@@ -249,13 +249,16 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
     }
 }
 
-fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, ast::Expr)) -> bool {
-    match name {
-        ast_defs::ShapeFieldName::SFlitStr(_) => expr_requires_deep_init_(expr),
-        ast_defs::ShapeFieldName::SFclassname(_) => false, // dynamic names are banned
-        ast_defs::ShapeFieldName::SFclassConst(ast_defs::Id(_, s), (_, p)) => {
-            class_const_requires_deep_init(s, p)
-        }
+fn shape_expr_field_requires_deep_init(field: &ast::ShapeExprField) -> bool {
+    match field {
+        ast::ShapeExprField::SFField(name, expr) => match name {
+            ast_defs::ShapeFieldName::SFlitStr(_) => expr_requires_deep_init_(expr),
+            ast_defs::ShapeFieldName::SFclassname(_) => false, // dynamic names are banned
+            ast_defs::ShapeFieldName::SFclassConst(ast_defs::Id(_, s), (_, p)) => {
+                class_const_requires_deep_init(s, p)
+            }
+        },
+        ast::ShapeExprField::SFSplat(_) => true,
     }
 }
 

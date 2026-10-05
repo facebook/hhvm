@@ -106,17 +106,6 @@ fn ro_expr_list(context: &mut Context, exprs: &[Expr]) -> Rty {
     }
 }
 
-fn ro_expr_list2<T>(context: &mut Context, exprs: &[(T, Expr)]) -> Rty {
-    if exprs
-        .iter()
-        .any(|e| rty_expr(context, &e.1) == Rty::Readonly)
-    {
-        Rty::Readonly
-    } else {
-        Rty::Mutable
-    }
-}
-
 fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
     match ro {
         Some(oxidized::ast_defs::ReadonlyKind::Readonly) => Rty::Readonly,
@@ -142,7 +131,16 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 context.get_rty(var_name)
             }
         }
-        Shape(fields) => ro_expr_list2(context, fields),
+        Shape(fields) => {
+            if fields.iter().any(|f| match f {
+                ShapeExprField::SFField(_, e) => rty_expr(context, e) == Rty::Readonly,
+                ShapeExprField::SFSplat(e) => rty_expr(context, e) == Rty::Readonly,
+            }) {
+                Rty::Readonly
+            } else {
+                Rty::Mutable
+            }
+        }
         ValCollection(v) => {
             let (_, _, exprs) = &**v;
             ro_expr_list(context, exprs)
@@ -518,8 +516,13 @@ fn check_assignment_validity(
         // shape assignment
         aast::Expr_::Shape(l) => {
             let exprs = &mut **l;
-            for (_field_name, e) in exprs.iter_mut() {
-                check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            for field in exprs.iter_mut() {
+                match field {
+                    ShapeExprField::SFField(_field_name, e) => {
+                        check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+                    }
+                    ShapeExprField::SFSplat(_) => {}
+                }
             }
         }
         // shape destructuring pattern

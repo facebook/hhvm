@@ -46,7 +46,13 @@ type setup = {
   naming_table: Naming_table.t;
 }
 
-let fake_dir = Filename.concat Sys_utils.temp_dir_name "fake"
+(* Per test binary. Several of them use this helper and can run at once, and
+   [setup] clears the tree, so one sharing a directory with another could pull
+   the ground from under it. *)
+let fake_dir =
+  Filename.concat
+    Sys_utils.temp_dir_name
+    ("fake." ^ Filename.basename Sys.executable_name)
 
 let in_fake_dir path = Filename.concat fake_dir path
 
@@ -54,12 +60,21 @@ let in_fake_dir path = Filename.concat fake_dir path
 Sets up the provider's reverse naming table. Returns an empty context, plus
 information about the files on disk. The [sqlite] flag determines
 whether we return a ctx where the naming table is backed by sqlite, or
-all in memory. *)
+all in memory.
+
+[extra_files] are laid down and named alongside Foo.php and Bar.php, as
+(basename, contents) pairs. Add symbols here rather than extend [foo_contents]:
+other tests pin the exact set of decls those two files produce. *)
 let setup
     ~(sqlite : bool)
+    ?(extra_files : (string * string) list = [])
     (tcopt : Global_options.t)
     ~(xhp_as : [ `Namespaces | `MangledSymbols ]) : setup =
-  (* Set up a simple fake repo *)
+  (* Set up a simple fake repo. The root is removed first: several cases run in
+     one process, and a file written by an earlier [setup] would otherwise stay
+     on disk while the naming table is built from this case's paths alone. *)
+  (try Disk.rm_dir_tree (in_fake_dir "root/") with
+  | Disk.No_such_file_or_directory _ -> ());
   Disk.mkdir_p @@ in_fake_dir "root/";
   Relative_path.set_path_prefix
     Relative_path.Root
@@ -69,8 +84,15 @@ let setup
      will be used for look up of symbols in type checking. *)
   Disk.write_file ~file:(in_fake_dir "root/Foo.php") ~contents:foo_contents;
   Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
+  List.iter
+    (fun (name, contents) ->
+      Disk.write_file ~file:(in_fake_dir ("root/" ^ name)) ~contents)
+    extra_files;
   let foo_path = Relative_path.from_root ~suffix:"Foo.php" in
   let bar_path = Relative_path.from_root ~suffix:"Bar.php" in
+  let extra_paths =
+    List.map (fun (name, _) -> Relative_path.from_root ~suffix:name) extra_files
+  in
   let nonexistent_path = Relative_path.from_root ~suffix:"Nonexistent.php" in
   (* Parsing produces the file infos that the naming table module can use
      to construct the forward naming table (files-to-symbols) *)
@@ -99,7 +121,7 @@ let setup
       ~backend:(Provider_backend.get ())
       ~deps_mode
   in
-  let get_next = Multi_worker.next None [foo_path; bar_path] in
+  let get_next = Multi_worker.next None ([foo_path; bar_path] @ extra_paths) in
   let (file_infos, _errors, _failed_parsing) =
     ( Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal),
       Diagnostics.empty,

@@ -37,6 +37,19 @@
   unit_test))
 
 (executable
+ (name isolation_outbound_tests)
+ (modules isolation_outbound_tests)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries
+  unit_test_common_setup
+  default_injector_config
+  hh_server_monitor
+  unit_test))
+
+(executable
  (name server_progress_unit_tests)
  (modules
   server_progress_unit_tests)

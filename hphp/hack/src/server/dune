@@ -175,6 +175,7 @@
     server_rpc
     server_isolation
     server_isolation_decls
+    server_isolation_outbound
     server_isolation_validate)
   (libraries
     ast

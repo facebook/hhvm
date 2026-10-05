@@ -6661,6 +6661,75 @@ end = struct
     in
     create ~code:Error_code.SplatFieldNotKnown ~reasons ()
 
+  let describe_shape_splat_cycle_element env element =
+    Typing_print.full_strip_ns ~hide_internals:true env element
+
+  let describe_shape_splat_cycle_edge env edge =
+    let open Typing_error.Secondary.Shape_splat_cycle in
+    let source =
+      describe_shape_splat_cycle_element env edge.source
+      |> Markdown_lite.md_codify
+    and target = describe_shape_splat_cycle_element env edge.target in
+    let message =
+      match edge.kind with
+      | Direct_upper ->
+        Printf.sprintf
+          "The upper bound of %s refers directly to %s here"
+          source
+          (Markdown_lite.md_codify target)
+      | Indirect_upper ->
+        Printf.sprintf
+          "Following the upper bounds of %s reaches %s here"
+          source
+          (Markdown_lite.md_codify target)
+      | Nested_upper ->
+        Printf.sprintf
+          "The upper bound of %s contains the shape spread %s here"
+          source
+          (Markdown_lite.md_codify ("..." ^ target))
+      | Nested_lower ->
+        Printf.sprintf
+          "The lower bound of %s contains the shape spread %s here"
+          source
+          (Markdown_lite.md_codify ("..." ^ target))
+    in
+    (edge.pos, message)
+
+  let unsupported_cyclic_shape_splat_bounds env pos cycle =
+    let reasons =
+      lazy
+        (let shown = List.take cycle 6 in
+         let reasons =
+           List.map shown ~f:(describe_shape_splat_cycle_edge env)
+         in
+         let omitted = List.length cycle - List.length shown in
+         let reasons =
+           if omitted > 0 then
+             reasons
+             @ [
+                 ( pos,
+                   Printf.sprintf
+                     "%d additional dependenc%s in this cycle %s not shown"
+                     omitted
+                     (if Int.equal omitted 1 then
+                       "y"
+                     else
+                       "ies")
+                     (if Int.equal omitted 1 then
+                       "is"
+                     else
+                       "are") );
+               ]
+           else
+             reasons
+         in
+         ( pos,
+           "These shape-splat bounds form a recursive dependency that cannot be checked safely"
+         )
+         :: reasons)
+    in
+    create ~code:Error_code.UnsupportedCyclicShapeSplatBounds ~reasons ()
+
   let abstract_tconst_not_allowed pos decl_pos tconst_name =
     let reasons =
       lazy
@@ -7415,6 +7484,8 @@ end = struct
       Eval_result.single (splat_may_require_fields pos decl_pos name)
     | Splat_field_not_known { pos; decl_pos; name; field } ->
       Eval_result.single (splat_field_not_known pos decl_pos name field)
+    | Unsupported_cyclic_shape_splat_bounds { pos; cycle } ->
+      Eval_result.single (unsupported_cyclic_shape_splat_bounds env pos cycle)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
       Eval_result.single (abstract_tconst_not_allowed pos decl_pos tconst_name)
     | Invalid_destructure { pos; decl_pos; ty_name } ->

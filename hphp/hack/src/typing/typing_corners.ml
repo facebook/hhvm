@@ -1030,6 +1030,8 @@ module Analysis : sig
     val members : t -> Splat_elem.Set.t
 
     val dependencies : t -> Dependency.t list
+
+    val dependency_cycle : t -> Dependency.t list
   end
 
   module Component : sig
@@ -1157,6 +1159,36 @@ end = struct
     let members info = info.members
 
     let dependencies info = info.dependencies
+
+    (* Return one concrete cycle for diagnostics. Every dependency stored in a
+       cyclic component is internal to that component, so a depth-first search
+       from an edge's target can recover a path back to its source. *)
+    let dependency_cycle info =
+      let same left right = Int.equal (Splat_elem.compare left right) 0 in
+      let outgoing source =
+        List.filter info.dependencies ~f:(fun dependency ->
+            same source (Dependency.source dependency))
+      in
+      let rec path_to source target seen =
+        if same source target then
+          Some []
+        else
+          List.find_map (outgoing source) ~f:(fun dependency ->
+              let next = Dependency.target dependency in
+              if Splat_elem.Set.mem next seen then
+                None
+              else
+                Option.map
+                  (path_to next target (Splat_elem.Set.add next seen))
+                  ~f:(fun path -> dependency :: path))
+      in
+      List.find_map info.dependencies ~f:(fun dependency ->
+          let source = Dependency.source dependency in
+          let target = Dependency.target dependency in
+          Option.map
+            (path_to target source (Splat_elem.Set.singleton target))
+            ~f:(fun path -> dependency :: path))
+      |> Option.value ~default:[]
   end
 
   module Component = struct

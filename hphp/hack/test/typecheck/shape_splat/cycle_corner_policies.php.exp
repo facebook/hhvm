@@ -1,23 +1,35 @@
 ERROR: File "cycle_corner_policies.php", line 25, characters 15-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4532])
   File "cycle_corner_policies.php", line 23, characters 18-19:
-  Cyclic shape-splat bounds are not supported by this subtyping check
+  These shape-splat bounds form a recursive dependency that cannot be checked safely
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  The upper bound of `T1` contains the shape spread `...T2` here
+  File "cycle_corner_policies.php", line 24, characters 18-19:
+  The upper bound of `T2` contains the shape spread `...T1` here
   File "cycle_corner_policies.php", line 21, characters 3-41:
   Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
   File "cycle_corner_policies.php", line 21, characters 3-41:
   But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
 ERROR: File "cycle_corner_policies.php", line 26, characters 14-24:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4532])
   File "cycle_corner_policies.php", line 23, characters 18-19:
-  Cyclic shape-splat bounds are not supported by this subtyping check
+  These shape-splat bounds form a recursive dependency that cannot be checked safely
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  The upper bound of `T1` contains the shape spread `...T2` here
+  File "cycle_corner_policies.php", line 24, characters 18-19:
+  The upper bound of `T2` contains the shape spread `...T1` here
   File "cycle_corner_policies.php", line 10, characters 4-49:
   Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))`
   File "cycle_corner_policies.php", line 10, characters 4-49:
   But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
 ERROR: File "cycle_corner_policies.php", line 29, characters 10-15:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4532])
   File "cycle_corner_policies.php", line 23, characters 18-19:
-  Cyclic shape-splat bounds are not supported by this subtyping check
+  These shape-splat bounds form a recursive dependency that cannot be checked safely
+  File "cycle_corner_policies.php", line 23, characters 18-19:
+  The upper bound of `T1` contains the shape spread `...T2` here
+  File "cycle_corner_policies.php", line 24, characters 18-19:
+  The upper bound of `T2` contains the shape spread `...T1` here
   File "cycle_corner_policies.php", line 29, characters 3-16:
   Expected `shape('x' => int, ?'y' => string)`
   File "cycle_corner_policies.php", line 21, characters 3-41:

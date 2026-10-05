@@ -1292,11 +1292,43 @@ let sccs_preserve_partitions_and_dependency_order _ =
   | Typing_corners.Component.Proven_equal _
   | Typing_corners.Component.Unsupported_cycle _ ->
     assert_failure "A should form an acyclic component");
-  (match component_with "B" with
-  | Typing_corners.Component.Unsupported_cycle _ -> ()
-  | Typing_corners.Component.Acyclic _
-  | Typing_corners.Component.Proven_equal _ ->
-    assert_failure "a nested-spread cycle must not be classified as equality");
+  let unsupported_cycle =
+    match component_with "B" with
+    | Typing_corners.Component.Unsupported_cycle info -> info
+    | Typing_corners.Component.Acyclic _
+    | Typing_corners.Component.Proven_equal _ ->
+      assert_failure "a nested-spread cycle must not be classified as equality"
+  in
+  let dependency_cycle =
+    Typing_corners.Cycle_info.dependency_cycle unsupported_cycle
+  in
+  (match dependency_cycle with
+  | [] -> assert_failure "an unsupported SCC must retain a witness cycle"
+  | first :: rest ->
+    let first_source = Typing_corners.Dependency.source first in
+    let rec check_path expected_source = function
+      | [] ->
+        assert_equal
+          0
+          (Typing_corners.Splat_elem.compare expected_source first_source)
+      | dependency :: rest ->
+        assert_equal
+          0
+          (Typing_corners.Splat_elem.compare
+             expected_source
+             (Typing_corners.Dependency.source dependency));
+        check_path (Typing_corners.Dependency.target dependency) rest
+    in
+    check_path (Typing_corners.Dependency.target first) rest);
+  assert_bool
+    "the witness retains the nested-spread edge classification"
+    (List.for_all dependency_cycle ~f:(fun dependency ->
+         match Typing_corners.Dependency.kind dependency with
+         | Typing_corners.Dependency.Nested_upper -> true
+         | Typing_corners.Dependency.Direct_upper
+         | Typing_corners.Dependency.Indirect_upper
+         | Typing_corners.Dependency.Nested_lower ->
+           false));
   (match component_with "Equal1" with
   | Typing_corners.Component.Proven_equal _ -> ()
   | Typing_corners.Component.Acyclic _

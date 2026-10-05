@@ -64,6 +64,10 @@ module Cycle_info : sig
   val members : t -> Splat_elem.Set.t
 
   val dependencies : t -> Dependency.t list
+
+  (** A deterministic sequence of dependencies whose last target is its first
+      source. *)
+  val dependency_cycle : t -> Dependency.t list
 end
 
 type 'a computation =

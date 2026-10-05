@@ -1773,6 +1773,23 @@ end = struct
 end
 
 and Secondary : sig
+  module Shape_splat_cycle : sig
+    type edge_kind =
+      | Direct_upper
+      | Indirect_upper
+      | Nested_upper
+      | Nested_lower
+    [@@deriving show]
+
+    type edge = {
+      pos: Pos_or_decl.t;
+      source: Typing_defs_core.locl_ty;
+      target: Typing_defs_core.locl_ty;
+      kind: edge_kind;
+    }
+    [@@deriving show]
+  end
+
   type t =
     | Of_error of Error.t
     (* Primary and secondary *)
@@ -1879,6 +1896,10 @@ and Secondary : sig
         decl_pos: Pos_or_decl.t;
         name: string;
         field: string;
+      }
+    | Unsupported_cyclic_shape_splat_bounds of {
+        pos: Pos_or_decl.t;
+        cycle: Shape_splat_cycle.edge list;
       }
     | Accept_disposable_invariant of {
         pos: Pos_or_decl.t;
@@ -2113,6 +2134,23 @@ and Secondary : sig
       }
   [@@deriving show]
 end = struct
+  module Shape_splat_cycle = struct
+    type edge_kind =
+      | Direct_upper
+      | Indirect_upper
+      | Nested_upper
+      | Nested_lower
+    [@@deriving show]
+
+    type edge = {
+      pos: Pos_or_decl.t;
+      source: Typing_defs_core.locl_ty;
+      target: Typing_defs_core.locl_ty;
+      kind: edge_kind;
+    }
+    [@@deriving show]
+  end
+
   type t =
     | Of_error of Error.t
     (* Primary and secondary *)
@@ -2219,6 +2257,10 @@ end = struct
         decl_pos: Pos_or_decl.t;
         name: string;
         field: string;
+      }
+    | Unsupported_cyclic_shape_splat_bounds of {
+        pos: Pos_or_decl.t;
+        cycle: Shape_splat_cycle.edge list;
       }
     | Accept_disposable_invariant of {
         pos: Pos_or_decl.t;

@@ -879,18 +879,21 @@ end = struct
     let (env, prop) = (env, left) &&& fun _ -> (env_after, right) in
     return (env, prop)
 
-  let shape_splat_failure subtype_env env ~position ~message ~ty_sub ~ty_super =
+  let missing_shape_splat_assignment subtype_env env missing ~ty_sub ~ty_super =
     let subtype_env =
       Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
           Typing_error.Reasons_callback.prepend_reason
             on_error
-            ~reason:(lazy (position, message)))
+            ~reason:
+              (lazy
+                ( Typing_corners.Missing_assignment.position missing,
+                  "Shape-splat dependency analysis failed before projection" )))
     in
     let fail = Subtype_env.fail subtype_env ~ty_sub ~ty_super in
     invalid ~fail env
 
-  let unsupported_cycle_position fallback info =
-    match Typing_corners.Cycle_info.dependencies info with
+  let unsupported_cycle_position fallback cycle info =
+    match cycle with
     | dependency :: _ -> Typing_corners.Dependency.position dependency
     | [] ->
       (match
@@ -900,6 +903,43 @@ end = struct
       | Some member -> get_pos member
       | None -> fallback)
 
+  let shape_splat_cycle_edge dependency =
+    let open Typing_error.Secondary.Shape_splat_cycle in
+    let kind =
+      match Typing_corners.Dependency.kind dependency with
+      | Typing_corners.Dependency.Direct_upper -> Direct_upper
+      | Typing_corners.Dependency.Indirect_upper -> Indirect_upper
+      | Typing_corners.Dependency.Nested_upper -> Nested_upper
+      | Typing_corners.Dependency.Nested_lower -> Nested_lower
+    in
+    {
+      pos = Typing_corners.Dependency.position dependency;
+      source = Typing_corners.Dependency.source dependency;
+      target = Typing_corners.Dependency.target dependency;
+      kind;
+    }
+
+  let unsupported_cyclic_shape_splat_bounds
+      subtype_env env ~r info ~ty_sub ~ty_super =
+    let dependency_cycle =
+      match Typing_corners.Cycle_info.dependency_cycle info with
+      | [] -> Typing_corners.Cycle_info.dependencies info
+      | cycle -> cycle
+    in
+    let position =
+      unsupported_cycle_position (Reason.to_pos r) dependency_cycle info
+    in
+    let cycle = List.map dependency_cycle ~f:shape_splat_cycle_edge in
+    let subtype_env =
+      Subtype_env.map_on_error subtype_env ~f:(fun on_error ->
+          Typing_error.Reasons_callback.prepend_on_apply
+            on_error
+            (Typing_error.Secondary.Unsupported_cyclic_shape_splat_bounds
+               { pos = position; cycle }))
+    in
+    let fail = Subtype_env.fail subtype_env ~ty_sub ~ty_super in
+    invalid ~fail env
+
   let report_shape_splat_failure subtype_env ~r ~sub ~super env failure =
     let ty_sub = LoclType (Typing_shape_normalize.Row.to_ty ~reason:r sub)
     and ty_super =
@@ -907,22 +947,15 @@ end = struct
     in
     match failure with
     | Unsupported_cycle info ->
-      shape_splat_failure
+      unsupported_cyclic_shape_splat_bounds
         subtype_env
         env
-        ~position:(unsupported_cycle_position (Reason.to_pos r) info)
-        ~message:
-          "Cyclic shape-splat bounds are not supported by this subtyping check"
+        ~r
+        info
         ~ty_sub
         ~ty_super
     | Missing_assignment missing ->
-      shape_splat_failure
-        subtype_env
-        env
-        ~position:(Typing_corners.Missing_assignment.position missing)
-        ~message:"Shape-splat dependency analysis failed before projection"
-        ~ty_sub
-        ~ty_super
+      missing_shape_splat_assignment subtype_env env missing ~ty_sub ~ty_super
 
   module Log = struct
     let level subtype_env ~ty_sub ~ty_super =
@@ -7097,11 +7130,10 @@ end = struct
         in
         (match result with
         | Error missing ->
-          shape_splat_failure
+          missing_shape_splat_assignment
             subtype_env
             env
-            ~position:(Typing_corners.Missing_assignment.position missing)
-            ~message:"Shape-splat dependency analysis failed before projection"
+            missing
             ~ty_sub:(LoclType ty_sub)
             ~ty_super:(LoclType ty_super)
         | Ok ty_sub ->

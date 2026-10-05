@@ -289,6 +289,33 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
+  let isolation_no_growth = ref false in
+  let isolation_output = ref None in
+  let isolation_seed_framework = ref None in
+  let isolation_seed_list = ref None in
+  let isolation_max_dependents = ref None in
+  let isolation_max_cluster_size = ref None in
+  let isolation_max_seeds = ref None in
+  let isolation_seed_offset = ref 0 in
+  (* The mode carries the options, so setting it needs a value before the flags
+     that follow it have been parsed. Both sites build from these refs, and the
+     one after parsing is the one that counts. *)
+  let isolation_options () =
+    Server_isolation_types.
+      {
+        no_growth = !isolation_no_growth;
+        output_file = !isolation_output;
+        seed_framework = !isolation_seed_framework;
+        seed_list = !isolation_seed_list;
+        (* 600 is the reach a run uses when the caller names none, and so the
+           bound the isolatability figures are reported against. Not derived
+           from measurement. *)
+        max_dependents = Option.value !isolation_max_dependents ~default:600;
+        max_cluster_size = !isolation_max_cluster_size;
+        max_seeds = !isolation_max_seeds;
+        seed_offset = !isolation_seed_offset;
+      }
+  in
   let output_jsonl = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
@@ -516,23 +543,40 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       ( "--find-isolatable-clusters",
         Arg.Unit
           (fun () ->
-            (* The options are carried by the mode so the server receives them
-               in one place. Every flag that sets them arrives in a later
-               diff; until then the defaults are what a run uses. *)
-            set_mode
-              (MODE_FIND_ISOLATABLE_CLUSTERS
-                 Server_isolation_types.
-                   {
-                     no_growth = false;
-                     output_file = None;
-                     seed_framework = None;
-                     seed_list = None;
-                     max_dependents = 600;
-                     max_cluster_size = None;
-                     max_seeds = None;
-                     seed_offset = 0;
-                   })),
+            set_mode (MODE_FIND_ISOLATABLE_CLUSTERS (isolation_options ()))),
         " (mode) find clusters of files that can be isolated from the codebase",
+        Arg_non_user_facing );
+      ( "--isolation-no-growth",
+        Arg.Set isolation_no_growth,
+        " report the smallest isolatable set around each starting file, instead of growing it",
+        Arg_non_user_facing );
+      ( "--isolation-output",
+        Arg.String (fun s -> isolation_output := Some s),
+        " <file> write clusters to <file> as JSON lines as they are found, and print only the summary",
+        Arg_non_user_facing );
+      ( "--isolation-seed-framework",
+        Arg.String (fun s -> isolation_seed_framework := Some s),
+        " <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds",
+        Arg_non_user_facing );
+      ( "--isolation-seed-list",
+        Arg.String (fun s -> isolation_seed_list := Some s),
+        " <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds",
+        Arg_non_user_facing );
+      ( "--isolation-max-dependents",
+        Arg.Int (fun n -> isolation_max_dependents := Some n),
+        " <n> the most files that may depend on a candidate for it to be taken along with them",
+        Arg_non_user_facing );
+      ( "--isolation-max-cluster-size",
+        Arg.Int (fun n -> isolation_max_cluster_size := Some n),
+        " <n> stop growing a cluster once it reaches <n> files",
+        Arg_non_user_facing );
+      ( "--isolation-max-seeds",
+        Arg.Int (fun n -> isolation_max_seeds := Some n),
+        " <n> grow from at most <n> seeds",
+        Arg_non_user_facing );
+      ( "--isolation-seed-offset",
+        Arg.Set_int isolation_seed_offset,
+        " <n> skip the first <n> seeds; pair with --isolation-max-seeds to walk the seed list in chunks",
         Arg_non_user_facing );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
@@ -1204,7 +1248,21 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   set_mode_from_single_files !show_tast !preexisting_warnings;
   set_mode_only_log_errors
     { log_file = !log_to_file; preexisting_warnings = !preexisting_warnings };
-  let mode = Option.value !mode ~default:MODE_STATUS in
+  let mode =
+    (* Isolation options are meaningless for every other mode. *)
+    match Option.value !mode ~default:MODE_STATUS with
+    | MODE_FIND_ISOLATABLE_CLUSTERS _ ->
+      let options = isolation_options () in
+      (match
+         Client_isolation_args.validate
+           ~max_dependents_given:(Option.is_some !isolation_max_dependents)
+           options
+       with
+      | Ok () -> ()
+      | Error message -> Die.bad_args ~message ~usage:None);
+      MODE_FIND_ISOLATABLE_CLUSTERS options
+    | mode -> mode
+  in
   (* fixups *)
   let (root, paths) =
     match (mode, args) with

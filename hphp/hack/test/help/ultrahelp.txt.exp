@@ -17,6 +17,14 @@ WWW-ROOT is assumed to be current directory if unspecified
   --file-dependents                        (mode) Given a list of filepaths, shows list of (possibly) dependent files
   --find-class-refs                        (mode) finds references of the provided class name
   --find-isolatable-clusters               (mode) find clusters of files that can be isolated from the codebase
+  --isolation-no-growth                    report the smallest isolatable set around each starting file, instead of growing it
+  --isolation-output                       <file> write clusters to <file> as JSON lines as they are found, and print only the summary
+  --isolation-seed-framework               <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds
+  --isolation-seed-list                    <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds
+  --isolation-max-dependents               <n> the most files that may depend on a candidate for it to be taken along with them
+  --isolation-max-cluster-size             <n> stop growing a cluster once it reaches <n> files
+  --isolation-max-seeds                    <n> grow from at most <n> seeds
+  --isolation-seed-offset                  <n> skip the first <n> seeds; pair with --isolation-max-seeds to walk the seed list in chunks
   --find-refs                              (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent
   --find-my-tests                          (mode) return test files that reference the given symbols, using the version specified in the JSON config (default: staging)
   --find-my-tests-staging                  (deprecated, use --find-my-tests) alias for --find-my-tests

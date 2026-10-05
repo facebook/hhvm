@@ -355,6 +355,112 @@ class TestFreshInit(common_tests.CommonTests):
 
         self.assertEqual(seed_count - 1, int(header_match.group(1)))
 
+    def test_growth_seeds_from_the_closure(self) -> None:
+        # A cluster must be closed under inbound references, and growth only
+        # ever looks outbound. So a seed that something references can only be
+        # made safe by seeding the cluster with the seed's closure rather than
+        # the seed alone.
+        #
+        # The whole-repository scan never produces such a seed — it filters them
+        # out — so this drives the seed-list path, which does not, and which is
+        # the path every published measurement used.
+        files = {
+            "closure_seed_target.php": (
+                "<?hh\nfunction closure_seed_target(): void {}\n"
+            ),
+            # Referencing the seed, and not referenced by it. Growth cannot
+            # reach this file by absorbing outward; only the seed's closure
+            # brings it in.
+            "closure_seed_referrer.php": (
+                "<?hh\n"
+                "function closure_seed_referrer(): void {\n"
+                "  closure_seed_target();\n"
+                "}\n"
+            ),
+        }
+        for filename, contents in files.items():
+            path = os.path.join(self.test_driver.repo_dir, filename)
+            with open(path, "w") as f:
+                f.write(contents)
+
+        seed_list = os.path.join(self.test_driver.repo_dir, "seeds.txt")
+        with open(seed_list, "w") as f:
+            f.write("closure_seed_target.php\n")
+
+        self.test_driver.start_hh_server(
+            changed_files=list(files.keys()), args=["--no-load"]
+        )
+        json_output, _ = self.test_driver.check_cmd(
+            expected_output=None,
+            options=[
+                "--find-isolatable-clusters",
+                "--isolation-seed-list",
+                seed_list,
+                "--json",
+            ],
+        )
+        payload = json.loads("\n".join(json_output.splitlines()))
+
+        clusters = [
+            frozenset(cluster["files"])
+            for cluster in payload["clusters"]
+            if any(f.startswith("closure_seed_") for f in cluster["files"])
+        ]
+        # Seeded from the target alone, the cluster must still come back holding
+        # the referrer. Before the closure seeding this returned the target on
+        # its own — a cluster with a reference into it, which is the one thing a
+        # cluster is defined not to have.
+        self.assertEqual(
+            [frozenset({"closure_seed_target.php", "closure_seed_referrer.php"})],
+            clusters,
+        )
+        self.assertTrue(payload["summary"]["grown"])
+
+    def test_growth_counts_only_new_files_against_the_cap(self) -> None:
+        # A candidate's closure is everything that transitively depends on it,
+        # and a candidate is only ever offered because a file already in the
+        # cluster references it. So the closure always contains part of the
+        # cluster, and only the files it would actually add can count against
+        # the size cap.
+        files = {
+            "cap_shared.php": "<?hh\nfunction cap_shared(): void {}\n",
+            "cap_a.php": "<?hh\nfunction cap_a(): void {\n  cap_shared();\n}\n",
+            "cap_b.php": "<?hh\nfunction cap_b(): void {\n  cap_shared();\n}\n",
+        }
+        for filename, contents in files.items():
+            path = os.path.join(self.test_driver.repo_dir, filename)
+            with open(path, "w") as f:
+                f.write(contents)
+
+        self.test_driver.start_hh_server(
+            changed_files=list(files.keys()), args=["--no-load"]
+        )
+        # Three is exactly the size of the closed cluster. Growing from cap_a,
+        # the cluster holds one file and cap_shared's closure holds three — it,
+        # cap_a and cap_b — of which two are new, so it fits the two remaining
+        # places. Measured against the whole closure it does not, and the seed
+        # is reported alone and truncated.
+        json_output, _ = self.test_driver.check_cmd(
+            expected_output=None,
+            options=[
+                "--find-isolatable-clusters",
+                "--isolation-max-cluster-size",
+                "3",
+                "--json",
+            ],
+        )
+        payload = json.loads("\n".join(json_output.splitlines()))
+
+        clusters = [
+            (frozenset(cluster["files"]), cluster["truncated"])
+            for cluster in payload["clusters"]
+            if any(f.startswith("cap_") for f in cluster["files"])
+        ]
+        self.assertEqual(
+            [(frozenset({"cap_a.php", "cap_b.php", "cap_shared.php"}), False)],
+            clusters,
+        )
+
     def test_remove_dead_fixmes(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(

@@ -1,0 +1,9 @@
+(5,14)-(5,14) A shape field name is expected here.
+(5,16)-(5,16) Shape field name must be a nonempty single-quoted string or a class constant
+(6,25)-(6,25) A shape field name is expected here.
+(6,27)-(6,27) Shape field name must be a nonempty single-quoted string or a class constant
+(7,26)-(7,33) Encountered unexpected token `$fields`.
+(8,17)-(8,18) Encountered unexpected token `,`.
+(9,14)-(9,15) Shape field name must be a nonempty single-quoted string or a class constant
+(9,15)-(9,15) An arrow `=>` is expected here.
+(9,16)-(9,16) An expression is expected here.

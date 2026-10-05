@@ -2558,34 +2558,85 @@ where
     fn parse_shape_expression(&mut self) -> S::Output {
         // SPEC
         // shape-literal:
-        //   shape  (  field-initializer-list-opt  )
-        //
-        // field-initializer-list:
-        //   field-initializers  ,-op
-        //
-        // field-initializers:
+        //   shape  (  shape-field-list-opt  ...opt  )
+        // shape-field:
         //   field-initializer
-        //   field-initializers  ,  field-initializer
+        //   variable                    (shorthand for 'var_name' => $var_name)
+        //   ... expression              (splat)
+        //   ?field-initializer          (optional destructuring field)
+        //   ?variable                   (optional punned destructuring field)
         //
-        // Extended for shape field punning:
-        //   shape-field:
-        //     field-initializer
-        //     variable  (shorthand for 'var_name' => $var_name)
-        //
-        // Extended for shape destructuring (LHS):
-        //   shape-field:
-        //     ?field-initializer       (optional field)
-        //     ?variable                (optional punned field)
-        //   field-initializer-list may end with ...
+        // Disambiguation: `...` followed by an expression is a splat.
+        // `...` alone (before `)`) is the destructuring rest marker.
         let shape = self.assert_token(TokenKind::Shape);
         let left_paren = self.require_left_paren();
-        let is_closing_token =
-            |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
-        let fields = self.parse_comma_list_opt_allow_trailing_predicate(
-            is_closing_token,
-            Errors::error1025,
-            |x: &mut Self| x.parse_shape_field(),
-        );
+        let mut items: Vec<S::Output> = vec![];
+
+        loop {
+            let kind = self.peek_token_kind();
+            if kind == TokenKind::RightParen || kind == TokenKind::EndOfFile {
+                break;
+            }
+            if kind == TokenKind::DotDotDot {
+                let next = self.peek_token_kind_with_lookahead(1);
+                if next == TokenKind::RightParen || next == TokenKind::Comma {
+                    break;
+                }
+                // This is `...$expr` — a shape splat
+                let ellipsis_token = self.assert_token(TokenKind::DotDotDot);
+                let expr = self.with_reset_precedence(|p| p.parse_expression());
+                let item = self
+                    .sc_mut()
+                    .make_shape_splat_specifier(ellipsis_token, expr);
+                if self.peek_token_kind() == TokenKind::Comma {
+                    let token = self.next_token();
+                    let separator = self.sc_mut().make_token(token);
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                } else {
+                    let pos = self.pos();
+                    let separator = self.sc_mut().make_missing(pos);
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                    break;
+                }
+            } else if kind == TokenKind::Comma {
+                self.with_error(Errors::error1025, Vec::new());
+                let token = self.next_token();
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let separator = self.sc_mut().make_token(token);
+                let list_item = self.sc_mut().make_list_item(missing, separator);
+                items.push(list_item);
+            } else {
+                // A regular shape field. Mirror parse_separated_list_predicate:
+                // parse the field, then continue only if a comma follows;
+                // otherwise bail (require_right_paren reports any error). This
+                // matches the old comma-list recovery and also prevents an
+                // infinite loop when parse_shape_field makes no progress on an
+                // invalid token such as a bare `_`.
+                let item = self.parse_shape_field();
+                if self.peek_token_kind() == TokenKind::Comma {
+                    let token = self.next_token();
+                    let separator = self.sc_mut().make_token(token);
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                } else {
+                    let pos = self.pos();
+                    let separator = self.sc_mut().make_missing(pos);
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                    break;
+                }
+            }
+        }
+
+        let pos = self.pos();
+        let fields = if items.is_empty() {
+            self.sc_mut().make_missing(pos)
+        } else {
+            self.sc_mut().make_list(items, pos)
+        };
         let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
             self.assert_token(TokenKind::DotDotDot)
         } else {

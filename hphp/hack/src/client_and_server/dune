@@ -266,6 +266,7 @@
   server_command_types
   server_command_types_utils
   server_format_types
+  server_isolation_types
   server_lint_types
   server_rage_types
   Server_rename_types

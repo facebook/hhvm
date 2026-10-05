@@ -4271,7 +4271,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
 
     fn make_const_declaration(
         &mut self,
-        _attributes: Self::Output,
+        attributes: Self::Output,
         modifiers: Self::Output,
         const_keyword: Self::Output,
         hint: Self::Output,
@@ -4282,6 +4282,8 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             // Class consts.
             Node::List(consts) if self.classish_name_builder.is_some() => {
                 let ty = self.node_to_ty(hint);
+                let is_shape_key = attributes
+                    .contains_marker_attribute(naming_special_names::user_attributes::SHAPE_KEY);
                 Node::List(
                     consts
                         .into_iter()
@@ -4311,6 +4313,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                                         } else {
                                             None
                                         },
+                                        is_shape_key,
                                         const_value: ConstValue::CVAbsent,
                                     },
                                 )))
@@ -5347,6 +5350,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 .infer_const(name, value)
                 .unwrap_or_else(|| self.tany_with_pos(id.0.clone())),
             value: v,
+            is_shape_key: false,
             const_value,
             name: id.into(),
             refs,
@@ -5568,6 +5572,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             } else {
                 None
             },
+            is_shape_key: false,
             const_value: ConstValue::CVAbsent,
         }))
     }

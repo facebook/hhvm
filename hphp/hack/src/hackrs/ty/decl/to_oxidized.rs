@@ -445,6 +445,7 @@ impl<R: Reason> ToOxidized for folded::ClassConst<R> {
             refs: self.refs.to_oxidized(),
             type_: self.ty.to_oxidized(),
             pos: self.pos.to_oxidized(),
+            is_shape_key: self.is_shape_key,
             value: self.value.to_oxidized(),
         }
     }
@@ -691,6 +692,7 @@ impl<R: Reason> ToOxidized for shallow::ShallowClassConst<R> {
             ty,
             refs,
             value,
+            is_shape_key,
             const_value,
         } = self;
         o::shallow_decl_defs::ShallowClassConst {
@@ -699,6 +701,7 @@ impl<R: Reason> ToOxidized for shallow::ShallowClassConst<R> {
             type_: ty.to_oxidized(),
             refs: refs.to_oxidized(),
             value,
+            is_shape_key,
             const_value: const_value.to_oxidized(),
         }
     }

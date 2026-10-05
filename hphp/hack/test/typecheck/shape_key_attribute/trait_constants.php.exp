@@ -1,0 +1,8 @@
+ERROR: File "trait_constants.php", line 14, characters 31-57:
+Class constant `TraitShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "trait_constants.php", line 6, characters 16-23:
+  The class constant is declared here
+ERROR: File "trait_constants.php", line 18, characters 14-40:
+Class constant `TraitShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "trait_constants.php", line 6, characters 16-23:
+  The class constant is declared here

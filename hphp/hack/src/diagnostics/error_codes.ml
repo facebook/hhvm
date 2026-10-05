@@ -832,6 +832,7 @@ module Typing = struct
     | UninstantiableClassViaStatic [@value 4530]
     | RedundantShapeSplat [@value 4531]
     | UnsupportedCyclicShapeSplatBounds [@value 4532]
+    | ShapeKeyClassConstMissingAttribute [@value 4533]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

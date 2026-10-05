@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,176 +1,176 @@
+@@ -1,179 +1,179 @@
  FoldedClass {
      name: "\\T1",
      pos: Pos(root|multiple_01.good.php, 4:7-9),
@@ -28,6 +28,7 @@
              ty: class<this>,
              origin: "\\T1",
              refs: [],
+             is_shape_key: false,
              value: CVAbsent,
          },
      },
@@ -67,6 +68,7 @@
              ty: class<this>,
              origin: "\\T2",
              refs: [],
+             is_shape_key: false,
              value: CVAbsent,
          },
      },
@@ -155,6 +157,7 @@
              ty: class<this>,
              origin: "\\C",
              refs: [],
+             is_shape_key: false,
              value: CVAbsent,
          },
      },

@@ -446,6 +446,10 @@ impl HhConfig {
                 "check_duplicate_enum_values",
                 default.tco_check_duplicate_enum_values,
             )?,
+            tco_require_shape_key_attribute: hhconfig.get_bool_or(
+                "require_shape_key_attribute",
+                default.tco_require_shape_key_attribute,
+            )?,
             tco_typecheck_sample_rate: hhconfig
                 .get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
             tco_pessimise_builtins: hhconfig

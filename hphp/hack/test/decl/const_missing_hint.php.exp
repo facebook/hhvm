@@ -52,7 +52,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([24:3-12], "FromConst");
            scc_type = (Rwitness_from_decl ([24:3-12]), Tany); scc_refs = [];
-           scc_value = None;
+           scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVAbsent }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

@@ -39,7 +39,7 @@
                [(Rhint ([6:7-8]), (Tapply (([6:7-8], "\\A"), [])));
                  (Rhint ([6:3-6]), (Tprim Tint))]
                )));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVAbsent };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([7:7-8], "Y");
@@ -50,6 +50,7 @@
                   (Rhint ([7:3-6]), (Tprim Tint))]
                 )));
             scc_refs = [((Typing_defs.From "\\B"), "Y")]; scc_value = None;
+            scc_is_shape_key = false;
             scc_const_value = Typing_defs.Const_value.CVAbsent };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([8:7-8], "Z");
@@ -60,6 +61,7 @@
                   (Rhint ([8:3-6]), (Tprim Tint))]
                 )));
             scc_refs = [((Typing_defs.From "\\B"), "Y")]; scc_value = None;
+            scc_is_shape_key = false;
             scc_const_value = Typing_defs.Const_value.CVAbsent };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([9:7-8], "W");
@@ -70,6 +72,7 @@
                   (Rhint ([9:3-6]), (Tprim Tint))]
                 )));
             scc_refs = [((Typing_defs.From "\\C"), "w")]; scc_value = None;
+            scc_is_shape_key = false;
             scc_const_value = Typing_defs.Const_value.CVAbsent }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -114,7 +117,7 @@
                [(Rhint ([12:12-13]), (Tapply (([12:12-13], "\\B"), [])));
                  (Rhint ([12:3-11]), (Tprim Tarraykey))]
                )));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVAbsent }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

@@ -1,0 +1,8 @@
+ERROR: File "forwarded_computed_constants.php", line 16, characters 9-47:
+Class constant `ForwardedUnresolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "forwarded_computed_constants.php", line 11, characters 16-23:
+  The class constant is declared here
+ERROR: File "forwarded_computed_constants.php", line 20, characters 14-52:
+Class constant `ForwardedUnresolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "forwarded_computed_constants.php", line 11, characters 16-23:
+  The class constant is declared here

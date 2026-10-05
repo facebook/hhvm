@@ -281,6 +281,8 @@ pub mod user_attributes {
 
     pub const ALLOW_UNCHECKED_ENUM_VALUES: &str = "__AllowUncheckedEnumValues";
 
+    pub const SHAPE_KEY: &str = "__ShapeKey";
+
     pub const PROVENANCE_SKIP_FRAME: &str = "__ProvenanceSkipFrame";
 
     pub const DYNAMICALLY_CALLABLE: &str = "__DynamicallyCallable";

@@ -1,0 +1,8 @@
+ERROR: File "inherited_constants.php", line 12, characters 35-57:
+Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "inherited_constants.php", line 6, characters 16-23:
+  The class constant is declared here
+ERROR: File "inherited_constants.php", line 16, characters 14-36:
+Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "inherited_constants.php", line 6, characters 16-23:
+  The class constant is declared here

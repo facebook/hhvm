@@ -19,14 +19,14 @@
           scc_type =
           (Rwitness_from_decl ([4:9-14]),
            (Tapply (([4:9-14], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = (Typing_defs.Const_value.CVString "foo") };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:3-6], "BAR");
            scc_type =
            (Rwitness_from_decl ([5:9-14]),
             (Tapply (([5:9-14], "\\HH\\string"), [])));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVString "bar") }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -64,7 +64,7 @@
            scc_refs =
            [((Typing_defs.From "\\Words"), "BAR");
              ((Typing_defs.From "\\Words"), "FOO")];
-           scc_value = None;
+           scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVAbsent }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

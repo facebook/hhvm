@@ -12,7 +12,7 @@
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:13-14], "X");
           scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [];
-          scc_value = None;
+          scc_value = None; scc_is_shape_key = false;
           scc_const_value = Typing_defs.Const_value.CVAbsent }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];

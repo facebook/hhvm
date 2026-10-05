@@ -20,6 +20,31 @@ module Reason = Typing_reason
 module TUtils = Typing_utils
 module Type = Typing_ops
 module MakeType = Typing_make_type
+module Cls = Folded_class
+
+let require_shape_key_attribute cls class_const =
+  (not class_const.cc_synthesized)
+  && (not class_const.cc_is_shape_key)
+  && (not (Ast_defs.is_c_enum (Cls.kind cls)))
+  && not (Ast_defs.is_c_enum_class (Cls.kind cls))
+
+let shape_key_attribute_error env pos cls const_name class_const =
+  if
+    Typechecker_options.require_shape_key_attribute (Env.get_tcopt env)
+    && require_shape_key_attribute cls class_const
+  then
+    Some
+      Typing_error.(
+        shape
+        @@ Primary.Shape.Shape_field_class_const_missing_shape_key_attribute
+             {
+               pos;
+               decl_pos = class_const.cc_pos;
+               class_name = Utils.strip_ns class_const.cc_origin;
+               const_name;
+             })
+  else
+    None
 
 let widen_for_refine_shape ~expr_pos field_name env ty =
   Typing_log.(
@@ -71,6 +96,27 @@ let tshape_field_name_with_ty_err env (_, pos, field) =
   in
   let p = Pos_or_decl.of_raw_pos pos in
   let map_pos = Tuple.T2.map_fst ~f:Pos_or_decl.of_raw_pos in
+  let class_const_field sid y =
+    let field_name = TSFclass_const (sid, map_pos y) in
+    if not (Typechecker_options.require_shape_key_attribute (Env.get_tcopt env))
+    then
+      Ok field_name
+    else
+      let error =
+        match Env.get_class env (snd sid) with
+        | Decl_entry.Found cls ->
+          Option.bind
+            (Env.get_const env cls (snd y))
+            ~f:(shape_key_attribute_error env pos cls (snd y))
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          None
+      in
+      (* A missing attribute does not prevent resolving the key. Preserve normal
+         shape typing and refinement even when this diagnostic is suppressed. *)
+      Option.iter error ~f:(Typing_error_utils.add_typing_error ~env);
+      Ok field_name
+  in
   match field with
   | Aast.Int name -> Ok (TSFregex_group (p, name))
   | Aast.String name -> Ok (TSFlit_str (p, name))
@@ -81,13 +127,12 @@ let tshape_field_name_with_ty_err env (_, pos, field) =
         primary
         @@ Primary.Class_const_to_string
              { pos; cls_name = Typing_class_pointers.string_of_class_id_ cid })
-  | Aast.Class_const ((_, _, Aast.CI x), y) ->
-    Ok (TSFclass_const (map_pos x, map_pos y))
+  | Aast.Class_const ((_, _, Aast.CI x), y) -> class_const_field (map_pos x) y
   | Aast.Nameof (_, _, Aast.CI x) ->
     Ok (TSFclass_const (map_pos x, (p, "class")))
   | Aast.Class_const ((_, _, Aast.CIself), y) ->
     let self_id = resolve_self env in
-    Result.map ~f:(fun sid -> TSFclass_const (sid, map_pos y)) self_id
+    Result.bind ~f:(fun sid -> class_const_field sid y) self_id
   | Aast.Nameof (_, _, Aast.CIself) ->
     let self_id = resolve_self env in
     Result.map ~f:(fun sid -> TSFclass_const (sid, (p, "class"))) self_id
@@ -741,6 +786,11 @@ let shape_field_pos = function
   | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
     Pos.btw cls_pos mem_pos
 
+let check_shape_key_attribute env pos cls const_name class_const =
+  Option.iter
+    (shape_key_attribute_error env pos cls const_name class_const)
+    ~f:(Typing_error_utils.add_typing_error ~env)
+
 let check_shape_keys_validity env keys =
   (* If the key is a class constant, get its class name and type. *)
   let get_field_info env key =
@@ -796,7 +846,7 @@ let check_shape_keys_validity env keys =
           let (env, ty) = Env.fresh_type_error env p in
 
           (env, key_pos, Some (cls, ty))
-        | Some { cc_type; cc_abstract; cc_pos; _ } ->
+        | Some ({ cc_type; cc_abstract; cc_pos; _ } as class_const) ->
           (match cc_abstract with
           | CCAbstract _ ->
             Typing_error_utils.add_typing_error ~env
@@ -809,6 +859,7 @@ let check_shape_keys_validity env keys =
                         name = cls ^ "::" ^ y;
                       })
           | CCConcrete -> ());
+          check_shape_key_attribute env key_pos cd y class_const;
           let ((env, ty_err_opt), ty) =
             Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
           in

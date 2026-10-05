@@ -43,6 +43,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\A",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
         "fred": ClassConst {
@@ -54,6 +55,7 @@ FoldedClass {
             ty: HH\MemberOf<A, string>,
             origin: "\\A",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
         "ginger": ClassConst {
@@ -65,6 +67,7 @@ FoldedClass {
             ty: HH\MemberOf<A, string>,
             origin: "\\A",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
     },
@@ -174,6 +177,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
         "fred": ClassConst {
@@ -183,6 +187,7 @@ FoldedClass {
             ty: HH\MemberOf<E, string>,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
         "ginger": ClassConst {
@@ -192,6 +197,7 @@ FoldedClass {
             ty: HH\MemberOf<E, string>,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
     },

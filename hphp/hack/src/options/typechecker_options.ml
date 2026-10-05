@@ -111,6 +111,9 @@ let disallow_discarded_nullable_awaitables t =
 let check_duplicate_enum_values t =
   t.Global_options.tco_check_duplicate_enum_values
 
+let require_shape_key_attribute t =
+  t.Global_options.tco_require_shape_key_attribute
+
 let is_systemlib t = t.Global_options.po.Parser_options.is_systemlib
 
 let enable_no_auto_dynamic t = t.Global_options.tco_enable_no_auto_dynamic

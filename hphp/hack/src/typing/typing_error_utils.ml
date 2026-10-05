@@ -392,6 +392,24 @@ end = struct
       in
       create ~code:Error_code.InvalidShapeFieldConst ~claim ~reasons ()
 
+    let shape_field_class_const_missing_shape_key_attribute
+        pos decl_pos class_name const_name =
+      let class_const = class_name ^ "::" ^ const_name in
+      let claim =
+        lazy
+          ( pos,
+            "Class constant "
+            ^ Markdown_lite.md_codify class_const
+            ^ " used as a shape key must be annotated with "
+            ^ Markdown_lite.md_codify "<<__ShapeKey>>"
+            ^ ". Prefer using an enum constant as a shape key." )
+      and reasons = lazy [(decl_pos, "The class constant is declared here")] in
+      create
+        ~code:Error_code.ShapeKeyClassConstMissingAttribute
+        ~claim
+        ~reasons
+        ()
+
     let shape_field_class_mismatch pos class_name witness_pos witness_class_name
         =
       let claim =
@@ -502,6 +520,13 @@ end = struct
         invalid_shape_field_literal pos witness_pos
       | Invalid_shape_field_const { pos; witness_pos } ->
         invalid_shape_field_const pos witness_pos
+      | Shape_field_class_const_missing_shape_key_attribute
+          { pos; decl_pos; class_name; const_name } ->
+        shape_field_class_const_missing_shape_key_attribute
+          pos
+          decl_pos
+          class_name
+          const_name
       | Shape_field_class_mismatch
           { pos; class_name; witness_pos; witness_class_name } ->
         shape_field_class_mismatch pos class_name witness_pos witness_class_name

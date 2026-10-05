@@ -1,0 +1,21 @@
+Errors in checked files:
+shape_type.php--use.php [3:16-26] Class constant `Key::FIELD` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key.
+shape_type.php--key.php [4:9-14] The class constant is declared here
+Type Key
+Type S
+use.php
+--
+Errors in checked files:
+No errors
+Type Key
+Type S
+--
+Errors in checked files:
+shape_type.php--use.php [3:16-26] Class constant `Key::FIELD` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key.
+shape_type.php--key.php [4:9-14] The class constant is declared here
+Type Key
+Type S
+use.php
+--
+Errors in checked files:
+No errors

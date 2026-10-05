@@ -242,6 +242,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
             ty: self.instantiate(&cc.ty),
             origin: cc.origin,
             refs: cc.refs.clone(),
+            is_shape_key: cc.is_shape_key,
             value: cc.value.clone(),
         }
     }

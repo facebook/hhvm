@@ -135,6 +135,9 @@ type class_const = {
       (** identifies the class from which this const originates *)
   cc_refs: class_const_ref list;
       (** references to the constants used in the initializer *)
+  cc_is_shape_key: bool;
+      (** Whether the constant is explicitly or intrinsically permitted as a
+          shape key. *)
   cc_value: Const_value.t;
       (** The recorded constant value; [CVAbsent] means no value was
           recorded or the initializer cannot be represented. *)

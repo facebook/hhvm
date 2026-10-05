@@ -1,0 +1,8 @@
+ERROR: File "shape_index_write.php", line 13, characters 35-54:
+Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "shape_index_write.php", line 4, characters 16-18:
+  The class constant is declared here
+ERROR: File "shape_index_write.php", line 20, characters 13-32:
+Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "shape_index_write.php", line 4, characters 16-18:
+  The class constant is declared here

@@ -420,6 +420,8 @@ module UserAttributes = struct
 
   let uaAllowUncheckedEnumValues = "__AllowUncheckedEnumValues"
 
+  let uaShapeKey = "__ShapeKey"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -483,6 +485,13 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Opts this enum out of the enum-value check, allowing members to share a value or to have values that cannot be statically checked.";
+            } );
+          ( uaShapeKey,
+            {
+              contexts = [clscst];
+              autocomplete = false;
+              doc =
+                "Marks a class constant whose value may be used as a shape key.";
             } );
           ( uaEntryPoint,
             {

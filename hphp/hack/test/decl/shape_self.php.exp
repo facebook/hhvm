@@ -13,7 +13,7 @@
           scc_name = ([4:16-19], "KEY");
           scc_type =
           (Rhint ([4:9-15]), (Tapply (([4:9-15], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = Typing_defs.Const_value.CVAbsent }
          ];
        sc_typeconsts =

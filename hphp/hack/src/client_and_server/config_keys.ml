@@ -118,6 +118,8 @@ module Hhconfig = struct
 
   let check_duplicate_enum_values = key "check_duplicate_enum_values"
 
+  let require_shape_key_attribute = key "require_shape_key_attribute"
+
   let include_enum_member_values = key "include_enum_member_values"
 
   let disallow_toplevel_requires = key "disallow_toplevel_requires"

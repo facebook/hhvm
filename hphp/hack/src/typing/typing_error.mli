@@ -23,6 +23,12 @@ module Primary : sig
           pos: Pos.t;
           witness_pos: Pos.t;
         }
+      | Shape_field_class_const_missing_shape_key_attribute of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          class_name: string;
+          const_name: string;
+        }
       | Invalid_shape_field_type of {
           pos: Pos.t;
           ty_pos: Pos_or_decl.t;

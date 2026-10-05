@@ -19,14 +19,14 @@
           scc_type =
           (Rwitness_from_decl ([5:7-10]),
            (Tapply (([5:7-10], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = Typing_defs.Const_value.CVLabel };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:3-4], "B");
            scc_type =
            (Rwitness_from_decl ([6:7-10]),
             (Tapply (([6:7-10], "\\HH\\string"), [])));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVLabel }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];

@@ -1,0 +1,119 @@
+[("\\ShapeKeyInterface",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
+       sc_name = ([3:11-28], "\\ShapeKeyInterface"); sc_tparams = [];
+       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+       sc_implements = []; sc_support_dynamic_type = false;
+       sc_consts =
+       [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+          scc_name = ([5:16-19], "KEY");
+          scc_type =
+          (Rhint ([5:9-15]), (Tapply (([5:9-15], "\\HH\\string"), [])));
+          scc_refs = []; scc_value = None; scc_is_shape_key = true;
+          scc_const_value = Typing_defs.Const_value.CVAbsent };
+         { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([6:16-24], "UNMARKED");
+           scc_type =
+           (Rhint ([6:9-15]), (Tapply (([6:9-15], "\\HH\\string"), [])));
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
+           scc_const_value = Typing_defs.Const_value.CVAbsent }
+         ];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package = None }));
+  ("\\ShapeKeyTrait",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Ctrait; sc_module = None;
+        sc_name = ([9:7-20], "\\ShapeKeyTrait"); sc_tparams = [];
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([11:16-19], "KEY");
+           scc_type =
+           (Rhint ([11:9-15]), (Tapply (([11:9-15], "\\HH\\string"), [])));
+           scc_refs = []; scc_value = None; scc_is_shape_key = true;
+           scc_const_value = Typing_defs.Const_value.CVAbsent };
+          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([12:16-24], "UNMARKED");
+            scc_type =
+            (Rhint ([12:9-15]), (Tapply (([12:9-15], "\\HH\\string"), [])));
+            scc_refs = []; scc_value = None; scc_is_shape_key = false;
+            scc_const_value = Typing_defs.Const_value.CVAbsent }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
+  ("\\ShapeKeyParent",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([15:7-21], "\\ShapeKeyParent");
+        sc_tparams = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([17:16-19], "KEY");
+           scc_type =
+           (Rhint ([17:9-15]), (Tapply (([17:9-15], "\\HH\\string"), [])));
+           scc_refs = []; scc_value = None; scc_is_shape_key = true;
+           scc_const_value = Typing_defs.Const_value.CVAbsent };
+          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([18:16-24], "UNMARKED");
+            scc_type =
+            (Rhint ([18:9-15]), (Tapply (([18:9-15], "\\HH\\string"), [])));
+            scc_refs = []; scc_value = None; scc_is_shape_key = false;
+            scc_const_value = Typing_defs.Const_value.CVAbsent }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
+  ("\\ShapeKeyChild",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([21:7-20], "\\ShapeKeyChild");
+        sc_tparams = [];
+        sc_extends =
+        [(Rhint ([21:29-43]), (Tapply (([21:29-43], "\\ShapeKeyParent"), [])))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
+  ("\\ShapeKeyTraitUser",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([23:7-24], "\\ShapeKeyTraitUser");
+        sc_tparams = []; sc_extends = [];
+        sc_uses =
+        [(Rhint ([24:7-20]), (Tapply (([24:7-20], "\\ShapeKeyTrait"), [])))];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
+  ]

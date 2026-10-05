@@ -1,0 +1,8 @@
+ERROR: File "interface_constants.php", line 10, characters 35-61:
+Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "interface_constants.php", line 6, characters 16-23:
+  The class constant is declared here
+ERROR: File "interface_constants.php", line 14, characters 14-40:
+Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "interface_constants.php", line 6, characters 16-23:
+  The class constant is declared here

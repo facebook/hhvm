@@ -137,6 +137,8 @@ pub struct ClassConst<R: Reason> {
     pub ty: Ty<R>,
     pub origin: TypeName, // Identifies the class from which this const originates
     pub refs: Box<[ClassConstRef]>,
+    /// Whether the constant is explicitly or intrinsically permitted as a shape key.
+    pub is_shape_key: bool,
     // The recorded constant value. CVAbsent means no value was recorded
     // or the initializer cannot be represented.
     pub value: ConstValue,

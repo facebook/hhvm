@@ -13,7 +13,7 @@
           scc_name = ([4:16-19], "KEY");
           scc_type =
           (Rhint ([4:9-15]), (Tapply (([4:9-15], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = Typing_defs.Const_value.CVAbsent };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:15-16], "X");
@@ -21,7 +21,7 @@
            scc_refs =
            [((Typing_defs.From "\\C"), "KEY");
              ((Typing_defs.From "\\C"), "class")];
-           scc_value = None;
+           scc_value = None; scc_is_shape_key = false;
            scc_const_value = Typing_defs.Const_value.CVAbsent }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];

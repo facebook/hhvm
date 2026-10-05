@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f93e24f7d96d114a5f1f0340c9c1128>>
+// @generated SignedSource<<7138557a09ec91e7429c31b61baf764c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -293,6 +293,9 @@ pub struct ClassConst {
     pub origin: String,
     /// references to the constants used in the initializer
     pub refs: Vec<ClassConstRef>,
+    /// Whether the constant is explicitly or intrinsically permitted as a
+    /// shape key.
+    pub is_shape_key: bool,
     /// The recorded constant value; `CVAbsent` means no value was
     /// recorded or the initializer cannot be represented.
     pub value: ConstValue,

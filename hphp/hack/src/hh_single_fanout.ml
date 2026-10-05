@@ -10,6 +10,7 @@ open Hh_prelude
 
 type options = {
   debug: bool;
+  show_errors: bool;
   config: Config_file_common.t;
 }
 
@@ -172,7 +173,9 @@ let get_files_for_symbols
     Relative_path.Set.empty
 
 let compute_fanout
-    ctx (old_and_new_defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
+    ctx
+    naming_table
+    (old_and_new_defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     Fanout.t =
   let { Decl_redecl_service.fanout; _ } =
     Decl_redecl_service.redo_type_decl
@@ -180,7 +183,10 @@ let compute_fanout
       ~during_init:false
       None
       ~bucket_size:500
-      (fun _ -> S_set.empty)
+      (fun file ->
+        match Naming_table.get_file_info naming_table file with
+        | None -> S_set.empty
+        | Some file_info -> (File_info.simplify file_info).File_info.n_classes)
       ~previously_oldified_defs:File_info.empty_names
       ~defs:old_and_new_defs
   in
@@ -217,7 +223,7 @@ let compute_fanout_and_resolve_deps
       new_naming_table
   in
   let { Fanout.changed; to_recheck; to_recheck_if_errors } =
-    compute_fanout ctx old_and_new_defs
+    compute_fanout ctx new_naming_table old_and_new_defs
   in
   let dependent_on_files =
     Relative_path.Set.fold
@@ -417,6 +423,14 @@ let type_check_make_depgraph ctx options (files : Relative_path.Set.t) :
     ()
   );
   commit_dep_edges ();
+  if options.show_errors then (
+    Printf.printf "Errors in checked files:\n";
+    match Diagnostics.get_sorted_diagnostic_list errors with
+    | [] -> Printf.printf "No errors\n"
+    | errors ->
+      Diagnostics.convert_errors_to_string ~include_filename:true errors
+      |> List.iter ~f:(fun error -> Printf.printf "%s\n" error)
+  );
   errors
 
 (** Build the naming table and typecheck the base file to create the depgraph.
@@ -515,10 +529,14 @@ let parse_args () : string * options =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let fn_ref = ref [] in
   let debug = ref false in
+  let show_errors = ref false in
   let config_overrides = ref [] in
   let options =
     [
       ("--debug", Arg.Set debug, "print debug information");
+      ( "--show-errors",
+        Arg.Set show_errors,
+        "print diagnostics from the initial check and each fanout recheck" );
       ( "--config",
         Arg.String (fun s -> config_overrides := s :: !config_overrides),
         "<key=value> set a .hhconfig option" );
@@ -533,7 +551,7 @@ let parse_args () : string * options =
         let overrides = Config_file_common.parse_contents setting in
         Config_file_common.apply_overrides ~config ~overrides ~log_reason:None)
   in
-  let options = { debug = !debug; config } in
+  let options = { debug = !debug; show_errors = !show_errors; config } in
   let files = !fn_ref in
   match files with
   | [file] -> (file, options)

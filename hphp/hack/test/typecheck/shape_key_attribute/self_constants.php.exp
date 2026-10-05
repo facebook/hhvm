@@ -1,0 +1,4 @@
+ERROR: File "self_constants.php", line 10, characters 26-39:
+Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
+  File "self_constants.php", line 6, characters 16-23:
+  The class constant is declared here

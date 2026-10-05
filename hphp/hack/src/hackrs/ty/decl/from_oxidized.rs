@@ -398,6 +398,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowClassConst> for shallow::Shall
             ty: scc.type_.into(),
             refs: slice(scc.refs),
             value: scc.value,
+            is_shape_key: scc.is_shape_key,
             const_value: scc.const_value.into(),
         }
     }
@@ -668,6 +669,7 @@ impl<R: Reason> From<o::typing_defs::ClassConst> for folded::ClassConst<R> {
             ty: x.type_.into(),
             origin: x.origin.into(),
             refs: slice(x.refs),
+            is_shape_key: x.is_shape_key,
             value: x.value.into(),
         }
     }

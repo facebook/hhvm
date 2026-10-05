@@ -12,6 +12,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\C",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
     },
@@ -126,6 +127,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
         "IntVal": ClassConst {
@@ -135,6 +137,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVInt(
                 1,
             ),
@@ -146,6 +149,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVInt(
                 -2,
             ),
@@ -157,6 +161,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVInt(
                 16,
             ),
@@ -168,6 +173,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVLargeInt(
                 "9223372036854775807",
             ),
@@ -179,6 +185,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVLargeInt(
                 "-9223372036854775808",
             ),
@@ -190,6 +197,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVString(
                 "hello",
             ),
@@ -201,6 +209,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVNameof(
                 "\\C",
             ),
@@ -219,6 +228,7 @@ FoldedClass {
                     "class",
                 ),
             ],
+            is_shape_key: false,
             value: CVClassPointer(
                 "\\C",
             ),
@@ -230,6 +240,7 @@ FoldedClass {
             ty: E,
             origin: "\\E",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
     },

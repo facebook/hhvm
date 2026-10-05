@@ -222,6 +222,9 @@ type shallow_class_const = {
   scc_value: string option;
       (** If DeclParserConfig option include_assignment_values is true,
       The string value for the constant *)
+  scc_is_shape_key: bool;
+      (** Whether the constant is explicitly or intrinsically permitted as a
+      shape key. *)
   scc_const_value: Typing_defs.Const_value.t;
       (** The recorded constant value. CVAbsent means no value was
       recorded or the initializer cannot be represented. *)

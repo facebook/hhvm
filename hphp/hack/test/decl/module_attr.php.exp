@@ -115,7 +115,7 @@ File root|module_attr.php--elsewhere.php
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([6:3-4], "A");
           scc_type = (Rwitness_from_decl ([6:7-8]), (Tprim Tint));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = (Typing_defs.Const_value.CVInt 3) }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];

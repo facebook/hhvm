@@ -19,7 +19,7 @@
           scc_type =
           (Rwitness_from_decl ([3:30-33]),
            (Tapply (([3:30-33], "\\HH\\string"), [])));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = (Typing_defs.Const_value.CVString "a") }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -52,7 +52,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:26-27], "X");
            scc_type = (Rwitness_from_decl ([5:28-29]), (Tprim Tint));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVInt 1) }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -87,7 +87,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:27-28], "X");
            scc_type = (Rwitness_from_decl ([7:29-30]), (Tprim Tint));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVInt 1) }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -127,14 +127,14 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([11:20-21], "X");
            scc_type = (Rwitness_from_decl ([11:22-23]), (Tprim Tint));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVInt 1) };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:25-26], "Y");
             scc_type =
             (Rwitness_from_decl ([11:27-30]),
              (Tapply (([11:27-30], "\\HH\\string"), [])));
-            scc_refs = []; scc_value = None;
+            scc_refs = []; scc_value = None; scc_is_shape_key = false;
             scc_const_value = (Typing_defs.Const_value.CVString "a") }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -166,6 +166,7 @@
            scc_name = ([13:18-19], "X");
            scc_type = (Rwitness_from_decl ([13:18-19]), Tany);
            scc_refs = [((Typing_defs.From "\\C"), "X")]; scc_value = None;
+           scc_is_shape_key = false;
            scc_const_value =
            (Typing_defs.Const_value.CVConstAccess ("\\C", "X")) }
           ];

@@ -11,6 +11,7 @@ FoldedClass {
             ty: class<this>,
             origin: "\\A",
             refs: [],
+            is_shape_key: false,
             value: CVAbsent,
         },
     },

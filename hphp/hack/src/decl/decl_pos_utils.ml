@@ -132,6 +132,7 @@ struct
       cc_type = ty cc.cc_type;
       cc_origin = cc.cc_origin;
       cc_refs = cc.cc_refs;
+      cc_is_shape_key = cc.cc_is_shape_key;
       cc_value = cc.cc_value;
     }
 
@@ -308,6 +309,7 @@ struct
       scc_type = ty scc.scc_type;
       scc_refs = scc.scc_refs;
       scc_value = scc.scc_value;
+      scc_is_shape_key = scc.scc_is_shape_key;
       scc_const_value = scc.scc_const_value;
     }
 

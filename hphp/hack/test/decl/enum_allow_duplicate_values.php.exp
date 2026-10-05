@@ -17,12 +17,12 @@
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([9:3-4], "A");
           scc_type = (Rwitness_from_decl ([9:7-8]), (Tprim Tint));
-          scc_refs = []; scc_value = None;
+          scc_refs = []; scc_value = None; scc_is_shape_key = false;
           scc_const_value = (Typing_defs.Const_value.CVInt 1) };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:3-4], "B");
            scc_type = (Rwitness_from_decl ([10:7-8]), (Tprim Tint));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVInt 1) }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -54,12 +54,12 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([15:3-4], "C");
            scc_type = (Rwitness_from_decl ([15:7-8]), (Tprim Tint));
-           scc_refs = []; scc_value = None;
+           scc_refs = []; scc_value = None; scc_is_shape_key = false;
            scc_const_value = (Typing_defs.Const_value.CVInt 1) };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([16:3-4], "D");
             scc_type = (Rwitness_from_decl ([16:7-8]), (Tprim Tint));
-            scc_refs = []; scc_value = None;
+            scc_refs = []; scc_value = None; scc_is_shape_key = false;
             scc_const_value = (Typing_defs.Const_value.CVInt 2) }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

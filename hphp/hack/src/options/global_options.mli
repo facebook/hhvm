@@ -178,6 +178,8 @@ type t = {
       (** Flag to error on using discarded nullable awaitables *)
   tco_check_duplicate_enum_values: bool;
       (** Flag to error on enums whose member values are not distinct *)
+  tco_require_shape_key_attribute: bool;
+      (** Require the ShapeKey attribute at class-constant shape-key use sites. *)
   tco_typecheck_sample_rate: float;
       (** Type check this proportion of all files. Default is 1.0.
         DO NOT set to any other value except for testing purposes. *)
@@ -365,6 +367,7 @@ val set :
   ?symbol_write_sym_hash_out:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?tco_check_duplicate_enum_values:bool ->
+  ?tco_require_shape_key_attribute:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_no_auto_dynamic:bool ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1a67b31933e531b41d34968b831dce26>>
+// @generated SignedSource<<5c2fb8b902dd8f7ee3de4b61a415dd61>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -53,6 +53,9 @@ pub struct ShallowClassConst {
     /// If DeclParserConfig option include_assignment_values is true,
     /// The string value for the constant
     pub value: Option<String>,
+    /// Whether the constant is explicitly or intrinsically permitted as a
+    /// shape key.
+    pub is_shape_key: bool,
     /// The recorded constant value. CVAbsent means no value was
     /// recorded or the initializer cannot be represented.
     pub const_value: typing_defs::ConstValue,

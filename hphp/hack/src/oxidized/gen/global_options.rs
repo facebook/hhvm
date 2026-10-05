@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b872b8807e509a450f0b48198874ae4d>>
+// @generated SignedSource<<85481162114ab096c2aeba6f876f0eb0>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -279,6 +279,8 @@ pub struct GlobalOptions {
     pub tco_disallow_discarded_nullable_awaitables: bool,
     /// Flag to error on enums whose member values are not distinct
     pub tco_check_duplicate_enum_values: bool,
+    /// Require the ShapeKey attribute at class-constant shape-key use sites.
+    pub tco_require_shape_key_attribute: bool,
     /// Type check this proportion of all files. Default is 1.0.
     /// DO NOT set to any other value except for testing purposes.
     pub tco_typecheck_sample_rate: f64,

@@ -108,6 +108,8 @@ module Hhconfig : sig
 
   val check_duplicate_enum_values : string
 
+  val require_shape_key_attribute : string
+
   val include_enum_member_values : string
 
   val disallow_toplevel_requires : string

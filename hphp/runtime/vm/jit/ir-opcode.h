@@ -85,10 +85,10 @@ struct SSATmp;
  *     NA                                     instruction takes no sources
  *     S(t1 OR ... OR tn, f1 | ... | fk)      source's type must one of t1, ..., tn
  *     S(AK(<kind>), f1 | ... | fk)           source must be an array with specified kind
- *     C(T, f1 | ... | fk)                    source must be a constant 
+ *     C(T, f1 | ... | fk)                    source must be a constant
  *                                            and subtype of T
  *     CStr(f1 | ... | fk)                    same as C(StaticStr)
- *     SVar(t1 OR ... OR tn, f1 | ... | fk)   variadic source list, 
+ *     SVar(t1 OR ... OR tn, f1 | ... | fk)   variadic source list,
  *                                            each one's type one of t1, ..., tn
  *     SCrossTrace                            cross-trace arguments specific
  *                                            to the SrcKey target
@@ -96,7 +96,7 @@ struct SSATmp;
  *     f1, ..., fk  are source-specific flags:
  *     CR         consumes reference: the instruction will decref the source
  *     MMR        may move reference: the instruction will either decref or store the source somewhere
- *     MR         moves reference:    the instuction will store the source somewhere 
+ *     MR         moves reference:    the instuction will store the source somewhere
  *
  * Opcode flags:
  *
@@ -133,12 +133,6 @@ enum class Opcode : uint16_t {
 #define O(...) +1
 size_t constexpr kNumOpcodes = IR_OPCODES;
 #undef O
-
-/*
- * Returns true for instructions that refine the types of values with
- * a runtime check.
- */
-bool isGuardOp(Opcode opc);
 
 /*
  * Returns the negated version of the specified opcode, if its a comparison

@@ -215,19 +215,6 @@ OpInfo g_opInfo[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool isGuardOp(Opcode opc) {
-  switch (opc) {
-    case CheckLoc:
-    case CheckStk:
-    case CheckType:
-    case CheckMBase:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
 Optional<Opcode> negateCmpOp(Opcode opc) {
   switch (opc) {
     case GtBool:              return LteBool;

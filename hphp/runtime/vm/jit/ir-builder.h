@@ -135,25 +135,23 @@ struct IRBuilder {
   void enableConstrainGuards();
 
   /*
+   * Emit and register a tracelet guard assumption for an untracked location.
+   * TCell requires no guard. Only used while constraining guards for region
+   * selection; the emitted assertion does not perform a runtime check.
+   */
+  void guardType(Location, Type);
+
+  /*
    * All the guards in the managed IRUnit.
    */
   const GuardConstraints* guards() const { return &m_constraints; }
 
   /*
-   * Return true iff `gc' is more specific than the existing constraint for the
-   * guard `inst'.
-   *
-   * This does not necessarily constrain the guard, if `gc.weak' is true.
-   */
-  bool constrainGuard(const IRInstruction* inst, GuardConstraint gc);
-
-  /*
    * Trace back to the guard that provided the type of `val', if any, then
    * constrain it so that its type will not be relaxed beyond `gc'.
    *
-   * Like constrainGuard(), this returns true iff `gc' is more specific than
-   * the existing constraint, and does not constrain the guard if `gc.weak' is
-   * true.
+   * Returns true iff a guard needs a tighter constraint, and does not change
+   * constraints if `gc.weak' is true.
    */
   bool constrainValue(SSATmp* const val, GuardConstraint gc);
 
@@ -165,7 +163,7 @@ struct IRBuilder {
   bool constrainStack(IRSPRelOffset offset, GuardConstraint gc);
 
   /*
-   * Returns the number of instructions that have non-generic type constraints.
+   * Returns the number of registered guards with non-generic type constraints.
    */
   uint32_t numGuards() const;
 
@@ -346,12 +344,11 @@ private:
    */
   bool constrainLocation(Location l, GuardConstraint gc,
                          const std::string& why);
-  bool constrainCheck(const IRInstruction* inst,
-                      GuardConstraint gc, Type srcType);
-  bool constrainAssert(const IRInstruction* inst,
-                       GuardConstraint gc, Type srcType,
-                       Optional<Type> knownType = std::nullopt);
   bool constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc);
+  bool constrainRefinement(const IRInstruction* inst,
+                           GuardConstraint gc, Type srcType);
+  bool constrainGuard(const IRInstruction* inst, GuardConstraint gc,
+                      Type srcType);
   bool shouldConstrainGuards() const;
 
   bool isMBaseLoad(const IRInstruction*) const;

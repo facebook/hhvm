@@ -176,13 +176,10 @@ dynamic getOpcode(const IRInstruction* inst,
 
   const bool isGuard = constraints &&
                        !inst->isTransient() &&
-                       isGuardOp(inst->op());
+                       constraints->guards.contains(inst);
   dynamic guard;
   if (isGuard) {
-    auto const it = constraints->guards.find(inst);
-    guard = (it == constraints->guards.end() ?
-             "unused" :
-             it->second.toString());
+    guard = constraints->guards.at(inst).toString();
   } else {
     guard = dynamic(nullptr);
   }
@@ -525,7 +522,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
   auto const hasTypeParam = inst->hasTypeParam();
   auto const hasExtra = inst->hasExtra();
   auto const isGuard =
-    constraints && !inst->isTransient() && isGuardOp(inst->op());
+    constraints && !inst->isTransient() && constraints->guards.contains(inst);
 
   if (!hasTypeParam && !hasExtra && !isGuard) return;
   os << color(ANSI_COLOR_LIGHT_BLUE) << '<' << color(ANSI_COLOR_END);
@@ -546,8 +543,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
   }
 
   if (isGuard) {
-    auto it = constraints->guards.find(inst);
-    os << (it == constraints->guards.end() ? "unused" : it->second.toString());
+    os << constraints->guards.at(inst).toString();
   }
 
   os << color(ANSI_COLOR_LIGHT_BLUE)

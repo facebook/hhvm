@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
-#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -28,8 +27,6 @@
 
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
-
-#include <folly/MapUtil.h>
 
 #include <algorithm>
 
@@ -197,15 +194,13 @@ bool prepareInstruction(Env& env) {
   auto const op = env.inst.op();
   auto& fs = env.irgs.irb->fs();
 
-  Block* guardFailBlock = nullptr;
   auto addGuardIfUntracked = [&](Location loc) {
     FTRACE(1, "prepareInstruction: input: {}\n", show(loc));
     if (!fs.tracked(loc) &&
         (loc.tag() != LTag::Local || !fs.localsCleared())) {
       auto const type = getLiveType(env.ctx.liveTypes, loc);
       assert_flog(type <= TCell, "loc = {}: type = {}", show(loc), type);
-      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
-      irgen::checkType(env.irgs, loc, type, guardFailBlock);
+      env.irgs.irb->guardType(loc, type);
     }
   };
 
@@ -349,40 +344,21 @@ bool isThisSelfOrParent(Op op) {
   }
 }
 
-/*
- * For every instruction in trace representing a tracelet guard, call func with
- * its location and type.
- */
-template<typename F>
-void visitGuards(IRUnit& unit, F func) {
-  auto blocks = rpoSortCfg(unit);
-
-  for (auto const block : blocks) {
-    for (auto const& inst : *block) {
-      switch (inst.op()) {
-        case CheckLoc:
-          func(&inst,
-               Location::Local{inst.extra<LocalId>()->locId},
-               inst.typeParam());
-          break;
-        case CheckStk: {
-          auto const irSPRel = inst.extra<IRSPRelOffsetData>()->offset;
-
-          auto const defSP = inst.src(0)->inst();
-          assertx(defSP->is(DefFrameRelSP, DefRegSP));
-          auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
-
-          func(&inst,
-               Location::Stack{irSPRel.to<SBInvOffset>(irSPOff)},
-               inst.typeParam());
-          break;
-        }
-        case CheckMBase:
-          func(&inst, Location::MBase{}, inst.typeParam());
-          break;
-        default: break;
-      }
+Location guardLocation(const IRInstruction* guard) {
+  switch (guard->op()) {
+    case AssertLoc:
+      return Location::Local{guard->extra<AssertLoc>()->locId};
+    case AssertStk: {
+      auto const defSP = guard->src(0)->inst();
+      assertx(defSP->is(DefFrameRelSP, DefRegSP));
+      auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
+      auto const offset = guard->extra<AssertStk>()->offset;
+      return Location::Stack{offset.to<SBInvOffset>(irSPOff)};
     }
+    case AssertMBase:
+      return Location::MBase{};
+    default:
+      not_reached();
   }
 }
 
@@ -392,17 +368,15 @@ void visitGuards(IRUnit& unit, F func) {
 void recordDependencies(Env& env) {
   // Relax guards and record the ones that survived.
   auto& firstBlock = *env.region->blocks().front();
-  auto& unit = env.irgs.unit;
   auto guardMap = std::map<Location,Type>{};
   ITRACE(2, "Visiting guards\n");
   auto catMap = std::map<Location,DataTypeCategory>{};
-  const auto& guards = env.irgs.irb->guards()->guards;
-  visitGuards(unit, [&] (const IRInstruction* guard,
-                         const Location& loc,
-                         Type type) {
+  auto const& constraints = *env.irgs.irb->guards();
+  for (auto const& [guard, gc] : constraints.guards) {
     Trace::Indent indent;
+    auto const loc = guardLocation(guard);
+    auto const type = guard->typeParam();
     assertx(type <= TCell);
-    auto const gc = folly::get_default(guards, guard);
     auto gcToRelax = gc;
     if (DataTypeGeneric < gc.category && gc.category < DataTypeSpecific) {
       gcToRelax = DataTypeSpecific;
@@ -414,12 +388,12 @@ void recordDependencies(Env& env) {
     auto inret = guardMap.insert(std::make_pair(loc, relaxedType));
     if (inret.second) {
       catMap[loc] = gc.category;
-      return;
+      continue;
     }
     inret.first->second &= relaxedType;
     auto& oldCat = catMap[loc];
     oldCat = std::max(oldCat, gc.category);
-  });
+  }
 
   for (auto& kv : guardMap) {
     if (kv.second == TCell) {

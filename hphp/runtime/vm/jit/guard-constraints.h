@@ -26,14 +26,15 @@ namespace HPHP::jit {
 struct IRInstruction;
 
 /*
- * GuardConstraints holds state that is collected during initial IR generation
- * and needed by the guard relaxation pass.
+ * GuardConstraints holds state collected during tracelet formation to determine
+ * which type assumptions the region depends on.
  */
 struct GuardConstraints {
   /*
-   * Maps guard instructions (CheckLoc, CheckStk, etc.) to GuardConstraints.
-   * The GuardConstraints for a guard start out fully generic and are tightened
-   * appropriately when a value's type is used.
+   * Maps explicitly emitted tracelet guard assumptions to GuardConstraints.
+   * Entries are inserted with a fully generic constraint when the guard is
+   * emitted, then tightened when its type is used. Only these instructions
+   * have relaxable types; ordinary checks and assertions do not.
    */
   jit::hash_map<const IRInstruction*, GuardConstraint> guards;
 
@@ -53,4 +54,3 @@ struct GuardConstraints {
 };
 
 }
-

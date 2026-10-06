@@ -764,18 +764,37 @@ void IRBuilder::setCurMarker(const BCMarker& newMarker) {
 ///////////////////////////////////////////////////////////////////////////////
 // Guard relaxation.
 
-bool IRBuilder::constrainGuard(const IRInstruction* inst, GuardConstraint gc) {
-  if (!shouldConstrainGuards()) return false;
+void IRBuilder::guardType(Location l, Type type) {
+  assertx(shouldConstrainGuards());
+  assertx(!m_state.tracked(l));
+  assertx(type <= TCell);
+  if (type == TCell) return;
 
-  auto& guard = m_constraints.guards[inst];
-  auto newGc = applyConstraint(guard, gc);
-  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, gc, guard, newGc);
-  Indent _i;
+  auto const inst = [&] {
+    auto const bcctx = nextBCContext();
+    switch (l.tag()) {
+      case LTag::Local:
+        return m_unit.gen(
+          AssertLoc, bcctx, type, LocalId{l.localId()}, m_state.fp()
+        );
+      case LTag::Stack:
+        return m_unit.gen(
+          AssertStk, bcctx, type,
+          IRSPRelOffsetData{l.stackIdx().to<IRSPRelOffset>(m_state.irSPOff())},
+          m_state.sp()
+        );
+      case LTag::MBase:
+        return m_unit.gen(AssertMBase, bcctx, type);
+    }
+    not_reached();
+  }();
 
-  auto const changed = guard != newGc;
-  if (changed && !gc.weak) guard = newGc;
-
-  return changed;
+  // An untracked location has no value, so this cannot become an AssertType.
+  // Its non-generic type also prevents the assertion from being eliminated.
+  optimizeInst(inst, CloneFlag::No, nullptr);
+  assertx(inst->is(AssertLoc, AssertStk, AssertMBase));
+  assertx(inst->block());
+  m_constraints.guards.emplace(inst, GuardConstraint{});
 }
 
 bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
@@ -819,22 +838,13 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
     return changed;
   }
 
-  if (inst->is(AssertType)) {
+  if (inst->is(AssertType, CheckType)) {
     // Sometimes code in irgen asks for a value with DataTypeSpecific but can
     // tolerate a less specific value.  If that happens, there's nothing to
     // constrain.
     if (!typeFitsConstraint(val->type(), gc)) return false;
 
-    return constrainAssert(inst, gc, inst->src(0)->type());
-  }
-
-  if (inst->is(CheckType)) {
-    // Sometimes code in irgen asks for a value with DataTypeSpecific but can
-    // tolerate a less specific value.  If that happens, there's nothing to
-    // constrain.
-    if (!typeFitsConstraint(val->type(), gc)) return false;
-
-    return constrainCheck(inst, gc, inst->src(0)->type());
+    return constrainRefinement(inst, gc, inst->src(0)->type());
   }
 
   if (inst->isPassthrough()) {
@@ -911,29 +921,27 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
     return false;
   }
 
-  if (guard->is(AssertLoc, AssertStk, AssertMBase)) {
-    return constrainAssert(guard, gc, prevType);
+  if (m_constraints.guards.contains(guard)) {
+    return constrainGuard(guard, gc, prevType);
   }
-  return constrainCheck(guard, gc, prevType);
+
+  return constrainRefinement(guard, gc, prevType);
 }
 
 /*
- * Constrain the sources of an Assert instruction.
- *
- * We also have to constrain the sources for Check instructions, and we share
- * this codepath for that purpose.  However, for Checks, we first pre-relax the
- * instruction's typeParam, which we pass as `knownType'.  (Otherwise, the
- * typeParam will be used as the `knownType'.)
+ * Constrain the sources of an ordinary assertion or check. Its typeParam is
+ * not relaxed, so only constrain sources for information it doesn't provide.
  */
-bool IRBuilder::constrainAssert(const IRInstruction* inst,
-                                GuardConstraint gc, Type srcType,
-                                Optional<Type> knownType) {
-  if (!knownType) knownType = inst->typeParam();
+bool IRBuilder::constrainRefinement(const IRInstruction* inst,
+                                    GuardConstraint gc, Type srcType) {
+  assertx(shouldConstrainGuards());
+
+  auto const knownType = inst->typeParam();
 
   // If the known type fits the constraint, we're done.
-  if (typeFitsConstraint(*knownType, gc)) return false;
+  if (typeFitsConstraint(knownType, gc)) return false;
 
-  auto const newGC = relaxConstraint(gc, *knownType, srcType);
+  auto const newGC = relaxConstraint(gc, knownType, srcType);
   ITRACE(1, "tracing through {}, orig gc: {}, new gc: {}\n",
          *inst, gc, newGC);
 
@@ -951,26 +959,30 @@ bool IRBuilder::constrainAssert(const IRInstruction* inst,
 }
 
 /*
- * Constrain the typeParam and sources of a Check instruction.
+ * Constrain a registered guard just enough to satisfy `gc', returning true
+ * iff that requires a more specific constraint than its existing one.
+ *
+ * This does not necessarily constrain the guard, if `gc.weak' is true.
  */
-bool IRBuilder::constrainCheck(const IRInstruction* inst,
-                               GuardConstraint gc, Type srcType) {
-  assertx(inst->is(CheckType, CheckLoc, CheckStk, CheckMBase));
+bool IRBuilder::constrainGuard(const IRInstruction* inst, GuardConstraint gc,
+                               Type srcType) {
+  assertx(shouldConstrainGuards());
 
-  auto changed = false;
-  auto const typeParam = inst->typeParam();
+  // The location was untracked when this guard was emitted, so its incoming
+  // type is TCell and there are no earlier type sources to constrain.
+  // We keep the scaffolding around with the aim of eventual introduction
+  // of entry assertions.
+  assertx(srcType == TCell);
 
-  // Constrain the guard on the Check instruction, but first relax the
-  // constraint based on what's known about `srcType'.
-  auto const guardGC = relaxConstraint(gc, srcType, typeParam);
-  changed |= constrainGuard(inst, guardGC);
+  auto& guard = m_constraints.guards.at(inst);
 
-  // Relax typeParam with its current constraint.  This is used below to
-  // recursively relax the constraint on the source, if needed.
-  auto constraint = applyConstraint(m_constraints.guards[inst], guardGC);
-  auto const knownType = relaxToConstraint(typeParam, constraint);
+  auto const guardGC = relaxConstraint(gc, srcType, inst->typeParam());
+  auto const newGC = applyConstraint(guard, guardGC);
+  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, gc, guard, newGC);
+  Indent _i;
 
-  changed |= constrainAssert(inst, gc, srcType, knownType);
+  auto const changed = guard != newGC;
+  if (changed && !gc.weak) guard = newGC;
 
   return changed;
 }

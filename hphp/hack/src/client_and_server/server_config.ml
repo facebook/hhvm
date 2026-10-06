@@ -513,8 +513,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt
          Config_keys.Hhconfig.reject_promoted_property_redeclaration
          config)
-    ?tco_ignore_unsafe_cast:
-      (bool_opt Config_keys.Hhconfig.ignore_unsafe_cast config)
     ?tco_allowed_expression_tree_visitors:
       (Option.map
          (string_list_opt

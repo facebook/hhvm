@@ -134,8 +134,6 @@ module Hhconfig : sig
 
   val hh_distc_should_disable_trace_store : string
 
-  val ignore_unsafe_cast : string
-
   val implicit_inherit_sdt : string
 
   val language_feature_logging : string

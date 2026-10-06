@@ -199,8 +199,6 @@ type t = {
       (** Allow variadic named parameters on function definitions, e.g.
           `function f(named int...): void {}` *)
   tco_global_access_check_enabled: bool;
-  tco_ignore_unsafe_cast: bool;
-      (** Ignores unsafe_cast and retains the original type of the expression *)
   tco_enable_expression_trees: bool;
       (** Enable expression trees via unstable features flag *)
   tco_allowed_expression_tree_visitors: string list;
@@ -376,7 +374,6 @@ val set :
   ?tco_named_variadic_type:bool ->
   ?tco_variadic_named_parameters:bool ->
   ?tco_global_access_check_enabled:bool ->
-  ?tco_ignore_unsafe_cast:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_typeconst_concrete_concrete_error:bool ->

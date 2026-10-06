@@ -147,8 +147,6 @@ module Hhconfig = struct
   let hh_distc_should_disable_trace_store =
     key "hh_distc_should_disable_trace_store"
 
-  let ignore_unsafe_cast = key "ignore_unsafe_cast"
-
   let implicit_inherit_sdt = key "implicit_inherit_sdt"
 
   let language_feature_logging = key "language_feature_logging"

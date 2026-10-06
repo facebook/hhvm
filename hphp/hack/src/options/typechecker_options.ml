@@ -132,8 +132,6 @@ let variadic_named_parameters t = t.Global_options.tco_variadic_named_parameters
 let interpret_soft_types_as_like_types t =
   t.Global_options.po.Parser_options.interpret_soft_types_as_like_types
 
-let ignore_unsafe_cast t = t.Global_options.tco_ignore_unsafe_cast
-
 let set_tco_no_parser_readonly_check t b =
   let po =
     { t.Global_options.po with Parser_options.no_parser_readonly_check = b }

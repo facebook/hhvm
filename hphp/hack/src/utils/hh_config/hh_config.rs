@@ -468,7 +468,6 @@ impl HhConfig {
                 "tco_global_access_check_enabled",
                 default.tco_global_access_check_enabled,
             )?,
-            tco_ignore_unsafe_cast: default.tco_ignore_unsafe_cast,
             tco_enable_expression_trees: default.tco_enable_expression_trees,
             tco_allowed_expression_tree_visitors: hhconfig
                 .get_str("allowed_expression_tree_visitors")

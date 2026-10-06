@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85481162114ab096c2aeba6f876f0eb0>>
+// @generated SignedSource<<815d20cda8bc4fbb3cef37f3f8be1cdd>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -300,8 +300,6 @@ pub struct GlobalOptions {
     /// `function f(named int...): void {}`
     pub tco_variadic_named_parameters: bool,
     pub tco_global_access_check_enabled: bool,
-    /// Ignores unsafe_cast and retains the original type of the expression
-    pub tco_ignore_unsafe_cast: bool,
     /// Enable expression trees via unstable features flag
     pub tco_enable_expression_trees: bool,
     /// Allowed expression tree visitors when not enabled via unstable features flag

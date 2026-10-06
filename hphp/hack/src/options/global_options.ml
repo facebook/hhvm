@@ -156,7 +156,6 @@ type t = {
   tco_named_variadic_type: bool;
   tco_variadic_named_parameters: bool;
   tco_global_access_check_enabled: bool;
-  tco_ignore_unsafe_cast: bool;
   tco_enable_expression_trees: bool;
   tco_allowed_expression_tree_visitors: string list;
   tco_typeconst_concrete_concrete_error: bool;
@@ -272,7 +271,6 @@ let default =
     tco_named_variadic_type = false;
     tco_variadic_named_parameters = false;
     tco_global_access_check_enabled = false;
-    tco_ignore_unsafe_cast = false;
     tco_enable_expression_trees = false;
     tco_allowed_expression_tree_visitors = [];
     tco_typeconst_concrete_concrete_error = false;
@@ -387,7 +385,6 @@ let set
     ?tco_named_variadic_type
     ?tco_variadic_named_parameters
     ?tco_global_access_check_enabled
-    ?tco_ignore_unsafe_cast
     ?tco_enable_expression_trees
     ?tco_allowed_expression_tree_visitors
     ?tco_typeconst_concrete_concrete_error
@@ -604,8 +601,6 @@ let set
       setting
         tco_global_access_check_enabled
         options.tco_global_access_check_enabled;
-    tco_ignore_unsafe_cast =
-      setting tco_ignore_unsafe_cast options.tco_ignore_unsafe_cast;
     tco_enable_expression_trees =
       setting tco_enable_expression_trees options.tco_enable_expression_trees;
     tco_allowed_expression_tree_visitors =

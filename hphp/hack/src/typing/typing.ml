@@ -6188,9 +6188,6 @@ end = struct
         ->
         let result =
           match el with
-          | [Aast_defs.Anormal original_expr]
-            when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
-            expr ~expected:None ~ctxt:Context.default env original_expr
           | _ ->
             (* first type the `unsafe_cast` as a call, handling arity errors *)
             let (env, fty, tal) =

@@ -166,14 +166,6 @@ void cgCheckStk(IRLS& env, const IRInstruction* inst) {
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
 }
 
-void cgCheckMBase(IRLS& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  auto const srcLoc = tmpLoc(env, src);
-  emitTypeCheck(vmain(env), env, inst->typeParam(),
-                memTVTypePtr(src, srcLoc), memTVValPtr(src, srcLoc),
-                inst->taken());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

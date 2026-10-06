@@ -36,6 +36,13 @@ void checkTypeImpl(IRGS& env, Type type, Block* exit, Check check, Ld ld) {
   }
 }
 
+void checkTypeImpl(IRGS& env, Type type, Block* exit, SSATmp* val) {
+  if (type.isSpecialized()) {
+    val = gen(env, CheckType, type.unspecialize(), exit, val);
+  }
+  gen(env, CheckType, type, exit, val);
+}
+
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Block* exit) {
   checkTypeImpl(env, type, exit,
     [&](Type test, Block* exit) {
@@ -62,16 +69,8 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, Block* exit) {
 }
 
 void checkTypeMBase(IRGS& env, Type type, Block* exit) {
-  auto const mbr = ldMBase(env);
-  checkTypeImpl(env, type, exit,
-    [&](Type test, Block* exit) {
-      gen(env, CheckMBase, test, exit, mbr);
-    },
-    [&](Type test) {
-      test &= env.irb->fs().mbase().type;
-      return gen(env, LdMem, test, mbr);
-    }
-  );
+  auto const val = gen(env, LdMem, TCell, ldMBase(env));
+  checkTypeImpl(env, type, exit, val);
 }
 
 //////////////////////////////////////////////////////////////////////

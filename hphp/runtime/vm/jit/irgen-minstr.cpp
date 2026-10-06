@@ -2251,8 +2251,8 @@ void checkElemDimForReadonly(IRGS& env) {
     env,
     [&] (Block* taken) {
       gen(env, CheckMROProp, taken);
-      auto const mbr = ldMBase(env);
-      gen(env, CheckMBase, TObj, taken, mbr);
+      auto const base = gen(env, LdMem, TCell, ldMBase(env));
+      gen(env, CheckType, TObj, taken, base);
     },
     [&] {
       env.irb->exceptionStackBoundary();

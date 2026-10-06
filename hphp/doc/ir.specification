@@ -199,11 +199,6 @@ Instruction set
   Check that the type of the cell on the stack pointed to by S0 at offset (in
   cells) is T; if not, branch to block B.
 
-| CheckMBase<T>, ND, S(Lval), B
-
-  Check that the value pointed to by the member base register S0 has type T; if
-  not, branch to block B.
-
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
@@ -220,8 +215,8 @@ Instruction set
 | AssertMBase<T>, ND, NA, NF
 
   Assert that the value pointed to by the member base register has type T.
-  This is similar to a CheckMBase except that it does not imply a runtime check
-  and cannot cause control flow.
+  This is similar to a CheckType on the member base value except that it does
+  not imply a runtime check and cannot cause control flow.
 
 | CheckCold<TransID>, ND, NA, B
 

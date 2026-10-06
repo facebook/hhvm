@@ -309,7 +309,6 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
   // JmpZero/JmpNZero is handled separately.
   assertx(inst->is(CheckLoc,
                    CheckStk,
-                   CheckMBase,
                    CheckRDSInitialized,
                    CheckVecBounds,
                    CheckDictKeys,
@@ -2689,10 +2688,6 @@ SSATmp* simplifyCheckStk(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckMBase(State& env, const IRInstruction* inst) {
-  return mergeBranchDests(env, inst);
-}
-
 SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
   assertx(inst->taken() != nullptr);
@@ -4232,7 +4227,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(MarkRDSInitialized)
       X(MarkRDSAccess)
       X(CheckLoc)
-      X(CheckMBase)
       X(CheckStk)
       X(CheckType)
       X(AssertType)

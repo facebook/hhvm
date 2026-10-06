@@ -551,7 +551,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckFuncNeedsCoverage:
   case CheckKeysetOffset:
   case CheckLoc:
-  case CheckMBase:
   case CheckMROProp:
   case CheckMissingKeyInArrLike:
   case CheckNonNull:

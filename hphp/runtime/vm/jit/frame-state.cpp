@@ -496,15 +496,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     );
     break;
 
-  case CheckMBase:
-    setMBR(inst->src(0), true);
-    refineTypeAndSyncMBase(
-      Location::MBase{},
-      inst->typeParam(),
-      TypeSource::makeGuard(inst)
-    );
-    break;
-
   case StLoc:
   case StLocMeta:
     setValueAndSyncMBase(

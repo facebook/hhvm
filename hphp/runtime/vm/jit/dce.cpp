@@ -350,7 +350,6 @@ bool canDCE(const IRInstruction& inst) {
   case CheckSmashableClass:
   case CheckLoc:
   case CheckStk:
-  case CheckMBase:
   case AssertLoc:
   case AssertStk:
   case AssertMBase:

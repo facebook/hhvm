@@ -1308,9 +1308,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Member instructions
 
-  case CheckMBase:
-    return may_load_store(pointee(inst.src(0)), AEmpty);
-
   /*
    * Various minstr opcodes that take a Lval in src 0, which may or may not
    * point to a frame local or the evaluation stack. Some may read or write to

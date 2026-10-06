@@ -40,7 +40,6 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
                JmpNZero,
                CheckLoc,
                CheckStk,
-               CheckMBase,
                CheckRDSInitialized)) {
     return false;
   }

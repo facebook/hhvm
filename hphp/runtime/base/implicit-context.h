@@ -25,6 +25,7 @@
 namespace HPHP {
 
 struct ImplicitContext {
+  static constexpr bool sweep = false;
 
   ////////////////////////////////////////////////////////////////////////////
   // Members

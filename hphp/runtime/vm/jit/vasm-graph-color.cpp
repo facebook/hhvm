@@ -4605,6 +4605,14 @@ SpillWithRematResult spill_with_remat(State& state,
                                       Vreg dst,
                                       bool useDst,
                                       bool useSrc) {
+  // A physical register has no RegInfo and no defining instruction to
+  // rematerialize, so spill directly if needed.
+  if (src.isPhys()) {
+    if (!useSrc) return {0, false};
+    v << spill{src, dst};
+    return {1, false};
+  }
+
   // Determine if this Vreg can be rematerialized at this current
   // program point.
   auto const remat =

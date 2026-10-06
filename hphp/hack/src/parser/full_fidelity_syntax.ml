@@ -230,6 +230,7 @@ module WithToken (Token : TokenType) = struct
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
       | ShapeSplatSpecifier _ -> SyntaxKind.ShapeSplatSpecifier
+      | ShapeSplatExpression _ -> SyntaxKind.ShapeSplatExpression
       | ShapeExpression _ -> SyntaxKind.ShapeExpression
       | TupleExpression _ -> SyntaxKind.TupleExpression
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
@@ -630,6 +631,8 @@ module WithToken (Token : TokenType) = struct
     let is_shape_type_specifier = has_kind SyntaxKind.ShapeTypeSpecifier
 
     let is_shape_splat_specifier = has_kind SyntaxKind.ShapeSplatSpecifier
+
+    let is_shape_splat_expression = has_kind SyntaxKind.ShapeSplatExpression
 
     let is_shape_expression = has_kind SyntaxKind.ShapeExpression
 
@@ -2529,6 +2532,10 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc shape_splat_ellipsis in
         let acc = f acc shape_splat_type in
         acc
+      | ShapeSplatExpression { shape_splat_ellipsis; shape_splat_expression } ->
+        let acc = f acc shape_splat_ellipsis in
+        let acc = f acc shape_splat_expression in
+        acc
       | ShapeExpression
           {
             shape_expression_keyword;
@@ -4356,6 +4363,8 @@ module WithToken (Token : TokenType) = struct
         ]
       | ShapeSplatSpecifier { shape_splat_ellipsis; shape_splat_type } ->
         [shape_splat_ellipsis; shape_splat_type]
+      | ShapeSplatExpression { shape_splat_ellipsis; shape_splat_expression } ->
+        [shape_splat_ellipsis; shape_splat_expression]
       | ShapeExpression
           {
             shape_expression_keyword;
@@ -6193,6 +6202,8 @@ module WithToken (Token : TokenType) = struct
         ]
       | ShapeSplatSpecifier { shape_splat_ellipsis; shape_splat_type } ->
         ["shape_splat_ellipsis"; "shape_splat_type"]
+      | ShapeSplatExpression { shape_splat_ellipsis; shape_splat_expression } ->
+        ["shape_splat_ellipsis"; "shape_splat_expression"]
       | ShapeExpression
           {
             shape_expression_keyword;
@@ -8250,6 +8261,9 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.ShapeSplatSpecifier,
           [shape_splat_ellipsis; shape_splat_type] ) ->
         ShapeSplatSpecifier { shape_splat_ellipsis; shape_splat_type }
+      | ( SyntaxKind.ShapeSplatExpression,
+          [shape_splat_ellipsis; shape_splat_expression] ) ->
+        ShapeSplatExpression { shape_splat_ellipsis; shape_splat_expression }
       | ( SyntaxKind.ShapeExpression,
           [
             shape_expression_keyword;
@@ -10838,6 +10852,14 @@ module WithToken (Token : TokenType) = struct
       let make_shape_splat_specifier shape_splat_ellipsis shape_splat_type =
         let syntax =
           ShapeSplatSpecifier { shape_splat_ellipsis; shape_splat_type }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_shape_splat_expression
+          shape_splat_ellipsis shape_splat_expression =
+        let syntax =
+          ShapeSplatExpression { shape_splat_ellipsis; shape_splat_expression }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

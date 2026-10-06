@@ -161,6 +161,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.LikeTypeSpecifier _
     | Syntax.VariablePattern _
     | Syntax.ShapeSplatSpecifier _
+    | Syntax.ShapeSplatExpression _
     | Syntax.ListItem _ ->
       transform_simple env node
     | Syntax.ReifiedTypeArgument

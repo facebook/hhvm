@@ -2587,7 +2587,7 @@ where
                 let expr = self.with_reset_precedence(|p| p.parse_expression());
                 let item = self
                     .sc_mut()
-                    .make_shape_splat_specifier(ellipsis_token, expr);
+                    .make_shape_splat_expression(ellipsis_token, expr);
                 if self.peek_token_kind() == TokenKind::Comma {
                     let token = self.next_token();
                     let separator = self.sc_mut().make_token(token);

@@ -303,7 +303,7 @@
                         {
                           "kind": "list_item",
                           "list_item": {
-                            "kind": "shape_splat_specifier",
+                            "kind": "shape_splat_expression",
                             "shape_splat_ellipsis": {
                               "kind": "token",
                               "token": {
@@ -318,7 +318,7 @@
                                 "line_number": 4
                               }
                             },
-                            "shape_splat_type": {
+                            "shape_splat_expression": {
                               "kind": "shape_expression",
                               "shape_expression_keyword": {
                                 "kind": "token",
@@ -592,7 +592,7 @@
                         {
                           "kind": "list_item",
                           "list_item": {
-                            "kind": "shape_splat_specifier",
+                            "kind": "shape_splat_expression",
                             "shape_splat_ellipsis": {
                               "kind": "token",
                               "token": {
@@ -607,7 +607,7 @@
                                 "line_number": 5
                               }
                             },
-                            "shape_splat_type": {
+                            "shape_splat_expression": {
                               "kind": "function_call_expression",
                               "function_call_receiver": {
                                 "kind": "token",

@@ -1166,6 +1166,10 @@ struct
         shape_splat_ellipsis: t;
         shape_splat_type: t;
       }
+    | ShapeSplatExpression of {
+        shape_splat_ellipsis: t;
+        shape_splat_expression: t;
+      }
     | ShapeExpression of {
         shape_expression_keyword: t;
         shape_expression_left_paren: t;

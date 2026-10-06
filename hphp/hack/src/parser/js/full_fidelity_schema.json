@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2026-06-16-0001",
+  "version" : "2026-10-06-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -2120,6 +2120,14 @@
       "fields" : [
         { "field_name" : "ellipsis" },
         { "field_name" : "type" }
+      ] },
+    { "kind_name" : "ShapeSplatExpression",
+      "type_name" : "shape_splat_expression",
+      "description" : "shape_splat_expression",
+      "prefix" : "shape_splat",
+      "fields" : [
+        { "field_name" : "ellipsis" },
+        { "field_name" : "expression" }
       ] },
     { "kind_name" : "ShapeExpression",
       "type_name" : "shape_expression",

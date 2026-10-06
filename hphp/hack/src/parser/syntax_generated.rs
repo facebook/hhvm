@@ -1867,6 +1867,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_shape_splat_expression(_: &C, shape_splat_ellipsis: Self, shape_splat_expression: Self) -> Self {
+        let syntax = SyntaxVariant::ShapeSplatExpression(Box::new(ShapeSplatExpressionChildren {
+            shape_splat_ellipsis,
+            shape_splat_expression,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_shape_expression(_: &C, shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_ellipsis: Self, shape_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
             shape_expression_keyword,
@@ -3413,6 +3422,12 @@ where
                 let acc = f(shape_splat_type, acc);
                 acc
             },
+            SyntaxVariant::ShapeSplatExpression(x) => {
+                let ShapeSplatExpressionChildren { shape_splat_ellipsis, shape_splat_expression } = *x;
+                let acc = f(shape_splat_ellipsis, acc);
+                let acc = f(shape_splat_expression, acc);
+                acc
+            },
             SyntaxVariant::ShapeExpression(x) => {
                 let ShapeExpressionChildren { shape_expression_keyword, shape_expression_left_paren, shape_expression_fields, shape_expression_ellipsis, shape_expression_right_paren } = *x;
                 let acc = f(shape_expression_keyword, acc);
@@ -3711,6 +3726,7 @@ where
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
             SyntaxVariant::ShapeTypeSpecifier {..} => SyntaxKind::ShapeTypeSpecifier,
             SyntaxVariant::ShapeSplatSpecifier {..} => SyntaxKind::ShapeSplatSpecifier,
+            SyntaxVariant::ShapeSplatExpression {..} => SyntaxKind::ShapeSplatExpression,
             SyntaxVariant::ShapeExpression {..} => SyntaxKind::ShapeExpression,
             SyntaxVariant::TupleExpression {..} => SyntaxKind::TupleExpression,
             SyntaxVariant::GenericTypeSpecifier {..} => SyntaxKind::GenericTypeSpecifier,
@@ -4916,6 +4932,11 @@ where
                  shape_splat_ellipsis: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::ShapeSplatExpression, 2) => SyntaxVariant::ShapeSplatExpression(Box::new(ShapeSplatExpressionChildren {
+                 shape_splat_expression: ts.pop().unwrap(),
+                 shape_splat_ellipsis: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::ShapeExpression, 5) => SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
                  shape_expression_right_paren: ts.pop().unwrap(),
                  shape_expression_ellipsis: ts.pop().unwrap(),
@@ -5196,6 +5217,7 @@ where
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeSplatSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_splat_ellipsis, 2) },
+            SyntaxVariant::ShapeSplatExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_splat_ellipsis, 2) },
             SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_expression_keyword, 5) },
             SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts(&x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.generic_class_type, 2) },
@@ -5387,6 +5409,7 @@ where
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeSplatSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_splat_ellipsis, 2) },
+            SyntaxVariant::ShapeSplatExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_splat_ellipsis, 2) },
             SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_expression_keyword, 5) },
             SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.generic_class_type, 2) },
@@ -6921,6 +6944,13 @@ pub struct ShapeSplatSpecifierChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct ShapeSplatExpressionChildren<T, V> {
+    pub shape_splat_ellipsis: Syntax<T, V>,
+    pub shape_splat_expression: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ShapeExpressionChildren<T, V> {
     pub shape_expression_keyword: Syntax<T, V>,
     pub shape_expression_left_paren: Syntax<T, V>,
@@ -7232,6 +7262,7 @@ pub enum SyntaxVariant<T, V> {
     FieldInitializer(Box<FieldInitializerChildren<T, V>>),
     ShapeTypeSpecifier(Box<ShapeTypeSpecifierChildren<T, V>>),
     ShapeSplatSpecifier(Box<ShapeSplatSpecifierChildren<T, V>>),
+    ShapeSplatExpression(Box<ShapeSplatExpressionChildren<T, V>>),
     ShapeExpression(Box<ShapeExpressionChildren<T, V>>),
     TupleExpression(Box<TupleExpressionChildren<T, V>>),
     GenericTypeSpecifier(Box<GenericTypeSpecifierChildren<T, V>>),
@@ -8945,6 +8976,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.shape_splat_ellipsis),
                     1 => Some(&x.shape_splat_type),
+                        _ => None,
+                    }
+                })
+            },
+            ShapeSplatExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.shape_splat_ellipsis),
+                    1 => Some(&x.shape_splat_expression),
                         _ => None,
                     }
                 })

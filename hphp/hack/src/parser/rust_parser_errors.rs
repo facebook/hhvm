@@ -2897,7 +2897,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             {
                 self.invalid_shape_field_check(&c.operand, allow_optional)
             }
-            ShapeSplatSpecifier(_) => {
+            ShapeSplatExpression(_) => {
                 // Expression-level splat `...$e` inside a `shape(...)` literal.
                 self.check_can_use_feature(node, &FeatureName::ShapeSplatExpression);
             }
@@ -2905,18 +2905,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 .errors
                 .push(make_error_from_node(node, errors::invalid_shape_field_name)),
         }
-    }
-
-    fn shape_splat_is_in_shape_expression(&self) -> bool {
-        self.parents
-            .iter()
-            .rev()
-            .find_map(|parent| match &parent.children {
-                ShapeExpression(_) => Some(true),
-                ShapeTypeSpecifier(_) => Some(false),
-                _ => None,
-            })
-            .unwrap_or(false)
     }
 
     fn is_in_unyieldable_magic_method(&self) -> bool {
@@ -5061,7 +5049,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.check_constant_expression(&x.name, static_allowed);
                 self.check_constant_expression(&x.value, static_allowed);
             }
-            ShapeSplatSpecifier(x) => self.check_constant_expression(&x.type_, static_allowed),
+            ShapeSplatExpression(x) => {
+                self.check_constant_expression(&x.expression, static_allowed)
+            }
             // Allow `ClassName::foo` in a constant, but don't allow `parent::class` and
             // only allow `static::foo` when `static_allowed` is set.
             ScopeResolutionExpression(x)
@@ -5518,7 +5508,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                 _ => err(self, errors::not_allowed_in_write("Expression")),
                             }
                         }
-                        ShapeSplatSpecifier(_) => {
+                        ShapeSplatExpression(_) => {
                             append_errors(self, field, errors::invalid_lval(lval_root))
                         }
                         VariableExpression(_) => {} // $var punning, valid
@@ -6001,7 +5991,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ClassPtrTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
             }
-            ShapeSplatSpecifier(_) if !self.shape_splat_is_in_shape_expression() => {
+            ShapeSplatSpecifier(_) => {
                 // The type-level splat syntax `...T` is admitted by either the
                 // concrete feature or the type-parameter feature. Whether `T` is
                 // a type parameter (requiring `shape_splat_type_parameters`) is

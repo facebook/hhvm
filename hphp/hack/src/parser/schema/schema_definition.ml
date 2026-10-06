@@ -26,6 +26,7 @@ type aggregate_type =
   | TODO
   | Name
   | ShapeElement
+  | ShapeExpressionField
 
 type child_spec =
   | Token (* Special case, since it's so common, synonym of `Just "Token"` *)
@@ -130,7 +131,8 @@ let schema : schema_node list =
       func_name = "variable_expression";
       description = "variable";
       prefix = "variable";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      aggregates =
+        [Expression; ConstructorExpression; LambdaBody; ShapeExpressionField];
       fields = [("expression", Token)];
     };
     {
@@ -1440,7 +1442,8 @@ let schema : schema_node list =
       func_name = "prefix_unary_expression";
       description = "prefix_unary_expression";
       prefix = "prefix_unary";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      aggregates =
+        [Expression; ConstructorExpression; LambdaBody; ShapeExpressionField];
       fields = [("operator", Token); ("operand", Aggregate Expression)];
     };
     {
@@ -2357,7 +2360,7 @@ let schema : schema_node list =
       func_name = "field_initializer";
       description = "field_initializer";
       prefix = "field_initializer";
-      aggregates = [];
+      aggregates = [ShapeExpressionField];
       fields =
         [
           ("name", Aggregate Expression);
@@ -2392,6 +2395,15 @@ let schema : schema_node list =
       fields = [("ellipsis", Token); ("type", Aggregate Specifier)];
     };
     {
+      kind_name = "ShapeSplatExpression";
+      type_name = "shape_splat_expression";
+      func_name = "shape_splat_expression";
+      description = "shape_splat_expression";
+      prefix = "shape_splat";
+      aggregates = [ShapeExpressionField];
+      fields = [("ellipsis", Token); ("expression", Aggregate Expression)];
+    };
+    {
       kind_name = "ShapeExpression";
       type_name = "shape_expression";
       func_name = "shape_expression";
@@ -2402,7 +2414,7 @@ let schema : schema_node list =
         [
           ("keyword", Token);
           ("left_paren", Token);
-          ("fields", ZeroOrMore (Just "FieldInitializer"));
+          ("fields", ZeroOrMore (Aggregate ShapeExpressionField));
           ("ellipsis", ZeroOrOne Token);
           ("right_paren", Token);
         ];
@@ -2644,6 +2656,7 @@ let generated_aggregate_types =
     TODO;
     Name;
     ShapeElement;
+    ShapeExpressionField;
   ]
 
 let string_of_aggregate_type = function
@@ -2665,6 +2678,7 @@ let string_of_aggregate_type = function
   | TODO -> "TODO"
   | Name -> "Name"
   | ShapeElement -> "ShapeElement"
+  | ShapeExpressionField -> "ShapeExpressionField"
 
 module AggregateKey = struct
   type t = aggregate_type
@@ -2728,6 +2742,9 @@ let aggregation_of_name_aggregate =
 let aggregation_of_shape_element =
   List.filter (fun x -> List.mem ShapeElement x.aggregates) schema
 
+let aggregation_of_shape_expression_field =
+  List.filter (fun x -> List.mem ShapeExpressionField x.aggregates) schema
+
 let aggregation_of = function
   | TopLevelDeclaration -> aggregation_of_top_level_declaration
   | Expression -> aggregation_of_expression
@@ -2747,6 +2764,7 @@ let aggregation_of = function
   | TODO -> aggregation_of_todo_aggregate
   | Name -> aggregation_of_name_aggregate
   | ShapeElement -> aggregation_of_shape_element
+  | ShapeExpressionField -> aggregation_of_shape_expression_field
 
 let aggregate_type_name = function
   | TopLevelDeclaration -> "top_level_declaration"
@@ -2767,6 +2785,7 @@ let aggregate_type_name = function
   | TODO -> "todo_aggregate"
   | Name -> "name_aggregate"
   | ShapeElement -> "shape_element"
+  | ShapeExpressionField -> "shape_expression_field"
 
 let aggregate_type_pfx_trim = function
   | TopLevelDeclaration -> ("TLD", "\\(Declaration\\|Statement\\)$")
@@ -2787,6 +2806,7 @@ let aggregate_type_pfx_trim = function
   | TODO -> ("TODO", "")
   | Name -> ("Name", "")
   | ShapeElement -> ("ShapeEl", "Specifier$")
+  | ShapeExpressionField -> ("ShapeExpr", "\\(Initializer\\|Expression\\)$")
 
 (******************************************************************************(
  * Useful for debugging / schema alterations

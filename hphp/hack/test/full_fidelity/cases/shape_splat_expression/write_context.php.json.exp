@@ -1073,7 +1073,7 @@
                         {
                           "kind": "list_item",
                           "list_item": {
-                            "kind": "shape_splat_specifier",
+                            "kind": "shape_splat_expression",
                             "shape_splat_ellipsis": {
                               "kind": "token",
                               "token": {
@@ -1088,7 +1088,7 @@
                                 "line_number": 12
                               }
                             },
-                            "shape_splat_type": {
+                            "shape_splat_expression": {
                               "kind": "literal",
                               "literal_expression": {
                                 "kind": "token",
@@ -1328,7 +1328,7 @@
                         {
                           "kind": "list_item",
                           "list_item": {
-                            "kind": "shape_splat_specifier",
+                            "kind": "shape_splat_expression",
                             "shape_splat_ellipsis": {
                               "kind": "token",
                               "token": {
@@ -1343,7 +1343,7 @@
                                 "line_number": 13
                               }
                             },
-                            "shape_splat_type": {
+                            "shape_splat_expression": {
                               "kind": "variable",
                               "variable_expression": {
                                 "kind": "token",
@@ -1572,7 +1572,7 @@
                       {
                         "kind": "list_item",
                         "list_item": {
-                          "kind": "shape_splat_specifier",
+                          "kind": "shape_splat_expression",
                           "shape_splat_ellipsis": {
                             "kind": "token",
                             "token": {
@@ -1587,7 +1587,7 @@
                               "line_number": 14
                             }
                           },
-                          "shape_splat_type": {
+                          "shape_splat_expression": {
                             "kind": "literal",
                             "literal_expression": {
                               "kind": "token",

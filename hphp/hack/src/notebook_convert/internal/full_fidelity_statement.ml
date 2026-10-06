@@ -100,6 +100,7 @@ let is_statement =
     | AnonymousFunctionUseClause _
     | VariablePattern _
     | ShapeSplatSpecifier _
+    | ShapeSplatExpression _
     | ConstructorPattern _
     | RefinementPattern _
     | LambdaExpression _

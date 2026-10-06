@@ -740,6 +740,10 @@ where
         Node(self.0.make_shape_splat_specifier(ellipsis.0, type_.0), self.1.make_shape_splat_specifier(ellipsis.1, type_.1))
     }
 
+    fn make_shape_splat_expression(&mut self, ellipsis: Self::Output, expression: Self::Output) -> Self::Output {
+        Node(self.0.make_shape_splat_expression(ellipsis.0, expression.0), self.1.make_shape_splat_expression(ellipsis.1, expression.1))
+    }
+
     fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
         Node(self.0.make_shape_expression(keyword.0, left_paren.0, fields.0, ellipsis.0, right_paren.0), self.1.make_shape_expression(keyword.1, left_paren.1, fields.1, ellipsis.1, right_paren.1))
     }

@@ -1031,6 +1031,10 @@ module type Syntax_S = sig
         shape_splat_ellipsis: t;
         shape_splat_type: t;
       }
+    | ShapeSplatExpression of {
+        shape_splat_ellipsis: t;
+        shape_splat_expression: t;
+      }
     | ShapeExpression of {
         shape_expression_keyword: t;
         shape_expression_left_paren: t;
@@ -1518,6 +1522,8 @@ module type Syntax_S = sig
 
   val make_shape_splat_specifier : t -> t -> t
 
+  val make_shape_splat_expression : t -> t -> t
+
   val make_shape_expression : t -> t -> t -> t -> t -> t
 
   val make_tuple_expression : t -> t -> t -> t -> t -> t
@@ -1891,6 +1897,8 @@ module type Syntax_S = sig
   val is_shape_type_specifier : t -> bool
 
   val is_shape_splat_specifier : t -> bool
+
+  val is_shape_splat_expression : t -> bool
 
   val is_shape_expression : t -> bool
 

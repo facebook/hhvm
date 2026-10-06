@@ -296,6 +296,8 @@ struct MountInfo {
   6: optional string fuseTransport;
   // Whether the mount point is visible in the daemon's current mount namespace.
   7: optional bool visibleInDaemonNamespace;
+  // The NFS transport: "tcp" or "unix". Only set for NFS mounts.
+  8: optional string nfsTransport;
 }
 
 struct MountArgument {

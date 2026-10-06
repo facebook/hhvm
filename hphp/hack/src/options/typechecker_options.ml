@@ -294,12 +294,6 @@ let allow_class_string_cast t = t.Global_options.allow_class_string_cast
 let class_pointer_ban_class_array_key t =
   t.Global_options.class_pointer_ban_class_array_key
 
-let tco_class_pointer_tyvar_lower_bound_source_level t =
-  t.Global_options.tco_class_pointer_tyvar_lower_bound_source_level
-
-let tco_class_pointer_tyvar_upper_bound_source_level t =
-  t.Global_options.tco_class_pointer_tyvar_upper_bound_source_level
-
 let disallow_specialized_function_refs t =
   t.Global_options.tco_disallow_specialized_function_refs
 

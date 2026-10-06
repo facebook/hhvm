@@ -66,35 +66,32 @@ let check_string_coercion_point env expr ty =
     | _ -> ()
 
 (* Weaken class-typed expression at runtime string coercion points *)
-let rec coerce_to_name ~level env ty =
-  if level < 1 then
-    (env, ty)
-  else
-    let (env, ety) = Typing_env.expand_type env ty in
-    let (stripped, env, inner) = Typing_utils.strip_supportdyn env ety in
-    let rewrap ty =
-      if stripped then
-        Typing_make_type.supportdyn (get_reason ety) ty
-      else
-        ty
+let rec coerce_to_name env ty =
+  let (env, ety) = Typing_env.expand_type env ty in
+  let (stripped, env, inner) = Typing_utils.strip_supportdyn env ety in
+  let rewrap ty =
+    if stripped then
+      Typing_make_type.supportdyn (get_reason ety) ty
+    else
+      ty
+  in
+  match deref inner with
+  | (r, Tclass_ptr ty_inner) ->
+    (env, rewrap (Typing_make_type.classname r [ty_inner]))
+  | (r, Tunion tyl) ->
+    let (env, tyl) = Common.List.map_env env tyl ~f:coerce_to_name in
+    (env, rewrap (mk (r, Tunion tyl)))
+  | (r, Tintersection tyl) ->
+    let (env, tyl) = Common.List.map_env env tyl ~f:coerce_to_name in
+    (env, rewrap (mk (r, Tintersection tyl)))
+  | (r, (Tgeneric _ | Tnewtype _)) ->
+    let (env, bound) =
+      Typing_utils.get_base_type ~expand_supportdyn:false env inner
     in
-    match deref inner with
-    | (r, Tclass_ptr ty_inner) ->
-      (env, rewrap (Typing_make_type.classname r [ty_inner]))
-    | (r, Tunion tyl) when level >= 2 ->
-      let (env, tyl) = Common.List.map_env env tyl ~f:(coerce_to_name ~level) in
-      (env, rewrap (mk (r, Tunion tyl)))
-    | (r, Tintersection tyl) when level >= 2 ->
-      let (env, tyl) = Common.List.map_env env tyl ~f:(coerce_to_name ~level) in
-      (env, rewrap (mk (r, Tintersection tyl)))
-    | (r, (Tgeneric _ | Tnewtype _)) when level >= 3 ->
-      let (env, bound) =
-        Typing_utils.get_base_type ~expand_supportdyn:false env inner
-      in
-      begin
-        match deref bound with
-        | (_, Tclass_ptr ty_inner) ->
-          (env, rewrap (Typing_make_type.classname r [ty_inner]))
-        | _ -> (env, ty)
-      end
-    | _ -> (env, ty)
+    begin
+      match deref bound with
+      | (_, Tclass_ptr ty_inner) ->
+        (env, rewrap (Typing_make_type.classname r [ty_inner]))
+      | _ -> (env, ty)
+    end
+  | _ -> (env, ty)

@@ -20,7 +20,7 @@ File class_hint_string.php, line 8, character 29 - line 8, character 31:
 10 |   return $gc;
 11 | }
 
-But got class<<expr#2> as C>
+But got string
 
 File class_hint_string.php, line 8, character 15 - line 8, character 22:
 
@@ -41,10 +41,32 @@ File class_hint_string.php, line 6, character 45 - line 6, character 45:
  8 | function test(class<C> $c): int {
  9 |   $gc = generic_string($c);
 
+  by the definition of classname
+
+File class_hint_string.php, line 8, character 15 - line 8, character 22:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(»class<C>« $c): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+  by the definition of typename
+
+File class_hint_string.php, line 8, character 15 - line 8, character 22:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(»class<C>« $c): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
 Here's why:
 
 
-  Step 1 of 2                                                                   
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -122,7 +144,7 @@ File class_hint_string.php, line 8, character 29 - line 8, character 31:
 11 | }
 
 
-  Step 2 of 2                                 (here is where the error occurred) 
+  Step 2 of 4                                                                   
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -148,6 +170,112 @@ File class_hint_string.php, line 6, character 45 - line 6, character 45:
  9 |   $gc = generic_string($c);
 
 as the instantiation of the generic T
+
+The supertype is the same as before.
+
+File class_hint_string.php, line 8, character 29 - line 8, character 31:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> $c): »int« {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+
+  Step 3 of 4                                                                   
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+The subtype comes from this hint
+
+File class_hint_string.php, line 8, character 15 - line 8, character 22:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(»class<C>« $c): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+and flows into this expression
+
+File class_hint_string.php, line 8, character 24 - line 8, character 25:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> »$c«): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File class_hint_string.php, line 9, character 24 - line 9, character 25:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> $c): int {
+ 9 |   $gc = generic_string(»$c«);
+10 |   return $gc;
+11 | }
+
+as the type of the local variable
+
+The supertype is the same as before.
+
+File class_hint_string.php, line 8, character 29 - line 8, character 31:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> $c): »int« {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+
+  Step 4 of 4                                 (here is where the error occurred) 
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+The subtype comes from this hint
+
+File class_hint_string.php, line 8, character 15 - line 8, character 22:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(»class<C>« $c): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+and flows into this expression
+
+File class_hint_string.php, line 8, character 24 - line 8, character 25:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> »$c«): int {
+ 9 |   $gc = generic_string($c);
+10 |   return $gc;
+11 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File class_hint_string.php, line 9, character 24 - line 9, character 25:
+
+ 6 | function generic_string<T as string>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(class<C> $c): int {
+ 9 |   $gc = generic_string(»$c«);
+10 |   return $gc;
+11 | }
+
+as the type of the local variable
 
 The supertype is the same as before.
 

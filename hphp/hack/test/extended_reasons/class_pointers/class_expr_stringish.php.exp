@@ -20,7 +20,7 @@ File class_expr_stringish.php, line 8, character 18 - line 8, character 20:
 10 |   return $gc;
 11 | }
 
-But got class<C>; implicitly defined constant ::class is a reference to class C
+But got string; implicitly defined constant ::class is a reference to class C
 
 File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
 
@@ -44,10 +44,34 @@ File class_expr_stringish.php, line 6, character 51 - line 6, character 51:
  8 | function test(): int {
  9 |   $gc = generic_stringish(C::class);
 
+  by the definition of classname; implicitly defined constant ::class is a reference to class C
+
+File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class »C« {}
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(C::class);
+
+  by the definition of typename; implicitly defined constant ::class is a reference to class C
+
+File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class »C« {}
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(C::class);
+
 Here's why:
 
 
-  Step 1 of 2                                                                   
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -127,7 +151,7 @@ File class_expr_stringish.php, line 8, character 18 - line 8, character 20:
 11 | }
 
 
-  Step 2 of 2                                 (here is where the error occurred) 
+  Step 2 of 4                                                                   
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -155,6 +179,88 @@ File class_expr_stringish.php, line 6, character 51 - line 6, character 51:
  9 |   $gc = generic_stringish(C::class);
 
 as the instantiation of the generic T
+
+The supertype is the same as before.
+
+File class_expr_stringish.php, line 8, character 18 - line 8, character 20:
+
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): »int« {
+ 9 |   $gc = generic_stringish(C::class);
+10 |   return $gc;
+11 | }
+
+
+  Step 3 of 4                                                                   
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+The subtype comes from this implicitly defined constant ::class of class \C
+
+File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class »C« {}
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(C::class);
+
+and flows into this class constant access expression
+
+File class_expr_stringish.php, line 9, character 27 - line 9, character 34:
+
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(»C::class«);
+10 |   return $gc;
+11 | }
+
+as the type of the constant
+
+The supertype is the same as before.
+
+File class_expr_stringish.php, line 8, character 18 - line 8, character 20:
+
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): »int« {
+ 9 |   $gc = generic_stringish(C::class);
+10 |   return $gc;
+11 | }
+
+
+  Step 4 of 4                                 (here is where the error occurred) 
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+The subtype comes from this implicitly defined constant ::class of class \C
+
+File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class »C« {}
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(C::class);
+
+and flows into this class constant access expression
+
+File class_expr_stringish.php, line 9, character 27 - line 9, character 34:
+
+ 6 | function generic_stringish<T as Stringish>(T $t): T { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(»C::class«);
+10 |   return $gc;
+11 | }
+
+as the type of the constant
 
 The supertype is the same as before.
 

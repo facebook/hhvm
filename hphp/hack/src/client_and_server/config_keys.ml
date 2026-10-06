@@ -87,12 +87,6 @@ module Hhconfig = struct
 
   let class_class_type = key "class_class_type"
 
-  let class_pointer_tyvar_lower_bound_source_level =
-    key "class_pointer_tyvar_lower_bound_source_level"
-
-  let class_pointer_tyvar_upper_bound_source_level =
-    key "class_pointer_tyvar_upper_bound_source_level"
-
   let class_pointer_ban_class_array_key =
     key "class_pointer_ban_class_array_key"
 

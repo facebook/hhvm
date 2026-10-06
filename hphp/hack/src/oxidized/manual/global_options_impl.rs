@@ -152,8 +152,6 @@ impl Default for GlobalOptions {
             strict_consistent_construct: false,
             allow_class_string_cast: true,
             class_pointer_ban_class_array_key: false,
-            tco_class_pointer_tyvar_lower_bound_source_level: 0,
-            tco_class_pointer_tyvar_upper_bound_source_level: 0,
             tco_disallow_specialized_function_refs: false,
             tco_permits_bypassing_visibility: Default::default(),
             tco_tests_bypass_visibility_static_properties: false,

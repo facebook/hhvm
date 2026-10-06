@@ -203,8 +203,6 @@ type t = {
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_class_array_key: bool;
-  tco_class_pointer_tyvar_lower_bound_source_level: int;
-  tco_class_pointer_tyvar_upper_bound_source_level: int;
   tco_disallow_specialized_function_refs: bool;
   tco_permits_bypassing_visibility: string list;
   tco_tests_bypass_visibility_static_properties: bool;
@@ -319,8 +317,6 @@ let default =
     strict_consistent_construct = false;
     allow_class_string_cast = true;
     class_pointer_ban_class_array_key = false;
-    tco_class_pointer_tyvar_lower_bound_source_level = 0;
-    tco_class_pointer_tyvar_upper_bound_source_level = 0;
     tco_disallow_specialized_function_refs = false;
     tco_permits_bypassing_visibility = [];
     tco_tests_bypass_visibility_static_properties = false;
@@ -432,8 +428,6 @@ let set
     ?strict_consistent_construct
     ?allow_class_string_cast
     ?class_pointer_ban_class_array_key
-    ?tco_class_pointer_tyvar_lower_bound_source_level
-    ?tco_class_pointer_tyvar_upper_bound_source_level
     ?tco_disallow_specialized_function_refs
     ?tco_permits_bypassing_visibility
     ?tco_tests_bypass_visibility_static_properties
@@ -739,14 +733,6 @@ let set
       setting
         class_pointer_ban_class_array_key
         options.class_pointer_ban_class_array_key;
-    tco_class_pointer_tyvar_lower_bound_source_level =
-      setting
-        tco_class_pointer_tyvar_lower_bound_source_level
-        options.tco_class_pointer_tyvar_lower_bound_source_level;
-    tco_class_pointer_tyvar_upper_bound_source_level =
-      setting
-        tco_class_pointer_tyvar_upper_bound_source_level
-        options.tco_class_pointer_tyvar_upper_bound_source_level;
     tco_disallow_specialized_function_refs =
       setting
         tco_disallow_specialized_function_refs

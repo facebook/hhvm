@@ -5762,7 +5762,7 @@ end = struct
       ((_, pos, _) as x) =
     let (env, (te, ty)) = array_value ~expected env x in
     (* A class pointer in a key position is used for its name. *)
-    let (env, ty) = Typing_class_pointers.coerce_to_name ~level:3 env ty in
+    let (env, ty) = Typing_class_pointers.coerce_to_name env ty in
     let (ty_arraykey, reason) =
       if is_set then
         ( MakeType.arraykey (Reason.idx_set_element pos),
@@ -13635,7 +13635,7 @@ end = struct
         let (env, te, ty) =
           Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
         in
-        let (env, ty) = Typing_class_pointers.coerce_to_name ~level:3 env ty in
+        let (env, ty) = Typing_class_pointers.coerce_to_name env ty in
         let parent_lenv = env.lenv in
         let (env, te1, ty1) =
           Expr.update_array_type

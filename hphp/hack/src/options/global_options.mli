@@ -305,10 +305,6 @@ type t = {
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
-  tco_class_pointer_tyvar_lower_bound_source_level: int;
-      (** source-type shapes widened for new class<T> lower bounds *)
-  tco_class_pointer_tyvar_upper_bound_source_level: int;
-      (** source-type shapes widened for existing class<T> lower bounds *)
   tco_disallow_specialized_function_refs: bool;
   tco_permits_bypassing_visibility: string list;
   tco_tests_bypass_visibility_static_properties: bool;
@@ -421,8 +417,6 @@ val set :
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_class_array_key:bool ->
-  ?tco_class_pointer_tyvar_lower_bound_source_level:int ->
-  ?tco_class_pointer_tyvar_upper_bound_source_level:int ->
   ?tco_disallow_specialized_function_refs:bool ->
   ?tco_permits_bypassing_visibility:string list ->
   ?tco_tests_bypass_visibility_static_properties:bool ->

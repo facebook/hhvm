@@ -20,7 +20,7 @@ function h(): void {
   hh_show(Foo::$bar);
   hh_show(Foo::{$bar});
 
-  $foo = Foo::class as dynamic;
+  $foo = nameof Foo as dynamic;
 
   $baz = 'bar';
 

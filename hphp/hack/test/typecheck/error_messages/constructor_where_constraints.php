@@ -8,5 +8,5 @@ class A<T> {
 }
 
 function test():void {
-  new A<X>(X::class);
+  new A<X>(nameof X);
 }

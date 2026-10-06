@@ -16,5 +16,5 @@ function takes_classname(classname<MyClass> $cn): void {
 <<__EntryPoint>>
 function call_it(): void {
   // accepted by hh, error at runtime (calling abstract method)
-  takes_classname(MyTrait::class);
+  takes_classname(nameof MyTrait);
 }

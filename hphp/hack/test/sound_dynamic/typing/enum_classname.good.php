@@ -16,7 +16,7 @@ function bar<T as supportdyn<mixed>>(T $x):void { }
 <<__SupportDynamicType>>
 function testit(): void {
   bar(new C());
-  foo(C::class);
+  foo(nameof C);
   bar(E::AA);
-  foo(E::class);
+  foo(nameof E);
 }

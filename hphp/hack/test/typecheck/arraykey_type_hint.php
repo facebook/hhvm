@@ -30,7 +30,7 @@ function f_opt(?arraykey $k1, arraykey $k2): arraykey {
 
 abstract class C {}
 function get_classname(): classname<C> {
-  return C::class;
+  return nameof C;
 }
 
 function test(): void {
@@ -38,7 +38,7 @@ function test(): void {
   f('a', 'a');
   f(1, 'a');
   f('a', 1);
-  f(get_classname(), C::class);
+  f(get_classname(), nameof C);
 
   generic(1, 1);
   generic('a', 'a');

@@ -10,5 +10,5 @@ enum E: string as string {
 function foo<T as HH\BuiltinEnum<T>>(classname<T> $class_name): void { }
 
 function testit(): void {
-  foo(E::class);
+  foo(nameof E);
 }

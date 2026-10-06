@@ -15,5 +15,5 @@ enum SomeEnum: string as string {
 }
 
 function foo(): classname<SomeEnum> {
-  return SomeEnum::class;
+  return nameof SomeEnum;
 }

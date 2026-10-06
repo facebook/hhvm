@@ -14,7 +14,7 @@ function make_a_num(classname<A<num>> $a): A<num> {
 }
 
 function breakit(): int {
-  $b = make_a_num(B::class) as B;
+  $b = make_a_num(nameof B) as B;
   return $b->get();
 }
 

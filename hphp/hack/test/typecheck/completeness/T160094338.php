@@ -36,30 +36,30 @@ final class MyGenericTest {
     ]);
     // Unexpected Hack error:
     $this->set($obj, dict[
-      'key' => shape('value' => $this->get(MyValue::class)),
+      'key' => shape('value' => $this->get(nameof MyValue)),
     ]);
     // No Hack error
     $this->set2($obj, dict[
-      'key' => shape('value' => $this->get(MyValue::class)),
+      'key' => shape('value' => $this->get(nameof MyValue)),
     ]);
 
     // No Hack error
     $this->set($obj2, shape('value' => new MyValue()));
     // No Hack error
-    $this->set($obj2, shape('value' => $this->get(MyValue::class)));
+    $this->set($obj2, shape('value' => $this->get(nameof MyValue)));
     // No Hack error
-    $this->set2($obj2, shape('value' => $this->get(MyValue::class)));
+    $this->set2($obj2, shape('value' => $this->get(nameof MyValue)));
 
     $this->set($obj3, vec[
       shape('value' => new MyValue()),
     ]);
     // Unexpected Hack error:
     $this->set($obj3, vec[
-      shape('value' => $this->get(MyValue::class)),
+      shape('value' => $this->get(nameof MyValue)),
     ]);
     // No Hack error
     $this->set2($obj3, vec[
-      shape('value' => $this->get(MyValue::class)),
+      shape('value' => $this->get(nameof MyValue)),
     ]);
   }
 }

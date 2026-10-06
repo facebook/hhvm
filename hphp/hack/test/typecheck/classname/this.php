@@ -3,6 +3,6 @@
 
 class Foo {
   public static function classname(): classname<this> {
-    return static::class;
+    return nameof static;
   }
 }

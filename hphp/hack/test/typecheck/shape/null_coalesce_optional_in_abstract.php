@@ -18,7 +18,7 @@ class Bar extends Foo {
 }
 
 class Baz {
-  const vec<classname<Foo>> FOOS = vec[Bar::class];
+  const vec<classname<Foo>> FOOS = vec[nameof Bar];
   public static function bazzy(): void {
     $class = self::FOOS[0];
     $test = $class::getFoo();

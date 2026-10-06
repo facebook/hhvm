@@ -19,8 +19,8 @@ final class C extends B {
 
 abstract class B { }
 function testIt(F $f):void {
-  $x = toplevel(C::class);
+  $x = toplevel(nameof C);
   $x->foo();
-  $y = $f->instmeth(C::class);
+  $y = $f->instmeth(nameof C);
   $y->foo();
 }

@@ -14,6 +14,6 @@ type enumname<T> = HH\enumname<T>;
 const enumname<arraykey> BUILTIN_ENUM = HH\BUILTIN_ENUM;
 
 function test(): void {
-  foo(Foo::class);
-  bar(Foo::class);
+  foo(nameof Foo);
+  bar(nameof Foo);
 }

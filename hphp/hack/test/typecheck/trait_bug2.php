@@ -32,6 +32,6 @@ trait TR {
 
   protected static function bar(
   ): void {
-    SMCC::foo(static::class);
+    SMCC::foo(nameof static);
   }
 }

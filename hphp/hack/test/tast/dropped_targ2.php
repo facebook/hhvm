@@ -4,7 +4,7 @@ class C {
   public static function bar<reify T>(): void {}
 }
 
-function foo(): ?classname<C> { return C::class; }
+function foo(): ?classname<C> { return nameof C; }
 
 function main(): void {
   $c = foo();

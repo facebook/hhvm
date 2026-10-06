@@ -14,5 +14,5 @@ function make_hgoldstein(classname<Hgoldstein> $cls): void {
 
 <<__EntryPoint>>
 function hgoldstein_main(): void {
-  make_hgoldstein(HgoldsteinChild::class);
+  make_hgoldstein(nameof HgoldsteinChild);
 }

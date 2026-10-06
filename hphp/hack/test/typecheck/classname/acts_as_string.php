@@ -9,11 +9,11 @@ newtype NTdef = I;
 function foo(): string {
   $x = Tr::class;
   hh_show($x);
-  print_stringish(Tr::class);
-  print_stringish(C::class);
-  print_stringish(I::class);
-  print_stringish(Tdef::class);
-  print_stringish(NTdef::class);
+  print_stringish(nameof Tr);
+  print_stringish(nameof C);
+  print_stringish(nameof I);
+  print_stringish(nameof Tdef);
+  print_stringish(nameof NTdef);
   print_string(Tr::class);
   print_string(C::class);
   print_string(I::class);

@@ -20,5 +20,5 @@ function bar(classname<NumbahsEnum> $test): int {
 }
 
 function foo(): int {
-  return bar(NumbahsEnum::class);
+  return bar(nameof NumbahsEnum);
 }

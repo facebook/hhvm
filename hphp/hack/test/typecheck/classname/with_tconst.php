@@ -10,5 +10,5 @@ abstract class ALoader {
 
 class CLoader extends ALoader {
   const type Ti = C;
-  const classname<this::Ti> I_NAME = C::class;
+  const classname<this::Ti> I_NAME = nameof C;
 }

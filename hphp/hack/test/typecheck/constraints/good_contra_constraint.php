@@ -12,6 +12,6 @@ class Base {}
 class Derived extends Base {}
 
 function genTextAttachment(Vector<Base> $x): Derived {
-  $v = filterInstance($x, Derived::class);
+  $v = filterInstance($x, nameof Derived);
   return $v[0];
 }

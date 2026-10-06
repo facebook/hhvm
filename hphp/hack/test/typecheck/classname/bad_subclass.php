@@ -10,12 +10,12 @@ abstract class Super {
 
 class GoodSub extends Super {
   public function nameOfISubclass(): classname<I> {
-    return C_isI::class;
+    return nameof C_isI;
   }
 }
 
 class BadSub extends Super {
   public function nameOfISubclass(): classname<C_notI> {
-    return C_notI::class;
+    return nameof C_notI;
   }
 }

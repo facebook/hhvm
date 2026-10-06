@@ -14,7 +14,7 @@ abstract final class MyTestConcrete extends MyTestBase {
 
 abstract final class MyTestRunner {
   const vec<classname<MyTestBase>> TESTS =
-    vec[MyTestConcrete::class, MyTestBase::class];
+    vec[nameof MyTestConcrete, nameof MyTestBase];
 
   public static function test(): void {
     foreach (self::TESTS as $classname) {

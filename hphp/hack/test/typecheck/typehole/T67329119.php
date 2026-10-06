@@ -10,7 +10,7 @@ trait FooTrait {
 
 <<__EntryPoint>>
 function bar(): void {
-  $x = FooTrait::class;
+  $x = nameof FooTrait;
   new_it($x);
 }
 

@@ -15,5 +15,5 @@ class D {
 
 <<__EntryPoint>>
 function main(): void {
-  new C(D::class);
+  new C(nameof D);
 }

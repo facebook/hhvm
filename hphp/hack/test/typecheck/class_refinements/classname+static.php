@@ -3,8 +3,8 @@
 abstract class Box {
   abstract const type T;
   public function m(): void {
-    f(static::class); // OK
-    f(self::class); // ERROR
+    f(nameof static); // OK
+    f(nameof self); // ERROR
   }
 }
 

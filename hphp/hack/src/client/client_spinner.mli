@@ -17,7 +17,8 @@ val start_heartbeat_telemetry : unit -> unit
 * Heartbeat: if [message_opt] is [Some] then all subsequent heartbeats will report
   this [message_opt] to telemetry, at least until the next time [report] is invoked
 * Hh_logger: if [message_opt] is [Some], and differs from what was previously reported,
-  then it will be written to Hh_logger i.e. to `$(hh --client-logname)`.
+  then it will be written to Hh_logger i.e. to `$(hh --client-logname)`, unless
+  [HH_DISABLE_SPINNER_LOGGING=1] is set at process start.
 * Stderr: if [to_stderr] is true and [message_opt] is [Some] then it will be displayed
   on stderr with an animated spinner (which continues to animate automatically, even if
   you don't call [report] again).

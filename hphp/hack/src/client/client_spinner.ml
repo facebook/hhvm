@@ -65,6 +65,11 @@ let get_latest_report () : (string * float) option =
 (** Used so that when we Hh_logger.log a spinner change, we can show wall-time. *)
 let start_time : float = Unix.gettimeofday ()
 
+let log_spinner =
+  match Sys.getenv_opt "HH_DISABLE_SPINNER_LOGGING" with
+  | Some "1" -> false
+  | _ -> true
+
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
     let%lwt (_ : unit) = Lwt_unix.sleep 1.0 in
@@ -120,10 +125,11 @@ let report ~(to_stderr : bool) ~(angery_reaccs_only : bool) :
       Message { text = next; is_hidden = false; start_time }
     | (_, Some next) ->
       (* text has changed *)
-      Hh_logger.log
-        "spinner %0.1fs: [%s]"
-        (Unix.gettimeofday () -. start_time)
-        next;
+      if log_spinner then
+        Hh_logger.log
+          "spinner %0.1fs: [%s]"
+          (Unix.gettimeofday () -. start_time)
+          next;
       Hack_event_logger.spinner_change ~spinner:(get_latest_report ()) ~next;
       Message
         { text = next; is_hidden = false; start_time = Unix.gettimeofday () }

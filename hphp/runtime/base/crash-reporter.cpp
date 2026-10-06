@@ -45,6 +45,7 @@
 
 #include <fcntl.h>
 #include <signal.h>
+#include <time.h>
 #include <ucontext.h>
 
 #include <folly/portability/Fcntl.h>
@@ -102,20 +103,45 @@ static const char* s_newIgnorelist[] = {
   "killpg"
 };
 
-static void bt_timeout_handler(int sig) {
-  signal(SIGABRT, SIG_DFL);
-  abort();
-}
-
 void bt_handler(int sigin, siginfo_t* info, void* args) {
+  // The report timed out (see the timer below): dump core on this thread.
+  if (sigin == SIGABRT && info && info->si_code == SI_TIMER) {
+    signal(SIGABRT, SIG_DFL);
+    abort();
+  }
+
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
                                              std::memory_order_acq_rel)) {
     // We're the first crashing thread, go ahead and report everything.
+    // folly::fibers' SIGSEGV handler calls us with every signal blocked; unblock
+    // the crash signals so nested faults re-enter and the timeout gets through.
+    sigset_t crashSignals;
+    sigemptyset(&crashSignals);
+    for (auto const s : {SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT}) {
+      sigaddset(&crashSignals, s);
+    }
+    pthread_sigmask(SIG_UNBLOCK, &crashSignals, nullptr);
+    // Otherwise a nested SIGSEGV may go through folly::fibers' handler and
+    // block everything again.
+    struct sigaction sa{};
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_ONSTACK | SA_SIGINFO | SA_NODEFER;
+    sa.sa_sigaction = &bt_handler;
+    sigaction(SIGSEGV, &sa, nullptr);
     if (Cfg::Debug::StackTraceTimeout > 0) {
-      signal(SIGALRM, bt_timeout_handler);
-      alarm(Cfg::Debug::StackTraceTimeout);
+      // If the report hangs, send SIGABRT to this thread.
+      sigevent sev{};
+      sev.sigev_notify = SIGEV_THREAD_ID;
+      sev.sigev_signo = SIGABRT;
+      sev._sigev_un._tid = tid;
+      timer_t timer;
+      if (timer_create(CLOCK_MONOTONIC, &sev, &timer) == 0) {
+        itimerspec its{};
+        its.it_value.tv_sec = Cfg::Debug::StackTraceTimeout;
+        timer_settime(timer, 0, &its, nullptr);
+      }
     }
   } else {
     if (expected != tid) {

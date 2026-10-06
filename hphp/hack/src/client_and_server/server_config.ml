@@ -410,9 +410,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
         package_support_multifile_tests =
           bool_opt Config_keys.Hhconfig.package_support_multifile_tests config
           >?? po_opt.package_support_multifile_tests;
-        enable_class_pointer_hint =
-          bool_opt Config_keys.Hhconfig.enable_class_pointer_hint config
-          >?? po_opt.enable_class_pointer_hint;
         disallow_non_annotated_memoize =
           bool_opt Config_keys.Hhconfig.disallow_non_annotated_memoize config
           >?? po_opt.disallow_non_annotated_memoize;

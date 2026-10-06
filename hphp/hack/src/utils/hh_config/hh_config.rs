@@ -329,10 +329,6 @@ impl HhConfig {
                 "package_support_multifile_tests",
                 default.package_support_multifile_tests,
             )?,
-            enable_class_pointer_hint: hhconfig.get_bool_or(
-                "enable_class_pointer_hint",
-                default.enable_class_pointer_hint,
-            )?,
             disallow_non_annotated_memoize: hhconfig.get_bool_or(
                 "disallow_non_annotated_memoize",
                 default.disallow_non_annotated_memoize,

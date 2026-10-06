@@ -5873,35 +5873,25 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         _trailing_comma: Self::Output,
         gt: Self::Output,
     ) -> Self::Output {
-        if self.opts.enable_class_pointer_hint {
-            let pos = self.merge_positions(&kw, &gt);
-            let cls = match (kw.token_kind(), self.node_to_ty(targ)) {
-                (Some(TokenKind::Class), Some(ty)) => ty,
-                (Some(TokenKind::Enum), Some(ty)) => Ty(
-                    Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
-                    Box::new(Ty_::Tapply(
-                        (
-                            pos.clone(),
-                            naming_special_names::classes::HH_BUILTIN_ENUM.to_string(),
-                        ),
-                        vec![ty],
-                    )),
-                ),
-                _ => return Node::Ignored(SK::ClassPtrTypeSpecifier),
-            };
-            Node::Ty(Box::new(Ty(
-                Reason::FromWitnessDecl(WitnessDecl::Hint(pos)),
-                Box::new(Ty_::TclassPtr(cls)),
-            )))
-        } else {
-            let id = match kw.token_kind() {
-                Some(TokenKind::Class) => naming_special_names::classes::CLASS_NAME,
-                Some(TokenKind::Enum) => naming_special_names::classes::ENUM_NAME,
-                _ => return Node::Ignored(SK::ClassPtrTypeSpecifier),
-            };
-            let p = self.get_pos(&targ);
-            self.make_apply((self.get_pos(&kw), id.to_string()), targ, p)
-        }
+        let pos = self.merge_positions(&kw, &gt);
+        let cls = match (kw.token_kind(), self.node_to_ty(targ)) {
+            (Some(TokenKind::Class), Some(ty)) => ty,
+            (Some(TokenKind::Enum), Some(ty)) => Ty(
+                Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
+                Box::new(Ty_::Tapply(
+                    (
+                        pos.clone(),
+                        naming_special_names::classes::HH_BUILTIN_ENUM.to_string(),
+                    ),
+                    vec![ty],
+                )),
+            ),
+            _ => return Node::Ignored(SK::ClassPtrTypeSpecifier),
+        };
+        Node::Ty(Box::new(Ty(
+            Reason::FromWitnessDecl(WitnessDecl::Hint(pos)),
+            Box::new(Ty_::TclassPtr(cls)),
+        )))
     }
 
     fn make_scope_resolution_expression(

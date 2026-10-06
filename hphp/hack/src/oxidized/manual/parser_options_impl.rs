@@ -37,7 +37,6 @@ impl Default for ParserOptions {
             consider_unspecified_experimental_features_released: true,
             package_info: PackageInfo::default(),
             package_support_multifile_tests: false,
-            enable_class_pointer_hint: true,
             disallow_non_annotated_memoize: false,
             treat_non_annotated_memoize_as_kbic: false,
             ignore_string_methods: true,

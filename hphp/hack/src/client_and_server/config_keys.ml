@@ -44,8 +44,6 @@ module Hhconfig = struct
   let disallow_static_constants_in_default_func_args =
     key "disallow_static_constants_in_default_func_args"
 
-  let enable_class_pointer_hint = key "enable_class_pointer_hint"
-
   let enable_experimental_stx_features = key "enable_experimental_stx_features"
 
   let enable_xhp_class_modifier = key "enable_xhp_class_modifier"

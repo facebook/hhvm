@@ -54,9 +54,8 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
             .unwrap();
         let consider_unspecified_experimental_features_released =
             bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
-        let enable_class_pointer_hint = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
-        let ignore_string_methods = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
-        let enable_intrinsics_extension = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
+        let ignore_string_methods = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
+        let enable_intrinsics_extension = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
         parser_options.const_static_props = po_const_static_props;
         parser_options.abstract_static_props = po_abstract_static_props;
         parser_options.enable_xhp_class_modifier = po_enable_xhp_class_modifier;
@@ -72,7 +71,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         parser_options.experimental_features = po_experimental_features;
         parser_options.consider_unspecified_experimental_features_released =
             consider_unspecified_experimental_features_released;
-        parser_options.enable_class_pointer_hint = enable_class_pointer_hint;
         parser_options.ignore_string_methods = ignore_string_methods;
         parser_options.enable_intrinsics_extension = enable_intrinsics_extension;
         (

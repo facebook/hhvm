@@ -44,8 +44,6 @@ module Hhconfig : sig
 
   val disallow_static_constants_in_default_func_args : string
 
-  val enable_class_pointer_hint : string
-
   val enable_experimental_stx_features : string
 
   val enable_xhp_class_modifier : string

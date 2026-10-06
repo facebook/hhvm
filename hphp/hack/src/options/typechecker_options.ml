@@ -274,9 +274,6 @@ let package_exclude_patterns t = t.Global_options.tco_package_exclude_patterns
 
 let class_sub_classname t = t.Global_options.class_sub_classname
 
-let enable_class_pointer_hint t =
-  t.Global_options.po.Parser_options.enable_class_pointer_hint
-
 let class_class_type t = t.Global_options.class_class_type
 
 let needs_concrete_body_check t = t.Global_options.needs_concrete_body_check

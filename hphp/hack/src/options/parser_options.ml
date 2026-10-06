@@ -36,7 +36,6 @@ type t = {
   consider_unspecified_experimental_features_released: bool;
   package_info: Package_info.t;
   package_support_multifile_tests: bool;
-  enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
   ignore_string_methods: bool;
@@ -74,7 +73,6 @@ let default =
     consider_unspecified_experimental_features_released = true;
     package_info = Package_info.empty;
     package_support_multifile_tests = false;
-    enable_class_pointer_hint = true;
     disallow_non_annotated_memoize = false;
     treat_non_annotated_memoize_as_kbic = false;
     ignore_string_methods = true;
@@ -101,7 +99,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -119,6 +116,5 @@ let to_rust_ffi_t po =
     po.use_legacy_experimental_feature_config,
     po.experimental_features,
     po.consider_unspecified_experimental_features_released,
-    po.enable_class_pointer_hint,
     po.ignore_string_methods,
     po.enable_intrinsics_extension )

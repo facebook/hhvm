@@ -313,7 +313,6 @@ let parse_options () =
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let get_some_file_deps_full_hierarchy = ref false in
-  let enable_class_pointer_hint = ref true in
   let disallow_non_annotated_memoize = ref false in
   let treat_non_annotated_memoize_as_kbic = ref false in
   let options =
@@ -709,10 +708,6 @@ let parse_options () =
       ( "--map-reduce",
         Arg.Unit (set_mode Map_reduce_mode),
         " Run the map reducers and print the result" );
-      ( "--enable-class-pointer-hint",
-        Arg.Bool (fun x -> enable_class_pointer_hint := x),
-        " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"
-      );
     ]
   in
 
@@ -869,7 +864,6 @@ let parse_options () =
         package_info = default.package_info;
         package_support_multifile_tests =
           default.package_support_multifile_tests;
-        enable_class_pointer_hint = !enable_class_pointer_hint;
         disallow_non_annotated_memoize = !disallow_non_annotated_memoize;
         treat_non_annotated_memoize_as_kbic =
           !treat_non_annotated_memoize_as_kbic;

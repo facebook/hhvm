@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9de11d856ac07af2637217ff0394b0c0>>
+// @generated SignedSource<<08d52e17f04d510632eb758353b8c2f1>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -97,10 +97,6 @@ pub struct ParserOptions {
     /// Option to strip the multifile filename mangling used in Hack tests.  Used in Packages tests.
     /// Should be set to true only by the unit tests in the Hack test suite
     pub package_support_multifile_tests: bool,
-    /// When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).
-    /// When true, it becomes decl ty class<T> (Tclass_ptr). This option is similar to the
-    /// interpret_soft_types_as_like_types switch.
-    pub enable_class_pointer_hint: bool,
     /// When true, plain <<__Memoize>> will not be allowed.
     pub disallow_non_annotated_memoize: bool,
     /// When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>.
@@ -146,7 +142,6 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub s_map::SMap<experimental_features::FeatureStatus>,
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

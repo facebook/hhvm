@@ -31,7 +31,6 @@ impl DeclParserOptions {
             deregister_php_stdlib: opts.deregister_php_stdlib,
             package_info: opts.package_info.clone(),
             package_support_multifile_tests: opts.package_support_multifile_tests,
-            enable_class_pointer_hint: opts.enable_class_pointer_hint,
             disallow_non_annotated_memoize: opts.disallow_non_annotated_memoize,
             treat_non_annotated_memoize_as_kbic: opts.treat_non_annotated_memoize_as_kbic,
             ignore_string_methods: opts.ignore_string_methods,

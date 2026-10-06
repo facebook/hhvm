@@ -21,7 +21,6 @@ let popt
     ~keep_user_attributes
     ~interpret_soft_types_as_like_types
     ~everything_sdt
-    ~enable_class_pointer_hint
     ~include_enum_member_values =
   Parser_options.
     {
@@ -32,7 +31,6 @@ let popt
       enable_xhp_class_modifier;
       interpret_soft_types_as_like_types;
       everything_sdt;
-      enable_class_pointer_hint;
       include_enum_member_values;
     }
 
@@ -449,7 +447,6 @@ let () =
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
   let rust_provider_backend = ref Hh_server_provider_backend.is_supported in
-  let enable_class_pointer_hint = ref true in
   let include_enum_member_values = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
@@ -491,10 +488,6 @@ let () =
       ( "--no-rust-provider-backend",
         Arg.Clear rust_provider_backend,
         " Use the shared-memory implementation of Provider_backend" );
-      ( "--enable-class-pointer-hint",
-        Arg.Bool (fun x -> enable_class_pointer_hint := x),
-        " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"
-      );
       ( "--enable-enum-member-values",
         Arg.Set include_enum_member_values,
         " Record canonical enum member values in decls" );
@@ -566,7 +559,6 @@ let () =
     !interpret_soft_types_as_like_types
   in
   let everything_sdt = !everything_sdt in
-  let enable_class_pointer_hint = !enable_class_pointer_hint in
   let popt =
     popt
       ~auto_namespace_map
@@ -575,7 +567,6 @@ let () =
       ~keep_user_attributes
       ~interpret_soft_types_as_like_types
       ~everything_sdt
-      ~enable_class_pointer_hint
       ~include_enum_member_values:!include_enum_member_values
   in
   let tcopt = Global_options.{ default with po = popt } in

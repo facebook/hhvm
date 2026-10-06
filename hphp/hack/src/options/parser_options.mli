@@ -62,10 +62,6 @@ type t = {
   package_support_multifile_tests: bool;
       (** Option to strip the multifile filename mangling used in Hack tests.  Used in Packages tests.
           Should be set to true only by the unit tests in the Hack test suite *)
-  enable_class_pointer_hint: bool;
-      (** When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).
-          When true, it becomes decl ty class<T> (Tclass_ptr). This option is similar to the
-          interpret_soft_types_as_like_types switch. **)
   disallow_non_annotated_memoize: bool;
       (** When true, plain <<__Memoize>> will not be allowed. **)
   treat_non_annotated_memoize_as_kbic: bool;
@@ -99,7 +95,6 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status S_map.t
-  * bool
   * bool
   * bool
   * bool

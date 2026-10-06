@@ -21,7 +21,6 @@ type t = {
   deregister_php_stdlib: bool;
   package_info: Package_info.t;
   package_support_multifile_tests: bool;
-  enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
   ignore_string_methods: bool;
@@ -45,7 +44,6 @@ let from_parser_options (popt : Parser_options.t) =
     deregister_php_stdlib = popt.deregister_php_stdlib;
     package_info = popt.package_info;
     package_support_multifile_tests = popt.package_support_multifile_tests;
-    enable_class_pointer_hint = popt.enable_class_pointer_hint;
     disallow_non_annotated_memoize = popt.disallow_non_annotated_memoize;
     treat_non_annotated_memoize_as_kbic =
       popt.treat_non_annotated_memoize_as_kbic;

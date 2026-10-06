@@ -311,7 +311,6 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   config.enable_xhp_class_modifier = EnableXHPClassModifier;
   config.php5_compat_mode = true;
   config.hhvm_compat_mode = true;
-  config.enable_class_pointer_hint = EnableClassPointerHint;
   config.use_obr_decls = UseObrDecls;
 }
 

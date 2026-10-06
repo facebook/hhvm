@@ -39,7 +39,6 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
   if (!term.is(JmpZero,
                JmpNZero,
                CheckLoc,
-               CheckStk,
                CheckRDSInitialized)) {
     return false;
   }

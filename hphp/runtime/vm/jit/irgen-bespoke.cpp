@@ -1720,20 +1720,11 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   if (required) return false;
 
   // Check any type bounds that are not already known to be satisfied.
-  //
-  // If we're going to do the writes inline, then we force a load here because
-  // we need to do the load below anyway. Otherwise, we check types in place.
   if (!guards.empty()) {
     auto const exit = makeExitSlow(env);
     for (auto const& guard : guards) {
       auto const soff = BCSPRelOffset{guard.first};
-      if (size > Cfg::HHIR::MaxInlineInitStructElements) {
-        auto const data = IRSPRelOffsetData{offsetFromIRSP(env, soff)};
-        gen(env, AssertStk, TInitCell, data, sp(env));
-        gen(env, CheckStk, guard.second, data, exit, sp(env));
-      } else {
-        gen(env, CheckType, guard.second, exit, topC(env, soff, gc));
-      }
+      gen(env, CheckType, guard.second, exit, topC(env, soff, gc));
     }
   }
 

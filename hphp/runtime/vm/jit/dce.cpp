@@ -349,7 +349,6 @@ bool canDCE(const IRInstruction& inst) {
   case CheckPtrIterTombstone:
   case CheckSmashableClass:
   case CheckLoc:
-  case CheckStk:
   case AssertLoc:
   case AssertStk:
   case AssertMBase:

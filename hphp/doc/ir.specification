@@ -194,11 +194,6 @@ Instruction set
   Check that type of the given localId on the frame S0 is T; if not, branch to
   block B.
 
-| CheckStk<T,offset>, ND, S(StkPtr), B
-
-  Check that the type of the cell on the stack pointed to by S0 at offset (in
-  cells) is T; if not, branch to block B.
-
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
@@ -209,8 +204,8 @@ Instruction set
 | AssertStk<T,offset>, ND, S(StkPtr), NF
 
   Assert that stack element at `offset' (in cells) from S0 has type T. This is
-  similar to a CheckStk except that it does not imply a runtime check and
-  cannot cause control flow.
+  similar to a CheckType on the stack element except that it does not imply a
+  runtime check and cannot cause control flow.
 
 | AssertMBase<T>, ND, NA, NF
 

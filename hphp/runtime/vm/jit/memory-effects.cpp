@@ -1454,12 +1454,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdOutAddr:
     return IrrelevantEffects{};
 
-  case CheckStk:
-    return may_load_store(
-      AStack::at(inst.extra<CheckStk>()->offset),
-      AEmpty
-    );
-
   case DbgTraceCall: {
     auto const irSPOff = inst.src(1)->inst()->extra<DefStackData>()->irSPOff;
     auto const stkHigh = SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);

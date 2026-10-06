@@ -308,7 +308,6 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
   // block. Only work if the instruction does not have side effect.
   // JmpZero/JmpNZero is handled separately.
   assertx(inst->is(CheckLoc,
-                   CheckStk,
                    CheckRDSInitialized,
                    CheckVecBounds,
                    CheckDictKeys,
@@ -2684,10 +2683,6 @@ SSATmp* simplifyCheckLoc(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckStk(State& env, const IRInstruction* inst) {
-  return mergeBranchDests(env, inst);
-}
-
 SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
   assertx(inst->taken() != nullptr);
@@ -4227,7 +4222,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(MarkRDSInitialized)
       X(MarkRDSAccess)
       X(CheckLoc)
-      X(CheckStk)
       X(CheckType)
       X(AssertType)
       X(CheckNonNull)

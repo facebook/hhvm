@@ -532,7 +532,6 @@ Flags handle_general_effects(Local& env,
   auto const flags = [&] () -> Optional<Flags> {
     switch (inst.op()) {
       case CheckLoc:
-      case CheckStk:
         return handleCheck(inst.typeParam());
 
       case CheckMROProp:
@@ -1145,7 +1144,6 @@ bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags,
 
   switch (inst.op()) {
   case CheckLoc:
-  case CheckStk:
     reduce_to(CheckType, inst.typeParam());
     break;
 
@@ -1363,7 +1361,6 @@ void optimize_edges(Global& env, Block* blk) {
 
     switch (inst.op()) {
       case CheckLoc:
-      case CheckStk:
         return handleCheck(inst.typeParam());
 
       case CheckMROProp:
@@ -1533,7 +1530,6 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
 
   switch (inst.op()) {
     case CheckLoc:
-    case CheckStk:
       // Subtract inst.typeParam() on the taken branch.
       handleCheck(TCell, inst.typeParam());
       break;

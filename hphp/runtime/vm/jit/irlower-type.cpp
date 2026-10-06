@@ -158,14 +158,6 @@ void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
 }
 
-void cgCheckStk(IRLS& env, const IRInstruction* inst) {
-  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
-  auto const base = srcLoc(env, inst, 0).reg()[baseOff];
-
-  emitTypeCheck(vmain(env), env, inst->typeParam(),
-                base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

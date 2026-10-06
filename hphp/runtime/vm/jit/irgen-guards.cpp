@@ -57,15 +57,8 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Block* exit) {
 
 void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, Block* exit) {
   auto const soff = IRSPRelOffsetData { offsetFromIRSP(env, idx) };
-  checkTypeImpl(env, type, exit,
-    [&](Type test, Block* exit) {
-      gen(env, CheckStk, test, soff, exit, sp(env));
-    },
-    [&](Type test) {
-      test &= env.irb->fs().stack(soff.offset).type;
-      return gen(env, LdStk, test, soff, sp(env));
-    }
-  );
+  auto const val = gen(env, LdStk, TCell, soff, sp(env));
+  checkTypeImpl(env, type, exit, val);
 }
 
 void checkTypeMBase(IRGS& env, Type type, Block* exit) {

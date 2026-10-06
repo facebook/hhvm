@@ -559,7 +559,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckRDSInitialized:
   case CheckRange:
   case CheckSmashableClass:
-  case CheckStk:
   case CheckSubClsCns:
   case CheckSurpriseFlags:
   case CheckSurpriseFlagsEnter:

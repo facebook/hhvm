@@ -480,7 +480,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case AssertStk:
-  case CheckStk:
     refineTypeAndSyncMBase(
       stk(inst->extra<IRSPRelOffsetData>()->offset),
       inst->typeParam(),

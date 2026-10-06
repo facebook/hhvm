@@ -3216,7 +3216,6 @@ X(InstanceOfIface,              InstanceOfData);
 X(InstanceOfIfaceVtable,        InstanceOfIfaceVtableData);
 X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
-X(CheckStk,                     IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
 X(StStkMeta,                    IRSPRelOffsetData);
 X(StStkRange,                   StackRange);

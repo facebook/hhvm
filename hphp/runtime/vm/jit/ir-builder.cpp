@@ -54,9 +54,7 @@ const typename M::mapped_type& get_required(const M& m,
 SSATmp* fwdGuardSource(IRInstruction* inst) {
   if (inst->is(AssertType, CheckType)) return inst->src(0);
 
-  assertx(inst->is(AssertLoc, CheckLoc,
-                   AssertStk, CheckStk,
-                   AssertMBase));
+  assertx(inst->is(AssertLoc, CheckLoc, AssertStk, AssertMBase));
   inst->convertToNop();
   return nullptr;
 }
@@ -122,7 +120,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
           return loc(inst->extra<LocalId>()->locId);
 
         case AssertStk:
-        case CheckStk:
         case LdStk:
           return stk(inst->extra<IRSPRelOffsetData>()->offset);
 
@@ -208,10 +205,6 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
 
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   return preOptimizeCheckLocation(inst, loc(inst->extra<CheckLoc>()->locId));
-}
-
-SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
-  return preOptimizeCheckLocation(inst, stk(inst->extra<CheckStk>()->offset));
 }
 
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
@@ -618,7 +611,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(AssertStk)
   X(AssertMBase)
   X(CheckLoc)
-  X(CheckStk)
   X(LdLoc)
   X(LdStk)
   X(LdMBase)
@@ -904,9 +896,7 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
   assertx(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
 
-  always_assert(guard->is(AssertLoc, CheckLoc,
-                          AssertStk, CheckStk,
-                          AssertMBase));
+  always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, AssertMBase));
 
   // If the dest of the Assert/Check doesn't fit `gc', there's no point in
   // continuing.

@@ -302,7 +302,6 @@ private:
    */
   SSATmp* preOptimizeCheckLocation(IRInstruction*, Location);
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
-  SSATmp* preOptimizeCheckStk(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,
                                   SSATmp* oldVal,

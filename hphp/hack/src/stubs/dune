@@ -1,4 +1,11 @@
 (library
+ (name agent_session_id_stubs)
+ (wrapped false)
+ (modules agent_session_id)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name ai_stubs)
  (wrapped false)
  (modules ai)

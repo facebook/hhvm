@@ -10,6 +10,7 @@
    outline_for_agents
    server_progress_lwt))
  (libraries
+  agent_session_id_stubs
   connection_tracker
   client_get_definition
   client_highlight_refs

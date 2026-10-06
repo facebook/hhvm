@@ -37,6 +37,7 @@ let init_event_logger
     ~from
     ~is_interactive:(Client_args.is_interactive command)
     ~custom_columns:(Client_command.get_custom_telemetry_data command)
+    ?agent_session_id:(Agent_session_id.get ())
     root;
   Hack_event_logger.set_hhconfig_version
     (Server_config.version config |> Config_file.version_to_string_opt);
@@ -202,6 +203,9 @@ let exec_command_with_config
   | exn -> handle_exn_and_exit exn ~command_name
 
 let main () =
+  (* Resolve once, before argument parsing, so every path through this client
+   * process observes the same session ID. *)
+  Agent_session_id.initialize ();
   Server_local_config_qe.prepare_client_startup ();
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();

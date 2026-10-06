@@ -111,7 +111,10 @@ let type_check_dirty ~start_t:_ ~dirty_count:_ ~recheck_count:_ = ()
 
 let lock_stolen _ = ()
 
-let client_init ~init_id:_ ~from:_ ~custom_columns:_ _ = ()
+let client_init
+    ?agent_session_id:_ ~init_id:_ ~from:_ ~is_interactive:_ ~custom_columns:_ _
+    =
+  ()
 
 let serverless_ide_init ~init_id:_ = ()
 

@@ -166,6 +166,7 @@ end = struct
       ~finally:(fun () -> Hh_logger.Level.set_min_level_stderr stderr_level)
       ~f:(fun () ->
         try
+          let agent_session_id = Agent_session_id.get () in
           (* Arg parsing failed, so there is no trustworthy root, --from or
            * --custom-telemetry-data yet; initialize with placeholders so that
            * the sample below has a base env to build on. *)
@@ -175,6 +176,7 @@ end = struct
             ~from:""
             ~is_interactive:false
             ~custom_columns:[]
+            ?agent_session_id
             (Path.make ".");
           Hack_event_logger.client_bad_args
             ~command_name:"Args"

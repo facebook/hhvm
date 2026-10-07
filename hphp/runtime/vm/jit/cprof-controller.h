@@ -44,7 +44,8 @@ bool captureContProfProfile(const ProfData&, const Func&);
 size_t numContProfProfileRecords();
 
 /*
- * Return a point-in-time copy of the captured records, sorted by function key.
+ * Finalize pending target profiles and return a key-ordered snapshot of the
+ * captured records. The caller must be in a treadmill session.
  */
 std::vector<ContProfProfileRecord> snapshotContProfProfileRecords();
 

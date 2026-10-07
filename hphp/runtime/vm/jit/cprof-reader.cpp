@@ -128,6 +128,32 @@ discoverCheckpointFiles(const std::string& directory) {
   return files;
 }
 
+std::optional<SrcKey> validateTranslationRegion(
+  const Func& func,
+  SrcKey start,
+  const ContProfProfileTranslation& translation
+) {
+  auto profile = translation.targetProfiles.begin();
+  auto last = start;
+
+  for (uint32_t i = 0; i < translation.regionLength; ++i) {
+    if (i != 0) last.advance(&func);
+    // Function entries are synthetic instructions, not bytecode sites.
+    if (last.anyFuncEntry()) continue;
+
+    while (profile != translation.targetProfiles.end() &&
+           profile->bytecodeOffset == last.offset()) {
+      ++profile;
+    }
+  }
+
+  if (profile != translation.targetProfiles.end()) {
+    return std::nullopt;
+  }
+
+  return last;
+}
+
 }
 
 std::optional<SrcKey> contProfTranslationSrcKey(
@@ -240,13 +266,11 @@ bool isContProfProfileRecordCompatible(
       if (!stackOffset || *stackOffset != SBInvOffset{0}) return false;
     }
 
-    auto last = *start;
-    for (uint32_t i = 1; i < translation.regionLength; ++i) {
-      last.advance(&func);
-    }
+    auto const region = validateTranslationRegion(func, *start, translation);
+    if (!region) return false;
 
     starts.push_back(*start);
-    lasts.push_back(last);
+    lasts.push_back(*region);
 
     auto const& guards = translation.localTypeGuards;
 

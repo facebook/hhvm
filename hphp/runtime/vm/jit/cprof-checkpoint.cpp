@@ -35,12 +35,15 @@
 #include <fmt/format.h>
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
+#include <folly/ScopeGuard.h>
 #include <folly/system/ThreadName.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
@@ -346,10 +349,14 @@ private:
 
   void writeCheckpoint() noexcept {
     try {
-      // Records are immutable, so an unchanged count is sufficient here.
+      // Records are immutable after their first snapshot, so an unchanged
+      // count means there is nothing new to write.
       if (numContProfProfileRecords() == m_lastWrittenRecordCount) return;
 
-      auto const records = snapshotContProfProfileRecords();
+      auto const records = [] {
+        Treadmill::Session session{Treadmill::SessionKind::ProfData};
+        return snapshotContProfProfileRecords();
+      }();
 
       if (!writeContProfCheckpointFile(m_path, records)) {
         Logger::Warning(
@@ -372,6 +379,9 @@ private:
 
   void run() noexcept {
     try {
+      hphp_thread_init(true /* skipExtensions */);
+      SCOPE_EXIT { hphp_thread_exit(true /* skipExtensions */); };
+
       folly::setThreadName("cont-prof");
 
       auto const interval = std::chrono::seconds{

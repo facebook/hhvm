@@ -20,6 +20,7 @@
 #include <chrono>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -183,7 +184,13 @@ bool candidateLess(
 }
 
 std::optional<ContProfProfileRecord>
-snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
+snapshotContProfProfileRecord(
+  const ProfData& profData,
+  const Func& func,
+  std::vector<TransID>* sourceTransIds
+) {
+  if (sourceTransIds) sourceTransIds->clear();
+
   auto funcKey = makeContProfFuncKey(func);
   if (!funcKey) return std::nullopt;
 
@@ -324,6 +331,13 @@ snapshotContProfProfileRecord(const ProfData& profData, const Func& func) {
   result.header.capturedAtMs = static_cast<uint64_t>(capturedAtMs);
 
   if (!isValidContProfProfileRecord(result)) return std::nullopt;
+
+  if (sourceTransIds) {
+    sourceTransIds->reserve(selectedCandidates.size());
+    for (auto const candidate : selectedCandidates) {
+      sourceTransIds->push_back(candidate->transId);
+    }
+  }
 
   return result;
 }

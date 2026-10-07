@@ -16,35 +16,20 @@
 
 #pragma once
 
+#include <cstdint>
 #include <optional>
-#include <vector>
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
-#include "hphp/runtime/vm/jit/types.h"
-
-namespace HPHP {
-struct Func;
-}
-
-namespace HPHP::jit {
-
-struct ProfData;
-
-}
 
 namespace HPHP::jit::cprof {
 
-/*
- * Snapshot the representable, positive-count translations for `func`,
- * retaining one preferred translation per start. Returns nullopt if no valid
- * portable record can be produced. If non-null, `sourceTransIds` receives the
- * original TransID for each retained translation.
- */
-std::optional<ContProfProfileRecord>
-snapshotContProfProfileRecord(
-  const ProfData&,
-  const Func&,
-  std::vector<TransID>* sourceTransIds = nullptr
+/* Snapshot a supported live RDS target profile. */
+std::optional<ContProfTargetProfile>
+snapshotContProfTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
 );
 
 }

@@ -141,7 +141,7 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   EXPECT_EQ(replacement, readContProfCheckpointFile(path));
 }
 
-TEST(ContProfCheckpoint, StaysInactiveWhenWriterCannotStart) {
+TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {
   folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-activation"};
 
   auto const oldServerMode = std::exchange(Cfg::Server::Mode, false);
@@ -169,6 +169,13 @@ TEST(ContProfCheckpoint, StaysInactiveWhenWriterCannotStart) {
   Cfg::Server::Mode = true;
   Cfg::Jit::ContProfCheckpointDirectory = temp.path().native() + "/missing";
   startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+
+  Cfg::Jit::ContProfCheckpointDirectory = temp.path().native();
+  startContProfCheckpointWriter();
+  EXPECT_TRUE(contProfActive());
+
+  stopContProfCheckpointWriter();
   EXPECT_FALSE(contProfActive());
 }
 

@@ -115,7 +115,8 @@ struct DecRefProfile {
     return total ? 100.0 * value / total : 0.0;
   }
 
-  void serialize(ProfDataSerializer& ser) const {
+  template<class Serializer>
+  void serialize(Serializer& ser) const {
     write_raw(ser, total);
     write_raw(ser, refcounted);
     write_raw(ser, released);
@@ -124,7 +125,8 @@ struct DecRefProfile {
     write_raw(ser, datatype);
   }
 
-  void deserialize(ProfDataDeserializer& ser) {
+  template<class Deserializer>
+  void deserialize(Deserializer& ser) {
     read_raw(ser, total);
     read_raw(ser, refcounted);
     read_raw(ser, released);

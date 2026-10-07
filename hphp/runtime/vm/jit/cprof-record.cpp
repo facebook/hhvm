@@ -120,6 +120,18 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
         return false;
       }
     }
+
+    auto const& profiles = translation.targetProfiles;
+    for (size_t i = 0; i < profiles.size(); ++i) {
+      auto const& profile = profiles[i];
+
+      if (!isValidContProfTargetProfile(profile)) return false;
+
+      if (i != 0 && !contProfTargetProfileKeyLess(profiles[i - 1], profile)) {
+        return false;
+      }
+    }
+
     if (translation.startKind != ContProfStartKind::Bytecode) {
       if (translation.executionCount >
           std::numeric_limits<uint64_t>::max() - entryExecutions) {

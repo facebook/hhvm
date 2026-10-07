@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <system_error>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -39,6 +40,32 @@
 
 namespace HPHP::jit::cprof {
 namespace {
+
+template<class T>
+void appendTargetProfilePayload(std::vector<uint8_t>& payload, T value) {
+  static_assert(std::is_unsigned_v<T>);
+
+  auto const bytes = reinterpret_cast<const uint8_t*>(&value);
+  payload.insert(payload.end(), bytes, bytes + sizeof(value));
+}
+
+ContProfTargetProfile makeDecRefTargetProfile(Offset bytecodeOffset) {
+  std::vector<uint8_t> payload;
+  payload.reserve(5 * sizeof(uint32_t) + sizeof(uint8_t));
+  appendTargetProfilePayload(payload, uint32_t{1});
+  appendTargetProfilePayload(payload, uint32_t{0});
+  appendTargetProfilePayload(payload, uint32_t{0});
+  appendTargetProfilePayload(payload, uint32_t{0});
+  appendTargetProfilePayload(payload, uint32_t{0});
+  appendTargetProfilePayload(payload, static_cast<uint8_t>(KindOfString));
+
+  return {
+    ContProfTargetProfileKind::DecRef,
+    static_cast<int32_t>(bytecodeOffset),
+    "DecRefProfile--1",
+    std::move(payload),
+  };
+}
 
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-reader-test.php";
 
@@ -461,6 +488,40 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesLocalPostConditionBounds) {
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, ValidatesTargetProfileSites) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto record = makeBytecodeRecord(*key, trueOffset(), 2);
+  auto profile = makeDecRefTargetProfile(trueOffset());
+  auto secondProfile = profile;
+  secondProfile.name = "DecRefProfile-0";
+  auto laterProfile = makeDecRefTargetProfile(jmpOffset());
+  record.translations.back().targetProfiles = {
+    profile,
+    secondProfile,
+    laterProfile,
+  };
+
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().targetProfiles = {laterProfile};
+  record.translations.back().targetProfiles[0].bytecodeOffset =
+    static_cast<int32_t>(popOffset());
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().targetProfiles.clear();
+  laterProfile.bytecodeOffset = 0;
+  record.translations.front().targetProfiles = {laterProfile};
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.front().regionLength = 2;
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
 }
 
 }

@@ -18,6 +18,8 @@
 
 #include <compare>
 #include <cstdint>
+#include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -59,6 +61,34 @@ struct ContProfLocalPostCondition {
     = default;
 };
 
+enum class ContProfTargetProfileKind : uint8_t {
+  DecRef = 1,
+};
+
+/* Portable target-profile payload associated with a bytecode site. */
+struct ContProfTargetProfile {
+  ContProfTargetProfileKind kind{ContProfTargetProfileKind::DecRef};
+  int32_t bytecodeOffset{0};
+  std::string name;
+  std::vector<uint8_t> payload;
+
+  bool operator==(const ContProfTargetProfile&) const = default;
+};
+
+/* Defined in cprof-target-profile.cpp, which knows the payload formats. */
+bool isValidContProfTargetProfile(const ContProfTargetProfile& profile);
+
+/*
+ * Key order only: payload is deliberately excluded, so this is not a
+ * defaulted <=>. The record validator requires strict key ordering.
+ */
+inline bool contProfTargetProfileKeyLess(
+    const ContProfTargetProfile& lhs,
+    const ContProfTargetProfile& rhs) {
+  return std::tie(lhs.bytecodeOffset, lhs.kind, lhs.name) <
+    std::tie(rhs.bytecodeOffset, rhs.kind, rhs.name);
+}
+
 struct ContProfProfileTranslation {
   ContProfStartKind startKind{ContProfStartKind::FuncEntry};
   // Shared payload, like SrcKey: bytecode offset or FuncEntry argument count.
@@ -72,6 +102,8 @@ struct ContProfProfileTranslation {
   // Sorted, unique predecessor indices into this record's translations.
   std::vector<uint32_t> incoming;
   std::vector<ContProfLocalPostCondition> localPostConditions;
+  // Strictly ordered by (bytecodeOffset, kind, name).
+  std::vector<ContProfTargetProfile> targetProfiles;
 
   // Valid only for Bytecode starts.
   uint32_t offset() const;

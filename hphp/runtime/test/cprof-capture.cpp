@@ -20,15 +20,19 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-target-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -118,6 +122,99 @@ TransID addProfileTranslation(
   *profData.transCounterAddr(transId) =
     profData.counterDefault() - executionCount;
   return transId;
+}
+
+DecRefProfile makeDecRefProfileValue(
+  uint32_t total,
+  uint32_t refcounted,
+  uint32_t released,
+  uint32_t decremented,
+  uint32_t arrayOfUncountedReleaseCount,
+  DataType datatype
+) {
+  return {
+    total,
+    refcounted,
+    released,
+    decremented,
+    arrayOfUncountedReleaseCount,
+    datatype,
+  };
+}
+
+struct ScopedDecRefProfile {
+  ScopedDecRefProfile(
+    TransID transId,
+    Offset bytecodeOffset,
+    const StringData* name,
+    const DecRefProfile& value
+  )
+    : m_key{
+        static_cast<DecRefProfile*>(nullptr),
+        transId,
+        bytecodeOffset,
+        name,
+      }
+    , m_handle{
+        rds::bind<DecRefProfile, rds::Mode::Local>(
+          rds::Symbol{m_key}
+        ).handle()
+      } {
+    set(value);
+  }
+
+  ~ScopedDecRefProfile() {
+    rds::unbind(rds::Symbol{m_key}, m_handle);
+  }
+
+  ScopedDecRefProfile(const ScopedDecRefProfile&) = delete;
+  ScopedDecRefProfile& operator=(const ScopedDecRefProfile&) = delete;
+
+  void set(const DecRefProfile& value) {
+    rds::handleToRef<DecRefProfile, rds::Mode::Local>(m_handle) = value;
+  }
+
+private:
+  rds::Profile m_key;
+  rds::Handle m_handle;
+};
+
+template<class T>
+void appendTargetProfilePayload(std::vector<uint8_t>& payload, T value) {
+  static_assert(std::is_unsigned_v<T>);
+
+  auto const bytes = reinterpret_cast<const uint8_t*>(&value);
+  payload.insert(payload.end(), bytes, bytes + sizeof(value));
+}
+
+ContProfTargetProfile makeContProfDecRefTargetProfile(
+  Offset bytecodeOffset,
+  int32_t profileId,
+  const DecRefProfile& value
+) {
+  std::vector<uint8_t> payload;
+  appendTargetProfilePayload(payload, static_cast<uint32_t>(value.total));
+  appendTargetProfilePayload(
+    payload,
+    static_cast<uint32_t>(value.refcounted)
+  );
+  appendTargetProfilePayload(payload, static_cast<uint32_t>(value.released));
+  appendTargetProfilePayload(
+    payload,
+    static_cast<uint32_t>(value.decremented)
+  );
+  appendTargetProfilePayload(
+    payload,
+    static_cast<uint32_t>(value.arrayOfUncountedReleaseCount)
+  );
+  appendTargetProfilePayload(payload, static_cast<uint8_t>(value.datatype));
+
+  return {
+    ContProfTargetProfileKind::DecRef,
+    bytecodeOffset,
+    decRefProfileKey(profileId)->toCppString(),
+    std::move(payload),
+  };
 }
 
 struct ContProfCaptureTest : testing::Test {
@@ -630,36 +727,169 @@ TEST_F(ContProfCaptureTest, CapturesLocalPostConditions) {
   EXPECT_EQ(expected, record->translations.back().localPostConditions);
 }
 
-TEST_F(ContProfCaptureTest, CaptureContProfProfileStoresFirstRecordOnly) {
+TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
   auto const before = snapshotContProfProfileRecords();
 
   ProfData profData;
   profData.resetCounters(100);
 
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
-  addProfileTranslation(profData, main, 2, 7);
+  auto const discardedMainTransId = addProfileTranslation(profData, main, 3, 5);
+  auto const selectedMainTransId = addProfileTranslation(profData, main, 2, 7);
+  auto const midTransId = addProfileTranslation(
+    profData,
+    emptyMid(),
+    1,
+    13,
+    SBInvOffset{0}
+  );
+
+  auto const selectedDefaultValue =
+    makeDecRefProfileValue(9, 6, 2, 3, 1, KindOfString);
+  ScopedDecRefProfile selectedDefault{
+    selectedMainTransId,
+    0,
+    decRefProfileKey(-1),
+    selectedDefaultValue,
+  };
+
+  auto const direct = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(direct);
+  ASSERT_EQ(2, direct->translations.size());
+  EXPECT_TRUE(direct->translations[0].targetProfiles.empty());
+  EXPECT_TRUE(direct->translations[1].targetProfiles.empty());
+
   EXPECT_TRUE(captureContProfProfile(profData, *func()));
 
-  addProfileTranslation(profData, main, 1, 11);
+  auto const laterMainTransId = addProfileTranslation(profData, main, 1, 11);
   EXPECT_FALSE(captureContProfProfile(profData, *func()));
 
+  auto const selectedNamedValue =
+    makeDecRefProfileValue(17, 12, 3, 5, 1, KindOfObject);
+  ScopedDecRefProfile const selectedNamed{
+    selectedMainTransId,
+    0,
+    decRefProfileKey(2'000'000),
+    selectedNamedValue,
+  };
+  auto const selectedMidValue =
+    makeDecRefProfileValue(11, 8, 2, 4, 0, kInvalidDataType);
+  ScopedDecRefProfile const selectedMid{
+    midTransId,
+    emptyMid().offset(),
+    decRefProfileKey(2'000'001),
+    selectedMidValue,
+  };
+  ScopedDecRefProfile const discarded{
+    discardedMainTransId,
+    0,
+    decRefProfileKey(2'000'002),
+    makeDecRefProfileValue(23, 15, 4, 7, 1, KindOfVec),
+  };
+  ScopedDecRefProfile const later{
+    laterMainTransId,
+    0,
+    decRefProfileKey(2'000'003),
+    makeDecRefProfileValue(29, 19, 5, 8, 2, KindOfDict),
+  };
+  ScopedDecRefProfile const negativeOffset{
+    selectedMainTransId,
+    Offset{-1},
+    decRefProfileKey(2'000'011),
+    makeDecRefProfileValue(7, 4, 1, 2, 0, KindOfString),
+  };
+  ScopedDecRefProfile const outsideFunction{
+    selectedMainTransId,
+    func()->bclen(),
+    decRefProfileKey(2'000'012),
+    makeDecRefProfileValue(7, 4, 1, 2, 0, KindOfString),
+  };
+  ScopedDecRefProfile const zero{
+    selectedMainTransId,
+    0,
+    decRefProfileKey(2'000'014),
+    makeDecRefProfileValue(0, 0, 0, 0, 0, kExtraInvalidDataType),
+  };
+
+  auto const requiredTransId = addProfileTranslation(
+    profData,
+    SrcKey{requiredFunc(), 1, false, SrcKey::FuncEntryTag{}},
+    2,
+    5
+  );
+  EXPECT_TRUE(captureContProfProfile(profData, *requiredFunc()));
+
   auto const records = snapshotContProfProfileRecords();
-  ASSERT_EQ(before.size() + 1, records.size());
+  ASSERT_EQ(before.size() + 2, records.size());
 
   auto const expectedKey = makeContProfFuncKey(*func());
   ASSERT_TRUE(expectedKey);
 
   auto const stored = std::find_if(
-      records.begin(), records.end(), [&](auto const &record) {
-        return record.header.funcKey == *expectedKey;
-      });
+    records.begin(),
+    records.end(),
+    [&](auto const& record) {
+      return record.header.funcKey == *expectedKey;
+    }
+  );
   ASSERT_NE(records.end(), stored);
 
-  std::vector<ContProfProfileTranslation> const expected{
-      {ContProfStartKind::FuncEntry, 0, 2, 7},
-  };
   EXPECT_EQ(7, stored->functionExecutions());
-  EXPECT_EQ(expected, stored->translations);
+  ASSERT_EQ(2, stored->translations.size());
+
+  auto const& entry = stored->translations[0];
+  EXPECT_EQ(ContProfStartKind::FuncEntry, entry.startKind);
+  EXPECT_EQ(2, entry.regionLength);
+  EXPECT_EQ(7, entry.executionCount);
+  ASSERT_EQ(2, entry.targetProfiles.size());
+  EXPECT_EQ(
+    makeContProfDecRefTargetProfile(0, -1, selectedDefaultValue),
+    entry.targetProfiles[0]
+  );
+  EXPECT_EQ(
+    makeContProfDecRefTargetProfile(0, 2'000'000, selectedNamedValue),
+    entry.targetProfiles[1]
+  );
+
+  auto const& bytecode = stored->translations[1];
+  ASSERT_EQ(ContProfStartKind::Bytecode, bytecode.startKind);
+  EXPECT_EQ(emptyMid().offset(), bytecode.offset());
+  EXPECT_EQ(13, bytecode.executionCount);
+  ASSERT_EQ(1, bytecode.targetProfiles.size());
+  EXPECT_EQ(
+    makeContProfDecRefTargetProfile(
+      emptyMid().offset(),
+      2'000'001,
+      selectedMidValue
+    ),
+    bytecode.targetProfiles[0]
+  );
+
+  selectedDefault.set(
+    makeDecRefProfileValue(31, 21, 6, 9, 2, KindOfVec)
+  );
+
+  auto const requiredKey = makeContProfFuncKey(*requiredFunc());
+  ASSERT_TRUE(requiredKey);
+  auto const required = std::find_if(
+    records.begin(),
+    records.end(),
+    [&](auto const& record) {
+      return record.header.funcKey == *requiredKey;
+    }
+  );
+  ASSERT_NE(records.end(), required);
+  ASSERT_EQ(1, required->translations.size());
+  EXPECT_TRUE(required->translations[0].targetProfiles.empty());
+
+  // Even a sweep with no target profiles finalizes the record.
+  ScopedDecRefProfile const afterFinalization{
+    requiredTransId,
+    0,
+    decRefProfileKey(-1),
+    selectedDefaultValue,
+  };
+  EXPECT_EQ(records, snapshotContProfProfileRecords());
 }
 
 }

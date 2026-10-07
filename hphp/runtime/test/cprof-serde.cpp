@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -58,6 +60,41 @@ ContProfRecordHeader exampleRecordHeader() {
   header.funcKey = exampleKey();
   header.capturedAtMs = 1'700'000'000'000;
   return header;
+}
+
+template<class T>
+void appendTargetProfilePayload(std::vector<uint8_t>& payload, T value) {
+  static_assert(std::is_unsigned_v<T>);
+
+  auto const bytes = reinterpret_cast<const uint8_t*>(&value);
+  payload.insert(payload.end(), bytes, bytes + sizeof(value));
+}
+
+ContProfTargetProfile exampleDecRefTargetProfile(
+  int32_t bytecodeOffset,
+  int32_t profileId,
+  uint32_t total,
+  uint32_t refcounted,
+  uint32_t released,
+  uint32_t decremented,
+  uint32_t arrayOfUncountedReleaseCount,
+  DataType datatype
+) {
+  std::vector<uint8_t> payload;
+  payload.reserve(5 * sizeof(uint32_t) + sizeof(uint8_t));
+  appendTargetProfilePayload(payload, total);
+  appendTargetProfilePayload(payload, refcounted);
+  appendTargetProfilePayload(payload, released);
+  appendTargetProfilePayload(payload, decremented);
+  appendTargetProfilePayload(payload, arrayOfUncountedReleaseCount);
+  appendTargetProfilePayload(payload, static_cast<uint8_t>(datatype));
+
+  return {
+    ContProfTargetProfileKind::DecRef,
+    bytecodeOffset,
+    "DecRefProfile-" + std::to_string(profileId),
+    std::move(payload),
+  };
 }
 
 ContProfProfileTranslation exampleBytecodeTranslation(
@@ -108,6 +145,14 @@ ContProfProfileRecord exampleProfileRecord() {
     {1, KindOfObject},
   };
   record.translations.back().incoming = {0, 1, 3};
+  record.translations[0].targetProfiles = {
+    exampleDecRefTargetProfile(
+      4, -1, 9, 4, 1, 2, 0, kInvalidDataType
+    ),
+    exampleDecRefTargetProfile(
+      4, 10'000, 17, 12, 3, 5, 1, KindOfString
+    ),
+  };
   return record;
 }
 
@@ -168,8 +213,48 @@ TEST(ContProfSerde, ProfileRecordRoundTrip) {
   EXPECT_EQ(4, deserialized->translations[3].offset());
 }
 
+TEST(ContProfSerde, PreservesDecRefPayloadAndName) {
+  auto expected = exampleProfileRecord();
+  expected.translations[0].targetProfiles = {
+    exampleDecRefTargetProfile(
+      4, -1, 0, 0, 0, 0, 0, kExtraInvalidDataType
+    ),
+    exampleDecRefTargetProfile(
+      4, 10'000, 17, 12, 3, 5, 1, KindOfPersistentString
+    ),
+  };
+  expected.translations[0].targetProfiles[1].name = "DecRefProfile-010000";
+  auto const serialized = serializeContProfProfileRecord(expected);
+  ASSERT_TRUE(serialized);
+
+  auto const deserialized = deserializeContProfProfileRecord(
+    folly::ByteRange{serialized->data(), serialized->size()}
+  );
+  ASSERT_TRUE(deserialized);
+  EXPECT_EQ(expected, *deserialized);
+}
+
+TEST(ContProfSerde, RejectsTruncatedOrTrailingDecRefPayload) {
+  auto const profile = exampleDecRefTargetProfile(
+    4, -1, 9, 4, 1, 2, 0, KindOfString
+  );
+
+  for (size_t size = 0; size < profile.payload.size(); ++size) {
+    auto truncated = profile;
+    truncated.payload.resize(size);
+    EXPECT_FALSE(isValidContProfTargetProfile(truncated)) << size;
+  }
+
+  auto trailingByte = profile;
+  trailingByte.payload.push_back(0);
+  EXPECT_FALSE(isValidContProfTargetProfile(trailingByte));
+}
+
 TEST(ContProfSerde, ProfileTranslationWireFormat) {
-  auto const record = exampleProfileRecord();
+  auto record = exampleProfileRecord();
+  for (auto& translation : record.translations) {
+    translation.targetProfiles.clear();
+  }
   auto const funcKey = serializeContProfFuncKey(record.header.funcKey);
   ASSERT_TRUE(funcKey);
   auto const serialized = serializeContProfProfileRecord(record);
@@ -206,14 +291,17 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   append(uint32_t{2});
   append(uint8_t{0});
   append(static_cast<uint8_t>(KindOfString));
+  append(size_t{0}); // target profiles
   appendTranslation(1, 1, 3, 7);
   append(size_t{0}); // local type guards
   append(size_t{0}); // incoming translations
   append(size_t{0}); // local postconditions
+  append(size_t{0}); // target profiles
   appendTranslation(2, 0, 1, 11);
   append(size_t{0}); // local type guards
   append(size_t{0}); // incoming translations
   append(size_t{0}); // local postconditions
+  append(size_t{0}); // target profiles
   appendTranslation(3, 4, 3, 13);
   append(size_t{1}); // local type guards
   append(uint32_t{1});
@@ -223,6 +311,7 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   append(uint32_t{1});
   append(uint32_t{3});
   append(size_t{0}); // local postconditions
+  append(size_t{0}); // target profiles
 
   auto const translationsOffset = sizeof(size_t) + funcKey->size() +
     sizeof(uint64_t) + sizeof(size_t);
@@ -335,6 +424,37 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   );
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[0].bytecodeOffset = -1;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[0].name = "DecRefProfile-2147483648";
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[0].name = "OtherProfile-1";
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[0].name = "DecRefProfile--2";
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[0].payload.pop_back();
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].targetProfiles[1].name =
+    record.translations[0].targetProfiles[0].name;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  std::swap(
+    record.translations[0].targetProfiles[0],
+    record.translations[0].targetProfiles[1]
+  );
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
   // Three individually valid counts overflow uint64_t to int64Max - 2.
   auto const int64Max = static_cast<uint64_t>(
     std::numeric_limits<int64_t>::max()
@@ -575,6 +695,102 @@ TEST(ContProfSerde, RejectsMalformedLocalPostConditions) {
   ));
 }
 
+TEST(ContProfSerde, RejectsMalformedTargetProfiles) {
+  auto const record = exampleProfileRecord();
+  auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
+  ASSERT_TRUE(encodedFuncKey);
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  ASSERT_TRUE(serialized);
+
+  constexpr size_t encodedFuncKeyLengthSize = sizeof(size_t);
+  constexpr size_t capturedAtMsSize = sizeof(uint64_t);
+  constexpr size_t translationCountSize = sizeof(size_t);
+  constexpr size_t guardCountOffset =
+    sizeof(uint8_t) +
+    sizeof(uint32_t) +
+    sizeof(uint32_t) +
+    sizeof(uint64_t);
+  constexpr size_t encodedGuardSize =
+    sizeof(uint32_t) + sizeof(uint8_t);
+  constexpr size_t encodedPostConditionSize =
+    sizeof(uint32_t) +
+    sizeof(uint8_t) +
+    sizeof(uint8_t);
+
+  auto const firstTranslation = encodedFuncKeyLengthSize +
+    encodedFuncKey->size() +
+    capturedAtMsSize +
+    translationCountSize;
+  auto const incomingCountPosition =
+    firstTranslation +
+    guardCountOffset +
+    sizeof(size_t) +
+    record.translations.front().localTypeGuards.size() *
+      encodedGuardSize;
+  auto const postConditionCountPosition =
+    incomingCountPosition +
+    sizeof(size_t) +
+    record.translations.front().incoming.size() * sizeof(uint32_t);
+  auto const targetProfileCountPosition =
+    postConditionCountPosition +
+    sizeof(size_t) +
+    record.translations.front().localPostConditions.size() *
+      encodedPostConditionSize;
+
+  auto invalidCount = *serialized;
+  auto const tooManyProfiles = std::numeric_limits<size_t>::max();
+  std::memcpy(
+    invalidCount.data() + targetProfileCountPosition,
+    &tooManyProfiles,
+    sizeof(tooManyProfiles)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidCount.data(), invalidCount.size()}
+  ));
+
+  auto const firstProfile = targetProfileCountPosition + sizeof(size_t);
+  auto const firstNameSize =
+    firstProfile +
+    sizeof(uint8_t) +
+    sizeof(uint32_t);
+  auto const firstName = firstNameSize + sizeof(size_t);
+  auto const firstPayloadSize =
+    firstName + record.translations[0].targetProfiles[0].name.size();
+  ASSERT_LE(firstPayloadSize + sizeof(size_t), serialized->size());
+
+  auto invalidKind = *serialized;
+  invalidKind[firstProfile] = std::numeric_limits<uint8_t>::max();
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidKind.data(), invalidKind.size()}
+  ));
+
+  auto invalidOffset = *serialized;
+  auto const negativeOffset = uint32_t{1} << 31;
+  std::memcpy(
+    invalidOffset.data() + firstProfile + sizeof(uint8_t),
+    &negativeOffset,
+    sizeof(negativeOffset)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidOffset.data(), invalidOffset.size()}
+  ));
+
+  auto invalidPayloadSize = *serialized;
+  auto const tooManyPayloadBytes = std::numeric_limits<size_t>::max();
+  std::memcpy(
+    invalidPayloadSize.data() + firstPayloadSize,
+    &tooManyPayloadBytes,
+    sizeof(tooManyPayloadBytes)
+  );
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{
+      invalidPayloadSize.data(),
+      invalidPayloadSize.size(),
+    }
+  ));
+}
+
 TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   ContProfProfileRecord record{};
   record.header = exampleRecordHeader();
@@ -599,6 +815,7 @@ TEST(ContProfSerde, RejectsMalformedTranslationStart) {
   constexpr size_t localTypeGuardCountSize = sizeof(size_t);
   constexpr size_t incomingCountSize = sizeof(size_t);
   constexpr size_t localPostConditionCountSize = sizeof(size_t);
+  constexpr size_t targetProfileCountSize = sizeof(size_t);
   constexpr size_t encodedTranslationSize =
     startKindSize +
     startSize +
@@ -606,7 +823,8 @@ TEST(ContProfSerde, RejectsMalformedTranslationStart) {
     executionCountSize +
     localTypeGuardCountSize +
     incomingCountSize +
-    localPostConditionCountSize;
+    localPostConditionCountSize +
+    targetProfileCountSize;
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +

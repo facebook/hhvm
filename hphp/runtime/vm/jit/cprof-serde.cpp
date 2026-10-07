@@ -44,7 +44,18 @@ using EncodedPostConditionCount = size_t;
 using EncodedPostConditionLocalId = uint32_t;
 using EncodedPostConditionChanged = uint8_t;
 using EncodedPostConditionType = uint8_t;
+using EncodedTargetProfileCount = size_t;
+using EncodedTargetProfileKind = uint8_t;
+// Unsigned on the wire: bytecodeOffset is validated non-negative everywhere,
+// and writeValue only accepts unsigned types.
+using EncodedTargetProfileOffset = uint32_t;
+using EncodedTargetProfilePayloadSize = size_t;
 
+constexpr size_t kMinEncodedTargetProfileSize =
+  sizeof(EncodedTargetProfileKind) +
+  sizeof(EncodedTargetProfileOffset) +
+  sizeof(size_t) +
+  sizeof(EncodedTargetProfilePayloadSize);
 constexpr size_t kEncodedIncomingIndexSize = sizeof(EncodedIncomingIndex);
 constexpr size_t kEncodedLocalTypeGuardSize =
   sizeof(EncodedLocalId) +
@@ -62,7 +73,8 @@ constexpr size_t kMinEncodedProfileTranslationSize =
   sizeof(EncodedExecutionCount) +
   sizeof(EncodedGuardCount) +
   sizeof(EncodedIncomingCount) +
-  sizeof(EncodedPostConditionCount);
+  sizeof(EncodedPostConditionCount) +
+  sizeof(EncodedTargetProfileCount);
 using EncodedSHA1 = std::array<uint32_t, SHA1::kQNumWords>;
 static_assert(sizeof(EncodedSHA1) == SHA1::kStrLen / 2);
 
@@ -252,6 +264,18 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
       writer.writeByte(post.changed ? 1 : 0);
       writer.writeByte(static_cast<EncodedPostConditionType>(post.type));
     }
+
+    writer.writeValue(translation.targetProfiles.size());
+
+    for (auto const& profile : translation.targetProfiles) {
+      writer.writeByte(static_cast<EncodedTargetProfileKind>(profile.kind));
+      writer.writeValue(
+        static_cast<EncodedTargetProfileOffset>(profile.bytecodeOffset)
+      );
+      writer.writeString(profile.name);
+      writer.writeValue(profile.payload.size());
+      writer.writeBytes(profile.payload.data(), profile.payload.size());
+    }
   }
 
   return std::move(writer).takeBytes();
@@ -296,6 +320,7 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
     EncodedGuardCount guardCount{};
     EncodedIncomingCount incomingCount{};
     EncodedPostConditionCount postConditionCount{};
+    EncodedTargetProfileCount targetProfileCount{};
 
     if (!reader.readValue(startKind) ||
         !reader.readValue(translation.offsetOrNumEntryArgs) ||
@@ -357,6 +382,37 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
       translation.localPostConditions.push_back({
         localId, changed != 0, static_cast<DataType>(encodedType)
       });
+    }
+
+    if (!reader.readValue(targetProfileCount) ||
+        targetProfileCount >
+            reader.remaining() / kMinEncodedTargetProfileSize) {
+      return std::nullopt;
+    }
+
+    translation.targetProfiles.reserve(targetProfileCount);
+    for (size_t j = 0; j < targetProfileCount; ++j) {
+      ContProfTargetProfile profile{};
+      EncodedTargetProfileKind encodedKind{};
+      EncodedTargetProfileOffset encodedOffset{};
+      EncodedTargetProfilePayloadSize payloadSize{};
+
+      if (!reader.readByte(encodedKind) ||
+          !reader.readValue(encodedOffset) ||
+          !reader.readString(profile.name) || !reader.readValue(payloadSize) ||
+          payloadSize > reader.remaining()) {
+        return std::nullopt;
+      }
+
+      profile.bytecodeOffset = static_cast<int32_t>(encodedOffset);
+      profile.kind = static_cast<ContProfTargetProfileKind>(encodedKind);
+
+      profile.payload.resize(payloadSize);
+      if (!reader.readBytes(profile.payload.data(), profile.payload.size())) {
+        return std::nullopt;
+      }
+
+      translation.targetProfiles.push_back(std::move(profile));
     }
 
     record.translations.push_back(std::move(translation));

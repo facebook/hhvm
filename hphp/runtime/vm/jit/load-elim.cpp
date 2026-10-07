@@ -381,16 +381,22 @@ Flags load(Local& env,
     };
   }
 
-  if (tracked.knownValue != nullptr) {
-    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
-  } else {
-    // Only set a new known value if we previously didn't have one. If we had a
-    // known value already, we would have made the load redundant above, unless
-    // we're in an Hint::Unused block. In that case, we want to keep any old
-    // known value to avoid disturbing the main trace in case we merge back.
-    tracked.knownValue = inst.dst();
-    FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
-    FTRACE(5, "       av: {}\n", show(env.state.avail));
+  // Set the known value to this load even if the value was already known.
+  //
+  // There are multiple reasons for this:
+  // - monotonicity: we track only one value per ALoc; if we are not consistent
+  //   which one we track, a later CheckType instruction would refine the
+  //   tracked type conditionally, breaking the monotonicity of the algorithm
+  // - recency: the most recent loaded value is more likely to be used by later
+  //   instructions and more likely to be refined by CheckType, resulting in
+  //   less future cleanup work for refineTmps and less phis
+  auto const prevValue = tracked.knownValue;
+  tracked.knownValue = inst.dst();
+  FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
+  FTRACE(5, "       av: {}\n", show(env.state.avail));
+
+  if (prevValue != nullptr) {
+    return FRedundant { prevValue, tracked.knownType, meta->index };
   }
 
   // Even if we can't make this load redundant, we might be able to refine its

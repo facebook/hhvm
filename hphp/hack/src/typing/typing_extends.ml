@@ -899,7 +899,8 @@ let check_abstract_overrides_concrete
              })
 
 (** Why this check: It would be unsound for a class that needs concrete (`<<__NeedsConcrete>>`) to override one that does not,
-  * since a __NeedsConcrete method imposes stricter requirements on its input (`static` must point to a concrete class) *)
+  * since a __NeedsConcrete method imposes stricter requirements on its input (`static` must point to a concrete class).
+  * A final, concrete class is exempt: its methods only run with `static` bound to the class itself. *)
 let check_needs_concrete_override
     (env : Typing_env_types.env)
     ~parent_class_elt
@@ -910,6 +911,7 @@ let check_needs_concrete_override
   if
     (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
     && get_ce_readonly_prop_or_needs_concrete class_elt
+    && not (Cls.final class_ && Env.is_concrete_class env class_)
   then
     let defined_in_same_class =
       String.equal class_elt.ce_origin (Cls.name class_)

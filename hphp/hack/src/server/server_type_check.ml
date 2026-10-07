@@ -476,7 +476,12 @@ let quantile ~index ~count : Relative_path.Set.t -> Relative_path.Set.t =
   pop_quantiles index files |> Relative_path.Set.of_list
 
 let type_check_core
-    (genv : genv) (env : env) start_time ~check_reason cgroup_steps =
+    ?agent_session_id
+    (genv : genv)
+    (env : env)
+    start_time
+    ~check_reason
+    cgroup_steps =
   let t = Unix.gettimeofday () in
   (* `start_time` is when the recheck_loop started and includes preliminaries like
    * reading about file-change notifications and communicating with client.
@@ -999,6 +1004,7 @@ let type_check_core
 
   (* CAUTION! Lots of alerts/dashboards depend on this event, particularly start_t  *)
   Hack_event_logger.type_check_end
+    ?agent_session_id
     (Some telemetry)
     ~heap_size
     ~started_count:to_recheck_count
@@ -1039,7 +1045,7 @@ let type_check_core
     telemetry,
     cancel_reason )
 
-let type_check_unsafe genv env start_time profiling =
+let type_check_unsafe ?agent_session_id genv env start_time profiling =
   let check_kind = "Full_check" in
   let check_reason =
     match env.Server_env.init_env.Server_env.why_needed_full_check with
@@ -1061,7 +1067,13 @@ let type_check_unsafe genv env start_time profiling =
   let telemetry = Telemetry.duration telemetry ~key:"core_start" ~start_time in
 
   let (env, stats, core_telemetry, cancel_reason) =
-    type_check_core genv env start_time ~check_reason profiling
+    type_check_core
+      ?agent_session_id
+      genv
+      env
+      start_time
+      ~check_reason
+      profiling
   in
 
   let telemetry =
@@ -1076,12 +1088,13 @@ let type_check_unsafe genv env start_time profiling =
   (env, stats, telemetry, cancel_reason)
 
 let type_check :
+    ?agent_session_id:string ->
     genv ->
     env ->
     seconds ->
     Cgroup_profiler.step_group ->
     env * CheckStats.t * Telemetry.t =
- fun genv env start_time cgroup_steps ->
+ fun ?agent_session_id genv env start_time cgroup_steps ->
   Server_utils.with_exit_on_exception @@ fun () ->
   (*
   (1) THE ENV MODEL FOR DIAGNOSTICS...
@@ -1150,7 +1163,7 @@ let type_check :
   (* This is the main typecheck function. Its contract is to
      (1) tweak env.diagnostics as needed based on what was rechecked , (2) write every single error to errors-file. *)
   let (env, stats, telemetry, cancel_reason) =
-    type_check_unsafe genv env start_time cgroup_steps
+    type_check_unsafe ?agent_session_id genv env start_time cgroup_steps
   in
 
   (* If the typecheck completed, them mark the errors-file as complete.

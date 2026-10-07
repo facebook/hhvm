@@ -127,6 +127,8 @@ let is_persistent = function
 
 let priority_to_string (_client : client) : string = "mock"
 
+let agent_session_id _ = None
+
 let shutdown_client _ = ()
 
 let ping _ = ()

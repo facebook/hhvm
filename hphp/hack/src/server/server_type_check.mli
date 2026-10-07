@@ -18,6 +18,7 @@ module CheckStats : sig
 end
 
 val type_check :
+  ?agent_session_id:string ->
   Server_env.genv ->
   Server_env.env ->
   float ->

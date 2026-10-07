@@ -270,7 +270,12 @@ let handled_connection _ = ()
 let handle_connection_exception _ _ = ()
 
 let handled_command
-    _ ~start_t:_ ~major_gc_time:_ ~minor_gc_time:_ ~parsed_files:_ =
+    ?agent_session_id:_
+    _
+    ~start_t:_
+    ~major_gc_time:_
+    ~minor_gc_time:_
+    ~parsed_files:_ =
   ()
 
 let remote_scheduler_get_dirty_files_end _ _ = ()
@@ -288,6 +293,7 @@ let remote_worker_type_check_end _ ~start_t:_ = ()
 let remote_worker_load_naming_end _ = ()
 
 let recheck_end
+    ?agent_session_id:_
     ~last_recheck_duration:_
     ~update_batch_count:_
     ~total_changed_files:_
@@ -335,6 +341,7 @@ let invariant_violation_bug ?path:_ ?pos:_ ?data:_ ?data_int:_ ?telemetry:_ _ =
 let decl_consistency_bug ?path:_ ?pos:_ ?data:_ _ = ()
 
 let type_check_end
+    ?agent_session_id:_
     _
     ~heap_size:_
     ~started_count:_

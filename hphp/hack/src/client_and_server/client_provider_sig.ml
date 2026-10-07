@@ -62,6 +62,9 @@ module type S = sig
 
   val priority_to_string : client -> string
 
+  (** The agent session responsible for this client request, if any. *)
+  val agent_session_id : client -> string option
+
   (** Shutdown socket connection to client *)
   val shutdown_client : client -> unit
 

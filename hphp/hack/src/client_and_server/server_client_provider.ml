@@ -52,6 +52,7 @@ type client = {
   ic: Stdlib.in_channel;
   oc: Out_channel.t;
   priority: priority;
+  agent_session_id: string option;
   mutable tracker: Connection_tracker.t;
 }
 
@@ -80,7 +81,11 @@ let accept_client
     (parent_in_fd : Unix.file_descr)
     (t_sleep_and_check : float)
     (t_monitor_fd_ready : float) : handoff =
-  let ({ Monitor_rpc.m2s_tracker = tracker; m2s_sequence_number }
+  let ({
+         Monitor_rpc.m2s_tracker = tracker;
+         m2s_sequence_number;
+         m2s_agent_session_id = agent_session_id;
+       }
         : Monitor_rpc.monitor_to_server_handoff_msg) =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
@@ -113,6 +118,7 @@ let accept_client
         ic = Unix.in_channel_of_descr socket;
         oc = Unix.out_channel_of_descr socket;
         priority;
+        agent_session_id;
         tracker;
       };
     m2s_sequence_number;
@@ -264,6 +270,8 @@ let priority_to_string (client : client) : string =
   | Priority_high -> "high"
   | Priority_default -> "default"
   | Priority_dormant -> "dormant"
+
+let agent_session_id client = client.agent_session_id
 
 let shutdown_client client = Server_utils.shutdown_client (client.ic, client.oc)
 

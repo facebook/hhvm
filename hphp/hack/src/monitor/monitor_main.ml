@@ -322,12 +322,19 @@ let read_version_string_then_newline (fd : Unix.file_descr) :
   else
     Error "missing newline after version"
 
-let hand_off_client_connection ~tracker server_fd client_fd =
+let hand_off_client_connection ~tracker ~agent_session_id server_fd client_fd =
   (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
   let m2s_sequence_number =
     Sent_fds_collector.get_and_increment_sequence_number ()
   in
-  let msg = Monitor_rpc.{ m2s_tracker = tracker; m2s_sequence_number } in
+  let msg =
+    Monitor_rpc.
+      {
+        m2s_tracker = tracker;
+        m2s_sequence_number;
+        m2s_agent_session_id = agent_session_id;
+      }
+  in
   msg_to_channel server_fd msg;
   log
     "Handed off tracker to server (client socket handoff #%d)"
@@ -368,7 +375,8 @@ let hand_off_client_connection ~tracker server_fd client_fd =
   This 30s must be comfortably shorter than the 60s delay in ClientConnect.connect, since
   if not then by the time we in the monitor timeout we'll find that every single item
   in our incoming queue is already stale! *)
-let hand_off_client_connection_wrapper ~tracker server_fd client_fd =
+let hand_off_client_connection_wrapper
+    ~tracker ~agent_session_id server_fd client_fd =
   (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
   let timeout = 30.0 in
   let to_finally_close = ref (Some client_fd) in
@@ -382,7 +390,11 @@ let hand_off_client_connection_wrapper ~tracker server_fd client_fd =
           timeout
       else
         try
-          hand_off_client_connection ~tracker server_fd client_fd;
+          hand_off_client_connection
+            ~tracker
+            ~agent_session_id
+            server_fd
+            client_fd;
           to_finally_close := None
         with
         | Unix.Unix_error (Unix.EPIPE, _, _) ->
@@ -438,7 +450,11 @@ let rec client_prehandoff
     let tracker =
       Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
     in
-    hand_off_client_connection_wrapper ~tracker server_fd client_fd;
+    hand_off_client_connection_wrapper
+      ~tracker
+      ~agent_session_id:handoff_options.Monitor_rpc.agent_session_id
+      server_fd
+      client_fd;
     server.last_request_handoff := Unix.time ();
     Ok env
   | Died_unexpectedly (status, was_oom) ->

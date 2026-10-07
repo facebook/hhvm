@@ -315,8 +315,8 @@ let update_stats_after_recheck :
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_until_no_changes_left stats genv env select_outcome :
-    RecheckLoopStats.t * env =
+let rec recheck_until_no_changes_left
+    ?agent_session_id stats genv env select_outcome : RecheckLoopStats.t * env =
   let start_time = Unix.gettimeofday () in
   (* this is telemetry for the current batch, i.e. iteration: *)
   let telemetry =
@@ -447,7 +447,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     in
     let (env, check_stats, type_check_telemetry) =
       Cgroup_profiler.step_group check_kind_str ~log:true
-      @@ Server_type_check.type_check genv env start_time
+      @@ Server_type_check.type_check ?agent_session_id genv env start_time
     in
     let telemetry =
       telemetry
@@ -474,7 +474,12 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     if !force_break_recheck_loop_for_test_ref then
       (stats, env)
     else
-      recheck_until_no_changes_left stats genv env select_outcome
+      recheck_until_no_changes_left
+        ?agent_session_id
+        stats
+        genv
+        env
+        select_outcome
 
 let new_serve_iteration_id () = Random_id.short_string ()
 
@@ -535,7 +540,8 @@ let idle_if_no_client env waiting_client =
       env
   | Client_provider.Select_new _ -> env
 
-let log_recheck_end (stats : Server_env.RecheckLoopStats.t) ~diagnostics =
+let log_recheck_end
+    ?agent_session_id (stats : Server_env.RecheckLoopStats.t) ~diagnostics =
   let telemetry =
     Server_env.RecheckLoopStats.to_user_telemetry stats
     |> Telemetry.object_
@@ -556,6 +562,7 @@ let log_recheck_end (stats : Server_env.RecheckLoopStats.t) ~diagnostics =
     stats
   in
   Hack_event_logger.recheck_end
+    ?agent_session_id
     ~last_recheck_duration:duration
     ~update_batch_count:(List.length per_batch_telemetry - 1)
     ~total_changed_files:total_changed_files_count
@@ -566,6 +573,18 @@ let log_recheck_end (stats : Server_env.RecheckLoopStats.t) ~diagnostics =
     recheck_id
     (Telemetry.to_string telemetry);
   ()
+
+let agent_session_id_for_recheck env select_outcome =
+  match env.nonpersistent_client_pending_command_needs_full_check with
+  | Some (_command, _reason, client) -> Client_provider.agent_session_id client
+  | None ->
+    (match select_outcome with
+    | Client_provider.Select_new { Client_provider.client; _ } ->
+      Client_provider.agent_session_id client
+    | Client_provider.Select_nothing
+    | Client_provider.Select_exception _
+    | Client_provider.Not_selecting_deferring _ ->
+      None)
 
 let exit_if_parent_dead () =
   (* Cross-platform compatible way; parent PID becomes 1 when parent dies. *)
@@ -654,6 +673,7 @@ let serve_one_iteration genv env client_provider =
       Server_progress.write ~include_in_logs:false "working"
   end;
   let env = idle_if_no_client env selected_client in
+  let agent_session_id = agent_session_id_for_recheck env selected_client in
   let stage =
     if Option.is_some env.init_env.why_needed_full_check then
       `Init
@@ -667,6 +687,7 @@ let serve_one_iteration genv env client_provider =
   let t_start_recheck = Unix.gettimeofday () in
   let (stats, env) =
     recheck_until_no_changes_left
+      ?agent_session_id
       (RecheckLoopStats.empty ~recheck_id)
       genv
       env
@@ -692,7 +713,8 @@ let serve_one_iteration genv env client_provider =
     }
   in
 
-  if did_work then log_recheck_end stats ~diagnostics:env.diagnostics;
+  if did_work then
+    log_recheck_end ?agent_session_id stats ~diagnostics:env.diagnostics;
 
   let env =
     match selected_client with

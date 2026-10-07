@@ -292,6 +292,7 @@ let rec connect
           Monitor_rpc.Priority
         else
           Monitor_rpc.Default);
+      agent_session_id = Agent_session_id.get ();
     }
   in
   let tracker = Connection_tracker.create () in

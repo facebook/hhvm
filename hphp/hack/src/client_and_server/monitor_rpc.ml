@@ -31,6 +31,8 @@ type handoff_options = {
       (** There can be multiple channels between server and monitor in order
           to prioritize some requests over others. Connecting code needs to specify
           which channel it wants to use. *)
+  agent_session_id: string option;
+      (** The agent session responsible for this client request, if any. *)
 }
 
 type command =
@@ -44,6 +46,8 @@ type monitor_to_server_handoff_msg = {
   m2s_sequence_number: int;
       (** A unique number incremented for each client socket handoff from monitor to server.
             Useful to correlate monitor and server logs. *)
+  m2s_agent_session_id: string option;
+      (** The agent session responsible for the handed-off client request, if any. *)
 }
 
 let (receipt_serialize, receipt_deserialize) =

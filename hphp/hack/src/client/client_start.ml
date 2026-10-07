@@ -248,7 +248,12 @@ let start_server (env : env) =
 let should_start env =
   let root_s = Path.to_string env.root in
   let handoff_options =
-    Monitor_rpc.{ force_dormant_start = false; pipe_type = Monitor_rpc.Default }
+    Monitor_rpc.
+      {
+        force_dormant_start = false;
+        pipe_type = Monitor_rpc.Default;
+        agent_session_id = None;
+      }
   in
   let tracker = Connection_tracker.create () in
   Hh_logger.log

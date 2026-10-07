@@ -8,8 +8,8 @@
 (library
  (name ai_stubs)
  (wrapped false)
- (modules ai)
- (libraries ai_options errors)
+ (modules ai ai_decl_heap)
+ (libraries ai_options decl_store errors)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -17,7 +17,7 @@
  (name ai_options_stubs)
  (wrapped false)
  (modules ai_options)
- (libraries errors)
+ (libraries errors sys_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

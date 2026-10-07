@@ -68,6 +68,7 @@
  (libraries
   ai
   default_injector_config
+  folly_stubs
   hhi
   sys_utils
   temp_file
@@ -85,6 +86,7 @@
  (libraries
   default_injector_config
   file_content
+  folly_stubs
   hh_single_common
   hhi
   search

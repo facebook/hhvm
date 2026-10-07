@@ -33,7 +33,13 @@
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
+#include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/incref-profile.h"
+#include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/util/assertions.h"
@@ -94,6 +100,72 @@ bool addTargetProfileValue(
   targetProfiles.add(key, value.get());
   value.release();
   return true;
+}
+
+template<class T>
+bool isValidRawTargetProfileSize(size_t size) {
+  static_assert(std::is_trivially_copyable_v<T>);
+  static_assert(std::has_unique_object_representations_v<T>);
+  return size == sizeof(T);
+}
+
+template<class T>
+bool isValidRawTargetProfile(const ContProfTargetProfile& profile) {
+  // The kind determines the layout; names are opaque RDS lookup keys.
+  return profile.bytecodeOffset >= 0 &&
+    isValidRawTargetProfileSize<T>(profile.payload.size());
+}
+
+template<class T>
+std::optional<ContProfTargetProfile>
+snapshotRawTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize,
+  ContProfTargetProfileKind kind
+) {
+  if (profile.bcOff < 0) return std::nullopt;
+
+  assertx(profile.name);
+  assertx(isValidRawTargetProfileSize<T>(allocationSize));
+
+  T reduced{};
+  TargetProfile<T>::reduce(reduced, handle, sizeof(T));
+
+  std::vector<uint8_t> payload(sizeof(T));
+  std::memcpy(payload.data(), &reduced, payload.size());
+
+  return ContProfTargetProfile{
+    kind,
+    profile.bcOff,
+    profile.name->toCppString(),
+    std::move(payload),
+  };
+}
+
+template<class T>
+bool installRawTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  assertx(profile.bytecodeOffset >= 0);
+  assertx(profile.name);
+  assertx(isValidRawTargetProfileSize<T>(profile.payload.size()));
+
+  T value{};
+  std::memcpy(&value, profile.payload.data(), sizeof(T));
+
+  return addTargetProfileValue(
+    rds::Profile{
+      static_cast<T*>(nullptr),
+      transId,
+      profile.bytecodeOffset,
+      profile.name,
+    },
+    value,
+    targetProfiles
+  );
 }
 
 std::optional<int32_t> decodeDecRefProfileId(std::string_view name) {
@@ -208,6 +280,24 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
   switch (profile.kind) {
     case ContProfTargetProfileKind::DecRef:
       return validateDecRefTargetProfile(profile).has_value();
+
+    case ContProfTargetProfileKind::COW:
+      return isValidRawTargetProfile<COWProfile>(profile);
+
+    case ContProfTargetProfileKind::CoeffectFunParam:
+      return isValidRawTargetProfile<CoeffectFunParamProfile>(profile);
+
+    case ContProfTargetProfileKind::IncRef:
+      return isValidRawTargetProfile<IncRefProfile>(profile);
+
+    case ContProfTargetProfileKind::IsTypeStruct:
+      return isValidRawTargetProfile<IsTypeStructProfile>(profile);
+
+    case ContProfTargetProfileKind::ArrayAccess:
+      return isValidRawTargetProfile<ArrayAccessProfile>(profile);
+
+    case ContProfTargetProfileKind::ClsCns:
+      return isValidRawTargetProfile<ClsCnsProfile>(profile);
   }
 
   return false;
@@ -222,6 +312,54 @@ snapshotContProfTargetProfile(
   switch (profile.kind) {
     case rds::ProfileKind::DecRefProfile:
       return snapshotDecRefTargetProfile(profile, handle, allocationSize);
+
+    case rds::ProfileKind::COWProfile:
+      return snapshotRawTargetProfile<COWProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::COW
+      );
+
+    case rds::ProfileKind::CoeffectFunParamProfile:
+      return snapshotRawTargetProfile<CoeffectFunParamProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::CoeffectFunParam
+      );
+
+    case rds::ProfileKind::IncRefProfile:
+      return snapshotRawTargetProfile<IncRefProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::IncRef
+      );
+
+    case rds::ProfileKind::IsTypeStructProfile:
+      return snapshotRawTargetProfile<IsTypeStructProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::IsTypeStruct
+      );
+
+    case rds::ProfileKind::ArrayAccessProfile:
+      return snapshotRawTargetProfile<ArrayAccessProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::ArrayAccess
+      );
+
+    case rds::ProfileKind::ClsCnsProfile:
+      return snapshotRawTargetProfile<ClsCnsProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::ClsCns
+      );
 
     default:
       return std::nullopt;
@@ -248,6 +386,48 @@ bool installContProfTargetProfile(
   switch (profile.kind) {
     case ContProfTargetProfileKind::DecRef:
       return installDecRefTargetProfile(profile, transId, targetProfiles);
+
+    case ContProfTargetProfileKind::COW:
+      return installRawTargetProfile<COWProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::CoeffectFunParam:
+      return installRawTargetProfile<CoeffectFunParamProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::IncRef:
+      return installRawTargetProfile<IncRefProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::IsTypeStruct:
+      return installRawTargetProfile<IsTypeStructProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::ArrayAccess:
+      return installRawTargetProfile<ArrayAccessProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::ClsCns:
+      return installRawTargetProfile<ClsCnsProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
   }
 
   return false;

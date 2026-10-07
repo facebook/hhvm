@@ -42,7 +42,7 @@ struct ContProfPreparedTargetProfile {
   std::vector<uint8_t> payload;
 };
 
-/* Snapshot a supported live RDS target profile. */
+/* Snapshot a supported live RDS target profile under a Treadmill session. */
 std::optional<ContProfTargetProfile>
 snapshotContProfTargetProfile(
   const rds::Profile& profile,

@@ -63,9 +63,15 @@ struct ContProfLocalPostCondition {
 
 enum class ContProfTargetProfileKind : uint8_t {
   DecRef = 1,
+  COW = 2,
+  CoeffectFunParam = 3,
+  IncRef = 4,
+  IsTypeStruct = 5,
+  ArrayAccess = 6,
+  ClsCns = 7,
 };
 
-/* Portable target-profile payload associated with a bytecode site. */
+/* Serialized target-profile payload associated with a bytecode site. */
 struct ContProfTargetProfile {
   ContProfTargetProfileKind kind{ContProfTargetProfileKind::DecRef};
   int32_t bytecodeOffset{0};
@@ -75,13 +81,9 @@ struct ContProfTargetProfile {
   bool operator==(const ContProfTargetProfile&) const = default;
 };
 
-/* Defined in cprof-target-profile.cpp, which knows the payload formats. */
 bool isValidContProfTargetProfile(const ContProfTargetProfile& profile);
 
-/*
- * Key order only: payload is deliberately excluded, so this is not a
- * defaulted <=>. The record validator requires strict key ordering.
- */
+/* Order by identity, excluding payload. */
 inline bool contProfTargetProfileKeyLess(
     const ContProfTargetProfile& lhs,
     const ContProfTargetProfile& rhs) {

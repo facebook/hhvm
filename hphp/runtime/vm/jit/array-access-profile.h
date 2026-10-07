@@ -117,7 +117,8 @@ private:
   uint32_t m_empty{0};
   uint32_t m_missing{0};
   uint32_t m_nocow{0};
-  bool m_init{false};
+  // Keep the raw profile representation free of padding.
+  uint32_t m_init{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -32,10 +32,6 @@ namespace jit {
 struct ClsCnsProfile {
   ClsCnsProfile() : m_curSlot(0) {}
 
-  ClsCnsProfile(const ClsCnsProfile& other)
-    : m_curSlot(other.m_curSlot)
-  {}
-
   std::string toString() const;
   folly::dynamic toDynamic() const;
 

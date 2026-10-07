@@ -16,20 +16,32 @@
 
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
+#include <vector>
 
 #include <folly/ScopeGuard.h>
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
+#include "hphp/runtime/vm/jit/cow-profile.h"
+#include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/incref-profile.h"
+#include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/util/sha1.h"
 
 namespace HPHP::jit::cprof {
 namespace {
@@ -228,6 +240,221 @@ TEST(ContProfTargetProfile, PreservesRecordedNameDuringPreparation) {
   ASSERT_TRUE(prepared);
   ASSERT_NE(nullptr, prepared->name);
   EXPECT_EQ(snapshot->name, prepared->name->toCppString());
+}
+
+std::optional<ContProfProfileRecord> roundTripTargetProfiles(
+  std::vector<ContProfTargetProfile> profiles
+) {
+  ContProfProfileRecord record{};
+  record.header.funcKey.resolutionUnitPath =
+    "hphp/runtime/test/cont-prof-target-profile.php";
+  record.header.funcKey.bytecodeUnitHash =
+    SHA1{"3333333333333333333333333333333333333333"};
+  record.header.funcKey.functionName = "cont_prof_target_profile_test";
+  record.header.capturedAtMs = 1'700'000'000'000;
+
+  ContProfProfileTranslation translation{};
+  translation.regionLength = 1;
+  translation.executionCount = 7;
+  translation.targetProfiles = std::move(profiles);
+  record.translations.push_back(std::move(translation));
+
+  auto const serialized = serializeContProfProfileRecord(record);
+  if (!serialized) return std::nullopt;
+  return deserializeContProfProfileRecord(
+    folly::ByteRange{serialized->data(), serialized->size()}
+  );
+}
+
+template<class T>
+void expectContProfFixedTargetProfile(
+  const ContProfTargetProfile& profile,
+  ContProfTargetProfileKind kind,
+  Offset bytecodeOffset,
+  const StringData* name,
+  const T& expected,
+  TransID transId,
+  ProfDataTargetProfile& imported
+) {
+  EXPECT_EQ(kind, profile.kind);
+  EXPECT_EQ(bytecodeOffset, profile.bytecodeOffset);
+  EXPECT_EQ(name->toCppString(), profile.name);
+  EXPECT_EQ(sizeof(T), profile.payload.size());
+
+  auto const prepared = prepareContProfTargetProfile(profile);
+  ASSERT_TRUE(prepared);
+  ASSERT_TRUE(installContProfTargetProfile(
+    *prepared,
+    transId,
+    imported
+  ));
+
+  auto const key = rds::Profile{
+    static_cast<T*>(nullptr),
+    transId,
+    bytecodeOffset,
+    name,
+  };
+  auto const actual = imported.get<T>(key);
+  ASSERT_NE(nullptr, actual);
+  EXPECT_EQ(expected.toDynamic(), actual->toDynamic());
+}
+
+TEST(ContProfTargetProfile, RoundTripsFixedTargetProfileKinds) {
+  constexpr auto transId = TransID{2'300'000};
+
+  auto const cowName = makeStaticString("ArrayCOW");
+  auto const coeffectName = makeStaticString("CoeffectFunParam");
+  // Raw profile names are preserved without a codec-specific allowlist.
+  auto const incRefName = makeStaticString("CustomIncRefProfile");
+  auto const isTypeStructName = makeStaticString("IsTypeStruct");
+  auto const arrayAccessName = makeStaticString("DictAccess");
+  auto const clsCnsName = makeStaticString("ClsCnsProfile");
+
+  COWProfile const cow{};
+  CoeffectFunParamProfile const coeffect{};
+  IncRefProfile const incRef{17, 12, 5};
+  IsTypeStructProfile const isTypeStruct{};
+  ArrayAccessProfile const arrayAccess{};
+  ClsCnsProfile const clsCns{};
+
+  ScopedTargetProfile<COWProfile> const cowSite{
+    transId, 0, cowName, cow
+  };
+  ScopedTargetProfile<CoeffectFunParamProfile> const coeffectSite{
+    transId, 0, coeffectName, coeffect
+  };
+  ScopedTargetProfile<IncRefProfile> const incRefSite{
+    transId, 0, incRefName, incRef
+  };
+  ScopedTargetProfile<IsTypeStructProfile> const isTypeStructSite{
+    transId, 0, isTypeStructName, isTypeStruct
+  };
+  ScopedTargetProfile<ArrayAccessProfile> const arrayAccessSite{
+    transId, 0, arrayAccessName, arrayAccess
+  };
+  ScopedTargetProfile<ClsCnsProfile> const clsCnsSite{
+    transId, 0, clsCnsName, clsCns
+  };
+
+  auto cowSnapshot = cowSite.snapshot();
+  auto coeffectSnapshot = coeffectSite.snapshot();
+  auto incRefSnapshot = incRefSite.snapshot();
+  auto isTypeStructSnapshot = isTypeStructSite.snapshot();
+  auto arrayAccessSnapshot = arrayAccessSite.snapshot();
+  auto clsCnsSnapshot = clsCnsSite.snapshot();
+  ASSERT_TRUE(cowSnapshot);
+  ASSERT_TRUE(coeffectSnapshot);
+  ASSERT_TRUE(incRefSnapshot);
+  ASSERT_TRUE(isTypeStructSnapshot);
+  ASSERT_TRUE(arrayAccessSnapshot);
+  ASSERT_TRUE(clsCnsSnapshot);
+
+  std::vector<ContProfTargetProfile> capturedProfiles{
+    std::move(*cowSnapshot),
+    std::move(*coeffectSnapshot),
+    std::move(*incRefSnapshot),
+    std::move(*isTypeStructSnapshot),
+    std::move(*arrayAccessSnapshot),
+    std::move(*clsCnsSnapshot),
+  };
+  std::sort(
+    capturedProfiles.begin(),
+    capturedProfiles.end(),
+    contProfTargetProfileKeyLess
+  );
+
+  auto const decoded = roundTripTargetProfiles(std::move(capturedProfiles));
+  ASSERT_TRUE(decoded);
+  ASSERT_EQ(1, decoded->translations.size());
+
+  auto const& profiles = decoded->translations[0].targetProfiles;
+  ASSERT_EQ(6, profiles.size());
+
+  ProfDataTargetProfile imported;
+  expectContProfFixedTargetProfile(
+    profiles[0],
+    ContProfTargetProfileKind::COW,
+    0,
+    cowName,
+    cow,
+    transId,
+    imported
+  );
+  expectContProfFixedTargetProfile(
+    profiles[1],
+    ContProfTargetProfileKind::CoeffectFunParam,
+    0,
+    coeffectName,
+    coeffect,
+    transId,
+    imported
+  );
+  expectContProfFixedTargetProfile(
+    profiles[2],
+    ContProfTargetProfileKind::IncRef,
+    0,
+    incRefName,
+    incRef,
+    transId,
+    imported
+  );
+  expectContProfFixedTargetProfile(
+    profiles[3],
+    ContProfTargetProfileKind::IsTypeStruct,
+    0,
+    isTypeStructName,
+    isTypeStruct,
+    transId,
+    imported
+  );
+  expectContProfFixedTargetProfile(
+    profiles[4],
+    ContProfTargetProfileKind::ArrayAccess,
+    0,
+    arrayAccessName,
+    arrayAccess,
+    transId,
+    imported
+  );
+  expectContProfFixedTargetProfile(
+    profiles[5],
+    ContProfTargetProfileKind::ClsCns,
+    0,
+    clsCnsName,
+    clsCns,
+    transId,
+    imported
+  );
+}
+
+TEST(ContProfTargetProfile, RejectsInvalidRawTargetProfiles) {
+  constexpr auto transId = TransID{2'500'000};
+
+  ScopedTargetProfile<COWProfile> const source{
+    transId,
+    0,
+    makeStaticString("ArrayCOW"),
+    COWProfile{},
+  };
+  ScopedTargetProfile<COWProfile> const negativeOffset{
+    transId,
+    Offset{-1},
+    makeStaticString("ArrayCOW"),
+    COWProfile{},
+  };
+  EXPECT_FALSE(negativeOffset.snapshot());
+
+  auto const snapshot = source.snapshot();
+  ASSERT_TRUE(snapshot);
+
+  auto invalid = *snapshot;
+  invalid.bytecodeOffset = -1;
+  EXPECT_FALSE(prepareContProfTargetProfile(invalid));
+
+  invalid = *snapshot;
+  invalid.payload.pop_back();
+  EXPECT_FALSE(prepareContProfTargetProfile(invalid));
 }
 
 }

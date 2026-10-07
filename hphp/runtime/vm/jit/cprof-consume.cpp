@@ -37,7 +37,9 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-reader.h"
+#include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -162,12 +164,23 @@ ContProfStartupCandidate prepareCandidate(
       }
     }
 
+    std::vector<ContProfPreparedTargetProfile> targetProfiles;
+    targetProfiles.reserve(translation.targetProfiles.size());
+
+    for (auto const& profile : translation.targetProfiles) {
+      auto prepared = prepareContProfTargetProfile(profile);
+      assertx(prepared);
+
+      targetProfiles.push_back(std::move(*prepared));
+    }
+
     result.translations.push_back({
       *start,
       std::move(region),
       static_cast<int64_t>(translation.executionCount),
       translation.incoming,
       std::move(postConditions),
+      std::move(targetProfiles),
     });
   }
 
@@ -187,8 +200,19 @@ void installCandidateProfileData(
     transIds.push_back(profData.allocTransID());
   }
 
+  auto const targetProfiles = profData.targetProfile();
+  assertx(targetProfiles);
+
   for (size_t i = 0; i < numTranslations; ++i) {
     auto const& translation = candidate.translations[i];
+
+    for (auto const& profile : translation.targetProfiles) {
+      (void)installContProfTargetProfile(
+        profile,
+        transIds[i],
+        *targetProfiles
+      );
+    }
 
     // Predecessor indices are record-local and were bounds-checked against
     // record.translations.size() during validation.
@@ -343,6 +367,14 @@ void consumeContProfAtStartup() noexcept {
 
       auto const profData = jit::profData();
       if (!profData || globalProfData() != profData) return;
+
+      if (!prepared.candidates.empty() && !profData->targetProfile()) {
+        // Replay covers only a subset of sites, so a miss falls back to live
+        // RDS rather than meaning "no data".
+        profData->setTargetProfile(
+          std::make_unique<ProfDataTargetProfile>(/*liveFallback=*/true)
+        );
+      }
 
       setMayAcquireLease(true);
       SCOPE_EXIT { setMayAcquireLease(false); };

@@ -36,7 +36,19 @@ namespace jit {
 
 struct ProfDataTargetProfile {
 
+  /*
+   * Whether a key that misses this store may fall back to live RDS slots.
+   *
+   * Jumpstart imports a whole profile and treats it as exhaustive, so a miss
+   * means "no data". Cont-prof replays only a subset, so a miss should still
+   * consult whatever this process collected live.
+   */
+  explicit ProfDataTargetProfile(bool liveFallback = false)
+    : m_liveFallback{liveFallback} {}
+
   ~ProfDataTargetProfile();
+
+  bool liveFallback() const { return m_liveFallback; }
 
   template <typename T>
   const T* get(const rds::Profile& key) const;
@@ -59,6 +71,9 @@ struct ProfDataTargetProfile {
   }
   RDS_PROFILE_SYMBOLS
 #undef PR
+
+private:
+  bool m_liveFallback{false};
 };
 
 #define PR(T)                                                  \

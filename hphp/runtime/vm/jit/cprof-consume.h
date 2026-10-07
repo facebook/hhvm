@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -42,6 +43,7 @@ struct ContProfStartupCandidate {
     int64_t executionCount{0};
     std::vector<uint32_t> incoming;
     PostConditions postConditions{};
+    std::vector<ContProfPreparedTargetProfile> targetProfiles;
   };
 
   Func* func{nullptr};

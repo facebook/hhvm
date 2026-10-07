@@ -18,11 +18,29 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
+#include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP::jit::cprof {
+namespace HPHP {
+
+struct StringData;
+
+namespace jit {
+
+struct ProfDataTargetProfile;
+
+namespace cprof {
+
+/* Process-local target profile ready to install under a fresh TransID. */
+struct ContProfPreparedTargetProfile {
+  ContProfTargetProfileKind kind{ContProfTargetProfileKind::DecRef};
+  Offset bytecodeOffset{0};
+  const StringData* name{nullptr};
+  std::vector<uint8_t> payload;
+};
 
 /* Snapshot a supported live RDS target profile. */
 std::optional<ContProfTargetProfile>
@@ -31,5 +49,22 @@ snapshotContProfTargetProfile(
   rds::Handle handle,
   uint32_t allocationSize
 );
+
+/* Validate and intern a target profile for this process. */
+std::optional<ContProfPreparedTargetProfile>
+prepareContProfTargetProfile(const ContProfTargetProfile& profile);
+
+/*
+ * Install a prepared target profile under a newly allocated TransID.
+ * Each profile key must be installed only once.
+ */
+bool installContProfTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+);
+
+}
+}
 
 }

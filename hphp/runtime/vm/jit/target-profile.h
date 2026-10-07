@@ -163,7 +163,9 @@ struct TargetProfile {
   /*
    * Access the data we collected during profiling.
    *
-   * It calls reduce to populate out (see description above).
+   * If any imported key matches, it is used exclusively. Otherwise data is
+   * reduced from live RDS slots, but only when the imported store allows a
+   * live fallback; jumpstart treats its import as exhaustive.
    *
    * Most callers want the second overload, for simplicity. This
    * version is just for variable-sized T (and has the same
@@ -173,20 +175,27 @@ struct TargetProfile {
    */
   void data(T& out, uint32_t size) const {
     assertx(optimizing());
-    auto s = profDataTargetProfile();
-    if (s) {
+
+    auto const profiles = profDataTargetProfile();
+
+    auto foundImported = false;
+    if (profiles) {
       for (auto const& key : m_keys) {
-        if (auto const v = s->get<T>(key)) {
-          detail::call_reduce(out, *v, size);
+        if (auto const value = profiles->get<T>(key)) {
+          detail::call_reduce(out, *value, size);
+          foundImported = true;
         }
       }
-    } else {
+    }
+
+    if (!foundImported && (!profiles || profiles->liveFallback())) {
       for (auto const& link : getLinks()) {
         if (link.bound()) {
           reduce(out, link.handle(), size);
         }
       }
     }
+
     if (Cfg::Eval::DumpTargetProfiles) {
       for (auto const& key : m_keys) {
         detail::addTargetProfileInfo(key, detail::call_tostring(out, size));
@@ -210,18 +219,28 @@ struct TargetProfile {
     return isProfiling(m_kind);
   }
 
+  /*
+   * Whether there is any data to optimize from, imported or live. Live slots
+   * are consulted in addition to imported keys, subject to the same
+   * liveFallback rule as data().
+   */
   bool optimizing() const {
     if (!isOptimized(m_kind)) return false;
-    auto s = profDataTargetProfile();
-    if (s) {
+
+    auto const profiles = profDataTargetProfile();
+
+    if (profiles) {
       for (auto const& key : m_keys) {
-        if (s->get<T>(key)) return true;
+        if (profiles->get<T>(key)) return true;
       }
-    } else {
+    }
+
+    if (!profiles || profiles->liveFallback()) {
       for (auto const& link : getLinks()) {
         if (link.bound()) return true;
       }
     }
+
     return false;
   }
 

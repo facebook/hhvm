@@ -19,7 +19,10 @@
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <new>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -28,8 +31,10 @@
 #include <utility>
 #include <vector>
 
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/util/assertions.h"
 
@@ -68,6 +73,27 @@ void read_raw(PayloadReader& reader, T& value) {
   std::memcpy(&value, reader.data, sizeof(value));
   reader.data += sizeof(value);
   reader.remaining -= sizeof(value);
+}
+
+template<class T>
+bool addTargetProfileValue(
+  const rds::Profile& key,
+  const T& source,
+  ProfDataTargetProfile& targetProfiles
+) {
+  static_assert(std::is_nothrow_copy_constructible_v<T>);
+  static_assert(std::is_trivially_destructible_v<T>);
+
+  auto const memory = std::malloc(sizeof(T));
+  if (!memory) return false;
+  std::unique_ptr<T, decltype(&std::free)> value{
+    new (memory) T{source},
+    &std::free,
+  };
+
+  targetProfiles.add(key, value.get());
+  value.release();
+  return true;
 }
 
 std::optional<int32_t> decodeDecRefProfileId(std::string_view name) {
@@ -152,6 +178,30 @@ snapshotDecRefTargetProfile(
   };
 }
 
+bool installDecRefTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  assertx(profile.kind == ContProfTargetProfileKind::DecRef);
+  assertx(profile.bytecodeOffset >= 0);
+  assertx(profile.name);
+
+  auto const decoded = decodeDecRefPayload(profile.payload);
+  if (!decoded) return false;
+
+  return addTargetProfileValue(
+    rds::Profile{
+      static_cast<DecRefProfile*>(nullptr),
+      transId,
+      profile.bytecodeOffset,
+      profile.name,
+    },
+    *decoded,
+    targetProfiles
+  );
+}
+
 }
 
 bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
@@ -176,6 +226,31 @@ snapshotContProfTargetProfile(
     default:
       return std::nullopt;
   }
+}
+
+std::optional<ContProfPreparedTargetProfile>
+prepareContProfTargetProfile(const ContProfTargetProfile& profile) {
+  if (!isValidContProfTargetProfile(profile)) return std::nullopt;
+
+  return ContProfPreparedTargetProfile{
+    profile.kind,
+    profile.bytecodeOffset,
+    makeStaticString(profile.name),
+    profile.payload,
+  };
+}
+
+bool installContProfTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  switch (profile.kind) {
+    case ContProfTargetProfileKind::DecRef:
+      return installDecRefTargetProfile(profile, transId, targetProfiles);
+  }
+
+  return false;
 }
 
 }

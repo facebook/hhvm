@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
@@ -42,6 +43,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/util/sha1.h"
 
 namespace HPHP::jit::cprof {
@@ -431,6 +433,142 @@ TEST(ContProfTargetProfile, RoundTripsFixedTargetProfileKinds) {
     transId,
     imported
   );
+}
+
+TEST(ContProfTargetProfile, RoundTripsTypeBearingTargetProfileKinds) {
+  constexpr auto transId = TransID{2'500'000};
+  auto const typeName = makeStaticString("CustomTypeProfile");
+  auto const arrayIterName = makeStaticString("CustomArrayIterProfile");
+
+  TypeProfile typeProfile{};
+  typeProfile.type = Type::cns(makeStaticString("cprof value"));
+  typeProfile.count = 17;
+
+  auto const keyTypes = ArrayKeyTypes::Ints() | ArrayKeyTypes::StaticStrs();
+  auto const arrayIterProfile = ArrayIterProfile{
+    .m_key_types = keyTypes,
+    .m_value_type = Type::cns(int64_t{7}),
+  };
+
+  ScopedTargetProfile<TypeProfile> const typeSite{
+    transId, 0, typeName, typeProfile
+  };
+  ScopedTargetProfile<ArrayIterProfile> const arrayIterSite{
+    transId, 0, arrayIterName, arrayIterProfile
+  };
+
+  auto typeSnapshot = typeSite.snapshot();
+  auto arrayIterSnapshot = arrayIterSite.snapshot();
+  ASSERT_TRUE(typeSnapshot);
+  ASSERT_TRUE(arrayIterSnapshot);
+
+  std::vector<ContProfTargetProfile> capturedProfiles{
+    std::move(*typeSnapshot),
+    std::move(*arrayIterSnapshot),
+  };
+  std::sort(
+    capturedProfiles.begin(),
+    capturedProfiles.end(),
+    contProfTargetProfileKeyLess
+  );
+
+  auto const decoded = roundTripTargetProfiles(std::move(capturedProfiles));
+  ASSERT_TRUE(decoded);
+  ASSERT_EQ(1, decoded->translations.size());
+
+  auto const& profiles = decoded->translations[0].targetProfiles;
+  ASSERT_EQ(2, profiles.size());
+  EXPECT_EQ(ContProfTargetProfileKind::Type, profiles[0].kind);
+  EXPECT_EQ(typeName->toCppString(), profiles[0].name);
+  EXPECT_EQ(ContProfTargetProfileKind::ArrayIter, profiles[1].kind);
+  EXPECT_EQ(arrayIterName->toCppString(), profiles[1].name);
+
+  ProfDataTargetProfile imported;
+  for (auto const& profile : profiles) {
+    auto const prepared = prepareContProfTargetProfile(profile);
+    ASSERT_TRUE(prepared);
+    ASSERT_TRUE(installContProfTargetProfile(*prepared, transId, imported));
+  }
+
+  auto const importedType = imported.get<TypeProfile>(rds::Profile{
+    static_cast<TypeProfile*>(nullptr),
+    transId,
+    0,
+    typeName,
+  });
+  ASSERT_NE(nullptr, importedType);
+  EXPECT_EQ(17, importedType->count);
+  EXPECT_TRUE(importedType->type == TStaticStr);
+
+  auto const importedArrayIter =
+    imported.get<ArrayIterProfile>(rds::Profile{
+      static_cast<ArrayIterProfile*>(nullptr),
+      transId,
+      0,
+      arrayIterName,
+    });
+  ASSERT_NE(nullptr, importedArrayIter);
+  auto const importedResult = importedArrayIter->result();
+  EXPECT_TRUE(importedResult.key_types == keyTypes);
+  EXPECT_TRUE(importedResult.value_type == TInt);
+}
+
+TEST(ContProfTargetProfile, RejectsInvalidTypeBearingTargetProfiles) {
+  constexpr auto transId = TransID{2'500'000};
+  auto const typeName = makeStaticString("TypeProfile");
+  auto const arrayIterName = makeStaticString("ArrayIterProfile");
+  ScopedTargetProfile<TypeProfile> const typeSite{
+    transId, 0, typeName, TypeProfile{}
+  };
+  ScopedTargetProfile<ArrayIterProfile> const arrayIterSite{
+    transId, 0, arrayIterName, ArrayIterProfile{}
+  };
+  auto const typeSnapshot = typeSite.snapshot();
+  auto const arrayIterSnapshot = arrayIterSite.snapshot();
+  ASSERT_TRUE(typeSnapshot);
+  ASSERT_TRUE(arrayIterSnapshot);
+
+  for (auto const& profile : {*typeSnapshot, *arrayIterSnapshot}) {
+    ASSERT_TRUE(prepareContProfTargetProfile(profile));
+
+    auto truncated = profile;
+    truncated.payload.pop_back();
+    EXPECT_FALSE(prepareContProfTargetProfile(truncated));
+
+    auto trailing = profile;
+    trailing.payload.push_back(0);
+    EXPECT_FALSE(prepareContProfTargetProfile(trailing));
+  }
+
+  auto invalidType = *typeSnapshot;
+  std::fill_n(
+    invalidType.payload.begin(), sizeof(Type::bits_t), uint8_t{0xff}
+  );
+  EXPECT_FALSE(prepareContProfTargetProfile(invalidType));
+
+  auto invalidArrayIter = *arrayIterSnapshot;
+  invalidArrayIter.payload[0] = 0x10;
+  EXPECT_FALSE(prepareContProfTargetProfile(invalidArrayIter));
+
+  TypeProfile nonCellTypeProfile{};
+  nonCellTypeProfile.type = Type{Type::kMem, PtrLocation::Frame};
+  ScopedTargetProfile<TypeProfile> const nonCellTypeSite{
+    TransID{2'500'001}, 0, typeName, nonCellTypeProfile
+  };
+  auto nonCellType = nonCellTypeSite.snapshot();
+  ASSERT_TRUE(nonCellType);
+  EXPECT_FALSE(prepareContProfTargetProfile(*nonCellType));
+
+  auto const uninitArrayIterProfile = ArrayIterProfile{
+    .m_key_types = ArrayKeyTypes::Ints(),
+    .m_value_type = TUninit,
+  };
+  ScopedTargetProfile<ArrayIterProfile> const uninitArrayIterSite{
+    TransID{2'500'002}, 0, arrayIterName, uninitArrayIterProfile
+  };
+  auto uninitArrayIter = uninitArrayIterSite.snapshot();
+  ASSERT_TRUE(uninitArrayIter);
+  EXPECT_FALSE(prepareContProfTargetProfile(*uninitArrayIter));
 }
 
 TEST(ContProfTargetProfile, RoundTripsSwitchTargetProfile) {

@@ -73,17 +73,17 @@ struct ArrayIterProfile {
   void serialize(ProfDataSerializer& ser) const;
   void deserialize(ProfDataDeserializer& ser);
 
-private:
-  // To ensure that `update` is constant time, we examine at most this many
-  // values when updating m_value_type. Bases with a large number of values are
-  // usually monotyped, so we don't get much benefit from examining more.
-  static constexpr size_t kNumProfiledValues = 16;
-
   ArrayKeyTypes m_key_types = ArrayKeyTypes::Empty();
 
   // Track a TypeProfile for values. Zero-initialized types are TBottom.
   static_assert(Type::kBottom.empty(), "Assuming TBottom is 0");
   Type m_value_type;
+
+private:
+  // To ensure that `update` is constant time, we examine at most this many
+  // values when updating m_value_type. Bases with a large number of values are
+  // usually monotyped, so we don't get much benefit from examining more.
+  static constexpr size_t kNumProfiledValues = 16;
 
   // In RDS, but can't contain pointers to request-allocated data.
   TYPE_SCAN_IGNORE_ALL;

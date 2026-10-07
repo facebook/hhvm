@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
@@ -43,6 +44,7 @@
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP::jit::cprof {
@@ -62,7 +64,7 @@ struct PayloadReader {
 
 template<class T>
 void write_raw(PayloadWriter& writer, const T& value) {
-  static_assert(std::is_unsigned_v<T> || std::is_enum_v<T>);
+  static_assert(std::is_trivially_copyable_v<T>);
 
   auto const bytes = reinterpret_cast<const uint8_t*>(&value);
   writer.payload.insert(writer.payload.end(), bytes, bytes + sizeof(value));
@@ -70,7 +72,7 @@ void write_raw(PayloadWriter& writer, const T& value) {
 
 template<class T>
 void read_raw(PayloadReader& reader, T& value) {
-  static_assert(std::is_unsigned_v<T> || std::is_enum_v<T>);
+  static_assert(std::is_trivially_copyable_v<T>);
 
   if (reader.failed || sizeof(value) > reader.remaining) {
     reader.failed = true;
@@ -180,6 +182,167 @@ bool installRawTargetProfile(
   targetProfiles.add(key, value.get());
   value.release();
   return true;
+}
+
+void writeType(PayloadWriter& writer, Type type) {
+  // These profiles contain cell types, so no pointer location is needed.
+  // Store only the basic bits: constants and specializations can contain
+  // process-local pointers.
+  write_raw(writer, type.rawBits());
+}
+
+std::optional<Type> readType(PayloadReader& reader) {
+  Type::bits_t bits{};
+  read_raw(reader, bits);
+  if (reader.failed || (bits & Type::kCell) != bits) {
+    return std::nullopt;
+  }
+
+  return Type{bits, PtrLocation::Bottom};
+}
+
+std::vector<uint8_t> encodeTypeProfilePayload(const TypeProfile& profile) {
+  PayloadWriter writer;
+  writer.payload.reserve(sizeof(profile));
+  writeType(writer, profile.type);
+  write_raw(writer, profile.count);
+  return std::move(writer.payload);
+}
+
+std::optional<TypeProfile>
+decodeTypeProfilePayload(const std::vector<uint8_t>& payload) {
+  PayloadReader reader{payload.data(), payload.size()};
+  auto const type = readType(reader);
+  if (!type) return std::nullopt;
+
+  TypeProfile result{};
+  result.type = *type;
+  read_raw(reader, result.count);
+  if (reader.failed || reader.remaining != 0) return std::nullopt;
+  return result;
+}
+
+std::vector<uint8_t>
+encodeArrayIterProfilePayload(const ArrayIterProfile& profile) {
+  auto const result = profile.result();
+
+  PayloadWriter writer;
+  writer.payload.reserve(sizeof(profile));
+  write_raw(writer, result.key_types.toBits());
+  writeType(writer, result.value_type);
+  return std::move(writer.payload);
+}
+
+std::optional<ArrayIterProfile>
+decodeArrayIterProfilePayload(const std::vector<uint8_t>& payload) {
+  PayloadReader reader{payload.data(), payload.size()};
+  uint8_t keyTypes{};
+  read_raw(reader, keyTypes);
+  auto const allowedKeyTypes = ArrayKeyTypes::Any().toBits();
+  if ((keyTypes | allowedKeyTypes) != allowedKeyTypes) {
+    return std::nullopt;
+  }
+
+  auto const valueType = readType(reader);
+  if (!valueType || !(*valueType <= TInitCell)) return std::nullopt;
+  if (reader.remaining != 0) return std::nullopt;
+
+  return ArrayIterProfile{
+    .m_key_types = ArrayKeyTypes::FromBits(keyTypes),
+    .m_value_type = *valueType,
+  };
+}
+
+std::optional<ContProfTargetProfile>
+snapshotTypeTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
+) {
+  if (profile.bcOff < 0) return std::nullopt;
+
+  assertx(profile.name);
+  assertx(allocationSize == sizeof(TypeProfile));
+
+  TypeProfile reduced{};
+  TargetProfile<TypeProfile>::reduce(reduced, handle, allocationSize);
+
+  return ContProfTargetProfile{
+    ContProfTargetProfileKind::Type,
+    profile.bcOff,
+    profile.name->toCppString(),
+    encodeTypeProfilePayload(reduced),
+  };
+}
+
+std::optional<ContProfTargetProfile>
+snapshotArrayIterTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
+) {
+  if (profile.bcOff < 0) return std::nullopt;
+
+  assertx(profile.name);
+  assertx(allocationSize == sizeof(ArrayIterProfile));
+
+  ArrayIterProfile reduced{};
+  TargetProfile<ArrayIterProfile>::reduce(reduced, handle, allocationSize);
+
+  return ContProfTargetProfile{
+    ContProfTargetProfileKind::ArrayIter,
+    profile.bcOff,
+    profile.name->toCppString(),
+    encodeArrayIterProfilePayload(reduced),
+  };
+}
+
+bool installTypeTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  assertx(profile.kind == ContProfTargetProfileKind::Type);
+  assertx(profile.bytecodeOffset >= 0);
+  assertx(profile.name);
+
+  auto const decoded = decodeTypeProfilePayload(profile.payload);
+  if (!decoded) return false;
+
+  return addTargetProfileValue(
+    rds::Profile{
+      static_cast<TypeProfile*>(nullptr),
+      transId,
+      profile.bytecodeOffset,
+      profile.name,
+    },
+    *decoded,
+    targetProfiles
+  );
+}
+
+bool installArrayIterTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  assertx(profile.kind == ContProfTargetProfileKind::ArrayIter);
+  assertx(profile.bytecodeOffset >= 0);
+  assertx(profile.name);
+
+  auto const decoded = decodeArrayIterProfilePayload(profile.payload);
+  if (!decoded) return false;
+
+  return addTargetProfileValue(
+    rds::Profile{
+      static_cast<ArrayIterProfile*>(nullptr),
+      transId,
+      profile.bytecodeOffset,
+      profile.name,
+    },
+    *decoded,
+    targetProfiles
+  );
 }
 
 std::optional<int32_t> decodeDecRefProfileId(std::string_view name) {
@@ -315,6 +478,14 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
 
     case ContProfTargetProfileKind::ClsCns:
       return isValidRawTargetProfile<ClsCnsProfile>(profile);
+
+    case ContProfTargetProfileKind::Type:
+      return profile.bytecodeOffset >= 0 &&
+        decodeTypeProfilePayload(profile.payload).has_value();
+
+    case ContProfTargetProfileKind::ArrayIter:
+      return profile.bytecodeOffset >= 0 &&
+        decodeArrayIterProfilePayload(profile.payload).has_value();
   }
 
   return false;
@@ -385,6 +556,12 @@ snapshotContProfTargetProfile(
         allocationSize,
         ContProfTargetProfileKind::ClsCns
       );
+
+    case rds::ProfileKind::TypeProfile:
+      return snapshotTypeTargetProfile(profile, handle, allocationSize);
+
+    case rds::ProfileKind::ArrayIterProfile:
+      return snapshotArrayIterTargetProfile(profile, handle, allocationSize);
 
     default:
       return std::nullopt;
@@ -460,6 +637,12 @@ bool installContProfTargetProfile(
         transId,
         targetProfiles
       );
+
+    case ContProfTargetProfileKind::Type:
+      return installTypeTargetProfile(profile, transId, targetProfiles);
+
+    case ContProfTargetProfileKind::ArrayIter:
+      return installArrayIterTargetProfile(profile, transId, targetProfiles);
   }
 
   return false;

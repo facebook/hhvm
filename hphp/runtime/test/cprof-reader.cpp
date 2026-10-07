@@ -67,6 +67,18 @@ ContProfTargetProfile makeDecRefTargetProfile(Offset bytecodeOffset) {
   };
 }
 
+ContProfTargetProfile makeSwitchTargetProfile(
+  Offset bytecodeOffset,
+  size_t numCases
+) {
+  return {
+    ContProfTargetProfileKind::Switch,
+    static_cast<int32_t>(bytecodeOffset),
+    "SwitchProfile",
+    std::vector<uint8_t>(numCases * sizeof(uint32_t)),
+  };
+}
+
 constexpr auto kUnitPath = "hphp/runtime/test/cont-prof-reader-test.php";
 
 constexpr auto kHhas = R"HHAS(
@@ -90,6 +102,15 @@ main:
   Null
   PopC
 done:
+  Int 0
+  Switch Unbounded 0 <case0 case1 case2>
+case0:
+  Null
+  RetC None
+case1:
+  Null
+  RetC None
+case2:
   Null
   RetC None
 DV:
@@ -339,6 +360,12 @@ struct ContProfReaderBytecodeTest : testing::Test {
     s_fallthroughOffset = s_jmpOffset + instrLen(s_func->at(s_jmpOffset));
     ASSERT_EQ(Op::Null, peek_op(s_func->at(s_fallthroughOffset)));
 
+    s_doneOffset = s_jmpOffset + getImm(s_func->at(s_jmpOffset), 0).u_BA;
+    ASSERT_EQ(Op::Int, peek_op(s_func->at(s_doneOffset)));
+    s_switchOffset = s_doneOffset + instrLen(s_func->at(s_doneOffset));
+    ASSERT_EQ(Op::Switch, peek_op(s_func->at(s_switchOffset)));
+    ASSERT_EQ(3, getImmVector(s_func->at(s_switchOffset)).size());
+
     s_namedEntry = s_func->getNamedParamsFuncEntry();
     ASSERT_TRUE(s_func->hasOptionalNamedParameters());
     ASSERT_GT(s_namedEntry, 0);
@@ -362,6 +389,10 @@ struct ContProfReaderBytecodeTest : testing::Test {
 
   static Offset namedEntry() { return s_namedEntry; }
 
+  static Offset doneOffset() { return s_doneOffset; }
+
+  static Offset switchOffset() { return s_switchOffset; }
+
 private:
   static inline std::unique_ptr<Unit> s_unit;
   static inline Func* s_func{nullptr};
@@ -369,7 +400,9 @@ private:
   static inline Offset s_trueOffset{0};
   static inline Offset s_jmpOffset{0};
   static inline Offset s_fallthroughOffset{0};
+  static inline Offset s_doneOffset{0};
   static inline Offset s_namedEntry{0};
+  static inline Offset s_switchOffset{0};
 };
 
 TEST_F(ContProfReaderBytecodeTest, AcceptsValidBytecodeBlock) {
@@ -522,6 +555,37 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesTargetProfileSites) {
 
   record.translations.front().regionLength = 2;
   EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST_F(ContProfReaderBytecodeTest, ValidatesSwitchProfileSize) {
+  auto const key = makeContProfFuncKey(*func());
+  ASSERT_TRUE(key);
+
+  auto record = makeBytecodeRecord(*key, doneOffset(), 2);
+  record.translations.back().targetProfiles = {
+    makeSwitchTargetProfile(switchOffset(), 3),
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().targetProfiles = {
+    makeSwitchTargetProfile(switchOffset(), 2),
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+
+  record.translations.back().targetProfiles = {
+    makeSwitchTargetProfile(switchOffset(), 4),
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+
+  record = makeBytecodeRecord(*key, trueOffset(), 1);
+  record.translations.back().targetProfiles = {
+    makeSwitchTargetProfile(trueOffset(), 3),
+  };
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
 }
 
 }

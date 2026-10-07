@@ -782,13 +782,11 @@ struct TargetProfileVisitor {
 
   template<typename T>
   void go(const rds::Profile& pt) {
-    if (size == sizeof(T)) {
-      T out{};
-      process(out, pt.name.get());
-    } else {
-      auto const mem = calloc(1, size);
-      SCOPE_EXIT { free(mem); };
-      process(*reinterpret_cast<T*>(mem), pt.name.get());
+    auto const success = TargetProfile<T>::withTemporary(
+      size, [&] (T& out) { process(out, pt.name.get()); }
+    );
+    if (!success) {
+      throw std::runtime_error("Failed to allocate target profile buffer");
     }
   }
 

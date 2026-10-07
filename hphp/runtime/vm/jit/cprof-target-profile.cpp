@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/util/assertions.h"
 
@@ -106,7 +107,14 @@ template<class T>
 bool isValidRawTargetProfileSize(size_t size) {
   static_assert(std::is_trivially_copyable_v<T>);
   static_assert(std::has_unique_object_representations_v<T>);
-  return size == sizeof(T);
+
+  if constexpr (std::is_same_v<T, SwitchProfile>) {
+    static_assert(sizeof(SwitchProfile) == sizeof(uint32_t));
+
+    return size >= sizeof(SwitchProfile) && size % sizeof(uint32_t) == 0;
+  } else {
+    return size == sizeof(T);
+  }
 }
 
 template<class T>
@@ -129,11 +137,14 @@ snapshotRawTargetProfile(
   assertx(profile.name);
   assertx(isValidRawTargetProfileSize<T>(allocationSize));
 
-  T reduced{};
-  TargetProfile<T>::reduce(reduced, handle, sizeof(T));
-
-  std::vector<uint8_t> payload(sizeof(T));
-  std::memcpy(payload.data(), &reduced, payload.size());
+  std::vector<uint8_t> payload(allocationSize);
+  auto const captured = TargetProfile<T>::withTemporary(
+    allocationSize, [&] (T& reduced) {
+      TargetProfile<T>::reduce(reduced, handle, allocationSize);
+      std::memcpy(payload.data(), &reduced, payload.size());
+    }
+  );
+  if (!captured) return std::nullopt;
 
   return ContProfTargetProfile{
     kind,
@@ -153,19 +164,22 @@ bool installRawTargetProfile(
   assertx(profile.name);
   assertx(isValidRawTargetProfileSize<T>(profile.payload.size()));
 
-  T value{};
-  std::memcpy(&value, profile.payload.data(), sizeof(T));
+  auto const key = rds::Profile{
+    static_cast<T*>(nullptr),
+    transId,
+    profile.bytecodeOffset,
+    profile.name,
+  };
 
-  return addTargetProfileValue(
-    rds::Profile{
-      static_cast<T*>(nullptr),
-      transId,
-      profile.bytecodeOffset,
-      profile.name,
-    },
-    value,
-    targetProfiles
-  );
+  auto const memory = std::malloc(profile.payload.size());
+  if (!memory) return false;
+  std::unique_ptr<T, decltype(&std::free)> value{
+    new (memory) T{}, &std::free
+  };
+  std::memcpy(value.get(), profile.payload.data(), profile.payload.size());
+  targetProfiles.add(key, value.get());
+  value.release();
+  return true;
 }
 
 std::optional<int32_t> decodeDecRefProfileId(std::string_view name) {
@@ -293,6 +307,9 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
     case ContProfTargetProfileKind::IsTypeStruct:
       return isValidRawTargetProfile<IsTypeStructProfile>(profile);
 
+    case ContProfTargetProfileKind::Switch:
+      return isValidRawTargetProfile<SwitchProfile>(profile);
+
     case ContProfTargetProfileKind::ArrayAccess:
       return isValidRawTargetProfile<ArrayAccessProfile>(profile);
 
@@ -343,6 +360,14 @@ snapshotContProfTargetProfile(
         handle,
         allocationSize,
         ContProfTargetProfileKind::IsTypeStruct
+      );
+
+    case rds::ProfileKind::SwitchProfile:
+      return snapshotRawTargetProfile<SwitchProfile>(
+        profile,
+        handle,
+        allocationSize,
+        ContProfTargetProfileKind::Switch
       );
 
     case rds::ProfileKind::ArrayAccessProfile:
@@ -410,6 +435,13 @@ bool installContProfTargetProfile(
 
     case ContProfTargetProfileKind::IsTypeStruct:
       return installRawTargetProfile<IsTypeStructProfile>(
+        profile,
+        transId,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::Switch:
+      return installRawTargetProfile<SwitchProfile>(
         profile,
         transId,
         targetProfiles

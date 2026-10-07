@@ -27,6 +27,10 @@
 
 #include "hphp/util/assertions.h"
 
+#include <folly/ScopeGuard.h>
+
+#include <cstdlib>
+#include <new>
 #include <utility>
 
 namespace HPHP {
@@ -144,6 +148,28 @@ struct TargetProfile {
                                    const StringData* name,
                                    size_t extraSize) {
     return TargetProfile{profTransIDs, kind, bcOff, name, extraSize};
+  }
+
+  /*
+   * Invoke f with a temporary T{}, including zeroed trailing storage for a
+   * variable-sized profile. The reference is valid only during the callback.
+   * Returns false if the temporary allocation fails.
+   */
+  template<class F>
+  static bool withTemporary(uint32_t size, F&& f) {
+    assertx(size >= sizeof(T));
+    if (size == sizeof(T)) {
+      T out{};
+      f(out);
+    } else {
+      auto const memory = std::calloc(1, size);
+      if (!memory) return false;
+      SCOPE_EXIT { std::free(memory); };
+      auto& out = *new (memory) T{};
+      SCOPE_EXIT { out.~T(); };
+      f(out);
+    }
+    return true;
   }
 
   /*

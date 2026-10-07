@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/util/sha1.h"
 
@@ -279,7 +280,11 @@ void expectContProfFixedTargetProfile(
   EXPECT_EQ(kind, profile.kind);
   EXPECT_EQ(bytecodeOffset, profile.bytecodeOffset);
   EXPECT_EQ(name->toCppString(), profile.name);
-  EXPECT_EQ(sizeof(T), profile.payload.size());
+  auto const bytes = reinterpret_cast<const uint8_t*>(&expected);
+  EXPECT_EQ(
+    std::vector<uint8_t>(bytes, bytes + sizeof(T)),
+    profile.payload
+  );
 
   auto const prepared = prepareContProfTargetProfile(profile);
   ASSERT_TRUE(prepared);
@@ -426,6 +431,70 @@ TEST(ContProfTargetProfile, RoundTripsFixedTargetProfileKinds) {
     transId,
     imported
   );
+}
+
+TEST(ContProfTargetProfile, RoundTripsSwitchTargetProfile) {
+  constexpr auto transId = TransID{2'400'000};
+  for (auto const& counts : {
+    std::vector<uint32_t>{17},
+    std::vector<uint32_t>{17, 9, 3},
+  }) {
+    SCOPED_TRACE(counts.size());
+    auto const key = rds::Profile{
+      static_cast<SwitchProfile*>(nullptr),
+      transId,
+      0,
+      makeStaticString("SwitchProfile"),
+    };
+    auto const extraSize = SwitchProfile::extraSize(
+      static_cast<int>(counts.size())
+    );
+    auto const allocationSize =
+      static_cast<uint32_t>(sizeof(SwitchProfile) + extraSize);
+    auto const handle = rds::bind<SwitchProfile, rds::Mode::Local>(
+      rds::Symbol{key}, extraSize
+    ).handle();
+    SCOPE_EXIT { rds::unbind(rds::Symbol{key}, handle); };
+    auto& local = rds::handleToRef<SwitchProfile, rds::Mode::Local>(handle);
+    std::copy(counts.begin(), counts.end(), local.cases());
+
+    auto snapshot = snapshotContProfTargetProfile(key, handle, allocationSize);
+    ASSERT_TRUE(snapshot);
+    auto const decoded = roundTripTargetProfiles({std::move(*snapshot)});
+    ASSERT_TRUE(decoded);
+    ASSERT_EQ(1, decoded->translations.size());
+    ASSERT_EQ(1, decoded->translations[0].targetProfiles.size());
+
+    auto const& profile = decoded->translations[0].targetProfiles[0];
+    EXPECT_EQ(ContProfTargetProfileKind::Switch, profile.kind);
+    EXPECT_EQ(0, profile.bytecodeOffset);
+    EXPECT_EQ("SwitchProfile", profile.name);
+    ASSERT_EQ(allocationSize, profile.payload.size());
+
+    auto const prepared = prepareContProfTargetProfile(profile);
+    ASSERT_TRUE(prepared);
+    ProfDataTargetProfile imported;
+    ASSERT_TRUE(installContProfTargetProfile(*prepared, transId, imported));
+    auto const actual = imported.get<SwitchProfile>(key);
+    ASSERT_NE(nullptr, actual);
+    auto const restored = std::vector<uint32_t>{
+      actual->cases(), actual->cases() + counts.size()
+    };
+    EXPECT_EQ(counts, restored);
+  }
+}
+
+TEST(ContProfTargetProfile, RejectsInvalidSwitchPayloadSizes) {
+  ContProfTargetProfile profile{
+    ContProfTargetProfileKind::Switch,
+    0,
+    "SwitchProfile",
+    {},
+  };
+  EXPECT_FALSE(prepareContProfTargetProfile(profile));
+
+  profile.payload.resize(sizeof(uint32_t) + 1);
+  EXPECT_FALSE(prepareContProfTargetProfile(profile));
 }
 
 TEST(ContProfTargetProfile, RejectsInvalidRawTargetProfiles) {

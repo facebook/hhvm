@@ -69,6 +69,7 @@ enum class ContProfTargetProfileKind : uint8_t {
   IsTypeStruct = 5,
   ArrayAccess = 6,
   ClsCns = 7,
+  Switch = 8,
 };
 
 /* Serialized target-profile payload associated with a bytecode site. */

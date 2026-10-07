@@ -28,8 +28,10 @@
 #include <vector>
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP::jit::cprof {
@@ -128,6 +130,23 @@ discoverCheckpointFiles(const std::string& directory) {
   return files;
 }
 
+bool hasValidTargetProfilePayload(
+  const Func& func,
+  const ContProfTargetProfile& profile
+) {
+  if (profile.kind != ContProfTargetProfileKind::Switch) {
+    return true;
+  }
+
+  auto const pc = func.at(profile.bytecodeOffset);
+  if (peek_op(pc) != Op::Switch) return false;
+
+  auto const numCases = getImmVector(pc).size();
+  // Replay uses the bytecode's case count, so the saved allocation must match.
+  return profile.payload.size() ==
+    sizeof(SwitchProfile) + SwitchProfile::extraSize(numCases);
+}
+
 std::optional<SrcKey> validateTranslationRegion(
   const Func& func,
   SrcKey start,
@@ -143,6 +162,9 @@ std::optional<SrcKey> validateTranslationRegion(
 
     while (profile != translation.targetProfiles.end() &&
            profile->bytecodeOffset == last.offset()) {
+      if (!hasValidTargetProfilePayload(func, *profile)) {
+        return std::nullopt;
+      }
       ++profile;
     }
   }

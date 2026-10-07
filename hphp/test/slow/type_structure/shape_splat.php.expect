@@ -1,0 +1,365 @@
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(3) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    ["z"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+  ["alias"]=>
+  string(9) "TExtended"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+  ["alias"]=>
+  string(9) "TOverride"
+}
+dict(4) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(3) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    ["z"]=>
+    dict(1) {
+      ["kind"]=>
+      int(3)
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["alias"]=>
+  string(11) "TOpenMerged"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(3) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    ["w"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(7) "TInline"
+}
+dict(5) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["variadic_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(30)
+  }
+  ["alias"]=>
+  string(8) "TDynLeft"
+}
+dict(5) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["x"]=>
+    dict(2) {
+      ["kind"]=>
+      int(31)
+      ["union_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        dict(1) {
+          ["kind"]=>
+          int(30)
+        }
+      }
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["variadic_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(30)
+  }
+  ["alias"]=>
+  string(9) "TDynRight"
+}
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(2) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        ["y"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+      }
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(1) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+  ["alias"]=>
+  string(11) "TUnionSplat"
+}
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(3) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        ["y"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        ["z"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(2) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+        ["z"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+  ["alias"]=>
+  string(14) "TUnionTrailing"
+}
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(2) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(3)
+        }
+        ["y"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+      }
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(1) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(3)
+        }
+      }
+    }
+  }
+  ["alias"]=>
+  string(14) "TUnionOverride"
+}
+dict(4) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["alias"]=>
+  string(9) "TBareOpen"
+}
+dict(4) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(3) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    ["y"]=>
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    ["z"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["alias"]=>
+  string(14) "TFieldThenOpen"
+}
+dict(5) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["x"]=>
+    dict(2) {
+      ["kind"]=>
+      int(31)
+      ["union_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+    ["y"]=>
+    dict(2) {
+      ["kind"]=>
+      int(31)
+      ["union_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+  }
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["variadic_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+  ["alias"]=>
+  string(10) "TTypedOpen"
+}

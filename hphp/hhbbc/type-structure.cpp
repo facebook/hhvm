@@ -608,7 +608,70 @@ Resolution resolve_typevar(ResolveCtx& ctx, SArray ts) {
   return Resolution { it->second.type, false };
 }
 
+// A shape splat: resolve each element to a concrete (statically-known) type
+// structure and merge them with the runtime's merge function, so HHBBC and the
+// runtime agree byte-for-byte. If any element is not a statically-known concrete
+// type structure we cannot fold it here, so we defer the ENTIRE merge to the
+// runtime (return TDictN) rather than partially merging.
+//
+// A union operand resolves to a (statically concrete) union type structure and
+// is distributed by the shared merge, so the merged result may itself be a
+// union (shape(...(A|B)) = shape(...A) | shape(...B)); the wrapping below is
+// kind-agnostic and carries the modifiers onto whatever the merge returns.
+//
+// A non-static element can be an unbound type-parameter operand, e.g.
+// `shape(...T)`. When `shape_splat_type_parameters` is enabled, HHBBC cannot
+// fold such an operand without its runtime type structure, so it defers the
+// whole merge to the runtime resolver.
+Resolution resolve_shape_splat(ResolveCtx& ctx, SArray ts, SArray splatElems) {
+  assertx(splatElems->isStatic());
+  assertx(splatElems->isVecType());
+
+  auto const size = splatElems->size();
+  req::vector<Array> resolved;
+  resolved.reserve(size);
+  bool mightFail = false;
+  bool contextSensitive = false;
+  for (size_t i = 0; i < size; ++i) {
+    auto const elem = splatElems->get(i);
+    assertx(tvIsDict(elem));
+    auto r = resolve(ctx, val(elem).parr);
+    if (r.type.is(BBottom)) return Resolution { TBottom, true };
+    mightFail |= r.mightFail;
+    contextSensitive |= r.contextSensitive;
+    auto const c = tv(r.type);
+    // Not statically foldable: defer the whole merge to the runtime resolver.
+    if (!c) return Resolution { TDictN, true };
+    assertx(tvIsDict(*c));
+    resolved.emplace_back(Array{val(*c).parr});
+  }
+
+  bool invalidType = false;
+  auto merged = TypeStructure::mergeResolvedShapeSplat(resolved, invalidType);
+  if (invalidType) {
+    // Keep the original splat for runtime validation: normalization may have
+    // erased the invalid operand, for example when followed by `nothing`.
+    return Resolution { TDictN, true };
+  }
+  merged.setEvalScalar();
+
+  // Carry outer modifiers and typevars/alias/case_type in the same order the
+  // runtime applies them after resolveShapeSplat.
+  auto res = Builder::attach(Resolution { dict_val(merged.get()), mightFail })
+    .copyModifiers(ts)
+    .optCopy(s_typevars, ts)
+    .optCopy(s_alias, ts)
+    .optCopy(s_case_type, ts)
+    .finishTS();
+  res.contextSensitive |= contextSensitive;
+  return res;
+}
+
 Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
+  if (auto const splat = get_ts_splat_elem_types_opt(ts)) {
+    return resolve_shape_splat(ctx, ts, splat);
+  }
+
   auto const fields = get_ts_fields(ts);
   assertx(fields->isStatic());
   assertx(fields->isDictType());
@@ -1358,8 +1421,13 @@ void type_structure_references(SArray ts, SStringSet& names) {
       onList(get_ts_generic_types_opt(ts));
       break;
     case TS::Kind::T_shape:
-      onShape(ts);
-      type_structure_references(get_ts_variadic_type_opt(ts), names);
+      if (auto const splat = get_ts_splat_elem_types_opt(ts)) {
+        // A shape splat: collect references from each element type structure.
+        onList(splat);
+      } else {
+        onShape(ts);
+        type_structure_references(get_ts_variadic_type_opt(ts), names);
+      }
       break;
     case TS::Kind::T_typeaccess:
       names.emplace(get_ts_root_name(ts));

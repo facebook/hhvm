@@ -4356,6 +4356,9 @@ Optional<Type> type_of_type_structure(const IIndex& index,
         return vec(v);
       }
       case TypeStructure::Kind::T_shape: {
+        // An unresolved shape splat carries `splat_elem_types` instead of
+        // `fields`; its full field set is unknown, so stay conservative.
+        if (get_ts_splat_elem_types_opt(ts)) return std::nullopt;
         // Taking a very conservative approach to shapes where we dont do any
         // conversions if the shape contains unknown or optional fields
         if (does_ts_shape_allow_unknown_fields(ts)) return std::nullopt;

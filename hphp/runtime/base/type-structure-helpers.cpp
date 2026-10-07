@@ -48,6 +48,7 @@ const StaticString s_optional_elem_types("optional_elem_types");
 const StaticString s_param_types("param_types");
 const StaticString s_return_type("return_type");
 const StaticString s_variadic_type("variadic_type");
+const StaticString s_splat_elem_types("splat_elem_types");
 const StaticString s_fields("fields");
 const StaticString s_kind("kind");
 const StaticString s_value("value");

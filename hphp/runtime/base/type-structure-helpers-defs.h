@@ -26,6 +26,7 @@ extern const StaticString s_optional_elem_types;
 extern const StaticString s_param_types;
 extern const StaticString s_return_type;
 extern const StaticString s_variadic_type;
+extern const StaticString s_splat_elem_types;
 extern const StaticString s_fields;
 extern const StaticString s_kind;
 extern const StaticString s_value;
@@ -160,6 +161,10 @@ ALWAYS_INLINE const ArrayData* get_ts_return_type(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_variadic_type_opt(const ArrayData* ts) {
   return detail::get_ts_darray_opt(ts, s_variadic_type);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_splat_elem_types_opt(const ArrayData* ts) {
+  return detail::get_ts_varray_opt(ts, s_splat_elem_types);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_fields(const ArrayData* ts) {

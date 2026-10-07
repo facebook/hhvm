@@ -88,4 +88,4 @@ dict(4) {
   ["alias"]=>
   string(13) "TPrefixSuffix"
 }
-string(51) "HH\shape(...T, ...TBase, ...HH\shape('z'=>HH\bool))"
+string(38) "HH\shape(...T, ...TBase, 'z'=>HH\bool)"

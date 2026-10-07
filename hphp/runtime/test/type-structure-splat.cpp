@@ -911,4 +911,92 @@ TEST(TypeStructureSplat, ReifiedSplatPreservesModifiersAndMetadata) {
   EXPECT_TRUE(resolved[s_typevars].asCStrRef().same(typevars));
 }
 
+// Displaying an UNRESOLVED splat shape (carrying splat_elem_types, no s_fields)
+// must not crash and should render the element list.
+TEST(TypeStructureSplat, DisplayUnresolvedSplat) {
+  auto splat = tsKind(Kind::T_shape);
+  VecInit elems(3);
+  elems.append(Variant(tsKind(Kind::T_int)));
+  elems.append(
+    Variant(closedShape(make_dict_array("a", Variant(field(Kind::T_int))))));
+  elems.append(Variant(openShape(Array::CreateDict())));
+  splat.set(s_splat_elem_types, Variant(elems.toArray()));
+
+  auto const s = TypeStructure::toString(
+    splat, TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(s.isNull());
+  EXPECT_EQ("shape(...int, 'a' => int, ...shape(...))", s.toCppString());
+}
+
+TEST(TypeStructureSplat, DisplayUnresolvedSplatOpenFieldRun) {
+  auto const fields = make_dict_array("a", Variant(field(Kind::T_int)));
+
+  auto const untyped = TypeStructure::toString(
+    shapeSplat({openShape(fields)}),
+    TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(untyped.isNull());
+  EXPECT_EQ("shape(...shape('a' => int, ...))", untyped.toCppString());
+
+  auto const typed = TypeStructure::toString(
+    shapeSplat({typedOpenShape(fields, tsKind(Kind::T_bool))}),
+    TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(typed.isNull());
+  EXPECT_EQ("shape(...shape('a' => int, bool...))", typed.toCppString());
+}
+
+TEST(TypeStructureSplat, DisplayUnresolvedSplatMultipleOpenOperands) {
+  auto const splat = shapeSplat({
+    typedOpenShape(
+      make_dict_array("a", Variant(field(Kind::T_int))),
+      tsKind(Kind::T_int)
+    ),
+    typedOpenShape(
+      make_dict_array("b", Variant(field(Kind::T_bool))),
+      tsKind(Kind::T_string)
+    ),
+    closedShape(make_dict_array("c", Variant(field(Kind::T_float)))),
+  });
+
+  auto const s = TypeStructure::toString(
+    splat, TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(s.isNull());
+  EXPECT_EQ(
+    "shape(...shape('a' => int, int...), "
+    "...shape('b' => bool, string...), 'c' => float)",
+    s.toCppString());
+}
+
+TEST(TypeStructureSplat, DisplayUnresolvedSplatEmptyOperands) {
+  auto const splat = shapeSplat({
+    closedShape(Array::CreateDict()),
+    closedShape(make_dict_array("a", Variant(field(Kind::T_int)))),
+    closedShape(Array::CreateDict()),
+  });
+
+  auto const s = TypeStructure::toString(
+    splat, TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(s.isNull());
+  EXPECT_EQ(
+    "shape(...shape(), 'a' => int, ...shape())",
+    s.toCppString());
+}
+
+TEST(TypeStructureSplat, DisplayNestedUnresolvedSplat) {
+  auto const nested = shapeSplat({
+    tsKind(Kind::T_dynamic),
+    closedShape(make_dict_array("a", Variant(field(Kind::T_int)))),
+  });
+  auto const outer = shapeSplat({
+    nested,
+    closedShape(make_dict_array("b", Variant(field(Kind::T_bool)))),
+  });
+
+  auto const s = TypeStructure::toString(
+    outer, TypeStructure::TSDisplayType::TSDisplayTypeUser);
+  ASSERT_FALSE(s.isNull());
+  EXPECT_EQ(
+    "shape(...shape(...dynamic, 'a' => int), 'b' => bool)",
+    s.toCppString());
+}
+
 } // namespace HPHP

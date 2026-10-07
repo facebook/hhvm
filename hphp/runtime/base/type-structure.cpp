@@ -314,26 +314,9 @@ bool forDisplay(TypeStructure::TSDisplayType type) {
   return type != TypeStructure::TSDisplayType::TSDisplayTypeReflection;
 }
 
-void shapeTypeName(const Array& arr, std::string& name,
-                   TypeStructure::TSDisplayType type) {
-  // works for both resolved and unresolved TypeStructures
-  name += "(";
-  if (arr.exists(s_splat_elem_types)) {
-    auto const elems = arr[s_splat_elem_types].asCArrRef();
-    auto const sz = elems.size();
-    auto sep = "";
-    for (auto i = 0; i < sz; i++) {
-      auto const elem = elems[i].asCArrRef();
-      folly::toAppend(sep, "...", fullName(elem, type), &name);
-      sep = ", ";
-    }
-    name += ")";
-    return;
-  }
-  assertx(arr.exists(s_fields));
-  auto const fields = arr[s_fields].asCArrRef();
+void appendShapeFields(const Array& fields, std::string& name,
+                       TypeStructure::TSDisplayType type, const char*& sep) {
   auto const sz = fields.size();
-  auto sep = "";
   for (auto i = 0; i < sz; i++) {
     name += sep;
     auto const field = fields->getKey(i);
@@ -361,9 +344,61 @@ void shapeTypeName(const Array& arr, std::string& name,
     );
     sep = ", ";
   }
+}
+
+// Display an unresolved shape splat, reconstructing the source-like form from
+// its ordered element list: inline field-runs, `...T` splat operands, and the
+// trailing `...` / `T...` open element.
+void shapeSplatTypeName(const Array& arr, std::string& name,
+                        TypeStructure::TSDisplayType type) {
+  auto const elems = arr[s_splat_elem_types].asCArrRef();
+  auto const sz = elems.size();
+  auto sep = "";
+  for (auto i = 0; i < sz; i++) {
+    auto const elem = elems->getValue(i).asCArrRef();
+    auto const kind = TypeStructure::kind(elem);
+    if (kind == TypeStructure::Kind::T_shape &&
+        (elem.exists(s_splat_elem_types) ||
+         elem.exists(s_allows_unknown_fields) ||
+         elem[s_fields].asCArrRef().empty())) {
+      // A nested unresolved splat, open shape, or empty closed shape remains a
+      // splat operand. An open shape's variadic bound belongs to that operand;
+      // hoisting it into the outer shape would move it across later operands.
+      // An empty shape has no fields to inline, so omitting it would erase the
+      // assigned identity operand entirely.
+      name += sep;
+      folly::toAppend("...", fullName(elem, type), &name);
+      sep = ", ";
+    } else if (kind == TypeStructure::Kind::T_shape) {
+      // an inline run of literal fields
+      appendShapeFields(elem[s_fields].asCArrRef(), name, type, sep);
+    } else {
+      // a splat operand: `...T`
+      name += sep;
+      folly::toAppend("...", fullName(elem, type), &name);
+      sep = ", ";
+    }
+  }
+}
+
+void shapeTypeName(const Array& arr, std::string& name,
+                   TypeStructure::TSDisplayType type) {
+  // works for both resolved and unresolved TypeStructures
+  name += "(";
+  if (arr.exists(s_splat_elem_types)) {
+    shapeSplatTypeName(arr, name, type);
+    name += ")";
+    return;
+  }
+  assertx(arr.exists(s_fields));
+  auto sep = "";
+  appendShapeFields(arr[s_fields].asCArrRef(), name, type, sep);
 
   if (arr.exists(s_allows_unknown_fields)) {
-    folly::toAppend(sep, "...", &name);
+    name += sep;
+    auto const v = arr.lookup(s_variadic_type);
+    if (v.is_init()) name += fullName(tvAsCVarRef(&v).toArray(), type);
+    name += "...";
   }
 
   name += ")";

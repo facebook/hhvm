@@ -1,0 +1,36 @@
+TClosed:
+  assigned: HH\shape('a'=>HH\int, 'b'=>HH\bool)
+  resolved: shape('a' => int, 'b' => bool)
+TEmptyIdentity:
+  assigned: HH\shape(...HH\shape(), 'value'=>HH\int, ...HH\shape())
+  resolved: shape('value' => int)
+TNothingLeading:
+  assigned: HH\shape(...HH\nothing, 'a'=>HH\int)
+  resolved: nothing
+TNothingMiddle:
+  assigned: HH\shape('a'=>HH\int, ...HH\nothing, 'b'=>HH\bool)
+  resolved: nothing
+TNothingTrailing:
+  assigned: HH\shape('a'=>HH\int, ...HH\nothing)
+  resolved: nothing
+TOpenBeforeField:
+  assigned: HH\shape(...HH\shape('a'=>HH\int, HH\string...), 'b'=>HH\bool)
+  resolved: shape('a' => int, 'b' => bool, string...)
+TMultipleOpen:
+  assigned: HH\shape(...HH\shape('a'=>HH\int, HH\int...), ...HH\shape('b'=>HH\bool, HH\string...), 'c'=>HH\float)
+  resolved: shape('a' => int | string, 'b' => bool, 'c' => float, int | string...)
+TResidualOpen:
+  assigned: HH\shape(...HH\shape('a'=>HH\int, HH\int...), ...T, ...HH\shape('b'=>HH\bool, HH\string...))
+  resolved: shape('a' => int | string, 'middle' => float | string, 'b' => bool, int | string...)
+TOuterOpen:
+  assigned: HH\shape(...HH\shape('left'=>HH\int, HH\string...), ...T, ...HH\shape('right'=>HH\bool, HH\string...))
+  resolved: shape('left' => int | string, 'middle' => float | string, 'right' => bool, string | string...)
+TNested:
+  assigned: HH\shape(...HH\shape(...T, 'inner'=>HH\int), 'outer'=>HH\bool)
+  resolved: shape('value' => string, 'inner' => int, 'outer' => bool)
+TUnionDistributed:
+  assigned: HH\shape('before'=>HH\int, ...TLeft | TRight, 'after'=>HH\bool)
+  resolved: shape('before' => int, 'left' => string, 'after' => bool) | shape('before' => int, 'right' => float, 'after' => bool)
+TDeeplyNested:
+  assigned: HH\shape(...HH\shape('level1'=>HH\int, ...HH\shape('level2'=>HH\string, ...HH\shape(...T, 'level3'=>HH\bool))), 'tail'=>HH\float)
+  resolved: shape('level1' => int, 'level2' => string, 'center' => num, 'level3' => bool, 'tail' => float)

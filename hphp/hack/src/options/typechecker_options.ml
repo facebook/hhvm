@@ -274,18 +274,8 @@ let class_sub_classname t = t.Global_options.class_sub_classname
 
 let class_class_type t = t.Global_options.class_class_type
 
-let needs_concrete_body_check t = t.Global_options.needs_concrete_body_check
-
-let needs_concrete_forwarding_call_check t =
-  t.Global_options.needs_concrete_forwarding_call_check
-
 let needs_concrete_class_call_check t =
   t.Global_options.needs_concrete_class_call_check
-
-let needs_concrete_body_or_call_check_enabled t =
-  needs_concrete_body_check t > 0
-  || needs_concrete_forwarding_call_check t > 0
-  || needs_concrete_class_call_check t > 0
 
 let strict_consistent_construct t = t.Global_options.strict_consistent_construct
 

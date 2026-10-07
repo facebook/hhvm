@@ -46,6 +46,7 @@ This attribute can be applied to classes; it has no attribute values.  Consider 
 class Base {
   public function __construct() {}
 
+  <<__NeedsConcrete>>
   public static function make(): this {
     return new static();
   }
@@ -377,13 +378,13 @@ This attribute marks a static method that requires the runtime class to be concr
 
 ### When you need this attribute
 
-Consider this code that produces a type checker warning:
+Consider this code that produces a type checker error:
 
-```hack warning
+```hack error
 abstract class Animal {
   public static function introduce(): void {
     echo "I say: ";
-    static::speak(); // Warning: static might refer to an abstract class
+    static::speak(); // Error: static might refer to an abstract class
   }
 
   public static abstract function speak(): void;
@@ -403,11 +404,11 @@ function main(): void {
 
 ```
 
-When you call a static method using `static::`, [late static binding](/hack/expressions-and-operators/scope-resolution) determines the class whose method gets called at runtime. The type checker warns here because if `static` refers to an abstract class (like `Animal`), calling `static::speak()` would fail—you can't call an abstract method.
+When you call a static method using `static::`, [late static binding](/hack/expressions-and-operators/scope-resolution) determines the class whose method gets called at runtime. The type checker reports an error here because if `static` refers to an abstract class (like `Animal`), calling `static::speak()` would fail—you can't call an abstract method.
 
-### How to fix the warning
+### How to fix the error
 
-Adding `<<__NeedsConcrete>>` tells the type checker: "This method is only safe to call when the runtime class is concrete." This resolves the warning:
+Adding `<<__NeedsConcrete>>` tells the type checker: "This method is only safe to call when the runtime class is concrete." This resolves the error:
 
 ```hack
 abstract class Animal {
@@ -452,14 +453,14 @@ Safe calls include:
 - Calling via `static::` from another `<<__NeedsConcrete>>` method
 - Calling from within a concrete class
 
-### How to fix warnings
+### How to fix errors and warnings
 
-- Instead of `static::foo()`, you can often adjust the receiver to be a specific concrete class rather than `static`.  
-- Mark the containing class `final`: then Hack knows that `static` refers to the containing class  
-- Sometimes `static::` is used to implicitly pass around a class name. If the class name is being used just as a name (no methods called, not instantiated), intent can be clearer if you pass the class name as an explicit parameter and remove the \_\_NeedsConcrete attribute.  
+- Instead of `static::foo()`, you can often adjust the receiver to be a specific concrete class rather than `static`.
+- Mark the containing class `final`: then Hack knows that `static` refers to the containing class
+- Sometimes `static::` is used to implicitly pass around a class name. If the class name is being used just as a name (no methods called, not instantiated), intent can be clearer if you pass the class name as an explicit parameter and remove the \_\_NeedsConcrete attribute.
 - When a static method relies on the current class being concrete, add the `__NeedsConcrete` attribute. We have codemods that do this automatically, but there may be stragglers in WWW.
 
-Fixing the warnings helps avoid runtime errors from calling static methods or attempting to instantiate abstract classes.
+Fixing the errors and warnings helps avoid runtime errors from calling static methods or attempting to instantiate abstract classes.
 
 ## __Newable
 

@@ -302,11 +302,11 @@ Abstract classes can have abstract static methods. When you use `static::` insid
 
 This creates a potential problem: what if someone calls your method in a context where `static` refers to an abstract class?
 
-```hack warning
+```hack error
 abstract class Animal {
   public static function introduce(): void {
     echo "I say: ";
-    static::speak(); // Warning: static might be abstract at runtime
+    static::speak(); // Error: static might be abstract at runtime
   }
 
   public static abstract function speak(): void;
@@ -321,7 +321,7 @@ class Dog extends Animal {
 
 When you call `Dog::introduce()`, `static::speak()` successfully resolves to `Dog::speak()`. But if someone calls `Animal::introduce()` directly, `static::speak()` calls an abstract method, causing a runtime error.
 
-The type checker tries to prevent such problems. To fix the warning, use the [`<<__NeedsConcrete>>`](/hack/attributes/predefined-attributes#__needsconcrete) attribute:
+The type checker tries to prevent such problems. To fix the error, use the [`<<__NeedsConcrete>>`](/hack/attributes/predefined-attributes#__needsconcrete) attribute:
 
 ```hack warning
 abstract class Animal {

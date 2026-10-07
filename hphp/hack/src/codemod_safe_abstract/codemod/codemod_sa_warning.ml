@@ -68,8 +68,9 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
   in
   let* raw_error_code = field "code" extract_int first_message in
   let* descr = field "descr" extract_string first_message in
-  (* Override violations are typing errors; the rest are warnings. The
-     validated code is carried through as an integer. *)
+  (* Override, body, and forwarding-call violations are typing errors;
+     class-call violations are warnings. The validated code is carried
+     through as an integer. *)
   let codemoddable warning_code message =
     let* path = field "path" extract_string message in
     let root = Relative_path.path_of_prefix Relative_path.Root in
@@ -89,7 +90,8 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
     ( Error_codes.Warning.of_enum raw_error_code,
       Error_codes.Typing.of_enum raw_error_code )
   with
-  | (Some Error_codes.Warning.CallNeedsConcrete, _) ->
+  | (Some Error_codes.Warning.CallNeedsConcrete, _)
+  | (_, Some Error_codes.Typing.CallNeedsConcrete) ->
     if
       List.exists ["self"; "parent"; "static"] ~f:(fun receiver ->
           String.is_substring
@@ -99,10 +101,10 @@ let parse_raw_warning_json (warning_json : Yojson.Safe.t) :
       codemoddable raw_error_code first_message
     else
       Ok Uncodemoddable
-  | ( Some
-        ( Error_codes.Warning.AbstractAccessViaStatic
-        | Error_codes.Warning.UninstantiableClassViaStatic ),
-      _ ) ->
+  | ( _,
+      Some
+        ( Error_codes.Typing.AbstractAccessViaStatic
+        | Error_codes.Typing.UninstantiableClassViaStatic ) ) ->
     codemoddable raw_error_code first_message
   | (_, Some Error_codes.Typing.NeedsConcreteOverride) ->
     let rec find_targets targets = function

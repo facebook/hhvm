@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff4c25fa2985cbdb55405ebe87487f0a>>
+// @generated SignedSource<<7749a7dc0b28496acd83698b64ad2ab2>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -398,12 +398,6 @@ pub struct GlobalOptions {
     pub class_sub_classname: bool,
     /// When true, C::class : class<C>
     pub class_class_type: bool,
-    /// Configure checks that require a method body to be marked
-    /// __NeedsConcrete: 0 disables, 1 warns, and 2 errors.
-    pub needs_concrete_body_check: isize,
-    /// Configure checks for calls to __NeedsConcrete methods through self,
-    /// parent, or static: 0 disables, 1 warns, and 2 errors.
-    pub needs_concrete_forwarding_call_check: isize,
     /// Configure checks for calls to __NeedsConcrete methods through a named
     /// non-concrete class: 0 disables, 1 warns, and 2 errors.
     pub needs_concrete_class_call_check: isize,

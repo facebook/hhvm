@@ -197,8 +197,6 @@ type t = {
   tco_enabled_unstable_features: S_set.t;
   class_sub_classname: bool;
   class_class_type: bool;
-  needs_concrete_body_check: int;
-  needs_concrete_forwarding_call_check: int;
   needs_concrete_class_call_check: int;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
@@ -311,8 +309,6 @@ let default =
     tco_enabled_unstable_features = S_set.empty;
     class_sub_classname = true;
     class_class_type = true;
-    needs_concrete_body_check = 0;
-    needs_concrete_forwarding_call_check = 0;
     needs_concrete_class_call_check = 0;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
@@ -422,8 +418,6 @@ let set
     ?tco_enabled_unstable_features
     ?class_sub_classname
     ?class_class_type
-    ?needs_concrete_body_check
-    ?needs_concrete_forwarding_call_check
     ?needs_concrete_class_call_check
     ?strict_consistent_construct
     ?allow_class_string_cast
@@ -715,12 +709,6 @@ let set
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
-    needs_concrete_body_check =
-      setting needs_concrete_body_check options.needs_concrete_body_check;
-    needs_concrete_forwarding_call_check =
-      setting
-        needs_concrete_forwarding_call_check
-        options.needs_concrete_forwarding_call_check;
     needs_concrete_class_call_check =
       setting
         needs_concrete_class_call_check

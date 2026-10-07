@@ -861,8 +861,8 @@ module Warning = struct
     | StringToClassPointer [@value 12022]
     | NullCoalesceAlways [@value 12023]
     | CallNeedsConcrete [@value 12024]
-    | AbstractAccessViaStatic [@value 12025]
-    | UninstantiableClassViaStatic [@value 12026]
+    (* | AbstractAccessViaStaticDEPRECATED [@value 12025] *)
+    (* | UninstantiableClassViaStaticDEPRECATED [@value 12026] *)
     (* | NeedsConcreteOverrideDEPRECATED [@value 12027] *)
     | ExpectBoolForCondition [@value 12028]
     | RedundantNullsafeMemberSelect [@value 12029]

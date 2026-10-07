@@ -4,6 +4,7 @@
 class Base {
   public function __construct() {}
 
+  <<__NeedsConcrete>>
   public static function make(): this {
     return new static();
   }

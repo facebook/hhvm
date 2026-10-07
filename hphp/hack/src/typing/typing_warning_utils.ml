@@ -626,80 +626,6 @@ module Call_needs_concrete = struct
   let quickfixes _ = []
 end
 
-module Abstract_access_via_static = struct
-  open Typing_warning.Abstract_access_via_static
-
-  type t = Typing_warning.Abstract_access_via_static.t
-
-  let code = Codes.AbstractAccessViaStatic
-
-  let codes = [code]
-
-  let code _ = code
-
-  let claim { class_name; member_name; _ } =
-    "Dangerous access of abstract member "
-    ^ Markdown_lite.md_codify (Utils.strip_ns class_name ^ "::" ^ member_name)
-    ^ "; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
-
-  let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
-
-  let quickfixes { containing_method_pos; decl_pos = _; _ } =
-    match containing_method_pos with
-    | Some function_pos ->
-      let title =
-        Printf.sprintf "Add %s attribute" SN.UserAttributes.uaNeedsConcrete
-      in
-      [
-        Quickfix.make
-          ~title
-          ~edits:
-            (Quickfix.Add_function_attribute
-               {
-                 function_pos;
-                 attribute_name = SN.UserAttributes.uaNeedsConcrete;
-               })
-          ~hint_styles:[];
-      ]
-    | None -> []
-end
-
-module Uninstantiable_class_via_static = struct
-  open Typing_warning.Uninstantiable_class_via_static
-
-  type t = Typing_warning.Uninstantiable_class_via_static.t
-
-  let code = Codes.UninstantiableClassViaStatic
-
-  let codes = [code]
-
-  let code _ = code
-
-  let claim _ =
-    "Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
-
-  let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
-
-  let quickfixes { containing_method_pos; _ } =
-    match containing_method_pos with
-    | Some function_pos ->
-      let title =
-        Printf.sprintf "Add %s attribute" SN.UserAttributes.uaNeedsConcrete
-      in
-      [
-        Quickfix.make
-          ~title
-          ~edits:
-            (Quickfix.Add_function_attribute
-               {
-                 function_pos;
-                 attribute_name = SN.UserAttributes.uaNeedsConcrete;
-               })
-          ~hint_styles:[];
-      ]
-    | None -> []
-end
-
 module Expect_bool_for_condition = struct
   type t = Typing_warning.Expect_bool_for_condition.t
 
@@ -1053,10 +979,6 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.String_to_class_pointer -> (module String_to_class_pointer)
   | Typing_warning.Null_coalesce_always -> (module Null_coalesce_always)
   | Typing_warning.Call_needs_concrete -> (module Call_needs_concrete)
-  | Typing_warning.Abstract_access_via_static ->
-    (module Abstract_access_via_static)
-  | Typing_warning.Uninstantiable_class_via_static ->
-    (module Uninstantiable_class_via_static)
   | Typing_warning.Expect_bool_for_condition ->
     (module Expect_bool_for_condition)
   | Typing_warning.Redundant_nullsafe_operation ->
@@ -1096,8 +1018,6 @@ let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
   | Typing_warning.Class_pointer_to_string -> false
   | Typing_warning.String_to_class_pointer -> false
   | Typing_warning.Call_needs_concrete -> false
-  | Typing_warning.Abstract_access_via_static -> false
-  | Typing_warning.Uninstantiable_class_via_static -> false
   | Typing_warning.Unbound_name_warning -> false
   | Typing_warning.Sealed_not_subtype -> false
   | Typing_warning.Sealed_not_override -> false

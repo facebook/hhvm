@@ -144,10 +144,6 @@ module Hhconfig : sig
 
   val meth_caller_only_public_visibility : string
 
-  val needs_concrete_body_check : string
-
-  val needs_concrete_forwarding_call_check : string
-
   val needs_concrete_class_call_check : string
 
   val package_allow_enforceable_enum_violations : string

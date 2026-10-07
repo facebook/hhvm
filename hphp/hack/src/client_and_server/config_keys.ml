@@ -156,11 +156,6 @@ module Hhconfig = struct
   let meth_caller_only_public_visibility =
     key "meth_caller_only_public_visibility"
 
-  let needs_concrete_body_check = key "needs_concrete_body_check"
-
-  let needs_concrete_forwarding_call_check =
-    key "needs_concrete_forwarding_call_check"
-
   let needs_concrete_class_call_check = key "needs_concrete_class_call_check"
 
   let package_allow_enforceable_enum_violations =

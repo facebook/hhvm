@@ -170,25 +170,6 @@ module Call_needs_concrete = struct
   }
 end
 
-module Abstract_access_via_static = struct
-  type t = {
-    access_pos: Pos.t;
-    class_name: string;
-    member_name: string;
-    decl_pos: Pos_or_decl.t;
-    containing_method_pos: Pos.t option;
-  }
-end
-
-module Uninstantiable_class_via_static = struct
-  type t = {
-    usage_pos: Pos.t;
-    class_name: string;
-    decl_pos: Pos_or_decl.t;
-    containing_method_pos: Pos.t option;
-  }
-end
-
 module Expect_bool_for_condition = struct
   type t = { ty: string }
 end
@@ -306,9 +287,6 @@ type (_, _) kind =
   | String_to_class_pointer : (String_to_class_pointer.t, warn) kind
   | Null_coalesce_always : (Null_coalesce_always.t, warn) kind
   | Call_needs_concrete : (Call_needs_concrete.t, warn) kind
-  | Abstract_access_via_static : (Abstract_access_via_static.t, warn) kind
-  | Uninstantiable_class_via_static
-      : (Uninstantiable_class_via_static.t, warn) kind
   | Expect_bool_for_condition : (Expect_bool_for_condition.t, warn) kind
   | Redundant_nullsafe_operation : (Redundant_nullsafe_operation.t, warn) kind
   | Unbound_name_warning : (Unbound_name_warning.t, warn) kind

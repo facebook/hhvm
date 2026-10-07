@@ -1,3 +1,0 @@
---config needs_concrete_body_check=0
---config needs_concrete_forwarding_call_check=0
---config needs_concrete_class_call_check=0

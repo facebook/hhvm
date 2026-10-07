@@ -140,9 +140,10 @@ let rewrite_syntax
         (* Codes accepted by Codemod_sa_warning.parse_raw_warning_json. *)
         match warning_code with
         | 12024
-        | 12025
-        | 12026
-        | 4526 ->
+        | 4526
+        | 4528
+        | 4529
+        | 4530 ->
           Pos.contains containing_pos pos
         | _ -> false)
   in

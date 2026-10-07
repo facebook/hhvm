@@ -117,7 +117,7 @@ class StreamingJsonTest(unittest.TestCase):
             "  }\n}\n"
         )
         target.write_text(original, encoding="utf-8")
-        message = self.message(target, 12026, "Cannot instantiate via `static`.")
+        message = self.message(target, 4530, "Cannot instantiate via `static`.")
         valid = {"message": [message]}
         invalid_diagnostics = [None, {}, {"message": None}, {"message": []}]
         for field in message:
@@ -127,7 +127,7 @@ class StreamingJsonTest(unittest.TestCase):
             invalid_diagnostics.append({"message": [{**message, field: None}]})
         for path in ("", "relative.php", f"{self.root}-sibling/Target.php"):
             invalid_diagnostics.append({"message": [{**message, "path": path}]})
-        for code in (12026.5, 1e100, -1e100):
+        for code in (4530.5, 1e100, -1e100):
             invalid_diagnostics.append({"message": [{**message, "code": code}]})
         invalid_diagnostics.append(
             {"message": [{**message, "code": 4526}, {"descr": None}]}
@@ -177,7 +177,7 @@ class StreamingJsonTest(unittest.TestCase):
                     {
                         **self.message(
                             caller,
-                            12024,
+                            4528,
                             "Dangerous call to `make` (a `<<__NeedsConcrete>>` "
                             f"method) via `{receiver}`.",
                         ),
@@ -251,7 +251,7 @@ class StreamingJsonTest(unittest.TestCase):
                 )
                 target.write_text(original, encoding="utf-8")
                 message = {
-                    **self.message(target, 12026, "Cannot instantiate via `static`."),
+                    **self.message(target, 4530, "Cannot instantiate via `static`."),
                     "line": 6,
                 }
 
@@ -296,7 +296,7 @@ class StreamingJsonTest(unittest.TestCase):
         )
         target.write_text(original, encoding="utf-8")
         diagnostic = {
-            "message": [self.message(target, 12026, "Cannot instantiate via `static`.")]
+            "message": [self.message(target, 4530, "Cannot instantiate via `static`.")]
         }
         errors_file.write_text('{"errors":[' + json.dumps(diagnostic), encoding="utf-8")
 

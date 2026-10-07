@@ -754,9 +754,6 @@ EVALFLAGS()
 #undef F
 hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
 
-RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
-RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
-
 #ifdef HHVM_FACEBOOK
 
 int RuntimeOption::ThriftFBServerThriftServerIOWorkerThreads = 1;
@@ -1333,49 +1330,6 @@ void RuntimeOption::Load(
   }
   {
     // Repo
-    auto repoModeToStr = [](RepoMode mode) {
-      switch (mode) {
-        case RepoMode::Closed:
-          return "--";
-        case RepoMode::ReadOnly:
-          return "r-";
-        case RepoMode::ReadWrite:
-          return "rw";
-      }
-
-      always_assert(false);
-      return "";
-    };
-
-    auto parseRepoMode = [&](const std::string& repoModeStr, const char* type, RepoMode defaultMode) {
-      if (repoModeStr.empty()) {
-        return defaultMode;
-      }
-      if (repoModeStr == "--") {
-        return RepoMode::Closed;
-      }
-      if (repoModeStr == "r-") {
-        return RepoMode::ReadOnly;
-      }
-      if (repoModeStr == "rw") {
-        return RepoMode::ReadWrite;
-      }
-
-      Logger::Error("Bad config setting: Repo.%s.Mode=%s",
-                    type, repoModeStr.c_str());
-      return RepoMode::ReadWrite;
-    };
-
-    // Local Repo
-    static std::string repoLocalMode;
-    Config::Bind(repoLocalMode, ini, config, "Repo.Local.Mode", repoModeToStr(RepoLocalMode));
-    RepoLocalMode = parseRepoMode(repoLocalMode, "Local", RepoMode::ReadOnly);
-
-    // Central Repo
-    static std::string repoCentralMode;
-    Config::Bind(repoCentralMode, ini, config, "Repo.Central.Mode", repoModeToStr(RepoCentralMode));
-    RepoCentralMode = parseRepoMode(repoCentralMode, "Central", RepoMode::ReadWrite);
-
     if (Cfg::Repo::Path.empty()) {
       always_assert_flog(
         !Cfg::Repo::Authoritative,

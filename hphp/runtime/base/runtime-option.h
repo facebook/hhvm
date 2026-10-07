@@ -78,12 +78,6 @@ enum class JitSerdesMode {
   DeserializeForPreload = 0x16,         // 10110
 };
 
-enum class RepoMode {
-  Closed    = 0,
-  ReadOnly  = 1,
-  ReadWrite = 2,
-};
-
 namespace hackc {
   struct NativeEnv;
   struct HhbcFlags;
@@ -397,10 +391,6 @@ public:
   static type Eval ## name;
   EVALFLAGS()
 #undef F
-
-  // These are (functionally) unused
-  static RepoMode RepoLocalMode;
-  static RepoMode RepoCentralMode;
 
 #ifdef HHVM_FACEBOOK
   // ThriftFBServer

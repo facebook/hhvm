@@ -767,13 +767,8 @@ When using HHVM's [Repo-Authoritative](/hhvm/advanced-usage/repo-authoritative) 
 |---------|------|---------|------------
 | `hhvm.repo.authoritative` | `boolean` | `false` | If `true`, you are specifying that you will be using HHVM's repo- authoritative mode to serve requests.
 | `hhvm.repo.path` | `string` | `""` | The path to the `hhvm.hhbc` file created when you compiled a repo-authoritative repo. (before HHVM 4.115: `hhvm.repo.central.path`)
-| `hhvm.repo.commit` | `bool` | `true` | If enabled, this will commit newly emitted units to the repo.
 | `hhvm.repo.debug_info` | `bool` | `true` | If enabled, the full source locations will be stored in the repo; otherwise, only line numbers will be stored.
-| `hhvm.repo.journal` | `string` | `delete` | If `delete`, then delete the on-disk SQLite journal upon each successful transaction commit. If `memory`, then store the SQLite journal in memory. `delete` is the safer mode to use.
-| `hhvm.repo.local.mode` | `string` | `r-` | `rw` to use the local repo for reading and writing (if file permissions allow). `r-` to use the local repo for reading (if it exists and is readable). `--`` to completely ignore the local repo, even if it exists.
-| `hhvm.repo.local.path` | `string` | `''` | `hhvm.repo.loca.path`or the environment variable `HHVM_REPO_LOCAL_PATH` (the former takes precedence) can be used to specify where the local repo is. If unspecified, then the local repo is `path/to/cli.php.hhbc` in [cli](/hhvm/basic-usage/command-line) mode or `<cwd>/hhvm.hhbc` in [server](/hhvm/basic-usage/server) mode.
-| `hhvm.repo.mode` | `string` | `readonly` | `local` to write eval units to the local repo if it is writeable; otherwise write to the central repo. `central` to write eval units to the central repo. `readonly` to not write eval units to a repo, but still search for them in repos.
-| `hhvm.repo.preload` | `bool` | `false` | If enabled, preload all units from the repo in parallel during startup.
+| `hhvm.repo.local.path` | `string` | `''` | `hhvm.repo.local.path` or the environment variable `HHVM_REPO_LOCAL_PATH` (the former takes precedence) can be used to specify where the local repo is. If unspecified, then the local repo is `path/to/cli.php.hhbc` in [cli](/hhvm/basic-usage/command-line) mode or `<cwd>/hhvm.hhbc` in [server](/hhvm/basic-usage/server) mode.
 | `hhvm.disable_some_repo_auth_notices` | `bool` | `true` | Make the repo authoritative notices you receive less verbose.
 
 ## Statistics

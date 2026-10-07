@@ -1,0 +1,40 @@
+ERROR: File "recursive_super_this_error.php", line 15, characters 21-36:
+Invalid argument (Typing[4110])
+  File "recursive_super_this_error.php", line 8, characters 31-35:
+  Expected `<expr#2>::TEnt`
+  File "recursive_super_this_error.php", line 7, characters 33-42:
+    resulting from expanding the type constant `<expr#2>::TEnt::TEnt`
+  File "recursive_super_this_error.php", line 12, characters 36-40:
+  But got `IBase`
+  File "recursive_super_this_error.php", line 12, characters 36-40:
+  This type argument to `IFields` must match exactly (it is invariant)
+ERROR: File "recursive_super_this_error.php", line 15, characters 21-36:
+Invalid argument (Typing[4110])
+  File "recursive_super_this_error.php", line 8, characters 43-46:
+  Expected `<expr#2> as IBase`
+  File "recursive_super_this_error.php", line 15, characters 21-26:
+    where `<expr#2>` is a reference to this expression
+  File "recursive_super_this_error.php", line 12, characters 36-40:
+  But got `IBase`
+  File "recursive_super_this_error.php", line 12, characters 36-40:
+  This type argument to `IFields` must match exactly (it is invariant)
+  File "recursive_super_this_error.php", line 14, characters 15-19:
+  Since `IBase` is not final
+  File "recursive_super_this_error.php", line 12, characters 36-40:
+  this might not be a `IBase`
+ERROR: File "recursive_super_this_error.php", line 15, characters 21-36:
+Invalid argument (Typing[4110])
+  File "recursive_super_this_error.php", line 12, characters 28-41:
+  Expected `IFields<IBase>`
+  File "recursive_super_this_error.php", line 9, characters 29-38:
+  But got `<expr#2>::TEnt where <expr#2>::TEnt super <expr#2> as IBase, <expr#2>::TEnt as IBase::TEnt`
+  File "recursive_super_this_error.php", line 15, characters 21-26:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "recursive_super_this_error.php", line 15, characters 21-36:
+Invalid argument (Typing[4110])
+  File "recursive_super_this_error.php", line 12, characters 28-41:
+  Expected `IFields<IBase>`
+  File "recursive_super_this_error.php", line 9, characters 29-38:
+  But got `IBase::TEnt where \IBase::TEnt super <expr#2>::TEnt, \IBase::TEnt super <expr#2> as IBase, \IBase::TEnt as IBase with { type TEnt = <expr#2>::TEnt }`
+  File "recursive_super_this_error.php", line 15, characters 21-26:
+    where `<expr#2>` is a reference to this expression

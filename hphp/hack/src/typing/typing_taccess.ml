@@ -112,6 +112,16 @@ type recursive_access_info = {
   scope: recursive_access_scope;
 }
 
+let recursive_access_info this_ty =
+  match get_node this_ty with
+  | Tdependent (DTexpr expr_id, _) ->
+    Some { this_name = Expression_id.display expr_id; scope = Everywhere }
+  | Tgeneric s when String.equal s Naming_special_names.Typehints.this ->
+    Some { this_name = s; scope = Only_in_refinement }
+  | Tgeneric s when DependentKind.is_generic_dep_ty s ->
+    Some { this_name = s; scope = Everywhere }
+  | _ -> None
+
 (** Recursive class refinements (the "fluent builder" pattern) introduce
     self-referential bounds on abstract type constants:
 
@@ -169,16 +179,7 @@ type recursive_access_info = {
     is exactly the name that [type_of_result] will register in the typing
     environment with the refined upper bound, establishing the fixpoint. *)
 let eliminate_recursive_access ty type_const_name this_ty =
-  let this_info_opt =
-    match get_node this_ty with
-    | Tdependent (DTexpr expr_id, _) ->
-      Some { this_name = Expression_id.display expr_id; scope = Everywhere }
-    | Tgeneric s when String.equal s Naming_special_names.Typehints.this ->
-      Some { this_name = s; scope = Only_in_refinement }
-    | Tgeneric s when DependentKind.is_generic_dep_ty s ->
-      Some { this_name = s; scope = Everywhere }
-    | _ -> None
-  in
+  let this_info_opt = recursive_access_info this_ty in
   Option.value_map this_info_opt ~default:ty ~f:(fun { this_name; scope } ->
       let on_ty ty ~ctx:nested_in_refinement =
         let in_scope =
@@ -207,6 +208,79 @@ let eliminate_recursive_access ty type_const_name this_ty =
         ~on_ty
         ~on_rc_bound
         ~ctx:false)
+
+(** An abstract type constant with a [super this] lower bound can induce an
+    infinitely deep chain when its upper bound defines the same type constant:
+
+      interface I extends IFields<this::T> {
+        abstract const type T as I super this;
+      }
+
+    If [C::T] is represented by the generic [C::T], expanding its upper bound
+    [I] and projecting [T] again otherwise produces [C::T::T], then
+    [C::T::T::T], and so on.
+
+    Polymorphic method extraction represents this finitely by refining class
+    bounds with the generic allocated for the projection. Do the same here:
+
+      C::T as I::T super C
+      I::T as I with { type T = C::T } super C::T
+
+    The exact refinement ties projection from the class bound back to the
+    existing generic, producing a finite mutually constrained pair instead of
+    an ever-deepening chain, without dropping either bound. *)
+let refine_super_this_upper_bound env ty type_const_name this_ty =
+  let generic_name_opt =
+    match recursive_access_info this_ty with
+    | Some { this_name; scope = Everywhere } ->
+      Some (Format.sprintf "%s::%s" this_name type_const_name)
+    | Some { scope = Only_in_refinement; _ }
+    | None ->
+      None
+  in
+  Option.value_map generic_name_opt ~default:ty ~f:(fun generic_name ->
+      let generic_ty = mk (get_reason ty, Tgeneric generic_name) in
+      let class_defines_typeconst class_name =
+        match Env.get_class env class_name with
+        | Decl_entry.Found class_ ->
+          Option.is_some (Env.get_typeconst env class_ type_const_name)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          false
+      in
+      let add_refinement reason inner_ty cr =
+        let cr =
+          Class_refinement.add_refined_const
+            type_const_name
+            { rc_bound = TRexact generic_ty; rc_is_ctx = false }
+            cr
+        in
+        mk (reason, Trefinement (inner_ty, cr))
+      in
+      let rec refine ty =
+        match deref ty with
+        | (reason, Tapply ((_, class_name), _))
+          when class_defines_typeconst class_name ->
+          add_refinement reason ty { cr_consts = S_map.empty }
+        | (reason, Trefinement (inner_ty, cr)) -> begin
+          match get_node inner_ty with
+          | Tapply ((_, class_name), _) when class_defines_typeconst class_name
+            ->
+            (match
+               Class_refinement.get_refined_const ((), type_const_name) cr
+             with
+            | Some { rc_bound = TRexact _; _ } -> ty
+            | Some { rc_bound = TRloose _; _ }
+            | None ->
+              add_refinement reason inner_ty cr)
+          | _ -> ty
+        end
+        | (reason, Tunion tys) -> mk (reason, Tunion (List.map tys ~f:refine))
+        | (reason, Tintersection tys) ->
+          mk (reason, Tintersection (List.map tys ~f:refine))
+        | _ -> ty
+      in
+      refine ty)
 
 (** [create_root_from_type_constant ctx env root class_name class_]
   looks up a type constant in a class and returns a `result`. More precisely, it looks up
@@ -307,6 +381,17 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (* Abstract type constants *)
       | TCAbstract
           { atc_as_constraint = upper; atc_super_constraint = lower; _ } ->
+        let upper =
+          match Option.map lower ~f:get_node with
+          | Some Tthis ->
+            Option.map upper ~f:(fun upper ->
+                refine_super_this_upper_bound
+                  env
+                  upper
+                  type_const_name
+                  ctx.ety_env.this_ty)
+          | _ -> upper
+        in
         let upper =
           Option.map upper ~f:(fun ty ->
               eliminate_recursive_access ty type_const_name ctx.ety_env.this_ty)

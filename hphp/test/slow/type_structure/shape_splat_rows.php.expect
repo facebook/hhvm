@@ -1,0 +1,4 @@
+TEmptyIdentity: {"kind":14,"fields":{"x":{"kind":1}}}
+TUntypedOpen: {"kind":14,"fields":{"x":{"kind":9},"y":{"kind":4}},"allows_unknown_fields":true}
+TTypedOpen: {"kind":14,"fields":{"x":{"kind":31,"union_types":[{"kind":1},{"kind":1}]},"y":{"kind":4}},"allows_unknown_fields":true,"variadic_type":{"kind":1}}
+TBottom: {"kind":29}

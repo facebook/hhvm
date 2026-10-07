@@ -1,0 +1,1 @@
+{"kind":31,"union_types":[{"kind":14,"splat_elem_types":[{"kind":13,"name":"T"},{"kind":14,"fields":{"a":{"kind":1}}}]},{"kind":14,"splat_elem_types":[{"kind":13,"name":"T"},{"kind":14,"fields":{"b":{"kind":4}}}]}],"typevars":"T","alias":"TResidualUnion"}

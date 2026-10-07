@@ -1,0 +1,91 @@
+dict(4) {
+  ["kind"]=>
+  int(14)
+  ["splat_elem_types"]=>
+  vec(2) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(3) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        ["y"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        ["z"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(7) "TSuffix"
+}
+dict(4) {
+  ["kind"]=>
+  int(14)
+  ["splat_elem_types"]=>
+  vec(3) {
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(1) {
+        ["a"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(3) {
+        ["x"]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        ["y"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        ["z"]=>
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(13) "TPrefixSuffix"
+}
+string(51) "HH\shape(...T, ...TBase, ...HH\shape('z'=>HH\bool))"

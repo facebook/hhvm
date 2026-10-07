@@ -1272,11 +1272,16 @@ SSATmp* handleIsResolutionAndCommonOpts(
       staticallyResolveTypeStructure(env, ts, partial, invalidType);
     shouldDecRef = maybe_resolved != ts;
   }
+  if (op == TypeStructResolveOp::Resolve && invalidType) {
+    shouldDecRef = true;
+    return resolveTypeStructImpl(
+      env, typeStructureCouldBeNonStatic(ts), true, 1, true);
+  }
   if (emitIsTypeStructWithoutResolvingIfPossible(env, maybe_resolved, op)) {
     done = true;
     return nullptr;
   }
-  if (op == TypeStructResolveOp::Resolve && (partial || invalidType)) {
+  if (op == TypeStructResolveOp::Resolve && partial) {
     shouldDecRef = true;
     return resolveTypeStructImpl(
       env, typeStructureCouldBeNonStatic(ts), true, 1, true);

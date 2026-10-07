@@ -57,6 +57,8 @@ struct TSEnv {
   bool partial{};
   // Initial value false since unless proven there are no invalid types
   bool invalidType{};
+  // An invalid shape-splat operand can be erased while normalizing the splat.
+  bool invalidShapeSplat{};
   // In some cases we cannot allow preresolved type aliases to be reused as it
   // could result in an extra layer of unrolling for case types.
   bool allowPreresolved{true};
@@ -133,6 +135,7 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_splat_elem_types("splat_elem_types"),
   s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
   s_optional_shape_field("optional_shape_field"),
@@ -315,6 +318,18 @@ void shapeTypeName(const Array& arr, std::string& name,
                    TypeStructure::TSDisplayType type) {
   // works for both resolved and unresolved TypeStructures
   name += "(";
+  if (arr.exists(s_splat_elem_types)) {
+    auto const elems = arr[s_splat_elem_types].asCArrRef();
+    auto const sz = elems.size();
+    auto sep = "";
+    for (auto i = 0; i < sz; i++) {
+      auto const elem = elems[i].asCArrRef();
+      folly::toAppend(sep, "...", fullName(elem, type), &name);
+      sep = ", ";
+    }
+    name += ")";
+    return;
+  }
   assertx(arr.exists(s_fields));
   auto const fields = arr[s_fields].asCArrRef();
   auto const sz = fields.size();
@@ -819,6 +834,414 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   return newfields;
 }
 
+//////////////////////////////////////////////////////////////////////
+// Shape splat merging.
+//
+// Runtime counterpart of the representable subset of OCaml
+// `Typing_shape_normalize`. Given a list of already-resolved shape type
+// structures (the operands of a shape splat), merge them left-to-right with
+// rightmost-wins semantics. Intersections have no runtime type-structure kind
+// and are currently emitted as mixed, so they remain invalid residuals here.
+
+namespace {
+
+Array tsOfKind(TypeStructure::Kind k) {
+  auto a = Array::CreateDict();
+  TypeStructure::setKind(a, k);
+  return a;
+}
+
+bool isBottomTypeStructure(const Array& ts) {
+  return TypeStructure::kind(ts) == TypeStructure::Kind::T_nothing &&
+         !ts.exists(s_nullable);
+}
+
+// The type of a shape's unknown fields: its variadic_type, else mixed if open,
+// else nothing (closed).
+Array unknownValueOf(const Array& shape) {
+  if (!shape.exists(s_allows_unknown_fields)) {
+    return tsOfKind(TypeStructure::Kind::T_nothing);
+  }
+  auto const v = shape.lookup(s_variadic_type);
+  if (v.is_init()) return tvAsCVarRef(&v).toArray();
+  return tsOfKind(TypeStructure::Kind::T_mixed);
+}
+
+// Union of two (non-optional) type structures, with the simplifications that
+// make closed (nothing) and open (mixed) merges exact.
+// TODO(shape-splat): general union fidelity (no dedup/flatten of distinct
+// types).
+Array unionTS(const Array& a, const Array& b) {
+  auto const ak = TypeStructure::kind(a);
+  auto const bk = TypeStructure::kind(b);
+  // `nothing` is the union identity.
+  if (isBottomTypeStructure(a)) return b;
+  if (isBottomTypeStructure(b)) return a;
+  // `mixed` is the union top.
+  if (ak == TypeStructure::Kind::T_mixed ||
+      bk == TypeStructure::Kind::T_mixed) {
+    return tsOfKind(TypeStructure::Kind::T_mixed);
+  }
+  auto u = Array::CreateDict();
+  TypeStructure::setKind(u, TypeStructure::Kind::T_union);
+  VecInit types(2);
+  types.append(Variant(a));
+  types.append(Variant(b));
+  u.set(s_union_types, Variant(types.toArray()));
+  return u;
+}
+
+// Strip the optional marker from a shape field value, leaving its type.
+Array typePartOf(const Array& fieldVal) {
+  if (!fieldVal.exists(s_optional_shape_field)) return fieldVal;
+  auto copy = fieldVal;
+  copy.remove(s_optional_shape_field);
+  return copy;
+}
+
+// The field descriptor for a key absent from a shape: optional, with the
+// shape's unknown-fields type.
+Array optionalFieldOf(const Array& unknownTS) {
+  auto f = unknownTS;
+  f.set(s_optional_shape_field, make_tv<KindOfBoolean>(true));
+  return f;
+}
+
+// Merge two shape field values under rightmost-wins:
+//   (_,        Req t) -> Req t
+//   (Req l,    Opt r) -> Req (l|r)
+//   (Opt l,    Opt r) -> Opt (l|r)
+Array mergeFieldValue(const Array& leftVal, const Array& rightVal) {
+  auto const leftOpt = leftVal.exists(s_optional_shape_field);
+  auto const rightOpt = rightVal.exists(s_optional_shape_field);
+  if (!rightOpt) return rightVal;
+  auto merged = unionTS(typePartOf(leftVal), typePartOf(rightVal));
+  if (leftOpt) merged.set(s_optional_shape_field, make_tv<KindOfBoolean>(true));
+  return merged;
+}
+
+// Merge a resolved shape `right` into the accumulator (fields + unknown value).
+void mergeShapeInto(Array& accFields, Array& accUnknown, const Array& right) {
+  auto const emptyFields = Array::CreateDict();
+  auto const rightFields = right.exists(s_fields)
+    ? right[s_fields].asCArrRef() : emptyFields;
+  auto const rightUnknown = unknownValueOf(right);
+  auto const accUnknownOpt = optionalFieldOf(accUnknown);
+
+  // A missing key projects to an optional field at the row's unknown bound.
+  auto merged = Array::CreateDict();
+  IterateKV(accFields.get(), [&](TypedValue k, TypedValue v) {
+    auto const leftVal = tvAsCVarRef(&v).toArray();
+    auto const rv = rightFields.lookup(k);
+    auto const rightVal = rv.is_init()
+      ? tvAsCVarRef(&rv).toArray() : optionalFieldOf(rightUnknown);
+    merged.set(tvAsCVarRef(&k), Variant(mergeFieldValue(leftVal, rightVal)));
+  });
+  IterateKV(rightFields.get(), [&](TypedValue k, TypedValue v) {
+    if (accFields.exists(k)) return;
+    auto const rightVal = tvAsCVarRef(&v).toArray();
+    merged.set(tvAsCVarRef(&k),
+               Variant(mergeFieldValue(accUnknownOpt, rightVal)));
+  });
+
+  accFields = merged;
+  // Either row may provide an unknown key, so their bounds union.
+  accUnknown = unionTS(accUnknown, rightUnknown);
+}
+
+// Build the resolved shape denoted by the merge accumulator (fields + unknown
+// value).
+Array shapeOfAccumulator(const Array& accFields, const Array& accUnknown) {
+  auto result = Array::CreateDict();
+  TypeStructure::setKind(result, TypeStructure::Kind::T_shape);
+  result.set(s_fields, Variant(accFields));
+  if (!isBottomTypeStructure(accUnknown)) {
+    result.set(s_allows_unknown_fields, make_tv<KindOfBoolean>(true));
+    if (TypeStructure::kind(accUnknown) != TypeStructure::Kind::T_mixed) {
+      result.set(s_variadic_type, Variant(accUnknown));
+    }
+  }
+  return result;
+}
+
+bool isEmptyClosedShape(const Array& shape) {
+  return TypeStructure::kind(shape) == TypeStructure::Kind::T_shape &&
+         !shape.exists(s_nullable) &&
+         shape.exists(s_fields) &&
+         shape[s_fields].asCArrRef().empty() &&
+         isBottomTypeStructure(unknownValueOf(shape));
+}
+
+Array shapeSplatOfElements(const req::vector<Array>& elems) {
+  auto result = Array::CreateDict();
+  TypeStructure::setKind(result, TypeStructure::Kind::T_shape);
+  VecInit v(elems.size());
+  for (auto const& elem : elems) v.append(Variant(elem));
+  result.set(s_splat_elem_types, Variant(v.toArray()));
+  return result;
+}
+
+// Combine the per-member branch types of a distributed union into one resolved
+// type. Nested unions (a branch that itself distributed a union) are flattened;
+// `nothing` branches are dropped (bottom is the unit of union). Mirrors OCaml
+// `Typing_union.union_list`, modulo deeper simplification: the runtime does not
+// run Hack's union simplifier, so members are not deduped.
+Array unionOfBranches(const req::vector<Array>& branches) {
+  req::vector<Array> flat;
+  flat.reserve(branches.size());
+  for (auto const& b : branches) {
+    auto const bk = TypeStructure::kind(b);
+    if (isBottomTypeStructure(b)) continue;
+    if (bk == TypeStructure::Kind::T_union) {
+      auto const inner = b[s_union_types].asCArrRef();
+      auto const n = inner.size();
+      for (auto i = 0; i < n; i++) {
+        auto const iv = inner->nvGetVal(i);
+        flat.push_back(tvAsCVarRef(&iv).toArray());
+      }
+      continue;
+    }
+    flat.push_back(b);
+  }
+  if (flat.empty()) return tsOfKind(TypeStructure::Kind::T_nothing);
+  if (flat.size() == 1) return flat[0];
+  auto u = Array::CreateDict();
+  TypeStructure::setKind(u, TypeStructure::Kind::T_union);
+  VecInit v(flat.size());
+  for (auto const& m : flat) v.append(Variant(m));
+  u.set(s_union_types, Variant(v.toArray()));
+  return u;
+}
+
+// Result normalization can short-circuit on bottom, but invalid operands must
+// still be recorded regardless of their position in the element list.
+void markInvalidShapeSplatOperand(const Array& elem, bool& invalidType) {
+  auto const k = TypeStructure::kind(elem);
+  if (elem.exists(s_nullable)) {
+    invalidType = true;
+    return;
+  }
+  if (k == TypeStructure::Kind::T_dynamic) {
+    return;
+  }
+  if (k == TypeStructure::Kind::T_shape) {
+    auto const nested = elem.lookup(s_splat_elem_types);
+    if (!nested.is_init()) {
+      // A non-splat shape must have fields, even when the shape is empty.
+      if (!elem.exists(s_fields)) invalidType = true;
+      return;
+    }
+    auto const elems = tvAsCVarRef(&nested).toArray();
+    auto const n = elems.size();
+    for (auto i = 0; i < n; i++) {
+      auto const member = elems->nvGetVal(i);
+      markInvalidShapeSplatOperand(
+        tvAsCVarRef(&member).toArray(), invalidType
+      );
+    }
+    return;
+  }
+  if (k == TypeStructure::Kind::T_nothing) return;
+  if (k == TypeStructure::Kind::T_union) {
+    auto const members = elem[s_union_types].asCArrRef();
+    auto const n = members.size();
+    for (auto i = 0; i < n; i++) {
+      auto const member = members->nvGetVal(i);
+      markInvalidShapeSplatOperand(
+        tvAsCVarRef(&member).toArray(), invalidType
+      );
+    }
+    return;
+  }
+  invalidType = true;
+}
+
+Array mergeResolvedShapeSplatImpl(const req::vector<Array>& elems,
+                                  bool& invalidType);
+
+// Preserve an invalid operand as a barrier while normalizing everything to its
+// right. A distributed suffix must retain the same residual prefix.
+Array mergeResidualShapeSplat(const req::vector<Array>& elems,
+                              size_t residualIndex,
+                              const Array& accFields,
+                              const Array& accUnknown,
+                              bool& invalidType) {
+  invalidType = true;
+
+  auto const hasPrefix =
+    accFields.size() != 0 || !isBottomTypeStructure(accUnknown);
+  req::vector<Array> residualElems;
+  residualElems.reserve(
+    elems.size() - residualIndex + (hasPrefix ? 1 : 0)
+  );
+  if (hasPrefix) {
+    residualElems.push_back(shapeOfAccumulator(accFields, accUnknown));
+  }
+  residualElems.push_back(elems[residualIndex]);
+
+  if (residualIndex + 1 == elems.size()) {
+    return shapeSplatOfElements(residualElems);
+  }
+
+  req::vector<Array> suffix;
+  suffix.reserve(elems.size() - (residualIndex + 1));
+  for (size_t i = residualIndex + 1; i < elems.size(); i++) {
+    suffix.push_back(elems[i]);
+  }
+  auto const merged = mergeResolvedShapeSplatImpl(suffix, invalidType);
+  auto const mergedKind = TypeStructure::kind(merged);
+  if (mergedKind == TypeStructure::Kind::T_nothing) {
+    // Bottom absorbs the residual prefix.
+    return tsOfKind(TypeStructure::Kind::T_nothing);
+  }
+  if (mergedKind == TypeStructure::Kind::T_union) {
+    // Every distributed suffix branch must retain the residual prefix.
+    auto const members = merged[s_union_types].asCArrRef();
+    req::vector<Array> branches;
+    branches.reserve(members.size());
+    auto const n = members.size();
+    for (auto i = 0; i < n; i++) {
+      auto branchElems = residualElems;
+      auto const member = members->nvGetVal(i);
+      branchElems.push_back(tvAsCVarRef(&member).toArray());
+      branches.push_back(
+        mergeResolvedShapeSplatImpl(branchElems, invalidType)
+      );
+    }
+    return unionOfBranches(branches);
+  }
+  if (merged.exists(s_splat_elem_types)) {
+    // Splice a residual suffix to keep the element list flat.
+    auto const inner = merged[s_splat_elem_types].asCArrRef();
+    auto const n = inner.size();
+    for (auto i = 0; i < n; i++) {
+      auto const member = inner->nvGetVal(i);
+      residualElems.push_back(tvAsCVarRef(&member).toArray());
+    }
+  } else if (!isEmptyClosedShape(merged)) {
+    // The empty closed shape is the merge identity.
+    residualElems.push_back(merged);
+  }
+  return shapeSplatOfElements(residualElems);
+}
+
+Array mergeResolvedShapeSplatImpl(const req::vector<Array>& elems,
+                                  bool& invalidType) {
+  auto accFields = Array::CreateDict();
+  auto accUnknown = tsOfKind(TypeStructure::Kind::T_nothing);
+
+  for (size_t i = 0; i < elems.size(); i++) {
+    auto const& elem = elems[i];
+    auto const k = TypeStructure::kind(elem);
+    auto const nullable = elem.exists(s_nullable);
+    if (k == TypeStructure::Kind::T_nothing && !nullable) {
+      // Spreading nothing yields the bottom row, which absorbs everything to
+      // its right; Hack has no canonical bottom shape, so collapse to nothing.
+      return tsOfKind(TypeStructure::Kind::T_nothing);
+    }
+    if (k == TypeStructure::Kind::T_dynamic && !nullable) {
+      // Spreading `dynamic` yields an open row whose unknown fields are
+      // `dynamic` (i.e. `shape(dynamic...)`): merge it as an open shape whose
+      // variadic (unknown-field) type is `dynamic`. This unions any concrete
+      // field to its left with `dynamic` and makes the accumulated unknown-field
+      // bound `dynamic`. Mirrors OCaml `Typing_shape_normalize`'s dynamic arms.
+      auto dynOpen = tsOfKind(TypeStructure::Kind::T_shape);
+      dynOpen.set(s_allows_unknown_fields, make_tv<KindOfBoolean>(true));
+      dynOpen.set(s_variadic_type,
+                  Variant(tsOfKind(TypeStructure::Kind::T_dynamic)));
+      mergeShapeInto(accFields, accUnknown, dynOpen);
+      continue;
+    }
+    if (k == TypeStructure::Kind::T_shape &&
+        !nullable &&
+        elem.exists(s_splat_elem_types)) {
+      // Flatten in place so shapes across the nested boundary remain adjacent.
+      auto const nested = elem[s_splat_elem_types].asCArrRef();
+      auto const hasPrefix =
+        accFields.size() != 0 || !isBottomTypeStructure(accUnknown);
+      req::vector<Array> flattened;
+      flattened.reserve(
+        (hasPrefix ? 1 : 0) + nested.size() + elems.size() - (i + 1)
+      );
+      if (hasPrefix) {
+        flattened.push_back(shapeOfAccumulator(accFields, accUnknown));
+      }
+      auto const nn = nested.size();
+      for (auto ni = 0; ni < nn; ni++) {
+        auto const nv = nested->nvGetVal(ni);
+        flattened.push_back(tvAsCVarRef(&nv).toArray());
+      }
+      for (size_t j = i + 1; j < elems.size(); j++) {
+        flattened.push_back(elems[j]);
+      }
+      return mergeResolvedShapeSplatImpl(flattened, invalidType);
+    }
+    if (k == TypeStructure::Kind::T_union && !nullable) {
+      // Distribute the union outward:
+      //   shape(...A, ...(m1|...|mk), ...B)
+      //     = shape(...A, ...m1, ...B) | ... | shape(...A, ...mk, ...B).
+      // The prefix (...A) is the current accumulator as a shape; the suffix
+      // (...B) is the remaining element list. Fork per member — re-merge
+      // [prefix, member, suffix...] to completion — then union the finalised
+      // branches. Doing this here (rather than as a pre-pass) lets a member that
+      // is itself a union/nothing/dynamic go through the full pipeline, and a
+      // `nothing` branch correctly absorb. The Hack typechecker performs the same
+      // distribution during normalization.
+      auto const prefix = shapeOfAccumulator(accFields, accUnknown);
+      auto const members = elem[s_union_types].asCArrRef();
+      auto const mn = members.size();
+      req::vector<Array> branches;
+      branches.reserve(mn);
+      for (auto mi = 0; mi < mn; mi++) {
+        auto const mv = members->nvGetVal(mi);
+        req::vector<Array> branchElems;
+        branchElems.reserve(elems.size() - i + 1);
+        branchElems.push_back(prefix);
+        branchElems.push_back(tvAsCVarRef(&mv).toArray());
+        for (size_t j = i + 1; j < elems.size(); j++) {
+          branchElems.push_back(elems[j]);
+        }
+        branches.push_back(mergeResolvedShapeSplatImpl(branchElems, invalidType));
+      }
+      return unionOfBranches(branches);
+    }
+    if (k == TypeStructure::Kind::T_shape &&
+        !nullable &&
+        elem.exists(s_fields)) {
+      // A resolved simple shape contributes fields and its unknown-row bound.
+      mergeShapeInto(accFields, accUnknown, elem);
+      continue;
+    }
+
+    // Every remaining operand is non-shape, nullable, or malformed. Preserve
+    // it as a barrier between the merged prefix and the normalized suffix.
+    return mergeResidualShapeSplat(
+      elems, i, accFields, accUnknown, invalidType
+    );
+  }
+
+  return shapeOfAccumulator(accFields, accUnknown);
+}
+
+// Resolve each splat element, then merge.
+Array resolveShapeSplat(TSEnv& env, const TSCtx& ctx, const Array& arr) {
+  auto const elemsArr = arr[s_splat_elem_types].asCArrRef();
+  req::vector<Array> resolved;
+  auto const n = elemsArr.size();
+  resolved.reserve(n);
+  for (auto i = 0; i < n; i++) {
+    auto const ev = elemsArr->nvGetVal(i);
+    resolved.push_back(resolveTSImpl(env, ctx, tvAsCVarRef(&ev).toArray()));
+  }
+  bool invalidType = false;
+  auto result = TypeStructure::mergeResolvedShapeSplat(resolved, invalidType);
+  env.invalidType |= invalidType;
+  env.invalidShapeSplat |= invalidType;
+  return result;
+}
+
+} // namespace
+
 bool resolveClass(TSEnv& env, const TSCtx& ctx, Array& ret,
                   const OptString& clsName) {
   auto const cls = getClass(env, ctx, clsName);
@@ -926,6 +1349,13 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       break;
     }
     case TypeStructure::Kind::T_shape: {
+      if (arr.exists(s_splat_elem_types)) {
+        // A shape splat: resolve and merge the element list, then carry over
+        // the outer modifiers (nullable/soft) onto the merged result.
+        newarr = resolveShapeSplat(env, ctx, arr);
+        copyTypeModifiers(arr, newarr);
+        break;
+      }
       newarr.set(s_fields, Variant(resolveShape(env, ctx, arr)));
       auto tv = arr.lookup(s_variadic_type);
       if (tv.is_init()) {
@@ -1124,6 +1554,21 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       IterateKV(env.tsList->at(id).get(), [&](auto key, auto val) {
         newarr.set(key, val);
       });
+      // The spliced `tsList` entry is an unresolved type structure. If it is
+      // itself a shape splat (a reified operand `...T` where `T`'s argument is a
+      // splat shape), it still carries `splat_elem_types` and no `s_fields`; the
+      // shape-splat merge would silently treat it as the empty shape. Re-resolve
+      // so the nested splat is merged before this element reaches any outer
+      // merge. Reachable only once the `shape_splat_type_parameters` gate + the
+      // is/as ban are lifted (a reified operand cannot appear in is/as today), so
+      // this is defensive; other reified arguments are left untouched.
+      if (TypeStructure::kind(newarr) == TypeStructure::Kind::T_shape &&
+          newarr.exists(s_splat_elem_types)) {
+        // Use the full resolver so the reified argument's modifiers and alias
+        // metadata survive shape-splat normalization.
+        newarr = resolveTSImpl(env, ctx, newarr);
+        copyTypeModifiers(arr, newarr);
+      }
       break;
     }
     case TypeStructure::Kind::T_union:
@@ -1243,6 +1688,18 @@ Array TypeStructure::resolve(const Array& ts,
                              const Class* declCls,
                              const req::vector<Array>& tsList,
                              bool& persistent) {
+  bool invalidShapeSplat;
+  return resolve(
+    ts, typeCnsCls, declCls, tsList, persistent, invalidShapeSplat
+  );
+}
+
+Array TypeStructure::resolve(const Array& ts,
+                             const Class* typeCnsCls,
+                             const Class* declCls,
+                             const req::vector<Array>& tsList,
+                             bool& persistent,
+                             bool& invalidShapeSplat) {
   TSEnv env;
   env.tsList = &tsList;
   TSCtx ctx;
@@ -1250,6 +1707,7 @@ Array TypeStructure::resolve(const Array& ts,
   ctx.typeCnsCls = typeCnsCls;
   auto resolved = resolveTS(env, ctx, ts, nullptr);
   persistent = env.persistent;
+  invalidShapeSplat = env.invalidShapeSplat;
   return resolved;
 }
 
@@ -1273,6 +1731,15 @@ Array TypeStructure::resolvePartial(const Array& ts,
   partial = env.partial;
   invalidType = env.invalidType;
   return resolved;
+}
+
+Array TypeStructure::mergeResolvedShapeSplat(
+    const req::vector<Array>& resolvedElems,
+    bool& invalidType) {
+  for (auto const& elem : resolvedElems) {
+    markInvalidShapeSplatOperand(elem, invalidType);
+  }
+  return mergeResolvedShapeSplatImpl(resolvedElems, invalidType);
 }
 
 namespace {

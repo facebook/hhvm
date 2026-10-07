@@ -1,0 +1,2 @@
+alias: {"a":{"kind":1},"shared":{"kind":7},"b":{"kind":2},"c":{"kind":3},"d":{"kind":6}}
+literal: {"base":{"kind":1},"shared":{"kind":7},"one":{"kind":2},"two":{"kind":3},"three":{"kind":6}}

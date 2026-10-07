@@ -1,0 +1,13 @@
+{"x":{"kind":1},"shared":{"kind":4},"y":{"kind":3},"z":{"kind":2}}
+match:
+bool(true)
+as: pass
+wrong type:
+bool(false)
+as: fail
+missing field:
+bool(false)
+as: fail
+extra field:
+bool(false)
+as: fail

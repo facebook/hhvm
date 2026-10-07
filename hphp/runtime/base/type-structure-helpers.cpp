@@ -1229,10 +1229,17 @@ Array resolveAndVerifyTypeStructure(
     return unresolved;
   };
   Array resolved;
+  bool invalidShapeSplat = false;
   try {
     bool persistent = true;
-    resolved =
-      TypeStructure::resolve(ts, calledCls, declaringCls, tsList, persistent);
+    resolved = TypeStructure::resolve(
+      ts,
+      calledCls,
+      declaringCls,
+      tsList,
+      persistent,
+      invalidShapeSplat
+    );
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
     resolved = handleResolutionException(e.getMessage());
@@ -1242,6 +1249,11 @@ Array resolveAndVerifyTypeStructure(
   }
   assertx(!resolved.empty());
   assertx(resolved.isDict());
+  if (IsOrAsOp && invalidShapeSplat) {
+    raise_error(
+      "\"is\" and \"as\" operators cannot be used with an invalid shape splat"
+    );
+  }
   if (IsOrAsOp) errorOnIsAsExpressionInvalidTypes(resolved, false);
   return resolved;
 }

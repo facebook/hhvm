@@ -1,0 +1,2 @@
+trailing: [{"kind":13,"name":"T"}]
+aligned: [{"kind":14,"fields":{"a":{"kind":1}}},{"kind":13,"name":"T"},{"kind":14,"fields":{"b":{"kind":2},"c":{"kind":3}}},{"kind":13,"name":"U"},{"kind":14,"fields":{"d":{"kind":4}}}]

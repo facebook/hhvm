@@ -86,6 +86,17 @@ Array resolve(const Array& ts,
               bool& persistent);
 
 /*
+ * As above, additionally reporting an invalid shape-splat operand which may no
+ * longer be present in the normalized result.
+ */
+Array resolve(const Array& ts,
+              const Class* typeCnsCls,
+              const Class* declCls,
+              const req::vector<Array>& tsList,
+              bool& persistent,
+              bool& invalidShapeSplat);
+
+/*
  * Allows partially resolving a type structure.
  * Does not call the autoloader.
  * If the resulting type structure is persistent, persistent will be set.
@@ -100,6 +111,27 @@ Array resolvePartial(const Array& ts,
                      bool& persistent,
                      bool& partial,
                      bool& invalidType);
+
+/*
+ * Merge a list of already-resolved shape type structures (the operands of a
+ * shape splat) into a single resolved shape, left-to-right, with rightmost-wins
+ * semantics. Each element must already be resolved. This implements the subset
+ * of `Typing_shape_normalize.merge` representable by runtime type structures
+ * and must agree with the HHBBC resolver. It performs NO alias/class resolution.
+ * Runtime type structures do not currently preserve intersections: hackc emits
+ * them as T_mixed, so an intersection operand remains an invalid residual.
+ *
+ * If an element is not a concrete shape it cannot be merged: invalidType is set
+ * and a best-effort residual shape (carrying splat_elem_types) is returned. In
+ * practice such an element can be an erased type parameter or a type that the
+ * runtime representation erased to T_mixed. Reified type parameters whose type
+ * structure is available are resolved before merging; erased type parameters
+ * stay unresolvable.
+ *
+ * Exposed for unit testing.
+ */
+Array mergeResolvedShapeSplat(const req::vector<Array>& resolvedElems,
+                              bool& invalidType);
 
 }
 

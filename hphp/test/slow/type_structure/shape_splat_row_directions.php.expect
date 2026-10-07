@@ -1,0 +1,5 @@
+TBoundsForward: {"fields":{},"allows_unknown_fields":true,"variadic_type":{"kind":31,"union_types":[{"kind":1},{"kind":4}]}}
+TBoundsReverse: {"fields":{},"allows_unknown_fields":true,"variadic_type":{"kind":31,"union_types":[{"kind":4},{"kind":1}]}}
+TOpenLeft: {"fields":{"x":{"kind":4},"y":{"kind":2}},"allows_unknown_fields":true}
+TDynamicRight: {"fields":{"x":{"kind":31,"union_types":[{"kind":1},{"kind":30}]}},"allows_unknown_fields":true,"variadic_type":{"kind":30}}
+TDynamicLeft: {"fields":{"x":{"kind":1}},"allows_unknown_fields":true,"variadic_type":{"kind":30}}

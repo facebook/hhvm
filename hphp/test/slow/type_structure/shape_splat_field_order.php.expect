@@ -1,0 +1,2 @@
+rightmost: {"kind":4}
+three: {"kind":31,"union_types":[{"kind":31,"union_types":[{"kind":1},{"kind":2}]},{"kind":3}],"optional_shape_field":true}

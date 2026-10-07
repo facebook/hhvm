@@ -1,0 +1,2 @@
+forward: {"kind":31,"union_types":[{"nullable":true,"kind":29},{"kind":4}]}
+reverse: {"kind":31,"union_types":[{"kind":4},{"nullable":true,"kind":29}]}

@@ -1,0 +1,15 @@
+exact:
+bool(true)
+as: pass
+extra:
+bool(true)
+as: pass
+wrong type:
+bool(false)
+as: fail
+wrong explicit field:
+bool(false)
+as: fail
+missing field:
+bool(false)
+as: fail

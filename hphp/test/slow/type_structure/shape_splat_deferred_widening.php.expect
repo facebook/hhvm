@@ -1,0 +1,2 @@
+field: {"kind":31,"union_types":[{"kind":31,"union_types":[{"nullable":true,"kind":29},{"kind":5}]},{"kind":2}],"optional_shape_field":true}
+bound: {"kind":31,"union_types":[{"kind":31,"union_types":[{"kind":6},{"kind":5}]},{"kind":3}]}

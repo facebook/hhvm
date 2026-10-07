@@ -1,0 +1,12 @@
+null:
+bool(true)
+as: pass
+int:
+bool(true)
+as: pass
+bool:
+bool(false)
+as: fail
+missing:
+bool(false)
+as: fail

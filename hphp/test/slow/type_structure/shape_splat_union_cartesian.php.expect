@@ -1,0 +1,1 @@
+{"kind":31,"union_types":[{"kind":14,"fields":{"a":{"kind":1},"y":{"kind":1}}},{"kind":14,"fields":{"a":{"kind":1},"z":{"kind":1}}},{"kind":14,"fields":{"b":{"kind":1},"y":{"kind":1}}},{"kind":14,"fields":{"b":{"kind":1},"z":{"kind":1}}}],"alias":"TTwoUnions"}

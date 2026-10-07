@@ -1,0 +1,4 @@
+open: {"kind":14,"fields":{"x":{"kind":1}},"allows_unknown_fields":true}
+typed: {"kind":14,"fields":{"x":{"kind":1}},"allows_unknown_fields":true,"variadic_type":{"kind":4}}
+open bottom: {"kind":29}
+bottom typed: {"kind":29}

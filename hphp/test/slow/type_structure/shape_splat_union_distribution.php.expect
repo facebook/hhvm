@@ -1,0 +1,4 @@
+suffix: {"kind":31,"union_types":[{"kind":14,"fields":{"x":{"kind":4}}},{"kind":14,"fields":{"x":{"kind":4}}}],"alias":"TUnionSuffix"}
+bottom: {"kind":14,"fields":{"a":{"kind":1},"b":{"kind":1}},"alias":"TUnionNothing"}
+same field: {"kind":31,"union_types":[{"kind":14,"fields":{"x":{"kind":1}}},{"kind":14,"fields":{"x":{"kind":2}}}],"alias":"TSameFieldUnion"}
+nested: {"kind":31,"union_types":[{"kind":14,"fields":{"a":{"kind":2}}},{"kind":14,"fields":{"b":{"kind":1}}},{"kind":14,"fields":{"c":{"kind":4}}}],"alias":"TNestedUnion"}

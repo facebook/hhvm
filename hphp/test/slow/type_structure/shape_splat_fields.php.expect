@@ -1,0 +1,4 @@
+TRequiredWins: {"shared":{"kind":4},"left":{"kind":2},"right":{"kind":3}}
+TRequiredOptional: {"shared":{"kind":31,"union_types":[{"kind":1},{"kind":4}]}}
+TOptionalOptional: {"shared":{"kind":31,"union_types":[{"kind":1},{"kind":4}],"optional_shape_field":true}}
+TSymbolicConflict: {"shared":{"kind":4}}

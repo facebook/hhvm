@@ -1,0 +1,2 @@
+field: {"kind":31,"union_types":[{"nullable":true,"kind":29},{"kind":1}]}
+row: {"allows_unknown_fields":true,"variadic_type":{"nullable":true,"kind":29}}

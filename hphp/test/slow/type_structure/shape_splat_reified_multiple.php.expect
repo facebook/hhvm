@@ -1,0 +1,7 @@
+fields: {"x":{"kind":1},"shared":{"kind":4},"y":{"kind":3}}
+match:
+bool(true)
+as: pass
+left conflict:
+bool(false)
+as: fail

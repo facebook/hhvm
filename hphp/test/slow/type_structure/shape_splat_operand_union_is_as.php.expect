@@ -1,0 +1,12 @@
+first branch:
+bool(true)
+as: pass
+second branch:
+bool(true)
+as: pass
+neither branch:
+bool(false)
+as: fail
+both branches:
+bool(false)
+as: fail

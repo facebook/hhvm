@@ -1,0 +1,11 @@
+File "wildcard_covariant_bound_nested.php", line 7, characters 3-13:
+  Cov<arraykey>
+File "wildcard_covariant_bound_nested.php", line 12, characters 3-13:
+  shape('a' => Cov<arraykey>)
+File "wildcard_covariant_bound_nested.php", line 17, characters 3-13:
+  (Cov<arraykey>, int)
+File "wildcard_covariant_bound_nested.php", line 22, characters 3-13:
+  ?Cov<arraykey>
+File "wildcard_covariant_bound_nested.php", line 27, characters 3-13:
+  ?(Cov<arraykey>, int)
+No errors

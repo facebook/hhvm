@@ -2374,6 +2374,58 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
     in
     (env, (MakeType.tuple reason (List.map ~f:fst tyl), List.exists ~f:snd tyl))
+  (* Even without structural information from ivar_ty, recurse so that
+     wildcards in nested classes are simplified, e.g. covariant ones
+     replaced by their bound. *)
+  | (_, Ttuple ({ t_required = hint_tyl; _ } as tuple)) ->
+    let (env, t_required) =
+      List.map_env env hint_tyl ~f:(fun env hint_ty ->
+          let (env, (ty, _)) =
+            class_for_refinement
+              env
+              p
+              reason
+              ivar_pos
+              (MakeType.mixed reason)
+              hint_ty
+          in
+          (env, ty))
+    in
+    (env, (mk (get_reason hint_ty, Ttuple { tuple with t_required }), false))
+  | (_, Toption hint_ty_inner) ->
+    let ivar_ty =
+      match get_node ivar_ty with
+      | Toption ivar_ty -> ivar_ty
+      | _ -> MakeType.mixed reason
+    in
+    let (env, (ty, _)) =
+      class_for_refinement env p reason ivar_pos ivar_ty hint_ty_inner
+    in
+    (env, (mk (get_reason hint_ty, Toption ty), false))
+  | (_, Tshape (Shape_simple ({ s_fields = hint_fields; _ } as shape))) ->
+    let ivar_fields =
+      match get_node ivar_ty with
+      | Tshape (Shape_simple { s_fields; _ }) -> s_fields
+      | _ -> TShapeMap.empty
+    in
+    let (env, s_fields) =
+      TShapeMap.map_env
+        (fun env name ({ sft_ty = hint_ty; _ } as sft) ->
+          let ivar_ty =
+            match TShapeMap.find_opt name ivar_fields with
+            | Some { sft_ty; _ } -> sft_ty
+            | None -> MakeType.mixed reason
+          in
+          let (env, (sft_ty, _)) =
+            class_for_refinement env p reason ivar_pos ivar_ty hint_ty
+          in
+          (env, { sft with sft_ty }))
+        env
+        hint_fields
+    in
+    ( env,
+      ( mk (get_reason hint_ty, Tshape (Shape_simple { shape with s_fields })),
+        false ) )
   | _ -> (env, (hint_ty, false))
 
 (** [refine_and_simplify_intersection env p reason ivar_pos ty hint_ty]

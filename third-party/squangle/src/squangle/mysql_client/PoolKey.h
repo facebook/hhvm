@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <folly/hash/Hash.h>
+
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/mysql_client/ConnectionOptions.h"
 
@@ -21,7 +23,9 @@ class PoolKey {
       std::shared_ptr<const ConnectionKey> conn_key,
       ConnectionOptions conn_opts)
       : connKey_(std::move(conn_key)), connOptions_(std::move(conn_opts)) {
-    options_hash_ = folly::hash::hash_range(
+    // The attributes are an unordered map, so equal sets of attributes have to
+    // hash equally in whatever order they iterate.
+    options_hash_ = folly::hash::commutative_hash_combine_range(
         connOptions_.getAttributes().begin(),
         connOptions_.getAttributes().end());
     partial_hash_ =

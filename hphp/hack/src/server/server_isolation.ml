@@ -344,8 +344,8 @@ let closure_of_seed r path =
     Server_isolation_inbound.release_closures ();
     Some (List.length files)
 
-(** Reported per batch so a run that is killed still says where the memory was
-    going, which the single line at the end cannot. *)
+(** Reported as the run goes so one that is killed still says where the memory
+    was going, which the single line at the end cannot. *)
 let log_closure_progress ~done_count ~total_seeds ~fitted_count =
   Hh_logger.log
     "[isolation] closure report: %d/%d seeds | %d isolatable | heap %.1fGiB rss %.1fGiB"
@@ -355,20 +355,21 @@ let log_closure_progress ~done_count ~total_seeds ~fitted_count =
     (Memory.heap_gib ())
     (Memory.rss_gib ())
 
-let log_closure_report ~total_seeds ~sizes =
+let log_closure_report ~total_seeds ~closure_sizes =
   Hh_logger.log
     "[isolation] closure report: %d files | %d isolatable (%.1f%%) | median %d | largest %d | buckets %s"
     total_seeds
-    (List.length sizes)
+    (List.length closure_sizes)
     (100.0
-    *. float_of_int (List.length sizes)
+    *. float_of_int (List.length closure_sizes)
     /. float_of_int (max 1 total_seeds))
-    (median sizes)
-    (List.fold sizes ~init:0 ~f:Int.max)
-    (histogram sizes ~bucket:closure_bucket ~label:closure_label)
+    (median closure_sizes)
+    (List.fold closure_sizes ~init:0 ~f:Int.max)
+    (histogram closure_sizes ~bucket:closure_bucket ~label:closure_label)
 
-(** Each file's closure, which is what "is this file isolatable, and what would
-    it cost" means. A refused seed counts as not isolatable, which is the
+(** Measure each seed's isolatability: walk its closure, emit it, and return
+    the sizes. The closure is what "is this file isolatable, and what would it
+    cost" means. A refused seed counts as not isolatable, which is the
     question's own definition — except where the walk's hash guard refuses a
     closure that would have fitted in files, which is why these figures are a
     lower bound.
@@ -377,29 +378,47 @@ let log_closure_report ~total_seeds ~sizes =
     Collected in batches because the walk's dependency sets live behind a Rust
     custom block, so the OCaml collector barely notices them. [compact] rather
     than [full_major] to hand memory back to the operating system. *)
-let closure_sizes r seeds ~total_seeds =
-  (* Seeds between progress lines, and so between forced compactions. Small
-     enough that a run killed partway has already said where the memory went,
-     large enough that walking the whole heap is not what the run spends its
-     time on. Not measured. *)
-  let report_batch_size = 2000 in
+let measure_seeds r seeds ~total_seeds =
+  (* Seeds between forced compactions. Large enough that walking the whole heap
+     is not what the run spends its time on. Not measured. *)
+  let compact_batch_size = 2000 in
+  (* On a clock rather than on the batch: a family smaller than one batch would
+     otherwise report nothing until it finished. *)
+  let seconds_between_reports = 60.0 in
   let done_count = ref 0 in
   let fitted_count = ref 0 in
-  let sizes =
-    List.chunks_of seeds ~length:report_batch_size
-    |> List.concat_map ~f:(fun batch ->
-           let batch_sizes = List.filter_map batch ~f:(closure_of_seed r) in
-           done_count := !done_count + List.length batch;
-           fitted_count := !fitted_count + List.length batch_sizes;
-           Gc.compact ();
-           log_closure_progress
-             ~done_count:!done_count
-             ~total_seeds
-             ~fitted_count:!fitted_count;
-           batch_sizes)
+  let last_report = ref (Unix.gettimeofday ()) in
+  let report () =
+    last_report := Unix.gettimeofday ();
+    log_closure_progress
+      ~done_count:!done_count
+      ~total_seeds
+      ~fitted_count:!fitted_count
   in
-  log_closure_report ~total_seeds ~sizes;
-  sizes
+  let report_if_due () =
+    if Float.(Unix.gettimeofday () -. !last_report > seconds_between_reports)
+    then
+      report ()
+  in
+  let measure_one_seed seed =
+    let size = closure_of_seed r seed in
+    incr done_count;
+    if Option.is_some size then incr fitted_count;
+    report_if_due ();
+    size
+  in
+  let measure_one_batch batch =
+    let measured_sizes = List.filter_map batch ~f:measure_one_seed in
+    Gc.compact ();
+    measured_sizes
+  in
+  let measured_sizes =
+    List.chunks_of seeds ~length:compact_batch_size
+    |> List.concat_map ~f:measure_one_batch
+  in
+  report ();
+  log_closure_report ~total_seeds ~closure_sizes:measured_sizes;
+  measured_sizes
 
 let log_growth_progress ~grown ~total_seeds ~since =
   let Growth.Stats.
@@ -610,7 +629,7 @@ let query r options =
     ~available:(List.length all_seeds);
   let sizes =
     if no_growth then
-      closure_sizes r seeds ~total_seeds
+      measure_seeds r seeds ~total_seeds
     else
       grow_seeds r seeds ~total_seeds ~since:t
   in

@@ -910,52 +910,6 @@ PY
   printf '%s\n' "$override_manifest"
 }
 
-prepare_getdeps_boost_override() {
-  local base_manifest="$GETDEPS_REAL_ROOT/manifests/boost"
-  local override_manifest="$GETDEPS_MANIFEST_OVERRIDE_DIR/boost"
-  local user_config="$SCRATCH_DIR/boost-user-config.jam"
-  local toolset
-
-  case "$(basename "$CMAKE_TOOLCHAIN_FILE_PATH")" in
-    HPHPClangToolchain.cmake) toolset="clang" ;;
-    HPHPGccToolchain.cmake) toolset="gcc" ;;
-    *)
-      echo "ERROR: Cannot select a Boost toolset for $CMAKE_COMPILER_DESCRIPTION"
-      exit 1
-      ;;
-  esac
-
-  mkdir -p "$GETDEPS_MANIFEST_OVERRIDE_DIR"
-  printf 'using %s : hhvm : %s ;\n' \
-    "$toolset" "$CMAKE_CXX_COMPILER_PATH" > "$user_config"
-  python3 - \
-    "$base_manifest" "$override_manifest" "$user_config" "$toolset" <<'PY'
-from pathlib import Path
-import sys
-
-base_manifest = Path(sys.argv[1])
-override_manifest = Path(sys.argv[2])
-user_config = sys.argv[3]
-toolset = sys.argv[4]
-
-output = []
-inserted = False
-for line in base_manifest.read_text().splitlines():
-    output.append(line)
-    if line.strip() == "[b2.args.os=linux]":
-        output.append(f"--user-config={user_config}")
-        output.append(f"toolset={toolset}-hhvm")
-        inserted = True
-
-if not inserted:
-    raise SystemExit("ERROR: boost manifest has no Linux b2 args section")
-
-override_manifest.write_text("\n".join(output) + "\n")
-PY
-
-  printf '%s\n' "$override_manifest"
-}
-
 prepare_getdeps_download_manifest_override() {
   local name="$1" url="$2" sha256="$3"
   local base_manifest="$GETDEPS_REAL_ROOT/manifests/$name"
@@ -1224,12 +1178,12 @@ find_boost_install_prefix() {
   for candidate in "$GETDEPS_DIR"/boost "$GETDEPS_DIR"/boost-*; do
     [ -d "$candidate" ] || continue
     [ -f "$candidate/include/boost/version.hpp" ] || continue
+    # Boost.System is header-only in Boost's CMake build, so there is no
+    # libboost_system.a to look for.
     libdir=""
-    if [ -f "$candidate/lib/libboost_system.a" ] && \
-       [ -f "$candidate/lib/libboost_filesystem.a" ]; then
+    if [ -f "$candidate/lib/libboost_filesystem.a" ]; then
       libdir="$candidate/lib"
-    elif [ -f "$candidate/lib64/libboost_system.a" ] && \
-         [ -f "$candidate/lib64/libboost_filesystem.a" ]; then
+    elif [ -f "$candidate/lib64/libboost_filesystem.a" ]; then
       libdir="$candidate/lib64"
     fi
     [ -n "$libdir" ] || continue
@@ -1472,7 +1426,6 @@ ensure_public_getdeps_source_mode
 rm -rf "$GETDEPS_MANIFEST_OVERRIDE_DIR"
 prepare_release_train
 prepare_local_getdeps_sources
-prepare_getdeps_boost_override >/dev/null
 prepare_getdeps_download_manifest_override magic_enum "$MAGIC_ENUM_DOWNLOAD_URL" "$MAGIC_ENUM_DOWNLOAD_SHA256" >/dev/null
 prepare_getdeps_gnu_mirror_overrides
 prepare_getdeps_runner_root

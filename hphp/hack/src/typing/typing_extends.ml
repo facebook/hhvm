@@ -1301,13 +1301,15 @@ let check_override
     parent_class_elt
     class_elt
     on_error;
-  check_needs_concrete_override
-    env
-    ~parent_class_elt
-    class_
-    class_elt
-    ~class_pos
-    ~member_name;
+  (* On properties the shared flag means readonly, not __NeedsConcrete *)
+  if MemberKind.is_method member_kind then
+    check_needs_concrete_override
+      env
+      ~parent_class_elt
+      class_
+      class_elt
+      ~class_pos
+      ~member_name;
 
   let (lazy pos) = class_elt.ce_pos in
 

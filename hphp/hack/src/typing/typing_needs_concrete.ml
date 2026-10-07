@@ -89,21 +89,7 @@ let check_class_get
     Typing_env.get_class env cid
     |> Decl_entry.to_option
     |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
-           let is_concrete : bool =
-             let is_non_abstract : bool = not (Folded_class.abstract class_) in
-             let is_final_non_consistent_construct =
-               lazy
-                 (match snd @@ Typing_env.get_construct env class_ with
-                 | Typing_defs.FinalClass -> true
-                 | Typing_defs.Inconsistent
-                 | Typing_defs.ConsistentConstruct ->
-                   false)
-             in
-             is_non_abstract
-             || Folded_class.final class_
-                && Lazy.force is_final_non_consistent_construct
-           in
-           if not is_concrete then
+           if not (Typing_env.is_concrete_class env class_) then
              add_call_needs_concrete
                env
                named_class_check_level

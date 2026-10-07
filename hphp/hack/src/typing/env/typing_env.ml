@@ -1131,20 +1131,20 @@ module M = struct
 
   let get_no_auto_likes env = env.genv.no_auto_likes
 
-  let containing_class_is_final_and_concrete env =
-    let is_final_non_abstract class_ =
-      Cls.final class_ && (not @@ Cls.abstract class_)
-    in
-    let is_final_non_consistent_construct class_ =
+  let is_concrete_class env class_ =
+    let has_final_class_consistency () =
       match snd @@ get_construct env class_ with
       | FinalClass -> true
       | Inconsistent
       | ConsistentConstruct ->
         false
     in
+    (not (Cls.abstract class_))
+    || (Cls.final class_ && has_final_class_consistency ())
+
+  let containing_class_is_final_and_concrete env =
     match get_self_class env |> Decl_entry.to_option with
-    | Some class_ ->
-      is_final_non_abstract class_ || is_final_non_consistent_construct class_
+    | Some class_ -> Cls.final class_ && is_concrete_class env class_
     | None -> false
 
   let static_points_to_concrete_class env =

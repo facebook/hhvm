@@ -337,11 +337,13 @@ val get_support_dynamic_type : env -> bool
 
 val get_no_auto_likes : env -> bool
 
+(** Whether `static` bound to exactly this class satisfies `__NeedsConcrete`:
+  the class is non-abstract, or final without an inherited
+  `__ConsistentConstruct`. *)
+val is_concrete_class : env -> class_decl -> bool
+
 (** when true, the receiver of `static::foo()` is a concrete class
- where "concrete" means that the class is
-  - non-abstract
-  - OR final+non-__ConsistentConstruct
-*)
+ in the sense of [is_concrete_class] *)
 val static_points_to_concrete_class : env -> bool
 
 val set_self : env -> string -> locl_ty -> env

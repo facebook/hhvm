@@ -1,0 +1,35 @@
+(* -*- tuareg -*- *)
+
+let library_entry name suffix =
+  Printf.sprintf
+"(library
+  (name %s)
+  (wrapped false)
+  (modules)
+  (libraries %s_%s))" name name suffix
+
+let fb_entry name =
+  library_entry name "fb"
+
+let stubs_entry name =
+  library_entry name "stubs"
+
+let entry is_fb name =
+  if is_fb then
+    fb_entry name
+  else
+    stubs_entry name
+
+let () =
+  (* test presence of fb subfolder *)
+  let current_dir = Sys.getcwd () in
+  (* we are in src/stubs/xxx, locate src/hackfmt/linttool/facebook *)
+  let src_dir = Filename.dirname @@ Filename.dirname current_dir in
+  let hackfmt_dir = Filename.concat src_dir "hackfmt" in
+  let linttool_dir = Filename.concat hackfmt_dir "linttool" in
+  let fb_linttool_dir = Filename.concat linttool_dir "facebook" in
+  (* locate src/hackfmt/linttool/facebook/dune *)
+  let fb_dune = Filename.concat fb_linttool_dir "dune" in
+  let is_fb = Sys.file_exists fb_dune in
+  let lib_name = entry is_fb "linttool" in
+  Jbuild_plugin.V1.send lib_name

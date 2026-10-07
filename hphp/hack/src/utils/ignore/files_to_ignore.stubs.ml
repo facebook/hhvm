@@ -23,8 +23,6 @@ let svn_dirname = J.strlist ["dirname"; ".svn"]
 type watch_spec = {
   include_extensions: string list;
   include_file_names: string list;
-  exclude_directories: string list;
-  exclude_vcs_directories: bool;
 }
 
 let server_watch_spec =
@@ -32,8 +30,6 @@ let server_watch_spec =
     include_extensions =
       ["php"; "phpt"; "hack"; "hackpartial"; "hck"; "hh"; "hhi"; "xhp"];
     include_file_names = [".hhconfig"; "PACKAGES.toml"];
-    exclude_directories = ["scripts/build/artifacts/sqlfacts"];
-    exclude_vcs_directories = true;
   }
 
 let watchman_server_expression_terms =

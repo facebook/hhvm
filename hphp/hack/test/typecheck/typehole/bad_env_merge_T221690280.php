@@ -9,6 +9,7 @@ abstract class Foo {
 
   public static abstract function takeOuter(this::TOuter $outer): void;
 
+  <<__NeedsConcrete>>
   public static function test(
     this::TOuter $outer,
     MyReifiedGenericClass<int> $i,

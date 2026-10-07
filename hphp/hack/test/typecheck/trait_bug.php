@@ -13,10 +13,12 @@ trait TQSIC {
 
   private function __construct() {}
 
+  <<__NeedsConcrete>>
   final public static function nonNullable(): this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   final public static function nullable(
   ): GNIC<this::TCoerced> {
     return new GNIC(static::nonNullable());

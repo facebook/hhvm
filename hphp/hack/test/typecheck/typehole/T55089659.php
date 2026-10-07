@@ -4,6 +4,7 @@
 trait BarTrait2 {
   abstract protected static function foo(): void;
 
+  <<__NeedsConcrete>>
   public static function start(): void {
     static::foo();
   }

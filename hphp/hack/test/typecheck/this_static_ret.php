@@ -11,6 +11,7 @@
 
 <<__ConsistentConstruct>>
 class Foo {
+  <<__NeedsConcrete>>
   public static function get(): this {
     return new static();
   }

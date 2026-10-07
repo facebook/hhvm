@@ -5,6 +5,7 @@
 abstract class FooA {
   abstract const type T;
   public function __construct(private string $a) {}
+  <<__NeedsConcrete>>
   public static function create(string $a): FooA {
     return new static($a);
   }

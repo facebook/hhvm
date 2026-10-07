@@ -1,18 +1,18 @@
-ERROR: File "this_param.php", line 23, characters 16-19:
+ERROR: File "this_param.php", line 24, characters 16-19:
 Invalid argument (Typing[4110])
-  File "this_param.php", line 23, characters 5-9:
+  File "this_param.php", line 24, characters 5-9:
   Expected `this`
-  File "this_param.php", line 17, characters 23-26:
+  File "this_param.php", line 18, characters 23-26:
     via this generic `this`
-  File "this_param.php", line 21, characters 24-26:
+  File "this_param.php", line 22, characters 24-26:
   But got `<expr#7> as Foo`
-  File "this_param.php", line 23, characters 16-19:
+  File "this_param.php", line 24, characters 16-19:
     where `<expr#7>` is a reference to this expression
-ERROR: File "this_param.php", line 23, characters 16-19:
+ERROR: File "this_param.php", line 24, characters 16-19:
 Invalid argument (Typing[4110])
-  File "this_param.php", line 23, characters 5-9:
+  File "this_param.php", line 24, characters 5-9:
   Expected `this`
-  File "this_param.php", line 17, characters 23-26:
+  File "this_param.php", line 18, characters 23-26:
     via this generic `this`
-  File "this_param.php", line 21, characters 24-26:
+  File "this_param.php", line 22, characters 24-26:
   But got `Foo`

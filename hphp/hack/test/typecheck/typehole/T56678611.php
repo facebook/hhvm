@@ -4,6 +4,7 @@
 abstract class AbstractBase {
   public abstract static function foo(): void;
 
+  <<__NeedsConcrete>>
   public static function bar(): void {
     static::foo();
   }

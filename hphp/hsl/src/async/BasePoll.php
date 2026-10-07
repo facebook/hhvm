@@ -55,10 +55,12 @@ namespace HH\Lib\Async;
 
 <<__ConsistentConstruct>>
 abstract class BasePoll<Tk, Tv> {
+  <<__NeedsConcrete>>
   final public static function create(): this {
     return new static();
   }
 
+  <<__NeedsConcrete>>
   final protected static function fromImpl(
     KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
   ): this {

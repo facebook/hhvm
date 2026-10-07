@@ -10,6 +10,7 @@ abstract class X {
     $this->priv = $val;
   }
 
+  <<__NeedsConcrete>>
   public static function test(this::T $t): void {
     $static = new static($t);
     $y = new Y(0);
@@ -23,6 +24,7 @@ class Y extends X {
     parent::__construct($val);
   }
 
+  <<__NeedsConcrete>>
   public static function test(this::T $t): void {
     $static = new static($t);
     // Since T cannot be overridden by sub-classes, we can pass in an int

@@ -33,6 +33,7 @@ class GenReadIdxApiClass<Tk, +Tv> implements GenReadIdxApi<Tk, Tv> {
 }
 
 class FooIdx {
+  <<__NeedsConcrete>>
   public static function make<Tk>(): GenReadIdxApi<Tk, mixed> {
     return new GenReadIdxApiClass(null);
   }
@@ -40,6 +41,7 @@ class FooIdx {
 
 <<__ConsistentConstruct>>
 class BarIdx extends FooIdx {
+  <<__NeedsConcrete>>
   public static function make<Tk>(): GenReadIdxApi<Tk, this> {
     return new GenReadIdxApiClass(new static());
   }

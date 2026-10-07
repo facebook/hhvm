@@ -1,6 +1,7 @@
 <?hh
 
 interface ILoader<T> {
+  <<__NeedsConcrete>>
   public static function gen(): Awaitable<T>;
 
   public function set(T $x);
@@ -16,6 +17,7 @@ abstract class Loader implements ILoader<this::TLoadsType> {
 abstract class SelfLoader extends Loader {
   const type TLoadsType = this;
 
+  <<__NeedsConcrete>>
   public static async function gen(): Awaitable<this::TLoadsType> {
     return new static();
   }

@@ -12,6 +12,7 @@
 class BadClass {
   private static ?this $instance;
 
+  <<__NeedsConcrete>>
   public static function getInstance(): this {
     $instance = self::$instance;
     if ($instance === null) {

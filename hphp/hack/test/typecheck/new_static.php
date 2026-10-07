@@ -13,6 +13,7 @@ abstract class A {
 
   public function foo(): void {}
 
+  <<__NeedsConcrete>>
   public static function bar(): void {
     $x = new static();
     $x->foo();

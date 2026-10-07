@@ -5,6 +5,7 @@
 abstract class C1<T> {
   final public function __construct(private T $value) {}
 
+  <<__NeedsConcrete>>
   public static function from(mixed $value): this {
     return new static($value);
   }

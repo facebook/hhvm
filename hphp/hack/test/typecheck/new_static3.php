@@ -11,12 +11,14 @@
 
 <<__ConsistentConstruct>>
 class A {
+  <<__NeedsConcrete>>
   public static function bar(): void {
     $x = new static();
   }
 }
 
 class B {
+  <<__NeedsConcrete>>
   public static function bar(): void {
     $x = new static();
   }

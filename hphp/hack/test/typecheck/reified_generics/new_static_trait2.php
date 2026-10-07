@@ -6,6 +6,7 @@ class BaseClass<reify T> {}
 trait MyTrait {
   require extends BaseClass<int>;
 
+  <<__NeedsConcrete>>
   public static function test(): void {
     new static();
   }

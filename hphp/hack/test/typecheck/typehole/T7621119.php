@@ -6,6 +6,7 @@ class SomeClass<T> {}
 abstract class Parent_<T> {
   abstract public static function get(): this;
   abstract public function someClass(): SomeClass<T>;
+  <<__NeedsConcrete>>
   public static function getSomeClass(): SomeClass<T> {
     $self = static::get();
     return $self->someClass();

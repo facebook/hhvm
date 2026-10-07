@@ -26,6 +26,7 @@ class Base<T> {
     return $this;
   }
 
+  <<__NeedsConcrete>>
   public static function make(Gen<T> $data): this {
     return new static($data);
   }

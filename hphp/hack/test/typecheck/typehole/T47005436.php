@@ -6,6 +6,7 @@ interface IExampleFailure {
   protected function get(): vec<string>;
 }
 abstract class BaseClass implements IExampleFailure {
+  <<__NeedsConcrete>>
   public static function start(): void {
     static::getEmptyData();
   }

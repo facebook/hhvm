@@ -71,6 +71,7 @@ abstract class Base {
 // CHECK:   ret null
 // CHECK: }
 
+  <<__NeedsConcrete>>
   public static function checkStatic0(int $arg1, int $zarg1): void {
     helper(
       () ==> {

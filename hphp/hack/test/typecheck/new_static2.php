@@ -14,11 +14,13 @@ abstract class A<T> {
 
   public function foo(): void {}
 
+  <<__NeedsConcrete>>
   public static function bar(): void {
     $x = new static();
     $x->xxx();
   }
 
+  <<__NeedsConcrete>>
   public static function baz(): A<int> {
     return new static(); // Error - A<T> isn't subtype of A<int>
   }

@@ -9,6 +9,7 @@ abstract class X {
     return $this->val;
   }
 
+  <<__NeedsConcrete>>
   final public static function create(this::T $x): this {
     return new static($x);
   }

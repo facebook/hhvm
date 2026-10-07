@@ -9,6 +9,7 @@ class X {
     $this->priv = $val;
   }
 
+  <<__NeedsConcrete>>
   public static function test(this::T $t): void {
     // Valid because T cannot be overridden
     $static = new static('');

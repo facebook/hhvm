@@ -198,6 +198,7 @@ type t = {
   class_sub_classname: bool;
   class_class_type: bool;
   needs_concrete_class_call_check: int;
+  needs_concrete_class_function_pointer_check: int option;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_class_array_key: bool;
@@ -310,6 +311,7 @@ let default =
     class_sub_classname = true;
     class_class_type = true;
     needs_concrete_class_call_check = 0;
+    needs_concrete_class_function_pointer_check = None;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
     class_pointer_ban_class_array_key = false;
@@ -419,6 +421,7 @@ let set
     ?class_sub_classname
     ?class_class_type
     ?needs_concrete_class_call_check
+    ?needs_concrete_class_function_pointer_check
     ?strict_consistent_construct
     ?allow_class_string_cast
     ?class_pointer_ban_class_array_key
@@ -713,6 +716,10 @@ let set
       setting
         needs_concrete_class_call_check
         options.needs_concrete_class_call_check;
+    needs_concrete_class_function_pointer_check =
+      setting
+        needs_concrete_class_function_pointer_check
+        options.needs_concrete_class_function_pointer_check;
     strict_consistent_construct =
       setting strict_consistent_construct options.strict_consistent_construct;
     allow_class_string_cast =

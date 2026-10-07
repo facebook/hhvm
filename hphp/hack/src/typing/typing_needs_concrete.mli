@@ -17,6 +17,7 @@ val check_class_get :
   string ->
   Typing_defs.class_elt ->
   ('ex, 'en) Aast_defs.class_id_ ->
+  is_function_pointer:bool ->
   bool ->
   unit
 

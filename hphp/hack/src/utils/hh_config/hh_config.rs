@@ -34,10 +34,17 @@ const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 /// Must match `Config_keys.Hhconfig.enable_implicit_packages` on the OCaml side.
 const ENABLE_IMPLICIT_PACKAGES_KEY: &str = "enable_implicit_packages";
 
-fn get_tristate(config: &ConfigFile, key: &str, default: isize) -> Result<isize> {
-    let value = config.get_int_or(key, default)?;
+fn get_optional_tristate(config: &ConfigFile, key: &str) -> Result<Option<isize>> {
+    let Some(value) = config.get_int(key) else {
+        return Ok(None);
+    };
+    let value = value?;
     anyhow::ensure!((0..=2).contains(&value), "{key} must be 0, 1, or 2");
-    Ok(value)
+    Ok(Some(value))
+}
+
+fn get_tristate(config: &ConfigFile, key: &str, default: isize) -> Result<isize> {
+    Ok(get_optional_tristate(config, key)?.unwrap_or(default))
 }
 
 /// For now, this struct only contains the parts of .hhconfig which
@@ -610,6 +617,10 @@ impl HhConfig {
                 "needs_concrete_class_call_check",
                 default.needs_concrete_class_call_check,
             )?,
+            needs_concrete_class_function_pointer_check: get_optional_tristate(
+                &hhconfig,
+                "needs_concrete_class_function_pointer_check",
+            )?,
             strict_consistent_construct: hhconfig.get_bool_or(
                 "strict_consistent_construct",
                 default.strict_consistent_construct,
@@ -777,5 +788,23 @@ mod test {
     fn test_needs_concrete_fine_grained() {
         let hhconf = from_slice(b"needs_concrete_class_call_check=2").unwrap();
         assert_eq!(hhconf.opts.needs_concrete_class_call_check, 2);
+        assert_eq!(
+            hhconf.opts.needs_concrete_class_function_pointer_check,
+            None
+        );
+    }
+
+    #[test]
+    fn test_needs_concrete_class_function_pointer_check() {
+        let hhconf = from_slice(
+            b"needs_concrete_class_call_check=2\nneeds_concrete_class_function_pointer_check=1",
+        )
+        .unwrap();
+        assert_eq!(hhconf.opts.needs_concrete_class_call_check, 2);
+        assert_eq!(
+            hhconf.opts.needs_concrete_class_function_pointer_check,
+            Some(1)
+        );
+        assert!(from_slice(b"needs_concrete_class_function_pointer_check=3").is_err());
     }
 }

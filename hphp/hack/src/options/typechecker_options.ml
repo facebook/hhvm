@@ -277,6 +277,11 @@ let class_class_type t = t.Global_options.class_class_type
 let needs_concrete_class_call_check t =
   t.Global_options.needs_concrete_class_call_check
 
+let needs_concrete_class_function_pointer_check t =
+  Option.value
+    t.Global_options.needs_concrete_class_function_pointer_check
+    ~default:(needs_concrete_class_call_check t)
+
 let strict_consistent_construct t = t.Global_options.strict_consistent_construct
 
 let allow_class_string_cast t = t.Global_options.allow_class_string_cast

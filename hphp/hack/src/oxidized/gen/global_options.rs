@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7749a7dc0b28496acd83698b64ad2ab2>>
+// @generated SignedSource<<d82b0e7a30852ebfc64daae568cbb69e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -401,6 +401,9 @@ pub struct GlobalOptions {
     /// Configure checks for calls to __NeedsConcrete methods through a named
     /// non-concrete class: 0 disables, 1 warns, and 2 errors.
     pub needs_concrete_class_call_check: isize,
+    /// Like `needs_concrete_class_call_check`, but for function pointers
+    /// such as `C::m<>`. When unset, follows `needs_concrete_class_call_check`.
+    pub needs_concrete_class_function_pointer_check: Option<isize>,
     /// When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes
     pub strict_consistent_construct: bool,
     /// Admits (string)$c when $c: class<T>

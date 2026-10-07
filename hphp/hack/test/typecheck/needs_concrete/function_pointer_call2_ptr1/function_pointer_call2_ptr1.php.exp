@@ -1,0 +1,8 @@
+WARN: File "function_pointer_call2_ptr1.php", line 14, characters 11-11:
+Dangerous call to `A::m` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `A` is not concrete. (Warn[12024])
+  File "function_pointer_call2_ptr1.php", line 7, characters 26-26:
+  Declaration is here
+ERROR: File "function_pointer_call2_ptr1.php", line 13, characters 6-6:
+Dangerous call to `A::m` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `A` is not concrete. (Typing[4528])
+  File "function_pointer_call2_ptr1.php", line 7, characters 26-26:
+  Declaration is here

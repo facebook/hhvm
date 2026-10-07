@@ -294,6 +294,9 @@ type t = {
   needs_concrete_class_call_check: int;
       (** Configure checks for calls to __NeedsConcrete methods through a named
        * non-concrete class: 0 disables, 1 warns, and 2 errors. *)
+  needs_concrete_class_function_pointer_check: int option;
+      (** Like `needs_concrete_class_call_check`, but for function pointers
+       * such as `C::m<>`. When unset, follows `needs_concrete_class_call_check`. *)
   strict_consistent_construct: bool;
       (** When true, ban abstract final classes from extending nonabstract __ConsistentConstruct classes *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
@@ -406,6 +409,7 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete_class_call_check:int ->
+  ?needs_concrete_class_function_pointer_check:int option ->
   ?strict_consistent_construct:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_class_array_key:bool ->

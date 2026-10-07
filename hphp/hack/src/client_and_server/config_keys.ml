@@ -158,6 +158,9 @@ module Hhconfig = struct
 
   let needs_concrete_class_call_check = key "needs_concrete_class_call_check"
 
+  let needs_concrete_class_function_pointer_check =
+    key "needs_concrete_class_function_pointer_check"
+
   let package_allow_enforceable_enum_violations =
     key "package_allow_enforceable_enum_violations"
 

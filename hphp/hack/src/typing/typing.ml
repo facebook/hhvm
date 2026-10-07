@@ -1141,7 +1141,16 @@ let is_hack_collection env ty =
 
 let check_class_get
     env p def_pos cid mid ce (_, _cid_pos, e) function_pointer is_method =
-  Typing_needs_concrete.check_class_get env p def_pos cid mid ce e is_method;
+  Typing_needs_concrete.check_class_get
+    env
+    p
+    def_pos
+    cid
+    mid
+    ce
+    e
+    ~is_function_pointer:function_pointer
+    is_method;
   match e with
   | CIself when get_ce_abstract ce -> begin
     match Env.get_self_id env with

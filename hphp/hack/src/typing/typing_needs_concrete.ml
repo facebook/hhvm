@@ -57,9 +57,14 @@ let check_class_get
     (mid : string)
     (ce : Typing_defs.class_elt)
     (e : ('ex, 'en) Aast_defs.class_id_)
+    ~(is_function_pointer : bool)
     (is_method : bool) : unit =
-  let class_call_check_level =
-    Typechecker_options.needs_concrete_class_call_check env.genv.tcopt
+  let named_class_check_level =
+    if is_function_pointer then
+      Typechecker_options.needs_concrete_class_function_pointer_check
+        env.genv.tcopt
+    else
+      Typechecker_options.needs_concrete_class_call_check env.genv.tcopt
   in
   let callee_is_needs_concrete_method : bool =
     is_method && Typing_defs.get_ce_readonly_prop_or_needs_concrete ce
@@ -80,7 +85,7 @@ let check_class_get
         (via :> [ `Id | `Static | `Self | `Parent ])
   in
   match e with
-  | CI _ when class_call_check_level > 0 && callee_is_needs_concrete_method ->
+  | CI _ when named_class_check_level > 0 && callee_is_needs_concrete_method ->
     Typing_env.get_class env cid
     |> Decl_entry.to_option
     |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
@@ -101,7 +106,7 @@ let check_class_get
            if not is_concrete then
              add_call_needs_concrete
                env
-               class_call_check_level
+               named_class_check_level
                class_get_pos
                cid
                mid

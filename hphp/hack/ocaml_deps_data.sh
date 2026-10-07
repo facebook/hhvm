@@ -6,11 +6,11 @@ export HACK_OPAM_DEPS=(
   base.v0.16.3
   base64.3.5.0
   camlp-streams.5.0.1
-  cmdliner.1.1.1
+  cmdliner.1.3.0
   core_kernel.v0.16.0
   core_unix.v0.16.0
   dtoa.0.3.2
-  dune.3.6.0
+  dune.3.22.0
   fileutils.0.6.4
   fmt.0.9.0
   iomux.0.3
@@ -19,12 +19,12 @@ export HACK_OPAM_DEPS=(
   lwt_log.1.1.2
   lwt_ppx.2.1.0
   memtrace.0.2.3
-  merlin.5.0-502
-  mtime.1.4.0
+  merlin.5.3-502
+  mtime.2.1.0
   ocp-indent.1.8.1
   ounit2.2.2.6
   pcre.7.5.0
-  ppx_deriving.5.2.1
+  ppx_deriving.6.0.2
   ppx_gen_rec.2.0.0
   ppx_sexp_conv.v0.16.0
   ppx_yojson_conv.v0.16.0

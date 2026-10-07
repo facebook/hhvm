@@ -12,7 +12,7 @@ from watchman.integration.lib import WatchmanInstance, WatchmanTestCase
 @WatchmanTestCase.expand_matrix
 class TestBulkStat(WatchmanTestCase.WatchmanTestCase):
     def test_bulkstat_on(self) -> None:
-        config = {"_use_bulkstat": True}
+        config = {**self.watchmanConfig(), "_use_bulkstat": True}
         with WatchmanInstance.Instance(config=config) as inst:
             inst.start()
             self.getClient(inst, replace_cached=True)
@@ -26,7 +26,7 @@ class TestBulkStat(WatchmanTestCase.WatchmanTestCase):
             self.assertFileList(root, ["foo", "bar"])
 
     def test_bulkstat_off(self) -> None:
-        config = {"_use_bulkstat": False}
+        config = {**self.watchmanConfig(), "_use_bulkstat": False}
         with WatchmanInstance.Instance(config=config) as inst:
             inst.start()
             self.getClient(inst, replace_cached=True)

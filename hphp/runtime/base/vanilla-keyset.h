@@ -381,6 +381,8 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue);
+  static ArrayData* AppendIntMove(ArrayData*, int64_t);
+  static ArrayData* AppendStrMove(ArrayData*, StringData*);
   static ArrayData* PopMove(ArrayData*, Variant&);
   static void OnSetEvalScalar(ArrayData*);
   static bool Equal(const ArrayData*, const ArrayData*);

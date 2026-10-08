@@ -85,11 +85,6 @@ ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
   return VanillaVec::AppendMove(vec, v);
 }
 
-ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
-  assertx(keyset->isVanillaKeyset());
-  return VanillaKeyset::AppendMove(keyset, v);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* convArrLikeToVecHelper(ArrayData* adIn) {

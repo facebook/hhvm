@@ -561,6 +561,39 @@ KEYSET_SETNEWELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
+inline ArrayData* keysetAddNewElemImplPre(ArrayData* a, int64_t i) {
+  return VanillaKeyset::AppendIntMove(a, i);
+}
+
+inline ArrayData* keysetAddNewElemImplPre(ArrayData* a, StringData* s) {
+  return VanillaKeyset::AppendStrMove(a, s);
+}
+
+inline ArrayData* keysetAddNewElemImplPre(ArrayData* a, TypedValue key) {
+  return VanillaKeyset::AppendMove(a, key);
+}
+
+template<KeyType keyType>
+ArrayData* keysetAddNewElemImpl(ArrayData* a, key_type<keyType> key) {
+  assertx(a->isVanillaKeyset());
+  return keysetAddNewElemImplPre(a, key);
+}
+
+#define KEYSET_ADDNEWELEM_HELPER_TABLE(m)       \
+  /* name              keyType      */          \
+  m(keysetAddNewElemC, KeyType::Any)            \
+  m(keysetAddNewElemI, KeyType::Int)            \
+  m(keysetAddNewElemS, KeyType::Str)            \
+
+#define X(nm, keyType)                                        \
+inline ArrayData* nm(ArrayData* a, key_type<keyType> key) {  \
+  return keysetAddNewElemImpl<keyType>(a, key);               \
+}
+KEYSET_ADDNEWELEM_HELPER_TABLE(X)
+#undef X
+
+//////////////////////////////////////////////////////////////////////
+
 template <KeyType keyType>
 StringData* setElemImpl(tv_lval base, key_type<keyType> key, TypedValue val) {
   return HPHP::SetElem<false, keyType>(base, key, &val);

@@ -402,7 +402,6 @@ static CallMap s_callMap {
     {SetNewElem,     setNewElem, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
 
     /* AddNewElem helpers */
-    {AddNewElemKeyset,   addNewElemKeyset, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
     {AddNewElemVec,      addNewElemVec, DSSA, SNone, {{SSA, 0}, {TV, 1}}},
 
     /* MInstrTranslator helpers */

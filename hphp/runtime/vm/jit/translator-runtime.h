@@ -45,7 +45,6 @@ namespace jit {
 
 void setNewElem(tv_lval base, TypedValue val);
 ArrayData* addNewElemVec(ArrayData* keyset, TypedValue v);
-ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);

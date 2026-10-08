@@ -639,6 +639,20 @@ ArrayData* VanillaKeyset::AppendMove(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
+ArrayData* VanillaKeyset::AppendIntMove(ArrayData* ad, int64_t i) {
+  auto const a = asSet(ad)->prepareForInsert(ad->cowCheck());
+  a->insert(i);
+  if (a != ad && ad->decReleaseCheck()) VanillaKeyset::Release(ad);
+  return a;
+}
+
+ArrayData* VanillaKeyset::AppendStrMove(ArrayData* ad, StringData* s) {
+  auto const a = asSet(ad)->prepareForInsert(ad->cowCheck());
+  a->insert<true>(s);
+  if (a != ad && ad->decReleaseCheck()) VanillaKeyset::Release(ad);
+  return a;
+}
+
 ArrayData* VanillaKeyset::PopMove(ArrayData* ad, Variant& value) {
   if (ad->empty()) {
     value = uninit_null();

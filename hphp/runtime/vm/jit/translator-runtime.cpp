@@ -82,10 +82,6 @@ void setNewElemVec(tv_lval base, TypedValue val) {
   HPHP::SetNewElemVec(base, &val);
 }
 
-void setNewElemDict(tv_lval base, TypedValue val) {
-  HPHP::SetNewElemDict(base, &val);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {

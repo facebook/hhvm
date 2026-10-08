@@ -3369,8 +3369,6 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-| SetNewElemDict,   ND, S(Lval) S(InitCell), NF
-
 | SetNewElemVec,    ND, S(Lval) S(InitCell), NF
 
 | SetNewElemKeyset, ND, S(Lval) S(InitCell), NF

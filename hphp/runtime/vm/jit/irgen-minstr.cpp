@@ -1296,10 +1296,6 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
 
   if (baseType <= TVec) {
     setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
-  } else if (baseType <= TDict) {
-    constrainBase(env);
-    gen(env, IncRef, value);
-    gen(env, SetNewElemDict, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     value = convertClassKey(env, value);

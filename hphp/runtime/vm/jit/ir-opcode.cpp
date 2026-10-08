@@ -440,7 +440,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SameArrLike:
   case SetElem:
   case SetNewElem:
-  case SetNewElemKeyset:
   case SetOpElem:
   case SetOpProp:
   case SetOpTV:

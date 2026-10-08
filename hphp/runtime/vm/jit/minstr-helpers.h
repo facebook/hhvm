@@ -518,49 +518,6 @@ DICTSET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, int64_t i) {
-  return VanillaKeyset::AddToSet(a, i);
-}
-
-inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
-  return VanillaKeyset::AddToSet(a, s);
-}
-
-inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, TypedValue key) {
-  if (tvIsInt(key)) return keysetSetNewElemImplPre(a, key.m_data.num);
-  if (tvIsString(key)) return keysetSetNewElemImplPre(a, key.m_data.pstr);
-  throwInvalidArrayKeyException(&key, a);
-}
-
-template<KeyType keyType>
-void keysetSetNewElemImpl(tv_lval base, key_type<keyType> key) {
-  assertx(tvIsPlausible(*base));
-  assertx(tvIsKeyset(base));
-  auto oldArr = val(base).parr;
-  auto newArr = keysetSetNewElemImplPre(oldArr, key);
-  if (oldArr != newArr) {
-    type(base) = KindOfKeyset;
-    val(base).parr = newArr;
-    assertx(tvIsPlausible(*base));
-    decRefArr(oldArr);
-  }
-}
-
-#define KEYSET_SETNEWELEM_HELPER_TABLE(m)       \
-  /* name              keyType      */          \
-  m(keysetSetNewElemC, KeyType::Any)            \
-  m(keysetSetNewElemI, KeyType::Int)            \
-  m(keysetSetNewElemS, KeyType::Str)            \
-
-#define X(nm, keyType)                                   \
-inline void nm(tv_lval tv, key_type<keyType> key) {  \
-  keysetSetNewElemImpl<keyType>(tv, key);                \
-}
-KEYSET_SETNEWELEM_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 inline ArrayData* keysetAddNewElemImplPre(ArrayData* a, int64_t i) {
   return VanillaKeyset::AppendIntMove(a, i);
 }

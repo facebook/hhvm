@@ -648,7 +648,6 @@ bool canDCE(const IRInstruction& inst) {
   case SetOpElem:
   case IncDecElem:
   case SetNewElem:
-  case SetNewElemKeyset:
   case ReserveVecNewElem:
   case VectorIsset:
   case PairIsset:

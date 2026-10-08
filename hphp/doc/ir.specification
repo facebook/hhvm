@@ -3369,10 +3369,6 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-| SetNewElemKeyset, ND, S(Lval) S(InitCell), NF
-
-  Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
-
 | DictIsset, D(Bool), S(Dict) S(Int OR Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.

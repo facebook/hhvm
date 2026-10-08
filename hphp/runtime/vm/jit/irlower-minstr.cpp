@@ -1097,16 +1097,6 @@ void cgKeysetGetK(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), keyset[off]);
 }
 
-void cgSetNewElemKeyset(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  BUILD_OPTAB(KEYSET_SETNEWELEM_HELPER_TABLE, getKeyType(key));
-
-  auto args = argGroup(env, inst).ssa(0).memberKeyIS(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgKeysetIsset(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(KEYSET_ISSET_ELEM_HELPER_TABLE, getKeyType(key));

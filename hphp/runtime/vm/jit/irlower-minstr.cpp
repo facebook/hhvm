@@ -816,7 +816,6 @@ void cgCheckPtrIterTombstone(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(SetNewElem)
-IMPL_OPCODE_CALL(SetNewElemVec)
 
 IMPL_OPCODE_CALL(AddNewElemVec)
 IMPL_OPCODE_CALL(AddNewElemKeyset)

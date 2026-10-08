@@ -1245,10 +1245,8 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
   return finishMe();
 }
 
-void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
-                       Type baseType, SSATmp* value) {
-  assertx(baseType <= TVec);
-
+void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
+                       SSATmp* value) {
   static const StaticString s_ArrayCOW{"NewElemVecCOW"};
   auto const profile = TargetProfile<COWProfile>{
     env.context,
@@ -1256,17 +1254,24 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
     s_ArrayCOW.get()
   };
 
+  auto const base = extractBase(env);
+  assertx(base->type() <= TVec);
+
   if (profile.profiling()) {
-    auto const base = extractBase(env);
     gen(env, ProfileArrayCOW, RDSHandleData { profile.handle() }, base);
   }
+
+  auto emitAddNewElemVec = [&]{
+    auto newBase = gen(env, AddNewElemVec, base, value);
+    gen(env, StMem, ldMBase(env), newBase);
+  };
 
   using R = COWProfile::Result;
   auto bias = R::None;
   if (profile.optimizing()) bias = profile.data().choose();
 
   if (bias <= R::UsuallyCOW) {
-    gen(env, SetNewElemVec, basePtr, value);
+    emitAddNewElemVec();
   } else {
     ifThen(
       env,
@@ -1278,7 +1283,7 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
         gen(env, StMem, elemPtr, value);
       },
       [&] {
-        gen(env, SetNewElemVec, basePtr, value);
+        emitAddNewElemVec();
       }
     );
   }
@@ -1295,7 +1300,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const basePtr = ldMBase(env);
 
   if (baseType <= TVec) {
-    setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
+    setNewElemVecImpl(env, nDiscard, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     value = convertClassKey(env, value);

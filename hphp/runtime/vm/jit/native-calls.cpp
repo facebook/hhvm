@@ -399,7 +399,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
 
     /* SetNewElem helpers */
-    {SetNewElemVec,  setNewElemVec, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElem,     setNewElem, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
 
     /* AddNewElem helpers */

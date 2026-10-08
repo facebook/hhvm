@@ -44,7 +44,6 @@ namespace jit {
 /* Helper functions for translated code */
 
 void setNewElem(tv_lval base, TypedValue val);
-void setNewElemVec(tv_lval base, TypedValue val);
 ArrayData* addNewElemVec(ArrayData* keyset, TypedValue v);
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);

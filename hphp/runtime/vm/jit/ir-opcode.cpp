@@ -441,7 +441,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SetElem:
   case SetNewElem:
   case SetNewElemKeyset:
-  case SetNewElemVec:
   case SetOpElem:
   case SetOpProp:
   case SetOpTV:

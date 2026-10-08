@@ -1314,7 +1314,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetElem:
   case SetNewElem:
   case SetOpElem:
-  case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
   case ElemDictD:
@@ -2471,7 +2470,6 @@ bool hasMInstrBaseEffects(const IRInstruction& inst) {
     case SetOpElem:
     case IncDecElem:
     case SetNewElem:
-    case SetNewElemVec:
     case SetNewElemKeyset:
     case SetRange:
     case SetRangeRev:
@@ -2508,7 +2506,6 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
         ? make_optional(old.modified() & TCounted)
         : std::nullopt;
     case SetNewElem:
-    case SetNewElemVec:
     case SetNewElemKeyset: {
       // Vecs and keysets will always COW. Dicts will COW in almost
       // all situations except if the "next key" hits the limit.

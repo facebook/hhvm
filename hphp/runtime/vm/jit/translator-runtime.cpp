@@ -90,13 +90,11 @@ void setNewElemDict(tv_lval base, TypedValue val) {
 
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
   assertx(vec->isVanillaVec());
-  tvIncRefGen(v);
   return VanillaVec::AppendMove(vec, v);
 }
 
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
   assertx(keyset->isVanillaKeyset());
-  tvIncRefGen(v);
   return VanillaKeyset::AppendMove(keyset, v);
 }
 

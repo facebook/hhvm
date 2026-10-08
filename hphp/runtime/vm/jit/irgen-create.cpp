@@ -528,7 +528,6 @@ void emitAddNewElemC(IRGS& env) {
   auto const arr = popC(env);
   auto const op = arr->isA(TVec) ? AddNewElemVec : AddNewElemKeyset;
   push(env, gen(env, op, arr, val));
-  decRef(env, val);
 }
 
 void emitNewCol(IRGS& env, CollectionType type) {

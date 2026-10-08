@@ -2393,9 +2393,9 @@ ReqBindJmp and CallFuncEntry.
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElemKeyset, D(Keyset),    S(Keyset,CR) S(InitCell), PRc
+| AddNewElemKeyset, DModified(0), S(Keyset,CR) S(InitCell,MMR), PRc
 
-| AddNewElemVec,    DModified(0), S(Vec,CR) S(InitCell),    PRc
+| AddNewElemVec,    DModified(0), S(Vec,CR) S(InitCell,MR),     PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet

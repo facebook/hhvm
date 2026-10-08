@@ -368,17 +368,16 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
       auto const loop_cont = v.makeBlock();
 
       // Skip nulls.
-      emitTypeTest(
-        v, env, TNull, *type_ptr_in, *data_ptr_in, v.makeReg(),
-        [&] (ConditionCode cc, Vreg sf) {
-          ifThen(v, cc, sf, [&] (Vout& v) {
-            v << phijmp{loop_cont, v.makeTuple({cnt_in})};
-          });
-        }
-      );
+      auto const sf_is_null = v.makeReg();
+      emitCmpTVType(v, sf_is_null, KindOfNull, *type_ptr_in);
+      ifThen(v, CC_E, sf_is_null, [&] (Vout& v) {
+        v << phijmp{loop_cont, v.makeTuple({cnt_in})};
+      });
 
       // Take exit on non-objects.
-      emitTypeCheck(v, env, TObj, *type_ptr_in, *data_ptr_in, inst->taken());
+      auto const sf_is_obj = v.makeReg();
+      emitCmpTVType(v, sf_is_obj, KindOfObject, *type_ptr_in);
+      fwdJcc(v, env, CC_NE, sf_is_obj, inst->taken());
 
       // Take exit on non-Awaitables.
       v << load{*data_ptr_in, obj};

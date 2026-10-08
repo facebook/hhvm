@@ -61,12 +61,8 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 
   auto const checkUninit = [&] {
     auto const sf = v.makeReg();
-    irlower::emitTypeTest(
-      v, env, TUninit, dst.reg(1), dst.reg(0), sf,
-      [&] (ConditionCode cc, Vreg sfr) {
-        fwdJcc(v, env, cc, sfr, inst->taken());
-      }
-    );
+    emitCmpTVType(v, sf, KindOfUninit, dst.reg(1));
+    fwdJcc(v, env, CC_E, sf, inst->taken());
   };
 
   if (rds::isNormalHandle(ch)) {

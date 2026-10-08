@@ -963,10 +963,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
 
-  case IsNTypeMem:
-  case IsTypeMem:
-    return may_load_store(pointee(inst.src(0)), AEmpty);
-
   case CheckRDSInitialized:
     return may_load_store(
       ARds { inst.extra<CheckRDSInitialized>()->handle },

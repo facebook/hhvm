@@ -260,6 +260,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     if (base == TArrLike)       return cmp(KindOfKeyset, CC_BE);
     if (type == (TVec|TDict))   return cmp(KindOfVec, CC_BE);
     if (type == TNull)          return cmp(KindOfUninit, CC_AE);
+    if (type == TNonNull)       return cmp(KindOfUninit, CC_B);
 
     if (type == TUncountedInit) {
       auto const rtype = emitGetTVType(v, typeSrc);

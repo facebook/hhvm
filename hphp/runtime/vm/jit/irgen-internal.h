@@ -373,6 +373,22 @@ void ifNonNull(IRGS& env, SSATmp* tmp, Then then) {
   );
 }
 
+/*
+ * Materialize a Bool telling whether `src' is of type `type' (must be supported
+ * by CheckType instruction).
+ *
+ * If the result only feeds a branch, emit the CheckType directly instead so
+ * the taken/next blocks get the refined value.
+ */
+inline SSATmp* isType(IRGS& env, Type type, SSATmp* src) {
+  return cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, type, taken, src); },
+    [&] (SSATmp*) { return cns(env, true); },
+    [&] { return cns(env, false); }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 // Multi cond (Chonky cond)
 

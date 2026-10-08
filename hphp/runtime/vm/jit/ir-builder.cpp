@@ -462,33 +462,6 @@ SSATmp* IRBuilder::preOptimizeStMemMeta(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeIsTypeMem(IRInstruction* inst) {
-  assertx(inst->is(IsTypeMem, IsNTypeMem));
-  auto const ptr = inst->src(0);
-  assertx(ptr->isA(TMem));
-
-  auto const trueSense = inst->is(IsTypeMem);
-
-  auto const oldType = m_state.typeOfPointee(ptr);
-  if (auto const prevValue = m_state.valueOfPointee(ptr)) {
-    auto const v = [&] {
-      assertx(oldType <= prevValue->type());
-      if (oldType < prevValue->type()) {
-        return gen(AssertType, oldType, prevValue);
-      }
-      return prevValue;
-    }();
-    return gen(trueSense ? IsType : IsNType, inst->typeParam(), v);
-  }
-  if (!oldType.maybe(inst->typeParam())) return m_unit.cns(!trueSense);
-  if (oldType <= inst->typeParam())      return m_unit.cns(trueSense);
-  return nullptr;
-}
-
-SSATmp* IRBuilder::preOptimizeIsNTypeMem(IRInstruction* inst) {
-  return preOptimizeIsTypeMem(inst);
-}
-
 SSATmp* IRBuilder::preOptimizeBaseTypeParam(IRInstruction* inst) {
   auto const ptr = inst->src(0);
   assertx(ptr->isA(TMem));
@@ -621,8 +594,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdFrameThis)
   X(StMem)
   X(StMemMeta)
-  X(IsTypeMem)
-  X(IsNTypeMem)
   X(StMROProp)
   X(CheckMROProp)
   X(ElemDictD)

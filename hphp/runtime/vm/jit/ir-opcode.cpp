@@ -723,9 +723,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsFunReifiedGenericsMatched:
   case IsLegacyArrLike:
   case IsNType:
-  case IsNTypeMem:
   case IsType:
-  case IsTypeMem:
   case IsTypeStructCached:
   case IsWaitHandle:
   case IterGetKeyArr:

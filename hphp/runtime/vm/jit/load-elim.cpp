@@ -513,28 +513,6 @@ Flags handle_general_effects(Local& env,
     return std::nullopt;
   };
 
-  // Given a pointer, return the best known type for what it points at
-  auto const pointeeType = [&] (SSATmp* ptr) {
-    if (!ptr->isA(TMem)) return TTop;
-    auto const acls = canonicalize(pointee(ptr));
-    auto const meta = env.global.ainfo.find(acls);
-    if (!meta || !env.state.avail[meta->index]) return TTop;
-    auto const& tracked = env.state.tracked[meta->index];
-    return tracked.knownType;
-  };
-
-  // Given a pointer, try to reduce an instruction to a constant. The
-  // given lambda will be given the best known type, and must return a
-  // value suitable for cns (or nullopt).
-  auto const reduceToConstantFromPtr =
-    [&] (SSATmp* ptr, auto f) -> Optional<Flags> {
-    auto const type = pointeeType(ptr);
-    auto const r = f(type);
-    if (!r) return std::nullopt;
-    auto const c = env.global.unit.cns(*r);
-    return FRedundant { c, c->type(), kMaxTrackedALocs };
-  };
-
   auto const flags = [&] () -> Optional<Flags> {
     switch (inst.op()) {
       case CheckLoc:
@@ -586,17 +564,6 @@ Flags handle_general_effects(Local& env,
         }
         return Flags{FJmpNext{}};
       }
-
-      case IsTypeMem:
-      case IsNTypeMem:
-        return reduceToConstantFromPtr(
-          inst.src(0),
-          [&] (Type type) -> Optional<bool> {
-            if (type <= inst.typeParam()) return inst.is(IsTypeMem);
-            if (!type.maybe(inst.typeParam())) return !inst.is(IsTypeMem);
-            return std::nullopt;
-          }
-        );
 
       case LdInitPropAddr: {
         // If know the location can't be Uninit, we can dispense with

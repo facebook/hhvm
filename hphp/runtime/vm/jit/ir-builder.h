@@ -324,8 +324,6 @@ private:
   SSATmp* preOptimizeLdFrameCls(IRInstruction*);
   SSATmp* preOptimizeStMem(IRInstruction*);
   SSATmp* preOptimizeStMemMeta(IRInstruction*);
-  SSATmp* preOptimizeIsTypeMem(IRInstruction*);
-  SSATmp* preOptimizeIsNTypeMem(IRInstruction*);
   SSATmp* preOptimizeStMROProp(IRInstruction*);
   SSATmp* preOptimizeCheckMROProp(IRInstruction*);
   SSATmp* preOptimizeBaseTypeParam(IRInstruction*);

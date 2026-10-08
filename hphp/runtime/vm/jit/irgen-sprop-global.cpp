@@ -361,7 +361,7 @@ void emitIssetS(IRGS& env) {
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
-      return gen(env, IsNTypeMem, TNull, ptr);
+      return isType(env, TNonNull, gen(env, LdMem, TCell, ptr));
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(env, false);
@@ -478,8 +478,8 @@ void emitIssetG(IRGS& env) {
       auto const addr = gen(env, LdGblAddr, name);
       return gen(env, CheckNonNull, taken, addr);
     },
-    [&] (SSATmp* ptr, Type) {
-      return gen(env, IsNTypeMem, TNull, ptr);
+    [&] (SSATmp* ptr, Type type) {
+      return isType(env, TNonNull, gen(env, LdMem, TCell, ptr));
     },
     [&] { return cns(env, false); },
     false

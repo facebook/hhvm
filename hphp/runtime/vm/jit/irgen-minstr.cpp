@@ -2266,10 +2266,11 @@ void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
                              SSATmp* propName) {
   gen(env, StMROProp, cns(env, true));
 
-  ifThen(
+  ifElse(
     env,
     [&] (Block* taken) {
-      gen(env, JmpNZero, taken, gen(env, IsTypeMem, TObj, propPtr));
+      auto const prop = gen(env, LdMem, TCell, propPtr);
+      gen(env, CheckType, TObj, taken, prop);
     },
     [&] {
       env.irb->exceptionStackBoundary();

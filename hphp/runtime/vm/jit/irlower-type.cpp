@@ -172,11 +172,6 @@ void implIsType(IRLS& env, const IRInstruction* inst, bool negate) {
     v << setcc{negate ? ccNegate(cc) : cc, sf, dst};
   };
 
-  if (src->isA(TPtr) || src->isA(TLval)) {
-    emitTypeTest(v, env, inst->typeParam(), memTVTypePtr(src, loc),
-                 memTVValPtr(src, loc), v.makeReg(), doJcc);
-    return;
-  }
   assertx(src->isA(TCell));
 
   auto const data = loc.reg(0);
@@ -195,12 +190,6 @@ void cgIsType(IRLS& env, const IRInstruction* inst) {
   implIsType(env, inst, false);
 }
 void cgIsNType(IRLS& env, const IRInstruction* inst) {
-  implIsType(env, inst, true);
-}
-void cgIsTypeMem(IRLS& env, const IRInstruction* inst) {
-  implIsType(env, inst, false);
-}
-void cgIsNTypeMem(IRLS& env, const IRInstruction* inst) {
   implIsType(env, inst, true);
 }
 

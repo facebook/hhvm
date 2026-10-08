@@ -317,6 +317,10 @@ void VanillaKeyset::insert(StringData* k, strhash_t h) {
   if (isValidIns(loc)) {
     auto elm = allocElm(loc);
     elm->setStrKey<Move>(k, h);
+  } else if constexpr (Move) {
+    // The key is already present, so nothing took the reference we were
+    // handed.
+    decRefStr(k);
   }
 }
 template <bool Move>

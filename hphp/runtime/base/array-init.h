@@ -340,8 +340,8 @@ struct KeysetInit : ArrayInitBase<VanillaKeyset, KindOfKeyset> {
     return *this;
   }
   KeysetInit& add(TypedValue tv) {
-    performOp([&]{ return VanillaKeyset::AppendMove(m_arr, tvToInit(tv)); });
     tvIncRefGen(tv);
+    performOp([&]{ return VanillaKeyset::AppendMove(m_arr, tvToInit(tv)); });
     return *this;
   }
   KeysetInit& add(const Variant& v) {

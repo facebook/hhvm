@@ -495,10 +495,10 @@ FOR_EACH_KEY_TYPE(set)
 void Array::append(TypedValue v) {
   if (!m_arr) operator=(CreateDict());
   assertx(m_arr);
+  tvIncRefGen(v);
   m_arr.mutateInPlace([&](ArrayData* ad) {
     return ad->appendMove(tvToInit(v));
   });
-  tvIncRefGen(v);
 }
 
 Variant Array::pop() {

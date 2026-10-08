@@ -895,8 +895,10 @@ Func* Func::unwrap() {
     auto const wrappedFunc = args->at(int64_t{0});
     assertx(tvIsString(wrappedFunc));
     assertx(wrappedFunc.m_data.pstr->isStatic());
-    auto const resolved_ne = NamedFunc::getOrCreate(wrappedFunc.m_data.pstr);
-    return resolved_ne->func();
+    auto const resolved =
+      NamedFunc::getOrCreate(wrappedFunc.m_data.pstr)->func();
+    // The target may be undefined; the wrapper body does a checked call.
+    if (resolved) return resolved;
   }
   return this;
 }

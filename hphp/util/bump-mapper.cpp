@@ -47,6 +47,8 @@ bool BumpSinglePageMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
 
   auto _ = m_state.lock();
+  // Recheck with the lock held: other threads may have mapped in more pages.
+  if (m_currHugePages >= m_maxHugePages) return false;
   auto const currFrontier = m_state.low_map.load(std::memory_order_acquire);
   if (currFrontier % pagesize() != 0) return false;
   auto const newFrontier = currFrontier + pagesize();

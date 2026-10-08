@@ -1659,12 +1659,8 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 
   return cond(
     env,
-    [&] (Block* taken) {
-      auto isObj = gen(env, IsType, TObj, src);
-      gen(env, JmpZero, taken, isObj);
-    },
-    [&] { // Next: src is an object
-      auto obj = gen(env, AssertType, TObj, src);
+    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, src); },
+    [&] (SSATmp* obj) { // Next: src is an object
       return checkClass(obj);
     },
     [&] { // Taken: src is not an object

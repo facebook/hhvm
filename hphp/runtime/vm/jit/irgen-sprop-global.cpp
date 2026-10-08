@@ -500,7 +500,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
   auto const idx = ctx->propSlotToIndex(slot);
 
   auto const curVal = gen(env, LdClsInitElem, IndexData{idx}, propInitVec);
-  push(env, gen(env, IsNType, TUninit, curVal));
+  push(env, isType(env, TInitCell, curVal));
 }
 
 void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {

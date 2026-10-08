@@ -540,7 +540,7 @@ SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
     },
     [&] {
       auto const elem = gen(env, LdVecElem, base, key);
-      return gen(env, IsNType, TInitNull, elem);
+      return isType(env, TNonNull, elem);
     },
     [&] { return cns(env, false); }
   );
@@ -558,7 +558,7 @@ SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
     env, base, key, MOpMode::Warn,
     [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
       auto const elem = gen(env, DictGetK, dict, key, pos);
-      return gen(env, IsNType, TInitNull, elem);
+      return isType(env, TNonNull, elem);
     },
     [&] (SSATmp*) { return cns(env, false); },
     [&] (SSATmp* key, SizeHintData) { return gen(env, DictIsset, base, key); },

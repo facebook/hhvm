@@ -580,12 +580,11 @@ SSATmp* isScalarImpl(IRGS& env, SSATmp* val) {
   if (val->isA(scalar)) return cns(env, true);
   if (!val->type().maybe(scalar)) return cns(env, false);
 
-  SSATmp* result = nullptr;
+  MultiCond mc{env};
   for (auto t : {TBool, TInt, TDbl, TStr, TFunc, TCls, TLazyCls, TEnumClassLabel}) {
-    auto const is_t = gen(env, ConvBoolToInt, gen(env, IsType, t, val));
-    result = result ? gen(env, OrInt, result, is_t) : is_t;
+    mc.ifTypeThen(val, t, [&](SSATmp*) { return cns(env, true); });
   }
-  return gen(env, ConvIntToBool, result);
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
@@ -643,28 +642,15 @@ SSATmp* isClsMethImpl(IRGS& env, SSATmp* src) {
 }
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
-
-  mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
-    return cns(env, true);
-  });
-
-  return mc.elseDo([&]{ return cns(env, false); });
+  return isType(env, TVec, src);
 }
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
-
-  mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
-    return cns(env, true);
-  });
-
-  return mc.elseDo([&]{ return cns(env, false); });
+  return isType(env, TDict, src);
 }
 
 SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
-  return mc.elseDo([&]{ return gen(env, IsType, TArrLike, src); });
+  return isType(env, TArrLike, src);
 }
 
 SSATmp* isLegacyArrLikeImpl(IRGS& env, SSATmp* src) {
@@ -903,36 +889,22 @@ SSATmp* check_nullable(IRGS& env, SSATmp* res, SSATmp* var) {
   return cond(
     env,
     [&] (Block* taken) { gen(env, JmpNZero, taken, res); },
-    [&] { return gen(env, IsType, TNull, var); },
+    [&] { return isType(env, TNull, var); },
     [&] { return cns(env, true); }
   );
 }
 
-void chain_is_type(IRGS& env, SSATmp* c, bool nullable, Type ty) {
-  always_assert(false);
-}
-
 template<typename... Types>
-void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
-                 Type ty1, Type ty2, Types&&... rest) {
-  ifThenElse(
-    env,
-    [&](Block* taken) {
-      auto const res = gen(env, IsType, ty1, c);
-      gen(env, JmpNZero, taken, res);
-    },
-    [&] {
-      if (sizeof...(rest) == 0) {
-        auto const res = gen(env, IsType, ty2, c);
-        push(env, nullable ? check_nullable(env, res, c) : res);
-      } else {
-        chain_is_type(env, c, nullable, ty2, rest...);
-      }
-    },
-    [&] { // taken block
-      push(env, cns(env, true));
-    }
-  );
+void chain_is_type(IRGS& env, SSATmp* c, bool nullable, Types... tys) {
+  static_assert(sizeof...(tys) >= 2);
+  MultiCond mc{env};
+  for (auto const ty : {tys...}) {
+    mc.ifTypeThen(c, ty, [&](SSATmp*) { return cns(env, true); });
+  }
+  if (nullable) {
+    mc.ifTypeThen(c, TNull, [&](SSATmp*) { return cns(env, true); });
+  }
+  push(env, mc.elseDo([&] { return cns(env, false); }));
 }
 
 /*
@@ -965,13 +937,13 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
   auto const success = [&] { return cnsResult(true); };
   auto const fail = [&] { return cnsResult(false); };
 
-  auto const primitive = [&] (Type ty, bool should_negate = false) {
+  auto const primitive = [&] (Type ty) {
     auto const nty = is_nullable_ts ? ty|TNull : ty;
-    if (t->isA(nty)) return should_negate ? fail() : success();
-    if (!t->type().maybe(nty)) return should_negate ? success() : fail();
+    if (t->isA(nty)) return success();
+    if (!t->type().maybe(nty)) return fail();
     popC(env); // pop the ts that's on the stack
     auto const c = popC(env);
-    auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
+    auto const res = isType(env, ty, c);
     push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
     return true;
   };
@@ -1055,7 +1027,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       }
       return unionOf(TStr, TLazyCls, TCls);
     }
-    case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
+    case TypeStructure::Kind::T_nonnull:     return primitive(TNonNull);
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_dynamic:
       return success();
@@ -1784,12 +1756,12 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
 
 void emitIssetL(IRGS& env, int32_t id) {
   auto const ld = ldLoc(env, id, DataTypeSpecific);
-  push(env, gen(env, IsNType, TNull, ld));
+  push(env, isType(env, TNonNull, ld));
 }
 
 void emitIsUnsetL(IRGS& env, int32_t id) {
   auto const ld = ldLoc(env, id, DataTypeSpecific);
-  push(env, gen(env, IsType, TUninit, ld));
+  push(env, isType(env, TUninit, ld));
 }
 
 SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
@@ -1807,7 +1779,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   }
 
   auto const t = typeOpToType(subop);
-  return t <= TObj ? optimizedCallIsObject(env, val) : gen(env, IsType, t, val);
+  return t <= TObj ? optimizedCallIsObject(env, val) : isType(env, t, val);
 }
 
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {

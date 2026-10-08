@@ -1610,8 +1610,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Shl:
   case Shr:
   case Lshr:
-  case IsNType:
-  case IsType:
   case Mov:
   case ConvDblToBool:
   case ConvDblToInt:

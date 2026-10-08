@@ -722,8 +722,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IsCol:
   case IsFunReifiedGenericsMatched:
   case IsLegacyArrLike:
-  case IsNType:
-  case IsType:
   case IsTypeStructCached:
   case IsWaitHandle:
   case IterGetKeyArr:

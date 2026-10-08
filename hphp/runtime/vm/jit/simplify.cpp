@@ -1988,45 +1988,6 @@ SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
-  assertx(inst->is(IsNType, IsType));
-  auto const trueSense = inst->is(IsType);
-  auto const type      = inst->typeParam();
-
-  // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
-  // and similarly for arrays. PHP treats both types of string the same, so if
-  // the distinction matters to you here, be careful.
-  assertx(IMPLIES(type <= TStr, type == TStr));
-  assertx(IMPLIES(type <= TVec, type == TVec));
-  assertx(IMPLIES(type <= TDict, type == TDict));
-  assertx(IMPLIES(type <= TKeyset, type == TKeyset));
-
-  // The types are disjoint; the result must be false.
-  if (!srcType.maybe(type)) {
-    return cns(env, !trueSense);
-  }
-
-  // The src type is a subtype of the tested type; the result must be true.
-  if (srcType <= type) {
-    return cns(env, trueSense);
-  }
-
-  // At this point, either the tested type is a subtype of the src type, or they
-  // are non-disjoint but neither is a subtype of the other. We can't simplify
-  // this away.
-  return nullptr;
-}
-
-SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
-  auto const src = i->src(0);
-  return isTypeImpl(env, i, src->type());
-}
-
-SSATmp* simplifyIsNType(State& env, const IRInstruction* i) {
-  auto const src = i->src(0);
-  return isTypeImpl(env, i, src->type());
-}
-
 SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -4277,8 +4238,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(InstanceOf)
       X(InstanceOfIface)
       X(InstanceOfIfaceVtable)
-      X(IsNType)
-      X(IsType)
       X(IsLegacyArrLike)
       X(IsWaitHandle)
       X(IsCol)

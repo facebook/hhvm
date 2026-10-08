@@ -160,41 +160,6 @@ void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void implIsType(IRLS& env, const IRInstruction* inst, bool negate) {
-  auto const src = inst->src(0);
-  auto const loc = srcLoc(env, inst, 0);
-  auto& v = vmain(env);
-
-  auto const doJcc = [&] (ConditionCode cc, Vreg sf) {
-    auto const dst = dstLoc(env, inst, 0).reg();
-    v << setcc{negate ? ccNegate(cc) : cc, sf, dst};
-  };
-
-  assertx(src->isA(TCell));
-
-  auto const data = loc.reg(0);
-  auto const type = loc.reg(1) != InvalidReg
-    ? loc.reg(1)
-    : v.cns(src->type().toDataType());
-
-  emitTypeTest(v, env, inst->typeParam(), type, data, v.makeReg(), doJcc);
-}
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void cgIsType(IRLS& env, const IRInstruction* inst) {
-  implIsType(env, inst, false);
-}
-void cgIsNType(IRLS& env, const IRInstruction* inst) {
-  implIsType(env, inst, true);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgAssertType(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const& dtype = inst->dst()->type();

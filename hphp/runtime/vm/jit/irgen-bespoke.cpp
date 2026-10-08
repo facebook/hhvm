@@ -686,7 +686,7 @@ SSATmp* emitIsset(IRGS& env, SSATmp* key) {
   return cond(
     env,
     [&](Block* taken) { return emitGet(env, base, key, taken); },
-    [&](SSATmp* val) { return gen(env, IsNType, TInitNull, val); },
+    [&](SSATmp* val) { return isType(env, TNonNull, val); },
     [&] { return cns(env, false); }
   );
 }

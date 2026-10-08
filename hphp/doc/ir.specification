@@ -102,7 +102,7 @@ data" in an arbitrary C++ struct (see extra-data.h).
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
 
-  IsType<T>, D(Bool), S(Cell), NF
+  CheckType<T>, DRefineS(0), S(Cell), B|P
 
 The first column is the instruction name (and optional Type parameter in <>).
 
@@ -709,16 +709,6 @@ To string conversions:
 | HasToString, D(Bool), S(Obj), NF
 
   Returns whether the object S0 has a toString method.
-
-| IsType<T>, D(Bool), S(Cell), NF
-
-  Sets D to true iff S0 holds a value that is of type T. T must not be a
-  specialized type.
-
-| IsNType<T>, D(Bool), S(Cell), NF
-
-  Sets D to true iff S0 holds a value that is not of type T. T must not be a
-  specialized type.
 
 | IsWaitHandle, D(Bool), S(Obj), NF
 

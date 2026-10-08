@@ -259,8 +259,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
   case HasToString:
-  case IsType:
-  case IsNType:
   case IsLegacyArrLike:
   case IsWaitHandle:
   case IsCol:

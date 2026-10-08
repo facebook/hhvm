@@ -7254,18 +7254,20 @@ end = struct
           env
       | (_, (Tnewtype (_, _, _) | Tgeneric _ | Tdependent _)) ->
         let ( ||| ) = ( ||| ) ~fail in
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
+        ||| fun env ->
         simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
           env
-        ||| default_subtype
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:{ super_like; super_supportdyn = false; ty_super }
       | _ ->
         (* T <: RepresentableAs<U> iff T <: U *)
         simplify

@@ -143,6 +143,12 @@ let add_prop p ps =
   else
     p :: ps
 
+let append_prop ps p =
+  if List.exists ps ~f:(equal_subtype_prop p) then
+    ps
+  else
+    ps @ [p]
+
 type prop_result =
   | Valid
   | Invalid of Typing_error.t option
@@ -162,11 +168,13 @@ let append_disj ~fail p1 p2 =
     let disj_err =
       Typing_error.intersect_opt @@ List.filter_opt [fail; err1; err2]
     in
-    Disj (disj_err, List.fold ps2 ~init:ps1 ~f:(fun ps p -> add_prop p ps))
-  | (p, Disj (err, ps))
-  | (Disj (err, ps), p) ->
+    Disj (disj_err, List.fold ps2 ~init:ps1 ~f:(fun ps p -> append_prop ps p))
+  | (p, Disj (err, ps)) ->
     let disj_err = Typing_error.intersect_opt @@ List.filter_opt [fail; err] in
     Disj (disj_err, add_prop p ps)
+  | (Disj (err, ps), p) ->
+    let disj_err = Typing_error.intersect_opt @@ List.filter_opt [fail; err] in
+    Disj (disj_err, append_prop ps p)
   | (_, _) -> Disj (fail, [p1; p2])
 
 (* Smart constructor for binary disjunction *)

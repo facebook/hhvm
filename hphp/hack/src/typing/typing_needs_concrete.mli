@@ -29,7 +29,8 @@ val check_instantiation :
 
 (** Validate `<<__NeedsConcrete>>` usage on class members.
  *  - Errors on instance methods and constructors.
- *  - Errors on static methods in final classes.
+ *  - Errors on static methods in final concrete classes
+ *    (see [Typing_env.is_concrete_class]).
  *)
 val check_class_def :
   Typing_env_types.env -> Nast.class_ -> Decl_provider.class_decl -> unit

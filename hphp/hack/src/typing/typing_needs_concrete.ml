@@ -176,8 +176,9 @@ let check_class_def
               @@ Primary.Needs_concrete_on_instance_method
                    { pos = fst m.m_name; class_name = snd c.c_name; meth_name })
         else if
-          (* Check for __NeedsConcrete on static methods in final classes *)
-          Folded_class.final tc && not (Folded_class.abstract tc)
+          (* In a final concrete class `static` is always the class itself, so
+           * the attribute is redundant *)
+          Folded_class.final tc && Typing_env.is_concrete_class env tc
         then
           Typing_error_utils.add_typing_error
             ~env

@@ -1,6 +1,6 @@
 {
   "name": "bser",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "JavaScript implementation of the BSER Binary Serialization",
   "main": "index.js",
   "directories": {

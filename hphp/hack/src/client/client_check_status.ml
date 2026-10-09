@@ -13,6 +13,9 @@ open Server_command_types
 let print_diagnostic_raw e =
   Printf.printf "%s" (Raw_diagnostic_formatter.to_string e)
 
+let print_diagnostic_agent e =
+  Printf.printf "%s" (Agent_diagnostic_formatter.to_string e)
+
 let print_diagnostic_plain e = Printf.printf "%s" (Diagnostics.to_string e)
 
 let print_diagnostic_contextual e =
@@ -32,6 +35,7 @@ let print_diagnostic
     : unit =
   match error_format with
   | Diagnostics.Raw -> print_diagnostic_raw e
+  | Diagnostics.Agent -> print_diagnostic_agent e
   | Diagnostics.Plain -> print_diagnostic_plain e
   | Diagnostics.Context -> print_diagnostic_contextual e
   | Diagnostics.Highlighted -> print_diagnostic_highlighted e

@@ -23,6 +23,7 @@ let get_error_list_json
       match error_format with
       | Extended -> Some Extended_diagnostic_formatter.to_string
       | Context
+      | Agent
       | Raw
       | Highlighted
       | Plain

@@ -111,6 +111,7 @@
    ppx_deriving.std
    ppx_hash))
  (modules
+   agent_diagnostic_formatter
    contextual_diagnostic_formatter
    error_category
    diagnostics

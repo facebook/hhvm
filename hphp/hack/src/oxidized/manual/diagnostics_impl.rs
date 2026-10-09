@@ -345,6 +345,7 @@ impl std::fmt::Display for Format {
             Self::Plain => "plain".fmt(f),
             Self::Extended => "extended".fmt(f),
             Self::PlainHighlighted => "plain_highlighted".fmt(f),
+            Self::Agent => "agent".fmt(f),
         }
     }
 }

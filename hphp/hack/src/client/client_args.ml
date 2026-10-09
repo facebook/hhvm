@@ -514,6 +514,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
           (fun s ->
             match s with
             | "raw" -> error_format := Some Diagnostics.Raw
+            | "agent" -> error_format := Some Diagnostics.Agent
             | "plain" -> error_format := Some Diagnostics.Plain
             | "context" -> error_format := Some Diagnostics.Context
             | "highlighted" -> error_format := Some Diagnostics.Highlighted
@@ -521,7 +522,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
             | "plain_highlighted" ->
               error_format := Some Diagnostics.PlainHighlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<format> Error formatting style (default: highlighted); valid formats: extended, raw, context, highlighted, plain, plain_highlighted",
+        "<format> Error formatting style (default: highlighted); valid formats: agent, extended, raw, context, highlighted, plain, plain_highlighted",
         Arg_user_facing );
       ( "--enforcement-at-pos-batch",
         Arg.Rest

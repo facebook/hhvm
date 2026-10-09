@@ -12,7 +12,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --deps-out-at-pos-batch                  (mode) for each entry in input list get list of what it depends on [file:line:character list]
   --deps-in-at-pos-batch                   (mode) for each entry in input list get list of what depends on it [file:line:character list]
   --dump-config                            Output configuration
-  --error-format <format>                  Error formatting style (default: highlighted); valid formats: extended, raw, context, highlighted, plain, plain_highlighted
+  --error-format <format>                  Error formatting style (default: highlighted); valid formats: agent, extended, raw, context, highlighted, plain, plain_highlighted
   --enforcement-at-pos-batch               (mode) show enforcement at multiple positions [file:line:character list]
   --file-dependents                        (mode) Given a list of filepaths, shows list of (possibly) dependent files
   --find-class-refs                        (mode) finds references of the provided class name

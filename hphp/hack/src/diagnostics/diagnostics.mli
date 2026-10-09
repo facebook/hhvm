@@ -22,6 +22,7 @@ type format =
       (** Verbose context showing expressions, statements, hints, and declarations involved in error *)
   | PlainHighlighted
       (** Underlines error spans with `^^^` to simulate IDE squiggles *)
+  | Agent  (** Compact format with complete ranges and no color *)
 
 (** Type representing the errors for a single file. *)
 type per_file_diagnostics

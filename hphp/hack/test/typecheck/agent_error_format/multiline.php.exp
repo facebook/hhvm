@@ -1,0 +1,8 @@
+ERROR: multiline.php:5:10-5:16: Invalid return type (Typing[4110])
+  multiline.php:3:26-4:6: Expected `dict<int, int>`
+  multiline.php:5:10-5:16: But got `string`
+
+ERROR: multiline.php:11:3-12:6: Too many positional arguments (expected 0 but got 2) (Typing[4105])
+  multiline.php:8:10-8:16: Definition is here
+
+2 errors found

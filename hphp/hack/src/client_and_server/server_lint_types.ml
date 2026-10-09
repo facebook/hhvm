@@ -45,6 +45,7 @@ let output_text oc el format =
       | Diagnostics.PlainHighlighted ->
         Lint.to_contextual_string
       | Diagnostics.Raw
+      | Diagnostics.Agent
       | Diagnostics.Plain ->
         Lint.to_string
       | Diagnostics.Highlighted -> Lint.to_highlighted_string

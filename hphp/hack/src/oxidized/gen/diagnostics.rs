@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca8cfb6c284405f1a9b0f27ff80f8856>>
+// @generated SignedSource<<9e6b57062425c26b9f88eb9673d8d763>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -59,6 +59,8 @@ pub enum Format {
     Extended,
     /// Underlines error spans with `^^^` to simulate IDE squiggles
     PlainHighlighted,
+    /// Compact format with complete ranges and no color
+    Agent,
 }
 impl TrivialDrop for Format {}
 arena_deserializer::impl_deserialize_in_arena!(Format);

@@ -11,6 +11,7 @@ let human_formatter_for error_format =
     match error_format with
     | Extended -> Some Extended_diagnostic_formatter.to_string
     | Context
+    | Agent
     | Raw
     | Highlighted
     | Plain

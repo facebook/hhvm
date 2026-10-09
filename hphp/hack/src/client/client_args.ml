@@ -295,6 +295,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let isolation_output = ref None in
   let isolation_seed_framework = ref None in
   let isolation_seed_list = ref None in
+  let isolation_seed_dir = ref None in
   let isolation_max_dependents = ref None in
   let isolation_max_cluster_size = ref None in
   let isolation_max_seeds = ref None in
@@ -309,6 +310,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
         output_file = !isolation_output;
         seed_framework = !isolation_seed_framework;
         seed_list = !isolation_seed_list;
+        seed_dir = !isolation_seed_dir;
         (* 600 is the reach a run uses when the caller names none, and so the
            bound the isolatability figures are reported against. Not derived
            from measurement. *)
@@ -563,6 +565,10 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       ( "--isolation-seed-list",
         Arg.String (fun s -> isolation_seed_list := Some s),
         " <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds",
+        Arg_non_user_facing );
+      ( "--isolation-seed-dir",
+        Arg.String (fun s -> isolation_seed_dir := Some s),
+        " <dir> grow from every Hack file under <dir>",
         Arg_non_user_facing );
       ( "--isolation-max-dependents",
         Arg.Int (fun n -> isolation_max_dependents := Some n),

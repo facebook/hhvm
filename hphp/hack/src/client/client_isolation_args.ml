@@ -22,6 +22,7 @@ let check
         output_file = _;
         seed_framework;
         seed_list;
+        seed_dir;
         max_dependents;
         max_cluster_size;
         max_seeds;
@@ -53,9 +54,25 @@ let check
          max_dependents);
   (* Picking two says the caller means something the run cannot do, and
      preferring one silently answers the wrong question. *)
-  if Option.is_some seed_framework && Option.is_some seed_list then
+  let seed_sources =
+    [
+      ("--isolation-seed-framework", seed_framework);
+      ("--isolation-seed-list", seed_list);
+      ("--isolation-seed-dir", seed_dir);
+    ]
+  in
+  let seed_sources_given =
+    List.filter_map seed_sources ~f:(fun (flag, value) ->
+        if Option.is_some value then
+          Some flag
+        else
+          None)
+  in
+  if List.length seed_sources_given > 1 then
     reject
-      "--isolation-seed-framework and --isolation-seed-list both name where to start; pass one";
+      (Printf.sprintf
+         "%s each name where to start; pass one"
+         (String.concat ~sep:" and " seed_sources_given));
   (* Nothing grows in this mode, so there is no cluster to cap. *)
   if no_growth && Option.is_some max_cluster_size then
     reject

@@ -21,6 +21,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --isolation-output                       <file> write clusters to <file> as JSON lines as they are found, and print only the summary
   --isolation-seed-framework               <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds
   --isolation-seed-list                    <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds
+  --isolation-seed-dir                     <dir> grow from every Hack file under <dir>
   --isolation-max-dependents               <n> the most files that may depend on a candidate for it to be taken along with them
   --isolation-max-cluster-size             <n> stop growing a cluster once it reaches <n> files
   --isolation-max-seeds                    <n> grow from at most <n> seeds

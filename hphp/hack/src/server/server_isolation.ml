@@ -125,42 +125,80 @@ module Seeds = struct
     |> fst
     |> List.rev
 
-  (** The repo-relative paths in [file], one per line.
+  (** [paths] less the repeats and less what the naming table does not know,
+      both counted out loud under [seed_source].
 
       A path the naming table does not know is dropped rather than grown from: it
       would look like a file that references nothing, and report as an isolatable
-      cluster of one. Silently wrong beats loudly wrong here, so it is counted out
-      loud instead. A repeat would be grown twice and the second cluster discarded
-      for overlapping the first, which is indistinguishable in the counters from
-      two distinct seeds colliding. *)
-  let from_list naming_table file =
-    let lines =
-      In_channel.read_lines file
-      |> List.filter_map ~f:(fun line ->
-             match String.strip line with
-             | "" -> None
-             | suffix -> Some (Relative_path.from_root ~suffix))
-    in
-    let deduped = dedupe lines in
-    let repeated = List.length lines - List.length deduped in
+      cluster of one. Silently wrong beats loudly wrong here. A repeat would be
+      grown twice and the second cluster discarded for overlapping the first,
+      which is indistinguishable in the counters from two distinct seeds
+      colliding. *)
+  let known_paths naming_table ~seed_source paths =
+    let deduped = dedupe paths in
+    let repeated = List.length paths - List.length deduped in
     if repeated > 0 then
-      Hh_logger.log "[isolation] seed list: %d repeated paths ignored" repeated;
+      Hh_logger.log
+        "[isolation] %s: %d repeated paths ignored"
+        seed_source
+        repeated;
     let (known, unknown) =
       List.partition_tf deduped ~f:(fun path ->
           Option.is_some (Naming_table.get_file_info naming_table path))
     in
     Hh_logger.log
-      "[isolation] seed list: %d paths from %s, %d unknown to the naming table"
+      "[isolation] %s: %d paths, %d unknown to the naming table"
+      seed_source
       (List.length known)
-      file
       (List.length unknown);
     known
 
-  let select ctx deps_mode naming_table ~seed_framework ~seed_list =
-    match (seed_framework, seed_list) with
-    | (Some base, _) -> from_framework ctx deps_mode base
-    | (None, Some file) -> from_list naming_table file
-    | (None, None) ->
+  (** The repo-relative paths in [file], one per line. *)
+  let from_list naming_table file =
+    In_channel.read_lines file
+    |> List.filter_map ~f:(fun line ->
+           match String.strip line with
+           | "" -> None
+           | suffix -> Some (Relative_path.from_root ~suffix))
+    |> known_paths
+         naming_table
+         ~seed_source:(Printf.sprintf "seed list %s" file)
+
+  (** Every Hack file under [dir], which is repo-relative.
+
+      The same walk the typechecker indexes the repository with, so it finds the
+      same files under [dir] that the naming table holds, and is then filtered
+      against the table exactly as a hand-written seed list is. *)
+  let from_directory ctx naming_table dir =
+    let absolute_dir =
+      Filename.concat Relative_path.(path_of_prefix Root) dir
+    in
+    if not (Disk.is_directory absolute_dir) then begin
+      Hh_logger.log
+        "[isolation] seed dir: %s is not a directory — is the path repo-relative?"
+        dir;
+      []
+    end else
+      let is_excluded_path = excluded_path_filter ctx in
+      Find.find
+        ~file_only:true
+        ~filter:Find_utils.file_filter
+        [Path.make absolute_dir]
+      |> List.map ~f:Relative_path.create_detect_prefix
+      |> List.filter ~f:(fun path ->
+             Relative_path.is_root (Relative_path.prefix path)
+             && not (is_excluded_path path))
+      |> List.sort ~compare:Relative_path.compare
+      |> known_paths
+           naming_table
+           ~seed_source:(Printf.sprintf "seed dir %s" dir)
+
+  let select ctx deps_mode naming_table ~seed_framework ~seed_list ~seed_dir =
+    match (seed_framework, seed_list, seed_dir) with
+    | (Some base, _, _) -> from_framework ctx deps_mode base
+    | (None, Some file, _) -> from_list naming_table file
+    | (None, None, Some dir) -> from_directory ctx naming_table dir
+    | (None, None, None) ->
       let seeds = scan ctx deps_mode naming_table in
       Hh_logger.log "[isolation] seed scan: found %d seeds" (List.length seeds);
       seeds
@@ -609,7 +647,15 @@ let result r ~grown ~total_seeds ~sizes ~clusters =
     with the caches already clear and the sink already open. *)
 let query r options =
   let Server_isolation_types.
-        { no_growth; seed_framework; seed_list; max_seeds; seed_offset; _ } =
+        {
+          no_growth;
+          seed_framework;
+          seed_list;
+          seed_dir;
+          max_seeds;
+          seed_offset;
+          _;
+        } =
     options
   in
   (* Accumulates across a run; a second query in the same server would otherwise
@@ -617,7 +663,13 @@ let query r options =
   Growth.reset_stats ();
   let t_start = Unix.gettimeofday () in
   let all_seeds =
-    Seeds.select r.ctx r.deps_mode r.naming_table ~seed_framework ~seed_list
+    Seeds.select
+      r.ctx
+      r.deps_mode
+      r.naming_table
+      ~seed_framework
+      ~seed_list
+      ~seed_dir
   in
   let t = Hh_logger.log_duration "[isolation] seed scan" t_start in
   let seeds = Seeds.window all_seeds ~seed_offset ~max_seeds in

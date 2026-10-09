@@ -27,6 +27,7 @@ type options = {
   output_file: string option;
   seed_framework: string option;
   seed_list: string option;
+  seed_dir: string option;
   max_dependents: int;
   max_cluster_size: int option;
   max_seeds: int option;

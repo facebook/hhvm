@@ -44,6 +44,8 @@ type options = {
       (** Start from every subclass of this class. *)
   seed_list: string option;
       (** Start from the repo-relative paths in this file, one per line. *)
+  seed_dir: string option;
+      (** Start from every Hack file under this repo-relative directory. *)
   max_dependents: int;
       (** The most files that may depend on a candidate for it to be absorbed
           along with them — how far the closure rule may reach. At least 1. *)

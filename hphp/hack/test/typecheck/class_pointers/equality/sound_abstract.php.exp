@@ -1,0 +1,52 @@
+File "sound_abstract.php", line 121, characters 5-15:
+  T
+ERROR: File "sound_abstract.php", line 39, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 37, characters 56-61:
+  But got `string`
+ERROR: File "sound_abstract.php", line 39, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 37, characters 67-67:
+  But got `?class<C1>`
+  File "sound_abstract.php", line 37, characters 44-53:
+    by the definition of `T`
+ERROR: File "sound_abstract.php", line 39, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 37, characters 67-67:
+  But got `T as ?class<C1>`
+ERROR: File "sound_abstract.php", line 39, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 38, characters 7-15:
+  But got `(string & <expr#2> as T) where T as ?class<C1>` from this equality test
+ERROR: File "sound_abstract.php", line 48, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 43, characters 54-56:
+  But got `int`
+ERROR: File "sound_abstract.php", line 48, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 44, characters 3-8:
+  But got `string`
+ERROR: File "sound_abstract.php", line 48, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 45, characters 3-3:
+  But got `T as (int | class<C1>)`
+ERROR: File "sound_abstract.php", line 48, characters 15-16:
+Invalid argument (Typing[4110])
+  File "sound_abstract.php", line 11, characters 20-28:
+  Expected `class<C1>`
+  File "sound_abstract.php", line 47, characters 7-15:
+  But got `(string & <expr#2> as T) where T as (int | class<C1>)` from this equality test

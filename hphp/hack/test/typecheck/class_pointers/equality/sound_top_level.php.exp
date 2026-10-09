@@ -1,0 +1,10 @@
+ERROR: File "sound_top_level.php", line 49, characters 15-17:
+Invalid argument (Typing[4110])
+  File "sound_top_level.php", line 10, characters 20-28:
+  Expected `class<C1>`
+  File "sound_top_level.php", line 48, characters 7-16:
+  But got `string` from this equality test
+  File "sound_top_level.php", line 48, characters 7-16:
+    by the definition of `classname` from this equality test
+  File "sound_top_level.php", line 48, characters 7-16:
+    by the definition of `typename` from this equality test

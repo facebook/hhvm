@@ -1,0 +1,36 @@
+ERROR: File "precise.php", line 56, characters 15-16:
+Invalid argument (Typing[4110])
+  File "precise.php", line 10, characters 20-28:
+  Expected `class<C1>`
+  File "precise.php", line 55, characters 7-16:
+  But got `string` from this equality test
+  File "precise.php", line 55, characters 7-16:
+    by the definition of `classname` from this equality test
+  File "precise.php", line 55, characters 7-16:
+    by the definition of `typename` from this equality test
+ERROR: File "precise.php", line 65, characters 15-16:
+Invalid argument (Typing[4110])
+  File "precise.php", line 10, characters 20-28:
+  Expected `class<C1>`
+  File "precise.php", line 64, characters 7-15:
+  But got `nonnull` from this equality test
+  File "precise.php", line 64, characters 7-15:
+    by the definition of `HH\class_or_classname` from this equality test
+ERROR: File "precise.php", line 84, characters 17-18:
+Invalid argument (Typing[4110])
+  File "precise.php", line 10, characters 20-28:
+  Expected `class<C1>`
+  File "precise.php", line 80, characters 7-19:
+  But got `string`
+  File "hackarray.hhi", line 52, characters 72-72:
+    via this generic `T`
+  File "hackarray.hhi", line 22, characters 35-36:
+    via this generic `Tv`
+  File "interfaces.hhi", line 115, characters 23-24:
+    via this generic `Tv`
+  File "interfaces.hhi", line 92, characters 66-67:
+    via this generic `Tv`
+  File "classname.hhi", line 21, characters 28-38:
+    by the definition of `classname`
+  File "classname.hhi", line 14, characters 27-32:
+    by the definition of `typename`

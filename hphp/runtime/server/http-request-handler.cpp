@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/server/http-request-handler.h"
 
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -57,8 +58,38 @@
 
 namespace HPHP {
 
+#ifdef __roar__
+extern "C" void __roar_api_trigger_warmup() __attribute__((__weak__));
+#endif
+
 namespace {
 const StaticString s_defaultCharset("default_charset");
+
+#ifdef __roar__
+/*
+ * Interpreter-only ServiceLab runs hold ROAR warmup until Treadmill starts
+ * replaying traffic so both A/B sides profile equivalent request windows.
+ * The replay cookie distinguishes that traffic from HHVM health checks.
+ */
+void maybeTriggerROARWarmupForServiceLab(Transport* transport) {
+  static std::atomic<bool> triggered{false};
+
+  if (!__roar_api_trigger_warmup ||
+      !transport->cookieExists("perflab_stats_rep_info")) {
+    return;
+  }
+
+  auto expected = false;
+  if (!triggered.compare_exchange_strong(
+        expected, true, std::memory_order_acq_rel)) {
+    return;
+  }
+
+  // The ROAR API is fire-and-forget, so there is no result to handle here.
+  __roar_api_trigger_warmup();
+  Logger::Info("Requested ROAR warmup from first ServiceLab request");
+}
+#endif
 }
 
 using std::string;
@@ -577,6 +608,11 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
   hphp_context_exit();
   ServerStats::LogPage(file, code);
+#ifdef __roar__
+  if (UNLIKELY(Cfg::Server::TriggerROARWarmupOnServiceLabRequest)) {
+    maybeTriggerROARWarmupForServiceLab(transport);
+  }
+#endif
   return ret;
 }
 

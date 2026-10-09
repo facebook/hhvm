@@ -47,6 +47,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::vector<std::string> Server.ExtendedWarmup.Requests = {}, UNKNOWN
 - std::string Server.CleanupRequest = "", UNKNOWN
 - int Server.InternalWarmupThreads = 0, UNKNOWN
+- bool Server.TriggerROARWarmupOnServiceLabRequest = false, UNKNOWN
 - boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
 - bool Server.ExitOnBindFail = false, UNKNOWN
 - bool Server.LogBootStats = true, UNKNOWN

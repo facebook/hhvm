@@ -129,6 +129,10 @@ MAGIC_ENUM_VERSION="v0.9.7"
 MAGIC_ENUM_DOWNLOAD_URL="https://github.com/Neargye/magic_enum/releases/download/${MAGIC_ENUM_VERSION}/magic_enum-${MAGIC_ENUM_VERSION}.tar.gz"
 MAGIC_ENUM_DOWNLOAD_ARCHIVE="magic_enum-${MAGIC_ENUM_VERSION}.tar.gz"
 MAGIC_ENUM_DOWNLOAD_SHA256="c047bc7ca0b76752168140e7ae9a4a30d72bf6530c196fdfbf5105a39d40cc46"
+# The release-train proxygen predates its c-ares 1.34.7 callback signature fix.
+C_ARES_VERSION="1.34.6"
+C_ARES_DOWNLOAD_URL="https://github.com/c-ares/c-ares/releases/download/v${C_ARES_VERSION}/c-ares-${C_ARES_VERSION}.tar.gz"
+C_ARES_DOWNLOAD_SHA256="912dd7cc3b3e8a79c52fd7fb9c0f4ecf0aaa73e45efda880266a2d6e26b84ef5"
 RELEASE_TRAIN_DEPENDENCIES=(
   "folly|facebook/folly|ff98381ea68687a95c6185326db933aa6124d4c5|b614255dd844dba1a694fff7b80b4ca1f28fa69cf7d1dff30ebdb1ea2c7a4c33"
   "fizz|facebookincubator/fizz|545cd6d4546fb1ace279a6253a32f3806fb9436f|630e468d03101be8e24c108db434192bac1a7b3ca8dad5e3681404b322444917"
@@ -1427,6 +1431,10 @@ rm -rf "$GETDEPS_MANIFEST_OVERRIDE_DIR"
 prepare_release_train
 prepare_local_getdeps_sources
 prepare_getdeps_download_manifest_override magic_enum "$MAGIC_ENUM_DOWNLOAD_URL" "$MAGIC_ENUM_DOWNLOAD_SHA256" >/dev/null
+C_ARES_MANIFEST_OVERRIDE="$(prepare_getdeps_download_manifest_override \
+  c-ares "$C_ARES_DOWNLOAD_URL" "$C_ARES_DOWNLOAD_SHA256")"
+sed -i "s|^subdir = c-ares-.*|subdir = c-ares-${C_ARES_VERSION}|" \
+  "$C_ARES_MANIFEST_OVERRIDE"
 prepare_getdeps_gnu_mirror_overrides
 prepare_getdeps_runner_root
 MCROUTER_INSTALL="$(find_mcrouter_install_prefix || true)"

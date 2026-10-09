@@ -299,6 +299,7 @@ type run = {
   sink: Sink.t;
   max_dependents: int;
   max_cluster_size: int option;
+  batch_size: int;
   overlapping_clusters: int ref;
       (** Clusters dropped because an earlier cluster in the same batch already
           claimed one of their files. Counted here rather than in growth: growth
@@ -568,7 +569,8 @@ let grow_one_batch
 
 (** Seeds are advanced in batches so each round's frontiers pool into one
     parallel index call. Larger batches fill the worker pool better; they also
-    hold more clusters in memory at once. A few thousand keeps both in hand. *)
+    hold more clusters in memory at once, which is the trade-off
+    [--isolation-batch-size] sets. *)
 let grow_seeds r seeds ~total_seeds ~since =
   (* A closure larger than the whole cluster can never be absorbed, and the walk
      is where growth spends its time. Clamped once per run, not per candidate:
@@ -583,12 +585,9 @@ let grow_seeds r seeds ~total_seeds ~since =
     "[isolation] cluster growth: starting over %d seeds (closure bound %d)"
     total_seeds
     max_dependents;
-  (* Seeds grown in lockstep. The batch is what pools candidates into one
-     parallel indexing call — a single cluster's frontier would leave the worker
-     pool idle — and every cluster in it is live at once, so this is peak memory
-     against worker occupancy. Not measured: the family-sized runs used windows
-     of 400 seeds, which makes a window one batch. *)
-  let batch_size = 2000 in
+  (* Caches are dropped between batches, so the batch sets how much memory a
+     run needs, not the length of the seed list. *)
+  let batch_size = r.batch_size in
   let grown = ref 0 in
   (* [visited] stops a seed being grown twice; [claimed] is every file in a
      cluster already reported. *)
@@ -604,7 +603,8 @@ let grow_seeds r seeds ~total_seeds ~since =
   sizes
 
 let make_run options genv env sink =
-  let Server_isolation_types.{ max_dependents; max_cluster_size; _ } =
+  let Server_isolation_types.{ max_dependents; max_cluster_size; batch_size; _ }
+      =
     options
   in
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -616,6 +616,7 @@ let make_run options genv env sink =
     sink;
     max_dependents;
     max_cluster_size;
+    batch_size;
     overlapping_clusters = ref 0;
     truncated_clusters = ref 0;
   }

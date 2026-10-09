@@ -31,6 +31,7 @@ type options = {
   seed_dir: string option;
   max_dependents: int;
   max_cluster_size: int option;
+  batch_size: int;
   max_seeds: int option;
   seed_offset: int;
 }

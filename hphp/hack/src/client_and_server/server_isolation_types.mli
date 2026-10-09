@@ -53,6 +53,10 @@ type options = {
   max_cluster_size: int option;
       (** Stop growing a cluster at this many files and never report a larger
           one, marking it [truncated]. [None] grows to a fixed point. *)
+  batch_size: int;
+      (** How many clusters to grow at once. They are all held in memory
+          until the batch ends, so this sets the run's peak memory. At
+          least 1. *)
   max_seeds: int option;  (** [None] means every seed. *)
   seed_offset: int;
       (** Skip this many seeds before applying [max_seeds], so a caller can walk

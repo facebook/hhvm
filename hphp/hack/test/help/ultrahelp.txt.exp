@@ -24,6 +24,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --isolation-seed-dir                     <dir> grow from every Hack file under <dir>
   --isolation-max-dependents               <n> the most files that may depend on a candidate for it to be taken along with them
   --isolation-max-cluster-size             <n> stop growing a cluster once it reaches <n> files
+  --isolation-batch-size                   <n> grow <n> clusters at a time; they are all held in memory together, so this sets how much memory the run needs
   --isolation-max-seeds                    <n> grow from at most <n> seeds
   --isolation-seed-offset                  <n> skip the first <n> seeds; pair with --isolation-max-seeds to walk the seed list in chunks
   --find-refs                              (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent

@@ -25,6 +25,7 @@ let check
         seed_dir;
         max_dependents;
         max_cluster_size;
+        batch_size;
         max_seeds;
         seed_offset;
       } =
@@ -40,6 +41,14 @@ let check
          "--isolation-max-cluster-size must be at least 2, got %d"
          n)
   | _ -> ());
+  (* One cluster per batch still works, it is just the slowest way to do it:
+     the batch exists to pool candidates into a single parallel indexing call,
+     and a batch of one leaves the worker pool idle. *)
+  if batch_size < 1 then
+    reject
+      (Printf.sprintf
+         "--isolation-batch-size must be at least 1, got %d"
+         batch_size);
   if seed_offset < 0 then
     reject
       (Printf.sprintf

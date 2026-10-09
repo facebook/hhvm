@@ -871,6 +871,7 @@ let parse_options () =
         enable_intrinsics_extension = default.enable_intrinsics_extension;
         expression_tree_shape_no_unwrap =
           default.expression_tree_shape_no_unwrap;
+        allow_intish_shape_keys = default.allow_intish_shape_keys;
       }
   in
 

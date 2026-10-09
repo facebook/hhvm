@@ -41,6 +41,7 @@ type t = {
   ignore_string_methods: bool;
   enable_intrinsics_extension: bool;
   expression_tree_shape_no_unwrap: bool;
+  allow_intish_shape_keys: bool;
 }
 [@@deriving show, eq]
 
@@ -78,6 +79,7 @@ let default =
     ignore_string_methods = true;
     enable_intrinsics_extension = false;
     expression_tree_shape_no_unwrap = false;
+    allow_intish_shape_keys = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

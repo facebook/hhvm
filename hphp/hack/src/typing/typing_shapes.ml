@@ -795,8 +795,6 @@ let check_shape_keys_validity env keys =
   (* If the key is a class constant, get its class name and type. *)
   let get_field_info env key =
     let key_pos = shape_field_pos key in
-    (* Empty strings or literals that start with numbers are not
-         permitted as shape field names. *)
     match key with
     | Ast_defs.SFlit_str (_, key_name) ->
       (if Int.equal 0 (String.length key_name) then

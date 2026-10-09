@@ -1,0 +1,6 @@
+string(6) "string"
+string(3) "int"
+vec(2) {
+  string(3) "123"
+  int(123)
+}

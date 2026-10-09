@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08d52e17f04d510632eb758353b8c2f1>>
+// @generated SignedSource<<8023f59734581409337067e049b114fe>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -109,6 +109,8 @@ pub struct ParserOptions {
     /// DSL's shape wrapper type a transparent type alias, after which the unwrap call no longer
     /// typechecks.
     pub expression_tree_shape_no_unwrap: bool,
+    /// Allow int-like string literals as shape keys in the typechecker.
+    pub allow_intish_shape_keys: bool,
 }
 
 #[derive(

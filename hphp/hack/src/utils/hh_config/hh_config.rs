@@ -351,6 +351,8 @@ impl HhConfig {
                 "expression_tree_shape_no_unwrap",
                 default.expression_tree_shape_no_unwrap,
             )?,
+            allow_intish_shape_keys: hhconfig
+                .get_bool_or("allow_intish_shape_keys", default.allow_intish_shape_keys)?,
         };
         let rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,

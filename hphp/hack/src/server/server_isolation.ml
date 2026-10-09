@@ -164,34 +164,26 @@ module Seeds = struct
          naming_table
          ~seed_source:(Printf.sprintf "seed list %s" file)
 
-  (** Every Hack file under [dir], which is repo-relative.
+  let absolute_dir dir = Filename.concat Relative_path.(path_of_prefix Root) dir
+
+  (** Every Hack file under [dir], which is repo-relative. [dir] is a directory:
+      [query] refuses the run before reaching here otherwise.
 
       The same walk the typechecker indexes the repository with, so it finds the
       same files under [dir] that the naming table holds, and is then filtered
       against the table exactly as a hand-written seed list is. *)
   let from_directory ctx naming_table dir =
-    let absolute_dir =
-      Filename.concat Relative_path.(path_of_prefix Root) dir
-    in
-    if not (Disk.is_directory absolute_dir) then begin
-      Hh_logger.log
-        "[isolation] seed dir: %s is not a directory — is the path repo-relative?"
-        dir;
-      []
-    end else
-      let is_excluded_path = excluded_path_filter ctx in
-      Find.find
-        ~file_only:true
-        ~filter:Find_utils.file_filter
-        [Path.make absolute_dir]
-      |> List.map ~f:Relative_path.create_detect_prefix
-      |> List.filter ~f:(fun path ->
-             Relative_path.is_root (Relative_path.prefix path)
-             && not (is_excluded_path path))
-      |> List.sort ~compare:Relative_path.compare
-      |> known_paths
-           naming_table
-           ~seed_source:(Printf.sprintf "seed dir %s" dir)
+    let is_excluded_path = excluded_path_filter ctx in
+    Find.find
+      ~file_only:true
+      ~filter:Find_utils.file_filter
+      [Path.make (absolute_dir dir)]
+    |> List.map ~f:Relative_path.create_detect_prefix
+    |> List.filter ~f:(fun path ->
+           Relative_path.is_root (Relative_path.prefix path)
+           && not (is_excluded_path path))
+    |> List.sort ~compare:Relative_path.compare
+    |> known_paths naming_table ~seed_source:(Printf.sprintf "seed dir %s" dir)
 
   let select ctx deps_mode naming_table ~seed_framework ~seed_list ~seed_dir =
     match (seed_framework, seed_list, seed_dir) with
@@ -628,12 +620,27 @@ let make_run options genv env sink =
     truncated_clusters = ref 0;
   }
 
+(** What a run that did not happen reports: the reason, and nothing found. *)
+let refused ~grown ~total_seeds message =
+  Server_isolation_types.
+    {
+      refused = Some message;
+      clusters = [];
+      grown;
+      total_seeds;
+      total_isolatable_files = 0;
+      total_clusters = 0;
+      total_truncated = 0;
+      largest_cluster = 0;
+    }
+
 (** Each mode reports the sizes of the sets it found, and differs in nothing
     else the caller sees, so the result is assembled here rather than at the end
     of each branch. *)
 let result r ~grown ~total_seeds ~sizes ~clusters =
   Server_isolation_types.
     {
+      refused = None;
       clusters;
       grown;
       total_seeds;
@@ -642,6 +649,24 @@ let result r ~grown ~total_seeds ~sizes ~clusters =
       total_truncated = !(r.truncated_clusters);
       largest_cluster = List.fold sizes ~init:0 ~f:Int.max;
     }
+
+(** Refuse a seed source that cannot be read, before the run starts. *)
+let unreadable_seed_source ~seed_list ~seed_dir =
+  (* [Disk.file_exists] is true of a directory, which would read as a file and
+     raise the error this is here to prevent. *)
+  let is_file path = Disk.file_exists path && not (Disk.is_directory path) in
+  match (seed_list, seed_dir) with
+  | (Some file, _) when not (is_file file) ->
+    Some
+      (Printf.sprintf
+         "%s is not a file. --isolation-seed-list takes a file of repo-relative paths, one per line."
+         file)
+  | (_, Some dir) when not (Disk.is_directory (Seeds.absolute_dir dir)) ->
+    Some
+      (Printf.sprintf
+         "%s is not a directory. --isolation-seed-dir takes a path relative to the repository root."
+         dir)
+  | _ -> None
 
 (** The query itself: which files to start from, then how far to take them. Runs
     with the caches already clear and the sink already open. *)
@@ -661,36 +686,37 @@ let query r options =
   (* Accumulates across a run; a second query in the same server would otherwise
      report the first one's totals. *)
   Growth.reset_stats ();
-  let t_start = Unix.gettimeofday () in
-  let all_seeds =
-    Seeds.select
-      r.ctx
-      r.deps_mode
-      r.naming_table
-      ~seed_framework
-      ~seed_list
-      ~seed_dir
-  in
-  let t = Hh_logger.log_duration "[isolation] seed scan" t_start in
-  let seeds = Seeds.window all_seeds ~seed_offset ~max_seeds in
-  let total_seeds = List.length seeds in
-  Seeds.log_window
-    ~total_seeds
-    ~seed_offset
-    ~max_seeds
-    ~available:(List.length all_seeds);
-  let sizes =
-    if no_growth then
-      measure_seeds r seeds ~total_seeds
-    else
-      grow_seeds r seeds ~total_seeds ~since:t
-  in
-  result
-    r
-    ~grown:(not no_growth)
-    ~total_seeds
-    ~sizes
-    ~clusters:(r.sink.collected ())
+  let grown = not no_growth in
+  match unreadable_seed_source ~seed_list ~seed_dir with
+  | Some refusal ->
+    Hh_logger.log "[isolation] refused: %s" refusal;
+    refused ~grown ~total_seeds:0 refusal
+  | None ->
+    let t_start = Unix.gettimeofday () in
+    let all_seeds =
+      Seeds.select
+        r.ctx
+        r.deps_mode
+        r.naming_table
+        ~seed_framework
+        ~seed_list
+        ~seed_dir
+    in
+    let t = Hh_logger.log_duration "[isolation] seed scan" t_start in
+    let seeds = Seeds.window all_seeds ~seed_offset ~max_seeds in
+    let total_seeds = List.length seeds in
+    Seeds.log_window
+      ~total_seeds
+      ~seed_offset
+      ~max_seeds
+      ~available:(List.length all_seeds);
+    let sizes =
+      if no_growth then
+        measure_seeds r seeds ~total_seeds
+      else
+        grow_seeds r seeds ~total_seeds ~since:t
+    in
+    result r ~grown ~total_seeds ~sizes ~clusters:(r.sink.collected ())
 
 let go
     (options : Server_isolation_types.options)

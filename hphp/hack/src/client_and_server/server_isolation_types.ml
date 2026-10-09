@@ -13,6 +13,7 @@ type cluster = {
 }
 
 type result = {
+  refused: string option;
   clusters: cluster list;
   grown: bool;
   total_seeds: int;

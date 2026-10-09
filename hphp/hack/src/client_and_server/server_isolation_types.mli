@@ -18,6 +18,7 @@ type cluster = {
 }
 
 type result = {
+  refused: string option;
   clusters: cluster list;
   grown: bool;
       (** Whether these were grown, or are each the smallest isolatable set

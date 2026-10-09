@@ -47,12 +47,24 @@ let print_find_my_tests_result result ~(json : bool) : unit =
     List.iter result.FMT.selected_test_files ~f:(fun file ->
         print_endline file.FMT.file_path)
 
+(** [Input_error] when the run was refused: the caller asked for more than the
+    limit allows and nothing was computed, so a zero exit would read as a run
+    that found nothing. *)
+let isolation_status (result : Server_isolation_types.result) =
+  match result.Server_isolation_types.refused with
+  | Some _ -> Exit_status.Input_error
+  | None -> Exit_status.No_error
+
 let output_isolation_result
     (result : Server_isolation_types.result) ~output_json =
   let open Server_isolation_types in
   if output_json then
     `Assoc
       [
+        ( "refused",
+          match result.refused with
+          | None -> `Null
+          | Some reason -> `String reason );
         ( "clusters",
           `List
             (List.map result.clusters ~f:(fun cluster ->
@@ -79,30 +91,33 @@ let output_isolation_result
     |> Yojson.Safe.to_string
     |> print_endline
   else begin
-    Printf.printf "Started from %d files.\n" result.total_seeds;
-    (* Both modes report sets of files called clusters, and they mean different
-       things, so the line a person reads has to say which. *)
-    if result.grown then begin
-      Printf.printf
-        "Grew %d clusters covering %d files (largest: %d).\n"
-        result.total_clusters
-        result.total_isolatable_files
-        result.largest_cluster;
-      (* A truncated cluster stopped at the cap with more to take, so something
-         outside it still references in. Saying how many kept that from being
-         read as a count of finished packages. Read off the summary rather than
-         counted here, so that it survives a run that streamed its clusters to a
-         file and sent back none of them. *)
-      if result.total_truncated > 0 then
+    match result.refused with
+    | Some reason -> Printf.printf "Did not run: %s\n" reason
+    | None ->
+      Printf.printf "Started from %d files.\n" result.total_seeds;
+      (* Both modes report sets of files called clusters, and they mean different
+         things, so the line a person reads has to say which. *)
+      if result.grown then begin
         Printf.printf
-          "%d of them stopped at the size cap and are not complete.\n"
-          result.total_truncated
-    end else
-      Printf.printf
-        "Found %d isolatable without growing, covering %d files (largest: %d).\n"
-        result.total_clusters
-        result.total_isolatable_files
-        result.largest_cluster
+          "Grew %d clusters covering %d files (largest: %d).\n"
+          result.total_clusters
+          result.total_isolatable_files
+          result.largest_cluster;
+        (* A truncated cluster stopped at the cap with more to take, so something
+           outside it still references in. Saying how many kept that from being
+           read as a count of finished packages. Read off the summary rather than
+           counted here, so that it survives a run that streamed its clusters to a
+           file and sent back none of them. *)
+        if result.total_truncated > 0 then
+          Printf.printf
+            "%d of them stopped at the size cap and are not complete.\n"
+            result.total_truncated
+      end else
+        Printf.printf
+          "Found %d isolatable without growing, covering %d files (largest: %d).\n"
+          result.total_clusters
+          result.total_isolatable_files
+          result.largest_cluster
   end
 
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
@@ -1133,7 +1148,7 @@ let main_internal
       rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
     in
     output_isolation_result result ~output_json:args.output_json;
-    Lwt.return (Exit_status.No_error, telemetry)
+    Lwt.return (isolation_status result, telemetry)
   | Client_env.MODE_VALIDATE_ISOLATION list_file ->
     (* Read here rather than on the server: the list file is a path on the
        caller's machine, and the server only ever sees repo-relative paths. *)

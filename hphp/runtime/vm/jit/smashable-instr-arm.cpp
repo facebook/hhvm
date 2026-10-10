@@ -442,9 +442,14 @@ bool optimizeSmashedJcc(TCA inst) {
 
   if (is_int28(offset)) {
     auto const veneerInstrs = load.instrCount() + 1; // load + BR
+    auto const veneerTCA = reinterpret_cast<TCA>(
+      const_cast<vixl::Instruction*>(veneer)
+    );
+    CodeWriteScope scope(veneerTCA,
+                         veneerTCA + veneerInstrs * kInstructionSize);
     CodeBlock tmpBlock;
     tmpBlock.init(
-      (TCA)veneer,
+      veneerTCA,
       veneerInstrs * kInstructionSize,
       "optimizeSmashedJcc"
     );

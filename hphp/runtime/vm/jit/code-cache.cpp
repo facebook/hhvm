@@ -28,6 +28,18 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
+#include <algorithm>
+#include <atomic>
+#include <cstring>
+#include <mutex>
+#include <pthread.h>
+#include <sched.h>
+#include <vector>
+
+#include <errno.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
 namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg)
@@ -36,12 +48,165 @@ TRACE_SET_MOD(mcg)
 
 namespace {
 
+std::recursive_mutex& codeWriteMutex() {
+  static std::recursive_mutex mutex;
+  return mutex;
+}
+
+constexpr uint64_t kForkBlocked = uint64_t{1} << 63;
+constexpr uint64_t kWriteCountMask = ~kForkBlocked;
+std::atomic<uint64_t> g_codeWriteState{0};
+std::atomic<bool> g_forkInProgress{false};
+thread_local uint32_t g_codeWriteDepth{0};
+
+void enterCodeWrite() {
+  if (g_codeWriteDepth++ != 0) return;
+  while (true) {
+    auto state = g_codeWriteState.load(std::memory_order_acquire);
+    if (state & kForkBlocked) {
+      ::sched_yield();
+      continue;
+    }
+    always_assert((state & kWriteCountMask) != kWriteCountMask);
+    if (g_codeWriteState.compare_exchange_weak(
+          state, state + 1, std::memory_order_acquire,
+          std::memory_order_relaxed)) return;
+  }
+}
+
+void leaveCodeWrite() {
+  always_assert(g_codeWriteDepth != 0);
+  if (--g_codeWriteDepth == 0) {
+    g_codeWriteState.fetch_sub(1, std::memory_order_release);
+  }
+}
+
+void blockCodeWrites() {
+  auto state = g_codeWriteState.load(std::memory_order_acquire);
+  while (!g_codeWriteState.compare_exchange_weak(
+      state, state | kForkBlocked, std::memory_order_acq_rel,
+      std::memory_order_acquire)) {
+  }
+  while (g_codeWriteState.load(std::memory_order_acquire) & kWriteCountMask) {
+    ::sched_yield();
+  }
+}
+
+void unblockCodeWrites() {
+  auto state = g_codeWriteState.load(std::memory_order_acquire);
+  while (true) {
+    always_assert(state & kForkBlocked);
+    if (g_codeWriteState.compare_exchange_weak(
+          state, state & kWriteCountMask, std::memory_order_release,
+          std::memory_order_acquire)) return;
+  }
+}
+
+void lockForkTransaction() {
+  bool expected = false;
+  while (!g_forkInProgress.compare_exchange_weak(
+      expected, true, std::memory_order_acquire,
+      std::memory_order_relaxed)) {
+    expected = false;
+    ::sched_yield();
+  }
+}
+
+void unlockForkTransaction() {
+  g_forkInProgress.store(false, std::memory_order_release);
+}
+
+void ensureCodeWriteAtfork() {
+  static std::once_flag once;
+  std::call_once(once, [] {
+    auto const result = pthread_atfork(
+      [] {
+        lockForkTransaction();
+        blockCodeWrites();
+      },
+      [] {
+        unblockCodeWrites();
+        unlockForkTransaction();
+      },
+      [] {
+        g_codeWriteDepth = 0;
+        unblockCodeWrites();
+        unlockForkTransaction();
+      }
+    );
+    always_assert_flog(result == 0, "pthread_atfork failed: {}", result);
+  });
+}
+
+std::vector<std::pair<CodeAddress, CodeAddress>>& codeWriteActive() {
+  thread_local std::vector<std::pair<CodeAddress, CodeAddress>> active;
+  return active;
+}
+
+size_t codeProtectGranularity() {
+  if (Cfg::CodeCache::MapTCHuge) return size2m;
+  auto const pageSize = ::sysconf(_SC_PAGESIZE);
+  return pageSize > 0 ? static_cast<size_t>(pageSize) : 4096;
+}
+
+void checkedProtect(CodeAddress address, size_t size, int protection) {
+  if (!size) return;
+  auto const result = ::mprotect(address, size, protection);
+  always_assert_flog(
+    result == 0,
+    "mprotect({:#x}, {}, {:#x}) failed: {}",
+    reinterpret_cast<uintptr_t>(address), size, protection, strerror(errno)
+  );
+}
+
+CodeAddress alignDownAddress(ConstCodeAddress address, size_t granularity) {
+  auto const value = reinterpret_cast<uintptr_t>(address);
+  return reinterpret_cast<CodeAddress>(value & ~(granularity - 1));
+}
+
+CodeAddress alignUpAddress(ConstCodeAddress address, size_t granularity) {
+  auto const value = reinterpret_cast<uintptr_t>(address);
+  return reinterpret_cast<CodeAddress>(
+    (value + granularity - 1) & ~(granularity - 1)
+  );
+}
+
+std::vector<std::pair<CodeAddress, CodeAddress>> subtractCovered(
+    CodeAddress begin, CodeAddress end,
+    const std::vector<std::pair<CodeAddress, CodeAddress>>& covered) {
+  std::vector<std::pair<CodeAddress, CodeAddress>> uncovered;
+  if (begin >= end) return uncovered;
+
+  auto current = begin;
+  auto sorted = covered;
+  std::sort(sorted.begin(), sorted.end(),
+            [](auto const& lhs, auto const& rhs) {
+              return lhs.first < rhs.first;
+            });
+  for (auto const& interval : sorted) {
+    if (interval.second <= current) continue;
+    if (interval.first >= end) break;
+    if (interval.first > current) {
+      uncovered.emplace_back(current, std::min(interval.first, end));
+    }
+    if (interval.second > current) current = interval.second;
+    if (current >= end) break;
+  }
+  if (current < end) uncovered.emplace_back(current, end);
+  return uncovered;
+}
+
+} // namespace
+
+namespace {
+
 void enhugen(void* base, unsigned numMB) {
   if (Cfg::CodeCache::MapTCHuge) {
     assertx((uintptr_t(base) & (size2m - 1)) == 0);
     assertx(numMB < (1 << 12));
     remap_interleaved_2m_pages(base, /* number of 2M pages */ numMB / 2);
-    madvise(base, numMB << 20, MADV_DONTFORK);
+    // Keep huge-page code mappings forkable. Child JIT writes use ordinary
+    // anonymous COW together with CodeWriteScope's temporary mprotect.
   }
 }
 
@@ -270,11 +435,6 @@ CodeCache::CodeCache() {
   TRACE(1, "init gdata @%p\n", m_all.frontier());
   m_data.ensure(*this, kGDataSize);
 
-  // The default on linux for the newly allocated memory is read/write/exec
-  // but on some systems its just read/write. Call unprotect to ensure that
-  // the memory is marked executable.
-  unprotect();
-
   // Assert that no one is actually writing to or reading from the pseudo
   // addresses used to emit thread local translations
   if (thread_local_size) {
@@ -371,12 +531,116 @@ bool CodeCache::isValidCodeAddress(ConstCodeAddress addr) const {
      addr >= m_threadLocalStart + m_threadLocalSize);
 }
 
+bool CodeCache::isProtectedCodeAddress(ConstCodeAddress addr) const {
+  if (addr == nullptr || !m_all.contains(addr)) return false;
+  if (m_threadLocalStart && addr >= m_threadLocalStart &&
+      addr < m_threadLocalStart + m_threadLocalSize) {
+    return false;
+  }
+  auto const index = static_cast<size_t>((addr - m_base) >> 21);
+  if (index >= m_blocks.size()) return false;
+  auto const block = m_blocks[index].load(std::memory_order_relaxed);
+  return block && block->name() != kGdataName && block->contains(addr);
+}
+
 void CodeCache::protect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_EXEC);
 }
 
 void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
+}
+
+CodeWriteScope::CodeWriteScope(CodeBlock& block) {
+  if (block.base() == nullptr || block.size() == 0) return;
+  init(block.base(), block.base() + block.size());
+}
+
+CodeWriteScope::CodeWriteScope(CodeAddress begin, CodeAddress end) {
+  init(begin, end);
+}
+
+CodeWriteScope::CodeWriteScope(ConstCodeAddress begin,
+                               ConstCodeAddress end) {
+  init(begin, end);
+}
+
+void CodeWriteScope::init(ConstCodeAddress begin, ConstCodeAddress end) {
+  if (begin == nullptr || end == nullptr || begin >= end) return;
+  auto const* code = tc::g_code;
+  if (!code || !code->isProtectedCodeAddress(begin) ||
+      !code->isProtectedCodeAddress(end - 1)) {
+    return;
+  }
+
+  auto const granularity = codeProtectGranularity();
+  auto const alignedBegin = alignDownAddress(begin, granularity);
+  auto const alignedEnd = alignUpAddress(end, granularity);
+  if (alignedBegin >= alignedEnd) return;
+
+  ensureCodeWriteAtfork();
+  enterCodeWrite();
+  m_mutex = &codeWriteMutex();
+  m_mutex->lock();
+  m_locked = true;
+  auto& active = codeWriteActive();
+  try {
+    for (auto const& interval : subtractCovered(
+           alignedBegin, alignedEnd, active)) {
+      checkedProtect(interval.first, interval.second - interval.first,
+                     PROT_READ | PROT_WRITE | PROT_EXEC);
+      try {
+        active.push_back(interval);
+        m_owned.push_back(interval);
+      } catch (...) {
+        checkedProtect(interval.first, interval.second - interval.first,
+                       PROT_READ | PROT_EXEC);
+        for (auto it = active.begin(); it != active.end(); ++it) {
+          if (*it == interval) {
+            active.erase(it);
+            break;
+          }
+        }
+        throw;
+      }
+    }
+  } catch (...) {
+    for (auto const& interval : m_owned) {
+      checkedProtect(interval.first, interval.second - interval.first,
+                     PROT_READ | PROT_EXEC);
+      for (auto it = active.begin(); it != active.end(); ++it) {
+        if (*it == interval) {
+          active.erase(it);
+          break;
+        }
+      }
+    }
+    m_owned.clear();
+    m_locked = false;
+    m_mutex->unlock();
+    m_mutex = nullptr;
+    leaveCodeWrite();
+    throw;
+  }
+}
+
+CodeWriteScope::~CodeWriteScope() {
+  if (!m_locked) return;
+  auto& active = codeWriteActive();
+  for (auto const& interval : m_owned) {
+    checkedProtect(interval.first, interval.second - interval.first,
+                   PROT_READ | PROT_EXEC);
+    for (auto it = active.begin(); it != active.end(); ++it) {
+      if (*it == interval) {
+        active.erase(it);
+        break;
+      }
+    }
+  }
+  m_owned.clear();
+  m_mutex->unlock();
+  m_mutex = nullptr;
+  leaveCodeWrite();
 }
 
 const bool CodeCache::isAnySectionFull() const {
@@ -431,8 +695,8 @@ void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation, pageSiz
   }
 
   if (code) {
-    mprotect(block->frontier(), block->size(),
-             PROT_READ | PROT_WRITE | PROT_EXEC);
+    checkedProtect(block->frontier(), block->size(),
+                   PROT_READ | PROT_EXEC);
   }
 
   size_t first = (block->base() - cc.base()) >> 21;

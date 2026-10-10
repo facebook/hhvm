@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
@@ -1969,6 +1970,8 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
     always_assert(end);
   }
 
+  CodeWriteScope scope(reinterpret_cast<TCA>(start),
+                       reinterpret_cast<TCA>(end));
   adjustInstructions(rel, start, end, false);
 }
 
@@ -1979,6 +1982,8 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
   for (auto codePtr : meta.codePointers) {
     if (auto adjusted = rel.adjustedAddressAfter(*codePtr)) {
+      CodeWriteScope scope(reinterpret_cast<TCA>(codePtr),
+                           reinterpret_cast<TCA>(codePtr) + sizeof(TCA));
       *codePtr = adjusted;
     }
   }

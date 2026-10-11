@@ -198,7 +198,7 @@ function dynamic_fun(string $name)[]: mixed;
  * $cls::foo() if $cls is a string.
  */
 <<__Native("NoRecording")>>
-function dynamic_class_meth(class_or_classname<mixed> $cls, string $meth)[]: mixed;
+function dynamic_class_meth(class<mixed> $cls, string $meth)[]: mixed;
 
 /**
  * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
@@ -214,7 +214,7 @@ function dynamic_fun_force(string $name)[]: mixed;
  * Raises a notice similar to $cls::foo() if $cls is a string.
  */
 <<__Native>>
-function dynamic_class_meth_force(class_or_classname<mixed> $cls, string $meth)[]: mixed;
+function dynamic_class_meth_force(class<mixed> $cls, string $meth)[]: mixed;
 
 /**
  * Creates a LazyClass pointer from input $classname. It does not eagerly

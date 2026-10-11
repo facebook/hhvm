@@ -5988,9 +5988,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.check_unset_target(expr);
                 }
             }
-            ClassPtrTypeSpecifier(_) => {
-                self.check_can_use_feature(node, &FeatureName::ClassType);
-            }
             ShapeSplatSpecifier(_) => {
                 // The type-level splat syntax `...T` is admitted by either the
                 // concrete feature or the type-parameter feature. Whether `T` is

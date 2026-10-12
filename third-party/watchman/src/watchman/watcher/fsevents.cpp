@@ -9,6 +9,7 @@
 
 #if HAVE_FSEVENTS
 
+#include <folly/ScopeGuard.h>
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <condition_variable>
@@ -51,7 +52,9 @@ using unique_ref = std::unique_ptr<std::remove_pointer_t<T>, CFDeleter>;
 
 struct FSEventsStream {
   FSEventStreamRef stream{nullptr};
-  std::shared_ptr<Root> root;
+  // Weak: the root owns this stream through its view and watcher. The
+  // FSEventsThread holds a strong reference while callbacks can run.
+  std::weak_ptr<Root> root;
   FSEventsWatcher* watcher;
   FSEventStreamEventId last_good{0};
   FSEventStreamEventId since{0};
@@ -164,7 +167,10 @@ void FSEventsWatcher::fse_callback(
   size_t i;
   auto paths = reinterpret_cast<char**>(eventPaths);
   auto stream = reinterpret_cast<FSEventsStream*>(clientCallBackInfo);
-  auto root = stream->root;
+  auto root = stream->root.lock();
+  if (!root) {
+    return;
+  }
   std::vector<watchman_fsevent> items;
   auto watcher = stream->watcher;
 
@@ -488,6 +494,12 @@ std::unique_ptr<FSEventsStream> FSEventsWatcher::fse_stream_make(
 
 void FSEventsWatcher::FSEventsThread(const std::shared_ptr<Root>& root) {
   unique_ref<CFFileDescriptorRef> fdref;
+  // Releasing a CFFileDescriptor does not invalidate it.
+  SCOPE_EXIT {
+    if (fdref) {
+      CFFileDescriptorInvalidate(fdref.get());
+    }
+  };
   auto fdctx = CFFileDescriptorContext();
 
   w_set_thread_name("fsevents ", root->root_path.view());
@@ -499,7 +511,11 @@ void FSEventsWatcher::FSEventsThread(const std::shared_ptr<Root>& root) {
     fdctx.info = root.get();
 
     fdref.reset(CFFileDescriptorCreate(
-        nullptr, fsePipe_.read.fd(), true, fse_pipe_callback, &fdctx));
+        nullptr,
+        fsePipe_.read.fd(),
+        /*closeOnInvalidate=*/false, // fsePipe_ owns the descriptor
+        fse_pipe_callback,
+        &fdctx));
     CFFileDescriptorEnableCallBacks(fdref.get(), kCFFileDescriptorReadCallBack);
     {
       unique_ref<CFRunLoopSourceRef> fdsrc{

@@ -1,12 +1,4 @@
 (library
- (name server_pos)
- (wrapped false)
- (modules server_pos)
- (libraries naming_provider tast_env)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_files)
  (wrapped false)
  (modules server_files)
@@ -46,21 +38,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_autocomplete_services)
- (wrapped false)
- (modules
-  autocomplete_service
-  server_auto_complete)
- (libraries
-  provider_utils
-  search
-  server_command_types
-  server_pos
-  tast_provider)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
   (name server_symbol_definition)
   (wrapped false)
   (modules
@@ -80,24 +57,7 @@
 (library
  (name server_services)
  (wrapped false)
- (modules
-  autoclose_tags
-  cst_search_service
-  find_refs_service
-  method_jumps
-  save_state_service
-  server_deps_out_batch
-  server_deps_util
-  server_error
-  server_file_dependents
-  server_fun_deps_batch
-  server_global_state
-  server_identify_function
-  server_rx_api_shared
-  server_signature_help
-  server_type_definition
-  symbol_fun_call_service
-  symbol_type_service)
+ (modules find_refs_service method_jumps server_error server_identify_function)
  (libraries
   ast
   cgroupprofiler
@@ -111,11 +71,9 @@
   provider_context
   provider_utils
   server_command_types
-  server_docblock_at
   server_env
   server_file_outline
   server_infer_type
-  server_pos
   server_symbol_definition
   sys_utils
   tast_check
@@ -159,7 +117,7 @@
 (library
  (name server_find_refs)
  (wrapped false)
- (modules server_find_refs server_deps_in_batch server_package_lint)
+ (modules server_find_refs)
  (libraries
   package_info
   package_provider
@@ -177,7 +135,7 @@
 (library
  (name server_go_to)
  (wrapped false)
- (modules server_go_to_definition server_go_to_impl)
+ (modules server_go_to_impl)
  (libraries provider_context server_find_refs server_services)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
@@ -185,7 +143,7 @@
 (library
  (name server_infer_type)
  (wrapped false)
- (modules server_infer_type server_infer_type_batch server_infer_type_error server_collect_tast_holes server_infer_dynamic)
+ (modules server_infer_type)
  (libraries
   annotated_ast
   ast
@@ -201,30 +159,6 @@
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name server_docblock_at)
- (wrapped false)
- (modules server_docblock_at)
- (libraries
-  ast
-  collections
-  decl_provider
-  naming_provider
-  parser
-  pos
-  provider_context
-  relative_path
-  search
-  search_utils
-  server_command_types
-  server_symbol_definition
-  symbol
-  typing_defs
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
 
 (library
  (name server_rewrite)
@@ -259,7 +193,6 @@
   autocomplete_types
   docblock_service
   find_refs_wire_format
-  hover_service
   infer_at_pos_service
   infer_error_at_pos_service
   save_state_service_types
@@ -407,26 +340,6 @@
    lwt_ppx
    ppx_deriving.std
    ppx_yojson_conv)))
-
-(library
- (name client_provider)
- (wrapped false)
- (modules
-  client_provider
-  client_provider_sig
-  server_client_provider
-  server_idle_gc
-  test_client_provider)
- (libraries
-  libancillary
-  monitor_rpc
-  relative_path
-  server_command_types
-  server_progress
-  server_utils
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name custom_error_config)

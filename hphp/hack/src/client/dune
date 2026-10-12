@@ -45,7 +45,9 @@
   utils_config_file_lwt
   watchman_lwt
   yojson
-  version)
+  version
+  hover_service
+  server_autocomplete_services)
  (preprocess
   (pps
    lwt_ppx ppx_deriving.std

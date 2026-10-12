@@ -31,7 +31,10 @@
   state_loader
   naming_table_builder_ffi_externs
   sys_utils
-  yojson)
+  yojson
+  ide_services
+  server_docblock_at
+  server_go_to_definition)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -44,7 +47,8 @@
   file_content
   lwt_utils
   server_command_types
-  server_services sys_utils yojson)
+  server_services sys_utils yojson
+  hover_service)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -91,7 +95,8 @@
   tast_provider
   typing
   utils_core
- )
+ 
+  hover_service)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -179,3 +184,117 @@
  )
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_pos)
+ (wrapped false)
+ (modules server_pos)
+ (libraries
+  naming_provider
+  tast_env)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_autocomplete_services)
+ (wrapped false)
+ (modules autocomplete_service server_auto_complete)
+ (libraries
+  provider_utils
+  search
+  server_command_types
+  server_pos
+  tast_provider)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_services)
+ (wrapped false)
+ (modules autoclose_tags server_signature_help server_type_definition)
+ (libraries
+  ast
+  cgroupprofiler
+  decl
+  decl_compare
+  decl_export
+  fileutils
+  heap_shared_mem
+  hint_print
+  parser
+  provider_context
+  provider_utils
+  server_command_types
+  server_docblock_at
+  server_infer_type
+  server_symbol_definition
+  sys_utils
+  tast_check
+  tast_provider
+  tast_type_collector
+  typechecker_options
+  typing
+  typing_check
+  typing_deps
+  typing_json
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_go_to_definition)
+ (wrapped false)
+ (modules server_go_to_definition)
+ (libraries
+  provider_context
+  server_command_types
+  server_services)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_docblock_at)
+ (wrapped false)
+ (modules server_docblock_at)
+ (libraries
+  ast
+  collections
+  decl_provider
+  naming_provider
+  parser
+  pos
+  provider_context
+  relative_path
+  search
+  search_utils
+  server_command_types
+  server_symbol_definition
+  symbol
+  typing_defs
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name hover_service)
+ (wrapped false)
+ (modules hover_service)
+ (libraries
+  base64
+  connection_tracker
+  full_fidelity
+  hh_json
+  ide_rpc_api_types
+  lsp
+  lwt
+  marshal_tools
+  pos
+  search_utils
+  symbol
+  typing_defs
+  typing_deps
+  utils_lint
+  version
+  warnings_saved_state)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum ppx_yojson_conv)))

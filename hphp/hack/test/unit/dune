@@ -34,7 +34,8 @@
   server_monitor
   telemetry_test_utils
   typing_check
-  unit_test))
+  unit_test
+  client_provider))
 
 (executable
  (name isolation_outbound_tests)

@@ -14,7 +14,8 @@
   server_command_types
   tast_provider
   server_services
-  utils_core)
+  utils_core
+  server_rpc_services)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -40,7 +41,8 @@
   provider_backend
   server_services
   typing_deps
-  utils_core))
+  utils_core
+  server_rpc_services))
 
 (rule
  (target server_invalidate_units.fb.ml)
@@ -150,7 +152,9 @@
    server_invalidate_units.ml
    from
    (facebook signed_source -> server_invalidate_units.fb.ml)
-   (-> server_invalidate_units.stubs.ml)))
+   (-> server_invalidate_units.stubs.ml))
+  server_infer_type_batch
+  server_rpc_services)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_sexp_conv ppx_hash)))
 
@@ -213,9 +217,122 @@
    server_init_messages.ml
    from
    (facebook signed_source -> server_init_messages.fb.ml)
-   (-> server_init_messages.stubs.ml)))
+   (-> server_init_messages.stubs.ml))
+  client_provider
+  server_find_refs_batch
+  server_infer_type_batch
+  server_rpc_services)
  (preprocess
   (pps
    lwt_ppx
    ppx_deriving.std
    ppx_yojson_conv)))
+
+(library
+ (name server_rpc_services)
+ (wrapped false)
+ (modules
+  cst_search_service
+  save_state_service
+  server_deps_out_batch
+  server_deps_util
+  server_file_dependents
+  server_fun_deps_batch
+  server_global_state
+  server_rx_api_shared
+  symbol_fun_call_service
+  symbol_type_service)
+ (libraries
+  ast
+  cgroupprofiler
+  decl
+  decl_compare
+  decl_export
+  fileutils
+  heap_shared_mem
+  hint_print
+  parser
+  provider_context
+  provider_utils
+  server_command_types
+  server_env
+  server_progress
+  server_symbol_definition
+  sys_utils
+  tast_check
+  tast_provider
+  tast_type_collector
+  typechecker_options
+  typing
+  typing_check
+  typing_deps
+  typing_json
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_find_refs_batch)
+ (wrapped false)
+ (modules server_deps_in_batch server_package_lint)
+ (libraries
+  package_info
+  package_provider
+  procs_procs
+  provider_context
+  server_command_types
+  server_env
+  server_find_refs
+  server_rpc_services
+  server_services
+  server_symbol_definition
+  typechecker_options
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_infer_type_batch)
+ (wrapped false)
+ (modules
+  server_collect_tast_holes
+  server_infer_dynamic
+  server_infer_type_batch
+  server_infer_type_error)
+ (libraries
+  annotated_ast
+  ast
+  hh_json
+  naming_provider
+  pos
+  provider_context
+  server_command_types
+  server_env
+  server_infer_type
+  tast_env
+  tast_provider
+  typing
+  typing_defs
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name client_provider)
+ (wrapped false)
+ (modules
+  client_provider
+  client_provider_sig
+  server_client_provider
+  server_idle_gc
+  test_client_provider)
+ (libraries
+  libancillary
+  monitor_rpc
+  relative_path
+  server_command_types
+  server_files
+  server_utils
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

@@ -56,7 +56,10 @@
   utils_core
   utils_multifile
   write_symbol_info
-  yojson))
+  yojson
+  hover_service
+  ide_services
+  server_rpc_services))
 
 (executable
  (name hh_single_ai)
@@ -95,7 +98,8 @@
   server_services
   string
   sys_utils
-  utils_core))
+  utils_core
+  ide_services))
 
 (executable
  (name hh_single_ide_format)

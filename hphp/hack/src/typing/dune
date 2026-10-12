@@ -544,6 +544,7 @@
   depgraph_decompress_ffi
   server_env
   server_env_build
+  server_progress
   errors
   typing_error
   typing_service_types

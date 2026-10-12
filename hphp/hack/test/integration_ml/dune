@@ -68,7 +68,10 @@
   test_unbound_name
   test_unbound_name_2
   test_unbound_name_3)
- (libraries config_file edenfs_watcher_stubs hg_states runner_base server_notifier yojson))
+ (libraries config_file edenfs_watcher_stubs hg_states runner_base server_notifier yojson
+  client_provider
+  hover_service
+  server_rpc_services))
 
 (executable
  (name server_progress_tests)

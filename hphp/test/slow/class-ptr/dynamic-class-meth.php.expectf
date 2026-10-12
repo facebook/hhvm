@@ -1,16 +1,24 @@
 
+Notice: String passed to class type-hint in %s/class-ptr/dynamic-class-meth.php on line 21
+
 Notice: Implicit string to Class conversion for classname C for dynamic_class_meth() in %s/class-ptr/dynamic-class-meth.php on line 21
 called m
+
+Notice: String passed to class type-hint in %s/class-ptr/dynamic-class-meth.php on line 22
 
 Notice: Implicit string to Class conversion for classname C for dynamic_class_meth() in %s/class-ptr/dynamic-class-meth.php on line 22
 called m
 called m
 called m
 
+Notice: String passed to class type-hint in %s/class-ptr/dynamic-class-meth.php on line 26
+
 Notice: Implicit string to Class conversion for classname C for dynamic_class_meth() in %s/class-ptr/dynamic-class-meth.php on line 26
 
 Warning: Method C::n not marked dynamic in %s/class-ptr/dynamic-class-meth.php on line 26
 called n
+
+Notice: String passed to class type-hint in %s/class-ptr/dynamic-class-meth.php on line 27
 
 Notice: Implicit string to Class conversion for classname C for dynamic_class_meth() in %s/class-ptr/dynamic-class-meth.php on line 27
 

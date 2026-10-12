@@ -1,0 +1,24 @@
+ERROR: File "variance.php", line 15, characters 19-30:
+The method `getClassname` is not compatible with the overridden method (Typing[4341])
+  File "variance.php", line 15, characters 19-30:
+  Method `getClassname` has type `(function(): ~class<mixed>)` in `Child`
+  File "variance.php", line 7, characters 28-39:
+  But it has type `(function(): ~classname<mixed>)` in parent `Base`
+  File "variance.php", line 15, characters 19-30:
+  Type `(function(): ~class<mixed>)` is not a subtype of `(function(): ~classname<mixed>)`
+  File "variance.php", line 7, characters 44-59:
+  Expected `classname<mixed>`
+  File "variance.php", line 15, characters 35-46:
+  But got `class<mixed>`
+ERROR: File "variance.php", line 20, characters 19-27:
+The method `takeClass` is not compatible with the overridden method (Typing[4341])
+  File "variance.php", line 20, characters 19-27:
+  Method `takeClass` has type `(function(classname<mixed> $value): void)` in `Child`
+  File "variance.php", line 8, characters 28-36:
+  But it has type `(function(class<mixed> $value): void)` in parent `Base`
+  File "variance.php", line 20, characters 19-27:
+  Type `(function(classname<mixed> $value): void)` is not a subtype of `(function(class<mixed> $value): void)`
+  File "variance.php", line 20, characters 29-44:
+  Expected `classname<mixed>`
+  File "variance.php", line 8, characters 38-49:
+  But got `class<mixed>`

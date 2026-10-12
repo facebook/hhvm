@@ -96,6 +96,8 @@ module Hhconfig : sig
 
   val constraint_method_call : string
 
+  val disable_class_sub_classname_method_override : string
+
   val disable_physical_equality : string
 
   val disallow_discarded_nullable_awaitables : string

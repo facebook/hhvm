@@ -197,6 +197,7 @@ type t = {
   recursive_case_types: bool;
   tco_enabled_unstable_features: S_set.t;
   class_sub_classname: bool;
+  disable_class_sub_classname_method_override: bool;
   class_class_type: bool;
   needs_concrete_class_call_check: int;
   needs_concrete_class_function_pointer_check: int option;
@@ -311,6 +312,7 @@ let default =
     recursive_case_types = false;
     tco_enabled_unstable_features = S_set.empty;
     class_sub_classname = true;
+    disable_class_sub_classname_method_override = false;
     class_class_type = true;
     needs_concrete_class_call_check = 0;
     needs_concrete_class_function_pointer_check = None;
@@ -422,6 +424,7 @@ let set
     ?recursive_case_types
     ?tco_enabled_unstable_features
     ?class_sub_classname
+    ?disable_class_sub_classname_method_override
     ?class_class_type
     ?needs_concrete_class_call_check
     ?needs_concrete_class_function_pointer_check
@@ -718,6 +721,10 @@ let set
         options.tco_enabled_unstable_features;
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
+    disable_class_sub_classname_method_override =
+      setting
+        disable_class_sub_classname_method_override
+        options.disable_class_sub_classname_method_override;
     class_class_type = setting class_class_type options.class_class_type;
     needs_concrete_class_call_check =
       setting

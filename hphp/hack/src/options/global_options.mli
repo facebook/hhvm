@@ -293,6 +293,8 @@ type t = {
   tco_enabled_unstable_features: S_set.t;
       (** Set of unstable features enabled for the current file *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
+  disable_class_sub_classname_method_override: bool;
+      (** Disable class<T> <: classname<T> rewrites in method override checks. *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
   needs_concrete_class_call_check: int;
       (** Configure checks for calls to __NeedsConcrete methods through a named
@@ -411,6 +413,7 @@ val set :
   ?recursive_case_types:bool ->
   ?tco_enabled_unstable_features:S_set.t ->
   ?class_sub_classname:bool ->
+  ?disable_class_sub_classname_method_override:bool ->
   ?class_class_type:bool ->
   ?needs_concrete_class_call_check:int ->
   ?needs_concrete_class_function_pointer_check:int option ->

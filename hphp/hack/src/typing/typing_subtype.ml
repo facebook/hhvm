@@ -259,7 +259,8 @@ module Subtype_env = struct
         (** When enabled, allow rewriting of class<T> <: U to classname<T> <: U
             for a subset of U types. This is normally controlled by the
             class_sub_classname typechecker option, but it is unconditionally
-            false for type well-formedness checks. *)
+            false for type well-formedness checks. Method override checks can
+            also disable it. *)
     recursion_tracker: Subtype_recursion_tracker.t;
   }
 
@@ -13531,13 +13532,21 @@ let subtype_funs
    * permit subtyping to dynamic
    *)
   let old_env = env in
+  let class_sub_classname =
+    if for_override then
+      not
+        (Typechecker_options.disable_class_sub_classname_method_override
+           (Env.get_tcopt env))
+    else
+      should_cls_sub_cn env
+  in
   let (env, prop) =
     Subtype.simplify_funs
       ~subtype_env:
         (Subtype_env.create
            ~log_level:2
            ~is_dynamic_aware:false
-           ~class_sub_classname:(should_cls_sub_cn env)
+           ~class_sub_classname
            on_error)
       ~check_return
       ~for_override

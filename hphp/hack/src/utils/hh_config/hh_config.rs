@@ -617,6 +617,10 @@ impl HhConfig {
             tco_enabled_unstable_features: Default::default(),
             class_sub_classname: hhconfig
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
+            disable_class_sub_classname_method_override: hhconfig.get_bool_or(
+                "disable_class_sub_classname_method_override",
+                default.disable_class_sub_classname_method_override,
+            )?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             needs_concrete_class_call_check: get_tristate(
                 &hhconfig,

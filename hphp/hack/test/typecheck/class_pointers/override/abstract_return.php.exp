@@ -1,0 +1,24 @@
+ERROR: File "abstract_return.php", line 18, characters 19-28:
+The method `getTypeAbs` is not compatible with the overridden method (Typing[4341])
+  File "abstract_return.php", line 18, characters 19-28:
+  Method `getTypeAbs` has type `(function(): ~class<mixed>)` in `ReproClassField`
+  File "abstract_return.php", line 8, characters 28-37:
+  But it has type `(function(): ~string)` in parent `ReproFieldBase`
+  File "abstract_return.php", line 18, characters 19-28:
+  Type `(function(): ~class<mixed>)` is not a subtype of `(function(): ~string)`
+  File "abstract_return.php", line 8, characters 42-47:
+  Expected `string`
+  File "abstract_return.php", line 18, characters 33-44:
+  But got `class<mixed>`
+ERROR: File "abstract_return.php", line 23, characters 19-25:
+The method `getType` is not compatible with the overridden method (Typing[4341])
+  File "abstract_return.php", line 23, characters 19-25:
+  Method `getType` has type `(function(): ~class<mixed>)` in `ReproClassField`
+  File "abstract_return.php", line 9, characters 19-25:
+  But it has type `(function(): string)` in parent `ReproFieldBase`
+  File "abstract_return.php", line 23, characters 19-25:
+  Type `(function(): ~class<mixed>)` is not a subtype of `(function(): string)`
+  File "abstract_return.php", line 9, characters 30-35:
+  Expected `string`
+  File "abstract_return.php", line 23, characters 30-41:
+  But got `class<mixed>`

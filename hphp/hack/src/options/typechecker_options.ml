@@ -275,6 +275,9 @@ let package_exclude_patterns t = t.Global_options.tco_package_exclude_patterns
 
 let class_sub_classname t = t.Global_options.class_sub_classname
 
+let disable_class_sub_classname_method_override t =
+  t.Global_options.disable_class_sub_classname_method_override
+
 let class_class_type t = t.Global_options.class_class_type
 
 let needs_concrete_class_call_check t =

@@ -1,0 +1,2 @@
+--config 'everything_sdt=true'
+--config 'disable_class_sub_classname_method_override=true'

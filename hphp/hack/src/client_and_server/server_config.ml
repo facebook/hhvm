@@ -602,6 +602,10 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt Config_keys.Hhconfig.recursive_case_types config)
     ?class_sub_classname:
       (bool_opt Config_keys.Hhconfig.class_sub_classname config)
+    ?disable_class_sub_classname_method_override:
+      (bool_opt
+         Config_keys.Hhconfig.disable_class_sub_classname_method_override
+         config)
     ?class_class_type:(bool_opt Config_keys.Hhconfig.class_class_type config)
     ?needs_concrete_class_call_check:
       (int_opt Config_keys.Hhconfig.needs_concrete_class_call_check config

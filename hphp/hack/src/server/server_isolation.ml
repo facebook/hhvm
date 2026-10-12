@@ -651,35 +651,34 @@ let result r ~grow ~total_seeds ~sizes ~clusters =
       largest_cluster = List.fold sizes ~init:0 ~f:Int.max;
     }
 
-(* Seconds a seed costs, measured rather than derived. Rough on purpose: here
-   to tell an afternoon apart from a week, not to predict a runtime. *)
-let seconds_per_seed ~grow =
-  if grow then
-    4.2
-  else
-    0.12
-
-(* Past this the caller is told rather than left to find out. Two hours still
-   clears measuring a whole class hierarchy, and refuses growing one. *)
-let hours_before_asking = 2.0
-
-(* Big enough to read a rate off, small enough to come back while the caller is
-   still waiting. Growth costs 35x what measuring does, so the two differ. *)
-let suggested_sample ~grow =
-  if grow then
-    400
-  else
-    5000
-
 (** Refuse a run long enough that the caller should have meant it, and say how
     to proceed. Reported rather than raised: the caller learns what to change
     and the server stays up. *)
 let too_long_to_run ~grow ~total_seeds ~allow_long_run =
-  let hours = float_of_int total_seeds *. seconds_per_seed ~grow /. 3600. in
+  (* Seconds a seed costs, measured rather than derived. Rough on purpose: here
+     to tell an afternoon apart from a week, not to predict a runtime. *)
+  let seconds_per_seed =
+    if grow then
+      4.2
+    else
+      0.12
+  in
+  (* Past this the caller is told rather than left to find out. Two hours still
+     clears measuring a whole class hierarchy, and refuses growing one. *)
+  let hours_before_asking = 2.0 in
+  let hours = float_of_int total_seeds *. seconds_per_seed /. 3600. in
   if allow_long_run || Float.(hours <= hours_before_asking) then
     None
   else
-    let sample = suggested_sample ~grow in
+    (* Big enough to read a rate off, small enough to come back while the
+       caller is still waiting. Growth costs 35x what measuring does, so the
+       two differ. *)
+    let sample =
+      if grow then
+        400
+      else
+        5000
+    in
     let (verb, verb_all) =
       if grow then
         ("grows", "grow")

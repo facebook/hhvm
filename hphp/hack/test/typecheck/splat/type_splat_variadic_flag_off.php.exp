@@ -1,0 +1,20 @@
+ERROR: File "type_splat_variadic_flag_off.php", line 11, characters 19-29:
+The method `__construct` is not compatible with the overridden method (Typing[4341])
+  File "type_splat_variadic_flag_off.php", line 11, characters 19-29:
+  Method `__construct` has type `(function(string $values...)[]: void)` in `Impl`
+  File "type_splat_variadic_flag_off.php", line 7, characters 19-29:
+  But it has type `(function(...(string...) $values): void)` in parent `Splat<(string...)>`
+  File "type_splat_variadic_flag_off.php", line 11, characters 19-29:
+  Type `(function(string $values...)[]: void)` is not a subtype of `(function(...(string...) $values): void)`
+  File "type_splat_variadic_flag_off.php", line 11, characters 41-47:
+  Expected `string` (variadic argument)
+  File "type_splat_variadic_flag_off.php", line 10, characters 35-45:
+  But got `(string...)`
+  File "type_splat_variadic_flag_off.php", line 7, characters 37-43:
+    via this generic `T` (tuple from parameters)
+ERROR: File "type_splat_variadic_flag_off.php", line 25, characters 22-23:
+Invalid argument (Typing[4042])
+  File "type_splat_variadic_flag_off.php", line 24, characters 22-52:
+  Should have a variadic argument
+  File "type_splat_variadic_flag_off.php", line 22, characters 29-59:
+  Because of this definition

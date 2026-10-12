@@ -190,6 +190,8 @@ module Hhconfig : sig
 
   val variadic_named_parameters : string
 
+  val pure_variadic_splat_subtyping : string
+
   val strict_consistent_construct : string
 
   val symbol_write_exclude_out : string

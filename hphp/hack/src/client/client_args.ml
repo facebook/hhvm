@@ -299,6 +299,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let isolation_max_dependents = ref None in
   let isolation_max_cluster_size = ref None in
   let isolation_batch_size = ref None in
+  let isolation_allow_long_run = ref false in
   let isolation_max_seeds = ref None in
   let isolation_seed_offset = ref 0 in
   (* The mode carries the options, so setting it needs a value before the flags
@@ -320,6 +321,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
         (* The largest batch a long run has finished at; not a tuned
            figure. *)
         batch_size = Option.value !isolation_batch_size ~default:400;
+        allow_long_run = !isolation_allow_long_run;
         max_seeds = !isolation_max_seeds;
         seed_offset = !isolation_seed_offset;
       }
@@ -582,6 +584,10 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       ( "--isolation-max-cluster-size",
         Arg.Int (fun n -> isolation_max_cluster_size := Some n),
         " <n> stop growing a cluster once it reaches <n> files",
+        Arg_non_user_facing );
+      ( "--isolation-allow-long-run",
+        Arg.Set isolation_allow_long_run,
+        " run even when the seed count says this will take hours",
         Arg_non_user_facing );
       ( "--isolation-batch-size",
         Arg.Int (fun n -> isolation_batch_size := Some n),

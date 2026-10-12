@@ -26,6 +26,7 @@ let check
         max_dependents;
         max_cluster_size;
         batch_size;
+        allow_long_run = _;
         max_seeds;
         seed_offset;
       } =

@@ -651,6 +651,57 @@ let result r ~grown ~total_seeds ~sizes ~clusters =
       largest_cluster = List.fold sizes ~init:0 ~f:Int.max;
     }
 
+(* Seconds a seed costs, measured rather than derived. Rough on purpose: here
+   to tell an afternoon apart from a week, not to predict a runtime. *)
+let seconds_per_seed ~grown =
+  if grown then
+    4.2
+  else
+    0.12
+
+(* Past this the caller is told rather than left to find out. Two hours still
+   clears measuring a whole class hierarchy, and refuses growing one. *)
+let hours_before_asking = 2.0
+
+(* Big enough to read a rate off, small enough to come back while the caller is
+   still waiting. Growth costs 35x what measuring does, so the two differ. *)
+let suggested_sample ~grown =
+  if grown then
+    400
+  else
+    5000
+
+(** Refuse a run long enough that the caller should have meant it, and say how
+    to proceed. Reported rather than raised: the caller learns what to change
+    and the server stays up. *)
+let too_long_to_run ~grown ~total_seeds ~allow_long_run =
+  let hours = float_of_int total_seeds *. seconds_per_seed ~grown /. 3600. in
+  if allow_long_run || Float.(hours <= hours_before_asking) then
+    None
+  else
+    let sample = suggested_sample ~grown in
+    let (verb, verb_all) =
+      if grown then
+        ("grows", "grow")
+      else
+        ("measures", "measure")
+    in
+    Some
+      (Printf.sprintf
+         "%d seeds, which will take %s.\nSample it rather than covering it: --isolation-max-seeds %d %s %d seeds and stops, which is enough to see what fraction is isolatable. --isolation-seed-offset %d picks a different %d.\nOr pass --isolation-allow-long-run to %s all %d."
+         total_seeds
+         (if Float.(hours >= 24.) then
+           "days"
+         else
+           "hours")
+         sample
+         verb
+         sample
+         (sample * 3)
+         sample
+         verb_all
+         total_seeds)
+
 (** Refuse a seed source that cannot be read, before the run starts. *)
 let unreadable_seed_source ~seed_list ~seed_dir =
   (* [Disk.file_exists] is true of a directory, which would read as a file and
@@ -680,6 +731,7 @@ let query r options =
           seed_dir;
           max_seeds;
           seed_offset;
+          allow_long_run;
           _;
         } =
     options
@@ -688,10 +740,15 @@ let query r options =
      report the first one's totals. *)
   Growth.reset_stats ();
   let grown = not no_growth in
+  let refuse ~total_seeds message =
+    Hh_logger.log "[isolation] refused: %s" message;
+    refused ~grown ~total_seeds message
+  in
+  (* Both are refusals before any work, checked where they can first be
+     answered: the seed source before the seeds are selected, the runtime only
+     once selecting them has said how many there are. *)
   match unreadable_seed_source ~seed_list ~seed_dir with
-  | Some refusal ->
-    Hh_logger.log "[isolation] refused: %s" refusal;
-    refused ~grown ~total_seeds:0 refusal
+  | Some refusal -> refuse ~total_seeds:0 refusal
   | None ->
     let t_start = Unix.gettimeofday () in
     let all_seeds =
@@ -711,13 +768,16 @@ let query r options =
       ~seed_offset
       ~max_seeds
       ~available:(List.length all_seeds);
-    let sizes =
-      if no_growth then
-        measure_seeds r seeds ~total_seeds
-      else
-        grow_seeds r seeds ~total_seeds ~since:t
-    in
-    result r ~grown ~total_seeds ~sizes ~clusters:(r.sink.collected ())
+    (match too_long_to_run ~grown ~total_seeds ~allow_long_run with
+    | Some refusal -> refuse ~total_seeds refusal
+    | None ->
+      let sizes =
+        if no_growth then
+          measure_seeds r seeds ~total_seeds
+        else
+          grow_seeds r seeds ~total_seeds ~since:t
+      in
+      result r ~grown ~total_seeds ~sizes ~clusters:(r.sink.collected ()))
 
 let go
     (options : Server_isolation_types.options)

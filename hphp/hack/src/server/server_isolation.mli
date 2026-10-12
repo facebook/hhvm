@@ -20,7 +20,7 @@
     truncated one stopped at the size cap, which is exactly the guarantee it
     drops.
 
-    Under [no_growth] it is the disjointness that is lost, not the closure: each
+    Without [grow] it is the disjointness that is lost, not the closure: each
     set is one seed's closure, so it is closed under inbound edges by
     construction and is never [truncated]. Two of them overlap wherever a file
     depends on both seeds, and one contains another whenever a seed lies inside

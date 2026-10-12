@@ -17,7 +17,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --file-dependents                        (mode) Given a list of filepaths, shows list of (possibly) dependent files
   --find-class-refs                        (mode) finds references of the provided class name
   --find-isolatable-clusters               (mode) find clusters of files that can be isolated from the codebase
-  --isolation-no-growth                    report the smallest isolatable set around each starting file, instead of growing it
+  --isolation-grow                         grow a bigger cluster around each starting file, instead of reporting its smallest isolatable set
   --isolation-output                       <file> write clusters to <file> as JSON lines as they are found, and print only the summary
   --isolation-seed-framework               <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds
   --isolation-seed-list                    <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds

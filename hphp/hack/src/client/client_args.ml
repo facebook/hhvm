@@ -291,7 +291,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
-  let isolation_no_growth = ref false in
+  let isolation_grow = ref false in
   let isolation_output = ref None in
   let isolation_seed_framework = ref None in
   let isolation_seed_list = ref None in
@@ -308,7 +308,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let isolation_options () =
     Server_isolation_types.
       {
-        no_growth = !isolation_no_growth;
+        grow = !isolation_grow;
         output_file = !isolation_output;
         seed_framework = !isolation_seed_framework;
         seed_list = !isolation_seed_list;
@@ -557,9 +557,9 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
             set_mode (MODE_FIND_ISOLATABLE_CLUSTERS (isolation_options ()))),
         " (mode) find clusters of files that can be isolated from the codebase",
         Arg_non_user_facing );
-      ( "--isolation-no-growth",
-        Arg.Set isolation_no_growth,
-        " report the smallest isolatable set around each starting file, instead of growing it",
+      ( "--isolation-grow",
+        Arg.Set isolation_grow,
+        " grow a bigger cluster around each starting file, instead of reporting its smallest isolatable set",
         Arg_non_user_facing );
       ( "--isolation-output",
         Arg.String (fun s -> isolation_output := Some s),

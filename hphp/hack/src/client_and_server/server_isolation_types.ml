@@ -24,7 +24,7 @@ type result = {
 }
 
 type options = {
-  no_growth: bool;
+  grow: bool;
   output_file: string option;
   seed_framework: string option;
   seed_list: string option;

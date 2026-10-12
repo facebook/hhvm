@@ -34,9 +34,10 @@ type result = {
 
 (** Where to start growing clusters, and how far to take them. *)
 type options = {
-  no_growth: bool;
-      (** Report each starting file's smallest isolatable set — its closure under
-          reverse dependencies — instead of growing it. *)
+  grow: bool;
+      (** Grow a bigger cluster around each starting file, instead of reporting
+          its smallest isolatable set — its closure under reverse
+          dependencies. *)
   output_file: string option;
       (** Write each cluster as it is produced, one JSON object per line, and
           return only the summary. A family-sized run cannot hold every cluster

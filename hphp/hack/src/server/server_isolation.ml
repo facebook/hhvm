@@ -257,7 +257,7 @@ module Sink = struct
      smallest isolatable set around a file, or that set grown as far as the bounds
      allow. A file that says which can be read without knowing the command that
      produced it. *)
-  let to_file ~grown path =
+  let to_file ~grow path =
     let out = Stdlib.open_out path in
     {
       emit =
@@ -268,7 +268,7 @@ module Sink = struct
               ("files", `List (List.map cluster.files ~f:(fun f -> `String f)));
               ("size", `Int (List.length cluster.files));
               ("common_directory", `String cluster.common_directory);
-              ("grown", `Bool grown);
+              ("grown", `Bool grow);
               ("truncated", `Bool cluster.truncated);
             ]
           |> Yojson.Safe.to_string
@@ -575,7 +575,7 @@ let grow_seeds r seeds ~total_seeds ~since =
   (* A closure larger than the whole cluster can never be absorbed, and the walk
      is where growth spends its time. Clamped once per run, not per candidate:
      the memo is keyed by path, so a varying bound would poison it. Growth only —
-     under [no_growth] the bound is the measurement. *)
+     without [grow] the bound is the measurement. *)
   let max_dependents =
     match r.max_cluster_size with
     | Some cap -> min r.max_dependents cap
@@ -622,12 +622,12 @@ let make_run options genv env sink =
   }
 
 (** What a run that did not happen reports: the reason, and nothing found. *)
-let refused ~grown ~total_seeds message =
+let refused ~grow ~total_seeds message =
   Server_isolation_types.
     {
       refused = Some message;
       clusters = [];
-      grown;
+      grown = grow;
       total_seeds;
       total_isolatable_files = 0;
       total_clusters = 0;
@@ -638,12 +638,12 @@ let refused ~grown ~total_seeds message =
 (** Each mode reports the sizes of the sets it found, and differs in nothing
     else the caller sees, so the result is assembled here rather than at the end
     of each branch. *)
-let result r ~grown ~total_seeds ~sizes ~clusters =
+let result r ~grow ~total_seeds ~sizes ~clusters =
   Server_isolation_types.
     {
       refused = None;
       clusters;
-      grown;
+      grown = grow;
       total_seeds;
       total_isolatable_files = List.fold sizes ~init:0 ~f:( + );
       total_clusters = List.length sizes;
@@ -653,8 +653,8 @@ let result r ~grown ~total_seeds ~sizes ~clusters =
 
 (* Seconds a seed costs, measured rather than derived. Rough on purpose: here
    to tell an afternoon apart from a week, not to predict a runtime. *)
-let seconds_per_seed ~grown =
-  if grown then
+let seconds_per_seed ~grow =
+  if grow then
     4.2
   else
     0.12
@@ -665,8 +665,8 @@ let hours_before_asking = 2.0
 
 (* Big enough to read a rate off, small enough to come back while the caller is
    still waiting. Growth costs 35x what measuring does, so the two differ. *)
-let suggested_sample ~grown =
-  if grown then
+let suggested_sample ~grow =
+  if grow then
     400
   else
     5000
@@ -674,14 +674,14 @@ let suggested_sample ~grown =
 (** Refuse a run long enough that the caller should have meant it, and say how
     to proceed. Reported rather than raised: the caller learns what to change
     and the server stays up. *)
-let too_long_to_run ~grown ~total_seeds ~allow_long_run =
-  let hours = float_of_int total_seeds *. seconds_per_seed ~grown /. 3600. in
+let too_long_to_run ~grow ~total_seeds ~allow_long_run =
+  let hours = float_of_int total_seeds *. seconds_per_seed ~grow /. 3600. in
   if allow_long_run || Float.(hours <= hours_before_asking) then
     None
   else
-    let sample = suggested_sample ~grown in
+    let sample = suggested_sample ~grow in
     let (verb, verb_all) =
-      if grown then
+      if grow then
         ("grows", "grow")
       else
         ("measures", "measure")
@@ -725,7 +725,7 @@ let unreadable_seed_source ~seed_list ~seed_dir =
 let query r options =
   let Server_isolation_types.
         {
-          no_growth;
+          grow;
           seed_framework;
           seed_list;
           seed_dir;
@@ -739,10 +739,9 @@ let query r options =
   (* Accumulates across a run; a second query in the same server would otherwise
      report the first one's totals. *)
   Growth.reset_stats ();
-  let grown = not no_growth in
   let refuse ~total_seeds message =
     Hh_logger.log "[isolation] refused: %s" message;
-    refused ~grown ~total_seeds message
+    refused ~grow ~total_seeds message
   in
   (* Both are refusals before any work, checked where they can first be
      answered: the seed source before the seeds are selected, the runtime only
@@ -768,25 +767,25 @@ let query r options =
       ~seed_offset
       ~max_seeds
       ~available:(List.length all_seeds);
-    (match too_long_to_run ~grown ~total_seeds ~allow_long_run with
+    (match too_long_to_run ~grow ~total_seeds ~allow_long_run with
     | Some refusal -> refuse ~total_seeds refusal
     | None ->
       let sizes =
-        if no_growth then
-          measure_seeds r seeds ~total_seeds
-        else
+        if grow then
           grow_seeds r seeds ~total_seeds ~since:t
+        else
+          measure_seeds r seeds ~total_seeds
       in
-      result r ~grown ~total_seeds ~sizes ~clusters:(r.sink.collected ()))
+      result r ~grow ~total_seeds ~sizes ~clusters:(r.sink.collected ()))
 
 let go
     (options : Server_isolation_types.options)
     (genv : Server_env.genv)
     (env : Server_env.env) : Server_isolation_types.result =
-  let Server_isolation_types.{ no_growth; output_file; _ } = options in
+  let Server_isolation_types.{ grow; output_file; _ } = options in
   let sink =
     match output_file with
-    | Some path -> Sink.to_file ~grown:(not no_growth) path
+    | Some path -> Sink.to_file ~grow path
     | None -> Sink.in_memory ()
   in
   (* Non-evictable shared heaps that outlive the query: cleared on the way in so

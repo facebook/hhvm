@@ -18,7 +18,7 @@ let check
     ~max_dependents_given
     Server_isolation_types.
       {
-        no_growth;
+        grow;
         output_file = _;
         seed_framework;
         seed_list;
@@ -83,17 +83,16 @@ let check
       (Printf.sprintf
          "%s each name where to start; pass one"
          (String.concat ~sep:" and " seed_sources_given));
-  (* Nothing grows in this mode, so there is no cluster to cap. *)
-  if no_growth && Option.is_some max_cluster_size then
+  (* Nothing grows without [--isolation-grow], so there is no cluster to cap. *)
+  if (not grow) && Option.is_some max_cluster_size then
     reject
-      "--isolation-max-cluster-size caps a growing cluster, and --isolation-no-growth does not grow one";
+      "--isolation-max-cluster-size caps a growing cluster; pass --isolation-grow to grow one";
   (* Growth clamps the reach to the cap, so a larger one is not refused, it is
      silently unused. Only worth saying when the caller picked the reach: the
      default sits above most caps, and naming a flag they never passed reads as
      an accusation rather than a hint. *)
   (match max_cluster_size with
-  | Some cap
-    when max_dependents_given && (not no_growth) && max_dependents > cap ->
+  | Some cap when max_dependents_given && grow && max_dependents > cap ->
     warn
       (Printf.sprintf
          "--isolation-max-dependents %d is clamped to --isolation-max-cluster-size %d for growth; a closure larger than the cluster can never be absorbed"

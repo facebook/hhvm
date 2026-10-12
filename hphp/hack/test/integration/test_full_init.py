@@ -208,7 +208,8 @@ class TestFreshInit(common_tests.CommonTests):
             changed_files=list(files.keys()), args=["--no-load"]
         )
         output, _ = self.test_driver.check_cmd(
-            expected_output=None, options=["--find-isolatable-clusters"]
+            expected_output=None,
+            options=["--find-isolatable-clusters", "--isolation-grow"],
         )
         lines = output.splitlines()
 
@@ -243,6 +244,7 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None,
             options=[
                 "--find-isolatable-clusters",
+                "--isolation-grow",
                 "--json",
             ],
         )
@@ -321,6 +323,19 @@ class TestFreshInit(common_tests.CommonTests):
             fixture_clusters,
         )
 
+        # Measuring is the default, so the same command without
+        # --isolation-grow reports each seed's own closure instead. Growth
+        # merges seeds into shared clusters, so over the same repo it reports
+        # fewer of them than measuring does — which is what tells the two modes
+        # apart, rather than merely reading the flag back out.
+        measured_output, _ = self.test_driver.check_cmd(
+            expected_output=None,
+            options=["--find-isolatable-clusters", "--json"],
+        )
+        measured = json.loads(measured_output)["summary"]
+        self.assertFalse(measured["grown"])
+        self.assertGreater(measured["total_clusters"], summary["total_clusters"])
+
         # isolation_seed.php calls only itself, so it is still a seed: a
         # self-reference is not an external dependent. It absorbs nothing and is
         # reported as a cluster of one, which is why it is expected above.
@@ -345,7 +360,8 @@ class TestFreshInit(common_tests.CommonTests):
             )
 
         output, _ = self.test_driver.check_cmd(
-            expected_output=None, options=["--find-isolatable-clusters"]
+            expected_output=None,
+            options=["--find-isolatable-clusters", "--isolation-grow"],
         )
         lines = output.splitlines()
         self.assertEqual(2, len(lines))
@@ -394,6 +410,7 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None,
             options=[
                 "--find-isolatable-clusters",
+                "--isolation-grow",
                 "--isolation-seed-list",
                 seed_list,
                 "--json",
@@ -444,6 +461,7 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None,
             options=[
                 "--find-isolatable-clusters",
+                "--isolation-grow",
                 "--isolation-max-cluster-size",
                 "3",
                 "--json",

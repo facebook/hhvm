@@ -406,15 +406,15 @@ let log_closure_report ~total_seeds ~closure_sizes =
     lower bound.
 
     Emitted and released one at a time; only the sizes are needed after.
-    Collected in batches because the walk's dependency sets live behind a Rust
-    custom block, so the OCaml collector barely notices them. [compact] rather
-    than [full_major] to hand memory back to the operating system. *)
+    Compacted periodically because the walk's dependency sets live behind a
+    Rust custom block, so the OCaml collector barely notices them. [compact]
+    rather than [full_major] to hand memory back to the operating system. *)
 let measure_seeds r seeds ~total_seeds =
-  (* Seeds between forced compactions. Large enough that walking the whole heap
-     is not what the run spends its time on. Not measured. *)
-  let compact_batch_size = 2000 in
-  (* On a clock rather than on the batch: a family smaller than one batch would
-     otherwise report nothing until it finished. *)
+  (* Large enough that walking the whole heap is not what the run spends its
+     time on. *)
+  let seeds_between_compactions = 2000 in
+  (* On a clock rather than per compaction: a run with fewer seeds than that
+     would otherwise report nothing until it finished. *)
   let seconds_between_reports = 60.0 in
   let done_count = ref 0 in
   let fitted_count = ref 0 in
@@ -438,14 +438,14 @@ let measure_seeds r seeds ~total_seeds =
     report_if_due ();
     size
   in
-  let measure_one_batch batch =
-    let measured_sizes = List.filter_map batch ~f:measure_one_seed in
+  let measure_then_compact seeds =
+    let measured_sizes = List.filter_map seeds ~f:measure_one_seed in
     Gc.compact ();
     measured_sizes
   in
   let measured_sizes =
-    List.chunks_of seeds ~length:compact_batch_size
-    |> List.concat_map ~f:measure_one_batch
+    List.chunks_of seeds ~length:seeds_between_compactions
+    |> List.concat_map ~f:measure_then_compact
   in
   report ();
   log_closure_report ~total_seeds ~closure_sizes:measured_sizes;

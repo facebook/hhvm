@@ -55,9 +55,11 @@ type options = {
       (** Stop growing a cluster at this many files and never report a larger
           one, marking it [truncated]. [None] grows to a fixed point. *)
   batch_size: int;
-      (** How many clusters to grow at once. They are all held in memory
-          until the batch ends, so this sets the run's peak memory. At
-          least 1. *)
+      (** How many clusters to grow at once. They are all held in memory until
+          the batch ends, so this sets the run's peak memory. It also changes
+          what comes back: clusters in one batch are grown against the same
+          [claimed] snapshot, so a larger batch drops more of them for
+          overlapping. At least 1. *)
   allow_long_run: bool;
       (** Run even when the seed count says this will take hours. Without it a
           run that long is refused before it starts. *)

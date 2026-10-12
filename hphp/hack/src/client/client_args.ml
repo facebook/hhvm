@@ -591,7 +591,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
         Arg_non_user_facing );
       ( "--isolation-batch-size",
         Arg.Int (fun n -> isolation_batch_size := Some n),
-        " <n> grow <n> clusters at a time; they are all held in memory together, so this sets how much memory the run needs",
+        " <n> grow <n> clusters at a time; they are all held in memory together, so this sets how much memory the run needs, and a larger batch drops more overlapping clusters so it also changes how many are reported",
         Arg_non_user_facing );
       ( "--isolation-max-seeds",
         Arg.Int (fun n -> isolation_max_seeds := Some n),

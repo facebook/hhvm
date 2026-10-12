@@ -13,15 +13,28 @@
 #include "watchman/watchman_stream.h"
 
 #ifdef _WIN32
+#include <memory>
 
 using namespace watchman;
 
-// Maps pid => process handle
-// This is so that we can wait/poll/query the termination status
-static folly::Synchronized<std::unordered_map<DWORD, HANDLE>> child_procs;
+struct ProcessHandle {
+  explicit ProcessHandle(HANDLE handle) : handle(handle) {}
+
+  ~ProcessHandle() {
+    CloseHandle(handle);
+  }
+
+  HANDLE handle;
+};
+
+// Maps pid => process handle. Waiters retain shared ownership so that erasing a
+// reaped pid cannot invalidate a handle that another thread is using.
+static folly::Synchronized<
+    std::unordered_map<DWORD, std::shared_ptr<ProcessHandle>>>
+    child_procs;
 
 pid_t waitpid(pid_t pid, int* status, int options) {
-  HANDLE h;
+  std::shared_ptr<ProcessHandle> process;
 
   {
     auto rlock = child_procs.rlock();
@@ -30,29 +43,39 @@ pid_t waitpid(pid_t pid, int* status, int options) {
       errno = ESRCH;
       return -1;
     }
-    h = it->second;
+    process = it->second;
   }
 
-  auto res = WaitForSingleObject(h, options == WNOHANG ? 0 : INFINITE);
+  auto res =
+      WaitForSingleObject(process->handle, options == WNOHANG ? 0 : INFINITE);
 
-  switch (res) {
-    case WAIT_OBJECT_0: {
-      DWORD exitCode = 0;
-      GetExitCodeProcess(h, &exitCode);
-      *status = int(exitCode);
-      child_procs.wlock()->erase(pid);
-      return pid;
-    }
-    case WAIT_ABANDONED_0:
-      *status = 0;
-      child_procs.wlock()->erase(pid);
-      return pid;
-    case WAIT_TIMEOUT:
-      return 0;
-    default:
-      errno = EINVAL;
+  if (res == WAIT_TIMEOUT) {
+    return 0;
+  }
+  if (res != WAIT_OBJECT_0) {
+    // WAIT_ABANDONED only applies to mutexes, never process handles.
+    errno = res == WAIT_FAILED ? map_win32_err(GetLastError()) : EINVAL;
+    return -1;
+  }
+
+  DWORD exitCode = 0;
+  if (!GetExitCodeProcess(process->handle, &exitCode)) {
+    errno = map_win32_err(GetLastError());
+    return -1;
+  }
+
+  {
+    auto wlock = child_procs.wlock();
+    auto it = wlock->find(pid);
+    if (it == wlock->end() || it->second != process) {
+      errno = ESRCH;
       return -1;
+    }
+    wlock->erase(it);
   }
+
+  *status = int(exitCode);
+  return pid;
 }
 
 int posix_spawnattr_init(posix_spawnattr_t* attrp) {
@@ -283,6 +306,7 @@ static int posix_spawn_common(
   DWORD create_flags = CREATE_NO_WINDOW | EXTENDED_STARTUPINFO_PRESENT;
   int ret;
   int i;
+  bool attribute_list_initialized = false;
   HANDLE inherited_handles[3] = {0, 0, 0};
 
   cmdbuf = build_command_line(argv);
@@ -417,15 +441,27 @@ static int posix_spawn_common(
 
     InitializeProcThreadAttributeList(NULL, 1, 0, &size);
     sinfo.lpAttributeList = (LPPROC_THREAD_ATTRIBUTE_LIST)malloc(size);
-    InitializeProcThreadAttributeList(sinfo.lpAttributeList, 1, 0, &size);
-    UpdateProcThreadAttribute(
-        sinfo.lpAttributeList,
-        0,
-        PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
-        inherited_handles,
-        3 * sizeof(HANDLE),
-        NULL,
-        NULL);
+    if (!sinfo.lpAttributeList) {
+      ret = ENOMEM;
+      goto done;
+    }
+    if (!InitializeProcThreadAttributeList(
+            sinfo.lpAttributeList, 1, 0, &size)) {
+      ret = map_win32_err(GetLastError());
+      goto done;
+    }
+    attribute_list_initialized = true;
+    if (!UpdateProcThreadAttribute(
+            sinfo.lpAttributeList,
+            0,
+            PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+            inherited_handles,
+            3 * sizeof(HANDLE),
+            NULL,
+            NULL)) {
+      ret = map_win32_err(GetLastError());
+      goto done;
+    }
   }
 
   if (!CreateProcess(
@@ -449,16 +485,21 @@ static int posix_spawn_common(
   } else {
     *pid = (pid_t)pinfo.dwProcessId;
 
-    // Record the pid -> handle mapping for later wait/reap
-    child_procs.wlock()->emplace(pinfo.dwProcessId, pinfo.hProcess);
+    // Record the pid -> handle mapping for later wait/reap. Replacing an old
+    // entry handles pid reuse without confusing existing waiters, which retain
+    // shared ownership of the prior process handle.
+    child_procs.wlock()->insert_or_assign(
+        pinfo.dwProcessId, std::make_shared<ProcessHandle>(pinfo.hProcess));
 
     CloseHandle(pinfo.hThread);
     ret = 0;
   }
 
-  free(sinfo.lpAttributeList);
-
 done:
+  if (attribute_list_initialized) {
+    DeleteProcThreadAttributeList(sinfo.lpAttributeList);
+  }
+  free(sinfo.lpAttributeList);
   free(cmdbuf);
   free(env_block);
 

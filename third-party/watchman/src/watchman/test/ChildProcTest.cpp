@@ -6,6 +6,9 @@
  */
 
 #include <folly/portability/GTest.h>
+#ifdef _WIN32
+#include <folly/portability/Windows.h>
+#endif
 #include <folly/test/TestUtils.h>
 #include <list>
 #include "watchman/ChildProcess.h"
@@ -99,3 +102,25 @@ TEST(ChildProcess, inputThreaded) {
 TEST(ChildProcess, inputNotThreaded) {
   test_pipe_input(false);
 }
+
+#ifdef _WIN32
+TEST(ChildProcess, releasesHandlesAfterWait) {
+  {
+    ChildProcess warmup({"cmd /c exit 0"}, Options{});
+    ASSERT_EQ(0, warmup.wait());
+  }
+
+  DWORD handlesBefore = 0;
+  ASSERT_TRUE(GetProcessHandleCount(GetCurrentProcess(), &handlesBefore));
+
+  constexpr int kSpawnCount = 64;
+  for (int i = 0; i < kSpawnCount; ++i) {
+    ChildProcess child({"cmd /c exit 0"}, Options{});
+    ASSERT_EQ(0, child.wait());
+  }
+
+  DWORD handlesAfter = 0;
+  ASSERT_TRUE(GetProcessHandleCount(GetCurrentProcess(), &handlesAfter));
+  EXPECT_LE(handlesAfter, handlesBefore + 2);
+}
+#endif

@@ -50,7 +50,7 @@ extern "C" __attribute__((weak)) uint32_t __roar_api_pending_warmups();
 namespace HPHP::jit::tc {
 
 void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
-                          const TCA start, const TCA end) {
+                          const TCA start, const TCA end, CGMeta& meta) {
   assertx(cb.contains(start, end));
   if (start != end) {
     auto const isCold = code().inCold(start);
@@ -63,15 +63,20 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
     if (Cfg::Eval::PerfPidMap) {
       Debug::DebugInfo::Get()->recordPerfMap(
         Debug::TCRange(start, end, isCold),
-        sk
+        sk,
+        "",
+        &meta
       );
     }
   }
 }
 
-void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
+void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold,
+                   CGMeta& meta) {
   if (addr != end) {
-    Debug::DebugInfo::Get()->recordBCInstr(Debug::TCRange(addr, end, cold), op);
+    Debug::DebugInfo::Get()->recordBCInstr(
+      Debug::TCRange(addr, end, cold), op, meta
+    );
   }
 }
 

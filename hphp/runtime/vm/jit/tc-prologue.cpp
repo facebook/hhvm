@@ -178,11 +178,14 @@ void PrologueTranslator::publishMetaImpl() {
     reportTraceletToVtune(func->unit(), func, tr);
   }
   recordTranslationSizes(tr);
+  auto& fixups = transMeta->fixups;
   recordGdbTranslation(sk, transMeta->view.main(), loc.mainStart(),
-                       loc.mainEnd());
+                       loc.mainEnd(), fixups);
   recordGdbTranslation(sk, transMeta->view.cold(), loc.coldStart(),
-                       loc.coldEnd());
-  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
+                       loc.coldEnd(), fixups);
+  recordBCInstr(
+    OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false, fixups
+  );
 }
 
 void PrologueTranslator::publishCodeImpl() {

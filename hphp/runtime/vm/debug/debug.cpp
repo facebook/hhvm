@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 
 
@@ -169,11 +170,11 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
-extern "C" __attribute__((weak))
+extern "C"
 int __roar_api_write_pid_map(uint64_t address, uint64_t size, const char* name);
 
 void DebugInfo::writeToPidMap(uint64_t start, uint64_t size, const char* name) {
-  if (use_roar) {
+  if constexpr (use_roar) {
     __roar_api_write_pid_map(start, size, name);
   } else if (m_perfMapEnabled) {
     fprintf(m_perfMap, "%lx %lx %s\n", start, size, name);
@@ -181,7 +182,8 @@ void DebugInfo::writeToPidMap(uint64_t start, uint64_t size, const char* name) {
   }
 }
 
-void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
+void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name,
+                              jit::CGMeta* meta) {
   if (!m_perfMapEnabled) return;
   if (Cfg::Eval::ProfileBC) return;
   if (name.empty()) {
@@ -189,7 +191,13 @@ void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
                           Cfg::Eval::PerfPidMapIncludeFilePath);
   }
   auto const start = reinterpret_cast<uintptr_t>(range.begin());
-  writeToPidMap(start, range.size(), name.c_str());
+  if (use_roar) {
+    if (meta != nullptr) {
+      meta->roarPidMapEntries.push_back({start, range.size(), name});
+    }
+  } else {
+    writeToPidMap(start, range.size(), name.c_str());
+  }
 
   //Dump the object code into the specified file
   if (m_perfJitDump) {
@@ -197,7 +205,7 @@ void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
   }
 }
 
-void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
+void DebugInfo::recordBCInstr(TCRange range, uint32_t op, jit::CGMeta& meta) {
   static const char* opcodeName[] = {
 #define O(name, imm, push, pop, flags) \
 #name,
@@ -223,7 +231,11 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
       name = highOpcodeName[op - OpHighStart];
     }
     auto const start = reinterpret_cast<uintptr_t>(range.begin());
-    writeToPidMap(start, range.size(), name);
+    if (use_roar) {
+      meta.roarPidMapEntries.push_back({start, range.size(), name});
+    } else {
+      writeToPidMap(start, range.size(), name);
+    }
   }
 }
 

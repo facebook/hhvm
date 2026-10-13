@@ -869,9 +869,12 @@ Optional<TranslationResult> Translator::bindOutgoingEdges() {
 TranslationResult Translator::publish() {
   assertx(transMeta.has_value());
   transMeta->fixups.processNativeCalls();
-  auto metaLock = lockMetadata();
-  publishMetaInternal();
-  publishCodeInternal();
+  {
+    auto metaLock = lockMetadata();
+    publishMetaInternal();
+    publishCodeInternal();
+  }
+  transMeta->fixups.processPidMapEntries();
   return TranslationResult{transMeta->range.loc().entry()};
 }
 

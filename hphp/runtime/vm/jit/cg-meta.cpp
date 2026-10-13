@@ -45,6 +45,12 @@ typedef struct ROARFunctionCallSiteWithLiteral_ {
   uint8_t literalSize;
 } ROARFunctionCallSiteWithLiteral;
 
+typedef struct ROARPidMapEntryAPI_ {
+  void* address;
+  uint64_t size;
+  const char* name;
+} ROARPidMapEntryAPI;
+
 namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg)
@@ -53,6 +59,8 @@ extern "C" __attribute__((weak))
 int __roar_api_flag_safe_function_call_sites(
   const ROARFunctionCallSite*, size_t, bool
 );
+extern "C"
+int __roar_api_write_pid_maps(const ROARPidMapEntryAPI*, size_t);
 
 // Missing from ROAR toolchains that predate it.
 extern "C" __attribute__((weak))
@@ -315,6 +323,31 @@ void CGMeta::processNativeCalls() {
   }
 
   nativeCalls.clear();
+}
+
+void CGMeta::processPidMapEntries() {
+  if constexpr (use_roar) {
+    if (!roarPidMapEntries.empty()) {
+      std::vector<ROARPidMapEntryAPI> entries;
+      entries.reserve(roarPidMapEntries.size());
+      for (auto const& entry : roarPidMapEntries) {
+        entries.push_back({
+          reinterpret_cast<void*>(entry.address), entry.size, entry.name.c_str()
+        });
+      }
+      auto const retval =
+        __roar_api_write_pid_maps(entries.data(), entries.size());
+      if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
+        Trace::ftraceRelease(
+          "ROAR: registering {} PID-map entries, "
+          "__roar_api_write_pid_maps returned = {}\n",
+          entries.size(), retval
+        );
+      }
+    }
+  }
+
+  roarPidMapEntries.clear();
 }
 
 void CGMeta::process_only(

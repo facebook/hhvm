@@ -41,12 +41,14 @@ namespace tc {
  * Record translation for gdb debugging of the tc.
  */
 void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
-                          const TCA start, const TCA end);
+                          const TCA start, const TCA end,
+                          CGMeta& meta);
 
 /*
  * Record BC instruction ranges in the tc for the perf map.
  */
-void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
+void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold,
+                   CGMeta& meta);
 
 /*
  * Update JIT warmup stats and related counters.

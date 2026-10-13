@@ -22,6 +22,10 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/debug/dwarf.h"
 
+namespace HPHP::jit {
+struct CGMeta;
+}
+
 namespace HPHP::Debug {
 
 //////////////////////////////////////////////////////////////////////
@@ -32,8 +36,9 @@ struct DebugInfo {
 
   void recordTracelet(TCRange range, SrcKey sk);
   void recordStub(TCRange range, const std::string&);
-  void recordPerfMap(TCRange range, SrcKey sk, std::string stub = "");
-  void recordBCInstr(TCRange range, uint32_t op);
+  void recordPerfMap(TCRange range, SrcKey sk, std::string stub = "",
+                     jit::CGMeta* meta = nullptr);
+  void recordBCInstr(TCRange range, uint32_t op, jit::CGMeta& meta);
 
   static void recordDataMap(const void* from, const void* to,
                             const std::string& desc);

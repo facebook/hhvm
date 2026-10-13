@@ -31,6 +31,7 @@
 #include "hphp/util/growable-vector.h"
 
 #include <map>
+#include <string>
 #include <vector>
 
 namespace HPHP::jit {
@@ -48,6 +49,7 @@ struct CGMeta {
   void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
   void process_literals();
   void processNativeCalls();
+  void processPidMapEntries();
 
   bool empty() const;
   void clear();
@@ -117,6 +119,15 @@ struct CGMeta {
    * Native calls.  Maps addresses in the JIT code cache to the target function being called.
    */
   jit::fast_map<TCA, TCA> nativeCalls;
+
+  struct ROARPidMapEntry {
+    uint64_t address;
+    uint64_t size;
+    std::string name;
+  };
+  // Populated while publishing metadata, after process()/clear(). It is
+  // consumed and cleared explicitly by processPidMapEntries().
+  std::vector<ROARPidMapEntry> roarPidMapEntries;
 
   /*
    * All the alignment constraints on each code address.

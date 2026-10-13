@@ -52,6 +52,8 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
+#include <folly/Range.h>
+
 TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
@@ -182,6 +184,26 @@ void publishOptFuncMeta(FuncMetaInfo& info) {
   for (auto const& translator : info.translators) {
     if (translator->translateSuccess()) translator->publishMetaInternal();
   }
+}
+
+void processOptFuncsPidMapEntries(folly::Range<FuncMetaInfo*> infos) {
+  if (!use_roar) return;
+
+  CGMeta batch;
+  for (auto& info : infos) {
+    for (auto const& translator : info.translators) {
+      if (!translator->translateSuccess()) continue;
+
+      auto& entries = translator->meta().roarPidMapEntries;
+      batch.roarPidMapEntries.insert(
+        batch.roarPidMapEntries.end(),
+        std::make_move_iterator(entries.begin()),
+        std::make_move_iterator(entries.end())
+      );
+      entries.clear();
+    }
+  }
+  batch.processPidMapEntries();
 }
 
 void processSortedOptFuncsNativeCalls(std::vector<FuncMetaInfo>& infos) {
@@ -535,13 +557,16 @@ void publishOptFunc(FuncMetaInfo info) {
   SrcKeyTransMap srcKeyTrans;
   relocateOptFunc(info, prologueTCAs, srcKeyTrans);
 
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-  invalidateFuncProfSrcKeys(Func::fromFuncId(info.fid));
-  publishOptFuncMeta(info);
-  publishOptFuncCode(info);
+  {
+    auto codeLock = lockCode();
+    auto metaLock = lockMetadata();
+    invalidateFuncProfSrcKeys(Func::fromFuncId(info.fid));
+    publishOptFuncMeta(info);
+    publishOptFuncCode(info);
 
-  updateCodeSizeCounters();
+    updateCodeSizeCounters();
+  }
+  processOptFuncsPidMapEntries({&info, 1});
 }
 
 void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
@@ -588,6 +613,7 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   // we have to assume that all of them are already reachable, even before
   // they're all published.
   publishSortedOptFuncsMeta(infos);
+  processOptFuncsPidMapEntries(folly::range(infos));
 
   jit::hash_set<TCA> publishedSet;
   publishSortedOptFuncsCode(infos, debug ? &publishedSet : nullptr);
@@ -748,16 +774,22 @@ void RegionTranslator::publishMetaImpl() {
     for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
-        recordBCInstr(uint32_t(prev.sk.op()), prev.aStart, cur.aStart, false);
+        recordBCInstr(
+          uint32_t(prev.sk.op()), prev.aStart, cur.aStart, false, fixups
+        );
       } else {
-        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
+        recordBCInstr(
+          OpTraceletGuard, loc.mainStart(), cur.aStart, false, fixups
+        );
       }
       prev = cur;
     }
   }
 
-  recordGdbTranslation(sk, view.main(), loc.mainStart(), loc.mainEnd());
-  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
+  recordGdbTranslation(sk, view.main(), loc.mainStart(), loc.mainEnd(), fixups);
+  recordGdbTranslation(
+    sk, view.cold(), loc.coldCodeStart(), loc.coldEnd(), fixups
+  );
 
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
               loc.coldCodeStart(), loc.coldCodeSize(),

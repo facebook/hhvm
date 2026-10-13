@@ -248,21 +248,21 @@ SSATmp* verifyTypeImpl(IRGS& env,
       case AnnotAction::WarnClassToString: {
         assertx(val->type() <= TCls);
         emitClassToStringNotice();
-        if (tc.isInherited() && tc.isSoft()) return val;
         [[fallthrough]];
       }
       case AnnotAction::ConvertClassToString:
         assertx(val->type() <= TCls);
+        if (tc.isInherited() && tc.isSoft()) return val;
         return gen(env, LdClsName, val);
 
       case AnnotAction::WarnLazyClassToString: {
         assertx(val->type() <= TLazyCls);
         emitClassToStringNotice();
-        if (tc.isInherited() && tc.isSoft()) return val;
         [[fallthrough]];
       }
       case AnnotAction::ConvertLazyClassToString:
         assertx(val->type() <= TLazyCls);
+        if (tc.isInherited() && tc.isSoft()) return val;
         return gen(env, LdLazyClsName, val);
 
       case AnnotAction::WarnClassname: {
@@ -422,13 +422,6 @@ SSATmp* verifyTypeImpl(IRGS& env,
           case AnnotAction::Pass:
             return AnnotAction::Pass;
 
-          case AnnotAction::ConvertClassToString:
-          case AnnotAction::ConvertLazyClassToString:
-            // We must have a classname and are checking a string. Unlike a
-            // non-union where we want to make the type more precise for a union
-            // just accept the string.
-            return AnnotAction::Pass;
-
           case AnnotAction::FallbackCoerce:
             // We never coerce a union - so always just treat it like a Fallback.
           case AnnotAction::Fallback:
@@ -441,9 +434,11 @@ SSATmp* verifyTypeImpl(IRGS& env,
           case AnnotAction::CallableCheck:
           case AnnotAction::ObjectCheck:
           case AnnotAction::WarnClassToString:
+          case AnnotAction::ConvertClassToString:
           case AnnotAction::WarnClassname:
           case AnnotAction::WarnClass:
           case AnnotAction::WarnLazyClassToString:
+          case AnnotAction::ConvertLazyClassToString:
             if (fallbackAction == AnnotAction::Fail) {
               fallbackAction = action;
             } else {

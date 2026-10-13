@@ -349,6 +349,7 @@ let gconst_def ctx cst =
   in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_current_package_membership env cst.cst_package in
+  Env.make_depend_on_current_module env;
   let pos = fst cst.cst_name in
   let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)

@@ -78,6 +78,7 @@ bool possiblySmashableJcc(TCA inst);
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
+TCA smashableCallLiteral(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);

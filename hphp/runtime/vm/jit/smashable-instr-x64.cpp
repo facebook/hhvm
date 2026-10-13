@@ -169,6 +169,12 @@ TCA smashableCallTarget(TCA inst) {
   return inst + 5 + ((int32_t*)(inst + 5))[-1];
 }
 
+TCA smashableCallLiteral(TCA /*inst*/) {
+  // A smashable call on x64 holds its target in the displacement, so there is
+  // no separate pointer to hand out.
+  return nullptr;
+}
+
 TCA smashableJmpTarget(TCA inst) {
   if (inst[0] != 0xe9) {
     if (inst[0] == 0x0f &&

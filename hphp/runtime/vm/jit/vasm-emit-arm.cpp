@@ -96,6 +96,7 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/roar.h"
 
 #include "hphp/vixl/hphp-compat.h"
 
@@ -1337,7 +1338,19 @@ void Vgen::emit(const call& i) {
 
 void Vgen::emit(const calls& i) {
   trap_unaligned_stack();
-  emitSmashableCall(*env.cb, env.meta, i.target);
+  auto const addr = emitSmashableCall(*env.cb, env.meta, i.target);
+  // When using ROAR, track the native call so we can register them with ROAR
+  // after the code is relocated into its final place in the code cache.
+  //
+  // ROAR patches the site in place and only recognizes a bare BL or B there,
+  // so `addr` must stay the address of the BL that emitSmashableCall emits,
+  // not of any load preceding it.
+  //
+  // ROAR patches a registered site for the life of the process, but a reusable
+  // TC frees translations and hands their memory to new code.
+  if (use_roar && !Cfg::Eval::EnableReusableTC) {
+    env.meta.nativeCalls[addr] = i.target;
+  }
   if (i.watch) {
     *i.watch = a->frontier();
     env.meta.watchpoints.push_back(i.watch);

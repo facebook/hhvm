@@ -108,6 +108,12 @@ uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
+/*
+ * If a smashable call reaches its target by loading a pointer rather than by
+ * branching straight there, the address of that pointer; nullptr otherwise.
+ * Lets an external patcher retarget the call without decoding our encoding.
+ */
+TCA smashableCallLiteral(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 

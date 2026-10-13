@@ -391,6 +391,15 @@ TCA smashableCallTarget(TCA inst) {
   return possiblySmashableCall(inst) ? smashableTarget(inst) : nullptr;
 }
 
+TCA smashableCallLiteral(TCA inst) {
+  using namespace vixl;
+  if (!possiblySmashableCall(inst)) return nullptr;
+  auto const veneer = Instruction::Cast(inst)->ImmPCOffsetTarget();
+  auto const load = smashableVeneerLoad(veneer);
+  if (!load) return nullptr;
+  return load.literalAddress(veneer);
+}
+
 TCA smashableJmpTarget(TCA inst) {
   return possiblySmashableJmp(inst) ? smashableTarget(inst) : nullptr;
 }

@@ -19,17 +19,31 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/roar.h"
+
+#include <cerrno>
 
 typedef struct ROARFunctionCallSite_ {
   void* call;
   void* target;
 } ROARFunctionCallSite;
+
+typedef struct ROARFunctionCallSiteWithLiteral_ {
+  void* call;
+  void* target;
+  // The pointer `call` loads its target from, `literalSize` bytes wide. ROAR
+  // patches it, and collapses `call` onto the callee once the callee reaches
+  // its final tier. Calls may share a literal.
+  void* literal;
+  uint8_t literalSize;
+} ROARFunctionCallSiteWithLiteral;
 
 namespace HPHP::jit {
 
@@ -38,6 +52,12 @@ TRACE_SET_MOD(mcg)
 extern "C" __attribute__((weak))
 int __roar_api_flag_safe_function_call_sites(
   const ROARFunctionCallSite*, size_t, bool
+);
+
+// Missing from ROAR toolchains that predate it.
+extern "C" __attribute__((weak))
+int __roar_api_flag_safe_function_call_sites_with_literals(
+  const ROARFunctionCallSiteWithLiteral*, size_t, bool
 );
 
 namespace {
@@ -241,26 +261,55 @@ void CGMeta::process_literals() {
   literalAddrs.clear();
 }
 
+namespace {
+
+// On x64 a native call is a direct call, which ROAR retargets in place.
+int registerDirectNativeCalls(const fast_map<TCA, TCA>& nativeCalls) {
+  std::vector<ROARFunctionCallSite> callSites;
+  callSites.reserve(nativeCalls.size());
+  for (auto const& nc : nativeCalls) {
+    callSites.push_back({nc.first, nc.second});
+  }
+  return __roar_api_flag_safe_function_call_sites(
+    callSites.data(), callSites.size(), false
+  );
+}
+
+// On ARM a native call reaches its target through a veneer that loads a
+// pointer, so hand ROAR the pointer: patching it works at any distance,
+// whereas retargeting the call itself only reaches +/-128MB. The call still
+// goes along, for ROAR to collapse onto once the callee settles.
+int registerLiteralNativeCalls(const fast_map<TCA, TCA>& nativeCalls) {
+  if (!__roar_api_flag_safe_function_call_sites_with_literals) return ENOSYS;
+  std::vector<ROARFunctionCallSiteWithLiteral> callSites;
+  callSites.reserve(nativeCalls.size());
+  for (auto const& nc : nativeCalls) {
+    auto const literal = smashableCallLiteral(nc.first);
+    // A call smashed straight to its target no longer loads a literal.
+    if (!literal) continue;
+    // A smashable veneer loads a 32-bit target, see smashableVeneerLoad().
+    callSites.push_back({nc.first, nc.second, literal, sizeof(uint32_t)});
+  }
+  return __roar_api_flag_safe_function_call_sites_with_literals(
+    callSites.data(), callSites.size(), false
+  );
+}
+
+}
+
 void CGMeta::processNativeCalls() {
   if (use_roar && !nativeCalls.empty()) {
     always_assert_flog(
       !Cfg::Eval::EnableReusableTC,
       "native calls must not be registered with ROAR when the TC is reusable"
     );
-    std::vector<ROARFunctionCallSite> callSites;
-    callSites.reserve(nativeCalls.size());
-    for (auto const& nc : nativeCalls) {
-      callSites.push_back({nc.first, nc.second});
-    }
-
-    auto const retval = __roar_api_flag_safe_function_call_sites(
-      callSites.data(), callSites.size(), false
-    );
+    auto const retval = arch::any<arch::ARM>()
+      ? registerLiteralNativeCalls(nativeCalls)
+      : registerDirectNativeCalls(nativeCalls);
     if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
       Trace::ftraceRelease(
-        "ROAR: registering {} native calls, "
-        "__roar_api_flag_safe_function_call_sites returned = {}\n",
-        callSites.size(), retval
+        "ROAR: registering {} native calls, returned = {}\n",
+        nativeCalls.size(), retval
       );
     }
   }

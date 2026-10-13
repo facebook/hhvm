@@ -113,6 +113,10 @@ TCA smashableCallTarget(TCA inst) {
   always_assert(inst);
   return ARCH_SWITCH_CALL(smashableCallTarget, inst);
 }
+TCA smashableCallLiteral(TCA inst) {
+  always_assert(inst);
+  return ARCH_SWITCH_CALL(smashableCallLiteral, inst);
+}
 TCA smashableJmpTarget(TCA inst) {
   always_assert(inst);
   return ARCH_SWITCH_CALL(smashableJmpTarget, inst);

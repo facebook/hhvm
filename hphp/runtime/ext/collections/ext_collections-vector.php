@@ -116,9 +116,6 @@ final class Vector<T> implements \MutableVector<T> {
    * @return mixed
    */
   public function get(mixed $key)[]: ?T {
-    // TODO(T125421081) `idx` is special cased in the typechecker, I don't think
-    // it quite understands how to deal with the input being `$this`, for some
-    // reason.
     /* HH_FIXME[4110] */
     return idx($this, $key);
   }

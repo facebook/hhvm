@@ -46,6 +46,15 @@ fn get_tristate(config: &ConfigFile, key: &str, default: isize) -> Result<isize>
     Ok(get_optional_tristate(config, key)?.unwrap_or(default))
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct DistcConfig {
+    pub min_worker_memory_gib: i64,
+    pub min_cpu_units: i64,
+    pub decl_buckets: i64,
+    pub enable_p2p: bool,
+    pub upload_only_changed_files: bool,
+}
+
 /// Aggregated configuration consumed by Rust Hack tools.
 #[derive(Debug, Clone)]
 pub struct HhConfig {
@@ -71,11 +80,7 @@ pub struct HhConfig {
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
-    pub distc_min_worker_memory_gib: i64,
-    pub distc_min_cpu_units: i64,
-    pub distc_decl_buckets: i64,
-    pub distc_enable_p2p: bool,
-    pub distc_upload_only_changed_files: bool,
+    pub distc: DistcConfig,
 }
 
 impl From<HhConfig> for OxidizedHhConfig {
@@ -121,11 +126,7 @@ impl Default for HhConfig {
             naming_table_compression_threads: 0,
             eden_fetch_parallelism: 0,
             use_distc_crawl_dircache: false,
-            distc_min_worker_memory_gib: 0,
-            distc_min_cpu_units: 0,
-            distc_decl_buckets: 0,
-            distc_enable_p2p: false,
-            distc_upload_only_changed_files: false,
+            distc: DistcConfig::default(),
         }
     }
 }
@@ -722,19 +723,19 @@ impl HhConfig {
                     c.use_distc_crawl_dircache = parse_json(&value)?;
                 }
                 "distc_min_worker_memory_gib" => {
-                    c.distc_min_worker_memory_gib = parse_json(&value)?;
+                    c.distc.min_worker_memory_gib = parse_json(&value)?;
                 }
                 "distc_min_cpu_units" => {
-                    c.distc_min_cpu_units = parse_json(&value)?;
+                    c.distc.min_cpu_units = parse_json(&value)?;
                 }
                 "distc_decl_buckets" => {
-                    c.distc_decl_buckets = parse_json(&value)?;
+                    c.distc.decl_buckets = parse_json(&value)?;
                 }
                 "distc_enable_p2p" => {
-                    c.distc_enable_p2p = parse_json(&value)?;
+                    c.distc.enable_p2p = parse_json(&value)?;
                 }
                 "distc_upload_only_changed_files" => {
-                    c.distc_upload_only_changed_files = parse_json(&value)?;
+                    c.distc.upload_only_changed_files = parse_json(&value)?;
                 }
                 _ => {}
             }
@@ -746,8 +747,8 @@ impl HhConfig {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
-            "distc_enable_p2p": self.distc_enable_p2p,
-            "distc_upload_only_changed_files": self.distc_upload_only_changed_files,
+            "distc_enable_p2p": self.distc.enable_p2p,
+            "distc_upload_only_changed_files": self.distc.upload_only_changed_files,
         });
         experiments.to_string()
     }

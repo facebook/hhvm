@@ -332,9 +332,9 @@ function fb_cs_entrypoint(): void {
 
   // Test keepClasses with FB_COMPACT_SERIALIZE_KEEP_CLASSES option
   $classes = vec[
-    HH\classname_from_string_unsafe('MyClass'),
-    HH\classname_from_string_unsafe('Some\Namespaced\Class'),
-    HH\classname_from_string_unsafe('A'),
+    MyClass::class,
+    Some\Namespaced\Class::class,
+    A::class,
   ];
 
   foreach ($classes as $cls) {
@@ -361,7 +361,7 @@ function fb_cs_entrypoint(): void {
   // Test keepClasses inside a container
   echo "\n";
   $container = dict[
-    'cls' => HH\classname_from_string_unsafe('Foo'),
+    'cls' => Foo::class,
     'val' => 42,
   ];
   $opts = FB_COMPACT_SERIALIZE_KEEP_CLASSES;
@@ -378,7 +378,7 @@ function fb_cs_entrypoint(): void {
 
   // Test keepClasses without the flag produces a plain string on unserialize
   echo "\n";
-  $cls = HH\classname_from_string_unsafe('Bar');
+  $cls = Bar::class;
   $plain = fb_compact_serialize($cls);
   $ret = null;
   $err = null;
@@ -405,7 +405,7 @@ function fb_cs_entrypoint(): void {
     | FB_COMPACT_SERIALIZE_KEEP_CLASSES;
   $mixed_container = dict[
     'ks' => keyset['x', 'y'],
-    'cls' => HH\classname_from_string_unsafe('Baz'),
+    'cls' => Baz::class,
     'num' => 7,
   ];
   $s = fb_compact_serialize($mixed_container, $combined_opts);

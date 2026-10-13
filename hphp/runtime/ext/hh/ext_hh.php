@@ -216,13 +216,6 @@ function dynamic_fun_force(string $name)[]: mixed;
 <<__Native>>
 function dynamic_class_meth_force(class<mixed> $cls, string $meth)[]: mixed;
 
-/**
- * Creates a LazyClass pointer from input $classname. It does not eagerly
- * verify that the $classname is in fact a valid class.
- */
-<<__Native>>
-function classname_from_string_unsafe(string $classname)[]: mixed;
-
 <<__Native>>
 function class_to_classname(readonly class_or_classname<mixed> $cn)[]: classname<mixed>;
 

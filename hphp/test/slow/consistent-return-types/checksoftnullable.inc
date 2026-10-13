@@ -33,13 +33,13 @@ function mainImpl() : void {
     }
   );
   try {
-    var_dump(new Derived()->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class(new Derived()->foo());
   } catch (Exception $e) {
     echo $e->getMessage()."\n";
   }
 
   try {
-    var_dump(new Derived()->bar());
+    __hhvm_intrinsics\debug_var_dump_lazy_class(new Derived()->bar());
   } catch (Exception $e) {
     echo $e->getMessage()."\n";
   }

@@ -1,4 +1,4 @@
 string(%d) "Notice: Class passed to inherited type-hint classname"
-string(1) "C"
+class(C)
 string(%d) "Notice: Class passed to inherited type-hint classname"
-string(1) "C"
+lazyclass(C)

@@ -52,16 +52,16 @@ function mainImpl() : void {
   );
 
   try {
-    var_dump((new Derived1())->foo());
-    var_dump((new Derived1())->bar());
-    var_dump((new Derived1())->baz());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived1())->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived1())->bar());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived1())->baz());
   } catch (Exception $e) {
     var_dump("Error: ".$e->getMessage());
   }
   try {
-    var_dump((new Derived2())->foo());
-    var_dump((new Derived2())->bar());
-    var_dump((new Derived2())->baz());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived2())->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived2())->bar());
+    __hhvm_intrinsics\debug_var_dump_lazy_class((new Derived2())->baz());
   } catch (Exception $e) {
     var_dump("Error: ".$e->getMessage());
   }

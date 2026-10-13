@@ -79,8 +79,15 @@ function create_clsmeth_pointer(string $cls, string $meth): mixed;
 <<__Native>>
 function is_lazy_class(mixed $val): bool;
 
-<<__Native>>
-function debug_var_dump_lazy_class(mixed $val)[]: void;
+function debug_var_dump_lazy_class(mixed $val): void {
+  if (is_lazy_class($val)) {
+    echo "lazyclass(".\HH\class_to_classname($val).")\n";
+  } else if (\HH\is_class($val)) {
+    echo "class(".\HH\class_to_classname($val).")\n";
+  } else {
+    \var_dump($val);
+  }
+}
 
 <<__Native>>
 function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,

@@ -27,6 +27,6 @@ class Child extends Parent_ {
 <<__EntryPoint>>
 function main(): void {
   $c = new Child();
-  var_dump($c->foo());
-  var_dump($c->bar());
+  __hhvm_intrinsics\debug_var_dump_lazy_class($c->foo());
+  __hhvm_intrinsics\debug_var_dump_lazy_class($c->bar());
 }

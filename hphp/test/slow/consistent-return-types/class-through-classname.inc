@@ -34,12 +34,12 @@ function mainImpl() : void {
   );
 
   try {
-    var_dump(new Derived1()->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class(new Derived1()->foo());
   } catch (Exception $e) {
     var_dump("Error: ".$e->getMessage());
   }
   try {
-    var_dump(new Derived2()->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class(new Derived2()->foo());
   } catch (Exception $e) {
     var_dump("Error: ".$e->getMessage());
   }

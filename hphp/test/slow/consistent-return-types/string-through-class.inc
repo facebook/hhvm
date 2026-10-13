@@ -26,7 +26,7 @@ function mainImpl() : void {
   );
 
   try {
-    var_dump(new Derived()->foo());
+    __hhvm_intrinsics\debug_var_dump_lazy_class(new Derived()->foo());
   } catch (Exception $e) {
     var_dump("Error: ".$e->getMessage());
   }

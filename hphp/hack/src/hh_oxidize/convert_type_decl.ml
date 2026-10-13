@@ -586,7 +586,20 @@ let record_label_declaration
   let name =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
-  let ty = Convert_type.core_type ~safe_ints ld.pld_type in
+  let ty =
+    match
+      List.find ld.pld_attributes ~f:(fun { attr_name; _ } ->
+          String.equal attr_name.txt "oxidize.usize")
+    with
+    | None -> Convert_type.core_type ~safe_ints ld.pld_type
+    | Some { attr_payload = PStr []; _ } ->
+      (match ld.pld_type.ptyp_desc with
+      | Ptyp_constr ({ txt = Lident "int"; _ }, []) -> rust_simple_type "usize"
+      | _ ->
+        raise (Skip_type_decl "[@oxidize.usize] requires an int record field"))
+    | Some _ ->
+      raise (Skip_type_decl "[@oxidize.usize] does not accept a payload")
+  in
   sprintf
     "%s%s%s%s %s: %s,\n"
     doc

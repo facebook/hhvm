@@ -4,7 +4,36 @@
 // LICENSE file in the "hack" directory of this source tree.
 //
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+use eq_modulo_pos::EqModuloPos;
+use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
+
 #[allow(unused_imports)]
 use crate::*;
 
 pub type A = isize;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[repr(C)]
+pub struct Counters {
+    pub signed: isize,
+    #[rust_to_ocaml(attr = "oxidize.usize")]
+    pub unsigned: usize,
+}

@@ -195,6 +195,8 @@ let convert_doc_comment doc =
 
 - `[@value 42]` → C-like enum discriminants
 - `[@deriving ...]` → `#[derive(...)]`
+- `count: int; [@oxidize.usize]` → `count: usize` on a record field.
+  The OCaml type remains `int`, and values must still fit its nonnegative range.
 - Doc comments → `/// ...`
 
 ### 3. Serde Integration

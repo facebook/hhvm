@@ -26,7 +26,7 @@ fn main() -> Result<()> {
     let dp_opts = match opts.root {
         Some(root) => {
             let hh_config = HhConfig::from_root(root, &Default::default())?;
-            DeclParserOptions::from_parser_options(&hh_config.opts.po)
+            DeclParserOptions::from_parser_options(&hh_config.common.opts.po)
         }
         None => Default::default(),
     };

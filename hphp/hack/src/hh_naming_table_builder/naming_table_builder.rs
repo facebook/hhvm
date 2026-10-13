@@ -83,15 +83,23 @@ pub fn build_naming_table(args: Args) -> anyhow::Result<ExitStatus> {
     };
 
     slog::info!(log, "Walking WWW...");
-    let files_to_ignore = FilesToIgnore::new(&hhconfig.ignored_paths)?;
+    let files_to_ignore = FilesToIgnore::new(&hhconfig.common.ignored_paths)?;
     let walk = |root, prefix| -> anyhow::Result<Vec<_>> {
         find_utils::find_hack_files(&files_to_ignore, root, prefix).collect()
     };
     let mut filenames = walk(&args.www, relative_path::Prefix::Root)?;
     filenames.extend(walk(&hhi_path, relative_path::Prefix::Hhi)?);
 
-    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts.po);
-    let parse = |path| parse_file(&hhconfig.opts.po, decl_opts, &args.www, &hhi_path, path);
+    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.common.opts.po);
+    let parse = |path| {
+        parse_file(
+            &hhconfig.common.opts.po,
+            decl_opts,
+            &args.www,
+            &hhi_path,
+            path,
+        )
+    };
     let save_result = if args.unsorted {
         slog::info!(log, "Parsing files and writing to DB...");
         names::Names::build(&args.output, |tx| {
@@ -139,14 +147,14 @@ pub fn build_naming_table_ide(
 ) -> anyhow::Result<(ExitStatus, Vec<(RelativePath, Vec<SiAddendum>)>)> {
     let hhconfig = hh_config::HhConfig::from_root(www, &Default::default())?;
 
-    let files_to_ignore = FilesToIgnore::new(&hhconfig.ignored_paths)?;
+    let files_to_ignore = FilesToIgnore::new(&hhconfig.common.ignored_paths)?;
     let walk = |root, prefix| -> anyhow::Result<Vec<_>> {
         find_utils::find_hack_files(&files_to_ignore, root, prefix).collect()
     };
     let mut filenames = walk(www, relative_path::Prefix::Root)?;
     filenames.extend(walk(hhi_path, relative_path::Prefix::Hhi)?);
 
-    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts.po);
+    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.common.opts.po);
 
     // Parse each file in parallel to get the file summary and a list of symbol
     // index addenda. The addenda are used to update the symbol index DB (e.g.
@@ -158,7 +166,7 @@ pub fn build_naming_table_ide(
         .into_par_iter()
         .map(|path| {
             let (path, summary, addenda) =
-                parse_file_with_addenda(&hhconfig.opts.po, decl_opts, www, hhi_path, path)?;
+                parse_file_with_addenda(&hhconfig.common.opts.po, decl_opts, www, hhi_path, path)?;
             Ok(((path.clone(), summary), (path, addenda)))
         })
         .collect::<anyhow::Result<_>>()?;

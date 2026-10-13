@@ -58,74 +58,31 @@ pub struct DistcConfig {
 /// Aggregated configuration consumed by Rust Hack tools.
 #[derive(Debug, Clone)]
 pub struct HhConfig {
-    pub version: Option<String>,
-
-    /// List of regex patterns of root-relative paths to ignore.
-    pub ignored_paths: Vec<String>,
-
-    /// SHA1 Hash of the .hhconfig file contents.
-    pub hash: String,
-
-    pub opts: GlobalOptions,
-
-    pub gc_minor_heap_size: usize,
-    pub gc_space_overhead: usize,
-    pub sharedmem_global_size: usize,
-    pub sharedmem_hash_table_pow: usize,
-    pub sharedmem_heap_size: usize,
-    pub ide_fall_back_to_full_index: bool,
-    pub hh_distc_should_disable_trace_store: bool,
-    pub hh_distc_exponential_backoff_num_retries: usize,
-    pub naming_table_compression_level: usize,
-    pub naming_table_compression_threads: usize,
-    pub eden_fetch_parallelism: usize,
-    pub use_distc_crawl_dircache: bool,
+    pub common: OxidizedHhConfig,
     pub distc: DistcConfig,
-}
-
-impl From<HhConfig> for OxidizedHhConfig {
-    fn from(config: HhConfig) -> Self {
-        Self {
-            version: config.version,
-            ignored_paths: config.ignored_paths,
-            hash: config.hash,
-            opts: config.opts,
-            gc_minor_heap_size: config.gc_minor_heap_size,
-            gc_space_overhead: config.gc_space_overhead,
-            sharedmem_global_size: config.sharedmem_global_size,
-            sharedmem_hash_table_pow: config.sharedmem_hash_table_pow,
-            sharedmem_heap_size: config.sharedmem_heap_size,
-            ide_fall_back_to_full_index: config.ide_fall_back_to_full_index,
-            hh_distc_should_disable_trace_store: config.hh_distc_should_disable_trace_store,
-            hh_distc_exponential_backoff_num_retries: config
-                .hh_distc_exponential_backoff_num_retries,
-            naming_table_compression_level: config.naming_table_compression_level,
-            naming_table_compression_threads: config.naming_table_compression_threads,
-            eden_fetch_parallelism: config.eden_fetch_parallelism,
-            use_distc_crawl_dircache: config.use_distc_crawl_dircache,
-        }
-    }
 }
 
 impl Default for HhConfig {
     fn default() -> Self {
         Self {
-            version: None,
-            ignored_paths: Vec::new(),
-            hash: String::new(),
-            opts: GlobalOptions::default(),
-            gc_minor_heap_size: 0,
-            gc_space_overhead: 0,
-            sharedmem_global_size: 0,
-            sharedmem_hash_table_pow: 0,
-            sharedmem_heap_size: 0,
-            ide_fall_back_to_full_index: false,
-            hh_distc_should_disable_trace_store: false,
-            hh_distc_exponential_backoff_num_retries: 10,
-            naming_table_compression_level: 0,
-            naming_table_compression_threads: 0,
-            eden_fetch_parallelism: 0,
-            use_distc_crawl_dircache: false,
+            common: OxidizedHhConfig {
+                version: None,
+                ignored_paths: Vec::new(),
+                hash: String::new(),
+                opts: GlobalOptions::default(),
+                gc_minor_heap_size: 0,
+                gc_space_overhead: 0,
+                sharedmem_global_size: 0,
+                sharedmem_hash_table_pow: 0,
+                sharedmem_heap_size: 0,
+                ide_fall_back_to_full_index: false,
+                hh_distc_should_disable_trace_store: false,
+                hh_distc_exponential_backoff_num_retries: 10,
+                naming_table_compression_level: 0,
+                naming_table_compression_threads: 0,
+                eden_fetch_parallelism: 0,
+                use_distc_crawl_dircache: false,
+            },
             distc: DistcConfig::default(),
         }
     }
@@ -196,10 +153,9 @@ impl HhConfig {
         hh_conf.apply_overrides(overrides);
         let custom_error_config =
             CustomErrorConfig::from_path(&custom_error_config_path).unwrap_or_default();
-        Ok(Self {
-            hash,
-            ..Self::from_configs(root, hhconfig, hh_conf, custom_error_config)?
-        })
+        let mut config = Self::from_configs(root, hhconfig, hh_conf, custom_error_config)?;
+        config.common.hash = hash;
+        Ok(config)
     }
 
     /// Returns all config files, as well as hhconfig hash.
@@ -670,57 +626,55 @@ impl HhConfig {
             )?,
             tco_repo_stdlib_path: hhconfig.get_str("repo_stdlib_path").map(|p| p.to_string()),
         };
-        let mut c = Self {
-            opts,
-            ..Self::default()
-        };
+        let mut c = Self::default();
+        c.common.opts = opts;
 
         for (key, mut value) in hhconfig {
             match key.as_str() {
                 "version" => {
-                    c.version = Some(value);
+                    c.common.version = Some(value);
                 }
                 "ignored_paths" => {
-                    c.ignored_paths = parse_json(&value)?;
+                    c.common.ignored_paths = parse_json(&value)?;
                 }
                 "gc_minor_heap_size" => {
                     value.retain(|c| c != '_');
-                    c.gc_minor_heap_size = parse_json(&value)?;
+                    c.common.gc_minor_heap_size = parse_json(&value)?;
                 }
                 "gc_space_overhead" => {
-                    c.gc_space_overhead = parse_json(&value)?;
+                    c.common.gc_space_overhead = parse_json(&value)?;
                 }
                 "sharedmem_global_size" => {
                     value.retain(|c| c != '_');
-                    c.sharedmem_global_size = parse_json(&value)?;
+                    c.common.sharedmem_global_size = parse_json(&value)?;
                 }
                 "sharedmem_hash_table_pow" => {
-                    c.sharedmem_hash_table_pow = parse_json(&value)?;
+                    c.common.sharedmem_hash_table_pow = parse_json(&value)?;
                 }
                 "sharedmem_heap_size" => {
                     value.retain(|c| c != '_');
-                    c.sharedmem_heap_size = parse_json(&value)?;
+                    c.common.sharedmem_heap_size = parse_json(&value)?;
                 }
                 "ide_fall_back_to_full_index" => {
-                    c.ide_fall_back_to_full_index = parse_json(&value)?;
+                    c.common.ide_fall_back_to_full_index = parse_json(&value)?;
                 }
                 "hh_distc_should_disable_trace_store" => {
-                    c.hh_distc_should_disable_trace_store = parse_json(&value)?;
+                    c.common.hh_distc_should_disable_trace_store = parse_json(&value)?;
                 }
                 "naming_table_compression_threads" => {
-                    c.naming_table_compression_threads = parse_json(&value)?;
+                    c.common.naming_table_compression_threads = parse_json(&value)?;
                 }
                 "naming_table_compression_level" => {
-                    c.naming_table_compression_level = parse_json(&value)?;
+                    c.common.naming_table_compression_level = parse_json(&value)?;
                 }
                 "eden_fetch_parallelism" => {
-                    c.eden_fetch_parallelism = parse_json(&value)?;
+                    c.common.eden_fetch_parallelism = parse_json(&value)?;
                 }
                 "hh_distc_exponential_backoff_num_retries" => {
-                    c.hh_distc_exponential_backoff_num_retries = parse_json(&value)?;
+                    c.common.hh_distc_exponential_backoff_num_retries = parse_json(&value)?;
                 }
                 "use_distc_crawl_dircache" => {
-                    c.use_distc_crawl_dircache = parse_json(&value)?;
+                    c.common.use_distc_crawl_dircache = parse_json(&value)?;
                 }
                 "distc_min_worker_memory_gib" => {
                     c.distc.min_worker_memory_gib = parse_json(&value)?;
@@ -745,8 +699,8 @@ impl HhConfig {
 
     pub fn to_selected_experiments_json(&self) -> String {
         let experiments = json!({
-            "eden_fetch_parallelism": self.eden_fetch_parallelism,
-            "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
+            "eden_fetch_parallelism": self.common.eden_fetch_parallelism,
+            "use_distc_crawl_dircache": self.common.use_distc_crawl_dircache,
             "distc_enable_p2p": self.distc.enable_p2p,
             "distc_upload_only_changed_files": self.distc.upload_only_changed_files,
         });
@@ -789,22 +743,21 @@ mod test {
     use super::*;
     fn from_slice(bytes: &[u8]) -> Result<HhConfig> {
         let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
-        Ok(HhConfig {
-            hash,
-            ..HhConfig::from_configs(
-                PathBuf::new(),
-                config,
-                Default::default(),
-                Default::default(),
-            )?
-        })
+        let mut hhconf = HhConfig::from_configs(
+            PathBuf::new(),
+            config,
+            Default::default(),
+            Default::default(),
+        )?;
+        hhconf.common.hash = hash;
+        Ok(hhconf)
     }
 
     #[test]
     fn test_log_levels() {
         let hhconf = from_slice(br#"log_levels={ "pessimise": 1 }"#).unwrap();
         assert_eq!(
-            hhconf.opts.log_levels.get("pessimise").copied(),
+            hhconf.common.opts.log_levels.get("pessimise").copied(),
             Some(1isize)
         );
     }
@@ -812,9 +765,12 @@ mod test {
     #[test]
     fn test_needs_concrete_fine_grained() {
         let hhconf = from_slice(b"needs_concrete_class_call_check=2").unwrap();
-        assert_eq!(hhconf.opts.needs_concrete_class_call_check, 2);
+        assert_eq!(hhconf.common.opts.needs_concrete_class_call_check, 2);
         assert_eq!(
-            hhconf.opts.needs_concrete_class_function_pointer_check,
+            hhconf
+                .common
+                .opts
+                .needs_concrete_class_function_pointer_check,
             None
         );
     }
@@ -825,9 +781,12 @@ mod test {
             b"needs_concrete_class_call_check=2\nneeds_concrete_class_function_pointer_check=1",
         )
         .unwrap();
-        assert_eq!(hhconf.opts.needs_concrete_class_call_check, 2);
+        assert_eq!(hhconf.common.opts.needs_concrete_class_call_check, 2);
         assert_eq!(
-            hhconf.opts.needs_concrete_class_function_pointer_check,
+            hhconf
+                .common
+                .opts
+                .needs_concrete_class_function_pointer_check,
             Some(1)
         );
         assert!(from_slice(b"needs_concrete_class_function_pointer_check=3").is_err());

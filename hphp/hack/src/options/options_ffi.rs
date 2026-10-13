@@ -57,7 +57,7 @@ fn rust_parse_config_to_hh_config(
         hh_conf,
         Default::default(),
     )
-    .map(OxidizedHhConfig::from)
+    .map(|config| config.common)
     .map_err(|e| format!("Rust config parse error: {}", e))
 }
 }

@@ -245,6 +245,7 @@ module Prop : Member_S with type t = shallow_prop = struct
 
   let is_internal p : bool =
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Internal
+    || Aast_defs.equal_visibility p.sp_visibility Aast_defs.ProtectedInternal
 
   let constructor_is_changed_inheritance_when_added p =
     Xhp_attribute.opt_is_required p.sp_xhp_attr
@@ -289,6 +290,7 @@ module Method : Member_S with type t = shallow_method = struct
 
   let is_internal m : bool =
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Internal
+    || Aast_defs.equal_visibility m.sm_visibility Aast_defs.ProtectedInternal
 
   let constructor_is_changed_inheritance_when_added _ = false
 

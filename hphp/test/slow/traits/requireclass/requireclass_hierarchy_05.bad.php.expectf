@@ -1,0 +1,1 @@
+Fatal error: Class 'D' uses trait 'T2', but trait 'T2' may only be used from class 'C' in %s

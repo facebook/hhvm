@@ -5,6 +5,8 @@ class C {
   use T;
 }
 
+class D extends C {}
+
 trait T {
   require class C;
 }

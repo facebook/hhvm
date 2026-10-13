@@ -4364,6 +4364,8 @@ void Class::setRequirements() {
 
   if (m_parent.get() != nullptr) {
     for (auto const& req : m_parent->allRequirements().range()) {
+      // `require class` constrains the class applying the trait, not subclasses
+      if (req->kind() == PreClass::RequirementClass) continue;
       // no need for addReq; parent won't have duplicates
       reqBuilder.add(req->name(), req);
     }
@@ -4827,11 +4829,10 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       break;
     }
     case PreClass::RequirementClass: {
-      assertx(m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal));
+      assertx(m_preClass->name() != reqName);
       for (auto const& traitCls : m_extra->m_usedTraits) {
         if (traitCls->allRequirements().contains(reqName)) {
-          raise_error("%s class '%s' uses trait '%s', but trait '%s' may only be used from class '%s', which must be final",
-                      m_preClass->attrs() & AttrFinal ? "Final" : "Non final",
+          raise_error("Class '%s' uses trait '%s', but trait '%s' may only be used from class '%s'",
                       m_preClass->name()->data(),
                       traitCls->preClass()->name()->data(),
                       traitCls->preClass()->name()->data(),
@@ -4843,8 +4844,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
         // A result of trait flattening, analogous to the RequirementImplements case above
         assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
         assertx(m_preClass->requirements().size() > 0);
-        raise_error("%s class '%s' uses trait '<<flattened>>', but trait '<<flattened>>' may only be used from class '%s', which must be final",
-                    m_preClass->attrs() & AttrFinal ? "Final" : "Non final",
+        raise_error("Class '%s' uses trait '<<flattened>>', but trait '<<flattened>>' may only be used from class '%s'",
                     m_preClass->name()->data(),
                     reqName->data());
       }
@@ -4905,7 +4905,7 @@ void Class::checkRequirementConstraints() const {
       }
       case PreClass::RequirementClass: {
         // remark: `require class` enforcement is disabled for mock classes
-        if ((m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal)) &&
+        if ((m_preClass->name() != reqName) &&
             (m_preClass->userAttributes().find(s___MockClass.get()) ==
              m_preClass->userAttributes().end())) {
           raiseUnsatisfiedRequirement(req);

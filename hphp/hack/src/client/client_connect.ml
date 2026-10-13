@@ -22,7 +22,6 @@ let log ?tracker ?connection_log_id s =
 type env = {
   root: Path.t;
   from: string;
-  abort_on_distc_failure: bool;
   autostart: bool;
   force_dormant_start: bool;
   deadline: float option;
@@ -54,7 +53,6 @@ type conn = {
   conn_progress_callback: string option -> unit;
   conn_root: Path.t;
   conn_deadline: float option;
-  conn_abort_on_distc_failure: bool;
   from: string;
 }
 
@@ -77,8 +75,8 @@ let check_for_deadline progress_callback deadline_opt =
     raise Exit_status.(Exit_with Out_of_time)
   | _ -> ()
 
-let server_exit_should_abort ~abort_on_distc_failure = function
-  | Exit_status.Distc_failed -> abort_on_distc_failure
+let server_exit_should_abort = function
+  | Exit_status.Distc_failed
   | Exit_status.Failed_to_load_should_abort
   | Exit_status.Server_non_opt_build_mode ->
     true
@@ -91,7 +89,6 @@ end
 (** Sleeps until the server sends a message. While waiting, prints out spinner
     and progress information using the argument callback. *)
 let rec wait_for_server_message
-    ~(abort_on_distc_failure : bool)
     ~(connection_log_id : string)
     ~(expected_message : 'a Server_command_types.message_type option)
     ~(ic : Stdlib.in_channel)
@@ -110,7 +107,6 @@ let rec wait_for_server_message
   if List.is_empty readable then (
     read_and_show_progress progress_callback;
     wait_for_server_message
-      ~abort_on_distc_failure
       ~connection_log_id
       ~expected_message
       ~ic
@@ -153,7 +149,6 @@ let rec wait_for_server_message
           (Server_command_types_utils.debug_describe_message_type msg);
         if not is_ping then read_and_show_progress progress_callback;
         wait_for_server_message
-          ~abort_on_distc_failure
           ~connection_log_id
           ~expected_message
           ~ic
@@ -196,9 +191,7 @@ let rec wait_for_server_message
       let external_exit_status =
         match server_exit_status with
         | Some server_exit_status
-          when server_exit_should_abort
-                 ~abort_on_distc_failure
-                 server_exit_status ->
+          when server_exit_should_abort server_exit_status ->
           Exit_status.Server_hung_up_should_abort finale_data
         | _ -> Exit_status.Server_hung_up_should_retry finale_data
       in
@@ -216,7 +209,6 @@ let rec wait_for_server_message
       raise (Exit_status.Exit_with external_exit_status)
 
 let wait_for_server_hello
-    ~(abort_on_distc_failure : bool)
     (connection_log_id : string)
     (ic : Stdlib.in_channel)
     (deadline : float option)
@@ -225,7 +217,6 @@ let wait_for_server_hello
     (root : Path.t) : unit Lwt.t =
   let%lwt (_ : 'a Server_command_types.message_type) =
     wait_for_server_message
-      ~abort_on_distc_failure
       ~connection_log_id
       ~expected_message:(Some Server_command_types.Hello)
       ~ic
@@ -257,7 +248,6 @@ let rec connect
     ({
        root;
        from;
-       abort_on_distc_failure;
        autostart;
        force_dormant_start;
        deadline;
@@ -341,7 +331,6 @@ let rec connect
     let%lwt () =
       if do_post_handoff_handshake then
         wait_for_server_hello
-          ~abort_on_distc_failure
           connection_log_id
           ic
           deadline
@@ -365,7 +354,6 @@ let rec connect
         conn_progress_callback = progress_callback;
         conn_root = root;
         conn_deadline = deadline;
-        conn_abort_on_distc_failure = abort_on_distc_failure;
         from;
       }
   | Error e ->
@@ -469,7 +457,6 @@ let rpc :
        conn_progress_callback = progress_callback;
        conn_root;
        conn_deadline = deadline;
-       conn_abort_on_distc_failure = abort_on_distc_failure;
        from;
      }
      ~desc
@@ -481,7 +468,6 @@ let rpc :
   let t_sent_cmd = Unix.gettimeofday () in
   let%lwt res =
     wait_for_server_message
-      ~abort_on_distc_failure
       ~connection_log_id
       ~expected_message:None
       ~ic

@@ -476,40 +476,35 @@ let check_obj_access
             msg
             (def_pos, vis))
     in
-    if
-      Typechecker_options.use_module_error_for_member_access (Env.get_tcopt env)
-    then
-      let module_error =
-        match vis with
-        | Vinternal m ->
-          check_internal_access
-            ~in_signature:false
-            ~tests_bypass_visibility_context
-            env
-            (Some m)
-            use_pos
-            def_pos
-        | Vprotected_internal { module_; _ } ->
-          check_internal_access
-            ~in_signature:false
-            ~tests_bypass_visibility_context
-            env
-            (Some module_)
-            use_pos
-            def_pos
-        | _ -> None
-      in
-      let vis_without_internal =
-        match vis with
-        | Vinternal _ -> Vpublic
-        | Vprotected_internal { class_id; _ } -> Vprotected class_id
-        | other -> other
-      in
-      List.filter_map
-        ~f:Fn.id
-        [module_error; check_visibility vis_without_internal]
-    else
-      Option.to_list (check_visibility vis)
+    let module_error =
+      match vis with
+      | Vinternal m ->
+        check_internal_access
+          ~in_signature:false
+          ~tests_bypass_visibility_context
+          env
+          (Some m)
+          use_pos
+          def_pos
+      | Vprotected_internal { module_; _ } ->
+        check_internal_access
+          ~in_signature:false
+          ~tests_bypass_visibility_context
+          env
+          (Some module_)
+          use_pos
+          def_pos
+      | _ -> None
+    in
+    let vis_without_internal =
+      match vis with
+      | Vinternal _ -> Vpublic
+      | Vprotected_internal { class_id; _ } -> Vprotected class_id
+      | other -> other
+    in
+    List.filter_map
+      ~f:Fn.id
+      [module_error; check_visibility vis_without_internal]
 
 let check_top_level_access
     ~should_check_package_boundary
@@ -639,40 +634,35 @@ let check_class_access
             msg
             (def_pos, vis))
     in
-    if
-      Typechecker_options.use_module_error_for_member_access (Env.get_tcopt env)
-    then
-      let module_error =
-        match vis with
-        | Vinternal m ->
-          check_internal_access
-            ~in_signature:false
-            ~tests_bypass_visibility_context
-            env
-            (Some m)
-            use_pos
-            def_pos
-        | Vprotected_internal { module_; _ } ->
-          check_internal_access
-            ~in_signature:false
-            ~tests_bypass_visibility_context
-            env
-            (Some module_)
-            use_pos
-            def_pos
-        | _ -> None
-      in
-      let vis_without_internal =
-        match vis with
-        | Vinternal _ -> Vpublic
-        | Vprotected_internal { class_id; _ } -> Vprotected class_id
-        | other -> other
-      in
-      List.filter_map
-        ~f:Fn.id
-        [module_error; check_visibility vis_without_internal]
-    else
-      Option.to_list (check_visibility vis)
+    let module_error =
+      match vis with
+      | Vinternal m ->
+        check_internal_access
+          ~in_signature:false
+          ~tests_bypass_visibility_context
+          env
+          (Some m)
+          use_pos
+          def_pos
+      | Vprotected_internal { module_; _ } ->
+        check_internal_access
+          ~in_signature:false
+          ~tests_bypass_visibility_context
+          env
+          (Some module_)
+          use_pos
+          def_pos
+      | _ -> None
+    in
+    let vis_without_internal =
+      match vis with
+      | Vinternal _ -> Vpublic
+      | Vprotected_internal { class_id; _ } -> Vprotected class_id
+      | other -> other
+    in
+    List.filter_map
+      ~f:Fn.id
+      [module_error; check_visibility vis_without_internal]
 
 let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
   let current_pkg = Env.get_current_package env in

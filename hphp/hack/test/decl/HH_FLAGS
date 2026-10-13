@@ -2,4 +2,3 @@
 --allowed-fixme-codes-strict 2001,2035,2071,4030
 --allowed-decl-fixme-codes 2001,2035,2071,4030
 --extra-builtin ../hhi/XHPTest.hhi
---config use_module_error_for_member_access=true

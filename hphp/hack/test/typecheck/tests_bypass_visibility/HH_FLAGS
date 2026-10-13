@@ -1,3 +1,2 @@
 --config permits_bypassing_visibility=WWWTest,AlternateWWWTest
 --config tests_bypass_visibility_static_properties=true
---config use_module_error_for_member_access=true

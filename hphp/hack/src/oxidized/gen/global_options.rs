@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a82c5ece00d3e59ed844a99e817ffd9b>>
+// @generated SignedSource<<a4ab6fe74aa46e30051adc256a43ec9e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -312,8 +312,6 @@ pub struct GlobalOptions {
     pub tco_typeconst_concrete_concrete_error: bool,
     /// meth_caller can only reference public methods
     pub tco_meth_caller_only_public_visibility: bool,
-    /// Use the module-specific error for member access across module boundaries.
-    pub tco_use_module_error_for_member_access: bool,
     /// Consider `require extends` and `require implements` as ancestors when checking a class
     pub tco_require_extends_implements_ancestors: bool,
     /// Inherit SDT from parents, without writing <<__SupportDynamicType>>

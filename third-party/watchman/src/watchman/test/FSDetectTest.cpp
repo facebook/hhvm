@@ -139,6 +139,15 @@ TEST(FSType, macosNfsEdenMountUsesMountSource) {
       w_fstype_detect_macos_nfs(w_string("nfs"), w_string("edenfs:")));
 }
 
+TEST(FSType, macosUnixSocketNfsEdenMountUsesEdenType) {
+  EXPECT_EQ(
+      w_string("edenfs:"),
+      w_fstype_detect_macos_nfs(
+          w_string("nfs"),
+          w_string(
+              "</Users/me/.eden/clients/repo/edenfs-nfsd.socket>:/Users/me/repo")));
+}
+
 TEST(FSType, macosNfsNonEdenMountRemainsNfs) {
   EXPECT_EQ(
       w_string("nfs"),

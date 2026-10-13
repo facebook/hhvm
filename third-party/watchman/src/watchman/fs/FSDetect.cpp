@@ -108,10 +108,15 @@ std::optional<w_string> find_fstype_in_linux_proc_mounts(
   return w_string(bestVfsType.data(), bestVfsType.size());
 }
 
-w_string w_fstype_detect_macos_nfs(w_string fstype, w_string edenfs_indicator) {
+w_string w_fstype_detect_macos_nfs(
+    w_string fstype,
+    const w_string& edenfs_indicator) {
   if (facebook::eden::is_edenfs_nfs_mount(
           fstype.view(), edenfs_indicator.view())) {
-    return edenfs_indicator;
+    // The mount source is "edenfs:" for TCP mounts but the nfsd socket path
+    // for Unix-socket mounts, so report the type the eden watcher checks for
+    // rather than the source itself.
+    return w_string("edenfs:", W_STRING_UNICODE);
   }
   return fstype;
 }

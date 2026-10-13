@@ -2242,7 +2242,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "config_file",
- "ocamlrep",
  "oxidized",
  "packages",
  "serde",

@@ -13,8 +13,6 @@ use std::path::PathBuf;
 use anyhow::Context;
 use anyhow::Result;
 use config_file::ConfigFile;
-use ocamlrep::FromOcamlRep;
-use ocamlrep::ToOcamlRep;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
@@ -22,6 +20,7 @@ use oxidized::global_options::GlobalOptions;
 use oxidized::global_options::NoneOrAllExcept;
 use oxidized::global_options::SavedState;
 use oxidized::global_options::SavedStateLoading;
+use oxidized::hh_config::HhConfig as OxidizedHhConfig;
 use oxidized::parser_options::ParserOptions;
 use oxidized::saved_state_rollouts::SavedStateRollouts;
 use packages::PackageInfo;
@@ -47,13 +46,8 @@ fn get_tristate(config: &ConfigFile, key: &str, default: isize) -> Result<isize>
     Ok(get_optional_tristate(config, key)?.unwrap_or(default))
 }
 
-/// For now, this struct only contains the parts of .hhconfig which
-/// have been needed in Rust tools.
-///
-/// Fields correspond to Server_config.t
-/// IMPORTANT: Field order must match the OCaml Hh_config.t type exactly for FFI.
-#[derive(Debug, Clone, FromOcamlRep, ToOcamlRep)]
-#[repr(C)]
+/// Aggregated configuration consumed by Rust Hack tools.
+#[derive(Debug, Clone)]
 pub struct HhConfig {
     pub version: Option<String>,
 
@@ -82,6 +76,30 @@ pub struct HhConfig {
     pub distc_decl_buckets: i64,
     pub distc_enable_p2p: bool,
     pub distc_upload_only_changed_files: bool,
+}
+
+impl From<HhConfig> for OxidizedHhConfig {
+    fn from(config: HhConfig) -> Self {
+        Self {
+            version: config.version,
+            ignored_paths: config.ignored_paths,
+            hash: config.hash,
+            opts: config.opts,
+            gc_minor_heap_size: config.gc_minor_heap_size,
+            gc_space_overhead: config.gc_space_overhead,
+            sharedmem_global_size: config.sharedmem_global_size,
+            sharedmem_hash_table_pow: config.sharedmem_hash_table_pow,
+            sharedmem_heap_size: config.sharedmem_heap_size,
+            ide_fall_back_to_full_index: config.ide_fall_back_to_full_index,
+            hh_distc_should_disable_trace_store: config.hh_distc_should_disable_trace_store,
+            hh_distc_exponential_backoff_num_retries: config
+                .hh_distc_exponential_backoff_num_retries,
+            naming_table_compression_level: config.naming_table_compression_level,
+            naming_table_compression_threads: config.naming_table_compression_threads,
+            eden_fetch_parallelism: config.eden_fetch_parallelism,
+            use_distc_crawl_dircache: config.use_distc_crawl_dircache,
+        }
+    }
 }
 
 impl Default for HhConfig {

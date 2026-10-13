@@ -199,8 +199,9 @@ end = struct
     (* A custom implementation of Ord for UserDiagnostic matches the sorting behavior of
        diagnostics in OCaml. *)
     | "user_diagnostic::UserDiagnostic" -> ["Ord"; "PartialOrd"]
-    (* These types contain floats, which only implement PartialEq/PartialOrd,
+    (* These types contain or embed floats, so they only implement PartialEq/PartialOrd,
        not Eq/Hash/Ord. *)
+    | "hh_config::HhConfig"
     | "global_options::GlobalOptions"
     | "edenfs_watcher_types::Changes" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]

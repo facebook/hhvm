@@ -6,8 +6,8 @@
  *)
 
 (**
- * OCaml representation of hh_config::HhConfig from Rust.
- * IMPORTANT: Field order must match the Rust struct exactly for FFI.
+ * OCaml type returned by the Rust config parser equivalence test.
+ * The Rust representation is generated from this type by hh_oxidize.
  *)
 
 type t = {
@@ -15,17 +15,17 @@ type t = {
   ignored_paths: string list;
   hash: string;
   opts: Global_options.t;
-  gc_minor_heap_size: int;
-  gc_space_overhead: int;
-  sharedmem_global_size: int;
-  sharedmem_hash_table_pow: int;
-  sharedmem_heap_size: int;
+  gc_minor_heap_size: int; [@oxidize.usize]
+  gc_space_overhead: int; [@oxidize.usize]
+  sharedmem_global_size: int; [@oxidize.usize]
+  sharedmem_hash_table_pow: int; [@oxidize.usize]
+  sharedmem_heap_size: int; [@oxidize.usize]
   ide_fall_back_to_full_index: bool;
   hh_distc_should_disable_trace_store: bool;
-  hh_distc_exponential_backoff_num_retries: int;
-  naming_table_compression_level: int;
-  naming_table_compression_threads: int;
-  eden_fetch_parallelism: int;
+  hh_distc_exponential_backoff_num_retries: int; [@oxidize.usize]
+  naming_table_compression_level: int; [@oxidize.usize]
+  naming_table_compression_threads: int; [@oxidize.usize]
+  eden_fetch_parallelism: int; [@oxidize.usize]
   use_distc_crawl_dircache: bool;
 }
 [@@deriving eq, show]

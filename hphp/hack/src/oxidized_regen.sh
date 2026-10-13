@@ -159,6 +159,7 @@ run_hh_oxidize \
   hphp/hack/src/options/decl_parser_options.ml                                  \
   hphp/hack/src/options/experimental_features.ml                              \
   hphp/hack/src/options/global_options.ml                                      \
+  hphp/hack/src/options/hh_config.ml                                           \
   hphp/hack/src/options/parser_options.ml                                      \
   hphp/hack/src/options/saved_state_rollouts.ml                               \
   hphp/hack/src/options/typechecker_options.ml                                 \

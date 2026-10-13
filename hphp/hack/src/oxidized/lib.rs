@@ -91,6 +91,7 @@ pub use r#gen::explanation;
 pub use r#gen::files_to_ignore;
 pub use r#gen::full_fidelity_parser_env;
 pub use r#gen::global_options;
+pub use r#gen::hh_config;
 pub use r#gen::map_reduce_ffi;
 pub use r#gen::message;
 pub use r#gen::name_context;

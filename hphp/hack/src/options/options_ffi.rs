@@ -8,6 +8,7 @@ use hh_config::HhConfig;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::experimental_features::FeatureName;
 use oxidized::experimental_features::FeatureStatus;
+use oxidized::hh_config::HhConfig as OxidizedHhConfig;
 use oxidized::saved_state_rollouts::Flag;
 use oxidized::saved_state_rollouts::SavedStateRollouts;
 
@@ -41,12 +42,12 @@ fn get_feature_status_deprecated(name: FeatureName) -> FeatureStatus {
     name.get_feature_status_deprecated()
 }
 
-// Parse configuration files using Rust parser and return full HhConfig.
-// Used for testing equivalence with OCaml parser.
+// Parse configuration files using the Rust parser and return the oxidized OCaml type.
+// Used for testing equivalence with the OCaml parser.
 fn rust_parse_config_to_hh_config(
     hhconfig_bytes: Vec<u8>,
     hh_conf_bytes: Vec<u8>,
-) -> Result<HhConfig, String> {
+) -> Result<OxidizedHhConfig, String> {
     let hhconfig = ConfigFile::from_slice(&hhconfig_bytes);
     let hh_conf = ConfigFile::from_slice(&hh_conf_bytes);
 
@@ -55,6 +56,8 @@ fn rust_parse_config_to_hh_config(
         hhconfig,
         hh_conf,
         Default::default(),
-    ).map_err(|e| format!("Rust config parse error: {}", e))
+    )
+    .map(OxidizedHhConfig::from)
+    .map_err(|e| format!("Rust config parse error: {}", e))
 }
 }

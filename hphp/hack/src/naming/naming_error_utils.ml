@@ -377,6 +377,15 @@ let variadic_named_parameter_disallowed pos =
     (pos, "Variadic named parameters (e.g. `named int...`) are not enabled.")
     []
 
+let trait_self_shape_key pos key_name =
+  User_diagnostic.make_err
+    Error_code.(to_enum TraitSelfShapeKey)
+    ( pos,
+      Printf.sprintf
+        "`%s` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly"
+        key_name )
+    []
+
 let primitive_top_level pos =
   User_diagnostic.make_err
     Error_code.(to_enum PrimitiveToplevel)
@@ -883,6 +892,8 @@ let to_user_diagnostic t custom_err_config =
     | Named_variadic_type_disallowed pos -> named_variadic_type_disallowed pos
     | Variadic_named_parameter_disallowed pos ->
       variadic_named_parameter_disallowed pos
+    | Trait_self_shape_key { pos; key_name } ->
+      trait_self_shape_key pos key_name
     | Primitive_top_level pos -> primitive_top_level pos
     | Primitive_invalid_alias { pos; ty_name_used; ty_name_canon } ->
       primitive_invalid_alias pos ty_name_used ty_name_canon

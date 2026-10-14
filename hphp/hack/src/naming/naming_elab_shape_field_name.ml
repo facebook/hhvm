@@ -47,8 +47,21 @@ let canonical_shape_name current_class sfld =
   | Ast_defs.SFclass_const ((class_pos, class_name), cst)
     when String.equal class_name SN.Classes.cSelf ->
     (match current_class with
-    | Some ((_, class_name), _, _) ->
-      Ok (Ast_defs.SFclass_const ((class_pos, class_name), cst))
+    | Some ((_, class_name), class_kind, _) ->
+      let shape_field = Ast_defs.SFclass_const ((class_pos, class_name), cst) in
+      if Ast_defs.is_c_trait class_kind then
+        let (const_pos, const_name) = cst in
+        let err =
+          Naming_phase_error.naming
+          @@ Naming_error.Trait_self_shape_key
+               {
+                 pos = Pos.btw class_pos const_pos;
+                 key_name = "self::" ^ const_name;
+               }
+        in
+        Error (shape_field, err)
+      else
+        Ok shape_field
     | None ->
       let err =
         Naming_phase_error.naming @@ Naming_error.Self_outside_class class_pos

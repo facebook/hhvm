@@ -128,12 +128,60 @@ let dest_args arg1 arg2 =
   | ((ty, _, _), (_, pos, String field_name)) -> Some (ty, pos, field_name)
   | _ -> None
 
+let is_shape env ty =
+  let (env, ty) = Tast_env.intersect_with_nonnull env (get_pos ty) ty in
+  let shape =
+    Typing_make_type.(locl_like Reason.none (top_shape Reason.none))
+  in
+  Tast_env.is_sub_type_for_union env ty shape
+  && not (Tast_env.is_sub_type env ty (Typing_make_type.dynamic Reason.none))
+
+let check_trait_self_shape_key (env : Tast_env.env) expr =
+  let report field =
+    let Equal = Tast_env.eq_typing_env in
+    Typing_shapes.check_trait_self_shape_key env field
+  in
+  match expr with
+  | ( _,
+      _,
+      Array_get
+        ( (ty, _, _),
+          Some
+            ((_, _, (Class_const ((_, _, CIself), _) | Nameof (_, _, CIself)))
+            as field) ) )
+    when is_shape env ty ->
+    report field
+  | ( _,
+      _,
+      Call
+        {
+          func =
+            (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name)));
+          args = _ :: field :: _;
+          unpacked_arg = None;
+          _;
+        } )
+    when (String.equal class_name SN.Shapes.cShapes
+         || String.equal class_name SN.Shapes.cReadonlyShapes)
+         && List.exists
+              [
+                SN.Shapes.at;
+                SN.Shapes.idx;
+                SN.Shapes.keyExists;
+                SN.Shapes.put;
+                SN.Shapes.removeKey;
+              ]
+              ~f:(String.equal method_name) ->
+    report (Aast_utils.arg_to_expr field)
+  | _ -> ()
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env =
-      function
+    method! at_expr env expr =
+      check_trait_self_shape_key env expr;
+      match expr with
       | ( _,
           p,
           Call

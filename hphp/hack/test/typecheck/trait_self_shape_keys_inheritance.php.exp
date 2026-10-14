@@ -1,0 +1,6 @@
+ERROR: File "trait_self_shape_keys_inheritance.php", line 15, characters 18-26:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "trait_self_shape_keys_inheritance.php", line 27, characters 18-26:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "trait_self_shape_keys_inheritance.php", line 39, characters 18-26:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2a0e9d96a7c45b3b749c93ccd991767c>>
+// @generated SignedSource<<8890579a36717deee759cc488da574e1>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -182,6 +182,8 @@ pub enum NamingError {
     NamedVariadicTypeDisallowed(pos::Pos),
     #[rust_to_ocaml(name = "Variadic_named_parameter_disallowed")]
     VariadicNamedParameterDisallowed(pos::Pos),
+    #[rust_to_ocaml(name = "Trait_self_shape_key")]
+    TraitSelfShapeKey { pos: pos::Pos, key_name: String },
     #[rust_to_ocaml(name = "Primitive_top_level")]
     PrimitiveTopLevel(pos::Pos),
     #[rust_to_ocaml(name = "Primitive_invalid_alias")]

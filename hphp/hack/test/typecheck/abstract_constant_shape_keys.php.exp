@@ -1,3 +1,7 @@
+ERROR: File "abstract_constant_shape_keys.php", line 38, characters 44-54:
+`self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "abstract_constant_shape_keys.php", line 39, characters 18-28:
+`self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
 ERROR: File "abstract_constant_shape_keys.php", line 6, characters 37-47:
 Cannot reference abstract constant `MagicFactory::MAGIC` directly (Typing[4129])
   File "abstract_constant_shape_keys.php", line 4, characters 25-29:

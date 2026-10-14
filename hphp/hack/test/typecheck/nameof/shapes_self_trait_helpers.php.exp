@@ -1,0 +1,10 @@
+ERROR: File "shapes_self_trait_helpers.php", line 7, characters 21-29:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "shapes_self_trait_helpers.php", line 11, characters 20-30:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "shapes_self_trait_helpers.php", line 15, characters 27-37:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "shapes_self_trait_helpers.php", line 19, characters 33-43:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "shapes_self_trait_helpers.php", line 23, characters 21-31:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])

@@ -1,0 +1,4 @@
+ERROR: File "shapes_self_subclass.php", line 17, characters 15-25:
+This shape doesn't have a field `\B::class` (Typing[4108])
+  File "shapes_self_subclass.php", line 4, characters 18-39:
+  The shape is defined here

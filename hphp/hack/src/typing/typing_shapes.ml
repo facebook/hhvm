@@ -46,6 +46,30 @@ let shape_key_attribute_error env pos cls const_name class_const =
   else
     None
 
+let check_trait_self_shape_key env (_, pos, field) =
+  let key_name =
+    match field with
+    | Aast.Class_const ((_, _, Aast.CIself), (_, const_name))
+      when not (String.equal const_name "class") ->
+      Some ("self::" ^ const_name)
+    | Aast.Nameof (_, _, Aast.CIself) -> Some "nameof self"
+    | _ -> None
+  in
+  Option.iter key_name ~f:(fun key_name ->
+      match Env.get_self_class env with
+      | Decl_entry.Found class_ when Ast_defs.is_c_trait (Cls.kind class_) ->
+        let custom_err_config =
+          Typechecker_options.custom_error_config (Env.get_tcopt env)
+        in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Trait_self_shape_key { pos; key_name })
+             custom_err_config)
+      | Decl_entry.Found _
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ())
+
 let widen_for_refine_shape ~expr_pos field_name env ty =
   Typing_log.(
     log_with_level env "typing" ~level:1 (fun () ->

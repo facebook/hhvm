@@ -1,0 +1,6 @@
+ERROR: File "trait_self_shape_keys_recursive.php", line 14, characters 15-25:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "trait_self_shape_keys_recursive.php", line 5, characters 12-26:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "trait_self_shape_keys_recursive.php", line 4, characters 31-33:
+  This is what makes me believe it can be `null`

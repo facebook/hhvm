@@ -75,6 +75,10 @@ val to_dict :
   Typing_defs.locl_phase Typing_defs.ty ->
   Type_mapper.result
 
+(** Report `self::CONST` or `nameof self` used as a shape key inside a trait. *)
+val check_trait_self_shape_key :
+  Typing_env_types.env -> ('a, 'b) Aast.expr -> unit
+
 val check_shape_keys_validity :
   Typing_env_types.env ->
   Ast_defs.shape_field_name list ->

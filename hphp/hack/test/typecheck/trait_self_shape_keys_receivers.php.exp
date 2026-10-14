@@ -1,0 +1,4 @@
+ERROR: File "trait_self_shape_keys_receivers.php", line 11, characters 15-23:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "trait_self_shape_keys_receivers.php", line 17, characters 15-25:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])

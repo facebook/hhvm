@@ -1,0 +1,8 @@
+ERROR: File "wrapped_receivers.php", line 8, characters 15-23:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "wrapped_receivers.php", line 12, characters 15-25:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "wrapped_receivers.php", line 16, characters 15-23:
+`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "wrapped_receivers.php", line 22, characters 15-25:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])

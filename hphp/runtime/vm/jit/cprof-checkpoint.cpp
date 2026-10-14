@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -23,10 +24,13 @@
 #include <cstdint>
 #include <cstring>
 #include <exception>
+#include <filesystem>
 #include <mutex>
 #include <string>
 #include <sys/stat.h>
+#include <system_error>
 #include <thread>
+#include <tuple>
 #include <type_traits>
 #include <unistd.h>
 #include <utility>
@@ -50,6 +54,25 @@
 #include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
+
+bool isContProfCheckpointFilename(std::string_view filename) {
+  constexpr std::string_view prefix{"cont-prof-"};
+  constexpr std::string_view suffix{".cprof"};
+  if (!filename.starts_with(prefix) || !filename.ends_with(suffix)) return false;
+
+  filename.remove_prefix(prefix.size());
+  filename.remove_suffix(suffix.size());
+  auto const separator = filename.find('-');
+  if (separator == std::string_view::npos) return false;
+
+  auto const isDecimal = [](std::string_view value) {
+    return !value.empty() && std::all_of(value.begin(), value.end(), [](char c) {
+      return c >= '0' && c <= '9';
+    });
+  };
+  return isDecimal(filename.substr(0, separator)) &&
+    isDecimal(filename.substr(separator + 1));
+}
 
 namespace {
 
@@ -302,6 +325,57 @@ bool writeContProfCheckpointFile(
   return true;
 }
 
+bool pruneContProfCheckpointFiles(const std::string& currentPath) {
+  auto const current = std::filesystem::path{currentPath};
+  auto const directory = current.parent_path();
+
+  struct CheckpointFile {
+    std::filesystem::path path;
+    std::filesystem::file_time_type mtime;
+  };
+  std::vector<CheckpointFile> files;
+  bool foundCurrent = false;
+  std::error_code error;
+  std::filesystem::directory_iterator iterator{directory, error};
+  auto const end = std::filesystem::directory_iterator{};
+  for (; !error && iterator != end; iterator.increment(error)) {
+    auto const& entry = *iterator;
+    auto const filename = entry.path().filename();
+    if (!isContProfCheckpointFilename(filename.native())) continue;
+
+    std::error_code entryError;
+    auto const status = entry.symlink_status(entryError);
+    if (entryError || !std::filesystem::is_regular_file(status)) continue;
+
+    if (filename == current.filename()) {
+      foundCurrent = true;
+      continue;
+    }
+    auto const mtime = entry.last_write_time(entryError);
+    if (!entryError) files.push_back({entry.path(), mtime});
+  }
+  if (error || !foundCurrent) return false;
+
+  std::sort(files.begin(), files.end(), [](auto const& lhs, auto const& rhs) {
+    return std::tie(lhs.mtime, lhs.path) > std::tie(rhs.mtime, rhs.path);
+  });
+
+  bool success = true;
+  for (size_t i = kMaxContProfCheckpointFiles - 1; i < files.size(); ++i) {
+    auto const& file = files[i];
+    auto const status = std::filesystem::symlink_status(file.path, error);
+    if (error || !std::filesystem::is_regular_file(status)) continue;
+
+    // Another writer may have replaced the file since this scan.
+    auto const mtime = std::filesystem::last_write_time(file.path, error);
+    if (error || mtime != file.mtime) continue;
+
+    std::filesystem::remove(file.path, error);
+    if (error) success = false;
+  }
+  return success;
+}
+
 std::optional<std::vector<ContProfProfileRecord>>
 readContProfCheckpointFile(const std::string& path) {
   if (path.empty()) return std::nullopt;
@@ -476,6 +550,12 @@ private:
       }
 
       m_lastWrittenRecordCount = records.size();
+      if (!pruneContProfCheckpointFiles(m_path)) {
+        Logger::Warning(
+          "Failed to prune cont-prof checkpoints: %s",
+          Cfg::Jit::ContProfCheckpointDirectory.c_str()
+        );
+      }
     } catch (const std::exception& exception) {
       Logger::Warning(
         "Failed to build cont-prof checkpoint: %s",

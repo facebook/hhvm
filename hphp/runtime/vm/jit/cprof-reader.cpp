@@ -21,7 +21,6 @@
 #include <filesystem>
 #include <map>
 #include <string>
-#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
@@ -39,7 +38,6 @@ namespace HPHP::jit::cprof {
 namespace {
 
 constexpr size_t kMaxDirectoryEntries = 1000;
-constexpr size_t kMaxCheckpointFiles = 20;
 constexpr size_t kMaxDecodedRecords = 200'000;
 
 struct CheckpointFile {
@@ -52,13 +50,6 @@ struct SelectedRecord {
   ContProfProfileRecord record{};
   std::string filename;
 };
-
-bool isCheckpointFilename(std::string_view filename) {
-  constexpr std::string_view kPrefix{"cont-prof-"};
-  constexpr std::string_view kSuffix{".cprof"};
-
-  return filename.starts_with(kPrefix) && filename.ends_with(kSuffix);
-}
 
 bool isBetterCandidate(
   const ContProfProfileRecord& candidate,
@@ -99,7 +90,7 @@ discoverCheckpointFiles(const std::string& directory) {
 
     auto const& entry = *iterator;
     auto const filename = entry.path().filename().native();
-    if (!isCheckpointFilename(filename)) continue;
+    if (!isContProfCheckpointFilename(filename)) continue;
 
     std::error_code entryError;
     auto const status = entry.symlink_status(entryError);
@@ -125,7 +116,9 @@ discoverCheckpointFiles(const std::string& directory) {
         std::tie(rhs.mtime, rhs.filename);
     }
   );
-  if (files.size() > kMaxCheckpointFiles) files.resize(kMaxCheckpointFiles);
+  if (files.size() > kMaxContProfCheckpointFiles) {
+    files.resize(kMaxContProfCheckpointFiles);
+  }
 
   return files;
 }

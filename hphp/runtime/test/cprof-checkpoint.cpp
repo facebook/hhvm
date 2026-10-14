@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 
+#include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <filesystem>
 #include <string>
@@ -63,6 +65,15 @@ void expectCheckpointCounters(const std::string& path, size_t records) {
   EXPECT_EQ(std::filesystem::file_size(path), ServiceData::exportCounterByKey(
     "jit.cprof.checkpoint.bytes"
   ).value_or(-1));
+}
+
+std::vector<std::string> directoryEntries(const std::filesystem::path& path) {
+  std::vector<std::string> names;
+  for (auto const& entry : std::filesystem::directory_iterator{path}) {
+    names.push_back(entry.path().filename().native());
+  }
+  std::sort(names.begin(), names.end());
+  return names;
 }
 
 TEST(ContProfCheckpoint, RoundTripsRecords) {
@@ -172,6 +183,85 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   EXPECT_EQ(*failures + 2, ServiceData::exportCounterByKey(
     "jit.cprof.checkpoint.write_failures"
   ).value_or(-1));
+}
+
+TEST(ContProfCheckpoint, PrunesOnlyOldCheckpointsAndPreservesCurrent) {
+  folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-retention"};
+  std::filesystem::path const directoryPath{temp.path().native()};
+  std::vector<ContProfProfileRecord> const records{makeRecord("alpha", 1, 7)};
+  auto const start = std::filesystem::file_time_type::clock::now();
+  std::vector<std::filesystem::path> checkpoints;
+  for (size_t i = 0; i < 22; ++i) {
+    auto const path = directoryPath /
+      ("cont-prof-1-" + std::to_string(1022 - i) + ".cprof");
+    ASSERT_TRUE(writeContProfCheckpointFile(path.native(), records));
+    std::filesystem::last_write_time(path, start + std::chrono::seconds{i});
+    checkpoints.push_back(path);
+  }
+
+  std::vector<std::string> expected{
+    "notes.txt",
+    "cont-prof-1.cprof",
+    "cont-prof-1-100.cprof.tmp",
+    "cont-prof--100.cprof",
+    "cont-prof-1-x.cprof",
+    "cont-prof-1-100-200.cprof",
+  };
+  for (auto const& name : expected) {
+    auto const path = directoryPath / name;
+    ASSERT_TRUE(writeContProfCheckpointFile(path.native(), records));
+    std::filesystem::last_write_time(path, start - std::chrono::seconds{1});
+  }
+
+  auto const directory = directoryPath / "cont-prof-2-100.cprof";
+  ASSERT_TRUE(std::filesystem::create_directory(directory));
+  ASSERT_TRUE(writeContProfCheckpointFile(
+    (directory / "nested.cprof").native(), records
+  ));
+  expected.push_back(directory.filename().native());
+
+  auto const symlink = directoryPath / "cont-prof-3-100.cprof";
+  std::filesystem::create_symlink(directoryPath / "notes.txt", symlink);
+  expected.push_back(symlink.filename().native());
+
+  ASSERT_TRUE(pruneContProfCheckpointFiles(checkpoints.front().native()));
+
+  // The oldest file belongs to this writer; keep it plus the newest 19 others.
+  expected.push_back(checkpoints.front().filename().native());
+  for (size_t i = 3; i < checkpoints.size(); ++i) {
+    expected.push_back(checkpoints[i].filename().native());
+  }
+  std::sort(expected.begin(), expected.end());
+  EXPECT_EQ(expected, directoryEntries(directoryPath));
+  EXPECT_EQ(records, readContProfCheckpointFile(checkpoints.front().native()));
+  EXPECT_EQ(records, readContProfCheckpointFile(
+    (directory / "nested.cprof").native()
+  ));
+  EXPECT_TRUE(std::filesystem::is_symlink(symlink));
+
+  EXPECT_TRUE(pruneContProfCheckpointFiles(checkpoints.front().native()));
+  EXPECT_EQ(expected, directoryEntries(directoryPath));
+}
+
+TEST(ContProfCheckpoint, PruningRequiresCurrentCheckpointInDirectory) {
+  folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-retention-failure"};
+  std::filesystem::path const directoryPath{temp.path().native()};
+  std::vector<ContProfProfileRecord> const records{makeRecord("alpha", 1, 7)};
+  for (size_t i = 0; i < 21; ++i) {
+    auto const path = directoryPath /
+      ("cont-prof-1-" + std::to_string(1000 + i) + ".cprof");
+    ASSERT_TRUE(writeContProfCheckpointFile(path.native(), records));
+  }
+  auto const expected = directoryEntries(directoryPath);
+  auto const missing = (directoryPath / "cont-prof-2-100.cprof").native();
+
+  EXPECT_FALSE(pruneContProfCheckpointFiles(missing));
+  EXPECT_EQ(expected, directoryEntries(directoryPath));
+
+  EXPECT_FALSE(pruneContProfCheckpointFiles(
+    (directoryPath / "missing/cont-prof-1-1000.cprof").native()
+  ));
+  EXPECT_EQ(expected, directoryEntries(directoryPath));
 }
 
 TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {

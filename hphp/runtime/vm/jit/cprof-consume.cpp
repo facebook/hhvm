@@ -50,10 +50,12 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 
@@ -70,6 +72,11 @@ bool contProfStartupActive() {
 }
 
 namespace {
+
+auto const s_startupPreparedFuncs =
+  ServiceData::createCounter("jit.cprof.startup.prepared_funcs");
+auto const s_startupPublishedFuncs =
+  ServiceData::createCounter("jit.cprof.startup.published_funcs");
 
 struct LoadedUnits {
   size_t pathsRequested{0};
@@ -349,21 +356,32 @@ void consumeContProfAtStartup() noexcept {
   auto installing = false;
 
   try {
+    BootStats::Block timer{"cont_prof_startup", Cfg::Server::Mode, true};
     VMWorker([&] {
       ProfileNonVMThread nonVM;
       HphpSession session{Treadmill::SessionKind::TranslateWorker};
 
-      auto const input = readContProfCheckpointDirectory(
-        Cfg::Jit::ContProfCheckpointDirectory
-      );
+      auto const input = [&] {
+        BootStats::Block timer{"cont_prof_read", Cfg::Server::Mode, true};
+        return readContProfCheckpointDirectory(
+          Cfg::Jit::ContProfCheckpointDirectory
+        );
+      }();
       if (!input) return;
 
-      auto const loaded = loadCandidateUnits(input->records);
-      auto const prepared = prepareContProfStartupCandidates(
-        input->records,
-        loaded.units,
-        Cfg::Jit::ContProfStartupMaxFunctions
-      );
+      auto const loaded = [&] {
+        BootStats::Block timer{"cont_prof_resolve", Cfg::Server::Mode, true};
+        return loadCandidateUnits(input->records);
+      }();
+      auto const prepared = [&] {
+        BootStats::Block timer{"cont_prof_prepare", Cfg::Server::Mode, true};
+        return prepareContProfStartupCandidates(
+          input->records,
+          loaded.units,
+          Cfg::Jit::ContProfStartupMaxFunctions
+        );
+      }();
+      s_startupPreparedFuncs->setValue(prepared.candidates.size());
 
       auto const profData = jit::profData();
       if (!profData || globalProfData() != profData) return;
@@ -381,14 +399,20 @@ void consumeContProfAtStartup() noexcept {
 
       size_t published{};
 
-      // Optimize candidates in descending function-hotness order.
-      for (auto const& candidate : prepared.candidates) {
-        if (jit::profData() != profData || globalProfData() != profData) {
-          break;
-        }
+      {
+        BootStats::Block timer{
+          "cont_prof_optimize_serial", Cfg::Server::Mode, true
+        };
+        // Optimize candidates in descending function-hotness order.
+        for (auto const& candidate : prepared.candidates) {
+          if (jit::profData() != profData || globalProfData() != profData) {
+            break;
+          }
 
-        if (optimizeCandidate(*profData, candidate, installing)) ++published;
+          if (optimizeCandidate(*profData, candidate, installing)) ++published;
+        }
       }
+      s_startupPublishedFuncs->setValue(published);
 
       Logger::Info(
         "Cont-prof startup published optimized code for %zu of "

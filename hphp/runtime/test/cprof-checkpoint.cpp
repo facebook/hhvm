@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 
+#include <cstddef>
+#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,6 +28,7 @@
 
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 namespace {
@@ -52,6 +55,15 @@ ContProfProfileRecord makeRecord(
   return record;
 }
 
+void expectCheckpointCounters(const std::string& path, size_t records) {
+  EXPECT_EQ(records, ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.records"
+  ).value_or(-1));
+  EXPECT_EQ(std::filesystem::file_size(path), ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.bytes"
+  ).value_or(-1));
+}
+
 TEST(ContProfCheckpoint, RoundTripsRecords) {
   std::vector<ContProfProfileRecord> const expected{
     makeRecord("alpha", 1, 7),
@@ -69,21 +81,21 @@ TEST(ContProfCheckpoint, RoundTripsRecords) {
 }
 
 TEST(ContProfCheckpoint, SkipsInvalidRecords) {
+  folly::test::TemporaryDirectory temp{"cont-prof-checkpoint"};
+  auto const path = temp.path().native() + "/checkpoint.cprof";
   auto const first = makeRecord("alpha", 1, 7);
   auto invalid = makeRecord("beta", 2, 11);
   invalid.header.capturedAtMs = 0;
   auto const last = makeRecord("gamma", 3, 13);
 
-  auto const encoded = serializeContProfCheckpoint({
+  ASSERT_TRUE(writeContProfCheckpointFile(path, {
     first,
     invalid,
     last,
-  });
-  ASSERT_TRUE(encoded);
+  }));
+  expectCheckpointCounters(path, 2);
 
-  auto const decoded = deserializeContProfCheckpoint(
-    folly::ByteRange{encoded->data(), encoded->size()}
-  );
+  auto const decoded = readContProfCheckpointFile(path);
   ASSERT_TRUE(decoded);
 
   std::vector<ContProfProfileRecord> const expected{first, last};
@@ -123,22 +135,42 @@ TEST(ContProfCheckpoint, RejectsMalformedOrNoncanonicalInput) {
 TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   folly::test::TemporaryDirectory temp{"cont-prof-checkpoint"};
   auto const path = temp.path().native() + "/checkpoint.cprof";
+  auto const failures = ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.write_failures"
+  );
+  ASSERT_TRUE(failures);
 
   std::vector<ContProfProfileRecord> const first{
     makeRecord("alpha", 1, 7),
   };
   ASSERT_TRUE(writeContProfCheckpointFile(path, first));
   EXPECT_EQ(first, readContProfCheckpointFile(path));
+  expectCheckpointCounters(path, first.size());
 
   EXPECT_FALSE(writeContProfCheckpointFile(path, {}));
   EXPECT_EQ(first, readContProfCheckpointFile(path));
+  expectCheckpointCounters(path, first.size());
+  EXPECT_EQ(*failures + 1, ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.write_failures"
+  ).value_or(-1));
 
   std::vector<ContProfProfileRecord> const replacement{
     makeRecord("alpha", 1, 7),
     makeRecord("beta", 2, 11),
   };
+  EXPECT_FALSE(writeContProfCheckpointFile(
+    temp.path().native() + "/missing/checkpoint.cprof", replacement
+  ));
+  expectCheckpointCounters(path, first.size());
+  EXPECT_EQ(*failures + 2, ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.write_failures"
+  ).value_or(-1));
   ASSERT_TRUE(writeContProfCheckpointFile(path, replacement));
   EXPECT_EQ(replacement, readContProfCheckpointFile(path));
+  expectCheckpointCounters(path, replacement.size());
+  EXPECT_EQ(*failures + 2, ServiceData::exportCounterByKey(
+    "jit.cprof.checkpoint.write_failures"
+  ).value_or(-1));
 }
 
 TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {

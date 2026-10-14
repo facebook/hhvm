@@ -47,6 +47,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 
@@ -57,6 +58,13 @@ using EncodedRecordSize = uint32_t;
 
 constexpr size_t kMaxCheckpointBytes = 256U << 20;
 constexpr EncodedRecordCount kMaxCheckpointRecords = 100'000;
+
+auto const s_checkpointRecords =
+  ServiceData::createCounter("jit.cprof.checkpoint.records");
+auto const s_checkpointBytes =
+  ServiceData::createCounter("jit.cprof.checkpoint.bytes");
+auto const s_checkpointWriteFailures =
+  ServiceData::createCounter("jit.cprof.checkpoint.write_failures");
 
 struct Writer {
   explicit Writer(size_t maxBytes) : m_maxBytes{maxBytes} {}
@@ -135,10 +143,13 @@ private:
   size_t m_remaining;
 };
 
-}
+struct EncodedCheckpoint {
+  std::vector<uint8_t> bytes;
+  EncodedRecordCount recordCount;
+};
 
-std::optional<std::vector<uint8_t>>
-serializeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
+std::optional<EncodedCheckpoint>
+encodeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
   // TODO(jtwarren): add support for selecting hottest and truncating the rest.
   if (records.empty() || records.size() > kMaxCheckpointRecords) {
     return std::nullopt;
@@ -174,7 +185,16 @@ serializeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
     return std::nullopt;
   }
 
-  return std::move(writer).takeBytes();
+  return EncodedCheckpoint{std::move(writer).takeBytes(), recordCount};
+}
+
+}
+
+std::optional<std::vector<uint8_t>>
+serializeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
+  auto encoded = encodeContProfCheckpoint(records);
+  if (!encoded) return std::nullopt;
+  return std::move(encoded->bytes);
 }
 
 std::optional<std::vector<ContProfProfileRecord>>
@@ -221,21 +241,30 @@ bool writeContProfCheckpointFile(
   const std::string& path,
   const std::vector<ContProfProfileRecord>& records
 ) {
+  auto onFailure = folly::makeGuard([] {
+    s_checkpointWriteFailures->increment();
+  });
   if (path.empty()) return false;
 
-  auto const encoded = serializeContProfCheckpoint(records);
+  auto const encoded = encodeContProfCheckpoint(records);
   if (!encoded) return false;
 
+  auto const& bytes = encoded->bytes;
   auto const contents = folly::StringPiece{
-    reinterpret_cast<const char*>(encoded->data()),
-    encoded->size()
+    reinterpret_cast<const char*>(bytes.data()),
+    bytes.size()
   };
 
-  return folly::writeFileAtomicNoThrow(
+  if (folly::writeFileAtomicNoThrow(
     path,
     contents,
     folly::WriteFileAtomicOptions{}
-  ) == 0;
+  ) != 0) return false;
+
+  s_checkpointRecords->setValue(encoded->recordCount);
+  s_checkpointBytes->setValue(bytes.size());
+  onFailure.dismiss();
+  return true;
 }
 
 std::optional<std::vector<ContProfProfileRecord>>

@@ -1,0 +1,20 @@
+ERROR: File "abstract_constants.php", line 4, characters 5-14:
+Abstract constant `AbstractShapeKeyConstants::KEY` cannot be used as a shape key (Typing[4129])
+  File "abstract_constants.php", line 5, characters 27-29:
+  Declaration is here
+ERROR: File "abstract_constants.php", line 7, characters 5-14:
+Abstract constant `AbstractShapeKeyConstants::DEFAULT_KEY` cannot be used as a shape key (Typing[4129])
+  File "abstract_constants.php", line 8, characters 25-35:
+  Declaration is here
+ERROR: File "abstract_constants.php", line 12, characters 5-14:
+Abstract constant `AbstractShapeKeyConstants::TYPE_CONSTANT` cannot be used as a shape key (Typing[4129])
+  File "abstract_constants.php", line 13, characters 26-38:
+  Declaration is here
+ERROR: File "abstract_constants.php", line 17, characters 5-14:
+Abstract constant `AbstractInterfaceShapeKeyConstants::KEY` cannot be used as a shape key (Typing[4129])
+  File "abstract_constants.php", line 18, characters 22-24:
+  Declaration is here
+ERROR: File "abstract_constants.php", line 22, characters 5-14:
+Abstract constant `AbstractTraitShapeKeyConstants::DEFAULT_KEY` cannot be used as a shape key (Typing[4129])
+  File "abstract_constants.php", line 23, characters 25-35:
+  Declaration is here

@@ -392,6 +392,16 @@ end = struct
       in
       create ~code:Error_code.InvalidShapeFieldConst ~claim ~reasons ()
 
+    let abstract_shape_field_const pos decl_pos name =
+      let claim =
+        lazy
+          ( pos,
+            "Abstract constant "
+            ^ Markdown_lite.md_codify (Render.strip_ns name)
+            ^ " cannot be used as a shape key" )
+      and reasons = lazy [(decl_pos, "Declaration is here")] in
+      create ~code:Error_code.AbstractConstUsage ~claim ~reasons ()
+
     let shape_field_class_const_missing_shape_key_attribute
         pos decl_pos class_name const_name =
       let class_const = class_name ^ "::" ^ const_name in
@@ -520,6 +530,8 @@ end = struct
         invalid_shape_field_literal pos witness_pos
       | Invalid_shape_field_const { pos; witness_pos } ->
         invalid_shape_field_const pos witness_pos
+      | Abstract_shape_field_const { pos; decl_pos; name } ->
+        abstract_shape_field_const pos decl_pos name
       | Shape_field_class_const_missing_shape_key_attribute
           { pos; decl_pos; class_name; const_name } ->
         shape_field_class_const_missing_shape_key_attribute

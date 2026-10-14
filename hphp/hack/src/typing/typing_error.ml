@@ -27,6 +27,11 @@ module Primary = struct
           pos: Pos.t;
           witness_pos: Pos.t;
         }
+      | Abstract_shape_field_const of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          name: string;
+        }
       | Shape_field_class_const_missing_shape_key_attribute of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;

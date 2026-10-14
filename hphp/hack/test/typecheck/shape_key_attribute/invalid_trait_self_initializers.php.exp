@@ -1,0 +1,4 @@
+ERROR: File "invalid_trait_self_initializers.php", line 8, characters 32-46:
+`self::LOCAL_KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+ERROR: File "invalid_trait_self_initializers.php", line 11, characters 34-44:
+`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])

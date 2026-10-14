@@ -873,8 +873,8 @@ let check_shape_keys_validity env keys =
           | CCAbstract _ ->
             Typing_error_utils.add_typing_error ~env
             @@ Typing_error.(
-                 primary
-                 @@ Primary.Abstract_const_usage
+                 shape
+                 @@ Primary.Shape.Abstract_shape_field_const
                       {
                         pos = key_pos;
                         decl_pos = cc_pos;

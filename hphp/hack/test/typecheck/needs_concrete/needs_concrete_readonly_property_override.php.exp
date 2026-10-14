@@ -1,1 +1,4 @@
-No errors
+WARN: File "needs_concrete_readonly_property_override.php", line 7, characters 17-17:
+The readonly-ness of property `x` is changed by this override (Warn[12045])
+  File "needs_concrete_readonly_property_override.php", line 8, characters 19-21:
+  Overriding property is here

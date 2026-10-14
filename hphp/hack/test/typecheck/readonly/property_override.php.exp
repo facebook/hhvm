@@ -1,0 +1,8 @@
+WARN: File "property_override.php", line 9, characters 25-37:
+The readonly-ness of property `a` is changed by this override (Warn[12045])
+  File "property_override.php", line 10, characters 19-21:
+  Overriding property is here
+WARN: File "property_override.php", line 9, characters 25-37:
+The readonly-ness of property `b` is changed by this override (Warn[12045])
+  File "property_override.php", line 11, characters 10-12:
+  Overriding property is here

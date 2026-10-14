@@ -877,6 +877,26 @@ let check_prop_const_mismatch env parent_class_elt class_elt on_error =
                parent_is_const = get_ce_const parent_class_elt;
              })
 
+(** Property `readonly`-ness is invariant across overrides: reading a mutable
+    property through a `readonly` view, or writing a `readonly` property through
+    a mutable view, would both be unsound. We only warn (rather than error) for
+    now, following `check_override_concrete_static_prop`. *)
+let check_readonly_prop_override
+    ~parent_pos env member_name parent_class_elt class_elt =
+  if
+    Bool.( <> )
+      (get_ce_readonly_prop_or_needs_concrete class_elt)
+      (get_ce_readonly_prop_or_needs_concrete parent_class_elt)
+  then
+    let child_prop_pos = Lazy.force class_elt.ce_pos in
+    Typing_warning_utils.add
+      env
+      Typing_warning.
+        ( parent_pos,
+          Readonly_property_override,
+          Readonly_property_override.{ prop_name = member_name; child_prop_pos }
+        )
+
 let check_abstract_overrides_concrete
     env member_kind parent_class_elt class_elt on_error =
   if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
@@ -1311,7 +1331,14 @@ let check_override
       class_
       class_elt
       ~class_pos
-      ~member_name;
+      ~member_name
+  else if MemberKind.is_property member_kind then
+    check_readonly_prop_override
+      ~parent_pos
+      env
+      member_name
+      parent_class_elt
+      class_elt;
 
   let (lazy pos) = class_elt.ce_pos in
 

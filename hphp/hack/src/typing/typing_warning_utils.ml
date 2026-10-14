@@ -560,6 +560,28 @@ module Static_property_override = struct
   let quickfixes _ = []
 end
 
+module Readonly_property_override = struct
+  open Typing_warning.Readonly_property_override
+
+  type t = Typing_warning.Readonly_property_override.t
+
+  let code = Codes.ReadonlyPropertyOverride
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { prop_name; _ } =
+    Printf.sprintf
+      "The readonly-ness of property %s is changed by this override"
+      (Markdown_lite.md_codify prop_name)
+
+  let reasons { child_prop_pos; _ } =
+    [(child_prop_pos, "Overriding property is here")]
+
+  let quickfixes _ = []
+end
+
 module String_to_class_pointer = struct
   open Typing_warning.String_to_class_pointer
 
@@ -976,6 +998,8 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Switch_redundancy -> (module Switch_redundancy)
   | Typing_warning.Static_call_on_trait -> (module Static_call_on_trait)
   | Typing_warning.Static_property_override -> (module Static_property_override)
+  | Typing_warning.Readonly_property_override ->
+    (module Readonly_property_override)
   | Typing_warning.String_to_class_pointer -> (module String_to_class_pointer)
   | Typing_warning.Null_coalesce_always -> (module Null_coalesce_always)
   | Typing_warning.Call_needs_concrete -> (module Call_needs_concrete)
@@ -1014,6 +1038,7 @@ let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
   (* Structural: don't depend on type information that could be invalidated by dynamic *)
   | Typing_warning.Static_call_on_trait -> false
   | Typing_warning.Static_property_override -> false
+  | Typing_warning.Readonly_property_override -> false
   | Typing_warning.Duplicate_properties -> false
   | Typing_warning.Class_pointer_to_string -> false
   | Typing_warning.String_to_class_pointer -> false

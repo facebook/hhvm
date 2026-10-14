@@ -153,6 +153,13 @@ module Static_property_override = struct
   }
 end
 
+module Readonly_property_override = struct
+  type t = {
+    prop_name: string;
+    child_prop_pos: Pos_or_decl.t;
+  }
+end
+
 module String_to_class_pointer = struct
   type t = {
     cls_name: string;
@@ -284,6 +291,7 @@ type (_, _) kind =
   | Switch_redundancy : (Switch_redundancy.t, warn) kind
   | Static_call_on_trait : (Static_call_on_trait.t, warn) kind
   | Static_property_override : (Static_property_override.t, warn) kind
+  | Readonly_property_override : (Readonly_property_override.t, warn) kind
   | String_to_class_pointer : (String_to_class_pointer.t, warn) kind
   | Null_coalesce_always : (Null_coalesce_always.t, warn) kind
   | Call_needs_concrete : (Call_needs_concrete.t, warn) kind

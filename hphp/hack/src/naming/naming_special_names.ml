@@ -1405,6 +1405,8 @@ module UnstableFeatures = struct
   let recursive_case_types = "recursive_case_types"
 
   let representable_as = "representable_as"
+
+  let named_parameters_meth_caller = "named_parameters_meth_caller"
 end
 
 module Coeffects = struct

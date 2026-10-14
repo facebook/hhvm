@@ -82,6 +82,7 @@ type feature_name =
   | ShapeSplatConcrete
   | ShapeSplatTypeParameters
   | ShapeSplatExpression
+  | NamedParametersMethCaller
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -140,6 +141,7 @@ let feature_name_map =
       ("shape_splat_concrete", ShapeSplatConcrete);
       ("shape_splat_type_parameters", ShapeSplatTypeParameters);
       ("shape_splat_expression", ShapeSplatExpression);
+      ("named_parameters_meth_caller", NamedParametersMethCaller);
     ]
 
 let feature_name_from_string s = S_map.find_opt s feature_name_map

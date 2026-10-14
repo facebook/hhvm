@@ -82,6 +82,9 @@ type feature_name =
   | ShapeSplatConcrete
   | ShapeSplatTypeParameters
   | ShapeSplatExpression
+  | NamedParametersMethCaller
+      (** "named_parameters_meth_caller": allows [meth_caller] to reference methods
+          with named parameters. Requires HHVM support for forwarding named arguments. *)
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

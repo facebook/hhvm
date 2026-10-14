@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b478b4a2d8c2ddf14b969ec944fc2e08>>
+// @generated SignedSource<<94d31a37f8a03ce484f04b499a4a6a69>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -141,6 +141,9 @@ pub enum FeatureName {
     ShapeSplatConcrete,
     ShapeSplatTypeParameters,
     ShapeSplatExpression,
+    /// "named_parameters_meth_caller": allows [meth_caller] to reference methods
+    /// with named parameters. Requires HHVM support for forwarding named arguments.
+    NamedParametersMethCaller,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

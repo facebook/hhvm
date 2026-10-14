@@ -67,6 +67,7 @@ impl FeatureName {
             ShapeSplatConcrete => Unstable,
             ShapeSplatTypeParameters => Unstable,
             ShapeSplatExpression => Unstable,
+            NamedParametersMethCaller => Unstable,
         }
     }
 

@@ -241,6 +241,18 @@ TEST(Type, ToString) {
 
   EXPECT_EQ("LazyCls", TLazyCls.toString());
   EXPECT_EQ("EnumClassLabel", TEnumClassLabel.toString());
+  EXPECT_EQ("Primitive", TPrimitive.toString());
+  EXPECT_EQ("PrimitiveInit", TPrimitiveInit.toString());
+  EXPECT_EQ("Static", TStatic.toString());
+  EXPECT_EQ("{PrimitiveInit|Static}", (TPrimitiveInit | TStatic).toString());
+  EXPECT_EQ("UncountedInit", (TPrimitiveInit | TPersistent).toString());
+  EXPECT_EQ("FuncLike", (TFunc | TRFunc).toString());
+  EXPECT_EQ("ClsMethLike", (TClsMeth | TRClsMeth).toString());
+  EXPECT_EQ("{FuncLike|InitNull}", (TFuncLike | TInitNull).toString());
+  EXPECT_EQ("{ClsMethLike|InitNull}", (TClsMethLike | TInitNull).toString());
+  EXPECT_EQ("NonNull", (TCell - TNull).toString());
+  EXPECT_EQ("InitCell", (TNonNull | TInitNull).toString());
+  EXPECT_EQ("Cell", (TNonNull | TNull).toString());
 
   auto const sub = Type::SubObj(SystemLib::getHH_IteratorClass());
   auto const exact = Type::ExactObj(SystemLib::getHH_IteratorClass());

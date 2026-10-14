@@ -212,17 +212,21 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(EnumClassLabel,  bits_t::bit<25>())                               \
 /**/
 
-#define UNCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth|kEnumClassLabel
+#define PRIMITIVE_INIT_UNION \
+  (kInitNull|kBool|kInt|kDbl|kFunc|kCls|kLazyCls|kClsMeth|kEnumClassLabel)
 
 #define INIT_CELL_UNION \
-  kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth
+  (kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth)
 
 /*
- * This list should be in non-decreasing order of specificity.
+ * This list should be in non-increasing order of specificity.
  */
 #define IRT_PHP_UNIONS                                                  \
   IRT(Null,                kUninit|kInitNull)                           \
+  IRT(FuncLike,            kFunc|kRFunc)                                \
+  IRT(ClsMethLike,         kClsMeth|kRClsMeth)                          \
+  IRT(PrimitiveInit,       PRIMITIVE_INIT_UNION)                        \
+  IRT(Primitive,           kUninit|kPrimitiveInit)                      \
   IRT(PersistentStr,       kStaticStr|kSharedStr)                       \
   IRT(Str,                 kPersistentStr|kCountedStr)                  \
   IRT(PersistentVec,       kStaticVec|kSharedVec)                       \
@@ -235,14 +239,13 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(PersistentArrLike,   kPersistentVec|kPersistentDict|kPersistentKeyset) \
   IRT(ArrLike,             kVec|kDict|kKeyset)                          \
   IRT(NullableObj,         kObj|kInitNull|kUninit)                      \
+  IRT(Static,              kStaticStr|kStaticArrLike)                   \
   IRT(Persistent,          kPersistentStr|kPersistentArrLike)           \
-  IRT(UncountedInit,       UNCOUNTED_INIT_UNION)                        \
+  IRT(UncountedInit,       kPrimitiveInit|kPersistent)                  \
   IRT(Uncounted,           kUninit|kUncountedInit)                      \
+  IRT(NonNull,             INIT_CELL_UNION & ~kNull)                    \
   IRT(InitCell,            INIT_CELL_UNION)                             \
-  IRT(Cell,                kUninit|kInitCell)                           \
-  IRT(FuncLike,            kFunc|kRFunc)                                \
-  IRT(ClsMethLike,         kClsMeth|kRClsMeth)                          \
-  IRT(NonNull,             kInitCell & ~kNull)
+  IRT(Cell,                kUninit|kInitCell)
 
 /*
  * Adding a new runtime type needs updating numRuntime variable.
